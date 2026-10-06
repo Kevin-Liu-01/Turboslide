@@ -42,12 +42,11 @@
 
 .ts-card-n {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12px;
   line-height: 16px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: left;
   padding: 2px 0 0 2px;
 }
@@ -135,7 +134,6 @@
   font-size: 12px;
   line-height: 20px;
   letter-spacing: -0.005em;
-  font-feature-settings: 'cv11', 'ss01';
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -249,8 +247,7 @@
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 500 9px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-card-n {
@@ -272,8 +269,7 @@
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 500 10px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-card-comments.is-empty {

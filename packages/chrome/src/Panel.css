@@ -31,7 +31,6 @@
   min-width: 0;
   margin: 0;
   font: 500 14px/1.2 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   letter-spacing: -0.005em;
   color: var(--pt-ink);
   white-space: nowrap;
@@ -43,7 +42,7 @@
   margin-left: 8px;
   font: 12px/1 var(--pt-text);
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-panel-x {

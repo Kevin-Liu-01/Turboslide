@@ -32,7 +32,6 @@
   display: inline-block;
   width: 14px;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12px;
   color: var(--pt-titanium);
@@ -60,5 +59,5 @@
   gap: 8px;
   font-size: 11px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }

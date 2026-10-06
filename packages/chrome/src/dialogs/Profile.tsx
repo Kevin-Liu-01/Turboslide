@@ -141,7 +141,7 @@ export function ProfileDialog() {
               ) : null}
             </div>
             <ul
-              className="ts-profile-rows"
+              className="ts-profile-rows pt-scroll"
               data-control="dialog.profile.sessions"
               data-count={sessions.length}
             >
@@ -202,7 +202,7 @@ export function ProfileDialog() {
                 <span className="ts-profile-sentence">{ACCOUNT.profile.keyShownOnce}</span>
               </div>
               <ul
-                className="ts-profile-rows"
+                className="ts-profile-rows pt-scroll"
                 data-control="dialog.profile.tokens"
                 data-count={tokens.length}
               >

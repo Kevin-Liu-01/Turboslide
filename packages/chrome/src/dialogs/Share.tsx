@@ -716,7 +716,7 @@ export function ShareDialog() {
             <h3 id="ts-share-links" className="ts-dialog-field-label">
               Links
             </h3>
-            <ul className="ts-dialog-list">
+            <ul className="ts-dialog-list pt-scroll">
               {links.map((link) => (
                 <li
                   key={link.id}
@@ -1365,7 +1365,7 @@ export function ShareDialog() {
               <h3 id="ts-share-links" className="ts-dialog-field-label">
                 Links
               </h3>
-              <ul className="ts-dialog-list" data-control="dialog.share.rows">
+              <ul className="ts-dialog-list pt-scroll" data-control="dialog.share.rows">
                 {LINK_ROWS.map((row) => {
                   const found = plain.find((link) => link.id === row.id);
                   return (

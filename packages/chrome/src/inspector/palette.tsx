@@ -9,6 +9,7 @@ import {
   isHexColor,
 } from '@turboslide/schema/color';
 import type { ColorToken } from '@turboslide/schema/color';
+import { contrastRatio } from '@turboslide/theme/contrast';
 import { useTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
@@ -94,23 +95,21 @@ export function colorRgb(value: string, theme: Theme): Rgb | null {
   return hexToRgb(value);
 }
 
-function luminance([r, g, b]: Rgb): number {
-  const channel = (c: number) => {
-    const s = c / 255;
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-}
-
-/** The WCAG contrast ratio of a color against the slide ground (paper) in a theme; null when unknown. */
+/**
+ * The WCAG 2.2 contrast ratio of a color against the slide ground (paper) in a theme, to one
+ * decimal, through the one contrast module of the design round (packages/theme/src/contrast.ts;
+ * docs/DESIGN.md 5.4); null when unknown.
+ */
 export function contrastAgainstPaper(value: string, theme: Theme): number | null {
   const rgb = colorRgb(value, theme);
   if (rgb === null) return null;
   const paper = TOKEN_RGB[theme].paper;
   if (paper === undefined) return null;
-  const a = luminance(rgb) + 0.05;
-  const b = luminance(paper) + 0.05;
-  return Math.round((Math.max(a, b) / Math.min(a, b)) * 10) / 10;
+  const ratio = contrastRatio(
+    { r: rgb[0], g: rgb[1], b: rgb[2], a: 1 },
+    { r: paper[0], g: paper[1], b: paper[2], a: 1 },
+  );
+  return Math.round(ratio * 10) / 10;
 }
 
 /** The CSS paint of a swatch: the chrome's token for a theme token, the hex for the rest. */

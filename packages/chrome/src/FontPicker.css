@@ -2,7 +2,7 @@
    docs/archive/rounds/PRODUCT.md 4.2): the toolbar control is a text button 128 px wide whose label is the family
    name, the plate is a 280 px column with the search field over the grouped list, every row a
    32 px option with the check column and the name drawn in its own face, and the dialog is
-   Google's two column form. Tokens only; radius 0; the plate grammar of Pickers.css. */
+   Google's two column form. Tokens only; the plate grammar of Pickers.css (.pt-float), fields at 6 px. */
 .ts-font-slot {
   display: inline-flex;
   align-items: center;

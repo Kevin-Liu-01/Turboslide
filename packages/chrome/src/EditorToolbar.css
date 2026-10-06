@@ -129,7 +129,7 @@
   background: none;
   color: var(--pt-ink-2);
   font: 13px/1 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: left;
 }
 
@@ -184,7 +184,7 @@
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: center;
 }
 
@@ -288,5 +288,4 @@
 /* the Text box glyph: a capital T in the display face (SPEC 3.1 row 9) */
 .ts-tb-glyph {
   font: 500 15px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
 }

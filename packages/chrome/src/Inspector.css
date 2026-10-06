@@ -75,7 +75,6 @@
   gap: 8px;
   color: var(--pt-ink);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
   letter-spacing: -0.005em;
@@ -128,7 +127,7 @@
   font-size: 12px;
   font-weight: 400;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-insp-head:hover > svg,
@@ -181,7 +180,6 @@
   min-width: 0;
   color: var(--pt-ink);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-size: 13px;
   white-space: nowrap;
 }
@@ -259,7 +257,7 @@
   padding-top: 6px;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-insp-item-head .pt-ib.ts-insp-item-remove {
@@ -343,7 +341,6 @@
 
 .ts-insp-block-type {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;

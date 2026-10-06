@@ -9,8 +9,8 @@
    so the foot's own --pt-hair line is the only one at that seam (directive 8.9). The active row
    is the 2px ink bar at its left edge and ink text, the sidebar's mark. Motion (directive 7.4):
    the scrim fades over the toast duration and the card fades and rises 8px over the enter
-   duration, as the help card does; both are still under reduced motion. Radius 0 apart from the
-   key chips, no shadow, Inter only, weight 500 at most. Toolbar.css draws the field-shaped
+   duration, as the help card does; both are still under reduced motion. The card is a .pt-window
+   (8 px) and the key chips .pt-kbd (4 px), no shadow, Inter only, weight 500 at most. Toolbar.css draws the field-shaped
    trigger. Additions over the source: the key chip and the hint line on a row, the prefix
    chips in the group label and the foot, the prompt state of the tools row, and the site-color
    rules of the source are gone with the site map. */
@@ -123,7 +123,7 @@
   flex: 0 0 auto;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 
@@ -165,7 +165,6 @@
   align-items: baseline;
   gap: 8px;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12.5px;
   line-height: 1.3;
@@ -245,7 +244,6 @@
   grid-area: title;
   min-width: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14px;
   line-height: 1.3;
@@ -254,7 +252,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   transition: color var(--pt-dur-fast) var(--pt-ease-out);
 }
 
@@ -268,7 +266,7 @@
   font-size: 12px;
   line-height: 1.3;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

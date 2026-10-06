@@ -48,7 +48,7 @@
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.4 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-fo-field.is-disabled input {
@@ -94,6 +94,7 @@
   padding: 8px 16px;
   color: var(--pt-titanium);
   font-size: 12px;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* The product round (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 15): the panel's labels read at 12.5 px

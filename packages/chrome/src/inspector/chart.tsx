@@ -522,7 +522,7 @@ export function ChartSection({
         />
       </div>
 
-      <div className="ts-chartgrid-wrap">
+      <div className="ts-chartgrid-wrap pt-scroll-x">
         <table
           ref={grid}
           className="ts-chartgrid"

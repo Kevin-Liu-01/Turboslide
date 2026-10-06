@@ -375,7 +375,7 @@
   background: var(--pt-ink);
   color: var(--pt-paper);
   font: 500 13px/1 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   pointer-events: none;
 }

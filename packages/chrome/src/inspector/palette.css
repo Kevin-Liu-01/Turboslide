@@ -118,7 +118,7 @@
 .ts-ctl-contrast {
   font-size: 11px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 

@@ -95,7 +95,7 @@ export function MoreFontsDialog({ rows, used, picked, onPick, onClose }: MoreFon
             </DialogField>
           </div>
           <div
-            className="ts-more-fonts-list"
+            className="ts-more-fonts-list pt-scroll"
             role="listbox"
             aria-label={words.title}
             data-control="dialog.moreFonts.list"

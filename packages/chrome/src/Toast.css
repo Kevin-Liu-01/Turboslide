@@ -15,7 +15,7 @@
   background: var(--pt-ink);
   color: var(--pt-paper);
   font: 12.5px/1.4 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   padding: 7px 12px;
   white-space: nowrap;
   overflow: hidden;

@@ -85,7 +85,7 @@ const theme = EditorView.theme({
     color: 'var(--pt-titanium)',
     border: 'none',
     fontFamily: 'var(--pt-text)',
-    fontVariantNumeric: 'tabular-nums',
+    fontVariantNumeric: 'var(--pt-numerals)',
   },
   '.cm-lineNumbers .cm-gutterElement': { padding: '0 6px 0 14px', minWidth: '40px' },
   '.cm-activeLineGutter': { backgroundColor: 'var(--pt-plate)', color: 'var(--pt-ink)' },
@@ -96,7 +96,10 @@ const theme = EditorView.theme({
     color: 'var(--pt-ink)',
     fontFamily: 'var(--pt-text)',
     fontSize: '12.5px',
-    borderRadius: '0',
+    /* the small floating plate of tokens.css (.pt-float): the frame, the 6 px corner, the ring */
+    borderColor: 'var(--pt-edge)',
+    borderRadius: 'var(--pt-radius)',
+    boxShadow: 'var(--pt-ring)',
   },
   '.cm-tooltip.cm-tooltip-autocomplete > ul': { fontFamily: 'var(--pt-mono)' },
   '.cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected]': {

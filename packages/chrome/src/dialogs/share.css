@@ -37,9 +37,8 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  /* the scroll and its reserved gutter are .pt-scroll's (tokens.css) */
   max-height: 200px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
   border: 0;
   border-top: 1px solid var(--pt-hair-soft);
 }
@@ -159,9 +158,8 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  /* the scroll and its reserved gutter are .pt-scroll's (tokens.css) */
   max-height: 200px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
   border: 0;
   border-top: 1px solid var(--pt-hair-soft);
 }
@@ -233,7 +231,6 @@
   text-align: center;
   color: var(--pt-ink-2);
   font: 500 11px/18px var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
 }
 
 .ts-share-row.is-pending .ts-share-row-chip,
@@ -349,7 +346,7 @@
 }
 
 .ts-share-address input[readonly] {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-overflow: ellipsis;
 }
 

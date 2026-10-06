@@ -130,7 +130,6 @@
 
 .ts-brand-lockup-word {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 22px;
   line-height: 1;

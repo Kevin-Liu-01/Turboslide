@@ -176,7 +176,6 @@
   padding: 0 8px;
   color: var(--pt-ink);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14.5px;
   letter-spacing: -0.01em;
@@ -197,12 +196,11 @@
   box-sizing: border-box;
   border: 1px solid var(--pt-hair);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 11px;
   line-height: 1;
   color: var(--pt-ink);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .pt-lint-count.is-zero {
@@ -214,7 +212,7 @@
 .pt-count {
   font-size: 13px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   gap: 4px;
   border-color: var(--pt-hair);
@@ -224,10 +222,9 @@
 .pt-count-field {
   color: var(--pt-ink);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .pt-count-word {
@@ -290,7 +287,6 @@
 
 .pt-bar-brand b {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14.5px;
   letter-spacing: -0.01em;

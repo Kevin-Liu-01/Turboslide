@@ -6,7 +6,7 @@
    reads in titanium and takes no pointer. The one solid button is Export PPTX; the build is a
    text button.
    The progress line reads the worker's last log line in 12px with a pulsing dot while a run is
-   in flight. Colors are tokens only, radius 0 apart from the Segs' shell corner, no shadow. */
+   in flight. Colors are tokens only; the card is a 6 px floating plate with the ring, no shadow. */
 .ts-export-anchor {
   display: inline-flex;
   align-items: center;

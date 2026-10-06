@@ -16,7 +16,6 @@
 .ts-comments-empty-title {
   color: var(--pt-ink-2);
   font: 500 13px/1.4 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
 }
 
 .ts-comments-empty-gesture {
@@ -76,8 +75,7 @@
 .ts-comment-list {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
+  /* the scroll and its reserved gutter are .pt-scroll's (tokens.css) */
 }
 
 .ts-comment {
@@ -121,7 +119,7 @@
 .ts-comment-time {
   color: var(--pt-ink-2);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   min-width: 3ch;
   text-align: right;
 }
@@ -175,7 +173,7 @@
   background: none;
   color: var(--pt-ink);
   font: 12px/1 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   cursor: pointer;
 }
 
@@ -296,10 +294,13 @@
   margin: 0;
   padding: 4px 0;
   list-style: none;
+  /* a small floating plate in the card (tokens.css .pt-float's values); it scrolls through
+     .pt-scroll (ReplyBox.tsx) */
   background: var(--pt-paper);
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-edge);
+  border-radius: var(--pt-radius);
+  box-shadow: var(--pt-ring);
   max-height: 232px;
-  overflow-y: auto;
 }
 
 .ts-reply-mention {
@@ -418,8 +419,7 @@
   background: none;
   color: var(--pt-ink);
   font: 500 11px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* ---- the panel (08 9): fixed height rows, tabular times ---- */
@@ -540,7 +540,7 @@
 .ts-comments-row-slide {
   color: var(--pt-ink-2);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   margin-left: auto;
   white-space: nowrap;
 }
@@ -563,7 +563,7 @@
 .ts-comments-row-time {
   color: var(--pt-ink-2);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   width: 4ch;
   text-align: right;
 }

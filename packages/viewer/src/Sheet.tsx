@@ -162,7 +162,9 @@ export function Sheet({
   return (
     <div
       ref={scrollerRef}
-      className="pt-sheet-stage"
+      /* a zoomed stage's bars draw their track in the chrome's paper, so the thumb reads over a
+         dark slide (tokens.css .pt-scroll-solid; docs/DESIGN.md 6.2) */
+      className="pt-sheet-stage pt-scroll-solid"
       data-dir={dir}
       data-zoom={zoomed ? String(fit.scale) : undefined}
       hidden={hidden}

@@ -13,7 +13,6 @@
 .ts-connect-title {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 15px;
   letter-spacing: -0.01em;

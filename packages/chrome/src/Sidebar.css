@@ -21,7 +21,7 @@
    pair). Spacing (directive 8.8): 28px rows, 24px headers with 16px above,
    8px above the tree and 32px of run-out below it. The list has no padding
    of its own: Chromium insets a sticky box's constraint rectangle by its
-   scroll container's padding. Colors are tokens only, radius 0, no shadow;
+   scroll container's padding. Colors are tokens only, the row menu a .pt-float plate, no shadow;
    motion is color over the fast duration plus the chevron's turn, off under
    reduced motion. Outline rows skip painting off screen (content-visibility); the thumbnail
    density rows do not, because their clones mount and unmount with the shared window
@@ -122,7 +122,6 @@ a.pt-sb-mark:focus-visible {
   font-weight: 500;
   font-size: 13.5px;
   letter-spacing: -0.01em;
-  font-feature-settings: 'cv11', 'ss01';
   white-space: nowrap;
 }
 
@@ -232,7 +231,6 @@ a.pt-sb-mark:focus-visible {
   font-weight: 500;
   font-size: 12.5px;
   letter-spacing: -0.005em;
-  font-feature-settings: 'cv11', 'ss01';
   text-align: left;
   cursor: pointer;
   transition: color var(--pt-dur-fast) var(--pt-ease-out);
@@ -267,7 +265,7 @@ a.pt-sb-mark:focus-visible {
   content: attr(data-count);
   flex: 0 0 auto;
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .pt-grp-head:hover,
@@ -301,12 +299,11 @@ a.pt-sb-mark:focus-visible {
 /* the derived number in tabular figures (SPEC 6.2) */
 .pt-orow-n {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12px;
   line-height: 17px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
 }
 
@@ -340,14 +337,13 @@ a.pt-sb-mark:focus-visible {
 
 .pt-orow-badge {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 11px;
   line-height: 16px;
   padding: 0 5px;
   color: var(--pt-titanium);
   border: 1px solid var(--pt-hair);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .pt-orow-badge[data-severity='3'] {
@@ -516,8 +512,7 @@ a.pt-sb-mark:focus-visible {
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 15px;
-  font-feature-settings: 'cv11', 'ss01';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-titanium);
 }
 
@@ -701,6 +696,6 @@ a.pt-sb-mark:focus-visible {
 
 .pt-orow-people-more {
   font: 500 9px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
 }

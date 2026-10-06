@@ -167,7 +167,7 @@ export function ReplyBox({
       />
       {candidates.length > 0 ? (
         <ul
-          className="ts-reply-mentions"
+          className="ts-reply-mentions pt-scroll"
           role="listbox"
           aria-label="People to name"
           data-control={`${control}.mentions`}

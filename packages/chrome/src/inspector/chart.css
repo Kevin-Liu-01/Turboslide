@@ -62,35 +62,17 @@
   width: auto;
   padding: 0 8px;
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* the grid sized to the 320 px panel (the polish round, docs/archive/rounds/POLISH.md item 26; audit-objects
    item 4: the second series sat past the panel's edge behind a scrollbar nobody could see): 12 px
    type, a 20 px corner, a category column of 80 px and value columns of 84 px, so two series fit
-   the panel whole (268 of 271 px); a third overflows sideways under a scrollbar that is drawn.
-   The scrollbar is the ::-webkit-scrollbar kind alone: scrollbar-width and scrollbar-color stay
-   auto, since Chromium ignores the webkit rules once either is set (tokens.css) and macOS then
-   hides the thin one until a scroll, which is what the audit met */
+   the panel whole (268 of 271 px); a third overflows sideways under a scrollbar that is drawn:
+   the one scrollbar of tokens.css, on a sideways strip (.pt-scroll-x in chart.tsx; the design
+   round, docs/DESIGN.md 6.3, took its own webkit copy out) */
 .ts-chartgrid-wrap {
-  overflow-x: auto;
-  overflow-y: hidden;
   padding: 0 4px 4px;
-}
-
-.ts-chartgrid-wrap::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.ts-chartgrid-wrap::-webkit-scrollbar-track {
-  background: var(--pt-plate);
-}
-
-.ts-chartgrid-wrap::-webkit-scrollbar-thumb {
-  border: 2px solid var(--pt-plate);
-  background: var(--pt-thumb);
-  background-clip: padding-box;
 }
 
 .ts-chartgrid {
@@ -99,7 +81,7 @@
   border: 1px solid var(--pt-hair);
   background: var(--pt-paper);
   font: 12px/1.2 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-chartgrid-cell {

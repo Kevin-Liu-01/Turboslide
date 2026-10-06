@@ -30,7 +30,7 @@
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 12px var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
   transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
 }

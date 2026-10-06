@@ -76,7 +76,7 @@
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 13px/1.2 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
 }
 

@@ -47,5 +47,5 @@
   margin: 8px 0 0;
   color: var(--pt-ink-2);
   font: 13px/1 var(--pt-text);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }

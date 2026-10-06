@@ -39,6 +39,12 @@
   z-index: 1;
 }
 
+/* while the stage is zoomed it scrolls, and its horizontal bar runs along the seam: the handle
+   moves under the seam so it covers no part of the bar (docs/DESIGN.md 6.4, question 29) */
+.pt-main:has(.pt-sheet-stage[data-zoom]) .ts-notes-handle {
+  top: 0;
+}
+
 .ts-notes-handle:hover,
 .ts-notes-handle:focus-visible {
   color: var(--pt-ink);

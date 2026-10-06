@@ -61,7 +61,7 @@ export function FromThisPresentationDialog({ target }: { target?: PictureTarget 
       {assets.length === 0 ? (
         <p className="ts-dialog-empty">No pictures in this presentation yet</p>
       ) : null}
-      <div className="ts-dialog-slides" role="listbox" aria-label="Pictures">
+      <div className="ts-dialog-slides pt-scroll" role="listbox" aria-label="Pictures">
         {assets.map((asset) => {
           const twin = 'neutral' in asset.twins ? asset.twins.neutral : asset.twins.light;
           return (

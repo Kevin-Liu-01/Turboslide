@@ -6,7 +6,12 @@ import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { layoutEntry } from '@turboslide/schema/layouts';
 import type { ShapeCategory } from '@turboslide/schema/shapes';
-import { applyTheme, readTheme } from '@turboslide/viewer/theme';
+import {
+  applyTheme,
+  applyThemeToTree,
+  readTheme,
+  writeThemeColor,
+} from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { ActivityPanel } from './activity/ActivityPanel';
@@ -287,15 +292,42 @@ function store(key: string, value: string): void {
   }
 }
 
-/** The chrome appearance the browser keeps: light, dark or match (SPEC 1.4). */
-function readAppearance(): 'light' | 'dark' | 'match' {
+/**
+ * The chrome appearance: light, dark or match (SPEC 1.4) once the person picked one, else
+ * `system`, the operating system's appearance, which nothing stores (the design round,
+ * docs/DESIGN.md 9 and question 6; research-surfaces 7: a dark system met light chrome on /new
+ * because the editor stored gt-theme=light about 3.5 s after the load, and /home and /decks then
+ * opened light). A stored gt-theme is the reader's (or a test's) explicit choice. Match follows
+ * the deck only when picked (B4's R18, docs/archive/rounds/POLISH.md item 49: as a default it
+ * turned the chrome dark with the Brand kit's Dark tile).
+ */
+type Appearance = 'light' | 'dark' | 'match' | 'system';
+
+function readAppearance(): Appearance {
   const saved = load(APPEARANCE_STORAGE);
   if (saved === 'light' || saved === 'dark' || saved === 'match') return saved;
-  /* nothing chosen: a stored gt-theme is the reader's (or a test's) explicit choice, else light
-     (B4's R18, docs/archive/rounds/POLISH.md item 49: with Match the Brand kit's Dark tile turned the chrome
-     dark along with the slides, where Google's theme changes the slides alone) */
   const theme = load('gt-theme');
-  return theme === 'light' || theme === 'dark' ? theme : 'light';
+  return theme === 'light' || theme === 'dark' ? theme : 'system';
+}
+
+/** The operating system's appearance, light when the browser cannot say. */
+function systemTheme(): Theme {
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+}
+
+/**
+ * Draws a theme on the document without storing it (applyTheme stores gt-theme): the system's
+ * appearance before the person picks one, so /home and /decks keep following the system too.
+ */
+function showTheme(theme: Theme): void {
+  if (readTheme() === theme) return;
+  document.documentElement.dataset.theme = theme;
+  writeThemeColor(theme);
+  applyThemeToTree(document, theme);
 }
 
 /** The sessionStorage key the home page reads for the editor's Move to trash (-recent.ts TRASHED_KEY). */
@@ -420,8 +452,8 @@ export function EditorShell({
   const filmstripRef = useRef<FilmstripHandle | null>(null);
   const titleField = useRef<HTMLElement | null>(null);
   /* read in the initializer, so the first effect run sees the browser's choice (the editor routes render on the client only) */
-  const [appearance, setAppearanceState] = useState<'light' | 'dark' | 'match'>(() =>
-    typeof window === 'undefined' ? 'match' : readAppearance(),
+  const [appearance, setAppearanceState] = useState<Appearance>(() =>
+    typeof window === 'undefined' ? 'system' : readAppearance(),
   );
   const [makeCopySelected, setMakeCopySelected] = useState(false);
   const [publishTab, setPublishTab] = useState<'link' | 'embed'>('link');
@@ -439,6 +471,10 @@ export function EditorShell({
     setLastLayout(readLastLayout(load(LAST_LAYOUT_STORAGE)));
     const chosen = readAppearance();
     setAppearanceState(chosen);
+    if (chosen === 'system') {
+      showTheme(systemTheme());
+      return;
+    }
     const theme: Theme = chosen === 'match' ? appearanceOf(inputRef.current.document.deck) : chosen;
     if (readTheme() !== theme) applyTheme(theme);
   });
@@ -503,20 +539,24 @@ export function EditorShell({
     if (routeThread !== null) setCommentCard({ threadId: routeThread });
   }, [routeThread]);
 
-  /* the default made explicit: `applyTheme` persists the theme it stamps under gt-theme (the
-     viewer's key), and `readAppearance` reads a stored gt-theme as the reader's explicit choice
-     when no choice of this menu is stored, so a chrome that matched the deck once and reloaded
-     came back pinned to that theme and stopped following the deck (the light appearance rows read
-     the dark selection colour on a light deck after a reload: return/build/b4.md request 4,
-     `arrange.selection-color.light`). With nothing chosen and no gt-theme set before the mount,
-     the choice is recorded as `match`; a gt-theme a reader or a test stored before the page opened
-     keeps its meaning */
+  /* nothing picked: the chrome follows the system as it changes, and stores nothing, until the
+     person picks an appearance (the menu, the D key, a ?theme address) and gt-theme is stored */
   useEffect(() => {
-    if (load(APPEARANCE_STORAGE) !== null) return;
-    const stored = load('gt-theme');
-    if (stored === 'light' || stored === 'dark') return;
-    store(APPEARANCE_STORAGE, 'light');
-  }, []);
+    if (appearance !== 'system') return undefined;
+    let query: MediaQueryList;
+    try {
+      query = window.matchMedia('(prefers-color-scheme: dark)');
+    } catch {
+      return undefined;
+    }
+    const follow = (): void => {
+      const stored = load('gt-theme');
+      if (stored === 'light' || stored === 'dark') return;
+      showTheme(systemTheme());
+    };
+    query.addEventListener('change', follow);
+    return () => query.removeEventListener('change', follow);
+  }, [appearance]);
 
   /* the deck's appearance changed while the chrome matches it */
   const deckAppearance = appearanceOf(input.document.deck);

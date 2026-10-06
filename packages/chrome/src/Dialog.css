@@ -67,7 +67,6 @@
 .ts-dialog-title {
   margin: 0;
   font: 500 18px/1.25 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   letter-spacing: -0.01em;
   color: var(--pt-ink);
 }
@@ -415,7 +414,7 @@
   flex: 0 0 auto;
   color: var(--pt-titanium);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-dialog-empty {
@@ -592,7 +591,7 @@
   display: grid;
   place-items: center;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-dialog-slide-frame img {
@@ -646,6 +645,7 @@
   margin: -4px 0 8px;
   color: var(--pt-ink-2);
   font-size: 12.5px;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* Tailor for a customer's Find the logo slot (dialogs/Tailor.tsx; docs/archive/rounds/FEATURES.md 4.5): the

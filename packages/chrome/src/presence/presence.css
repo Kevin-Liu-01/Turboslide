@@ -53,7 +53,6 @@
   fill: var(--pt-ink);
   font-family: var(--pt-display);
   font-weight: 500;
-  font-feature-settings: 'cv11', 'ss01';
   paint-order: stroke fill;
   stroke: var(--pt-paper);
   stroke-width: 2px;
@@ -194,8 +193,7 @@
   width: 32px;
   border: 1px solid var(--pt-edge);
   font: 500 12px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* with nobody else present the chip keeps its track and draws nothing, like the empty chip slots
@@ -248,10 +246,8 @@
 
 /* ten 32 px rows, then the region scrolls with its gutter reserved */
 .ts-plate-menu-rows {
+  /* the scroll and its reserved gutter are .pt-scroll's (tokens.css) */
   max-height: 320px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-gutter: stable;
 }
 
 .ts-roster-row {

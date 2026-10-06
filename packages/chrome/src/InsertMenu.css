@@ -4,7 +4,7 @@
    ink-2 (ink on hover), --pt-hair-soft rules between the groups. The Shape row carries its five
    variants as 24px glyph squares, bordered on hover in --pt-hair and never at rest. The sprite
    picker (IconPicker.css) takes the card while an icon is being picked. Colors are tokens only,
-   radius 0, no shadow; the fade over the fast duration. */
+   the card .pt-float (6 px, the ring), no shadow; the fade over the fast duration. */
 .ts-insert-anchor {
   display: inline-flex;
   align-items: center;

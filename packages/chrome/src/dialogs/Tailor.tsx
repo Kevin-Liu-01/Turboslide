@@ -409,7 +409,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
       >
         {TAILOR.skipHead}
       </p>
-      <div className="ts-dialog-list" data-control="dialog.tailor.skip">
+      <div className="ts-dialog-list pt-scroll" data-control="dialog.tailor.skip">
         {order.map((id, index) => {
           const slide = input.document.slides[id];
           if (slide === undefined) return null;

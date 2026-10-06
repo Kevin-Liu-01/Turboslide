@@ -62,7 +62,7 @@
 .ts-dither-metrics dd {
   margin: 0;
   color: var(--pt-ink);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-dither-warnings {
@@ -99,7 +99,7 @@
   line-height: 20px;
   font-size: 12px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -181,7 +181,7 @@
   line-height: 18px;
   font-size: 12px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-dialog-material-row {

@@ -19,7 +19,6 @@
 
 .ts-lint-head b {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
 }
@@ -28,7 +27,7 @@
   margin-left: auto;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-lint-notice,
@@ -112,11 +111,10 @@
   box-sizing: border-box;
   border: 1px solid var(--pt-hair);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 11px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-lint-row[data-severity='3'] .ts-lint-sev {

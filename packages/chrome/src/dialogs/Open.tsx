@@ -158,7 +158,7 @@ export function OpenDialog() {
           ) : null}
           {rows.length > 0 ? (
             <ul
-              className="ts-dialog-list"
+              className="ts-dialog-list pt-scroll"
               role="listbox"
               aria-label={DIALOGS.open.presentations}
               aria-busy={listing ? 'true' : undefined}

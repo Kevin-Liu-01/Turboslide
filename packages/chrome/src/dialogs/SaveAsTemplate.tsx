@@ -221,7 +221,7 @@ export function SaveAsTemplateDialog() {
         />
       </DialogField>
       <div
-        className="ts-dialog-slides"
+        className="ts-dialog-slides pt-scroll"
         data-control="dialog.saveAsTemplate.cover"
         {...tipProps({ name: SAVE_AS_TEMPLATE.cover, doc: SAVE_AS_TEMPLATE.coverDoc })}
       >

@@ -10820,6 +10820,56 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D2#2; replaces versions.field.square; the walk probe's share area"
     },
     {
+      "id": "chrome.scroll.default-everywhere",
+      "feature": "chrome",
+      "interaction": "Chromium with scrollbars shown, a fine pointer, at 1440 in both appearances: the filmstrip, the speaker notes, Format options, the font list and the Insert menu in a 360 px tall window each draw an 8 px gutter and, where they scroll, a 4 px thumb at 3:1 or more on its track, 6 px under the pointer; none draws a 15 px bar; the Import slides list is read when the server lists another presentation",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-scroll 3.2: menus, the font list, dialog bodies and textareas drew the platform's 15 px bar; the thumb read 2.17:1",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts on its own Chromium without --hide-scrollbars, reading the gutter from the box and the thumb from the gutter's pixels"
+    },
+    {
+      "id": "chrome.scroll.stage-track",
+      "feature": "chrome",
+      "interaction": "At 200 % zoom on a deck with dark slides in light chrome: the stage's 8 px bars draw their track in the chrome's paper; the thumb reads 3:1 or more on it; the speaker notes handle covers no part of the horizontal bar",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-scroll 3.3 items 7 and 8",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts"
+    },
+    {
+      "id": "chrome.numerals.tabular",
+      "feature": "chrome",
+      "interaction": "A ruler numeral, the zoom field, a filmstrip number, a Format options field, the font size field, Version history's times and the inbox count when drawn compute tabular-nums; \"1111\" and \"0000\" in a Format options field's face measure the same width",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 2: the rulers, Format options' count and the dialog count in proportional figures",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts"
+    },
+    {
+      "id": "chrome.type.default-glyphs",
+      "feature": "chrome",
+      "interaction": "With a menu open, no element of the editor's chrome (outside slides, thumbnails and the hover preview's clone) computes cv11 or ss01 in font-feature-settings; a heading of the General Translation brand deck computes \"cv11\", \"ss01\"",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 1.1: 87 rules in 42 files drew General Translation's alternates in the chrome",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts; the heading is read on /deck/gt-brand, which every base serves"
+    },
+    {
+      "id": "chrome.appearance.system-until-picked",
+      "feature": "chrome",
+      "interaction": "A dark system on /new: the chrome is dark, and 10 s after the editor is ready localStorage holds no gt-theme; picking Light (Tools > Preferences > Appearance > Light) stores it, and /decks then opens light",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-surfaces 7: the editor stored gt-theme=light about 3.5 s after the load on a dark system",
+      "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts; a /new draft, which writes nothing"
+    },
+    {
       "id": "accounts.sign-in-fits",
       "feature": "share",
       "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",

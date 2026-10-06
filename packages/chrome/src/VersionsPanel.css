@@ -19,7 +19,6 @@
 
 .ts-versions-head b {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
 }
@@ -28,7 +27,7 @@
   margin-left: auto;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-versions-save {
@@ -98,11 +97,10 @@
 
 .ts-version-n {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
 }
 
@@ -131,7 +129,7 @@
   /* 12 px in ink-2 (docs/archive/rounds/PRODUCT.md 3.2; audit-interface 31): the author's name reads */
   font-size: 12px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -386,8 +384,7 @@
 /* the +N count in the chrome's smallest size, 11 px tabular in ink-2 (authorship 15) */
 .ts-version-marks-more {
   font: 500 11px/1 var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01', 'tnum';
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
 }
 

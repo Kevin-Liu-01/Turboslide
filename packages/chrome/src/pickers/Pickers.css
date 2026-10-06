@@ -2,8 +2,9 @@
    bullet and numbering preset grids, the line decoration grid, the dash list, the colour plate and
    the weight list. One grammar: a plate in paper with a --pt-hair frame, tiles 40 px square drawn
    in the ink with a --pt-hair-soft edge, the pointed or focused tile in --pt-plate with an ink
-   edge, the picked one with an ink ring. Radius 0; colours are tokens only. The menu's dynamic
-   plate (.ts-menu.is-dynamic) carries the padding when a picker sits inside a submenu. */
+   edge, the picked one with an ink ring. An anchored plate is .pt-float (6 px, the ring); tiles
+   are square; colours are tokens only. The menu's dynamic plate (.ts-menu.is-dynamic) carries the
+   padding when a picker sits inside a submenu. */
 .ts-picker {
   display: inline-flex;
   flex-direction: column;
@@ -86,7 +87,7 @@
   display: inline-flex;
   gap: 6px;
   font-size: 13px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-picker-glyphs span:nth-child(2) {

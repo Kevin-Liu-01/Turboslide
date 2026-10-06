@@ -1,5 +1,9 @@
-import { expect, test } from '@playwright/test';
+import { inflateSync } from 'node:zlib';
+
+import { chromium, expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
+
+import { contrastRatio, parseColor } from '@turboslide/theme/contrast';
 
 import { LAYERS } from '@turboslide/theme/scale';
 
@@ -9,6 +13,7 @@ import {
   extraHTTPHeaders,
   headingRun,
   invoke,
+  menuPath,
   openEditor,
   settled,
   teardownAll,
@@ -175,6 +180,44 @@ async function presenceTooltip(page: Page): Promise<void> {
   await page.waitForTimeout(250);
 }
 
+/**
+ * Removes a deck of this file through the action surface as its owner (the page's cookies):
+ * deck.trash, then deck.remove with confirm, then deck.info answers 404. The product's own path
+ * (File > Move to trash, then Delete forever on the trash page) is lib.ts teardownAll, which this
+ * falls back to; on a server whose trash had grown long the trash card it waits for was not drawn
+ * and the hook ran out its time.
+ */
+async function removeDeck(page: Page, id: string): Promise<boolean> {
+  const call = async (action: string, input: unknown) => {
+    const answer = await page.request.post(
+      `/api/actions/${action}?deck=${encodeURIComponent(id)}`,
+      {
+        data: input,
+        timeout: 30_000,
+      },
+    );
+    const body = (await answer.json().catch(() => null)) as {
+      revision?: number;
+      result?: { revision?: number };
+      deck?: { revision?: number };
+    } | null;
+    return {
+      status: answer.status(),
+      revision: body?.revision ?? body?.result?.revision ?? body?.deck?.revision,
+    };
+  };
+  try {
+    const info = await call('deck.info', {});
+    if (info.status === 404) return true;
+    await call('deck.trash', { id, baseRevision: info.revision });
+    const again = await call('deck.info', {});
+    await call('deck.remove', { id, confirm: true, baseRevision: again.revision ?? info.revision });
+    return (await call('deck.info', {})).status === 404;
+  } catch {
+    return false;
+  }
+}
+
 /** The editor of the person's deck loaded again, so a row starts with no surface open. */
 async function fresh(person: Person): Promise<Page> {
   await openEditor(person.page, person.deck);
@@ -301,12 +344,14 @@ async function blurredShadows(page: Page): Promise<string[]> {
       layers.push(value.slice(from));
       for (const layer of layers) {
         if (/\binset\b/.test(layer)) continue;
-        const lengths = (layer.replace(/(rgba?|oklch|color|hsla?)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []).map(
-          (n) => Number.parseFloat(n),
-        );
+        const lengths = (
+          layer.replace(/(rgba?|oklch|color|hsla?)\([^)]*\)/g, '').match(/-?[\d.]+px/g) ?? []
+        ).map((n) => Number.parseFloat(n));
         const [x = 0, y = 0, blur = 0] = lengths;
         if (x !== 0 || y !== 0 || blur !== 0) {
-          out.push(`${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}: ${layer.trim()}`);
+          out.push(
+            `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}: ${layer.trim()}`,
+          );
           break;
         }
       }
@@ -367,7 +412,10 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
       await page.mouse.move(undo.x + 2, undo.y + 2, { steps: 2 });
       await page.waitForTimeout(150);
       await page.mouse.move(undo.x + undo.width / 2, undo.y + undo.height / 2, { steps: 2 });
-      await page.locator('#pt-tip:not([hidden])').waitFor({ timeout: 8000 }).catch(() => undefined);
+      await page
+        .locator('#pt-tip:not([hidden])')
+        .waitFor({ timeout: 8000 })
+        .catch(() => undefined);
       await take(walk.floating, 'the tooltip', '#pt-tip');
       await take(walk.chips, "the tooltip's key", '#pt-tip .pt-tip-key');
       await page.mouse.move(5, 300);
@@ -381,8 +429,12 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
     if ((await subRow.count()) > 0) {
       await subRow.hover();
       await page.waitForTimeout(500);
-      if (phone) await subRow.click().catch(() => undefined);
-      await page.locator('.ts-menu.is-sub').first().waitFor({ timeout: 5000 }).catch(() => undefined);
+      if (phone) await subRow.click({ timeout: 3000 }).catch(() => undefined);
+      await page
+        .locator('.ts-menu.is-sub')
+        .first()
+        .waitFor({ timeout: 5000 })
+        .catch(() => undefined);
       await take(walk.floating, 'a submenu', '.ts-menu.is-sub');
     }
     walk.shadows.push(...(await blurredShadows(page)));
@@ -396,14 +448,22 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
       await page.mouse.click(sheet.x + sheet.width - 20, sheet.y + sheet.height - 20, {
         button: 'right',
       });
-      await page.locator('.ts-context-menu').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+      await page
+        .locator('.ts-context-menu')
+        .first()
+        .waitFor({ timeout: 8000 })
+        .catch(() => undefined);
       await take(walk.floating, 'a context menu', '.ts-context-menu');
       await closeAll(page);
     }
     /* the account plate menu (the title row hides the presence slot under 720 px) */
     if (!phone && (await visible('title.account'))) {
       await ctl(page, 'title.account').click();
-      await page.locator('.ts-plate-menu').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+      await page
+        .locator('.ts-plate-menu')
+        .first()
+        .waitFor({ timeout: 8000 })
+        .catch(() => undefined);
       await take(walk.floating, 'the account plate menu', '.ts-plate-menu');
       walk.shadows.push(...(await blurredShadows(page)));
       await closeAll(page);
@@ -411,15 +471,25 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
     /* the layout plate */
     if (await visible('toolbar.layout')) {
       await ctl(page, 'toolbar.layout').click();
-      await page.locator('.ts-layout-plate').first().waitFor({ timeout: 8000 }).catch(() => undefined);
+      await page
+        .locator('.ts-layout-plate')
+        .first()
+        .waitFor({ timeout: 8000 })
+        .catch(() => undefined);
       await take(walk.floating, 'the layout plate', '.ts-layout-plate');
       await closeAll(page);
     } else walk.absent.push('the layout plate (the Layout button folds at this width)');
     /* the title selected: the selection, its chip, a block; the colour and font pickers */
-    const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]').first();
+    const heading = page
+      .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]')
+      .first();
     await heading.click();
     await page.waitForTimeout(400);
-    await take(walk.structure, 'a block on the slide', '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]');
+    await take(
+      walk.structure,
+      'a block on the slide',
+      '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]',
+    );
     await take(walk.structure, 'the selection ring', '.ts-select.is-selected');
     await take(walk.structure, 'the selection chip', '.ts-select-chip');
     for (const [control, name, plate] of [
@@ -428,7 +498,11 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
     ] as const) {
       if (await visible(control)) {
         await ctl(page, control).click();
-        await page.locator(plate).first().waitFor({ timeout: 8000 }).catch(() => undefined);
+        await page
+          .locator(plate)
+          .first()
+          .waitFor({ timeout: 8000 })
+          .catch(() => undefined);
         await take(walk.floating, name, plate);
         walk.shadows.push(...(await blurredShadows(page)));
         await page.keyboard.press('Escape');
@@ -440,7 +514,11 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
     await page.waitForTimeout(300);
     if (await visible('toolbar.formatOptions')) {
       await ctl(page, 'toolbar.formatOptions').click();
-      await page.locator('.ts-panel').first().waitFor({ timeout: 10_000 }).catch(() => undefined);
+      await page
+        .locator('.ts-panel')
+        .first()
+        .waitFor({ timeout: 10_000 })
+        .catch(() => undefined);
       await take(walk.controls, 'a segmented control', '.ts-panel .pt-seg');
       await take(walk.structure, 'a docked panel', '.ts-panel');
     } else walk.absent.push('Format options (its button folds at this width)');
@@ -458,7 +536,10 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
       if (rb) {
         await page.mouse.move(rb.x + 10, rb.y + rb.height / 2, { steps: 3 });
         await page.mouse.move(rb.x + 30, rb.y + rb.height / 2, { steps: 3 });
-        await page.locator('.pt-preview.is-on').waitFor({ timeout: 8000 }).catch(() => undefined);
+        await page
+          .locator('.pt-preview.is-on')
+          .waitFor({ timeout: 8000 })
+          .catch(() => undefined);
         await take(walk.windows, 'the hover preview', '.pt-preview.is-on');
       }
     } else if (phone) walk.absent.push('the hover preview (no hover on a phone layout)');
@@ -469,7 +550,11 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
     await take(walk.controls, "the dialog's select", '[data-control="dialog.share"] select');
     await take(walk.controls, "the dialog's field", '[data-control="dialog.share.address"]');
     await take(walk.controls, 'the solid button', '[data-control="dialog.share"] .pt-ib.is-solid');
-    await take(walk.checkboxes, "the dialog's checkbox", '[data-control="dialog.share"] .ts-dialog-check-box');
+    await take(
+      walk.checkboxes,
+      "the dialog's checkbox",
+      '[data-control="dialog.share"] .ts-dialog-check-box',
+    );
     walk.shadows.push(...(await blurredShadows(page)));
     await ctl(page, 'dialog.share.copy').click();
     await page.locator('[data-control="snackbar"].is-on').waitFor({ timeout: 10_000 });
@@ -506,6 +591,232 @@ function line(list: SurfaceFacts[]): string {
   return list.map((f) => `${f.name} ${f.radius}`).join(', ');
 }
 
+// ---------------------------------------------------------------------------------------------
+// DR-D2#3: the scrollbar read from the pixels. Playwright's Chromium runs with
+// `--hide-scrollbars`, so these rows launch one Chromium of their own without it (research-scroll
+// 2, the D5 rows' way) and read a scroller's vertical gutter as offsetWidth - clientWidth less its
+// borders, then its thumb from a screenshot of the gutter: the columns of the longest run that
+// differs from the track, its colour against the track.
+
+let bars: Browser | null = null;
+const barPeople: Person[] = [];
+
+async function barsBrowser(): Promise<Browser> {
+  bars ??= await chromium.launch({ ignoreDefaultArgs: ['--hide-scrollbars'] });
+  return bars;
+}
+
+/** A context on the bars browser at a size and an appearance, on a fresh deck. */
+async function barPerson(
+  baseURL: string | undefined,
+  width: number,
+  height: number,
+  appearance: Appearance,
+): Promise<Person> {
+  const browser = await barsBrowser();
+  const context = await browser.newContext({
+    ...(baseURL === undefined ? {} : { baseURL }),
+    extraHTTPHeaders,
+    viewport: { width, height },
+    colorScheme: appearance,
+  });
+  await context.addInitScript((value) => {
+    try {
+      localStorage.setItem('gt-theme', value);
+    } catch {
+      /* a storage that refuses keeps the system's appearance, which is the same here */
+    }
+  }, appearance);
+  const page = await context.newPage();
+  const scratch = new Scratch();
+  await page.goto('/new');
+  await waitEditor(page);
+  const info = await invoke<{ id: string }>(page, 'deck.info');
+  const run = await headingRun(page);
+  await typeInto(page, run, `Bars ${appearance}`);
+  await waitRevision(page, 1, 30_000);
+  await page.waitForURL(/\/edit\//, { timeout: 30_000 });
+  await settled(page);
+  const person = { context, page, scratch, deck: scratch.add(info.id) };
+  barPeople.push(person);
+  const bar = ctl(page, 'dialog.namePrompt.close');
+  if (await bar.isVisible().catch(() => false))
+    await bar.click({ timeout: 3000 }).catch(() => undefined);
+  return person;
+}
+
+/** What a gutter strip's pixels say: the thumb's width and colour and the track's colour. */
+type Strip = { thumb: number; thumbColor: string; track: string; ratio: number; rows: number };
+
+/**
+ * The pixels of a PNG screenshot (8 bit RGB or RGBA, not interlaced: what Chromium writes),
+ * decoded here with zlib, so the reading needs no image library and no work in the page.
+ */
+function decodePng(bytes: Buffer): {
+  width: number;
+  height: number;
+  rgb: (x: number, y: number) => number[];
+} {
+  const width = bytes.readUInt32BE(16);
+  const height = bytes.readUInt32BE(20);
+  const colorType = bytes[25] ?? 6;
+  const channels = colorType === 6 ? 4 : 3;
+  const idat: Buffer[] = [];
+  for (let at = 8; at < bytes.length;) {
+    const length = bytes.readUInt32BE(at);
+    const type = bytes.toString('latin1', at + 4, at + 8);
+    if (type === 'IDAT') idat.push(bytes.subarray(at + 8, at + 8 + length));
+    at += 12 + length;
+  }
+  const raw = inflateSync(Buffer.concat(idat));
+  const stride = width * channels;
+  const out = Buffer.alloc(height * stride);
+  for (let y = 0; y < height; y += 1) {
+    const filter = raw[y * (stride + 1)] ?? 0;
+    for (let i = 0; i < stride; i += 1) {
+      const x = raw[y * (stride + 1) + 1 + i] ?? 0;
+      const a = i >= channels ? (out[y * stride + i - channels] ?? 0) : 0;
+      const b = y > 0 ? (out[(y - 1) * stride + i] ?? 0) : 0;
+      const c = i >= channels && y > 0 ? (out[(y - 1) * stride + i - channels] ?? 0) : 0;
+      let v = x;
+      if (filter === 1) v = x + a;
+      else if (filter === 2) v = x + b;
+      else if (filter === 3) v = x + Math.floor((a + b) / 2);
+      else if (filter === 4) {
+        const p = a + b - c;
+        const pa = Math.abs(p - a);
+        const pb = Math.abs(p - b);
+        const pc = Math.abs(p - c);
+        v = x + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c);
+      }
+      out[y * stride + i] = v & 255;
+    }
+  }
+  return {
+    width,
+    height,
+    rgb: (x, y) => {
+      const i = y * stride + x * channels;
+      return [out[i] ?? 0, out[i + 1] ?? 0, out[i + 2] ?? 0];
+    },
+  };
+}
+
+/** Reads a vertical gutter strip of `width` px at `x` from `top` to `bottom` in the viewport. */
+async function stripOf(
+  page: Page,
+  box: { x: number; top: number; bottom: number; width: number },
+): Promise<(Strip & { mid: number }) | null> {
+  const height = Math.max(1, Math.floor(box.bottom - box.top));
+  const shot = await page.screenshot({
+    clip: { x: box.x, y: box.top, width: box.width, height },
+  });
+  const png = decodePng(shot);
+  const same = (a: number[], b: number[]) =>
+    Math.abs((a[0] ?? 0) - (b[0] ?? 0)) +
+      Math.abs((a[1] ?? 0) - (b[1] ?? 0)) +
+      Math.abs((a[2] ?? 0) - (b[2] ?? 0)) <
+    12;
+  const track = png.rgb(0, Math.floor(png.height / 2));
+  /* per column, the longest run of pixels that differ from the track */
+  const runs: { len: number; mid: number; x: number }[] = [];
+  for (let x = 0; x < png.width; x += 1) {
+    let best = 0;
+    let bestMid = 0;
+    let len = 0;
+    for (let y = 0; y < png.height; y += 1) {
+      if (!same(png.rgb(x, y), track)) {
+        len += 1;
+        if (len > best) {
+          best = len;
+          bestMid = y - Math.floor(len / 2);
+        }
+      } else len = 0;
+    }
+    runs.push({ len: best, mid: bestMid, x });
+  }
+  const trackCss = `rgb(${track.join(', ')})`;
+  const longest = Math.max(...runs.map((r) => r.len));
+  if (longest < 16)
+    return { thumb: 0, thumbColor: '', track: trackCss, ratio: 0, rows: longest, mid: 0 };
+  const cols = runs.filter((r) => r.len >= longest * 0.6);
+  const middle = cols[Math.floor(cols.length / 2)] ?? cols[0];
+  const color = png.rgb(middle?.x ?? 0, middle?.mid ?? 0);
+  const thumbColor = `rgb(${color.join(', ')})`;
+  const a = parseColor(thumbColor);
+  const b = parseColor(trackCss);
+  return {
+    thumb: cols.length,
+    thumbColor,
+    track: trackCss,
+    ratio: a && b ? contrastRatio(a, b) : 0,
+    rows: longest,
+    mid: middle?.mid ?? 0,
+  };
+}
+
+type BarReading = {
+  name: string;
+  gutter: number;
+  overflows: boolean;
+  rest: (Strip & { mid: number }) | null;
+  hover: (Strip & { mid: number }) | null;
+};
+
+/** One scroller's vertical bar: its gutter, its thumb at rest and under the pointer. */
+async function barOf(page: Page, name: string, selector: string): Promise<BarReading | null> {
+  const el = page.locator(selector).first();
+  if ((await el.count()) === 0 || !(await el.isVisible())) return null;
+  const geo = await el.evaluate((node) => {
+    const cs = getComputedStyle(node);
+    const r = node.getBoundingClientRect();
+    const bl = Number.parseFloat(cs.borderLeftWidth) || 0;
+    const br = Number.parseFloat(cs.borderRightWidth) || 0;
+    const bt = Number.parseFloat(cs.borderTopWidth) || 0;
+    const bb = Number.parseFloat(cs.borderBottomWidth) || 0;
+    const h = node as HTMLElement;
+    return {
+      gutter: Math.round(h.offsetWidth - h.clientWidth - bl - br),
+      overflows: h.scrollHeight > h.clientHeight + 1,
+      right: r.right - br,
+      top: r.top + bt,
+      bottom: r.bottom - bb,
+    };
+  });
+  const reading: BarReading = {
+    name,
+    gutter: geo.gutter,
+    overflows: geo.overflows,
+    rest: null,
+    hover: null,
+  };
+  if (!geo.overflows || geo.gutter < 4) return reading;
+  const box = {
+    x: Math.round(geo.right - geo.gutter),
+    top: Math.round(geo.top),
+    bottom: Math.round(geo.bottom),
+    width: geo.gutter,
+  };
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(200);
+  reading.rest = await stripOf(page, box);
+  const mid = reading.rest?.mid;
+  if (reading.rest && reading.rest.thumb > 0 && mid !== undefined) {
+    /* into the gutter from its right, so the pointer crosses no row of a menu on its way (a row
+       under a moving pointer takes the focus and scrolls the list) */
+    await page.mouse.move(box.x + box.width + 24, box.top + mid);
+    await page.mouse.move(box.x + box.width / 2, box.top + mid, { steps: 3 });
+    await page.waitForTimeout(250);
+    reading.hover = await stripOf(page, box);
+    await page.mouse.move(5, 5);
+  }
+  return reading;
+}
+
+function barLine(r: BarReading): string {
+  return `${r.name}: gutter ${r.gutter}, ${r.overflows ? 'scrolls' : 'does not scroll'}${r.rest ? `, thumb ${r.rest.thumb} px ${r.rest.thumbColor} on ${r.rest.track} ${r.rest.ratio.toFixed(2)}:1` : ''}${r.hover ? `, under the pointer ${r.hover.thumb} px` : ''}`;
+}
+
 export function chromeSurfaces(): string[] {
   const declared: string[] = [];
   const row = (id: string, body: Parameters<typeof test>[2]) => {
@@ -514,20 +825,36 @@ export function chromeSurfaces(): string[] {
     test(title(id), body);
   };
   test.afterAll(async () => {
-    test.setTimeout(300_000);
+    /* every context tears its own decks down at once: one after another, the walk's four decks
+       and the bars' three took more than five minutes at a load of 150 */
+    test.setTimeout(900_000);
     const failures: string[] = [];
-    for (const person of [...people.values()]) {
-      try {
-        if (person.scratch.ids.size > 0) await teardownAll(person.page, person.scratch);
-      } catch (error) {
-        failures.push(
-          error instanceof Error ? (error.message.split('\n')[0] ?? error.message) : String(error),
-        );
-      } finally {
-        await person.context.close().catch(() => undefined);
-      }
-    }
+    const all = [...people.values(), ...barPeople.splice(0)];
     people.clear();
+    await Promise.all(
+      all.map(async (person) => {
+        try {
+          const left: string[] = [];
+          for (const id of person.scratch.ids)
+            if (!(await removeDeck(person.page, id))) left.push(id);
+          if (left.length > 0) {
+            const rest = new Scratch();
+            for (const id of left) rest.add(id);
+            await teardownAll(person.page, rest);
+          }
+        } catch (error) {
+          failures.push(
+            error instanceof Error
+              ? (error.message.split('\n')[0] ?? error.message)
+              : String(error),
+          );
+        } finally {
+          await person.context.close().catch(() => undefined);
+        }
+      }),
+    );
+    await bars?.close().catch(() => undefined);
+    bars = null;
     expect(failures, 'every deck of the D2 rows is torn down').toEqual([]);
   });
 
@@ -946,7 +1273,8 @@ export function chromeSurfaces(): string[] {
       readings.push(`${walk.combo}: ${line(walk.windows)}`);
       for (const f of walk.windows)
         if (f.radius !== '8px') failures.push(`${walk.combo}: ${f.name} ${f.radius}`);
-      if (walk.windows.length < 2) failures.push(`${walk.combo}: ${walk.windows.length} windows read`);
+      if (walk.windows.length < 2)
+        failures.push(`${walk.combo}: ${walk.windows.length} windows read`);
     }
     test.info().annotations.push({ type: 'radius', description: readings.join('; ') });
     expect(failures).toEqual([]);
@@ -999,7 +1327,9 @@ export function chromeSurfaces(): string[] {
       const walk = await walkOf(browser, width, appearance);
       for (const f of [...walk.floating, ...walk.windows]) {
         if (f.borderWidth !== '1px' || f.border !== f.edge)
-          failures.push(`${walk.combo}: ${f.name} frame ${f.borderWidth} ${f.border} (want ${f.edge})`);
+          failures.push(
+            `${walk.combo}: ${f.name} frame ${f.borderWidth} ${f.border} (want ${f.edge})`,
+          );
         if (f.shadow !== f.ring) failures.push(`${walk.combo}: ${f.name} ring ${f.shadow}`);
       }
       const shadows = [...new Set(walk.shadows)];
@@ -1010,6 +1340,331 @@ export function chromeSurfaces(): string[] {
     }
     test.info().annotations.push({ type: 'plates', description: readings.join('; ') });
     expect(failures).toEqual([]);
+  });
+
+  /* DESIGN.md 6.1 to 6.3: every scroller of the editor draws the one bar: an 8 px gutter, a 4 px
+     thumb at 3:1 or more on its track, 6 px under the pointer; no 15 px platform bar */
+  row('chrome.scroll.default-everywhere', async ({ browser: _browser, baseURL }) => {
+    test.setTimeout(600_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    const judge = (r: BarReading | null, name: string, mustScroll: boolean) => {
+      if (r === null) {
+        readings.push(`${name}: not drawn`);
+        failures.push(`${name} was not drawn`);
+        return;
+      }
+      readings.push(barLine(r));
+      if (r.gutter !== 8) failures.push(`${name}: gutter ${r.gutter}`);
+      if (!r.overflows) {
+        if (mustScroll) failures.push(`${name} does not scroll`);
+        return;
+      }
+      if (!r.rest || r.rest.thumb !== 4)
+        failures.push(`${name}: thumb at rest ${r.rest?.thumb ?? 'unread'} px`);
+      if (!r.rest || r.rest.ratio < 3)
+        failures.push(`${name}: thumb ${r.rest?.ratio.toFixed(2) ?? 'unread'}:1`);
+      if (!r.hover || r.hover.thumb !== 6)
+        failures.push(`${name}: thumb under the pointer ${r.hover?.thumb ?? 'unread'} px`);
+    };
+    for (const appearance of ['light', 'dark'] as const) {
+      const { page } = await barPerson(baseURL, 1440, 900, appearance);
+      /* the filmstrip: seven more slides make it scroll */
+      for (let i = 0; i < 7; i += 1) {
+        await ctl(page, 'toolbar.newSlide').click();
+        await page.waitForTimeout(250);
+      }
+      await settled(page);
+      judge(
+        await barOf(page, `${appearance} the filmstrip`, '.pt-viewer.is-editor .ts-film'),
+        `${appearance} the filmstrip`,
+        true,
+      );
+      /* the speaker notes: thirty lines */
+      const notes = page.locator('.ts-notes-field').first();
+      await notes.click();
+      await page.keyboard.type(Array.from({ length: 30 }, (_, i) => `Line ${i + 1}`).join('\n'), {
+        delay: 0,
+      });
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+      judge(
+        await barOf(page, `${appearance} the speaker notes`, '.ts-notes-field'),
+        `${appearance} the speaker notes`,
+        true,
+      );
+      /* Format options for the title; the font list */
+      const heading = page
+        .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]')
+        .first();
+      await heading.click();
+      await page.waitForTimeout(300);
+      await ctl(page, 'toolbar.formatOptions').click();
+      await page.locator('.ts-panel').first().waitFor({ timeout: 10_000 });
+      judge(
+        await barOf(page, `${appearance} Format options`, '.ts-panel .ts-panel-body'),
+        `${appearance} Format options`,
+        false,
+      );
+      await ctl(page, 'toolbar.font').click();
+      await page.locator('.ts-font-list').first().waitFor({ timeout: 10_000 });
+      judge(
+        await barOf(page, `${appearance} the font list`, '.ts-font-list'),
+        `${appearance} the font list`,
+        true,
+      );
+      await page.keyboard.press('Escape');
+      /* a menu in a 360 px tall window */
+      await page.setViewportSize({ width: 1440, height: 360 });
+      await page.waitForTimeout(300);
+      await ctl(page, 'menubar.insert').click();
+      await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+      await page.waitForTimeout(300);
+      judge(
+        await barOf(page, `${appearance} the Insert menu at 360 px`, '#ts-menu-insert'),
+        `${appearance} the Insert menu at 360 px`,
+        true,
+      );
+      await page.keyboard.press('Escape');
+      await page.setViewportSize({ width: 1440, height: 900 });
+      /* the Import slides list, when this server lists another presentation */
+      await menuPath(page, 'file', 'file.importSlides').catch(() => undefined);
+      const list = page.locator('[role="dialog"] .ts-dialog-list:not(.is-loading)').first();
+      if (
+        await list
+          .waitFor({ timeout: 6000 })
+          .then(() => true)
+          .catch(() => false)
+      ) {
+        const r = await barOf(
+          page,
+          `${appearance} the Import slides list`,
+          '[role="dialog"] .ts-dialog-list:not(.is-loading)',
+        );
+        if (r) readings.push(barLine(r));
+        if (r && r.gutter === 15)
+          failures.push(`${appearance} the Import slides list draws a 15 px bar`);
+      } else readings.push(`${appearance} the Import slides list: no list on this server`);
+      await page.keyboard.press('Escape');
+    }
+    test.info().annotations.push({ type: 'scroll', description: readings.join('; ') });
+    expect(failures).toEqual([]);
+  });
+
+  /* DESIGN.md 6.2, 6.4: at 200 % the stage's bars draw their track in the chrome's paper, the thumb
+     reads 3:1 over a dark slide in light chrome, and the notes handle sits under the seam */
+  row('chrome.scroll.stage-track', async ({ baseURL }) => {
+    test.setTimeout(300_000);
+    const { page } = await barPerson(baseURL, 1440, 900, 'light');
+    /* the slides dark, the chrome light: Slide > Change theme (the toolbar's Theme button folds
+       while the title the first write typed is still selected) */
+    await menuPath(page, 'slide', 'slide.changeTheme');
+    await ctl(page, 'panel.brand.appearance.dark').click({ timeout: 15_000 });
+    await settled(page);
+    await ctl(page, 'panel.brand.close')
+      .click({ timeout: 3000 })
+      .catch(() => undefined);
+    await menuPath(page, 'view', 'view.zoom', 'view.zoom.200');
+    await page.waitForTimeout(800);
+    const facts = await page.evaluate(() => {
+      const stage = document.querySelector<HTMLElement>('.ts-editor .pt-sheet-stage[data-zoom]');
+      const handle = document.querySelector('.ts-notes-handle');
+      if (!stage) return null;
+      const r = stage.getBoundingClientRect();
+      const h = handle?.getBoundingClientRect();
+      const gutterY = stage.offsetHeight - stage.clientHeight;
+      const gutterX = stage.offsetWidth - stage.clientWidth;
+      return {
+        chrome: document.documentElement.dataset.theme,
+        gutterX,
+        gutterY,
+        right: r.right,
+        top: r.top,
+        bottom: r.bottom,
+        left: r.left,
+        handle: h ? { top: h.top, bottom: h.bottom, left: h.left, right: h.right } : null,
+        bar: { top: r.bottom - gutterY, bottom: r.bottom, left: r.left, right: r.right - gutterX },
+        paper: getComputedStyle(document.documentElement).getPropertyValue('--pt-paper').trim(),
+      };
+    });
+    expect(facts, 'the stage at 200 %').not.toBeNull();
+    const f = facts!;
+    /* the vertical bar's strip at the stage's right edge */
+    const strip = await stripOf(page, {
+      x: Math.round(f.right - f.gutterX),
+      top: Math.round(f.top),
+      bottom: Math.round(f.bottom - f.gutterY),
+      width: f.gutterX,
+    });
+    const paper = parseColor(f.paper);
+    const track = strip ? parseColor(strip.track) : null;
+    const trackIsPaper =
+      paper !== null &&
+      track !== null &&
+      Math.abs(paper.r - track.r) + Math.abs(paper.g - track.g) + Math.abs(paper.b - track.b) < 12;
+    const overlap =
+      f.handle !== null &&
+      f.handle.bottom > f.bar.top + 0.5 &&
+      f.handle.top < f.bar.bottom - 0.5 &&
+      f.handle.right > f.bar.left &&
+      f.handle.left < f.bar.right;
+    test.info().annotations.push({
+      type: 'scroll',
+      description: `chrome ${f.chrome}; gutters ${f.gutterX} by ${f.gutterY}; track ${strip?.track} (paper ${f.paper}); thumb ${strip?.thumb} px ${strip?.thumbColor} ${strip?.ratio.toFixed(2)}:1; the horizontal bar ${Math.round(f.bar.top)} to ${Math.round(f.bar.bottom)}, the notes handle ${f.handle ? `${Math.round(f.handle.top)} to ${Math.round(f.handle.bottom)}` : 'absent'}`,
+    });
+    expect(f.chrome).toBe('light');
+    expect(f.gutterX, 'the stage scrolls at 200 %').toBe(8);
+    expect(trackIsPaper, "the track is the chrome's paper").toBe(true);
+    expect(strip?.ratio ?? 0, 'the thumb at 3:1 or more').toBeGreaterThanOrEqual(3);
+    expect(overlap, 'the notes handle covers no part of the horizontal bar').toBe(false);
+  });
+
+  /* DESIGN.md 4.5: the editor's numbers in tabular figures */
+  row('chrome.numerals.tabular', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const page = await fresh(await personIn(browser, 'light'));
+    await menuPath(page, 'view', 'view.showRuler').catch(() => undefined);
+    const heading = page
+      .locator('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]')
+      .first();
+    await heading.click();
+    await page.waitForTimeout(300);
+    await ctl(page, 'toolbar.formatOptions').click();
+    await page.locator('.ts-panel .ts-fo-field input').first().waitFor({ timeout: 10_000 });
+    const facts = await page.evaluate(() => {
+      const read = (name: string, sel: string) => {
+        const el = document.querySelector<HTMLElement>(sel);
+        return { name, value: el ? getComputedStyle(el).fontVariantNumeric : 'absent' };
+      };
+      const list = [
+        read('a ruler numeral', '.ts-ruler-numeral'),
+        read('the zoom field', '.ts-tb-zoom-field'),
+        read('a filmstrip number', '.ts-card-n'),
+        read('a Format options field', '.ts-panel .ts-fo-field input'),
+        read('the font size field', '.ts-tb-size-field'),
+        read('the inbox count', '.ts-title-inbox-count'),
+      ];
+      /* "1111" and "0000" in a Format options field's face */
+      const input = document.querySelector<HTMLElement>('.ts-panel .ts-fo-field input');
+      let widths: number[] = [];
+      if (input) {
+        const cs = getComputedStyle(input);
+        widths = ['1111', '0000'].map((text) => {
+          const span = document.createElement('span');
+          span.textContent = text;
+          span.style.cssText = `position:fixed;left:-9999px;top:0;white-space:pre;font:${cs.font};font-variant-numeric:${cs.fontVariantNumeric};font-feature-settings:${cs.fontFeatureSettings}`;
+          document.body.append(span);
+          const w = span.getBoundingClientRect().width;
+          span.remove();
+          return w;
+        });
+      }
+      return { list, widths };
+    });
+    /* Version history's times */
+    await ctl(page, 'deck.lastEdit')
+      .click({ timeout: 5000 })
+      .catch(() => undefined);
+    await page
+      .locator('.ts-version-meta')
+      .first()
+      .waitFor({ timeout: 10_000 })
+      .catch(() => undefined);
+    const version = await page.evaluate(() => {
+      const el = document.querySelector('.ts-version-meta');
+      return el ? getComputedStyle(el).fontVariantNumeric : 'absent';
+    });
+    const all = [...facts.list, { name: "Version history's times", value: version }];
+    test.info().annotations.push({
+      type: 'numerals',
+      description: `${all.map((f) => `${f.name} ${f.value}`).join(', ')}; "1111" ${facts.widths[0]?.toFixed(2)} px and "0000" ${facts.widths[1]?.toFixed(2)} px`,
+    });
+    for (const f of all)
+      if (f.value !== 'absent' || f.name !== 'the inbox count')
+        expect(f.value, f.name).toContain('tabular-nums');
+    expect(facts.widths.length).toBe(2);
+    expect(Math.abs((facts.widths[0] ?? 0) - (facts.widths[1] ?? 1))).toBeLessThan(0.01);
+    await page.keyboard.press('Escape');
+  });
+
+  /* DESIGN.md 4.2: no cv11 or ss01 in the chrome; a General Translation heading keeps them */
+  row('chrome.type.default-glyphs', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const page = await fresh(await personIn(browser, 'light'));
+    await ctl(page, 'menubar.insert').click();
+    await page.locator('#ts-menu-insert').waitFor({ timeout: 8000 });
+    const chrome = await page.evaluate(() => {
+      const out: string[] = [];
+      for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+        if (el.closest('.pt-slide, .ts-thumb, .pt-preview-frame')) continue;
+        const ff = getComputedStyle(el).fontFeatureSettings;
+        if (/cv11|ss01/.test(ff))
+          out.push(`${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]} ${ff}`);
+      }
+      return out;
+    });
+    await page.keyboard.press('Escape');
+    /* a heading of the General Translation brand deck, which every base serves */
+    await page.goto('/deck/gt-brand');
+    const headings = page.locator('.pt-slide h1, .pt-slide h2');
+    await headings.first().waitFor({ state: 'attached', timeout: 60_000 });
+    await page.evaluate(() => document.fonts.ready);
+    const heading = await headings
+      .first()
+      .evaluate((el) => getComputedStyle(el).fontFeatureSettings);
+    test.info().annotations.push({
+      type: 'type',
+      description: `chrome elements with cv11 or ss01: ${chrome.length}${chrome.length ? ` (${chrome.slice(0, 8).join('; ')})` : ''}; a General Translation heading: ${heading}`,
+    });
+    expect(chrome).toEqual([]);
+    expect(heading).toMatch(/cv11/);
+    expect(heading).toMatch(/ss01/);
+  });
+
+  /* DESIGN.md question 6: a dark system gives dark chrome on /new and nothing is stored until the
+     person picks an appearance */
+  row('chrome.appearance.system-until-picked', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const context = await browser.newContext({
+      extraHTTPHeaders,
+      viewport: { width: 1440, height: 900 },
+      colorScheme: 'dark',
+    });
+    const page = await context.newPage();
+    try {
+      await page.goto('/new');
+      await waitEditor(page);
+      const ready = Date.now();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+      await page.waitForTimeout(Math.max(0, 10_000 - (Date.now() - ready)));
+      const stored = await page.evaluate(() => ({
+        theme: localStorage.getItem('gt-theme'),
+        deck: localStorage.getItem('gt-deck-theme'),
+        html: document.documentElement.dataset.theme,
+      }));
+      await menuPath(
+        page,
+        'tools',
+        'tools.preferences',
+        'tools.preferences.appearance',
+        'tools.preferences.appearance.light',
+      );
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+      const picked = await page.evaluate(() => localStorage.getItem('gt-theme'));
+      await page.goto('/decks');
+      await page.locator('.ts-home-page[data-hydrated]').first().waitFor({ timeout: 60_000 });
+      const decks = await page.evaluate(() => document.documentElement.dataset.theme);
+      test.info().annotations.push({
+        type: 'appearance',
+        description: `a dark system: html ${stored.html} 10 s after the editor was ready, gt-theme ${stored.theme}, gt-deck-theme ${stored.deck}; after Tools > Preferences > Appearance > Light gt-theme ${picked}; /decks then ${decks}`,
+      });
+      expect(stored.html).toBe('dark');
+      expect(stored.theme).toBeNull();
+      expect(picked).toBe('light');
+      expect(decks).toBe('light');
+    } finally {
+      await context.close();
+    }
   });
 
   return declared;

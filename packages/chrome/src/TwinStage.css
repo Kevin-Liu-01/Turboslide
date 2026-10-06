@@ -43,7 +43,6 @@
   align-items: center;
   justify-content: center;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12.5px;
   line-height: 1;

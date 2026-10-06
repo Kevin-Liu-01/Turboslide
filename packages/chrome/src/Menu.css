@@ -141,7 +141,7 @@
 .ts-menu-key {
   color: var(--pt-titanium);
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
   padding-left: 8px;
 }

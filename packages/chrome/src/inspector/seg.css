@@ -17,7 +17,7 @@
   height: 20px;
   padding: 0 8px;
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* the native mirror: in the accessibility tree and reachable by the window API, off screen for

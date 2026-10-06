@@ -282,7 +282,7 @@ export function FontList({
   return (
     <div
       ref={root}
-      className="ts-font-list"
+      className="ts-font-list pt-scroll"
       role="listbox"
       aria-label={FONT_PICKER.control}
       aria-activedescendant={activeId(active)}

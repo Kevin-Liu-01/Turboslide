@@ -88,6 +88,9 @@
     padding: 10px 12px;
     overflow-x: auto;
     overflow-y: hidden;
+    /* a sideways strip: no vertical gutter (.pt-scroll reserves one on the column it is above
+       720 px; docs/DESIGN.md 6.3) */
+    scrollbar-gutter: auto;
   }
 
   .pt-viewer.is-editor > .pt-sb .ts-card {

@@ -62,7 +62,7 @@
 .ts-activity-time {
   color: var(--pt-ink-2);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: right;
 }
 

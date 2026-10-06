@@ -27,7 +27,6 @@
 
 .ts-report-head b {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 15px;
 }
@@ -58,7 +57,7 @@
 
 .ts-report-row dd {
   margin: 0;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   overflow-wrap: anywhere;
 }
 
@@ -88,7 +87,7 @@
 
 .ts-report-bytes {
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   white-space: nowrap;
 }
 

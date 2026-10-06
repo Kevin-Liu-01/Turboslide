@@ -64,6 +64,7 @@
   position: absolute;
   color: var(--pt-titanium);
   font: 11px/1 var(--pt-text);
+  font-variant-numeric: var(--pt-numerals);
   pointer-events: none;
   white-space: nowrap;
 }

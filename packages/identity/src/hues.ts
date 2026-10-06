@@ -12,6 +12,11 @@
 // principal asks for in every room; the room grants it if free, else the least used slot with
 // the lowest index (assignHueSlot). The grant lives on the presence record so every client draws
 // the same colour; no client computes a hue on its own.
+import {
+  contrastRatio as wcagRatio,
+  relativeLuminance as luminanceOf,
+} from '@turboslide/theme/contrast';
+
 import { sha256 } from './sha256.ts';
 
 export type HueSlot = 1 | 2 | 3 | 4 | 5 | 6;
@@ -80,21 +85,18 @@ export function parseHex(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-function linear(channel: number): number {
-  const c = channel / 255;
-  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-}
-
-/** WCAG 2.2 relative luminance of a #rrggbb colour. */
+/**
+ * WCAG 2.2 relative luminance of a #rrggbb colour, through the one contrast module of the design
+ * round (packages/theme/src/contrast.ts; docs/DESIGN.md 5.4).
+ */
 export function relativeLuminance(hex: string): number {
   const [r, g, b] = parseHex(hex);
-  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+  return luminanceOf({ r, g, b, a: 1 });
 }
 
-/** WCAG 2.2 contrast ratio between two #rrggbb colours, 1 to 21. */
+/** WCAG 2.2 contrast ratio between two #rrggbb colours, 1 to 21 (packages/theme/src/contrast.ts). */
 export function contrastRatio(a: string, b: string): number {
-  const la = relativeLuminance(a);
-  const lb = relativeLuminance(b);
-  const [light, dark] = la >= lb ? [la, lb] : [lb, la];
-  return (light + 0.05) / (dark + 0.05);
+  parseHex(a);
+  parseHex(b);
+  return wcagRatio(a, b);
 }

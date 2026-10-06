@@ -1400,24 +1400,35 @@ export function rows(): void {
           await context.close();
         }
       }
-      /* the gathered still under reduced motion and with Pause Motion stored */
-      for (const options of [{ reduce: true }, { paused: true }] as const) {
-        const { context, page } = await open(browser, options);
-        try {
-          await visit(page);
-          await liveReady(page);
-          const shown = await renderedInterludes(page);
-          expect(shown.length).toBeGreaterThan(0);
-          for (const next of shown) {
-            const read = await inkedCells(page, next);
-            expect(read.ink, `${JSON.stringify(options)} ${next}`).toEqual(
-              gatheredCells(next, read.cols, read.rows),
-            );
+      /* the gathered still under reduced motion and with Pause Motion stored, at both widths, read
+         at the core's ready: the core reports ready once the stills are drawn (2.4; the Round 1
+         follow-up, lane E item 5: at 390 with Pause Motion stored the canvases were still blank
+         at ready, their glyph chunk not yet arrived) */
+      for (const width of [1440, 390])
+        for (const options of [{ reduce: true }, { paused: true }] as const) {
+          const size = { width, height: width === 390 ? 844 : 900 };
+          const { context, page } = await open(browser, { ...options, ...size });
+          /* the glyph chunk answers a second late, as a loaded server or a slow network serves it,
+             so a ready reported before the stills reads blank canvases */
+          await context.route(/\/glyphs(\.ts|-[^/]*\.m?js)(\?|$)/, async (route) => {
+            await new Promise((r) => setTimeout(r, 1000));
+            await route.continue();
+          });
+          try {
+            await visit(page);
+            await liveReady(page);
+            const shown = await renderedInterludes(page);
+            expect(shown.length).toBeGreaterThan(0);
+            for (const next of shown) {
+              const read = await inkedCells(page, next);
+              expect(read.ink, `${width} ${JSON.stringify(options)} ${next}`).toEqual(
+                gatheredCells(next, read.cols, read.rows),
+              );
+            }
+          } finally {
+            await context.close();
           }
-        } finally {
-          await context.close();
         }
-      }
       test.skip(!quiet, `not read: load ${load()} (the functional checks passed)`);
     });
 

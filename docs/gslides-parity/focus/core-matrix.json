@@ -10634,12 +10634,12 @@
     {
       "id": "home.interludes.glyphs",
       "feature": "decks",
-      "interaction": "Eleven interludes, one between every two sections from the numbers row to the close, `aria-hidden`, 128 px tall at 1440 and 80 px at 390, printed at 2 px cells; each one's gathered still equals its glyph's cells; a cycle gathers over 1,500 ms, holds to 7 s, thins over 1,500 ms and rests to 12 s; at most two draw at once; the still under reduce and with Pause Motion stored",
+      "interaction": "Eleven interludes, one between every two sections from the numbers row to the close, `aria-hidden`, 128 px tall at 1440 and 80 px at 390, printed at 2 px cells; each one's gathered still equals its glyph's cells; a cycle gathers over 1,500 ms, holds to 7 s, thins over 1,500 ms and rests to 12 s; at most two draw at once; the still under reduce and with Pause Motion stored, at 1440 and 390, read at the core's ready with the glyph chunk answering a second late",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
-      "evidence": "b-strip-field-gather.png; b-strip-field-glyphs.png (drawn finer)",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#18"
+      "evidence": "b-strip-field-gather.png; b-strip-field-glyphs.png (drawn finer); verify-landing.md finding 5 (production 2026-10-05: with Pause Motion stored at 390 the ten canvases 300 by 150 and blank at main[data-live=\"ready\"], their stills drawn within 3 s)",
+      "note": "docs/LANDING.md 6.7 (second pass), V4#18; Round 1 follow-up, lane E item 5: the core reports ready once the first screen's starts have drawn (apps/studio/src/components/home/live/index.ts), and startInterludes (live/field.ts) settles once every interlude has drawn its first pose from the glyph chunk"
     },
     {
       "id": "home.motion.loops",

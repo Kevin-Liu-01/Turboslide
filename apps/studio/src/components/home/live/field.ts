@@ -798,11 +798,12 @@ type Glyphs = typeof import('./glyphs');
  * glyphs travel in a chunk of their own, imported here when the core starts, so the core and the
  * chunks it imports at once stay inside 4.1's 20 KB gzip (`home.budget.live-module`; the
  * integrator's V4#18 seam, as V1#15 moved the hero's stage into `hero-stage.ts`). Until it
- * arrives an interlude's canvas is empty, as it is before the core starts.
+ * arrives an interlude's canvas is empty, as it is before the core starts; the promise settles
+ * once every interlude has drawn its first pose, and the core reports ready after it.
  */
-export function startInterludes(root: HTMLElement): void {
+export function startInterludes(root: HTMLElement): Promise<void> {
   installGuards();
-  void import('./glyphs').then(
+  return import('./glyphs').then(
     (glyphs) => {
       for (const el of root.querySelectorAll<HTMLElement>('[data-interlude]')) {
         try {

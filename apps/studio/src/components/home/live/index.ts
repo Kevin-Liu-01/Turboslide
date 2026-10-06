@@ -49,7 +49,8 @@ export type BandId =
   | 'features'
   | 'close';
 
-export type Registration = { band: BandId; start(ctx: LiveContext): void };
+/** A first screen start; one that draws after an import returns that drawing's promise. */
+export type Registration = { band: BandId; start(ctx: LiveContext): void | Promise<void> };
 
 /** One entry of a band below the first screen: the module it imports and the start it exports. */
 export type BandModule = { start(ctx: LiveContext): void };
@@ -390,15 +391,22 @@ export function startLive(root: HTMLElement): void {
   paintSlides(root, store.get());
   pageKit(store.get());
   wireUndo(root, store);
+  const drawn: unknown[] = [];
   for (const registration of REGISTRATIONS) {
     const band = root.querySelector<HTMLElement>(`[data-band="${registration.band}"]`);
     if (band === null) continue;
     try {
-      registration.start({ root, band, store, announce: announcer(band), reserve: null });
+      drawn.push(
+        registration.start({ root, band, store, announce: announcer(band), reserve: null }),
+      );
     } catch (error) {
       console.error(`the ${registration.band} band did not start`, error);
     }
   }
   watchBands(root);
-  root.dataset['live'] = 'ready';
+  // ready once the first screen's starts have drawn: the interludes' stills come with their glyph
+  // chunk, and 2.4 draws each still when the core starts (verify-landing.md finding 5)
+  void Promise.allSettled(drawn).then(() => {
+    root.dataset['live'] = 'ready';
+  });
 }

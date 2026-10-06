@@ -35,7 +35,7 @@ export const FACTS_DATA = {
       id: 'tailor',
       where: 'Tools > Tailor for a customer',
       path: ['Tools', 'Tailor for a customer'],
-      icon: 'chat',
+      icon: 'pencil',
       mac: '',
       other: '',
       macKeys: [],

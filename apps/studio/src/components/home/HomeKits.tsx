@@ -16,7 +16,8 @@ import { HOME_THEME_AT_REST, HOME_THEME_TILES } from './theme-tiles.generated';
  * The swatches' behaviour, the typed colour and the grid's slides are V2's (`live/kits.ts`).
  * Themes and brand kits (DESIGN.md 8.7): the first row is the library's nine themes as tiles, each
  * its name and a swatch of its paper and ink in the shown appearance; a pick swaps in the
- * stylesheet the renderer writes for that theme (`themes.generated.ts`, the band's chunk), so
+ * stylesheet the renderer writes for that theme (`themes.generated.ts`, a chunk of its own asked
+ * for on a tile's first hover, focus or press), so
  * every slide on the page takes it, and a kit's colors stay over it. General Translation, the
  * page deck's theme, is pressed at rest.
  */

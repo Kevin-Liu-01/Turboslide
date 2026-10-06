@@ -4,6 +4,7 @@ import type { Locator, Page } from '@playwright/test';
 import { loadavg } from 'node:os';
 
 import { HISTORY, MENUS } from '../../../src/components/home/copy';
+import { docOf } from '../../../src/components/home/menu-docs.generated';
 import { MINI_MENUS } from '../../../src/components/home/menus.generated';
 import type { MiniRow } from '../../../src/components/home/menus.generated';
 import { title } from '../lib';
@@ -267,17 +268,17 @@ export function rows(): void {
       await page.keyboard.press('Escape');
       await openPath(page, ['File', notRun?.label ?? ''], true);
       await expect(band(page).locator('[data-mini-status]')).toHaveText(
-        MENUS.editorRow(notRun?.doc ?? '').trim(),
+        MENUS.editorRow(notRun === undefined ? '' : docOf(notRun)).trim(),
       );
       const withDoc = MINI_MENUS.flatMap((m) =>
         m.rows.flatMap((r) =>
           (r.items ?? []).map((s) => ({ menu: m.label, row: r.label, sub: s })),
         ),
-      ).find((x) => x.sub.run !== true && x.sub.doc !== undefined && x.sub.items === undefined);
+      ).find((x) => x.sub.run !== true && docOf(x.sub) !== '' && x.sub.items === undefined);
       if (withDoc !== undefined) {
         await openPath(page, [withDoc.menu, withDoc.row, withDoc.sub.label], true);
         await expect(band(page).locator('[data-mini-status]')).toHaveText(
-          MENUS.editorRow(withDoc.sub.doc ?? '').trim(),
+          MENUS.editorRow(docOf(withDoc.sub)).trim(),
         );
       }
     } finally {

@@ -166,6 +166,30 @@ const ALL_ROWS = walk(MINI_MENUS);
 const rowById = (id: string): MiniRow | undefined => ALL_ROWS.find((r) => r.row.id === id)?.row;
 
 /**
+ * The rows' model sentences (`menu-docs.generated.ts`): a chunk of their own, imported on the
+ * miniature's first hover, focus or press of a menu or a row, so they are not part of the page's
+ * script until a row is used (docs/DESIGN.md 8.16, the design round's finishing fix). `docs` is
+ * null until it arrives; a row that answers with its sentence waits for it.
+ */
+type Docs = { docOf(row: { readonly at: number }): string };
+let docs: Docs | null = null;
+let docsLoad: Promise<Docs> | null = null;
+const loadDocs = (): Promise<Docs> =>
+  (docsLoad ??= import('../menu-docs.generated')
+    .then((m) => (docs = m))
+    .catch((error: unknown) => {
+      console.error("the menus' sentences did not load", error);
+      docsLoad = null;
+      return { docOf: () => '' };
+    }));
+/** A row's sentence once the sentences arrived, else ''. */
+const docNow = (row: MiniRow | undefined): string =>
+  row === undefined || docs === null ? '' : docs.docOf(row);
+/** A row's sentence, after the sentences arrive. */
+const docOf = async (row: MiniRow | undefined): Promise<string> =>
+  row === undefined ? '' : (await loadDocs()).docOf(row);
+
+/**
  * True when the row runs on the page, or is a submenu with a row under it that does (File >
  * Download for Download > PDF document): the editor draws such a submenu available, so it reads in
  * ink beside the rows it leads to (2.5, verify1 F10).
@@ -230,6 +254,28 @@ export function startMenus(ctx: LiveContext): void {
     status.toggleAttribute('data-said', true);
     ctx.announce(text);
   };
+
+  // the rows' sentences arrive on the first hover, focus or press of the menu bar or a plate; the
+  // rows drawn by then take their tooltip names (`data-tip`), and the rows drawn after take theirs
+  // as they are made
+  const tipRows = (): void => {
+    for (const el of plates.querySelectorAll<HTMLElement>('.ts-mini-row')) {
+      const doc = docNow((el as HTMLElement & { miniRow?: MiniRow }).miniRow);
+      if (doc !== '' && !el.hasAttribute('data-tip')) el.setAttribute('data-tip', doc);
+    }
+  };
+  const wantDocs = (): void => {
+    if (docs !== null) return;
+    for (const type of ['pointerover', 'focusin', 'pointerdown'] as const) {
+      bar.removeEventListener(type, wantDocs);
+      plates.removeEventListener(type, wantDocs);
+    }
+    void loadDocs().then(tipRows);
+  };
+  for (const type of ['pointerover', 'focusin', 'pointerdown'] as const) {
+    bar.addEventListener(type, wantDocs, { passive: true });
+    plates.addEventListener(type, wantDocs, { passive: true });
+  }
 
   // a press on the stage's ground focuses the stage, so the band's keys (Cmd or Ctrl+Z, the rows'
   // shortcuts) act after a click beside the slide, as the editor's canvas takes the keys
@@ -792,7 +838,8 @@ export function startMenus(ctx: LiveContext): void {
     'file.rename': () => renameDialog(),
     'file.download.pdf': () => {
       const link = ctx.root.querySelector<HTMLAnchorElement>('a[data-pdf]');
-      if (link === null || link.href === '') return say(rowById('file.download.pdf')?.doc ?? '');
+      if (link === null || link.href === '')
+        return void docOf(rowById('file.download.pdf')).then(say);
       const a = h('a', {
         href: link.href,
         download: link.getAttribute('download') ?? 'onboarding-plan.pdf',
@@ -969,7 +1016,7 @@ export function startMenus(ctx: LiveContext): void {
     } catch {
       /* the show has not loaded; the row says what it does */
     }
-    say(WORDS.editorRow(rowById('view.slideshow')?.doc ?? '').trim());
+    say(WORDS.editorRow(await docOf(rowById('view.slideshow'))).trim());
   };
 
   // ---- dialogs: plates over the stage, square, ruled, paper ----
@@ -1121,7 +1168,18 @@ export function startMenus(ctx: LiveContext): void {
       });
       group.append(b);
     }
-    dialog('Brand kit', row?.doc ?? null, [group], [{ label: 'Close', act: closeDialog }]);
+    const lead = docNow(row);
+    const el = dialog('Brand kit', lead || null, [group], [
+      { label: 'Close', act: closeDialog },
+    ]);
+    // pressed before the sentences arrived (a key on the row): the lead joins under the title
+    if (lead === '')
+      void docOf(row).then((doc) => {
+        if (doc === '' || !el.isConnected) return;
+        el.querySelector('.ts-mini-dialog-title')?.after(
+          h('p', { class: 'ts-mini-dialog-lead' }, doc),
+        );
+      });
   };
 
   const tailorDialog = (): void => {
@@ -1241,7 +1299,7 @@ export function startMenus(ctx: LiveContext): void {
     finishBand('menus');
     const run = row.run === true ? RUN[row.id] : undefined;
     if (run === undefined) {
-      say(WORDS.editorRow(row.doc ?? '').trim());
+      void docOf(row).then((doc) => say(WORDS.editorRow(doc).trim()));
       return;
     }
     run(row);
@@ -1410,7 +1468,7 @@ export function startMenus(ctx: LiveContext): void {
           'aria-disabled': off && !sub ? 'true' : undefined,
           'aria-haspopup': row.items !== undefined ? 'menu' : undefined,
           'aria-checked': check === undefined ? undefined : String(check),
-          'data-tip': row.doc,
+          'data-tip': docNow(row) || undefined,
         },
         h(
           'span',

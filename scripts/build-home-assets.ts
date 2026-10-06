@@ -96,7 +96,7 @@ import type { PanelWidth } from '../apps/studio/src/components/home/panel-format
 import { deriveChips, recordChips } from './home/run.ts';
 import { deriveLoupe, writeExportMark } from './home/export.ts';
 import { deriveBoot } from './home/boot.ts';
-import { deriveMenus } from './home/menus.ts';
+import { deriveMenuDocs, deriveMenus } from './home/menus.ts';
 import { derivePattern } from './home/pattern.ts';
 import { iconMaskRules, maskUri } from './home/icons.ts';
 import { deriveEditorChrome, firstScreenIcons } from './home/chrome.ts';
@@ -2999,6 +2999,10 @@ async function derive(): Promise<{ outputs: Output[]; served: Set<string>; repor
     {
       path: `${HOME}/menus.generated.ts`,
       content: await formatTs(`${HOME}/menus.generated.ts`, deriveMenus()),
+    },
+    {
+      path: `${HOME}/menu-docs.generated.ts`,
+      content: await formatTs(`${HOME}/menu-docs.generated.ts`, deriveMenuDocs()),
     },
     {
       path: `${HOME}/facts-data.ts`,

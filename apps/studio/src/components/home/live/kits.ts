@@ -1,7 +1,6 @@
 import { HISTORY, KITS as WORDS } from '../copy';
 import { HOME_SLIDE_MARKUP } from '../bands/deck.generated';
 import { KITS_ROUND } from '../design-copy';
-import { HOME_THEME_CSS } from '../themes.generated';
 import { cloneSlide, registerDeckSlides } from './index';
 import type { LiveContext } from './index';
 import { finishBand } from './motion';
@@ -112,22 +111,43 @@ export function startKits(ctx: LiveContext): void {
   // ---- the themes (DESIGN.md 8.7): a pick swaps in the renderer's stylesheet of that theme for
   // every slide on the page, one style element after the page's own sheets; a kit's colours are
   // inline on each slide, so they stay over any theme ----
+  // the nine stylesheets (`themes.generated.ts`) are a chunk of their own, asked for on a tile's
+  // first hover, focus or press, so they are not part of the page's script until a tile is used
+  // (docs/DESIGN.md 8.16, the design round's finishing fix); a press waits for them
   const tiles = [...band.querySelectorAll<HTMLElement>('[data-theme-id]')];
   let themeSheet: HTMLStyleElement | null = null;
-  for (const tile of tiles)
+  let sheets: Promise<Readonly<Record<string, string>>> | null = null;
+  const loadSheets = (): Promise<Readonly<Record<string, string>>> =>
+    (sheets ??= import('../themes.generated')
+      .then((m) => m.HOME_THEME_CSS)
+      .catch((error: unknown) => {
+        console.error("the themes' stylesheets did not load", error);
+        sheets = null;
+        return {};
+      }));
+  /** the tile the visitor pressed last, so a slow chunk never applies an earlier press over it */
+  let wanted: HTMLElement | null = null;
+  for (const tile of tiles) {
+    for (const type of ['pointerover', 'focusin'] as const)
+      tile.addEventListener(type, () => void loadSheets(), { once: true, passive: true });
     tile.addEventListener('click', () => {
       const id = tile.dataset['themeId'] ?? '';
       if (tile.getAttribute('aria-pressed') === 'true') return;
-      if (themeSheet === null) {
-        themeSheet = document.createElement('style');
-        themeSheet.dataset['homeTheme'] = '';
-        document.head.append(themeSheet);
-      }
-      themeSheet.textContent = HOME_THEME_CSS[id] ?? '';
-      themeSheet.dataset['homeTheme'] = id;
-      for (const other of tiles) other.setAttribute('aria-pressed', String(other === tile));
-      say(KITS_ROUND.status.theme(tile.textContent?.trim() ?? id));
+      wanted = tile;
+      void loadSheets().then((css) => {
+        if (wanted !== tile) return;
+        if (themeSheet === null) {
+          themeSheet = document.createElement('style');
+          themeSheet.dataset['homeTheme'] = '';
+          document.head.append(themeSheet);
+        }
+        themeSheet.textContent = css[id] ?? '';
+        themeSheet.dataset['homeTheme'] = id;
+        for (const other of tiles) other.setAttribute('aria-pressed', String(other === tile));
+        say(KITS_ROUND.status.theme(tile.textContent?.trim() ?? id));
+      });
     });
+  }
 
   // ---- the swatches ----
   const paintSwatches = (state: HomeDeckState): void => {

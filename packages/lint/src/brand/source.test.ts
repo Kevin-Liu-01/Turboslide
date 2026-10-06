@@ -153,12 +153,54 @@ describe('the thirteen gt-ui rules over the TypeScript syntax tree (P:.oxlintrc.
   test('an inline radius keeps the radius rule', () => {
     expect(rulesOf("const a = <div style={{ borderRadius: '4px' }} />;")).toEqual(['css/radius']);
     expect(rulesOf("const a = <div style={{ borderRadius: 'var(--pt-radius)' }} />;")).toEqual([]);
+    expect(rulesOf("const a = <div style={{ borderRadius: 'var(--pt-radius-lg)' }} />;")).toEqual(
+      [],
+    );
     expect(rulesOf('const a = <div style={{ borderRadius: 0 }} />;')).toEqual([]);
     expect(isAllowedRadius('calc(var(--pt-radius) - 1px)')).toBe(true);
     expect(isAllowedRadius('var(--pt-radius, 6px)')).toBe(true);
     expect(isAllowedRadius('50%')).toBe(true);
     expect(isAllowedRadius('0 !important')).toBe(true);
     expect(isAllowedRadius('8px 0 0 8px')).toBe(false);
+  });
+
+  test('the inline forms of the design round: z-index, shadows, scrollbars, numerals, alternates', () => {
+    expect(rulesOf('const a = <div style={{ zIndex: 2 }} />;')).toEqual([]);
+    expect(rulesOf('const a = <div style={{ zIndex: -1 }} />;')).toEqual([]);
+    expect(rulesOf("const a = <div style={{ zIndex: 'var(--ts-layer-toast)' }} />;")).toEqual([]);
+    expect(rulesOf('const a = <div style={{ zIndex: 30 + level }} />;')).toEqual(['css/z-index']);
+    expect(rulesOf("const a = { zIndex: '10' };")).toEqual(['css/z-index']);
+    expect(rulesOf('el.style.zIndex = String(LAYERS[layer]);')).toEqual([]);
+    expect(rulesOf("el.style.zIndex = '40';")).toEqual(['css/z-index']);
+    expect(rulesOf("st.zIndex = '3';")).toEqual([]);
+    expect(rulesOf("const a = { boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)' };")).toEqual([
+      'css/no-shadow',
+    ]);
+    expect(rulesOf("const a = { boxShadow: 'var(--pt-ring)' };")).toEqual([]);
+    expect(rulesOf("const a = { scrollbarWidth: 'thin' };")).toEqual(['css/scrollbar']);
+    expect(rulesOf("const a = { scrollbarWidth: 'none' };")).toEqual([]);
+    expect(rulesOf("const css = '.x::-webkit-scrollbar { width: 4px }';")).toEqual([
+      'css/scrollbar',
+    ]);
+    expect(rulesOf("const css = '.x::-webkit-scrollbar { display: none }';")).toEqual([]);
+    expect(
+      lintSource(
+        'packages/viewer/standalone/chrome.ts',
+        "const css = '.x::-webkit-scrollbar { width: 8px }';",
+      ),
+    ).toEqual([]);
+    expect(rulesOf("const a = { fontVariantNumeric: 'tabular-nums' };")).toEqual(['css/numerals']);
+    expect(rulesOf("const css = '.n { font-variant-numeric: tabular-nums; }';")).toEqual([
+      'css/numerals',
+    ]);
+    expect(rulesOf("const numerals = 'tabular';")).toEqual([]);
+    expect(rulesOf("const a = { fontFeatureSettings: \"'cv11', 'ss01'\" };")).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf("const css = 'h1 { font-feature-settings: \\'ss01\\'; }';")).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf("const id = 'ss01';")).toEqual([]);
   });
 
   test('a file that does not parse is a parse finding, never a pass', () => {

@@ -6,7 +6,8 @@
       "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
       "changes": [
         "the four site colors (--pt-site-dossier, --pt-site-orbit, --pt-site-signal, --pt-site-shipped) and their dark remap removed (SPEC 2.2: verbatim minus the four site colors)",
-        "--pt-display and --pt-text drop Next's var(--font-inter): Inter comes from @turboslide/fonts, and an undefined custom property would invalidate the whole font-family declaration"
+        "--pt-display and --pt-text drop Next's var(--font-inter): Inter comes from @turboslide/fonts, and an undefined custom property would invalidate the whole font-family declaration",
+        "the design round (docs/DESIGN.md 2 to 6, DR-D1#1): the colour declarations apart from the sizes, faces and motion; the ten stacking layers (--ts-layer-*); the radius ladder (--pt-radius-sm, --pt-radius-lg beside --pt-radius) on .pt-ib and .pt-select; --pt-ring with .pt-float, .pt-window and .pt-kbd; the popover reset; --pt-numerals with .pt-num; the one scrollbar every scroller draws in place of .pt-scroll's 4 px bar, with .pt-on-ink; --pt-thumb at ink 0.44; .pt-icon without cv11 and ss01"
       ]
     },
     "src/lib/cn.ts": {
@@ -579,6 +580,14 @@
     },
     "src/inspector/lint-mark.css": {
       "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/Layer.ts": {
+      "source": "new (the design round, docs/DESIGN.md 2.3: the top layer through popover=\"manual\" with the scale's order)",
+      "commit": ""
+    },
+    "src/place.ts": {
+      "source": "new (the design round, docs/DESIGN.md 2.4: @floating-ui/dom in place of placeMenu, the tooltip's place and anchoredAt)",
       "commit": ""
     }
   },

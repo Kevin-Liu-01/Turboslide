@@ -13,7 +13,14 @@
    never collide and a light sheet can sit inside dark chrome.
 
    Imported once, from the studio's root route. Every other file under
-   packages/chrome/src imports only its own sheet. */
+   packages/chrome/src imports only its own sheet.
+
+   The design round (docs/DESIGN.md 2 to 6) adds, each in one block below: the ten stacking
+   layers (--ts-layer-*), the radius ladder (--pt-radius-sm, --pt-radius, --pt-radius-lg) with
+   the plate ring and the shared plate classes (.pt-float, .pt-window, .pt-kbd), the numerals
+   token and class (--pt-numerals, .pt-num), and the one scrollbar every scroller draws. The
+   numbers of the layers, the ladder and the scrollbar are data in packages/theme/src/scale.ts,
+   and packages/theme/src/scale.test.ts pins this file to them. */
 
 /* The overlay layer carries the sheet's own appearance as its data-theme (docs/archive/rounds/POLISH.md 2.5
    item 49; the integrator's merge): the chrome that sits over the sheet (the selection ring and
@@ -58,7 +65,9 @@
   --pt-plate: rgba(7, 7, 7, 0.06);
   --pt-cross: rgba(7, 7, 7, 0.38);
   --pt-edge: rgba(7, 7, 7, 0.62);
-  --pt-thumb: rgba(7, 7, 7, 0.32);
+  /* The scrollbar thumb (docs/DESIGN.md 6.2, 5.2): ink at 0.44 composites #929292 on paper,
+     3.12:1, the 3:1 of WCAG 2.2 SC 1.4.11; 0.32 read 2.17:1 (research-type 3.1). */
+  --pt-thumb: rgba(7, 7, 7, 0.44);
   --pt-scrim: rgba(7, 7, 7, 0.28);
   --pt-panel-ink: #101010;
   --pt-panel-text: rgba(255, 255, 255, 0.87);
@@ -71,6 +80,60 @@
   --pt-status-done: #12a37a;
   --pt-status-open: #c47d00;
   --pt-status-refused: #e5484d;
+  /* The selection colour (round four, the orchestrator's ruling 1 over SPEC-4 0.3; Kevin's
+     directive d: "canvas boxes turn blue so they don't blend in with the background"): the canvas
+     selection ring, the eight handles and the rotation handle, the marquee, the hover outline, the
+     crop frame, the group box and the selection chip read --pt-select (Overlay.css, Marquee.css),
+     the chip's text --pt-select-text; the snap guides read --pt-guide (Guides.css). Since Round 1
+     of the next program the ring is GT's blue #2f5ce0 in both appearances with white chip text
+     (docs/NEXT.md question 3's default and 4.1.3 item 14; brand A rule 9, brand C rule 10), where
+     it was Google's #1a73e8 and #3d86f0. Each value holds at least 3:1 (WCAG 2.2 SC 1.4.11)
+     against both the paper and the ink of its appearance, so a box reads on a white slide and on
+     a dark photograph: #2f5ce0 is 5.63:1 on #ffffff and 3.58:1 on #070707, 5.03:1 on the dark
+     ink #f2f2f0, and white on it is 5.63:1; #d6336c is 4.62:1 and 4.36:1 (packages/theme/src/
+     brand.ts SELECTION_COLORS, brand.test.ts). The remote collaborator outlines keep the six hues;
+     the export, the deck content, the menus, /home, the card and the README stay paper and ink.
+     Every other token keeps its name and value (SPEC-4 0.9). */
+  --pt-select: #2f5ce0;
+  --pt-select-text: #ffffff;
+  --pt-guide: #d6336c;
+}
+
+/* Dark is a token remap. --pt-scrim, --pt-panel-ink and --pt-panel-text do
+   not change. */
+:root[data-theme='dark'],
+.ts-overlay[data-theme='dark'] {
+  --pt-paper: #070707;
+  --pt-ink: #f2f2f0;
+  --pt-ink-2: #b9bcc3;
+  --pt-titanium: #8a8f98;
+  --pt-disabled: #6b6e73;
+  --pt-field: rgba(242, 242, 240, 0.44);
+  --pt-hair: rgba(242, 242, 240, 0.22);
+  --pt-hair-soft: rgba(242, 242, 240, 0.1);
+  /* the lines and grounds over the dark appearance's ink (#f2f2f0): a paper (#070707) tint */
+  --pt-hair-on-ink: rgba(7, 7, 7, 0.26);
+  --pt-plate-on-ink: rgba(7, 7, 7, 0.16);
+  --pt-plate-on-ink-open: rgba(7, 7, 7, 0.24);
+  /* 0.08 composites #1a1a1a on the dark paper, 1.16:1 (3.1) */
+  --pt-plate: rgba(242, 242, 240, 0.08);
+  --pt-cross: rgba(255, 255, 255, 0.34);
+  --pt-edge: rgba(242, 242, 240, 0.55);
+  --pt-thumb: rgba(242, 242, 240, 0.44);
+  /* the status hues lifted for the ink ground (P:src/components/viewer/tokens.css 101 to 107): on
+     #070707 green #1fbf92 8.56:1, amber #f0a020 9.36:1, red #e5484d 5.15:1 */
+  --pt-status-done: #1fbf92;
+  --pt-status-open: #f0a020;
+  --pt-status-refused: #e5484d;
+  /* the selection colour on dark chrome: the one blue of :root, #2f5ce0 at 3.58:1 on #070707 and
+     5.03:1 on #f2f2f0; the white chip text is :root's --pt-select-text; the guide #f0397a is
+     5.34:1 and 3.77:1 */
+  --pt-select: #2f5ce0;
+  --pt-guide: #f0397a;
+}
+
+/* Sizes, faces and motion: the tokens that do not change with the appearance. */
+:root {
   /* the view route's one bar (/deck/:deckId keeps today's viewer shell, gslides-parity SPEC 1.2) */
   --pt-bar-h: 52px;
   /* the editor's rows (gslides-parity SPEC 1.1, 1.2): the title row, the menu bar, the toolbar,
@@ -101,33 +164,7 @@
      whether empty or full so a join or a notification moves nothing */
   --pt-presence-w: 184px;
   --pt-inbox-w: 60px;
-  /* The selection colour (round four, the orchestrator's ruling 1 over SPEC-4 0.3; Kevin's
-     directive d: "canvas boxes turn blue so they don't blend in with the background"): the canvas
-     selection ring, the eight handles and the rotation handle, the marquee, the hover outline, the
-     crop frame, the group box and the selection chip read --pt-select (Overlay.css, Marquee.css),
-     the chip's text --pt-select-text; the snap guides read --pt-guide (Guides.css). Since Round 1
-     of the next program the ring is GT's blue #2f5ce0 in both appearances with white chip text
-     (docs/NEXT.md question 3's default and 4.1.3 item 14; brand A rule 9, brand C rule 10), where
-     it was Google's #1a73e8 and #3d86f0. Each value holds at least 3:1 (WCAG 2.2 SC 1.4.11)
-     against both the paper and the ink of its appearance, so a box reads on a white slide and on
-     a dark photograph: #2f5ce0 is 5.63:1 on #ffffff and 3.58:1 on #070707, 5.03:1 on the dark
-     ink #f2f2f0, and white on it is 5.63:1; #d6336c is 4.62:1 and 4.36:1 (packages/theme/src/
-     brand.ts SELECTION_COLORS, brand.test.ts). The remote collaborator outlines keep the six hues;
-     the export, the deck content, the menus, /home, the card and the README stay paper and ink.
-     Every other token keeps its name and value (SPEC-4 0.9). */
-  --pt-select: #2f5ce0;
-  --pt-select-text: #ffffff;
-  --pt-guide: #d6336c;
   --pt-rail: 1170px;
-  /* The one corner in chrome (Kevin's directive): the Search pill's 6px,
-     shared by the segmented control at both sizes (the toolbar's format seg,
-     the sidebar's density seg and the index panel's set switch), the
-     sidebar's filter field at both sizes (.pt-filter, 30px and 34px), the
-     index panel's own filter field (.pt-panel-filter in IndexPanel.css,
-     34px, beside the set switch) and the hover preview frame
-     (PreviewLayer.css reads it with a 6px fallback). Every other box in the
-     shell stays square. */
-  --pt-radius: 6px;
   /* 'Inter Fallback' second (docs/archive/rounds/FEATURES.md 3.1 item 3): inter.css's metric matched local
      Arial, so the chrome's first paint holds Inter's line boxes until the woff2 lands */
   --pt-display: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
@@ -151,7 +188,7 @@
 
 /* Native controls follow the theme (directive: light and dark hold
    everywhere). color-scheme paints form controls, the caret, autofill, the
-   scrollbars outside .pt-scroll and the browser's overscroll canvas in the
+   scrollbars of a touch screen and the browser's overscroll canvas in the
    theme's own scheme instead of the OS scheme. The boot script stamps
    data-theme before first paint, so there is no mismatch window; the deck
    document (deck/parts/head.html) carries the same pair. */
@@ -163,122 +200,227 @@
   color-scheme: dark;
 }
 
-/* Dark is a token remap. --pt-scrim, --pt-panel-ink and --pt-panel-text do
-   not change. */
-:root[data-theme='dark'],
-.ts-overlay[data-theme='dark'] {
-  --pt-paper: #070707;
-  --pt-ink: #f2f2f0;
-  --pt-ink-2: #b9bcc3;
-  --pt-titanium: #8a8f98;
-  --pt-disabled: #6b6e73;
-  --pt-field: rgba(242, 242, 240, 0.44);
-  --pt-hair: rgba(242, 242, 240, 0.22);
-  --pt-hair-soft: rgba(242, 242, 240, 0.1);
-  /* the lines and grounds over the dark appearance's ink (#f2f2f0): a paper (#070707) tint */
-  --pt-hair-on-ink: rgba(7, 7, 7, 0.26);
-  --pt-plate-on-ink: rgba(7, 7, 7, 0.16);
-  --pt-plate-on-ink-open: rgba(7, 7, 7, 0.24);
-  /* 0.08 composites #1a1a1a on the dark paper, 1.16:1 (3.1) */
-  --pt-plate: rgba(242, 242, 240, 0.08);
-  --pt-cross: rgba(255, 255, 255, 0.34);
-  --pt-edge: rgba(242, 242, 240, 0.55);
-  --pt-thumb: rgba(242, 242, 240, 0.32);
-  /* the status hues lifted for the ink ground (P:src/components/viewer/tokens.css 101 to 107): on
-     #070707 green #1fbf92 8.56:1, amber #f0a020 9.36:1, red #e5484d 5.15:1 */
-  --pt-status-done: #1fbf92;
-  --pt-status-open: #f0a020;
-  --pt-status-refused: #e5484d;
-  /* the selection colour on dark chrome: the one blue of :root, #2f5ce0 at 3.58:1 on #070707 and
-     5.03:1 on #f2f2f0; the white chip text is :root's --pt-select-text; the guide #f0397a is
-     5.34:1 and 3.77:1 */
-  --pt-select: #2f5ce0;
-  --pt-guide: #f0397a;
+/* The stacking layers (docs/DESIGN.md 2.2, decision C1): ten named layers, bottom to top, one
+   custom property each. The Layer primitive (Layer.ts) writes a surface's value as its z-index and
+   puts the surface in the browser's top layer, keeping this order among the open surfaces. A
+   z-index of 5 or more anywhere else reads one of these (the brand lint's css/z-index); a value
+   under 5 is local order inside one stacking context. Pinned to LAYERS of
+   packages/theme/src/scale.ts by scale.test.ts. */
+:root {
+  --ts-layer-stage: 0; /* the stage and everything in its own context */
+  --ts-layer-docked: 10; /* the notes slot, the narrow right panel, the sidebar overlay, banners */
+  --ts-layer-bar: 20; /* the name prompt bar, the conflict banner, the edit banner */
+  --ts-layer-show: 30; /* the slideshow and the presenter view over the editor */
+  --ts-layer-dialog: 40; /* every dialog with its scrim, the search and help cards, the report */
+  --ts-layer-popover: 50; /* menus, context menus, plate menus, pickers, the layout plate */
+  --ts-layer-toast: 60; /* toasts and snackbars */
+  --ts-layer-tooltip: 70; /* the tooltip */
+  --ts-layer-preview: 80; /* the hover preview of a slide */
+  --ts-layer-skip: 90; /* the keyboard skip link on /home and /decks */
 }
 
-/* Scroll regions (directive 8.11): one thin scrollbar for every scrolling
-   box in chrome, the sidebar list, the index panel body, the search
-   results, the grid, the book and the flow sheet. A 4px gutter, always
-   present, with no track and no rule; a 2px thumb in --pt-thumb centered
-   in the gutter (a 1px transparent border on each side, clipped out of the
-   thumb's ground, leaves the paint on the middle 2px, so the thumb never
-   touches the seam beside the gutter and never reads as a 3px band with
-   it), widening to the full 4px only while the pointer is on the thumb
-   itself; no buttons; radius 0. This class is the single owner of the
-   values, and deck/parts/head.html's .scroll rule carries the same ones so
-   the standalone deck matches. Shell routes never scroll the document.
-   Chromium ignores ::-webkit-scrollbar rules on any box where
-   scrollbar-width or scrollbar-color is not auto, so the region resets
-   them before the webkit rules below can paint. Firefox, which has no
-   ::-webkit-scrollbar, takes scrollbar-width: thin with the thumb color on
-   a transparent track. .pt-scroll-x is the sideways variant for a stage
-   wider than its box. */
-.pt-scroll,
-.pt-scroll-x {
-  scrollbar-gutter: stable;
-  scrollbar-width: auto;
-  scrollbar-color: auto;
+/* The radius ladder of General Translation's UI (docs/DESIGN.md 3.1, decision C4): 0 for
+   structure, slides and anything on a slide (the title row, the menu bar, the toolbar, the
+   filmstrip column, docked panels, rows and rails, the sheet, thumbnails, the selection ring,
+   identity chips); 4 px chips (key chips, count chips, the checkbox, the scrollbar thumb, a
+   button inside a 6 px plate); 6 px controls and small floating plates (every button with a box,
+   fields, selects, segmented controls, the search pill, tooltips, menus, popovers, pickers, the
+   name prompt bar, toasts and snackbars); 8 px windows (dialogs, cards, the hover preview, every
+   figure frame on /home); 50% round marks. A box inside a rounded box takes the outer radius less
+   the inset. The slides keep the square rule of DECK-GRAMMAR.md 40; docs/brand.md section 10
+   records the chrome's deviation. Pinned to RADII by scale.test.ts. */
+:root {
+  --pt-radius-sm: 4px;
+  --pt-radius: 6px;
+  --pt-radius-lg: 8px;
 }
 
+/* The separation of a floating plate (docs/DESIGN.md 3.4, decision C5): a 1 px paper gap and a
+   1 px soft line around the plate's --pt-edge frame, no blur and no offset, so two plates that
+   touch read as two plates and the one in front is the one whose ring is unbroken. Declared with
+   the appearance selectors so a light overlay inside dark chrome draws its own paper. */
+:root,
+.ts-overlay[data-theme] {
+  --pt-ring: 0 0 0 1px var(--pt-paper), 0 0 0 2px var(--pt-hair-soft);
+}
+
+/* The browser's popover styles, reset at zero specificity (docs/DESIGN.md 2.3 item 4): a surface
+   the Layer primitive puts in the top layer keeps the box its own sheet draws. The width and
+   height lines undo the user agent's fit-content, so a scrim with inset 0 still covers the
+   window. Each plate positions itself with position: fixed through place(). */
+:where([popover]) {
+  inset: auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  overflow: visible;
+}
+
+/* A small floating plate (docs/DESIGN.md 3.2): the tooltip, a menu, a popover, a picker, a toast,
+   the name prompt bar. An ink plate (a toast, a snackbar) sets its own ground and text over it
+   and keeps the ring. */
+.pt-float {
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-edge);
+  border-radius: var(--pt-radius);
+  box-shadow: var(--pt-ring);
+}
+
+/* A window (docs/DESIGN.md 3.2): a dialog, a card, the hover preview, a figure frame on /home. */
+.pt-window {
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-edge);
+  border-radius: var(--pt-radius-lg);
+  box-shadow: var(--pt-ring);
+}
+
+/* A key chip (docs/DESIGN.md 3.3): the tooltip's, the palette's, the shortcuts dialog's, the
+   search pill's and the landing's, one drawing in place of four. */
+.pt-kbd {
+  border-radius: var(--pt-radius-sm);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+/* Numbers (docs/DESIGN.md 4.5, decision C9): every number that sits in a column or changes in
+   place takes Inter's tabular figures through this one token and class: counters, slide numbers,
+   sizes and positions, times, revisions and versions, byte counts, the landing's numbers row.
+   font-variant-numeric combines with a rule's font-feature-settings, where a second feature
+   list would replace the first. The brand lint's css/numerals reads a literal tabular-nums
+   anywhere else. */
+:root {
+  --pt-numerals: tabular-nums;
+}
+
+.pt-num {
+  font-variant-numeric: var(--pt-numerals);
+}
+
+/* identifiers read character by character: revision ids, hex values, share codes */
+.pt-num[data-num='code'] {
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* The one scrollbar (docs/DESIGN.md 6.1, 6.2; decision C11): every scroller on a fine pointer
+   draws it with no class, in Chromium and Safari. An 8 px gutter with a transparent track and no
+   line; a 4 px thumb 2 px from each edge with round ends and a 32 px shortest length, in
+   --pt-thumb (ink at 0.44, 3.12:1 light and 3.97:1 dark); 6 px under the pointer in --pt-ink-2
+   and while dragged in --pt-ink. No buttons. Chromium 121 and later stop reading
+   ::-webkit-scrollbar on a box whose scrollbar-width or scrollbar-color is not auto, and
+   scrollbar-color is inherited, so neither is set here outside the Firefox block, and the brand
+   lint's css/scrollbar reads either anywhere else (scrollbar-width: none, the menu bar row's
+   hidden bar, stays allowed). Touch screens keep the platform's overlay bar. The numbers are
+   SCROLLBAR of packages/theme/src/scale.ts, pinned by scale.test.ts; the standalone deck's copy
+   (packages/viewer/standalone/chrome.ts) draws the same rule over its own token names. */
+:root,
+.ts-overlay[data-theme] {
+  --pt-thumb-hover: var(--pt-ink-2);
+  --pt-thumb-active: var(--pt-ink);
+}
+
+:root {
+  --pt-scroll-w: 8px;
+  --pt-scroll-inset: 2px;
+  --pt-scroll-inset-on: 1px;
+  --pt-scroll-min: 32px;
+}
+
+@media (hover: hover) and (pointer: fine) and (forced-colors: none) {
+  ::-webkit-scrollbar {
+    width: var(--pt-scroll-w);
+    height: var(--pt-scroll-w);
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+    border: 0;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    min-width: var(--pt-scroll-min);
+    min-height: var(--pt-scroll-min);
+    border: var(--pt-scroll-inset) solid transparent;
+    border-radius: var(--pt-radius-sm);
+    background: var(--pt-thumb);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: var(--pt-scroll-inset-on);
+    background-color: var(--pt-thumb-hover);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    border-width: var(--pt-scroll-inset-on);
+    background-color: var(--pt-thumb-active);
+  }
+
+  /* the zoomed stage: the track in the chrome's paper, so the thumb reads over a dark slide */
+  .pt-scroll-solid::-webkit-scrollbar-track,
+  .pt-scroll-solid::-webkit-scrollbar-corner {
+    background: var(--pt-paper);
+  }
+}
+
+/* Firefox, the one engine that answers false here (research-scroll 3.1 item 3): its own thin bar
+   in the thumb colour on a transparent track. The old gate, not selector(::-webkit-scrollbar),
+   never applied, because Firefox parses that pseudo-element. */
+@supports not selector(::-webkit-scrollbar-thumb) {
+  :root {
+    scrollbar-color: var(--pt-thumb) transparent;
+  }
+
+  * {
+    scrollbar-width: thin;
+  }
+
+  .pt-scroll-solid {
+    scrollbar-color: var(--pt-thumb) var(--pt-paper);
+  }
+}
+
+/* more contrast: the thumb at rest in --pt-ink-2; the selectors match the dark remap's weight, so
+   this later rule wins in both appearances */
+@media (prefers-contrast: more) {
+  :root,
+  :root[data-theme],
+  .ts-overlay[data-theme] {
+    --pt-thumb: var(--pt-ink-2);
+  }
+}
+
+/* A scroller on the #101010 panels (the landing's terminals, the presenter's panels): paper at
+   0.44, #797979 on #101010, 4.37:1. */
+.pt-on-ink {
+  --pt-thumb: rgba(255, 255, 255, 0.44);
+  --pt-thumb-hover: rgba(255, 255, 255, 0.72);
+  --pt-thumb-active: #ffffff;
+}
+
+/* Layout only: a vertical list whose width never changes (the gutter is reserved whether or not
+   it scrolls), and a sideways strip. The bar itself is the rule above. */
 .pt-scroll {
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 .pt-scroll-x {
   overflow-x: auto;
   overflow-y: hidden;
-}
-
-.pt-scroll::-webkit-scrollbar,
-.pt-scroll-x::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-
-.pt-scroll::-webkit-scrollbar-track,
-.pt-scroll-x::-webkit-scrollbar-track {
-  background: transparent;
-  border: 0;
-}
-
-.pt-scroll::-webkit-scrollbar-thumb,
-.pt-scroll-x::-webkit-scrollbar-thumb {
-  background: var(--pt-thumb);
-  background-clip: padding-box;
-  border: 0;
-  border-left: 1px solid transparent;
-  border-right: 1px solid transparent;
-  border-radius: 0;
-}
-
-.pt-scroll-x::-webkit-scrollbar-thumb {
-  border-left: 0;
-  border-right: 0;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
-}
-
-/* the pointer on the thumb: the full 4px, in the hover color */
-.pt-scroll::-webkit-scrollbar-thumb:hover,
-.pt-scroll-x::-webkit-scrollbar-thumb:hover {
-  background-color: var(--pt-ink-2);
-  border-width: 0;
-}
-
-.pt-scroll::-webkit-scrollbar-button,
-.pt-scroll-x::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-@supports not selector(::-webkit-scrollbar) {
-  .pt-scroll,
-  .pt-scroll-x {
-    scrollbar-width: thin;
-    scrollbar-color: var(--pt-thumb) transparent;
-  }
 }
 
 /* The document does not scroll while a shell is mounted. ViewerShell sets
@@ -302,7 +444,9 @@ body[data-shell] {
   gap: 8px;
   white-space: nowrap;
   cursor: pointer;
-  border-radius: 0;
+  /* the control rung of the ladder (docs/DESIGN.md 3.1, 3.2): the hover and pressed grounds and
+     the frame of every shell button draw the 6 px corner */
+  border-radius: var(--pt-radius);
   /* directive 7.4: color and ground move over the fast duration; nothing else animates */
   transition:
     color var(--pt-dur-fast) var(--pt-ease-out),
@@ -378,7 +522,7 @@ body[data-shell] {
   min-height: 32px;
   padding: 0 28px 0 10px;
   border: 1px solid var(--pt-field);
-  border-radius: 0;
+  border-radius: var(--pt-radius);
   background-color: var(--pt-paper);
   background-image:
     linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
@@ -420,7 +564,6 @@ body[data-shell] {
   padding: 0;
   justify-content: center;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14px;
 }
@@ -468,6 +611,8 @@ body[data-shell] {
   z-index: 1;
   height: 30px;
   border: 0;
+  /* the options sit square inside the box; the end options take the inner corner below */
+  border-radius: 0;
   border-right: 1px solid var(--pt-hair);
   padding: 0 12px;
 }

@@ -14,11 +14,15 @@
 import ts from 'typescript';
 
 import {
+  ALTERNATES_OWNERS,
   BUTTON_ELEMENTS,
   BUTTON_LABEL_PROPS,
+  NUMERALS_OWNER,
   RADIUS_VALUES,
   RAIL_WRAPPER_CLASSES,
+  SCROLLBAR_OWNERS,
   SOURCE_RULES,
+  Z_INDEX,
 } from './config.ts';
 import type { BrandFinding, BrandRuleId, SourceRuleId } from './config.ts';
 
@@ -64,7 +68,19 @@ const MESSAGES: Record<string, string> = {
   stackedRailPairs:
     'One rail: this element stacks two or more full-height side-border children, which is two rail pairs.',
   inlineRadius:
-    'An inline radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 "Corners"): 0, 50% or var(--pt-radius).',
+    'An inline radius outside the radius ladder (docs/DESIGN.md 3.1): 0, 50%, var(--pt-radius-sm), var(--pt-radius) or var(--pt-radius-lg).',
+  inlineZIndex:
+    'An inline z-index off the stacking scale (docs/DESIGN.md 2.6): a value under 5, var(--ts-layer-<name>), or the Layer primitive (packages/chrome/src/Layer.ts) for a floating surface.',
+  inlineShadow:
+    'An inline shadow with a blur or an offset (docs/DESIGN.md 3.4): a floating plate draws the --pt-edge frame and --pt-ring (.pt-float, .pt-window).',
+  inlineScrollbar:
+    'An inline scrollbar style (docs/DESIGN.md 6.5): every scroller draws the one scrollbar of tokens.css; only scrollbarWidth "none" hides a bar.',
+  scrollbarText:
+    'A ::-webkit-scrollbar or scrollbar-color rule in a style string (docs/DESIGN.md 6.5): the one scrollbar lives in tokens.css.',
+  inlineNumerals:
+    'Tabular figures written by hand (docs/DESIGN.md 4.5): use the .pt-num class or var(--pt-numerals).',
+  inlineAlternates:
+    "General Translation's alternates cv11 and ss01 belong to its theme's slides (docs/DESIGN.md 4.2); the chrome draws Inter's defaults.",
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -315,6 +331,69 @@ export function isAllowedRadius(value: string | number): boolean {
     parts.length > 0 &&
     parts.every((part) => RADIUS_VALUES.some((re) => re.test(part.replace(/\s+/g, ''))))
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The design round's value tests (docs/DESIGN.md 2.6, 3.5, 4.2, 4.5, 6.5), shared by the CSS
+// checks (css.ts) and the inline style forms below.
+
+const LAYER_VALUE = /^var\(--ts-layer-([a-z]+)\)$/;
+const CSS_KEYWORD = /^(?:auto|inherit|initial|unset|revert|revert-layer)$/;
+
+/**
+ * True when a z-index is on the scale: a keyword, an integer under the local limit (order inside
+ * one stacking context), or `var(--ts-layer-<name>)` naming one of the ten layers.
+ */
+export function isScaleZIndex(value: string | number): boolean {
+  if (typeof value === 'number') return value < Z_INDEX.localLimit;
+  const v = value
+    .replace(/\s*!important\s*$/i, '')
+    .trim()
+    .replace(/\s+/g, '');
+  if (CSS_KEYWORD.test(v)) return true;
+  if (/^-?\d+$/.test(v)) return Number(v) < Z_INDEX.localLimit;
+  const layer = LAYER_VALUE.exec(v);
+  return layer !== null && Z_INDEX.layers.includes(layer[1] ?? '');
+}
+
+const LENGTH = /^-?(?:\d+|\d*\.\d+)(?:px|em|rem|%|vh|vw|ch)?$/;
+const ZERO = /^-?0*(?:\.0+)?(?:px|em|rem|%|vh|vw|ch)?$/;
+
+/**
+ * True when a box-shadow draws a shadow, a blur or an offset outside the box, in any of its layers
+ * (docs/DESIGN.md 3.4: the plates separate by the frame and a ring of spreads alone; the two drop
+ * shadows go). A layer's lengths are read in order, offset x, offset y, blur, spread; a length
+ * written as var() or calc() is not read. An inset layer with no blur is a rule drawn inside the
+ * box (a table's seam, a terminal's head line), not a shadow, so its offset is allowed.
+ */
+export function shadowHasBlurOrOffset(value: string): boolean {
+  const v = value.replace(/\s*!important\s*$/i, '').trim();
+  if (v === 'none' || CSS_KEYWORD.test(v)) return false;
+  for (const layer of splitTopLevel(v, /,/)) {
+    const tokens = splitTopLevel(layer, /\s/);
+    const lengths = tokens.filter((token) => LENGTH.test(token));
+    const [x, y, blur] = lengths;
+    const drawn = (length: string | undefined): boolean =>
+      length !== undefined && !ZERO.test(length);
+    if (drawn(blur)) return true;
+    if (!tokens.includes('inset') && (drawn(x) || drawn(y))) return true;
+  }
+  return false;
+}
+
+/** True when a feature list turns on General Translation's alternates `cv11` or `ss01`. */
+export function hasAlternates(value: string): boolean {
+  return /\b(?:cv11|ss01)\b/.test(value);
+}
+
+/** True when a file path sits under one of the owners (a file, or a folder ending in `/`). */
+export function isOwnedBy(file: string, owners: readonly string[]): boolean {
+  return owners.some((owner) => (owner.endsWith('/') ? file.startsWith(owner) : file === owner));
+}
+
+/** True when a value writes tabular figures by hand: `tabular-nums`, or `tnum` in a feature list. */
+export function hasTabularLiteral(value: string): boolean {
+  return /\btabular-nums\b/.test(value) || /(['"])tnum\1/.test(value);
 }
 
 /** Splits a CSS value on a separator outside parentheses and quotes. */
@@ -601,11 +680,37 @@ function buttonLabels(children: ts.NodeArray<ts.JsxChild>): string[] | null {
 // ---------------------------------------------------------------------------------------------
 // The walk.
 
+/** The CSS checks the walk reads in their inline forms: style objects and style strings. */
+type InlineCssRuleId =
+  | 'css/radius'
+  | 'css/z-index'
+  | 'css/no-shadow'
+  | 'css/scrollbar'
+  | 'css/numerals'
+  | 'css/chrome-alternates';
+
+export const INLINE_CSS_RULES: readonly InlineCssRuleId[] = [
+  'css/radius',
+  'css/z-index',
+  'css/no-shadow',
+  'css/scrollbar',
+  'css/numerals',
+  'css/chrome-alternates',
+];
+
+/** A z-index written as an expression is on the scale when it reads LAYERS or a layer token. */
+function expressionOnScale(text: string): boolean {
+  return /\bLAYERS\b|--ts-layer-/.test(text);
+}
+
+/** A style string that hides a scrollbar and does nothing else to it. */
+const HIDDEN_SCROLLBAR = /::-webkit-scrollbar\s*\{\s*display\s*:\s*none\s*;?\s*\}/g;
+
 /** Parses one file and runs every rule of `rules` over it. A parse error is a `brand/parse` finding. */
 export function lintSource(
   file: string,
   text: string,
-  rules: ReadonlySet<BrandRuleId> = new Set<BrandRuleId>([...SOURCE_RULES, 'css/radius']),
+  rules: ReadonlySet<BrandRuleId> = new Set<BrandRuleId>([...SOURCE_RULES, ...INLINE_CSS_RULES]),
 ): BrandFinding[] {
   const kind =
     file.endsWith('.tsx') || file.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
@@ -626,7 +731,7 @@ export function lintSource(
   }
   if (out.length > 0) return out;
 
-  const on = (rule: SourceRuleId | 'css/radius'): boolean => rules.has(rule);
+  const on = (rule: SourceRuleId | InlineCssRuleId): boolean => rules.has(rule);
   const report = (rule: BrandRuleId, node: ts.Node, message: string, snippet?: string): void => {
     const at = source.getLineAndCharacterOfPosition(node.getStart(source));
     const raw = snippet ?? node.getText(source);
@@ -641,6 +746,20 @@ export function lintSource(
   };
 
   const checkString = (node: ts.Node, value: string, template: boolean): void => {
+    if (on('css/numerals') && file !== NUMERALS_OWNER && hasTabularLiteral(value))
+      report('css/numerals', node, MESSAGES.inlineNumerals ?? '');
+    if (
+      on('css/chrome-alternates') &&
+      !isOwnedBy(file, ALTERNATES_OWNERS) &&
+      (/font-feature-settings\s*:[^;}]*\b(?:cv11|ss01)\b/.test(value) ||
+        (enclosingPropertyName(node) === 'fontFeatureSettings' && hasAlternates(value)))
+    )
+      report('css/chrome-alternates', node, MESSAGES.inlineAlternates ?? '');
+    if (on('css/scrollbar') && !isOwnedBy(file, SCROLLBAR_OWNERS)) {
+      const rest = value.replace(HIDDEN_SCROLLBAR, '');
+      if (/::-webkit-scrollbar|scrollbar-color\s*:|scrollbar-width\s*:\s*(?!none)/.test(rest))
+        report('css/scrollbar', node, MESSAGES.scrollbarText ?? '');
+    }
     if (on('gt-ui/single-rail') && isDoubleRailClassList(value))
       report('gt-ui/single-rail', node, MESSAGES.doubleRail ?? '');
     if (on('gt-ui/no-em-dash') && hasEmDash(value))
@@ -758,6 +877,48 @@ export function lintSource(
       if (radius !== null && !isAllowedRadius(radius))
         report('css/radius', node, MESSAGES.inlineRadius ?? '');
     }
+    if (on('css/z-index') && name === 'zIndex' && !zIndexOnScale(value))
+      report('css/z-index', node, MESSAGES.inlineZIndex ?? '');
+    if (on('css/no-shadow') && name === 'boxShadow') {
+      const shadow = stringValue(value);
+      if (shadow !== null && shadowHasBlurOrOffset(shadow))
+        report('css/no-shadow', node, MESSAGES.inlineShadow ?? '');
+    }
+    if (on('css/scrollbar') && !isOwnedBy(file, SCROLLBAR_OWNERS)) {
+      const width = name === 'scrollbarWidth' ? stringValue(value) : null;
+      if (name === 'scrollbarColor' || (name === 'scrollbarWidth' && width !== 'none'))
+        report('css/scrollbar', node, MESSAGES.inlineScrollbar ?? '');
+    }
+  };
+
+  /** A z-index value node: a number, a string, a negative number, or an expression on LAYERS. */
+  const zIndexOnScale = (value: ts.Node): boolean => {
+    if (ts.isNumericLiteral(value)) return isScaleZIndex(Number(value.text));
+    if (
+      ts.isPrefixUnaryExpression(value) &&
+      value.operator === ts.SyntaxKind.MinusToken &&
+      ts.isNumericLiteral(value.operand)
+    )
+      return true;
+    const text = stringValue(value);
+    if (text !== null) return isScaleZIndex(text);
+    return expressionOnScale(value.getText(source));
+  };
+
+  /** `element.style.zIndex = <value>`: the same scale as a style object's zIndex. */
+  const checkAssignment = (node: ts.BinaryExpression): void => {
+    if (node.operatorToken.kind !== ts.SyntaxKind.EqualsToken) return;
+    const left = unwrap(node.left);
+    if (!ts.isPropertyAccessExpression(left)) return;
+    const name = left.name.text;
+    const value = unwrap(node.right);
+    if (on('css/z-index') && name === 'zIndex' && !zIndexOnScale(value))
+      report('css/z-index', node, MESSAGES.inlineZIndex ?? '');
+    if (on('css/no-shadow') && name === 'boxShadow') {
+      const shadow = stringValue(value);
+      if (shadow !== null && shadowHasBlurOrOffset(shadow))
+        report('css/no-shadow', node, MESSAGES.inlineShadow ?? '');
+    }
   };
 
   const checkOpening = (node: Opening): void => {
@@ -855,6 +1016,8 @@ export function lintSource(
       checkCall(node);
     } else if (ts.isPropertyAssignment(node)) {
       checkProperty(node);
+    } else if (ts.isBinaryExpression(node)) {
+      checkAssignment(node);
     } else if (ts.isJsxFragment(node)) {
       if (on('gt-ui/single-rail')) checkRailChildren(node.children, node.openingFragment);
     }

@@ -110,6 +110,95 @@ describe('the CSS checks', () => {
     expect(rulesOf('.ts-rail { border-inline: 1px solid var(--pt-hair) }')).toEqual([]);
   });
 
+  test('css/radius takes the ladder of the design round: the three rungs and a rung less an inset', () => {
+    expect(
+      rulesOf(
+        '.a { border-radius: var(--pt-radius-sm) } .b { border-radius: var(--pt-radius-lg) } .c { border-radius: calc(var(--pt-radius-lg) - 1px) } .d { border-radius: var(--pt-radius-sm) var(--pt-radius-sm) 0 0 }',
+      ),
+    ).toEqual([]);
+    expect(rulesOf(':root { --pt-radius-sm: 4px; --pt-radius-lg: 8px }')).toEqual([]);
+    expect(rulesOf('.a { border-radius: 8px }')).toEqual(['css/radius']);
+    expect(rulesOf('.a { border-radius: var(--pt-radius-xl) }')).toEqual(['css/radius']);
+  });
+
+  test('css/z-index passes local order under 5 and the layer tokens, and reads every other value', () => {
+    expect(
+      rulesOf(
+        '.a { z-index: 1 } .b { z-index: -1 } .c { z-index: auto } .d { z-index: var(--ts-layer-popover) } .e { z-index: var(--ts-layer-skip) }',
+      ),
+    ).toEqual([]);
+    expect(rulesOf('.ts-menu { z-index: 30 }')).toEqual(['css/z-index']);
+    expect(rulesOf('.ts-tip { z-index: 120 }')).toEqual(['css/z-index']);
+    expect(rulesOf('.a { z-index: var(--ts-layer-modal) }')).toEqual(['css/z-index']);
+    expect(rulesOf('.a { z-index: calc(var(--ts-layer-popover) + 1) }')).toEqual(['css/z-index']);
+    /* tokens.css declares the layers; a z-index there is its own */
+    expect(rulesOf('.a { z-index: 40 }', 'packages/chrome/src/tokens.css')).toEqual([]);
+  });
+
+  test('css/no-shadow passes the ring of spreads and reads a blur or an offset', () => {
+    expect(
+      rulesOf(
+        '.a { box-shadow: var(--pt-ring) } .b { box-shadow: 0 0 0 1px var(--pt-paper), 0 0 0 2px var(--pt-hair-soft) } .c { box-shadow: inset 0 0 0 1px var(--pt-ink) } .d { box-shadow: none }',
+      ),
+    ).toEqual([]);
+    expect(rulesOf('.ts-dialog-card { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18) }')).toEqual([
+      'css/no-shadow',
+    ]);
+    expect(rulesOf('.a { box-shadow: 0 0 12px var(--pt-hair) }')).toEqual(['css/no-shadow']);
+    expect(rulesOf('.a { box-shadow: 0 0 0 1px red, 2px 2px 0 0 blue }')).toEqual([
+      'css/no-shadow',
+    ]);
+    /* an inset line with no blur is a rule inside the box, not a shadow */
+    expect(rulesOf('.a { box-shadow: inset 0 -1px 0 var(--pt-hair) }')).toEqual([]);
+    expect(rulesOf('.a { box-shadow: inset 0 2px 6px var(--pt-hair) }')).toEqual(['css/no-shadow']);
+  });
+
+  test('css/scrollbar keeps the one scrollbar in tokens.css and lets another file only hide a bar', () => {
+    expect(
+      rulesOf(
+        '.ts-menubar { scrollbar-width: none } .ts-menubar::-webkit-scrollbar { display: none }',
+      ),
+    ).toEqual([]);
+    expect(rulesOf('.a::-webkit-scrollbar { width: 8px }')).toEqual(['css/scrollbar']);
+    expect(rulesOf('.a::-webkit-scrollbar-thumb { background: var(--pt-thumb) }')).toEqual([
+      'css/scrollbar',
+    ]);
+    expect(rulesOf('.a { scrollbar-width: thin }')).toEqual(['css/scrollbar']);
+    expect(rulesOf('html { scrollbar-color: var(--pt-thumb) transparent }')).toEqual([
+      'css/scrollbar',
+    ]);
+    expect(
+      rulesOf(
+        '::-webkit-scrollbar { width: 8px } :root { scrollbar-color: red transparent }',
+        'packages/chrome/src/tokens.css',
+      ),
+    ).toEqual([]);
+  });
+
+  test('css/numerals reads tabular figures written by hand outside tokens.css', () => {
+    expect(rulesOf('.a { font-variant-numeric: var(--pt-numerals) }')).toEqual([]);
+    expect(rulesOf('.a { font-variant-numeric: tabular-nums }')).toEqual(['css/numerals']);
+    expect(rulesOf(".a { font-feature-settings: 'tnum' }")).toEqual(['css/numerals']);
+    expect(
+      rulesOf('.pt-num { font-variant-numeric: tabular-nums }', 'packages/chrome/src/tokens.css'),
+    ).toEqual([]);
+  });
+
+  test("css/chrome-alternates reads cv11 and ss01 outside the General Translation theme's files", () => {
+    expect(rulesOf(".ts-x { font-feature-settings: 'cv11', 'ss01' }")).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf(".ts-x { --ts-features: 'ss01' }")).toEqual(['css/chrome-alternates']);
+    expect(rulesOf('.ts-x { font-feature-settings: normal }')).toEqual([]);
+    expect(rulesOf('.ts-x h1 { font-feature-settings: var(--display-features) }')).toEqual([]);
+    expect(
+      rulesOf(
+        ".ts-sheet h1 { font-feature-settings: 'cv11', 'ss01' }",
+        'packages/theme/src/gt-ink-paper/sheet.css',
+      ),
+    ).toEqual([]);
+  });
+
   test('each finding names the file, the line and the declaration', () => {
     const [finding] = lintCss(
       'packages/viewer/src/BookView.css',

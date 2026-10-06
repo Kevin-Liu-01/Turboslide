@@ -7,8 +7,10 @@ import {
   ACCEPTED,
   BRAND_LINT_MODE,
   CODE_SURFACES,
+  CSS_RULES,
   OVERRIDES,
   RADIUS_EXCEPTIONS,
+  REPORT_RULES,
 } from './config.ts';
 import type { Acceptance, BrandFinding } from './config.ts';
 import {
@@ -80,6 +82,45 @@ describe('the brand lint run', () => {
     expect(formatBrandLint(report)[0]).toMatch(
       /^brand lint \(report mode\): 0 scripts, 1 stylesheets/,
     );
+  });
+
+  test('the design round rules report apart and never fail an enforce run until DR-D1#5', () => {
+    expect([...REPORT_RULES].sort()).toEqual(
+      [
+        'css/chrome-alternates',
+        'css/no-shadow',
+        'css/numerals',
+        'css/scrollbar',
+        'css/z-index',
+      ].sort(),
+    );
+    for (const rule of REPORT_RULES) expect(CSS_RULES).toContain(rule);
+    // 0d75ab90 is the tree the design round was cut from: Menu.css and Dialog.css draw the old
+    // z-index values, the dialog's drop shadow, tabular figures by hand and the alternates
+    const files = ['packages/chrome/src/Menu.css', 'packages/chrome/src/Dialog.css'];
+    const before = runBrandLint({ root: ROOT, mode: 'enforce', ref: '0d75ab90', files });
+    expect(before.reported.length).toBeGreaterThan(0);
+    expect(new Set(before.reported.map((f) => f.rule))).toEqual(
+      new Set(['css/z-index', 'css/no-shadow', 'css/numerals', 'css/chrome-alternates']),
+    );
+    expect(before.open.filter((f) => REPORT_RULES.includes(f.rule))).toEqual([]);
+    expect(before.failed).toBe(before.open.length > 0 || before.stale.length > 0);
+    expect(formatBrandLint(before).some((line) => line.startsWith('reported, never failing'))).toBe(
+      true,
+    );
+    /* DR-D1#5 turns them to enforce: the same findings are then open */
+    const enforced = runBrandLint({
+      root: ROOT,
+      mode: 'enforce',
+      ref: '0d75ab90',
+      files,
+      reportOnly: [],
+    });
+    expect(enforced.reported).toEqual([]);
+    expect(enforced.open.filter((f) => REPORT_RULES.includes(f.rule)).length).toBe(
+      before.reported.length,
+    );
+    expect(enforced.failed).toBe(true);
   });
 
   test("a run on a commit reads git's objects, not the working tree", () => {

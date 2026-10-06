@@ -390,6 +390,25 @@ Turboslide's `--pt-` tokens differ from the deck's in these places, each for a m
 The sheet theme of the slides (`packages/theme/src/gt-ink-paper/sheet.css`) keeps the deck's own
 values, so a slide is the deck's in both appearances.
 
+### The design round's chrome tokens (2026-10-05)
+
+The design round (`docs/DESIGN.md` sections 2 to 6, push DR-D1#1) adds these to `tokens.css`. The
+numbers are data in `packages/theme/src/scale.ts`, and `scale.test.ts` pins the file to them.
+
+| Token or class                                             | Value                                                       | Deviation from the deck and why                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--pt-radius-sm`, `--pt-radius`, `--pt-radius-lg`          | 4, 6 and 8 px                                               | DECK-GRAMMAR.md 40 squares every corner. The chrome takes General Translation's UI ladder instead (decision C4, question 1): 4 px chips, 6 px controls and small floating plates, 8 px windows. Slides, thumbnails, rails, the selection ring and everything on a slide stay square |
+| `--pt-ring`, `.pt-float`, `.pt-window`, `.pt-kbd`          | a 1 px paper gap and a 1 px `--pt-hair-soft` line           | The deck draws no shadows; a floating plate separates by its `--pt-edge` frame and the ring, with no blur and no offset (decision C5)                                                                                                                                               |
+| `--ts-layer-stage` to `--ts-layer-skip`                    | 0, 10, 20 to 90                                             | None in the deck. Ten stacking layers for the chrome's floating surfaces, applied through the top layer by `packages/chrome/src/Layer.ts` (decision C1)                                                                                                                             |
+| `--pt-numerals`, `.pt-num`                                 | `tabular-nums`; `tabular-nums slashed-zero` on codes        | The deck sets figures per slide. The chrome writes Inter's tabular figures through one token wherever a number aligns or changes in place (decision C9)                                                                                                                             |
+| `--pt-thumb`                                               | ink at 0.44 in both appearances, 3.12:1 and 3.97:1          | Was ink at 0.32 (2.17:1 and 2.58:1), under the 3:1 of WCAG 2.2 SC 1.4.11 for the scrollbar thumb                                                                                                                                                                                    |
+| The scrollbar (`::-webkit-scrollbar` at the root, Firefox) | an 8 px gutter, a 4 px thumb with round ends, 6 px on hover | Every scroller draws one bar with no class (decision C11); the deck's `head.html` 188 to 198 carries a Firefox gate that never applies, reported to Prototemplate in the round's ship note                                                                                          |
+| `.pt-icon`                                                 | Inter's default glyphs                                      | The chrome leaves the deck's alternates `cv11` and `ss01`, which belong to the General Translation theme's slides (decision C6, question 8)                                                                                                                                         |
+
+The brand lint (`packages/lint/src/brand/`) reads the new rules: `css/z-index`, `css/no-shadow`,
+`css/scrollbar`, `css/numerals` and `css/chrome-alternates` report from DR-D1#1 and fail from
+DR-D1#5; `css/radius` accepts the three rungs.
+
 ## 11. The selection colour
 
 The canvas selection ring, the eight resize handles and the rotation handle, the marquee, the hover

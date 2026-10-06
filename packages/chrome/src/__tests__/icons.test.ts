@@ -141,4 +141,17 @@ describe('the icon table', () => {
     expect(chat).toContain('fill-rule="evenodd"');
     expect(chat).not.toContain('stroke=');
   });
+
+  it('draws pause beside play for the motion toggle, from Heroicons 20 solid (docs/DESIGN.md 8.1)', () => {
+    expect(ICON_NAMES).toContain('pause');
+    expect(iconPaths('pause')).toEqual([
+      {
+        d: 'M5.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75A.75.75 0 0 0 7.25 3h-1.5ZM12.75 3a.75.75 0 0 0-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-.75-.75h-1.5Z',
+      },
+    ]);
+    const pause = markup('pause');
+    expect(pause).not.toContain('stroke=');
+    expect(pause).not.toContain('fill-rule');
+    expect(iconPaths('pause')[0]?.d).not.toBe(iconPaths('play')[0]?.d);
+  });
 });

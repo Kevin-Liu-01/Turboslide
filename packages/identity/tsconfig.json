@@ -8,6 +8,9 @@
     },
     {
       "path": "../effects"
+    },
+    {
+      "path": "../theme"
     }
   ]
 }

@@ -10,6 +10,8 @@
   "exports": {
     "./tokens.css": "./src/tokens.css",
     "./brand.css": "./src/brand.css",
+    "./Layer": "./src/Layer.ts",
+    "./place": "./src/place.ts",
     "./shell-data": "./src/shell-data.ts",
     "./shell-context": "./src/shell-context.ts",
     "./dispatch": "./src/dispatch.ts",
@@ -99,6 +101,7 @@
     "@codemirror/lint": "catalog:",
     "@codemirror/state": "catalog:",
     "@codemirror/view": "catalog:",
+    "@floating-ui/dom": "catalog:",
     "@lezer/highlight": "catalog:",
     "@turboslide/effects": "workspace:*",
     "@turboslide/identity": "workspace:*",

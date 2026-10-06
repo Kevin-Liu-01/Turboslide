@@ -1,7 +1,9 @@
 // The brand lint over the tree (docs/NEXT.md 4.1.3 item 25): the files of LINT_ROOTS that git
 // tracks or would track (new files of a lane included, ignored files never), the source rules on
 // each script, the CSS rules on each stylesheet, the credits check over decks/ and
-// apps/studio/public/, then the overrides and, in enforce mode, the acceptances of config.ts.
+// apps/studio/public/, then the overrides and, in enforce mode, the acceptances of config.ts. The
+// rules of REPORT_RULES (the design round's five checks until DR-D1#5) print their findings apart
+// and never fail a run.
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,6 +16,7 @@ import {
   EXCLUDED_FILES,
   LINT_ROOTS,
   OVERRIDES,
+  REPORT_RULES,
   SOURCE_RULES,
 } from './config.ts';
 import type { Acceptance, BrandFinding, BrandLintMode, BrandRuleId } from './config.ts';
@@ -37,14 +40,18 @@ export type BrandLintOptions = {
    * from git's objects, so a run on a worktree several lanes edit reads what is committed alone.
    */
   ref?: string;
+  /** the rules that report and never fail; config.ts REPORT_RULES when absent */
+  reportOnly?: readonly BrandRuleId[];
 };
 
 export type BrandLintResult = {
   mode: BrandLintMode;
   /** how many files each part read */
   read: { scripts: number; stylesheets: number; pictures: number };
-  /** every finding after the overrides */
+  /** every finding after the overrides, the reported ones included */
   findings: BrandFinding[];
+  /** the findings of a report-only rule: printed, never failing */
+  reported: BrandFinding[];
   /** the findings an acceptance names (enforce mode) */
   accepted: BrandFinding[];
   /** the findings no acceptance names */
@@ -211,12 +218,18 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
   }
   const kept = findings.filter((f) => f.rule === 'brand/parse' || !isOverridden(f.file, f.rule));
   const broken = kept.filter((f) => f.rule === 'brand/parse');
-  const judged = kept.filter((f) => f.rule !== 'brand/parse');
+  const reportOnly = new Set<BrandRuleId>(options.reportOnly ?? REPORT_RULES);
+  const all = kept.filter((f) => f.rule !== 'brand/parse');
+  const reported = all.filter((f) => reportOnly.has(f.rule));
+  const judged = all.filter((f) => !reportOnly.has(f.rule));
   // a run narrowed by --files or --rules weighs only the acceptances it could have matched, so an
   // acceptance in a file or rule it did not read is not stale
   const readFiles = new Set(files);
   const inScope = (options.accepted ?? ACCEPTED).filter(
-    (a) => rules.has(a.rule) && (a.rule === 'brand/credits' ? credited : readFiles.has(a.file)),
+    (a) =>
+      rules.has(a.rule) &&
+      !reportOnly.has(a.rule) &&
+      (a.rule === 'brand/credits' ? credited : readFiles.has(a.file)),
   );
   const split =
     mode === 'enforce'
@@ -225,7 +238,8 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
   return {
     mode,
     read: { scripts, stylesheets, pictures },
-    findings: judged,
+    findings: all,
+    reported,
     accepted: split.accepted,
     open: split.open,
     stale: split.stale,
@@ -246,6 +260,14 @@ export function formatBrandLint(result: BrandLintResult): string[] {
     `brand lint (${result.mode} mode): ${result.read.scripts} scripts, ${result.read.stylesheets} stylesheets and ${result.read.pictures} mood pictures read; ${result.open.length} open finding(s) in ${files} file(s), ${result.accepted.length} accepted, ${result.stale.length} stale acceptance(s), ${result.broken.length} file(s) that do not parse`,
   );
   for (const [rule, n] of [...count.entries()].sort()) lines.push(`  ${rule}: ${n}`);
+  if (result.reported.length > 0) {
+    const reportCount = new Map<string, number>();
+    for (const f of result.reported) reportCount.set(f.rule, (reportCount.get(f.rule) ?? 0) + 1);
+    lines.push(
+      `reported, never failing (REPORT_RULES): ${result.reported.length} finding(s) in ${new Set(result.reported.map((f) => f.file)).size} file(s)`,
+    );
+    for (const [rule, n] of [...reportCount.entries()].sort()) lines.push(`  ${rule}: ${n}`);
+  }
   for (const f of [...result.broken, ...result.open])
     lines.push(`${f.file}:${f.line}:${f.column}  ${f.rule}  ${f.text}`);
   for (const a of result.stale)

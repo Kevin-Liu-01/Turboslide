@@ -8,6 +8,12 @@
 //
 // The rendered one rail check lives in chrome.ts (the audit of `lint --chrome`, check step 18)
 // and reads the mode from here. It imports nothing, so chrome.ts stays loadable by the CLI.
+//
+// The design round (docs/DESIGN.md 2.6, 3.5, 4.2, 4.5, 6.5) adds five CSS checks, the stacking
+// scale (`css/z-index`), the drop shadows (`css/no-shadow`), the one scrollbar (`css/scrollbar`),
+// the numerals token (`css/numerals`) and the chrome's alternates (`css/chrome-alternates`), and
+// widens `css/radius` to the ladder. The five report until DR-D1#5 (REPORT_RULES), while the lanes
+// of the round move their files onto the tokens; the source rules read their inline style forms.
 
 /**
  * `report` prints every finding and passes; `enforce` fails on any finding that ACCEPTED does not
@@ -45,7 +51,13 @@ export type CssRuleId =
   | 'css/mono-outside-code'
   | 'css/no-eyebrow'
   | 'css/inter-only'
-  | 'css/single-rail';
+  | 'css/single-rail'
+  /* the design round (docs/DESIGN.md 2.6, 3.5, 6.5, 4.5, 4.2) */
+  | 'css/z-index'
+  | 'css/no-shadow'
+  | 'css/scrollbar'
+  | 'css/numerals'
+  | 'css/chrome-alternates';
 
 export type BrandRuleId = SourceRuleId | CssRuleId | 'brand/credits' | 'brand/parse';
 
@@ -72,6 +84,70 @@ export const CSS_RULES: readonly CssRuleId[] = [
   'css/no-eyebrow',
   'css/inter-only',
   'css/single-rail',
+  'css/z-index',
+  'css/no-shadow',
+  'css/scrollbar',
+  'css/numerals',
+  'css/chrome-alternates',
+];
+
+/**
+ * The rules that print their findings and never fail a run, whatever the mode: the design round's
+ * five checks from DR-D1#1 until DR-D1#5 turns them to enforce, after every other lane's last push
+ * (docs/DESIGN.md 10.1, 12 item 3). The run lists their findings apart as `reported`.
+ */
+export const REPORT_RULES: readonly BrandRuleId[] = [
+  'css/z-index',
+  'css/no-shadow',
+  'css/scrollbar',
+  'css/numerals',
+  'css/chrome-alternates',
+];
+
+/**
+ * The stacking scale (docs/DESIGN.md 2.2, 2.6; packages/theme/src/scale.ts LAYERS): the layer
+ * names a `var(--ts-layer-<name>)` may read, the file whose layers block declares them, and the
+ * limit under which a z-index is local order inside one stacking context.
+ */
+export const Z_INDEX = {
+  layers: [
+    'stage',
+    'docked',
+    'bar',
+    'show',
+    'dialog',
+    'popover',
+    'toast',
+    'tooltip',
+    'preview',
+    'skip',
+  ] as readonly string[],
+  tokensFile: 'packages/chrome/src/tokens.css',
+  localLimit: 5,
+};
+
+/**
+ * The files that own the one scrollbar (docs/DESIGN.md 6.1, 6.5): the rule in tokens.css and the
+ * standalone deck's copy over its own token names. Anywhere else a `::-webkit-scrollbar` rule may
+ * only hide the bar (`display: none`) and `scrollbar-width` may only be `none`.
+ */
+export const SCROLLBAR_OWNERS: readonly string[] = [
+  'packages/chrome/src/tokens.css',
+  'packages/viewer/standalone/chrome.ts',
+];
+
+/** The file that declares --pt-numerals and .pt-num (docs/DESIGN.md 4.5). */
+export const NUMERALS_OWNER = 'packages/chrome/src/tokens.css';
+
+/**
+ * Where General Translation's alternates may be written (docs/DESIGN.md 4.2): the General
+ * Translation theme's sheet and the theme records. A file path from the tree's root, or a folder
+ * ending in `/`.
+ */
+export const ALTERNATES_OWNERS: readonly string[] = [
+  'packages/theme/src/gt-ink-paper/',
+  'packages/theme/src/tokens.ts',
+  'packages/theme/src/themes.ts',
 ];
 
 /** One finding: the rule, the file from the tree's root, a 1-based line and column, the text. */
@@ -128,20 +204,24 @@ export const OVERRIDES: readonly Override[] = [
 
 /**
  * The radius values every rule may draw (DECK-GRAMMAR.md:39, P:DESIGN.md section 15, NEXT.md
- * 4.1.2 "Corners"): square, a circle, the one token, the token less the border inside a segmented
- * control, and the keywords that take the parent's value.
+ * 4.1.2 "Corners"; the ladder of docs/DESIGN.md 3.1 since the design round): square, a circle,
+ * the three rungs' tokens (4 px chips, 6 px controls and plates, 8 px windows), a rung less the
+ * inset of a box inside a rounded box, and the keywords that take the parent's value.
  */
 export const RADIUS_VALUES: readonly RegExp[] = [
   /^0(?:px)?$/,
   /^50%$/,
   /^(?:inherit|initial|unset|revert)$/,
-  /^var\(--pt-radius(?:,6px)?\)$/,
-  /^calc\(var\(--pt-radius(?:,6px)?\)-\d+(?:\.\d+)?px\)$/,
+  /^var\(--pt-radius(?:-sm|-lg)?(?:,\d+px)?\)$/,
+  /^calc\(var\(--pt-radius(?:-sm|-lg)?(?:,\d+px)?\)-\d+(?:\.\d+)?px\)$/,
 ];
 
 /** A named corner outside RADIUS_VALUES: the file, the rule's selector as written, the value. */
 export type RadiusException = { file: string; selector: string; value: string; reason: string };
 
+/* The design round (docs/DESIGN.md 3.5): both entries leave in DR-D1#5, once DR-D2#2 draws the
+   Slideshow box and the search key chip from the ladder's tokens. Until then they name the two
+   literal corners the tree still writes. */
 export const RADIUS_EXCEPTIONS: readonly RadiusException[] = [
   {
     file: 'packages/chrome/src/TitleRow.css',

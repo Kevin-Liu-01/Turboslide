@@ -39,7 +39,18 @@ acceptance commands per milestone are in the milestone plan; the M1 acceptance i
 - Plain CSS: one `tokens.css` and one small CSS file per component, no Tailwind (SPEC 3.3 item 6).
   Since round four `packages/chrome/src/brand.css` carries the eleven `--ts-` identity tokens
   (gslides-parity SPEC-4 1.8) and `tokens.css` keeps every `--pt-` name and value (the one
-  addition is the `--pt-select` block, recorded under the round four seams below).
+  addition is the `--pt-select` block, recorded under the round four seams below). The design
+  round (`docs/DESIGN.md` 2 to 6) adds the stacking layers (`--ts-layer-*`), the radius ladder
+  (`--pt-radius-sm`, `--pt-radius`, `--pt-radius-lg`), the plate ring and classes (`--pt-ring`,
+  `.pt-float`, `.pt-window`, `.pt-kbd`), the numerals token (`--pt-numerals`, `.pt-num`) and the
+  one scrollbar every scroller draws; their numbers are `packages/theme/src/scale.ts`, pinned by
+  `scale.test.ts`. A floating surface enters its layer through `packages/chrome/src/Layer.ts`
+  (`useLayer`) and is placed by `packages/chrome/src/place.ts`; no file writes a z-index of 5 or
+  more, a drop shadow, a scrollbar rule or `tabular-nums` of its own (the brand lint's
+  `css/z-index`, `css/no-shadow`, `css/scrollbar` and `css/numerals`). From DR-D1#2 the colour
+  declarations of `tokens.css` sit between `/* colors:generated:start */` and
+  `/* colors:generated:end */` and are written by `node scripts/build-colors.ts` from
+  `packages/theme/src/palette.ts`; edit the palette and regenerate, never the block by hand.
 - Every control, toolbar button, menu item, handle and chip carries the Tooltip primitive
   (`packages/chrome/src/Tooltip.tsx`, `data-tip`) with its name, one sentence on what it does and
   its key; a native `title` alone does not count. `node scripts/tooltip-audit.mjs --base <origin>`
@@ -238,6 +249,23 @@ secret.ts` refuses a shorter session secret and the server answers 500 on every 
   | 4367 | the integrator                                                                    | the merge smokes and `node scripts/probes/core-gate.mjs --base http://localhost:4367` beside 4321                                           |
   | 4368 | unassigned                                                                        | spare                                                                                                                                       |
   | 4369 | b7 (the server: the write path, the head read on the blob tier)                   | `new-write-probe.mjs`, the draft picture probe                                                                                              |
+
+- The written exception for the design round (`docs/DESIGN.md`, the binding specification; its
+  lanes' notes under `docs/gslides-parity/design-round/`): the focus round's form stands, with the
+  identity database, the captured mail, the overlay folder and the local open switch per lane, on
+  `vite.no-watch.config.ts` for any row run or picture. From `apps/studio`:
+
+  `TURBOSLIDE_STORE=tmp TURBOSLIDE_OVERLAY_DIR=.turboslide/<key>-overlay TURBOSLIDE_REALTIME=memory TURBOSLIDE_LOCAL_OPEN=1 TURBOSLIDE_AUTH_DB=.turboslide/auth-<key>.sqlite TURBOSLIDE_MAIL=capture TURBOSLIDE_AUTH_RATE_LIMIT=off TURBOSLIDE_SESSION_SECRET=<32 or more fake characters> TURBOSLIDE_DOWNLOAD_SECRET=<32 or more fake characters> node_modules/.bin/vite dev --port <port> --strictPort`
+
+  | Port | Who                                                           | Notes                                                                                       |
+  | ---- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+  | 4661 | D1 (the foundation: tokens, layers, placement, colour, fonts) | its rows of `core/chrome.spec.ts` and `core/export.spec.ts`, the pictures of `d1/`          |
+  | 4662 | D2 (the editor's surfaces)                                    | the `chrome.layers.*`, `chrome.radius.*` and `chrome.scroll.*` rows                         |
+  | 4663 | D3 (the themes)                                               | `core/brand.spec.ts`, `e2e/agent-http.spec.ts`'s theme rows                                 |
+  | 4664 | D4 (the landing)                                              | `core/home.spec.ts`                                                                         |
+  | 4665 | D5 (the other pages)                                          | `core/decks.spec.ts`, `core/present.spec.ts`, the share spec's sign in rows                 |
+  | 4670 | the lane holding `.turboslide/build.lock`                     | `PORT=4670 node apps/studio/.output/server/index.mjs` for readings on the node-server build |
+  | 4671 | D1's second server                                            | a second origin when a D1 reading needs one                                                 |
 
   The switch of the round: one `MenuSetting`, `advancedTools`, off by default and remembered per
   browser under `ts-editor-settings`; one row, Tools > Advanced tools (`tools.advancedTools`, a
@@ -888,3 +916,4 @@ Each round after the focus round has its own specification and keeps its evidenc
 | people           | `docs/archive/rounds/PEOPLE.md`          | 2026-09-29      | 2026-09-30                                | `people/`                  |
 | realtime         | `docs/REALTIME.md`, `docs/CLOUDFLARE.md` | 2026-10-01      | shipping lane by lane from its own branch | `realtime/`, `cloudflare/` |
 | the next program | `docs/NEXT.md`                           | 2026-10-01      | Round 1 is building on `next/round1`      | `next/`, `round1/`         |
+| design           | `docs/DESIGN.md`                         | 2026-10-05      | building on `design/round`                | `design-round/`            |

@@ -117,6 +117,15 @@
 // `home.agents.run` for `home.agents.chips` (V3#13). A retired id leaves the matrix with its
 // module's test, so the driver's coverage never reads it as a row with no test.
 //
+// The design round (docs/DESIGN.md 11; DR-D1#1, its day 0) enters its rows push by push under
+// the areas they measure, each with a note that starts "Design round (docs/DESIGN.md 11),
+// DR-D<n>#<m>", restates rows in place (their note gains "; restated in the design round,
+// DR-D<n>#<m>" at its end) and retires `versions.field.square` (for `versions.field.corner`) and
+// `brand.reset.default-kit` (for `themes.reset.returns-to-theme`) in the push that enters their
+// replacement. The new area `themes` (the theme library of DESIGN.md 7) belongs to the unparkable
+// feature `decks` (AREA_FEATURE), so a red theme row blocks the ship. The round's rows reuse the
+// drivers that exist; no driver is added.
+//
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
 //   node scripts/probes/core-matrix.mjs --emit-parked docs/gslides-parity/focus/ship-<commit>.json
@@ -211,6 +220,9 @@ export const AREA_FEATURE = Object.freeze({
   /* the landing round (docs/LANDING.md 6.7; build/integrator.md "Landing, day 0" 5.1): the /home
      rows are the decks feature's, which is unparkable, so a red landing row blocks the ship */
   home: 'decks',
+  /* the design round (docs/DESIGN.md 7, 11; DR-D1#1): the theme library's rows are the decks
+     feature's, which is unparkable, so a red theme row blocks the ship */
+  themes: 'decks',
 });
 
 /**

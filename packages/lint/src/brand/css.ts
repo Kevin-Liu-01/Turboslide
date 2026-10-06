@@ -1,6 +1,8 @@
 // The CSS checks of the brand lint (docs/NEXT.md 4.1.3 item 25): smooth scrolling, radii outside
 // the radius rule, monospace outside the code surfaces, eyebrows, faces outside Inter and the
-// retired outer rail, read from the tree's plain stylesheets (AGENTS.md code rules: one tokens.css
+// retired outer rail, and since the design round (docs/DESIGN.md 2.6, 3.5, 4.2, 4.5, 6.5) the
+// stacking scale, drop shadows, the one scrollbar, the numerals token and the chrome's
+// alternates, read from the tree's plain stylesheets (AGENTS.md code rules: one tokens.css
 // and one small CSS file per component). The gt-ui plugin reads script files alone
 // (P:.oxlintrc.json 32 to 35), which is how P:src/components/viewer/BookView.css line 11 kept its
 // smooth scroll (audit-brand-source 15.3); these are the same laws over CSS.
@@ -8,9 +10,25 @@
 // The parser is small on purpose: comments out, then every block's prelude and every declaration
 // with its line, with nesting resolved (`&` takes the parent's selector) and the enclosing at-rules
 // kept. It reads what the tree writes; it is no validator.
-import { CODE_SURFACES, CSS_RULES, RADIUS_EXCEPTIONS } from './config.ts';
+import {
+  ALTERNATES_OWNERS,
+  CODE_SURFACES,
+  CSS_RULES,
+  NUMERALS_OWNER,
+  RADIUS_EXCEPTIONS,
+  SCROLLBAR_OWNERS,
+  Z_INDEX,
+} from './config.ts';
 import type { BrandFinding, BrandRuleId, CssRuleId } from './config.ts';
-import { isAllowedRadius, splitTopLevel } from './source.ts';
+import {
+  hasAlternates,
+  hasTabularLiteral,
+  isAllowedRadius,
+  isOwnedBy,
+  isScaleZIndex,
+  shadowHasBlurOrOffset,
+  splitTopLevel,
+} from './source.ts';
 
 export type CssDeclaration = {
   /** the rule's selector list as written, nesting resolved; '' at the top level */
@@ -152,7 +170,20 @@ const MESSAGES: Record<CssRuleId, string> = {
     'Type is Inter only (DECK-GRAMMAR.md:24): this face is outside Inter and its fallbacks.',
   'css/single-rail':
     'One rail: the outer pair 10 px outside the column (--tc-rail-outer) is retired (P:.oxlintrc.json gt-ui/single-rail).',
+  'css/z-index':
+    'A z-index off the stacking scale (docs/DESIGN.md 2.6): a value under 5 is local order; a floating surface reads var(--ts-layer-<name>) or enters its layer through the Layer primitive.',
+  'css/no-shadow':
+    'A shadow with a blur or an offset (docs/DESIGN.md 3.4): a floating plate draws the --pt-edge frame and --pt-ring (.pt-float, .pt-window); the brand deck uses no shadows.',
+  'css/scrollbar':
+    'A scrollbar style outside tokens.css (docs/DESIGN.md 6.5): every scroller draws the one scrollbar; a ::-webkit-scrollbar rule here may only set display: none, and scrollbar-width only none.',
+  'css/numerals':
+    'Tabular figures written by hand (docs/DESIGN.md 4.5): use the .pt-num class or font-variant-numeric: var(--pt-numerals).',
+  'css/chrome-alternates':
+    "General Translation's alternates cv11 and ss01 belong to its theme's slides (docs/DESIGN.md 4.2); the chrome, the pages and the landing draw Inter's defaults.",
 };
+
+/** The ladder's three tokens, declared once in tokens.css. */
+const RADIUS_TOKEN_NAMES = new Set(['--pt-radius', '--pt-radius-sm', '--pt-radius-lg']);
 
 const RADIUS_PROPERTY =
   /^border(?:-(?:top|bottom)-(?:left|right)|-(?:start|end)-(?:start|end))?-radius$/;
@@ -266,7 +297,9 @@ export function lintCss(
       report('css/no-smooth-scroll', decl);
     if (on('css/radius')) {
       const custom =
-        property.startsWith('--') && property.includes('radius') && property !== '--pt-radius';
+        property.startsWith('--') &&
+        property.includes('radius') &&
+        !RADIUS_TOKEN_NAMES.has(property);
       if (
         (RADIUS_PROPERTY.test(property) || custom) &&
         !isAllowedRadius(value) &&
@@ -311,6 +344,43 @@ export function lintCss(
         /--[a-z-]*rail-outer/.test(value))
     )
       report('css/single-rail', decl);
+    if (
+      on('css/z-index') &&
+      property === 'z-index' &&
+      file !== Z_INDEX.tokensFile &&
+      !isScaleZIndex(value)
+    )
+      report('css/z-index', decl);
+    if (on('css/no-shadow') && property === 'box-shadow' && shadowHasBlurOrOffset(value))
+      report('css/no-shadow', decl);
+    if (on('css/scrollbar') && !isOwnedBy(file, SCROLLBAR_OWNERS)) {
+      const hidesOnly =
+        /::-webkit-scrollbar\b/.test(selector) &&
+        (byBlock.get(decl.block) ?? []).every(
+          (d) => d.property === 'display' && d.value.trim() === 'none',
+        );
+      if (
+        (/::-webkit-scrollbar/.test(selector) && !hidesOnly) ||
+        property === 'scrollbar-color' ||
+        (property === 'scrollbar-width' && value.trim() !== 'none')
+      )
+        report('css/scrollbar', decl);
+    }
+    if (
+      on('css/numerals') &&
+      file !== NUMERALS_OWNER &&
+      (property === 'font-variant-numeric' || property === 'font-feature-settings') &&
+      hasTabularLiteral(value)
+    )
+      report('css/numerals', decl);
+    if (
+      on('css/chrome-alternates') &&
+      !isOwnedBy(file, ALTERNATES_OWNERS) &&
+      (property === 'font-feature-settings' ||
+        (property.startsWith('--') && property.includes('feature'))) &&
+      hasAlternates(value)
+    )
+      report('css/chrome-alternates', decl);
   }
   return out;
 }

@@ -14,6 +14,9 @@
     },
     {
       "path": "../effects"
+    },
+    {
+      "path": "../theme"
     }
   ]
 }

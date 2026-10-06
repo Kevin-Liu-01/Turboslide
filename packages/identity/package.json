@@ -25,7 +25,8 @@
   },
   "dependencies": {
     "@turboslide/effects": "workspace:*",
-    "@turboslide/schema": "workspace:*"
+    "@turboslide/schema": "workspace:*",
+    "@turboslide/theme": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -12,6 +12,7 @@
   "exports": {
     "./theme": "./src/theme.ts",
     "./tokens": "./src/tokens.ts",
+    "./scale": "./src/scale.ts",
     "./sprite": "./src/sprite.ts",
     "./copy": "./src/copy.ts",
     "./brand": "./src/brand.ts",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "colorjs.io": "catalog:",
     "typescript": "catalog:"
   }
 }

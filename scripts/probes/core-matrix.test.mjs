@@ -61,6 +61,14 @@ import {
 // probe and the core specs use answer from the file, and the two ship helpers compute rule 4 of
 // section 1, RETURN.md's rule 2 (the unparkable features, the `parks` rows) and the exit rule of 6.2.
 
+/* The design round (docs/DESIGN.md 10.6, 11): a row a push of the round entered carries a note
+   that starts "Design round"; a restated row keeps its note and gains "; restated in the design
+   round, DR-D<n>#<m>" at its end, so it is never counted as entered. The two retired ids leave in
+   the push that enters their replacements. */
+const DESIGN_NOTE = /^Design round \(docs\/DESIGN\.md 11\), DR-D[1-5]#\d+[a-z]?\b/;
+const DESIGN_RETIRED = ['versions.field.square', 'brand.reset.default-kit'];
+const isDesignRow = (row) => (row.note ?? '').startsWith('Design round');
+
 describe('the committed matrix', () => {
   it('loads with every row on the scheme and no duplicate id', () => {
     expect(CORE_MATRIX.length).toBeGreaterThan(300);
@@ -526,8 +534,14 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         /* the Round 1 follow-up, lane A item 1 (verify-r1.md finding 2): slides.import.example-deck */
         1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
-           count reads the ones entered and the landing block below holds their order */
-        CORE_MATRIX.filter((r) => areaOf(r.id) === 'home').length,
+           count reads the ones entered and the landing block below holds their order; the design
+           round's home rows are counted by its own term */
+        CORE_MATRIX.filter((r) => areaOf(r.id) === 'home' && !isDesignRow(r)).length +
+        /* the design round (docs/DESIGN.md 10.6, 11): each push enters its own rows and retires
+           the two rows DESIGN_RETIRED names in the push that enters their replacement, so the
+           count reads the rows entered and the retired ones gone */
+        CORE_MATRIX.filter(isDesignRow).length -
+        DESIGN_RETIRED.filter((id) => !isCoreId(id)).length,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -929,6 +943,8 @@ describe('the vector round (docs/archive/rounds/VECTOR.md section 6)', () => {
       people: 'share',
       /* the landing round (docs/LANDING.md 6.7): the /home rows under the unparkable decks */
       home: 'decks',
+      /* the design round (docs/DESIGN.md 11; DR-D1#1): the theme library's rows under decks */
+      themes: 'decks',
     });
     expect(CORE_SPEC_DRIVERS).toContain('core/svg.spec.ts');
     /* the polish round adds two rows to the svg spec (docs/archive/rounds/POLISH.md 2.4, 2.5) */
@@ -1385,9 +1401,11 @@ describe('the realtime round (docs/REALTIME.md section 2)', () => {
       rowsForDriver('core/realtime.spec.ts').filter((r) => r.feature === 'realtime').length,
     ).toBe(12);
     expect(rowsForDriver('realtime.spec.ts')).toEqual(rowsForDriver('core/realtime.spec.ts'));
-    expect(rowsForDriver('e2e/agent-http.spec.ts').map((row) => row.id)).toEqual([
-      'realtime.agent.write-announced',
-    ]);
+    expect(
+      rowsForDriver('e2e/agent-http.spec.ts')
+        .filter((row) => !isDesignRow(row))
+        .map((row) => row.id),
+    ).toEqual(['realtime.agent.write-announced']);
     expect(
       rowsForDriver('core/share.spec.ts')
         .filter((row) => row.feature === 'realtime')
@@ -1722,7 +1740,10 @@ describe('the landing round', () => {
   });
 
   it('enters the home rows in push order, each on the driver with its note', () => {
-    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home').map((row) => row.id);
+    /* the design round's home rows (docs/DESIGN.md 11) are its own block's, below */
+    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home' && !isDesignRow(row)).map(
+      (row) => row.id,
+    );
     const ids = new Set(home);
     /* the second pass's rows entered are a prefix of its push order (no push's row before an
        earlier push's), wherever in the home rows a lane placed them (beside its band's first
@@ -1735,8 +1756,14 @@ describe('the landing round', () => {
     expect(followup).toEqual(LANDING_FOLLOWUP.slice(0, followup.length));
     expect([...home].sort()).toEqual([...firstKept, ...second, ...followup].sort());
     expect(home.length).toBe(firstKept.length + second.length + followup.length);
-    expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(home);
-    for (const row of CORE_MATRIX.filter((candidate) => areaOf(candidate.id) === 'home')) {
+    expect(
+      rowsForDriver('core/home.spec.ts')
+        .filter((row) => !isDesignRow(row))
+        .map((row) => row.id),
+    ).toEqual(home);
+    for (const row of CORE_MATRIX.filter(
+      (candidate) => areaOf(candidate.id) === 'home' && !isDesignRow(candidate),
+    )) {
       expect(row.feature, row.id).toBe('decks');
       expect(row.driver, row.id).toBe('core/home.spec.ts');
       expect(isCoreId(row.id), row.id).toBe(true);
@@ -1754,5 +1781,40 @@ describe('the landing round', () => {
         expect([1, 2], row.id).toContain(row.severity);
       }
     }
+  });
+});
+
+// The design round (docs/DESIGN.md 10.6, 11): day 0 (DR-D1#1) adds the area `themes` under the
+// unparkable decks feature and the count term above; every push of the round enters its rows with
+// the round's note on a driver that exists, restates rows in place and retires the two ids of
+// DESIGN_RETIRED in the push that enters their replacement.
+describe('the design round', () => {
+  it('holds the themes area under the unparkable decks feature', () => {
+    expect(AREA_FEATURE.themes).toBe('decks');
+    expect(isParkable('decks')).toBe(false);
+  });
+
+  it('enters each row with the round note, a known driver and the scheme, and retires a row only with its replacement', () => {
+    const design = CORE_MATRIX.filter(isDesignRow);
+    for (const row of design) {
+      expect(row.note, row.id).toMatch(DESIGN_NOTE);
+      expect(CORE_DRIVERS, row.id).toContain(row.driver);
+      expect(row.feature, row.id).toBe(
+        ROW_FEATURE[row.id] ?? AREA_FEATURE[areaOf(row.id)] ?? areaOf(row.id),
+      );
+    }
+    /* a retired id is gone only once its replacement is in */
+    const replacement = {
+      'versions.field.square': 'versions.field.corner',
+      'brand.reset.default-kit': 'themes.reset.returns-to-theme',
+    };
+    expect(Object.keys(replacement)).toEqual(DESIGN_RETIRED);
+    for (const [old, next] of Object.entries(replacement))
+      if (!isCoreId(old)) expect(isCoreId(next), `${old} retired with ${next}`).toBe(true);
+    /* a restated row is not counted as entered */
+    for (const row of CORE_MATRIX.filter((r) =>
+      /; restated in the design round, DR-D/.test(r.note ?? ''),
+    ))
+      expect(isDesignRow(row), row.id).toBe(false);
   });
 });

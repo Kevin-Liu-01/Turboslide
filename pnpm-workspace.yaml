@@ -22,6 +22,9 @@ catalog:
   '@codemirror/lint': 6.9.7
   '@codemirror/state': 6.7.4
   '@codemirror/view': 6.43.11
+  # The design round (docs/DESIGN.md 2.4, decision C3): placement of every floating plate in the
+  # editor and the pages through one shared place() (packages/chrome/src/place.ts), 7,057 B gzip
+  '@floating-ui/dom': 1.8.0
   '@lezer/highlight': 1.2.3
   '@modelcontextprotocol/sdk': 1.30.0
   '@paper-design/shaders': 0.0.78
@@ -54,6 +57,10 @@ catalog:
   '@vercel/functions': 3.9.7
   '@vitejs/plugin-react': 6.1.1
   better-auth: 1.7.4
+  # The design round (docs/DESIGN.md 5.1, decision C10): the chrome's colour tokens generated in
+  # OKLCH and solved to their WCAG 2.2 floors at build time and in tests (scripts/build-colors.ts);
+  # a devDependency, 0 B on any page
+  colorjs.io: 0.7.1
   dompurify: 3.4.15
   eslint: 10.10.0
   ioredis: 6.0.0

@@ -33,6 +33,9 @@ catalogs:
     '@codemirror/view':
       specifier: 6.43.11
       version: 6.43.11
+    '@floating-ui/dom':
+      specifier: 1.8.0
+      version: 1.8.0
     '@lezer/highlight':
       specifier: 1.2.3
       version: 1.2.3
@@ -117,6 +120,9 @@ catalogs:
     better-auth:
       specifier: 1.7.4
       version: 1.7.4
+    colorjs.io:
+      specifier: 0.7.1
+      version: 0.7.1
     dompurify:
       specifier: 3.4.15
       version: 3.4.15
@@ -218,6 +224,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.4
+      colorjs.io:
+        specifier: 'catalog:'
+        version: 0.7.1
       eslint:
         specifier: 'catalog:'
         version: 10.10.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -566,6 +575,9 @@ importers:
       '@codemirror/view':
         specifier: 'catalog:'
         version: 6.43.11
+      '@floating-ui/dom':
+        specifier: 'catalog:'
+        version: 1.8.0
       '@lezer/highlight':
         specifier: 'catalog:'
         version: 1.2.3
@@ -758,6 +770,9 @@ importers:
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../schema
+      '@turboslide/theme':
+        specifier: workspace:*
+        version: link:../theme
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -796,6 +811,9 @@ importers:
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../schema
+      '@turboslide/theme':
+        specifier: workspace:*
+        version: link:../theme
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -999,6 +1017,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.4
+      colorjs.io:
+        specifier: 'catalog:'
+        version: 0.7.1
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -1556,6 +1577,15 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@floating-ui/core@1.8.0':
+    resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
+
+  '@floating-ui/dom@1.8.0':
+    resolution: {integrity: sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg==}
+
+  '@floating-ui/utils@0.2.12':
+    resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
   '@hexagon/base64@1.1.28':
     resolution: {integrity: sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw==}
@@ -3209,6 +3239,9 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  colorjs.io@0.7.1:
+    resolution: {integrity: sha512-LY7OHnJZxHwT5UlzNa9bbhHHDbzB6yE5+3MIPwJEQKRvSCt/T4G7epsj+9j2BExUIIfXFIJGsIXUKdfrK9Q5tA==}
 
   comment-parser@1.4.9:
     resolution: {integrity: sha512-+2AvZKjJaNq9GQljm3tr0utwrig5BL+jgJGvz5rDpGKNIp+ojcRXWUwBbh/sGIi1QCprR6PsKFakub+w1v+4hQ==}
@@ -5456,6 +5489,17 @@ snapshots:
     optionalDependencies:
       '@noble/hashes': 2.4.0
 
+  '@floating-ui/core@1.8.0':
+    dependencies:
+      '@floating-ui/utils': 0.2.12
+
+  '@floating-ui/dom@1.8.0':
+    dependencies:
+      '@floating-ui/core': 1.8.0
+      '@floating-ui/utils': 0.2.12
+
+  '@floating-ui/utils@0.2.12': {}
+
   '@hexagon/base64@1.1.28': {}
 
   '@hono/node-server@2.1.1(hono@4.13.7)':
@@ -7057,6 +7101,8 @@ snapshots:
       color-name: 1.1.4
 
   color-name@1.1.4: {}
+
+  colorjs.io@0.7.1: {}
 
   comment-parser@1.4.9: {}
 

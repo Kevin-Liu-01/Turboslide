@@ -1018,3 +1018,148 @@ The pictures under `pictures/`, each looked at:
 6. `authorize()` stays in shadow mode on production (`docs/security.md` 40 and 76) until he dates the enforce step. Lane A noted that `slide.import` reads its source deck without `authorize(read)`, so any caller who knows a deck id can import its slides. Recorded, not changed.
 7. The CLI's version: `apps/cli/package.json` reads `2026.1001.3`, and `apps/cli/src/commands/banner.test.ts` expects the newest entry of `docs/updates.md` (`2026.1006.1` after this record). A docs-only push cannot stamp it, and the stamp also needs the landing's recorded terminal run again, since the landing prints the CLI version. It goes with the next push that changes code.
 8. The people band (`0d75ab90`) is reverted on `main` by `14bd67d1` and ships again from `landing/ship` when the machine's load lets its realtime rows read. Since 2026-10-06 a docs-only push skips the production realtime rows, so release notes no longer meet them.
+# Design round, pass 1 (2026-10-05)
+
+The design round's verifier, pass 1, on `design/round` at `d863c179` (the integrator's note over `3e3654b8`), in `/Users/kevinliu/repos/Turboslide-design`, from 04:40 to 05:20 PDT on 2026-10-06. Read first: `docs/DESIGN.md` (every section), `docs/gslides-parity/design-round/integrator.md`, the lane notes `d1.md`, `d2.md`, `d4.md`, `d5.md` and `requests.md`. One node-server build of the head (34 s at a load of 43) was served on port 4671 with the round's environment (a tmp store, the memory tier, secrets made per start and never printed) under `.turboslide/build.lock`; port 4681 was not used. Every drive ran in Playwright's Chromium with its scrollbars shown, at human speed (a pause of 20 to 40 ms between steps, typing at 50 to 70 ms a key), at 1440 by 900 and 390 by 844 in both appearances, with WebKit and Firefox where named. Production (`https://www.turboslide.com`) was read only: `/home` and `/new` with no write. Nothing was pushed or deployed and no setting changed. Loads are one minute load averages; a timing at a load over 24 is not a verdict. Pictures are under `docs/gslides-parity/design-round/verify1/` (49 JPEGs, 668,960 B in all, each under 200,000 B and each looked at). The server was stopped and the build lock released before this note was written.
+
+## DR-V1.1 Verdict
+
+Not ready to ship. Kevin's first and fifth items are done on the editor and the landing and hold by hand. His second item is not on this branch. His third and fourth items are done in part. The head names Google Slides on `/home` and in the README, which production no longer does.
+
+| Kevin's item | Reading on the head |
+| --- | --- |
+| 1. Layering and corners | Done. The presence tooltip paints over the name prompt bar with its own ring, the bar sits 4 px under the title row, menus, submenus, context menus, pickers, tooltips, toasts and the bar draw 6 px with the `--pt-edge` frame and the ring, dialogs 8 px, Slideshow and Share one 6 px corner, "Link copied" over the Share dialog. Left: the Theme panel's 12 fields and selects are square (finding 5) |
+| 2. Themes | Not done. D3's four pushes are on `d3/stage` and wait for the seam. A new deck and Blank are `gt-ink-paper`; the Theme panel lists no theme; Reset reads "Reset to General Translation" and draws the GT mark, rails, rules, crosses and counter on a Blank deck (finding 1) |
+| 3. The landing | Done for the navigation, the hero, the numbers row, menus, canvas, Tailor, the two diagrams, features and the close. Not done: themes and kits, agents, two people, the captured presenter view, the Download dialog and the pattern stills (finding 3) |
+| 4. Colour and the face | The colour tokens come from colorjs.io and are current; the face is Inter 4.001 by Rasmus Andersson in one Latin subset; no Berkeley Mono anywhere. Left: GT's alternates on `/decks`, the trash and the book view, and "GT Inter Display" in the PowerPoint file (finding 4) |
+| 5. Scrollbars | Done in Chromium and WebKit: every scroller draws the 8 px gutter or none. Firefox's gate applies; its drawn bar could not be seen under Playwright (section DR-V1.7) |
+| "dont mention google slides at all" | Broken on the head: `/home`'s description and footer, README line 8, the CLI help and the generated contracts. Main's guard reads 2,294 mentions in 61 files on this tree. The seam brings main's removal and its guard (finding 2) |
+
+## DR-V1.2 The gates on the head
+
+| Gate | Reading | Load |
+| --- | --- | --- |
+| The node-server build | exit 0, 34.1 s (04:40 to 04:41) | 43 |
+| `node scripts/build-colors.ts --check` | tokens.css and colors.generated.ts are current | 137 |
+| `node scripts/build-home-assets.ts --check` | 38 outputs match, 18 served files each in `assets.json` and on disk | 137 |
+| `node docs/readme/what-works.mjs --check` | README.md is current | 137 |
+| The brand lint (`main.ts`, enforce) | exit 0: 0 open, 19 accepted, 0 stale; reported by the round's rules: 20 findings in 6 files (`css/chrome-alternates` 11, `css/numerals` 6, `css/z-index` 3) | 137 |
+| `vitest run` of `core-matrix.test.mjs`, `what-works.test.mjs` and `packages/theme/src` | 10 files, 201 tests passed | 137 |
+| `node_modules/.bin/tsc -b` | exit 0 (0.28 s: the build information of the integrator's run on the same tree) | 137 |
+| Main's no Google guard (`origin/main:packages/lint/src/brand/competitor.ts` at `95808c36`, run from the scratchpad against this tree) | 2,294 mentions in 61 files: `packages/agent/generated/mcp-tools.json` 863, `openapi.json` 812, `docs/grammar.md` 198, `copy.ts` 6, `menus/model.ts` 5, README 2, `apps/cli/src/cli.ts` 1 among them. The round's own added lines name Google in comments only | |
+| `git merge-base --is-ancestor origin/main HEAD` | false: `origin/main` is at `95808c36` here, 36 commits past `0d75ab90` (R1F-E landing fixes and the R1F integrator among them) | |
+
+Not run again: the whole `pnpm test` (the integrator's reading stands: 5,386 passed, 2 failed for the environment) and `check-client-bundle.mjs` (exit 1 on the standing `/decks` and `/deck` readings).
+
+## DR-V1.3 The run ledger
+
+| Run | Rows | Result | Load |
+| --- | --- | --- | --- |
+| 1, 04:42 to 04:53, `core-gate --only specs` on 4671 | the integrator's 53 rows (every spec row the round entered or restated, the seven `home.budget.*` rows, `home.page.bands-after-load`) | 50 passed, 0 failed, 3 not driven, retries zero. Not driven: `home.motion.pause` (its functional checks passed), `home.budget.frame`, `home.budget.main-thread`, each "not read: load 38.6" | 43 to 51 |
+| 2, 04:53 to 05:02, `core-gate --only probe --areas share,chrome,polish-text` | 61 walk rows | 58 passed, 3 failed, retries zero: `chrome.split.one-box` ("box 133x32 radius 6px"), `chrome.cluster.gaps-heights` ("corners share 6px, split 6px"), both against the walk's 8 px expectation until DR-D2#2b; `versions.show-changes-marks` ("marks with Show changes on 0"), a row of an earlier round | 51 to 57 |
+
+The budgets of DESIGN.md 8.16, read in run 1 on the build:
+
+| Measure | Reading | Line |
+| --- | --- | --- |
+| Document | 88,581 B decoded, 15,180 B brotli | 100,000 B; 20 KB |
+| Page CSS | 17,139 B brotli | 20 KB |
+| Route chunk | 61,848 B decoded, 15,464 B brotli | 70 KB; 22 KB |
+| Live core with its imports | 55,381 B decoded, 19,732 B gzip | 64 KB; 20,480 B |
+| The page's own script after a full scroll | 357,645 B decoded, 119,854 B gzip | 360,000 B; 120,000 B |
+| Pictures after a full scroll | 6 files, 57,133 B; 0 before load | 200 KB |
+| Font | one request, `InterVariable-latin` 113,752 B | reported against 120 KB |
+| CLS, LCP | CLS 0 at 1440 and 390; the h1, 132 to 164 ms cold (load 38.8, not a verdict) | 0; 400 ms |
+
+## DR-V1.4 Hand drives
+
+Each drive made its own deck on 4671 and removed it through `deck.trash` and `deck.remove` as its owner (every removal answered 404 after).
+
+**Layering (Kevin's screenshot 1).** Chromium at 1440 and 390 in both appearances, Firefox at 1440 light:
+
+- With the name prompt bar open: the title row ends at y 44; the bar is 1033,48 to 1428,76, 6 px, `1px solid --pt-edge`, the ring, in the `bar` layer and the top layer. The presence tooltip ("Collaborators. Who is in this presentation now. Nobody else has it open") is 751,44 to 1031,115 in the `tooltip` layer; the two plates share no edge. Moved onto the bar, the tooltip paints over it with its ring unbroken (`layers-bar-tooltip-1440-dark.jpg`, `layers-tooltip-over-bar-1440-dark.jpg`). `elementsFromPoint` does not list the tooltip, which takes no pointer events, so the picture is the reading. At 390 the bar is 63,88 to 378,116, 4 px under the toolbar row, over the top edge of the slide (`layers-context-390-dark.jpg`).
+- File 8,73 to 229,446 and its submenu 224,186 to 444,252, both 6 px in the `popover` layer. With Insert open, the toolbar Undo tooltip (71,114 to 177,147) is drawn over the menu's left edge (`layers-menu-tooltip-1440-light.jpg`).
+- The slide's context menu 6 px in the `popover` layer at both widths.
+- Share opens an 8 px window in the `dialog` layer and the name prompt bar closes. Copy link shows "Link copied" at 8,852 to 139,892, 6 px, `toast` layer; at its centre the stack is the snackbar's text, the snackbar, then the dialog's scrim (`layers-share-snackbar-1440-dark.jpg`). Share's access control is the browser's select, so no chrome menu opens from a dialog.
+- The font picker 335,110 to 615,530 and the text colour plate 679,110 to 849,331, both 6 px in the `popover` layer; the Theme panel's display font picker 1137,88 to 1417,508 the same (`pickers-font-1440-light.jpg`). The Background dialog draws its colours inline (`pickers-bg-dialog-plate-1440-light.jpg`).
+- Firefox read the same boxes, corners and layers. WebKit opened the deck View only after its first write, because the `__Host-` session cookie is Secure and Playwright's WebKit keeps no Secure cookie over `http://localhost` (`layers-fail-webkit-1440-dark.jpg`); layering was not read in WebKit.
+- Production `/new` beside the head, dark, no write: production's File menu and tooltip are square with no ring, Slideshow 8 px and Share square; the head's are 6 px with the ring and Slideshow and Share both 6 px (`editor-file-menu-prod-1440-dark.jpg`, `editor-file-menu-local-1440-dark.jpg`).
+
+**Corners, type, numbers and contrast.** An audit of computed styles in 21 states at each width and appearance (the editor, File, Format, the context menu, Share, Keyboard shortcuts, the search card, Find and replace, Version history, Format options, the Theme panel, Sign in from the editor, the show, `/decks`, the trash, the templates gallery, `/deck/gt-brand`, Not found, the refused page, Sign in from `/decks`), and the landing after a full scroll:
+
+- No radius off the ladder anywhere. Boxed controls at radius 0: none but the Theme panel's two logo position selects, the footer logo and counter format selects, six hex fields, the footer text field and the words field (12).
+- Every text element is in Inter; code and the terminals in `ui-monospace`. The served Latin subset reads name ID 9 "Rasmus Andersson", version "4.001;git-9221beed3", both axes and `tnum`. No requested file, loaded family or build output names Berkeley; no client asset names "GT Inter".
+- `cv11` and `ss01` outside slides: none in the editor or on `/home`; `/decks` 6 elements (the two h2s, the template labels, the card plate and title), the trash's h1, `/deck/gt-brand` at 390 30 (the book view).
+- Numbers that align in proportional figures: Version history's row time (`.ts-version-note`, "Oct 6, 4:47 AM") and the Keyboard shortcuts dialog's key chips ("Cmd 0", "Shift F10", "Cmd Shift 7").
+- Text under its WCAG floor: the search card's key chips at 4.27:1 in light (`#686d76` on `#e9e9e9`); nothing else in the editor, the pages or the landing.
+- Button words in sentence case: "Copy link", "Reset to theme", "Add to theme", "Use the default logo", "Recent presentations", "Empty trash".
+
+**Themes.** `/new` makes `gt-ink-paper`, light. The Blank card makes `gt-ink-paper` with a kit that turns the mark, the footer logo, the counter and the frame off; a reload keeps it. The Theme panel lists Appearance, Logo, Colors, Fonts, Footer, Slide numbers, Frame and Words, and no theme (`themes-panel-1440-light.jpg`). Its foot reads "Reset to General Translation"; pressed on the Blank deck it draws the GT mark above the title, the rails, rules and crosses and `01 / 01` (`themes-blank-after-reset.jpg`). `POST /api/actions/theme.list` answers 404 "Unknown action"; `deck.create` with a name and no `from` answers 400 "expected string" at `/from`.
+
+**The landing, band by band, beside production** (1440 and 390, both appearances; production at 1440 light and 390 dark):
+
+| Band | The head | Production |
+| --- | --- | --- |
+| Navigation | One 58 px row: the lockup, Documentation as a link, the theme button and the pause toggle as 32 px icon buttons, Sign In as text, New Presentation solid, all 6 px; at 390 the mark, the two icons, Sign In and New Presentation | Documentation, Light, Dark, Pause Motion and Sign In as boxed text buttons at 0, three rows at 390 (`landing-first-prod-1440-light.jpg`, `landing-first-prod-390-dark.jpg`) |
+| Hero | "Presentations for people and agents" on two lines; the frame with the editor's title row, menus, toolbar, filmstrip and `1 / 9`; the terminal keeps its transcript with four step rows and their seconds (`landing-first-local-1440-light.jpg`, `-1440-dark`, `-390-dark`). The frame's title "Onboarding plan" loses its descenders (`landing-hero-frame-title-1440-light.jpg`, `-390-dark`) | A 96 px three line h1 and a frame with no chrome |
+| Numbers | Glyph wells, 44 px tabular figures, the menu path as crumbs, CLI 180, MCP 169 and HTTP 177 as chips; 22 words (`landing-numbers-local-1440-light.jpg`) | 46 words |
+| Menus, canvas, Tailor | The miniature with the model's glyphs, the Format options readout, the Tailor dialog (`landing-menus-…`, `landing-canvas-…`, `landing-tailor-local-1440-light.jpg`) | Text rows under the figures |
+| Kits | As production: three kits, no themes (`landing-kits-local-1440-light.jpg`) | Same |
+| Agents | As production: three "Recorded" cells, no Today group (`landing-agents-local-1440-light.jpg`) | Same |
+| Two people | Present on this tree, square framed screens (`landing-people-local-1440-dark.jpg`) | Reverted on main in `14bd67d1` |
+| Present | Present with its glyph and key chips, Print This Deck, the editor to presenter view and show diagram; the nine title rows stay and no captured presenter view (`landing-present-local-1440-light.jpg`) | The buttons and the rows |
+| Export | The slide to `pitch.pdf` and `pitch.pptx` diagram; the three ruled rows stay and no Download dialog (`landing-export-local-1440-light.jpg`) | The rows |
+| Patterns | The live and still pair; no 17 stills (`landing-patterns-local-1440-dark.jpg`) | Same |
+| Features | Two columns of five with glyph wells, crumbs and key chips; Tailor shares Comments' glyph (`landing-features-local-1440-dark.jpg`) | A table with sentences |
+| Close, footer | "Start a presentation"; the footer adds "Google Slides is a product of Google LLC." (`landing-close-local-1440-dark.jpg`, `landing-footer-local-1440-light.jpg`) | The footer names no other company (`landing-footer-prod-1440-light.jpg`) |
+
+Visible words outside slides, code and terminals: 1,964 on the head (1,814 without the two people band) and 1,858 on production. The page's description reads "Turboslide is a slides editor in the browser. It has Google Slides' menus and shortcuts. No account is needed."; production's names no other product. No `img` on `/home` failed to load and no request answered 400 or more in the four runs; the hidden appearance's twins were not requested.
+
+**Scrollbars.** Chromium and WebKit, every scroller on `/home`, `/decks`, the templates gallery, the editor, the Insert menu, Keyboard shortcuts and `/deck/gt-brand`: a gutter of 8 px or none, the document's 8 px. The filmstrip draws a 4 px thumb with round ends in its 8 px gutter in WebKit, and the font list in Chromium (`scroll-filmstrip-webkit-light.jpg`, `scroll-fontlist-chromium-light.jpg`, `scroll-home-webkit-light.jpg`). Firefox answers false to `selector(::-webkit-scrollbar-thumb)` and reads `scrollbar-color: rgba(7, 7, 7, 0.44) transparent` on the root.
+
+**The regression set.**
+
+- Drag, resize and rotate, Chromium 1440 light, each on its own slide: a rectangle (a press and drag on its body 880,135 to 738,220; the south east handle 320x162 to 405x205; the rotation handle 20), a text box (typed "Typed by the verifier"; press and drag 880,135 to 738,220; after Escape the move handle, eight resize handles and the rotation handle), a 3 by 2 table (320,218 to 180,303; 960 to 1045 wide; 20), a column chart (320,218 to 137,317; 960x540 to 1079x599; 20), an uploaded picture (361,395 to 235,466; 320x200 to 405x243; 20) and a line (992,108 to 864,178) (`drag2-rectangle-pressdrag.jpg`, `drag2-text-box-selected.jpg`, `objects-picture-light.jpg`, `objects-chart-light.jpg`). A click on a selected box that holds text starts typing in it and hides the handles; Escape returns the box with its handles.
+- File > Download > PDF Document: `Export light.pdf`, 16,207 B, `%PDF-1.4`, 2 pages. Download options with PowerPoint: `Export light.pptx`, 36,752 B, a zip whose slides name "GT Inter Display" in 5 runs.
+- Slideshow: the show in the `show` layer and the top layer at 1440 by 900; the presenter view at `/present/<id>` with its timer and "2 of 2" in tabular figures (`export-presenter-light.jpg`).
+- Share: Copy link writes "Link copied".
+- Sign in: the dialog opens from the editor and from `/decks`. The editor's body scrolls by 35 px (250 over 215) and draws a thumb over an empty band in both appearances; the pages' dialog does not (`signin-editor-light.jpg`, `walk-signin-editor-1440-dark.jpg`, `walk-signin-pages-1440-light.jpg`).
+- `/decks` lists the deck with its 6 px search pill, view switch and sort select (`walk-decks-1440-dark.jpg`); the trash and the refused page draw 6 px buttons (`walk-trash-1440-light.jpg`, `walk-refused-1440-dark.jpg`).
+
+Loads during the drives: 43 to 137.
+
+## DR-V1.5 Findings and owners
+
+| # | Finding | Severity | Owner |
+| --- | --- | ---: | --- |
+| 1 | Kevin's second item is not on `design/round`: new decks and Blank are `gt-ink-paper`, the Theme panel lists no theme, Reset reads "Reset to General Translation" and draws GT's mark, frame and counter on a Blank deck, `theme.list` is unknown and `deck.create` needs `from` | 3 | D3 (the port of `d3/stage`), the integrator (the seam) |
+| 2 | The head names Google Slides where production does not: `/home`'s description ("It has Google Slides' menus and shortcuts."), the footer ("Google Slides is a product of Google LLC."), README line 8, `apps/cli/src/cli.ts`, `menus/model.ts` omit reasons, the generated contracts; main's guard reads 2,294 mentions in 61 files on this tree. Shipped without the seam, the head brings them back | 3 | the integrator (the seam, with the guard green after it); D4 for DR-D4#1b |
+| 3 | The landing's DESIGN.md 8.7 to 8.12 are not done: the kits band has no themes, the agents band keeps three "Recorded" cells, the two people band has no Share dialog, the Present band has no captured presenter view (the one product picture Kevin asked for) and keeps its nine title rows, the export band has no Download dialog, the patterns band has no stills. The page's own script has 146 B of room under 120,000 B gzip | 2 | D4; the script line is Kevin's |
+| 4 | General Translation's cuts remain: `cv11` and `ss01` on `/decks` (6 elements), the trash's h1 and the book view (30 at 390), and the PowerPoint file names "GT Inter Display" | 2 | D5 (DR-D5#1b, #3b), D1 (DR-D1#4) |
+| 5 | The Theme panel's 12 fields and selects draw radius 0 beside 6 px buttons | 2 | D3 (DR-D3#4 rewrites the panel) |
+| 6 | The editor's Sign in dialog scrolls by 35 px and draws a thumb over an empty band in both appearances; main's `104c3a17` sizes it to its content | 2 | D5 (DR-D5#2b), the integrator (the seam) |
+| 7 | The search card's key chips read 4.27:1 in light (`#686d76` on `#e9e9e9`), under the 4.5:1 floor; `chrome.colors.pairs-at-floor` does not read the search card | 2 | D2 |
+| 8 | `chrome.split.one-box` and `chrome.cluster.gaps-heights` read red on the walk until DR-D2#2b restates them, and both are rows of the unparkable `chrome` feature, so they hold the ship | 2 | D2 |
+| 9 | The hero frame's title "Onboarding plan" loses its descenders: `.ts-hero-frame-name` sets a 14 px line height on 14 px text with `overflow: hidden` | 1 | D4 |
+| 10 | In the dark appearance the hero frame draws Slideshow as a dark framed button; the editor draws it as a light plate | 1 | D4 |
+| 11 | Proportional figures where numbers align: Version history's row time and the Keyboard shortcuts dialog's key chips (`.pt-kbd` loses `--pt-numerals` to a later `font` shorthand) | 1 | D2 |
+| 12 | Buttons in sentence case: "Copy link", "Reset to theme", "Add to theme", "Use the default logo", "Recent presentations", "Empty trash" | 1 | D3 (DR-D3#4), D5 (request 7) |
+| 13 | Tailor shares the Comments glyph in Tools and on the landing's features list | 1 | D2 (`menus/model.ts` after the seam), D4 |
+| 14 | The two people band's screens are square framed where a figure frame takes 8 px | 1 | D4 (DR-D4#6) |
+
+## DR-V1.6 Pictures
+
+`docs/gslides-parity/design-round/verify1/`: the layering (`layers-*`, 6), the pickers, dialogs and pages (`pickers-*`, `signin-editor-light`, `walk-*`, 10), themes (`themes-*`, 2), production beside the head (`editor-file-menu-*`, `landing-*-prod-*`, 5), the landing (`landing-*-local-*` and the two frame title zooms, 18), scrollbars (`scroll-*`, 3), the object drives and the presenter view (`drag2-*`, `objects-*`, `export-presenter-light`, 5). Each is a viewport or an element's box, recompressed to 820 px wide at most; 49 files, 668,960 B; the round folder's tracked pictures then hold 24,682,056 B of 25,000,000.
+
+## DR-V1.7 Not driven
+
+- Firefox's drawn bar: Playwright's Firefox computes `scrollbar-width: none` on every element of any page (a blank page reads the same), so the `* { scrollbar-width: thin }` rule cannot be seen there.
+- Layering in WebKit (the cookie note in DR-V1.4).
+- `home.budget.frame`, `home.budget.main-thread` and the timing clause of `home.motion.pause`: not read at a load of 38.6.
+- The hover preview and the show's Keyboard shortcuts card were not opened by these drives; `chrome.layers.top-layer` and `present.presenter.surfaces` passed in run 1.
+- The plate menus of a signed in person (account, roster) by hand; `chrome.radius.floating` passed in run 1.
+
+## DR-V1.8 For Kevin
+
+1. The landing's own script reads 119,854 B gzip against its 120,000 B line. The captured presenter view, the Download dialog and the 17 pattern stills need about 2,000 B more: either the line rises to 124,000 B or a band's chunk is cut first.
+2. The order the ship needs: the seam (origin/main into `design/round`, which removes the Google Slides words and brings the guard and the Sign in height), then D3's port with DR-D3#1 shipped before DR-D3#2, then DR-D2#2b, DR-D4#1b, #5, #6 and DR-D5#1b to #3b, then DR-D1#4 and DR-D1#5.

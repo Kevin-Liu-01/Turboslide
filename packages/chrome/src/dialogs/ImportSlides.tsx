@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import { sectionOfSlide } from '@turboslide/schema/deck';
 
+import type { Theme } from '@turboslide/viewer/theme';
+
 import { Dialog, DialogTabs } from '../Dialog';
+import { appearanceOf } from '../editor-shell';
 import type { DeckHeadRow, SourceDeckSlides } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
 import { cn } from '../lib/cn';
@@ -328,7 +331,13 @@ export function ImportSlidesDialog() {
               <span className="pt-lb">{DIALOGS.importSlides.none}</span>
             </button>
           </div>
-          <SlideTiles key={source.id} source={source} picked={picked} onToggle={toggle} />
+          <SlideTiles
+            key={source.id}
+            source={source}
+            appearance={appearanceOf(input.document.deck)}
+            picked={picked}
+            onToggle={toggle}
+          />
           <p className="ts-dialog-hint" data-control="dialog.importSlides.theme">
             {DIALOGS.importSlides.theme}
           </p>
@@ -353,15 +362,28 @@ export function rowMeta(deck: Pick<DeckHeadRow, 'slides' | 'example'>): string {
 }
 
 /**
+ * The picture of one tile: the source's slide at 320 px in the appearance of the deck imported
+ * into, the appearance its copy is drawn in, so the tile shows what the sentence under the grid
+ * promises (design round pass 2 finding 1: every tile asked for `theme=dark`, and a light deck's
+ * slides showed black).
+ */
+export function importTileSrc(sourceId: string, slideId: string, appearance: Theme): string {
+  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(sourceId)}&theme=${appearance}&w=320`;
+}
+
+/**
  * Step 2's grid of the source's slides. One picture gate and one watch per source, so Back and
  * another deck start from nothing and every turn of the last source goes back when it unmounts.
  */
 function SlideTiles({
   source,
+  appearance,
   picked,
   onToggle,
 }: {
   source: SourceDeckSlides;
+  /** the appearance of the deck imported into, which the copies take */
+  appearance: Theme;
   picked: ReadonlySet<string>;
   onToggle: (id: string, event?: ReactMouseEvent<HTMLButtonElement>) => void;
 }) {
@@ -395,7 +417,7 @@ function SlideTiles({
         >
           <span className="ts-dialog-slide-frame">
             <TilePicture
-              src={`/api/render/${encodeURIComponent(slide.id)}?deck=${encodeURIComponent(source.id)}&theme=dark&w=320`}
+              src={importTileSrc(source.id, slide.id, appearance)}
               gate={gate}
               watch={watch}
             />

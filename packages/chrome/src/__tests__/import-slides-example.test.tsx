@@ -4,7 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
 
-import { IMPORT_NONE_OF_YOURS, ImportSlidesDialog, rowMeta } from '../dialogs/ImportSlides';
+import {
+  IMPORT_NONE_OF_YOURS,
+  ImportSlidesDialog,
+  importTileSrc,
+  rowMeta,
+} from '../dialogs/ImportSlides';
 import { OpenDialog } from '../dialogs/Open';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
 import type { DeckHeadRow, EditorShellInput, SourceDeckSlides } from '../editor-shell';
@@ -294,5 +299,74 @@ describe('the tile pictures of a long list (item 2, P2-1)', () => {
     expect(asked()).toEqual([87, 90, 91, 92, 93, 94]);
     move(89, 90, true, true);
     expect(asked()).toContain(89);
+  });
+});
+
+describe('the tiles draw in the appearance of the deck imported into (design round pass 2 finding 1)', () => {
+  const SOURCE: SourceDeckSlides = {
+    id: 'simple-source',
+    title: 'Simple source',
+    slides: [{ id: 'title', title: 'Click to add title', n: 1 }],
+  };
+  const SOURCE_ROW = row('simple-source', 'Simple source', '2026-10-06T12:00:00Z');
+
+  /** the worked document with its appearance written, as the Theme panel's Appearance writes it */
+  function targetIn(appearance: 'light' | 'dark') {
+    return { ...doc, deck: { ...doc.deck, defaults: { ...doc.deck.defaults, appearance } } };
+  }
+
+  async function firstTile(appearance: 'light' | 'dark') {
+    const listing = Promise.resolve([SOURCE_ROW]);
+    const read = Promise.resolve(SOURCE);
+    const { container } = render(
+      <Host
+        input={input({
+          document: targetIn(appearance),
+          recentDecks: () => [],
+          listDecks: () => listing,
+          readDeck: () => read,
+        })}
+      >
+        <ImportSlidesDialog />
+      </Host>,
+    );
+    await act(async () => {
+      await listing;
+    });
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector('[data-control="dialog.importSlides.deck.simple-source"]')!,
+      );
+      await read;
+    });
+    const img = container.querySelector<HTMLImageElement>(
+      '[data-control="dialog.importSlides.slide.title"] img',
+    )!;
+    const view = FakeObserver.all.find((o) => o.options.rootMargin === undefined)!;
+    const near = FakeObserver.all.find((o) => o.options.rootMargin !== undefined)!;
+    act(() => {
+      view.fire([[img, true]]);
+      near.fire([[img, true]]);
+    });
+    return { img, container };
+  }
+
+  it('a light deck asks for light tiles, under the sentence that the copies take its theme', async () => {
+    const { img, container } = await firstTile('light');
+    expect(img.getAttribute('src')).toBe('/api/render/title?deck=simple-source&theme=light&w=320');
+    expect(container.querySelector('[data-control="dialog.importSlides.theme"]')?.textContent).toBe(
+      'The copies take this presentation’s theme',
+    );
+  });
+
+  it('a dark deck asks for dark tiles', async () => {
+    const { img } = await firstTile('dark');
+    expect(img.getAttribute('src')).toBe('/api/render/title?deck=simple-source&theme=dark&w=320');
+  });
+
+  it('importTileSrc encodes the ids and names the appearance it is given', () => {
+    expect(importTileSrc('a b', 's/1', 'light')).toBe(
+      '/api/render/s%2F1?deck=a%20b&theme=light&w=320',
+    );
   });
 });

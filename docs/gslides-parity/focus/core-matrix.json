@@ -4305,7 +4305,7 @@
     {
       "id": "chrome.split.one-box",
       "feature": "chrome",
-      "interaction": "Read from a 1x screenshot: the Slideshow control is one 32 px box with 8 px outer corners, halves with no corners, no notch 1 and 2 px under the top edge at the seam, and one 1 px divider at mid height that reads on the ink ground at 1.7:1 or more, in both appearances (splitSeamFromShot)",
+      "interaction": "Read from a 1x screenshot: the Slideshow control is one 32 px box with 6 px outer corners (--pt-radius; restated by the design round, docs/DESIGN.md 3.1 and 11, from 8 px), halves with no corners, no notch 1 and 2 px under the top edge at the seam, and one 1 px divider at mid height that reads on the ink ground at 1.7:1 or more, in both appearances (splitSeamFromShot)",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-chrome row 9; audit-surface row 3",
@@ -4419,7 +4419,7 @@
     {
       "id": "chrome.cluster.gaps-heights",
       "feature": "chrome",
-      "interaction": "Gaps 8 px, inset 12 px, Share, the split button and the comments glyph 32 px tall, the split button has the 8 px corner and Share is square (the inset read from Sign In when it is drawn after Share), no empty +N box is drawn while nobody else is present, no inbox slot is drawn while the plate is parked; note: if question 1 picks 6 px the corner read is --pt-radius on both; the side panel toggle (title.sidePanel) sits in the cluster at 32 px once the bottom bar leaves (PRODUCT.md section 2 rank 25), and is not required while the bottom bar is still drawn",
+      "interaction": "Gaps 8 px, inset 12 px (read from Sign In when it is drawn after Share), Share, the split button and the comments glyph 32 px tall, Share and the split button share the one 6 px corner (--pt-radius; restated by the design round, docs/DESIGN.md 3.1 and 11, from the 8 px split button beside a square Share), no empty +N box is drawn while nobody else is present, no inbox slot is drawn while the plate is parked; the side panel toggle (title.sidePanel) sits in the cluster at 32 px once the bottom bar leaves (PRODUCT.md section 2 rank 25), and is not required while the bottom bar is still drawn",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "audit-chrome rows 22, 25, 30",

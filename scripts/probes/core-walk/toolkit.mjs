@@ -2892,10 +2892,12 @@ export const seamsFromShot = (img, pts, scale = 1) => {
 
 /**
  * The split button's own seam, read from a 1x screenshot: the divider between the halves at mid
- * height, and the pixels 1, 2 and 4 px under the top edge, where an 8 px corner on each half
- * leaves a notch of paper (audit-chrome row 9). `presentRect` and `arrowRect` are the halves'
- * viewport boxes, `cropOrigin` the screenshot's origin in viewport px (`{ x: 0, y: 0 }` for the
- * whole page).
+ * height, and the pixels 1, 2 and 4 px under the top edge, where a corner on each half would
+ * leave a notch of paper (audit-chrome row 9). The reads span 6 px either side of the seam and
+ * never reach the box's outer corners, which the caller reads from the computed style (6 px from
+ * the design round, docs/DESIGN.md 3.1 and 11; 8 px before it). `presentRect` and `arrowRect` are
+ * the halves' viewport boxes, `cropOrigin` the screenshot's origin in viewport px
+ * (`{ x: 0, y: 0 }` for the whole page).
  */
 export const splitSeamFromShot = (img, presentRect, arrowRect, cropOrigin = { x: 0, y: 0 }) => {
   const x0 = Math.round(presentRect.x + presentRect.w - 6 - cropOrigin.x);

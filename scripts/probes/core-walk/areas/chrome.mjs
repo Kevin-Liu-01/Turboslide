@@ -150,7 +150,7 @@ export async function run(t) {
   await t.step(
     'chrome.split.one-box',
     'read the Slideshow control from a 1x screenshot, both appearances',
-    'one 32 px box with 8 px outer corners, halves with no corners, no notch under the top edge, one 1 px divider at mid height reading on the ink ground at 1.7:1 or more',
+    'one 32 px box with 6 px outer corners (--pt-radius, the design round, docs/DESIGN.md 3.1 and 11), halves with no corners, no notch under the top edge, one 1 px divider at mid height reading on the ink ground at 1.7:1 or more',
     async () => {
       await t.clearAll();
       const result = await eachAppearance(async (appearance) => {
@@ -181,7 +181,8 @@ export async function run(t) {
           notch: notch1 + notch2,
           ok:
             Math.round(c.split.h) === 32 &&
-            /^8px/.test(c.split.radius) &&
+            /* 6 px, the one corner of the chrome's controls (DESIGN.md 3.1; 8 px until DR-D2#2) */
+            /^6px/.test(c.split.radius) &&
             c.open.radius === '0px' &&
             c.arrow.radius === '0px' &&
             divider !== null &&
@@ -685,7 +686,7 @@ export async function run(t) {
   await t.step(
     'chrome.cluster.gaps-heights',
     "read the right cluster's controls",
-    'gaps 8 px, inset 12 px from the last control (Sign In when drawn, else Share), Share, the split button and the comments glyph 32 px tall, the split button with the 8 px corner and Share square, no empty +N box, no inbox slot while the plate is parked',
+    'gaps 8 px, inset 12 px from the last control (Sign In when drawn, else Share), Share, the split button and the comments glyph 32 px tall, Share and the split button at the one 6 px corner (--pt-radius, docs/DESIGN.md 3.1 and 11), no empty +N box, no inbox slot while the plate is parked',
     async () => {
       await t.clearAll();
       if (await t.visible('panel.comments.close')) await t.clickControl('panel.comments.close');
@@ -721,14 +722,16 @@ export async function run(t) {
         heights.share === 32 &&
         heights.split === 32 &&
         heights.comments === 32 &&
-        /* Share square and the split button at 8 px (question 9's default, Round 1 push B3b#10) */
-        /^0px/.test(c.share.radius) &&
-        /^8px/.test(c.split.radius) &&
+        /* Share and the split button at the one 6 px corner (the design round, DR-D2#2: Kevin's
+           screenshot 1 drew a rounded Slideshow beside a square Share; Round 1 push B3b#10 had
+           Share square and the split button at 8 px) */
+        /^6px/.test(c.share.radius) &&
+        /^6px/.test(c.split.radius) &&
         moreHidden &&
         (!inboxParked || inboxCollapsed);
       return {
         ok,
-        observed: `gaps ${gaps.join(', ')}; inset ${inset} from ${last === c.share ? 'Share' : 'Sign In'}; heights ${JSON.stringify(heights)}; corners share ${c.share.radius}, split ${c.split.radius}; +N box ${c.more ? `${Math.round(c.more.w)}x${Math.round(c.more.h)} opacity ${c.more.opacity}` : 'absent'} hidden ${moreHidden}; inbox plate ${c.inbox ? 'drawn' : 'parked'}, slot ${c.inboxSlot ? `${Math.round(c.inboxSlot.w)} px` : 'absent'}${c.share.radius.startsWith('6px') && c.split.radius.startsWith('6px') ? '; note: both corners read 6 px (--pt-radius), the alternative of question 1' : ''}`,
+        observed: `gaps ${gaps.join(', ')}; inset ${inset} from ${last === c.share ? 'Share' : 'Sign In'}; heights ${JSON.stringify(heights)}; corners share ${c.share.radius}, split ${c.split.radius}; +N box ${c.more ? `${Math.round(c.more.w)}x${Math.round(c.more.h)} opacity ${c.more.opacity}` : 'absent'} hidden ${moreHidden}; inbox plate ${c.inbox ? 'drawn' : 'parked'}, slot ${c.inboxSlot ? `${Math.round(c.inboxSlot.w)} px` : 'absent'}`,
       };
     },
   );

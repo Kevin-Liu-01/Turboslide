@@ -15,7 +15,6 @@ import { TABLE_SIZES } from '@turboslide/schema/blocks/table';
 import { isLineKind } from '@turboslide/schema/shapes';
 import type { Dash } from '@turboslide/schema/shapes';
 import type { Color } from '@turboslide/schema/color';
-import { deckAppearance } from '@turboslide/schema/deck';
 import { headingBlockSchema } from '@turboslide/schema/blocks';
 import { BULLET_PRESETS, NUMBER_PRESETS, marksOfRange, plainLength } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
@@ -1354,8 +1353,6 @@ export function ToolbarTail() {
             label={plate.plate.control.label}
             current={colorTarget(plate.plate.op)?.current}
             tones={colorTarget(plate.plate.op)?.tones === true}
-            kit={input.document.deck.brand}
-            appearance={deckAppearance(input.document.deck)}
             control={plate.plate.control.control}
             onPick={(
               (op: TailOp) => (value: Color | 'none') =>

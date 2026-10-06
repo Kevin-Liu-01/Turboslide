@@ -31,6 +31,7 @@ import {
   themeFactsOf,
   themeIdOf,
 } from '@turboslide/schema/brand';
+import { SEMANTIC_PALETTE, isColorToken, isHexColor } from '@turboslide/schema/color';
 import type { Deck } from '@turboslide/schema/deck';
 import type { FontId } from '@turboslide/schema/fonts';
 import { DEFAULT_FONT_ID } from '@turboslide/schema/fonts';
@@ -44,6 +45,7 @@ import {
   DISPLAY_FEATURES_OFF,
   DISPLAY_FEATURES_TOKEN,
   TOKEN_NAMES,
+  composite,
   parseHex,
   parseRgba,
   toHex,
@@ -394,6 +396,24 @@ export function deckTokens(deck: ThemeDeck, appearance: ThemeName): Record<Token
       );
   }
   return tokens;
+}
+
+/** The twelve tokens `deckTokens` answers: the colours a deck's slides draw in one appearance. */
+export type DeckTokens = Readonly<Record<TokenName, string>>;
+
+/**
+ * The hex a Color paints with a deck's tokens (docs/DESIGN.md 7.5): a token reads its value, and
+ * a translucent token is composited on the deck's paper, the ground under it on the slide; GT
+ * blue reads the deck's `--blue`, as `colorCss` writes it; the three other semantic hues and a
+ * hex read as written; null for any other string. The colour pickers paint every swatch with it,
+ * so a swatch shows the colour the slide draws in the deck's theme under its kit.
+ */
+export function colorHexOf(tokens: DeckTokens, color: string): string | null {
+  if (isHexColor(color)) return color.toLowerCase();
+  if (!isColorToken(color)) return null;
+  if (color === 'green' || color === 'amber' || color === 'red') return SEMANTIC_PALETTE[color];
+  const value = tokens[color];
+  return value.startsWith('#') ? value.toLowerCase() : composite(value, tokens.paper);
 }
 
 /** The role whose token a hex sets, for the panel's tooltips and the plate's kit row: the token id. */

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
+import { colorHexOf, deckTokens } from '@turboslide/render/theme-css';
+import type { DeckTokens } from '@turboslide/render/theme-css';
 import {
   COLOR_LABELS,
   COLOR_TOKENS,
@@ -9,10 +11,12 @@ import {
   isHexColor,
 } from '@turboslide/schema/color';
 import type { ColorToken } from '@turboslide/schema/color';
+import { deckAppearance } from '@turboslide/schema/deck';
 import { contrastRatio } from '@turboslide/theme/contrast';
+import { TOKENS } from '@turboslide/theme/tokens';
 import { useTheme } from '@turboslide/viewer/theme';
-import type { Theme } from '@turboslide/viewer/theme';
 
+import { EditorShellContext } from '../editor-shell-context';
 import { tipProps } from '../Tooltip';
 import { LintMark } from './lint-mark';
 import type { ControlProps } from './props';
@@ -24,37 +28,30 @@ import './palette.css';
  * A Color as the palette control (annotation control `color`, schema/color.ts; Kevin, 2026-09-11:
  * "selecting colors"): a swatch row of the eight theme tokens and the four semantic hues, each
  * named in its tooltip, then a custom hex field with a contrast readout against the slide's
- * ground and the color/off-palette lint mark while a hex is set (severity 2, rules.ts). The
- * theme tokens paint with the chrome's own --pt- tokens, so the swatches follow the theme as the
- * sheet does; the contrast is computed from the composited token values of tokens.ts for the
- * current theme. A visually hidden select carries the label and data-control, so the window API's
- * set(label, 'plate') lands in the same onChange as a click.
+ * ground and the color/off-palette lint mark while a hex is set (severity 2, rules.ts). Every
+ * swatch here, in the colour plate, the Background dialog, Format options and the chart's series
+ * paints the colour the deck's slides draw: the deck's theme under its brand kit in the deck's
+ * appearance (`useDeckTokens`, render/theme-css.ts `deckTokens` and `colorHexOf`; docs/DESIGN.md
+ * 7.5), and the contrast reads against that theme's paper. A visually hidden select carries the
+ * label and data-control, so the window API's set(label, 'plate') lands in the same onChange as
+ * a click.
  */
 type Rgb = [number, number, number];
 
-/** The eight theme tokens on paper, per theme, as tokens.ts TOKENS composited (SPEC 5.1 parity). */
-const TOKEN_RGB: Readonly<Record<Theme, Readonly<Record<string, Rgb>>>> = {
-  light: {
-    paper: [255, 255, 255],
-    ink: [7, 7, 7],
-    'ink-2': [58, 61, 68],
-    titanium: [138, 143, 152],
-    hair: [210, 210, 210],
-    'hair-soft': [233, 233, 233],
-    plate: [246, 246, 246],
-    edge: [101, 101, 101],
-  },
-  dark: {
-    paper: [7, 7, 7],
-    ink: [242, 242, 240],
-    'ink-2': [185, 188, 195],
-    titanium: [138, 143, 152],
-    hair: [59, 59, 58],
-    'hair-soft': [31, 31, 30],
-    plate: [19, 19, 19],
-    edge: [136, 136, 135],
-  },
-};
+/**
+ * The tokens the deck's slides draw in the deck's appearance, its theme under its brand kit
+ * (docs/DESIGN.md 7.5), read from the editor's document; outside the editor (a lone control in a
+ * test), General Translation's sheet in the chrome's appearance.
+ */
+export function useDeckTokens(): DeckTokens {
+  const shell = useContext(EditorShellContext);
+  const chrome = useTheme();
+  const deck = shell?.input.document.deck;
+  return useMemo(
+    () => (deck === undefined ? TOKENS[chrome] : deckTokens(deck, deckAppearance(deck))),
+    [deck, chrome],
+  );
+}
 
 const OFF_PALETTE = {
   rule: 'color/off-palette',
@@ -85,26 +82,21 @@ export function normalizeHex(input: string): string | null {
   return `#${rgb.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
 }
 
-/** The RGB of a color value in a theme: a token from the tables, a hex as written. */
-export function colorRgb(value: string, theme: Theme): Rgb | null {
-  if (isColorToken(value)) {
-    if (value === 'green' || value === 'amber' || value === 'red' || value === 'blue')
-      return hexToRgb(SEMANTIC_PALETTE[value]);
-    return TOKEN_RGB[theme][value] ?? null;
-  }
-  return hexToRgb(value);
+/** The RGB of a color value on the deck's slides: a token from the deck's tokens, a hex as written. */
+export function colorRgb(value: string, tokens: DeckTokens): Rgb | null {
+  const hex = colorHexOf(tokens, value);
+  return hex === null ? hexToRgb(value) : hexToRgb(hex);
 }
 
 /**
- * The WCAG 2.2 contrast ratio of a color against the slide ground (paper) in a theme, to one
+ * The WCAG 2.2 contrast ratio of a color against the slide's ground (the deck's paper), to one
  * decimal, through the one contrast module of the design round (packages/theme/src/contrast.ts;
  * docs/DESIGN.md 5.4); null when unknown.
  */
-export function contrastAgainstPaper(value: string, theme: Theme): number | null {
-  const rgb = colorRgb(value, theme);
-  if (rgb === null) return null;
-  const paper = TOKEN_RGB[theme].paper;
-  if (paper === undefined) return null;
+export function contrastAgainstPaper(value: string, tokens: DeckTokens): number | null {
+  const rgb = colorRgb(value, tokens);
+  const paper = hexToRgb(tokens.paper);
+  if (rgb === null || paper === null) return null;
   const ratio = contrastRatio(
     { r: rgb[0], g: rgb[1], b: rgb[2], a: 1 },
     { r: paper[0], g: paper[1], b: paper[2], a: 1 },
@@ -112,21 +104,19 @@ export function contrastAgainstPaper(value: string, theme: Theme): number | null
   return Math.round(ratio * 10) / 10;
 }
 
-/** The CSS paint of a swatch: the chrome's token for a theme token, the hex for the rest. */
-export function swatchPaint(value: string): string {
-  if (isColorToken(value)) {
-    if (value === 'green' || value === 'amber' || value === 'red' || value === 'blue')
-      return SEMANTIC_PALETTE[value];
-    return `var(--pt-${value})`;
-  }
-  return value;
+/**
+ * The CSS paint of a swatch: the hex the colour paints on the deck's slides (`colorHexOf` over
+ * the deck's tokens), so a swatch is the slide's colour and never the chrome's.
+ */
+export function swatchPaint(value: string, tokens: DeckTokens): string {
+  return colorHexOf(tokens, value) ?? value;
 }
 
 const TOKEN_DOC: Readonly<Record<ColorToken, string>> = {
   ink: 'The text color; follows the theme.',
   paper: 'The sheet ground; follows the theme.',
   'ink-2': 'Body ink, a step lighter than ink.',
-  titanium: 'The muted gray of captions and credits, the same in both themes.',
+  titanium: 'The hint colour of slide numbers, prompts and credits.',
   hair: 'The 1 px rule.',
   'hair-soft': 'The soft rule between rows.',
   plate: 'The faint ground of a plate.',
@@ -134,13 +124,13 @@ const TOKEN_DOC: Readonly<Record<ColorToken, string>> = {
   green: `The semantic ok hue ${SEMANTIC_PALETTE.green}.`,
   amber: `The semantic warn hue ${SEMANTIC_PALETTE.amber}.`,
   red: `The semantic no hue ${SEMANTIC_PALETTE.red}.`,
-  blue: `GT blue ${SEMANTIC_PALETTE.blue}, the semantic info hue; the brand kit's Primary.`,
+  blue: 'The brand kit’s Primary: links and the key colour of charts and highlights.',
   accent:
     'The brand kit’s Accent, the second color of charts and highlights; Primary until a kit sets it.',
 };
 
 export function PaletteControl({ spec, onChange, disabled }: ControlProps) {
-  const theme = useTheme();
+  const deckColors = useDeckTokens();
   const current = typeof spec.value === 'string' ? spec.value : '';
   const [draft, setDraft] = useState<string | null>(null);
   const [hexError, setHexError] = useState(false);
@@ -150,7 +140,7 @@ export function PaletteControl({ spec, onChange, disabled }: ControlProps) {
   /* the schema takes a hex when the palette is not the whole set it accepts */
   const customAllowed = spec.schema.safeParse('#0a0a0a').success;
   const isHex = current !== '' && isHexColor(current);
-  const contrast = current === '' ? null : contrastAgainstPaper(current, theme);
+  const contrast = current === '' ? null : contrastAgainstPaper(current, deckColors);
 
   const pick = (value: string | undefined) => {
     if (disabled) return;
@@ -257,7 +247,7 @@ export function PaletteControl({ spec, onChange, disabled }: ControlProps) {
               key={token}
               type="button"
               className={current === token ? 'ts-ctl-swatch is-on' : 'ts-ctl-swatch'}
-              style={{ ['--swatch' as string]: swatchPaint(token) }}
+              style={{ ['--swatch' as string]: swatchPaint(token, deckColors) }}
               aria-pressed={current === token}
               aria-label={`${spec.label} ${token}`}
               data-control={`${spec.control}.${token}`}
@@ -309,7 +299,7 @@ export function PaletteControl({ spec, onChange, disabled }: ControlProps) {
               data-low={contrast < 3 ? '' : undefined}
               {...tipProps({
                 name: 'Contrast',
-                doc: `${contrast}:1 against the ${theme} paper; text wants 4.5:1, large type 3:1.`,
+                doc: `${contrast}:1 against the slide’s background; text wants 4.5:1, large type 3:1.`,
               })}
             >
               {contrast}:1

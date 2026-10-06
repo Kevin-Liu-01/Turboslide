@@ -10,7 +10,7 @@ import { Icon } from '../icons';
 import type { IconName } from '../icons';
 import { cn } from '../lib/cn';
 import { tipProps } from '../Tooltip';
-import { swatchPaint } from './palette';
+import { swatchPaint, useDeckTokens } from './palette';
 
 import './fields.css';
 
@@ -418,6 +418,7 @@ export function ColorRow({
   doc?: string;
 }) {
   const [hex, setHex] = useState('');
+  const deckColors = useDeckTokens();
   const hexTip = tipProps({
     name: `${label} custom`,
     doc: 'Six hex digits; Enter applies',
@@ -453,7 +454,7 @@ export function ColorRow({
             aria-checked={current === token}
             aria-label={COLOR_LABELS[token]}
             className={cn('ts-fo-swatch', current === token && 'is-on')}
-            style={{ background: swatchPaint(token) }}
+            style={{ background: swatchPaint(token, deckColors) }}
             data-control={`${control}.${token}`}
             disabled={disabled}
             onClick={() => onPick(token)}

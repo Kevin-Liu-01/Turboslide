@@ -8,6 +8,8 @@ import {
   ditherPresetOf,
 } from '@turboslide/schema/blocks/dither';
 import type { PictureDither } from '@turboslide/schema/blocks/dither';
+import { colorHexOf } from '@turboslide/render/theme-css';
+import type { DeckTokens } from '@turboslide/render/theme-css';
 import { brandWriteMutation } from '@turboslide/schema/brand';
 import type { HexColor } from '@turboslide/schema/color';
 import {
@@ -36,7 +38,7 @@ import { BACKGROUND_PICTURE_POS, insertBlockPlan, factsOf } from '../editor-shel
 import { useEditorShell } from '../editor-shell-context';
 import { isParked } from '../parked-controls';
 import type { FormatSectionId } from '../inspector/format-sections';
-import { swatchPaint } from '../inspector/palette';
+import { swatchPaint, useDeckTokens } from '../inspector/palette';
 import { cn } from '../lib/cn';
 import { DIALOGS, DITHER, SHADER_GALLERY } from '../menus/strings';
 import { tipProps } from '../Tooltip';
@@ -147,6 +149,9 @@ export function BackgroundDialog() {
   const slide = input.document.slides[input.slideId];
   const current = slide?.background?.color;
   const themeDefault = input.document.deck.defaults?.background?.color;
+  /* the colours the deck's slides draw, its theme under its kit (docs/DESIGN.md 7.5): the
+     swatches paint them and Add to Theme writes them */
+  const deckColors = useDeckTokens();
   const [color, setColor] = useState<Color | undefined>(current);
   const [hex, setHex] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -280,8 +285,9 @@ export function BackgroundDialog() {
   /**
    * Add to theme (docs/archive/rounds/PRODUCT.md 4.1; audit-brand 17): the brand kit's Background role for the
    * deck's appearance, one commit, so every slide follows and Version history lists "Brand kit:
-   * Background"; a theme token becomes its hex for the kit. Without the editor's commit the older
-   * deck default (`deck.setBackground`) is written.
+   * Background"; a theme token becomes the hex it paints on the deck's slides (its theme under its
+   * kit), so Paper on a Mint deck writes Mint's paper. Without the editor's commit the older deck
+   * default (`deck.setBackground`) is written.
    */
   const addToTheme = () => {
     if (color === undefined) {
@@ -292,7 +298,7 @@ export function BackgroundDialog() {
     const hex: HexColor | null = isHexColor(color)
       ? color
       : isColorToken(color)
-        ? tokenHex(color, appearance)
+        ? tokenHex(color, deckColors)
         : null;
     if (input.commit !== undefined && hex !== null) {
       input
@@ -568,7 +574,7 @@ export function BackgroundDialog() {
               aria-label={COLOR_LABELS[token]}
               className={cn('ts-color-swatch', color === token && 'is-on')}
               data-control={`dialog.background.color.${token}`}
-              style={{ background: swatchPaint(token) }}
+              style={{ background: swatchPaint(token, deckColors) }}
               onClick={() => setColor(token)}
               {...swatchTip(COLOR_LABELS[token])}
             />
@@ -848,28 +854,20 @@ export function BackgroundDialog() {
   );
 }
 
-/** A theme token's hex in an appearance, for the kit's Background role; null for a token with no solid value. */
-function tokenHex(token: Color, appearance: 'light' | 'dark'): HexColor | null {
-  const css = colorCss(token);
-  if (isHexColor(css)) return css;
-  const base: Readonly<Record<string, string>> =
-    appearance === 'dark'
-      ? {
-          paper: '#070707',
-          ink: '#f2f2f0',
-          'ink-2': '#b9bcc3',
-          titanium: '#8a8f98',
-          blue: '#2f5ce0',
-          accent: '#2f5ce0',
-        }
-      : {
-          paper: '#ffffff',
-          ink: '#070707',
-          'ink-2': '#3a3d44',
-          titanium: '#8a8f98',
-          blue: '#2f5ce0',
-          accent: '#2f5ce0',
-        };
-  const value = base[token];
-  return value !== undefined && isHexColor(value) ? value : null;
+/**
+ * A colour's hex for the kit's Background role: the hex it paints on the deck's slides, the
+ * deck's theme under its kit in the deck's appearance (docs/DESIGN.md 7.5); null for a token with
+ * no solid value (the lines and grounds that are alphas of the ink).
+ */
+export function tokenHex(color: Color, tokens: DeckTokens): HexColor | null {
+  if (
+    isColorToken(color) &&
+    color !== 'green' &&
+    color !== 'amber' &&
+    color !== 'red' &&
+    !tokens[color].startsWith('#')
+  )
+    return null;
+  const hex = colorHexOf(tokens, color);
+  return hex !== null && isHexColor(hex) ? hex : null;
 }

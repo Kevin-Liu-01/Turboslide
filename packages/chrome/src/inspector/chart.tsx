@@ -48,7 +48,7 @@ import { Seg } from '../Seg';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
 import { usePlate, usePointOrElement } from '../usePlate';
-import { swatchPaint } from './palette';
+import { swatchPaint, useDeckTokens } from './palette';
 
 import './chart.css';
 
@@ -144,6 +144,7 @@ export function ChartSection({
 }: ChartSectionProps) {
   const words = PANELS.chart;
   const control = 'formatOptions.chart';
+  const deckColors = useDeckTokens();
   const rows = block.categories.length;
   const columns = block.series.length;
   /* Add series and Add category refused with their reason (docs/archive/rounds/OBJECTS.md 4.2 item 1: a pie
@@ -549,7 +550,7 @@ export function ChartSection({
                     <button
                       type="button"
                       className="ts-chartgrid-swatch"
-                      style={{ background: swatchPaint(seriesSwatch(series, index)) }}
+                      style={{ background: swatchPaint(seriesSwatch(series, index), deckColors) }}
                       aria-label={`${series.name} color`}
                       aria-expanded={swatchesFor === index}
                       data-control={`${control}.series.${index}.color`}
@@ -715,7 +716,7 @@ export function ChartSection({
                 aria-checked={current === token}
                 aria-label={token}
                 className={cn('ts-chart-swatch', current === token && 'is-current')}
-                style={{ background: swatchPaint(token) }}
+                style={{ background: swatchPaint(token, deckColors) }}
                 data-control={`${control}.swatches.${token}`}
                 onClick={() => {
                   runEdit({ kind: 'seriesColor', index: swatchesFor, color: token as Color });

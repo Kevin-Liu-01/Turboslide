@@ -6,7 +6,7 @@
 import type { BrandKit, DefaultKit, StoredThemeId } from '@turboslide/schema/brand';
 import { THEME_IDS } from '@turboslide/schema/brand';
 import { THEME_RECORDS, themeRecord } from '@turboslide/theme/themes';
-import { TOKENS, TOKEN_NAMES } from '@turboslide/theme/tokens';
+import { TOKENS, TOKEN_NAMES, composite } from '@turboslide/theme/tokens';
 import { defaultKitOf, DEFAULT_APPEARANCE } from '@turboslide/schema/brand';
 import type { Deck, TitleSlide } from '@turboslide/schema/deck';
 import { parseCss } from '@turboslide/theme/css';
@@ -28,7 +28,7 @@ import { fontVariablesRule } from './fonts.ts';
 import { fontFamilyStack } from '@turboslide/fonts/summary';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { DISPLAY } from '@turboslide/theme/tokens';
-import { THEME_SLIDE_ATTRIBUTE, deckTokens, themeScope } from './theme-css.ts';
+import { THEME_SLIDE_ATTRIBUTE, colorHexOf, deckTokens, themeScope } from './theme-css.ts';
 
 const LIGHT = `${THEME_CSS_SCOPE}:not([data-theme='dark'])`;
 const DARK = `${THEME_CSS_SCOPE}[data-theme='dark']`;
@@ -569,5 +569,28 @@ describe('the theme library', () => {
     expect(kit.hair).toBe('rgba(11, 61, 145, 0.18)');
     expect(kit.paper).toBe(themeRecord('swiss').tokens.light.paper);
     expect(THEME_RECORDS).toHaveLength(9);
+  });
+
+  /* the colour pickers' paint (the design round's verifier, pass 3, finding 2): a swatch is the
+     colour the slide draws in the deck's theme under its kit, never General Translation's */
+  it('answers the hex a colour paints with the deck’s tokens', () => {
+    const mint = deckTokens(deck(undefined, 'mint'), 'light');
+    expect(colorHexOf(mint, 'paper')).toBe('#e8f3ee');
+    expect(colorHexOf(mint, 'ink')).toBe('#0d271d');
+    expect(colorHexOf(mint, 'blue')).toBe('#11734f');
+    expect(colorHexOf(mint, 'accent')).toBe('#11734f');
+    /* an alpha of the ink over the theme's paper: rgba(13, 39, 29, 0.18) on #e8f3ee */
+    expect(colorHexOf(mint, 'hair')).toBe(composite(mint.hair, '#e8f3ee'));
+    expect(colorHexOf(mint, 'hair')).not.toBe(colorHexOf(deckTokens(deck(), 'light'), 'hair'));
+    expect(colorHexOf(mint, 'green')).toBe('#12a37a');
+    expect(colorHexOf(mint, '#AA3366')).toBe('#aa3366');
+    expect(colorHexOf(mint, 'not-a-colour')).toBeNull();
+    const kit = deckTokens(deck({ colors: { light: { primary: '#aa3366' } } }, 'mint'), 'light');
+    expect(colorHexOf(kit, 'blue')).toBe('#aa3366');
+    expect(colorHexOf(kit, 'accent')).toBe('#aa3366');
+    expect(colorHexOf(kit, 'paper')).toBe('#e8f3ee');
+    const gt = deckTokens(deck(), 'dark');
+    expect(colorHexOf(gt, 'paper')).toBe(TOKENS.dark.paper);
+    expect(colorHexOf(gt, 'hair')).toBe('#3b3b3a');
   });
 });

@@ -16,6 +16,7 @@ import {
   menuPath,
   newDeck,
   openGtBrandCopy,
+  selectBlock,
   settled,
   slideOrder,
   teardownAll,
@@ -920,7 +921,176 @@ export function brandThemes(): string[] {
     expect(drawn.marks).toBeGreaterThan(0);
   });
 
+  /* DESIGN.md 7.5 (the design round's verifier, pass 3, finding 2): on a Mint deck the colour
+     plate and the Background dialog paint each swatch with the colour the slide draws, in both
+     appearances, and Paper then Add to Theme writes Mint's paper, so the slides keep their ground */
+  row('themes.pickers.follow-theme', async ({ browser }) => {
+    test.setTimeout(300_000);
+    const { page, scratch } = await personAt(browser);
+    await newDeck(page, scratch, 'Picker colours deck');
+    let s = await settled(page);
+    await invoke(page, 'deck.set', { path: '/theme', value: 'mint', baseRevision: s.revision });
+    await settled(page);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of ['light', 'dark'] as const) {
+      const mint = themeRecord('mint').tokens[appearance];
+      s = await settled(page);
+      await invoke(page, 'deck.set', {
+        path: '/defaults/appearance',
+        value: appearance,
+        baseRevision: s.revision,
+      });
+      await settled(page);
+      await expect
+        .poll(() => stageToken(page, '--paper'), { timeout: 10_000 })
+        .toBe(mint.paper.toLowerCase());
+      const check = (ok: boolean, what: string) => {
+        if (!ok) failures.push(`${appearance}: ${what}`);
+      };
+      /* the text colour plate over the title, the slide's first block */
+      const block = await page.evaluate(
+        () =>
+          document
+            .querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-block]')
+            ?.getAttribute('data-block') ?? '',
+      );
+      await selectBlock(page, block);
+      await page.locator('[data-control="toolbar.textColor"]').first().click();
+      await page.locator('.ts-color-plate').first().waitFor({ timeout: 10_000 });
+      const plate = await pickerPaint(page, 'toolbar.textColor');
+      readings.push(
+        `${appearance} plate: ${plate.swatches.map((w) => `${w.id} ${w.paint}/${w.want}`).join(', ')}; slide ground ${plate.ground}`,
+      );
+      check(plate.swatches.length === 16, `${plate.swatches.length} plate swatches read`);
+      for (const w of plate.swatches)
+        check(near(w.paint, w.want), `plate ${w.id} paints ${w.paint}, the slide ${w.want}`);
+      check(near(plate.ground, mint.paper), `the slide ground ${plate.ground}`);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(250);
+      /* the Background dialog, then Paper and Add to Theme */
+      await menuPath(page, 'slide', 'slide.changeBackground');
+      await page.locator('[data-control="dialog.background"]').first().waitFor({ timeout: 10_000 });
+      const dialog = await pickerPaint(page, 'dialog.background.color');
+      readings.push(
+        `${appearance} Background dialog: ${dialog.swatches.map((w) => `${w.id} ${w.paint}/${w.want}`).join(', ')}`,
+      );
+      check(dialog.swatches.length === 10, `${dialog.swatches.length} dialog swatches read`);
+      for (const w of dialog.swatches)
+        check(near(w.paint, w.want), `dialog ${w.id} paints ${w.paint}, the slide ${w.want}`);
+      const before = (await settled(page)).revision;
+      await page.locator('[data-control="dialog.background.color.paper"]').first().click();
+      await page.locator('[data-control="dialog.background.addToTheme"]').first().click();
+      await waitRevision(page, before + 1, 30_000);
+      await settled(page);
+      const kit = (
+        await invoke<{ brand?: { colors?: Record<string, { background?: string }> } }>(
+          page,
+          'deck.info',
+        )
+      ).brand?.colors?.[appearance]?.background;
+      if (
+        await page
+          .locator('[data-control="dialog.background"]')
+          .first()
+          .isVisible()
+          .catch(() => false)
+      )
+        await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      const after = await pickerPaint(page, 'none');
+      readings.push(
+        `${appearance} Paper then Add to Theme: kit background ${kit ?? 'none'}, slide ground ${after.ground}`,
+      );
+      check(kit === mint.paper.toLowerCase(), `the kit's background ${kit ?? 'none'}`);
+      check(near(after.ground, mint.paper), `the slide ground after Add to Theme ${after.ground}`);
+      s = await settled(page);
+      await invoke(page, 'brand.reset', { baseRevision: s.revision });
+      await settled(page);
+    }
+    test.info().annotations.push({ type: 'themes', description: readings.join('; ') });
+    expect(failures, readings.join('\n')).toEqual([]);
+  });
+
   return declared;
+}
+
+/** Two `#rrggbb` colours within one step per channel (a composite rounds each channel once). */
+function near(a: string, b: string): boolean {
+  const ch = (hex: string) =>
+    [1, 3, 5].map((i) => parseInt(hex.toLowerCase().slice(i, i + 2), 16) || 0);
+  if (!/^#[0-9a-f]{6}$/i.test(a) || !/^#[0-9a-f]{6}$/i.test(b)) return false;
+  const x = ch(a);
+  const y = ch(b);
+  return x.every((v, i) => Math.abs(v - (y[i] ?? -9)) <= 1);
+}
+
+/**
+ * The swatches of a picker whose controls start with `prefix`, each with the hex it paints and
+ * the hex the slide draws for its token (the stage sheet's computed token, an alpha of the ink
+ * composited on the sheet's paper), and the slide's ground on the stage.
+ */
+function pickerPaint(
+  page: Page,
+  prefix: string,
+): Promise<{ swatches: { id: string; paint: string; want: string }[]; ground: string }> {
+  return page.evaluate((head) => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .ts-stage')?.closest('.ts-sheet');
+    const parse = (v: string): [number, number, number, number] | null => {
+      const s = v.trim().toLowerCase();
+      const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/.exec(s)?.[1];
+      if (hex !== undefined) {
+        const full = hex.length === 3 ? [...hex].map((c) => c + c).join('') : hex;
+        return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)).concat(1) as [
+          number,
+          number,
+          number,
+          number,
+        ];
+      }
+      const m = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,/]+([\d.]+))?\s*\)$/.exec(s);
+      return m === null
+        ? null
+        : [Number(m[1]), Number(m[2]), Number(m[3]), m[4] === undefined ? 1 : Number(m[4])];
+    };
+    const hexOf = (c: [number, number, number, number] | null, ground: number[]) => {
+      if (c === null) return '';
+      const mixed = [0, 1, 2].map((i) => {
+        const g = ground[i] ?? 255;
+        return Math.round(g + ((c[i] ?? 0) - g) * c[3]);
+      });
+      return `#${mixed.map((n) => n.toString(16).padStart(2, '0')).join('')}`;
+    };
+    const token = (name: string) =>
+      sheet ? getComputedStyle(sheet).getPropertyValue(`--${name}`) : '';
+    const paper = parse(token('paper')) ?? [255, 255, 255, 1];
+    const drawn = (name: string) => hexOf(parse(token(name)), paper);
+    const ROLE: Record<string, string> = {
+      text: 'ink',
+      background: 'paper',
+      caption: 'ink-2',
+      hint: 'titanium',
+      primary: 'blue',
+      accent: 'accent',
+    };
+    const SEMANTIC = new Set(['green', 'amber', 'red', 'none', 'hex']);
+    const swatches = [...document.querySelectorAll<HTMLElement>(`[data-control^="${head}."]`)]
+      .map((el) => {
+        const id = (el.dataset.control ?? '').slice(head.length + 1);
+        const name = id.startsWith('kit.') ? (ROLE[id.slice(4)] ?? '') : id;
+        return { el, id, name };
+      })
+      .filter(({ el, name }) => el.tagName === 'BUTTON' && name !== '' && !SEMANTIC.has(name))
+      .map(({ el, id, name }) => ({
+        id,
+        paint: hexOf(parse(getComputedStyle(el).backgroundColor), paper),
+        want: drawn(name),
+      }));
+    const slide = document.querySelector('.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving)');
+    const own = slide ? parse(getComputedStyle(slide).backgroundColor) : null;
+    const ground = own !== null && own[3] > 0 ? hexOf(own, paper) : hexOf(paper, paper);
+    return { swatches, ground };
+  }, prefix);
 }
 
 /** A deck from the Blank card on /decks (a link to /new), its title typed so the first write saves it. */

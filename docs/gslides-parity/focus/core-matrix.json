@@ -11434,6 +11434,15 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D3#4"
     },
     {
+      "id": "themes.pickers.follow-theme",
+      "feature": "decks",
+      "interaction": "On a Mint deck in each appearance, every swatch of the text colour plate's brand kit row and token row and of the Background dialog paints the colour the slide draws for its role or token (the theme's value where the kit is silent), and Paper then Add to Theme writes Mint's paper into the kit, so the slides keep their ground",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "VERIFICATION.md design round pass 3, finding 2 (the plate read #ffffff, #070707 and #2f5ce0 beside a #e8f3ee slide; Paper then Add to Theme turned every Mint slide white)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#4; finishing round 2, driven by apps/studio/e2e/core/brand-themes.ts"
+    },
+    {
       "id": "accounts.sign-in-fits",
       "feature": "share",
       "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",

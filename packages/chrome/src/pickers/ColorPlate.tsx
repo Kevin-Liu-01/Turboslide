@@ -1,14 +1,14 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
-import type { BrandKit, KitColor } from '@turboslide/schema/brand';
+import type { DeckTokens } from '@turboslide/render/theme-css';
+import type { KitColor } from '@turboslide/schema/brand';
 import { KIT_COLORS, KIT_COLOR_TOKENS, KIT_COLOR_WORDS } from '@turboslide/schema/brand';
 import { COLOR_LABELS, COLOR_TOKENS, isHexColor } from '@turboslide/schema/color';
 import type { Color, ColorToken } from '@turboslide/schema/color';
-import type { Appearance } from '@turboslide/schema/deck';
-import { TOKENS } from '@turboslide/theme/tokens';
+import type { TokenName } from '@turboslide/theme/tokens';
 
-import { swatchPaint } from '../inspector/palette';
+import { swatchPaint, useDeckTokens } from '../inspector/palette';
 import { cn } from '../lib/cn';
 import { useMountEffect } from '../lib/useMountEffect';
 import { PICKERS } from '../menus/strings';
@@ -23,11 +23,12 @@ import './Pickers.css';
  * each writing its token so the colour follows the kit; the role's name and hex in the tooltip,
  * the token id on its second line for agents), the theme tokens second, then None and the Custom
  * hex field, anchored under a toolbar button or a menu row (Format > Borders & lines > Border
- * color). `tones` is the older heading and paragraph form: Ink and Muted only, kept for a block
- * whose schema takes a tone and no colour. The plate is a dialog that closes on Esc (focus
- * returns to the anchor) and on a click outside; the caller writes the field the plate stands
- * for. The container is `<control>.menu` (audit-brand 11: it shared `.plate` with the plate
- * token's swatch).
+ * color). Every swatch paints the colour the deck's slides draw, the deck's theme under its kit
+ * in the deck's appearance (`useDeckTokens`; docs/DESIGN.md 7.5). `tones` is the older heading
+ * and paragraph form: Ink and Muted only, kept for a block whose schema takes a tone and no
+ * colour. The plate is a dialog that closes on Esc (focus returns to the anchor) and on a click
+ * outside; the caller writes the field the plate stands for. The container is `<control>.menu`
+ * (audit-brand 11: it shared `.plate` with the plate token's swatch).
  */
 export type ColorPlateProps = {
   anchor: HTMLElement;
@@ -36,25 +37,17 @@ export type ColorPlateProps = {
   current: Color | 'none' | undefined;
   /** Ink and Muted only (a heading or paragraph tone) */
   tones?: boolean;
-  /** the deck's brand kit and appearance, for the kit row's hexes; the theme's values when absent */
-  kit?: BrandKit | undefined;
-  appearance?: Appearance;
   onPick: (value: Color | 'none') => void;
   onClose: () => void;
   control: string;
 };
 
-/** The hex a kit role shows in an appearance: the kit's own value, else the theme token's. */
-export function kitRoleHex(
-  kit: BrandKit | undefined,
-  appearance: Appearance,
-  role: KitColor,
-): string {
-  const own = kit?.colors?.[appearance]?.[role];
-  if (own !== undefined) return own;
-  const token = KIT_COLOR_TOKENS[role] as keyof (typeof TOKENS)['light'];
-  const value = TOKENS[appearance][token];
-  return typeof value === 'string' ? value : '';
+/**
+ * The hex a kit role shows: the value of its token on the deck's slides, the kit's own value when
+ * it names one and the deck's theme's value when it does not (docs/DESIGN.md 7.5).
+ */
+export function kitRoleHex(tokens: DeckTokens, role: KitColor): string {
+  return tokens[KIT_COLOR_TOKENS[role] as TokenName];
 }
 
 export function ColorPlate({
@@ -62,8 +55,6 @@ export function ColorPlate({
   label,
   current,
   tones = false,
-  kit,
-  appearance = 'light',
   onPick,
   onClose,
   control,
@@ -75,6 +66,7 @@ export function ColorPlate({
   const start = useStart(anchor);
   usePlate(root, { layer: 'popover', anchor, side: 'below', gap: 2 });
   const words = PICKERS.colors;
+  const deckColors = useDeckTokens();
 
   /* the first swatch takes the focus once, on mount (the focus round, cycle 3 fix; b3 C3-R1,
      VERIFICATION C3-F7). It sat in the listener effect below, which re-runs whenever the caller
@@ -107,13 +99,14 @@ export function ColorPlate({
   };
 
   /* the kit's six colours first: each swatch writes its token (KIT_COLOR_TOKENS), so a heading
-     painted Primary follows the kit when the kit changes; the swatch paints the kit's hex */
+     painted Primary follows the kit when the kit changes; the swatch paints the role's hex on the
+     deck's slides */
   const kitOptions: ReadonlyArray<{ value: ColorToken; role: KitColor; hex: string }> = tones
     ? []
     : KIT_COLORS.map((role) => ({
         value: KIT_COLOR_TOKENS[role] as ColorToken,
         role,
-        hex: kitRoleHex(kit, appearance, role),
+        hex: kitRoleHex(deckColors, role),
       }));
   const options: ReadonlyArray<{ value: Color | 'none'; label: string }> = tones
     ? [
@@ -171,7 +164,11 @@ export function ColorPlate({
             aria-label={option.label}
             aria-pressed={shown === option.value}
             data-control={`${control}.${option.value}`}
-            style={option.value === 'none' ? undefined : { background: swatchPaint(option.value) }}
+            style={
+              option.value === 'none'
+                ? undefined
+                : { background: swatchPaint(option.value, deckColors) }
+            }
             onClick={() => onPick(option.value)}
             {...tipProps({ name: option.label })}
           />

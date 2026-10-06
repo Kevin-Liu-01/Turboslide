@@ -25,7 +25,7 @@ import {
 import type { TableCommandId, TablePlan, TableSelection } from '../table-tools';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
-import { swatchPaint } from './palette';
+import { swatchPaint, useDeckTokens } from './palette';
 
 import './table.css';
 
@@ -122,6 +122,7 @@ function Swatches({
   disabled: boolean;
   onPick: (color: Color | null) => void;
 }) {
+  const deckColors = useDeckTokens();
   return (
     <div className="ts-table-swatches" role="radiogroup" aria-label={label} data-control={control}>
       <button
@@ -143,7 +144,7 @@ function Swatches({
           aria-checked={current === token}
           aria-label={`${label} ${token}`}
           className={cn('ts-table-swatch', current === token && 'is-current')}
-          style={{ background: swatchPaint(token) }}
+          style={{ background: swatchPaint(token, deckColors) }}
           data-control={`${control}.${token}`}
           disabled={disabled}
           onClick={() => onPick(token)}

@@ -73,3 +73,25 @@ it serves.
    lane owns them): the link popover over a slide (`.ts-link-pop`) is a small floating plate at
    radius 0 on `--pt-hair`; under the ladder (DESIGN.md 3.1, 3.4) it takes `.pt-float` (6 px,
    `--pt-edge`, the ring) and keeps the stage's local order.
+
+## D3 (finishing round 2)
+
+1. **D2, notice** (pass 3 finding 2, `fc8dd7e3`): the finding named D2's picker files for this
+   fix, and they changed: `ColorPlate` takes no `kit` or `appearance` prop and paints from
+   `useDeckTokens()` (`inspector/palette.tsx`, the editor's document through EditorShellContext);
+   `swatchPaint(value, tokens)` takes the deck's tokens; `contrastAgainstPaper` and `colorRgb`
+   take them in place of the chrome's appearance; `dialogs/Background.tsx` exports
+   `tokenHex(color, tokens)`. A new swatch anywhere in the chrome paints through
+   `swatchPaint(value, useDeckTokens())`, so it shows the colour the slide draws.
+2. **D2 or the integrator, `packages/chrome/src/logo-model.ts`** (DESIGN.md 7.5): `kitTextColour`
+   and `kitBackgroundColour` fall back to General Translation's `TOKENS`, so on a Mint deck the
+   Logo dialog's two tile grounds (`dialogs/Logo.tsx` 315 to 318) and the server's tint of a one
+   colour logo (`apps/studio/src/server/logos.ts` 937) read `#070707` and `#ffffff` where the slide
+   draws `#0d271d` on `#e8f3ee`. `deckTokens(deck, appearance)` (`render/theme-css.ts`) answers
+   the theme's value under the kit.
+3. **The integrator, `packages/schema/src/color.ts`**: `COLOR_LABELS.blue` reads "GT blue", the
+   name of the token row's swatch in the colour plate, the Background dialog and Format options,
+   which now paints each theme's Primary (Mint's `#11734f`). "Primary", the kit role the token
+   names, would read right on every theme; `packages/chrome/src/__tests__/inspector-sections.test.tsx`
+   208 pins the label.
+

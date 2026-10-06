@@ -386,11 +386,12 @@ export const EXPORT = {
   /* LANDING.md 2.12 wrote "what each kind of PowerPoint file holds"; "kind" is a default view word
      of the menu model (packages/chrome/src/menus/strings.ts), so the lead says it without it */
   lead: 'File > Download writes a PDF or a PowerPoint file. Drag the seam to see what each PowerPoint file holds.',
-  /** the Download dialog's own mode names (packages/chrome/src/ExportMenu.tsx 85) */
-  labels: { perfect: 'Perfect', editable: 'Editable text' },
+  /** the Download dialog's own mode names (packages/chrome/src/menus/strings.ts DIALOGS.download,
+      equal by copy.test.ts; the page does not import the editor's strings) */
+  labels: { perfect: 'Pictures', editable: 'Editable text' },
   /**
    * Under the seam since the design round (docs/DESIGN.md 8.11): the editor's Download dialog as
-   * captured, the Perfect file's reading beside it with the done glyph, and the two links; the
+   * captured, the Pictures file's reading beside it with the done glyph, and the two links; the
    * dialog's own words say what each file holds
    */
   rows: {
@@ -406,15 +407,15 @@ export const EXPORT = {
     pdf: { link: 'Download the PDF' },
   },
   slider: (percent: number): string =>
-    `The Perfect file's picture fills ${Math.round(percent)} percent of the slide`,
+    `The Pictures file fills ${Math.round(percent)} percent of the slide and the Editable text file the rest`,
   sliderLabel: 'Where the two files meet',
-  perfectAlt: 'Slide 7 as the one picture the Perfect file holds',
+  perfectAlt: 'Slide 7 as the one picture the Pictures file holds',
   caption:
-    "Hold the pointer on the slide to compare the browser's render with the Perfect file's picture.",
+    "Hold the pointer on the slide to compare the browser's render with the slide in the Pictures file.",
   /** the loupe (V3#17) */
   loupe: {
     browser: 'Browser',
-    perfect: 'Perfect file',
+    perfect: 'Pictures file',
     target: 'Pixel comparison of slide 7',
     /** generated: the readout under the two windows */
     readout: (differ: number, total: number, x: number, y: number): string =>

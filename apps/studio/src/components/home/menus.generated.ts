@@ -38,7 +38,7 @@ export type MiniMenu = {
 
 /** sha256 of packages/chrome/src/menus/model.ts and keys.ts the menus were read from */
 export const MINI_SOURCES = {
-  model: 'b70ce707a72bd647bd6ca9d84aa3b25efa1d2c5dfc3da9f8cad28d9793535540',
+  model: 'f67ac33a597ed55cb8b58eff77dd91a6b0783ae48c0b447b6804176432137252',
   keys: 'eb1d94f9a045bb345a280f9df1636aa72388fbd2acc24363c73d4951000ea669',
 } as const;
 
@@ -95,7 +95,7 @@ const PACKED: readonly (readonly [string, string, readonly Packed[]])[] = [
         '',
         '',
         [
-          ['', 'Microsoft PowerPoint (.pptx)', 0, '', '', 'Perfect by default, or Editable text.'],
+          ['', 'Microsoft PowerPoint (.pptx)', 0, '', '', 'Pictures by default, or Editable text.'],
           ['file.download.pdf', 'PDF Document (.pdf)', 2, '', '', 'One slide per page.'],
           ['', 'JPEG image (.jpg, current slide)'],
           ['', 'PNG image (.png, current slide)'],

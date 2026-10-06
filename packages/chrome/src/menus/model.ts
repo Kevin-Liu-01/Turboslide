@@ -2,7 +2,7 @@ import type { Capability, Role } from '@turboslide/schema/access';
 import type { ActionId } from '@turboslide/schema/actions';
 
 import type { IconName } from '../icons';
-import { FORMAT as FORMAT_WORDS, STUB_PREFIX, stubClause } from './strings.ts';
+import { DIALOGS, FORMAT as FORMAT_WORDS, STUB_PREFIX, stubClause } from './strings.ts';
 
 /**
  * The menu model of the Google Slides parity round (SPEC 2.13): every row of SPEC sections 2.0 to
@@ -1035,7 +1035,8 @@ const FILE: Menu = {
       'Download',
       [
         now('file.download.pptx', 'Microsoft PowerPoint (.pptx)', dialog('Download'), {
-          doc: 'Perfect by default, or Editable text',
+          /* the dialog's own mode names (strings.ts DIALOGS.download) */
+          doc: `${DIALOGS.download.perfect} by default, or ${DIALOGS.download.editable}`,
         }),
         later('file.download.odp', 'ODP Document (.odp)', DOWNLOAD_FORMATS),
         now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {

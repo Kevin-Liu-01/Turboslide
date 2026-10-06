@@ -418,7 +418,10 @@ export const DIALOGS = {
   download: {
     title: 'Download',
     /* the two PowerPoint modes in a seller's words (docs/archive/rounds/POLISH.md 2.6 item 73; audit-chrome item
-       36: "Perfect" named nothing a seller can picture): every slide as a picture, or editable text */
+       36: "Perfect" named nothing a seller can picture): every slide as a picture, or editable text.
+       The one name of each mode wherever a person reads it: the tiles, the dialog's file type row
+       (dialogs/Download.tsx DOWNLOAD_TYPES), File > Download's row (model.ts) and the landing's
+       export band (apps/studio/src/components/home/copy.ts EXPORT.labels, pinned by copy.test.ts) */
     perfect: 'Pictures',
     editable: 'Editable text',
     includeNotes: 'Include speaker notes',

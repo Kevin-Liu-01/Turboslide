@@ -110,7 +110,7 @@ export const FIGURES_ROUND = {
     caption: 'Presenter view opens in a second window with the timer, the next slide and your notes.',
   },
   download: {
-    alt: "The editor's Download dialog with Microsoft PowerPoint (.pptx) in Perfect or Editable text, and PDF Document (.pdf)",
+    alt: "The editor's Download dialog with Microsoft PowerPoint (.pptx) in Pictures or Editable text, and PDF Document (.pdf)",
   },
   patterns: { label: 'The patterns of Insert > Animated pattern' },
 } as const;

@@ -16,6 +16,8 @@ import {
   TABLE_SENTENCE,
 } from '../dialogs/Download';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
+import { itemById } from '../menus/model';
+import { DIALOGS } from '../menus/strings';
 import type { EditorShellInput } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
@@ -205,6 +207,28 @@ describe('the one click downloads (product round)', () => {
     expect(estimateSentence(85, 'pptx', 2.5)).toBe(
       'Preparing your PowerPoint file, about 4 minutes for 85 slides',
     );
+  });
+});
+
+// One name per PowerPoint mode (DR-int fix, the design round's verifier pass 2 finding 1): the
+// options dialog's file type row read "Perfect or Editable text" above the tiles Pictures and
+// Editable text; the row, the tiles and File > Download's row now take the tiles' words.
+describe('the PowerPoint modes by one name', () => {
+  it("names them by the tiles' words in the file type row, the tiles and the menu row", () => {
+    const { view, control } = mount('pptx', { options: true });
+    const both = `${DIALOGS.download.perfect} or ${DIALOGS.download.editable}`;
+    expect(control('dialog.download.type.pptx')?.textContent).toContain(both);
+    expect(control('dialog.download.mode.flatten')?.querySelector('b')?.textContent).toBe(
+      DIALOGS.download.perfect,
+    );
+    expect(control('dialog.download.mode.native')?.querySelector('b')?.textContent).toBe(
+      DIALOGS.download.editable,
+    );
+    expect(view.container.textContent).not.toMatch(/\bPerfect\b/);
+    expect(itemById('file.download.pptx').doc).toBe(
+      `${DIALOGS.download.perfect} by default, or ${DIALOGS.download.editable}`,
+    );
+    expect(DIALOGS.download.perfect).toBe('Pictures');
   });
 });
 

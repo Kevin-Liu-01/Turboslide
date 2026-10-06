@@ -10,12 +10,12 @@
     {
       "appearance": "light",
       "file": "download-light.webp",
-      "sha256": "390f6585b5c606e5353615dcce8e7826dcb3a23644d44c7543d62ddbaedc896d"
+      "sha256": "02bacb47956446067277a8ccd1997fa6f535600ea1e53a640a5d67e96e39b420"
     },
     {
       "appearance": "dark",
       "file": "download-dark.webp",
-      "sha256": "29f8caf24de72202174d03fe92605b471daf754072ca3a9c95d610bd4106c87a"
+      "sha256": "d906493ac5aa3b4b12f0590e123279d6fca69aaae123009ab8eb08cb6381fda8"
     }
   ]
 }

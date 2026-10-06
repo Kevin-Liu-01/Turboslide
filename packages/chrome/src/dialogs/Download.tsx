@@ -231,7 +231,7 @@ export const DOWNLOAD_TYPES: ReadonlyArray<{ format: 'pptx' | 'pdf'; label: stri
     {
       format: 'pptx',
       label: 'Microsoft PowerPoint (.pptx)',
-      doc: 'Perfect or Editable text, with speaker notes if you want them',
+      doc: `${DIALOGS.download.perfect} or ${DIALOGS.download.editable}, with speaker notes if you want them`,
     },
     { format: 'pdf', label: 'PDF Document (.pdf)', doc: 'One slide per page' },
   ];

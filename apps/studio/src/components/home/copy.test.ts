@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { forbiddenWordsIn } from '@turboslide/chrome/menus/strings';
+import { DIALOGS, forbiddenWordsIn } from '@turboslide/chrome/menus/strings';
 import { SITE } from '@turboslide/theme/brand/site';
 import {
   CONTRAST_PAIR_PATTERN,
@@ -44,6 +44,7 @@ import {
   CANVAS_ROUND,
   CLOSE_ROUND,
   DESIGN_COPY,
+  FIGURES_ROUND,
   HERO_ROUND,
   KITS_ROUND,
   MENUS_ROUND,
@@ -626,5 +627,41 @@ describe('the shape of the page (docs/LANDING.md section 2)', () => {
       `block set lighthouse#h /pos {"x":612,"y":388,"w":520,"h":96}`,
       'block rotate lighthouse#h --to 15',
     ]);
+  });
+});
+
+/* the PowerPoint modes by one name (DR-int fix, the design round's verifier pass 2 finding 1): the
+   export band names the Download dialog's two modes by the dialog's own words, and no word of the
+   band, its loupe, its slider or the captured dialog's alt names the mode the retired "Perfect" */
+describe('the export band and the Download dialog', () => {
+  it('name the two PowerPoint modes by the same words', () => {
+    expect(EXPORT.labels.perfect).toBe(DIALOGS.download.perfect);
+    expect(EXPORT.labels.editable).toBe(DIALOGS.download.editable);
+    expect(EXPORT.loupe.perfect).toBe(`${DIALOGS.download.perfect} file`);
+    expect(FIGURES_ROUND.download.alt).toContain(
+      `${DIALOGS.download.perfect} or ${DIALOGS.download.editable}`,
+    );
+    const words = [
+      EXPORT.lead,
+      EXPORT.labels.perfect,
+      EXPORT.labels.editable,
+      EXPORT.slider(0),
+      EXPORT.slider(50),
+      EXPORT.sliderLabel,
+      EXPORT.perfectAlt,
+      EXPORT.caption,
+      EXPORT.loupe.browser,
+      EXPORT.loupe.perfect,
+      EXPORT.loupe.target,
+      EXPORT.rows.perfect.sentence(
+        { width: HOME_EXPORT_FACTS.perfectWidth, height: HOME_EXPORT_FACTS.perfectHeight },
+        HOME_FACTS,
+      ),
+      FIGURES_ROUND.download.alt,
+    ];
+    for (const text of words) expect(text, text).not.toMatch(/\bPerfect\b/);
+    expect(EXPORT.slider(50)).toBe(
+      'The Pictures file fills 50 percent of the slide and the Editable text file the rest',
+    );
   });
 });

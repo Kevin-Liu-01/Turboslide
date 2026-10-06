@@ -1010,7 +1010,8 @@ export function startMenus(ctx: LiveContext): void {
         openShow?: (c: HTMLElement, s: SlideKey) => unknown;
       };
       if (typeof show.openShow === 'function') {
-        show.openShow(stage, shown);
+        // the show's own chunk loads on the way (show-mount.ts)
+        await show.openShow(stage, shown);
         return;
       }
     } catch {

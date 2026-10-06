@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 4: the canvas band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .fig { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+  .slidebox { position: relative; }
+  .fmt .ph { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--pt-hair); font-weight: 500; font-size: 14px; }
+  .fmt .sec { padding: 12px 14px 14px; border-bottom: 1px solid var(--pt-hair-soft); }
+  .fmt .sec:last-child { border-bottom: 0; }
+  .fmt .st { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; font-weight: 500; }
+  .fmt .st .ic { color: var(--pt-ink-2); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fl { display: grid; gap: 4px; font-size: 11.5px; color: var(--pt-titanium); }
+  .fl .field { font-variant-numeric: tabular-nums; justify-content: space-between; }
+  .fl .field u { text-decoration: none; color: var(--pt-titanium); }
+  .cmd { font-size: 12.5px; line-height: 1.5; color: var(--pt-ink-2); overflow-wrap: anywhere; }
+  .lay { display: flex; align-items: center; justify-content: space-between; }
+  .guide { position: absolute; top: 6.22%; bottom: 6.22%; width: 0; border-left: 1px dashed var(--pt-select); }
+  @media (width < 720px) {
+    .fig { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Drag, resize and rotate anything</h2>
+    <p class="lead">The first drag turns a layout into a canvas. Undo puts the layout back.</p>
+  </div>
+  <div class="fig">
+    <div class="slidebox">
+      <div data-slide="lighthouse" id="lh"></div>
+      <div class="guide" style="left:56%"></div>
+      <div class="sel" style="left:56%;top:52.5%;width:36%;height:33.5%;transform:rotate(-3deg);transform-origin:50% 50%">
+        <i style="left:-4px;top:-4px"></i><i style="left:calc(50% - 4px);top:-4px"></i><i style="right:-4px;top:-4px"></i>
+        <i style="left:-4px;top:calc(50% - 4px)"></i><i style="right:-4px;top:calc(50% - 4px)"></i>
+        <i style="left:-4px;bottom:-4px"></i><i style="left:calc(50% - 4px);bottom:-4px"></i><i style="right:-4px;bottom:-4px"></i>
+        <span style="position:absolute;left:50%;top:-26px;height:22px;border-left:1px solid var(--pt-select)"></span>
+        <i style="left:calc(50% - 4px);top:-32px;border-radius:50%"></i>
+        <span class="chipsel" style="top:auto;bottom:-22px">Text box</span>
+      </div>
+    </div>
+    <div class="win fmt">
+      <div class="ph">Format options<span class="ib"><svg class="ic"><use href="#i-x-mark"/></svg></span></div>
+      <div class="sec">
+        <div class="st"><svg class="ic"><use href="#i-arrows-pointing-out"/></svg>Position and size</div>
+        <div class="grid2">
+          <label class="fl">X<span class="field">896<u>px</u></span></label>
+          <label class="fl">Y<span class="field">472<u>px</u></span></label>
+          <label class="fl">Width<span class="field">576<u>px</u></span></label>
+          <label class="fl">Height<span class="field">236<u>px</u></span></label>
+          <label class="fl">Rotation<span class="field focus">−3<u>°</u></span></label>
+          <span style="display:flex;align-items:end;gap:4px"><span class="ib boxed"><svg class="ic"><use href="#i-arrow-uturn-left"/></svg></span><span class="ib boxed"><svg class="ic"><use href="#i-arrow-path"/></svg></span></span>
+        </div>
+      </div>
+      <div class="sec lay"><span class="st" style="margin:0"><svg class="ic"><use href="#i-squares-2x2"/></svg>Layout</span><span class="chip">Canvas</span></div>
+      <div class="sec">
+        <div class="st"><svg class="ic"><use href="#i-command-line"/></svg>Command</div>
+        <div class="cmd">turboslide block rotate lighthouse#plate --to -3</div>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

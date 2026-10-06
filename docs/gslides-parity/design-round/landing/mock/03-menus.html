@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 3: the menus band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .mini { position: relative; }
+  .mini .ed-body { grid-template-columns: 132px minmax(0, 1fr); }
+  .mini .ed-strip { height: 430px; overflow-y: scroll; }
+  .mini .ed-strip .th { grid-template-columns: 14px 1fr; font-size: 11px; }
+  .mini .ed-stage { padding: 28px 40px; }
+  .mini .ed-stage > .sheet { width: 100%; box-shadow: 0 0 0 1px var(--pt-hair-soft); }
+  .plate { position: absolute; left: 196px; top: 74px; z-index: 5; }
+  .status { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 36px; padding: 0 14px; border-top: 1px solid var(--pt-hair); font-size: 12.5px; color: var(--pt-ink-2); }
+  .status .r { color: var(--pt-titanium); font-variant-numeric: tabular-nums; }
+  .key390 { display: none; }
+  @media (width < 720px) {
+    .mini .ed-menu { display: none; }
+    .key390 { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-top: 1px solid var(--pt-hair-soft); font-size: 13px; }
+    .mini .ed-body { grid-template-columns: 1fr; }
+    .mini .ed-strip { display: none; }
+    .mini .ed-stage { padding: 14px; }
+    .mini { display: flex; flex-direction: column; }
+    .mini .ed-title { order: 1; } .key390 { order: 2; } .plate { order: 3; } .mini .ed-body { order: 4; } .status { order: 5; }
+    .plate { position: static; padding: 0 12px 12px; }
+    .plate .menu { width: auto; }
+    .plate .menu .row { height: 40px; }
+    .status .l { display: none; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Google Slides' menus</h2>
+    <p class="lead">The same nine menus in the same order, with the same shortcuts. Every row is drawn as the editor draws it.</p>
+  </div>
+  <div class="win mini">
+    <div class="ed-title" style="white-space:nowrap">
+      <svg style="width:26px;height:18px;fill:var(--pt-ink)"><use href="#ts-mark"/></svg>
+      <span class="name">Onboarding plan</span><span class="meta num">9 slides</span>
+      <span class="sp"></span>
+      <span class="ib"><svg class="ic"><use href="#i-arrow-uturn-left"/></svg></span>
+    </div>
+    <div class="ed-menu"><span>File</span><span>Edit</span><span>View</span><span class="on">Insert</span><span>Format</span><span>Slide</span><span>Arrange</span><span>Tools</span><span>Help</span></div>
+    <div class="key390"><svg class="ic"><use href="#i-bars-3"/></svg>Menus<span style="margin-left:auto;color:var(--pt-titanium)">Insert</span></div>
+    <div class="ed-body" style="border-top:1px solid var(--pt-hair)">
+      <div class="ed-strip pt-scroll">
+        <div class="th"><span>1</span><div data-slide="title" class="thumb"></div></div>
+        <div class="th on"><span>2</span><div data-slide="plan" class="thumb"></div></div>
+        <div class="th"><span>3</span><div data-slide="gets" class="thumb"></div></div>
+        <div class="th"><span>4</span><div data-slide="ships" class="thumb"></div></div>
+        <div class="th"><span>5</span><div data-slide="next" class="thumb"></div></div>
+        <div class="th"><span>6</span><div data-slide="lighthouse" class="thumb"></div></div>
+        <div class="th"><span>7</span><div data-slide="field" class="thumb"></div></div>
+      </div>
+      <div class="ed-stage"><div data-slide="plan"></div></div>
+    </div>
+    <div class="status"><span class="l">Insert <svg class="ic sm" style="vertical-align:-2px;color:var(--pt-titanium)"><use href="#i-chevron-right"/></svg> Text box places a text box at the slide's center.</span><span class="r">Title · x 789 · y 362 · 0°</span></div>
+    <div class="plate">
+      <div class="menu">
+        <div class="row"><svg class="ic"><use href="#i-photo"/></svg><span>Image</span><svg class="ic sm"><use href="#i-chevron-right"/></svg></div>
+        <div class="row"><svg class="ic"><use href="#i-tag"/></svg><span>Logo</span><span></span></div>
+        <div class="row hot"><svg class="ic"><use href="#i-bars-3-bottom-left"/></svg><span>Text box</span><span></span></div>
+        <div class="row"><svg class="ic"><use href="#i-shape-rect"/></svg><span>Shape</span><svg class="ic sm"><use href="#i-chevron-right"/></svg></div>
+        <div class="row"><svg class="ic"><use href="#i-table-cells"/></svg><span>Table</span><svg class="ic sm"><use href="#i-chevron-right"/></svg></div>
+        <div class="row"><svg class="ic"><use href="#i-chart-bar"/></svg><span>Chart</span><svg class="ic sm"><use href="#i-chevron-right"/></svg></div>
+        <div class="row"><svg class="ic"><use href="#i-rectangle-group"/></svg><span>Diagram</span><span></span></div>
+        <div class="row"><svg class="ic"><use href="#i-word-art"/></svg><span>Word art</span><span></span></div>
+        <div class="row"><svg class="ic"><use href="#i-minus"/></svg><span>Line</span><svg class="ic sm"><use href="#i-chevron-right"/></svg></div>
+        <div class="sep"></div>
+        <div class="row off"><svg class="ic"><use href="#i-link"/></svg><span>Link</span><span class="k">⌘K</span></div>
+        <div class="row off"><svg class="ic"><use href="#i-chat-bubble-left-right"/></svg><span>Comment</span><span class="k">⌥⌘M</span></div>
+        <div class="sep"></div>
+        <div class="row"><svg class="ic"><use href="#i-plus"/></svg><span>New slide</span><span class="k">⌃M</span></div>
+        <div class="row"><svg class="ic"><use href="#i-hashtag"/></svg><span>Slide numbers</span><span></span></div>
+        <div class="row"><svg class="ic"><use href="#i-cube"/></svg><span>Animated pattern</span><span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 6: the brand kits band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .fig { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .fig > * { min-width: 0; }
+  .kit .ph { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--pt-hair); font-weight: 500; font-size: 14px; }
+  .kit .gl { padding: 12px 14px 6px; font-size: 12px; color: var(--pt-titanium); }
+  .kit .kr { display: grid; grid-template-columns: 26px minmax(0, 1fr) 16px; align-items: center; gap: 10px; height: 40px; padding: 0 14px; font-size: 13px; }
+  .kit .kr.on { background: var(--pt-plate); }
+  .kit .kr small { display: block; font-size: 11.5px; color: var(--pt-titanium); line-height: 1.2; }
+  .sw { width: 24px; height: 24px; border-radius: var(--r-sm); box-shadow: inset 0 0 0 1px var(--pt-hair); display: grid; place-items: center; }
+  .sw i { width: 12px; height: 2px; }
+  .kit .cr { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: 10px; height: 34px; padding: 0 14px; font-size: 13px; border-top: 1px solid var(--pt-hair-soft); }
+  .kit .cr .s { width: 16px; height: 16px; border-radius: var(--r-sm); box-shadow: inset 0 0 0 1px var(--pt-hair); }
+  .kit .cr .hex { color: var(--pt-ink-2); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .kit .foot { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 8px 0 14px; border-top: 1px solid var(--pt-hair); font-size: 12.5px; color: var(--pt-ink-2); }
+  .deck { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 12px; }
+  .deck .n { margin-bottom: 5px; font-size: 11.5px; color: var(--pt-titanium); font-variant-numeric: tabular-nums; }
+  .globex { --pt-paper: #0a1b38; --pt-ink: #f4f1ea; --pt-ink-2: #c9cbd3; --pt-titanium: #8d97ab; --pt-hair: rgba(244,241,234,0.22); --pt-hair-soft: rgba(244,241,234,0.12); --pt-edge: rgba(244,241,234,0.4); }
+  @media (width < 720px) {
+    .fig { grid-template-columns: 1fr; }
+    .deck { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Brand kits restyle every slide</h2>
+    <p class="lead">Slide › Change theme opens the Brand kit. A kit or a typed color changes all nine slides at once.</p>
+  </div>
+  <div class="fig">
+    <div class="win kit">
+      <div class="ph"><span style="display:flex;gap:8px;align-items:center"><svg class="ic" style="color:var(--pt-ink-2)"><use href="#i-swatch"/></svg>Brand kit</span><span class="ib"><svg class="ic"><use href="#i-x-mark"/></svg></span></div>
+      <div class="gl">Kits</div>
+      <div class="kr"><span class="sw" style="background:#ffffff"><i style="background:#070707"></i></span><span>GT<small>The GT brand deck's colors</small></span><span></span></div>
+      <div class="kr"><span class="sw" style="background:#f3efe6"><i style="background:#1f1b16"></i></span><span>Kestrel<small>An example customer</small></span><span></span></div>
+      <div class="kr on"><span class="sw" style="background:#0a1b38"><i style="background:#f4f1ea"></i></span><span>Globex<small>An example customer</small></span><svg class="ic"><use href="#i-check"/></svg></div>
+      <div class="gl" style="padding-top:14px">Colors</div>
+      <div class="cr"><span class="s" style="background:#0a1b38"></span><span>Background</span><span class="field focus" style="height:26px;width:96px;font-variant-numeric:tabular-nums">#0a1b38</span></div>
+      <div class="cr"><span class="s" style="background:#f4f1ea"></span><span>Text</span><span class="hex">#f4f1ea</span></div>
+      <div class="cr"><span class="s" style="background:#c9cbd3"></span><span>Captions</span><span class="hex">#c9cbd3</span></div>
+      <div class="cr"><span class="s" style="background:#8d97ab"></span><span>Hints</span><span class="hex">#8d97ab</span></div>
+      <div class="cr"><span class="s" style="background:#f4f1ea"></span><span>Primary</span><span class="hex">#f4f1ea</span></div>
+      <div class="cr"><span class="s" style="background:#f4f1ea"></span><span>Accent</span><span class="hex">#f4f1ea</span></div>
+      <div class="foot"><span>Text on background reads <span class="num">15.2</span> to 1</span><span class="btn" style="height:28px;padding:0 10px;font-size:12.5px"><svg class="ic sm"><use href="#i-arrow-uturn-left"/></svg>Undo</span></div>
+    </div>
+    <div class="deck globex">
+      <div><div class="n">1</div><div class="thumb" data-slide="title" data-name="Globex"></div></div>
+      <div><div class="n">2</div><div class="thumb" data-slide="plan" data-name="Globex"></div></div>
+      <div><div class="n">3</div><div class="thumb" data-slide="gets" data-name="Globex"></div></div>
+      <div><div class="n">4</div><div class="thumb" data-slide="ships" data-name="Globex"></div></div>
+      <div><div class="n">5</div><div class="thumb" data-slide="next" data-name="Globex"></div></div>
+      <div><div class="n">6</div><div class="thumb" data-slide="lighthouse"></div></div>
+      <div><div class="n">7</div><div class="thumb" data-slide="field"></div></div>
+      <div><div class="n">8</div><div class="thumb" data-slide="pattern" data-name="Globex"></div></div>
+      <div><div class="n">9</div><div class="thumb" data-slide="close"></div></div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

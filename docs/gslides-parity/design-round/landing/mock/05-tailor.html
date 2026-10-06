@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 5: the Tailor band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .fig { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .fig > * { min-width: 0; }
+  .dlg .fl { display: grid; gap: 6px; margin-bottom: 14px; font-size: 12.5px; color: var(--pt-ink-2); }
+  .count { display: flex; align-items: center; gap: 8px; padding: 10px 0 2px; border-top: 1px solid var(--pt-hair-soft); font-size: 13px; color: var(--pt-ink-2); }
+  .count b { font-weight: 500; color: var(--pt-ink); font-variant-numeric: tabular-nums; }
+  .strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+  .strip .n { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11.5px; color: var(--pt-titanium); font-variant-numeric: tabular-nums; }
+  .strip .n b { font-weight: 500; color: var(--pt-ink-2); }
+  .big { margin-top: 12px; }
+  .big > .sheet { box-shadow: 0 0 0 1px var(--pt-hair); }
+  .snack { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; height: 40px; padding: 0 6px 0 14px; border-radius: var(--r-md); background: var(--pt-ink); color: var(--pt-paper); font-size: 13px; }
+  .snack .btn { height: 28px; background: transparent; color: var(--pt-paper); border-color: transparent; }
+  @media (width < 720px) {
+    .fig { grid-template-columns: 1fr; }
+    .strip { grid-template-columns: repeat(5, 120px); overflow-x: auto; padding-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">One name on every slide</h2>
+    <p class="lead">Tools › Tailor for a customer changes every slide's text and notes as one edit.</p>
+  </div>
+  <div class="fig">
+    <div class="dialog dlg">
+      <div class="dh">Tailor for a customer<span class="ib"><svg class="ic"><use href="#i-x-mark"/></svg></span></div>
+      <div class="db">
+        <label class="fl">Replace<span class="field" style="border-color:var(--pt-hair)">Northwind</span></label>
+        <label class="fl">With<span class="field focus">Globex<span style="display:inline-block;width:1px;height:15px;background:var(--pt-ink);margin-left:1px"></span></span></label>
+        <div class="count"><svg class="ic" style="color:var(--pt-ink-2)"><use href="#i-document-duplicate"/></svg><span><b>13</b> places on <b>6</b> slides</span></div>
+      </div>
+      <div class="df"><span class="btn">Cancel</span><span class="btn solid">Apply</span></div>
+    </div>
+    <div>
+      <div class="strip pt-scroll-x">
+        <div><div class="n"><b>1</b></div><div class="thumb" data-slide="title" data-name="Globex" data-mark></div></div>
+        <div><div class="n"><b>2</b></div><div class="thumb" data-slide="plan" data-name="Globex" data-mark></div></div>
+        <div><div class="n"><b>3</b></div><div class="thumb" data-slide="gets" data-name="Globex" data-mark></div></div>
+        <div><div class="n"><b>4</b></div><div class="thumb" data-slide="ships" data-name="Globex" data-mark></div></div>
+        <div><div class="n"><b>5</b></div><div class="thumb" data-slide="next" data-name="Globex" data-mark></div></div>
+      </div>
+      <div class="big"><div data-slide="plan" data-name="Globex" data-mark></div></div>
+      <div class="snack"><span>Tailored for Globex: <span class="num">13</span> places on <span class="num">6</span> slides</span><span class="btn">Undo</span></div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

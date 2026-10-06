@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 7: the agents band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .fig { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; }
+  .fig > * { min-width: 0; }
+  .slide5 { position: relative; }
+  .slide5 > .sheet { box-shadow: 0 0 0 1px var(--pt-hair); }
+  .slide5 [data-h] { transform: rotate(8deg); transform-origin: 40% 50%; }
+  .term { margin-top: 16px; }
+  .tb { padding: 12px 14px; height: 196px; }
+  .tb p { margin: 0; white-space: pre-wrap; }
+  .tb .cmd::before { content: '$ '; color: var(--pt-panel-dim); }
+  .tin { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-top: 1px solid var(--pt-panel-hair); }
+  .chips { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 8px; margin-top: 12px; }
+  .chips .btn { height: 34px; padding: 0 10px; font-size: 13px; gap: 6px; }
+  .chips .btn .ic { color: var(--pt-ink-2); }
+  .vh .ph { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--pt-hair); font-weight: 500; font-size: 14px; }
+  .scrub { padding: 14px 14px 12px; border-bottom: 1px solid var(--pt-hair-soft); }
+  .track { position: relative; height: 24px; }
+  .track::before { content: ''; position: absolute; left: 0; right: 0; top: 11px; height: 2px; background: var(--pt-hair); border-radius: 1px; }
+  .track .fill { position: absolute; left: 0; top: 11px; height: 2px; background: var(--pt-ink); }
+  .track .tick { position: absolute; top: 18px; width: 1px; height: 6px; background: var(--pt-titanium); }
+  .track .knob { position: absolute; top: 5px; width: 14px; height: 14px; margin-left: -7px; border-radius: var(--r-sm); background: var(--pt-ink); }
+  .scrub .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12.5px; color: var(--pt-ink-2); }
+  .grp { padding: 12px 14px 4px; font-size: 12px; color: var(--pt-titanium); }
+  .vr { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 52px; padding: 6px 14px; border-bottom: 1px solid var(--pt-hair-soft); font-size: 13px; }
+  .vr:last-child { border-bottom: 0; }
+  .vr.cur { background: var(--pt-plate); }
+  .vr small { display: block; font-size: 12px; color: var(--pt-titanium); }
+  .vr .t { font-size: 12px; color: var(--pt-titanium); font-variant-numeric: tabular-nums; }
+  @media (width < 720px) {
+    .fig { grid-template-columns: 1fr; }
+    .tb { height: 216px; }
+    .chips { display: grid; grid-template-columns: 1fr 1fr; }
+    .chips .btn { height: 44px; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Agents run the same actions</h2>
+    <p class="lead">The CLI, the MCP server and the HTTP API change the deck you see. Every change lands in Version history.</p>
+  </div>
+  <div class="fig">
+    <div>
+      <div class="slide5">
+        <div data-slide="next" data-name="Initech"></div>
+        <div class="ring" style="left:9.5%;top:41%;width:28%;height:14%;transform:rotate(8deg)"><span class="flag">Agent</span></div>
+      </div>
+      <div class="term">
+        <div class="th"><span class="tab on">CLI</span><span class="tab">MCP</span><span class="tab">HTTP</span><span style="margin-left:auto">Recorded from the CLI</span></div>
+        <div class="tb pt-scroll">
+<p class="cmd">turboslide tailor --replace=Northwind=Initech</p><p class="dim">13 replacements on 6 slides, 0 pictures swapped,
+0 skipped; revision 4</p><p class="cmd">turboslide block rotate next-steps#h --to 8</p><p class="dim">rotated h to 8 degrees on next-steps: revision 5,
+3 finding(s)</p>
+        </div>
+        <div class="tin"><span class="dim">$ turboslide</span><span class="dim" style="opacity:.6">Type a command or help</span></div>
+      </div>
+      <div class="chips">
+        <span class="btn"><svg class="ic"><use href="#i-command-line"/></svg>Tailor for Northwind</span>
+        <span class="btn"><svg class="ic"><use href="#i-arrow-path"/></svg>Straighten the Title</span>
+        <span class="btn"><svg class="ic"><use href="#i-pencil-square"/></svg>Rewrite a Row</span>
+        <span class="btn"><svg class="ic"><use href="#i-eye-slash"/></svg>Skip This Slide</span>
+      </div>
+    </div>
+    <div class="win vh">
+      <div class="ph"><span style="display:flex;gap:8px;align-items:center"><svg class="ic" style="color:var(--pt-ink-2)"><use href="#i-clock"/></svg>Version history</span><span class="ib"><svg class="ic"><use href="#i-x-mark"/></svg></span></div>
+      <div class="scrub">
+        <div class="track"><span class="fill" style="width:100%"></span>
+          <span class="tick" style="left:0"></span><span class="tick" style="left:20%"></span><span class="tick" style="left:40%"></span><span class="tick" style="left:60%"></span><span class="tick" style="left:80%"></span><span class="tick" style="left:100%"></span>
+          <span class="knob" style="left:100%"></span></div>
+        <div class="meta"><span>Version <span class="num">6</span> of <span class="num">6</span>, by Agent</span><span class="btn" style="height:28px;padding:0 10px;font-size:12.5px;color:var(--pt-disabled)"><svg class="ic sm"><use href="#i-arrow-uturn-left"/></svg>Restore This Version</span></div>
+      </div>
+      <div class="grp">Today</div>
+      <div class="vr cur"><span class="pres b"><svg class="ic sm"><use href="#i-command-line"/></svg></span><span>Agent<small>Turned the title on slide 5 to 8 degrees</small></span><span class="t">6:45 PM</span></div>
+      <div class="vr"><span class="pres b"><svg class="ic sm"><use href="#i-command-line"/></svg></span><span>Agent<small>Tailored for Initech</small></span><span class="t">6:45 PM</span></div>
+      <div class="grp">Recorded from the CLI</div>
+      <div class="vr"><span class="pres b"><svg class="ic sm"><use href="#i-command-line"/></svg></span><span>Agent<small>Set the rows of slide 5</small></span><span class="t">v4</span></div>
+      <div class="vr"><span class="pres b"><svg class="ic sm"><use href="#i-command-line"/></svg></span><span>Agent<small>Set the title of slide 5</small></span><span class="t">v3</span></div>
+      <div class="vr"><span class="pres b"><svg class="ic sm"><use href="#i-command-line"/></svg></span><span>Agent<small>Added slide 5 with the Ruled rows layout</small></span><span class="t">v2</span></div>
+      <div class="vr"><span class="pres"><svg class="ic sm"><use href="#i-user-circle"/></svg></span><span>You<small>Named the version Onboarding plan</small></span><span class="t">v1</span></div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

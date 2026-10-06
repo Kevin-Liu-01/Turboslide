@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 9: the present band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .acts { display: flex; gap: 8px; margin-top: 18px; }
+  .acts .kbd { margin-left: 4px; background: rgba(255,255,255,.16); color: inherit; }
+  :root[data-theme='dark'] .acts .kbd { background: rgba(7,7,7,.16); }
+  .pv { margin-top: 32px; }
+  .pv .bar { display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 8px 0 14px; border-bottom: 1px solid var(--pt-hair); font-size: 13px; }
+  .pv .bar .timer { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .pv .bar .sp { flex: 1; }
+  .pv .body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; background: var(--pt-plate); }
+  .pv .now { padding: 20px; }
+  .pv .now > .sheet { box-shadow: 0 0 0 1px var(--pt-hair-soft); }
+  .pv .side { display: grid; align-content: start; gap: 14px; padding: 20px 20px 20px 0; }
+  .pv .lab { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: var(--pt-titanium); font-variant-numeric: tabular-nums; }
+  .pv .notes { padding: 12px 14px; background: var(--pt-paper); border: 1px solid var(--pt-hair); border-radius: var(--r-md); font-size: 15px; line-height: 1.5; }
+  .pv .nav2 { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 8px; border-top: 1px solid var(--pt-hair); }
+  .pv .nav2 .count { font-size: 13px; color: var(--pt-ink-2); font-variant-numeric: tabular-nums; }
+  @media (width < 720px) {
+    .acts { flex-direction: column; }
+    .acts .btn { height: 44px; }
+    .pv .body { grid-template-columns: 1fr; }
+    .pv .now { padding: 12px; }
+    .pv .side { padding: 0 12px 12px; grid-template-columns: 110px minmax(0, 1fr); }
+    .pv .notes { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <div>
+      <h2 class="h2">Present from the browser</h2>
+      <div class="acts"><span class="btn solid big"><svg class="ic"><use href="#i-play"/></svg>Present<span class="kbd">⌘↵</span></span><span class="btn big"><svg class="ic"><use href="#i-printer"/></svg>Print This Deck</span></div>
+    </div>
+    <p class="lead">This page is a deck. Presenter view shows your notes, the next slide and the time.</p>
+  </div>
+  <div class="win pv">
+    <div class="bar">
+      <svg style="width:22px;height:15px;fill:var(--pt-ink)"><use href="#ts-mark"/></svg><b style="font-weight:500">Presenter view</b>
+      <span class="sp"></span>
+      <span class="timer"><svg class="ic" style="color:var(--pt-ink-2)"><use href="#i-clock"/></svg>04:12</span>
+      <span class="ib boxed"><svg class="ic"><use href="#i-pause"/></svg></span>
+      <span class="btn" style="height:32px"><svg class="ic sm"><use href="#i-x-mark"/></svg>Exit</span>
+    </div>
+    <div class="body">
+      <div class="now"><div data-slide="plan"></div></div>
+      <div class="side">
+        <div><div class="lab"><span>Next</span><span>3 / 9</span></div><div class="thumb" data-slide="gets"></div></div>
+        <div><div class="lab"><span>Notes</span></div><div class="notes">Ask Northwind who reviews each week.</div></div>
+      </div>
+    </div>
+    <div class="nav2"><span class="btn ghost"><svg class="ic"><use href="#i-chevron-left"/></svg>Previous</span><span class="count">Slide 2 of 9</span><span class="btn ghost">Next<svg class="ic"><use href="#i-chevron-right"/></svg></span></div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

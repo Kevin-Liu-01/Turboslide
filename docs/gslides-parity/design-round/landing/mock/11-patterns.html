@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 11: the patterns band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .pair .lab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--pt-ink-2); }
+  .pair .lab span { display: inline-flex; align-items: center; gap: 6px; }
+  .pair .sheet { box-shadow: 0 0 0 1px var(--pt-hair); }
+  .picker { margin-top: 28px; }
+  .picker .ph { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .tiles { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 12px 10px; }
+  .tile { font-size: 11.5px; color: var(--pt-ink-2); }
+  .tile .pic { position: relative; aspect-ratio: 16 / 9; margin-bottom: 5px; outline: 1px solid var(--pt-edge); outline-offset: -1px; overflow: hidden; }
+  .tile.on .pic { outline: 2px solid var(--pt-ink); outline-offset: -2px; }
+  .tile canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  @media (width < 720px) {
+    .pair { grid-template-columns: 1fr; }
+    .tiles { display: flex; overflow-x: auto; padding-bottom: 8px; }
+    .tile { flex: 0 0 96px; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Animated patterns</h2>
+    <p class="lead">A pattern moves in the editor and the show. The PDF and the PowerPoint file carry its still frame.</p>
+  </div>
+  <div class="pair">
+    <div><div class="lab"><span><svg class="ic" style="color:var(--pt-ink-2)"><use href="#i-play"/></svg>In the editor and the show</span><span class="ib boxed" style="width:28px;height:28px"><svg class="ic sm"><use href="#i-pause"/></svg></span></div><div data-slide="pattern" data-small></div></div>
+    <div><div class="lab"><span><svg class="ic" style="color:var(--pt-ink-2)"><use href="#i-document-text"/></svg>In the PDF and the PowerPoint file</span><span class="chip">Still frame</span></div><div data-slide="pattern" data-small></div></div>
+  </div>
+  <div class="picker">
+    <div class="ph"><span class="crumb" style="font-size:13px">Insert<svg class="ic"><use href="#i-chevron-right"/></svg>Animated pattern</span></div>
+    <div class="tiles pt-scroll-x" id="tiles"></div>
+  </div>
+</section>
+<script>
+  const names = ['Liquid metal', 'Gem smoke', 'Smoke ring', 'God rays', 'Mesh gradient', 'Simplex noise', 'Swirl', 'Spiral', 'Grain gradient', 'Dithering', 'Static radial gradient', 'Neuro noise', 'Metaballs', 'Waves', 'Dot grid', 'Perlin noise', 'Static mesh gradient'];
+  const t = document.getElementById('tiles');
+  names.forEach((n) => {
+    const id = n.toLowerCase().replace(/ /g, '-');
+    t.insertAdjacentHTML('beforeend', `<div class="tile${n === 'Dithering' ? ' on' : ''}"><div class="pic"><img src="../../../../../packages/materials/previews/${id}.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></div>${n}</div>`);
+  });
+</script>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

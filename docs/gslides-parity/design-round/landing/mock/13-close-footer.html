@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 13: the close and the footer</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .close { display: grid; justify-items: center; text-align: center; gap: 22px; padding-top: 112px; padding-bottom: 112px; }
+  .close svg.mk { width: 168px; height: 117px; fill: var(--pt-ink); }
+  .close .acts { display: flex; gap: 8px; }
+  .close .label { margin-top: -6px; }
+  .foot { display: grid; grid-template-columns: auto 1fr; gap: 16px 40px; align-items: center; padding: 28px 40px 32px; }
+  .foot .lk { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 13.5px; }
+  .foot .lk span { display: inline-flex; align-items: center; gap: 5px; }
+  .foot .lk .ic { color: var(--pt-titanium); width: 12px; height: 12px; }
+  .foot .by { grid-column: 1 / 3; font-size: 12.5px; color: var(--pt-ink-2); }
+  .lockup { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 17px; letter-spacing: -0.02em; }
+  .lockup svg { width: 24px; height: 17px; fill: var(--pt-ink); }
+  @media (width < 720px) {
+    .close { padding-top: 72px; padding-bottom: 72px; }
+    .close svg.mk { width: 112px; height: 78px; }
+    .close .acts { flex-direction: column; width: 100%; }
+    .close .acts .btn { height: 44px; }
+    .foot { grid-template-columns: 1fr; padding: 24px 0 28px; }
+    .foot .by { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band close seam">
+  <svg class="mk"><use href="#ts-mark"/></svg>
+  <h2 class="h2">Start a presentation</h2>
+  <p class="label">No account needed. The first edit saves it.</p>
+  <div class="acts"><span class="btn solid big">New Presentation</span><span class="btn big">Open the Example Deck</span></div>
+</section>
+<footer class="col foot">
+  <span class="lockup"><svg><use href="#ts-mark"/></svg>Turboslide</span>
+  <span class="lk"><span>Your presentations</span><span>Documentation<svg class="ic"><use href="#i-arrow-top-right-on-square"/></svg></span><span>GitHub<svg class="ic"><use href="#i-arrow-top-right-on-square"/></svg></span><span>MIT License<svg class="ic"><use href="#i-arrow-top-right-on-square"/></svg></span><span>Third party notices</span></span>
+  <span class="by">Turboslide is made by General Translation. Google Slides is a product of Google LLC.</span>
+</footer>
+</body>
+</html>

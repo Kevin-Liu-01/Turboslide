@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 8: the two people band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .fig { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 24px; align-items: start; }
+  .fig > * { min-width: 0; }
+  .share .gl { margin: 4px 0 8px; font-size: 12px; font-weight: 500; color: var(--pt-ink-2); }
+  .acc { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+  .acc .g { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--pt-plate); color: var(--pt-ink-2); }
+  .acc .sel2 { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 500; }
+  .acc small { display: block; font-size: 12px; color: var(--pt-titanium); }
+  .lk { display: flex; gap: 8px; margin: 14px 0 6px; }
+  .lk .field { flex: 1; color: var(--pt-ink-2); }
+  .pp { margin-top: 10px; }
+  .pp > div { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: center; height: 46px; border-top: 1px solid var(--pt-hair-soft); font-size: 13px; }
+  .pp small { display: block; font-size: 12px; color: var(--pt-titanium); }
+  .pp .r { font-size: 12.5px; color: var(--pt-ink-2); }
+  .screens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .scr .bar { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border-bottom: 1px solid var(--pt-hair); font-size: 12.5px; }
+  .scr .bar b { font-weight: 500; }
+  .scr .bar .sp { flex: 1; }
+  .scr .stage { position: relative; padding: 14px; background: var(--pt-plate); }
+  .scr .stage > .sheet { box-shadow: 0 0 0 1px var(--pt-hair-soft); }
+  .who { margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 12.5px; color: var(--pt-ink-2); }
+  .out { position: absolute; outline: 1.5px solid var(--pt-ink); pointer-events: none; }
+  .out .flag { position: absolute; left: -1.5px; top: -19px; height: 17px; padding: 0 6px; background: var(--pt-ink); color: var(--pt-paper); font: 500 11px/17px var(--pt-text); }
+  .caret2 { position: absolute; width: 1.5px; background: var(--pt-ink); }
+  .follow { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 4px 0 8px; border-radius: var(--r-md); background: var(--pt-ink); color: var(--pt-paper); font-size: 11.5px; font-weight: 500; }
+  .follow span { padding: 0 6px; border-left: 1px solid rgba(255,255,255,.26); }
+  @media (width < 720px) {
+    .fig, .screens { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Share a link and edit together</h2>
+    <p class="lead">Each person's outline, caret and name show on the other screen. Follow keeps your view on their slide.</p>
+  </div>
+  <div class="fig">
+    <div class="dialog share">
+      <div class="dh">Share Onboarding plan<span class="ib"><svg class="ic"><use href="#i-x-mark"/></svg></span></div>
+      <div class="db">
+        <div class="gl">General access</div>
+        <div class="acc"><span class="g"><svg class="ic"><use href="#i-globe-alt"/></svg></span><span><span class="sel2">Anyone with the link<svg class="ic sm"><use href="#i-chevron-down"/></svg></span><small>Anyone with this link can edit</small></span><span class="sel2" style="font-weight:400">Editor<svg class="ic sm"><use href="#i-chevron-down"/></svg></span></div>
+        <div class="lk"><span class="field">www.turboslide.com/s/…</span><span class="btn"><svg class="ic sm"><use href="#i-link"/></svg>Copy link</span></div>
+        <div class="pp">
+          <div><span class="pres">K</span><span>You</span><span class="r">Owner</span></div>
+          <div><span class="pres">M</span><span>Maya<small>Editing slide <span class="num">2</span></small></span><span class="r">Editor</span></div>
+          <div><span class="pres b">S</span><span>Sam<small>Editing slide <span class="num">2</span></small></span><span class="r">Editor</span></div>
+        </div>
+      </div>
+      <div class="df"><span class="btn solid">Done</span></div>
+    </div>
+    <div class="screens">
+      <div>
+        <div class="who"><span>Maya's screen</span><span class="follow">Following Sam<span>Stop</span></span></div>
+        <div class="win scr">
+          <div class="bar"><svg style="width:20px;height:14px;fill:var(--pt-ink)"><use href="#ts-mark"/></svg><b>Onboarding plan</b><span class="sp"></span><span class="pres b">S</span><span class="pres">M</span></div>
+          <div class="stage">
+            <div data-slide="plan" data-small></div>
+            <div class="out" style="left:50.5%;top:56.5%;width:43%;height:8%"><span class="flag">Sam</span></div>
+            <span class="caret2" style="left:86.4%;top:58.2%;height:4.6%"></span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="who"><span>Sam's screen</span><span class="num" style="color:var(--pt-titanium)">2 / 9</span></div>
+        <div class="win scr">
+          <div class="bar"><svg style="width:20px;height:14px;fill:var(--pt-ink)"><use href="#ts-mark"/></svg><b>Onboarding plan</b><span class="sp"></span><span class="pres">M</span><span class="pres b">S</span></div>
+          <div class="stage">
+            <div data-slide="plan" data-small></div>
+            <div class="sel" style="left:50.5%;top:56.5%;width:43%;height:8%"><i style="left:-4px;top:-4px"></i><i style="right:-4px;top:-4px"></i><i style="left:-4px;bottom:-4px"></i><i style="right:-4px;bottom:-4px"></i></div>
+            <div class="out" style="left:13%;top:43%;width:26%;height:12%"><span class="flag">Maya</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 10: the export band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .fig { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+  .fig > * { min-width: 0; }
+  .seamed { position: relative; }
+  .seamed > .sheet { box-shadow: 0 0 0 1px var(--pt-hair); }
+  .seamline { position: absolute; top: 0; bottom: 0; left: 46%; width: 0; border-left: 1px solid var(--pt-ink); }
+  .seamline::after { content: ''; position: absolute; left: -10px; top: calc(50% - 10px); width: 20px; height: 20px; background: var(--pt-paper); border: 1px solid var(--pt-ink); border-radius: var(--r-sm); }
+  .lbl { position: absolute; top: 12px; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: var(--r-sm); background: var(--pt-paper); border: 1px solid var(--pt-hair); font-size: 12px; font-weight: 500; }
+  .tb { position: absolute; outline: 1px dashed var(--pt-ink-2); outline-offset: 2px; }
+  .loupe { position: absolute; left: 6%; top: 18%; display: grid; grid-template-columns: 120px 120px; gap: 8px; padding: 8px; background: var(--pt-paper); border: 1px solid var(--pt-edge); border-radius: var(--r-md); }
+  .loupe .px { width: 120px; height: 120px; image-rendering: pixelated; background: var(--pt-paper); }
+  .loupe .t { font-size: 11.5px; color: var(--pt-ink-2); display: flex; justify-content: space-between; }
+  .loupe .r { grid-column: 1 / 3; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .dl .opt { display: grid; grid-template-columns: 18px 20px minmax(0, 1fr); gap: 10px; align-items: start; padding: 11px 0; border-top: 1px solid var(--pt-hair-soft); font-size: 13.5px; }
+  .dl .opt:first-of-type { border-top: 0; }
+  .dl .opt small { display: block; margin-top: 2px; font-size: 12px; color: var(--pt-titanium); }
+  .radio { width: 16px; height: 16px; margin-top: 1px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--pt-field); }
+  .radio.on { box-shadow: inset 0 0 0 1.5px var(--pt-ink), inset 0 0 0 4.5px var(--pt-paper), inset 0 0 0 9px var(--pt-ink); }
+  .dl .opt .ic { color: var(--pt-ink-2); margin-top: 1px; }
+  .seg { display: inline-flex; margin: 8px 0 2px; border: 1px solid var(--pt-hair); border-radius: var(--r-md); overflow: hidden; font-size: 12.5px; }
+  .seg span { padding: 5px 10px; }
+  .seg span + span { border-left: 1px solid var(--pt-hair); }
+  .seg .on { background: var(--pt-ink); color: var(--pt-paper); }
+  .readout { display: flex; align-items: center; gap: 8px; margin-top: 4px; padding: 10px 12px; border-radius: var(--r-md); background: var(--pt-plate); font-size: 12.5px; color: var(--pt-ink-2); }
+  .readout .ic { color: var(--pt-status-done); }
+  @media (width < 720px) {
+    .fig { grid-template-columns: 1fr; }
+    .loupe { grid-template-columns: 84px 84px; left: 4%; top: 22%; }
+    .loupe .px { width: 84px; height: 84px; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head">
+    <h2 class="h2">Download PDF and PowerPoint</h2>
+    <p class="lead">Drag the seam to compare the two kinds of PowerPoint file. Hold the pointer still to count the pixels that differ.</p>
+  </div>
+  <div class="fig">
+    <div class="seamed">
+      <div data-slide="field"></div>
+      <span class="tb" style="left:57.2%;top:68.5%;width:30%;height:7%"></span>
+      <span class="tb" style="left:57.2%;top:77%;width:30%;height:7.5%"></span>
+      <span class="tb" style="left:57.2%;top:85.4%;width:30%;height:2.6%"></span>
+      <span class="lbl" style="left:12px"><svg class="ic sm"><use href="#i-photo"/></svg>Perfect</span>
+      <span class="lbl" style="right:12px"><svg class="ic sm"><use href="#i-document-text"/></svg>Editable text</span>
+      <span class="seamline"></span>
+      <div class="loupe">
+        <span class="t"><span>Browser</span></span><span class="t"><span>Perfect file</span></span>
+        <canvas class="px dither" data-dither="field" data-cx="0.2" data-cy="0.9" data-r="1.6" data-cell="10" style="position:static"></canvas>
+        <canvas class="px dither" data-dither="field" data-cx="0.2" data-cy="0.9" data-r="1.6" data-cell="10" style="position:static"></canvas>
+        <span class="r"><span class="num">4</span> of <span class="num">196</span> pixels differ at x <span class="num">1210</span>, y <span class="num">640</span></span>
+      </div>
+    </div>
+    <div class="dialog dl">
+      <div class="dh">Download<span class="ib"><svg class="ic"><use href="#i-x-mark"/></svg></span></div>
+      <div class="db">
+        <div class="opt"><span class="radio on"></span><svg class="ic"><use href="#i-photo"/></svg><span>Microsoft PowerPoint (.pptx)<small>Perfect or Editable text, with speaker notes if you want them</small>
+          <span class="seg"><span class="on">Perfect</span><span>Editable text</span></span><small>Every slide looks exactly like the screen</small></span></div>
+        <div class="opt"><span class="radio"></span><svg class="ic"><use href="#i-document-text"/></svg><span>PDF Document (.pdf)<small>One slide per page</small></span></div>
+        <div class="readout"><svg class="ic"><use href="#i-check-circle"/></svg><span>The worst GT deck page differs from its screenshot by <span class="num">0.003%</span></span></div>
+      </div>
+      <div class="df"><span class="btn">Cancel</span><span class="btn solid"><svg class="ic sm"><use href="#i-arrow-down-tray"/></svg>Download</span></div>
+    </div>
+  </div>
+</section>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+</body>
+</html>

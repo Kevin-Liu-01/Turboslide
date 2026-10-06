@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 14: the landing's scroll regions</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  body { padding: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 24px; }
+  figure { min-width: 0; }
+  figure { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; align-content: start; }
+  figcaption { font-size: 12.5px; color: var(--pt-ink-2); overflow-wrap: anywhere; }
+  figcaption code { font-size: 11.5px; }
+  .hstrip { display: flex; gap: 8px; width: 100%; padding: 10px 10px 6px; border: 1px solid var(--pt-hair); border-radius: var(--r-lg); }
+  .hstrip > div { flex: 0 0 96px; }
+  .vstrip > div { flex: none; }
+  .vstrip { height: 230px; width: 150px; display: flex; flex-direction: column; gap: 8px; padding: 10px 6px 10px 10px; border: 1px solid var(--pt-hair); border-radius: var(--r-lg); }
+  .term .tb { height: 160px; padding: 10px 12px; }
+  .term .tb p { margin: 0; white-space: pre; }
+  .page { position: relative; height: 230px; border: 1px solid var(--pt-hair); border-radius: var(--r-lg); overflow-y: scroll; scrollbar-width: thin; scrollbar-color: var(--pt-thumb) transparent; padding: 14px; font-size: 12.5px; color: var(--pt-ink-2); }
+  .page div { height: 26px; border-bottom: 1px solid var(--pt-hair-soft); }
+  .states { display: flex; gap: 40px; align-items: end; height: 230px; padding: 14px 20px; border: 1px solid var(--pt-hair); border-radius: var(--r-lg); }
+  .states .g { display: grid; justify-items: center; gap: 8px; font-size: 12px; color: var(--pt-ink-2); }
+  .gut { position: relative; width: 4px; height: 170px; background: transparent; box-shadow: 0 0 0 1px var(--pt-hair-soft); }
+  .gut i { position: absolute; left: 1px; width: 2px; top: 40px; height: 70px; background: var(--pt-thumb); }
+  .gut.hover i { left: 0; width: 4px; background: var(--pt-ink-2); }
+  .gut.ink { background: var(--pt-panel-ink); box-shadow: none; }
+  .gut.ink i { background: rgba(255,255,255,0.3); }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<div class="grid">
+  <figure>
+    <div class="hstrip pt-scroll-x" id="h">
+      <div data-slide="title" class="thumb"></div><div data-slide="plan" class="thumb"></div><div data-slide="gets" class="thumb"></div><div data-slide="ships" class="thumb"></div><div data-slide="next" class="thumb"></div><div data-slide="lighthouse" class="thumb"></div><div data-slide="field" class="thumb"></div>
+    </div>
+    <figcaption>The hero filmstrip at 390 px: <code>.pt-scroll-x</code> in place of today's hidden scrollbar.</figcaption>
+  </figure>
+  <figure>
+    <div style="display:flex;gap:16px">
+      <div class="vstrip pt-scroll" id="v">
+        <div data-slide="title" class="thumb"></div><div data-slide="plan" class="thumb"></div><div data-slide="gets" class="thumb"></div><div data-slide="ships" class="thumb"></div><div data-slide="next" class="thumb"></div><div data-slide="lighthouse" class="thumb"></div>
+      </div>
+      <div class="term" style="flex:1;min-width:0">
+        <div class="th"><span class="tab on">CLI</span><span class="tab">MCP</span><span class="tab">HTTP</span></div>
+        <div class="tb pt-scroll" id="t">
+<p><span class="dim">$</span> turboslide version list</p><p class="dim">  1  r0  agent:landing  "Onboarding plan"</p><p class="dim">  2  r1  agent:landing  slide.insert</p><p class="dim">  3  r2  agent:landing  block.set</p><p class="dim">  4  r3  agent:landing  block.set</p><p><span class="dim">$</span> turboslide tailor --replace=</p><p>  Northwind=Initech</p><p class="dim">13 replacements on 6 slides</p><p><span class="dim">$</span> turboslide version list</p><p class="dim">  5  r4  agent:landing  deck.tailor</p>
+        </div>
+      </div>
+    </div>
+    <figcaption>The miniature's filmstrip and the agents console: <code>.pt-scroll</code>, the thumb in paper on the ink panel.</figcaption>
+  </figure>
+  <figure>
+    <div class="page" id="p"><div>The page scrolls natively.</div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    <figcaption>The page: <code>scrollbar-color: var(--pt-thumb) transparent</code> and <code>scrollbar-width: thin</code> on the root, native scrolling.</figcaption>
+  </figure>
+  <figure>
+    <div class="states">
+      <div class="g"><span class="gut"><i></i></span>At rest</div>
+      <div class="g"><span class="gut hover"><i></i></span>Pointer on the thumb</div>
+      <div class="g"><span class="gut ink"><i></i></span>On the ink panel</div>
+    </div>
+    <figcaption>The 4 px gutter with no track rule, a 2 px thumb in <code>--pt-thumb</code> that widens to 4 px in <code>--pt-ink-2</code> under the pointer, square ends.</figcaption>
+  </figure>
+</div>
+<script src="slides.js"></script>
+<script src="dither.js"></script>
+<script>
+  window.addEventListener('load', () => {
+    document.getElementById('h').scrollLeft = 120;
+    document.getElementById('v').scrollTop = 90;
+    document.getElementById('t').scrollTop = 60;
+    document.getElementById('p').scrollTop = 80;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 12: the features band</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .ft { display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px; border-top: 1px solid var(--pt-hair); }
+  .fr { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; min-height: 64px; padding: 10px 0; border-bottom: 1px solid var(--pt-hair-soft); }
+  .fr .g { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--r-md); background: var(--pt-plate); color: var(--pt-ink); }
+  .fr .nm { font-weight: 500; font-size: 15px; letter-spacing: -0.01em; }
+  .fr .wh { grid-column: 2; margin-top: -2px; }
+  .fr .sc { grid-row: 1 / 3; grid-column: 3; display: flex; gap: 3px; }
+  .fr .wh .crumb { font-size: 13px; color: var(--pt-titanium); }
+  .fr .wh .crumb .ic { color: var(--pt-disabled); }
+  @media (width < 720px) {
+    .ft { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band seam">
+  <div class="head" style="margin-bottom:28px">
+    <h2 class="h2">Where to find each feature</h2>
+    <p class="lead">Every row is a menu path in the editor, with its shortcut.</p>
+  </div>
+  <div class="ft">
+    <div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-bars-3"/></svg></span><span class="nm">Menus</span><span class="sc"></span><span class="wh"><span class="crumb">File to Help, in Google's order</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-pencil-square"/></svg></span><span class="nm">Tailor for a customer</span><span class="sc"></span><span class="wh"><span class="crumb">Tools<svg class="ic"><use href="#i-chevron-right"/></svg>Tailor for a customer</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-swatch"/></svg></span><span class="nm">Brand kit</span><span class="sc"></span><span class="wh"><span class="crumb">Slide<svg class="ic"><use href="#i-chevron-right"/></svg>Change theme</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-chat-bubble-left-right"/></svg></span><span class="nm">Comments</span><span class="sc"><span class="kbd">⌥</span><span class="kbd">⌘</span><span class="kbd">M</span></span><span class="wh"><span class="crumb">Insert<svg class="ic"><use href="#i-chevron-right"/></svg>Comment</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-clock"/></svg></span><span class="nm">Version history</span><span class="sc"><span class="kbd">⌥</span><span class="kbd">⇧</span><span class="kbd">⌘</span><span class="kbd">H</span></span><span class="wh"><span class="crumb">File<svg class="ic"><use href="#i-chevron-right"/></svg>Version history</span></span></div>
+    </div>
+    <div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-link"/></svg></span><span class="nm">Share</span><span class="sc"></span><span class="wh"><span class="crumb">The Share button, or File<svg class="ic"><use href="#i-chevron-right"/></svg>Share</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-play"/></svg></span><span class="nm">Slideshow and presenter view</span><span class="sc"><span class="kbd">⌘</span><span class="kbd">↵</span></span><span class="wh"><span class="crumb">Slideshow<svg class="ic"><use href="#i-chevron-right"/></svg>Presenter view</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-arrow-down-tray"/></svg></span><span class="nm">Download</span><span class="sc"></span><span class="wh"><span class="crumb">File<svg class="ic"><use href="#i-chevron-right"/></svg>Download</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-cube"/></svg></span><span class="nm">Animated pattern</span><span class="sc"></span><span class="wh"><span class="crumb">Insert<svg class="ic"><use href="#i-chevron-right"/></svg>Animated pattern</span></span></div>
+      <div class="fr"><span class="g"><svg class="ic"><use href="#i-command-line"/></svg></span><span class="nm">Agents</span><span class="sc"></span><span class="wh"><span class="crumb">The CLI, the MCP server and the HTTP API</span></span></div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

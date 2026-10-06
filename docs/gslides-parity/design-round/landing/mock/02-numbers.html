@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 2: the numbers row</title>
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || 'light';</script>
+<link rel="stylesheet" href="mock.css">
+<style>
+  .nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+  .nums > div { display: grid; align-content: start; gap: 6px; padding: 20px 20px 22px; border-left: 1px solid var(--pt-hair-soft); }
+  .nums > div:first-child { border-left: 0; padding-left: 0; }
+  .nums .ic.lg { color: var(--pt-ink-2); margin-bottom: 14px; }
+  .fig { font-weight: 500; font-size: 44px; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+  .noun { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+  .sub { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .row-rule { border-top: 1px solid var(--pt-hair); }
+  @media (width < 720px) {
+    .nums { grid-template-columns: 1fr 1fr; }
+    .nums > div { padding: 18px 12px 20px; border-left: 1px solid var(--pt-hair-soft); }
+    .nums > div:nth-child(odd) { border-left: 0; padding-left: 0; }
+    .nums > div:nth-child(n+3) { border-top: 1px solid var(--pt-hair-soft); }
+    .fig { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+<script src="sprite.js"></script>
+<section class="col band tight seam" aria-label="Turboslide in four numbers">
+  <div class="row-rule"></div>
+  <div class="nums">
+    <div>
+      <svg class="ic lg"><use href="#i-command-line"/></svg>
+      <span class="fig">193</span><span class="noun">actions</span>
+      <span class="sub"><span class="chip num">CLI 180</span><span class="chip num">MCP 169</span><span class="chip num">HTTP 177</span></span>
+    </div>
+    <div>
+      <svg class="ic lg"><use href="#i-squares-2x2"/></svg>
+      <span class="fig">22</span><span class="noun">layouts</span>
+      <span class="sub"><span class="crumb">Slide<svg class="ic"><use href="#i-chevron-right"/></svg>Apply layout</span></span>
+    </div>
+    <div>
+      <svg class="ic lg"><use href="#i-cube"/></svg>
+      <span class="fig">17</span><span class="noun">animated patterns</span>
+      <span class="sub"><span class="crumb">Insert<svg class="ic"><use href="#i-chevron-right"/></svg>Animated pattern</span></span>
+    </div>
+    <div>
+      <svg class="ic lg"><use href="#i-square-2-stack"/></svg>
+      <span class="fig">135</span><span class="noun">shapes</span>
+      <span class="sub"><span class="crumb">Insert<svg class="ic"><use href="#i-chevron-right"/></svg>Shape</span></span>
+    </div>
+  </div>
+</section>
+</body>
+</html>

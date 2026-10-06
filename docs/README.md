@@ -4,19 +4,20 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 
 ## Start here
 
-| Document                                                      | What it is                                                                                          |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [../README.md](../README.md)                                  | What Turboslide is, how to start it, the CLI                                                        |
-| [../AGENTS.md](../AGENTS.md)                                  | The rules for working in this repository                                                            |
-| [NEXT.md](NEXT.md)                                            | The next program from 2026-10-02: the rounds for speed, cost, features, the brand and sign in       |
-| [LANDING.md](LANDING.md)                                      | The landing redesign of `/home`: one eight slide deck the visitor edits, tailors, runs and presents |
-| [FOCUS.md](FOCUS.md)                                          | The rule, the core set, the parked set, the matrix and the ship gate (section 6.2)                  |
-| [REALTIME.md](REALTIME.md) and [CLOUDFLARE.md](CLOUDFLARE.md) | The realtime round: the realtime channel, presence and Google sign in, with the move to Cloudflare  |
-| [hosting.md](hosting.md) and [security.md](security.md)       | How the studio is hosted, deployed, verified and protected                                          |
-| [../scripts/hosting/README.md](../scripts/hosting/README.md)  | The hosting setup of the realtime round's Cloudflare phase                                          |
-| [spec/SPEC.md](spec/SPEC.md)                                  | The base specification, cited in code as "SPEC n.n"                                                 |
-| [grammar.md](grammar.md)                                      | The generated grammar and agent contract, written by `pnpm generate:contracts`                      |
-| [updates.md](updates.md)                                      | The release notes, one entry per ship                                                               |
+| Document                                                      | What it is                                                                                                                  |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [../README.md](../README.md)                                  | What Turboslide is, how to start it, the CLI                                                                                |
+| [../AGENTS.md](../AGENTS.md)                                  | The rules for working in this repository                                                                                    |
+| [NEXT.md](NEXT.md)                                            | The next program from 2026-10-02: the rounds for speed, cost, features, the brand and sign in                               |
+| [LANDING.md](LANDING.md)                                      | The landing redesign of `/home`: one eight slide deck the visitor edits, tailors, runs and presents                         |
+| [DESIGN.md](DESIGN.md)                                        | The design round of 2026-10-05: layers, corners, Inter, colour, scrollbars, the theme library and the landing on every page |
+| [FOCUS.md](FOCUS.md)                                          | The rule, the core set, the parked set, the matrix and the ship gate (section 6.2)                                          |
+| [REALTIME.md](REALTIME.md) and [CLOUDFLARE.md](CLOUDFLARE.md) | The realtime round: the realtime channel, presence and Google sign in, with the move to Cloudflare                          |
+| [hosting.md](hosting.md) and [security.md](security.md)       | How the studio is hosted, deployed, verified and protected                                                                  |
+| [../scripts/hosting/README.md](../scripts/hosting/README.md)  | The hosting setup of the realtime round's Cloudflare phase                                                                  |
+| [spec/SPEC.md](spec/SPEC.md)                                  | The base specification, cited in code as "SPEC n.n"                                                                         |
+| [grammar.md](grammar.md)                                      | The generated grammar and agent contract, written by `pnpm generate:contracts`                                              |
+| [updates.md](updates.md)                                      | The release notes, one entry per ship                                                                                       |
 
 ## Reference by subsystem
 

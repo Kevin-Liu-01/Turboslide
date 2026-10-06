@@ -198,9 +198,6 @@ function restingStrings(): string[] {
   return [
     NAV.lockup.word,
     ...NAV.links.map((link) => link.label),
-    NAV.appearance.light.label,
-    NAV.appearance.dark.label,
-    NAV.motion.pause,
     NAV.signIn.label,
     NAV.newPresentation.label,
     HERO.visit[0],
@@ -411,10 +408,6 @@ describe('headings and buttons', () => {
   const buttons: string[] = [
     NAV.signIn.label,
     NAV.newPresentation.label,
-    NAV.appearance.light.label,
-    NAV.appearance.dark.label,
-    NAV.motion.pause,
-    NAV.motion.play,
     HERO.undo,
     HERO.buttons.newPresentation.label,
     HERO.buttons.openDeck.label,

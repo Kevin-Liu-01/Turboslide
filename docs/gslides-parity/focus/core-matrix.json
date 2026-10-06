@@ -11646,12 +11646,12 @@
     {
       "id": "home.export.pdf-appearance",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in each appearance, Download the PDF's href names the shown appearance's file (assets.json `pdf`) once the export band has started, before any click, and follows the nav's Light and Dark presses both ways; naming the file requests nothing",
+      "interaction": "At 1440 and 390 in each appearance, Download the PDF's href names the shown appearance's file (assets.json `pdf`) once the export band has started, before any click, and follows the navigation's theme button both ways; naming the file requests nothing",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "verify-landing.md finding 4 (production 2026-10-05: in the dark appearance the link carried /home/pdf-light-6f207f1381.pdf until a click rewrote it, probe-pdf.mjs)",
-      "note": "Round 1 follow-up, lane E item 4: apps/studio/src/components/home/live/seam.ts names the file from the band's start, on every change of html[data-theme] and of the system appearance, and on the click; HomeExport.tsx's markup keeps the light file for a page without script"
+      "note": "Round 1 follow-up, lane E item 4: apps/studio/src/components/home/live/seam.ts names the file from the band's start, on every change of html[data-theme] and of the system appearance, and on the click; HomeExport.tsx's markup keeps the light file for a page without script; restated in the design round, DR-D4#1b"
     },
     {
       "id": "home.export.one-mark",

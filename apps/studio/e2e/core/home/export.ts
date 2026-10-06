@@ -378,10 +378,14 @@ export function rows(): void {
         const link = band(page).locator('a[data-pdf]');
         /* the shown appearance's file before any click, so a copied link or a new tab takes it */
         await expect(link, `${width} ${scheme} at rest`).toHaveAttribute('href', fileOf(scheme));
-        /* the nav's other appearance, then back: the href follows each change */
-        await page.locator(`[data-theme-option="${other}"]`).click();
+        /* the navigation's theme button to the other appearance, then back (docs/DESIGN.md 8.1:
+           one button in place of the Light and Dark pair): the href follows each change */
+        const themeButton = page.locator('header [data-control="view.theme"]');
+        await themeButton.click();
+        await expect(page.locator('html')).toHaveAttribute('data-theme', other);
         await expect(link, `${width} after ${other}`).toHaveAttribute('href', fileOf(other));
-        await page.locator(`[data-theme-option="${scheme}"]`).click();
+        await themeButton.click();
+        await expect(page.locator('html')).toHaveAttribute('data-theme', scheme);
         await expect(link, `${width} after ${scheme}`).toHaveAttribute('href', fileOf(scheme));
         /* naming the file requests nothing */
         expect(asked).toEqual([]);

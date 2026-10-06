@@ -95,16 +95,8 @@ export const NAV = {
       external: true,
     },
   ] as ReadonlyArray<NavLink>,
-  appearance: {
-    label: 'Appearance',
-    light: { label: 'Light' },
-    dark: { label: 'Dark' },
-  },
-  /**
-   * Pause Motion (docs/LANDING.md 2.1, 3.2): it reads Play Motion while pressed; its button lands
-   * in V4#9 with its behaviour
-   */
-  motion: { pause: 'Pause Motion', play: 'Play Motion' },
+  /* the theme button and the motion toggle are icon buttons since the design round (docs/DESIGN.md
+     8.1): the theme button carries the editor's words, the toggle design-copy.ts NAV_ICONS */
   /** drawn for an anonymous visitor once the deployment answers that it offers a method (sign-in.tsx) */
   signIn: { label: 'Sign In' },
   newPresentation: { label: 'New Presentation', href: '/new' },

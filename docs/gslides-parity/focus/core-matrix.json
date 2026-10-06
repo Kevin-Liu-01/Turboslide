@@ -11201,7 +11201,7 @@
     {
       "id": "home.hero.frame-chrome",
       "feature": "decks",
-      "interaction": "The hero frame draws the editor's title row (the mark, the title, the saved phrase with its cloud, the agent's chip, the comments glyph, Slideshow with its play glyph, Share with its lock), the menu row, the toolbar row with the editor's glyphs for its 16 controls in the menu model's order, the filmstrip, the slide and the notes row with the shown slide's notes and `n / 9` in tabular figures, at the window's 8 px corner",
+      "interaction": "The hero frame draws the editor's title row (the mark, the title, the saved phrase with its cloud, the agent's chip, the comments glyph, Slideshow with its play glyph, Share with its lock), the menu row, the toolbar row with the editor's glyphs for its 16 controls in the menu model's order, the filmstrip, the slide and the notes row with the shown slide's notes and `n / 9` in tabular figures, at the window's 8 px corner; at 1440 and 390 in both appearances every cell of the title row that clips its overflow holds its whole line, so the title keeps its descenders",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,

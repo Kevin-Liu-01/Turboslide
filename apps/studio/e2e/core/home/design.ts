@@ -854,6 +854,47 @@ async function frameChrome(browser: Browser): Promise<void> {
       await context.close();
     }
   }
+  /* the title row's words keep their descenders at both widths: a cell that clips its overflow
+     holds its whole line box (pass 1 finding 9, pass 2 finding 4: "Onboarding plan" on a 14 px
+     line lost the g and p) */
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      try {
+        await openHome(page);
+        const clipped = await page.evaluate(() =>
+          [...document.querySelectorAll<HTMLElement>('[data-hero-frame] .ts-hero-frame-title *')]
+            .filter((el) => {
+              const s = getComputedStyle(el);
+              return (
+                s.overflowY !== 'visible' &&
+                (el.textContent ?? '').trim() !== '' &&
+                el.getClientRects().length > 0
+              );
+            })
+            .map((el) => ({
+              cls: el.className,
+              text: (el.textContent ?? '').trim(),
+              scroll: el.scrollHeight,
+              client: el.clientHeight,
+              line: getComputedStyle(el).lineHeight,
+            })),
+        );
+        const name = clipped.find((c) => c.cls.includes('ts-hero-frame-name'));
+        notes.push(
+          `${label}: the title cell ${name === undefined ? 'not read' : `${name.scroll} over ${name.client} (line ${name.line})`}`,
+        );
+        if (name === undefined) failures.push(`${label}: the title cell was not read`);
+        for (const c of clipped)
+          if (c.scroll > c.client)
+            failures.push(
+              `${label}: "${c.text}" (${c.cls}) clips its line: ${c.scroll} over ${c.client}`,
+            );
+      } finally {
+        await context.close();
+      }
+    }
   test.info().annotations.push({ type: 'frame', description: notes.join(' | ') });
   expect(failures).toEqual([]);
 }

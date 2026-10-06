@@ -684,6 +684,8 @@ export async function deriveChips(): Promise<{
   source: string;
   loopSource: string;
   loopMs: number;
+  /** each loop step's scheduled length in ms with the fixture's name, by step id (DR-D4#2) */
+  stepMs: Readonly<Record<string, number>>;
 }> {
   const recordedPath = `${RECORDED}/chips.json`;
   if (!existsSync(resolve(ROOT, recordedPath))) fail(`${recordedPath} is missing; run --record`);
@@ -1160,6 +1162,7 @@ export const HOME_NEXT_STEPS: { turnTo: number; row: { index: number; before: st
       filepath: resolve(ROOT, OUT_LOOP),
     }),
     loopMs: cycleMs,
+    stepMs: Object.fromEntries(loop.map((step) => [step.id, step.schedule.total])),
   };
 }
 

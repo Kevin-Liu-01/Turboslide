@@ -4,7 +4,14 @@ import { chromium, expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { HOME_ASSETS } from '../../../src/components/home/assets';
-import { NAV } from '../../../src/components/home/copy';
+import {
+  HOME_STEP_ICONS,
+  HOME_TITLE_ROW,
+  HOME_TOOLBAR,
+} from '../../../src/components/home/chrome.generated';
+import { HERO } from '../../../src/components/home/copy';
+import { HOME_DECK, HOME_LOOP_FACTS } from '../../../src/components/home/deck.generated';
+import { HERO_ROUND, NAV_ICONS } from '../../../src/components/home/design-copy';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';
 
@@ -24,6 +31,9 @@ export const ROWS: readonly string[] = [
   'home.radius.ladder',
   'home.scroll.regions',
   'home.pictures.all-load',
+  'home.hero.frame-chrome',
+  'home.hero.terminal-never-empty',
+  'home.hero.steps',
 ];
 
 type Theme = 'light' | 'dark';
@@ -187,7 +197,7 @@ async function navIcons(browser: Browser): Promise<void> {
         const nextAppearance = theme === 'light' ? 'Switch to dark' : 'Switch to light';
         if (nav.themeTip !== nextAppearance)
           failures.push(`${label}: the theme button's tooltip reads "${nav.themeTip}"`);
-        if (nav.motionTip !== NAV.motion.pause)
+        if (nav.motionTip !== NAV_ICONS.motion.pause)
           failures.push(`${label}: the motion toggle's tooltip reads "${nav.motionTip}"`);
         if (!nav.themeBeforeMotion)
           failures.push(`${label}: the motion toggle does not follow the theme button`);
@@ -219,12 +229,14 @@ async function navIcons(browser: Browser): Promise<void> {
         await page.evaluate(() =>
           document.querySelector<HTMLButtonElement>('[data-motion-toggle]')!.click(),
         );
-        const pressed = await page.locator('[data-motion-toggle]').getAttribute('aria-pressed');
+        const pressed = await page
+          .locator('header [data-motion-toggle]')
+          .getAttribute('aria-pressed');
         const after = await glyphs();
         await page.evaluate(() =>
           document.querySelector<HTMLButtonElement>('[data-motion-toggle]')!.click(),
         );
-        const back = await page.locator('[data-motion-toggle]').getAttribute('aria-pressed');
+        const back = await page.locator('header [data-motion-toggle]').getAttribute('aria-pressed');
         if (
           JSON.stringify(before) !== '["visible","hidden"]' ||
           pressed !== 'true' ||
@@ -664,6 +676,317 @@ async function picturesLoad(browser: Browser): Promise<void> {
   expect(failures).toEqual([]);
 }
 
+// ---------------------------------------------------------------------------------------------
+// home.hero.frame-chrome
+
+async function frameChrome(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const theme of THEMES) {
+    const { context, page } = await homeContext(browser, DESKTOP, theme);
+    const label = `1440 ${theme}`;
+    try {
+      await openHome(page);
+      const read = await page.evaluate(() => {
+        const frame = document.querySelector<HTMLElement>('[data-hero-frame]')!;
+        const text = (sel: string) =>
+          (frame.querySelector(sel)?.textContent ?? '').replace(/\s+/g, ' ').trim();
+        const glyph = (el: Element | null) => {
+          if (!(el instanceof HTMLElement)) return null;
+          const s = getComputedStyle(el);
+          return {
+            name: el.dataset['icon'] ?? '',
+            mask: s.maskImage !== 'none' || s.webkitMaskImage !== 'none',
+            w: Math.round(el.getBoundingClientRect().width),
+          };
+        };
+        const title = frame.querySelector('.ts-hero-frame-title')!;
+        /* the toolbar's cells in order: a glyph or a word each; the undo is the frame's Undo */
+        const tools = [
+          ...frame.querySelectorAll<HTMLElement>('[data-hero-tools] .ts-hero-tool'),
+        ].map((el) => ({
+          undo: el.matches('button[data-undo="hero"]'),
+          icon: glyph(el.querySelector('.ts-icon')),
+          word: el.querySelector('.ts-icon') === null ? (el.textContent ?? '').trim() : null,
+        }));
+        const counter = frame.querySelector<HTMLElement>('[data-hero-counter]');
+        return {
+          mark: title.querySelector('svg') !== null,
+          name: text('[data-hero-title]'),
+          saved: text('.ts-hero-frame-saved'),
+          titleGlyphs: [...title.querySelectorAll('.ts-icon')].map(glyph),
+          slideshow: text('.ts-hero-frame-split'),
+          share: text('.ts-hero-frame-share'),
+          menus: [...frame.querySelectorAll('.ts-hero-frame-menus > span')].map((m) =>
+            (m.textContent ?? '').trim(),
+          ),
+          tools,
+          thumbs: frame.querySelectorAll('[data-hero-filmstrip] [data-hero-thumb]').length,
+          slide: frame.querySelector('[data-hero-slide] [data-home-slides]') !== null,
+          notes: text('[data-hero-notes]'),
+          counter: (counter?.textContent ?? '').trim(),
+          counterFigures: counter === null ? '' : getComputedStyle(counter).fontVariantNumeric,
+          radius: getComputedStyle(frame).borderTopLeftRadius,
+        };
+      });
+      notes.push(
+        `${label}: title "${read.name}" "${read.saved}" ${read.titleGlyphs.map((g) => g?.name).join(',')}; ${read.tools.length} tools; notes "${read.notes}" ${read.counter}`,
+      );
+      if (!read.mark) failures.push(`${label}: no mark in the title row`);
+      if (read.name !== HOME_DECK.title) failures.push(`${label}: the title reads "${read.name}"`);
+      if (read.saved !== HOME_TITLE_ROW.saved)
+        failures.push(`${label}: the save cell reads "${read.saved}"`);
+      const wantGlyphs = [
+        HOME_TITLE_ROW.savedIcon,
+        HOME_TITLE_ROW.agentIcon,
+        HOME_TITLE_ROW.commentsIcon,
+        HOME_TITLE_ROW.slideshowIcon,
+        HOME_TITLE_ROW.slideshowMore,
+        HOME_TITLE_ROW.shareIcon,
+      ];
+      if (JSON.stringify(read.titleGlyphs.map((g) => g?.name)) !== JSON.stringify(wantGlyphs))
+        failures.push(
+          `${label}: the title row's glyphs ${read.titleGlyphs.map((g) => g?.name).join(',')}`,
+        );
+      if (read.titleGlyphs.some((g) => g === null || !g.mask || g.w === 0))
+        failures.push(`${label}: a title row glyph draws no mask`);
+      if (read.slideshow !== HOME_TITLE_ROW.slideshow || read.share !== HOME_TITLE_ROW.share)
+        failures.push(`${label}: Slideshow "${read.slideshow}", Share "${read.share}"`);
+      if (JSON.stringify(read.menus) !== JSON.stringify(HERO.stage.menus))
+        failures.push(`${label}: the menu row reads ${read.menus.join(' ')}`);
+      if (read.tools.length !== 16)
+        failures.push(`${label}: the toolbar draws ${read.tools.length} controls`);
+      HOME_TOOLBAR.forEach((cell, i) => {
+        const got = read.tools[i];
+        if (got === undefined)
+          failures.push(`${label}: no toolbar control ${i + 1} (${cell.control})`);
+        else if (got.undo !== (cell.control === 'toolbar.undo'))
+          failures.push(`${label}: toolbar control ${i + 1} is the frame's Undo: ${got.undo}`);
+        else if (
+          cell.icon !== null &&
+          (got.icon?.name !== cell.icon || !got.icon.mask || got.icon.w === 0)
+        )
+          failures.push(
+            `${label}: ${cell.control} draws ${got.icon?.name}, not the editor's ${cell.icon}`,
+          );
+        else if (cell.word !== null && got.word !== cell.word)
+          failures.push(`${label}: ${cell.control} reads "${got.word}"`);
+      });
+      if (read.thumbs !== 9 || !read.slide)
+        failures.push(`${label}: ${read.thumbs} thumbnails, slide ${read.slide}`);
+      if (read.notes !== HOME_DECK.slides.title.notes)
+        failures.push(`${label}: the notes row reads "${read.notes}"`);
+      if (read.counter !== '1 / 9' || !read.counterFigures.includes('tabular-nums'))
+        failures.push(`${label}: the counter "${read.counter}" in ${read.counterFigures}`);
+      if (read.radius !== '8px') failures.push(`${label}: the frame's corner is ${read.radius}`);
+    } finally {
+      await context.close();
+    }
+  }
+  test.info().annotations.push({ type: 'frame', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// home.hero.terminal-never-empty
+
+async function terminalNeverEmpty(browser: Browser): Promise<void> {
+  const { context, page } = await homeContext(browser, DESKTOP, 'light');
+  const failures: string[] = [];
+  const notes: string[] = [];
+  try {
+    await openHome(page);
+    await page.waitForFunction(
+      () =>
+        (window as unknown as { tsHomeMotion?: { running(): string[] } }).tsHomeMotion
+          ?.running()
+          .includes('L-H') === true,
+      undefined,
+      { timeout: 30_000 },
+    );
+    const samples = await page.evaluate(async () => {
+      const screen = document.querySelector<HTMLElement>('[data-hero-screen]')!;
+      const out: {
+        t: number;
+        visible: number;
+        lines: number;
+        atEnd: boolean;
+        restore: boolean;
+        restoreLast: boolean;
+      }[] = [];
+      const t0 = performance.now();
+      while (performance.now() - t0 < 24_000) {
+        const box = screen.getBoundingClientRect();
+        const lines = [...screen.children] as HTMLElement[];
+        const visible = lines.filter((l) => {
+          const r = l.getBoundingClientRect();
+          return (
+            r.bottom > box.top + 4 && r.top < box.bottom - 4 && (l.textContent ?? '').trim() !== ''
+          );
+        }).length;
+        const restoreAt = lines.findLastIndex((l) =>
+          (l.textContent ?? '').startsWith('$ turboslide version restore'),
+        );
+        out.push({
+          t: Math.round(performance.now() - t0),
+          visible,
+          lines: lines.length,
+          atEnd: screen.scrollTop + screen.clientHeight >= screen.scrollHeight - 2,
+          restore:
+            document.querySelector('[data-hero-step="restore"][aria-current="step"]') !== null,
+          restoreLast: restoreAt >= 0 && restoreAt >= lines.length - 3,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      return out;
+    });
+    const fewest = Math.min(...samples.map((s) => s.visible));
+    const during = samples.filter((s) => s.restore);
+    notes.push(
+      `${samples.length} samples over 24 s: fewest visible lines ${fewest}, most lines held ${Math.max(...samples.map((s) => s.lines))}; ${during.length} samples while Restore played; load ${oneMinuteLoad()}`,
+    );
+    if (samples.length < 80) failures.push(`only ${samples.length} samples in 24 s`);
+    if (fewest < 12) failures.push(`a sample showed ${fewest} lines`);
+    if (during.length === 0) failures.push('Restore did not play in 24 s');
+    const restored = during.filter((s) => s.restoreLast);
+    if (during.length > 0 && restored.length === 0)
+      failures.push("Restore's line never reached the end");
+    const lagging = during.filter((s) => s.restoreLast && !s.atEnd);
+    if (lagging.length > 0)
+      failures.push(
+        `${lagging.length} samples with Restore's line printed and the screen short of its end`,
+      );
+    const before = samples.findIndex((s) => s.restore);
+    if (before > 0 && (samples[before]?.lines ?? 0) < (samples[before - 1]?.lines ?? 0))
+      failures.push('Restore cleared the screen');
+  } finally {
+    await context.close();
+  }
+  test.info().annotations.push({ type: 'terminal', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
+// home.hero.steps
+
+async function heroSteps(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const theme of THEMES) {
+    const { context, page } = await homeContext(browser, DESKTOP, theme);
+    const label = `1440 ${theme}`;
+    try {
+      await openHome(page);
+      const rest = await page.evaluate(() => {
+        const terminal = document.querySelector<HTMLElement>('[data-hero-terminal]')!;
+        const rows = [...document.querySelectorAll<HTMLElement>('[data-hero-step]')];
+        const done = getComputedStyle(document.documentElement)
+          .getPropertyValue('--pt-status-done')
+          .trim();
+        return {
+          head: [...(terminal.querySelector('.ts-hero-terminal-head')?.children ?? [])]
+            .map((el) => (el.textContent ?? '').trim())
+            .filter((t) => t !== '')
+            .join(' '),
+          pause: terminal.querySelector('.ts-hero-terminal-head [data-motion-toggle]') !== null,
+          inFoot: rows.every((r) => r.closest('[data-hero-terminal]') === terminal),
+          rows: rows.map((r) => {
+            const glyph = r.querySelector<HTMLElement>('.is-done');
+            const length = r.querySelector<HTMLElement>('.ts-hero-step-length');
+            return {
+              id: r.dataset['heroStep'] ?? '',
+              label: (r.querySelector('.ts-hero-step-label')?.textContent ?? '').trim(),
+              length: (length?.textContent ?? '').trim(),
+              tabular:
+                length !== null &&
+                getComputedStyle(length).fontVariantNumeric.includes('tabular-nums'),
+              glyph: glyph?.dataset['icon'] ?? '',
+              glyphShown: glyph !== null && getComputedStyle(glyph).visibility === 'visible',
+              glyphColor: glyph === null ? '' : getComputedStyle(glyph).color,
+              text: (r.textContent ?? '').trim(),
+            };
+          }),
+          doneColor: done,
+          cli: document.querySelectorAll('.ts-hero-step-cli, [data-caption-row]').length,
+        };
+      });
+      notes.push(
+        `${label}: head "${rest.head}"; rows ${rest.rows.map((r) => `${r.label} ${r.length}`).join(', ')}`,
+      );
+      if (
+        rest.head !==
+        `${HERO_ROUND.terminal.agent} ${HERO_ROUND.terminal.recorded(HOME_LOOP_FACTS.captionSeconds)}`
+      )
+        failures.push(`${label}: the head reads "${rest.head}"`);
+      if (!rest.pause) failures.push(`${label}: no pause button in the head`);
+      if (!rest.inFoot || rest.rows.length !== 4)
+        failures.push(`${label}: ${rest.rows.length} rows, in the foot ${rest.inFoot}`);
+      if (rest.cli > 0) failures.push(`${label}: a CLI fragment under a step`);
+      HERO.stage.steps.forEach((step, i) => {
+        const row = rest.rows[i];
+        const want = HERO_ROUND.terminal.length(HOME_LOOP_FACTS.stepSeconds[step.id]);
+        if (row === undefined || row.id !== step.id || row.label !== step.label) {
+          failures.push(`${label}: row ${i + 1} is ${row?.id} "${row?.label}"`);
+          return;
+        }
+        if (row.length !== want || !/^\d+\.\d s$/.test(row.length) || !row.tabular)
+          failures.push(`${label}: ${step.id} length "${row.length}", tabular ${row.tabular}`);
+        if (row.glyph !== HOME_STEP_ICONS.done || !row.glyphShown)
+          failures.push(`${label}: ${step.id} at rest draws no done glyph`);
+        if (/version restore|slide new|block set/.test(row.text))
+          failures.push(`${label}: ${step.id} carries CLI words`);
+      });
+      /* the done glyph in the status green: the token's colour as the browser computes it */
+      const green = await page.evaluate((token) => {
+        const probe = document.createElement('i');
+        probe.style.color = token;
+        document.body.append(probe);
+        const c = getComputedStyle(probe).color;
+        probe.remove();
+        return c;
+      }, rest.doneColor);
+      for (const row of rest.rows)
+        if (row.glyphColor !== green)
+          failures.push(`${label}: ${row.id}'s glyph is ${row.glyphColor}, not ${green}`);
+      /* the playing row: aria-current, the play glyph and the 2 px countdown rule filling */
+      await page.waitForFunction(
+        () => document.querySelector('[data-hero-step][aria-current="step"]') !== null,
+        undefined,
+        { timeout: 30_000 },
+      );
+      const playing = await page.evaluate(async () => {
+        const row = document.querySelector<HTMLElement>('[data-hero-step][aria-current="step"]')!;
+        const before = getComputedStyle(row, '::before');
+        const first = parseFloat(row.style.getPropertyValue('--ts-step-progress') || '0');
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        const later = parseFloat(row.style.getPropertyValue('--ts-step-progress') || '0');
+        const play = row.querySelector<HTMLElement>('.is-playing');
+        return {
+          id: row.dataset['heroStep'],
+          ruleHeight: before.height,
+          first,
+          later,
+          play: play !== null && getComputedStyle(play).visibility === 'visible',
+        };
+      });
+      notes.push(
+        `${label}: playing ${playing.id}, rule ${playing.ruleHeight}, progress ${playing.first.toFixed(2)} to ${playing.later.toFixed(2)}`,
+      );
+      if (playing.ruleHeight !== '2px')
+        failures.push(`${label}: the countdown rule is ${playing.ruleHeight}`);
+      if (!(playing.later > playing.first) && playing.later < 1)
+        failures.push(
+          `${label}: the countdown did not fill (${playing.first} to ${playing.later})`,
+        );
+      if (!playing.play) failures.push(`${label}: the playing row draws no play glyph`);
+    } finally {
+      await context.close();
+    }
+  }
+  test.info().annotations.push({ type: 'steps', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
 export function rows(): void {
   if (entered('home.nav.icons'))
     test(title('home.nav.icons'), async ({ browser }) => {
@@ -685,6 +1008,21 @@ export function rows(): void {
     test(title('home.scroll.regions'), async () => {
       test.setTimeout(360_000);
       await scrollRegions();
+    });
+  if (entered('home.hero.frame-chrome'))
+    test(title('home.hero.frame-chrome'), async ({ browser }) => {
+      test.setTimeout(240_000);
+      await frameChrome(browser);
+    });
+  if (entered('home.hero.terminal-never-empty'))
+    test(title('home.hero.terminal-never-empty'), async ({ browser }) => {
+      test.setTimeout(240_000);
+      await terminalNeverEmpty(browser);
+    });
+  if (entered('home.hero.steps'))
+    test(title('home.hero.steps'), async ({ browser }) => {
+      test.setTimeout(240_000);
+      await heroSteps(browser);
     });
   if (entered('home.pictures.all-load'))
     test(title('home.pictures.all-load'), async ({ browser }) => {

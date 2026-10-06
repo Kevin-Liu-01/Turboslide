@@ -186,16 +186,23 @@ function spans(texts: readonly string[]): HTMLElement[] {
   });
 }
 
-/** Appends a logical line; the oldest lines leave the top when the screen is full, as a terminal scrolls. */
+/**
+ * Appends a logical line; the oldest lines leave the top past the screen's keep, as a terminal
+ * scrolls. A screen that scrolls (`data-keep`, the hero's terminal, docs/DESIGN.md 8.2) keeps that
+ * many lines and follows its end while its end is in view; any other keeps its slots.
+ */
 export function addEntry(screen: Screen, text: string): Entry {
   const entry: Entry = { lines: {}, text };
   for (const width of widthsOf(screen)) {
     const host = screen[width] as HTMLElement;
+    const keep = Number(host.dataset['keep']) || PANEL_WIDTHS[width].slots;
+    const atEnd = host.scrollTop + host.clientHeight >= host.scrollHeight - 24;
     const els = spans(formatLines([text], width, { overlong: 'break' }));
     host.append(...els);
     entry.lines[width] = els;
-    const extra = host.children.length - PANEL_WIDTHS[width].slots;
+    const extra = host.children.length - keep;
     for (let i = 0; i < extra; i += 1) host.firstElementChild?.remove();
+    if (atEnd) host.scrollTop = host.scrollHeight;
   }
   return entry;
 }
@@ -205,13 +212,16 @@ function setEntry(screen: Screen, entry: Entry, text: string): void {
   if (entry.text === text) return;
   entry.text = text;
   for (const width of widthsOf(screen)) {
+    const host = screen[width] as HTMLElement;
+    const atEnd = host.scrollTop + host.clientHeight >= host.scrollHeight - 24;
     const old = entry.lines[width] ?? [];
     const els = spans(formatLines([text], width, { overlong: 'break' }));
     const first = old[0];
     if (first !== undefined && first.isConnected) first.before(...els);
-    else screen[width]?.append(...els);
+    else host.append(...els);
     for (const el of old) el.remove();
     entry.lines[width] = els;
+    if (atEnd && host.dataset['keep'] !== undefined) host.scrollTop = host.scrollHeight;
   }
 }
 

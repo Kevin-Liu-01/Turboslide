@@ -9,6 +9,7 @@ import type { Browser, BrowserContext, Page, Request } from '@playwright/test';
 import { HOME_LOOP_FACTS } from '../../../src/components/home/deck.generated';
 import { FACTS_DATA } from '../../../src/components/home/facts-data';
 import { HOME_LOOP } from '../../../src/components/home/loop.generated';
+import { HERO_ROUND } from '../../../src/components/home/design-copy';
 import { HOME_RUN } from '../../../src/components/home/run.generated';
 import { extraHTTPHeaders, title } from '../lib';
 
@@ -236,6 +237,7 @@ function measureLoad(): { load: number; read: boolean } {
    115,243). The first lines, 80,000, 300,000 and 90,000, are Round 2's goals after its entry chunk
    split and Inter subset ---- */
 const DOCUMENT_LINE = 100_000;
+const PAGE_CSS_LINE = 20_000;
 const OWN_SCRIPT_LINE = 360_000;
 const OWN_SCRIPT_GZIP_LINE = 120_000;
 
@@ -437,7 +439,8 @@ async function heroRun(browser: Browser): Promise<{ failures: string[]; notes: s
           failures.push(`${id}: the screen lacks "$ ${step.command}"`);
         for (const line of step.answer)
           if (!text.includes(flat(line))) failures.push(`${id}: the screen lacks "${line}"`);
-        if (at.screen.length > 22) failures.push(`${id}: ${at.screen.length} lines in 22 slots`);
+        /* the terminal keeps its lines and scrolls (DESIGN.md 8.2): at most its keep of 64 */
+        if (at.screen.length > 64) failures.push(`${id}: ${at.screen.length} lines over 64`);
       }
       /* the frame: Restore takes slide 5 out (n / 8), New Slide cuts to slide 5, the cycle's end
          cuts back to slide 1 */
@@ -1240,26 +1243,24 @@ export function rows(): void {
           notes.push(
             `${label}: h1 ${facts.fontPx.toFixed(2)} px at weight ${facts.weight}, tracking ${facts.tracking.toFixed(4)} em, lines ${facts.lines.map((l) => l.text).join(' / ')}, h2 ${[...new Set(facts.h2)].join(', ')} px, weights ${facts.weights.join(', ')}, sheets ${facts.sheets.map((s) => `${s.sheet} ${s.width}`).join(', ')}`,
           );
-          /* clamp(40px, 6.67vw, 96px): 96 at 1,440 and over, 85.4 at 1,280, 40 under 720 */
-          const wantPx = narrow ? 40 : Math.min(96, Math.max(40, 0.0667 * size.width));
+          /* restated in the design round, DR-D4#2 (docs/DESIGN.md 8.2): clamp(40px, 5.28vw, 76px),
+             76 at 1,440 and over, 67.6 at 1,280, 44 under 720 */
+          const wantPx = narrow ? 44 : Math.min(76, Math.max(40, 0.0528 * size.width));
           if (Math.abs(facts.fontPx - wantPx) > 1)
             failures.push(
               `${label}: the h1 draws at ${facts.fontPx.toFixed(2)} px, not ${wantPx.toFixed(1)}`,
             );
           if (facts.inSlide) failures.push(`${label}: the h1 sits in a slide`);
           if (facts.weight !== '500') failures.push(`${label}: the h1 weighs ${facts.weight}`);
-          const wantTrack = narrow ? -0.032 : -0.042;
+          const wantTrack = narrow ? -0.034 : -0.042;
           if (Math.abs(facts.tracking - wantTrack) > 0.0015)
             failures.push(`${label}: the h1 tracks ${facts.tracking.toFixed(4)} em`);
-          if (
-            JSON.stringify(facts.lines.map((l) => l.text)) !==
-            JSON.stringify(['Build the pitch,', 'present it and', 'send the link'])
-          )
+          if (JSON.stringify(facts.lines.map((l) => l.text)) !== JSON.stringify(HERO_ROUND.h1Lines))
             failures.push(
               `${label}: the h1's lines read ${facts.lines.map((l) => l.text).join(' / ')}`,
             );
-          if (new Set(facts.lines.map((l) => l.top)).size !== 3)
-            failures.push(`${label}: the h1 does not draw three lines`);
+          if (new Set(facts.lines.map((l) => l.top)).size !== 2)
+            failures.push(`${label}: the h1 does not draw two lines`);
           if (facts.h1Bottom > facts.stageTop)
             failures.push(`${label}: the h1 ends at ${facts.h1Bottom}, below the stage's top`);
           /* clamp(30px, 3.9vw, 54px): 54 px at 1440, 30 at 390 */
@@ -1284,9 +1285,10 @@ export function rows(): void {
 
   test(title('home.hero.stage'), async ({ browser }) => {
     test.setTimeout(300_000);
-    /* B's first screen (LANDING.md 2.2): the editor frame and the terminal side by side at 1440,
-       stacked at 390; slide 1 in the first viewport; the terminal's transcript in its 22 slots;
-       the counter "1 / 9"; no selection blue at rest */
+    /* B's first screen (LANDING.md 2.2; restated in the design round, DR-D4#2, DESIGN.md 8.2):
+       the editor frame and the terminal side by side at 1440, both 480 px tall, stacked at 390;
+       slide 1 in the first viewport; the terminal's transcript resting whole at 1440; the
+       notes row's counter "1 / 9"; no selection blue at rest */
     const failures: string[] = [];
     const notes: string[] = [];
     const transcript = HOME_RUN.screens.transcript.narrow;
@@ -1334,20 +1336,17 @@ export function rows(): void {
               thumbs: document.querySelectorAll('[data-hero-filmstrip] [data-hero-thumb]').length,
               lines: slots.map((s) => s.textContent ?? ''),
               cut: slots.filter((s) => s.scrollWidth > s.clientWidth + 1).length,
-              outside: screen
-                ? slots.filter(
-                    (s) =>
-                      s.getBoundingClientRect().bottom >
-                      screen.getBoundingClientRect().bottom + 0.5,
-                  ).length
-                : -1,
+              /* the transcript rests scrolled to its last line (DESIGN.md 8.2) */
+              atEnd: screen
+                ? screen.scrollTop + screen.clientHeight >= screen.scrollHeight - 1
+                : false,
               wider: screen ? screen.scrollWidth > screen.clientWidth + 1 : true,
               blues,
             };
           }, SELECTION_BLUE);
           const label = `${size.width} ${theme}`;
           notes.push(
-            `${label}: frame ${JSON.stringify(facts.frame)}, terminal ${JSON.stringify(facts.terminal)}, slide ${JSON.stringify(facts.slide)}, counter "${facts.counter}", ${facts.lines.length} lines, ${facts.cut} cut, ${facts.outside} outside`,
+            `${label}: frame ${JSON.stringify(facts.frame)}, terminal ${JSON.stringify(facts.terminal)}, slide ${JSON.stringify(facts.slide)}, counter "${facts.counter}", ${facts.lines.length} lines, ${facts.cut} cut, at the end ${facts.atEnd}`,
           );
           const f = facts.frame;
           const t = facts.terminal;
@@ -1361,7 +1360,7 @@ export function rows(): void {
               failures.push(`${label}: the frame is ${f.w} px and the terminal ${t.w} px`);
             if (Math.abs(t.x - (f.x + f.w) - 16) > 1)
               failures.push(`${label}: the frame and the terminal are ${t.x - f.x - f.w} px apart`);
-            if (Math.abs(f.h - 408) > 1 || Math.abs(t.h - 408) > 1)
+            if (Math.abs(f.h - 480) > 1 || Math.abs(t.h - 480) > 1)
               failures.push(`${label}: the frame is ${f.h} px tall and the terminal ${t.h}`);
             if (Math.abs(f.y - t.y) > 1) failures.push(`${label}: the two panels do not align`);
           } else {
@@ -1378,14 +1377,13 @@ export function rows(): void {
           if (facts.title !== 'Onboarding plan')
             failures.push(`${label}: the title row reads ${facts.title}`);
           if (facts.thumbs !== 9) failures.push(`${label}: ${facts.thumbs} thumbnails`);
-          if (facts.lines.length > 22)
-            failures.push(`${label}: ${facts.lines.length} lines over 22 slots`);
           if (JSON.stringify(facts.lines) !== JSON.stringify(transcript))
             failures.push(`${label}: the terminal's lines differ from the recorded transcript`);
-          if (facts.cut > 0 || facts.outside > 0 || facts.wider)
-            failures.push(
-              `${label}: ${facts.cut} lines cut, ${facts.outside} outside the terminal`,
-            );
+          if (facts.cut > 0 || facts.wider)
+            failures.push(`${label}: ${facts.cut} lines cut, wider ${facts.wider}`);
+          /* at 1440 the transcript rests whole in its slots (DESIGN.md 8.2) */
+          if (size.width >= 1440 && !facts.atEnd)
+            failures.push(`${label}: the transcript does not rest whole in the terminal`);
           if (facts.blues.length > 0)
             failures.push(`${label}: the selection blue at rest on ${facts.blues.join(', ')}`);
         } finally {
@@ -1790,7 +1788,11 @@ export function rows(): void {
         notes.push(
           `${label}: the page's CSS ${cssBr} B brotli; own bytes ${docBr + cssBr + routeBr} B`,
         );
-        if (cssBr > 16_000) failures.push(`${label}: the page's CSS is ${cssBr} B brotli`);
+        /* the design round's question 32 (docs/DESIGN.md 13, 8.16): the first screen's glyph masks
+           took the page's CSS over 16 KB brotli (15,194 B at DR-D4#1, 16,770 B with the hero's
+           masks at DR-D4#2), so the line is 20 KB brotli */
+        if (cssBr > PAGE_CSS_LINE)
+          failures.push(`${label}: the page's CSS is ${cssBr} B brotli (line ${PAGE_CSS_LINE})`);
         if (docBr + cssBr + routeBr > 70_000)
           failures.push(`${label}: the first screen's own bytes are ${docBr + cssBr + routeBr} B`);
       } finally {

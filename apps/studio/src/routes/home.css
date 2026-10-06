@@ -551,8 +551,9 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   contain-intrinsic-size: 1600px 900px;
 }
 
-/* ---- the hero (LANDING.md 2.2): the h1 as page text at 96 px over the editor frame and the
-   agent's terminal, side by side, 16 px apart, 408 px tall ---- */
+/* ---- the hero (docs/DESIGN.md 8.2; LANDING.md 2.2): the h1 at 76 px on two lines with the lead
+   and the buttons beside it, then the editor frame and the agent's terminal side by side, 16 px
+   apart, 480 px tall, the stage starting near y 330 at 1440 ---- */
 .ts-band-hero {
   padding: 32px 0 96px;
 }
@@ -561,33 +562,40 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   outline: none;
 }
 
-/* three locked lines, 96 px at 1,440 and over (about 85 px at 1,280), the LCP element; nothing
-   moves it (3.7) */
+.ts-hero-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 384px);
+  align-items: end;
+  gap: 24px 48px;
+}
+
+/* two locked lines, 76 px at 1,440 and over, the LCP element; nothing moves it (3.7) */
 .ts-h1 {
   margin: 0;
   font-family: var(--pt-display);
   font-weight: 500;
-  font-size: clamp(40px, 6.67vw, 96px);
-  line-height: 0.98;
+  font-size: clamp(40px, 5.28vw, 76px);
+  line-height: 1;
   letter-spacing: -0.042em;
   color: var(--pt-ink);
-}
-
-.ts-h1 {
   white-space: nowrap;
 }
 
-.ts-hero-lead-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px 40px;
-  margin-top: 28px;
+/* the side keeps the height of a four line lead over the buttons (4 lines of 29.45 px, the 24 px
+   gap, the 40 px buttons and its 4 px foot), the words at its foot: the
+   fallback face wraps the three lines Inter draws into four, and the box holds that height
+   whichever face paints, so the stage never moves when Inter arrives (CLS 0) */
+.ts-hero-side {
+  display: grid;
+  align-content: end;
+  gap: 24px;
+  min-width: 0;
+  min-height: 186px;
+  padding-bottom: 4px;
 }
 
 .ts-hero-lead {
   min-width: 0;
-  max-width: 560px;
 }
 
 /* the stage: the frame 644 px and the terminal 364 px at 1,024 px of content */
@@ -595,19 +603,17 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   display: grid;
   grid-template-columns: minmax(0, 644fr) minmax(0, 364fr);
   gap: 16px;
-  height: 408px;
-  margin-top: 28px;
+  height: 480px;
+  margin-top: 40px;
 }
 
-/* the editor frame: the editor's chrome is a box; the slide in it is not framed */
+/* ---- the editor frame (8.2): a .pt-window holding the editor's title row, menu row, toolbar,
+   filmstrip and stage, and notes row; the slide in it is not framed ---- */
 .ts-hero-frame {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 40px 32px minmax(0, 1fr);
+  grid-template-rows: 40px 30px 36px minmax(0, 1fr) 34px;
   min-width: 0;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
-  border-radius: var(--pt-radius-lg);
   overflow: hidden;
 }
 
@@ -616,8 +622,8 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   align-items: center;
   gap: 10px;
   min-width: 0;
-  padding: 0 12px;
-  border-bottom: 1px solid var(--pt-hair);
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid var(--pt-hair-soft);
 }
 
 .ts-hero-frame-mark {
@@ -637,12 +643,105 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   color: var(--pt-ink);
 }
 
-.ts-hero-frame-counter {
-  margin-left: auto;
-  font-size: 13px;
-  font-variant-numeric: var(--pt-numerals);
+/* the save cell: the cloud and the saved phrase in the secondary ink, as the title row draws them */
+.ts-hero-frame-saved {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
   white-space: nowrap;
   color: var(--pt-titanium);
+}
+
+.ts-hero-frame-saved > .ts-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--pt-titanium);
+}
+
+.ts-hero-frame-r {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* the agent in the presence slot: a square identity chip with the CLI's glyph (the ladder keeps
+   identity chips square) */
+.ts-hero-frame-chip {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--pt-paper);
+  background: var(--pt-ink);
+}
+
+.ts-hero-frame-chip > .ts-icon {
+  width: 14px;
+  height: 14px;
+  color: inherit;
+}
+
+.ts-hero-frame-ib {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+}
+
+/* Slideshow and Share: the control rung, 28 px tall here, as the title row's split and Share */
+.ts-hero-frame-split,
+.ts-hero-frame-share {
+  display: inline-flex;
+  align-items: stretch;
+  height: 28px;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--pt-radius);
+}
+
+.ts-hero-frame-split {
+  color: var(--pt-paper);
+  background: var(--pt-ink);
+}
+
+.ts-hero-frame-split > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-hero-frame-split > .is-main {
+  padding: 0 10px;
+}
+
+.ts-hero-frame-split > .is-more {
+  padding: 0 6px;
+  border-left: 1px solid color-mix(in srgb, var(--pt-paper) 30%, transparent);
+}
+
+.ts-hero-frame-split .ts-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--pt-paper);
+}
+
+.ts-hero-frame-share {
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-hero-frame-share .ts-icon {
+  width: 12px;
+  height: 12px;
 }
 
 /* the drawn menu row (aria-hidden; the working menus are the menus band's) */
@@ -653,11 +752,87 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   min-width: 0;
   padding: 0 12px;
   overflow: hidden;
-  border-bottom: 1px solid var(--pt-hair);
   font-size: 13px;
   white-space: nowrap;
   color: var(--pt-ink-2);
   pointer-events: none;
+}
+
+/* the toolbar: the editor's sixteen controls with nothing selected, glyphs at 16 px in 28 px
+   cells, the rules the model draws between groups; the undo is the frame's Undo */
+.ts-hero-frame-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  border-top: 1px solid var(--pt-hair-soft);
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+/* the drawn controls' groups take no box of their own: their cells sit in the toolbar's row */
+.ts-hero-tools-drawn {
+  display: contents;
+}
+
+.ts-hero-tool {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pt-radius);
+  background: none;
+  font: 13px / 1 var(--pt-text);
+  color: var(--pt-ink-2);
+}
+
+.ts-hero-tool .ts-icon {
+  color: var(--pt-ink-2);
+}
+
+.ts-hero-tool.is-word {
+  padding: 0 7px;
+}
+
+/* the pointer is the pressed tool at rest, as the editor's Select */
+.ts-hero-tool[data-on] {
+  background: var(--pt-plate);
+}
+
+.ts-hero-tool[data-on] .ts-icon {
+  color: var(--pt-ink);
+}
+
+button.ts-hero-tool {
+  cursor: pointer;
+}
+
+button.ts-hero-tool:hover {
+  background: var(--pt-plate);
+}
+
+button.ts-hero-tool:hover .ts-icon {
+  color: var(--pt-ink);
+}
+
+button.ts-hero-tool[aria-disabled='true'] {
+  cursor: default;
+  background: none;
+}
+
+button.ts-hero-tool[aria-disabled='true'] .ts-icon {
+  color: var(--pt-disabled);
+}
+
+.ts-hero-tool-rule {
+  flex: 0 0 1px;
+  height: 18px;
+  margin: 0 5px;
+  background: var(--pt-hair);
 }
 
 .ts-hero-frame-body {
@@ -676,7 +851,7 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   padding: 8px 6px 8px 2px;
   overflow: hidden;
   list-style: none;
-  border-right: 1px solid var(--pt-hair);
+  border-right: 1px solid var(--pt-hair-soft);
 }
 
 .ts-hero-thumb {
@@ -700,7 +875,6 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   font-weight: 500;
   line-height: 1;
   text-align: right;
-  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-titanium);
 }
 
@@ -721,7 +895,7 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   display: grid;
   place-items: center;
   min-width: 0;
-  padding: 16px 15px;
+  padding: 14px 15px;
   background: var(--pt-plate);
 }
 
@@ -730,6 +904,30 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   max-width: 540px;
   margin: 0;
   background: var(--paper, var(--pt-paper));
+}
+
+/* the notes row: the shown slide's speaker notes and the counter, in tabular figures */
+.ts-hero-frame-notes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+  padding: 0 14px;
+  border-top: 1px solid var(--pt-hair-soft);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ts-hero-frame-notes-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--pt-ink-2);
+}
+
+.ts-hero-frame-counter {
+  flex: 0 0 auto;
+  color: var(--pt-titanium);
 }
 
 /* slide 1: the renderer's title layout; the title and the subtitle are object boxes in its flow,
@@ -772,38 +970,73 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   pointer-events: none;
 }
 
-/* the terminal: the page's narrow panel, 22 slots of 16 px at 12 px (LANDING.md 2.0 "The two
-   panels"); the one other monospace surface is the agents band's console. On the dark page the
-   #101010 panel sits on #070707, so it draws the page's hairline as its edge (B's terminal) */
+/* ---- the terminal (8.2): the page's narrow panel at the window corner; the head names the agent
+   and the recording beside the motion toggle, the screen keeps every line the loop prints and
+   scrolls to its end inside the shared bar with the ink thumb, and the four steps are rows in its
+   foot. On the dark page the #101010 panel sits on #070707, so it draws the page's hairline as its
+   edge (B's terminal) ---- */
 :root[data-theme='dark'] .ts-hero-terminal {
   box-shadow: inset 0 0 0 1px var(--pt-hair);
 }
 
 .ts-hero-terminal {
+  /* the panel's hairline, from the panel's own text in both appearances */
+  --ts-panel-hair: color-mix(in srgb, var(--pt-panel-text) 16%, transparent);
   display: grid;
-  grid-template-rows: 32px minmax(0, 1fr);
+  grid-template-rows: 40px minmax(0, 1fr) auto;
   min-width: 0;
-  border-radius: var(--pt-radius-lg);
   overflow: hidden;
 }
 
 .ts-hero-terminal-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 12px;
-  font-size: 12px;
-  line-height: 1;
+  gap: 8px;
+  min-width: 0;
+  padding: 0 4px 0 12px;
+  font: 13px / 1 var(--pt-text);
   white-space: nowrap;
   color: var(--pt-panel-dim, rgba(255, 255, 255, 0.6));
-  box-shadow: inset 0 -1px 0 var(--pt-hair-on-ink);
+  box-shadow: inset 0 -1px 0 var(--ts-panel-hair);
 }
 
+.ts-hero-terminal-head > .ts-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--pt-panel-text);
+}
+
+.ts-hero-terminal-who {
+  color: var(--pt-panel-text);
+}
+
+.ts-hero-terminal-recorded {
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the head's motion toggle: the shell's icon square on the panel's ink */
+.ts-hero-terminal .ts-motion-toggle.pt-ib {
+  width: 28px;
+  height: 28px;
+  color: var(--pt-panel-text);
+}
+
+.ts-hero-terminal .ts-motion-toggle .ts-icon {
+  color: var(--pt-panel-text);
+}
+
+.ts-hero-terminal .ts-motion-toggle.pt-ib:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: transparent;
+}
+
+/* 19 slots of 16 px between the head and the four 28 px rows at 1440, so the transcript rests whole */
 .ts-hero-screen {
   display: block;
   min-height: 0;
-  padding: 12px;
+  padding: 8px 12px;
   overflow-x: hidden;
   overflow-y: auto;
   font-size: 12px;
@@ -818,29 +1051,39 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   white-space: pre;
 }
 
-/* the step tabs (V1#15): four across the content width, 8 px apart, each a 2 px ink rule on top
-   (the countdown, filled by `--ts-step-progress` while its step plays), its label and its CLI words.
-   One pseudo element draws the rule: the hair track is its ground and the ink countdown a solid
-   layer over it sized by the progress (grammar.css draws its crosses with the same one colour
-   layers), so the chrome lint reads one owner of the line, not two at one seam (check step 18) */
+/* the steps: four rows in the panel's foot, each its glyph, label and length in tabular seconds;
+   a step done draws the done glyph in the status green, the playing step the play glyph and the
+   2 px countdown rule in the panel's ink across its top, filled by `--ts-step-progress`. One
+   pseudo element draws the rule: the hair track is its ground and the countdown a solid layer over
+   it sized by the progress (grammar.css draws its crosses with the same one colour layers) */
 .ts-hero-steps {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 16px;
+  box-shadow: inset 0 1px 0 var(--ts-panel-hair);
 }
 
 .ts-hero-step {
   position: relative;
   display: grid;
-  gap: 2px;
-  min-height: 56px;
-  padding: 10px 0 0;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  height: 28px;
+  padding: 0 12px;
   border: 0;
   background: none;
+  font: 13px / 1 var(--pt-text);
   text-align: left;
-  color: var(--pt-ink);
+  color: var(--pt-panel-dim, rgba(255, 255, 255, 0.6));
   cursor: pointer;
+}
+
+.ts-hero-step + .ts-hero-step {
+  box-shadow: inset 0 1px 0 var(--ts-panel-hair);
+}
+
+.ts-hero-step:hover {
+  color: var(--pt-panel-text);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .ts-hero-step::before {
@@ -850,31 +1093,44 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
   top: 0;
   width: 100%;
   height: 2px;
-  background:
-    linear-gradient(var(--pt-ink), var(--pt-ink)) 0 0 / calc(var(--ts-step-progress, 0) * 100%) 100%
-      no-repeat,
-    var(--pt-hair);
+  background: linear-gradient(var(--pt-panel-text), var(--pt-panel-text)) 0 0 /
+    calc(var(--ts-step-progress, 0) * 100%) 100% no-repeat;
+  pointer-events: none;
+}
+
+.ts-hero-step > .ts-icon {
+  grid-area: 1 / 1;
+  width: 14px;
+  height: 14px;
+  visibility: hidden;
+}
+
+.ts-hero-step > .is-done {
+  color: var(--pt-status-done);
+}
+
+.ts-hero-step > .is-playing {
+  color: var(--pt-panel-text);
+}
+
+.ts-hero-step[data-done]:not([aria-current]) > .is-done,
+.ts-hero-step[aria-current] > .is-playing {
+  visibility: visible;
+}
+
+.ts-hero-step[aria-current] {
+  color: var(--pt-panel-text);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .ts-hero-step-label {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.ts-hero-step-cli {
-  font-size: 13px;
-  line-height: 1.3;
-  color: var(--pt-titanium);
-}
-
-.ts-hero-caption-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 40px;
-  margin-top: 8px;
+.ts-hero-step-length {
+  color: var(--pt-panel-dim, rgba(255, 255, 255, 0.6));
 }
 
 /* ---- the numbers row (LANDING.md 2.3): four ruled cells, still on purpose ---- */
@@ -1966,11 +2222,11 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 
   .ts-hero-frame {
-    height: 408px;
+    height: 480px;
   }
 
   .ts-hero-terminal {
-    height: 408px;
+    height: 440px;
   }
 }
 
@@ -1988,10 +2244,14 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     width: 46%;
   }
 
-  .ts-hero-lead-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+  /* the lead and the buttons under the h1 */
+  .ts-hero-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-hero-side {
+    max-width: 560px;
+    min-height: 0;
   }
 }
 
@@ -2050,43 +2310,61 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     margin-top: 8px;
   }
 
-  /* the hero (LANDING.md 2.2 "Layout at 390"): the h1 at 40 px in its three lines, the lead at
-     17 px, the buttons stacked at 44 px, then the frame at 358 px (the slide at 326 by 183, the
-     filmstrip one row of 64 by 36 thumbnails under it that scrolls inside the frame) and the
-     terminal under it, 22 slots of 18 px */
+  /* the hero (DESIGN.md 8.2 at 390): the h1 at 44 px on its two lines (the LCP element over the
+     lead), the lead at 17 px, the buttons stacked at 44 px, then the frame at 358 px (the title
+     row with the mark, the title, the play glyph and Share; the menu row; the slide at 326 by 183;
+     the filmstrip one row of 64 by 36 thumbnails under it, its bar showing; the notes row) and the
+     terminal under it, 14 slots of 18 px over its four step rows */
   .ts-band-hero {
     padding: 32px 0 64px;
   }
 
   .ts-h1 {
+    font-size: 44px;
     line-height: 1;
-    letter-spacing: -0.032em;
+    letter-spacing: -0.034em;
+    white-space: normal;
   }
 
-  .ts-hero-lead-row {
-    flex-direction: column;
-    align-items: stretch;
+  .ts-hero-head {
     gap: 24px;
+  }
+
+  .ts-hero-side {
+    gap: 24px;
+  }
+
+  /* the lead at 16 px under 720 px, so the h1's two lines stay the largest text and the LCP
+     element on a warm visit as on a cold one */
+  .ts-hero-lead {
+    font-size: 16px;
   }
 
   .ts-hero-stage {
     grid-template-columns: minmax(0, 1fr);
     height: auto;
+    margin-top: 32px;
   }
 
-  /* the column's rails are the frame's sides under 720 px (the gutter is 0): the frame draws its
-     top and bottom rules alone, and the dark terminal its top and bottom hairlines (check step 18) */
   .ts-hero-frame {
-    grid-template-rows: 36px 32px auto;
+    grid-template-rows: 40px 32px auto 34px;
     height: auto;
-    border-left: 0;
-    border-right: 0;
+  }
+
+  .ts-hero-frame-saved,
+  .ts-hero-frame-chip,
+  .ts-hero-frame-ib,
+  .ts-hero-frame-split .ts-hero-frame-word,
+  .ts-hero-frame-tools {
+    display: none;
+  }
+
+  .ts-hero-frame-split > .is-main {
+    padding: 0 9px;
   }
 
   :root[data-theme='dark'] .ts-hero-terminal {
-    box-shadow:
-      inset 0 1px 0 var(--pt-hair),
-      inset 0 -1px 0 var(--pt-hair);
+    box-shadow: inset 0 0 0 1px var(--pt-hair);
   }
 
   .ts-hero-frame-body {
@@ -2102,11 +2380,11 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   .ts-hero-filmstrip {
     flex-direction: row;
     gap: 8px;
-    padding: 8px 16px 12px;
+    padding: 8px 16px 8px;
     overflow-x: auto;
     overflow-y: hidden;
     border-right: 0;
-    border-top: 1px solid var(--pt-hair);
+    border-top: 1px solid var(--pt-hair-soft);
   }
 
   .ts-hero-thumb {
@@ -2114,10 +2392,12 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 
   .ts-hero-terminal {
-    height: calc(32px + 24px + 22 * 18px);
+    height: auto;
+    grid-template-rows: 40px calc(24px + 14 * 18px) auto;
   }
 
   .ts-hero-screen {
+    padding: 12px;
     line-height: 18px;
   }
 
@@ -2125,14 +2405,8 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     height: 18px;
   }
 
-  /* the step tabs in two rows of two at 44 px */
-  .ts-hero-steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 12px;
-  }
-
   .ts-hero-step {
-    min-height: 44px;
+    height: 44px;
   }
 
   /* the numbers row: two by two, each cell 171 px, the figure at 24 px */
@@ -2147,10 +2421,6 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
   .ts-number-sentence {
     font-size: 15px;
-  }
-
-  .ts-hero-caption-row {
-    margin-top: 12px;
   }
 
   /* the show's bar under 720 px: the counter and the timer, then Previous, Next and Exit at

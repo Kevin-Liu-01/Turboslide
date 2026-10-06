@@ -6,6 +6,7 @@ import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
 
 import { useMountEffect } from '../useMountEffect';
 import { NAV } from './copy';
+import { NAV_ICONS } from './design-copy';
 import { HomeLink } from './HomeLink';
 import { SignInButton } from './sign-in';
 
@@ -35,7 +36,18 @@ import { SignInButton } from './sign-in';
 const PRESSED_SCRIPT =
   "(function(){try{var m=document.querySelector('[data-motion-toggle]');if(m)m.setAttribute('aria-pressed',String(document.documentElement.getAttribute('data-motion')==='paused'))}catch(e){}})();";
 
-function MotionToggle() {
+/**
+ * The motion toggle: the navigation's, and the hero terminal's head draws a second one for the
+ * recording it plays (DESIGN.md 8.2). Both are the page's one control of motion: the boot script
+ * and the live core keep every `[data-motion-toggle]` pressed together.
+ */
+export function MotionToggle({
+  control = 'home.motion',
+  className,
+}: {
+  control?: string;
+  className?: string;
+}) {
   const [paused, setPaused] = useState(false);
   useMountEffect(() => {
     const read = () => setPaused(document.documentElement.getAttribute('data-motion') === 'paused');
@@ -50,13 +62,13 @@ function MotionToggle() {
   return (
     <button
       type="button"
-      className="pt-ib pt-icon ts-motion-toggle"
+      className={`pt-ib pt-icon ts-motion-toggle${className === undefined ? '' : ` ${className}`}`}
       data-motion-toggle
-      data-control="home.motion"
-      aria-label={NAV.motion.pause}
+      data-control={control}
+      aria-label={NAV_ICONS.motion.pause}
       aria-pressed="false"
       suppressHydrationWarning
-      {...tipProps(paused ? NAV.motion.play : NAV.motion.pause)}
+      {...tipProps(paused ? NAV_ICONS.motion.play : NAV_ICONS.motion.pause)}
     >
       <i className="ts-icon is-pause" data-icon="pause" aria-hidden="true" />
       <i className="ts-icon is-play" data-icon="play" aria-hidden="true" />

@@ -10464,22 +10464,22 @@
     {
       "id": "home.hero.type",
       "feature": "decks",
-      "interaction": "The h1 is page text above the stage, 96 px ± 1 at 1440, weight 500, -0.042 em, three lines \"Build the pitch,\" \"present it and\" \"send the link\"; 40 px under 720 px; every h2 54 px at 1440 and 30 px at 390; page text in weights 400 and 500 only; no full width sheet draws a frame",
+      "interaction": "The h1 is page text above the stage, 76 px ± 1 at 1440, weight 500, -0.042 em, two lines \"Presentations for\" \"people and agents\"; 44 px under 720 px; every h2 54 px at 1440 and 30 px at 390; page text in weights 400 and 500 only; no full width sheet draws a frame",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-first.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#2"
     },
     {
       "id": "home.budget.bytes-first",
       "feature": "decks",
-      "interaction": "Cold at 1440 ×1, ×2 and 390: no picture and no chunk but the route's before `load`; the document at most 100 KB decoded (80 KB from Round 2's entry chunk split and Inter subset; docs/LANDING.md 7 question 21) and 20 KB brotli (52 KB decoded once audit item 13 lands); the page CSS at most 16 KB brotli; the route chunk at most 70 KB decoded and 22 KB brotli with no `data-home-slides`; the page's own bytes at most 70 KB over the wire",
+      "interaction": "Cold at 1440 ×1, ×2 and 390: no picture and no chunk but the route's before `load`; the document at most 100 KB decoded (80 KB from Round 2's entry chunk split and Inter subset; docs/LANDING.md 7 question 21) and 20 KB brotli (52 KB decoded once audit item 13 lands); the page CSS at most 20 KB brotli (docs/DESIGN.md question 32, the first screen's glyph masks); the route chunk at most 70 KB decoded and 22 KB brotli with no `data-home-slides`; the page's own bytes at most 70 KB over the wire",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "docs/LANDING.md 4.1",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; the document line raised from 80 KB to 100 KB decoded on 2026-10-04 for Kevin's picks, every element of A, B and C and much more interaction (docs/LANDING.md 4.1, 7 question 21), the first lines kept as Round 2's goals"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; the document line raised from 80 KB to 100 KB decoded on 2026-10-04 for Kevin's picks, every element of A, B and C and much more interaction (docs/LANDING.md 4.1, 7 question 21), the first lines kept as Round 2's goals; restated in the design round, DR-D4#2"
     },
     {
       "id": "home.budget.bytes-page",
@@ -10864,12 +10864,12 @@
     {
       "id": "home.hero.stage",
       "feature": "decks",
-      "interaction": "At 1440 the frame (644 px) and the terminal (364 px) side by side, 16 px apart, both 408 px tall; at 390 stacked at 358 px; slide 1 of the frame lies inside the first viewport at 1440 by 900 and 390 by 844; the terminal's resting lines equal `HOME_RUN.screens.transcript` at 44 columns in 22 slots, none cut or wider than the terminal; the frame's counter reads \"1 / 9\"; no `#2f5ce0` at rest",
+      "interaction": "At 1440 the frame (644 px) and the terminal (364 px) side by side, 16 px apart, both 480 px tall; at 390 stacked at 358 px; slide 1 of the frame lies inside the first viewport at 1440 by 900 and 390 by 844; the terminal's resting lines equal `HOME_RUN.screens.transcript` at 44 columns, none cut or wider than the terminal, whole in its slots at 1440; the notes row's counter reads \"1 / 9\"; no `#2f5ce0` at rest",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-first.png; judge-3 b-typed.png (tokens broken, avoided)",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#2"
     },
     {
       "id": "home.lead.visit",
@@ -11197,6 +11197,36 @@
       "severity": 1,
       "evidence": "research-surfaces 3.2",
       "note": "Design round (docs/DESIGN.md 11), DR-D2#2; replaces versions.field.square; the walk probe's share area"
+    },
+    {
+      "id": "home.hero.frame-chrome",
+      "feature": "decks",
+      "interaction": "The hero frame draws the editor's title row (the mark, the title, the saved phrase with its cloud, the agent's chip, the comments glyph, Slideshow with its play glyph, Share with its lock), the menu row, the toolbar row with the editor's glyphs for its 16 controls in the menu model's order, the filmstrip, the slide and the notes row with the shown slide's notes and `n / 9` in tabular figures, at the window's 8 px corner",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F2: the frame drew the title row and the menu names alone",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#2; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.hero.terminal-never-empty",
+      "feature": "decks",
+      "interaction": "Sampled every 250 ms for 24 s with the loop playing at 1440: the terminal shows at least 12 lines in every sample; a Restore appends its lines after the transcript and the screen scrolls to its end",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-landing F2: 22 percent of samples at five lines or fewer, the Restore clearing the screen",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#2; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.hero.steps",
+      "feature": "decks",
+      "interaction": "The four steps are rows in the terminal's foot with the done glyph in the status green, the playing row's 2 px countdown rule and each length in tabular seconds; no CLI fragment under a step; the panel's head reads \"Recorded from the CLI, 19 s\" with a pause button",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F2: four tabs under the stage with CLI fragments and a caption sentence",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#2; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "decks.pages.access-plates",

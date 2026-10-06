@@ -1,5 +1,6 @@
 import { ANNOUNCE } from '../copy';
 import type { LoopStep } from '../loop.generated';
+import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId } from '../deck.generated';
 import type { StepHandle } from './step';
 import { heroDeveloped } from './hero';
@@ -27,8 +28,9 @@ import type { HomeDeckState, SlideKey } from './state';
  * slide a menu row adds gets a thumbnail of its own (v2.md R21). While the loop stages the run's
  * start, the frame reads the deck's order without slide 5.
  *
- * The loop. A cycle holds slide 1 for 3 s; Restore clears the terminal, types `turboslide version
- * restore 1` and prints its answer, and slide 5 leaves the frame's filmstrip (the counters read
+ * The loop. A cycle holds slide 1 for 3 s; Restore types `turboslide version restore 1` after the
+ * lines already on the terminal, which keeps every line and scrolls to its end (docs/DESIGN.md
+ * 8.2), and prints its answer, and slide 5 leaves the frame's filmstrip (the counters read
  * n / 8); then the recorded run's three steps play through V3's `playStep` on the agent's 24 ms
  * clock with the ink ring and flag, the frame cutting to slide 5 when step 1's answer lands and
  * slide 5 taking its recorded states (`bands/live.generated.ts`, imported on the loop's first
@@ -107,6 +109,7 @@ export function startStage(ctx: LiveContext): void {
   const host = band.querySelector<HTMLElement>('[data-hero-slide]');
   const wrapper = host?.querySelector<HTMLElement>('[data-sheet="hero"]') ?? null;
   const counter = band.querySelector<HTMLElement>('[data-hero-counter]');
+  const notes = band.querySelector<HTMLElement>('[data-hero-notes]');
   const screen = band.querySelector<HTMLElement>('[data-hero-screen]');
   if (stage === null || strip === null || host === null || wrapper === null || screen === null)
     return;
@@ -132,11 +135,15 @@ export function startStage(ctx: LiveContext): void {
     return staged ? order.filter((id) => id !== SLIDE_5) : order;
   };
 
+  /** The notes row: the shown slide's counter and its speaker notes (docs/DESIGN.md 8.2). */
   const paintCounter = (): void => {
     const order = orderNow();
     const n = order.indexOf(shown) + 1;
     const text = `${n} / ${order.length}`;
     if (counter !== null && n > 0 && counter.textContent !== text) counter.textContent = text;
+    const words =
+      (HOME_DECK.slides as Partial<Record<string, { notes: string }>>)[shown]?.notes ?? '';
+    if (notes !== null && notes.textContent !== words) notes.textContent = words;
   };
   /**
    * The frame's thumbnails in the order the frame reads, each numbered by it, a slide the order
@@ -348,10 +355,19 @@ export function startStage(ctx: LiveContext): void {
     paintSlides(strip, ctx.store.get());
     show('title');
     screen.replaceChildren(...restLines.map((n) => n.cloneNode(true)));
+    screen.scrollTop = 0;
     for (const button of stepButtons.values()) {
       button.removeAttribute('aria-current');
       button.style.removeProperty('--ts-step-progress');
+      button.setAttribute('data-done', '');
     }
+  };
+
+  /** A step starting: it and the steps after it are not done in this cycle (8.2's done glyph). */
+  const undone = (id: StepId): void => {
+    const at = STEP_IDS.indexOf(id);
+    for (const [other, button] of stepButtons)
+      if (STEP_IDS.indexOf(other) >= at) button.removeAttribute('data-done');
   };
 
   /** Lands a step's change on the frame (the recorded state after it); returns the ring's target. */
@@ -418,12 +434,13 @@ export function startStage(ctx: LiveContext): void {
     const step = steps.loopStep(stepOf(loop, id), ctx.store.get().customer);
     playing = id;
     const button = stepButtons.get(id);
+    undone(id);
     button?.setAttribute('aria-current', 'step');
     button?.style.setProperty('--ts-step-progress', '0');
     stepElapsed = 0;
     stepStarted = performance.now();
+    /* the terminal keeps every line (DESIGN.md 8.2): Restore appends and the screen scrolls */
     const mine = steps.playStep({ terminal: { narrow: screen }, sheet: wrapper }, step, {
-      clear: id === 'restore',
       land: () => land(id),
       band: 'hero',
       track,
@@ -439,6 +456,7 @@ export function startStage(ctx: LiveContext): void {
     window.cancelAnimationFrame(frame);
     button?.style.setProperty('--ts-step-progress', '1');
     button?.removeAttribute('aria-current');
+    button?.setAttribute('data-done', '');
     playing = null;
     handle = null;
   };
@@ -585,13 +603,13 @@ export function startStage(ctx: LiveContext): void {
             const { step: steps, loop } = await loadLoop();
             const step = steps.loopStep(stepOf(loop, before), ctx.store.get().customer);
             const h = steps.playStep({ terminal: { narrow: screen }, sheet: wrapper }, step, {
-              clear: before === 'restore',
               land: () => land(before),
               band: 'hero',
               track: false,
             });
             h.finish();
             await h.done;
+            stepButtons.get(before)?.setAttribute('data-done', '');
           }
         }
         running = true;

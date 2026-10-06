@@ -5,7 +5,8 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { BOOT_LIMIT_BYTES, FIELD_STILL_MS, MOTION_KEY } from '../../../src/components/home/boot';
 import { BOOT_SCRIPT } from '../../../src/components/home/boot.generated';
-import { HERO, NAV } from '../../../src/components/home/copy';
+import { HERO } from '../../../src/components/home/copy';
+import { NAV_ICONS } from '../../../src/components/home/design-copy';
 import { bayer8 } from '../../../../../packages/effects/src/bayer';
 import { INTERLUDE_BANDS, glyphFor, glyphTone } from '../../../src/components/home/live/glyphs';
 import { extraHTTPHeaders, title } from '../lib';
@@ -543,7 +544,7 @@ const motionState = (page: Page) =>
     visible: window.tsHomeMotion?.visible?.() ?? {},
   }));
 
-const toggle = (page: Page) => page.locator('[data-motion-toggle]');
+const toggle = (page: Page) => page.locator('header [data-motion-toggle]');
 
 /** Presses Pause Motion without scrolling the page to the nav (the button's own click). */
 const pressInPlace = (page: Page): Promise<void> =>
@@ -739,10 +740,10 @@ export function rows(): void {
         /* the button (restated in the design round, DR-D4#1; docs/DESIGN.md 8.1): the icon
            toggle right after the editor's theme button in the navigation, named Pause motion, its
            tooltip naming the next press */
-        await expect(toggle(page)).toHaveAttribute('aria-label', NAV.motion.pause);
+        await expect(toggle(page)).toHaveAttribute('aria-label', NAV_ICONS.motion.pause);
         await expect(toggle(page)).toHaveAttribute('aria-pressed', 'false');
         await liveReady(page);
-        await expect(toggle(page)).toHaveAttribute('data-tip', NAV.motion.pause);
+        await expect(toggle(page)).toHaveAttribute('data-tip', NAV_ICONS.motion.pause);
         const order = await page.evaluate(() => {
           const theme = document.querySelector('header [data-control="view.theme"]');
           const button = document.querySelector('[data-motion-toggle]');
@@ -783,7 +784,7 @@ export function rows(): void {
         note('C1 at its end state after the press', (landed?.[0] ?? NaN) - pressedAt);
         if (!unread)
           expect((landed?.[0] ?? Infinity) - pressedAt).toBeLessThanOrEqual(FRAME_SLACK_MS);
-        await expect(toggle(page)).toHaveAttribute('data-tip', NAV.motion.play);
+        await expect(toggle(page)).toHaveAttribute('data-tip', NAV_ICONS.motion.play);
         await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
         expect(await page.evaluate((key) => localStorage.getItem(key), MOTION_KEY)).toBe('paused');
         /* 0 frame callbacks in the next 2 s without input, at the top, the middle and the bottom */
@@ -853,7 +854,7 @@ export function rows(): void {
             ),
           ),
         ).toEqual(['hidden', 'visible']);
-        await expect(toggle(again.page)).toHaveAttribute('data-tip', NAV.motion.play);
+        await expect(toggle(again.page)).toHaveAttribute('data-tip', NAV_ICONS.motion.play);
         await readNoDevelop(again.page);
         await again.page.waitForTimeout(1_000);
         const quietReading = await idle(again.page, again.context);

@@ -535,13 +535,13 @@ export const HOME_RUN_FACTS = {
   steps: 3,
 } as const;
 
-/** The hero's loop as the route prints it (2.2): each step tab's CLI words and the caption's seconds. */
+/** The hero's loop as the route prints it (2.2; DESIGN.md 8.2): the recording's seconds in the terminal's head and each step's length in its foot. */
 export const HOME_LOOP_FACTS = {
   captionSeconds: 19,
-  cli: {
-    restore: 'version restore',
-    new: 'slide new',
-    title: 'block set',
-    rows: 'block set',
+  stepSeconds: {
+    restore: '2.5',
+    new: '4.1',
+    title: '4.1',
+    rows: '3.5',
   },
 } as const;

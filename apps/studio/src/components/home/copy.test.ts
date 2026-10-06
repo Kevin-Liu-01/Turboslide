@@ -39,6 +39,7 @@ import {
   VERSIONS,
 } from './copy';
 import { HOME_DECK, HOME_EXPORT_FACTS, HOME_RUN_FACTS, HOME_TAILOR_WORDS } from './deck.generated';
+import { DESIGN_COPY, HERO_ROUND, NAV_ICONS } from './design-copy';
 import { FACTS_DATA } from './facts-data';
 import { HOME_FACTS, formatCount } from './facts';
 import type { HomeFacts } from './facts';
@@ -138,6 +139,8 @@ function walk(value: unknown, path: string, visit: Visit): void {
 
 const every: { text: string; path: string; resolved: boolean }[] = [];
 walk(HOME_COPY, '', (text, path, resolved) => every.push({ text, path, resolved }));
+/* the design round's words (design-copy.ts), under the same lints */
+walk(DESIGN_COPY, 'design', (text, path, resolved) => every.push({ text, path, resolved }));
 
 /** Generated command lines, the panel's prompt and a colour in code form: code, not page copy. */
 const isCommand = (path: string): boolean =>
@@ -149,8 +152,13 @@ const isCommand = (path: string): boolean =>
 const isProduct = (path: string): boolean => path === 'menus.editorRow';
 /** The slide's credit line, in the deck's own credit form ("Image: ..., 2007, public domain"). */
 const isCredit = (path: string): boolean => path === 'slides.heroCredit';
+/* the design round's hero names the CLI and the MCP server in its lead and its terminal
+   (docs/DESIGN.md 8.2), as LANDING.md lets the hero's stage and the agents band */
+const DESIGN_VIEW_EXEMPT: ReadonlyArray<string> = ['design.hero'];
 const isExempt = (path: string): boolean =>
-  DEFAULT_VIEW_EXEMPT.some((prefix) => path === prefix || path.startsWith(`${prefix}.`));
+  [...DEFAULT_VIEW_EXEMPT, ...DESIGN_VIEW_EXEMPT].some(
+    (prefix) => path === prefix || path.startsWith(`${prefix}.`),
+  );
 
 function wholeWord(word: string): RegExp {
   return new RegExp(`(^|[^A-Za-z])${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![A-Za-z])`, 'i');
@@ -183,12 +191,13 @@ function restingStrings(): string[] {
     NAV.signIn.label,
     NAV.newPresentation.label,
     HERO.visit[0],
-    HERO.lead,
+    /* the design round's hero (design-copy.ts): its lead, the terminal's head and the step rows */
+    HERO_ROUND.lead,
     HERO.buttons.newPresentation.label,
     HERO.buttons.openDeck.label,
     ...HERO.stage.steps.map((step) => step.label),
-    HERO.stage.caption(19),
-    HERO.undo,
+    HERO_ROUND.terminal.agent,
+    HERO_ROUND.terminal.recorded(19),
     ...NUMBERS.cells.flatMap((cell) => [cell.figure(HOME_FACTS), cell.sentence]),
     MENUS.h2,
     MENUS.lead,
@@ -432,6 +441,18 @@ describe('headings and buttons', () => {
     }
     expect(EXPORT.rows.perfect.link.label).toBe('Read the record');
     expect(EXPORT.rows.pdf.link).toBe('Download the PDF');
+  });
+
+  it("names the design round's controls and headings in sentence case (docs/DESIGN.md 8.1, 8.2)", () => {
+    for (const name of [NAV_ICONS.motion.pause, NAV_ICONS.motion.play]) {
+      expect(wordsOutsideSentenceCase(name, HOME_PROPER_NOUNS), name).toEqual([]);
+      expect(wordCount(name), name).toBe(2);
+    }
+    expect(HERO_ROUND.heading).toBe('Presentations for people and agents');
+    expect(HERO_ROUND.h1Lines.join(' ')).toBe(HERO_ROUND.heading);
+    expect(wordsOutsideSentenceCase(HERO_ROUND.heading, HOME_PROPER_NOUNS)).toEqual([]);
+    for (const text of [HERO_ROUND.heading, HERO_ROUND.lead])
+      expect(/google/i.test(text), text).toBe(false);
   });
 
   it('puts the Heroicons in the features table key cells only, never sparkles or cursor-arrow-rays', () => {

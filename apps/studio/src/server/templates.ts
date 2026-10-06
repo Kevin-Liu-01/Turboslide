@@ -33,13 +33,19 @@ import type { AuthContext } from './authorize';
 /**
  * One gallery card: the index row without its kit record (the kit travels through `template.list`
  * and the store, never the page's loader, whose payload must be plain JSON), the rendered cover,
- * the appearance it is drawn in, whether the template carries a kit and whether it is the default.
+ * the appearance it is drawn in, the theme's name, whether the template carries a kit and whether
+ * it is the default.
  */
 export type TemplateCard = Omit<TemplateIndexEntry, 'brand'> & {
   /** the cover slide's HTML in `coverAppearance`, for a LiveClone; null when the folder cannot be read */
   coverHtml: string | null;
   /** the appearance the cover is drawn in and a deck made from the template opens in */
   coverAppearance: Appearance;
+  /**
+   * the name of the theme a deck made from the template draws in (docs/DESIGN.md 9): the
+   * document's theme, or the index row's when the folder cannot be read
+   */
+  themeName: string;
   /** true when the template carries a brand kit record (docs/archive/rounds/PRODUCT.md 4.1) */
   hasKit: boolean;
   /** true on the template new presentations start from */
@@ -110,6 +116,7 @@ const listTemplateGalleryFn = createServerFn({ method: 'GET' }).handler(
     const { readDefaultTemplateId, readTemplateIndex, templateDocument } =
       await import('@turboslide/store/templates');
     const { renderSlide } = await import('./render');
+    const { themeName } = await import('@turboslide/theme/themes');
     const decks = await ensureDecks();
     // the saved templates of the other instances first (one head when nothing moved; FR2)
     await decks.templates.pull();
@@ -119,9 +126,11 @@ const listTemplateGalleryFn = createServerFn({ method: 'GET' }).handler(
       const { brand, ...row } = entry;
       let coverHtml: string | null = null;
       let coverAppearance: Appearance = row.appearance ?? 'dark';
+      let theme = themeName(row.theme);
       try {
         const document = templateDocument(decks.decksDir, row.id);
         coverAppearance = row.appearance ?? deckAppearance(document.deck);
+        theme = themeName(document.deck.theme);
         const slideId = row.cover ?? document.deck.sections[0]?.slideIds[0];
         const slide = slideId === undefined ? undefined : document.slides[slideId];
         if (slide !== undefined) {
@@ -142,6 +151,7 @@ const listTemplateGalleryFn = createServerFn({ method: 'GET' }).handler(
         ...row,
         coverHtml,
         coverAppearance,
+        themeName: theme,
         hasKit: brand !== undefined,
         isDefault: row.id === defaultId,
       };

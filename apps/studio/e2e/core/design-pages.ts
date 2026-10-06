@@ -730,12 +730,25 @@ export function designDecks(): string[] {
     });
     const facts: string[] = [];
     const failures: string[] = [];
-    /* each template card names its theme once the build has the theme library (DR-D3#1) */
-    const library = await page.request
-      .post('/api/actions/theme.list', { data: {} })
-      .then((answer) => answer.ok())
-      .catch(() => false);
-    if (!library) facts.push('no theme library on this build (theme.list, DR-D3#1): theme names not read');
+    /* each template card names its theme once the build has the theme library (DR-D3#1): the
+       name theme.list gives the theme template.list stores for that template, or any name of the
+       library when the stored id is not a library id (the legacy gt-ink-paper) */
+    const answer = async (action: string): Promise<Record<string, unknown> | null> =>
+      page.request
+        .post(`/api/actions/${action}`, { data: {} })
+        .then(async (res) => (res.ok() ? ((await res.json()) as Record<string, unknown>) : null))
+        .catch(() => null);
+    const listed = await answer('theme.list');
+    const library = new Map(
+      ((listed?.['themes'] ?? []) as { id: string; name: string }[]).map((t) => [t.id, t.name]),
+    );
+    const stored = new Map(
+      (
+        ((await answer('template.list'))?.['templates'] ?? []) as { id: string; theme: string }[]
+      ).map((t) => [t.id, t.theme]),
+    );
+    if (library.size === 0)
+      facts.push('no theme library on this build (theme.list, DR-D3#1): theme names not read');
     for (const appearance of APPEARANCES) {
       await appearanceOf(person, baseURL, appearance);
       for (const each of DECK_PAGES) {
@@ -766,16 +779,18 @@ export function designDecks(): string[] {
         );
         const broken = pictures.filter((p) => p.width === 0 && p.src !== '');
         const refused = answers.filter((a) => a.status !== 200 && a.status !== 304);
-        const themes =
-          library && each.path === '/decks/templates'
+        const cards =
+          library.size > 0 && each.path === '/decks/templates'
             ? await page.evaluate(() =>
-                [...document.querySelectorAll('.ts-gallery-card')].map(
-                  (card) => card.querySelector('.ts-gallery-theme')?.textContent?.trim() ?? '',
-                ),
+                [...document.querySelectorAll<HTMLElement>('.ts-gallery-card')].map((card) => ({
+                  id: card.dataset['template'] ?? '',
+                  theme: card.querySelector('.ts-gallery-theme')?.textContent?.trim() ?? '',
+                })),
               )
             : [];
+        const names = [...library.values()];
         facts.push(
-          `${appearance} ${each.name}: ${pictures.length} pictures, ${broken.length} not decoded, ${answers.length} answers, ${refused.length} not 200${themes.length > 0 ? `; themes ${themes.join(', ')}` : ''}`,
+          `${appearance} ${each.name}: ${pictures.length} pictures, ${broken.length} not decoded, ${answers.length} answers, ${refused.length} not 200${cards.length > 0 ? `; themes ${cards.map((c) => `${c.id} ${c.theme || 'none'}`).join(', ')}` : ''}`,
         );
         if (broken.length > 0)
           failures.push(
@@ -785,8 +800,17 @@ export function designDecks(): string[] {
           failures.push(
             `${appearance} ${each.name}: ${refused.map((r) => `${r.status} ${r.url}`).join(', ')}`,
           );
-        if (themes.some((t) => t === ''))
-          failures.push(`${appearance} ${each.name}: a template card names no theme`);
+        for (const card of cards) {
+          const want = library.get(stored.get(card.id) ?? '');
+          if (card.theme === '')
+            failures.push(
+              `${appearance} ${each.name}: a template card names no theme (${card.id})`,
+            );
+          else if (want !== undefined ? card.theme !== want : !names.includes(card.theme))
+            failures.push(
+              `${appearance} ${each.name}: ${card.id} names "${card.theme}", the library names ${want ?? names.join(', ')}`,
+            );
+        }
       }
     }
     test.info().annotations.push({ type: 'pictures', description: facts.join('; ') });

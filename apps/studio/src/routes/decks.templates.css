@@ -236,6 +236,12 @@
   text-overflow: ellipsis;
 }
 
+/* the theme's name leads the meta line in the ink of the name above it, the slide count after it
+   in the second ink (docs/DESIGN.md 9) */
+.ts-gallery-theme {
+  color: var(--pt-ink);
+}
+
 .ts-gallery-sentence {
   grid-column: 1 / -1;
   margin: 6px 0 0;

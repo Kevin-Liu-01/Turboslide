@@ -34,8 +34,8 @@ import './decks.templates.css';
  * and 13, judge-seller additions 3 and 4): the heading "Template gallery", then Your organisation
  * (the templates saved on this deployment, with the template new presentations start from first
  * and marked "Used for new presentations"), then Turboslide's (Blank alone this round), each card
- * the cover slide as a live clone in the template's appearance, the name, the slide count and one
- * sentence. A click on a card runs `deck.create { from }` through `createFromTemplate` and opens
+ * the cover slide as a live clone in the template's appearance, the name, the theme's name and the
+ * slide count, and one sentence. A click on a card runs `deck.create { from }` through `createFromTemplate` and opens
  * the editor; the Blank card opens /new while blank is the deployment default, since /new is the
  * draft nothing writes until the first edit. The card menu under Your organisation carries Rename
  * (in place, `template.rename`), Use for new presentations (`template.setDefault`) and Delete (a
@@ -72,8 +72,10 @@ export const TEMPLATES = {
   rename: 'Rename',
   delete: 'Delete',
   slides: (n: number) => `${n} slide${n === 1 ? '' : 's'}`,
+  /** the card's meta line as one sentence, for the tooltip: "Simple theme, 1 slide" */
+  themed: (theme: string, n: number) => `${theme} theme, ${n} slide${n === 1 ? '' : 's'}`,
   opening: 'Opening',
-  back: HOME.recent,
+  back: HOME.back,
   deleteTitle: (name: string) => `Delete the template ${name}?`,
   deleteSentence: 'Presentations made from it are not changed. This cannot be undone.',
   deleteOk: 'Delete',
@@ -395,8 +397,8 @@ type CardProps = {
 
 /**
  * One card: the cover as a live clone in the template's appearance under one open button, the
- * mark of the default, the name (a second way to open it), the slide count, the sentence and the
- * menu button. The clone sits beside the button and never inside it, so a slide's own markup is
+ * mark of the default, the name (a second way to open it), the theme's name and the slide count
+ * on the meta line (docs/DESIGN.md 9), the sentence and the menu button. The clone sits beside the button and never inside it, so a slide's own markup is
  * never inside a control.
  */
 function GalleryCard({
@@ -413,7 +415,8 @@ function GalleryCard({
   const base = TEMPLATE_CONTROLS.card(card.id);
   const items = cardMenuItems(card);
   const doc =
-    card.description ?? `${TEMPLATES.slides(card.slides)}; opens a presentation made from it.`;
+    card.description ??
+    `${TEMPLATES.themed(card.themeName, card.slides)}; opens a presentation made from it.`;
   return (
     <li
       className={busy ? 'ts-gallery-card is-busy' : 'ts-gallery-card'}
@@ -457,7 +460,11 @@ function GalleryCard({
             {busy ? TEMPLATES.opening : card.name}
           </button>
         )}
-        <span className="ts-gallery-meta">{TEMPLATES.slides(card.slides)}</span>
+        <span className="ts-gallery-meta">
+          <span className="ts-gallery-theme">{card.themeName}</span>
+          {' · '}
+          <span className="ts-gallery-count">{TEMPLATES.slides(card.slides)}</span>
+        </span>
         {items.length > 0 ? (
           <button
             type="button"

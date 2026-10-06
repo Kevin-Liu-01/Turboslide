@@ -28,6 +28,15 @@ Output: <out>/<PostScriptName>.ttf per face and <out>/fonts.json mapping (size, 
 italic) to a family name, with bytes and sha256 per file. The build is deterministic
 (head.modified is kept from the source) so the committed files can be checked with --check.
 
+The design round (docs/DESIGN.md 4.4, decision C7) adds the web subsets: the same two release files
+cut into unicode-range files under packages/fonts/assets (InterVariable-<range>.woff2 and
+InterVariable-Italic-<range>.woff2 for latin, latin-ext, cyrillic, greek, vietnamese and symbols,
+every OpenType feature and both axes kept), the @font-face rules of packages/fonts/src/inter.css
+between its two markers, and fonts.json `web`. A Latin page loads the Latin upright alone (113 KB
+where the whole file was 352 KB); a page that draws Cyrillic loads the Cyrillic subset when the
+text is drawn. The render documents, the standalone file, the PDF and the PowerPoint export keep
+the whole files. --check compares the subsets and the inter.css block too.
+
 Usage:
   build-fonts.py [--source packages/fonts/assets/InterVariable.woff2]
                  [--italic-source packages/fonts/assets/InterVariable-Italic.woff2]
@@ -49,6 +58,7 @@ import sys
 from pathlib import Path
 
 try:
+    from fontTools import subset as ft_subset
     from fontTools.ttLib import TTFont
     from fontTools.varLib import instancer
 except ImportError as error:  # pragma: no cover - reported to the caller
@@ -114,6 +124,45 @@ ARIAL_PATHS = [
     Path("/usr/share/fonts/truetype/msttcorefonts/Arial.ttf"),
 ]
 FALLBACK_FAMILY = "Inter Fallback"
+
+# The web subsets (docs/DESIGN.md 4.4; research-type 1.2): each range as written in the CSS. The
+# Latin range carries the UI symbols the chrome draws in its own controls (the command keys, the
+# arrows, the check, the warning sign, the blocks and the geometric shapes), found by scanning the
+# chrome, viewer and studio sources for characters above U+007E; symbols is every remaining code
+# point of the font. The order is the order of the @font-face rules: the browser checks the last
+# rule first where ranges overlap (CSS Fonts 4, 4.5), so Latin is written last and a Latin page
+# requests the Latin file alone.
+WEB_RANGES: list[tuple[str, str]] = [
+    (
+        "vietnamese",
+        "U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, "
+        "U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB",
+    ),
+    ("greek", "U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF, U+1F00-1FFF"),
+    (
+        "cyrillic",
+        "U+0301, U+0400-052F, U+1C80-1C8A, U+20B4, U+2116, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F",
+    ),
+    (
+        "latin-ext",
+        "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, "
+        "U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, "
+        "U+2C60-2C7F, U+A720-A7FF",
+    ),
+    (
+        "latin",
+        "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, "
+        "U+0329, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212, U+2215, U+22EE-22EF, U+2303, "
+        "U+2318, U+2325, U+2328, U+232B, U+238B, U+23CE, U+2580-259F, U+25A0-25FF, U+2713, U+26A0, "
+        "U+FEFF, U+FFFD",
+    ),
+]
+# the subset of every code point no range above names, written first
+WEB_REST = "symbols"
+WEB_ASSETS = REPO_ROOT / "packages" / "fonts" / "assets"
+INTER_CSS = REPO_ROOT / "packages" / "fonts" / "src" / "inter.css"
+FACES_START = "/* faces:generated:start */"
+FACES_END = "/* faces:generated:end */"
 
 
 def sha256_of(data: bytes) -> str:
@@ -411,6 +460,133 @@ def fallback_face(source: TTFont) -> dict:
     }
 
 
+def parse_ranges(text: str) -> set[int]:
+    """The code points of a unicode-range value (`U+0000-00FF, U+0131`)."""
+    points: set[int] = set()
+    for part in text.split(","):
+        part = part.strip().upper().removeprefix("U+")
+        if "-" in part:
+            low, high = part.split("-")
+            points.update(range(int(low, 16), int(high, 16) + 1))
+        elif part:
+            points.add(int(part, 16))
+    return points
+
+
+def format_ranges(points: set[int]) -> str:
+    """A unicode-range value for a set of code points, runs collapsed (`U+2190-21FF`)."""
+    ordered = sorted(points)
+    parts: list[str] = []
+    start = prev = None
+    for point in ordered + [None]:
+        if point is not None and prev is not None and point == prev + 1:
+            prev = point
+            continue
+        if start is not None:
+            parts.append(f"U+{start:04X}" if start == prev else f"U+{start:04X}-{prev:04X}")
+        start = prev = point
+    return ", ".join(parts)
+
+
+def range_declaration(text: str, width: int = 100) -> list[str]:
+    """The unicode-range declaration as the repository's prettier prints it (printWidth 100): one
+    line when it fits, else the value on its own lines at a four space indent, filled greedily."""
+    one = f"  unicode-range: {text};"
+    if len(one) <= width:
+        return [one]
+    items = [part.strip() for part in text.split(",")]
+    lines: list[str] = ["  unicode-range:"]
+    line = "   "
+    for i, item in enumerate(items):
+        token = item + (";" if i == len(items) - 1 else ",")
+        if len(line) + 1 + len(token) > width:
+            lines.append(line)
+            line = "    " + token
+        else:
+            line = f"{line} {token}"
+    lines.append(line)
+    return lines
+
+
+def subset_woff2(source_bytes: bytes, points: set[int]) -> bytes:
+    """One unicode-range subset of a variable source as woff2: every layout feature, both axes,
+    every name record (the copyright and the OFL notice travel with the file), the source's
+    head.modified kept so the bytes are the same on every run."""
+    font = TTFont(io.BytesIO(source_bytes), recalcTimestamp=False)
+    options = ft_subset.Options()
+    options.layout_features = ["*"]
+    options.name_IDs = ["*"]
+    options.name_languages = ["*"]
+    options.name_legacy = True
+    options.notdef_outline = True
+    options.recalc_timestamp = False
+    options.flavor = "woff2"
+    subsetter = ft_subset.Subsetter(options=options)
+    subsetter.populate(unicodes=sorted(points))
+    subsetter.subset(font)
+    out = io.BytesIO()
+    font.flavor = "woff2"
+    font.save(out)
+    return out.getvalue()
+
+
+def web_subsets(source: TTFont, source_bytes: bytes, italic: TTFont, italic_bytes: bytes) -> tuple[list[dict], dict[str, bytes], str]:
+    """The web subsets of docs/DESIGN.md 4.4: the records for fonts.json `web`, the files by name
+    and the @font-face block of inter.css."""
+    cmap = set(source.getBestCmap().keys()) | set(italic.getBestCmap().keys())
+    named: set[int] = set()
+    ranges: list[tuple[str, str, set[int]]] = []
+    for name, text in WEB_RANGES:
+        points = parse_ranges(text)
+        named |= points
+        ranges.append((name, text, points & cmap))
+    rest = cmap - named
+    ranges.insert(0, (WEB_REST, format_ranges(rest), rest))
+    files: dict[str, bytes] = {}
+    records: list[dict] = []
+    css: list[str] = [FACES_START]
+    for name, text, points in ranges:
+        for style, data, stem in (("normal", source_bytes, "InterVariable"), ("italic", italic_bytes, "InterVariable-Italic")):
+            file_name = f"{stem}-{name}.woff2"
+            woff2 = subset_woff2(data, points)
+            files[file_name] = woff2
+            records.append(
+                {
+                    "file": file_name,
+                    "range": name,
+                    "style": style,
+                    "unicodeRange": text,
+                    "codepoints": len(points),
+                    "bytes": len(woff2),
+                    "sha256": sha256_of(woff2),
+                }
+            )
+            css.extend(
+                [
+                    "@font-face {",
+                    "  font-family: 'Inter';",
+                    f"  font-style: {style};",
+                    "  font-weight: 100 900;",
+                    "  font-display: swap;",
+                    f"  src: url('../assets/{file_name}') format('woff2');",
+                    *range_declaration(text),
+                    "}",
+                ]
+            )
+    css.append(FACES_END)
+    return records, files, "\n".join(css)
+
+
+def inter_css_with(block: str) -> str:
+    """inter.css with its generated @font-face block replaced."""
+    text = INTER_CSS.read_text(encoding="utf-8")
+    start = text.find(FACES_START)
+    end = text.find(FACES_END)
+    if start < 0 or end < start:
+        raise SystemExit(f"build-fonts: {INTER_CSS} has no {FACES_START} block")
+    return text[:start] + block + text[end + len(FACES_END):]
+
+
 def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, bytes]]:
     source, source_bytes, version = open_source(source_path, "upright")
     italic, italic_bytes, italic_version = open_source(italic_path, "italic")
@@ -453,6 +629,10 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
                 "sha256": sha256_of(data),
             }
         )
+    web_records, web_files, web_css = web_subsets(source, source_bytes, italic, italic_bytes)
+    for name, data in web_files.items():
+        files[f"web:{name}"] = data
+    files["web:inter.css"] = inter_css_with(web_css).encode("utf-8")
     fonts_json = {
         "version": f"{version_short}+gt.{BUILD_VERSION}",
         "generatedBy": "scripts/build-fonts.py",
@@ -485,15 +665,28 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
         "faces": faces,
         # The same rows under the key the PPTX builder's fonts-map.ts reads (packages/export).
         "families": faces,
+        # the web subsets of the design round (docs/DESIGN.md 4.4): packages/fonts/assets and the
+        # @font-face block of packages/fonts/src/inter.css
+        "web": web_records,
     }
     return fonts_json, files
+
+
+def target(out: Path, name: str) -> Path:
+    """Where a built file lives: an export face under <out>, a web subset under
+    packages/fonts/assets, the @font-face block in packages/fonts/src/inter.css."""
+    if name == "web:inter.css":
+        return INTER_CSS
+    if name.startswith("web:"):
+        return WEB_ASSETS / name.removeprefix("web:")
+    return out / name
 
 
 def write(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
     out.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
     for name, data in files.items():
-        path = out / name
+        path = target(out, name)
         if not path.exists() or path.read_bytes() != data:
             path.write_bytes(data)
             written.append(str(path))
@@ -508,7 +701,7 @@ def write(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
 def check(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
     stale: list[str] = []
     for name, data in files.items():
-        path = out / name
+        path = target(out, name)
         if not path.exists():
             stale.append(f"missing {path}")
         elif path.read_bytes() != data:
@@ -550,6 +743,7 @@ def main(argv: list[str]) -> int:
             {"file": f["file"], "family": f["family"], "style": f["style"], "opsz": f["opsz"], "weight": f["weight"], "bytes": f["bytes"]}
             for f in fonts_json["faces"]
         ],
+        "web": [{"file": w["file"], "codepoints": w["codepoints"], "bytes": w["bytes"]} for w in fonts_json["web"]],
         "written": written,
         "reservedFontName": None,
     }
@@ -558,6 +752,8 @@ def main(argv: list[str]) -> int:
     else:
         for face in fonts_json["faces"]:
             print(f"{face['file']:<40} {face['family']:<28} {face['style']:<8} opsz {face['opsz']:>2} wght {face['weight']} {face['bytes']:>8} B")
+        for web in fonts_json["web"]:
+            print(f"{web['file']:<40} {web['codepoints']:>5} code points {web['bytes']:>8} B")
         print(f"build-fonts: {len(files)} faces, {len(written)} file(s) written under {args.out}, version {fonts_json['version']}")
     return 0
 

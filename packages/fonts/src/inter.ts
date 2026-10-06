@@ -61,6 +61,41 @@ export const INTER_ITALIC_WOFF2 = new URL('../assets/InterVariable-Italic.woff2'
 /** Absolute file URL of the @font-face stylesheet. */
 export const INTER_CSS = new URL('./inter.css', import.meta.url);
 
+/**
+ * The web subsets of the design round (docs/DESIGN.md 4.4, decision C7): the two release files
+ * cut by scripts/build-fonts.py into unicode-range files, every OpenType feature and both axes
+ * kept, in the order inter.css declares them (Latin last, so the browser checks it first where
+ * ranges overlap). Each name has an upright `InterVariable-<name>.woff2` and an italic
+ * `InterVariable-Italic-<name>.woff2`; fonts.json `web` records each file's range, code points,
+ * bytes and sha256. The page loads these; the render documents, the standalone file and the
+ * exports keep the whole files above.
+ */
+export const INTER_SUBSETS = [
+  'symbols',
+  'vietnamese',
+  'greek',
+  'cyrillic',
+  'latin-ext',
+  'latin',
+] as const;
+export type InterSubset = (typeof INTER_SUBSETS)[number];
+
+/** The file of one subset in one style. */
+export function interSubsetFile(
+  subset: InterSubset,
+  style: 'normal' | 'italic' = 'normal',
+): string {
+  return `${style === 'italic' ? 'InterVariable-Italic' : 'InterVariable'}-${subset}.woff2`;
+}
+
+/** Absolute file URL of one subset, for Node callers and tests. */
+export function interSubsetUrl(subset: InterSubset, style: 'normal' | 'italic' = 'normal'): URL {
+  return new URL(`../assets/${interSubsetFile(subset, style)}`, import.meta.url);
+}
+
+/** The line the Latin upright stays under, the font line of `home.budget.shared` (DESIGN.md 8.16). */
+export const INTER_LATIN_MAX_BYTES = 120_000;
+
 /** The deck's font family stack for display and text before the fallback face joined it (head:21-22). */
 export const FONT_FAMILY = "'Inter', 'Helvetica Neue', Arial, sans-serif";
 

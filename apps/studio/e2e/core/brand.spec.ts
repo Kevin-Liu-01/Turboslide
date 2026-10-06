@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { brotliDecompressSync } from 'node:zlib';
 
 import { expect, test } from '@playwright/test';
@@ -1137,9 +1138,19 @@ test(title('fonts.budget.no-load-before-ready'), async ({ browser }) => {
 // the features round, ship one (docs/archive/rounds/FEATURES.md 3.1, 3.5, 7.1): the Inter 4.1 italic, the P1
 // specimen rows and Recent group of the Font dropdown, and the italic preload on /edit alone
 
-/** The sha256 of the Inter 4.1 italic (docs/archive/rounds/FEATURES.md 3.1 item 1; `INTER_ITALIC.sha256` in packages/fonts/src/inter.ts). */
-const INTER_ITALIC_SHA256 = 'e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a';
-const INTER_ITALIC_BYTES = 387_976;
+/**
+ * The italic the editor prefetches: since the design round (docs/DESIGN.md 4.4, DR-D1#3) the Latin
+ * subset cut from the Inter 4.1 italic by scripts/build-fonts.py, whose bytes and sha256 fonts.json
+ * `web` records (the whole 4.1 italic, 387,976 bytes, stays pinned by packages/fonts/src/inter.test.ts
+ * and inlined in the render documents).
+ */
+const ITALIC_LATIN = (
+  JSON.parse(
+    readFileSync(new URL('../../../../packages/fonts/export/fonts.json', import.meta.url), 'utf8'),
+  ) as { web: { file: string; bytes: number; sha256: string }[] }
+).web.find((record) => record.file === 'InterVariable-Italic-latin.woff2');
+const INTER_ITALIC_SHA256 = ITALIC_LATIN?.sha256 ?? 'unrecorded';
+const INTER_ITALIC_BYTES = ITALIC_LATIN?.bytes ?? -1;
 const INTER_ITALIC_VERSION = 'Version 4.001;git-9221beed3';
 const WOFF2_KNOWN_TAGS = [
   'cmap',
@@ -1292,8 +1303,10 @@ test(title('fonts.inter.italic-release'), async () => {
     type: 'italic',
     description: `${bytes.length} bytes; sha256 ${sha.slice(0, 16)}…; name table "${version ?? 'unread'}"`,
   });
-  expect(bytes.length, 'the 4.1 italic is 387,976 bytes').toBe(INTER_ITALIC_BYTES);
-  expect(sha, 'the sha256 equals INTER_ITALIC.sha256').toBe(INTER_ITALIC_SHA256);
+  expect(bytes.length, 'the Latin italic subset is the bytes fonts.json records').toBe(
+    INTER_ITALIC_BYTES,
+  );
+  expect(sha, 'the sha256 equals the recorded subset').toBe(INTER_ITALIC_SHA256);
   expect(version, 'the name table reads the 4.1 version string').toBe(INTER_ITALIC_VERSION);
   /* Cmd+I on the title renders the italic face */
   const first = await page.evaluate(

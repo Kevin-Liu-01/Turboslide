@@ -10,9 +10,9 @@ import { useState } from 'react';
 import brandCss from '@turboslide/chrome/brand.css?url';
 import tokensCss from '@turboslide/chrome/tokens.css?url';
 import { tipProps } from '@turboslide/chrome/Tooltip';
-import interWoff2 from '@turboslide/fonts/assets/InterVariable.woff2?url';
+import interWoff2 from '@turboslide/fonts/assets/InterVariable-latin.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
-import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic.woff2?url';
+import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic-latin.woff2?url';
 import { BLOCK_CSS } from '@turboslide/render/block-css';
 import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
@@ -132,7 +132,11 @@ export const Route = createRootRoute({
         { rel: 'icon', href: SITE.icons.svg, type: 'image/svg+xml' },
         { rel: 'apple-touch-icon', href: SITE.icons.touch },
         { rel: 'manifest', href: SITE.icons.manifest },
-        /* the upright starts with the HTML on every route (SPEC-3 9.2 G1): the request no longer
+        /* the Latin subsets since the design round (docs/DESIGN.md 4.4): the upright of
+           inter.css's Latin range, 113 KB where the whole file was 352 KB, preloaded on every
+           route, and its italic prefetched on the editor; another script's subset loads through
+           its unicode-range when its text is drawn.
+           The upright starts with the HTML on every route (SPEC-3 9.2 G1): the request no longer
            waits for the stylesheet, and the metric matched fallback face of inter.css covers the
            swap; the italic is prefetched on the editor alone (docs/archive/rounds/FEATURES.md 3.1, the fonts P1
            item; audit-fonts 12: /decks, /deck and /present painted none and downloaded it): a

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Browser, BrowserContext, Page, Response } from '@playwright/test';
+import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { contrastRatio, composite, parseColor, toHex } from '@turboslide/theme/contrast';
 import type { Rgba } from '@turboslide/theme/contrast';
@@ -177,31 +177,18 @@ export function chromeFoundation(): string[] {
     const facts: string[] = [];
     for (const path of ['/home', '/decks', '/new']) {
       const { page } = await contextAt(browser, 1440, 900);
-      const fonts: { url: string; bytes: number }[] = [];
-      const pending: Promise<void>[] = [];
-      page.on('response', (response: Response) => {
-        const url = response.url();
-        if (
-          response.request().resourceType() !== 'font' &&
-          !/\.(?:woff2?|ttf|otf)(?:\?|$)/.test(url)
-        )
-          return;
-        pending.push(
-          response
-            .body()
-            .then((body) => {
-              fonts.push({ url, bytes: body.length });
-            })
-            .catch(() => {
-              fonts.push({ url, bytes: -1 });
-            }),
-        );
-      });
       await page.goto(path);
       if (path === '/new') await waitEditor(page);
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(2000);
-      await Promise.all(pending);
+      /* the font files the page fetched, read from Resource Timing as home.budget.shared reads
+         them: one entry per fetch, a preload the face then used counted once (a dev server also
+         imports each face's URL as a module, `?import&url`, which is script) */
+      const fonts = await page.evaluate(() =>
+        (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+          .filter((r) => /\.(woff2?|ttf|otf)(\?|$)/.test(r.name) && !/[?&]import\b/.test(r.name))
+          .map((r) => ({ url: r.name, bytes: r.encodedBodySize || r.decodedBodySize })),
+      );
       const families = await page.evaluate(() =>
         [...document.fonts].map((face) => `${face.family} ${face.style} ${face.status}`),
       );
@@ -212,8 +199,9 @@ export function chromeFoundation(): string[] {
         `${path}: ${fonts.map((f) => `${f.url.split('/').pop()} ${f.bytes} B`).join(', ') || 'none'}; ${families.length} faces`,
       );
       expect(fonts, `${path}: one font request`).toHaveLength(1);
+      /* the file as the dev server names it, or with the build's eight character hash */
       expect(fonts[0]?.url, `${path}: the Latin subset`).toMatch(
-        /InterVariable-latin(?:\.[\w-]+)?\.woff2/,
+        /\/InterVariable-latin(?:-[\w-]{8})?\.woff2(?:\?|$)/,
       );
       expect(fonts[0]?.bytes ?? 0, `${path}: at most 120,000 B`).toBeLessThanOrEqual(120_000);
       expect(fonts[0]?.bytes ?? 0).toBeGreaterThan(0);
@@ -251,7 +239,9 @@ export function chromeFoundation(): string[] {
       false,
     );
     expect(
-      requested.filter((name) => /Italic/.test(name) && !/Italic-latin\./.test(name)),
+      requested.filter(
+        (name) => /Italic/.test(name) && !/Italic-latin(?:-[\w-]{8})?\.woff2/.test(name),
+      ),
       'no italic file but the prefetched Latin one',
     ).toEqual([]);
     const before = requested.length;
@@ -269,23 +259,14 @@ export function chromeFoundation(): string[] {
         timeout: 10_000,
       })
       .toBe(true);
-    /* an italic run: Cmd+I and a word typed into the subtitle */
-    const runs = await page.evaluate(() =>
-      [
-        ...document.querySelectorAll(
-          '.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run]',
-        ),
-      ].map((el) => el.getAttribute('data-run') ?? ''),
-    );
-    const lead = runs.find((r) => r !== run) ?? run;
-    const el = page
-      .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${lead}"]`)
+    /* an italic run: the title made italic with Cmd+I, as fonts.inter.italic-release draws it */
+    const heading = page
+      .locator(`.ts-stagewrap.ts-editor .pt-slide:not(.is-leaving) [data-run="${run}"]`)
       .first();
-    await el.dblclick();
+    await heading.dblclick();
     await page.waitForTimeout(200);
     await page.keyboard.press('Meta+a');
     await page.keyboard.press('Meta+i');
-    await page.keyboard.type('Italic words', { delay: 40 });
     await expect.poll(italicLoaded, { timeout: 10_000 }).toBe(true);
     await page.keyboard.press('Escape');
     test.info().annotations.push({

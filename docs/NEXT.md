@@ -516,6 +516,8 @@ Dates and facts to watch:
 
 The push list, one mechanism each (19 pushes): P3a the perf step, the `perf` feature and rows, and `scripts/chunk-attribution.mjs`; P3b the entry chunk; P3c the font subsets; P3d the hashed renderer CSS; P1a the deck index; P1b the loaders on intent; P2a the loader's reads at once; P2b the mirror when the store is busy; P2c the first keystroke's calls; P4a the picture twins; P4b the PDF export; P5a a snapshot every Nth record; P5b the command frame; P5c store retention; P5d the gate deck sweep script (its first run waits for question 30); P5e Workers Logs sampling; P5f R11 dropped; P6 the quotas that hold; P7 the field beacon. P3a goes first, so every later push measures against the gate.
 
+P3c moved to the design round on 2026-10-05 (`docs/DESIGN.md` 4.4, decision C7, question 28; push DR-D1#3): `scripts/build-fonts.py` cuts InterVariable and its italic into the unicode-range subsets of `packages/fonts/assets` (the Latin upright 113,752 B where the whole file is 352,240 B), `packages/fonts/src/inter.css` declares them, `__root.tsx` preloads the Latin upright and prefetches the Latin italic on the editor, and the rows `chrome.font.one-subset` and `chrome.font.on-demand` read it. Round 2 keeps the other eighteen pushes.
+
 #### 4.2.6 Rows
 
 | Id                           | Feature | Interaction and bound                                                                                                                                                                       | Driver                    | Today      | Severity | Evidence                                       | Entered by |

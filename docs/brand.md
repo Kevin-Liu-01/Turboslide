@@ -409,6 +409,26 @@ The brand lint (`packages/lint/src/brand/`) reads the new rules: `css/z-index`, 
 `css/scrollbar`, `css/numerals` and `css/chrome-alternates` report from DR-D1#1 and fail from
 DR-D1#5; `css/radius` accepts the three rungs.
 
+From DR-D1#2 the colour declarations of `tokens.css` are generated (`scripts/build-colors.ts` over
+`packages/theme/src/palette.ts` with colorjs.io): `--pt-titanium` is solved to 4.5:1 on the hover
+ground (`#686d76` light, `#91969f` dark), `--pt-status-open` to 3:1 on the paper (`#d08200`), and
+the dark scrim is black at 0.56; every other value is the table above.
+
+### The face (2026-10-05)
+
+The face is the original Inter 4.1 by Rasmus Andersson, the rsms/inter release files the
+repository vendors (`packages/fonts/assets/InterVariable.woff2` and its italic, SIL OFL 1.1).
+Berkeley Mono is not used anywhere and no file of it is in the tree. The chrome, the pages and the
+landing draw Inter's default glyphs; the deck's alternates `cv11` and `ss01` belong to the General
+Translation theme's slides (`--display-features`). Numbers that align or change in place take
+Inter's tabular figures through `--pt-numerals`. Code and commands keep `--pt-mono`.
+
+Since DR-D1#3 the page loads the release files cut into unicode-range subsets by
+`scripts/build-fonts.py`, every OpenType feature and both axes kept: the Latin upright is
+113,752 B (the whole file 352,240 B), the Latin italic 126,000 B, and Latin Extended, Cyrillic,
+Greek, Vietnamese and the remaining symbols load when their text is drawn. The render documents,
+the standalone file, the PDF and the PowerPoint export keep the whole files.
+
 ## 11. The selection colour
 
 The canvas selection ring, the eight resize handles and the rotation handle, the marquee, the hover

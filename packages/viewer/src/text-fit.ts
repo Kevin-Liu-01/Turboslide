@@ -16,6 +16,11 @@
 //     the live stage with the rule of render/measure-dom.ts measureFitBoxes (the lowest text rect
 //     against the wrapper's top, plus the larger bottom padding), divided by the stage scale, and
 //     the `pos.h` write travels in the same call as the burst's splice.
+//
+//   loadTextFaces: the font wait of the design round (docs/DESIGN.md 4.4). Inter loads as
+//     unicode-range subsets, so `document.fonts.ready` and a `fonts.load(spec)` with no text cover
+//     the Latin file alone; a measurement of Cyrillic, Greek or Vietnamese text waits for the
+//     subsets its own characters touch, passing the text to `document.fonts.load(spec, text)`.
 import type { Block } from '@turboslide/schema/blocks';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { parseText } from '@turboslide/schema/text';
@@ -161,4 +166,42 @@ export function shrinkMutation(
     path: '/typography',
     value: { ...typography, size: next },
   };
+}
+
+/** The distinct characters of a text, so a long paragraph asks the font loader a short question. */
+function distinctCharacters(text: string): string {
+  return [...new Set(text.replace(/\s+/g, ''))].join('');
+}
+
+/**
+ * Loads the faces a subtree's text needs before it is measured (docs/DESIGN.md 4.4): every text
+ * node's computed font with its own characters goes to `document.fonts.load(font, text)`, so the
+ * unicode-range subsets the text touches (the Cyrillic file for a Cyrillic title) resolve before
+ * a box is read. Bounded by `timeoutMs`; a face that fails to load measures with the fallback, as
+ * before. Resolves to the number of distinct fonts asked for.
+ */
+export async function loadTextFaces(root: Element, timeoutMs = 10_000): Promise<number> {
+  const doc = root.ownerDocument;
+  const view = doc.defaultView;
+  if (!view || !('fonts' in doc) || typeof doc.fonts?.load !== 'function') return 0;
+  const texts = new Map<string, string>();
+  const walker = doc.createTreeWalker(root, view.NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+    const text = node.textContent ?? '';
+    const el = node.parentElement;
+    if (!el || text.trim() === '') continue;
+    const cs = view.getComputedStyle(el);
+    if (!cs.fontFamily || cs.display === 'none') continue;
+    const style = cs.fontStyle === 'normal' ? '' : `${cs.fontStyle} `;
+    const font = `${style}${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    texts.set(font, (texts.get(font) ?? '') + text);
+  }
+  if (texts.size === 0) return 0;
+  const loads = Promise.all(
+    [...texts].map(([font, text]) =>
+      doc.fonts.load(font, distinctCharacters(text)).catch(() => [] as FontFace[]),
+    ),
+  );
+  await Promise.race([loads, new Promise((resolve) => view.setTimeout(resolve, timeoutMs))]);
+  return texts.size;
 }

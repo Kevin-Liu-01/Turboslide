@@ -13,8 +13,12 @@ import {
   fallbackFontFaceCss,
   fontFaceCss,
   inlineFontFaceCss,
+  INTER_LATIN_MAX_BYTES,
+  INTER_SUBSETS,
   interBytes,
   interItalicBytes,
+  interSubsetFile,
+  interSubsetUrl,
 } from './inter.ts';
 import { FONTS_JSON } from './export.ts';
 import { licenceUrl } from './summary.ts';
@@ -28,13 +32,19 @@ describe('InterVariable', () => {
     expect(bytes.subarray(0, 4).toString('latin1')).toBe('wOF2');
   });
 
-  it('has the deck’s descriptor in inter.css, and the italic face beside it (gslides-parity SPEC-2 7.1)', () => {
+  it('has the deck’s descriptor in inter.css for every subset, the italic beside each (gslides-parity SPEC-2 7.1; docs/DESIGN.md 4.4)', () => {
     const css = readFileSync(INTER_CSS, 'utf8');
     expect(css).toContain("font-family: 'Inter';");
     expect(css).toContain('font-weight: 100 900;');
-    expect(css).toContain("url('../assets/InterVariable.woff2') format('woff2')");
     expect(css).toContain('font-style: italic;');
-    expect(css).toContain("url('../assets/InterVariable-Italic.woff2') format('woff2')");
+    /* the page loads the subsets, never the whole files */
+    expect(css).not.toContain("url('../assets/InterVariable.woff2')");
+    expect(css).not.toContain("url('../assets/InterVariable-Italic.woff2')");
+    for (const subset of INTER_SUBSETS)
+      for (const style of ['normal', 'italic'] as const)
+        expect(css, `${subset} ${style}`).toContain(
+          `url('../assets/${interSubsetFile(subset, style)}') format('woff2')`,
+        );
     expect(fontFaceCss('x.woff2')).toContain("src: url('x.woff2') format('woff2');");
     expect(fontFaceCss('y.woff2', 'italic')).toContain('font-style: italic;');
     const inlined = inlineFontFaceCss();
@@ -129,7 +139,8 @@ describe('InterVariable', () => {
     expect(css).toContain(`ascent-override: ${INTER_FALLBACK.ascentOverride};`);
     expect(css).toContain(`descent-override: ${INTER_FALLBACK.descentOverride};`);
     expect(css).toContain(`line-gap-override: ${INTER_FALLBACK.lineGapOverride};`);
-    expect(css.match(/@font-face/g)).toHaveLength(3);
+    /* the twelve subset faces of the design round (docs/DESIGN.md 4.4) and the fallback */
+    expect(css.match(/@font-face/g)).toHaveLength(INTER_SUBSETS.length * 2 + 1);
     expect(fallbackFontFaceCss()).toContain(`size-adjust: ${INTER_FALLBACK.sizeAdjust};`);
     expect(fallbackFontFaceCss()).toContain("src: local('Arial'), local('Liberation Sans');");
     expect(FONT_FAMILY_WITH_FALLBACK.startsWith("'Inter', 'Inter Fallback'")).toBe(true);
@@ -191,5 +202,101 @@ describe('InterVariable', () => {
       (metrics.inter.ascent / 2048 / sizeAdjust + -metrics.inter.descent / 2048 / sizeAdjust) *
       sizeAdjust;
     expect(Math.abs(interBox - fallbackBox)).toBeLessThan(1e-9);
+  });
+});
+
+// The web subsets of the design round (docs/DESIGN.md 4.4, decision C7): the two release files cut
+// into unicode-range files by scripts/build-fonts.py, recorded in fonts.json `web` and declared by
+// inter.css's generated block; `turboslide fonts build --check` compares them with a fresh cut.
+type WebRecord = {
+  file: string;
+  range: string;
+  style: 'normal' | 'italic';
+  unicodeRange: string;
+  codepoints: number;
+  bytes: number;
+  sha256: string;
+};
+
+function codepointsOf(range: string): Set<number> {
+  const out = new Set<number>();
+  for (const part of range.split(',')) {
+    const [low, high] = part.trim().replace(/^U\+/i, '').split('-');
+    const a = parseInt(low ?? '', 16);
+    const b = high === undefined ? a : parseInt(high, 16);
+    for (let c = a; c <= b; c += 1) out.add(c);
+  }
+  return out;
+}
+
+describe('the web subsets of InterVariable', () => {
+  const fonts = JSON.parse(readFileSync(FONTS_JSON, 'utf8')) as { web: WebRecord[] };
+  const css = readFileSync(INTER_CSS, 'utf8');
+
+  it('records one file per subset and style, each on disk with its bytes and sha256', () => {
+    expect(fonts.web).toHaveLength(INTER_SUBSETS.length * 2);
+    for (const subset of INTER_SUBSETS)
+      for (const style of ['normal', 'italic'] as const) {
+        const record = fonts.web.find((w) => w.range === subset && w.style === style);
+        expect(record, `${subset} ${style}`).toBeDefined();
+        expect(record?.file).toBe(interSubsetFile(subset, style));
+        const bytes = readFileSync(interSubsetUrl(subset, style));
+        expect(bytes.byteLength, record?.file).toBe(record?.bytes);
+        expect(createHash('sha256').update(bytes).digest('hex'), record?.file).toBe(record?.sha256);
+        expect(bytes.subarray(0, 4).toString('latin1')).toBe('wOF2');
+      }
+  });
+
+  it('keeps the Latin upright under 120,000 B, a third of the whole file', () => {
+    const latin = readFileSync(interSubsetUrl('latin')).byteLength;
+    expect(latin).toBeLessThanOrEqual(INTER_LATIN_MAX_BYTES);
+    expect(latin).toBeLessThan(INTER.bytes / 3);
+    expect(readFileSync(interSubsetUrl('latin', 'italic')).byteLength).toBeLessThan(
+      INTER_ITALIC.bytes / 3,
+    );
+  });
+
+  it('keeps the release in every file: the 4.1 name table, the alternates and the figures', () => {
+    for (const record of fonts.web) {
+      const facts = woff2Facts(readFileSync(new URL(`../assets/${record.file}`, import.meta.url)));
+      expect(facts.version, record.file).toBe(INTER_NAME_VERSION);
+      expect(facts.family, record.file).toBe('Inter Variable');
+    }
+    const latin = woff2Facts(readFileSync(interSubsetUrl('latin')));
+    for (const feature of ['cv11', 'ss01', 'tnum', 'zero', 'case', 'calt'])
+      expect(latin.features, feature).toContain(feature);
+  });
+
+  it('declares each file with its own range, Latin last so it is checked first where ranges overlap', () => {
+    const rules = [
+      ...css.matchAll(
+        /src: url\('\.\.\/assets\/([^']+)'\) format\('woff2'\);\s*unicode-range:\s*([^;]+);/g,
+      ),
+    ];
+    expect(rules.map((m) => m[1])).toEqual(
+      INTER_SUBSETS.flatMap((subset) => [
+        interSubsetFile(subset, 'normal'),
+        interSubsetFile(subset, 'italic'),
+      ]),
+    );
+    for (const [, file, range] of rules) {
+      const record = fonts.web.find((w) => w.file === file);
+      expect((range ?? '').replace(/\s+/g, ' ').trim(), file).toBe(record?.unicodeRange);
+    }
+    /* the chrome's own control glyphs sit in the Latin range, so a page of chrome text asks for
+       the Latin file alone (research-type 1.2) */
+    const latin = codepointsOf(
+      fonts.web.find((w) => w.file === interSubsetFile('latin'))?.unicodeRange ?? '',
+    );
+    for (const glyph of '⋯⋮▾▸✓⚠↩⇥●█▄▀⌘⌥⇧⌫←→↵…–—•×◐')
+      expect(latin.has(glyph.codePointAt(0) ?? 0), glyph).toBe(true);
+    /* the Cyrillic range holds Cyrillic and the Latin range holds none of it */
+    const cyrillic = codepointsOf(
+      fonts.web.find((w) => w.file === interSubsetFile('cyrillic'))?.unicodeRange ?? '',
+    );
+    for (const letter of 'Привет') {
+      expect(cyrillic.has(letter.codePointAt(0) ?? 0), letter).toBe(true);
+      expect(latin.has(letter.codePointAt(0) ?? 0), letter).toBe(false);
+    }
   });
 });

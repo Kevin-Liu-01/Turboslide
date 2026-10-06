@@ -46,12 +46,41 @@ export function spriteMarkup(fileText: string): string {
   return fileText.replace(/^\s*<!--[\s\S]*?-->\s*/, '').trim();
 }
 
-/** The Inter CSS with the woff2 inlined at its `url(...)`. */
+/** The markers of inter.css's generated block of subset faces (scripts/build-fonts.py). */
+const FACES_START = '/* faces:generated:start */';
+const FACES_END = '/* faces:generated:end */';
+
+/**
+ * The Inter CSS of a rendered document with the whole upright woff2 inlined (SPEC 5.2, 5.3). Since
+ * the design round inter.css declares the page's unicode-range subsets (docs/DESIGN.md 4.4)
+ * between two markers; a document keeps the whole file instead, for determinism and every script,
+ * so the block is replaced by the two faces the stylesheet declared before the round: the upright
+ * with the file inlined and no range, and the italic at its relative path, as a document drew it
+ * then. The fallback face after the block stays. A stylesheet without the markers takes the file
+ * at its first `url(...)`, the rule before the round.
+ */
 export function inlineFontCss(css: string, woff2: Buffer): string {
-  return css.replace(
-    /url\(['"]?[^)'"]+['"]?\)/,
-    `url(data:font/woff2;base64,${woff2.toString('base64')})`,
-  );
+  const data = `url(data:font/woff2;base64,${woff2.toString('base64')})`;
+  const start = css.indexOf(FACES_START);
+  const end = css.indexOf(FACES_END);
+  if (start < 0 || end < start) return css.replace(/url\(['"]?[^)'"]+['"]?\)/, data);
+  const faces = [
+    '@font-face {',
+    "  font-family: 'Inter';",
+    '  font-style: normal;',
+    '  font-weight: 100 900;',
+    '  font-display: swap;',
+    `  src: ${data} format('woff2');`,
+    '}',
+    '@font-face {',
+    "  font-family: 'Inter';",
+    '  font-style: italic;',
+    '  font-weight: 100 900;',
+    '  font-display: swap;',
+    "  src: url('../assets/InterVariable-Italic.woff2') format('woff2');",
+    '}',
+  ].join('\n');
+  return css.slice(0, start) + faces + css.slice(end + FACES_END.length);
 }
 
 export type LoadThemeOptions = {

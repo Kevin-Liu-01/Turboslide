@@ -1571,5 +1571,115 @@
       "bytes": 345968,
       "sha256": "94ac8dbf928c93e00e180960e2ba6d625b5ebe5d5e0ffb1c56ba1c3f7a6bf511"
     }
+  ],
+  "web": [
+    {
+      "file": "InterVariable-symbols.woff2",
+      "range": "symbols",
+      "style": "normal",
+      "unicodeRange": "U+02CD, U+02D8-02D9, U+02DB, U+0302, U+0306-0307, U+030A, U+030C, U+030F, U+0313, U+0315, U+031B, U+0326-0328, U+032C, U+0337-0338, U+0342-0343, U+0346-036F, U+0E3F, U+1DC0-1DF5, U+1DFC-1DFF, U+2070-2071, U+2074-208E, U+2090-209C, U+20DB-20DE, U+20E8, U+20F0, U+2100-2101, U+2103, U+2105-2106, U+2109, U+2117, U+211E-2121, U+2126, U+212A-212B, U+212E, U+2132, U+213B, U+214D, U+2150-217F, U+2183-2186, U+2189, U+2202, U+2205-2206, U+220F, U+2211, U+221A, U+221E, U+222B, U+2236, U+2248, U+2260, U+2264-2265, U+2295-2298, U+2304-2305, U+2326-2327, U+2380, U+2387, U+23CF, U+2423, U+2460-2468, U+24B6-24CF, U+24EA, U+2600, U+2605-2606, U+263C, U+2661, U+2665, U+266A-266B, U+2717, U+2756, U+2764, U+2780-2788, U+27EF, U+27F5-27FA, U+2913, U+2A38, U+2B06, U+2B12-2B13, U+2B1C, U+2B24, U+2E18, U+A92E, U+E000, U+E002-E05E, U+E06A-E0BD, U+E0C8-E0CC, U+E0DC-E0E6, U+E0F3-E0F5, U+E106, U+E109-E10A, U+E10C-E10F, U+E111-E113, U+E117-E118, U+E121-E122, U+E124, U+E12A-E15E, U+E163, U+E1C3, U+E1D2-E1DF, U+E1E1-E2DC, U+EE01-EE07, U+EE09-EE0A, U+EE0C-EE12, U+EE14, U+EE17, U+EE1D-EE45, U+EE47-EE84, U+EE87-EEE1, U+F6C3, U+1F12F-1F149, U+1F16A-1F16B, U+1F850, U+1F852",
+      "codepoints": 1115,
+      "bytes": 155592,
+      "sha256": "c67ed8c6967b9b65f023398f97615a2b78b0e7d6ba6fbb138530e6fc7dbb6fd1"
+    },
+    {
+      "file": "InterVariable-Italic-symbols.woff2",
+      "range": "symbols",
+      "style": "italic",
+      "unicodeRange": "U+02CD, U+02D8-02D9, U+02DB, U+0302, U+0306-0307, U+030A, U+030C, U+030F, U+0313, U+0315, U+031B, U+0326-0328, U+032C, U+0337-0338, U+0342-0343, U+0346-036F, U+0E3F, U+1DC0-1DF5, U+1DFC-1DFF, U+2070-2071, U+2074-208E, U+2090-209C, U+20DB-20DE, U+20E8, U+20F0, U+2100-2101, U+2103, U+2105-2106, U+2109, U+2117, U+211E-2121, U+2126, U+212A-212B, U+212E, U+2132, U+213B, U+214D, U+2150-217F, U+2183-2186, U+2189, U+2202, U+2205-2206, U+220F, U+2211, U+221A, U+221E, U+222B, U+2236, U+2248, U+2260, U+2264-2265, U+2295-2298, U+2304-2305, U+2326-2327, U+2380, U+2387, U+23CF, U+2423, U+2460-2468, U+24B6-24CF, U+24EA, U+2600, U+2605-2606, U+263C, U+2661, U+2665, U+266A-266B, U+2717, U+2756, U+2764, U+2780-2788, U+27EF, U+27F5-27FA, U+2913, U+2A38, U+2B06, U+2B12-2B13, U+2B1C, U+2B24, U+2E18, U+A92E, U+E000, U+E002-E05E, U+E06A-E0BD, U+E0C8-E0CC, U+E0DC-E0E6, U+E0F3-E0F5, U+E106, U+E109-E10A, U+E10C-E10F, U+E111-E113, U+E117-E118, U+E121-E122, U+E124, U+E12A-E15E, U+E163, U+E1C3, U+E1D2-E1DF, U+E1E1-E2DC, U+EE01-EE07, U+EE09-EE0A, U+EE0C-EE12, U+EE14, U+EE17, U+EE1D-EE45, U+EE47-EE84, U+EE87-EEE1, U+F6C3, U+1F12F-1F149, U+1F16A-1F16B, U+1F850, U+1F852",
+      "codepoints": 1115,
+      "bytes": 170020,
+      "sha256": "bdbd635b365a878b0b2e4ffe38596c61da78cc692bdb8fedef690ee19a7e46fd"
+    },
+    {
+      "file": "InterVariable-vietnamese.woff2",
+      "range": "vietnamese",
+      "style": "normal",
+      "unicodeRange": "U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB",
+      "codepoints": 110,
+      "bytes": 17544,
+      "sha256": "f1a1f8adde847e266a02f72de5f905db1f0f0ceb8877cbe4a3e802d8b00b0cac"
+    },
+    {
+      "file": "InterVariable-Italic-vietnamese.woff2",
+      "range": "vietnamese",
+      "style": "italic",
+      "unicodeRange": "U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB",
+      "codepoints": 110,
+      "bytes": 17880,
+      "sha256": "b501808bc21c051db5a05ffad3e0b4e864fca642106f3c674bc380c0c8db2e20"
+    },
+    {
+      "file": "InterVariable-greek.woff2",
+      "range": "greek",
+      "style": "normal",
+      "unicodeRange": "U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF, U+1F00-1FFF",
+      "codepoints": 338,
+      "bytes": 39520,
+      "sha256": "b63e3b8c7b21d8fc5bdb0c5062fef281e6af6f609e0fd6ce20f54746310e44ac"
+    },
+    {
+      "file": "InterVariable-Italic-greek.woff2",
+      "range": "greek",
+      "style": "italic",
+      "unicodeRange": "U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF, U+1F00-1FFF",
+      "codepoints": 338,
+      "bytes": 43216,
+      "sha256": "dbe87d1890a8e819633e0ae20ffb36da06b4ac3a9e7c97632e8fd8cba5888ca0"
+    },
+    {
+      "file": "InterVariable-cyrillic.woff2",
+      "range": "cyrillic",
+      "style": "normal",
+      "unicodeRange": "U+0301, U+0400-052F, U+1C80-1C8A, U+20B4, U+2116, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F",
+      "codepoints": 254,
+      "bytes": 55456,
+      "sha256": "5c905c4baa6d589d010a03141e343a9b5a0855631b1bf2c242e8f18986305bbc"
+    },
+    {
+      "file": "InterVariable-Italic-cyrillic.woff2",
+      "range": "cyrillic",
+      "style": "italic",
+      "unicodeRange": "U+0301, U+0400-052F, U+1C80-1C8A, U+20B4, U+2116, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F",
+      "codepoints": 254,
+      "bytes": 59684,
+      "sha256": "b52ec0170e46e01703a5d393753c23509529249962bfe878b23cd65fd01bc568"
+    },
+    {
+      "file": "InterVariable-latin-ext.woff2",
+      "range": "latin-ext",
+      "style": "normal",
+      "unicodeRange": "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF",
+      "codepoints": 726,
+      "bytes": 141380,
+      "sha256": "2fcb88de215a0dc88ba52fa089dfd6813808eae834b55ff1f897e642fa286f43"
+    },
+    {
+      "file": "InterVariable-Italic-latin-ext.woff2",
+      "range": "latin-ext",
+      "style": "italic",
+      "unicodeRange": "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF",
+      "codepoints": 726,
+      "bytes": 155568,
+      "sha256": "e820fe8c02361a19ff7fe6071d7e5e906987f7517706ba5d5acea9b7ef74c39b"
+    },
+    {
+      "file": "InterVariable-latin.woff2",
+      "range": "latin",
+      "style": "normal",
+      "unicodeRange": "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212, U+2215, U+22EE-22EF, U+2303, U+2318, U+2325, U+2328, U+232B, U+238B, U+23CE, U+2580-259F, U+25A0-25FF, U+2713, U+26A0, U+FEFF, U+FFFD",
+      "codepoints": 341,
+      "bytes": 113752,
+      "sha256": "eed1304968c90fa68eaa8c10c44de65412770b82a5686d5dae7882e7bce4fd7a"
+    },
+    {
+      "file": "InterVariable-Italic-latin.woff2",
+      "range": "latin",
+      "style": "italic",
+      "unicodeRange": "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212, U+2215, U+22EE-22EF, U+2303, U+2318, U+2325, U+2328, U+232B, U+238B, U+23CE, U+2580-259F, U+25A0-25FF, U+2713, U+26A0, U+FEFF, U+FFFD",
+      "codepoints": 341,
+      "bytes": 126000,
+      "sha256": "ee42853e1c5191ca04ef4210b340a4563abfc8c3de5590163fb3825ea3a7f7e4"
+    }
   ]
 }

@@ -2,7 +2,8 @@
 // directive of 2026-09-12: every slide is a canvas). The first canvas gesture on a slide that is
 // not on the freeform layout renders the slide once more into a hidden 1600 by 900 sheet at scale
 // 1 with the prompts of empty placeholders drawn, waits for the same readiness as a render (fonts,
-// every image decoded, the dither canvases, two frames), measures every object's box relative to
+// every image decoded, the dither canvases, two frames) and for the Inter subsets the slide's own
+// text touches (text-fit.ts loadTextFaces, docs/DESIGN.md 4.4), measures every object's box relative to
 // the stage element and hands the boxes to `toCanvas`. The CLI, the MCP server and the hosted
 // studio measure the same way in a headless sheet page (apps/cli/src/deps/canvas.ts), so the pos
 // the editor and the CLI write are identical in Chromium (SPEC-2 0.104). The stage's own
@@ -33,6 +34,7 @@ import type { Box } from '@turboslide/schema/render';
 import type { MeasuredBoxes } from './Gestures';
 import { drawAllDither } from './dither';
 import { SHEET_H, SHEET_W } from './model';
+import { loadTextFaces } from './text-fit';
 import { applyThemeToTree } from './theme';
 import type { Theme } from './theme';
 
@@ -174,6 +176,9 @@ async function withHiddenSheet<T>(
     mounted.body.innerHTML = renderForMeasure(document, slide, theme, assetBase);
     applyThemeToTree(mounted.body, theme);
     await awaitSheetReady(mounted.root);
+    /* the subsets the slide's own text touches (docs/DESIGN.md 4.4): a Cyrillic title measures in
+       Inter, never in the fallback, when its subset was not on the page yet */
+    await loadTextFaces(mounted.root);
     drawAllDither(mounted.body, theme);
     return read(mounted.root, mounted.stage);
   } finally {

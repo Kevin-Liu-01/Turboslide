@@ -6711,12 +6711,12 @@
     {
       "id": "fonts.inter.italic-release",
       "feature": "fonts",
-      "interaction": "The italic woff2 the editor preloads is 387,976 bytes and its name table reads \"Version 4.001;git-9221beed3\"; the sha256 equals INTER_ITALIC.sha256; Cmd+I on the title renders the italic face",
+      "interaction": "The italic woff2 the editor prefetches is the Latin subset of the 4.1 italic that fonts.json `web` records (its bytes and sha256), and its name table reads \"Version 4.001;git-9221beed3\"; Cmd+I on the title renders the italic face",
       "driver": "core/brand.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-fonts 4 (inter-4.1-compare.txt, woff2-names.mjs, title-italic-zoom.png)",
-      "note": "Ship one P0; docs/archive/rounds/FEATURES.md 3.1 item 1 (B2: the 4.1 italic file, INTER_ITALIC in inter.ts); a red row of an Inter file fix carries no parks and reverts its commit in the fix round (3.6)"
+      "note": "Ship one P0; docs/archive/rounds/FEATURES.md 3.1 item 1 (B2: the 4.1 italic file, INTER_ITALIC in inter.ts); a red row of an Inter file fix carries no parks and reverts its commit in the fix round (3.6); restated in the design round, DR-D1#3 (docs/DESIGN.md 4.4: the page loads the Latin subsets, the whole 4.1 italic stays pinned by inter.test.ts)"
     },
     {
       "id": "fonts.links.licence-v4-1",
@@ -10700,6 +10700,25 @@
       "severity": 1,
       "evidence": "research-type 3.1: the menu key on a hovered row 4.12:1, the scrollbar thumb 2.17:1 light and 2.58:1 dark",
       "note": "Design round (docs/DESIGN.md 11), DR-D1#2; the generated block of tokens.css (scripts/build-colors.ts) and colors.test.ts hold the same pairs in the unit tests"
+    },
+    {
+      "id": "chrome.font.one-subset",
+      "feature": "chrome",
+      "interaction": "Cold on /home, /decks and /new at 1440: one font request, the Latin subset of InterVariable named in inter.css, at most 120,000 B; no requested file or loaded family carries \"GT Inter\" or \"Berkeley\"; document.fonts reports Inter loaded",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 1.4: 352,615 B over the wire on production /home, the whole InterVariable on every route",
+      "note": "Design round (docs/DESIGN.md 11), DR-D1#3"
+    },
+    {
+      "id": "chrome.font.on-demand",
+      "feature": "chrome",
+      "interaction": "A slide title typed in Cyrillic requests the Cyrillic subset and draws in Inter (document.fonts.check true for its text) within 1 s; on /edit no italic face is loaded before an italic run is drawn and none is requested but the prefetched Latin italic, and the italic face loads once an italic run is drawn",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "evidence": "research-type 1.2",
+      "note": "Design round (docs/DESIGN.md 11), DR-D1#3; DESIGN.md 4.4 keeps the italic prefetch on /edit, so the italic clause reads the face's status in document.fonts and the files requested"
     },
     {
       "id": "accounts.sign-in-fits",

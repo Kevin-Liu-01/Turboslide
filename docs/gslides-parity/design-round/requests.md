@@ -42,10 +42,12 @@ it serves.
    DESIGN.md 4.2 the chrome and the pages draw Inter's defaults, and `decks.pages.default-glyphs`
    reads the lockup as the one element of these pages that still computes them once `decks.css`
    leaves them (read on 4665 before the seam: the lockup, the strip's and the list's headings,
-   the template labels, the card plates and titles, the trash heading).
+   the template labels, the card plates and titles, the trash heading). Answered in DR-D2#3
+   (08c3020d).
 6. **D2, `packages/chrome/src/dialogs/Profile.tsx`** (DR-D5#2; DESIGN.md 6.3): the profile's
    session list (`.ts-profile-rows`) takes `.pt-scroll`; `accounts.css` then drops its local
    `overflow-y` and `scrollbar-gutter` (D5 makes that line change in the push that follows).
+   Answered in DR-D2#3 (08c3020d); `accounts.css` drops the two lines in DR-D5#2b.
 7. **D3, `packages/chrome/src/menus/strings.ts`** (DR-D3#4, the words D5 asks for): Title Case on the
    button words of D5's pages: the trash's Delete forever and Empty trash buttons ("Delete
    Forever", "Empty Trash"; the snackbars that name the act keep their sentence case), the

@@ -3,8 +3,11 @@
    and Turboslide as two groups of cards. A card is the cover slide as a live clone in the
    template's appearance over a hairline, the name, the slide count and one sentence, with the
    card menu button at the right; the template new presentations start from carries an ink mark
-   on its cover. Lines are 1px and drawn once (SPEC 2.2 line law), colors are tokens only, radius
-   0, Inter at 13px, the ink state on hover as the home cards draw it. */
+   on its cover. Lines are 1px and drawn once (SPEC 2.2 line law), colors are tokens only, Inter at
+   13px with its default glyphs, the ink state on hover as the home cards draw it. The design
+   round's ladder (docs/DESIGN.md 3.1): the cards and covers square, the menu button and the
+   rename field at the 6 px control corner, the default mark a chip at 4 px; the meta line names
+   the template's theme and counts in tabular figures. */
 .ts-gallery {
   padding: 24px 0 48px;
 }
@@ -19,7 +22,6 @@
 .ts-gallery-head h1 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 22px;
   letter-spacing: -0.02em;
@@ -50,7 +52,6 @@
 .ts-gallery-group h2 {
   margin: 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 16px;
   letter-spacing: -0.01em;
@@ -128,7 +129,6 @@
   padding: 16px;
   text-align: center;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 14px;
   color: var(--pt-ink-2);
@@ -172,6 +172,7 @@
   left: 8px;
   z-index: 2;
   padding: 3px 7px;
+  border-radius: var(--pt-radius-sm);
   background: var(--pt-ink);
   color: var(--pt-paper);
   font-size: 11px;
@@ -204,7 +205,6 @@
   text-align: left;
   text-decoration: none;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 13.5px;
   letter-spacing: -0.01em;
@@ -229,6 +229,7 @@
   grid-column: 1;
   margin-top: 2px;
   font-size: 12px;
+  font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
   white-space: nowrap;
   overflow: hidden;
@@ -271,10 +272,10 @@
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--pt-ink);
+  border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
   font: 500 13.5px var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
 }
 
 .ts-gallery-rename input:focus-visible {

@@ -59,7 +59,6 @@
 .ts-empty-title {
   margin: 8px 0 0;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: var(--ts-h3, 20px);
   line-height: 1.25;

@@ -42,8 +42,7 @@
   background: var(--pt-plate);
   color: var(--pt-titanium);
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }

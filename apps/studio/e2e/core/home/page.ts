@@ -42,6 +42,7 @@ export const ROWS: readonly string[] = [
   'home.budget.lcp',
   'home.a11y.skip-and-contrast',
   'home.hero.run',
+  'home.hero.thumb-frames',
 ];
 
 const DESKTOP = { width: 1440, height: 900 } as const;
@@ -2187,6 +2188,73 @@ export function rows(): void {
     test.setTimeout(400_000);
     const { failures, notes } = await heroRun(browser);
     test.info().annotations.push({ type: 'loop', description: notes.join(' | ') });
+    expect(failures).toEqual([]);
+  });
+
+  test(title('home.hero.thumb-frames'), async ({ browser }) => {
+    test.setTimeout(300_000);
+    const failures: string[] = [];
+    for (const size of [DESKTOP, PHONE])
+      for (const theme of ['light', 'dark'] as const) {
+        const { context, page } = await homeContext(browser, size, theme);
+        try {
+          await openHome(page);
+          await page.locator('main#top[data-live="ready"]').waitFor({ timeout: 60_000 });
+          const cdp = await context.newCDPSession(page);
+          await cdp.send('DOM.enable');
+          /** the thumbnails whose ::after frame has no box in the layout */
+          const unframed = async (): Promise<string[]> => {
+            const { root } = await cdp.send('DOM.getDocument', { depth: -1 });
+            const { nodeIds } = await cdp.send('DOM.querySelectorAll', {
+              nodeId: root.nodeId,
+              selector: '[data-hero-thumb]:not([hidden]) .ts-home-sheet.is-thumb',
+            });
+            const out: string[] = [];
+            for (const [i, nodeId] of nodeIds.entries()) {
+              const { node } = await cdp.send('DOM.describeNode', { nodeId, depth: 1 });
+              const frame = (node.pseudoElements ?? []).find((p) => p.pseudoType === 'after');
+              const boxed =
+                frame !== undefined &&
+                (await cdp
+                  .send('DOM.getBoxModel', { backendNodeId: frame.backendNodeId })
+                  .then(() => true)
+                  .catch(() => false));
+              if (!boxed) out.push(`thumbnail ${i + 1}`);
+            }
+            return out;
+          };
+          const label = `${size.width} ${theme}`;
+          const read = async (when: string): Promise<void> => {
+            for (const miss of await unframed())
+              failures.push(`${label} ${when}: ${miss} drew no frame`);
+          };
+          await read('at rest');
+          // Set the Title: the steps before it land at once, the step plays, the frame shows slide 5
+          await page.locator('[data-hero-step="title"]').scrollIntoViewIfNeeded();
+          await page.locator('[data-hero-step="title"]').click();
+          await page.waitForFunction(
+            () =>
+              document.querySelector('[data-hero-step][aria-current="step"]') === null &&
+              document.querySelector<HTMLElement>('[data-hero-slide] [data-home-slides]')?.dataset[
+                'slide'
+              ] === 'next-steps',
+            undefined,
+            { timeout: 60_000 },
+          );
+          await read('after Set the Title');
+          // Restore takes the frame to the run's start, and slide 1's thumbnail shows it again
+          await page.locator('[data-hero-step="restore"]').click();
+          await page.waitForFunction(
+            () => document.querySelector('[data-hero-step][aria-current="step"]') === null,
+            undefined,
+            { timeout: 60_000 },
+          );
+          await page.locator('[data-hero-thumb="title"]').click();
+          await read('after Restore and a click on slide 1');
+        } finally {
+          await context.close();
+        }
+      }
     expect(failures).toEqual([]);
   });
 }

@@ -10740,6 +10740,16 @@
       "severity": 1,
       "evidence": "verify-landing.md finding 2 (production 2026-10-05: ps-show-version3-slide5.png and b-1440-light-12-print-sheet.png, seven \"Click to add text\" hints on slide 5 in the show and the print after a restore of version 3)",
       "note": "Round 1 follow-up, lane E item 2: versions.ts paintStep draws slide 5's recorded render of the run's first or second step, prompts included, on every slide root, and the show's and the print's copies (show.ts showSlide and cloneSlide) now drop `[data-prompt]` (dropPrompts); live/show-prompts.test.ts pins it"
+    },
+    {
+      "id": "home.hero.thumb-frames",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances, every hero filmstrip thumbnail keeps its frame (its ::after edge has a box in the layout) at rest, after the Set the Title step tab plays (the steps before it landed at once, the frame on slide 5) and after Restore and a click on slide 1",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-landing.md finding 3 (production 2026-10-05: S-pt3.png against S-pt2.png, slide 1's thumbnail with no edge after Set the Title, its ::after still computing 2 px solid ink)",
+      "note": "Round 1 follow-up, lane E item 3: nothing painted over the frame; Chromium's moveBefore left slide 1's thumbnail without its ::after box when a step reordered the strip several times in one task, so the strip reorders by insertBefore (apps/studio/src/components/home/live/hero-stage.ts reorder) and gives the focus back; live/hero-stage.test.ts pins the moves"
     }
   ]
 }

@@ -1679,7 +1679,11 @@ const LANDING_SECOND = [
 ];
 /* the Round 1 follow-up's lane E rows (verify-landing.md findings 1 to 6, read on production
    2026-10-05), in the order lane E enters them; each note reads "Round 1 follow-up, lane E item <n>" */
-const LANDING_FOLLOWUP = ['home.menus.readout', 'home.present.no-prompts'];
+const LANDING_FOLLOWUP = [
+  'home.menus.readout',
+  'home.present.no-prompts',
+  'home.hero.thumb-frames',
+];
 const FOLLOWUP_NOTE = /^Round 1 follow-up, lane E item \d/;
 /* a first pass id and the second pass row that replaces it (LANDING.md 6.7) */
 const RETIRED = {

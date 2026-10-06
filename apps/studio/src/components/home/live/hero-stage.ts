@@ -77,6 +77,29 @@ const AFTER: Readonly<Record<StepId, SlideState>> = {
 
 type LiveStates = { placeholders: string; titled: string };
 
+/**
+ * Puts `items`, children of `parent` in their present order, in the order `want` (the same
+ * elements): each one out of place moves by `insertBefore`, and the focus one of them held is given
+ * back. Chromium's `moveBefore` left a moved thumbnail without its ::after frame in the layout when
+ * a step tab reordered the strip several times in one task (slide 1 drew no edge after Set the
+ * Title, verify-landing.md finding 3); a removal and an insertion lay the frame out again.
+ */
+export function reorder(
+  parent: HTMLElement,
+  items: readonly HTMLElement[],
+  want: readonly HTMLElement[],
+): void {
+  if (want.every((t, i) => items[i] === t)) return;
+  const focused = document.activeElement;
+  const held = focused instanceof HTMLElement && parent.contains(focused) ? focused : null;
+  let at: Element | null = items[0] ?? null;
+  for (const item of want) {
+    if (item === at) at = item.nextElementSibling;
+    else parent.insertBefore(item, at);
+  }
+  if (held !== null && document.activeElement !== held) held.focus({ preventScroll: true });
+}
+
 export function startStage(ctx: LiveContext): void {
   const band = ctx.band;
   const stage = band.querySelector<HTMLElement>('[data-hero-stage]');
@@ -131,13 +154,7 @@ export function startStage(ctx: LiveContext): void {
       return thumb === null ? [] : [thumb];
     });
     const want = [...inOrder, ...items.filter((t) => !inOrder.includes(t))];
-    // moveBefore keeps a moved thumbnail's focus and its slide's state where the browser has it
-    const parent = strip as HTMLElement & { moveBefore?: (n: Node, r: Node | null) => void };
-    if (!want.every((t, i) => items[i] === t))
-      for (const thumb of want) {
-        if (typeof parent.moveBefore === 'function') parent.moveBefore(thumb, null);
-        else strip.append(thumb);
-      }
+    reorder(strip, items, want);
     for (const thumb of want) {
       const id = thumb.dataset['heroThumb'] ?? '';
       const n = order.indexOf(id) + 1;

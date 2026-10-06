@@ -1,0 +1,199 @@
+{
+  "base": "https://turboslide-lng2n2kua-general-translation.vercel.app",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-06T07:27:47.050Z",
+  "ms": 131389,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 130982,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/r1f-C-hold-r2/core-walk.json",
+    "deckId": "untitled-20261006-kro8",
+    "steps": 30
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "versions"
+    ],
+    "costRows": null
+  },
+  "rows": 10,
+  "passed": 9,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "b4b89ace",
+  "origin": "https://turboslide-lng2n2kua-general-translation.vercel.app",
+  "date": "2026-10-06",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.undo-restore": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "versions.show-changes-toggle": "passed",
+    "versions.show-changes-marks": "failed",
+    "comments.panel.empty-gesture": "passed",
+    "versions.panel.author-you": "passed",
+    "versions.field.square": "passed",
+    "versions.window-mark-column": "passed",
+    "versions.restore-in-more": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "versions.show-changes-marks",
+        "feature": "versions",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "versions.show-changes-marks",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "failed"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.13.pick (named row versionHistory.13.pick); marks with Show changes on 0 (); off 0"
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.field.square",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

@@ -1,0 +1,659 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-06T12:01:11.506Z",
+  "ms": 675655,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 674836,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/verify-followup/walk-r2/core-walk.json",
+    "deckId": "untitled-20261006-fsl8",
+    "steps": 77
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "brand",
+      "logos",
+      "shaders",
+      "assist"
+    ],
+    "costRows": null
+  },
+  "rows": 52,
+  "passed": 44,
+  "failed": 2,
+  "notDriven": 6,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "95808c36",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-06",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "brand.panel.opens": "passed",
+    "brand.logo.use-on-every-slide": "not driven",
+    "brand.logo.remove": "passed",
+    "brand.colors.primary-live": "passed",
+    "brand.colors.palette-row": "passed",
+    "brand.colors.control-ids-unique": "passed",
+    "brand.colors.version-history-entry": "passed",
+    "brand.colors.role-tooltips": "passed",
+    "brand.background.enter-keeps-open": "passed",
+    "brand.fonts.roles": "passed",
+    "brand.counter.format": "passed",
+    "brand.reset.default-kit": "passed",
+    "brand.layout.tiles-in-kit": "passed",
+    "brand.agent.set-get": "passed",
+    "assist.entry.title-row": "passed",
+    "assist.panel.first-line-and-cards": "passed",
+    "assist.tailor.dialog-one-undo": "passed",
+    "assist.tailor.agent-deck-tailor": "passed",
+    "assist.outside-write.snackbar": "passed",
+    "assist.finder.terms": "passed",
+    "assist.finder.ask-row": "passed",
+    "assist.agent.propose-accept": "passed",
+    "brand.objects.kit-colours-first": "not driven",
+    "logos.insert.row": "passed",
+    "logos.picker.search": "passed",
+    "logos.picker.paper-and-ink": "passed",
+    "logos.picker.your-brand": "passed",
+    "logos.picker.empty-state": "passed",
+    "logos.picker.licence-words": "passed",
+    "logos.insert.one-click-asset": "passed",
+    "logos.insert.logo-size": "passed",
+    "logos.insert.mono-tint": "passed",
+    "logos.insert.every-slide": "passed",
+    "logos.tailor.find-customer-logo": "passed",
+    "logos.replace-image.row": "passed",
+    "logos.picker.variants": "not driven",
+    "logos.kit.find-a-logo": "not driven",
+    "logos.intake.url-sentence": "passed",
+    "shaders.insert.gallery-thumbnails": "passed",
+    "shaders.insert.selected-free-rectangle": "passed",
+    "shaders.insert.words": "passed",
+    "shaders.panel.slider-live-undo": "failed",
+    "shaders.panel.preset-tiles": "passed",
+    "shaders.panel.control-sentences": "passed",
+    "shaders.panel.kit-colours": "passed",
+    "shaders.panel.one-home": "passed",
+    "shaders.background.place-answers": "failed",
+    "shaders.perf.one-context": "passed",
+    "shaders.background.add-to-theme": "not driven",
+    "shaders.frame.scrubber-capture": "not driven",
+    "shaders.view.play-setting": "passed",
+    "shaders.insert.gallery-hover-live": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "brand.logo.use-on-every-slide",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.objects.kit-colours-first",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "logos.picker.variants",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.panel.slider-live-undo",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "feature": "shaders",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "feature": "shaders",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "brand"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "parks": [
+        "format.image.useOnEverySlide"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.picker.variants",
+      "parks": [
+        "dialog.logo.kind.wordmark",
+        "dialog.logo.tone.mono"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "parks": [
+        "panel.brand.logo.find"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "parks": [
+        "formatOptions.shader.strength"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "parks": [
+        "dialog.background.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": [
+        "dialog.background.shader.addToTheme"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": [
+        "formatOptions.shader.frame.scrubber",
+        "formatOptions.shader.frame.capture"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "brand.panel.opens",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: format.image.useOnEverySlide (docs/archive/rounds/PRODUCT.md 7.1, B5a); the picture's menu lists edit.cut, edit.copy, edit.paste, edit.delete, edit.duplicate, arrange.order, arrange.rotate, arrange.centerOnPage, arrange.align, format.image.replaceImage, format.image.cropImage, format.image.maskImage, format.image.resetImage, format.image.imageOptions, format.formatOptions, format.altText, insert.comment"
+    },
+    {
+      "id": "brand.logo.remove",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.primary-live",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.palette-row",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.control-ids-unique",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.version-history-entry",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.colors.role-tooltips",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.background.enter-keeps-open",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.fonts.roles",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.counter.format",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.reset.default-kit",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.layout.tiles-in-kit",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.agent.set-get",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.entry.title-row",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.panel.first-line-and-cards",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.tailor.dialog-one-undo",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.tailor.agent-deck-tailor",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.outside-write.snackbar",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.finder.terms",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.finder.ask-row",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "assist.agent.propose-accept",
+      "feature": "assist",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.objects.kit-colours-first",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.chart.swatches.primary (docs/archive/rounds/PRODUCT.md 7.1, B3); the chart's series swatches list formatOptions.chart.swatches.ink, formatOptions.chart.swatches.paper, formatOptions.chart.swatches.ink-2, formatOptions.chart.swatches.titanium, formatOptions.chart.swatches.hair, formatOptions.chart.swatches.hair-soft first and no kit role (P1, FEATURES.md 2.3 item 4); the deck held no table of the tables area and no chart of the charts area, so the row made its own a 4 by 3 table (table) and a bar chart (chart) on blank-1-2a0d; table fill plate: toolbar.fillColor.kit.text, toolbar.fillColor.kit.background, toolbar.fillColor.kit.caption, toolbar.fillColor.kit.hint, toolbar.fillColor.kit.primary, toolbar.fillColor.kit.accent first (kit 6 of 6); tooltip \"Text #070707 headings and body text; the token ink\"; text colour plate: kit 6 of 6 first; chart series swatches: formatOptions.chart.swatches.ink, formatOptions.chart.swatches.paper, formatOptions.chart.swatches.ink-2, formatOptions.chart.swatches.titanium, formatOptions.chart.swatches.hair, formatOptions.chart.swatches.hair-soft first (kit 0 of 6)"
+    },
+    {
+      "id": "logos.insert.row",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.search",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.paper-and-ink",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.your-brand",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.empty-state",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.licence-words",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.one-click-asset",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.logo-size",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.mono-tint",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.insert.every-slide",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.tailor.find-customer-logo",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.replace-image.row",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.variants",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.logo.kind.wordmark (docs/archive/rounds/PRODUCT.md 7.1, B1); no Symbol, Wordmark, Color or Mono control in the dialog head (P1, FEATURES.md 4.11; the appearance rule chooses)"
+    },
+    {
+      "id": "logos.kit.find-a-logo",
+      "feature": "logos",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: panel.brand.logo.find (docs/archive/rounds/PRODUCT.md 7.1, B6); no Find a logo beside Replace in the Brand kit panel's Logo section (P1, FEATURES.md 4.5)"
+    },
+    {
+      "id": "logos.intake.url-sentence",
+      "feature": "images",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.words",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "select the shader; drag Amplitude with the mount at rest (Strength maps to no uniform of liquid metal, build/integrator.md); release; Cmd+Z: mount at rest 0.00 percent moving; during the drag the value read 5.6 with 1.4 percent of pixels changed and revision 75 (75 before); release: revision 78, value 3.2 -> 5.6 (block controls {\"amplitude\":5.6}); before the chord the banner \"changed elsewhere\" drawn and Undo off; Cmd+Z: value 5.6, 1.35 percent of pixels differ from rest"
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.control-sentences",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Slide > Change background on the body slide; Shader; a tile; Place; read the ground, the button and the dialog: chose Liquid metal; Place dialog.background.shader.place; the ground changed after 24078 ms (covering picture background, asset liquid-metal); the button read \"Placing, 23 s\" with the seconds"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.background.shader.addToTheme (docs/archive/rounds/PRODUCT.md 7.1, B1 (dialogs/Background.tsx)); no Add to theme row beside the Shader row (P1, FEATURES.md 5.2 item 1)"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.frame.scrubber (docs/archive/rounds/PRODUCT.md 7.1, B5 (inspector/shader.tsx)); no Frame scrubber in the Shader section (P1, FEATURES.md 5.2 item 3)"
+    },
+    {
+      "id": "shaders.view.play-setting",
+      "feature": "view",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-hover-live",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

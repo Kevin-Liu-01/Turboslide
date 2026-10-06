@@ -1,0 +1,147 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-06T11:19:26.041Z",
+  "ms": 114107,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 113319,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/r1f-E-prod-r1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "home.menus.readout",
+      "home.present.no-prompts",
+      "home.hero.thumb-frames",
+      "home.export.pdf-appearance",
+      "home.export.one-mark",
+      "home.interludes.glyphs"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 6,
+  "passed": 5,
+  "failed": 0,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "95808c36",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-06",
+  "results": {
+    "home.hero.thumb-frames": "passed",
+    "home.present.no-prompts": "passed",
+    "home.export.pdf-appearance": "passed",
+    "home.export.one-mark": "passed",
+    "home.interludes.glyphs": "not driven",
+    "home.menus.readout": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "home.interludes.glyphs",
+        "feature": "decks",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "home.interludes.glyphs",
+      "feature": "decks",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "home.interludes.glyphs",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 54.4 (the functional checks passed)"
+    },
+    {
+      "id": "home.menus.readout",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.no-prompts",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.thumb-frames",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.pdf-appearance",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.one-mark",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

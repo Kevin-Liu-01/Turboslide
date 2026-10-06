@@ -1,0 +1,258 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-06T12:12:48.738Z",
+  "ms": 317517,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 316946,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/verify-followup/walk-r3/core-walk.json",
+    "deckId": "untitled-20261006-r8su",
+    "steps": 34
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "shaders"
+    ],
+    "costRows": null
+  },
+  "rows": 14,
+  "passed": 11,
+  "failed": 1,
+  "notDriven": 2,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "95808c36",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-06",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "failed",
+    "decks.title.save-words": "failed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "shaders.insert.gallery-thumbnails": "passed",
+    "shaders.insert.selected-free-rectangle": "passed",
+    "shaders.insert.words": "passed",
+    "shaders.panel.slider-live-undo": "passed",
+    "shaders.panel.preset-tiles": "passed",
+    "shaders.panel.control-sentences": "passed",
+    "shaders.panel.kit-colours": "passed",
+    "shaders.panel.one-home": "passed",
+    "shaders.background.place-answers": "failed",
+    "shaders.perf.one-context": "passed",
+    "shaders.background.add-to-theme": "not driven",
+    "shaders.frame.scrubber-capture": "not driven",
+    "shaders.view.play-setting": "passed",
+    "shaders.insert.gallery-hover-live": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "shaders.background.place-answers",
+        "feature": "shaders",
+        "result": "failed"
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "feature": "shaders",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "feature": "shaders",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "shaders.background.place-answers",
+      "parks": [
+        "dialog.background.shader"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "parks": [
+        "dialog.background.shader.addToTheme"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "parks": [
+        "formatOptions.shader.frame.scrubber",
+        "formatOptions.shader.frame.capture"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "shaders.insert.gallery-thumbnails",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.selected-free-rectangle",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.words",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.slider-live-undo",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.preset-tiles",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.control-sentences",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.kit-colours",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.panel.one-home",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.place-answers",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Slide > Change background on the body slide; Shader; a tile; Place; read the ground, the button and the dialog: chose Liquid metal; Place dialog.background.shader.place; the ground changed after 22823 ms (covering picture background, asset liquid-metal); the button read \"Placing, 22 s\" with the seconds"
+    },
+    {
+      "id": "shaders.perf.one-context",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.background.add-to-theme",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: dialog.background.shader.addToTheme (docs/archive/rounds/PRODUCT.md 7.1, B1 (dialogs/Background.tsx)); no Add to theme row beside the Shader row (P1, FEATURES.md 5.2 item 1)"
+    },
+    {
+      "id": "shaders.frame.scrubber-capture",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.frame.scrubber (docs/archive/rounds/PRODUCT.md 7.1, B5 (inspector/shader.tsx)); no Frame scrubber in the Shader section (P1, FEATURES.md 5.2 item 3)"
+    },
+    {
+      "id": "shaders.view.play-setting",
+      "feature": "view",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.insert.gallery-hover-live",
+      "feature": "shaders",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

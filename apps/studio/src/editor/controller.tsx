@@ -4922,12 +4922,14 @@ export function slideStamp(slide: Slide): string {
 function renderDeckStamp(deck: DeckDocument['deck'], theme: Theme, assetBase: string): string {
   /* the brand kit is a render input too (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R12): the kit's
      stylesheet rides inside every slide, so a kit change re renders the memoized slides the show
-     and the filmstrip read */
+     and the filmstrip read; and so is the deck's theme (docs/DESIGN.md 7.5), whose rules ride the
+     same stylesheet */
   return fnv1a(
     `${theme}|${assetBase}|${canonicalJson({
       assets: deck.assets,
       defaults: deck.defaults ?? null,
       brand: deck.brand ?? null,
+      theme: deck.theme,
     })}`,
   );
 }

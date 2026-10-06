@@ -3,7 +3,10 @@
 // token under the appearance's selector, the derived tokens follow an edited text colour, the
 // slots draw the default, none and a picture (stage.ts frameBandOf and slide.ts titleMarkSlot),
 // and every rule is scoped to the sheet root.
-import type { BrandKit, DefaultKit } from '@turboslide/schema/brand';
+import type { BrandKit, DefaultKit, StoredThemeId } from '@turboslide/schema/brand';
+import { THEME_IDS } from '@turboslide/schema/brand';
+import { THEME_RECORDS, themeRecord } from '@turboslide/theme/themes';
+import { TOKENS, TOKEN_NAMES } from '@turboslide/theme/tokens';
 import { defaultKitOf, DEFAULT_APPEARANCE } from '@turboslide/schema/brand';
 import type { Deck, TitleSlide } from '@turboslide/schema/deck';
 import { parseCss } from '@turboslide/theme/css';
@@ -25,16 +28,17 @@ import { fontVariablesRule } from './fonts.ts';
 import { fontFamilyStack } from '@turboslide/fonts/summary';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { DISPLAY } from '@turboslide/theme/tokens';
+import { THEME_SLIDE_ATTRIBUTE, deckTokens, themeScope } from './theme-css.ts';
 
 const LIGHT = `${THEME_CSS_SCOPE}:not([data-theme='dark'])`;
 const DARK = `${THEME_CSS_SCOPE}[data-theme='dark']`;
 
-function deck(brand?: BrandKit): Deck {
+function deck(brand?: BrandKit, theme: StoredThemeId = 'gt-ink-paper'): Deck {
   return {
     schemaVersion: 1,
     id: 'acme',
     title: 'Acme',
-    theme: 'gt-ink-paper',
+    theme,
     sections: [{ id: 'deck', name: 'Deck', slideIds: ['title'] }],
     assets: {
       'acme-mark': {
@@ -366,5 +370,177 @@ describe('the slots', () => {
     expect(kit).toEqual({ name: 'General Translation', appearance: 'light' });
     expect(defaultKitOf(undefined).appearance).toBe(DEFAULT_APPEARANCE);
     expect(DEFAULT_APPEARANCE).toBe('light');
+  });
+});
+
+/*
+ * The theme library under the kit (docs/DESIGN.md 7.2, 7.5): a deck in General Translation (or
+ * the legacy id) without a kit emits nothing; every other theme emits its twelve tokens per
+ * appearance, its display features, its frame, its band and its title composition, and the kit's
+ * rules follow at the same specificity so a kit colour wins; the slots read the theme's logo.
+ */
+describe('the theme library', () => {
+  const lightOf = (id: string) => `${themeScope(id)}:not([data-theme='dark'])`;
+  const darkOf = (id: string) => `${themeScope(id)}[data-theme='dark']`;
+  const options = {
+    theme: 'light' as const,
+    chrome: false,
+    assetBase: 'decks/acme/',
+    blockAttrs: false,
+    gtWord: true,
+  };
+
+  it('emits nothing for General Translation and its legacy id without a kit', () => {
+    expect(themeCss(deck(undefined, 'general-translation'))).toBe('');
+    expect(themeCss(deck(undefined, 'gt-ink-paper'))).toBe('');
+    expect(themeCss(deck({ name: 'Acme' }, 'general-translation'))).toBe('');
+  });
+
+  it('writes every token of both appearances, the features and the frame for each other theme', () => {
+    for (const id of THEME_IDS) {
+      if (id === 'general-translation') continue;
+      const record = themeRecord(id);
+      const rules = parseCss(themeCss(deck(undefined, id)));
+      const light = rules.find((rule) => rule.selector === lightOf(id))?.declarations ?? {};
+      const dark = rules.find((rule) => rule.selector === darkOf(id))?.declarations ?? {};
+      for (const name of TOKEN_NAMES) {
+        expect(light[`--${name}`], `${id} light --${name}`).toBe(record.tokens.light[name]);
+        expect(dark[`--${name}`], `${id} dark --${name}`).toBe(record.tokens.dark[name]);
+      }
+      expect(
+        rules.find((rule) => rule.selector === themeScope(id))?.declarations['--display-features'],
+        id,
+      ).toBe('normal');
+      const selectors = rules.map((rule) => rule.selector);
+      expect(selectors.includes(`${themeScope(id)} .frame .cross`), `${id} crosses hidden`).toBe(
+        true,
+      );
+      // no theme but General Translation draws the GT wordmark
+      expect(selectors, id).toContain(`${themeScope(id)} .wordmark:not(.ts-kit-wordmark)`);
+      // every rule reaches only a sheet that holds a slide of this theme
+      for (const rule of rules)
+        expect(rule.selector.startsWith(themeScope(id)), rule.selector).toBe(true);
+      expect(themeScope(id)).toBe(
+        `${THEME_CSS_SCOPE}:has(.slide[${THEME_SLIDE_ATTRIBUTE}='${id}'])`,
+      );
+    }
+  });
+
+  it('draws one rule at the top for Swiss and both rules for Night and Slate', () => {
+    const swiss = parseCss(themeCss(deck(undefined, 'swiss'))).map((rule) => rule.selector);
+    expect(swiss).toContain(`${themeScope('swiss')} .frame .rule.bottom`);
+    expect(swiss).not.toContain(`${themeScope('swiss')} .frame .rule`);
+    expect(swiss).not.toContain(`${themeScope('swiss')} .frame .rule.top`);
+    for (const id of ['night', 'slate'] as const) {
+      const selectors = parseCss(themeCss(deck(undefined, id))).map((rule) => rule.selector);
+      expect(
+        selectors.some((selector) => selector.includes('.frame .rule')),
+        id,
+      ).toBe(false);
+    }
+    const simple = parseCss(themeCss(deck(undefined, 'simple'))).map((rule) => rule.selector);
+    expect(simple).toContain(`${themeScope('simple')} .frame .rule`);
+    expect(simple).toContain(`${themeScope('simple')} .frame::before`);
+    expect(simple).toContain(`${themeScope('simple')} .frame::after`);
+  });
+
+  it('lets a kit toggle draw a part the theme leaves out and a kit colour win over the theme', () => {
+    const rails = parseCss(themeCss(deck({ frame: { rails: true } }, 'simple'))).map(
+      (rule) => rule.selector,
+    );
+    expect(rails).not.toContain(`${themeScope('simple')} .frame::before`);
+    expect(rails).toContain(`${themeScope('simple')} .frame .cross`);
+    const css = themeCss(deck({ colors: { light: { text: '#101010' } } }, 'mint'));
+    const rules = parseCss(css);
+    const lights = rules.filter((rule) => rule.selector === lightOf('mint'));
+    expect(lights).toHaveLength(2);
+    expect(lights[0]?.declarations['--ink']).toBe(themeRecord('mint').tokens.light.ink);
+    // the later rule at the same specificity wins: the kit's
+    expect(lights[1]?.declarations['--ink']).toBe('#101010');
+    expect(lights[1]?.declarations['--hair']).toBe('rgba(16, 16, 16, 0.18)');
+    // Inter as the kit's display face draws the alternates in General Translation alone
+    expect(displayFeatures('inter', 'swiss')).toBe('normal');
+    expect(displayFeatures('inter', 'general-translation')).toBe(DISPLAY.features);
+  });
+
+  it('writes the title composition and the accent bar of the themes that have them', () => {
+    const title = (id: string) => `${themeScope(id)} .slide[data-kind='title'] .left-mid`;
+    const swiss = parseCss(themeCss(deck(undefined, 'swiss')));
+    expect(swiss.find((rule) => rule.selector === title('swiss'))?.declarations).toEqual({
+      top: '0',
+      transform: 'none',
+    });
+    expect(
+      swiss.find((rule) => rule.selector === `${themeScope('swiss')} .slide h2::before`)
+        ?.declarations['background'],
+    ).toBe('var(--accent)');
+    const coral = parseCss(themeCss(deck(undefined, 'coral')));
+    expect(coral.find((rule) => rule.selector === title('coral'))?.declarations['bottom']).toBe(
+      '0',
+    );
+    const mint = parseCss(themeCss(deck(undefined, 'mint')));
+    expect(mint.find((rule) => rule.selector === title('mint'))?.declarations['text-align']).toBe(
+      'center',
+    );
+    const simple = parseCss(themeCss(deck(undefined, 'simple')));
+    expect(simple.some((rule) => rule.selector.startsWith(title('simple')))).toBe(false);
+    expect(simple.some((rule) => rule.selector.endsWith('.frame::before'))).toBe(true);
+    expect(simple.some((rule) => rule.selector.endsWith('h1::before'))).toBe(false);
+  });
+
+  it('draws no GT mark, no wordmark band and no counter format of GT on a Simple title slide', () => {
+    const html = renderSlide(deck(undefined, 'simple'), title, options).html;
+    expect(html).not.toContain('#gt-mark');
+    expect(html).toContain(THEME_CSS_CLASS);
+    expect(html).toContain(`${THEME_SLIDE_ATTRIBUTE}="simple"`);
+    expect(renderSlide(deck(undefined, 'general-translation'), title, options).html).not.toContain(
+      THEME_SLIDE_ATTRIBUTE,
+    );
+    // an exact root, for a page that restyles slides of no stamped theme
+    expect(
+      themeCss(deck(undefined, 'swiss'), { root: '.ts-sheet' }).startsWith('.ts-sheet:not('),
+    ).toBe(true);
+    const band = frameBandOf(deck(undefined, 'simple'), 'light');
+    expect(band.kit).toBe(true);
+    expect(band.logo).toEqual({ kind: 'none' });
+    expect(frameBandHtml(band)).toBe('');
+    // the theme's logo is General Translation's alone: the default kind draws nothing elsewhere
+    const named = renderSlide(deck({ mark: { kind: 'default' } }, 'swiss'), title, options).html;
+    expect(named).not.toContain('#gt-mark');
+    expect(frameBandOf(deck({ footer: { logo: 'default' } }, 'swiss'), 'light').logo).toEqual({
+      kind: 'none',
+    });
+    // a picture still draws on any theme
+    const picture = renderSlide(
+      deck({ mark: { kind: 'picture', assetId: 'acme-mark' } }, 'simple'),
+      title,
+      options,
+    ).html;
+    expect(picture).toContain('class="mark mark-picture"');
+    // and General Translation keeps its mark and band byte for byte
+    expect(renderSlide(deck(undefined, 'general-translation'), title, options).html).toBe(
+      renderSlide(deck(undefined, 'gt-ink-paper'), title, options).html,
+    );
+    expect(frameBandOf(deck(undefined, 'general-translation'), 'light')).toBe(GT_BAND);
+  });
+
+  it('reads the counter format of the theme where the kit names none', () => {
+    expect(frameBandOf(deck(undefined, 'swiss'), 'light').counterFormat).toBe('n');
+    expect(frameBandOf(deck(undefined, 'night'), 'dark').counterFormat).toBe('n');
+    expect(
+      frameBandOf(deck({ counter: { format: 'Slide n' } }, 'swiss'), 'light').counterFormat,
+    ).toBe('Slide n');
+  });
+
+  it('answers the tokens a writer without a page reads, the theme under the kit', () => {
+    expect(deckTokens(deck(), 'dark')).toEqual(TOKENS.dark);
+    expect(deckTokens(deck(undefined, 'swiss'), 'light')).toEqual(
+      themeRecord('swiss').tokens.light,
+    );
+    const kit = deckTokens(deck({ colors: { light: { text: '#0b3d91' } } }, 'swiss'), 'light');
+    expect(kit.ink).toBe('#0b3d91');
+    expect(kit.hair).toBe('rgba(11, 61, 145, 0.18)');
+    expect(kit.paper).toBe(themeRecord('swiss').tokens.light.paper);
+    expect(THEME_RECORDS).toHaveLength(9);
   });
 });

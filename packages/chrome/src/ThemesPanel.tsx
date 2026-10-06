@@ -8,6 +8,7 @@ import type {
   KitColor,
   LogoKind,
   SlotPosition,
+  StoredThemeId,
 } from '@turboslide/schema/brand';
 import {
   COUNTER_FORMATS,
@@ -21,15 +22,22 @@ import {
   SLOT_POSITION_LABELS,
   brandWriteLabel,
   brandWriteMutation,
+  frameOf,
 } from '@turboslide/schema/brand';
 import type { HexColor } from '@turboslide/schema/color';
 import { isHexColor } from '@turboslide/schema/color';
 import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
-import { deckAppearance, slideOrder } from '@turboslide/schema/deck';
+import {
+  deckAppearance,
+  deckCounter,
+  deckCounterFormat,
+  slideOrder,
+} from '@turboslide/schema/deck';
 import type { FontId } from '@turboslide/schema/fonts';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { THEME_CSS_STYLE_ID, themeCss } from '@turboslide/render/theme-css';
-import { TOKENS } from '@turboslide/theme/tokens';
+import { themeRecord } from '@turboslide/theme/themes';
+import type { TokenName } from '@turboslide/theme/tokens';
 import { LiveClone } from '@turboslide/viewer/LiveClone';
 
 import { useEditorShell } from './editor-shell-context';
@@ -79,12 +87,17 @@ function defaultKitOfInput(input: EditorShellInput): DefaultKit {
   return kit ?? FALLBACK_DEFAULT_KIT;
 }
 
-/** The hex a role shows: the kit's value in the appearance, else the theme token's value. */
-function roleHex(kit: BrandKit | undefined, appearance: Appearance, role: KitColor): string {
+/** The hex a role shows: the kit's value in the appearance, else the deck theme's token value. */
+function roleHex(
+  kit: BrandKit | undefined,
+  appearance: Appearance,
+  role: KitColor,
+  theme: StoredThemeId,
+): string {
   const own = kit?.colors?.[appearance]?.[role];
   if (own !== undefined) return own;
-  const token = KIT_COLOR_TOKENS[role] as keyof (typeof TOKENS)['light'];
-  const value = TOKENS[appearance][token];
+  const token = KIT_COLOR_TOKENS[role] as TokenName;
+  const value = themeRecord(theme).tokens[appearance][token];
   return typeof value === 'string' && value.startsWith('#') ? value : '#000000';
 }
 
@@ -94,6 +107,7 @@ function previewKit(
   appearance: Appearance,
   role: KitColor,
   hex: HexColor | null,
+  theme: StoredThemeId,
 ): void {
   if (typeof document === 'undefined') return;
   let style = document.getElementById(THEME_CSS_STYLE_ID) as HTMLStyleElement | null;
@@ -113,7 +127,7 @@ function previewKit(
       [appearance]: { ...(kit?.colors?.[appearance] ?? {}), [role]: hex },
     },
   };
-  style.textContent = themeCss({ brand: next });
+  style.textContent = themeCss({ brand: next, theme });
 }
 
 function clearPreview(): void {
@@ -200,6 +214,8 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   const words = PANELS.brand;
   const defaultKit = defaultKitOfInput(input);
   const current = deckAppearance(deck);
+  /* the frame the sheet draws: the kit's toggles over the deck theme's parts (docs/DESIGN.md 7.5) */
+  const drawnFrame = frameOf(deck.theme, kit);
   const [colorAppearance, setColorAppearance] = useState<Appearance>(current);
   /* the Colors tab follows the appearance the seller picks (docs/archive/rounds/POLISH.md item 49; audit-media
      item 20: the Dark tile left the tab on Light): the tab resets when the deck's appearance
@@ -456,7 +472,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   };
 
   const colorRow = (role: KitColor) => {
-    const hex = roleHex(kit, colorAppearance, role);
+    const hex = roleHex(kit, colorAppearance, role, deck.theme);
     const own = kit?.colors?.[colorAppearance]?.[role] !== undefined;
     const meaning = KIT_COLOR_WORDS[role];
     const pointer = `/colors/${colorAppearance}/${role}`;
@@ -468,7 +484,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         else next[role] = typed;
         return next;
       });
-      previewKit(kit, colorAppearance, role, typed);
+      previewKit(kit, colorAppearance, role, typed, deck.theme);
     };
     return (
       <div key={role} className="ts-brand-color" data-role={role}>
@@ -489,6 +505,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
                 colorAppearance,
                 role,
                 (event.target as HTMLInputElement).value as HexColor,
+                deck.theme,
               )
             }
             onChange={(event) => {
@@ -532,9 +549,11 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
 
   const footerLogo: LogoKind = kit?.footer?.logo ?? 'default';
   const footerAsset = kit?.footer?.assetId ?? kit?.mark?.assetId;
-  const format: CounterFormat = kit?.counter?.format ?? 'n / N';
-  const counterShow = kit?.counter?.show ?? deck.defaults?.counter !== 'off';
-  const counterSkip = kit?.counter?.skipTitle ?? deck.defaults?.counter === 'skip-title';
+  /* the counter the sheet draws: the kit's, the Slide numbers dialog's, else the theme's (docs/DESIGN.md 7.5) */
+  const format: CounterFormat = deckCounterFormat(deck);
+  const counterMode = deckCounter(deck);
+  const counterShow = counterMode !== 'off';
+  const counterSkip = kit?.counter?.skipTitle ?? counterMode === 'skip-title';
   const [footerText, setFooterText] = useState<string | null>(null);
   const [lexicon, setLexicon] = useState<string | null>(null);
   const shownFooterText = footerText ?? kit?.footer?.text ?? '';
@@ -848,7 +867,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         </h3>
         {check(
           words.frameRails,
-          kit?.frame?.rails ?? true,
+          drawnFrame.rails,
           'panel.brand.frame.rails',
           (next) => void writeKit('/frame/rails', next),
           words.frameRailsLine,
@@ -856,7 +875,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         <p className="ts-brand-line">{words.frameRailsLine}</p>
         {check(
           words.frameRules,
-          kit?.frame?.rules ?? true,
+          drawnFrame.top || drawnFrame.bottom,
           'panel.brand.frame.rules',
           (next) => void writeKit('/frame/rules', next),
           words.frameRulesLine,
@@ -864,7 +883,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         <p className="ts-brand-line">{words.frameRulesLine}</p>
         {check(
           words.frameCrosses,
-          kit?.frame?.crosses ?? true,
+          drawnFrame.crosses,
           'panel.brand.frame.crosses',
           (next) => void writeKit('/frame/crosses', next),
           words.frameCrossesLine,

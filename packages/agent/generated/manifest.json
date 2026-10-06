@@ -103,7 +103,8 @@
       "assist.accept",
       "brand.get",
       "brand.set",
-      "brand.reset"
+      "brand.reset",
+      "theme.list"
     ],
     "slide": [
       "slide.list",
@@ -298,7 +299,7 @@
       "account.forget"
     ]
   },
-  "actionCount": 193,
+  "actionCount": 194,
   "resources": [
     {
       "uri": "deck://manifest",

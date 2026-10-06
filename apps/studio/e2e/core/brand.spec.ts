@@ -35,6 +35,7 @@ import {
   clickCard,
   zipEntries,
 } from './lib';
+import { brandThemes } from './brand-themes';
 
 // The brand kit and the templates, the spec rows (docs/archive/rounds/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
 // `brand.logo.replace-every-slide` and `fonts.budget.no-load-before-ready` with the driver
@@ -1743,7 +1744,11 @@ test(title('brand.panel.words-match-sheet'), async () => {
   expect(failures).toEqual([]);
 });
 
+/* lane D3 of the design round (docs/DESIGN.md 7, 10.3, 11): its rows live in brand-themes.ts */
+const THEME_ROWS = brandThemes();
+
 coverage(import.meta.filename, [
+  ...THEME_ROWS,
   /* docs/NEXT.md 3.2 H6 */
   'brand.template.blank-no-gt-mark',
   /* docs/NEXT.md 4.1.3 item 23 */

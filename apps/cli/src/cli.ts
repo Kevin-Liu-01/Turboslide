@@ -36,6 +36,7 @@ import { slides } from './commands/slides.ts';
 import { table } from './commands/table.ts';
 import { tailor } from './commands/tailor.ts';
 import { template } from './commands/template.ts';
+import { theme } from './commands/theme.ts';
 import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
 import { version } from './commands/version.ts';
@@ -115,6 +116,7 @@ Commands
   template rename <id> <name>       renames a template; its id stays (template.rename)
   template delete <id> --confirm    deletes a template; the default and Turboslide's own are refused (template.delete)
   template default <id>             the template new presentations start from; blank restores the default (template.setDefault)
+  theme list                        the nine themes a deck's /theme takes, with their tokens per appearance (theme.list)
   text replace <find> <replace> [--match-case] [--slides <id,...>]
                                     find and replace across the deck's text and notes in one write (text.replaceAll)
   text style <slide>#<block> <pointer> --range a:b [--italic] [--underline] [--strike] [--superscript] [--subscript] [--color <c>] [--highlight <c>]
@@ -283,6 +285,7 @@ const COMMANDS: Record<string, Command> = {
   deck,
   brand,
   template,
+  theme,
   slides,
   slide,
   block,

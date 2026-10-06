@@ -24,9 +24,10 @@ import { grammarRecordOf } from '@turboslide/schema/canvas';
 import { slideFieldTypography } from '@turboslide/schema/field-typography';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import type { SlotPosition } from '@turboslide/schema/brand';
+import { GT_THEME_ID, themeFactsOf, themeIdOf } from '@turboslide/schema/brand';
 import type { FontSrc } from './fonts.ts';
 import { deckFontsCss, routeFontSrc } from './fonts.ts';
-import { THEME_CSS_CLASS, themeCss } from './theme-css.ts';
+import { THEME_CSS_CLASS, THEME_SLIDE_ATTRIBUTE, themeCss } from './theme-css.ts';
 import { counterShownOn, frameBandOf } from './stage.ts';
 
 export type RenderOptions = {
@@ -208,7 +209,7 @@ function titleMarkOf(deck: Deck, slide: Slide): BlockContext['titleMark'] {
   const blockId = record.slots?.main?.[0];
   return blockId === undefined
     ? undefined
-    : { blockId, mark: deck.brand?.mark, empty: titleMarkEmpty(deck.brand) };
+    : { blockId, mark: deck.brand?.mark, empty: titleMarkEmpty(deck.brand, deck.theme) };
 }
 
 const NO_IDS: ReadonlySet<string> = new Set();
@@ -267,10 +268,14 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     (residual?.css ? `<style>${rewriteSlideScope(residual.css, `.ts-x-${slide.id}`)}</style>` : '');
   // The residual rules are written against `.ts-x-<slideId>`; rewriteSlideScope prefixes `.ts-sheet`
   // so they keep the cascade weight they had in the deck, where the theme's rules had one class less.
+  const themeId = themeIdOf(deck.theme);
   const common = {
     'data-slide': slide.id,
     'data-kind': slide.kind,
     'data-counter': options.counter,
+    /* a theme other than General Translation stamps its id, which its rules scope to (theme-css.ts
+       themeScope); a General Translation slide keeps its markup byte for byte */
+    [THEME_SLIDE_ATTRIBUTE]: themeId === GT_THEME_ID ? undefined : themeId,
   };
   const active = options.active !== false ? 'is-on' : undefined;
   const pictureKind = slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing';
@@ -450,13 +455,17 @@ export function kitStyle(deck: Deck, slide: Slide, options: RenderOptions): stri
 
 /**
  * True when the brand kit's title mark slot draws nothing: a record whose mark is none or whose
- * mark position is hidden. A deck without a record, or a record silent about the slot, draws the
- * GT mark. titleMarkSlot (the title kind) and renderMark (the canvas title's mark block) share it.
+ * mark position is hidden, or a slot that names the theme's logo in a theme without one (docs/
+ * DESIGN.md 7.5: only General Translation has a logo). A General Translation deck without a
+ * record, or with a record silent about the slot, draws the GT mark. titleMarkSlot (the title
+ * kind) and renderMark (the canvas title's mark block) share it.
  */
-export function titleMarkEmpty(kit: Deck['brand']): boolean {
+export function titleMarkEmpty(kit: Deck['brand'], theme?: string): boolean {
+  const themeLogo = themeFactsOf(theme).logo;
   if (kit === undefined || (kit.mark === undefined && kit.positions?.mark === undefined))
-    return false;
-  return (kit.mark?.kind ?? 'default') === 'none' || kit.positions?.mark === 'hidden';
+    return !themeLogo;
+  const kind = kit.mark?.kind ?? 'default';
+  return kind === 'none' || kit.positions?.mark === 'hidden' || (kind === 'default' && !themeLogo);
 }
 
 /**
@@ -472,12 +481,16 @@ export function titleMarkSlot(
   ctx: BlockContext,
 ): { inFlow: string; corner: string } {
   const kit = deck.brand;
-  // a deck without a record, or a record silent about the slot, draws the GT mark byte for byte
+  const themeLogo = themeFactsOf(deck.theme).logo;
+  // a General Translation deck without a record, or with a record silent about the slot, draws
+  // the GT mark byte for byte; a theme without a logo draws nothing there (docs/DESIGN.md 7.5)
   if (kit === undefined || (kit.mark === undefined && kit.positions?.mark === undefined))
-    return { inFlow: markSvg(ctx, 'mark', markBox.w, markBox.h), corner: '' };
+    return themeLogo
+      ? { inFlow: markSvg(ctx, 'mark', markBox.w, markBox.h), corner: '' }
+      : { inFlow: '', corner: '' };
   const position: SlotPosition = kit.positions?.mark ?? 'bottom-left';
   const kind = kit.mark?.kind ?? 'default';
-  if (titleMarkEmpty(kit)) return { inFlow: '', corner: '' };
+  if (titleMarkEmpty(kit, deck.theme)) return { inFlow: '', corner: '' };
   const box = kit.mark?.box ?? markBox;
   let logo: string;
   const assetId = kit.mark?.assetId;
@@ -490,8 +503,11 @@ export function titleMarkSlot(
         ? { w: box.w, h: Math.round(box.w / ratio) }
         : { w: Math.round(box.h * ratio), h: box.h };
     logo = `<img class="mark mark-picture" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))} width="${fit.w}" height="${fit.h}" alt="${escapeAttr(image.alt)}" data-slot="mark">`;
-  } else {
+  } else if (themeLogo) {
     logo = markSvg(ctx, 'mark', box.w, box.h, { class: 'mark', 'data-slot': 'mark' });
+  } else {
+    // a picture whose asset the deck lacks falls back to the theme's logo, and this theme has none
+    return { inFlow: '', corner: '' };
   }
   // the default corner of the title mark is the flow (the left mid stack); a named corner takes
   // the logo out of the flow into the kit layer at the sheet's corner

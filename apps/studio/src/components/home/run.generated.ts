@@ -879,8 +879,8 @@ export const HOME_RUN: HomeRun = {
       ],
     },
   },
-  cliCommands: 180,
-  refusal: "This page runs 5 of the CLI's 180 commands.",
+  cliCommands: 181,
+  refusal: "This page runs 5 of the CLI's 181 commands.",
   gestures: [
     {
       argv: ['slide', 'to-canvas', 'lighthouse'],

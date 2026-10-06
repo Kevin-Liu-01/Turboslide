@@ -69,6 +69,7 @@ import {
   slideSchema,
   SLIDE_KINDS,
   SLOT_NAMES,
+  THEME_IDS,
   THEMES,
 } from './deck.ts';
 import { exportCheckSchema, exportReportSchema } from './export.ts';
@@ -317,6 +318,9 @@ export const ACTION_IDS = [
   // the people round's janitor for orphan pictures under u/ (docs/archive/rounds/PEOPLE.md 4.6; B4, build/b4.md
   // R2), before the round three block so GS3_ACTION_IDS keeps its slice
   'admin.avatar.sweep',
+  // the design round's theme library (docs/DESIGN.md 7.8), before the round three block so
+  // GS3_ACTION_IDS keeps its slice
+  'theme.list',
   // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
   'presence.list',
   'presence.follow',
@@ -1263,7 +1267,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.set': action({
     id: 'deck.set',
     label: 'Set a deck field',
-    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.',
+    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -4119,6 +4123,36 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: { usage: 'turboslide fonts list' },
     mcp: 'deck_fonts_list',
+    example: {},
+  }),
+  /* the design round's theme library (docs/DESIGN.md 7.8): the nine themes a deck's `/theme` takes,
+     each with its tokens per appearance; a read with no deck, on the CLI, MCP and HTTP (the
+     editor's Theme panel reads the same records from @turboslide/theme/themes) */
+  'theme.list': action({
+    id: 'theme.list',
+    label: 'Themes',
+    doc: 'The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme.',
+    group: 'deck',
+    mutates: false,
+    transports: ['cli', 'mcp', 'http'],
+    milestone: 'P1',
+    input: empty,
+    output: z.strictObject({
+      themes: z.array(
+        z.strictObject({
+          id: z.enum(THEME_IDS),
+          name: z.string(),
+          sentence: z.string(),
+          defaultAppearance: z.enum(APPEARANCES),
+          tokens: z.strictObject({
+            light: z.record(z.string(), z.string()),
+            dark: z.record(z.string(), z.string()),
+          }),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide theme list' },
+    mcp: 'deck_list_themes',
     example: {},
   }),
   /* the features round's logo picker over thesvg.org (docs/archive/rounds/FEATURES.md 4.2, 4.4, 4.11; audit-logos

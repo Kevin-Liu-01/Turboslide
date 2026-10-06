@@ -23,6 +23,8 @@ import {
   typeInto,
 } from './core/lib';
 import { coreTitle } from './core/matrix';
+import { THEME_IDS } from '@turboslide/schema/brand';
+import { THEME_RECORDS } from '@turboslide/theme/themes';
 
 // MILESTONES M4 acceptance, agent-http.spec.ts: the hosted agent surface against a running studio.
 // It posts a slide.update with a stale baseRevision and receives 409 with the current document,
@@ -584,6 +586,101 @@ test.describe('the realtime round: the agent write announced in the open tab', (
     } finally {
       try {
         await teardownAll(A, scratch);
+      } finally {
+        await context.close().catch(() => undefined);
+      }
+    }
+  });
+});
+
+/*
+ * The design round's theme library on the agent surface (docs/DESIGN.md 7.8, 11; lane D3): the
+ * nine themes through `theme.list`, and `deck.set /theme` over HTTP with each id and the legacy
+ * one, on a deck made from /new and torn down through the product. Runs on every base the gate
+ * names, with the bearer off localhost.
+ */
+test.describe('the design round: the theme library on the agent surface', () => {
+  test.describe.configure({ mode: 'default' });
+
+  /** One POST to the surface: the status and the answer's own fields (bare or under `output`). */
+  async function post(
+    api: APIRequestContext,
+    url: string,
+    headers: Record<string, string>,
+    data: unknown,
+  ): Promise<{ status: number; body: Record<string, unknown> }> {
+    const res = await api.post(url, { headers, data, timeout: 30_000, maxRedirects: 0 });
+    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    const body = (raw['output'] as Record<string, unknown> | undefined) ?? raw;
+    return { status: res.status(), body };
+  }
+
+  test(coreTitle('themes.agent.theme-list'), async ({ browser, baseURL }) => {
+    test.setTimeout(240_000);
+    const base = (baseURL ?? 'http://localhost:4321').replace(/\/$/, '');
+    const headers = agentHeaders(base, { 'x-turboslide-author': 'agent:theme-row' });
+    test.skip(
+      headers === null,
+      `not driven: no bearer for ${base} (TURBOSLIDE_TOKEN or the origin's row of ~/.config/turboslide/hosts.json)`,
+    );
+    if (headers === null) return;
+    const scratch = new Scratch();
+    const { context, page } = await ownerContext(browser);
+    const api = await request.newContext();
+    try {
+      const listed = await post(api, `${base}/api/actions/theme.list`, headers, {});
+      const themes = (listed.body['themes'] ?? []) as {
+        id: string;
+        name: string;
+        defaultAppearance: string;
+        tokens: { light: Record<string, string>; dark: Record<string, string> };
+      }[];
+      const deckId = await newDeck(page, scratch, 'Theme agent deck');
+      await settled(page);
+      const writes: string[] = [];
+      for (const id of [...THEME_IDS, 'gt-ink-paper']) {
+        const info = await post(
+          api,
+          `${base}/api/actions/deck.info?deck=${encodeURIComponent(deckId)}`,
+          headers,
+          {},
+        );
+        const set = await post(
+          api,
+          `${base}/api/actions/deck.set?deck=${encodeURIComponent(deckId)}`,
+          headers,
+          { path: '/theme', value: id, baseRevision: info.body['revision'] },
+        );
+        writes.push(`${id} ${set.status} ${String(set.body['value'])}`);
+      }
+      const after = await post(
+        api,
+        `${base}/api/actions/deck.info?deck=${encodeURIComponent(deckId)}`,
+        headers,
+        {},
+      );
+      test.info().annotations.push({
+        type: 'themes',
+        description: `theme.list ${listed.status}: ${themes.map((t) => `${t.id} (${t.name}, ${t.defaultAppearance}, light paper ${t.tokens?.light?.['paper']}, dark paper ${t.tokens?.dark?.['paper']}, ${Object.keys(t.tokens?.light ?? {}).length} tokens)`).join('; ')}; deck.set /theme ${writes.join('; ')}; deck.info theme ${String(after.body['theme'])}`,
+      });
+      expect(listed.status).toBe(200);
+      expect(themes.map((t) => t.id)).toEqual([...THEME_IDS]);
+      for (const record of THEME_RECORDS) {
+        const row = themes.find((t) => t.id === record.id);
+        expect(row?.name, record.id).toBe(record.name);
+        expect(row?.defaultAppearance, record.id).toBe(record.defaultAppearance);
+        expect(row?.tokens.light, record.id).toEqual(record.tokens.light);
+        expect(row?.tokens.dark, record.id).toEqual(record.tokens.dark);
+      }
+      expect(writes).toEqual([
+        ...THEME_IDS.map((id) => `${id} 200 ${id}`),
+        'gt-ink-paper 200 general-translation',
+      ]);
+      expect(after.body['theme']).toBe('general-translation');
+    } finally {
+      await api.dispose().catch(() => undefined);
+      try {
+        await teardownAll(page, scratch);
       } finally {
         await context.close().catch(() => undefined);
       }

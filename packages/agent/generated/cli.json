@@ -4962,6 +4962,19 @@
       "milestone": "P1"
     },
     {
+      "action": "theme.list",
+      "usage": "turboslide theme list",
+      "command": [
+        "theme",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
       "action": "presence.list",
       "usage": "turboslide presence list",
       "command": [

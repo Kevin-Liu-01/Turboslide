@@ -19,6 +19,7 @@
     "./sprite": "./src/sprite.ts",
     "./copy": "./src/copy.ts",
     "./brand": "./src/brand.ts",
+    "./themes": "./src/themes.ts",
     "./brand/site": "./brand/site.ts",
     "./css": "./src/css.ts",
     "./gt-ink-paper/sheet.css": "./src/gt-ink-paper/sheet.css",

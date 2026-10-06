@@ -118,7 +118,7 @@
     },
     "packages/theme/brand/facts.json": {
       "bytes": 37283,
-      "sha256": "c9405be5cfc28671a52a9a7a4a7ff5b6d867b8c24df9ea85c2fe98354b567615",
+      "sha256": "fb4cfdd0cc5789b4132760bee8bfcbf75e052f3a190dd13fca38ec88b6013092",
       "kind": "facts"
     },
     "packages/theme/brand/hero.recipe.json": {

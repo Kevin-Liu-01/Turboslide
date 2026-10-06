@@ -3531,7 +3531,10 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects row 60 (both rows disabled with one cell)",
-      "parks": ["format.table.mergeCells", "format.table.unmergeCells"]
+      "parks": [
+        "format.table.mergeCells",
+        "format.table.unmergeCells"
+      ]
     },
     {
       "id": "tables.tail.merge-unmerge-buttons",
@@ -3540,7 +3543,10 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "toolbar-tails.ts 143 to 157; no audit drove the buttons",
-      "parks": ["toolbar.mergeCells", "toolbar.unmergeCells"]
+      "parks": [
+        "toolbar.mergeCells",
+        "toolbar.unmergeCells"
+      ]
     },
     {
       "id": "tables.distribute.rows-columns",
@@ -3549,7 +3555,10 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects row 60 lists the rows, none picked",
-      "parks": ["format.table.distributeRows", "format.table.distributeColumns"]
+      "parks": [
+        "format.table.distributeRows",
+        "format.table.distributeColumns"
+      ]
     },
     {
       "id": "tables.light-appearance",
@@ -4267,7 +4276,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 48",
-      "parks": ["view.snapTo.grid"]
+      "parks": [
+        "view.snapTo.grid"
+      ]
     },
     {
       "id": "arrange.snap.grid-effect",
@@ -4276,7 +4287,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-surface row 48 verdict: the 8 px grid snap itself was not driven",
-      "parks": ["view.snapTo.grid"]
+      "parks": [
+        "view.snapTo.grid"
+      ]
     },
     {
       "id": "arrange.guides.context",
@@ -4482,7 +4495,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "model.ts 2646 to 2654",
-      "parks": ["toolbar.hideMenus"]
+      "parks": [
+        "toolbar.hideMenus"
+      ]
     },
     {
       "id": "view.live-pointers.toggles",
@@ -4491,7 +4506,10 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 54",
-      "parks": ["view.livePointers.mine", "view.livePointers.others"]
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.others"
+      ]
     },
     {
       "id": "view.live-pointers.second-browser",
@@ -4500,7 +4518,10 @@
       "driver": "core/share.spec.ts",
       "today": "not driven",
       "evidence": "audit-surface row 54 verdict: the pointer drawing across browsers was not driven",
-      "parks": ["view.livePointers.mine", "view.livePointers.others"]
+      "parks": [
+        "view.livePointers.mine",
+        "view.livePointers.others"
+      ]
     },
     {
       "id": "view.comments.radios",
@@ -4561,7 +4582,9 @@
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 17",
-      "parks": ["file.new.templateGallery"]
+      "parks": [
+        "file.new.templateGallery"
+      ]
     },
     {
       "id": "decks.file.open-list-search",
@@ -4570,7 +4593,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 18",
-      "parks": ["file.open"]
+      "parks": [
+        "file.open"
+      ]
     },
     {
       "id": "decks.file.open-upload-bundle",
@@ -4579,7 +4604,9 @@
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 19",
-      "parks": ["file.open"],
+      "parks": [
+        "file.open"
+      ],
       "note": "The polish round ship step, third attempt (the integrator for B6): the bundle uploaded is File > Download > Turboslide bundle from the deck's editor (bundleBytes), since item 85 made the card's Download the PowerPoint, a PK file with no manifest.json, which the second ship attempt uploaded twice (B5's R21)"
     },
     {
@@ -4589,7 +4616,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 20",
-      "parks": ["file.importSlides"]
+      "parks": [
+        "file.importSlides"
+      ]
     },
     {
       "id": "decks.file.import-slides-bundle",
@@ -4598,7 +4627,9 @@
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 21",
-      "parks": ["file.importSlides"],
+      "parks": [
+        "file.importSlides"
+      ],
       "note": "Since the product round the row uploads a bundle of its own copy of the deck (File > Make a copy through the card menu), so the upload's name is fresh and never the one the row before it removed (ship.md section 10 item 3, R2-F6); the copy leaves with the row. The listing of the upload waits up to 65 s where the row reads it (PRODUCT.md 8.2).. The polish round ship step, third attempt (the integrator for B6): the copy's bundle is File > Download > Turboslide bundle from its editor (bundleBytes; B5's R21)"
     },
     {
@@ -4608,7 +4639,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 31",
-      "parks": ["file.details"]
+      "parks": [
+        "file.details"
+      ]
     },
     {
       "id": "slides.numbers.apply",
@@ -4617,7 +4650,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "model.ts 1479; research 07 row \"Number slides\"; no audit drove the dialog",
-      "parks": ["insert.slideNumbers"]
+      "parks": [
+        "insert.slideNumbers"
+      ]
     },
     {
       "id": "versions.show-changes-toggle",
@@ -4626,7 +4661,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 32",
-      "parks": ["file.versionHistory.showChanges"]
+      "parks": [
+        "file.versionHistory.showChanges"
+      ]
     },
     {
       "id": "versions.show-changes-marks",
@@ -4635,7 +4672,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-surface row 32: change marks 0 on a fresh deck",
-      "parks": ["file.versionHistory.showChanges"]
+      "parks": [
+        "file.versionHistory.showChanges"
+      ]
     },
     {
       "id": "export.zip.bundle",
@@ -4644,7 +4683,9 @@
       "driver": "core/export.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 30",
-      "parks": ["file.download.zip"],
+      "parks": [
+        "file.download.zip"
+      ],
       "note": "The polish fix round 3 (B6): the ship's run of record read \"Saved <id>.zip\" twice against the row's older \"names the bundle\"; the read follows item 86's one sentence"
     },
     {
@@ -4655,7 +4696,9 @@
       "today": "flaky",
       "evidence": "audit-surface row 29; return-drive rows 13 to 16 (three cancelled of six attempts)",
       "severity": 2,
-      "parks": ["file.download.html"]
+      "parks": [
+        "file.download.html"
+      ]
     },
     {
       "id": "export.jpg.current-slide",
@@ -4665,7 +4708,9 @@
       "today": "broken",
       "evidence": "audit-surface row 27",
       "severity": 2,
-      "parks": ["file.download.jpg"]
+      "parks": [
+        "file.download.jpg"
+      ]
     },
     {
       "id": "export.png.current-slide",
@@ -4675,7 +4720,9 @@
       "today": "broken",
       "evidence": "audit-surface row 28",
       "severity": 2,
-      "parks": ["file.download.png"]
+      "parks": [
+        "file.download.png"
+      ]
     },
     {
       "id": "help.check-slides",
@@ -4684,7 +4731,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "audit-surface row 63",
-      "parks": ["tools.checkSlides"]
+      "parks": [
+        "tools.checkSlides"
+      ]
     },
     {
       "id": "help.improve-link",
@@ -4693,7 +4742,9 @@
       "driver": "core/decks.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 68",
-      "parks": ["help.improve"]
+      "parks": [
+        "help.improve"
+      ]
     },
     {
       "id": "inbox.bell-panel-toggle",
@@ -4728,7 +4779,9 @@
       "driver": "core/share.spec.ts",
       "today": "works",
       "evidence": "audit-surface row 16",
-      "parks": ["title.presence.goTo"]
+      "parks": [
+        "title.presence.goTo"
+      ]
     },
     {
       "id": "arrange.insert.selected-after-menu",
@@ -4803,7 +4856,7 @@
     {
       "id": "slides.import.example-deck",
       "feature": "slides",
-      "interaction": "A fresh browser on a deck made from /new: File > Open does not list the GT brand deck; File > Import slides lists it alone, its meta \"Example \u00b7 <n> slides\", under the sentence \"You have no other presentations yet\"; no tile is picked when its list opens, two clicks read \"Import 2 slides\" and Import brings two after the current slide",
+      "interaction": "A fresh browser on a deck made from /new: File > Open does not list the GT brand deck; File > Import slides lists it alone, its meta \"Example · <n> slides\", under the sentence \"You have no other presentations yet\"; no tile is picked when its list opens, two clicks read \"Import 2 slides\" and Import brings two after the current slide",
       "driver": "core/slides.spec.ts",
       "today": "works",
       "evidence": "verify-r1.md finding 2 (production 2026-10-05: a fresh browser read \"No other presentations on this Turboslide\" and was offered nothing); lane A's reading on its dev server (port 4601, tmp store) 2026-10-05 18:17:49Z to 18:18:37Z at a one minute load of 91.7 to 119.4: passed in 28.0 s",
@@ -4982,7 +5035,10 @@
       "today": "broken",
       "evidence": "audit-seller 12; audit-brand 3",
       "severity": 3,
-      "parks": ["home.gallery", "file.new.templateGallery"]
+      "parks": [
+        "home.gallery",
+        "file.new.templateGallery"
+      ]
     },
     {
       "id": "templates.gallery.strip-and-link",
@@ -4992,7 +5048,9 @@
       "today": "broken",
       "evidence": "audit-brand 3 (t-01)",
       "severity": 3,
-      "parks": ["home.gallery"]
+      "parks": [
+        "home.gallery"
+      ]
     },
     {
       "id": "templates.save.as-template",
@@ -5001,7 +5059,9 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "audit-brand 13",
-      "parks": ["file.saveAsTemplate"],
+      "parks": [
+        "file.saveAsTemplate"
+      ],
       "note": "Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
@@ -5011,7 +5071,9 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "judge-seller addition 4; audit-brand 13",
-      "parks": ["file.saveAsTemplate"],
+      "parks": [
+        "file.saveAsTemplate"
+      ],
       "note": "Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
@@ -5021,7 +5083,9 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "judge-seller addition 4",
-      "parks": ["templates.card.menu"],
+      "parks": [
+        "templates.card.menu"
+      ],
       "note": "The parks id names the card menu family templates.card.<id>.menu of PRODUCT.md 7.1, one control per template card on the gallery page. Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
@@ -5031,7 +5095,9 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "judge-seller addition 3; audit-brand section 3",
-      "parks": ["panel.brand.template.useForNew"],
+      "parks": [
+        "panel.brand.template.useForNew"
+      ],
       "note": "The polish fix round (VERIFICATION.md polish pass 1 finding 3): the row reads the store's default through the agent surface (template.list) before its write and puts that default back through template.setDefault after the page's own restore, in the row and again in the teardown, with a read after each; a base the surface does not answer on (no bearer for the origin off localhost) is not driven with the reason, never a write the run cannot undo. On 2026-09-28 a preview run without a bearer left this file's template as production's default until a hand reset. Round 1 follow-up, lane D (verify-r1.md finding 3): not driven on a deployment. The row saves a template, a deployment wide record the gallery lists for every visitor, and the previews share production's store, so core/brand.spec.ts skips it on every base that is not localhost with that reason and its reading is a localhost run's; a run on a deployment on 2026-10-01 left the template core-spec-template-muouve9u (listed as \"Core spec\") in production's gallery."
     },
     {
@@ -5295,7 +5361,10 @@
       "today": "broken",
       "evidence": "audit-gaps 13 (pictures row 13); FOCUS.md 3.2",
       "severity": 2,
-      "parks": ["insert.image.byUrl", "format.image.replaceImage.byUrl"]
+      "parks": [
+        "insert.image.byUrl",
+        "format.image.replaceImage.byUrl"
+      ]
     },
     {
       "id": "formatting.alt-text.write-undo",
@@ -5304,7 +5373,9 @@
       "driver": "probe --core",
       "today": "works",
       "evidence": "RETURN.md question 6 (audit-formatting row 70); audit-gaps 10",
-      "parks": ["format.altText"]
+      "parks": [
+        "format.altText"
+      ]
     },
     {
       "id": "comments.panel.empty-gesture",
@@ -5578,7 +5649,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-brand 4, 8; audit-seller 6",
-      "parks": ["slide.changeTheme"]
+      "parks": [
+        "slide.changeTheme"
+      ]
     },
     {
       "id": "brand.logo.replace-every-slide",
@@ -5595,7 +5668,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-brand 2 (b-12, b-13)",
-      "parks": ["format.image.useOnEverySlide"]
+      "parks": [
+        "format.image.useOnEverySlide"
+      ]
     },
     {
       "id": "brand.logo.remove",
@@ -5754,7 +5829,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-seller 5; audit-gaps 3; audit-brand 5 (the control is drawn disabled on purpose)",
-      "parks": ["toolbar.font"]
+      "parks": [
+        "toolbar.font"
+      ]
     },
     {
       "id": "fonts.dropdown.apply-selection",
@@ -5779,7 +5856,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-seller 5 (no row today); audit-brand 5 (b-09)",
-      "parks": ["format.text.font"]
+      "parks": [
+        "format.text.font"
+      ]
     },
     {
       "id": "fonts.more-fonts.licence",
@@ -5840,7 +5919,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-assist 2; audit-interface 6",
-      "parks": ["title.assist"]
+      "parks": [
+        "title.assist"
+      ]
     },
     {
       "id": "assist.panel.first-line-and-cards",
@@ -5849,7 +5930,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-assist 2",
-      "parks": ["title.assist"]
+      "parks": [
+        "title.assist"
+      ]
     },
     {
       "id": "assist.tailor.dialog-one-undo",
@@ -5858,7 +5941,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-gaps 16 (surface-01-insert-menu-default.png, no assist row)",
-      "parks": ["tools.tailor"],
+      "parks": [
+        "tools.tailor"
+      ],
       "note": "Round 1 follow-up, lane D (verify-r1.md finding 1): the row read red on production for \"revision 251 -> 251 -> 252\" with every Acme renamed, the slide skipped and one Cmd+Z restoring both: the tab's revision follows the room's checkpoint 2 s after the last op, so the read after Apply was the revision before it and the undo's checkpoint then carried both writes. The driver reads the revision once it has stopped moving (toolkit stableRevision) before Apply, after it and after Cmd+Z; lane D's local walk read \"revision 84 -> 85 -> 86\"."
     },
     {
@@ -5876,7 +5961,9 @@
       "driver": "core/assist.spec.ts",
       "today": "not driven",
       "evidence": "audit-assist 1, 3, 4",
-      "parks": ["panel.assist.starter.shorter"],
+      "parks": [
+        "panel.assist.starter.shorter"
+      ],
       "note": "On the preview the spec drives the panel against TURBOSLIDE_ASSIST=fixture; on production the card is one real model call. A model call past its 20 s bound or a provider 5xx is a recorded class of PRODUCT.md 8.2, written into the ship note by id with the provider's status and latency."
     },
     {
@@ -5886,7 +5973,9 @@
       "driver": "core/assist.spec.ts",
       "today": "not driven",
       "evidence": "audit-assist 10",
-      "parks": ["panel.assist.starter.notes"]
+      "parks": [
+        "panel.assist.starter.notes"
+      ]
     },
     {
       "id": "assist.free-ask.fallback-sentence",
@@ -5895,7 +5984,9 @@
       "driver": "core/assist.spec.ts",
       "today": "not driven",
       "evidence": "judge-design rejection 15; audit-assist section \"The proposal\"",
-      "parks": ["panel.assist.prompt"]
+      "parks": [
+        "panel.assist.prompt"
+      ]
     },
     {
       "id": "assist.mark.chip-and-history",
@@ -5931,7 +6022,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-assist 8",
-      "parks": ["finder.assist.ask"]
+      "parks": [
+        "finder.assist.ask"
+      ]
     },
     {
       "id": "assist.quota.429",
@@ -6190,7 +6283,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects rows 26 to 49 (a hexagon inserts as the box); shapes.ts 421 to 445",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.3 (B2 the interpreter and the sheet; B1 the picker)"
     },
     {
@@ -6200,7 +6295,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "inspector/shape.tsx 28 to 80 writes the fields; the path ignores them (shapes.ts 421 to 445); the 30 percent VECTOR.md 6.1 names is the field's value, not the ECMA ratio (definitions.ts star5 iwd2 = swd2 × a / 50000)",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.4 (B2)"
     },
     {
@@ -6211,7 +6308,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects rows 26 to 49; the arc conversion of 2.1",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1 (B2)"
     },
     {
@@ -6222,7 +6321,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects rows 26 to 49; primitives.ts 492 to 503 writes one path",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.3 (B2)"
     },
     {
@@ -6233,7 +6334,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects rows 26 to 49; 2.1 the path space",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1 (B2)"
     },
     {
@@ -6244,7 +6347,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 25 (the Arrows plate's tiles are the box glyph), rows 26 to 49",
-      "parks": ["insert.shape.arrows"],
+      "parks": [
+        "insert.shape.arrows"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.6 (B2; B1 the Arrows row)"
     },
     {
@@ -6255,7 +6360,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects rows 26 to 49; definitions.ts curvedRightArrow shades with darkenLess (vector/build/b2.md 2.6)",
-      "parks": ["insert.shape.arrows"],
+      "parks": [
+        "insert.shape.arrows"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.3 (B2)"
     },
     {
@@ -6266,7 +6373,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 25, rows 26 to 49",
-      "parks": ["insert.shape.callouts"],
+      "parks": [
+        "insert.shape.callouts"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.6 (B2; B1 the Callouts row)"
     },
     {
@@ -6277,7 +6386,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects rows 26 to 49; definitions.ts cloudCallout (eleven arcTo commands in the cloud path, where VECTOR.md 6.1 wrote cubic curves)",
-      "parks": ["insert.shape.callouts"],
+      "parks": [
+        "insert.shape.callouts"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.3 (B2)"
     },
     {
@@ -6288,7 +6399,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 25, rows 26 to 49",
-      "parks": ["insert.shape.equation"],
+      "parks": [
+        "insert.shape.equation"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.1, 2.6 (B2; B1 the Equation row)"
     },
     {
@@ -6319,7 +6432,9 @@
       "today": "broken",
       "severity": 2,
       "evidence": "shapes.ts 483 to 490 answers rectSites for every preset; connect.ts 36 to 40",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "setup": "block.insert of the hexagon through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.2 (B2)"
     },
@@ -6330,7 +6445,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "Editor.tsx 2500 to 2536 writes pos alone (the invariant this row pins)",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.4 (B2 (a probe row over Gestures.tsx and Editor.tsx as they stand))"
     },
     {
@@ -6340,7 +6457,10 @@
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "audit-shapes row 48; build.ts 534 to 538 writes the values, unmeasured for a gallery preset",
-      "parks": ["insert.shape.gallery", "insert.shape.callouts"],
+      "parks": [
+        "insert.shape.gallery",
+        "insert.shape.callouts"
+      ],
       "setup": "block.insert of the three shapes through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.5 (B4)"
     },
@@ -6351,7 +6471,9 @@
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "audit-shapes rows 47 and 48",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "setup": "block.insert of the three shapes through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.5 (B4; B2 the sheet the raster shoots) Objects round fix round (the verifier's pass 1 finding 8): a count over what the setup wrote (one more slide) is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/archive/rounds/SYNC.md 3.2, the sync owner's), which the driver reads before the download and records not driven with the counts and the class named, so the row spends no download on a deck that is not its own."
     },
@@ -6363,7 +6485,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 24 (99 tiles draw three glyph paths); ShapePicker.tsx 47 to 58; the table holds 99 shapes presets (shapes.ts SHAPE_PRESETS), not the 100 of VECTOR.md 6.1",
-      "parks": ["insert.shape.gallery"],
+      "parks": [
+        "insert.shape.gallery"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.6 (B1; B2 the glyphs)"
     },
     {
@@ -6374,7 +6498,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 25",
-      "parks": ["insert.shape.arrows"],
+      "parks": [
+        "insert.shape.arrows"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.6 (B1; B2 the glyphs)"
     },
     {
@@ -6385,7 +6511,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 25",
-      "parks": ["insert.shape.callouts"],
+      "parks": [
+        "insert.shape.callouts"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.6 (B1; B2 the glyphs)"
     },
     {
@@ -6396,7 +6524,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-objects row 25",
-      "parks": ["insert.shape.equation"],
+      "parks": [
+        "insert.shape.equation"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.6 (B1; B2 the glyphs)"
     },
     {
@@ -6416,7 +6546,10 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "docs/archive/rounds/RETURN.md 2.9 (parked with the galleries); toolbar-tails.ts 376 to 392",
-      "parks": ["toolbar.changeShape", "format.changeShape"],
+      "parks": [
+        "toolbar.changeShape",
+        "format.changeShape"
+      ],
       "setup": "block.insert of the hexagon through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.6 (B1 the flags and the plate; B2 the glyphs)"
     },
@@ -6427,7 +6560,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "docs/archive/rounds/RETURN.md 2.9; picture.ts 66 to 72 already clips from shapePath",
-      "parks": ["format.image.maskImage"],
+      "parks": [
+        "format.image.maskImage"
+      ],
       "setup": "asset.add and block.insert of a PNG picture through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 2.6 (B1 the flag and the plate)"
     },
@@ -6489,7 +6624,9 @@
       "today": "broken",
       "severity": 2,
       "evidence": "audit-objects 17 (run-charts-rows.json rows 2, 4)",
-      "parks": ["bar.chart.editData"],
+      "parks": [
+        "bar.chart.editData"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 2.2 rank 7 (B3: the double click in Editor.tsx, the button in Overlay.tsx)"
     },
     {
@@ -6591,7 +6728,9 @@
       "today": "not driven",
       "evidence": "audit-objects 8 (run-tables-rows.json rows 16, 17)",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
-      "parks": ["handle.table.row"],
+      "parks": [
+        "handle.table.row"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 1 (B3: table-seam.ts gains the axis; ids handle.table.row.<n>); lands only under the P1 condition of FEATURES.md section 1. Objects round; docs/archive/rounds/OBJECTS.md 3.3 item 4 (table-seam.ts gains the row axis; ids handle.<block>.row.<n>); B5 the overlay, B2 the plans Objects round fix round: the last seam is pressed at a quarter of its width (its centre is the s resize square's, the verifier's pass 1 finding 3) and the fact is the last row's own height as well as the box."
     },
     {
@@ -6602,7 +6741,10 @@
       "today": "not driven",
       "evidence": "audit-objects 9",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
-      "parks": ["handle.table.add.column", "handle.table.add.row"],
+      "parks": [
+        "handle.table.add.column",
+        "handle.table.add.row"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 2 (B3: Overlay.tsx); lands only under the P1 condition. Objects round; docs/archive/rounds/OBJECTS.md 3.3 item 4 (ids handle.<block>.add.column and .add.row); B5 the overlay, B2 the plans"
     },
     {
@@ -6613,7 +6755,10 @@
       "today": "not driven",
       "evidence": "audit-objects 9",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
-      "parks": ["handle.table.head.column", "handle.table.head.row"],
+      "parks": [
+        "handle.table.head.column",
+        "handle.table.head.row"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 2 (B3; ids handle.table.head.column.<n>, handle.table.head.row.<n>); lands only under the P1 condition. Objects round; docs/archive/rounds/OBJECTS.md 3.3 item 4 (ids handle.<block>.head.column.<n> and .head.row.<n>); B5 the overlay, B2 the plans"
     },
     {
@@ -6624,7 +6769,9 @@
       "today": "not driven",
       "evidence": "audit-objects 3",
       "setup": "block.insert of a typed 3 by 4 table through the window API",
-      "parks": ["bar.table"],
+      "parks": [
+        "bar.table"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 3 (B3: Overlay.tsx; ids bar.table.<command>); lands only under the P1 condition, after ranks 2 and items 2 and 7"
     },
     {
@@ -6665,7 +6812,9 @@
       "today": "not driven",
       "evidence": "audit-objects 13",
       "setup": "block.insert of two text blocks sharing one group through the window API",
-      "parks": ["toolbar.group.text"],
+      "parks": [
+        "toolbar.group.text"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 6 (B3: toolbar-tails.ts GROUP_TAIL through memberWritePlan); lands only under the P1 condition"
     },
     {
@@ -6696,7 +6845,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-objects 25 (d12-wordart-context.png)",
-      "parks": ["toolbar.wordart.outline"],
+      "parks": [
+        "toolbar.wordart.outline"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 2.3 item 10 (B3: toolbar-tails.ts); lands only under the P1 condition. Objects round; docs/archive/rounds/OBJECTS.md 4.2 item 4 (menus/toolbar-tails.ts, ToolbarTail.tsx); B5"
     },
     {
@@ -6758,7 +6909,9 @@
       "today": "not driven",
       "evidence": "audit-fonts 2",
       "setup": "block.insert of three text boxes (Inter, Bebas Neue, Playfair Display) through the window API",
-      "parks": ["formatOptions.typography.numerals"],
+      "parks": [
+        "formatOptions.typography.numerals"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 3.1 item 4 (B2: inspector/typography.tsx, the row's terms; the tnum flag per family from fetch-fonts.mjs)"
     },
     {
@@ -6845,7 +6998,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 1, 17 (02-insert-menu.png, 03-insert-image-submenu.png, 10-search-menus-logo.png)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1 by request in model.ts: the two rows and the terms of insert.logo)"
     },
     {
@@ -6855,7 +7010,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 1",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1 the dialog, B6 logo-model.ts ranking and logo.search)"
     },
     {
@@ -6865,7 +7022,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 6 (12-thesvg-default-marks-on-paper-and-ink.png, raster-check.json)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1 the two grounds per tile, B6 the appearance rule and the readsOnPaper flag)"
     },
     {
@@ -6875,7 +7034,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 15",
-      "parks": ["dialog.logo.group.brand"],
+      "parks": [
+        "dialog.logo.group.brand"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1 the group, B6 the model); on a tmp store with no deployment kit the group lists the deck's role logo assets alone and the row says so. The polish fix round 3 (B6): the ship's run of record read the asset tile under Recent against the older rule \"under Your brand\" twice; the read follows item 46"
     },
     {
@@ -6885,7 +7046,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 17, 15",
-      "parks": ["dialog.logo.upload"],
+      "parks": [
+        "dialog.logo.upload"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1); the kit name half reads the deployment's kit name and is recorded where the deployment has none"
     },
     {
@@ -6895,7 +7058,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 17",
-      "parks": ["dialog.logo.group.recent"],
+      "parks": [
+        "dialog.logo.group.recent"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1: localStorage per browser, question 6 of section 9). The polish fix round 3 (B6): the ship's run of record read the two asset tiles beside the two marks twice; the read follows item 46"
     },
     {
@@ -6905,7 +7070,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 12 (thesvg-facts.json: 57 licence strings)",
-      "parks": ["dialog.logo.source"],
+      "parks": [
+        "dialog.logo.source"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.6 (B1 the words, B6 the sentence mapping in logo-model.ts); question 1 of section 9 keeps the cloud collections behind the row"
     },
     {
@@ -6915,7 +7082,9 @@
       "driver": "core/chrome.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 21 (09-insert-icon-dialog.png as the grid's precedent)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.3 (B1: Dialog.tsx and the Icon dialog's grid; docs/brand.md section 9)"
     },
     {
@@ -6925,7 +7094,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 2 (04-upload-thesvg-svg.png: the svg refused; logo-walk.json)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.4 (B6 logo.insert with B7's registration; the logo source kind in assets.ts)"
     },
     {
@@ -6935,7 +7106,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 9 (05-upload-png-logo.png, 06-upload-png-wordmark.png: the largest fit)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.4 (B6 the size rule over the product round's free rectangle helper; the chip word in Selection.tsx by request to B3)"
     },
     {
@@ -6945,7 +7118,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 5, 6 (raster-check.json)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.4 (B6: the tint rewrites every fill and stroke; off for CC BY-ND, Proprietary, Trademark and Unknown, question 2 of section 9); the integrator at the merge: Stripe (a mono and no pair) in place of GitHub, whose own light and dark files the appearance rule prefers to a tint (build/b6.md section 5); the tint half through logo.insert { variant: 'mono' } because the ten mark fixture holds no mark whose default fails on ink with a tintable mono and no pair"
     },
     {
@@ -6955,7 +7130,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 11",
-      "parks": ["dialog.logo.everySlide"],
+      "parks": [
+        "dialog.logo.everySlide"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.4 (B1 the check and its sentence, B6 useOnEverySlidePlan in the insert's commit); off by default and not remembered, judge-seller rejection 4"
     },
     {
@@ -6966,7 +7143,9 @@
       "today": "not driven",
       "evidence": "audit-logos 3",
       "setup": "block.insert of a picture whose alt names Acme and a text naming Acme through the window API",
-      "parks": ["dialog.tailor.logo.find"],
+      "parks": [
+        "dialog.tailor.logo.find"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.5 (B1 the button's slot, B6 the handler and the cache match; merge order B1 then B6) Round 1 follow-up, lane D (verify-r1.md finding 1): the row read red on production for \"revision 224 -> 224\" with the picture swapped, the text renamed and one Cmd+Z restoring both. On the memory, redis and do tiers the tab's revision follows the room's checkpoint 2 s after the last op, so the read right after the write had settled was the revision before it. The driver reads the revision once it has stopped moving (toolkit stableRevision) before Apply, after it and after Cmd+Z; lane D's local walk read \"revision 60 -> 61; Cmd+Z -> 62, restored true\"."
     },
     {
@@ -6977,7 +7156,9 @@
       "today": "not driven",
       "evidence": "audit-logos 14 (07-picture-context-menu.png)",
       "setup": "asset.add and block.insert of a picture through the window API",
-      "parks": ["format.image.replaceImage.logo"],
+      "parks": [
+        "format.image.replaceImage.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.4 (B6 by request in model.ts; the dialog with the block as its target). The polish fix round 2 reads item 37's refit (VERIFICATION.md \"Polish round, pass 2\" finding 6): the row's \"the box stays\" predated it"
     },
     {
@@ -6987,7 +7168,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 2 (svg/ the sampled files; corpus-sample.json)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.7 (B6: logo-sanitize.ts and routes/api/logo.$.ts); the unit tests are apps/studio/src/server/logos.test.ts"
     },
     {
@@ -6997,7 +7180,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 10",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.2 (B6 with B7: the agent bearer and CRON_SECRET; the crons entry of vercel.json); driven on both origins (7.2)"
     },
     {
@@ -7007,7 +7192,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 13 (thesvg-registry.headers; the camel case keys against the kebab case files)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.9 and 7.2 (B6: logo-fixtures/**; the spec reads the deployment's facts for the upstream and records the row not driven with apps/studio/src/server/logos.test.ts named where the upstream is thesvg.org, the pattern of assist.quota.429)"
     },
     {
@@ -7017,7 +7204,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 10",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.9 and 7.2 (B6, B7's flag); not driven by design where the upstream is not down, with apps/studio/src/server/logos.test.ts named"
     },
     {
@@ -7027,7 +7216,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "audit-logos 12, section 1 (thesvg-facts.json: 4,236 of the 4,940 marks under an open licence)",
-      "parks": ["insert.image.logo"],
+      "parks": [
+        "insert.image.logo"
+      ],
       "note": "Ship one P0; docs/archive/rounds/FEATURES.md 4.2 and 4.10 (B6: the week cache for CC0, MIT, Apache, BSD, ISC and Unlicense alone; judge-design rejection 17)"
     },
     {
@@ -7056,7 +7247,10 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 5 (thesvg-facts.json: a wordmark on 315 icons, mono on 3,757)",
-      "parks": ["dialog.logo.kind.wordmark", "dialog.logo.tone.mono"],
+      "parks": [
+        "dialog.logo.kind.wordmark",
+        "dialog.logo.tone.mono"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 4.11 (B1: the two segmented controls); lands only under the P1 condition, the appearance rule of 4.3 chooses until then"
     },
     {
@@ -7066,7 +7260,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-logos 7 (08-theme-panel.png)",
-      "parks": ["panel.brand.logo.find"],
+      "parks": [
+        "panel.brand.logo.find"
+      ],
       "note": "Ship one P1; docs/archive/rounds/FEATURES.md 4.5 (B6: ThemesPanel.tsx, logo.insert { kit: true }); lands only under the P1 condition"
     },
     {
@@ -7086,7 +7282,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 3 (s03-insert-material-dialog.png, s09b-background-material-list.png)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.4 (B1 the gallery dialogs/ShaderGallery.tsx, the row insert.shader in model.ts by request to the integrator; B5 the thumbnails under packages/materials/previews); the row measures the dialog's title and sentence too; a card is read as dialog.shader.tile.<id> with its data-material and the img inside it"
     },
     {
@@ -7097,7 +7295,9 @@
       "today": "broken",
       "severity": 2,
       "evidence": "audit-shaders 14 (s04-material-block-inserted.png, walk-run2.json row 5)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "slide.new with the title layout through the window API, the slide the insert lands on; never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.4 (B5: insertBlockPlan's shader branch through the product round's free rectangle helper; B1 the gallery); the overlap is read against every text object of the slide after the insert converted it; the kind clause of 7.1 (\"the title slide keeps its kind\") was dropped in the fix round of ship two: an object insert through insertBlockPlan converts a fixed kind slide to a canvas first (SPEC-2 1.6, slide.toCanvas), as a table's and a chart's do, and no objects row asserts the kind (the integrator's ship two finding 1) Round 1 follow-up, lane D (lane C's request 1): since lane C item 2 the chip reads Animated pattern; the step reads Shader or Animated pattern, as shaders.insert.words does; read green locally (20:00Z): chip \"Animated pattern\"."
     },
@@ -7109,7 +7309,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 13 (s04-material-block-inserted.png, s05-material-selected.png, s03-insert-material-dialog.png)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.1, 5.4 (B5 whole: the chip in Selection.tsx by request to the integrator, the section title in inspector/shader.tsx, the alt in editor-shell.ts, the sheet label in render/blocks/material.ts); the filmstrip card is a rendered thumbnail, so the card's words are read on the sheet, the viewer (/deck) and the show, which the same renderer draws"
     },
     {
@@ -7120,7 +7322,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 4 (s06-format-options-material-1440.png, s07-format-options-material-1280.png)",
-      "parks": ["formatOptions.shader"],
+      "parks": [
+        "formatOptions.shader"
+      ],
       "setup": "block.insert of a material block through the window API on each viewport's deck; never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.3 (B5 inspector/shader.tsx; format-sections.ts routes a material to the section); the spec reads the groups by their headings inside [data-section=\"shader\"] at both viewports; the P1 Frame and Play in the show groups are recorded when drawn and judged by their own rows"
     },
@@ -7131,7 +7335,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 4, 5 (walk-run2.json row 13: 0 range inputs)",
-      "parks": ["formatOptions.shader.strength"],
+      "parks": [
+        "formatOptions.shader.strength"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.3 (B5); the live half is read from the block's pixels with the mount at rest: the walk emulates prefers-reduced-motion: reduce for the drag (5.6's speed 0) and puts it back, so the change read is the slider's and not the animation's Round 1 follow-up, lane D (verify-r1.md finding 1): red on production in group 3's walk and in verify-r1's ten area walk (\"release: revision 234 -> 236; Cmd+Z: value 5.6\"), green in the shaders area alone on production and in lane D's local walk of brand, logos, shaders and assist on the memory tier (\"revision 70 -> 71; Cmd+Z: value 3.2\", 18:08Z, load about 160). Both production pictures draw the banner \"This presentation changed elsewhere\" with no author and Undo off: the controller's resync path cleared the undo history between the release and the chord. The panel writes one entry on release and Cmd+Z restores it. Reproduced on a local do tier (wrangler dev and TURBOSLIDE_REALTIME=do; the walk of brand, logos and shaders, 20:23Z to 20:36Z, load 99 to 136): red with the banner drawn and Undo off, after brand.colors.version-history-entry's restore (an external checkpoint at 20:24:37Z) left the tab's stream position at 16 until its next socket open at 20:30:32Z, the slider row's first quiet 8 s; green in isolation on the same tier. The client's position after an external checkpoint is the integrator's request of followup/requests.md (Lane D 1). The step records the banner and Undo before the chord."
     },
     {
@@ -7142,7 +7348,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 7 (walk-run2.json row 15: selectOption('chrome') found no option)",
-      "parks": ["formatOptions.shader.preset"],
+      "parks": [
+        "formatOptions.shader.preset"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.2, 5.3 (B5: formatOptions.shader.preset.<id> tiles labelled in sentence case); the canvas change is read as the mean luminance and the changed pixel fraction of the block's box before and after the click, against the entry's preset list from material.list Round 1 follow-up, lane D (verify-r1.md finding 1): production read 692 to 3708 ms against the 500 ms bound, timed from before the walk's click helper to the first of several screenshots, each 100 to 300 ms on the loaded machine. The step times the change on the page's own clock: from the click's pointerdown to the first WebGL draw whose 64 points read with readPixels moved (core-walk shaders.mjs armWatch); read green locally (20:00Z, load about 140): \"the canvas changed 199 ms after the pointerdown\". By hand (lane D's shader-clock.mjs, 20:08Z to 20:14Z, load 74 to 102) the Chrome tile changed the canvas 26 and 108 ms after the pointerdown at 1440 (light, dark) and 99, 31 and 31 ms at 390 (light, dark, light); the first dark reading at 390 of each run read 1212 and 1549 ms, the second 31 ms."
     },
     {
@@ -7152,7 +7360,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 4, 5",
-      "parks": ["formatOptions.shader"],
+      "parks": [
+        "formatOptions.shader"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.3 (B5: the ten sentences in menus/strings.ts by request to the integrator); read from each control's tooltip plate on hover, else its data-tip"
     },
     {
@@ -7162,7 +7372,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 8 (material-list.json presets; no swatches drawn)",
-      "parks": ["formatOptions.shader.color"],
+      "parks": [
+        "formatOptions.shader.color"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.7 (B5: presets.ts computes the palette from the kit; formatOptions.shader.color.<role> the six swatches); the walk writes the role of the appearance the sheet renders (/colors/<light|dark>/primary from the editor root's data-theme, the deckAppearance(deck) EditorRoot passes and shaderPaletteOfDeck reads; a /new deck draws light under a dark chrome) and records which, and reads the block's colour once the new frame's picture is decoded; the frameKey is read from the block's asset record in describe().state.assets before and after"
     },
     {
@@ -7173,7 +7385,9 @@
       "today": "broken",
       "severity": 2,
       "evidence": "audit-shaders 19 (s06-format-options-material-1440.png)",
-      "parks": ["formatOptions.shader"],
+      "parks": [
+        "formatOptions.shader"
+      ],
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.3 (B5: PicturesPanel.tsx drops Material, inspector/material.tsx removed; B1: the Background dialog's options link); the link is read on the slide whose ground shaders.background.place-answers set"
     },
     {
@@ -7184,7 +7398,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 2 (s12-slideshow.png, s14-viewer.png, export-pdf-page-1.png, export-pptx-report.json)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B5 the client capture shader-frame.ts, B7 the shader.frame handler); the frameKey's equality with frameKeyOf(block, kit) is read through the storage rule (the asset id frame-<first 16 hex of frameKey>) and a recipe change writing a new key; the function itself is pinned by packages/materials/src/capture.test.ts (7.3); the id is compared with the sha256: prefix stripped from the key (recipe-key.ts frameAssetId); the filmstrip card is read again every 500 ms for up to 10 s until it shows the new frame (its thumbnail is re rendered after the commit), sampled over the block's share of the slide against the frame's centre"
     },
@@ -7195,7 +7411,9 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 2, 9 (export-pdf-page-1.png)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B5: the capture canvas takes the box's aspect with the long side 3200); the resize is the se handle's drag (block.set /pos when the handle is not drawn, recorded); the editor's canvas at rest is read under prefers-reduced-motion: reduce (5.6's speed 0) and the viewer's still on /deck/<id>; the tolerance is 48 per channel over a 6 percent patch mean around each point (liquid metal's chrome edges move by a pixel between the two renderings), the still at 3200 px and the box at 600 compared over one relative area"
     },
@@ -7206,7 +7424,9 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 2",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B5 the storage rule; B7 the shader.frame handler's superseded frame removal and pruneFrameAssets behind the response); the Strength values are typed into the slider's number field and committed with Enter, one block.set each; a frame asset is one whose id is frame-<16 hex> (the storage rule), so a layout's own material picture is not counted"
     },
@@ -7217,7 +7437,9 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 2",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B5: the committing client captures from the shell's commit() path; B7 the write); the second context is the same person in a second browser (sameCookiesContext); the first page's requests are read for shader.frame in the address or the body; a frame asset is one whose id is frame-<16 hex> (the storage rule), so a layout's own material picture is not counted"
     },
@@ -7229,7 +7451,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 1 (s09c-background-material-chosen.png, s10-background-material-placed.png, walk-run2.json row 19)",
-      "parks": ["dialog.background.shader"],
+      "parks": [
+        "dialog.background.shader"
+      ],
       "setup": "slide.new with the Title and body layout through the window API, the slide the ground is placed on; never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.5 (B7 the 30 s bound and the RenderError sentence; B1 the Shader row, the gallery, the Placing state and the sentence in dialogs/Background.tsx); on a build where the dialog still reads Material the walk drives that row and says so Round 1 follow-up, lane D (verify-r1.md finding 1): still red, still parked. By hand on lane D's server the client's capture took 0.2 to 0.4 s on the GPU (ANGLE Metal) and 1.6 to 2.3 s on SwiftShader (the walk's browser); the one POST of slide.setBackgroundMaterial took 20.3 to 34.2 s, of which slide.toCanvas on a Title and body slide alone took 11.0 s through the server's measure (load 90 to 133). The product's own path is over the bound for a person on a GPU too; the request of followup/requests.md (Lane D 2) names the three changes."
     },
@@ -7283,7 +7507,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 15 (walk-run1.json row 9, walk-run2.json rows 9, 12, 21)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "a second shader block placed through the window API (block.insert of a material block) beside the inserted one; never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.6 (B5: MaterialMount mounts the selected block alone); the canvases are counted inside the stage's recipe roots and on the whole page Round 1 follow-up, lane D (verify-r1.md finding 1): production read the swap 1379 to 4177 ms after the walk's selection helper started; the step times it on the page's own clock from the pointerdown that selected the second block to the frame the mount had swapped in (shaders.mjs armWatch); read green locally twice (18:12Z and 20:01Z, load about 150): \"swapped 54 ms\" and \"swapped 75 ms after the pointerdown that selected it\"; by hand (shader-clock.mjs) 34 and 29 ms at 1440 (light, dark) and 24, 26, 60 and 87 ms at 390."
     },
@@ -7294,7 +7520,9 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 15, 17, section 7 (walk-run2.json row 25 not driven)",
-      "parks": ["insert.shader"],
+      "parks": [
+        "insert.shader"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P0; docs/archive/rounds/FEATURES.md 5.6 (B5); the frame counter wraps requestAnimationFrame in the page; the hidden half fronts a second tab and reads document.visibilityState, and when the headless browser never reads hidden (the cost probe's finding on cost.editor-hidden.calls) the driver sets the document's state itself, dispatches visibilitychange and records that it did; the reduced motion half is a second context with prefers-reduced-motion: reduce"
     },
@@ -7325,7 +7553,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 11 (s09-background-dialog.png, s10-background-material-placed.png)",
-      "parks": ["dialog.background.shader.addToTheme"],
+      "parks": [
+        "dialog.background.shader.addToTheme"
+      ],
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.2 item 1 (B5 the kit's background slot and slide.setBackgroundShader; B1 the Add to theme and Apply to all rows by request); lands only under the P1 condition of section 1"
     },
     {
@@ -7335,7 +7565,9 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 12 (material-list.json: the proto entries unavailable)",
-      "parks": ["dialog.shader.engine.glyph"],
+      "parks": [
+        "dialog.shader.engine.glyph"
+      ],
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.2 item 2 (B5: engine.ts, proto.ts); the spec reads shader.list (material.list as the alias) for the three ids and records not driven while they are absent or unavailable; lands only under the P1 condition of section 1"
     },
     {
@@ -7345,7 +7577,10 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 6 (s06-format-options-material-1440.png)",
-      "parks": ["formatOptions.shader.frame.scrubber", "formatOptions.shader.frame.capture"],
+      "parks": [
+        "formatOptions.shader.frame.scrubber",
+        "formatOptions.shader.frame.capture"
+      ],
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.2 item 3 (B5); lands only under the P1 condition of section 1"
     },
     {
@@ -7355,7 +7590,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 17 (walk-run2.json row 25)",
-      "parks": ["tools.preferences.playShaders"],
+      "parks": [
+        "tools.preferences.playShaders"
+      ],
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.6 (B1: view.playShaders and its MenuSetting in model.ts by request to the integrator, the Slideshow Options row; B5 reads it); the feature is view (7.1), so the row parks its control alone through parks and never the shaders feature; the walk reads the submenu's rows by their labels and puts the default back"
     },
     {
@@ -7366,7 +7603,10 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 10 (s12-slideshow.png, walk-run2.json row 22)",
-      "parks": ["tools.preferences.playShaders", "formatOptions.shader.play"],
+      "parks": [
+        "tools.preferences.playShaders",
+        "formatOptions.shader.play"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.6 (B5 present/ShaderLayer.tsx; B1 the View row); question 5 of section 9: motion.play 'show' on insert with the setting's default In the show only; the show is started from the slide the block is on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
     },
@@ -7377,7 +7617,9 @@
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 17, section 7 (walk-run2.json row 25)",
-      "parks": ["tools.preferences.playShaders"],
+      "parks": [
+        "tools.preferences.playShaders"
+      ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.6 (B5; B1 the View row); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
     },
@@ -7388,7 +7630,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 3",
-      "parks": ["dialog.shader.hover"],
+      "parks": [
+        "dialog.shader.hover"
+      ],
       "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.2 item 5, 5.4 (B1 with B5: the hovered card mounts one canvas in the kit's colours after 400 ms); the walk reads the P1 surface from data-hover-live on the gallery root or a dialog.shader.hover.<id> control and records not built while neither is drawn"
     },
     {
@@ -7398,7 +7642,9 @@
       "driver": "core/logos.spec.ts",
       "today": "not driven",
       "evidence": "docs/archive/rounds/FEATURES.md 4.8 and section 8; kit-logos.ts 1 to 27",
-      "parks": ["export.svg.vector"],
+      "parks": [
+        "export.svg.vector"
+      ],
       "setup": "logo.insert { slug: 'figma', everySlide: true } through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.6 (B4; B3 the logo asset's vector twins)"
     },
@@ -7410,7 +7656,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-logos 4 (the refusal sentence); upload.ts 58 to 63; EditorRoot.tsx 423",
-      "parks": ["intake.svg.upload"],
+      "parks": [
+        "intake.svg.upload"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.1 to 4.3 (B3; the integrator the chooser's accept list)"
     },
     {
@@ -7420,7 +7668,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "Editor.tsx 4883 to 4909 takes the file; the server refuses it today",
-      "parks": ["intake.svg.paste"],
+      "parks": [
+        "intake.svg.paste"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.3 (B3)"
     },
     {
@@ -7430,7 +7680,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "Editor.tsx 4895 to 4905 reads the text as the envelope or plain text",
-      "parks": ["intake.svg.paste"],
+      "parks": [
+        "intake.svg.paste"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.3 (B3)"
     },
     {
@@ -7440,7 +7692,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "Editor.tsx 6167 to 6190; images.spec.ts 82 to 125 (the drop pattern)",
-      "parks": ["intake.svg.drop"],
+      "parks": [
+        "intake.svg.drop"
+      ],
       "setup": "asset.add and block.insert of the PNG picture the second drop replaces",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.3 (B3)"
     },
@@ -7451,7 +7705,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "Editor.tsx 3947 to 3961; picture-place.ts 285 to 287",
-      "parks": ["intake.svg.url"],
+      "parks": [
+        "intake.svg.url"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.3 (B3); the alt rule is the polish round's item 45 (B4 with B6, fix round 2)"
     },
     {
@@ -7461,7 +7717,12 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "4.4; picture.ts 74 to 129 draws the twin today",
-      "parks": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "parks": [
+        "intake.svg.upload",
+        "intake.svg.paste",
+        "intake.svg.drop",
+        "intake.svg.url"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.4 (B3)"
     },
     {
@@ -7471,7 +7732,12 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "4.4; AMENDMENTS.md A1",
-      "parks": ["intake.svg.upload", "intake.svg.paste", "intake.svg.drop", "intake.svg.url"],
+      "parks": [
+        "intake.svg.upload",
+        "intake.svg.paste",
+        "intake.svg.drop",
+        "intake.svg.url"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.4 (B3; B1 the crop sentence). The polish fix round 3 (B6): the crop sentence is read from the row's own attributes and the toolbar Crop button's doc, never from the page's one tooltip plate unless the row anchors it; the ship's run of record read the rotate handle's plate twice"
     },
     {
@@ -7481,7 +7747,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "Editor.tsx 4869 to 4882 writes the envelope alone",
-      "parks": ["picture.svg.copy"],
+      "parks": [
+        "picture.svg.copy"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.5 (B3)"
     },
     {
@@ -7491,7 +7759,9 @@
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "probe (a); pdf/build.ts 179 to 187",
-      "parks": ["export.svg.vector"],
+      "parks": [
+        "export.svg.vector"
+      ],
       "setup": "asset.add of the svg and block.insert of its picture through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.6 (B4; B3 the vector img the print document draws) Objects round fix round (the verifier's pass 1 finding 8): a count over what the setup wrote (one more slide) is the blob tier's admission class (a write acknowledged late, resent and admitted a second time by an instance behind the store; docs/archive/rounds/SYNC.md 3.2, the sync owner's), which the driver reads before the download and records not driven with the counts and the class named, so the row spends no download on a deck that is not its own."
     },
@@ -7502,7 +7772,9 @@
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "probe (b); docs/archive/rounds/FEATURES.md 4.8 (\"the vector path is the round after's\")",
-      "parks": ["export.svg.vector"],
+      "parks": [
+        "export.svg.vector"
+      ],
       "setup": "asset.add of the svg and block.insert of its picture through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.6 (B4)"
     },
@@ -7513,7 +7785,9 @@
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "probe (b) (pptxgenjs's own fallback is the svg's bytes); extract.ts 65 to 71",
-      "parks": ["export.svg.vector"],
+      "parks": [
+        "export.svg.vector"
+      ],
       "setup": "asset.add of the svg and block.insert of its picture through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.6 (B4; the integrator the export.run field)"
     },
@@ -7524,7 +7798,9 @@
       "driver": "core/export.spec.ts",
       "today": "not driven",
       "evidence": "apps/cli/src/assets.ts 18 to 27; docs/archive/rounds/RETURN.md 2.15",
-      "parks": ["export.svg.vector"],
+      "parks": [
+        "export.svg.vector"
+      ],
       "setup": "asset.add of the svg and block.insert of its picture through the window API",
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.6 (B4; B3 the vector img)"
     },
@@ -7535,7 +7811,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "logo-sanitize.ts 1 to 16, 63 to 96",
-      "parks": ["intake.svg.upload"],
+      "parks": [
+        "intake.svg.upload"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.2 (B3)"
     },
     {
@@ -7545,7 +7823,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "4.2 (today every image is dropped, logo-sanitize.ts 63 to 71)",
-      "parks": ["intake.svg.upload"],
+      "parks": [
+        "intake.svg.upload"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.2 (B3)"
     },
     {
@@ -7555,7 +7835,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "4.2; upload.ts 47 to 63 (the sentence shape)",
-      "parks": ["intake.svg.upload"],
+      "parks": [
+        "intake.svg.upload"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.2 (B3)"
     },
     {
@@ -7565,7 +7847,9 @@
       "driver": "core/svg.spec.ts",
       "today": "not driven",
       "evidence": "4.2; logo-sanitize.ts 233 to 254",
-      "parks": ["intake.svg.upload"],
+      "parks": [
+        "intake.svg.upload"
+      ],
       "note": "Vector round; docs/archive/rounds/VECTOR.md 4.2 (B3)"
     },
     {
@@ -7861,7 +8145,9 @@
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "docs/gslides-parity/objects/audit/b10-table-format-options.png (the toggle in the panel only)",
-      "parks": ["handle.table.head.row"],
+      "parks": [
+        "handle.table.head.row"
+      ],
       "note": "Objects round; docs/archive/rounds/OBJECTS.md 3.3 item 4 (the row head's menu; format.table.headerRow is the integrator's row by B5's request); B5 the overlay, B2 the plans",
       "setup": "the table of tables.rows.grow-with-text"
     },
@@ -7934,7 +8220,10 @@
       "today": "broken",
       "severity": 3,
       "evidence": "AUDIT.md defects 11, 14; production 1 and 2; A-account-menu-named.png",
-      "parks": ["title.account", "title.presence.me"],
+      "parks": [
+        "title.account",
+        "title.presence.me"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 3.11, 3.14 (B3, B1; the integrator unparks the two ids). The prompt of the first edit is the one the toolkit closes before the step that follows the walk's title, recorded on t.prompts.namePrompt"
     },
     {
@@ -7945,7 +8234,9 @@
       "today": "broken",
       "severity": 3,
       "evidence": "AUDIT.md defects 11, 13; avatars 4, 5; A-slot-after-glyph-avatar.png",
-      "parks": ["title.account.changeAvatar"],
+      "parks": [
+        "title.account.changeAvatar"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 3.11, 3.13 (B3, B4, B1). The reading after the reload has 10 s on a deployment (6.4, the per instance identity cache) and is rerun once with the instance named from sync.status"
     },
     {
@@ -8060,7 +8351,10 @@
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "AUDIT.md defect 12; avatars 1, 2, 3, 12; production gap 3",
-      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 4.1 to 4.4 (B3, B4, B2, B1). Local; the fixture apps/studio/e2e/fixtures/portrait-1200x900.jpg is the seed's picture jpeg 1200 900, committed so setInputFiles has a path"
     },
     {
@@ -8070,7 +8364,10 @@
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "avatars 7 (the caps do not line up: 5 MB, 1 MB, 4.5 MB)",
-      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 4.1, 4.2 (B3, B4). Local; the server half goes through the localhost server's agent surface, since the window API refuses account actions without the page's nonce; the store is read as the folder under the server's state folder"
     },
     {
@@ -8080,7 +8377,10 @@
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "avatar.test.ts 155 (the server half); no chrome row drives it (avatars 17)",
-      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 4.3 (B4, B3). Local"
     },
     {
@@ -8090,7 +8390,10 @@
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "parity, \"the picture's limits and fallbacks\"; IdentityChip.tsx 145 to 146 (no onError)",
-      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 4.4 (B2). Local; the folder is the server's state folder (TURBOSLIDE_OVERLAY_DIR/.turboslide/users/u on a tmp store, the checkout's .turboslide/users/u on the file store)"
     },
     {
@@ -8109,7 +8412,10 @@
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "avatar.test.ts 117 (the unit half); accounts.spec.ts 350 to 368 (the seeded route only)",
-      "parks": ["dialog.avatarBuilder.panel.picture", "dialog.avatarBuilder.file"],
+      "parks": [
+        "dialog.avatarBuilder.panel.picture",
+        "dialog.avatarBuilder.file"
+      ],
       "note": "People round; docs/archive/rounds/PEOPLE.md 4.1, 4.3 (B3, B4). Local; the seed's oriented mode: a red ramp along the source's width and a blue ramp along its height, so an upright first row holds one red and a spread of blue"
     },
     {
@@ -8520,7 +8826,9 @@
       "severity": 2,
       "evidence": "audit-objects item 15",
       "note": "Polish round; docs/archive/rounds/POLISH.md 2.4 item 32; B4's `logo-sanitize.ts` by B3's request; parks the paste intake alone, by the vector round's rule for every svg row (docs/archive/rounds/VECTOR.md 6.1; the 5.1 table names no parks)",
-      "parks": ["intake.svg.paste"]
+      "parks": [
+        "intake.svg.paste"
+      ]
     },
     {
       "id": "lines.connector.perpendicular-at-sites",
@@ -8622,7 +8930,9 @@
       "today": "not driven",
       "evidence": "audit-media item 8",
       "setup": "asset.add and block.insert of a picture through the window API",
-      "parks": ["formatOptions.picture.shadow"],
+      "parks": [
+        "formatOptions.picture.shadow"
+      ],
       "note": "Polish round; docs/archive/rounds/POLISH.md 2.5 item 41; B4"
     },
     {
@@ -8758,7 +9068,9 @@
       "severity": 2,
       "evidence": "audit-media item 22",
       "note": "Polish round; docs/archive/rounds/POLISH.md 2.5 item 50; B4; parks the drop intake alone, by the vector round's rule for every svg row (docs/archive/rounds/VECTOR.md 6.1; the 5.1 table names no parks)",
-      "parks": ["intake.svg.drop"]
+      "parks": [
+        "intake.svg.drop"
+      ]
     },
     {
       "id": "images.drop.clamped",
@@ -9505,7 +9817,9 @@
       "driver": "core/share.spec.ts",
       "today": "not driven",
       "evidence": "audit-collab item 8",
-      "parks": ["title.presence.follow"],
+      "parks": [
+        "title.presence.follow"
+      ],
       "note": "Polish round; docs/archive/rounds/POLISH.md 2.8 item 104; B5"
     },
     {
@@ -9967,7 +10281,7 @@
       "today": "not driven",
       "evidence": "audit-auth 40 to 41, 67",
       "note": "docs/NEXT.md 3.2 H3 and 4.3.3: local row; not driven today by the matrix rule for local rows (production holds no account; NEXT.md 4.3.3 reads it broken from audit-auth 40 to 41); the menu row runs EditorAccount.signOut(), whose account.signOut ends this browser session and mints a fresh anonymous cookie in the same answer; the revocation bound is A1b accounts.revoke-within-5s"
-      },
+    },
     {
       "id": "accounts.decks-list-scoped",
       "feature": "share",
@@ -10967,6 +11281,34 @@
       "severity": 1,
       "evidence": "research-type 1.1",
       "note": "Design round (docs/DESIGN.md 11), DR-D1#4; landed in lane D5's fix round of pass 1 (finding 4); the clause on Inter's defaults is read once theme.list (DR-D3#1) is on the build"
+    },
+    {
+      "id": "themes.render.each-theme",
+      "feature": "decks",
+      "interaction": "deck.set /theme to each of the nine ids redraws every slide (the stage and every filmstrip card) within 500 ms with that theme's paper and ink (read from the sheet's computed tokens), its frame (rails, rules and crosses) and band (the GT wordmark, the counter's words), its title composition, and the display features of DESIGN.md 7.2 (\"cv11\", \"ss01\" in General Translation, normal elsewhere), in both appearances; the deck's kit is reset first so the theme alone draws",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "research-themes 6.1",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#1; the theme records are packages/theme/src/themes.ts, read under the kit by packages/render/src/theme-css.ts, stage.ts frameBandOf and slide.ts titleMarkSlot; the driver lives in apps/studio/e2e/core/brand-themes.ts"
+    },
+    {
+      "id": "themes.agent.theme-list",
+      "feature": "decks",
+      "interaction": "POST /api/actions/theme.list answers the nine themes in the picker's order with id, name, default appearance and the twelve tokens per appearance; deck.set /theme over HTTP accepts each of the nine ids and answers it, and a write of gt-ink-paper answers and stores general-translation",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "not driven",
+      "evidence": "research-themes 6.8",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#1; theme.list is registered by apps/cli/src/commands/deck.ts registerDeckActions (apps/cli/src/commands/theme.ts themeList), so the CLI, MCP and HTTP answer one implementation"
+    },
+    {
+      "id": "themes.export.pptx-token-colours",
+      "feature": "decks",
+      "interaction": "On a Swiss deck in the dark appearance, a shape whose shadow names the ink token and a word art text whose outline names the hair token export to PowerPoint (Editable text) with Swiss's dark ink (F4F4F2) as the shadow colour and Swiss's dark hair composited on Swiss's dark paper (#111111) as the outline colour, where General Translation's sheet gives F2F2F0 and its own composite",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-themes G12 (packages/export/src/scene/enrich.ts colorHexFor read GT's TOKENS and GT's paper)",
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#1; enrich.ts colorHexFor reads render/theme-css.ts deckTokens, the deck's theme under its kit"
     },
     {
       "id": "accounts.sign-in-fits",

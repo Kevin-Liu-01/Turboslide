@@ -465,13 +465,13 @@ describe('the counts of the tree (SPEC-4 0.25)', () => {
     expect(AGENTS.lead(PROBE)).toContain(formatCount(PROBE.httpPaths));
     /* and on today's tree the row reads LANDING.md 2.3, the lead 2.9 */
     expect(NUMBERS.cells.map((cell) => cell.figure(HOME_FACTS))).toEqual([
-      '193 actions',
+      '194 actions',
       '22 layouts',
       '17 patterns',
       '135 shapes',
     ]);
     expect(AGENTS.lead(HOME_FACTS)).toBe(
-      "The CLI takes 180 of the editor's actions, the MCP server 169 and the HTTP API 177. The commands below change the slide above them.",
+      "The CLI takes 181 of the editor's actions, the MCP server 170 and the HTTP API 178. The commands below change the slide above them.",
     );
   });
 

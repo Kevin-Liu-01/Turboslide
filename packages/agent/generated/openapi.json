@@ -660,7 +660,7 @@
       "post": {
         "operationId": "deck.set",
         "summary": "Set a deck field",
-        "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.",
+        "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
         "tags": [
           "deck"
         ],
@@ -15213,6 +15213,126 @@
         }
       }
     },
+    "/api/actions/theme.list": {
+      "post": {
+        "operationId": "theme.list",
+        "summary": "Themes",
+        "description": "The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckInfoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThemeListOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/presence.list": {
       "post": {
         "operationId": "presence.list",
@@ -23609,6 +23729,15 @@
           "theme": {
             "type": "string",
             "enum": [
+              "simple",
+              "general-translation",
+              "swiss",
+              "mint",
+              "coral",
+              "night",
+              "slate",
+              "sand",
+              "signal",
               "gt-ink-paper"
             ],
             "title": "Theme",
@@ -23616,10 +23745,20 @@
               "label": "Theme",
               "control": "select",
               "snap": [
-                "gt-ink-paper"
+                "simple",
+                "general-translation",
+                "swiss",
+                "mint",
+                "coral",
+                "night",
+                "slate",
+                "sand",
+                "signal"
               ],
-              "group": "Slide"
-            }
+              "group": "Slide",
+              "help": "One of the nine themes of theme.list; gt-ink-paper is read as general-translation."
+            },
+            "description": "One of the nine themes of theme.list; gt-ink-paper is read as general-translation."
           },
           "sections": {
             "type": "array",
@@ -49253,6 +49392,15 @@
                 "theme": {
                   "type": "string",
                   "enum": [
+                    "simple",
+                    "general-translation",
+                    "swiss",
+                    "mint",
+                    "coral",
+                    "night",
+                    "slate",
+                    "sand",
+                    "signal",
                     "gt-ink-paper"
                   ]
                 },
@@ -61732,6 +61880,87 @@
           "young",
           "orphans",
           "filesRemoved"
+        ],
+        "additionalProperties": false
+      },
+      "ThemeListOutput": {
+        "$id": "#/components/schemas/ThemeListOutput",
+        "type": "object",
+        "properties": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "enum": [
+                    "simple",
+                    "general-translation",
+                    "swiss",
+                    "mint",
+                    "coral",
+                    "night",
+                    "slate",
+                    "sand",
+                    "signal"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "sentence": {
+                  "type": "string"
+                },
+                "defaultAppearance": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
+                "tokens": {
+                  "type": "object",
+                  "properties": {
+                    "light": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "dark": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "light",
+                    "dark"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "sentence",
+                "defaultAppearance",
+                "tokens"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "themes"
         ],
         "additionalProperties": false
       },

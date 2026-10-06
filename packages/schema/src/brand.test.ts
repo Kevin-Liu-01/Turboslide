@@ -5,10 +5,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   BRAND_ROOTS,
+  GT_THEME_ID,
   KIT_COLORS,
   KIT_COLOR_TOKENS,
   KIT_COLOR_WORDS,
+  LEGACY_THEME_ID,
   SLOT_POSITIONS,
+  STORED_THEME_IDS,
+  THEME_FACTS,
+  THEME_IDS,
   brandAfter,
   brandKitSchema,
   brandResetMutations,
@@ -16,11 +21,14 @@ import {
   brandWriteMutation,
   checkBrandKit,
   defaultKitOf,
+  frameOf,
   isBrandPointer,
+  isThemeId,
   kitFontIds,
+  themeIdOf,
 } from './brand.ts';
 import type { BrandHost, BrandKit } from './brand.ts';
-import { deckAppearance, deckCounter, deckCounterFormat, deckSchema } from './deck.ts';
+import { deckAppearance, deckCounter, deckCounterFormat, deckSchema, deckTheme } from './deck.ts';
 import type { Deck } from './deck.ts';
 import { validateDeck } from './validate.ts';
 import { workedDocument } from './fixtures.ts';
@@ -196,5 +204,87 @@ describe('the deck helpers', () => {
     );
     expect(kitFontIds(FULL)).toEqual(['playfair-display', 'source-sans-3']);
     expect(kitFontIds({ fonts: { display: 'lora', text: 'lora' } })).toEqual(['lora']);
+  });
+});
+
+/*
+ * The theme library's ids and facts (docs/DESIGN.md 7.2, 7.5, 7.8): the schema takes the nine ids
+ * and the legacy one, reads the legacy id as General Translation, and the counter and the frame
+ * fall back to the theme's part under the kit and `defaults.counter`.
+ */
+describe('the theme library in the schema', () => {
+  const base = workedDocument().deck;
+
+  it('takes the nine ids and the legacy id, and reads the legacy id as General Translation', () => {
+    expect(THEME_IDS).toHaveLength(9);
+    expect(STORED_THEME_IDS).toEqual([...THEME_IDS, LEGACY_THEME_ID]);
+    for (const id of STORED_THEME_IDS)
+      expect(deckSchema.safeParse({ ...base, theme: id }).success, id).toBe(true);
+    expect(deckSchema.safeParse({ ...base, theme: 'editorial' }).success).toBe(false);
+    expect(themeIdOf(LEGACY_THEME_ID)).toBe(GT_THEME_ID);
+    expect(themeIdOf('swiss')).toBe('swiss');
+    expect(deckTheme({ theme: 'gt-ink-paper' })).toBe('general-translation');
+    expect(isThemeId('gt-ink-paper')).toBe(false);
+    expect(isThemeId('simple')).toBe(true);
+  });
+
+  it('keeps the logo, the frame and the pictures in General Translation alone', () => {
+    for (const id of THEME_IDS) {
+      const facts = THEME_FACTS[id];
+      const gt = id === GT_THEME_ID;
+      expect(facts.logo, id).toBe(gt);
+      expect(facts.pictures, id).toBe(gt);
+      expect(facts.frame.rails && facts.frame.crosses, id).toBe(gt);
+    }
+    expect(THEME_FACTS.simple).toEqual({
+      appearance: 'light',
+      counter: { show: false, format: 'n / N' },
+      logo: false,
+      frame: { rails: false, top: false, bottom: false, crosses: false },
+      pictures: false,
+    });
+  });
+
+  it('reads the counter as the kit, then defaults.counter, then the theme', () => {
+    expect(deckCounter({ ...base, theme: 'general-translation' })).toBe('on');
+    expect(deckCounter({ ...base, theme: 'simple' })).toBe('off');
+    expect(deckCounter({ ...base, theme: 'swiss' })).toBe('on');
+    expect(deckCounter({ ...base, theme: 'simple', defaults: { counter: 'on' } })).toBe('on');
+    expect(
+      deckCounter({
+        ...base,
+        theme: 'swiss',
+        defaults: { counter: 'on' },
+        brand: { counter: { show: false } },
+      }),
+    ).toBe('off');
+    expect(deckCounterFormat({ theme: 'swiss' })).toBe('n');
+    expect(deckCounterFormat({ theme: 'gt-ink-paper' })).toBe('n / N');
+    expect(deckCounterFormat({ theme: 'swiss', brand: { counter: { format: 'Slide n' } } })).toBe(
+      'Slide n',
+    );
+  });
+
+  it('reads the frame as the kit toggles over the theme parts', () => {
+    expect(frameOf('general-translation', undefined)).toEqual({
+      rails: true,
+      top: true,
+      bottom: true,
+      crosses: true,
+    });
+    expect(frameOf('swiss', undefined)).toEqual({
+      rails: false,
+      top: true,
+      bottom: false,
+      crosses: false,
+    });
+    expect(frameOf('swiss', { frame: { rules: true } })).toEqual({
+      rails: false,
+      top: true,
+      bottom: true,
+      crosses: false,
+    });
+    expect(frameOf('gt-ink-paper', { frame: { rails: false } }).rails).toBe(false);
+    expect(frameOf('simple', { frame: { crosses: true } }).crosses).toBe(true);
   });
 });

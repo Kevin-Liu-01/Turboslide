@@ -423,7 +423,7 @@
     },
     "deck.set": {
       "label": "Set a deck field",
-      "doc": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.",
+      "doc": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
       "mutates": true,
       "milestone": "GS1",
       "group": "deck"

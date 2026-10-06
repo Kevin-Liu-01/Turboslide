@@ -54,6 +54,7 @@ import {
 } from './lib';
 import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
 import { canvasR1f } from './canvas-r1f';
+import { themeRecord } from '@turboslide/theme/themes';
 
 // Download and print, the file rows (docs/FOCUS.md 2.8, 6.4 `export.*`, `images.export.*` and
 // `shapes.export.*` with the driver core/export.spec.ts): the PDF and the PowerPoint files
@@ -3659,11 +3660,102 @@ test(title('export.fonts.upstream-names'), async () => {
   expect(failures, facts.join('; ')).toEqual([]);
 });
 
+/*
+ * The design round's theme under the kit in the PowerPoint (docs/DESIGN.md 7.5 G12, 11; lane D3):
+ * a Swiss deck in the dark appearance with a shape whose shadow names the ink token and a word art
+ * text whose outline names the hair token, exported as Editable text in its own context (one
+ * download of a fresh identity's five). The shadow's colour is Swiss's dark ink and the outline's
+ * is Swiss's dark hair composited on Swiss's dark paper, where the GT sheet would give its own.
+ */
+test(title('themes.export.pptx-token-colours'), async ({ browser }) => {
+  test.setTimeout(300_000);
+  const swiss = themeRecord('swiss').tokens.dark;
+  const gt = themeRecord('general-translation').tokens.dark;
+  const hex = (value: string) => value.replace('#', '').toUpperCase();
+  const over = (value: string, paper: string) => {
+    const m = /rgba\((\d+), (\d+), (\d+), ([\d.]+)\)/.exec(value);
+    const ground = paper.replace('#', '');
+    if (!m) return hex(value);
+    const a = Number(m[4]);
+    return [1, 2, 3]
+      .map((i) => {
+        const g = parseInt(ground.slice((i - 1) * 2, i * 2), 16);
+        return Math.round(Number(m[i]) * a + g * (1 - a))
+          .toString(16)
+          .padStart(2, '0');
+      })
+      .join('')
+      .toUpperCase();
+  };
+  const want = { shadow: hex(swiss.ink), outline: over(swiss.hair, swiss.paper) };
+  const gtWould = { shadow: hex(gt.ink), outline: over(gt.hair, gt.paper) };
+  const own = await ownerContext(browser);
+  const scratch = new Scratch();
+  try {
+    const page = own.page;
+    await newDeck(page, scratch, 'Swiss export deck');
+    const second = await addSlide(page);
+    await clickCard(page, second);
+    let s = await settled(page);
+    await invoke(page, 'deck.set', { path: '/theme', value: 'swiss', baseRevision: s.revision });
+    s = await settled(page);
+    await invoke(page, 'deck.set', {
+      path: '/defaults/appearance',
+      value: 'dark',
+      baseRevision: s.revision,
+    });
+    await placeBlock(page, second, {
+      id: 'theme-shadow',
+      type: 'shape',
+      shape: 'rectangle',
+      fill: '#aa3366',
+      shadow: { color: 'ink', opacity: 0.5, distance: 8, blur: 4 },
+      pos: { x: 900, y: 300, w: 300, h: 180 },
+    });
+    await placeBlock(page, second, {
+      id: 'theme-outline',
+      type: 'text',
+      text: 'Outlined',
+      typography: { size: 88, weight: 500 },
+      outline: { color: 'hair', width: 2 },
+      pos: { x: 120, y: 300, w: 700, h: 140 },
+    });
+    await openPptx(page);
+    await ctl(page, 'dialog.download.mode.native').click({ force: true });
+    const file = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+    await closeDialogs(page);
+    const xml = pptxSlideXml(file.bytes);
+    const shadow = /<a:outerShdw[^>]*>\s*<a:srgbClr val="([0-9A-Fa-f]{6})"/
+      .exec(xml)?.[1]
+      ?.toUpperCase();
+    const outline =
+      /<a:rPr[^>]*>(?:(?!<\/a:rPr>)[\s\S])*?<a:ln[^>]*>\s*<a:solidFill>\s*<a:srgbClr val="([0-9A-Fa-f]{6})"/
+        .exec(xml)?.[1]
+        ?.toUpperCase();
+    test.info().annotations.push({
+      type: 'colours',
+      description: `the PowerPoint's shadow ${shadow ?? 'none'} and word art outline ${outline ?? 'none'}; Swiss dark gives ${want.shadow} and ${want.outline}, the GT sheet ${gtWould.shadow} and ${gtWould.outline}; ${file.bytes.length} B in ${file.ms} ms`,
+    });
+    expect(shadow, 'the shadow in Swiss dark ink').toBe(want.shadow);
+    expect(outline, 'the outline in Swiss dark hair over Swiss dark paper').toBe(want.outline);
+    expect(want.shadow).not.toBe(gtWould.shadow);
+    expect(want.outline).not.toBe(gtWould.outline);
+  } finally {
+    try {
+      await teardownAll(own.page, scratch);
+    } finally {
+      await own.context.close().catch(() => undefined);
+    }
+  }
+});
+
 /* lane B of the Round 1 follow-up: its rows live in canvas-r1f.ts */
 const canvasR1fIds = canvasR1f(() => browserRef);
 
 coverage(import.meta.filename, [
   ...canvasR1fIds,
+  /* the design round (docs/DESIGN.md 11), lane D3 */
+  'themes.export.pptx-token-colours',
   'export.remove.copies-gone',
   'export.zip.bundle',
   'export.html.web-page',

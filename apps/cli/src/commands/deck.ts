@@ -19,6 +19,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 import { DECK_TEMPLATES } from '@turboslide/schema/actions';
+import { GT_THEME_ID, LEGACY_THEME_ID } from '@turboslide/schema/brand';
 import { ConflictError } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES, BUNDLE_MEDIA_TYPE, sha256Hex } from '@turboslide/store/bundle';
@@ -62,6 +63,7 @@ import { normalizeHost } from '../hosts.ts';
 import { authHeaders, readError, refused, tokenFor } from '../remote.ts';
 import { deckFollowCommand, deckWatchCommand } from './follow.ts';
 import { publish } from './share.ts';
+import { themeList } from './theme.ts';
 import { formatBytes } from '../output.ts';
 import { commit, deckGuides, deckSetBackground } from '../store-actions.ts';
 import type { StoreActionDeps, WriteContext } from '../store-actions.ts';
@@ -165,17 +167,20 @@ export async function deckSet(
   ctx: WriteContext,
   input: DeckSetInput,
 ): Promise<DeckSetResult> {
+  // the legacy id of General Translation is stored as the theme's id (docs/DESIGN.md 7.8, 7.9)
+  const value =
+    input.path === '/theme' && input.value === LEGACY_THEME_ID ? GT_THEME_ID : input.value;
   const committed = await commit(deps, ctx, input.baseRevision, [
     {
       op: 'deck.set',
       path: input.path,
-      ...(input.value === undefined ? {} : { value: input.value }),
+      ...(value === undefined ? {} : { value }),
     },
   ]);
-  const value = manifestValue(committed.document.deck, input.path);
+  const stored = manifestValue(committed.document.deck, input.path);
   return {
     path: input.path,
-    ...(value === undefined ? {} : { value }),
+    ...(stored === undefined ? {} : { value: stored }),
     revision: committed.revision,
   };
 }
@@ -249,6 +254,8 @@ export function registerDeckActions(
     deckSet(deps, context, input as DeckSetInput),
   );
   dispatcher.register('deck.list', (input) => deckList(deps.decksDir, input as DeckListInput));
+  // the theme library (docs/DESIGN.md 7.8): a read of packages/theme's records, no deck needed
+  dispatcher.register('theme.list', () => themeList());
   dispatcher.register('deck.copy', (input) => deckCopy(deps.decksDir, input as DeckCopyInput));
   dispatcher.register('deck.trash', (input) => deckTrash(deps.decksDir, input as DeckIdInput));
   dispatcher.register('deck.restore', (input) => deckRestore(deps.decksDir, input as DeckIdInput));

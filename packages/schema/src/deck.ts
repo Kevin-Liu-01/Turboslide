@@ -8,8 +8,8 @@ import { annotate } from './annotate.ts';
 import type { Asset } from './assets.ts';
 import { assetSchema } from './assets.ts';
 import type { Block } from './blocks.ts';
-import type { BrandKit, CounterFormat } from './brand.ts';
-import { brandKitSchema } from './brand.ts';
+import type { BrandKit, CounterFormat, StoredThemeId, ThemeId } from './brand.ts';
+import { STORED_THEME_IDS, THEME_IDS, brandKitSchema, themeFactsOf, themeIdOf } from './brand.ts';
 import { blockSchema, extSchema } from './blocks.ts';
 import type { Color } from './color.ts';
 import { colorSchema } from './color.ts';
@@ -27,9 +27,14 @@ export const SCHEMA_VERSION = 1;
 /** The appearance a new deck opens in when the deployment's kit is silent (docs/archive/rounds/PRODUCT.md section 1, question 1): one line to flip. */
 export { DEFAULT_APPEARANCE } from './brand.ts';
 
-/** The one theme; a second theme is additive (SPEC 2.1, open question 6). */
-export const THEMES = ['gt-ink-paper'] as const;
-export type ThemeId = (typeof THEMES)[number];
+/**
+ * The values `deck.theme` takes on input (docs/DESIGN.md 7.2, 7.9): the library's nine ids
+ * (brand.ts THEME_IDS) and the legacy `gt-ink-paper`, which every reader takes as General
+ * Translation (`deckTheme`).
+ */
+export const THEMES = STORED_THEME_IDS;
+export type { StoredThemeId, ThemeId } from './brand.ts';
+export { THEME_IDS } from './brand.ts';
 
 /**
  * The layout ids of the layout list (gslides-parity SPEC 5.2): Google's eleven names first, in
@@ -84,7 +89,7 @@ export type Deck = {
   /** slug, stable: 'gt-brand' */
   id: string;
   title: string;
-  theme: ThemeId;
+  theme: StoredThemeId;
   sections: Section[];
   assets: Record<AssetId, Asset>;
   defaults?: {
@@ -622,8 +627,9 @@ export const deckSchema = z.strictObject({
   theme: annotate(z.enum(THEMES), {
     label: 'Theme',
     control: 'select',
-    snap: THEMES,
+    snap: THEME_IDS,
     group: 'Slide',
+    help: 'One of the nine themes of theme.list; gt-ink-paper is read as general-translation.',
   }),
   sections: z.array(sectionSchema),
   assets: z.record(slugSchema, assetSchema),
@@ -685,18 +691,28 @@ export function deckAppearance(deck: Deck): Appearance {
  * (docs/archive/rounds/PRODUCT.md 4.1: `show` and `skipTitle`) when the record names either, else the
  * `defaults.counter` the Slide numbers dialog wrote before the kit, else on.
  */
-export function deckCounter(deck: Deck): CounterMode {
+export function deckCounter(deck: Pick<Deck, 'brand' | 'defaults' | 'theme'>): CounterMode {
   const kit = deck.brand?.counter;
   if (kit !== undefined && (kit.show !== undefined || kit.skipTitle !== undefined)) {
     if (kit.show === false) return 'off';
     return kit.skipTitle === true ? 'skip-title' : 'on';
   }
-  return deck.defaults?.counter ?? 'on';
+  // the theme's counter under both (docs/DESIGN.md 7.5): on in General Translation, Swiss, Night
+  // and Slate, off in the five themes that draw none
+  return deck.defaults?.counter ?? (themeFactsOf(deck.theme).counter.show ? 'on' : 'off');
 }
 
-/** The counter's format (docs/archive/rounds/PRODUCT.md 4.1): `n / N` when the kit names none, today's `01 / 85`. */
-export function deckCounterFormat(deck: Pick<Deck, 'brand'>): CounterFormat {
-  return deck.brand?.counter?.format ?? 'n / N';
+/**
+ * The counter's format (docs/archive/rounds/PRODUCT.md 4.1): the kit's, else the theme's (`n / N`
+ * in General Translation, today's `01 / 85`; `n` in Swiss, Night and Slate).
+ */
+export function deckCounterFormat(deck: Pick<Deck, 'brand' | 'theme'>): CounterFormat {
+  return deck.brand?.counter?.format ?? themeFactsOf(deck.theme).counter.format;
+}
+
+/** The deck's theme: the stored id, with the legacy `gt-ink-paper` read as General Translation. */
+export function deckTheme(deck: Pick<Deck, 'theme'>): ThemeId {
+  return themeIdOf(deck.theme);
 }
 
 /** True when the deck is in the trash. */

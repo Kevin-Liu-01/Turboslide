@@ -214,6 +214,159 @@ export const FALLBACK_DEFAULT_KIT: DefaultKit = {
   appearance: DEFAULT_APPEARANCE,
 };
 
+// ---------------------------------------------------------------------------------------------
+// The theme library (docs/DESIGN.md 7.2): the ids a deck stores and the facts the schema reads.
+// The colours, the names, the title composition and the display features are the theme
+// package's (packages/theme/src/themes.ts THEME_RECORDS, which builds each record over these
+// facts); this module keeps the parts that decide what a deck draws when its kit is silent, so
+// deck.ts, layouts.ts and the renderer read one table.
+
+/** The nine themes of the library in the picker's order; every one is Inter. */
+export const THEME_IDS = [
+  'simple',
+  'general-translation',
+  'swiss',
+  'mint',
+  'coral',
+  'night',
+  'slate',
+  'sand',
+  'signal',
+] as const;
+export type ThemeId = (typeof THEME_IDS)[number];
+
+/**
+ * The General Translation theme's stored id before the design round. The reader accepts it as
+ * the General Translation theme; validateDeck maps it once (docs/DESIGN.md 7.9), and a write of it
+ * through `deck.set /theme` stores `general-translation`.
+ */
+export const LEGACY_THEME_ID = 'gt-ink-paper';
+
+/** Every value `deck.theme` takes on input: the nine ids and the legacy one. */
+export const STORED_THEME_IDS = [...THEME_IDS, LEGACY_THEME_ID] as const;
+export type StoredThemeId = (typeof STORED_THEME_IDS)[number];
+
+/** The General Translation theme: the brand deck's sheet, mark, wordmark, frame and materials. */
+export const GT_THEME_ID = 'general-translation' satisfies ThemeId;
+
+/** The theme of a new presentation and of Blank (docs/DESIGN.md 7.3). */
+export const DEFAULT_THEME_ID = 'simple' satisfies ThemeId;
+
+/** True for one of the nine ids. */
+export function isThemeId(value: unknown): value is ThemeId {
+  return typeof value === 'string' && (THEME_IDS as ReadonlyArray<string>).includes(value);
+}
+
+/** The theme a stored id names: the legacy id is General Translation; anything unknown too. */
+export function themeIdOf(stored: string | undefined): ThemeId {
+  return isThemeId(stored) ? stored : GT_THEME_ID;
+}
+
+/** The parts of the frame a theme draws when the kit names no frame toggle. */
+export type ThemeFrame = { rails: boolean; top: boolean; bottom: boolean; crosses: boolean };
+
+/** What a theme draws where the deck's kit is silent (docs/DESIGN.md 7.2, 7.5). */
+export type ThemeFacts = {
+  /** the appearance a deck that never chose one draws in */
+  appearance: KitAppearance;
+  /** the slide counter of a deck whose kit and `defaults.counter` say nothing */
+  counter: { show: boolean; format: CounterFormat };
+  /** the theme's logo: the GT mark above the title and the GT wordmark in the band */
+  logo: boolean;
+  frame: ThemeFrame;
+  /** the four GT materials Section header, Caption and Closing take */
+  pictures: boolean;
+};
+
+const NO_FRAME: ThemeFrame = { rails: false, top: false, bottom: false, crosses: false };
+
+/** The table; the theme package's records read their structure from it. */
+export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
+  simple: {
+    appearance: 'light',
+    counter: { show: false, format: 'n / N' },
+    logo: false,
+    frame: NO_FRAME,
+    pictures: false,
+  },
+  'general-translation': {
+    appearance: 'dark',
+    counter: { show: true, format: 'n / N' },
+    logo: true,
+    frame: { rails: true, top: true, bottom: true, crosses: true },
+    pictures: true,
+  },
+  swiss: {
+    appearance: 'light',
+    counter: { show: true, format: 'n' },
+    logo: false,
+    frame: { rails: false, top: true, bottom: false, crosses: false },
+    pictures: false,
+  },
+  mint: {
+    appearance: 'light',
+    counter: { show: false, format: 'n / N' },
+    logo: false,
+    frame: NO_FRAME,
+    pictures: false,
+  },
+  coral: {
+    appearance: 'light',
+    counter: { show: false, format: 'n / N' },
+    logo: false,
+    frame: NO_FRAME,
+    pictures: false,
+  },
+  night: {
+    appearance: 'dark',
+    counter: { show: true, format: 'n' },
+    logo: false,
+    frame: { rails: false, top: true, bottom: true, crosses: false },
+    pictures: false,
+  },
+  slate: {
+    appearance: 'light',
+    counter: { show: true, format: 'n' },
+    logo: false,
+    frame: { rails: false, top: true, bottom: true, crosses: false },
+    pictures: false,
+  },
+  sand: {
+    appearance: 'light',
+    counter: { show: false, format: 'n / N' },
+    logo: false,
+    frame: NO_FRAME,
+    pictures: false,
+  },
+  signal: {
+    appearance: 'dark',
+    counter: { show: false, format: 'n / N' },
+    logo: false,
+    frame: NO_FRAME,
+    pictures: false,
+  },
+};
+
+/** The facts of a deck's stored theme id. */
+export function themeFactsOf(stored: string | undefined): ThemeFacts {
+  return THEME_FACTS[themeIdOf(stored)];
+}
+
+/**
+ * The frame a deck draws: each kit toggle where the kit names it (`rules` covers the top and the
+ * bottom rule together), else the theme's part.
+ */
+export function frameOf(theme: string | undefined, kit: BrandKit | undefined): ThemeFrame {
+  const base = themeFactsOf(theme).frame;
+  const rules = kit?.frame?.rules;
+  return {
+    rails: kit?.frame?.rails ?? base.rails,
+    top: rules ?? base.top,
+    bottom: rules ?? base.bottom,
+    crosses: kit?.frame?.crosses ?? base.crosses,
+  };
+}
+
 /** The kit of a template record, read into a default kit; the fallback's fields where the record is silent. */
 export function defaultKitOf(
   kit: Pick<BrandKit, 'name' | 'appearance'> | undefined,

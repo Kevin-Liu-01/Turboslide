@@ -14,6 +14,7 @@ import { assetTwin, assetVector } from '@turboslide/schema/assets';
 import type { BrandKit, CounterFormat, SlotPosition } from '@turboslide/schema/brand';
 import type { Deck } from '@turboslide/schema/deck';
 import { deckCounter, deckCounterFormat } from '@turboslide/schema/deck';
+import { themeFactsOf } from '@turboslide/schema/brand';
 import type { Slide } from '@turboslide/schema/deck';
 import { slideKindOf } from '@turboslide/schema/canvas';
 import type { Theme } from '@turboslide/schema/render';
@@ -139,21 +140,26 @@ export function footerLogoBox(size: [number, number]): { w: number; h: number } 
  * blanks the band. The GT band for a deck without a record.
  */
 export function frameBandOf(
-  deck: Pick<Deck, 'brand'>,
+  deck: Pick<Deck, 'brand' | 'theme'>,
   theme: Theme,
   resolve?: BandAssetResolver,
 ): FrameBand {
   const kit: BrandKit | undefined = deck.brand;
-  if (kit === undefined) return GT_BAND;
-  const position = kit.positions?.footerLogo ?? 'bottom-left';
-  const logoKind = kit.footer?.logo ?? 'default';
+  // the theme's band under the kit (docs/DESIGN.md 7.5): the default logo is the theme's, which
+  // only General Translation has, and the counter's format is the theme's where the kit is silent
+  const facts = themeFactsOf(deck.theme);
+  if (kit === undefined && facts.logo && facts.counter.format === 'n / N') return GT_BAND;
+  const themeLogo = (position: SlotPosition): FrameBandLogo =>
+    facts.logo ? { kind: 'default', position } : { kind: 'none' };
+  const position = kit?.positions?.footerLogo ?? 'bottom-left';
+  const logoKind = kit?.footer?.logo ?? 'default';
   let logo: FrameBandLogo;
   if (position === 'hidden' || logoKind === 'none') logo = { kind: 'none' };
-  else if (logoKind === 'picture' && kit.footer?.assetId !== undefined) {
+  else if (logoKind === 'picture' && kit?.footer?.assetId !== undefined) {
     const picture = resolve?.(kit.footer.assetId, theme);
     logo =
       picture === undefined
-        ? { kind: 'default', position }
+        ? themeLogo(position)
         : {
             kind: 'picture',
             position,
@@ -161,8 +167,8 @@ export function frameBandOf(
             alt: picture.alt,
             ...footerLogoBox(picture.size),
           };
-  } else logo = { kind: 'default', position };
-  const text = kit.footer?.text?.trim();
+  } else logo = themeLogo(position);
+  const text = kit?.footer?.text?.trim();
   const counterFormat = deckCounterFormat(deck);
   const band: FrameBand = {
     logo,

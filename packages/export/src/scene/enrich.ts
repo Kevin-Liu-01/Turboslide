@@ -22,33 +22,44 @@ import { NUMBER_PRESETS, NUMBER_PRESET_FORMS, presetSlot } from '@turboslide/sch
 import type { Theme } from '@turboslide/schema/render';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { TOKENS } from '@turboslide/theme/tokens';
+import { deckTokens } from '@turboslide/render/theme-css';
 
 import { parseCssColor } from '../units.ts';
 import { join } from 'node:path';
 
 import type { Scene, SceneBullet, SceneDither, SceneShadow, SceneText } from './types.ts';
 
-/** A Color as the theme's hex (no hash), for the shadow and outline the builder writes. */
-export function colorHexFor(color: Color, theme: Theme): string {
+/**
+ * A Color as the theme's hex (no hash), for the shadow and outline the builder writes. A token
+ * reads the deck's theme under its brand kit (render/theme-css.ts `deckTokens`, the values the
+ * page computes; docs/DESIGN.md 7.5, G12), General Translation's sheet when no deck is given.
+ */
+export function colorHexFor(
+  color: Color,
+  theme: Theme,
+  deck?: Pick<Deck, 'brand' | 'theme'>,
+): string {
   if (isColorToken(color)) {
     if (color === 'green' || color === 'amber' || color === 'red' || color === 'blue')
       return SEMANTIC_PALETTE[color].slice(1).toUpperCase();
-    const tokens = TOKENS[theme] as Record<string, string>;
+    const tokens: Record<string, string> =
+      deck === undefined ? { ...TOKENS[theme] } : deckTokens(deck, theme);
     const value = tokens[color] ?? tokens['ink'] ?? '#070707';
-    return cssToHex(value, theme);
+    return cssToHex(value, tokens['paper'] ?? TOKENS[theme].paper);
   }
   return color.slice(1).toUpperCase();
 }
 
 /** A token's CSS value (a hex or an rgba over the paper) as a composite hex. */
-function cssToHex(value: string, theme: Theme): string {
+function cssToHex(value: string, paperHex: string): string {
   if (value.startsWith('#')) return value.slice(1).toUpperCase();
   const match = /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+))?\s*\)/.exec(
     value,
   );
   if (!match) return '070707';
   const alpha = match[4] === undefined ? 1 : Number(match[4]);
-  const paper = theme === 'dark' ? [7, 7, 7] : [255, 255, 255];
+  const ground = /^#?([0-9a-f]{6})$/i.exec(paperHex)?.[1] ?? 'ffffff';
+  const paper = [0, 2, 4].map((i) => parseInt(ground.slice(i, i + 2), 16));
   const channel = (i: number): string => {
     const c = Number(match[i] ?? 0);
     const over = Math.round(c * alpha + (paper[i - 1] ?? 255) * (1 - alpha));
@@ -58,9 +69,13 @@ function cssToHex(value: string, theme: Theme): string {
 }
 
 /** The scene form of a block's shadow (SPEC-2 2.3.4) with the defaults filled in. */
-export function sceneShadow(shadow: Shadow, theme: Theme): SceneShadow {
+export function sceneShadow(
+  shadow: Shadow,
+  theme: Theme,
+  deck?: Pick<Deck, 'brand' | 'theme'>,
+): SceneShadow {
   return {
-    colorHex: colorHexFor(shadow.color ?? SHADOW_DEFAULTS.color, theme),
+    colorHex: colorHexFor(shadow.color ?? SHADOW_DEFAULTS.color, theme, deck),
     opacity: shadow.opacity ?? SHADOW_DEFAULTS.opacity,
     angle: shadow.angle ?? SHADOW_DEFAULTS.angle,
     distance: shadow.distance ?? SHADOW_DEFAULTS.distance,
@@ -158,7 +173,7 @@ export function enrichScene(scene: Scene, slide: Slide, context: EnrichContext =
     if (!block) return {};
     const out: { shadow?: SceneShadow; alt?: string; dash?: Scene['rects'][number]['dash'] } = {};
     if ('shadow' in block && block.shadow !== undefined)
-      out.shadow = sceneShadow(block.shadow, theme);
+      out.shadow = sceneShadow(block.shadow, theme, context.deck);
     if (block.alt !== undefined) out.alt = block.alt;
     if ('dash' in block && block.dash !== undefined) out.dash = block.dash;
     return out;
@@ -182,7 +197,7 @@ export function enrichScene(scene: Scene, slide: Slide, context: EnrichContext =
     if (padding && (block.type === 'text' || block.type === 'shape')) text.padding = padding;
     if (block.type === 'text' && block.outline !== undefined)
       text.outline = {
-        colorHex: colorHexFor(block.outline.color, theme),
+        colorHex: colorHexFor(block.outline.color, theme, context.deck),
         width: block.outline.width,
       };
     if ('typography' in block && block.typography !== undefined) {

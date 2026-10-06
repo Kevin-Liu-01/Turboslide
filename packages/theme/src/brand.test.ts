@@ -144,7 +144,9 @@ describe('brand.css agrees with BRAND_TOKENS', () => {
     expect(word['font-size']).toBe('22px');
     expect(word['font-weight']).toBe('500');
     expect(word['letter-spacing']).toBe('-0.01em');
-    expect(word['font-feature-settings']).toBe("'cv11', 'ss01'");
+    /* the chrome draws Inter's default glyphs (docs/DESIGN.md 4.2, DR-D2#3): the lockup's word
+       sets no feature list of its own */
+    expect(word['font-feature-settings']).toBeUndefined();
     expect(declarationsOf(brandCss, '.ts-brand-lockup-mark').width).toBe('24px');
     expect(declarationsOf(brandCss, '.ts-brand-lockup-mark').height).toBe('24px');
     expect(declarationsOf(brandCss, '.ts-brand-lockup-word').height).toBe('24px');

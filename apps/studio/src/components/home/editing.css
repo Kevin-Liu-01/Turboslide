@@ -38,8 +38,11 @@
   fill: currentColor;
 }
 
+/* the clip keeps the line box whole, so the g and p keep their descenders (the hero frame's title,
+   pass 2 finding 4) */
 .ts-mini-name {
   font-weight: 500;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -201,6 +204,7 @@
 }
 
 .ts-mini-status [data-mini-status] {
+  line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

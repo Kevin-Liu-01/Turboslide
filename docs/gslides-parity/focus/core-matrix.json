@@ -11033,7 +11033,7 @@
     {
       "id": "home.type.default-glyphs",
       "feature": "decks",
-      "interaction": "No element of /home outside a slide computes `cv11` or `ss01`; every number of docs/DESIGN.md 8.0 the page draws (the numbers row, the counters, the filmstrip numbers, the times and versions, the key chips) computes tabular-nums",
+      "interaction": "No element of /home outside a slide computes `cv11` or `ss01`; every number of docs/DESIGN.md 8.0 the page draws (the numbers row, the counters, the filmstrip numbers, the times and versions, the key chips) computes tabular-nums; at 1440 and 390 in both appearances no element with its own words that clips its overflow cuts its line box (the descenders of the titles in the miniature, the people screens and the status row)",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,

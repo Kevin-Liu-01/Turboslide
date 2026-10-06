@@ -1031,8 +1031,10 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   color: var(--pt-panel-text);
 }
 
+/* a clipped cell keeps its whole line box on the head's 13 px line of 1 */
 .ts-hero-terminal-recorded {
   margin-left: auto;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1145,6 +1147,7 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
 }
 
 .ts-hero-step-label {
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

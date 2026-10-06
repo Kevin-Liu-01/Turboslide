@@ -343,10 +343,27 @@ async function defaultGlyphs(browser: Browser): Promise<void> {
               if (!getComputedStyle(el).fontVariantNumeric.includes('tabular-nums'))
                 proportional.push(`${selector} "${(el.textContent ?? '').trim().slice(0, 20)}"`);
           }
+          /* a word that clips its overflow keeps its whole line box, so no g, p or y loses its
+             descender (pass 2 finding 4; the miniature's, the people screens' and the status
+             row's titles read the same); the screen reader's one pixel box is the exception */
+          const clipped: string[] = [];
+          for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+            if (inSlide(el) || el.closest('.ts-sr, [hidden], svg') !== null) continue;
+            const own = [...el.childNodes].some(
+              (n) => n.nodeType === 3 && (n.textContent ?? '').trim() !== '',
+            );
+            if (!own || el.getClientRects().length === 0) continue;
+            if (getComputedStyle(el).overflowY === 'visible') continue;
+            if (el.clientHeight > 0 && el.scrollHeight > el.clientHeight)
+              clipped.push(
+                `${el.tagName.toLowerCase()}.${[...el.classList].join('.')} "${(el.textContent ?? '').trim().slice(0, 24)}" ${el.scrollHeight} over ${el.clientHeight}`,
+              );
+          }
           return {
             elements,
             alternates: alternates.slice(0, 12),
             proportional: proportional.slice(0, 12),
+            clipped: clipped.slice(0, 12),
             counts,
           };
         }, NUMBER_SELECTORS);
@@ -361,6 +378,8 @@ async function defaultGlyphs(browser: Browser): Promise<void> {
           failures.push(`${label}: alternates on ${read.alternates.join('; ')}`);
         if (read.proportional.length > 0)
           failures.push(`${label}: proportional figures in ${read.proportional.join('; ')}`);
+        if (read.clipped.length > 0)
+          failures.push(`${label}: a line box cut by its clip: ${read.clipped.join('; ')}`);
         if (
           (read.counts['.ts-number-figure .pt-num'] ?? 0) === 0 ||
           (read.counts['[data-thumb-n]'] ?? 0) === 0

@@ -1,5 +1,73 @@
 # The design round: the integrator
 
+## Finishing step
+
+Written by the design round's integrator on the finishing step from 09:44 to 10:15 PDT on 2026-10-06 in `/Users/kevinliu/repos/Turboslide-design` on `design/round`. Read first: `docs/DESIGN.md`, this file's two sections below and "Design round, pass 2" in `docs/gslides-parity/focus/VERIFICATION.md`. The rebase ran in a scratch worktree of the session's scratchpad (`finish/wt`, detached) with `-c rerere.enabled=false`, so the shared `rr-cache` neither resolved nor recorded anything. Port 4670 served one node-server build of the rebased head for the readings of section 6; 4680 was not used. Nothing was pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, and production was not read or written. Times are PDT and loads are one minute load averages (44 to 55 during this step); a timing read at a load over 24 is not a verdict. No picture was taken.
+
+### 1. The state at the start
+
+- `design/round` stood at `f6f66dd3` (the verifier's pass 2): 46 commits over origin/main's `f2b0b7a0`, among them the seam merge `b6ff2fc9` (origin/main at `f2b0b7a0`), so 45 commits that are not merges. The checkout was clean, no git lock was held and no lane process was running.
+- origin/main stood at `0a79db8e` ("Ship the people band (V4#20) again"), one commit past the seam. It brings back the band that `14bd67d1` took off, as it was at `0d75ab90`, the commit the round was cut from.
+- `design/round-before-finish` was made at `f6f66dd3` at 09:49 under the git lock and keeps the history before this step.
+
+### 2. The rebase
+
+`git rebase origin/main` replays the 45 commits on `0a79db8e` in their order and leaves out the seam merge; each resolution the seam made is made again at the commit that first meets the same lines. The commits before the seam (DR-spec to DR-verify1) were written over `0d75ab90`, which had the people band, so the band's return meets no conflict in them, and the commits after the seam touch none of the band's lines.
+
+| File | Commits that conflicted | Resolution |
+| --- | --- | --- |
+| `docs/gslides-parity/focus/core-matrix.json` | 15: DR-D1#2, DR-D1#3, DR-D2#1 to #3, DR-D4#4, DR-D4#7 (part), the three D5 fix commits before their notes, DR-D3#1 to #4 and DR-D4#1b | Merged row by row by id (`scratchpad/finish/matrix-merge.mjs`): the rows the commit enters, restates and retires over its parent are applied to the rebased file, each row's text byte for byte from its side. No row changed on both sides in any commit. The same script over `0d75ab90`, `f2b0b7a0` and `189d6655` gives the seam's 1,206 rows, equal by value |
+| `README.md` | 18 | Ours outside the "What works today" block, and the block rendered by `docs/readme/what-works.mjs` from the merged matrix. DR-D3#1 also takes its own line "the same 194 actions" (`theme.list`) |
+| `scripts/probes/core-matrix.test.mjs` | DR-D1#1 | main's `LANDING_FOLLOWUP` order beside the round's `isDesignRow` filter, as the seam; the file equals the seam's |
+| `packages/fonts/src/inter.css` | DR-D1#3 | the round's subset header and generated rules with main's two comment edits; the file equals the seam's |
+| `apps/studio/e2e/core/home/page.ts` | DR-D4#4 | the menus h2 read from `MENUS_ROUND.h2`, as the seam |
+| `docs/gslides-parity/focus/VERIFICATION.md` | DR-verify1 | main's three production tables, then the round's pass 1 |
+
+After the rebase `what-works.mjs --check` read README.md stale at DR-D5#2b and DR-D1#4 (made by D5): git merged the block's text without a conflict while the matrix merge changed its counts. Both commits were made again with the block rendered (`git commit -C`, which keeps the message, author and date), and the 15 commits after them were picked again with no conflict. The head's tree did not change (`b2e844e8` and `2e1019c2` hold the same tree), and README.md is current at each of the 27 commits that touch README.md or the matrix. The branch moved twice under the git lock, each time after reading the checkout clean and the branch at the expected commit: `git read-tree -m -u` then `git update-ref` at 09:57 (to `b2e844e8`), and `git update-ref` alone at 10:02 (to `2e1019c2`, the same tree).
+
+### 3. Checks of the rebase
+
+- At the last commit before the seam's place (`5951c499`, DR-verify1), the tree equals `git merge-tree` of the seam `b6ff2fc9` with `0a79db8e` in every file but six: the three files the merge leaves in conflict (`README.md`, `apps/studio/e2e/core/home.spec.ts`, `live/index.ts`) as resolved here, `live/bands.ts`, `VERIFICATION.md` and `core-matrix.json`, whose 1,208 rows equal by value the seam's rows merged with `0a79db8e`'s; only their order differs.
+- At the head `2e1019c2`, the same six files differ from the merge of `f6f66dd3` with `0a79db8e` (the trial merge of section 7 below), and nothing else: README.md is current; `home.spec.ts` lists `people` then `design`; `live/index.ts` keeps the round's registry in `live/bands.ts`, where the people band's two entries stand (the band module and its markup, `../bands/people.generated`); `VERIFICATION.md` keeps main's "Round 1 follow-up, the production table (2026-10-06)", the 143 lines of `f2b0b7a0` that the seam left out; `core-matrix.json`'s 1,234 rows equal by value.
+- Against the old head `f6f66dd3`, the new head adds `0a79db8e`'s 38 files (`HomePeople.tsx` with DR-D4#4's attribute change kept, `live/people.ts`, `people-timing.ts`, the band's block of `motion.css`, `home.tsx`, the home and decks specs, `LANDING.md`, the landing notes and pictures), the two lines of `bands.ts`, the follow-up's production table and the matrix's two `home.people` rows. No file of the round's changes is lost.
+- Each of the 45 commits keeps its message, author and author date, and its committer is kevin@generaltranslation.com; 23 keep their old patch id and 22 differ by the resolutions above. main's follow-up and sweep stand: the competitor scan reads 0 mentions (section 5).
+
+The commits, old and new, in order: DR-spec `53c6c9f2` `39c0a9d4`; DR-D1#1 `6fc14f09` `3f5807bf`; DR-D1#2 `ccbe70f0` `19d0a36b`; DR-D1#3 `af1139c5` `2feb9761`; D1 notes `a2e4ede6` `6973fa9f`; DR-D2#1 `7b67283e` `ad310a97`; DR-D2#2 `4ba6688c` `caf5e13e`; DR-D2#3 `1b664daa` `064ed3cc`; the integrator (D2) `78780874` `3276b8ef` and `5f94be30` `e0b6e9b1`; DR-D2 fix `f2210e03` `a30c379a` and `b9686651` `4e178207`; DR-D5#3 `1b5ae8cc` `7cf0caf1`; DR-D5#2a `a78751ce` `67b7f0eb`; DR-D5#1a `081503d0` `5cd472e8`; D5 notes `be6e5f61` `fdcf8d66`; the integrator (D5) `3fe484c8` `ca7a1261` and `39d4799c` `8d520b16`; DR-D4#1 `7d2b3181` `452f91c3`; DR-D4#2 `b034f5f9` `cb77daf7`; DR-D4#3 `612d0946` `44cf71f1`; DR-D4#4 `a4ab2464` `a01beef9`; DR-D4#7 (part) `ab429737` `00b919ea`; the integrator (D4) `6da1f58d` `3c055ee3` and `4b46b826` `c1ad1bca`; the integrator's first note `74d497eb` `d15329e0`; DR-verify1 `189d6655` `5951c499`; the seam `b6ff2fc9`, left out; D5 fix `a9b9515a` `56b9e94b`, `48639f83` `b2be71de`, `75a10c07` `ca651125`, `769863e0` `247aca82`; D3 fix `96ffbcbd` `8f4583d4`, `ab3218bf` `96a97fdb`, `506a2680` `94afb71d`, `64d05da9` `cf2e8112`, `ff45eace` `b9aa15c2`, `0a5b192e` `8e2833eb`, `c893c616` `328c90ff`, `c851570a` `f571d1a0`, `b89d4bc4` `bc58fcd9`; D4 fix `d386a0cf` `e3f3cc32`, `5df84734` `e6cf185f`, `3a2c216e` `607e9f35`; the integrator's second note `78806ee2` `8bee2382`; DR-verify2 `f6f66dd3` `2e1019c2`.
+
+### 4. D3's pushes on `d3/stage`
+
+None waits there. The four pushes `a640deb0`, `868ae672`, `3f86484b` and `2d95465d` are on `design/round` as their ports (now `8f4583d4` DR-D3#1, `94afb71d` DR-D3#2, `cf2e8112` DR-D3#3 and `b9aa15c2` DR-D3#4), and `d3/stage`'s last commit `41bd5748` is `d3.md`'s "The staging record". The staging lane's 45 pictures (1,980,758 B) stay on `d3/stage`, as D3 chose for the round folder's 25 MB line.
+
+### 5. The quick gates on the head
+
+| Gate | Reading | Load |
+| --- | --- | --- |
+| `node_modules/.bin/tsc -b` | exit 0, 288 s (on `b2e844e8`, the head's tree) | 46 to 49 |
+| The competitor guard | `scanCompetitorMentions` over the tree: 0 mentions in 0 files; `competitor.test.ts` passed | 47 |
+| The brand lint (`main.ts --enforce`) | exit 0: 0 open, 19 accepted, 0 stale; reported by the round's rules: 3 findings in 3 files, all `css/z-index` (DR-D1#5 has not landed) | 47 |
+| `core-matrix.test.mjs`, `docs/readme` (`what-works.test.mjs`, `evidence-policy.test.mjs`, `docs-index.test.mjs`) and `competitor.test.ts` | 5 files, 66 tests passed | 44 |
+| `what-works.mjs --check`, `build-colors.ts --check`, `build-home-assets.ts --check` | README.md current; tokens current; 66 outputs match, 43 files the page names, each in `assets.json` and on disk | 50 |
+| The unit tests of the packages with a conflict (`vitest run scripts/probes scripts/home packages/fonts packages/lint apps/studio`) | 151 files: 1,202 passed, 1 failed, 1 skipped. Failed: `apps/studio/src/server/agent-actions.test.ts` "answers deck.info with the reader's counts..." timed out at 5 s; the file alone, twice: 7 of 7 passed (loads 46 and 45). The rebase changes no file under `apps/studio/src/server` | 46 to 55 |
+
+### 6. Rows on the node-server build (port 4670)
+
+The build (`NITRO_PRESET=node-server vite build -c vite.deploy.config.ts` under `.turboslide/build.lock`): exit 0, 86 s, load 50. One run, 10:05 to 10:09, `core-gate --only specs --rows` with 11 rows of the landing, its budgets and the people band, `TURBOSLIDE_OVERLAY_DIR` given: 8 passed, 1 failed, 2 not driven, retries zero (load 50 to 54).
+
+- Passed: `home.page.order` (the people band between agents and present at 1440 and 390 in both appearances, one h1), `home.page.markup-final`, `home.page.bands-after-load`, `home.budget.bytes-first`, `home.budget.live-module`, `home.budget.shared` (one font request, `InterVariable-latin` 113,752 B), `home.radius.ladder` and `home.pictures.all-load`.
+- Failed: `home.budget.bytes-page`. The page's own script after a full scroll reads 374,047 B decoded and 121,977 B gzip against 360,000 B and 120,000 B, at 1440 x1 and x2. Pass 2 read 356,209 B and 116,900 B without the band, so the band costs 17,838 B decoded and 5,077 B gzip. The pictures read 152,147 B at x1 and 194,639 B at x2, inside 200 KB.
+- Not driven: `home.people.loop` and `home.people.type`. Their functional checks passed and their timings were not read at load 53.8 (a cycle of 13,998 ms; the words on the other screen 121 ms after the last key).
+
+### 7. Blockers and what remains
+
+1. `home.budget.bytes-page` (feature `decks`, unparkable) is red on the head with the people band in. The line is Kevin's (DR-V2.8 item 1): the band alone takes the script to 374,047 B decoded and 121,977 B gzip, past both the 360,000 B and 120,000 B lines and past the 370,000 B decoded of the raised line that pass 2 named; DR-D4#6 adds about 1,200 B gzip more. Either the lines rise or a band's chunk is cut.
+2. The people band is on the branch with the round's tokens (`--pt-ink`, `--pt-paper`, `--pt-edge`, `--pt-select`) and Inter, and with its own corners: the two screens, the chip and the Following plate are square, where a figure frame takes 8 px (pass 1 finding 14, DR-D4#6, D4). `home.radius.ladder` passes because its figure frames rung does not name `.ts-people-screen`; DR-D4#6 adds it with the 8 px frame and the Share dialog of DESIGN.md 8.9.
+3. Pass 2's open findings 1 and 3 to 9 (D5, D4, D2, D3), then DR-D1#5 last.
+
+### 8. Notes
+
+- The commit ids in the two sections below are the ones before this rebase; section 3 gives each new id. The seam merge `b6ff2fc9` is not on the rebased branch.
+- The server on 4670 stopped at 10:09 and the build lock was released. The logs are under `.turboslide/finish/` and `.turboslide/finish-gate-1/` of the worktree (ignored by git); the scripts are under `scratchpad/finish/`.
+
 ## After the fix round of pass 1
 
 Written by the design round's integrator from 08:20 to 09:05 PDT on 2026-10-06 in `/Users/kevinliu/repos/Turboslide-design` on `design/round`, which stood at `1b8ba95e` (DR-D4 fix: DR-D4#5) with 81 commits over `0d75ab90` (44 on the first parent) when it began. Read first: the verifier's pass 1 (`docs/gslides-parity/focus/VERIFICATION.md`, "Design round, pass 1") and the fix round sections of `d2.md`, `d3.md`, `d4.md` and `d5.md`. Port 4670 served the node-server output of the head with the round's environment (a tmp store in a new overlay, `.turboslide/integrator2-overlay`, the memory tier, secrets made per start and never printed); 4680 was not used. A scratch worktree in the session's scratchpad (`integrator2/wt`, detached, its own `pnpm install --offline`) held the reorder and the group typechecks. Nothing was pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, and production was not read or written. Times are PDT and loads are one minute load averages; a timing read at a load over 24 is not a verdict. No picture was taken: the round folder's tracked pictures hold 24,965,217 B of their 25,000,000 B line.

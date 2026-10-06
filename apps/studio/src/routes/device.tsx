@@ -21,7 +21,7 @@ export const DEVICE_ATTEMPTS = 5;
 export const DEVICE_WORDS = {
   title: 'Sign in a device',
   code: 'Code from the terminal',
-  approve: 'Sign in the device',
+  approve: 'Sign In the Device',
   deny: 'Deny',
   approved: 'The device is signed in. You can close this tab.',
   denied: 'The device was denied. You can close this tab.',
@@ -49,43 +49,37 @@ async function postJson(path: string, body: unknown): Promise<Response> {
   });
 }
 
+/* the box is the shared window plate (tokens.css .pt-window: paper, the edge frame, the ring, the
+   8 px window corner of docs/DESIGN.md 3.1); the buttons the shell's .pt-ib at the 6 px control
+   corner, the confirming one solid */
 const box: CSSProperties = {
   width: 400,
+  maxWidth: 'calc(100vw - 32px)',
   minHeight: 320,
   margin: '48px auto',
   padding: 24,
   boxSizing: 'border-box',
-  border: '1px solid var(--pt-edge, #8a8a88)',
-  background: 'var(--pt-paper, #ffffff)',
-  color: 'var(--pt-ink, #070707)',
-  fontFamily: 'Inter, system-ui, sans-serif',
+  font: '13px/1.45 var(--pt-text)',
   display: 'grid',
   gridTemplateRows: 'auto 1fr 20px',
   gap: 12,
 };
 
+/* a field on the field boundary (3:1) at the control corner */
 const field: CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
   height: 36,
   padding: '0 10px',
-  border: '1px solid var(--pt-edge, #8a8a88)',
-  background: 'transparent',
+  border: '1px solid var(--pt-field)',
+  borderRadius: 'var(--pt-radius)',
+  background: 'var(--pt-paper)',
   color: 'inherit',
   font: 'inherit',
 };
 
-const button: CSSProperties = {
-  height: 36,
-  padding: '0 14px',
-  border: '1px solid var(--pt-ink, #070707)',
-  background: 'var(--pt-ink, #070707)',
-  color: 'var(--pt-paper, #ffffff)',
-  font: 'inherit',
-  cursor: 'pointer',
-};
-
-const quiet: CSSProperties = { ...button, background: 'transparent', color: 'inherit' };
+const SOLID = 'pt-ib is-solid';
+const QUIET = 'pt-ib';
 
 function DevicePage() {
   const search = Route.useSearch();
@@ -172,7 +166,7 @@ function DevicePage() {
   };
 
   return (
-    <main style={box} data-step={step}>
+    <main className="pt-window" style={box} data-step={step}>
       <h1 style={{ fontSize: 16, fontWeight: 500, margin: 0 }}>{DEVICE_WORDS.title}</h1>
       <div style={{ display: 'grid', gap: 12, alignContent: 'start' }}>
         {step === 'loading' ? <p style={{ margin: 0 }}>Checking your session.</p> : null}
@@ -197,7 +191,13 @@ function DevicePage() {
                 data-control="device.email"
               />
             </label>
-            <button style={button} type="submit" disabled={busy} data-control="device.continue">
+            <button
+              className={SOLID}
+              style={{ justifySelf: 'start' }}
+              type="submit"
+              disabled={busy}
+              data-control="device.continue"
+            >
               {ACCOUNT.signInDialog.continue}
             </button>
           </form>
@@ -225,10 +225,10 @@ function DevicePage() {
               />
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button style={button} type="submit" disabled={busy} data-control="device.verify">
+              <button className={SOLID} type="submit" disabled={busy} data-control="device.verify">
                 {ACCOUNT.signInDialog.verify}
               </button>
-              <button style={quiet} type="button" onClick={() => setStep('email')}>
+              <button className={QUIET} type="button" onClick={() => setStep('email')}>
                 {ACCOUNT.signInDialog.back}
               </button>
             </div>
@@ -245,7 +245,9 @@ function DevicePage() {
             <label style={{ display: 'grid', gap: 4 }}>
               <span>{DEVICE_WORDS.code}</span>
               <input
-                style={{ ...field, fontVariantNumeric: 'tabular-nums', letterSpacing: '0.08em' }}
+                className="pt-num"
+                data-num="code"
+                style={{ ...field, letterSpacing: '0.08em' }}
                 autoComplete="one-time-code"
                 maxLength={12}
                 required
@@ -255,11 +257,11 @@ function DevicePage() {
               />
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button style={button} type="submit" disabled={busy} data-control="device.approve">
+              <button className={SOLID} type="submit" disabled={busy} data-control="device.approve">
                 {DEVICE_WORDS.approve}
               </button>
               <button
-                style={quiet}
+                className={QUIET}
                 type="button"
                 disabled={busy}
                 onClick={() => void decide(false)}

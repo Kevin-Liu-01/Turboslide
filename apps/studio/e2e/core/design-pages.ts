@@ -1,7 +1,18 @@
 import { chromium, expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
-import { Scratch, ctl, invoke, newDeck, settled, slideOrder, state, teardownAll, title } from './lib';
+import {
+  Scratch,
+  ctl,
+  invoke,
+  menuPath,
+  newDeck,
+  settled,
+  slideOrder,
+  state,
+  teardownAll,
+  title,
+} from './lib';
 import { isCoreId } from './matrix';
 
 // Lane D5's rows of the design round (docs/DESIGN.md 9, 10.5, 11): the pages other than the editor
@@ -376,6 +387,103 @@ export function designPresent(): string[] {
   return declared;
 }
 
+/** The three pages of DR-D5#1 and the selectors each page's readings wait for. */
+const DECK_PAGES = [
+  { path: '/decks', name: '/decks', ready: '.ts-home-page[data-hydrated]' },
+  { path: '/decks/trash', name: '/decks/trash', ready: '.ts-home-page[data-hydrated]' },
+  {
+    path: '/decks/templates',
+    name: '/decks/templates',
+    ready: '[data-control="templates.page"][data-hydrated]',
+  },
+] as const;
+
+/** The two widths every page row reads at. */
+const WIDTHS = [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+] as const;
+
+export type Corner = { what: string; radius: string; count: number };
+
+/**
+ * The top left radius of every element a selector matches that draws a box (a border, a
+ * background or an outline at rest is not required: a control's radius is read whether or not it
+ * is drawn), grouped by radius, with the selector named `what`.
+ */
+export async function cornersOf(page: Page, what: string, selector: string): Promise<Corner[]> {
+  const radii = await page.evaluate(
+    (sel) =>
+      [...document.querySelectorAll<HTMLElement>(sel)]
+        .filter((el) => el.getClientRects().length > 0)
+        .map((el) => getComputedStyle(el).borderTopLeftRadius),
+    selector,
+  );
+  const by = new Map<string, number>();
+  for (const r of radii) by.set(r, (by.get(r) ?? 0) + 1);
+  return [...by].map(([radius, count]) => ({ what, radius, count }));
+}
+
+/**
+ * The elements outside a slide whose computed font-feature-settings name cv11 or ss01: every
+ * element of the body but those inside a sheet, a stage, a slide or an svg.
+ */
+export async function alternatesOutsideSlides(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const out: string[] = [];
+    for (const el of document.body.querySelectorAll<HTMLElement>('*')) {
+      if (el.closest('.ts-sheet, .ts-stage, .slide, .pt-slide, svg')) continue;
+      const features = getComputedStyle(el).fontFeatureSettings;
+      if (/cv11|ss01/.test(features) && el.getClientRects().length > 0)
+        out.push(
+          `${el.tagName.toLowerCase()}.${(typeof el.className === 'string' ? el.className : '').split(' ')[0] ?? ''} ${features}`,
+        );
+    }
+    return [...new Set(out)].slice(0, 12);
+  });
+}
+
+/** Title Case as the brand writes it on a button: every word capitalised but the small words. */
+export function isTitleCase(label: string): boolean {
+  const small = new Set([
+    'a',
+    'an',
+    'and',
+    'as',
+    'at',
+    'by',
+    'for',
+    'in',
+    'of',
+    'on',
+    'or',
+    'the',
+    'to',
+    'with',
+  ]);
+  const words = label
+    .replace(/[^A-Za-z0-9' -]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 0 && /[A-Za-z]/.test(w));
+  return words.every((word, at) => {
+    if (at > 0 && small.has(word.toLowerCase())) return true;
+    return /^[A-Z0-9]/.test(word);
+  });
+}
+
+/** A deck made through /new by `person`, trashed through the window API when `trash` is set. */
+async function listedDeck(person: Person, name: string, trash = false): Promise<string> {
+  const { page } = person;
+  const id = await newDeck(page, person.scratch, name);
+  if (trash) {
+    /* File > Move to trash, the product's path (core/decks.spec.ts trashFromEditor) */
+    await page.keyboard.press('Escape');
+    await menuPath(page, 'file', 'file.moveToTrash');
+    await page.waitForURL(/\/decks/, { timeout: 20_000 });
+  }
+  return id;
+}
+
 /** The deck every base serves to anyone: the General Translation brand deck. */
 const VIEW_DECK = 'gt-brand';
 
@@ -418,6 +526,425 @@ export function designDecks(): string[] {
       }
     }
     test.info().annotations.push({ type: 'surfaces', description: facts.join('; ') });
+    expect(failures, facts.join('; ')).toEqual([]);
+  });
+
+  /* DR-D5#1: the presentations list, the trash and the templates gallery on the ladder of
+     DESIGN.md 3.1, in tabular figures, in Inter's defaults, on the shared bar, every picture loaded */
+  row('decks.pages.radius', async ({ baseURL }) => {
+    test.setTimeout(900_000);
+    const person = await personAt(baseURL, 1440, 900, 'light');
+    const { page } = person;
+    const listed = await listedDeck(person, 'Design round pages');
+    await listedDeck(person, 'Design round pages, trashed', true);
+    const facts: string[] = [];
+    const failures: string[] = [];
+    const want = (corners: Corner[], radius: string, where: string) => {
+      for (const c of corners) {
+        facts.push(`${where} ${c.what} ${c.radius} x${c.count}`);
+        if (c.radius !== radius)
+          failures.push(`${where}: ${c.what} computes ${c.radius} (${c.count}), not ${radius}`);
+      }
+    };
+    for (const appearance of APPEARANCES) {
+      await appearanceOf(person, baseURL, appearance);
+      for (const size of WIDTHS) {
+        await page.setViewportSize(size);
+        const where = `${appearance} ${size.width}`;
+        /* /decks: the list view with the listed deck's row */
+        await page.goto('/decks');
+        await page.locator('.ts-home-page[data-hydrated]').waitFor({ timeout: 120_000 });
+        await page.locator('[data-control="home.search"]').waitFor({ timeout: 120_000 });
+        await page.locator(`[data-control="home.card.${listed}"]`).waitFor({ timeout: 60_000 });
+        want(
+          await cornersOf(page, 'search field', '[data-control="home.search"]'),
+          '6px',
+          `${where} /decks`,
+        );
+        want(await cornersOf(page, 'view switch', '.ts-seg'), '6px', `${where} /decks`);
+        want(
+          await cornersOf(page, 'sort select', '[data-control="home.sort"]'),
+          '6px',
+          `${where} /decks`,
+        );
+        want(
+          await cornersOf(page, 'buttons', '.ts-decks-page .pt-ib:not(.ts-seg .pt-ib)'),
+          '6px',
+          `${where} /decks`,
+        );
+        want(await cornersOf(page, 'rows', '.ts-rows tr, .ts-rows td'), '0px', `${where} /decks`);
+        want(
+          await cornersOf(page, 'thumbnails', '.ts-hm-card-thumb, .ts-template-plate'),
+          '0px',
+          `${where} /decks`,
+        );
+        await ctl(page, `home.more.${listed}`).click();
+        await page.locator('.ts-menu').first().waitFor({ timeout: 10_000 });
+        want(await cornersOf(page, 'card menu', '.ts-menu'), '6px', `${where} /decks`);
+        await page.keyboard.press('Escape');
+        /* the grid view's cards */
+        await ctl(page, 'home.view.grid').click();
+        await page.locator('.ts-cards .ts-hm-card').first().waitFor({ timeout: 20_000 });
+        want(await cornersOf(page, 'cards', '.ts-cards .ts-hm-card'), '0px', `${where} /decks`);
+        await ctl(page, 'home.view.list').click();
+        /* the trash: its buttons, its rows and the Delete forever dialog */
+        await page.goto('/decks/trash');
+        await page.locator('.ts-home-page[data-hydrated]').waitFor({ timeout: 120_000 });
+        await page
+          .locator('.ts-trash .ts-rows tr, .ts-trash .ts-hm-card')
+          .first()
+          .waitFor({ timeout: 60_000 });
+        want(await cornersOf(page, 'buttons', '.ts-trash .pt-ib'), '6px', `${where} trash`);
+        want(
+          await cornersOf(page, 'rows', '.ts-trash .ts-rows tr, .ts-trash .ts-rows td'),
+          '0px',
+          `${where} trash`,
+        );
+        const forever = page.locator('.ts-trash .ts-trash-delete:not(:disabled)').first();
+        if ((await forever.count()) > 0) {
+          await forever.click();
+          await page.locator('[role="dialog"]').first().waitFor({ timeout: 10_000 });
+          want(await cornersOf(page, 'dialog', '[role="dialog"]'), '8px', `${where} trash`);
+          await page.keyboard.press('Escape');
+        }
+        /* the templates gallery: its cards, covers, buttons and the default mark */
+        await page.goto('/decks/templates');
+        await page
+          .locator('[data-control="templates.page"][data-hydrated]')
+          .waitFor({ timeout: 60_000 });
+        want(
+          await cornersOf(page, 'cards', '.ts-gallery-card, .ts-gallery-cover'),
+          '0px',
+          `${where} templates`,
+        );
+        want(
+          await cornersOf(page, 'buttons', '[data-control="templates.page"] .pt-ib'),
+          '6px',
+          `${where} templates`,
+        );
+        want(
+          await cornersOf(page, 'default mark', '.ts-gallery-default'),
+          '4px',
+          `${where} templates`,
+        );
+      }
+    }
+    test.info().annotations.push({ type: 'corners', description: facts.join('; ') });
+    expect(failures, failures.join('; ')).toEqual([]);
+  });
+
+  row('decks.pages.numerals', async ({ baseURL }) => {
+    test.setTimeout(600_000);
+    const person = await personAt(baseURL, 1440, 900, 'light');
+    const { page } = person;
+    const listed = await listedDeck(person, 'Design round numerals');
+    await listedDeck(person, 'Design round numerals, trashed', true);
+    const facts: string[] = [];
+    const failures: string[] = [];
+    const tabular = async (where: string, selector: string) => {
+      const figures = await numeralsOf(page, selector, 20);
+      facts.push(`${where}: ${figures.length} cells, ${[...new Set(figures)].join('/') || 'none'}`);
+      if (figures.length === 0 || !figures.every((v) => v.includes('tabular-nums')))
+        failures.push(`${where} computes ${[...new Set(figures)].join(', ') || 'nothing'}`);
+    };
+    await page.goto('/decks');
+    await page.locator('.ts-home-page[data-hydrated]').waitFor({ timeout: 120_000 });
+    await page.locator(`[data-control="home.card.${listed}"]`).waitFor({ timeout: 120_000 });
+    await tabular('/decks list times', '.ts-rows .ts-row-when');
+    await tabular('/decks list slide counts', '.ts-rows .ts-row-count');
+    await ctl(page, 'home.view.grid').click();
+    await page.locator('.ts-cards .ts-hm-card-when').first().waitFor({ timeout: 20_000 });
+    await tabular('/decks grid times', '.ts-cards .ts-hm-card-when');
+    await ctl(page, 'home.view.list').click();
+    await page.goto('/decks/trash');
+    await page.locator('.ts-home-page[data-hydrated]').waitFor({ timeout: 120_000 });
+    await page.locator('.ts-trash .ts-rows td').first().waitFor({ timeout: 60_000 });
+    await tabular(
+      'trash dates and counts',
+      '.ts-trash .ts-rows td:not(:first-child):not(:last-child)',
+    );
+    test.info().annotations.push({ type: 'numerals', description: facts.join('; ') });
+    expect(failures, facts.join('; ')).toEqual([]);
+  });
+
+  row('decks.pages.default-glyphs', async ({ baseURL }) => {
+    test.setTimeout(600_000);
+    const person = await personAt(baseURL, 1440, 900, 'light');
+    const { page } = person;
+    await listedDeck(person, 'Design round glyphs');
+    const facts: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of APPEARANCES) {
+      await appearanceOf(person, baseURL, appearance);
+      for (const each of DECK_PAGES) {
+        await page.goto(each.path);
+        await page.locator(each.ready).first().waitFor({ timeout: 120_000 });
+        await page.waitForTimeout(500);
+        const found = await alternatesOutsideSlides(page);
+        facts.push(`${appearance} ${each.name}: ${found.length === 0 ? 'none' : found.join(', ')}`);
+        if (found.length > 0) failures.push(`${appearance} ${each.name}: ${found.join(', ')}`);
+      }
+    }
+    test.info().annotations.push({ type: 'glyphs', description: facts.join('; ') });
+    expect(failures, facts.join('; ')).toEqual([]);
+  });
+
+  row('decks.pages.scrollbar', async ({ baseURL }) => {
+    test.setTimeout(600_000);
+    /* a 400 px tall window, where each document scrolls */
+    const person = await personAt(baseURL, 1440, 400, 'light');
+    const { page } = person;
+    await listedDeck(person, 'Design round bars');
+    await page.setViewportSize({ width: 1440, height: 400 });
+    const facts: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of APPEARANCES) {
+      await appearanceOf(person, baseURL, appearance);
+      for (const each of DECK_PAGES) {
+        await page.goto(each.path);
+        await page.locator(each.ready).first().waitFor({ timeout: 120_000 });
+        const bar = await documentBar(page);
+        facts.push(`${appearance} ${each.name}: ${bar.bar} px (scrolls ${bar.scrolls})`);
+        if (!(bar.scrolls && bar.bar === SHARED_BAR))
+          failures.push(
+            `${appearance} ${each.name}: the document scrolls ${bar.scrolls} with a ${bar.bar} px bar`,
+          );
+      }
+    }
+    test.info().annotations.push({ type: 'bars', description: facts.join('; ') });
+    expect(failures, facts.join('; ')).toEqual([]);
+  });
+
+  row('decks.pages.pictures-load', async ({ baseURL }) => {
+    test.setTimeout(600_000);
+    const person = await personAt(baseURL, 1440, 900, 'light');
+    const { page } = person;
+    await listedDeck(person, 'Design round pictures');
+    await listedDeck(person, 'Design round pictures, trashed', true);
+    const answers: { url: string; status: number }[] = [];
+    page.on('response', (response) => {
+      if (response.request().resourceType() === 'image')
+        answers.push({ url: response.url().slice(0, 120), status: response.status() });
+    });
+    const facts: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of APPEARANCES) {
+      await appearanceOf(person, baseURL, appearance);
+      for (const each of DECK_PAGES) {
+        answers.length = 0;
+        await page.goto(each.path);
+        await page.locator(each.ready).first().waitFor({ timeout: 120_000 });
+        /* every picture in the document, scrolled into view so a lazy one is requested */
+        await page.evaluate(async () => {
+          for (const img of document.querySelectorAll('img')) {
+            img.scrollIntoView({ block: 'center' });
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          window.scrollTo(0, 0);
+        });
+        await page
+          .waitForFunction(
+            () => [...document.querySelectorAll('img')].every((img) => img.complete),
+            null,
+            { timeout: 30_000 },
+          )
+          .catch(() => undefined);
+        const pictures = await page.evaluate(() =>
+          [...document.querySelectorAll('img')].map((img) => ({
+            src: (img.currentSrc || img.src).slice(0, 120),
+            width: img.naturalWidth,
+            hidden: img.getClientRects().length === 0,
+          })),
+        );
+        const broken = pictures.filter((p) => p.width === 0 && p.src !== '');
+        const refused = answers.filter((a) => a.status !== 200 && a.status !== 304);
+        const themes =
+          each.path === '/decks/templates'
+            ? await page.evaluate(() =>
+                [...document.querySelectorAll('.ts-gallery-card')].map(
+                  (card) => card.querySelector('.ts-gallery-theme')?.textContent?.trim() ?? '',
+                ),
+              )
+            : [];
+        facts.push(
+          `${appearance} ${each.name}: ${pictures.length} pictures, ${broken.length} not decoded, ${answers.length} answers, ${refused.length} not 200${themes.length > 0 ? `; themes ${themes.join(', ')}` : ''}`,
+        );
+        if (broken.length > 0)
+          failures.push(
+            `${appearance} ${each.name}: not decoded ${broken.map((b) => b.src).join(', ')}`,
+          );
+        if (refused.length > 0)
+          failures.push(
+            `${appearance} ${each.name}: ${refused.map((r) => `${r.status} ${r.url}`).join(', ')}`,
+          );
+        if (themes.some((t) => t === ''))
+          failures.push(`${appearance} ${each.name}: a template card names no theme`);
+      }
+    }
+    test.info().annotations.push({ type: 'pictures', description: facts.join('; ') });
+    expect(failures, facts.join('; ')).toEqual([]);
+  });
+
+  /* DR-D5#2: You need access, the refused page and Not found */
+  row('decks.pages.access-plates', async ({ baseURL }) => {
+    test.setTimeout(600_000);
+    const person = await personAt(baseURL, 1440, 900, 'light');
+    const { page } = person;
+    const plates = [
+      {
+        name: 'You need access',
+        path: '/edit/design-round-no-such-deck',
+        root: '[data-control="access.page"]',
+        words: '.ts-access-title, .ts-access-sentence',
+      },
+      {
+        name: 'the refused page',
+        path: '/edit/Not_A_Slug',
+        root: '[data-control="refused"], .ts-refused',
+        words: '.ts-page-title, .ts-page-sentence',
+      },
+      {
+        name: 'Not found',
+        path: '/design-round-no-such-page',
+        root: '.ts-notfound',
+        words: '.ts-page-title, .ts-page-sentence, h1, p',
+      },
+    ];
+    const facts: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of APPEARANCES) {
+      await appearanceOf(person, baseURL, appearance);
+      for (const plate of plates) {
+        await page.goto(plate.path);
+        await page.locator(plate.root).first().waitFor({ timeout: 120_000 });
+        const buttons = await page.evaluate((root) => {
+          const scope = document.querySelector(root);
+          return [...(scope?.querySelectorAll<HTMLElement>('.pt-ib') ?? [])]
+            .filter((el) => el.getClientRects().length > 0)
+            .map((el) => ({
+              label: (el.textContent ?? '').trim(),
+              radius: getComputedStyle(el).borderTopLeftRadius,
+            }));
+        }, plate.root);
+        const words = await page.evaluate(
+          (sel) =>
+            [...document.querySelectorAll<HTMLElement>(sel)]
+              .filter((el) => !el.closest('.ts-sheet, svg'))
+              .map((el) => getComputedStyle(el).fontFeatureSettings),
+          plate.words,
+        );
+        facts.push(
+          `${appearance} ${plate.name}: ${buttons.map((b) => `"${b.label}" ${b.radius}`).join(', ') || 'no button'}; words ${[...new Set(words)].join('/') || 'none'}`,
+        );
+        if (buttons.length === 0) failures.push(`${appearance} ${plate.name}: no button`);
+        for (const b of buttons) {
+          if (b.radius !== '6px')
+            failures.push(`${appearance} ${plate.name}: "${b.label}" computes ${b.radius}`);
+          if (!isTitleCase(b.label))
+            failures.push(`${appearance} ${plate.name}: "${b.label}" is not Title Case`);
+        }
+        if (words.length === 0 || words.some((w) => /cv11|ss01/.test(w)))
+          failures.push(
+            `${appearance} ${plate.name}: the message computes ${[...new Set(words)].join(', ') || 'nothing'}`,
+          );
+      }
+    }
+    test.info().annotations.push({ type: 'plates', description: facts.join('; ') });
+    expect(failures, facts.join('; ')).toEqual([]);
+  });
+
+  return declared;
+}
+
+/** The facts of one open Sign in dialog: its card, its methods and its buttons. */
+type SignInFacts = {
+  found: boolean;
+  classes: string;
+  radius: string;
+  methods: { label: string; radius: string; mark: boolean }[];
+  actions: { label: string; radius: string }[];
+};
+
+async function signInFacts(page: Page, control: string): Promise<SignInFacts> {
+  return page.evaluate((id) => {
+    const card = document.querySelector<HTMLElement>(`[data-control="${id}"]`);
+    if (!card) return { found: false, classes: '', radius: '', methods: [], actions: [] };
+    const label = (el: Element) => (el.textContent ?? '').replace(/\s+/g, ' ').trim();
+    return {
+      found: true,
+      classes: card.className,
+      radius: getComputedStyle(card).borderTopLeftRadius,
+      methods: [...card.querySelectorAll<HTMLElement>('.ts-sign-in-method')].map((b) => ({
+        label: label(b),
+        radius: getComputedStyle(b).borderTopLeftRadius,
+        mark: b.querySelector('svg') !== null,
+      })),
+      actions: [...card.querySelectorAll<HTMLElement>('.ts-dialog-actions button')].map((b) => ({
+        label: label(b),
+        radius: getComputedStyle(b).borderTopLeftRadius,
+      })),
+    };
+  }, control);
+}
+
+/**
+ * Lane D5's row in core/share.spec.ts: Sign In from /home, /decks and the editor opens the one
+ * Sign in dialog (DR-D5#2b, `accounts.signin.one-dialog`).
+ */
+export function designSignIn(): string[] {
+  const { declared, row } = rowsOf('D5 sign in');
+
+  row('accounts.signin.one-dialog', async ({ baseURL }) => {
+    test.setTimeout(900_000);
+    const person = await personAt(baseURL, 1440, 900, 'light');
+    const { page } = person;
+    const surfaces = [
+      { name: '/home', path: '/home', button: 'home.nav.signIn', dialog: 'page.signIn' },
+      { name: '/decks', path: '/decks', button: 'home.signIn', dialog: 'page.signIn' },
+      { name: 'the editor', path: '/new', button: 'title.signIn', dialog: 'dialog.signIn' },
+    ];
+    const facts: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of APPEARANCES) {
+      await appearanceOf(person, baseURL, appearance);
+      for (const surface of surfaces) {
+        const where = `${appearance} ${surface.name}`;
+        await page.goto(surface.path);
+        const button = page.locator(`[data-control="${surface.button}"]`).first();
+        await button.waitFor({ state: 'visible', timeout: 120_000 });
+        await button.click();
+        await page
+          .locator(`[data-control="${surface.dialog}"]`)
+          .first()
+          .waitFor({ timeout: 30_000 });
+        await page.waitForTimeout(300);
+        const read = await signInFacts(page, surface.dialog);
+        const google = read.methods.find((m) => m.label === 'Continue with Google');
+        facts.push(
+          `${where}: card ${read.radius} (${read.classes
+            .split(' ')
+            .filter((c) => c.startsWith('ts-sign-in') || c === 'pt-window')
+            .join(
+              ' ',
+            )}); methods ${read.methods.map((m) => `"${m.label}" ${m.radius}${m.mark ? ' with its mark' : ''}`).join(', ')}; buttons ${read.actions.map((a) => `"${a.label}" ${a.radius}`).join(', ')}`,
+        );
+        if (!read.classes.split(' ').includes('ts-sign-in'))
+          failures.push(`${where}: the dialog is not the one Sign in dialog (${read.classes})`);
+        if (read.radius !== '8px') failures.push(`${where}: the window computes ${read.radius}`);
+        if (google === undefined || !google.mark)
+          failures.push(`${where}: no "Continue with Google" with the provider's mark`);
+        for (const b of [...read.methods, ...read.actions]) {
+          if (b.radius !== '6px') failures.push(`${where}: "${b.label}" computes ${b.radius}`);
+          if (!isTitleCase(b.label)) failures.push(`${where}: "${b.label}" is not Title Case`);
+        }
+        await page.keyboard.press('Escape');
+        await page
+          .locator(`[data-control="${surface.dialog}"]`)
+          .waitFor({ state: 'detached', timeout: 10_000 })
+          .catch(() => undefined);
+      }
+    }
+    test.info().annotations.push({ type: 'sign in', description: facts.join('; ') });
     expect(failures, facts.join('; ')).toEqual([]);
   });
 

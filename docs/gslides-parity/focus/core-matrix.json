@@ -10840,6 +10840,16 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D2#2; replaces versions.field.square; the walk probe's share area"
     },
     {
+      "id": "decks.pages.access-plates",
+      "feature": "decks",
+      "interaction": "You need access, the refused page and Not found draw their buttons at 6 px with Title Case labels and their messages in Inter's defaults",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-surfaces 3.2: the You need access buttons square",
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#2"
+    },
+    {
       "id": "chrome.scroll.default-everywhere",
       "feature": "chrome",
       "interaction": "Chromium with scrollbars shown, a fine pointer, at 1440 in both appearances: the filmstrip, the speaker notes, Format options, the font list and the Insert menu in a 360 px tall window each draw an 8 px gutter and, where they scroll, a 4 px thumb at 3:1 or more on its track, 6 px under the pointer; none draws a 15 px bar; the Import slides list is read when the server lists another presentation",

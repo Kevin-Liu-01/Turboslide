@@ -647,7 +647,7 @@ const NUMBERING_STARTS = 'Numbering starts at 1';
 const NO_MEDIA = 'Link to a recording instead';
 const START_FROM_GT = 'Start from the GT brand deck on the home page';
 const DOWNLOAD_FORMATS = 'Only PowerPoint, PDF, text, pictures and the web page download';
-const GOOGLE_SERVICE = 'A Google service';
+const GOOGLE_SERVICE = 'A service outside Turboslide';
 /* SPEC-2 12: Edit guides stays Later; a guide is moved by dragging and removed from its right-click menu */
 const GUIDES_BY_HAND = 'Drag a guide to move it and right-click it to delete it';
 
@@ -1436,7 +1436,7 @@ const INSERT: Menu = {
         omit(
           'insert.image.stockWeb',
           'Stock & web',
-          'Google services and the licensing hazard R07 names',
+          'Services outside Turboslide and the licensing hazard R07 names',
         ),
         omit('insert.image.drivePhotos', 'Drive & Photos', GOOGLE_SERVICE),
         omit('insert.image.camera', 'Camera', GOOGLE_SERVICE),
@@ -2454,7 +2454,7 @@ const TOOLS: Menu = {
         { icon: 'language' },
       ),
     ),
-    omit('tools.explore', 'Explore', 'Retired by Google in 2024 (R02 8.6)'),
+    omit('tools.explore', 'Explore', 'Turboslide has no Explore panel (R02 8.6)'),
     omit('tools.linkedObjects', 'Linked objects', 'No linked sources'),
     omit('tools.dictionary', 'Dictionary', GOOGLE_SERVICE),
     omit('tools.qaHistory', 'Q&A history', GOOGLE_SERVICE),
@@ -2970,7 +2970,7 @@ export const OMITTED_MENUS: ReadonlyArray<{ label: string; reason: string }> = [
   {
     label: 'Accessibility',
     reason:
-      'Appears in Google only with screen reader support on; the browser’s screen reader reads the page as it is',
+      'A menu that appears only with screen reader support on; the browser’s screen reader reads the page as it is',
   },
 ];
 

@@ -129,8 +129,8 @@
   bottom: 51px;
 }
 
-/* the counter, the wordmark and the kit's footer text paint over every object on every slide
-   (gslides-parity SPEC-2 0.98): the slide is a stacking context (stage.css isolation: isolate) and
+/* the counter, the wordmark and the kit's footer text paint over every object on every slide:
+   the slide is a stacking context (stage.css isolation: isolate) and
    on the editor stage and in the show the viewer's Frame draws them before the slide, so without a
    z-index a covering picture object and its chips painted over them and the chips read as blank
    plates (the polish round's fix round 3, B4's R1). z-index 2 is the frame's own (.frame below);
@@ -828,7 +828,7 @@
   }
 }
 
-/* gslides-parity SPEC 5.4: the prompt of an empty placeholder on the editor stage, in titanium at
+/* the prompt of an empty placeholder on the editor stage, in titanium at
    the block's own size, unselectable; nothing else draws it (packages/render blocks/prompt.ts) */
 .ts-sheet .prompt {
   color: var(--titanium);
@@ -851,7 +851,7 @@
   -webkit-user-select: none;
 }
 
-/* gslides-parity SPEC 7.4: a paragraph break in a paragraph, text box, box or table cell is one
+/* a paragraph break in a paragraph, text box, box or table cell is one
    .para span per paragraph, display block with no added spacing; an empty paragraph keeps its line */
 .ts-sheet .para {
   display: block;
@@ -860,7 +860,7 @@
   content: '\200b';
 }
 
-/* gslides-parity SPEC 7.2.6: a numbered ruled list puts a tabular numeral in the key position
+/* a numbered ruled list puts a tabular numeral in the key position
    where the icon sits, with the icon's 36 px hanging indent (head:119-120) */
 .ts-sheet .plain.numbered > .item {
   display: grid;
@@ -880,7 +880,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* gslides-parity SPEC 7.3: the table block as a grid in the ruled rows idiom: a hairline above, a
+/* the table block as a grid in the ruled rows idiom: a hairline above, a
    rule under every row, the header row at display weight 500 with an ink rule under it,
    text-align per column, a plate fill per column, the vertical alignment through align-items, the
    .rows size ladder (packages/render blocks/table.ts). The cells take tabular figures (the rule
@@ -913,7 +913,7 @@
   border-bottom: var(--table-rule, 1px) solid var(--hair);
 }
 /* the header row's display weight and ink rule draw only once the row holds text (docs/archive/rounds/POLISH.md
-   2.1 item 3; Google draws equal borders on every row and a header is styling the seller adds):
+   2.1 item 3; a table draws equal borders on every row, and a header is styling the seller adds):
    the renderer marks such a row `has-text` (packages/render blocks/table.ts), and on the editor's
    stage, whose markup is frozen while a cell is edited, the first character typed into an open
    header cell draws it at once through `:has()`, so the heavy rule never sits between two blank
@@ -938,8 +938,8 @@
   padding: 12px 16px;
   overflow-wrap: anywhere;
   /* a cell fills its row's track in both forms (docs/archive/rounds/OBJECTS.md 3.2, 3.3 item 1: the cell ring
-     is the cell's grid area, the full row height): the fill covers the row, as Google's does
-     and as the a:tbl the export writes, and the vertical alignment moves to the content */
+     is the cell's grid area, the full row height): the fill covers the row, as in the a:tbl the
+     export writes, and the vertical alignment moves to the content */
   align-self: stretch;
   align-content: var(--table-valign, start);
 }
@@ -980,7 +980,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* gslides-parity SPEC-2 7.2: the mark span's elements. An underline is a 1 px rule 3 px under the
+/* the mark span's elements. An underline is a 1 px rule 3 px under the
    baseline (2.2.2), a strike a line through (2.2.3), super and subscript 0.65 em with the line
    height held (2.2.4), a highlight the run's background (2.2.6); the colour is inline */
 .ts-sheet .slide u {
@@ -1009,7 +1009,7 @@
   padding: 0;
 }
 
-/* gslides-parity SPEC-2 2.2.9: paragraph spacing, above every paragraph but the first and under
+/* paragraph spacing, above every paragraph but the first and under
    every paragraph but the last, from the block's --para-before and --para-after (0 unless set) */
 .ts-sheet .para:not(:first-child) {
   padding-top: var(--para-before, 0);
@@ -1018,7 +1018,7 @@
   padding-bottom: var(--para-after, 0);
 }
 
-/* gslides-parity SPEC-2 2.7.3: the table rules take the block's colour and dash */
+/* the table rules take the block's colour and dash */
 .ts-sheet .table {
   border-top-color: var(--table-rule-color, var(--hair));
   border-top-style: var(--table-rule-style, solid);
@@ -1032,7 +1032,7 @@
   border-bottom-color: var(--ink);
 }
 
-/* gslides-parity SPEC 7.2.7: a block link wraps the block; the wrapper draws nothing of its own */
+/* a block link wraps the block; the wrapper draws nothing of its own */
 .ts-sheet .slide .link {
   display: block;
   color: inherit;

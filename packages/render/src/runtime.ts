@@ -171,7 +171,7 @@ ${DITHER_SCRIPT}
     if (!d || d.type !== 'gt-theme' || (d.theme !== 'dark' && d.theme !== 'light') || e.origin !== location.origin) return;
     if (root.getAttribute('data-theme') !== d.theme) { root.setAttribute('data-theme', d.theme); store('gt-deck-theme', d.theme); applyTheme(); }
   });
-  // a slide link (#s/<id>, #next, #previous, #first, #last; gslides-parity SPEC 7.2.7, 7.2.8):
+  // a slide link (#s/<id>, #next, #previous, #first, #last):
   // a keyword resolves against the current slide and is rewritten to the numeric hash so the
   // same link fires again on the next click
   window.addEventListener('hashchange', function () { var h = location.hash.replace(/^#/, ''); show(fromHash(), { hash: isKeyword(h) }); });

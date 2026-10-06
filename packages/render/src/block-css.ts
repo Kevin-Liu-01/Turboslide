@@ -85,8 +85,7 @@ export const BLOCK_CSS = `
 .ts-sheet .ladder.wide-value > div { grid-template-columns: 1fr 320px; } /* s21:6 */
 
 /* ---- figures ---- */
-/* every image the renderer writes carries width and height from the asset's size (gslides-parity
-   SPEC-3 9.2 E12), so a rule below that fixes one dimension leaves the other auto and the
+/* every image the renderer writes carries width and height from the asset's size, so a rule below that fixes one dimension leaves the other auto and the
    attribute ratio reserves the box before the file decodes */
 .ts-sheet .shot-fig { margin: 0; width: 100%; display: grid; gap: 12px; } /* s33:3 */
 .ts-sheet .shot-fig figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); } /* s33:4 */
@@ -171,7 +170,7 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .rule-h { width: 100%; }
 .ts-sheet .free > .rule-v { height: 100%; }
 .ts-sheet .free > h1, .ts-sheet .free > h2, .ts-sheet .free > .big, .ts-sheet .free > p { margin: 0; }
-/* a linked block (gslides-parity SPEC 7.2.7) sits in its .link wrapper, which takes the box the block would have */
+/* a linked block sits in its .link wrapper, which takes the box the block would have */
 .ts-sheet .free > .link { display: block; width: 100%; height: 100%; }
 .ts-sheet .free > .link > .box, .ts-sheet .free > .link > svg.shape { width: 100%; height: 100%; }
 .ts-sheet .free > .link > .rule-h { width: 100%; }
@@ -189,7 +188,7 @@ export const BLOCK_CSS = `
 /* icon: one glyph at its stated size; .ic keeps the sprite fill */
 .ts-sheet svg.icon-block { display: block; vertical-align: baseline; }
 
-/* ---- the canvas (gslides-parity SPEC-2 section 1, 1.4): every object in its .free wrapper ---- */
+/* ---- the canvas: every object in its .free wrapper ---- */
 /* an object's box is its wrapper: the block's own flow margins (a paragraph's margin-top, an
    imported residual margin) do not move it inside the box, whatever the inline style says */
 .ts-sheet .free > *, .ts-sheet .free > .link > * { margin: 0 !important; }
@@ -202,7 +201,7 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .picture, .ts-sheet .free > .link > .picture { width: 100%; height: 100%; }
 .ts-sheet .picture > img.picture-img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .ts-sheet .picture > .ts-material-live { position: absolute; inset: 0; }
-/* the dither overlay (gslides-parity SPEC-3 10.3): absolute inside the picture's box, drawn at the
+/* the dither overlay: absolute inside the picture's box, drawn at the
    screen size and scaled by CSS with pixelated cells so a 2x device shows exact cells; hidden until
    the runtime draws it, so a toggle or a state change moves nothing (9.2) */
 .ts-sheet .picture > canvas.picture-dither, .ts-sheet .shot-crop > canvas.picture-dither { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; pointer-events: none; }

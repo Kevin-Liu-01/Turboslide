@@ -2,7 +2,7 @@
    "Version 4.001;git-9221beed3") with opsz 14 to 32 and wght 100 to 900, decoded by the scaffold
    from Prototemplate/deck/fonts/deck-fonts.css, where it was inlined as base64. The descriptor is
    the deck's, byte for byte apart from the src. The second face is the italic companion of the
-   same v4.1 release (gslides-parity SPEC-2 7.1; docs/archive/rounds/FEATURES.md 3.1 item 1), so `<i>` renders a
+   same v4.1 release (docs/archive/rounds/FEATURES.md 3.1 item 1), so `<i>` renders a
    true italic. The renderer's standalone build inlines both files at <!--FONTS--> (SPEC 5.2).
    License: SIL OFL 1.1, see THIRD_PARTY_NOTICES.md. */
 @font-face {
@@ -19,7 +19,7 @@
   font-display: swap;
   src: url('../assets/InterVariable-Italic.woff2') format('woff2');
 }
-/* The metric matched fallback (gslides-parity SPEC-3 9.2 G1; research-3 05 section 4 rule 3):
+/* The metric matched fallback (research-3 05 section 4 rule 3):
    Arial adjusted to Inter's average advance and line box, so a first visit paints the sheet at
    Inter's metrics before InterVariable.woff2 arrives and nothing moves when it does. The four
    descriptors are computed by scripts/build-fonts.py (fonts.json `fallback`) and pinned by

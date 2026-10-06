@@ -1,11 +1,13 @@
 // The blank template's slide is plain (docs/NEXT.md 4.1.3 item 23; the row
-// `brand.template.blank-plain`): its record turns the GT frame's rails, rules and crosses off and
-// the counter off, so the stage around a new presentation's slide draws nothing of the GT frame
-// and no slide number in the editor, the show and the print document the PDF is printed from.
-// The GT template, a deck without a record, keeps the frame and the counter.
+// `brand.template.blank-plain`): since the design round (docs/DESIGN.md 7.3, DR-D3#2) its record
+// names the Simple theme and no kit, and Simple draws no rails, rules or crosses and no counter,
+// so the stage around a new presentation's slide draws nothing of the GT frame and no slide
+// number in the editor, the show and the print document the PDF is printed from. The GT
+// template, a General Translation deck without a kit, keeps the frame and the counter.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
+import { frameOf, themeFactsOf } from '@turboslide/schema/brand';
 import { deckCounter, deckSchema, slideSchema } from '@turboslide/schema/deck';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
@@ -15,18 +17,19 @@ import { slideCounter } from '../deck.ts';
 import { renderPrintDocument } from '../print.ts';
 import { renderSlide } from '../slide.ts';
 import { counterShownOn } from '../stage.ts';
-import { THEME_CSS_SCOPE, themeCss } from '../theme-css.ts';
+import { themeCss, themeScope } from '../theme-css.ts';
 import { contentSlide } from './fixtures.ts';
 
 const REPO = resolve(import.meta.dirname, '../../../..');
 const THEMES: Theme[] = ['light', 'dark'];
 const bundle = { sheetCss: '', stageCss: '', sprite: '<svg id="sprite"></svg>', fontsCss: '' };
 
-/** The three rules the kit's stylesheet writes to hide the rails, the rules and the crosses. */
+/** The three rules the Simple theme's stylesheet writes to hide the rails, the rules and the crosses. */
+const SCOPE = themeScope('simple');
 const HIDDEN = [
-  `${THEME_CSS_SCOPE} .frame::before, ${THEME_CSS_SCOPE} .frame::after { display: none; }`,
-  `${THEME_CSS_SCOPE} .frame .rule { display: none; }`,
-  `${THEME_CSS_SCOPE} .frame .cross { display: none; }`,
+  `${SCOPE} .frame::before, ${SCOPE} .frame::after { display: none; }`,
+  `${SCOPE} .frame .rule { display: none; }`,
+  `${SCOPE} .frame .cross { display: none; }`,
 ];
 
 function loadTemplate(name: string): { deck: Deck; slides: Slide[] } {
@@ -50,14 +53,20 @@ describe('the blank template draws a plain slide (B4a)', () => {
     sections: [{ id: 'deck', name: 'Deck', slideIds: ['title', 'body'] }],
   };
 
-  it('carries a record with the rails, the rules, the crosses and the counter off, beside H6 fields', () => {
-    expect(blank.deck.brand?.frame).toEqual({ rails: false, rules: false, crosses: false });
-    expect(blank.deck.brand?.counter).toEqual({ show: false });
-    expect(blank.deck.brand?.mark?.kind).toBe('none');
-    expect(blank.deck.brand?.footer?.logo).toBe('none');
+  it('names the Simple theme and no kit, so the rails, the rules, the crosses, the counter and the logo are off', () => {
+    expect(blank.deck.theme).toBe('simple');
+    expect(blank.deck.brand).toBeUndefined();
+    expect(frameOf(blank.deck.theme, blank.deck.brand)).toEqual({
+      rails: false,
+      top: false,
+      bottom: false,
+      crosses: false,
+    });
+    expect(themeFactsOf(blank.deck.theme).counter.show).toBe(false);
+    expect(themeFactsOf(blank.deck.theme).logo).toBe(false);
   });
 
-  it("hides the frame in the kit's stylesheet", () => {
+  it("hides the frame in the theme's stylesheet", () => {
     const css = themeCss(blank.deck).split('\n');
     for (const rule of HIDDEN) expect(css).toContain(rule);
   });
@@ -70,7 +79,7 @@ describe('the blank template draws a plain slide (B4a)', () => {
     }
   });
 
-  it("carries the kit's stylesheet on every slide it renders, in either theme", () => {
+  it("carries the theme's stylesheet on every slide it renders, in either appearance", () => {
     for (const theme of THEMES) {
       for (const slide of [title, body]) {
         const html = renderSlide(withBody, slide, {
@@ -100,8 +109,9 @@ describe('the blank template draws a plain slide (B4a)', () => {
     }
   });
 
-  it('keeps the frame and the counter for the GT template, a deck without a record', () => {
+  it('keeps the frame and the counter for the GT template, a General Translation deck without a kit', () => {
     const gt = loadTemplate('gt-brand');
+    expect(gt.deck.theme).toBe('general-translation');
     expect(gt.deck.brand).toBeUndefined();
     expect(themeCss(gt.deck)).toBe('');
     expect(deckCounter(gt.deck)).toBe('on');

@@ -1,7 +1,8 @@
 // The blank template draws no GT mark (docs/NEXT.md 3.2 H6; the row
-// `brand.template.blank-no-gt-mark`): its record names no title mark and no footer logo, so the
-// title slide, a body slide, the frame band and the print document (the PDF's source) carry no
-// `#gt-mark` reference, while the GT template, a deck without a record, keeps the GT band. After
+// `brand.template.blank-no-gt-mark`): since the design round (docs/DESIGN.md 7.3, DR-D3#2) its
+// record names the Simple theme, which has no logo, and no kit, so the title slide, a body slide,
+// the frame band and the print document (the PDF's source) carry no `#gt-mark` reference, while
+// the GT template, a General Translation deck without a kit, keeps the GT band. After
 // the first write the title slide is a canvas whose `mark` block still sits in the document (the
 // schema requires the title's mark box); the renderer writes no element for it, so nothing on the
 // stage, in the print document or in the exporter's scene stands for it (Round 1 verification
@@ -12,6 +13,7 @@ import { join, resolve } from 'node:path';
 import type { Block } from '@turboslide/schema/blocks';
 import { toCanvas } from '@turboslide/schema/canvas';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
+import { themeFactsOf } from '@turboslide/schema/brand';
 import { deckSchema, slideSchema } from '@turboslide/schema/deck';
 import type { ContentSlide, Deck, Slide } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
@@ -50,9 +52,10 @@ describe('the blank template draws no GT mark (H6)', () => {
     sections: [{ id: 'deck', name: 'Deck', slideIds: ['title', 'body'] }],
   };
 
-  it('carries a record with no title mark and no footer logo', () => {
-    expect(blank.deck.brand?.mark?.kind).toBe('none');
-    expect(blank.deck.brand?.footer?.logo).toBe('none');
+  it('names the Simple theme, which has no logo, and no kit', () => {
+    expect(blank.deck.theme).toBe('simple');
+    expect(themeFactsOf(blank.deck.theme).logo).toBe(false);
+    expect(blank.deck.brand).toBeUndefined();
     expect(title).toBeDefined();
   });
 
@@ -155,10 +158,12 @@ describe('the Blank title slide after its first write draws no mark object', () 
     }
   });
 
-  it('names the mark as the one undrawn object, and none once the kit draws a mark', () => {
+  it("names the mark as the one undrawn object, and none once the deck's theme draws its logo", () => {
     expect([...undrawnObjectIds(blank.deck, canvas)]).toEqual(['mark']);
+    /* the default mark is the theme's logo, which General Translation alone has (DESIGN.md 7.5) */
     const drawn: Deck = {
       ...blank.deck,
+      theme: 'general-translation',
       brand: { ...blank.deck.brand, mark: { kind: 'default' } },
     };
     expect(undrawnObjectIds(drawn, canvas).size).toBe(0);

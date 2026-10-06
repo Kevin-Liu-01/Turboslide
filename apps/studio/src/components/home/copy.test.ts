@@ -48,6 +48,7 @@ import {
   HERO_ROUND,
   KITS_ROUND,
   MENUS_ROUND,
+  PEOPLE_ROUND,
   NAV_ICONS,
   NUMBERS_ROUND,
 } from './design-copy';
@@ -666,5 +667,20 @@ describe('the export band and the Download dialog', () => {
     expect(EXPORT.slider(50)).toBe(
       'The Pictures file fills 50 percent of the slide and the Editable text file the rest',
     );
+  });
+});
+
+/* the two people band's Share dialog speaks the editor's words (DESIGN.md 8.9) */
+describe("the people band's Share dialog", () => {
+  it('names each part as the editor does', () => {
+    const share = PEOPLE_ROUND.share;
+    expect(share.title('Onboarding plan')).toBe(DIALOGS.share.title('Onboarding plan'));
+    expect(share.generalAccess).toBe(DIALOGS.share.generalAccess);
+    expect(share.anyoneWithLink).toBe(DIALOGS.share.anyoneWithLink);
+    expect(share.anyoneCanEdit).toBe(DIALOGS.share.anyoneCanEdit);
+    expect(share.copyLink).toBe(DIALOGS.share.copyLink);
+    expect(share.done).toBe(DIALOGS.share.done);
+    expect(share.roles.owner).toBe(DIALOGS.share.roles.owner);
+    expect(share.roles.editor).toBe(DIALOGS.share.roles.editor);
   });
 });

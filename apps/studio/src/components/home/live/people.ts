@@ -3,6 +3,8 @@ import type { LiveContext } from './index';
 import { finishBand, installGuards, loop, onFrame, play, timeline } from './motion';
 import type { LoopHandle, Timeline } from './motion';
 import { paintSlide } from './paint';
+import { startShare } from './share';
+import type { SlideKey } from './state';
 import { keyGaps, PEOPLE_LOOP_MS } from '../people-timing';
 
 /**
@@ -186,6 +188,9 @@ export function start(ctx: LiveContext): void {
     const state = store.get() as { deckTitle?: string };
     return state.deckTitle ?? document.querySelector('[data-hero-title]')?.textContent ?? '';
   }
+  /* the Share dialog the band opens with (DESIGN.md 8.9): each person's row names the slide
+     their screen shows */
+  const share = startShare(ctx, deckTitle());
   store.subscribe(() => {
     for (const who of WHO) {
       const deck = screens[who]?.el.querySelector('.ts-people-deck');
@@ -273,6 +278,7 @@ export function start(ctx: LiveContext): void {
   const showSlide = (who: Who, slide: SlideOf): void => {
     screens[who].sheets.plan.hidden = slide !== 'plan';
     screens[who].sheets.gets.hidden = slide !== 'gets';
+    share?.slide(who, slide as SlideKey);
     place(who);
   };
 

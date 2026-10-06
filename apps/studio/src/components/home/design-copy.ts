@@ -154,6 +154,29 @@ export const AGENTS_ROUND = {
   },
 } as const;
 
+/**
+ * The two people band's Share dialog (DESIGN.md 8.9), in the editor's own words (copy.test.ts pins
+ * each to packages/chrome/src/menus/strings.ts DIALOGS.share; the page does not import the editor's
+ * strings): the general access, the link of this page with Copy Link, the people with their roles
+ * and the slide each is on, and Done
+ */
+export const PEOPLE_ROUND = {
+  share: {
+    title: (name: string): string => `Share ${name}`,
+    generalAccess: 'General access',
+    anyoneWithLink: 'Anyone with the link',
+    anyoneCanEdit: 'Anyone with this link can edit',
+    linkLabel: 'The link to this page',
+    copyLink: 'Copy Link',
+    linkCopied: 'Link copied',
+    you: 'You',
+    roles: { owner: 'Owner', editor: 'Editor' },
+    editing: (n: number): string => `Editing slide ${n}`,
+    done: 'Done',
+    doneSays: 'Done closes the dialog in the editor.',
+  },
+} as const;
+
 /** The close (DESIGN.md 8.14): the h2 and one line; replaces copy.ts `CLOSE.h2` and `CLOSE.lead`. */
 export const CLOSE_ROUND = {
   h2: 'Start a presentation',
@@ -173,5 +196,6 @@ export const DESIGN_COPY = {
   figures: FIGURES_ROUND,
   kits: KITS_ROUND,
   agents: AGENTS_ROUND,
+  people: PEOPLE_ROUND,
   close: CLOSE_ROUND,
 } as const;

@@ -21,6 +21,7 @@ import {
 } from '../../../src/components/home/deck.generated';
 import {
   AGENTS_ROUND,
+  PEOPLE_ROUND,
   BAND_CONTROLS,
   CANVAS_ROUND,
   DIAGRAM_WORDS,
@@ -76,6 +77,7 @@ export const ROWS: readonly string[] = [
   'home.patterns.stills',
   'home.kits.themes',
   'home.agents.history-panel',
+  'home.people.share-dialog',
 ];
 
 type Theme = 'light' | 'dark';
@@ -430,6 +432,9 @@ const LADDER: readonly {
       '.ts-hero-terminal',
       '.ts-mini-editor',
       '[data-band="agents"] .ts-home-panel',
+      '.ts-home-vh',
+      '.ts-people-screen',
+      '.ts-people-share',
     ],
   },
   { rung: 'dialogs', px: '8px', selectors: ['.ts-mini-dialog'] },
@@ -1965,6 +1970,99 @@ async function patternsStills(browser: Browser): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------
+// home.people.share-dialog
+
+async function shareDialog(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const W = PEOPLE_ROUND.share;
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      try {
+        await openHome(page);
+        await context.grantPermissions(['clipboard-read', 'clipboard-write'], {
+          origin: new URL(page.url()).origin,
+        });
+        await bandReady(page, 'people');
+        const band = page.locator('[data-band="people"]');
+        await band.locator('[data-share] .ts-share-title').waitFor({ timeout: 30_000 });
+        const read = await band.evaluate((root) => {
+          const box = root.querySelector<HTMLElement>('[data-share]')!;
+          const text = (el: Element | null) => (el?.textContent ?? '').trim();
+          const glyphs = [...box.querySelectorAll<HTMLElement>('.ts-icon')].map((el) => ({
+            name: el.dataset['icon'] ?? '',
+            mask: getComputedStyle(el).maskImage !== 'none',
+            w: Math.round(el.getBoundingClientRect().width),
+          }));
+          const screens = [...root.querySelectorAll<HTMLElement>('.ts-people-screen')];
+          const b = box.getBoundingClientRect();
+          const s = screens[0]?.getBoundingClientRect();
+          return {
+            radius: getComputedStyle(box).borderTopLeftRadius,
+            screenRadii: screens.map((el) => getComputedStyle(el).borderTopLeftRadius),
+            title: text(box.querySelector('.ts-share-title')),
+            label: text(box.querySelector('.ts-share-label')),
+            access: text(box.querySelector('.ts-share-access')),
+            field: box.querySelector<HTMLInputElement>('.ts-share-field')?.value ?? '',
+            copy: text(box.querySelector('.ts-share-copy')),
+            people: [...box.querySelectorAll('.ts-share-person')].map((li) => ({
+              name: text(li.querySelector('.ts-share-name')),
+              sub: text(li.querySelector('.ts-share-sub')),
+              role: text(li.querySelector('.ts-share-role')),
+            })),
+            done: text(box.querySelector('.ts-share-done')),
+            glyphs,
+            beside: s === undefined ? null : b.right <= s.left + 1,
+            above: s === undefined ? null : b.bottom <= s.top + 1,
+          };
+        });
+        notes.push(
+          `${label}: "${read.title}", ${read.people.map((p) => `${p.name} ${p.role}${p.sub === '' ? '' : ` (${p.sub})`}`).join(', ')}; field ${read.field}`,
+        );
+        if (read.radius !== '8px') failures.push(`${label}: the dialog's corner is ${read.radius}`);
+        if (read.screenRadii.length !== 2 || read.screenRadii.some((r) => r !== '8px'))
+          failures.push(`${label}: the screens' corners ${read.screenRadii.join(', ')}`);
+        if (read.title !== W.title(HOME_DECK.title)) failures.push(`${label}: the title "${read.title}"`);
+        if (read.label !== W.generalAccess) failures.push(`${label}: the label "${read.label}"`);
+        for (const words of [W.anyoneWithLink, W.anyoneCanEdit, W.roles.editor])
+          if (!read.access.includes(words)) failures.push(`${label}: the access row lacks "${words}"`);
+        if (read.field !== new URL('/home', page.url()).href)
+          failures.push(`${label}: the link field reads ${read.field}`);
+        if (read.copy !== W.copyLink) failures.push(`${label}: Copy Link reads "${read.copy}"`);
+        const want = [
+          [W.you, W.roles.owner],
+          ['Maya', W.roles.editor],
+          ['Sam', W.roles.editor],
+        ];
+        if (JSON.stringify(read.people.map((p) => [p.name, p.role])) !== JSON.stringify(want))
+          failures.push(`${label}: the people ${JSON.stringify(read.people)}`);
+        for (const p of read.people.slice(1))
+          if (!/^Editing slide \d+$/.test(p.sub)) failures.push(`${label}: ${p.name}'s slide "${p.sub}"`);
+        if (read.done !== W.done) failures.push(`${label}: Done reads "${read.done}"`);
+        if (read.glyphs.some((g) => !g.mask || g.w === 0))
+          failures.push(`${label}: a glyph draws no mask (${JSON.stringify(read.glyphs)})`);
+        if (size.width >= 720 ? read.beside !== true : read.above !== true)
+          failures.push(`${label}: the dialog beside ${read.beside}, above ${read.above}`);
+        /* Copy Link writes the page's link */
+        await band.locator('.ts-share-copy').click();
+        await expect(band.locator('.ts-share-copy')).toHaveText(W.linkCopied);
+        const clip = await page.evaluate(() => navigator.clipboard.readText());
+        if (clip !== new URL('/home', page.url()).href)
+          failures.push(`${label}: the clipboard holds "${clip}"`);
+        /* Done says what it does in the editor */
+        await band.locator('.ts-share-done').click();
+        await expect(band.locator('.ts-share-note')).toHaveText(W.doneSays);
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'share', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
 // home.agents.history-panel
 
 /** The chips' glyphs in their order (DESIGN.md 8.8). */
@@ -2286,6 +2384,11 @@ export function rows(): void {
     test(title('home.kits.themes'), async ({ browser }) => {
       test.setTimeout(360_000);
       await kitsThemes(browser);
+    });
+  if (entered('home.people.share-dialog'))
+    test(title('home.people.share-dialog'), async ({ browser }) => {
+      test.setTimeout(360_000);
+      await shareDialog(browser);
     });
   if (entered('home.agents.history-panel'))
     test(title('home.agents.history-panel'), async ({ browser }) => {

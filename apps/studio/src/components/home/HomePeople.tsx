@@ -1,4 +1,6 @@
 import { PEOPLE } from './copy';
+import { HOME_DECK } from './deck.generated';
+import { PEOPLE_ROUND } from './design-copy';
 import { BandHead, HomeSection } from './HomeSection';
 import { HomeSheet } from './HomeSheet';
 import { PEOPLE_LOOP_SECONDS } from './people-timing';
@@ -12,13 +14,22 @@ import { PEOPLE_LOOP_SECONDS } from './people-timing';
  * as placeholders the band's chunk fills. The caption's figure is the staged sequence's length
  * (`people-timing.ts`, V4's, beside this file and outside `live/`, so the route imports no live
  * module). Its push (V4#20) ships only when production's presence rows read green (2.10 "The
- * gate").
+ * gate"). Since the design round (DESIGN.md 8.9) the band opens with the editor's Share dialog
+ * beside the two screens: the document reserves its window (`[data-share]`, 8 px) and the band's
+ * chunk draws it (`live/share.ts`), so its words cost the document nothing; each screen is an
+ * 8 px window.
  */
 export function HomePeople() {
   return (
     <HomeSection id="people">
       <BandHead id="people" heading={PEOPLE.h2} lead={PEOPLE.lead} span={7} />
       <div className="ts-people" data-reserve="people">
+        <div
+          className="ts-people-share pt-window"
+          data-share=""
+          role="group"
+          aria-label={PEOPLE_ROUND.share.title(HOME_DECK.title)}
+        />
         <p className="ts-people-label" data-label="maya">
           {PEOPLE.screens.maya}
         </p>
@@ -26,7 +37,7 @@ export function HomePeople() {
           {PEOPLE.screens.sam}
         </p>
         {(['maya', 'sam'] as const).map((who) => (
-          <div className="ts-people-screen" data-screen={who} key={who}>
+          <div className="ts-people-screen pt-window" data-screen={who} key={who}>
             <div className="ts-people-title" aria-hidden="true" />
             <div className="ts-people-slides">
               <HomeSheet instance={`people-${who}-plan`} fill />

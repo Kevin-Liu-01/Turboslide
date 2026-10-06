@@ -10449,7 +10449,7 @@
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#5"
+      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#5 and DR-D4#6"
     },
     {
       "id": "home.page.markup-final",
@@ -11376,6 +11376,15 @@
       "today": "broken",
       "severity": 1,
       "evidence": "research-landing F8: three \"Recorded\" cells and no group; VERIFICATION.md design round pass 2 finding 3",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
+      "id": "home.people.share-dialog",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the people band, \"Share a link and edit together\", opens with the editor's Share dialog in an 8 px window beside the two screens (above them under 720 px), each screen an 8 px window: Share Onboarding plan, General access, Anyone with the link with \"Anyone with this link can edit\" and Editor, the link of this page with Copy Link, You as Owner and Maya and Sam as Editors each with the slide their screen shows, and Done; the glyphs draw; Copy Link writes the page's link to the clipboard and reads \"Link copied\"; Done says it closes the dialog in the editor",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "research-landing P9; integrator.md finishing step, blocker 2 (the screens' square corners)",
       "note": "Design round (docs/DESIGN.md 11), DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
     },
     {

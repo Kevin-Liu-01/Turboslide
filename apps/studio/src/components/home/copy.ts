@@ -436,10 +436,10 @@ export const VERSIONS = {
     `Version ${n} of ${total}, recorded from the CLI.`,
 } as const;
 
-/** Two people edit the same slide (docs/LANDING.md 2.10). */
+/** Share a link and edit together (docs/LANDING.md 2.10; the h2 of docs/DESIGN.md 8.9). */
 export const PEOPLE = {
   id: 'people',
-  h2: 'Two people edit the same slide',
+  h2: 'Share a link and edit together',
   lead: "Share an editor link. Each person's outline, caret and name show on the other screen. Follow keeps your view on the other person's slide.",
   screens: { maya: "Maya's screen", sam: "Sam's screen" },
   flags: { maya: 'Maya', sam: 'Sam' },

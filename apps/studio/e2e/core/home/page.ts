@@ -83,7 +83,8 @@ const H2_OF: Readonly<Record<string, string>> = {
   tailor: 'One name on every slide',
   kits: KITS_ROUND.h2,
   agents: 'Agents run the same actions',
-  people: 'Two people edit the same slide',
+  /* DESIGN.md 8.9 */
+  people: 'Share a link and edit together',
   present: 'Present from the browser',
   export: 'Export to PDF and PowerPoint',
   patterns: 'Animated patterns',

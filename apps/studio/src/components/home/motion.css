@@ -69,18 +69,176 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 }
 
-/* ---- two people edit the same slide (2.10): two screens of 500 px, 24 px apart, each the
-   editor's title row over the slide; the labels pinned to the column's two sides; the presence
-   marks in ink (question 20), the visitor's own selection in the live selection's blue ---- */
+/* ---- share a link and edit together (2.10; DESIGN.md 8.9): the editor's Share dialog, then two
+   screens 24 px apart, each an 8 px window with the editor's title row over the slide; the labels
+   over the screens; the presence marks in ink (question 20), the visitor's own selection in the
+   live selection's blue ---- */
 .ts-people {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 340px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   grid-template-areas:
-    'label-maya label-sam'
-    'maya sam';
+    'share label-maya label-sam'
+    'share maya sam'
+    'share . .';
   column-gap: 24px;
   row-gap: 12px;
   margin-top: 40px;
+}
+
+/* the Share dialog's window: its height reserved in the document, its words the band's chunk's
+   (live/share.ts) */
+.ts-people-share {
+  grid-area: share;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto;
+  align-content: start;
+  box-sizing: border-box;
+  height: 404px;
+  min-width: 0;
+  padding: 20px 20px 16px;
+}
+
+.ts-people-share > .ts-share-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.ts-people-share > .ts-share-label {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--pt-ink-2);
+}
+
+.ts-share-access,
+.ts-share-person {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  min-height: 44px;
+}
+
+.ts-share-chip {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--pt-ink);
+}
+
+.ts-share-chip.is-you {
+  border: 0;
+  background: var(--pt-ink);
+}
+
+.ts-share-chip.is-you > .ts-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--pt-paper);
+}
+
+.ts-share-chip.is-access {
+  border-color: var(--pt-edge);
+}
+
+.ts-share-chip > .ts-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.ts-share-who {
+  display: grid;
+  min-width: 0;
+}
+
+.ts-share-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.ts-share-sub {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--pt-ink-2);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-share-sub:empty {
+  display: none;
+}
+
+.ts-share-role {
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-share-address {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-product .ts-share-field {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+
+.ts-product .ts-share-address > .ts-button {
+  flex: none;
+  width: auto;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.ts-share-people {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-share-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ts-share-note {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pt-ink-2);
+}
+
+.ts-product .ts-share-foot > .ts-button {
+  flex: none;
+  width: auto;
+  height: 36px;
+  font-size: 13px;
 }
 
 .ts-people-label {
@@ -97,16 +255,17 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 
 .ts-people-label[data-label='sam'] {
   grid-area: label-sam;
-  text-align: right;
 }
 
+/* each screen is an 8 px window (.pt-window: paper, the --pt-edge frame, the ring); the slide
+   inside keeps its square corners and the window clips them */
 .ts-people-screen {
   position: relative;
   display: grid;
   grid-template-rows: 32px auto;
+  align-self: start;
   min-width: 0;
-  border: 1px solid var(--pt-edge);
-  background: var(--pt-paper);
+  overflow: hidden;
 }
 
 .ts-people-screen[data-screen='maya'] {
@@ -267,7 +426,9 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 @media (max-width: 719px) {
   .ts-people {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
     grid-template-areas:
+      'share'
       'label-maya'
       'maya'
       'label-sam'
@@ -275,17 +436,13 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     row-gap: 8px;
   }
 
-  .ts-people-label[data-label='sam'] {
-    margin-top: 16px;
-    text-align: left;
+  .ts-people-share {
+    height: 404px;
+    margin-bottom: 16px;
   }
 
-  /* the column's rails are the two screens' sides under 720 px (the gutter is 0), so each screen
-     draws its top and bottom rules alone, as the hero frame does (check step 18's chrome lint:
-     one owner a seam) */
-  .ts-people-screen {
-    border-left: 0;
-    border-right: 0;
+  .ts-people-label[data-label='sam'] {
+    margin-top: 16px;
   }
 
   /* the Following plate sits at the title row's right, before the chip, and while it shows the

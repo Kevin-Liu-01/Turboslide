@@ -1570,11 +1570,55 @@ export function chromeSurfaces(): string[] {
       .first()
       .waitFor({ timeout: 10_000 })
       .catch(() => undefined);
-    const version = await page.evaluate(() => {
-      const el = document.querySelector('.ts-version-meta');
-      return el ? getComputedStyle(el).fontVariantNumeric : 'absent';
+    /* the meta lines and the rows' own times, a window's span and each version's button ("Oct 6,
+       9:00 AM", the fix round of pass 2, finding 5): every one that holds a figure, with a window
+       opened so its versions' buttons are drawn */
+    const windowRow = page.locator('.ts-version-window-row[aria-expanded="false"]').first();
+    if (
+      (await page.locator('button.ts-version-note').count()) === 0 &&
+      (await windowRow.count()) > 0
+    )
+      await windowRow.click();
+    await page
+      .locator('button.ts-version-note')
+      .first()
+      .waitFor({ timeout: 10_000 })
+      .catch(() => undefined);
+    const versions = await page.evaluate(() =>
+      (
+        [
+          ["Version history's times", '.ts-version-meta'],
+          ["Version history's row time", '.ts-version-note'],
+        ] as const
+      ).flatMap(([name, sel]) => {
+        const els = [...document.querySelectorAll(sel)].filter((e) =>
+          /\d/.test(e.textContent ?? ''),
+        );
+        if (els.length === 0) return [{ name, value: 'absent' }];
+        return els.map((el) => ({
+          name: `${name} (${el.tagName.toLowerCase()} "${el.textContent}")`,
+          value: getComputedStyle(el).fontVariantNumeric,
+        }));
+      }),
+    );
+    await page.keyboard.press('Escape');
+    /* the Keyboard shortcuts dialog's key chips: their font shorthand must not reset the figures */
+    await page.keyboard.press('Meta+/');
+    await page
+      .locator('.ts-shortcuts-keys .pt-kbd')
+      .first()
+      .waitFor({ timeout: 10_000 })
+      .catch(() => undefined);
+    const chips = await page.evaluate(() => {
+      const el = [...document.querySelectorAll('.ts-shortcuts-keys .pt-kbd')].find((e) =>
+        /\d/.test(e.textContent ?? ''),
+      );
+      return {
+        name: `the shortcuts dialog's key chip "${el?.textContent ?? ''}"`,
+        value: el ? getComputedStyle(el).fontVariantNumeric : 'absent',
+      };
     });
-    const all = [...facts.list, { name: "Version history's times", value: version }];
+    const all = [...facts.list, ...versions, chips];
     test.info().annotations.push({
       type: 'numerals',
       description: `${all.map((f) => `${f.name} ${f.value}`).join(', ')}; "1111" ${facts.widths[0]?.toFixed(2)} px and "0000" ${facts.widths[1]?.toFixed(2)} px`,
@@ -1582,6 +1626,10 @@ export function chromeSurfaces(): string[] {
     for (const f of all)
       if (f.value !== 'absent' || f.name !== 'the inbox count')
         expect(f.value, f.name).toContain('tabular-nums');
+    expect(
+      versions.some((v) => v.name.includes('(button')),
+      "a version's own button read",
+    ).toBe(true);
     expect(facts.widths.length).toBe(2);
     expect(Math.abs((facts.widths[0] ?? 0) - (facts.widths[1] ?? 1))).toBeLessThan(0.01);
     await page.keyboard.press('Escape');

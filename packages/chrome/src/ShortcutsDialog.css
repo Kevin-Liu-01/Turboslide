@@ -57,6 +57,9 @@
   background: var(--pt-plate);
   color: var(--pt-ink-2);
   font: 12px/1.3 var(--pt-text);
+  /* the font shorthand resets the numerals .pt-kbd sets; "Cmd 0" and "Shift F10" keep the
+     tabular figures (docs/DESIGN.md 4.5) */
+  font-variant-numeric: var(--pt-numerals);
 }
 
 tr.is-later td {

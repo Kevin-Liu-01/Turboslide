@@ -111,10 +111,13 @@
   min-width: 0;
 }
 
+/* a row's name or its time ("Oct 6, 9:00 AM", a window's "12:37 PM to 12:38 PM"): the times take
+   the tabular figures (docs/DESIGN.md 4.5) */
 .ts-version-note {
   font-size: 12.5px;
   line-height: 1.35;
   color: var(--pt-ink-2);
+  font-variant-numeric: var(--pt-numerals);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -295,6 +298,8 @@
   background: none;
   color: inherit;
   font: inherit;
+  /* the shorthand resets the row time's tabular figures (.ts-version-note) */
+  font-variant-numeric: var(--pt-numerals);
   text-align: left;
   cursor: pointer;
   max-width: 100%;

@@ -10842,7 +10842,7 @@
     {
       "id": "chrome.numerals.tabular",
       "feature": "chrome",
-      "interaction": "A ruler numeral, the zoom field, a filmstrip number, a Format options field, the font size field, Version history's times and the inbox count when drawn compute tabular-nums; \"1111\" and \"0000\" in a Format options field's face measure the same width",
+      "interaction": "A ruler numeral, the zoom field, a filmstrip number, a Format options field, the font size field, Version history's times (each meta line, each window's time and each version's own time button), the Keyboard shortcuts dialog's key chips and the inbox count when drawn compute tabular-nums; \"1111\" and \"0000\" in a Format options field's face measure the same width",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,

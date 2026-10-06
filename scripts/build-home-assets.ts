@@ -2508,7 +2508,7 @@ const VISIT = [
  * skipped slide's mark, every one from the editor's table (packages/chrome/src/icons.tsx). The
  * footer's GT mark is the one glyph the editor's table does not hold, from the theme sprite.
  */
-const DOCUMENT_ICONS = ['next', 'command-line', 'user-circle', 'eye-slash'] as const;
+const DOCUMENT_ICONS = ['next', 'command-line', 'user-circle', 'eye-slash', 'printer'] as const;
 const THEME_SPRITE_ICONS = ['gt-mark'] as const;
 /** A glyph a stylesheet draws on a pseudo element, as a custom property: the external link's. */
 const GLYPH_PROPERTIES = { external: 'arrow-up-right' } as const;

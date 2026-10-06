@@ -70,6 +70,36 @@ export const CANVAS_ROUND = {
 /** A band's Undo as a glyph button (the miniature's title row, the canvas panel's head). */
 export const BAND_CONTROLS = { undo: 'Undo' } as const;
 
+/**
+ * The line diagrams of the Present and export bands (DESIGN.md 8.0 "Diagrams", 8.10, 8.11): each
+ * one's sentence, its accessible name, which the bands' markup carries.
+ */
+export const DIAGRAMS_ROUND = {
+  present: {
+    label:
+      'The editor, presenter view and a phone with the show, joined by the S key and a present link.',
+  },
+  export: { label: 'A slide with a line to two files, pitch.pdf and pitch.pptx.' },
+} as const;
+
+/**
+ * The diagrams' labels, drawn at build into the landing's sprite (scripts/home/sprite.ts); no
+ * component imports them, so the route's script leaves them out.
+ */
+export const DIAGRAM_WORDS = {
+  present: {
+    editor: 'Editor',
+    presenter: 'Presenter view',
+    timer: 'Timer',
+    notes: 'Notes',
+    next: 'Next slide',
+    show: 'Show',
+    key: 'S',
+    link: 'present link',
+  },
+  export: { slide: 'Slide', pdf: 'pitch.pdf', pptx: 'pitch.pptx' },
+} as const;
+
 /** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */
 export const AGENTS_ROUND = {
   lead: "The CLI, the MCP server and the HTTP API run the editor's actions. The commands below change the slide above them.",
@@ -89,6 +119,8 @@ export const DESIGN_COPY = {
   menus: MENUS_ROUND,
   canvas: CANVAS_ROUND,
   controls: BAND_CONTROLS,
+  diagrams: DIAGRAMS_ROUND,
+  diagramWords: DIAGRAM_WORDS,
   agents: AGENTS_ROUND,
   close: CLOSE_ROUND,
 } as const;

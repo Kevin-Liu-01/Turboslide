@@ -7,7 +7,8 @@
 
 export type HomeToolbarCell = {
   control: string;
-  label: string;
+  /** the undo's name, the one control of the frame a screen reader meets */
+  label?: string;
   /** the glyph of packages/chrome/src/icons.tsx, drawn as a mask of icons.generated.css; null for a word */
   icon: string | null;
   word: string | null;
@@ -17,14 +18,12 @@ export type HomeToolbarCell = {
 export const HOME_TOOLBAR: readonly HomeToolbarCell[] = [
   {
     control: 'toolbar.search',
-    label: 'Search the menus',
     icon: 'search',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.newSlide',
-    label: 'New slide',
     icon: 'plus',
     word: null,
     divider: false,
@@ -38,91 +37,78 @@ export const HOME_TOOLBAR: readonly HomeToolbarCell[] = [
   },
   {
     control: 'toolbar.redo',
-    label: 'Redo',
     icon: 'arrow-uturn-right',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.print',
-    label: 'Print',
     icon: 'printer',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.paintFormat',
-    label: 'Paint format',
     icon: 'paint-brush',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.zoom',
-    label: 'Zoom',
     icon: null,
     word: 'Fit',
     divider: false,
   },
   {
     control: 'toolbar.select',
-    label: 'Select',
     icon: 'cursor-arrow',
     word: null,
     divider: true,
   },
   {
     control: 'toolbar.textBox',
-    label: 'Text box',
     icon: 'text',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.insertImage',
-    label: 'Insert image',
     icon: 'photo',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.insertShape',
-    label: 'Insert shape',
     icon: 'square-2-stack',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.insertLine',
-    label: 'Insert line',
     icon: 'minus',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.insertComment',
-    label: 'Insert comment',
     icon: 'chat',
     word: null,
     divider: false,
   },
   {
     control: 'toolbar.background',
-    label: 'Background',
     icon: null,
     word: 'Background',
     divider: true,
   },
   {
     control: 'toolbar.layout',
-    label: 'Layout',
     icon: null,
     word: 'Layout',
     divider: false,
   },
   {
     control: 'toolbar.theme',
-    label: 'Theme',
     icon: null,
     word: 'Theme',
     divider: false,
@@ -159,4 +145,10 @@ export const HOME_FORMAT_PANEL = {
   x: 'X',
   y: 'Y',
   icons: ['arrows-pointing-in', 'move', 'columns', 'command-line'],
+} as const;
+
+/** View > Slideshow's shortcut on the Present button: the Mac chips, the other form. */
+export const HOME_SLIDESHOW_KEYS = {
+  mac: ['⌘', '↩'],
+  other: 'Ctrl+F5',
 } as const;

@@ -23,6 +23,8 @@ import {
 } from '../../packages/chrome/src/menus/model.ts';
 import type { MenuItem } from '../../packages/chrome/src/menus/model.ts';
 
+import { DIAGRAM_WORDS } from '../../apps/studio/src/components/home/design-copy.ts';
+
 import { formatPanel } from './chrome.ts';
 import { iconPathsOf, spriteSvg } from './icons.ts';
 
@@ -81,9 +83,101 @@ export function glyphId(name: string): string {
   return `g${i}`;
 }
 
-/** The sprite's text. */
+// ---------------------------------------------------------------------------------------------
+// The line diagrams (docs/DESIGN.md 8.0 "Diagrams"): the B2a sources (b5921633:
+// apps/studio/src/components/home/diagrams/Present.tsx and Export.tsx) restyled and written as
+// symbols of the sprite, which the bands draw by one `<use>`, so they cost no script: 1 px strokes
+// (non-scaling) in --pt-hair and --pt-edge, fills --pt-plate, 11 unit square markers in ink at a
+// flow's end and no arrowheads, labels at 20 units in --pt-ink-2 in the page's face (inherited
+// through the `<use>`), the window boxes at the 8 px corner, both appearances from the tokens.
+
+const esc = (t: string): string => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const STROKE = 'fill:none;vector-effect:non-scaling-stroke;stroke-width:1px;stroke:';
+const box = (x: number, y: number, w: number, h: number, kind: 'edge' | 'hair' | 'plate', rx = 0) =>
+  `<rect x="${x}" y="${y}" width="${w}" height="${h}"${rx > 0 ? ` rx="${rx}"` : ''} style="${
+    kind === 'plate' ? 'fill:var(--pt-plate)' : `${STROKE}var(--pt-${kind})`
+  }"/>`;
+const line = (points: string, kind: 'edge' | 'hair' = 'edge') =>
+  `<polyline points="${points}" style="${STROKE}var(--pt-${kind})"/>`;
+const marker = (x: number, y: number) =>
+  `<rect x="${x - 5.5}" y="${y - 5.5}" width="11" height="11" style="fill:var(--pt-ink)"/>`;
+const label = (x: number, y: number, text: string, anchor: 'start' | 'middle' = 'start') =>
+  `<text x="${x}" y="${y}"${anchor === 'middle' ? ' text-anchor="middle"' : ''} style="fill:var(--pt-ink-2);font-size:20px">${esc(text)}</text>`;
+
+/** The diagrams' viewBoxes, which the bands' `<svg>`s repeat. */
+export const DIAGRAM_VIEWBOX = { present: '0 0 612 400', export: '0 0 612 300' } as const;
+
+/** The Present band's flow: the editor to presenter view (the S key) and to a phone's show (the link). */
+function presentDiagram(): string {
+  const d = DIAGRAM_WORDS.present;
+  return [
+    box(20, 180, 260, 180, 'edge', 8),
+    line('20,200 280,200', 'hair'),
+    box(32, 212, 44, 26, 'hair'),
+    box(32, 248, 44, 26, 'hair'),
+    box(32, 284, 44, 26, 'hair'),
+    box(96, 212, 168, 96, 'plate'),
+    label(20, 389, d.editor),
+    box(340, 20, 252, 180, 'edge', 8),
+    line('340,40 592,40', 'hair'),
+    box(352, 52, 80, 48, 'hair'),
+    label(392, 83, d.timer, 'middle'),
+    box(444, 52, 136, 76, 'plate'),
+    label(512, 97, d.next, 'middle'),
+    box(352, 140, 228, 48, 'hair'),
+    label(466, 171, d.notes, 'middle'),
+    label(340, 229, d.presenter),
+    box(520, 252, 72, 120, 'edge', 8),
+    box(528, 264, 56, 96, 'hair'),
+    box(532, 298, 48, 27, 'plate'),
+    label(520, 396, d.show),
+    line('280,250 310,250 310,110 340,110'),
+    marker(340, 110),
+    label(322, 170, d.key),
+    line('280,320 520,320'),
+    marker(520, 320),
+    label(400, 302, d.link, 'middle'),
+  ].join('');
+}
+
+/** The export band's flow: one slide forking to pitch.pdf and pitch.pptx. */
+function exportDiagram(): string {
+  const d = DIAGRAM_WORDS.export;
+  return [
+    box(20, 80, 240, 135, 'edge', 8),
+    line('44,108 200,108', 'hair'),
+    line('44,124 150,124', 'hair'),
+    box(44, 144, 192, 52, 'plate'),
+    label(20, 244, d.slide),
+    line('260,148 340,148'),
+    line('340,68 340,208'),
+    line('340,68 380,68'),
+    marker(380, 68),
+    line('340,208 380,208'),
+    marker(380, 208),
+    box(380, 20, 96, 96, 'edge', 8),
+    box(392, 68, 48, 36, 'plate'),
+    label(380, 145, d.pdf),
+    box(380, 160, 96, 96, 'edge', 8),
+    box(392, 208, 48, 36, 'plate'),
+    label(380, 285, d.pptx),
+  ].join('');
+}
+
+/** The diagrams as symbols: `d-present` and `d-export`. */
+export function diagramSymbols(): string {
+  return [
+    `<symbol id="d-present" viewBox="${DIAGRAM_VIEWBOX.present}">${presentDiagram()}</symbol>`,
+    `<symbol id="d-export" viewBox="${DIAGRAM_VIEWBOX.export}">${exportDiagram()}</symbol>`,
+  ].join('');
+}
+
+/** The sprite's text: the glyphs, then the diagrams. */
 export function deriveSprite(): string {
-  return spriteSvg(spriteNames(), (_name, i) => `g${i}`);
+  return spriteSvg(spriteNames(), (_name, i) => `g${i}`).replace(
+    '</svg>\n',
+    `${diagramSymbols()}</svg>\n`,
+  );
 }
 
 /** `sprite.generated.ts`: the served path of the sprite. */

@@ -2351,6 +2351,49 @@ code.ts-command:not([data-printed]) {
   mask: var(--ts-icon) center / contain no-repeat;
 }
 
+/* the Present and Print buttons' glyphs and Present's key chips (DESIGN.md 8.10): the glyph in
+   the button's own colour, the chips on the button's ground at the 4 px rung */
+.ts-product .ts-button > .ts-icon {
+  color: inherit;
+}
+
+.ts-product .ts-button:has(> .ts-icon) {
+  flex-direction: row;
+  gap: 8px;
+  padding-left: 14px;
+}
+
+.ts-present-keys {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+.ts-present-keys > kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: var(--pt-radius-sm);
+  background: color-mix(in srgb, currentColor 18%, transparent);
+  font: 12px / 1 var(--pt-text);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+/* the line diagrams (DESIGN.md 8.0 "Diagrams"): the sprite's symbols at the column's width, their
+   labels in the page's face through the <use> */
+.ts-diagram {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+  margin-top: 40px;
+  font-family: var(--pt-text);
+  overflow: visible;
+}
+
 /* ---- the close (LANDING.md 2.10): slide 8, then the h2, the lead and the buttons on the axis ---- */
 .ts-close-text {
   margin-top: 40px;

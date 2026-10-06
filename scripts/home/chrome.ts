@@ -20,6 +20,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { shortcutLabel } from '../../packages/chrome/src/menus/keys.ts';
 import { FORMAT, PANELS, TITLE_ROW } from '../../packages/chrome/src/menus/strings.ts';
 import {
   TOOLBAR_HEAD,
@@ -38,7 +39,8 @@ const LEFT_OUT = new Set(['toolbar.hideMenus']);
 
 export type ToolbarCell = {
   control: string;
-  label: string;
+  /** the control's name, written for the undo alone, the one cell the frame names */
+  label?: string;
   /** the glyph name of icons.tsx; null for a word */
   icon: string | null;
   /** the word a text control draws */
@@ -65,7 +67,7 @@ export function toolbarCells(): ToolbarCell[] {
     if (!text) iconPathsOf(control.icon as string);
     return {
       control: control.control,
-      label: control.label,
+      ...(control.control === 'toolbar.undo' ? { label: control.label } : {}),
       icon: text ? null : (control.icon as string),
       word: text ? (control.control === 'toolbar.zoom' ? zoomWord(control) : control.label) : null,
       divider: control.dividerBefore === true,
@@ -170,6 +172,19 @@ export function formatPanel(): {
   };
 }
 
+/**
+ * The Present button's key chips (DESIGN.md 8.10): View > Slideshow's shortcut as keys.ts prints
+ * it, the Mac form one chip a symbol, the other form's keys joined by `+` for the page's swap.
+ */
+export function slideshowKeys(): { mac: string[]; other: string } {
+  const item = itemById('view.slideshow') as { key?: { mac: string; win: string } };
+  if (item.key === undefined) throw new Error('view.slideshow has no shortcut');
+  return {
+    mac: [...shortcutLabel(item.key, 'mac', 'symbols')],
+    other: shortcutLabel(item.key, 'win', 'words'),
+  };
+}
+
 export function deriveEditorChrome(header: string): string {
   return `${header}
 //
@@ -179,7 +194,8 @@ export function deriveEditorChrome(header: string): string {
 
 export type HomeToolbarCell = {
   control: string;
-  label: string;
+  /** the undo's name, the one control of the frame a screen reader meets */
+  label?: string;
   /** the glyph of packages/chrome/src/icons.tsx, drawn as a mask of icons.generated.css; null for a word */
   icon: string | null;
   word: string | null;
@@ -194,5 +210,8 @@ export const HOME_STEP_ICONS = ${JSON.stringify(STEP_ICONS, null, 2)} as const;
 
 /** The Format options panel's words, as FormatOptions.tsx draws them (the canvas band's readout). */
 export const HOME_FORMAT_PANEL = ${JSON.stringify(formatPanel(), null, 2)} as const;
+
+/** View > Slideshow's shortcut on the Present button: the Mac chips, the other form. */
+export const HOME_SLIDESHOW_KEYS = ${JSON.stringify(slideshowKeys(), null, 2)} as const;
 `;
 }

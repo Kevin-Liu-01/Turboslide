@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 
 import { homeAsset } from './assets';
 import { EXPORT } from './copy';
+import { DIAGRAMS_ROUND } from './design-copy';
+import { Diagram } from './HomeDiagram';
 import { HOME_EXPORT_FACTS } from './deck.generated';
 import { HOME_FACTS } from './facts';
 import { HomeLink } from './HomeLink';
@@ -10,7 +12,8 @@ import { ServerHtml } from './HomeSheet';
 
 /**
  * Export to PDF and PowerPoint (docs/LANDING.md 2.12, Kevin's picks "C: Export seam" and "B:
- * Export loupe", the loupe V3#17's): slide 7 (the opener field's slide) at the column's width,
+ * Export loupe", the loupe V3#17's; the slide to pitch.pdf and pitch.pptx diagram under the lead,
+ * DESIGN.md 8.11): slide 7 (the opener field's slide) at the column's width,
  * unframed, in the band's reserved box, as the two files the CLI writes meet at a
  * seam: left of the cut, the Perfect file's picture of the whole slide (its part, served as
  * lossless WebP of the same pixels; the file lays the deck's footer logo, the Turboslide mark the
@@ -34,7 +37,9 @@ export function HomeExport() {
   const size = { width: HOME_EXPORT_FACTS.perfectWidth, height: HOME_EXPORT_FACTS.perfectHeight };
   return (
     <HomeSection id="export">
-      <BandHead id="export" heading={EXPORT.h2} lead={EXPORT.lead} span={7} />
+      <BandHead id="export" heading={EXPORT.h2} lead={EXPORT.lead} span={7}>
+        <Diagram id="export" label={DIAGRAMS_ROUND.export.label} />
+      </BandHead>
       <Reserve band="export" className="ts-export-reserve">
         <div
           className="ts-seam-slide"

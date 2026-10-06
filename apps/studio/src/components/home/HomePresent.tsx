@@ -1,11 +1,16 @@
+import { HOME_SLIDESHOW_KEYS } from './chrome.generated';
 import { PRESENT } from './copy';
 import { HOME_DECK } from './deck.generated';
+import { DIAGRAMS_ROUND } from './design-copy';
+import { Diagram } from './HomeDiagram';
 import { BandHead, HomeSection, Reserve } from './HomeSection';
 import { HomeSheet } from './HomeSheet';
 
 /**
  * Present from the browser (docs/LANDING.md 2.11, Kevin's pick "A: Present from the browser"): the
- * h2, the lead and the two buttons in the left 5 of 12 columns; in the right 7 the chosen slide
+ * h2, the lead and the two buttons in the left 5 of 12 columns (Present with the editor's play
+ * glyph and View > Slideshow's key chips, Print This Deck with the printer glyph; DESIGN.md 8.10),
+ * and under them the editor to presenter view to show diagram (`HomeDiagram.tsx`); in the right 7 the chosen slide
  * (slide 3 at rest, the band's reserved box, written by its chunk after `load`), unframed, and
  * under it the ruled list of the deck's nine titles, the chosen row in ink at weight 500 with
  * `aria-current` (no blue at rest). The band reserves the show's height (the 1,024 by 576 stage and
@@ -27,12 +32,26 @@ export function HomePresent() {
               data-present=""
               aria-keyshortcuts="Meta+Enter Control+F5"
             >
+              <i className="ts-icon" data-icon="play" />
               {PRESENT.present}
+              <span
+                className="ts-present-keys"
+                data-shortcut-other={HOME_SLIDESHOW_KEYS.other}
+                aria-hidden="true"
+              >
+                {HOME_SLIDESHOW_KEYS.mac.map((key) => (
+                  <kbd key={key} className="pt-kbd">
+                    {key}
+                  </kbd>
+                ))}
+              </span>
             </button>
             <button type="button" className="pt-ib ts-button" data-print="">
+              <i className="ts-icon" data-icon="printer" />
               {PRESENT.print}
             </button>
           </div>
+          <Diagram id="present" label={DIAGRAMS_ROUND.present.label} />
         </BandHead>
         <div className="ts-present-slide">
           <Reserve band="present" className="ts-present-reserve">

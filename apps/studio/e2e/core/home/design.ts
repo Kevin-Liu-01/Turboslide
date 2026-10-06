@@ -21,6 +21,8 @@ import {
 import {
   BAND_CONTROLS,
   CANVAS_ROUND,
+  DIAGRAM_WORDS,
+  DIAGRAMS_ROUND,
   HERO_ROUND,
   MENUS_ROUND,
   NAV_ICONS,
@@ -57,6 +59,7 @@ export const ROWS: readonly string[] = [
   'home.menus.icons',
   'home.canvas.panel',
   'home.tailor.dialog',
+  'home.diagrams.flows',
 ];
 
 type Theme = 'light' | 'dark';
@@ -1480,6 +1483,121 @@ async function tailorDialog(browser: Browser): Promise<void> {
   expect(failures).toEqual([]);
 }
 
+// ---------------------------------------------------------------------------------------------
+// home.diagrams.flows (DESIGN.md 8.0 "Diagrams", 8.10, 8.11)
+
+const FLOWS = [
+  {
+    band: 'present',
+    id: 'd-present',
+    label: DIAGRAMS_ROUND.present.label,
+    words: DIAGRAM_WORDS.present,
+    markers: 2,
+  },
+  {
+    band: 'export',
+    id: 'd-export',
+    label: DIAGRAMS_ROUND.export.label,
+    words: DIAGRAM_WORDS.export,
+    markers: 2,
+  },
+] as const;
+
+async function diagramsFlows(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  // the symbols in the sprite: the labels, the markers, the tokens, no arrowheads
+  {
+    const { context, page } = await homeContext(browser, DESKTOP, 'light');
+    try {
+      const response = await page.request.get(HOME_SPRITE);
+      const text = await response.text();
+      if (response.status() !== 200) failures.push(`${HOME_SPRITE} answered ${response.status()}`);
+      for (const flow of FLOWS) {
+        const at = text.indexOf(`<symbol id="${flow.id}"`);
+        const body = at < 0 ? '' : text.slice(at, text.indexOf('</symbol>', at));
+        if (body === '') {
+          failures.push(`${HOME_SPRITE} has no ${flow.id}`);
+          continue;
+        }
+        const texts = [...body.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
+        for (const word of Object.values(flow.words))
+          if (!texts.includes(word)) failures.push(`${flow.id}: no label "${word}"`);
+        const markers = (body.match(/width="11" height="11"/g) ?? []).length;
+        if (markers !== flow.markers) failures.push(`${flow.id}: ${markers} markers`);
+        if (/<marker|marker-end|<polygon/.test(body)) failures.push(`${flow.id}: an arrowhead`);
+        if (/#[0-9a-f]{3,6}\b|rgb\(/i.test(body.replace(/href="[^"]*"/g, '')))
+          failures.push(`${flow.id}: a colour outside the tokens`);
+        if (!/rx="8"/.test(body)) failures.push(`${flow.id}: no window at the 8 px corner`);
+      }
+      notes.push(`${HOME_SPRITE}: ${text.length} B`);
+    } finally {
+      await context.close();
+    }
+  }
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      try {
+        await openHome(page);
+        for (const flow of FLOWS) {
+          const band = page.locator(`[data-band="${flow.band}"]`);
+          await band.scrollIntoViewIfNeeded();
+          const svg = band.locator('svg.ts-diagram');
+          if ((await svg.count()) !== 1) {
+            failures.push(`${label}: ${flow.band} holds ${await svg.count()} diagrams`);
+            continue;
+          }
+          const read = await svg.evaluate((el) => ({
+            role: el.getAttribute('role'),
+            name: el.getAttribute('aria-label'),
+            href: el.querySelector('use')?.getAttribute('href') ?? '',
+            width: el.getBoundingClientRect().width,
+            font: getComputedStyle(el).fontFamily,
+          }));
+          if (read.role !== 'img' || read.name !== flow.label)
+            failures.push(`${label}: ${flow.band}'s diagram is ${read.role} "${read.name}"`);
+          if (read.href !== `${HOME_SPRITE}#${flow.id}`)
+            failures.push(`${label}: ${flow.band}'s diagram uses ${read.href}`);
+          if (read.width < 200)
+            failures.push(`${label}: ${flow.band}'s diagram is ${read.width} px`);
+          if (!/^"?Inter/.test(read.font)) failures.push(`${label}: the labels' face ${read.font}`);
+          // the symbol drew: the use's box holds the flow
+          const drawn = await page
+            .waitForFunction(
+              (sel) => {
+                const use = document.querySelector<SVGGraphicsElement>(sel);
+                return use !== null && use.getBBox().width > 100;
+              },
+              `[data-band="${flow.band}"] svg.ts-diagram use`,
+              { timeout: 15_000 },
+            )
+            .then(() => true)
+            .catch(() => false);
+          if (!drawn) failures.push(`${label}: ${flow.band}'s diagram drew nothing`);
+        }
+        // the Present band's buttons: the play glyph and the key chips, the printer glyph
+        const buttons = await page.evaluate(() => {
+          const present = document.querySelector('[data-band="present"] [data-present]');
+          const print = document.querySelector('[data-band="present"] [data-print]');
+          return {
+            play: present?.querySelector('.ts-icon[data-icon="play"]') !== null,
+            keys: present?.querySelectorAll('.ts-present-keys > kbd').length ?? 0,
+            printer: print?.querySelector('.ts-icon[data-icon="printer"]') !== null,
+          };
+        });
+        if (!buttons.play || buttons.keys < 2 || !buttons.printer)
+          failures.push(`${label}: the Present band's buttons ${JSON.stringify(buttons)}`);
+        notes.push(`${label}: both diagrams drawn`);
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'diagrams', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
 export function rows(): void {
   if (entered('home.nav.icons'))
     test(title('home.nav.icons'), async ({ browser }) => {
@@ -1536,5 +1654,10 @@ export function rows(): void {
     test(title('home.tailor.dialog'), async ({ browser }) => {
       test.setTimeout(360_000);
       await tailorDialog(browser);
+    });
+  if (entered('home.diagrams.flows'))
+    test(title('home.diagrams.flows'), async ({ browser }) => {
+      test.setTimeout(300_000);
+      await diagramsFlows(browser);
     });
 }

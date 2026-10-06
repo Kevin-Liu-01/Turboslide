@@ -11319,6 +11319,16 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
+      "id": "home.diagrams.flows",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the Present band draws the editor to presenter view (the S key) and to a phone's show (the present link) under its buttons, and the export band a slide to pitch.pdf and pitch.pptx under its lead: each an svg named by one sentence (role img) whose one use of the landing's sprite (answering 200) draws the symbol: 1 px strokes and fills in the tokens alone, the window boxes at the 8 px corner, 11 unit square markers at each flow's end and no arrowhead, the labels in Inter; Present carries the play glyph and View > Slideshow's key chips, Print This Deck the printer glyph",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-landing F9 and F10: the Present band is half empty; the export band ends in three rows of text",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
       "id": "decks.pages.radius",
       "feature": "decks",
       "interaction": "On /decks, /decks/trash and /decks/templates at 1440 and 390 in both appearances: buttons, fields, the search pill, selects, the view switch and the card menus compute 6 px; dialogs 8 px; cards, thumbnails and rows 0",

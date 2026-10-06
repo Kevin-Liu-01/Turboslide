@@ -41,6 +41,8 @@
   .ts-product .ts-hero-terminal,
   .ts-product .ts-hero-frame-title,
   .ts-product .ts-hero-frame-menus,
+  .ts-product .ts-hero-frame-tools,
+  .ts-product .ts-hero-frame-notes,
   .ts-product .ts-hero-filmstrip {
     display: none;
   }

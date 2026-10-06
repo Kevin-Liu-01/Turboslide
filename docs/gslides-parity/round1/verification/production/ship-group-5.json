@@ -1,0 +1,302 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T10:10:33.961Z",
+  "ms": 678557,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 677331,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/out-group-5-r1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "chrome.buttons.one-rule",
+      "decks.card.download",
+      "export.zip.bundle",
+      "shaders.show.plays-when-on",
+      "shaders.show.frame-when-off",
+      "surface.domain.build-commit",
+      "share.name-prompt.empty-field",
+      "share.dialog.ruled-rows",
+      "versions.panel.seam-and-time",
+      "chrome.title-row.phone",
+      "chrome.phone.menus-key",
+      "chrome.title-row.name-after-first-write",
+      "chrome.title-row.one-status",
+      "chrome.stage.deck-appearance",
+      "chrome.mark.one-product-mark",
+      "chrome.ai.no-sparkle",
+      "chrome.selection.gt-blue",
+      "chrome.scroll.no-smooth",
+      "chrome.words.no-process-words",
+      "present.presenter.phone-head"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 20,
+  "passed": 18,
+  "failed": 0,
+  "notDriven": 2,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "ead786c3",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "chrome.words.no-process-words": "passed",
+    "chrome.buttons.one-rule": "passed",
+    "chrome.title-row.phone": "passed",
+    "chrome.title-row.name-after-first-write": "passed",
+    "chrome.title-row.one-status": "passed",
+    "chrome.scroll.no-smooth": "passed",
+    "chrome.selection.gt-blue": "passed",
+    "chrome.ai.no-sparkle": "passed",
+    "chrome.mark.one-product-mark": "passed",
+    "chrome.stage.deck-appearance": "passed",
+    "versions.panel.seam-and-time": "passed",
+    "chrome.phone.menus-key": "passed",
+    "decks.card.download": "passed",
+    "export.zip.bundle": "passed",
+    "present.presenter.phone-head": "passed",
+    "shaders.show.plays-when-on": "not driven",
+    "shaders.show.frame-when-off": "not driven",
+    "share.name-prompt.empty-field": "passed",
+    "share.dialog.ruled-rows": "passed",
+    "surface.domain.build-commit": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "shaders.show.plays-when-on",
+        "feature": "shaders",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.show.frame-when-off",
+        "feature": "shaders",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "shaders.show.plays-when-on",
+      "parks": [
+        "tools.preferences.playShaders",
+        "formatOptions.shader.play"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "parks": [
+        "tools.preferences.playShaders"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land"
+    },
+    {
+      "id": "surface.domain.build-commit",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.empty-field",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.ruled-rows",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.panel.seam-and-time",
+      "feature": "versions",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter.phone-head",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.phone",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.phone.menus-key",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.name-after-first-write",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.one-status",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.stage.deck-appearance",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.mark.one-product-mark",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.ai.no-sparkle",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.selection.gt-blue",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.scroll.no-smooth",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.words.no-process-words",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.buttons.one-rule",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

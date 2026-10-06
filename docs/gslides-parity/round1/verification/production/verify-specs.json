@@ -1,0 +1,695 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T11:40:46.621Z",
+  "ms": 1652522,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 1651301,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/verify-r1/out-specs-r1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.list.own-and-shared",
+      "decks.list.action-scoped",
+      "decks.card.download",
+      "decks.manifest.paper",
+      "decks.home.pictures-three-widths",
+      "decks.home.product-pictures",
+      "decks.home.grammar",
+      "decks.home.capture-plain",
+      "decks.home.copy",
+      "decks.home.phone",
+      "decks.access.unknown-edit",
+      "decks.access.sign-in-link",
+      "decks.card.edited-relative-time",
+      "decks.access.stranger-links",
+      "decks.notfound.sentence-case",
+      "decks.list.ruled-rows",
+      "decks.og.deck-card",
+      "decks.list.gt-brand-deck",
+      "export.remove.copies-gone",
+      "export.zip.bundle",
+      "export.html.web-page",
+      "export.download.options-dialog",
+      "export.refusal.sentence-and-retry",
+      "accounts.no-dead-method",
+      "share.access.true-sentence",
+      "share.name-prompt.empty-field",
+      "share.dialog.ruled-rows",
+      "logos.picker.chrome-1280",
+      "chrome.menus.one-logo-row",
+      "chrome.menus.preferences-named",
+      "chrome.menus.download-four-first",
+      "chrome.buttons.one-rule",
+      "versions.panel.seam-and-time",
+      "chrome.title-row.phone",
+      "chrome.phone.menus-key",
+      "chrome.title-row.name-after-first-write",
+      "chrome.title-row.one-status",
+      "chrome.stage.deck-appearance",
+      "chrome.mark.one-product-mark",
+      "chrome.ai.no-sparkle",
+      "chrome.selection.gt-blue",
+      "chrome.scroll.no-smooth",
+      "chrome.words.no-process-words",
+      "logos.route.mark-headers",
+      "logos.index.refresh-dry-run",
+      "logos.index.refresh-fixture",
+      "logos.index.cached-offline",
+      "logos.cache.open-licence-only",
+      "shaders.show.plays-when-on",
+      "shaders.show.frame-when-off",
+      "surface.domain.build-commit",
+      "present.presenter.phone-head",
+      "export.download.large-deck-pdf",
+      "export.download.large-deck-pptx",
+      "brand.template.blank-plain"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 55,
+  "passed": 51,
+  "failed": 0,
+  "notDriven": 4,
+  "manual": [],
+  "measured": [
+    {
+      "id": "export.download.large-deck-pdf",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "PDF: GT brand deck.pdf, 95 slides in 23.4 s, 0.25 s per slide",
+        "PDF: GT brand deck.pdf, 95 slides in 23.4 s, 0.25 s per slide"
+      ]
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 95 slides in 199.0 s, 2.10 s per slide",
+        "Editable text PowerPoint with Embed fonts: GT brand deck (editable).pptx, 95 slides in 199.0 s, 2.10 s per slide"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "a3ca96da",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "brand.template.blank-plain": "passed",
+    "logos.picker.chrome-1280": "passed",
+    "chrome.menus.one-logo-row": "passed",
+    "chrome.menus.preferences-named": "passed",
+    "chrome.menus.download-four-first": "passed",
+    "chrome.words.no-process-words": "passed",
+    "chrome.buttons.one-rule": "passed",
+    "chrome.title-row.phone": "passed",
+    "chrome.title-row.name-after-first-write": "passed",
+    "chrome.title-row.one-status": "passed",
+    "chrome.scroll.no-smooth": "passed",
+    "chrome.selection.gt-blue": "passed",
+    "chrome.ai.no-sparkle": "passed",
+    "chrome.mark.one-product-mark": "passed",
+    "chrome.stage.deck-appearance": "passed",
+    "versions.panel.seam-and-time": "passed",
+    "chrome.phone.menus-key": "passed",
+    "decks.list.gt-brand-deck": "passed",
+    "decks.card.download": "passed",
+    "decks.access.unknown-edit": "passed",
+    "decks.access.sign-in-link": "passed",
+    "decks.card.edited-relative-time": "passed",
+    "decks.access.stranger-links": "passed",
+    "decks.notfound.sentence-case": "passed",
+    "decks.home.pictures-three-widths": "passed",
+    "decks.home.product-pictures": "passed",
+    "decks.home.grammar": "passed",
+    "decks.home.capture-plain": "passed",
+    "decks.home.copy": "passed",
+    "decks.home.phone": "passed",
+    "decks.list.ruled-rows": "passed",
+    "decks.og.deck-card": "passed",
+    "decks.list.own-and-shared": "passed",
+    "decks.list.action-scoped": "passed",
+    "decks.manifest.paper": "passed",
+    "export.zip.bundle": "passed",
+    "export.html.web-page": "passed",
+    "export.download.options-dialog": "passed",
+    "export.download.large-deck-pdf": "passed",
+    "export.download.large-deck-pptx": "passed",
+    "export.refusal.sentence-and-retry": "passed",
+    "export.remove.copies-gone": "passed",
+    "logos.route.mark-headers": "passed",
+    "logos.index.refresh-dry-run": "passed",
+    "logos.cache.open-licence-only": "passed",
+    "logos.index.refresh-fixture": "not driven",
+    "logos.index.cached-offline": "not driven",
+    "present.presenter.phone-head": "passed",
+    "shaders.show.plays-when-on": "not driven",
+    "shaders.show.frame-when-off": "not driven",
+    "share.name-prompt.empty-field": "passed",
+    "accounts.no-dead-method": "passed",
+    "share.access.true-sentence": "passed",
+    "share.dialog.ruled-rows": "passed",
+    "surface.domain.build-commit": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "logos.index.refresh-fixture",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "logos.index.cached-offline",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.show.plays-when-on",
+        "feature": "shaders",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.show.frame-when-off",
+        "feature": "shaders",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "logos.index.refresh-fixture",
+      "parks": [
+        "insert.image.logo"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "parks": [
+        "insert.image.logo"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "parks": [
+        "tools.preferences.playShaders",
+        "formatOptions.shader.play"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "parks": [
+        "tools.preferences.playShaders"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.list.gt-brand-deck",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.unknown-edit",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.html.web-page",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.card.edited-relative-time",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.access.stranger-links",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.notfound.sentence-case",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.options-dialog",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pdf",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.large-deck-pptx",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.chrome-1280",
+      "feature": "logos",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.route.mark-headers",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-dry-run",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the index reads network, not the ten mark fixture (TURBOSLIDE_LOGO_UPSTREAM=fixture on a preview); the unit tests apps/studio/src/server/logos.test.ts cover the 404 marking and the takedown (docs/archive/rounds/FEATURES.md 7.3)"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the index reads network, not the outage (TURBOSLIDE_LOGO_UPSTREAM=down on a preview); the unit test apps/studio/src/server/logos.test.ts covers the cache during an outage (docs/archive/rounds/FEATURES.md 7.3)"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/archive/rounds/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/archive/rounds/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land"
+    },
+    {
+      "id": "surface.domain.build-commit",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.template.blank-plain",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.name-prompt.empty-field",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.dialog.ruled-rows",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.panel.seam-and-time",
+      "feature": "versions",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "present.presenter.phone-head",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.phone",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.phone.menus-key",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.name-after-first-write",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.title-row.one-status",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.stage.deck-appearance",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.mark.one-product-mark",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.ai.no-sparkle",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.selection.gt-blue",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.scroll.no-smooth",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.one-logo-row",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.preferences-named",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.download-four-first",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.words.no-process-words",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.own-and-shared",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.action-scoped",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.manifest.paper",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.refusal.sentence-and-retry",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.remove.copies-gone",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.phone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.list.ruled-rows",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.buttons.one-rule",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "share.access.true-sentence",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.og.deck-card",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.no-dead-method",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

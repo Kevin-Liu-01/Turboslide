@@ -1,0 +1,356 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T08:21:52.523Z",
+  "ms": 337623,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 336156,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/out-group-3-r1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.card.download",
+      "decks.manifest.paper",
+      "decks.home.pictures-three-widths",
+      "decks.home.product-pictures",
+      "decks.home.grammar",
+      "decks.home.capture-plain",
+      "decks.home.copy",
+      "decks.home.phone",
+      "export.zip.bundle",
+      "export.html.web-page",
+      "export.download.options-dialog",
+      "logos.picker.chrome-1280",
+      "chrome.menus.one-logo-row",
+      "chrome.menus.preferences-named",
+      "chrome.menus.download-four-first",
+      "logos.route.mark-headers",
+      "logos.index.refresh-dry-run",
+      "logos.index.refresh-fixture",
+      "logos.index.cached-offline",
+      "logos.cache.open-licence-only",
+      "shaders.show.plays-when-on",
+      "shaders.show.frame-when-off",
+      "surface.domain.build-commit"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 23,
+  "passed": 19,
+  "failed": 0,
+  "notDriven": 4,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "1c8ae0e7",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "logos.picker.chrome-1280": "passed",
+    "chrome.menus.one-logo-row": "passed",
+    "chrome.menus.preferences-named": "passed",
+    "chrome.menus.download-four-first": "passed",
+    "decks.card.download": "passed",
+    "decks.home.pictures-three-widths": "passed",
+    "decks.home.product-pictures": "passed",
+    "decks.home.grammar": "passed",
+    "decks.home.capture-plain": "passed",
+    "decks.home.copy": "passed",
+    "decks.home.phone": "passed",
+    "decks.manifest.paper": "passed",
+    "export.zip.bundle": "passed",
+    "export.html.web-page": "passed",
+    "export.download.options-dialog": "passed",
+    "logos.route.mark-headers": "passed",
+    "logos.index.refresh-dry-run": "passed",
+    "logos.cache.open-licence-only": "passed",
+    "logos.index.refresh-fixture": "not driven",
+    "logos.index.cached-offline": "not driven",
+    "shaders.show.plays-when-on": "not driven",
+    "shaders.show.frame-when-off": "not driven",
+    "surface.domain.build-commit": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "logos.index.refresh-fixture",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "logos.index.cached-offline",
+        "feature": "logos",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.show.plays-when-on",
+        "feature": "shaders",
+        "result": "not driven"
+      },
+      {
+        "id": "shaders.show.frame-when-off",
+        "feature": "shaders",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "logos.index.refresh-fixture",
+      "parks": [
+        "insert.image.logo"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "parks": [
+        "insert.image.logo"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "parks": [
+        "tools.preferences.playShaders",
+        "formatOptions.shader.play"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "parks": [
+        "tools.preferences.playShaders"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.card.download",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.zip.bundle",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.html.web-page",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.download.options-dialog",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.picker.chrome-1280",
+      "feature": "logos",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.route.mark-headers",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-dry-run",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "logos.index.refresh-fixture",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the index reads network, not the ten mark fixture (TURBOSLIDE_LOGO_UPSTREAM=fixture on a preview); the unit tests apps/studio/src/server/logos.test.ts cover the 404 marking and the takedown (docs/FEATURES.md 7.3)"
+    },
+    {
+      "id": "logos.index.cached-offline",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not driven: the index reads network, not the outage (TURBOSLIDE_LOGO_UPSTREAM=down on a preview); the unit test apps/studio/src/server/logos.test.ts covers the cache during an outage (docs/FEATURES.md 7.3)"
+    },
+    {
+      "id": "logos.cache.open-licence-only",
+      "feature": "logos",
+      "driver": "core/logos.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "shaders.show.plays-when-on",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land"
+    },
+    {
+      "id": "shaders.show.frame-when-off",
+      "feature": "shaders",
+      "driver": "core/shaders.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land"
+    },
+    {
+      "id": "surface.domain.build-commit",
+      "feature": "surface",
+      "driver": "core/surface.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.one-logo-row",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.preferences-named",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menus.download-four-first",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.manifest.paper",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.phone",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

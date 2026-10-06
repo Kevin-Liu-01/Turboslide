@@ -1,0 +1,187 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T15:07:02.838Z",
+  "ms": 174980,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 173130,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/c1-prod-r2/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.home.load-budget",
+      "decks.home.layout-shift",
+      "home.page.bands-after-load",
+      "home.budget.bytes-first",
+      "home.hero.edit"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 5,
+  "passed": 1,
+  "failed": 4,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: ready 533 ms (line 500)",
+      "measures": [
+        "first byte 74 ms (line 150)",
+        "LCP 284 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 533 ms (line 500)",
+        "pictures before the first scroll 17541 B in 2 requests (line 0)",
+        "pictures after a full scroll 56525 B (line 200000)",
+        "document 86374 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 2",
+        "JavaScript decoded 1286888 B (reported against 600000)",
+        "first byte 74 ms (line 150)",
+        "LCP 284 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 533 ms (line 500)",
+        "pictures before the first scroll 17541 B in 2 requests (line 0)",
+        "pictures after a full scroll 56525 B (line 200000)",
+        "document 86374 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 2",
+        "JavaScript decoded 1286888 B (reported against 600000)"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "ddd5429b",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "decks.home.load-budget": "failed",
+    "decks.home.layout-shift": "failed",
+    "home.page.bands-after-load": "passed",
+    "home.budget.bytes-first": "failed",
+    "home.hero.edit": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.home.layout-shift",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.budget.bytes-first",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.hero.edit",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: ready 533 ms (line 500)"
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "home.page.bands-after-load",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

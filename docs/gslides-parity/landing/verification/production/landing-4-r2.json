@@ -1,0 +1,159 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T20:36:06.024Z",
+  "ms": 109864,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 108893,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/p2-landing-4-r2/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.home.load-budget",
+      "home.interludes.glyphs",
+      "home.motion.loops"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 3,
+  "passed": 0,
+  "failed": 2,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: ready 647 ms (line 500)",
+      "measures": [
+        "first byte 82 ms (line 150)",
+        "LCP 204 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 647 ms (line 500)",
+        "pictures before the first scroll 0 B in 0 requests, read cold (line 0)",
+        "pictures after a full scroll 58619 B (line 200000)",
+        "document 93681 B decoded (reported against 60000 until audit item 13; gated at 100000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1, read cold (108 ms)",
+        "JavaScript decoded 1392690 B (reported against 600000)",
+        "under the runner's trace: pictures before the first scroll 4592 B in 1 requests; long animation frames over 100 ms 0",
+        "first byte 82 ms (line 150)",
+        "LCP 204 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 647 ms (line 500)",
+        "pictures before the first scroll 0 B in 0 requests, read cold (line 0)",
+        "pictures after a full scroll 58619 B (line 200000)",
+        "document 93681 B decoded (reported against 60000 until audit item 13; gated at 100000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1, read cold (108 ms)",
+        "JavaScript decoded 1392690 B (reported against 600000)",
+        "under the runner's trace: pictures before the first scroll 4592 B in 1 requests; long animation frames over 100 ms 0"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "617117e8",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "decks.home.load-budget": "failed",
+    "home.interludes.glyphs": "failed",
+    "home.motion.loops": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "home.interludes.glyphs",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.motion.loops",
+        "feature": "decks",
+        "result": "not driven"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "home.interludes.glyphs",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.motion.loops",
+      "feature": "decks",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: ready 647 ms (line 500)"
+    },
+    {
+      "id": "home.interludes.glyphs",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: menus at 2 px cells"
+    },
+    {
+      "id": "home.motion.loops",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 112.4 (the functional checks passed)"
+    }
+  ]
+}

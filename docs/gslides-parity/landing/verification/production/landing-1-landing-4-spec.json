@@ -1,0 +1,169 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T15:14:32.090Z",
+  "ms": 994879,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 987316,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/c1-prod-l4spec/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.home.load-budget",
+      "decks.home.layout-shift",
+      "home.budget.bytes-first",
+      "home.hero.edit"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 4,
+  "passed": 1,
+  "failed": 3,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: LCP 408 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+      "measures": [
+        "first byte 118 ms (line 150)",
+        "LCP 408 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 2398 ms (line 500)",
+        "pictures before the first scroll 17541 B in 2 requests, read cold (line 0): /home/lighthouse-still-wide-79b80783b6.webp, /home/lighthouse-tone-e58fc86d6e.jpg",
+        "pictures after a full scroll 56525 B (line 200000)",
+        "document 86374 B decoded (reported against 60000 until audit item 13; gated at 100000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1, read cold (262 ms)",
+        "JavaScript decoded 1286888 B (reported against 600000)",
+        "under the runner's trace: pictures before the first scroll 17541 B in 2 requests; long animation frames over 100 ms 2",
+        "first byte 118 ms (line 150)",
+        "LCP 408 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 2398 ms (line 500)",
+        "pictures before the first scroll 17541 B in 2 requests, read cold (line 0): /home/lighthouse-still-wide-79b80783b6.webp, /home/lighthouse-tone-e58fc86d6e.jpg",
+        "pictures after a full scroll 56525 B (line 200000)",
+        "document 86374 B decoded (reported against 60000 until audit item 13; gated at 100000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1, read cold (262 ms)",
+        "JavaScript decoded 1286888 B (reported against 600000)",
+        "under the runner's trace: pictures before the first scroll 17541 B in 2 requests; long animation frames over 100 ms 2"
+      ]
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "617117e8",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "decks.home.load-budget": "failed",
+    "decks.home.layout-shift": "failed",
+    "home.budget.bytes-first": "passed",
+    "home.hero.edit": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.home.layout-shift",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.hero.edit",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: LCP 408 ms on h1#ts-product-h1 (line 400 cold, the h1)"
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThanOrEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m"
+    }
+  ]
+}

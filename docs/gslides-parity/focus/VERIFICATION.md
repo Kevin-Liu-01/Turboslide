@@ -626,3 +626,251 @@ P2-3. **A store test pins the seed deck at 85 slides, so check step 5 reads red 
 3. Two fixers chose where Kevin had been asked. B4 typed the seven speed mark slides in the template and kept all 95 slides, so pass 1's question 3 no longer needs an answer, and the slides read within 0.021 percent of their drawing after a drag. The integrator moved an earlier round's row to the product's words "The PowerPoint file could not be made" (its deviation 4). Either can be overruled.
 4. NEXT.md 5.6 check 1 (finding 13): the tree now holds 6,425 tracked files and 342.6 MB.
 5. The licences of pass 1's question 4 are unchanged (check step 15 still reads the live dictionary slide's 1897 credit).
+
+# Round 1, the production table (2026-10-05)
+
+The ship of Round 1 (`docs/NEXT.md` 4.1 and the hotfixes H2 to H10 of 3.2) to `main` and the verifier's reading of it on production. The ship step's record, the verifier's notes and the guard's log (`~/.config/turboslide/gt-follow.log`) are the sources, and the ship notes step wrote this section on 2026-10-05. Every time is UTC on 2026-10-05. Every load is the one minute load of the shared machine, which other sessions' jobs kept between 24 and 95 during Round 1's ship. The ledgers, the guard's files of each pass and the pictures named here are under `docs/gslides-parity/round1/verification/production/`: each JSON file under 81 KB, with share link paths written as `/s/<link>`, and 9 WebP pictures of 274,074 B in all.
+
+## R1P.1 Verdict
+
+Round 1 is on production. The seven groups went out in order from the branch `round1/ship` (worktree `/Users/kevinliu/repos/Turboslide-next`, head `a3ca96da`), and the guard deployed each one with no hold, no error line and no rollback. Each pass read the hosted smoke 42/42 on the preview and on production, and each read the production realtime rows green, three of them after one rerun of a timing row.
+
+The ship step read every row each group entered or changed on production with that group's own spec. No row of the round read red twice for a reason of its push. `chrome.buttons.one-rule` read red twice after group 4 on two 8 px corners that production carried before that push, and group 5's `19b964bd` squared them; the row passed after group 5.
+
+The verifier then read Round 1 on production at `a3ca96da` from 11:40Z to 13:15Z. Every row of the round that production can drive passed: 51 spec rows in one run and the 22 walk rows of the round in one walk of 10 areas. The hand drives found no broken feature of Round 1. They found four severity 2 defects and eight severity 1 defects a seller meets, and the eight earlier rounds' rows that read red in the ship's walks read red again (R1P.5). Lanes A to D of the Round 1 follow-up fix them on the branch `followup/round`, which no push has carried yet.
+
+## R1P.2 The pushes
+
+Before group 1: `origin/main` and `gt-follow.last` were `4aa32718`, `gt-follow.lock` was absent, `gt-follow.held` was empty and the guard loop was running. Every group sha descended from `origin/main` and from the group before it, so no rebase was needed. A scan of the added lines of `origin/main..a3ca96da` for key, token and private key patterns found nothing. Production `/decks` at `4aa32718` listed every deck of the store to an anonymous visitor.
+
+The check's numbers are the guard's: smoke, walk (passed, failed, not driven, no step), specs (the same four), seconds and the load it wrote. The walk's failed row on every pass is the standing `fonts.table.takes-family`. The realtime rows run on production after the promote, because the preview environment keeps its forced `TURBOSLIDE_REALTIME` row.
+
+| Group | Sha | Pushed (load) | The guard's line | Check on the preview | Production after the promote |
+| --- | --- | --- | --- | --- | --- |
+| 1, the hotfixes H2 to H10 and the realtime env test fix | `4180d58b` | 06:49:06Z (62.66) | `deployed 4180d58b7a1bbae3db1f5eb23d492bfe4f7cc599 (exit 0)` at 07:15:11Z as `turboslide-phz9tiu1u` | smoke 42/42; walk 128 1 2 0 in 689 s; specs 9 0 0 0 in 286 s; check 1006 s; load 79.00 | smoke 42/42; realtime 2 1 0 0 in 120 s, rerun of `realtime.caret.within-300ms` 1 0 0 0 in 41 s; Worker `/health` `4180d58b` at 07:10:03Z |
+| 2, the binaries leave the tree, the brand lint in report mode, the docs archived | `c836ecb9` | 07:20:09Z (67.37) | `deployed c836ecb9e1876b68fc9e90d56902d56abb73bee9 (exit 0)` at 07:51:48Z as `turboslide-hnevr65xm` | smoke 42/42; walk 128 1 2 0 in 692 s; specs 9 0 0 0 in 556 s; check 1311 s; load 94.25 | smoke 42/42; realtime 3 0 0 0 in 173 s |
+| 3, the new mark, the B2a `/home`, the menu cuts | `1c8ae0e7` | 07:53:23Z (71.02) | `deployed 1c8ae0e7c955f7139e617c6ace436cd26032073b (exit 0)` at 08:21:20Z as `turboslide-7krsnnrqy` | smoke 42/42; walk 128 1 2 0 in 682 s; specs 9 0 0 0 in 259 s; check 964 s; load 58.06 | smoke 42/42; realtime 2 1 0 0 in 199 s, rerun of `realtime.title.two-typers` 1 0 0 0 in 52 s |
+| 4, `/decks`, Not found, You need access, the deck card | `5aaea382` | 09:07:12Z (41.93) | `deployed 5aaea382fdcc9ce388fb973a91f8b1db9441030b (exit 0)` at 09:34:25Z as `turboslide-lp872v9iv` | smoke 42/42; walk 128 1 2 0 in 677 s; specs 9 0 0 0 in 296 s; check 1002 s; load 52.41 | smoke 42/42; realtime 2 1 0 0 in 114 s, rerun of `realtime.title.two-typers` 1 0 0 0 in 48 s |
+| 5, the menu words and the chrome | `ead786c3` | 09:41:29Z (53.68) | `deployed ead786c3cec34ad91759be5e0c8ff75953ba07f3 (exit 0)` at 10:09:58Z as `turboslide-6zgtpl0i9` | smoke 42/42; walk 128 1 2 0 in 676 s; specs 9 0 0 0 in 352 s; check 1056 s; load 48.39 | smoke 42/42; realtime 3 0 0 0 in 157 s |
+| 6, the brand lint in enforce mode, the round documents moved | `7dc709ac` | 10:29:51Z (42.92) | `deployed 7dc709ac1370b785e4344e5c1894e4638016f314 (exit 0)` at 10:55:13Z as `turboslide-m5lpvhanc` | smoke 42/42; walk 128 1 2 0 in 674 s; specs 8 1 0 0 in 265 s, rerun of `export.download.pptx-direct` 1 0 0 0 in 86 s; check 1051 s; load 46.59 | smoke 42/42; realtime 2 1 0 0 in 123 s, rerun of `realtime.caret.within-300ms` 1 0 0 0 in 40 s |
+| 7, the plain blank slide, the GT template import, the fix round, the verifier notes | `a3ca96da` | 10:57:20Z (30.14) | `deployed a3ca96daf0fad70f19f28960fbcaf6c368df3818 (exit 0)` at 11:25:12Z as `turboslide-q5osr7zb2` | smoke 42/42; walk 128 1 2 0 in 729 s; specs 8 1 0 0 in 274 s, rerun of `export.download.pptx-direct` 1 0 0 0 in 81 s; check 1113 s; load 37.63 | smoke 42/42; realtime 3 0 0 0 in 106 s |
+
+The guard's specs and realtime files of each pass are `guard/<stamp>-<sha8>-specs.json`, `-realtime.json` and `-realtime-rerun.json`.
+
+`export.download.pptx-direct` read red on the first try of the preview check for groups 6 and 7 ("the export was refused 2319 ms after the click: The PowerPoint file could not be made", then 2315 ms) and green on each rerun and on production. The 40 guard passes before group 6 show no such red, and group 6 changes no runtime code in the export path. It is named for the owner of the export rows.
+
+## R1P.3 The ship step's readings per group
+
+Each group's rows were read on production from a scratch worktree detached at the group's sha, with `with-tokens.mjs --base https://www.turboslide.com --bearer-of https://www.turboslide.com -- node scripts/probes/core-gate.mjs --base https://www.turboslide.com --only specs --rows <ids>`, or `--only probe --areas <areas>` for walk rows.
+
+| Group | When (load) | Ledger | Result |
+| --- | --- | --- | --- |
+| 1 | 07:15Z to 07:18Z (77.90 to 70.79) | `ship-group-1.json` | 4 passed of 4: `decks.list.own-and-shared`, `decks.list.action-scoped` (POST with the cookie 401, the bearer lists 150 decks), `export.remove.copies-gone`, `accounts.no-dead-method` |
+| 3, spec rows | 08:21Z to 08:27Z (65.19 to 68.49) | `ship-group-3.json` | 23 rows: 19 passed, 4 not driven by design (the logo index's fixture and outage modes are preview settings; `shaders.show.plays-when-on` and `frame-when-off` are P1 rows "not on this build") |
+| 3, walk rows | 08:29Z to 09:01Z (73.46 to 52.42) | `ship-group-3-walk.json` | the group's 17 walk rows passed; the whole narrowed walk 220 rows, 206 passed, 8 failed, 6 not driven, 1968 s. The 8 reds are earlier rounds' rows (R1P.5 finding 1) |
+| 3, shaders again | 09:02Z to 09:06Z (54.19 to 41.38) | `ship-group-3-walk-shaders-r2.json` | 14 rows: 9 passed, 3 failed, 2 not driven; `shaders.panel.slider-live-undo` passed this time |
+| 4 | 09:35Z to 09:37Z (53.93 to 63.01), again 09:38Z to 09:39Z (66.48 to 62.42) | `ship-group-4.json`, `ship-group-4-r2.json` | 9 rows: 8 passed; `chrome.buttons.one-rule` red twice on "share.open has a 8px corner" and "refused.reload has a 8px corner", both corners on production before the push |
+| 5, spec rows | 10:10Z to 10:21Z (52.83 to 40.94) | `ship-group-5.json` | 20 rows: 18 passed (`chrome.buttons.one-rule` green), 2 not driven ("not on this build") |
+| 5, walk rows | 10:10Z to 10:29Z (51.17 to 41.80) | `ship-group-5-walk.json` | the group's 6 walk rows passed; the whole narrowed walk 129 rows, 122 passed, 4 failed (the shaders rows of finding 1), 3 not driven |
+| 7 | 11:26Z to 11:36Z (39.83 to 28.77) | `ship-group-7.json` | 7 passed of 7: `decks.list.gt-brand-deck` (the copy addressed at 5779 ms, 95 slides at 9416 ms), `export.download.large-deck-pdf` (95 slides in 22.6 s), `export.download.large-deck-pptx` (95 slides in 201.9 s), `brand.template.blank-plain`, `chrome.words.no-process-words`, `export.refusal.sentence-and-retry`, `export.download.pptx-direct` |
+
+Groups 2 and 6 enter or change no row. The local rows `accounts.decks-list-scoped` and `accounts.google-button` (driver `e2e/accounts.spec.ts`) were not read on production, because `core-gate.mjs --only specs` refuses them on a deployment.
+
+## R1P.4 The verifier's reading on production
+
+From the ship's scratch worktree at `a3ca96da`, with the same wrapper and the gate's `--only specs` and `--only probe` modes. GET `/api/agent` answered `a3ca96da` at 11:40:34Z and at 13:14:55Z, and the guard ran no pass during the reading.
+
+| Run | When (load) | Ledger | Reading |
+| --- | --- | --- | --- |
+| The 55 spec rows | 11:40:46Z to 12:08:19Z (33.1 to 24.5) | `verify-specs.json` | 51 passed, 0 failed, 4 not driven (the two logo index modes and the two "not on this build" shader rows), 1653 s |
+| The walk of 10 areas | 11:48Z to 12:30:54Z (30 to 37, three hand drives beside it) | `verify-walk.json` | 300 rows: 281 passed, 12 failed, 7 not driven, 2530 s; all 22 of Round 1's walk rows passed |
+| text, arrange, chrome | 12:31:24Z to 12:52:32Z (30.9 to 91.5 to 45.0) | `verify-walk-re1.json` | 205 rows: 201 passed, 2 failed (`arrange.clipboard.paste-keeps-position`, `chrome.toolbar.bold-follows-selection`), 2 not driven |
+| text, arrange, chrome again | 12:52:32Z to 13:13:57Z (45 to 60 to 40) | `verify-walk-re2.json` | the same two rows red for the same reasons |
+| text, chrome | 12:52:24Z to 13:06:00Z (40.5 to 59.0) | `verify-walk-tc.json` | 125 rows: 124 passed, 1 manual; `chrome.toolbar.bold-follows-selection` passed |
+
+The measurement rows at loads 25 to 33: `decks.list.gt-brand-deck` addressed its copy at 7959 ms and settled with 95 slides at 12131 ms (bound 15 s); `export.download.large-deck-pdf` 95 pages in 23.4 s; `export.download.large-deck-pptx` 95 slides in 199.0 s. Two text rows read red once in the 10 area walk ("revision 73 -> 73", the write not landed when read, with three browsers running) and passed in all three later readings. The two arrange and chrome reds come from the walk's area order and its driver (R1P.5 finding 13).
+
+The hand drives, Playwright from the same worktree with a 40 to 60 ms pause on every action, at 1440 and 390 in both appearances:
+
+- `/home` (the B2a page then), `/decks`, Not found, You need access and the refused page: 200 or the page's own status, no horizontal overflow, no page error.
+- Sign in: Sign In on `/home` and `/decks` reaches Google's sign in page in 2.2 to 2.4 s; the editor's dialog reads "Sign in, Continue with Google, Cancel" and reaches Google in 3.8 to 3.9 s. No password was typed.
+- Objects: 19 kinds from the Insert menu, each on a slide of its own, grew from a corner by 113 by 71 sheet px with the other corner held and moved by -156, -85 sheet px with the size kept, to the unit. Every box kind rotated to 45 degrees; lines and connectors draw start and end handles, as Google draws them. The PDF and the PowerPoint carry each object where it was left, rotated where it was rotated, except finding 12.
+- The text box: one click selects it, a second click opens the caret, typing stores.
+- Present: Right, Left, Home, End, Space on the last slide, Page Up, 1 then Enter, B, W, L and Escape each moved the show or drew its state as the show's keys define, at both widths in both appearances.
+- Share: a copied editor link opened in a second browser in /edit with editing on in 1436 to 2548 ms over six readings at loads 26.6 to 34.1, and the owner's row drew the second person's chip. The 2 s bound is not judged at those loads.
+- The trash page, File > Import slides and the template gallery: findings 2, 3, 6 and 11.
+
+## R1P.5 Findings and owners
+
+| # | Finding | Severity | Since | Owner, and the fix on `followup/round` |
+| --: | --- | --- | --- | --- |
+| 1 | Eight earlier rounds' rows read red on production again: `shaders.panel.preset-tiles`, `shaders.background.place-answers` (parked), `shaders.perf.one-context`, `shaders.panel.slider-live-undo`, `brand.background.enter-keeps-open`, `brand.objects.kit-colours-first`, `logos.tailor.find-customer-logo`, `assist.tailor.dialog-one-undo` | 3 by the verifier's rule, standing | before Round 1 | Lane D: four drivers that misread a working product (`7a3496de` for the two Tailor rows, `07628e06` for two shader rows), one product defect fixed (`f1a9aa8e`), one control not built (`8802e370`); `slider-live-undo` and `place-answers` measured and requested from the realtime and materials owners |
+| 2 | File > Import slides offers no presentation in a fresh browser | 2 | `4180d58b` (H2) | Lane A, `9c8df2f2` (the GT brand deck offered to every browser, row `slides.import.example-deck`) |
+| 3 | A test template ("Core spec", `core-spec-template-muouve9u`) in production's template gallery | 2 | before Round 1 | Lane D: removed from production by its id; `e58330d3` saves templates on localhost alone |
+| 4 | Every Blank title slide carries an invisible Mark a click selects after the first write | 2 | H6 `a73db740` | Lane B, `a16d7c91` (row `brand.template.blank-mark-not-an-object`) |
+| 5 | A Restricted deck opens View only for any browser that has its address | 2 | standing | Kevin: `authorize()` runs in shadow mode until he dates enforce (R1P.8) |
+| 6 | The Import slides tiles are slow on a fresh copy, and the tiles at the end of the list wait behind every tile scrolled past | 1 | `4180d58b` (H2 fix `b9ade6f8`) | Lane A, `2a942472` |
+| 7 | The editor's Sign in dialog is one button in a 400 by 320 box | 1 | `4180d58b` (H4) | Lane C, `87b50ed5` |
+| 8 | The animated pattern's chip reads "Shader" | 1 | standing | Lane C, `1107fb56`; the walk step follows in lane D's `63d98821` |
+| 9 | The refused page shows the store's words "deckId must be a slug." | 1 | standing | Lane C, `1f01add7` |
+| 10 | The `/deck` view at 390 draws its hint over the title | 1 | standing | Lane C, `1dc2cf67` |
+| 11 | The trash page draws boxed cards | 1 | standing | Lane C, `79c25200` |
+| 12 | The Editable text PowerPoint drops a table's and a chart's rotation | 1 | standing | Lane B, `d4082275` |
+| 13 | `arrange.clipboard.paste-keeps-position` and `chrome.toolbar.bold-follows-selection` read red from the walk's area order | 1 (the drivers) | standing | Lane D, `4cb45eda`; the product defect under it (after Cmd+V with a filmstrip card focused, Delete removes the slide) is requested from the editor's owner |
+
+`followup/round` was made from `419d3941` at 17:28Z in `/Users/kevinliu/repos/Turboslide-next` and held 21 commits at 23:52Z. Its readings are the lanes' own, on their local servers; none of it is on production.
+
+## R1P.6 Not read
+
+- `accounts.decks-list-scoped` and `accounts.google-button`: local rows, refused on a deployment.
+- `logos.index.refresh-fixture`, `logos.index.cached-offline`, `shaders.show.plays-when-on`, `shaders.show.frame-when-off`: not driven on production, as in every reading since the features round.
+- The share link's 2 s bound under a load of 24: no reading could be taken there.
+- Insert > Icon, behind Tools > Advanced tools.
+
+## R1P.7 Decks and pictures
+
+Every deck the ship step and the verifier made on production was removed by its id (deck.info, deck.trash, deck.remove) and answers deck.info 404. `gt-brand`, the stored templates and every other deployment wide record were only read. The guard's walk decks are named in its lines and answer deck.info 404.
+
+The pictures under `pictures/`, each looked at:
+
+- `g1-4180d58b-decks-1440-light.webp`: `/decks` for an anonymous visitor after H2, "No presentations yet" (group 1 still draws the old mark).
+- `g3-1c8ae0e7-home-1440-light.webp`: the B2a `/home` with the new mark, the rails and the facts rows.
+- `g4-5aaea382-no_such_page-1440-dark.webp`: Not found with three Title Case buttons and the Blue Marble with its credit.
+- `g4-5aaea382-edit_untitled_20200101_zzzz-390-light.webp`: You need access at 390.
+- `g5-ead786c3-new-390-light.webp`: the phone editor, one Menus key and the filmstrip under the sheet.
+- `g7-a3ca96da-new-1440-light.webp`: the blank slide plain after group 7.
+- `g7-a3ca96da-decks_templates-1440-light.webp`: the template gallery with the GT brand deck, the leaked "Core spec" template (finding 3) and Blank.
+- `verify-objects-light-kinds.webp`: the verifier's contact sheet of the object kinds moved, resized and rotated.
+- `verify-import.webp`: Import slides in a fresh browser (finding 2), then the GT copy's tiles and the landed slides.
+
+## R1P.8 For Kevin
+
+1. The example deck in File > Import slides (pass 2 question 1). The follow-up takes the default: the deployment's example deck is offered to every browser, after the viewer's own decks (lane A `9c8df2f2`). Production offers nothing in a fresh browser until `followup/round` ships.
+2. `authorize()` stays in shadow mode on production (`docs/security.md` 40 and 76) until Kevin dates the enforce step. A denial is logged as `authorize.deny` and the call proceeds with the legacy role, so finding 5 stands until then.
+3. Protection Bypass for Automation (NEXT.md K6) is not set, so the hosted `do` rows are read on production after each promote. The landing's table below records the holds this produced on a loaded machine.
+
+# Landing, the production table (2026-10-05)
+
+The ship of the landing redesign (`docs/LANDING.md`) from the branch `landing/ship` to `main`, its holds, the fix forward of its stylesheets, and the verifier's reading of it on production. The ship records, the fix record, the verifier's notes, the people band's record and the guard's log are the sources, and the ship notes step wrote this section on 2026-10-05. Every time is UTC on 2026-10-05. Every load is the one minute load of the shared machine, which other sessions' jobs held between 25 and 560 from 13:00Z to 23:45Z. The ledgers, the guard's files of each pass and the pictures named here are under `docs/gslides-parity/landing/verification/production/`: each JSON file under 25 KB, with share link paths written as `/s/<link>`, and 16 WebP pictures of 464,326 B in all.
+
+## LP.1 Verdict
+
+Landing 1 to 4 are on production. `https://www.turboslide.com` serves `617117e85e5c646977ade9a20df7c2a28591f6df` since 20:30:24Z (`turboslide-cr9ph0wys`), and the production Worker's `/health` answers the same commit.
+
+The ship took six pushes and eleven guard passes. The first push of landing 1 (`a21c7358`) was a regression: its unscoped `.ts-row` rules broke `/decks`'s list rows, the guard held it on the preview, and production never served it. The fix forward scoped every landing selector that named a class used outside the landing and pinned the rule with a unit test. Every later hold was a production realtime row: a network outage of this machine (landing 2), a colo check that reads the room's latest request (landing 3), and timing bounds missed at loads over 100 with nothing lost (landing 4 and the people band). Each of the first three cleared on a retry and deployed.
+
+The verifier's reading on production at `617117e8` found no severity 3 or severity 2 defect and six severity 1 defects (LP.6). Every band draws and answers its controls at 1440 and 390 in both appearances, and no landing stylesheet reaches `/decks`, the editor, its dialogs or Version history.
+
+The two people band `0d75ab90` is on `main` and not on production. The guard held it three times on production realtime timing rows, and both retries the ship rule allows for a sha were used. It is the one severity 3 finding of the ship. Production serves `617117e8`, `gt-follow.held` holds `0d75ab90` and `gt-follow.last` holds `617117e8`.
+
+## LP.2 The pushes
+
+| Push | Sha | Pushed (load) | The guard's verdict | Check on the preview | Production after the promote |
+| --- | --- | --- | --- | --- | --- |
+| Landing 1, first | `a21c7358` | 13:20:54Z (39.11) | `held a21c7358d9e94296820c7b1413dbb6711750c249: specs: decks.list.open-title failed: Error: expect(locator).toBeVisible() failed` at 13:41:09Z; not retried | smoke 42/42; walk 128 1 2 0 in 677 s; specs 8 1 0 0 in 323 s; check 1024 s; load 29.96 | never promoted |
+| Landing 1, the fix forward | `ddd5429b` | 14:26:37Z (30.39) | `deployed ddd5429b64f6182d121d4b0b0d677eeab0b28380 (exit 0)` at 14:52:14Z as `turboslide-hzyw70ucc` | smoke 42/42; walk 128 1 2 0 in 698 s; specs 9 0 0 0 in 279 s; check 1001 s; load 29.58 | smoke 42/42; realtime 2 1 0 0 in 157 s, rerun of `realtime.join.chip-within-1s` 1 0 0 0 in 32 s |
+| Landing 2, first pass | `419d3941` | 15:56:22Z | `held 419d39415a432851d1b184d9eb9f09c1088aed8f: production realtime rows red twice` at 16:43:03Z | smoke 42/42; walk 128 1 2 0 in 806 s; specs 9 0 0 0 in 365 s; check 1211 s; load 41.01 | smoke 42/42; realtime 1 2 0 0 in 361 s, rerun 0 2 0 0 in 121 s; the promote back and the Worker rollback failed for the outage, so production kept `419d3941` |
+| Landing 2, the retry | `419d3941` | `--retry` at 17:23:56Z | `deployed 419d39415a432851d1b184d9eb9f09c1088aed8f (exit 0)` at 18:01:02Z as `turboslide-msfbxoa52` | smoke 42/42; walk 128 1 2 0 in 753 s; specs 9 0 0 0 in 430 s; check 1381 s; load 436.91 | smoke 42/42; realtime 1 2 0 0 in 214 s, rerun of the caret and two typers rows 2 0 0 0 in 121 s |
+| Landing 3 | `506a697c` | 18:02:17Z (212.71) | "error for 506a697c... (attempt 1 of 3): deploy failed (exit 1): ... Error: Not authorized" at 18:04:46Z, then `held 506a697c7225f9c17581a836b5edd6bdbf6cc9e8: production realtime rows red twice` at 18:38:43Z | smoke 42/42; walk 128 1 2 0 in 771 s; specs 9 0 0 0 in 377 s; check 1179 s; load 355.64 | smoke 42/42; realtime 2 1 0 0 in 235 s, rerun 0 1 0 0 in 87 s; rolled back to `419d3941` |
+| Landing 3, the retry | `506a697c` | `--retry` at 18:44:56Z | `deployed 506a697c7225f9c17581a836b5edd6bdbf6cc9e8 (exit 0)` at 19:16:26Z as `turboslide-3qystujx7` | smoke 42/42; walk 128 1 2 0 in 782 s; specs 9 0 0 0 in 350 s; check 1175 s; load 96.07 | smoke 42/42; realtime 3 0 0 0 in 194 s |
+| Landing 4 | `617117e8` | 19:28:01Z (78.03) | `held 617117e85e5c646977ade9a20df7c2a28591f6df: production realtime rows red twice` at 19:59:46Z | smoke 42/42; walk 128 1 2 0 in 765 s; specs 9 0 0 0 in 337 s; check 1137 s; load 121.30 | smoke 42/42; realtime 2 1 0 0 in 191 s, rerun 0 1 0 0 in 84 s; rolled back to `506a697c` |
+| Landing 4, the retry | `617117e8` | `--retry` at 20:03:46Z | `deployed 617117e85e5c646977ade9a20df7c2a28591f6df (exit 0)` at 20:30:24Z as `turboslide-cr9ph0wys` | smoke 42/42; walk 128 1 2 0 in 726 s; specs 9 0 0 0 in 308 s; check 1061 s; load 119.62 | smoke 42/42; realtime 2 1 0 0 in 154 s, rerun of `realtime.join.chip-within-1s` 1 0 0 0 in 39 s |
+| The people band | `0d75ab90` | 21:48:06Z (104.45) | held at 22:20:42Z, 23:01:43Z and 23:40:16Z; `--retry` at 22:25:52Z and 23:07:32Z | each pass: smoke 42/42; walk 128 1 2 0 in 746, 798 and 797 s; specs 9 0 0 0 in 276, 329 and 293 s; loads 115.80, 143.63 and 178.25 | smoke 42/42 each time; realtime 1 2 0 0, 1 2 0 0 and 2 1 0 0; rolled back to `617117e8` each time |
+
+The walk's failed row on every pass is the standing `fonts.table.takes-family`. The guard's files of each pass are `guard/<stamp>-<sha8>-specs.json`, `-realtime.json` and `-realtime-rerun.json`.
+
+Before each push the ship step read `gt-follow.lock` absent, `gt-follow.last` on the previous deployed sha and `origin/main` an ancestor of the push. After the hold of `a21c7358`, `gt-follow.last` held `a3ca96da` while `origin/main` held `a21c7358`: that is the state a hold leaves, and the fix forward was pushed on it. No push needed a rebase. Every commit is authored by `kevin@generaltranslation.com`, and no `.storage-state.json` is in any pushed tree.
+
+## LP.3 The holds, read again
+
+| Hold | Red row and reason | Narrowed readings (load) | Judgment |
+| --- | --- | --- | --- |
+| `a21c7358` at 13:41:09Z | `decks.list.open-title`: the list row's title link hidden, 14 times in 5 s | on the held preview from the guard's checkout at 13:43:21Z (26.89 to 28.86) and 13:44:31Z (28.69 to 32.67): failed both times for the same reason (`landing-1-hold-r1.json`, `-r2.json`) | a regression of the push: it passed on `a3ca96da`'s pass. Not retried; fixed forward in `ddd5429b` |
+| `419d3941` at 16:43:03Z | `realtime.caret.within-300ms` (one move of 432 ms), `realtime.join.chip-within-1s` (`net::ERR_NETWORK_CHANGED`), then both rows `net::ERR_INTERNET_DISCONNECTED` | the orchestrator on production at 17:19:41Z, load near 100 (`landing-2-production-419d3941.json`): `decks.list.open-title`, the caret row and the join row passed; `realtime.title.two-typers` lost no word and missed 500 ms by 51 ms | a network outage of this machine. `--retry` at 17:23:56Z |
+| `506a697c` at 18:38:43Z | `realtime.join.chip-within-1s`: `net::ERR_TIMED_OUT`, then "one object across both origins", EWR against CDG | on production serving `419d3941` at 18:41:04Z (76.13 to 94.86): the colo check failed, EWR against ATL; at 18:42:57Z (102.74 to 98.51): the colo check passed, round 3 at 1090 ms against 1 s; every chip arrived (`landing-3-hold-r1.json`, `-r2.json`) | the same reason on the last deployed sha's production, and landing 3 changes no realtime file. `--retry` at 18:44:56Z |
+| `617117e8` at 19:59:46Z | `realtime.title.two-typers`: one word 546 ms, then 504 ms after its keystrokes against 500; every word in both browsers | on production serving `506a697c` at 20:00:41Z (104.81 to 203.46) and 20:02:30Z (203.46 to 155.84): passed both (`landing-4-hold-r1.json`, `-r2.json`) | a timing bound at a load over 100 with nothing lost. `--retry` at 20:03:46Z |
+| `0d75ab90` at 22:20:42Z | caret moves of 969 and 345 ms, a join chip at 1216 ms, then a caret move of 318 ms | on production serving `617117e8` at 22:21:27Z (121.93 to 112.35): both rows missed their bounds; at 22:24:06Z (110.94 to 110.17): both passed (`people-hold-1-r1.json`, `-r2.json`) | timing bounds at loads over 100 with nothing lost, missed on `617117e8` too. `--retry` at 22:25:52Z |
+| `0d75ab90` at 23:01:43Z | caret moves of 594 and 315 ms, a two typers word at 578 ms, then a caret move of 360 ms | at 23:02:03Z (142.91 to 125.93): both rows missed their bounds; at 23:05:01Z (122.25 to 154.62): the caret row passed, the two typers row missed its bound; nothing lost (`people-hold-2-r1.json`, `-r2.json`) | the same. `--retry` at 23:07:32Z, the second and last the rule allows |
+| `0d75ab90` at 23:40:16Z | caret moves of 344, 375 and 396 ms, then 324 and 312 ms | at 23:40:30Z (151.45 to 145.18): missed by 27 ms; at 23:42:17Z (145.18 to 141.32): passed (`people-hold-3-r1.json`, `-r2.json`) | the same reading, with no retry left. The hold stands |
+
+The realtime rows cannot be read on a held preview, because the preview environment keeps its forced `TURBOSLIDE_REALTIME` row (NEXT.md K6). Each narrowed realtime reading therefore ran on production serving the last deployed sha, from the guard's checkout at the held sha, where `realtime.spec.ts` is the same file.
+
+## LP.4 Readings per push
+
+Each push's rows were read on production with that push's own spec, from a scratch worktree detached at its sha.
+
+| Push | When (load) | Ledger | Result |
+| --- | --- | --- | --- |
+| Landing 1, 51 rows | 14:53:11Z to 15:06:22Z (27.14 to 37.35) | `landing-1.json` | 40 passed, 5 failed, 6 not read by the rows' own load rule |
+| Landing 1, the 5 red rows | 15:07:02Z to 15:09:58Z (35.05 to 39.47) | `landing-1-r2.json` | 1 passed (`home.page.bands-after-load`), 4 failed |
+| Landing 1, 4 rows with landing 4's spec | 15:14:04Z to 15:31:08Z (95.41 to 85.91) | `landing-1-landing-4-spec.json` | 1 passed (`home.budget.bytes-first` with the raised line), 3 failed on time bounds or the layout shift |
+| Landing 3, 6 rows | 19:17:18Z to 19:21:06Z (91.09 to 85.15) | `landing-3.json` | 5 passed; `home.hero.run` failed one check, "the loop went on after a chip on slide 5" |
+| Landing 3, `home.hero.run` | 19:21:29Z to 19:23:28Z (81.73 to 88.16) | `landing-3-r2.json` | passed |
+| Landing 4, 7 rows | 20:31:18Z to 20:35:41Z (102.63 to 102.29) | `landing-4.json` | 3 passed (`home.budget.bytes-first`, `home.budget.bytes-page`, `home.patterns.pair`), 3 failed, 1 not read |
+| Landing 4, again | 20:36:05Z to 20:45:25Z (86.47 to 296.26) | `landing-4-r2.json` to `landing-4-r4.json` | `decks.home.load-budget` red on time bounds only; `home.interludes.glyphs` red on a read before the glyph chunk lands, then not read at load 296 with every functional check passed; `home.motion.loops` passed its functional checks; `home.motion.offscreen` not read at the load, its counts passed |
+
+The landing 1 reds: `home.budget.bytes-first` read the document at 86,374 B decoded against the 80,000 B line, which landing 4 raised by LANDING.md 7 question 21. `home.hero.edit` compared the curve as written in the source with the minifier's `cubic-bezier(.65, 0, .35, 1)`, and landing 4's spec reads it. `decks.home.load-budget` read the lighthouse's still and tone map before the first scroll, the LANDING.md 4.1 against 4.2 question that landing 4 answers. `decks.home.layout-shift` read a 390 px shift of 0.3634 in two of three readings, and 44 hand loads of production `/home` at 390 read no shift of 0.001 or more.
+
+Pictures of each push's `/home`, `/decks` and the editor at 1440 and 390 in both appearances answered 200 (one landing 3 shot was taken again after a network timeout of this machine) with no page error, no console error, no answer of 400 or more and no sideways scroll. The list row on `/decks` computed `table-row` with the title link 518 by 26 px at 1440 and 202 by 26 px at 390 at `419d3941`, `506a697c` and `617117e8`.
+
+## LP.5 The verifier's reading on production
+
+From the scratch worktree on `landing/ship` at `0d75ab90`, whose specs differ from `617117e8`'s only in the people band's module and rows and two tolerant reads in `motion.ts` and `decks.spec.ts`. Production served `617117e8` for the whole reading, and the guard ran no pass. The load was 75 to 558.
+
+| Run | When (load) | Ledger | Reading |
+| --- | --- | --- | --- |
+| The 66 home and `decks.home` rows | 20:53:39Z to 21:16:30Z (171.55 to 249.33) | `verify-rows-r1.json` | 55 passed, 3 failed, 8 not read by the rows' own load rule |
+| The 3 red rows | 21:18:26Z to 21:27:44Z (402.73 to 152.73) | `verify-rows-r2.json` | 2 failed, 1 timed out |
+| The same 3 rows | 21:39:45Z to 21:43:41Z (294.20 to 99.19) | `verify-rows-r3.json` | 1 passed (`decks.home.layout-shift`), 2 failed |
+| The six presence rows of LANDING.md 2.10 | 21:26:34Z to 21:33:10Z (317.05 to 226.48) | `verify-presence-r1.json` | 5 passed; `realtime.caret.within-300ms` drew the first caret at 398 ms against 300 |
+| The same six | 21:33:34Z to 21:38:43Z (265.01 to 276.89) | `verify-presence-r2.json` | 6 passed |
+| The caret row | 21:38:54Z to 21:39:37Z (273.94 to 302.84) | `verify-presence-r3.json` | passed |
+
+The byte rows passed: the document 93,681 B decoded and 18,254 B brotli at 1440 x1, x2 and 390; the route chunk 51,562 B decoded; no picture before `load`; 6 pictures, 57,133 B, after a full scroll; the page's own script 327,456 B decoded and 110,516 B gzip; the live core with its imports 57,480 B decoded and 20,283 B gzip; the shader chunk 7,283 B gzip. `decks.home.load-budget` read red in all three readings on time bounds only (ready 674 and 604 ms against 500, long animation frames of 118 and 174 ms), with first byte 44 to 105 ms and LCP 188 to 400 ms on the h1. `home.interludes.glyphs` read red three times for one reason (finding 5).
+
+The hand drives at 1440 light, 390 light, 1440 dark and 390 dark (headless Chromium with pauses of 120 to 900 ms between actions, loads 84 to 416): the navigation, the hero's loop, step tabs, selection, drag and Undo; the numbers row; the menus band's menus and keys; the canvas band's drag, resize, rotate and nudges with five Undo presses back to the layout; Tailor, the kits and the typed colours; the agents band's chips, terminal, MCP and HTTP tabs and Version history; the scrubber and Restore; Present and its keys; Print This Deck (9 pages of 16 by 9); the export seam, the loupe and the PDF (200, 895,057 B, `application/pdf`); the patterns band; the ten interludes; the features table; the close and the footer; Pause Motion; 60 Tab stops with the focus ring; reduced motion; and `/decks`, the editor with a second browser and Sign in. No page error, console error or answer of 400 or more. Every one of the 499 landing only selectors was tested against `/decks`, the editor, the Share dialog, the second browser's editor, Version history and the Sign in dialog, and none matched.
+
+## LP.6 Findings and owners
+
+| # | Finding | Severity | Since | Owner |
+| --: | --- | --- | --- | --- |
+| 1 | The people band is held: the guard's production realtime rows read red twice on each of three passes at loads 115 to 178, timing bounds only, and the two retries are used | 3 | `0d75ab90` | the orchestrator or Kevin (a third retry); the realtime rows' owner |
+| 2 | With background graphics off, every printed page but the last carries a white strip about 0.3 in tall where the slide's paper is not white (the finish pass's P1) | 2, standing | before the ship | V3 (`print.css`, `live/print.ts`) |
+| 3 | The menus band's readout reads "x 0 · y 0" for every object on a layout slide | 1 | landing 2 | the landing's owner |
+| 4 | After Restore This Version on version 2 or 3, the show and the print draw slide 5's placeholders with "Click to add text" | 1 | landing 2 | the landing's owner |
+| 5 | Under Pause Motion stored at 390 the ten interlude canvases are blank at the core's ready and draw their exact stills within 3 s; `home.interludes.glyphs` reads them at ready | 1 | landing 4 | the landing's owner: the core can await the glyph chunk, or the row can wait for it |
+| 6 | After a hero step tab plays, slide 1's thumbnail in the frame's filmstrip draws no edge | 1 | landing 3 | the landing's owner |
+| 7 | In the dark appearance "Download the PDF" carries the light file's address until it is clicked | 1 | landing 1 | the landing's owner (`live/seam.ts` 175 to 180) |
+| 8 | The export band's Perfect side draws the GT monogram and "07 / 09" on slide 7, where the page's slides draw the Turboslide mark | 1, named for Kevin in `build/ship.md` 6 | landing 1 | the landing's owner |
+| 9 | `realtime.join.chip-within-1s` compares the colo of two `sync.status` reads, and the colo is the colo of the room's latest request | 1 (the row) | before the landing | the realtime rows' owner |
+| 10 | A chip on slide 5 did not stop the hero loop in one of two readings of `home.hero.run` at load about 90 | 1 | landing 3 | the landing's owner |
+
+## LP.7 Not read
+
+- The people band's rows `home.people.loop` and `home.people.type` on production: the band is not deployed.
+- The time parts of `home.motion.develop`, `home.motion.pause`, `home.motion.in-view`, `home.motion.rest`, `home.budget.frame`, `home.budget.main-thread`, `home.motion.loops` and `home.motion.offscreen`: not read by each row's own load rule at loads 249 to 385. Their functional checks passed.
+- Every timing row under the 20 and 24 lines of LANDING.md 4.4: the load never fell under 24 during the ship.
+
+## LP.8 Decks and pictures
+
+The guard's walk decks and every deck the ship step, the verifier and the narrowed readings made were removed by their ids and answer deck.info 404: among them the verifier's `untitled-20261005-x16e`, `-w382`, `-ue25` and `-3gni`, and the ship step's `-vf1f`, `-q7up`, `-e2gf`, `-ixc7` and `-tsgn`. The spec runs removed theirs in their teardowns with no error. No deployment wide record was written.
+
+The pictures under `pictures/`, each looked at:
+
+- `l1-hold-a21c7358-preview-decks-list-1440-light.webp`: the held preview's `/decks` list row with the landing's `.ts-row` rules, the name missing and the columns out of line.
+- `p2base-419d3941-decks-row-1440-light.webp`: the same row on production after the fix, "Ship check row" under its headers.
+- `p2l4-617117e8-home-1440-light-first.webp`, `-1440-dark-first.webp`, `-390-light-first.webp`, `-390-dark-first.webp`: the first screen at landing 4.
+- `p2l4-617117e8-home-1440-dark-slice-05.webp`: a slice of the lower page at 1440 dark.
+- `p2l4-617117e8-patterns-1440-light.webp`, `p2l4-617117e8-patterns-390-dark.webp`: the patterns band in view, the moving shader beside the exported still.
+- `p2l4-617117e8-editor-1440-light.webp`, `p2l4-617117e8-decks-row-390-light.webp`: the editor and the `/decks` row after landing 4, unchanged by the landing.
+- `verify-a-1440-light-09-interlude-menus.webp`: the menus interlude gathered.
+- `verify-b-1440-light-12-print-sheet.webp`, `verify-ps-show-version3-slide5.webp`: finding 4 in the print and the show.
+- `verify-S-pt3.webp`: finding 6, slide 1's thumbnail with no edge.
+- `verify-d-1440-light-08-decks-listed.webp`: `/decks` listing the verifier's deck.
+
+## LP.9 For Kevin
+
+1. LANDING.md 7 questions 21 to 23, decided by the orchestrator on 2026-10-04 for Kevin's picks. The document gates at 100,000 B decoded and 20,000 B brotli, and the page's own script at 360,000 B decoded and 120,000 B gzip after a full scroll. 80,000, 300,000 and 90,000 stay in LANDING.md 4.1 as Round 2's goals. `decks.home.load-budget` stays a measure row. Production read 93,681 B, 327,456 B and 110,516 B.
+2. The print strip (finding 2): the landing shipped with it.
+3. The people band: a third retry of `0d75ab90` goes past the ship rule's two retries. Production serving `617117e8` misses the same bounds at the same loads, and the band changes no realtime file. A push to `main` after `0d75ab90` carries the band with it, so the guard reads it again on that push.
+4. NEXT.md K6, Protection Bypass for Automation, is not set. Every realtime hold of this ship was read on production after a promote, so each hold moved production to the push and back. With K6 the guard reads those rows on the preview before production moves.

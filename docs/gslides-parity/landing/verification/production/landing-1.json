@@ -1,0 +1,736 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-05T14:53:11.484Z",
+  "ms": 790739,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 789932,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/c1-prod-r1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "home.page.order",
+      "home.page.markup-final",
+      "home.hero.type",
+      "home.budget.bytes-first",
+      "home.budget.bytes-page",
+      "home.budget.shared",
+      "home.budget.lcp",
+      "home.a11y.skip-and-contrast",
+      "home.hero.select",
+      "home.hero.edit",
+      "home.canvas.gestures",
+      "home.canvas.log",
+      "home.objects.keyboard",
+      "home.budget.live-module",
+      "home.tailor.apply",
+      "home.tailor.theme",
+      "home.tailor.filmstrip",
+      "home.agents.rest",
+      "home.agents.run",
+      "home.agents.typed",
+      "home.agents.transports",
+      "home.agents.history",
+      "home.agents.recorded",
+      "home.present.show",
+      "home.present.focus",
+      "home.present.print",
+      "home.export.seam",
+      "home.export.figure",
+      "home.motion.in-view",
+      "home.motion.rest",
+      "home.motion.reduced",
+      "home.motion.hidden-tab",
+      "home.budget.frame",
+      "home.budget.main-thread",
+      "home.a11y.keyboard-walk",
+      "home.page.bands-after-load",
+      "home.hero.stage",
+      "home.lead.visit",
+      "home.numbers.row",
+      "home.features.table",
+      "home.motion.pause",
+      "home.motion.develop",
+      "decks.home.new-presentation",
+      "decks.home.seller-lead",
+      "decks.home.pictures-three-widths",
+      "decks.home.copy-rules",
+      "decks.home.product-pictures",
+      "decks.home.load-budget",
+      "decks.home.layout-shift",
+      "decks.home.grammar",
+      "decks.home.capture-plain"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 51,
+  "passed": 40,
+  "failed": 5,
+  "notDriven": 6,
+  "manual": [],
+  "measured": [
+    {
+      "id": "decks.home.load-budget",
+      "result": "failed",
+      "reason": "Error: pictures before the first scroll 17541 B in 2 requests (line 0)",
+      "measures": [
+        "first byte 79 ms (line 150)",
+        "LCP 276 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 420 ms (line 500)",
+        "pictures before the first scroll 17541 B in 2 requests (line 0)",
+        "pictures after a full scroll 56525 B (line 200000)",
+        "document 86374 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1",
+        "JavaScript decoded 1286888 B (reported against 600000)",
+        "first byte 79 ms (line 150)",
+        "LCP 276 ms on h1#ts-product-h1 (line 400 cold, the h1)",
+        "ready 420 ms (line 500)",
+        "pictures before the first scroll 17541 B in 2 requests (line 0)",
+        "pictures after a full scroll 56525 B (line 200000)",
+        "document 86374 B decoded (reported against 60000 until audit item 13; gated at 80000 by home.budget.bytes-first)",
+        "long animation frames over 100 ms 1",
+        "JavaScript decoded 1286888 B (reported against 600000)"
+      ]
+    },
+    {
+      "id": "home.budget.shared",
+      "result": "passed",
+      "reason": "",
+      "measures": [
+        "shared entry chunk /assets/index-BAixOwud.js 1187408 B decoded (reported against 600000); all shared script 1242273 B",
+        "fonts 1 request(s): /assets/InterVariable-DiVDrmQJ.woff2 352240 B (reported against 120000)",
+        "shared entry chunk /assets/index-BAixOwud.js 1187408 B decoded (reported against 600000); all shared script 1242273 B",
+        "fonts 1 request(s): /assets/InterVariable-DiVDrmQJ.woff2 352240 B (reported against 120000)"
+      ]
+    },
+    {
+      "id": "home.budget.lcp",
+      "result": "passed",
+      "reason": "",
+      "measures": []
+    },
+    {
+      "id": "home.budget.frame",
+      "result": "not driven",
+      "reason": "not read: load 38.4",
+      "measures": []
+    },
+    {
+      "id": "home.budget.main-thread",
+      "result": "not driven",
+      "reason": "not read: load 38.4",
+      "measures": []
+    }
+  ],
+  "noStep": [],
+  "local": [],
+  "commit": "ddd5429b",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-05",
+  "results": {
+    "decks.home.new-presentation": "passed",
+    "decks.home.seller-lead": "passed",
+    "decks.home.pictures-three-widths": "passed",
+    "decks.home.copy-rules": "passed",
+    "decks.home.product-pictures": "passed",
+    "decks.home.load-budget": "failed",
+    "decks.home.layout-shift": "failed",
+    "decks.home.grammar": "passed",
+    "decks.home.capture-plain": "passed",
+    "home.page.order": "passed",
+    "home.page.markup-final": "passed",
+    "home.page.bands-after-load": "failed",
+    "home.hero.type": "passed",
+    "home.hero.stage": "passed",
+    "home.lead.visit": "passed",
+    "home.numbers.row": "passed",
+    "home.features.table": "passed",
+    "home.budget.bytes-first": "failed",
+    "home.budget.bytes-page": "passed",
+    "home.budget.live-module": "passed",
+    "home.budget.shared": "passed",
+    "home.budget.lcp": "passed",
+    "home.a11y.skip-and-contrast": "passed",
+    "home.hero.select": "passed",
+    "home.hero.edit": "failed",
+    "home.canvas.gestures": "passed",
+    "home.canvas.log": "passed",
+    "home.objects.keyboard": "passed",
+    "home.tailor.apply": "passed",
+    "home.tailor.theme": "passed",
+    "home.tailor.filmstrip": "passed",
+    "home.agents.rest": "passed",
+    "home.agents.run": "passed",
+    "home.agents.typed": "passed",
+    "home.agents.transports": "passed",
+    "home.agents.history": "passed",
+    "home.agents.recorded": "passed",
+    "home.present.show": "passed",
+    "home.present.focus": "passed",
+    "home.present.print": "passed",
+    "home.export.seam": "passed",
+    "home.export.figure": "passed",
+    "home.motion.develop": "not driven",
+    "home.motion.pause": "not driven",
+    "home.motion.in-view": "not driven",
+    "home.motion.rest": "not driven",
+    "home.motion.reduced": "passed",
+    "home.motion.hidden-tab": "passed",
+    "home.budget.frame": "not driven",
+    "home.budget.main-thread": "not driven",
+    "home.a11y.keyboard-walk": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.home.layout-shift",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.budget.bytes-first",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.hero.edit",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.motion.in-view",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "home.motion.rest",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "home.page.bands-after-load",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.motion.pause",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "home.motion.develop",
+        "feature": "decks",
+        "result": "not driven"
+      }
+    ],
+    "measured": [
+      {
+        "id": "decks.home.load-budget",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "home.budget.frame",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "home.budget.main-thread",
+        "feature": "decks",
+        "result": "not driven"
+      }
+    ],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.motion.in-view",
+      "feature": "decks",
+      "result": "not driven"
+    },
+    {
+      "id": "home.motion.rest",
+      "feature": "decks",
+      "result": "not driven"
+    },
+    {
+      "id": "home.page.bands-after-load",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "result": "not driven"
+    },
+    {
+      "id": "home.motion.develop",
+      "feature": "decks",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.home.new-presentation",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.seller-lead",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.pictures-three-widths",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.copy-rules",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.product-pictures",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.load-budget",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: pictures before the first scroll 17541 B in 2 requests (line 0)"
+    },
+    {
+      "id": "decks.home.layout-shift",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "decks.home.grammar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.home.capture-plain",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.order",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.markup-final",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.type",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.bytes-first",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.budget.bytes-page",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.shared",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.lcp",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.a11y.skip-and-contrast",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.select",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.edit",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m"
+    },
+    {
+      "id": "home.canvas.gestures",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.canvas.log",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.objects.keyboard",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.live-module",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.tailor.apply",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.tailor.theme",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.tailor.filmstrip",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.rest",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.run",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.typed",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.transports",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.history",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.agents.recorded",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.show",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.focus",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.present.print",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.seam",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.export.figure",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.in-view",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 50.9 (the functional checks passed)"
+    },
+    {
+      "id": "home.motion.rest",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 40.4 (the counts passed)"
+    },
+    {
+      "id": "home.motion.reduced",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.hidden-tab",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.budget.frame",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not read: load 38.4"
+    },
+    {
+      "id": "home.budget.main-thread",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not read: load 38.4"
+    },
+    {
+      "id": "home.a11y.keyboard-walk",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.page.bands-after-load",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "home.hero.stage",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.lead.visit",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.numbers.row",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.features.table",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 54.7 (the functional checks passed)"
+    },
+    {
+      "id": "home.motion.develop",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 38.7 (the functional checks passed)"
+    }
+  ]
+}

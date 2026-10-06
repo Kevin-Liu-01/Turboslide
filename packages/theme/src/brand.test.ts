@@ -449,14 +449,16 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
       'plate',
       'edge',
     ] as const) {
-      /* the chrome's light titanium reads #6f747d since the product round (docs/archive/rounds/PRODUCT.md 3.1:
-         4.7 to 1 on paper for the save words, the menu keys and the filmstrip numbers); the
-         sheet's titanium of tokens.ts is the deck grammar's and stays */
-      if (name === 'titanium') expect(light[`pt-${name}`]).toBe('#6f747d');
+      /* the chrome's titanium is solved since the design round (docs/DESIGN.md 5.2, DR-D1#2;
+         scripts/build-colors.ts): 4.5 to 1 on the paper and on the hover ground in light, where
+         the product round's #6f747d read 4.12 to 1 on a hovered menu row, and lifted to APCA Lc 45
+         in dark (question 11); the sheet's titanium of tokens.ts is the deck grammar's and stays */
+      if (name === 'titanium') expect(light[`pt-${name}`]).toBe('#686d76');
       else if (name === 'plate') expect(light[`pt-${name}`]).toBe('rgba(7, 7, 7, 0.06)');
       else expect(light[`pt-${name}`]).toBe(TOKENS.light[name]);
       /* the hover ground reads a step darker in both appearances since the product round (3.1) */
       if (name === 'plate') expect(dark[`pt-${name}`]).toBe('rgba(242, 242, 240, 0.08)');
+      else if (name === 'titanium') expect(dark[`pt-${name}`]).toBe('#91969f');
       else expect(dark[`pt-${name}`]).toBe(TOKENS.dark[name]);
     }
     /* the dark remap gains exactly the names below and nothing else that is not a colour of
@@ -472,6 +474,8 @@ describe('the selection colour (the orchestrator’s ruling 1; Kevin’s directi
       'pt-hair-on-ink',
       'pt-plate-on-ink',
       'pt-plate-on-ink-open',
+      /* the dark scrim of the design round (docs/DESIGN.md 5.2, DR-D1#2): black at 0.56 */
+      'pt-scrim',
       /* the status hues per theme (docs/NEXT.md 4.1.3 item 14; Round 1 push B3b#10) */
       'pt-status-done',
       'pt-status-open',

@@ -1,10 +1,12 @@
 // The sheet's colors as numbers, for the rendered rules that read pixels (contrast/both-themes,
 // lines/law, layout/empty-half; SPEC 7.7). The values are the nine tokens of
 // packages/theme/src/tokens.ts (TOKENS) and their composites on paper (COMPOSITE), duplicated
-// here because @turboslide/lint depends on schema and render only (SPEC 3.3 item 3); a change to a
+// here (the lint read no theme module before the design round, SPEC 3.3 item 3); a change to a
 // token is made there and here together, and palette.test.ts pins the composites this file
-// computes against the theme's recorded COMPOSITE values.
+// computes against the theme's recorded COMPOSITE values. The contrast arithmetic is
+// @turboslide/theme/contrast's since the design round (docs/DESIGN.md 5.4).
 import type { Theme } from '@turboslide/schema/render';
+import { contrastRatio as wcagRatio, relativeLuminance } from '@turboslide/theme/contrast';
 
 export type Rgb = [number, number, number];
 export type Rgba = { rgb: Rgb; alpha: number };
@@ -87,21 +89,17 @@ export function channelDistance(a: Rgb, b: Rgb): number {
   return Math.max(Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1]), Math.abs(a[2] - b[2]));
 }
 
-/** WCAG 2 relative luminance of an sRGB color. */
+/**
+ * WCAG 2 relative luminance of an sRGB color: the one function of @turboslide/theme/contrast
+ * (docs/DESIGN.md 5.4), which replaced this file's own copy in the design round.
+ */
 export function luminance(rgb: Rgb): number {
-  const lin = (c: number): number => {
-    const s = c / 255;
-    return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * lin(rgb[0]) + 0.7152 * lin(rgb[1]) + 0.0722 * lin(rgb[2]);
+  return relativeLuminance({ r: rgb[0], g: rgb[1], b: rgb[2], a: 1 });
 }
 
-/** WCAG 2 contrast ratio, 1 to 21. */
+/** WCAG 2 contrast ratio, 1 to 21 (@turboslide/theme/contrast). */
 export function contrastRatio(a: Rgb, b: Rgb): number {
-  const la = luminance(a);
-  const lb = luminance(b);
-  const [hi, lo] = la >= lb ? [la, lb] : [lb, la];
-  return (hi + 0.05) / (lo + 0.05);
+  return wcagRatio({ r: a[0], g: a[1], b: a[2], a: 1 }, { r: b[0], g: b[1], b: b[2], a: 1 });
 }
 
 export type LineRole =

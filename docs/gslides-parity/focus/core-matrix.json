@@ -9977,7 +9977,7 @@
       "evidence": "audit-auth 40 to 41, 67",
       "note": "docs/NEXT.md 3.2 H3 and 4.3.3: local row; not driven today by the matrix rule for local rows (production holds no account; NEXT.md 4.3.3 reads it broken from audit-auth 40 to 41); the menu row runs EditorAccount.signOut(), whose account.signOut ends this browser session and mints a fresh anonymous cookie in the same answer; the revocation bound is A1b accounts.revoke-within-5s"
       },
-      {
+    {
       "id": "accounts.decks-list-scoped",
       "feature": "share",
       "interaction": "A signed in person's `/decks` and `deck.list` list the presentations they own and the ones shared with them, and no other",
@@ -10690,6 +10690,16 @@
       "severity": 2,
       "evidence": "b-strip-people-typing.png",
       "note": "docs/LANDING.md 6.7 (second pass), V4#20"
+    },
+    {
+      "id": "chrome.colors.pairs-at-floor",
+      "feature": "chrome",
+      "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row read from the drawn elements included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-type 3.1: the menu key on a hovered row 4.12:1, the scrollbar thumb 2.17:1 light and 2.58:1 dark",
+      "note": "Design round (docs/DESIGN.md 11), DR-D1#2; the generated block of tokens.css (scripts/build-colors.ts) and colors.test.ts hold the same pairs in the unit tests"
     },
     {
       "id": "accounts.sign-in-fits",

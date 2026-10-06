@@ -19,6 +19,7 @@ import {
   teardownAll,
   title,
 } from './lib';
+import { chromeFoundation } from './chrome-foundation';
 import { chromeMenus } from './chrome-menus';
 import { chromePages } from './chrome-pages';
 import { chromeRound1 } from './chrome-round1';
@@ -575,7 +576,11 @@ const PAGE_ROWS = chromePages();
 /* lane B3b of Round 1 (docs/NEXT.md 4.1.3 items 13 to 18): its rows live in chrome-round1.ts */
 const ROUND1_ROWS = chromeRound1();
 
+/* lane D1 of the design round (docs/DESIGN.md 10.1, 11): its rows live in chrome-foundation.ts */
+const FOUNDATION_ROWS = chromeFoundation();
+
 coverage(import.meta.filename, [
+  ...FOUNDATION_ROWS,
   ...ROUND1_ROWS,
   ...PAGE_ROWS,
   ...MENU_ROWS,

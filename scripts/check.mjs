@@ -52,6 +52,8 @@
 // twins by bytes, the card, the two build records and facts.json against the tree; it launches
 // Chrome for Testing once for the card compare when chromium-1217 is present and prints why it
 // skips the compare otherwise, build-4/b1.md R13; Round 1's B1#2 retired the outline step), then
+// `node scripts/build-colors.ts --check` (the colour block of tokens.css and colors.generated.ts
+// against a fresh colorjs.io run over palette.ts, docs/DESIGN.md 5.4), then
 // `node scripts/build-home-assets.ts --check` (the /home screenshots and facts-data.ts against
 // facts.json, b2.md R2), `node packages/schema/scripts/build-definitions.mjs --check` (the shape
 // table as one compact string and ids.ts, b4.md R3) and `node packages/native/scripts/check-record.mjs`
@@ -149,6 +151,8 @@ const PREVIEW_PORT = '4344';
 const BUILD_BRAND = 'scripts/build-brand.ts';
 const BUILD_HOME_ASSETS = 'scripts/build-home-assets.ts';
 const BUILD_DEFINITIONS = 'packages/schema/scripts/build-definitions.mjs';
+/* the design round (docs/DESIGN.md 5.4, DR-D1#2): the chrome's colour block and colors.generated.ts */
+const BUILD_COLORS = 'scripts/build-colors.ts';
 const NATIVE_RECORD_CHECK = 'packages/native/scripts/check-record.mjs';
 const CLIENT_BUNDLE_CHECK = 'scripts/check-client-bundle.mjs';
 // the node-server build's client output, where its documents' preloaded chunks live (SPEC-4 3.12)
@@ -428,7 +432,7 @@ const steps = [
   // build, the /home assets, the shape table, the native record), the Vercel output check after
   // a Vercel build, the perf budget against the node-server build
   {
-    cmd: `node ${BUILD_BRAND} --check && node ${BUILD_HOME_ASSETS} --check && node ${BUILD_DEFINITIONS} --check && node ${NATIVE_RECORD_CHECK}`,
+    cmd: `node ${BUILD_BRAND} --check && node ${BUILD_COLORS} --check && node ${BUILD_HOME_ASSETS} --check && node ${BUILD_DEFINITIONS} --check && node ${NATIVE_RECORD_CHECK}`,
     needs: 'brand',
   },
   {

@@ -397,7 +397,7 @@ export type SheetLayout = {
   unfree(): void;
   /** draws a pose on the object; with no pose, its rest */
   draw(it: LayoutItem, p: SheetBox | undefined): void;
-  /** the store's pose, else the box at rest, else a zero box */
+  /** the store's pose, else the box at rest, else the box the slide's layout draws it in */
   pose(it: LayoutItem, state: HomeDeckState): SheetBox;
   /** the offset the object's ancestors' moves add, in units */
   offset(it: LayoutItem, state: HomeDeckState): { x: number; y: number; rot: number };
@@ -408,6 +408,21 @@ export type SheetLayout = {
 };
 
 const layouts = new WeakMap<HTMLElement, SheetLayout>();
+
+/**
+ * An object's box in units from its drawn rectangle and its sheet's, at `k` screen pixels per unit:
+ * the rest a freeing records, and the place a layout slide draws an object in before any freeing
+ * (the menus band's readout, 2.5).
+ */
+export function boxIn(sheet: DOMRectReadOnly, r: DOMRectReadOnly, k: number): SheetBox {
+  return {
+    x: (r.left - sheet.left) / k,
+    y: (r.top - sheet.top) / k,
+    w: r.width / k,
+    h: r.height / k,
+    rot: 0,
+  };
+}
 
 /** True when the slide draws a dithered picture: a moved text box draws its paper there. */
 const dithered = (root: HTMLElement): boolean =>
@@ -480,9 +495,9 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
     // the style the build wrote travels with the element, so a copy of a drawn slide can be put
     // back (`heal`) before it is drawn again
     it.el.dataset['liveCss'] = it.css;
-    const w = r.width / k;
-    const h = r.height / k;
-    it.rest = { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w, h, rot: 0 };
+    const rest = boxIn(sr, r, k);
+    const { w, h } = rest;
+    it.rest = rest;
     if (cs.position === 'absolute' || cs.position === 'fixed') return;
     // a child's margin that collapses through the wrapper in the flow (the hero's title carries
     // its slot's margin-top) would sit inside the freed box: the spacer takes it, the child drops it
@@ -624,7 +639,15 @@ export function sheetLayout(root: HTMLElement): SheetLayout {
       if (Math.abs(p.h - it.rest.h) > 0.01) st.minHeight = `${round(p.h)}px`;
       else st.removeProperty('min-height');
     },
-    pose: (it, state) => state.poses[it.id] ?? it.rest ?? { x: 0, y: 0, w: 0, h: 0, rot: 0 },
+    pose(it, state) {
+      const posed = state.poses[it.id] ?? it.rest;
+      if (posed !== null) return posed;
+      // a layout slide holds no rest until its first freeing: the place its layout draws the object
+      // in, so the readout of an object at rest reads where it stands, never x 0 and y 0
+      const sr = root.getBoundingClientRect();
+      if (sr.width === 0) return { x: 0, y: 0, w: 0, h: 0, rot: 0 };
+      return boxIn(sr, it.el.getBoundingClientRect(), sr.width / UNITS);
+    },
     offset(it, state) {
       let x = 0;
       let y = 0;

@@ -10720,6 +10720,16 @@
       "severity": 1,
       "evidence": "verify-r1.md finding 11; Round 1 pass 2 P2-2 (production 2026-10-05: trash-trash-listed-*.jpg, a framed card with framed Restore and Delete forever)",
       "note": "Round 1 follow-up, lane C item 5: apps/studio/src/routes/decks.trash.tsx TrashRow on the page grammar (.ts-decks-page), decks.css; the data-control ids stay (trash.card.<id> is the row)"
+    },
+    {
+      "id": "home.menus.readout",
+      "feature": "decks",
+      "interaction": "At 1440 with slide 2 at rest (a layout slide, no pose), a click on the heading reads the status row's readout \"Heading · x <x> · y <y> · 0°\" with x and y the heading's drawn place in units, never x 0 and y 0, and the read frees nothing; Insert > Shape > Rectangle on the layout slide reads the inserted box's place; after an arrow nudge the readout reads the store's pose",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "verify-landing.md finding 1 (production 2026-10-05: \"Heading · x 0 · y 0 · 0°\" for slide 2's heading at rest, \"Shape · x 0 · y 0 · 0°\" for a rectangle at left 680, top 370; probe-readout.mjs)",
+      "note": "Round 1 follow-up, lane E item 1: a layout slide holds no rest until its first freeing, so sheetLayout's pose (apps/studio/src/components/home/live/paint.ts) reads the place the layout draws the object in (boxIn), where it read a zero box; live/pose.test.ts pins it"
     }
   ]
 }

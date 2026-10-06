@@ -1677,6 +1677,10 @@ const LANDING_SECOND = [
   'home.people.loop',
   'home.people.type',
 ];
+/* the Round 1 follow-up's lane E rows (verify-landing.md findings 1 to 6, read on production
+   2026-10-05), in the order lane E enters them; each note reads "Round 1 follow-up, lane E item <n>" */
+const LANDING_FOLLOWUP = ['home.menus.readout'];
+const FOLLOWUP_NOTE = /^Round 1 follow-up, lane E item \d/;
 /* a first pass id and the second pass row that replaces it (LANDING.md 6.7) */
 const RETIRED = {
   'home.parts.table': 'home.features.table',
@@ -1703,7 +1707,7 @@ describe('the landing round', () => {
     expect(specPathOf('core/home.spec.ts')).toBe('apps/studio/e2e/core/home.spec.ts');
     expect(rowsForDriver('home.spec.ts')).toEqual(rowsForDriver('core/home.spec.ts'));
     expect(LANDING_FIRST.length).toBe(37);
-    const all = [...LANDING_FIRST, ...LANDING_SECOND];
+    const all = [...LANDING_FIRST, ...LANDING_SECOND, ...LANDING_FOLLOWUP];
     expect(new Set(all).size).toBe(all.length);
     for (const [old, next] of Object.entries(RETIRED)) {
       expect(LANDING_FIRST).toContain(old);
@@ -1720,14 +1724,18 @@ describe('the landing round', () => {
     const second = LANDING_SECOND.filter((id) => ids.has(id));
     expect(second).toEqual(LANDING_SECOND.slice(0, second.length));
     const firstKept = LANDING_FIRST.filter((id) => !(id in RETIRED && ids.has(RETIRED[id])));
-    expect([...home].sort()).toEqual([...firstKept, ...second].sort());
-    expect(home.length).toBe(firstKept.length + second.length);
+    /* the follow-up's rows entered are a prefix of lane E's order, as the second pass's are */
+    const followup = LANDING_FOLLOWUP.filter((id) => ids.has(id));
+    expect(followup).toEqual(LANDING_FOLLOWUP.slice(0, followup.length));
+    expect([...home].sort()).toEqual([...firstKept, ...second, ...followup].sort());
+    expect(home.length).toBe(firstKept.length + second.length + followup.length);
     expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(home);
     for (const row of CORE_MATRIX.filter((candidate) => areaOf(candidate.id) === 'home')) {
       expect(row.feature, row.id).toBe('decks');
       expect(row.driver, row.id).toBe('core/home.spec.ts');
       expect(isCoreId(row.id), row.id).toBe(true);
       if (LANDING_SECOND.includes(row.id)) expect(row.note, row.id).toMatch(SECOND_NOTE);
+      else if (LANDING_FOLLOWUP.includes(row.id)) expect(row.note, row.id).toMatch(FOLLOWUP_NOTE);
       else
         expect(row.note, row.id).toMatch(new RegExp(`${FIRST_NOTE.source}|${SECOND_NOTE.source}`));
       if (LANDING_MEASURE.includes(row.id)) {

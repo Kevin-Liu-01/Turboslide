@@ -18,7 +18,7 @@ import { bandReady, openHome } from './objects';
 // is through the page (the page deck's state through `window.tsHomeStore`, read only); /home
 // writes no store.
 
-export const ROWS: readonly string[] = ['home.menus.bar', 'home.menus.rows'];
+export const ROWS: readonly string[] = ['home.menus.bar', 'home.menus.rows', 'home.menus.readout'];
 
 /** A change shows within this long of its press (6.7 home.menus.rows), read at a load under 24. */
 const CHANGE_BOUND_MS = 300;
@@ -604,6 +604,62 @@ export function rows(): void {
           page.locator('[data-band="kits"] [data-kit-grid] [data-inserted="text"]').first(),
         ).toBeVisible();
       }
+    } finally {
+      await context.close();
+    }
+  });
+
+  test(title('home.menus.readout'), async ({ browser }) => {
+    test.setTimeout(240_000);
+    const { context, page } = await openHome(browser);
+    try {
+      await bandReady(page, 'menus');
+      expect(await stageSlide(page)).toBe('plan');
+      const readout = band(page).locator('[data-mini-readout]');
+      /** an object's drawn place in units of its sheet (1,600 across) */
+      const placed = (selector: string): Promise<{ x: number; y: number }> =>
+        page.evaluate((sel) => {
+          const el = document.querySelector<HTMLElement>(sel);
+          const sheet = el?.closest<HTMLElement>('[data-home-slides]');
+          if (el === null || el === undefined || sheet === null || sheet === undefined)
+            throw new Error(`no ${sel}`);
+          const r = el.getBoundingClientRect();
+          const sr = sheet.getBoundingClientRect();
+          const k = sr.width / 1600;
+          return { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k };
+        }, selector);
+
+      // slide 2 at rest is a layout slide: no pose, and its heading reads where the layout draws it
+      expect(Object.keys((await deck(page)).poses)).toEqual([]);
+      const heading = '[data-band="menus"] [data-mini-stage] [data-object="plan#h"]';
+      await page.locator(heading).click();
+      const h = await placed(heading);
+      expect(h.x, 'the heading stands right of the sheet edge').toBeGreaterThan(100);
+      expect(h.y, 'the heading stands under the sheet top').toBeGreaterThan(100);
+      await expect(readout).toHaveText(MENUS.readout('Heading', h.x, h.y, 0));
+      expect(Object.keys((await deck(page)).poses), 'reading the place frees nothing').toEqual([]);
+
+      // Insert > Shape > Rectangle on the layout slide: the readout reads the inserted box's place
+      await page.keyboard.press('Escape');
+      await openPath(page, ['Insert', 'Shape', 'Rectangle'], true);
+      const rect = band(page).locator('[data-mini-stage] [data-inserted="rect"]');
+      await expect(rect).toHaveCount(1);
+      const at = await rect.evaluate((el) => ({
+        x: parseFloat((el as HTMLElement).style.left),
+        y: parseFloat((el as HTMLElement).style.top),
+      }));
+      expect(at.x).toBeGreaterThan(0);
+      await expect(readout).toHaveText(MENUS.readout('Shape', at.x, at.y, 0));
+      expect(Object.keys((await deck(page)).poses)).toEqual([]);
+
+      // a move turns the slide into a canvas, and the readout follows the store's pose
+      await page.keyboard.press('Escape');
+      await page.locator(heading).click();
+      await page.keyboard.press('ArrowRight');
+      await expect.poll(async () => (await deck(page)).poses['plan#h']?.x).toBeDefined();
+      const pose = (await deck(page)).poses['plan#h'];
+      expect(pose?.x ?? 0).toBeCloseTo(h.x + 1, 0);
+      await expect(readout).toHaveText(MENUS.readout('Heading', pose?.x ?? 0, pose?.y ?? 0, 0));
     } finally {
       await context.close();
     }

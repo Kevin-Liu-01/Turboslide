@@ -14,7 +14,7 @@ import {
   ALTERNATES_OWNERS,
   CODE_SURFACES,
   CSS_RULES,
-  NUMERALS_OWNER,
+  NUMERALS_OWNERS,
   RADIUS_EXCEPTIONS,
   SCROLLBAR_OWNERS,
   Z_INDEX,
@@ -368,7 +368,7 @@ export function lintCss(
     }
     if (
       on('css/numerals') &&
-      file !== NUMERALS_OWNER &&
+      !isOwnedBy(file, NUMERALS_OWNERS) &&
       (property === 'font-variant-numeric' || property === 'font-feature-settings') &&
       hasTabularLiteral(value)
     )

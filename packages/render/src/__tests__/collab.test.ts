@@ -84,7 +84,7 @@ describe('the collaborator layer', () => {
     expect(marker.position).toBe('absolute');
     const count = declarations(css, `.${COLLAB_CLASSES.commentCount}`);
     expect(count['min-width']).toBe(`var(${COLLAB_TOKENS.countMinWidth})`);
-    expect(count['font-variant-numeric']).toBe('tabular-nums');
+    expect(count['font-variant-numeric']).toBe('var(--pt-numerals)');
     expect(declarations(css, `.${COLLAB_CLASSES.remoteOutline}`).position).toBe('absolute');
     expect(css).toMatch(
       /prefers-reduced-motion: reduce\)\s*\{\s*\.ts-remote-pointer\s*\{\s*transition: none;/,

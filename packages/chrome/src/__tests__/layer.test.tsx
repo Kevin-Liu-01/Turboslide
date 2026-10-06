@@ -171,6 +171,29 @@ describe('the top layer in the scale order', () => {
     expect(document.activeElement).toBe(field);
   });
 
+  it('shows the open surfaces again in their order over an element that enters full screen', () => {
+    const bar = surface('bar');
+    const show = surface('show');
+    const menu = surface('menu');
+    openLayer(bar, 'bar');
+    openLayer(show, 'show');
+    openLayer(menu, 'popover');
+    /* the document's root enters full screen: the browser puts it on top of the top layer */
+    const root = surface('root');
+    topLayer.push(root);
+    calls = [];
+    document.dispatchEvent(new Event('fullscreenchange'));
+    expect(calls).toEqual([
+      'hide menu',
+      'hide show',
+      'hide bar',
+      'show bar',
+      'show show',
+      'show menu',
+    ]);
+    expect(topLayer.map((el) => el.id)).toEqual(['root', 'bar', 'show', 'menu']);
+  });
+
   it('drops a surface whose element left the document', () => {
     const menu = surface('menu');
     openLayer(menu, 'popover');

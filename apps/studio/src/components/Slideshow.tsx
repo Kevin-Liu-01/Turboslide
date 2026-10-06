@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Icon } from '@turboslide/chrome/icons';
+import { useLayer } from '@turboslide/chrome/Layer';
 import {
   SETTINGS_STORAGE,
   readStoredSettings,
@@ -259,6 +260,10 @@ export function Slideshow({
   const snackbar = useSnackbar();
 
   const root = useRef<HTMLDivElement>(null);
+  /* the show takes the show layer of the top layer (docs/DESIGN.md 2.2, 2.3): over the editor's
+     docked surfaces and the name prompt bar, which are in the top layer since DR-D2#1, and under
+     every dialog, menu, toast and tooltip; its two viewer surfaces take the hook below */
+  useLayer(root, { layer: 'show' });
   const barHover = useRef(false);
   const barTimer = useRef(0);
   const digits = useRef('');
@@ -662,6 +667,7 @@ export function Slideshow({
           index={index}
           theme={theme}
           placement="up"
+          layer={useLayer}
           onSelect={(to) => {
             closePopover(listAnchor.current);
             goto(to);
@@ -690,6 +696,7 @@ export function Slideshow({
       {popover === 'shortcuts' ? (
         <PresentShortcuts
           platform={platform}
+          layer={useLayer}
           onClose={() => closePopover(optionsAnchor)}
           icons={ICONS}
           tip={tip}

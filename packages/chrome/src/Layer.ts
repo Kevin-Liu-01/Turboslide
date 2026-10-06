@@ -72,6 +72,37 @@ function byScale(a: LayerEntry, b: LayerEntry): number {
   return LAYERS[a.layer] - LAYERS[b.layer] || a.opened - b.opened;
 }
 
+/** Puts focus back on the element that held it before a reorder, when the reorder moved it. */
+function keepFocus(focused: Element | null): void {
+  if (focused instanceof HTMLElement && focused.isConnected && document.activeElement !== focused)
+    focused.focus({ preventScroll: true });
+}
+
+/**
+ * Shows every open surface again in the scale's order. A full screen element enters the top layer
+ * above every surface already in it: the show asks for full screen on the document's root as it
+ * opens (`requestPresentFullscreen`), and the root then covered the show's own layer, its toolbar
+ * and an open menu (read in Chromium: `elementFromPoint` over the toolbar answered the stage until
+ * the toolbar was shown again). Run on every `fullscreenchange`, so the open surfaces sit above
+ * the full screen element in their order, and again in their order when it leaves.
+ */
+function raiseOpen(): void {
+  open = open.filter((entry) => entry.element.isConnected);
+  if (open.length === 0) return;
+  const focused = document.activeElement;
+  for (const each of [...open].reverse()) hide(each.element);
+  for (const each of open) show(each.element);
+  keepFocus(focused);
+}
+
+let watchingFullscreen = false;
+
+function watchFullscreen(): void {
+  if (watchingFullscreen || typeof document === 'undefined') return;
+  watchingFullscreen = true;
+  document.addEventListener('fullscreenchange', raiseOpen);
+}
+
 /**
  * Opens a surface at a layer: writes `data-layer` and the scale's z-index, puts it in the top
  * layer above every open surface of its layer and below every open surface of a higher one, and
@@ -87,14 +118,14 @@ export function openLayer(element: HTMLElement, layer: LayerName): void {
   const below = open.filter((each) => LAYERS[each.layer] <= LAYERS[layer]);
   open = [...below, entry, ...above];
   if (!topLayerSupported(element) || !element.isConnected) return;
+  watchFullscreen();
   const focused = typeof document === 'undefined' ? null : document.activeElement;
   for (const each of [...above].reverse()) hide(each.element);
   hide(element);
   show(element);
   for (const each of above) show(each.element);
   /* hiding a surface that held focus may move focus; the reorder must not */
-  if (focused instanceof HTMLElement && focused.isConnected && document.activeElement !== focused)
-    focused.focus({ preventScroll: true });
+  keepFocus(focused);
 }
 
 /**

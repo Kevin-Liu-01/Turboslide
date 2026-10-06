@@ -136,8 +136,15 @@ export const SCROLLBAR_OWNERS: readonly string[] = [
   'packages/viewer/standalone/chrome.ts',
 ];
 
-/** The file that declares --pt-numerals and .pt-num (docs/DESIGN.md 4.5). */
-export const NUMERALS_OWNER = 'packages/chrome/src/tokens.css';
+/**
+ * The files that declare the numerals token (docs/DESIGN.md 4.5): tokens.css with --pt-numerals
+ * and .pt-num, and the standalone deck's copy, which declares its own --numerals once in its
+ * :root and reads it in its rules, as it owns its scrollbar copy (build/d5.md request 2).
+ */
+export const NUMERALS_OWNERS: readonly string[] = [
+  'packages/chrome/src/tokens.css',
+  'packages/viewer/standalone/chrome.ts',
+];
 
 /**
  * Where General Translation's alternates may be written (docs/DESIGN.md 4.2): the General
@@ -539,14 +546,6 @@ export const ACCEPTED: readonly Acceptance[] = [
     match: '.ts-report-residual',
     reason:
       'The residual list of the export report is set in monospace. From before Round 1, outside every item; build/b5.md request 6.',
-    owner: 'the integrator',
-  },
-  {
-    rule: 'css/no-eyebrow',
-    file: 'packages/viewer/src/present/PresentShortcuts.css',
-    match: '.ts-present-card h3',
-    reason:
-      'The headings of the presenter shortcut card are uppercase with 0.06 em tracking. From before Round 1, outside every item; build/b5.md request 6.',
     owner: 'the integrator',
   },
   {

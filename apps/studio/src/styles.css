@@ -36,7 +36,6 @@ body {
 .ts-word-chip {
   flex: 0 0 auto;
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 11px;
   line-height: 16px;
@@ -62,7 +61,6 @@ body {
 .ts-home-head h1,
 .ts-home > h1 {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 28px;
   line-height: 1.1;
@@ -104,7 +102,6 @@ body {
 
 .ts-deck-row b {
   font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
   font-size: 15px;
   letter-spacing: -0.01em;
@@ -123,7 +120,7 @@ body {
   grid-column: 1 / -1;
   font-size: 12.5px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-deck-row:hover b {
@@ -141,7 +138,7 @@ body {
   margin-top: 32px;
   font-size: 12px;
   color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 /* ---- the collaborator layer (gslides-parity SPEC-3 4.4, 9.3; research-3 11 sections 6 and 8).
@@ -215,7 +212,7 @@ body {
   box-sizing: border-box;
   min-width: var(--ts-count-min-w);
   height: 16px;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
   text-align: center;
 }
 /* the presence slot of the title row (11 6.2, 05 rule 4): 184 px reserved from first paint whether
@@ -330,7 +327,7 @@ body {
   font-size: 12px;
   line-height: 16px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: var(--pt-numerals);
 }
 
 .ts-skeleton .ts-skeleton-frame {

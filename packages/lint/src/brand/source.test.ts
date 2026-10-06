@@ -194,6 +194,12 @@ describe('the thirteen gt-ui rules over the TypeScript syntax tree (P:.oxlintrc.
       'css/numerals',
     ]);
     expect(rulesOf("const numerals = 'tabular';")).toEqual([]);
+    expect(
+      lintSource(
+        'packages/viewer/standalone/chrome.ts',
+        "const css = ':root { --numerals: tabular-nums; } .n { font-variant-numeric: var(--numerals); }';",
+      ),
+    ).toEqual([]);
     expect(rulesOf("const a = { fontFeatureSettings: \"'cv11', 'ss01'\" };")).toEqual([
       'css/chrome-alternates',
     ]);

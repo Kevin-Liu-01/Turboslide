@@ -39,12 +39,11 @@
   letter-spacing: -0.01em;
 }
 
+/* the group headings in sentence case, as the editor's Keyboard shortcuts dialog draws them
+   (ShortcutsDialog.css .ts-shortcuts-group h3), where they were capitals with tracking */
 .ts-present-card h3 {
   margin: 18px 0 8px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font: 500 12px/1 var(--pt-text);
   color: var(--pt-titanium);
 }
 

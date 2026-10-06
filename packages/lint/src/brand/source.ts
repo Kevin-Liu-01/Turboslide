@@ -17,7 +17,7 @@ import {
   ALTERNATES_OWNERS,
   BUTTON_ELEMENTS,
   BUTTON_LABEL_PROPS,
-  NUMERALS_OWNER,
+  NUMERALS_OWNERS,
   RADIUS_VALUES,
   RAIL_WRAPPER_CLASSES,
   SCROLLBAR_OWNERS,
@@ -746,7 +746,7 @@ export function lintSource(
   };
 
   const checkString = (node: ts.Node, value: string, template: boolean): void => {
-    if (on('css/numerals') && file !== NUMERALS_OWNER && hasTabularLiteral(value))
+    if (on('css/numerals') && !isOwnedBy(file, NUMERALS_OWNERS) && hasTabularLiteral(value))
       report('css/numerals', node, MESSAGES.inlineNumerals ?? '');
     if (
       on('css/chrome-alternates') &&

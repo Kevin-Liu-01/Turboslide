@@ -80,6 +80,7 @@
     "./NotesPane": "./src/NotesPane.tsx",
     "./Dialog": "./src/Dialog.tsx",
     "./dialogs/DeleteForever": "./src/dialogs/DeleteForever.tsx",
+    "./dialogs/SignIn": "./src/dialogs/SignIn.tsx",
     "./dialogs/share-links": "./src/dialogs/share-links.ts",
     "./panels/AssistViewerPanel": "./src/panels/AssistViewerPanel.tsx",
     "./panels/assist-strings": "./src/panels/assist-strings.ts",

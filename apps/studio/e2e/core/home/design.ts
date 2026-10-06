@@ -593,19 +593,45 @@ async function scrollRegions(): Promise<void> {
           }, size.width < 720);
           notes.push(`${label}: ${JSON.stringify(read)}`);
           const inkThumb = theme === 'light' ? 'rgba(7, 7, 7, 0.44)' : 'rgba(242, 242, 240, 0.44)';
+          /* a token's value is its text as the sheet wrote it: the build's minifier writes
+             rgba(255, 255, 255, 0.44) as #ffffff70, so the two forms compare as colours, the
+             channels equal and the alpha within one step of 255 */
+          const rgbaOf = (value: string): number[] | null => {
+            const hex = /^#([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(value);
+            if (hex !== null) {
+              const n = (i: number) => parseInt((hex[1] ?? '').slice(i, i + 2), 16);
+              return [n(0), n(2), n(4), hex[2] === undefined ? 1 : parseInt(hex[2], 16) / 255];
+            }
+            const fn = /^rgba?\(([^)]+)\)$/.exec(value);
+            if (fn === null) return null;
+            const parts = (fn[1] ?? '').split(/[\s,/]+/).filter(Boolean).map(Number);
+            return [parts[0] ?? NaN, parts[1] ?? NaN, parts[2] ?? NaN, parts[3] ?? 1];
+          };
+          const sameColour = (a: string, b: string): boolean => {
+            const x = rgbaOf(a);
+            const y = rgbaOf(b);
+            return (
+              x !== null &&
+              y !== null &&
+              x[0] === y[0] &&
+              x[1] === y[1] &&
+              x[2] === y[2] &&
+              Math.abs((x[3] ?? 1) - (y[3] ?? 1)) <= 1 / 255
+            );
+          };
           if (read.documentBar !== 8)
             failures.push(`${label}: the document's bar is ${read.documentBar} px`);
           if (read.rootWidth !== 'auto')
             failures.push(`${label}: the root's scrollbar-width is ${read.rootWidth}`);
           const t = read.terminal;
-          if (t === null || t.size !== 8 || t.thumb !== 'rgba(255, 255, 255, 0.44)')
+          if (t === null || t.size !== 8 || !sameColour(t.thumb, 'rgba(255, 255, 255, 0.44)'))
             failures.push(`${label}: the hero terminal's bar ${JSON.stringify(t)}`);
           const m = read.miniFilmstrip;
           if (
             m === null ||
             m.overflow <= 0 ||
             m.size !== 8 ||
-            m.thumb !== inkThumb ||
+            !sameColour(m.thumb, inkThumb) ||
             m.width !== 'auto'
           )
             failures.push(`${label}: the miniature filmstrip's bar ${JSON.stringify(m)}`);

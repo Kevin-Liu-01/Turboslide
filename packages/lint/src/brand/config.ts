@@ -562,7 +562,7 @@ export const ACCEPTED: readonly Acceptance[] = [
     match: 'el.style.zIndex = z',
     reason:
       "A block of the landing's live slide brought to front (20) or sent to back (0) over the renderer's order + 1: local order inside the slide sheet's own stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
-    owner: 'D4',
+    owner: 'the integrator',
   },
   {
     rule: 'css/z-index',
@@ -570,7 +570,7 @@ export const ACCEPTED: readonly Acceptance[] = [
     match: "zIndex: '10'",
     reason:
       "The printed field's canvas over the slide's own blocks (10): local order inside the slide sheet's stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
-    owner: 'D4',
+    owner: 'the integrator',
   },
   {
     rule: 'css/z-index',

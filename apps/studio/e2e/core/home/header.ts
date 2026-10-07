@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, Page } from '@playwright/test';
 
 import { MOTION_KEY } from '../../../src/components/home/boot';
+import { HERO } from '../../../src/components/home/copy';
 import { MOTION_BUTTON } from '../../../src/components/home/design-copy';
 import { extraHTTPHeaders, title } from '../lib';
 import { rowsForDriver } from '../matrix';
@@ -415,6 +416,160 @@ export async function themeFirstPaint(browser: Browser): Promise<void> {
   expect(failures).toEqual([]);
 }
 
+// ---------------------------------------------------------------------------------------------
+// home.hero.side-fits-headline (P2-N#3)
+
+/**
+ * Inter's metrics at 2,048 units to the em (ascender 1,984, cap height 1,490). A text range's box
+ * is its content area, the ascender to the descender, which 'Inter Fallback' matches through its
+ * overrides (packages/fonts/src/inter.css), so a line's cap line and baseline are read from that
+ * box with Inter's numbers in both faces: the row reads where the layout puts each line, and the
+ * layout is what must not move when Inter arrives.
+ */
+const ASCENT = 1984 / 2048;
+const CAP = 1490 / 2048;
+
+/** The hero head's boxes and lines, read from the page as it is painted. */
+function readHead(page: Page) {
+  return page.evaluate(
+    ([ascent, cap]) => {
+      const h1 = document.querySelector<HTMLElement>('h1#ts-product-h1')!;
+      const side = document.querySelector<HTMLElement>('.ts-hero-side')!;
+      const lead = document.querySelector<HTMLElement>('.ts-hero-lead')!;
+      const buttons = document.querySelector<HTMLElement>('.ts-hero-side .ts-buttons')!;
+      /* each word's content area top, in the order of the text */
+      const words = (el: Element): { top: number; text: string }[] => {
+        const out: { top: number; text: string }[] = [];
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
+          const data = node.textContent ?? '';
+          for (const m of data.matchAll(/\S+/g)) {
+            const range = document.createRange();
+            range.setStart(node, m.index);
+            range.setEnd(node, m.index + m[0].length);
+            const rect = range.getClientRects()[0];
+            if (rect !== undefined) out.push({ top: rect.top, text: m[0] });
+          }
+        }
+        return out;
+      };
+      const lines = (el: Element): { top: number; count: number }[] => {
+        const result: { top: number; count: number }[] = [];
+        for (const w of words(el)) {
+          const last = result.at(-1);
+          if (last !== undefined && Math.abs(last.top - w.top) < 1) last.count += 1;
+          else result.push({ top: w.top, count: 1 });
+        }
+        return result;
+      };
+      const size = (el: Element): number => parseFloat(getComputedStyle(el).fontSize);
+      const h1Size = size(h1);
+      const leadSize = size(lead);
+      const h1Lines = lines(h1);
+      const leadLines = lines(lead);
+      const box = (el: Element) => el.getBoundingClientRect();
+      const round = (n: number): number => Math.round(n * 100) / 100;
+      return {
+        face: [...document.fonts].some((f) => f.family === 'Inter' && f.status === 'loaded'),
+        theme: document.documentElement.getAttribute('data-theme'),
+        sentence: (lead.textContent ?? '').trim().split('. ')[0] ?? '',
+        h1Size: round(h1Size),
+        h1Box: round(box(h1).height),
+        sideBox: round(box(side).height),
+        columns: getComputedStyle(h1.parentElement!).gridTemplateColumns.split(' ').length,
+        leadBreaks: leadLines.map((l) => l.count).join(','),
+        h1Breaks: h1Lines.map((l) => l.count).join(','),
+        /* the lead's first cap line less the h1's: negative when the lead's sits higher */
+        capDelta:
+          h1Lines.length > 0 && leadLines.length > 0
+            ? round(
+                leadLines[0]!.top +
+                  (ascent - cap) * leadSize -
+                  (h1Lines[0]!.top + (ascent - cap) * h1Size),
+              )
+            : NaN,
+        /* the buttons' foot less the h1's last baseline */
+        footDelta:
+          h1Lines.length > 0
+            ? round(box(buttons).bottom - (h1Lines.at(-1)!.top + ascent * h1Size))
+            : NaN,
+      };
+    },
+    [ASCENT, CAP] as const,
+  );
+}
+
+export async function sideFitsHeadline(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const sentences = HERO.visit;
+  for (const width of [1440, 1280, 1024, 768, 390, 320]) {
+    const wide = width >= 1024;
+    const breaks: Record<string, string[]> = { inter: [], fallback: [] };
+    for (const face of ['inter', 'fallback'] as const) {
+      const { context, page } = await homeContext(browser, width, 'light', { height: 900 });
+      try {
+        if (face === 'fallback')
+          await context.route(/\.woff2(\?|$)/, (route) =>
+            route.request().resourceType() === 'font' ? route.abort() : route.continue(),
+          );
+        /* a fresh context shows the first visit's sentence; each reload the next (boot.ts) */
+        for (const visit of [0, 1, 2]) {
+          if (visit === 0) await openHome(page);
+          else {
+            await page.reload();
+            await page.locator('main#top[data-hydrated]').waitFor({ timeout: 60_000 });
+            await page.evaluate(() => document.fonts.ready);
+          }
+          const reads = [await readHead(page)];
+          /* the other appearance through the bar's theme button: the same boxes */
+          if (wide) {
+            await page.locator('header [data-control="view.theme"]').click();
+            reads.push(await readHead(page));
+            await page.locator('header [data-control="view.theme"]').click();
+          }
+          for (const r of reads) {
+            const label = `${width} ${face} ${r.theme} visit ${visit + 1}`;
+            if (r.face !== (face === 'inter'))
+              failures.push(`${label}: Inter ${r.face ? 'loaded' : 'not loaded'}`);
+            if (!r.sentence.startsWith((sentences[visit] ?? '').replace(/\.$/, '')))
+              failures.push(`${label}: the lead starts "${r.sentence}"`);
+            const lines = r.leadBreaks.split(',').length;
+            const wantLines = width === 320 && visit === 2 ? 3 : 2;
+            if (lines !== wantLines)
+              failures.push(`${label}: the lead is ${lines} lines (${r.leadBreaks})`);
+            if (r.h1Breaks !== '2,3') failures.push(`${label}: the h1's words ${r.h1Breaks}`);
+            const wantSize = width >= 1136 ? 76 : width >= 1024 ? 61.6 : width >= 720 ? 64 : null;
+            if (wantSize !== null && Math.abs(r.h1Size - wantSize) > (width === 1024 ? 0.5 : 1))
+              failures.push(`${label}: the h1 is ${r.h1Size} px`);
+            if (wide) {
+              if (r.sideBox > r.h1Box + 0.5)
+                failures.push(`${label}: the side is ${r.sideBox} px over an h1 of ${r.h1Box}`);
+              if (Math.abs(r.capDelta) > 1)
+                failures.push(`${label}: the lead's cap line ${r.capDelta} px from the h1's`);
+              if (Math.abs(r.footDelta) > 1.5)
+                failures.push(`${label}: the buttons' foot ${r.footDelta} px from the baseline`);
+            } else if (r.columns !== 1)
+              failures.push(`${label}: the head has ${r.columns} columns`);
+            notes.push(
+              `${label}: h1 ${r.h1Size} px, box ${r.h1Box}, side ${r.sideBox}, lead ${r.leadBreaks}${wide ? `, cap ${r.capDelta}, foot ${r.footDelta}` : ''}`,
+            );
+          }
+          breaks[face]!.push(reads[0]!.leadBreaks);
+        }
+      } finally {
+        await context.close();
+      }
+    }
+    if (breaks['inter']!.join(' / ') !== breaks['fallback']!.join(' / '))
+      failures.push(
+        `${width}: the lead breaks ${breaks['inter']!.join(' / ')} in Inter and ${breaks['fallback']!.join(' / ')} in the fallback`,
+      );
+  }
+  test.info().annotations.push({ type: 'hero', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
 export function rows(): void {
   if (entered('home.nav.no-pause'))
     test(title('home.nav.no-pause'), async ({ browser }) => {
@@ -433,5 +588,11 @@ export function rows(): void {
       test.setTimeout(420_000);
       test.info().annotations.push({ type: 'load', description: `${oneMinuteLoad()}` });
       await themeFirstPaint(browser);
+    });
+  if (entered('home.hero.side-fits-headline'))
+    test(title('home.hero.side-fits-headline'), async ({ browser }) => {
+      test.setTimeout(900_000);
+      test.info().annotations.push({ type: 'load', description: `${oneMinuteLoad()}` });
+      await sideFitsHeadline(browser);
     });
 }

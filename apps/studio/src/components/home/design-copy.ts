@@ -26,8 +26,10 @@ const H1_LINES = ['Presentations for', 'people and agents'] as const;
 export const HERO_ROUND = {
   h1Lines: H1_LINES,
   heading: H1_LINES.join(' '),
-  /** the lead after its visit sentence; replaces copy.ts `HERO.lead` */
-  lead: 'It has a CLI and an MCP server, so agents edit the same deck. No account is needed.',
+  /** the lead after its visit sentence; replaces copy.ts `HERO.lead`. Two lines beside the h1 with
+      the same breaks in Inter and in 'Inter Fallback' (docs/POLISH-2.md 3.4, P2-N#3); the CLI and
+      the MCP server are said on the same screen by the terminal's head and the numbers row */
+  lead: 'No account is needed.',
   frame: {
     toolbarLabel: 'Toolbar',
     /** the agent's chip in the presence slot */

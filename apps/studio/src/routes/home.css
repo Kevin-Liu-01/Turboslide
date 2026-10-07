@@ -565,9 +565,9 @@ html:has(.ts-product) {
   contain-intrinsic-size: 1600px 900px;
 }
 
-/* ---- the hero (docs/DESIGN.md 8.2; LANDING.md 2.2): the h1 at 76 px on two lines with the lead
-   and the buttons beside it, then the editor frame and the agent's terminal side by side, 16 px
-   apart, 480 px tall, the stage starting near y 330 at 1440 ---- */
+/* ---- the hero (docs/DESIGN.md 8.2; LANDING.md 2.2; docs/POLISH-2.md 3.4): the h1 at 76 px on
+   two lines with the lead and the buttons beside it, then the editor frame and the agent's
+   terminal side by side, 16 px apart, 480 px tall, the stage starting near y 283 at 1440 ---- */
 .ts-band-hero {
   padding: 32px 0 96px;
 }
@@ -577,45 +577,48 @@ html:has(.ts-product) {
 }
 
 .ts-hero-head {
+  container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 384px);
-  align-items: end;
+  align-items: stretch;
   gap: 24px 48px;
+  /* the h1's size: 76 px wherever its column is 592 px wide (the content is 1,024 px from a
+     1,136 px viewport), scaled with the content under it (61.6 px at 1024) */
+  --ts-h1: min(76px, (100cqi - 432px) * 0.12838);
 }
 
-/* two locked lines, 76 px at 1,440 and over, the LCP element; nothing moves it (3.7) */
+/* two locked lines, the LCP element; nothing moves it (3.7) */
 .ts-h1 {
   margin: 0;
   font-family: var(--pt-display);
   font-weight: 500;
-  font-size: clamp(40px, 5.28vw, 76px);
+  font-size: var(--ts-h1);
   line-height: 1;
   letter-spacing: -0.042em;
   color: var(--pt-ink);
   white-space: nowrap;
 }
 
-/* the side keeps the height of a four line lead over the buttons (4 lines of 29.45 px, the 24 px
-   gap, the 40 px buttons and its 4 px foot), the words at its foot: the
-   fallback face wraps the three lines Inter draws into four, and the box holds that height
-   whichever face paints, so the stage never moves when Inter arrives (CLS 0) */
+/* the side spans the h1's ink (Kevin, 2026-10-07: "the right side paragraph + the buttons is too
+   tall"): the lead's first cap on the h1's first cap, 0.1362 em under the h1's box less the lead's
+   own 7.82 px at 19 px on 1.55, and the buttons' foot on the h1's last baseline, 0.1362 em above
+   its box's foot (Inter's ascender 1,984, cap 1,490 and descender -494 at 2,048 units). The head's
+   height is the h1's two lines in either face, so nothing under it moves when Inter arrives */
 .ts-hero-side {
   display: grid;
-  align-content: end;
-  gap: 24px;
+  align-content: space-between;
+  gap: 16px;
   min-width: 0;
-  min-height: 186px;
-  padding-bottom: 4px;
+  padding: calc(var(--ts-h1) * 0.1362 - 7.82px) 0 calc(var(--ts-h1) * 0.1362);
 }
 
-/* the lead's measure (docs/DESIGN.md 8.2): at 341 px each visit sentence with the lead wraps to
-   four lines with the same words on each in Inter and in 'Inter Fallback' (the faces draw the same
-   breaks from 340 to 342 px at 19 px and the same line counts from 326 to 374), so nothing in the
-   hero moves when Inter arrives after the first paint; the first button keeps one width in both
-   faces, so the second starts at one place (home.hero.font-swap) */
+/* the lead's measure: at 372 px each visit sentence with "No account is needed." wraps to two
+   lines with the same words on each in Inter and in 'Inter Fallback' (research-header 2.2), so
+   nothing in the hero moves when Inter arrives after the first paint; the first button keeps one
+   width in both faces, so the second starts at one place (home.hero.font-swap) */
 .ts-hero-lead {
   min-width: 0;
-  max-width: 341px;
+  max-width: 372px;
 }
 
 .ts-hero-side .ts-button:first-child {
@@ -2639,20 +2642,17 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     grid-auto-flow: row;
   }
 
-  /* the lead and the buttons under the h1 */
+  /* the lead and the buttons under the h1, which is 64 px in one column */
   .ts-hero-head {
     grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    --ts-h1: 64px;
   }
 
   .ts-hero-side {
-    max-width: 560px;
-    min-height: 0;
-  }
-
-  /* at 560 px each lead wraps to three lines with the same breaks in both faces (they agree from
-     438 px) */
-  .ts-hero-lead {
-    max-width: none;
+    align-content: start;
+    gap: 24px;
+    padding: 0;
   }
 }
 
@@ -2744,14 +2744,12 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
      the size at which it fits, so the first paint and Inter draw the same two lines at every
      width from 320 px and nothing under the h1 moves when Inter arrives */
   .ts-h1 {
-    font-size: min(44px, 100cqi / 8.4);
-    line-height: 1;
     letter-spacing: -0.034em;
   }
 
   .ts-hero-head {
     gap: 24px;
-    container-type: inline-size;
+    --ts-h1: min(44px, 100cqi / 8.4);
   }
 
   .ts-hero-side {
@@ -2759,13 +2757,12 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 
   /* the lead at 16 px under 720 px, so the h1's two lines stay the largest text and the LCP
-     element on a warm visit as on a cold one; at a measure of at most 349 px each visit sentence
-     wraps with the same breaks in both faces (they agree from 346 to 352 px, and from 286 to
-     292 px, which a 320 px screen's 288 px column falls in; the line counts agree from 326 to
-     352 px and from 274 to 318) */
+     element on a warm visit as on a cold one; across the column each visit sentence wraps to two
+     lines with the same breaks in both faces at 358 px (390) and 288 px (320, three lines on the
+     third visit), research-header 2.2 */
   .ts-hero-lead {
     font-size: 16px;
-    max-width: 349px;
+    max-width: none;
   }
 
   .ts-hero-stage {

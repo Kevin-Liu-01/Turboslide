@@ -1251,13 +1251,16 @@ export function rows(): void {
           notes.push(
             `${label}: h1 ${facts.fontPx.toFixed(2)} px at weight ${facts.weight}, tracking ${facts.tracking.toFixed(4)} em, lines ${facts.lines.map((l) => l.text).join(' / ')}, h2 ${[...new Set(facts.h2)].join(', ')} px, weights ${facts.weights.join(', ')}, sheets ${facts.sheets.map((s) => `${s.sheet} ${s.width}`).join(', ')}`,
           );
-          /* restated in the design round, DR-D4#2 (docs/DESIGN.md 8.2): clamp(40px, 5.28vw, 76px),
-             76 at 1,440 and over, 67.6 at 1,280; under 720 44 px while the longer line fits the
-             column in the fallback face, else the head's width over 8.4 (42.6 at 390; the finishing
-             round 2 of the design round, so the two lines never wrap in either face) */
+          /* restated in polish two, P2-N#3 (docs/POLISH-2.md 3.4): 76 px wherever the h1's column
+             is 592 px wide (the head 1,024 px, from a 1,136 px viewport), the head's width less
+             432 px times 0.12838 under it (61.6 at 1024), 64 px in one column from 720 to 1023;
+             under 720 44 px while the longer line fits the column in the fallback face, else the
+             head's width over 8.4 (42.6 at 390), so the two lines never wrap in either face */
           const wantPx = narrow
             ? Math.min(44, facts.head / 8.4)
-            : Math.min(76, Math.max(40, 0.0528 * size.width));
+            : size.width < 1024
+              ? 64
+              : Math.min(76, (facts.head - 432) * 0.12838);
           if (Math.abs(facts.fontPx - wantPx) > 1)
             failures.push(
               `${label}: the h1 draws at ${facts.fontPx.toFixed(2)} px, not ${wantPx.toFixed(1)}`,

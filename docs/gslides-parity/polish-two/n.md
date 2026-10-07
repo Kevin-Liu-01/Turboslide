@@ -159,3 +159,79 @@ carries none: the toolbar's tier three hides the word with `display: none` (`Too
 a button whose only text is hidden and whose glyphs are `aria-hidden` would have no name. The name
 equals the visible label, so WCAG 2.5.3 holds. Request P2-N-3: `apps/studio/e2e/home-page.spec.ts`
 152 and 156 still expect "Switch to ...".
+
+## P2-N#3: the hero's side spans the headline
+
+Items (docs/POLISH-2.md 3.4; C11, Q10, Q13, Q14; Kevin: "the right side paragraph + the buttons is
+too tall"): the head's h1 size is one custom property, `--ts-h1: min(76px, (100cqi - 432px) *
+0.12838)` on the head (now the size container at every width), 76 px from 1,136 px and 61.6 px at
+1024; from 720 to 1023 the head is one column with the h1 at 64 px; under 720 `min(44px, 100cqi /
+8.4)` as before. The side stretches to the h1's two lines and spreads its lead and buttons with
+`align-content: space-between`, its padding putting the lead's first cap on the h1's first cap
+(`--ts-h1 * 0.1362 - 7.82px`) and the buttons' foot on the h1's last baseline (`--ts-h1 * 0.1362`).
+The lead after the visit sentence is "No account is needed." at 372 px (16 px across the column
+under 720). The 186 px floor, the side's 560 px measure and the 341 and 349 px measures left. The
+CLI and MCP sentence that left the lead is said on the same screen by the terminal's head and the
+numbers row.
+
+Files: `apps/studio/src/routes/home.css` (the hero's rules and the 1023 and 719 blocks),
+`apps/studio/src/components/home/design-copy.ts` (`HERO_ROUND.lead`);
+`apps/studio/e2e/core/home/header.ts` (`home.hero.side-fits-headline`), `home/page.ts`
+(`home.hero.type` restated: the h1's size from the head's width, 64 px from 720 to 1023; page.ts is
+under `core/home/**`, lane N's by docs/POLISH-2.md 7.5); `docs/LANDING.md` 2.2; the matrix and
+README's block.
+
+Rows, on 4722 (16:00 to 16:05):
+
+| Row | Reading | Load |
+| --- | --- | --- |
+| `home.hero.side-fits-headline` (new) | passed. At 1440 and 1280, in both faces, both appearances and the three visits: h1 76 px, its box and the side's both 152 px, the lead two lines (7,5 / 6,6 / 4,6 words), the lead's first cap line 0.23 px above the h1's, the buttons' foot 0.03 px under its last baseline. At 1024: h1 61.62 px, both boxes 123.83 px (the side's content sets the row, 0.6 px over the h1's two lines), cap +0.28 px, foot +1.12 px. At 768: one column, h1 64 px, the lead 7,5 / 6,6 / 4,6. At 390: h1 42.62 px, the lead 9,3 / 7,5 / 5,5. At 320: h1 34.29 px, the lead 7,5 / 5,7 / 4,5,1. The same breaks in Inter and in 'Inter Fallback' at every width | 113.4 to 103.9 |
+| `home.hero.type` (restated) | passed | 103.9 to 87.2 |
+| `home.hero.font-swap` (re-run) | passed: the same boxes and breaks in both faces at 1440, 390 and 320 for the three visits, and no layout shift with Inter 2.5 s late | 103.9 to 87.2 |
+| `home.hero.stage` (re-run) | passed | 103.9 to 87.2 |
+| `decks.home.seller-lead` (re-run) | passed | 103.9 to 87.2 |
+
+The node-server build (shared tree, 16:07 to 16:13, load 90.1 to 116.1) on 4732 with mail off:
+`home.budget.bytes-page`, `live-module` and `shared` passed; `frame` and `main-thread` not read
+(load 108.4); `lcp` not read (load 104.6 to 108.4), and its element is now the h1 at 390 on the warm
+visit too, where P2-N#1's and #2's builds named the lead; `bytes-first` failed on the document alone,
+100,588 B decoded (16,963 B brotli), the page CSS 18,607 B brotli (56 B over P2-N#2's) and the
+route chunk 41,068 B decoded, 9,071 B brotli. This push takes 62 B off the document, all in the
+lead (the diff of the two builds' documents), so lane N's three pushes stand at -42 B against the
+design round's tree; the 588 B over the line are the shared tree's (request P2-N-2).
+
+Other gates: `tsc -p apps/studio --noEmit` exit 0; the landing's unit tests 17 files, 106 tests
+passed (60 s timeout); brand lint in enforce mode 0 open findings; `competitor.test.ts` passed;
+prettier clean; `build-home-assets.ts --check` reports `menus.generated.ts` out of date against the
+menu model, which lane A's work in progress changes (`packages/chrome/src/menus/model.ts` and
+`strings.ts`, uncommitted at 16:15), none of this push's sources.
+
+`pnpm test` (the whole workspace, `vitest run --testTimeout=60000`, 16:22 to 16:31, load 116.0 to
+90.3): 543 of 545 files and 5,685 tests passed; the two failures are outside lane N's files:
+`apps/cli/src/commands/banner.test.ts` (the CLI's
+release reads 2026.1001.3 where `docs/updates.md` names 2026.1006.1) and
+`packages/import/src/__tests__/import.test.ts` (the Prototemplate deck at
+`/Users/kevinliu/repos/Prototemplate` has 93 slides where the test expects 95).
+
+Pictures (`n/`): `n3-hero-<1440|1280|1024|768|390|320>-<light|dark>.jpg`, each the first viewport
+(1440 by 900, 1280 by 800, 1024 by 768, 768 by 1024, 390 by 844, 320 by 640). Each was opened: the
+lead's two lines beside "Presentations for" with their first cap on its cap and the buttons beside
+"people and agents" with their foot on its baseline at 1440 and 1280, the same at 1024 with 16 px
+between lead and buttons, the head in one column at 768 with the h1 at 64 px, and two lines of lead
+under the h1 at 390 and 320, the stage higher in the first screen than in research-header's
+`hero-*.jpg`.
+
+Deviations: none in the CSS of 3.4. The 1024 side's content is 0.6 px taller than the h1's two
+lines, so the row is 123.83 px and the buttons' foot sits 1.12 px under the last baseline, inside
+the row's 1.5 px.
+
+## Requests and notes for the integrator
+
+- P2-N-1 (`routes/home.tsx` 136): `<HomeNav />` without the nonce; lane N then drops `_props`.
+- P2-N-2: `/home`'s document reads 100,588 B against its 100,000 B line on the shared tree, from
+  other lanes' head links and router state; lane N's pushes are -42 B together.
+- P2-N-3 (`e2e/home-page.spec.ts` 152, 156): the theme button's name is "Dark or light".
+- `docs/DESIGN.md` 8.1 still places the motion toggle in the bar and 8.2 the stage near y 330 and the
+  186 px floor; DESIGN.md has no owner in this round (POLISH-2.md 7.5), so lane N leaves it.
+- `apps/studio/src/components/home/copy.test.ts` (not lane N's) lists the page's buttons for the
+  Title Case check; `MOTION_BUTTON.pause` and `.play` could join that list.

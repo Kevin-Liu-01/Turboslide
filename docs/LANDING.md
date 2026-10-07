@@ -222,6 +222,7 @@ The Rosetta Stone leaves the fixture and `public/home/` (its stills and tone map
 - **Motion.** H5 (the Blue Marble develops in the frame's slide 1 after `load` and one idle callback), then the loop (3.4). The h1, the lead and the buttons never move.
 - **Kind.** Product render (the slides, the transcript, the commands and answers); live page code (the frame's selection and filmstrip); staged sequence (the loop, captioned). The terminal is the first pass's narrow panel.
 - **Reduced motion.** The rest state: the Blue Marble's still, the transcript, no loop. A step tab press lands its step at once.
+- **Polish two (docs/POLISH-2.md 3.4, P2-N#3).** The lead after the visit sentence is "No account is needed.", two lines beside the h1 at 372 px with the same breaks in Inter and in 'Inter Fallback'. The h1 is 76 px from 1,136 px, 61.6 px at 1024 and 64 px in one column from 720 to 1023. From 1024 px the side spans the h1: the lead's first cap on the h1's first cap and the buttons' foot on its last baseline, so the stage starts 34 px higher at 1440 and 62 px higher at 1024 than in the design round.
 
 ### 2.3 The numbers row
 

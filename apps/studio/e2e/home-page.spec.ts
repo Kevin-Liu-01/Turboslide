@@ -15,7 +15,12 @@ import {
   REPORT_WORDS,
   TAILOR,
 } from '../src/components/home/copy';
-import { CLOSE_ROUND, HERO_ROUND, KITS_ROUND, MENUS_ROUND } from '../src/components/home/design-copy';
+import {
+  CLOSE_ROUND,
+  HERO_ROUND,
+  KITS_ROUND,
+  MENUS_ROUND,
+} from '../src/components/home/design-copy';
 import { HOME_META } from '../src/components/home/home-meta';
 
 // The landing, /home (docs/LANDING.md section 2; V4's file, restated for the second pass in V4's
@@ -97,8 +102,10 @@ test("the server's HTML carries main#top, the h1, the head, the boot script and 
   /* the h1 is page text, in no slide (2.2) */
   expect(html).toMatch(/<h1[^>]*>[\s\S]*?Presentations for/);
   expect(/data-home-slides[^>]*>(?:(?!<\/section>)[\s\S])*<h1/.test(html)).toBe(false);
-  /* the lead's first sentence is the visit sentence, the first visit's in the markup */
-  expect(html).toMatch(new RegExp(`data-visit[^>]*>${HERO.visit[0]!.replace(/[.]/g, '\\.')}<`));
+  /* the lead's first sentence is the visit sentence, the first visit's in the markup, in one run of
+     text with the rest of the lead (docs/DESIGN.md 8.2, the design round's finishing round 2) */
+  const run = `${HERO.visit[0]!} ${HERO_ROUND.lead}`.replace(/[.,]/g, (c) => `\\${c}`);
+  expect(html).toMatch(new RegExp(`data-visit[^>]*>${run}<`));
   expect(html).toContain(HERO_ROUND.lead);
   expect(html).toContain(`<title>${HOME_META.title}</title>`);
   expect(html).toMatch(/property="og:url" content="[^"]*\/home"/);

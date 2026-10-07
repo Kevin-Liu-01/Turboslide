@@ -702,15 +702,18 @@ export function rows(): void {
           const before = await h1.boundingBox();
           await readDevelop(page, `visit ${index + 1}`, quiet);
           expect(await h1.boundingBox()).toEqual(before);
-          /* the visit's sentence, set before its first paint and never changed after (2.2) */
-          const shown = (await page.locator('[data-visit]').textContent()) ?? '';
+          /* the visit's sentence, set before its first paint and never changed after (2.2); the
+             lead is one run of text since the design round's finishing round 2 (DESIGN.md 8.2), so
+             the sentence is the run's first and the run is what never changes */
+          const run = (await page.locator('[data-visit]').textContent()) ?? '';
+          const shown = run.slice(0, run.indexOf('.') + 1);
           expect(HERO.visit).toContain(shown);
           if (turn !== null)
             expect(shown, 'the next visit shows the next sentence').toBe(HERO.visit[turn]);
           const r = await rec(page);
           const firstPaint = firstPaintOf(r) ?? Infinity;
           for (const [at, text] of r.visit)
-            if (at > firstPaint) expect(text, 'no change after the first paint').toBe(shown);
+            if (at > firstPaint) expect(text, 'no change after the first paint').toBe(run);
         }
       } finally {
         await context.close();

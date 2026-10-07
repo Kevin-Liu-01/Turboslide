@@ -6,7 +6,7 @@ import type { Browser, BrowserContext, Page } from '@playwright/test';
 import { BOOT_LIMIT_BYTES, FIELD_STILL_MS, MOTION_KEY } from '../../../src/components/home/boot';
 import { BOOT_SCRIPT } from '../../../src/components/home/boot.generated';
 import { HERO } from '../../../src/components/home/copy';
-import { NAV_ICONS } from '../../../src/components/home/design-copy';
+import { MOTION_BUTTON, NAV_ICONS } from '../../../src/components/home/design-copy';
 import { bayer8 } from '../../../../../packages/effects/src/bayer';
 import { INTERLUDE_BANDS, glyphFor, glyphTone } from '../../../src/components/home/live/glyphs';
 import { extraHTTPHeaders, title } from '../lib';
@@ -544,11 +544,31 @@ const motionState = (page: Page) =>
     visible: window.tsHomeMotion?.visible?.() ?? {},
   }));
 
-const toggle = (page: Page) => page.locator('header [data-motion-toggle]');
+/**
+ * The page's two motion toggles since polish two (docs/POLISH-2.md 3.1): the hero terminal's icon
+ * button, in the first screen at 1440, which the rows press by default, and the footer's Pause
+ * Motion text button. The navigation draws none.
+ */
+const toggle = (page: Page) => page.locator('[data-control="home.hero.motion"]');
+const footToggle = (page: Page) => page.locator('[data-control="home.foot.motion"]');
+const toggles = (page: Page) => page.locator('[data-motion-toggle]');
 
-/** Presses Pause Motion without scrolling the page to the nav (the button's own click). */
+/** Presses Pause Motion without scrolling the page to the hero (the button's own click). */
 const pressInPlace = (page: Page): Promise<void> =>
   page.evaluate(() => document.querySelector<HTMLButtonElement>('[data-motion-toggle]')?.click());
+
+/** The footer toggle's shown label: both words are in its markup, one visible (motion.css). */
+const footLabel = (page: Page): Promise<string> =>
+  footToggle(page).evaluate(
+    (el) =>
+      [...el.querySelectorAll('.ts-motion-word')].find(
+        (word) => getComputedStyle(word).visibility === 'visible',
+      )?.textContent ?? '',
+  );
+
+/** Every motion toggle's `aria-pressed`, the hero's first. */
+const pressedStates = (page: Page): Promise<(string | null)[]> =>
+  toggles(page).evaluateAll((els) => els.map((el) => el.getAttribute('aria-pressed')));
 
 /** H5 in one visit: the hero field's develop, or its still shown by the first paint plus 3.0 s. */
 async function readDevelop(page: Page, label: string, quiet: boolean): Promise<void> {
@@ -740,21 +760,20 @@ export function rows(): void {
       const { context, page } = await open(browser, { height: 700 });
       try {
         await visit(page, '?slow=10');
-        /* the button (restated in the design round, DR-D4#1; docs/DESIGN.md 8.1): the icon
-           toggle right after the editor's theme button in the navigation, named Pause motion, its
-           tooltip naming the next press */
-        await expect(toggle(page)).toHaveAttribute('aria-label', NAV_ICONS.motion.pause);
-        await expect(toggle(page)).toHaveAttribute('aria-pressed', 'false');
+        /* the buttons (restated in polish two, P2-N#1; docs/POLISH-2.md 3.1): the hero
+           terminal's icon toggle with its tooltip naming the next press and the footer's Pause
+           Motion text button, both named Pause motion; none in the navigation */
+        await expect(toggles(page)).toHaveCount(2);
+        await expect(page.locator('header [data-motion-toggle]')).toHaveCount(0);
+        for (const button of [toggle(page), footToggle(page)]) {
+          await expect(button).toHaveAttribute('aria-label', NAV_ICONS.motion.pause);
+          await expect(button).toHaveAttribute('aria-pressed', 'false');
+        }
+        await expect(page.locator('.ts-hero-terminal-head [data-motion-toggle]')).toHaveCount(1);
+        await expect(page.locator('footer [data-motion-toggle]')).toHaveCount(1);
+        expect(await footLabel(page), 'the footer label').toBe(MOTION_BUTTON.pause);
         await liveReady(page);
         await expect(toggle(page)).toHaveAttribute('data-tip', NAV_ICONS.motion.pause);
-        const order = await page.evaluate(() => {
-          const theme = document.querySelector('header [data-control="view.theme"]');
-          const button = document.querySelector('[data-motion-toggle]');
-          return theme !== null && button !== null
-            ? theme.nextElementSibling === button && button.closest('header') !== null
-            : false;
-        });
-        expect(order, 'right after the theme button, in the navigation').toBe(true);
         /* a running one shot motion lands at its end state within one frame: C1 at a tenth of
            speed, pressed mid develop */
         await loadBelow(page, 'canvas');
@@ -772,7 +791,9 @@ export function rows(): void {
           'developing',
         );
         const pressedAt = await pageNow(page);
-        await toggle(page).click();
+        /* the footer's: the click scrolls the page to its foot, and the developing field still
+           lands at its end state */
+        await footToggle(page).click();
         await page.waitForFunction(
           () =>
             document
@@ -788,7 +809,8 @@ export function rows(): void {
         if (!unread)
           expect((landed?.[0] ?? Infinity) - pressedAt).toBeLessThanOrEqual(FRAME_SLACK_MS);
         await expect(toggle(page)).toHaveAttribute('data-tip', NAV_ICONS.motion.play);
-        await expect(toggle(page)).toHaveAttribute('aria-pressed', 'true');
+        expect(await pressedStates(page), 'both toggles pressed').toEqual(['true', 'true']);
+        expect(await footLabel(page), 'the footer label').toBe(MOTION_BUTTON.play);
         expect(await page.evaluate((key) => localStorage.getItem(key), MOTION_KEY)).toBe('paused');
         /* 0 frame callbacks in the next 2 s without input, at the top, the middle and the bottom */
         const height = await page.evaluate(
@@ -845,27 +867,32 @@ export function rows(): void {
           r.motion.filter(([, v]) => v !== 'paused'),
           'never played',
         ).toEqual([]);
-        await expect(toggle(again.page)).toHaveAttribute('aria-pressed', 'true');
-        /* the play glyph shows and the pause glyph is hidden from the first paint (motion.css) */
+        expect(await pressedStates(again.page), 'both toggles pressed').toEqual(['true', 'true']);
+        /* the play glyph shows and the pause glyph is hidden from the first paint (motion.css),
+           in both toggles */
         expect(
           await again.page.evaluate(() =>
-            ['pause', 'play'].map(
-              (glyph) =>
-                getComputedStyle(
-                  document.querySelector(`[data-motion-toggle] [data-icon="${glyph}"]`)!,
-                ).visibility,
+            [...document.querySelectorAll('[data-motion-toggle]')].map((button) =>
+              ['pause', 'play']
+                .map(
+                  (glyph) =>
+                    getComputedStyle(button.querySelector(`[data-icon="${glyph}"]`)!).visibility,
+                )
+                .join(' '),
             ),
           ),
-        ).toEqual(['hidden', 'visible']);
+        ).toEqual(['hidden visible', 'hidden visible']);
+        expect(await footLabel(again.page), 'the footer label').toBe(MOTION_BUTTON.play);
         await expect(toggle(again.page)).toHaveAttribute('data-tip', NAV_ICONS.motion.play);
         await readNoDevelop(again.page);
         await again.page.waitForTimeout(1_000);
         const quietReading = await idle(again.page, again.context);
         expect(quietReading.raf, 'no automatic motion starts').toBe(0);
         expect((await motionState(again.page)).running).toEqual([]);
-        /* Play puts the key away */
+        /* Play puts the key away, from the hero's toggle */
         await toggle(again.page).click();
         await expect(toggle(again.page)).toHaveAttribute('aria-pressed', 'false');
+        await expect(footToggle(again.page)).toHaveAttribute('aria-pressed', 'false');
         expect(
           await again.page.evaluate((key) => localStorage.getItem(key), MOTION_KEY),
         ).toBeNull();
@@ -879,19 +906,20 @@ export function rows(): void {
         expect(
           await blind.page.evaluate(() => document.documentElement.getAttribute('data-motion')),
         ).toBeNull();
-        await toggle(blind.page).click();
+        await footToggle(blind.page).click();
         expect(
           await blind.page.evaluate(() => document.documentElement.getAttribute('data-motion')),
         ).toBe('paused');
-        await expect(toggle(blind.page)).toHaveAttribute('aria-pressed', 'true');
+        await expect(footToggle(blind.page)).toHaveAttribute('aria-pressed', 'true');
       } finally {
         await blind.context.close();
       }
-      /* hidden under reduced motion */
+      /* hidden under reduced motion, both */
       const reduced = await open(browser, { reduce: true });
       try {
         await visit(reduced.page);
         await expect(toggle(reduced.page)).toBeHidden();
+        await expect(footToggle(reduced.page)).toBeHidden();
       } finally {
         await reduced.context.close();
       }
@@ -1084,7 +1112,12 @@ export function rows(): void {
         expect(loaded.classes.some(([, cls]) => cls.includes('ts-intro'))).toBe(false);
         expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
         expect(await stillShown(page, 'hero')).toBe(true);
-        if (PAUSE) await expect(toggle(page)).toBeHidden();
+        /* every motion toggle hidden, the terminal's and the footer's (restated in polish two,
+           P2-N#1) */
+        if (PAUSE) {
+          await expect(toggles(page)).toHaveCount(2);
+          for (const button of await toggles(page).all()) await expect(button).toBeHidden();
+        }
         /* a full native scroll moves nothing and prints every field at once */
         const height = await page.evaluate(() => document.documentElement.scrollHeight);
         await wheelTo(page, height, 500, 120);
@@ -1519,8 +1552,8 @@ export function rows(): void {
         await page.waitForTimeout(800);
         const running = (await motionState(page)).running;
         expect(running.length).toBeGreaterThan(0);
-        /* pressed where the page stands: the nav scrolls with the page, and a click through the
-           locator would scroll it into view and take the loops out of it first */
+        /* pressed where the page stands: a click through the locator would scroll a toggle into
+           view and take the loops out of it first */
         await pressInPlace(page);
         await page.waitForTimeout(FRAME_SLACK_MS);
         expect((await motionState(page)).running).toEqual([]);

@@ -30,7 +30,6 @@ import {
   HERO_ROUND,
   KITS_ROUND,
   MENUS_ROUND,
-  NAV_ICONS,
 } from '../../../src/components/home/design-copy';
 import { HOME_FACTS } from '../../../src/components/home/facts';
 import { MENU_GLYPHS } from '../../../src/components/home/menu-glyphs.generated';
@@ -166,7 +165,24 @@ async function readNav(page: Page) {
       };
     };
     const theme = document.querySelector('header [data-control="view.theme"]');
-    const motion = document.querySelector('header [data-motion-toggle]');
+    /* the bar's controls in their order (restated in polish two, P2-N#1): the lockup,
+       Documentation from 720 px, the theme button, one hairline, Sign In, New Presentation */
+    const order = [
+      ['lockup', '[data-control="home.nav.lockup"]'],
+      ['documentation', '[data-control="home.nav.docs"]'],
+      ['theme', '[data-control="view.theme"]'],
+      ['hairline', '.ts-product-nav-rule'],
+      ['sign in', '[data-control="home.nav.signIn"]'],
+      ['new', '[data-control="home.nav.new"]'],
+    ]
+      .flatMap(([name, selector]) =>
+        [...row.querySelectorAll(selector!)].filter(shown).map((el) => ({
+          name: name!,
+          left: el.getBoundingClientRect().left,
+        })),
+      )
+      .sort((a, b) => a.left - b.left)
+      .map((c) => c.name);
     /* every control with words in the bar: a frame or a ground at rest is a box */
     const boxed = [...row.querySelectorAll<HTMLElement>('a, button')]
       .filter((el) => shown(el) && (el.textContent ?? '').trim() !== '' && !el.matches('.pt-icon'))
@@ -199,10 +215,8 @@ async function readNav(page: Page) {
       theme: box(theme),
       themeTip: theme?.getAttribute('data-tip') ?? null,
       themeIcon: theme?.classList.contains('pt-icon') ?? false,
-      motion: box(motion),
-      motionTip: motion?.getAttribute('data-tip') ?? null,
-      motionPressed: motion?.getAttribute('aria-pressed') ?? null,
-      themeBeforeMotion: theme !== null && motion !== null && theme.nextElementSibling === motion,
+      motionToggles: document.querySelectorAll('header [data-motion-toggle]').length,
+      order,
       newPresentation: box(document.querySelector('header [data-control="home.nav.new"]')),
       boxed,
       overflow: document.documentElement.scrollWidth - innerWidth,
@@ -219,9 +233,14 @@ async function navIcons(browser: Browser): Promise<void> {
       const label = `${size.width} ${theme}`;
       try {
         await openHome(page);
+        /* Sign In arrives once the deployment answers that it offers a method (sign-in.tsx) */
+        await page
+          .locator('header [data-control="home.nav.signIn"]')
+          .waitFor({ timeout: 30_000 })
+          .catch(() => undefined);
         const nav = await readNav(page);
         notes.push(
-          `${label}: row ${nav.rowHeight} px, ${nav.rows} row; theme ${nav.theme?.w}x${nav.theme?.h} "${nav.themeTip}", motion ${nav.motion?.w}x${nav.motion?.h} "${nav.motionTip}"; boxed ${nav.boxed.map((b) => b.text).join(', ')}`,
+          `${label}: row ${nav.rowHeight} px, ${nav.rows} row; ${nav.order.join(', ')}; theme ${nav.theme?.w}x${nav.theme?.h} "${nav.themeTip}"; boxed ${nav.boxed.map((b) => b.text).join(', ')}`,
         );
         if (nav.rowHeight !== 58) failures.push(`${label}: the bar is ${nav.rowHeight} px`);
         if (nav.rows !== 1) failures.push(`${label}: the controls sit in ${nav.rows} rows`);
@@ -230,12 +249,22 @@ async function navIcons(browser: Browser): Promise<void> {
         if (nav.docs !== size.width >= 720)
           failures.push(`${label}: Documentation ${nav.docs ? 'shown' : 'hidden'} in the bar`);
         if (!nav.footerDocs) failures.push(`${label}: no Documentation in the footer`);
-        for (const [name, b] of [
-          ['theme button', nav.theme],
-          ['motion toggle', nav.motion],
-        ] as const)
-          if (b === null || b.w !== 32 || b.h !== 32)
-            failures.push(`${label}: the ${name} is ${b?.w}x${b?.h}, not a 32 px square`);
+        if (nav.theme === null || nav.theme.w !== 32 || nav.theme.h !== 32)
+          failures.push(
+            `${label}: the theme button is ${nav.theme?.w}x${nav.theme?.h}, not a 32 px square`,
+          );
+        if (nav.motionToggles !== 0)
+          failures.push(`${label}: ${nav.motionToggles} motion toggles in the navigation`);
+        const wantOrder = [
+          'lockup',
+          ...(size.width >= 720 ? ['documentation'] : []),
+          'theme',
+          'hairline',
+          'sign in',
+          'new',
+        ];
+        if (JSON.stringify(nav.order) !== JSON.stringify(wantOrder))
+          failures.push(`${label}: the bar reads ${nav.order.join(', ')}`);
         if (!nav.themeIcon)
           failures.push(`${label}: the theme button is not the shell's icon square`);
         /* the shared component's own words: its name says the next appearance, its sentence the
@@ -243,10 +272,6 @@ async function navIcons(browser: Browser): Promise<void> {
         const nextAppearance = theme === 'light' ? 'Switch to dark' : 'Switch to light';
         if (nav.themeTip !== nextAppearance)
           failures.push(`${label}: the theme button's tooltip reads "${nav.themeTip}"`);
-        if (nav.motionTip !== NAV_ICONS.motion.pause)
-          failures.push(`${label}: the motion toggle's tooltip reads "${nav.motionTip}"`);
-        if (!nav.themeBeforeMotion)
-          failures.push(`${label}: the motion toggle does not follow the theme button`);
         const boxed = nav.boxed.filter((b) => b.control !== 'home.nav.new');
         if (boxed.length > 0)
           failures.push(`${label}: boxed text controls ${boxed.map((b) => b.text).join(', ')}`);
@@ -262,36 +287,6 @@ async function navIcons(browser: Browser): Promise<void> {
         if (!tip.startsWith(nextAppearance) || !tip.includes('Dark or light'))
           failures.push(`${label}: the tooltip plate reads "${tip}"`);
         await page.mouse.move(tb.x - 40, tb.y + 200);
-        /* the toggle flips aria-pressed and its glyph, and back */
-        const glyphs = () =>
-          page.evaluate(() =>
-            ['pause', 'play'].map(
-              (g) =>
-                getComputedStyle(document.querySelector(`[data-motion-toggle] [data-icon="${g}"]`)!)
-                  .visibility,
-            ),
-          );
-        const before = await glyphs();
-        await page.evaluate(() =>
-          document.querySelector<HTMLButtonElement>('[data-motion-toggle]')!.click(),
-        );
-        const pressed = await page
-          .locator('header [data-motion-toggle]')
-          .getAttribute('aria-pressed');
-        const after = await glyphs();
-        await page.evaluate(() =>
-          document.querySelector<HTMLButtonElement>('[data-motion-toggle]')!.click(),
-        );
-        const back = await page.locator('header [data-motion-toggle]').getAttribute('aria-pressed');
-        if (
-          JSON.stringify(before) !== '["visible","hidden"]' ||
-          pressed !== 'true' ||
-          JSON.stringify(after) !== '["hidden","visible"]' ||
-          back !== 'false'
-        )
-          failures.push(
-            `${label}: the toggle read ${JSON.stringify({ before, pressed, after, back })}`,
-          );
       } finally {
         await context.close();
       }

@@ -10804,12 +10804,12 @@
     {
       "id": "home.motion.reduced",
       "feature": "decks",
-      "interaction": "Under reduce: no `ts-intro`; `document.getAnimations()` empty after the load, a full scroll and each interaction; no loop starts and no shader chunk is requested; every field at its final tone, the people band's still, the pattern's still frame on both sides; Pause Motion hidden; every interaction works",
+      "interaction": "Under reduce: no `ts-intro`; `document.getAnimations()` empty after the load, a full scroll and each interaction; no loop starts and no shader chunk is requested; every field at its final tone, the people band's still, the pattern's still frame on both sides; every motion toggle hidden, the terminal's and the footer's; every interaction works",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-reduced-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9; restated in polish two, P2-N#1"
     },
     {
       "id": "home.motion.hidden-tab",
@@ -10904,12 +10904,12 @@
     {
       "id": "home.motion.pause",
       "feature": "decks",
-      "interaction": "The motion toggle sits right after the theme button in the nav as a 32 px icon button with `aria-pressed`, named \"Pause motion\"; pressing it, a running one shot motion lands at its end state within one frame and 0 frame callbacks run in the next 2 s without input at the top, middle and bottom; its tooltip reads \"Play motion\" and it draws the play glyph; the choice is in `localStorage` `ts-home-motion` and a reload paints with the button pressed, H5's still from the first paint and no automatic motion starting; with storage throwing the page plays and the button works for the visit; hidden under reduced motion; a drag on the lighthouse and the show still move while paused. Its loop clauses are `home.motion.loops`'s",
+      "interaction": "The motion toggles (the hero terminal's 28 px icon button and the footer's Pause Motion text button; none in the navigation) carry `aria-pressed` and the name \"Pause motion\"; pressing either, a running one shot motion lands at its end state within one frame and 0 frame callbacks run in the next 2 s without input at the top, middle and bottom; both then draw the play glyph, the terminal's tooltip reads \"Play motion\" and the footer's label Play Motion; the choice is in `localStorage` `ts-home-motion` and a reload paints both pressed, H5's still from the first paint and no automatic motion starting; with storage throwing the page plays and the toggles work for the visit; hidden under reduced motion; a drag on the lighthouse and the show still move while paused. Its loop clauses are `home.motion.loops`'s",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "b-1440-light-first.png (the control); judge-1 (121 to 0 frame callbacks a second in B)",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9; restated in the design round, DR-D4#1"
+      "note": "docs/LANDING.md 6.7 (second pass), V4#9; restated in the design round, DR-D4#1; restated in polish two, P2-N#1"
     },
     {
       "id": "home.motion.develop",
@@ -11023,12 +11023,12 @@
     {
       "id": "home.nav.icons",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the nav is one 58 px row: the lockup, Documentation at 1440 only (the footer holds it under 720 px), the shared theme button and the motion toggle as 32 px icon buttons with the shared tooltip, Sign In and New Presentation; no boxed text button but New Presentation; the toggle flips `aria-pressed` and its glyph between pause and play",
+      "interaction": "At 1440 and 390 in both appearances the nav is one 58 px row: the lockup, Documentation from 720 px (the footer holds it under 720 px), the shared theme button as a 32 px icon button with the shared tooltip, one hairline, Sign In and New Presentation; no boxed text button but New Presentation; no motion toggle",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "research-landing F1: six text controls, four kinds of button, two rows at 390",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts; restated in polish two, P2-N#1"
     },
     {
       "id": "home.type.default-glyphs",
@@ -11741,6 +11741,26 @@
       "severity": 1,
       "evidence": "verify-landing.md finding 6 (production 2026-10-05: the Perfect side drew the GT monogram and \"07 / 09\" beside the page's Turboslide mark); build/ship.md 6 named it for Kevin",
       "note": "Round 1 follow-up, lane E item 6: the exporter draws the theme's default logo, the GT monogram, for a deck whose kit names no footer logo, so the export's page deck takes the Turboslide mark as its footer logo (scripts/home/export.ts writeExportMark); the Perfect file lays that logo over its sheet picture a second time at 3x, and the build serves the sheet picture (scripts/build-home-assets.ts). The counter stays the exporter's \"07 / 09\" (the n / N format pads)"
+    },
+    {
+      "id": "home.nav.no-pause",
+      "feature": "decks",
+      "interaction": "At 1440, 1024, 768, 390 and 320 in both appearances the navigation's header holds no [data-motion-toggle]; the hero terminal's head holds one (a 28 px icon button) and the footer's closing line one, a text button reading Pause Motion or Play Motion with its glyph and the same width in both; pressing either flips html[data-motion] and both buttons' aria-pressed within one frame; a reload with the pause stored paints both pressed before the live core loads; under reduced motion neither shows",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "Kevin, 2026-10-07: \"remove the pause unpause button in top bar\"; research-header 1.2 findings 1 and 2, 3.2 findings 1 and 2",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-N#1"
+    },
+    {
+      "id": "home.nav.fits-320",
+      "feature": "decks",
+      "interaction": "At 320 and 359 px in both appearances the navigation is one 58 px row whose controls' boxes do not overlap, and nothing draws inside Sign In's box; from 360 px the bar reads the lockup, Documentation from 720 px, the theme button, one hairline, Sign In and New Presentation",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-header 1.2 finding 3 (the pause glyph and a hairline inside Sign In at 320), nav-320-light-today.jpg",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-N#1"
     }
   ]
 }

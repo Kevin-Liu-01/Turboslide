@@ -4,6 +4,7 @@ import { coverage } from './lib';
 import * as agents from './home/agents';
 import * as design from './home/design';
 import * as exportBand from './home/export';
+import * as header from './home/header';
 import * as kits from './home/kits';
 import * as menus from './home/menus';
 import * as motion from './home/motion';
@@ -33,6 +34,7 @@ import * as versions from './home/versions';
 //   patterns.ts  V4, push 19           the animated patterns band
 //   people.ts    V4, push 20           the two people band
 //   design.ts    D4, DR-D4#1 to #7     the design round's landing rows (docs/DESIGN.md 8, 11)
+//   header.ts    N, P2-N#1 to #3       polish two's bar and hero rows (docs/POLISH-2.md 3, 6.3)
 //
 // Each module exports `ROWS`, the ids it drives, and `rows()`, which declares one test per row with
 // `test(title(id), ...)`. A module declares a row's test only in the push that enters the row,
@@ -60,6 +62,7 @@ const MODULES = [
   patterns,
   people,
   design,
+  header,
 ] as const;
 
 /* the runner's trace keeps its actions, network and console but not its DOM snapshots or its

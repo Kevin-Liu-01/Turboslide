@@ -7,10 +7,17 @@
  * copy.ts string it names; the page draws this one.
  */
 
-/** The navigation's icon controls (DESIGN.md 8.1): the motion toggle's name and its tooltip. */
+/**
+ * The motion toggle's name and its tooltip (DESIGN.md 8.1). Since polish two (docs/POLISH-2.md
+ * 3.1) the toggles are the hero terminal's icon button and the footer's text button; the
+ * navigation draws none.
+ */
 export const NAV_ICONS = {
   motion: { pause: 'Pause motion', play: 'Play motion' },
 } as const;
+
+/** The footer's motion toggle, a text button (docs/POLISH-2.md 3.1): its two labels. */
+export const MOTION_BUTTON = { pause: 'Pause Motion', play: 'Play Motion' } as const;
 
 /** The h1 in its two lines (DESIGN.md 8.2, question 20); replaces copy.ts `HERO.h1Lines`. */
 const H1_LINES = ['Presentations for', 'people and agents'] as const;
@@ -196,6 +203,7 @@ export const CLOSE_ROUND = {
 /** Every string of this module, keyed, for the lints of copy.test.ts. */
 export const DESIGN_COPY = {
   navIcons: NAV_ICONS,
+  motionButton: MOTION_BUTTON,
   hero: HERO_ROUND,
   numbers: NUMBERS_ROUND,
   menus: MENUS_ROUND,

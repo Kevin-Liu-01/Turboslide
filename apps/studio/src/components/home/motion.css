@@ -3,18 +3,33 @@
    people band and the patterns band. Imported after home.css, so the reduced motion block sits
    last. */
 
-/* ---- the motion toggle (3.2; docs/DESIGN.md 8.1): a 32 px icon square of the shell beside the
-   theme button, drawing the editor's `pause` glyph while the page moves and `play` while it is
-   paused, both masks of icons.generated.css in one grid cell, so nothing in the bar moves when it
-   is pressed (3.7). The glyph follows html[data-motion], which the boot script sets before the
-   first paint ---- */
-header .ts-motion-toggle.pt-ib {
+/* ---- the motion toggles (3.2; docs/POLISH-2.md 3.1): the hero terminal's icon square and the
+   footer's text button, drawing the editor's `pause` glyph while the page moves and `play` while it
+   is paused, both masks of icons.generated.css in one grid cell, so nothing moves when one is
+   pressed (3.7). The text button's two labels share the next cell the same way, so its width is
+   the longer label's in both states. The glyph and the label follow html[data-motion], which the
+   boot script sets before the first paint ---- */
+.ts-motion-toggle.pt-ib {
   display: inline-grid;
   place-items: center;
 }
 
 .ts-motion-toggle > .ts-icon {
   grid-area: 1 / 1;
+}
+
+.ts-motion-toggle.is-label {
+  grid-template-columns: 16px auto;
+  column-gap: 6px;
+  justify-items: start;
+}
+
+.ts-motion-toggle.is-label > .ts-icon {
+  color: inherit;
+}
+
+.ts-motion-toggle > .ts-motion-word {
+  grid-area: 1 / 2;
 }
 
 .ts-motion-toggle .is-play,
@@ -564,10 +579,11 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 }
 
-/* ---- reduced motion (3.9): Pause Motion is hidden, decided at the first paint ---- */
+/* ---- reduced motion (3.9): every motion toggle is hidden, the terminal's and the footer's,
+   decided at the first paint ---- */
 @media (prefers-reduced-motion: reduce) {
-  /* the selector of the button's own display rule above, so this one wins by its place */
-  header .ts-motion-toggle.pt-ib {
+  /* the selector of the toggles' own display rule above, so this one wins by its place */
+  .ts-motion-toggle.pt-ib {
     display: none;
   }
 }

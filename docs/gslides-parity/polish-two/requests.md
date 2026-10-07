@@ -31,3 +31,30 @@ memory tier), More, Collaborators opens the roster plate as an empty outlined pi
 wide under the title row, with no row for a person alone
 (`docs/gslides-parity/polish-two/f/editor-390-light-roster-open.jpg`, `editor-390-dark-roster-open.jpg`).
 The own row is in the default view since the people round, so a person alone should read one row.
+
+## N
+
+### P2-N-1, to the integrator: the route stops passing the nonce to the bar
+
+Since P2-N#1 the bar renders no script: the pressed script of the motion toggles moved after the
+footer's toggle, the last one in the document (`docs/POLISH-2.md` 3.1 item 3), and
+`apps/studio/src/components/home/HomeFooter.tsx` reads the request's nonce itself through
+`useRouter().options.ssr?.nonce`, as `routes/home.tsx` 81 does. In
+`apps/studio/src/routes/home.tsx` 136, `<HomeNav nonce={nonce} />` becomes `<HomeNav />`; lane N
+then drops the unused `_props` parameter of `HomeNav` in its next push.
+
+### P2-N-2, to the integrator: `/home`'s document crosses its line from the shared tree
+
+The node-server build of the shared tree at 15:06 serves `/home` at 100,579 B decoded against the
+100,000 B line of `home.budget.bytes-first` (DESIGN.md 8.16 read 99,756 B on `f2d48868`). Lane N's
+P2-N#1 changes it by -51 B. The rest is in the head and the router's state, from other lanes' work:
+a `vendor-*.css` stylesheet link (about 118 B) with lane D's work in the tree; once lane A's
+`/signin` imported the shared `ThemeButton` (`packages/chrome/src/auth/AuthPage.tsx`), Rolldown
+moved it into a chunk of its own, so `/home` gained `<link rel="modulepreload"
+href="/assets/ThemeButton-*.js">` (80 B) and `<link rel="stylesheet"
+href="/assets/ToolButton-*.css">` (about 103 B); the router's manifest grew 81 B with the new
+routes. Lane N has no more bytes to give in its own files without changing the mark or the copy.
+Two ways out for the integrator with lanes A and D: keep the shared chrome modules `/home` imports
+(`ThemeButton`, `ToolButton.css`, `Tooltip`) in one group of `output.codeSplitting.groups` in
+`apps/studio/vite.config.ts` so a second importer adds no link to `/home`, and keep the docs'
+styles out of the vendor stylesheet; or ask Kevin to move the line. The line is not raised here.

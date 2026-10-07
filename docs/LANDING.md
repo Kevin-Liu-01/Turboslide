@@ -186,6 +186,7 @@ The Rosetta Stone leaves the fixture and `public/home/` (its stills and tone map
 - **Interaction.** Light and Dark store `gt-theme` and restyle at once; every printed field reprints in one frame. Pause Motion (`[data-motion-toggle]`, `aria-pressed`) pauses or plays every automatic motion on the page (3.2) and is remembered across visits. It is hidden under reduced motion, where nothing moves on its own. The skip link moves focus to the hero section.
 - **Motion.** B1 and B2 only (3.6).
 - **Kind.** Live product code (`HomeNav.tsx`); Pause Motion's behaviour is V4's (`live/motion.ts`, `boot.ts`).
+- **Polish two (docs/POLISH-2.md 3.1 and 3.2, P2-N#1).** The bar draws no motion toggle: it reads the lockup, Documentation from 720 px, the shared theme button, one hairline, Sign In and New Presentation. Under 360 px the row's gap is 4 px and the hairline hides, so the row takes 318 px of 320. Pause Motion is the hero terminal's 28 px icon toggle and the footer's text button (3.2).
 
 ### 2.2 Hero
 
@@ -475,6 +476,7 @@ Under reduced motion no loop starts and no one shot motion plays: every still sh
 - **Remembered across visits.** The choice is stored in `localStorage` under `ts-home-motion` (`paused`, or the key removed on Play), every read and write wrapped in try and catch. Storage that throws or is empty means playing, and the button still works for the visit. The boot script reads the key before the first paint and sets `html[data-motion="paused"]`, so a paused visitor's page paints still: the loops at their rest frames, H5's still from the first paint, every one shot motion at its end state. The key is per browser, as `gt-theme` is.
 - **Under reduced motion** the button is hidden by a `prefers-reduced-motion: reduce` rule, decided at the first paint, so its absence shifts nothing; a change of the preference while the page is open hides or shows it.
 - **Owner.** V1 renders the button in `HomeNav.tsx`; V4's `boot.ts` and `live/motion.ts` give it its behaviour (section 6.3 fixes the hook).
+- **Polish two (docs/POLISH-2.md 3.1, P2-N#1).** The control left the navigation. The page has two toggles of the one state: the hero terminal's 28 px icon button and a text button at the end of the footer's closing line reading "Pause Motion" or "Play Motion" (both labels in one grid cell, so its width never changes), each named "Pause motion" with `aria-pressed`. The inline script after the footer's toggle sets every toggle's `aria-pressed` as the document parses. Under reduced motion every toggle hides. The terminal's toggle is the 13th Tab stop.
 
 ### 3.3 Curves and duration tokens
 
@@ -542,7 +544,7 @@ Under `prefers-reduced-motion: reduce` the boot script adds no intro class, the 
 
 ### 3.10 The 5 s rule and WCAG 2.2.2
 
-The loops run longer than 5 s, start on their own and sit beside other content, so WCAG 2.2.2 (https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html, read 2026-10-02 by the motion researcher) asks for a way to pause them: Pause Motion is that control, early in the Tab order, acting within one frame, and the hero's and the people's loops also stop for good on a press. Every one shot motion ends within 5 s of its start (H5 1.5 s, C1 2.4 s, E1 0.6 s, K1 0.93 s). Every visitor motion ends within 5 s (a chip's or step tab's step at most about 4.8 s with a 24 character name, by the first pass's arithmetic; Tailor 1.4 s; a kit 0.5 s; the show 0.5 s in and 0.4 s out).
+The loops run longer than 5 s, start on their own and sit beside other content, so WCAG 2.2.2 (https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html, read 2026-10-02 by the motion researcher) asks for a way to pause them: Pause Motion is that control (since polish two the hero terminal's toggle, the 13th Tab stop, and the footer's Pause Motion, one state), acting within one frame, and the hero's and the people's loops also stop for good on a press. Every one shot motion ends within 5 s of its start (H5 1.5 s, C1 2.4 s, E1 0.6 s, K1 0.93 s). Every visitor motion ends within 5 s (a chip's or step tab's step at most about 4.8 s with a 24 character name, by the first pass's arithmetic; Tailor 1.4 s; a kit 0.5 s; the show 0.5 s in and 0.4 s out).
 
 ## 4. The budgets
 

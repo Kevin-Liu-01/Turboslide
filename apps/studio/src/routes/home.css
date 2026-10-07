@@ -334,7 +334,7 @@ html:has(.ts-product) {
   background: var(--pt-plate);
 }
 
-/* the two hairlines: after the link, and between the icon controls and Sign In */
+/* the bar's one hairline, between the theme button and Sign In (docs/POLISH-2.md 3.2) */
 .ts-product-nav-rule {
   flex: 0 0 1px;
   height: 20px;
@@ -342,15 +342,9 @@ html:has(.ts-product) {
   background: var(--pt-hair);
 }
 
-/* the theme button and the motion toggle: 32 px icon squares of the shell (.pt-ib .pt-icon), the
-   6 px corner on their hover ground, in ink */
-.ts-product-nav-icons {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.ts-product-nav-icons .pt-ib {
+/* the theme button: a 32 px icon square of the shell (.pt-ib .pt-icon), the 6 px corner on its
+   hover ground, in ink */
+.ts-product-nav .ts-product-nav-icon {
   color: var(--pt-ink);
   border-radius: var(--pt-radius);
 }
@@ -1057,10 +1051,12 @@ button.ts-hero-tool[aria-disabled='true'] .ts-icon {
   text-overflow: ellipsis;
 }
 
-/* the head's motion toggle: the shell's icon square on the panel's ink, at the head's end; the
-   recording's words start after the agent's, so their place never depends on their own width
-   (a right aligned cell moved 3 px when Inter arrived) */
+/* the head's motion toggle: the shell's icon square on the panel's ink, at the head's end, 28 px
+   at every width (at 320 the head's words shrank it to 27.6); the recording's words start after
+   the agent's, so their place never depends on their own width (a right aligned cell moved 3 px
+   when Inter arrived) */
 .ts-hero-terminal .ts-motion-toggle.pt-ib {
+  flex: 0 0 28px;
   margin-left: auto;
   width: 28px;
   height: 28px;
@@ -2549,12 +2545,27 @@ code.ts-command:not([data-printed]) {
   text-underline-offset: 3px;
 }
 
-.ts-product-foot-closing {
+/* the closing line: the sentence, then Pause Motion at the line's end (docs/POLISH-2.md 3.1); the
+   button's 10 px side sits in the gutter, so its word ends on the column's edge */
+.ts-product-foot-end {
   flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
   margin-top: 16px;
+}
+
+.ts-product-foot-closing {
   font-size: 14px;
   line-height: 1.55;
   color: var(--pt-ink-2);
+}
+
+.ts-product-foot-end .ts-motion-toggle.pt-ib {
+  margin-right: -10px;
+  font-size: 14px;
 }
 
 /* the GT mark before the company's name at the text's cap, in the text's ink */
@@ -2665,15 +2676,13 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     --ts-gutter: 0px;
   }
 
-  /* the navigation stays one 58 px row (docs/DESIGN.md 8.1): Documentation and its hairline
-     leave for the footer, and the row holds the lockup, the two icon controls, a hairline, Sign In
-     and New Presentation */
+  /* the navigation stays one 58 px row (docs/DESIGN.md 8.1): Documentation leaves for the footer,
+     and the row holds the lockup, the theme button, the hairline, Sign In and New Presentation */
   .ts-product-nav-row {
     gap: 8px;
   }
 
-  .ts-product-nav-link,
-  .ts-product-nav-rule.is-links {
+  .ts-product-nav-link {
     display: none;
   }
 
@@ -2713,8 +2722,15 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
     width: auto;
   }
 
-  .ts-product-foot-closing {
+  /* Pause Motion on its own line under the sentence, its glyph on the column's edge */
+  .ts-product-foot-end {
+    flex-direction: column;
+    align-items: flex-start;
     margin-top: 8px;
+  }
+
+  .ts-product-foot-end .ts-motion-toggle.pt-ib {
+    margin: 0 0 0 -10px;
   }
 
   /* the hero (DESIGN.md 8.2 at 390): the h1 at 44 px on its two lines (the LCP element over the
@@ -3012,9 +3028,22 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
 }
 
 /* ---- under 480 px the lockup shows the mark alone, named "Turboslide" by its link (2.1), so the
-   one row holds the mark, the two icon controls, Sign In and New Presentation at 390 ---- */
+   one row holds the mark, the theme button, the hairline, Sign In and New Presentation at 390 ---- */
 @media (max-width: 479px) {
   .ts-product-lockup-word {
+    display: none;
+  }
+}
+
+/* ---- under 360 px (docs/POLISH-2.md 3.2): 4 px between the bar's controls and no hairline, so
+   the mark, the theme button, Sign In's 68 px slot and New Presentation take 318 px of 320 and
+   nothing draws inside Sign In ---- */
+@media (max-width: 359px) {
+  .ts-product-nav-row {
+    gap: 4px;
+  }
+
+  .ts-product-nav-rule {
     display: none;
   }
 }

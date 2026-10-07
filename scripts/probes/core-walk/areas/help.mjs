@@ -36,40 +36,18 @@ export async function run(t) {
   await t.step(
     'help.documentation-link',
     'read the Documentation link in Help > Help and GET it',
-    'the link answers 200',
+    'the link is /docs and answers 200 on the base',
     async () => {
       await t.menuPath('help', 'help.help');
       await t.waitControl('dialog.help', 8000);
       const href = await t.attr('[data-control="dialog.help.docs"]', 'href');
       await t.clickControl('dialog.help.done');
       if (!href) return { ok: false, observed: 'no Documentation link' };
-      const url = /^https?:/.test(href) ? href : `${BASE}${href}`;
-      /* the link is GitHub's: a 429 is GitHub rate limiting the runner, not the document
-         (VERIFICATION.md pass 2: help.documentation-link failed on a 429 alone), so a 429 is
-         retried twice after a pause and the same path is then read from raw.githubusercontent.com,
-         which answers from another limit; the observed column names every answer */
-      const own = /^https?:\/\/[^/]*turboslide|^https?:\/\/localhost/.test(url) ? headers : {};
-      const answers = [];
-      let status = 0;
-      for (let attempt = 0; attempt < 3; attempt += 1) {
-        const res = await page.request.get(url, { headers: own, maxRedirects: 3 });
-        status = res.status();
-        answers.push(String(status));
-        if (status !== 429) break;
-        await t.sleep(15_000);
-      }
-      if (status === 429) {
-        const raw = url.replace(
-          /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\//,
-          'https://raw.githubusercontent.com/$1/$2/$3/',
-        );
-        if (raw !== url) {
-          const res = await page.request.get(raw, { maxRedirects: 3 });
-          status = res.status();
-          answers.push(`raw ${status}`);
-        }
-      }
-      return { ok: status === 200, observed: `${href} -> ${answers.join(', ')}` };
+      /* the docs at /docs since polish two (docs/POLISH-2.md 5.8): a page of the base itself, so
+         the GitHub retries of the repository link left with it */
+      const res = await page.request.get(`${BASE}${href}`, { headers, maxRedirects: 3 });
+      const status = res.status();
+      return { ok: href === '/docs' && status === 200, observed: `${href} -> ${status}` };
     },
   );
   await t.step(

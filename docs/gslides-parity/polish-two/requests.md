@@ -68,6 +68,43 @@ The own row is in the default view since the people round, so a person alone sho
   the same empty span until the facts arrive after hydration, and the link it then draws is in the
   route's chunk. The other four `home.budget.*` rows pass on the same build.
 
+## D
+
+### P2-D-1, to lane F or the integrator: robots.txt names the sitemap (row `help.docs.links`)
+
+`apps/studio/public/robots.txt` is an output of `scripts/build-brand.ts` (`robotsTxt()`), which lane F
+owns in this round, and `node scripts/build-brand.ts --check` compares it byte for byte, so lane D did
+not edit it by hand. The change:
+
+1. `packages/theme/brand/site.ts` `ROBOTS` gains `sitemap: '/sitemap.xml'`.
+2. `scripts/build-brand.ts` `robotsTxt()` ends with an empty line and
+   `Sitemap: ${SITE.productionOrigin}${SITE.robots.sitemap}` (`https://www.turboslide.com/sitemap.xml`).
+3. `node scripts/build-brand.ts`, so `apps/studio/public/robots.txt` and `brand-manifest.json` carry it.
+4. `apps/studio/src/brand-files.test.ts`, "writes robots.txt from the site rules", gains
+   `expect(robots).toContain(\`Sitemap: ${SITE.productionOrigin}/sitemap.xml\`)`, the unit test of
+   `docs/POLISH-2.md` 5.2 that pins the line to `productionOrigin`.
+
+`/sitemap.xml` is lane D's (`apps/studio/src/routes/sitemap[.]xml.ts`, prerendered, `/home` and every
+docs page). Until this lands `help.docs.links` reads red on its robots clause alone; every other
+clause passed on the node-server build (`docs/gslides-parity/polish-two/d.md`).
+
+### P2-D-2, to the integrator: the shared chunk is named `vendor` since the docs' lazy chunks
+
+On the node-server build with the docs in, the client's shared entry chunk is written as
+`vendor-*.js` (1,428,094 B), where a control build of the same tree without the fumadocs-mdx plugin
+writes it as `index-*.js` (1,427,016 B): the vendor group of `vite.deploy.config.ts`
+(`codeSplitting.groups`, whose recursive dependencies pull the app's statically reachable modules
+in) takes effect once the docs add their 35 lazy page chunks. The bytes every route preloads are the
+same within the route tree's 1,078 B, but `scripts/check-client-bundle.mjs` now finds a vendor chunk
+and asserts the 600,000 B largest chunk ceiling it used to report, so check step 31 fails on that
+line. Lane D's options do not move it (`updateViteConfig: false` was measured, same result). A
+decision for the integrator: keep that line reported until the vendor group holds React, the
+scheduler and the router alone (`includeDependenciesRecursively: false`, a separate measured change
+to every route's chunks), or accept the line as asserted. The same build reads `/docs` preloading
+1,527,714 B against its 450,000 B ceiling for the same shared chunk (the docs' own: 41,511 B for the
+shell, 6,041 B for the route chunk, and the chrome's 51,137 B icon table that `/decks` preloads too),
+as `/decks` and `/deck/gt-brand` read over theirs.
+
 ## N
 
 ### P2-N-1, to the integrator: the route stops passing the nonce to the bar

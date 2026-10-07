@@ -3212,11 +3212,12 @@
     {
       "id": "help.documentation-link",
       "feature": "help",
-      "interaction": "The Documentation link in Help > Help answers 200",
+      "interaction": "The Documentation link in Help > Help is /docs and answers 200 on the base",
       "driver": "probe --core",
       "today": "broken",
       "severity": 1,
-      "evidence": "audit-export row 39"
+      "evidence": "audit-export row 39",
+      "note": "Restated in polish two, P2-D#6"
     },
     {
       "id": "help.keyboard-shortcuts",
@@ -11965,6 +11966,16 @@
       "severity": 2,
       "evidence": "research-docs 3.2 (194, 181, 170, 173 and 178 in the five generated files), 6 P6",
       "note": "Polish two (docs/POLISH-2.md 6), P2-D#5"
+    },
+    {
+      "id": "help.docs.links",
+      "feature": "help",
+      "interaction": "The landing's navigation (720 px and over) and footer link Documentation to /docs with no external glyph; Help > Help's Documentation opens /docs in a new tab from the editor; robots.txt names the sitemap and /sitemap.xml lists /home and every docs page",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-docs 3.1 (the link opens the repository's engineering index, ts-documentation-link-target.jpg; no sitemap line)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#6"
     }
   ]
 }

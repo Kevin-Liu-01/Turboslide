@@ -88,12 +88,8 @@ export const NAV = {
   skip: 'Skip to content',
   lockup: { word: 'Turboslide', name: 'Turboslide' },
   links: [
-    {
-      id: 'home.nav.docs',
-      label: 'Documentation',
-      href: `${GITHUB_FILE}/docs/README.md`,
-      external: true,
-    },
+    /* the docs at /docs since polish two (docs/POLISH-2.md 5.8): a page of this site, no new tab */
+    { id: 'home.nav.docs', label: 'Documentation', href: '/docs' },
   ] as ReadonlyArray<NavLink>,
   /* the theme button and the motion toggle are icon buttons since the design round (docs/DESIGN.md
      8.1): the theme button carries the editor's words, the toggle design-copy.ts NAV_ICONS */
@@ -560,12 +556,7 @@ export const FOOTER = {
   links: [
     { id: 'home.foot.new', label: 'New presentation', href: '/new' },
     { id: 'home.foot.decks', label: 'Your presentations', href: '/decks' },
-    {
-      id: 'home.foot.docs',
-      label: 'Documentation',
-      href: `${GITHUB_FILE}/docs/README.md`,
-      external: true,
-    },
+    { id: 'home.foot.docs', label: 'Documentation', href: '/docs' },
     { id: 'home.foot.github', label: 'GitHub', href: REPOSITORY, external: true },
     {
       id: 'home.foot.licence',

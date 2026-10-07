@@ -5,7 +5,7 @@ import { tipProps } from '../Tooltip';
 
 /**
  * Help > Help (gslides-parity SPEC 2.10, 11.2): the ten tasks of the sales user as one line
- * how-tos, and a link to the documentation.
+ * how-tos, and a link to the documentation at /docs (docs/POLISH-2.md 5.8).
  */
 export const HOW_TOS: ReadonlyArray<{ task: string; how: string }> = [
   {
@@ -73,8 +73,9 @@ export function HelpDialog() {
         ))}
       </ol>
       <p>
+        {/* the docs at /docs (docs/POLISH-2.md 5.8), in a new tab so the editor stays open */}
         <a
-          href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md"
+          href="/docs"
           target="_blank"
           rel="noopener"
           data-control="dialog.help.docs"

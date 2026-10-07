@@ -209,6 +209,56 @@ describe('the thirteen gt-ui rules over the TypeScript syntax tree (P:.oxlintrc.
     expect(rulesOf("const id = 'ss01';")).toEqual([]);
   });
 
+  test('css/chrome-alternates reads every alternate in JSX, inline styles and style strings (docs/POLISH-2.md 2.3)', () => {
+    expect(rulesOf('const a = <div style={{ fontFeatureSettings: "\'ss02\'" }} />;')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf('const a = <span style="font-feature-settings: \'cv05\'" />;')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf("const a = { fontVariantAlternates: 'stylistic(x)' };")).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf("const a = { fontVariantAlternates: 'normal' };")).toEqual([]);
+    expect(rulesOf("const a = { fontFeatureSettings: 'var(--display-features)' };")).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(
+      rulesOf("const css = '.ts-sheet h1 { font-feature-settings: var(--display-features) }';"),
+    ).toEqual([]);
+    expect(
+      rulesOf("const css = '.ts-x h1 { font-feature-settings: var(--display-features) }';"),
+    ).toEqual(['css/chrome-alternates']);
+    expect(rulesOf("const css = '.x { font-variant-alternates: swash(fancy) }';")).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf("const a = { fontFeatureSettings: \"'case', 'calt'\" };")).toEqual([]);
+    expect(
+      rulesOf("const css = '.ts-product [data-home-slides] { --display-features: normal; }';"),
+    ).toEqual([]);
+  });
+
+  test("css/chrome-alternates reads the people marks' renderer and the brand build, and no other rule does", () => {
+    /* the attribute marks-render.ts 353 drew until P2-F#3 */
+    const initials =
+      'const t = `<text class="ts-mark-initials" font-size="${f}" style="font-feature-settings:\'cv11\',\'ss01\'" fill="${c}">${i}</text>`;';
+    expect(rulesOf(initials, 'packages/identity/src/marks-render.ts')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(
+      rulesOf(initials.replace(/ style="[^"]*"/, ''), 'packages/identity/src/marks-render.ts'),
+    ).toEqual([]);
+    /* the card's body rule build-brand.ts 655 wrote until P2-F#3 */
+    const card =
+      "const html = `<style>\nbody { font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01'; }\n</style>`;";
+    expect(rulesOf(card, 'scripts/build-brand.ts')).toEqual(['css/chrome-alternates']);
+    /* the other rules do not read these roots: a hex value and an em dash pass there */
+    expect(
+      rulesOf('const a = <p style="color: #ff0000">One — two</p>;', 'packages/identity/src/x.tsx'),
+    ).toEqual([]);
+    expect(rulesOf('const a = <p style="color: #ff0000">One — two</p>;')).not.toEqual([]);
+  });
+
   test('a file that does not parse is a parse finding, never a pass', () => {
     expect(rulesOf('const a = <div>;')[0]).toBe('brand/parse');
   });

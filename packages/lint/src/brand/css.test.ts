@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'vitest';
 
-import { lintCss, parseCss } from './css.ts';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { lintAlternatesText, lintCss, parseCss } from './css.ts';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
 
 function rulesOf(text: string, file = 'packages/chrome/src/Fixture.css'): string[] {
   return lintCss(file, text).map((f) => f.rule);
@@ -188,19 +194,76 @@ describe('the CSS checks', () => {
     ).toEqual([]);
   });
 
-  test("css/chrome-alternates reads cv11 and ss01 outside the General Translation theme's files", () => {
+  test("css/chrome-alternates reads every stylistic set and character variant outside the General Translation theme's files", () => {
     expect(rulesOf(".ts-x { font-feature-settings: 'cv11', 'ss01' }")).toEqual([
       'css/chrome-alternates',
     ]);
     expect(rulesOf(".ts-x { --ts-features: 'ss01' }")).toEqual(['css/chrome-alternates']);
+    /* docs/POLISH-2.md 2.3: every ssNN, cvNN, salt, swsh and aalt, not only General Translation's two */
+    expect(rulesOf('.pt-button { font-feature-settings: "ss02" }')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    for (const tag of ['ss20', 'cv01', 'cv99', 'salt', 'swsh', 'aalt'])
+      expect(rulesOf(`.ts-x { font-feature-settings: '${tag}' 1 }`), tag).toEqual([
+        'css/chrome-alternates',
+      ]);
+    expect(rulesOf('.ts-x { font-variant-alternates: stylistic(x) }')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf('.ts-x { font-variant: styleset(open-digits) }')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(rulesOf('.ts-x { font-variant-alternates: normal }')).toEqual([]);
     expect(rulesOf('.ts-x { font-feature-settings: normal }')).toEqual([]);
-    expect(rulesOf('.ts-x h1 { font-feature-settings: var(--display-features) }')).toEqual([]);
+    /* case, calt and kern are not alternates; the numeric features are css/numerals' */
+    expect(rulesOf(".ts-x { font-feature-settings: 'case', 'calt', 'kern' }")).toEqual([]);
+    /* the theme's token is read only on a slide */
+    expect(rulesOf('.ts-x h1 { font-feature-settings: var(--display-features) }')).toEqual([
+      'css/chrome-alternates',
+    ]);
+    expect(
+      rulesOf(
+        '.ts-sheet .ts-home-h1, .ts-home-h2 { font-feature-settings: var(--display-features) }',
+      ),
+    ).toEqual(['css/chrome-alternates']);
+    expect(
+      rulesOf(
+        '.ts-sheet .ts-home-h1,\n.ts-sheet .ts-home-h2 { font-feature-settings: var(--display-features) }',
+        'apps/studio/src/routes/home.css',
+      ),
+    ).toEqual([]);
     expect(
       rulesOf(
         ".ts-sheet h1 { font-feature-settings: 'cv11', 'ss01' }",
         'packages/theme/src/gt-ink-paper/sheet.css',
       ),
     ).toEqual([]);
+  });
+
+  test('css/chrome-alternates reads the generated brand sources as text, and nothing else reads them', () => {
+    const old =
+      '<svg><text font-weight="500" style="font-feature-settings:\'cv11\',\'ss01\'">Turboslide</text></svg>';
+    expect(lintAlternatesText('packages/theme/brand/wordmark.svg', old)).toMatchObject([
+      { rule: 'css/chrome-alternates', line: 1 },
+    ]);
+    const card =
+      "<style>\nbody { color: var(--pt-ink); font-feature-settings: 'cv11', 'ss01'; }\n</style>";
+    expect(lintAlternatesText('packages/theme/brand/og-template.html', card)).toMatchObject([
+      { rule: 'css/chrome-alternates', line: 2 },
+    ]);
+    expect(
+      lintAlternatesText('packages/theme/brand/og-template.html', '<!-- cv11 and ss01 -->'),
+    ).toEqual([]);
+    /* the committed sources since P2-F#3 */
+    for (const file of [
+      'packages/theme/brand/wordmark.svg',
+      'packages/theme/brand/og-template.html',
+    ])
+      expect(lintAlternatesText(file, readFileSync(resolve(ROOT, file), 'utf8')), file).toEqual([]);
+    /* a stylesheet under an alternates root is read by this rule alone */
+    expect(rulesOf('.x { border-radius: 3px; z-index: 40 }', 'packages/theme/brand/x.css')).toEqual(
+      [],
+    );
   });
 
   test('each finding names the file, the line and the declaration', () => {

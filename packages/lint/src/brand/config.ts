@@ -154,6 +154,18 @@ export const ALTERNATES_OWNERS: readonly string[] = [
   'packages/theme/src/themes.ts',
 ];
 
+/**
+ * The roots `css/chrome-alternates` reads beside the chrome's trees (docs/POLISH-2.md 2.3 item 4):
+ * the people marks' renderer, the brand build that writes the lockup and the social card, and the
+ * brand sources it generates (the HTML and SVG read as text by `lintAlternatesText` of css.ts). They
+ * are in LINT_ROOTS, and no other rule reads them.
+ */
+export const ALTERNATES_ROOTS: readonly string[] = [
+  'packages/identity/src/',
+  'scripts/build-brand.ts',
+  'packages/theme/brand/',
+];
+
 /** One finding: the rule, the file from the tree's root, a 1-based line and column, the text. */
 export type BrandFinding = {
   rule: BrandRuleId;
@@ -168,13 +180,15 @@ export type BrandFinding = {
 /**
  * The trees the source and CSS rules read (NEXT.md 4.1.3 item 25: packages/chrome, packages/viewer
  * and apps/studio/src). packages/viewer/standalone is the viewer's runtime for the exported web
- * page, so it is the viewer's too.
+ * page, so it is the viewer's too. The roots of ALTERNATES_ROOTS follow, read by
+ * `css/chrome-alternates` alone.
  */
 export const LINT_ROOTS: readonly string[] = [
   'packages/chrome/src',
   'packages/viewer/src',
   'packages/viewer/standalone',
   'apps/studio/src',
+  ...ALTERNATES_ROOTS,
 ];
 
 /**

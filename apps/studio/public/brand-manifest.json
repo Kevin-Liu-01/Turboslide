@@ -107,8 +107,8 @@
       "kind": "built"
     },
     "apps/studio/public/og/turboslide.png": {
-      "bytes": 173321,
-      "sha256": "6bb1502f3d8e2937c7d3cd9464bf6c63378f9ed2a34a31c1c7b4bcd07b0e68d1",
+      "bytes": 156855,
+      "sha256": "4063a19afc27deedbc774dccbb35af6a9d50804ee6eeb93acdbad3468e1ef635",
       "kind": "rendered"
     },
     "apps/studio/public/robots.txt": {
@@ -152,13 +152,13 @@
       "kind": "built"
     },
     "packages/theme/brand/og-template.html": {
-      "bytes": 3894,
-      "sha256": "a7ae5dcd8a731a0dca97daad5196b8955df765105c583f74593989437c80eff0",
+      "bytes": 3787,
+      "sha256": "f6d81cc63af132014dec06f56cb4a3df04660dff88ce18ec33ffaf13776c9dbf",
       "kind": "built"
     },
     "packages/theme/brand/wordmark.svg": {
-      "bytes": 983,
-      "sha256": "87b3780e9918bc7dd42809c6aee527ebce29427153f8a883b87d9fa53b0a2385",
+      "bytes": 946,
+      "sha256": "d23392e7bf2c24ff311c05ba964742fc11d99d24d88c09f3768537e897bc599b",
       "kind": "built"
     }
   }

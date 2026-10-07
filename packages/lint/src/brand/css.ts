@@ -21,8 +21,10 @@ import {
 } from './config.ts';
 import type { BrandFinding, BrandRuleId, CssRuleId } from './config.ts';
 import {
-  hasAlternates,
+  alternatesInStyleText,
+  breaksAlternates,
   hasTabularLiteral,
+  isAlternatesOnly,
   isAllowedRadius,
   isOwnedBy,
   isScaleZIndex,
@@ -179,7 +181,7 @@ const MESSAGES: Record<CssRuleId, string> = {
   'css/numerals':
     'Tabular figures written by hand (docs/DESIGN.md 4.5): use the .pt-num class or font-variant-numeric: var(--pt-numerals).',
   'css/chrome-alternates':
-    "General Translation's alternates cv11 and ss01 belong to its theme's slides (docs/DESIGN.md 4.2); the chrome, the pages and the landing draw Inter's defaults.",
+    "A stylistic set, a character variant (ss01 to ss20, cv01 to cv99, salt, swsh, aalt), a font-variant-alternates or var(--display-features) outside a .ts-sheet rule: General Translation's alternates belong to its theme's slides (docs/DESIGN.md 4.2, docs/POLISH-2.md 2.3); the chrome, the pages, the landing, the marks and the card draw Inter's defaults.",
 };
 
 /** The ladder's three tokens, declared once in tokens.css. */
@@ -273,7 +275,9 @@ export function lintCss(
 ): BrandFinding[] {
   const out: BrandFinding[] = [];
   const decls = parseCss(text);
-  const on = (rule: CssRuleId): boolean => rules.has(rule);
+  const alternatesOnly = isAlternatesOnly(file);
+  const on = (rule: CssRuleId): boolean =>
+    rules.has(rule) && (!alternatesOnly || rule === 'css/chrome-alternates');
   const report = (rule: CssRuleId, decl: CssDeclaration): void => {
     out.push({
       rule,
@@ -376,11 +380,35 @@ export function lintCss(
     if (
       on('css/chrome-alternates') &&
       !isOwnedBy(file, ALTERNATES_OWNERS) &&
-      (property === 'font-feature-settings' ||
-        (property.startsWith('--') && property.includes('feature'))) &&
-      hasAlternates(value)
+      breaksAlternates(property, value, selector)
     )
       report('css/chrome-alternates', decl);
   }
   return out;
+}
+
+/**
+ * `css/chrome-alternates` over a file read as text (docs/POLISH-2.md 2.3 item 4): the generated
+ * HTML and SVG under packages/theme/brand, whose style blocks and `style` attributes are read
+ * declaration by declaration.
+ */
+export function lintAlternatesText(
+  file: string,
+  text: string,
+  rules: ReadonlySet<BrandRuleId> = new Set(CSS_RULES),
+): BrandFinding[] {
+  if (!rules.has('css/chrome-alternates') || isOwnedBy(file, ALTERNATES_OWNERS)) return [];
+  const body = stripComments(text.replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, ' ')));
+  return alternatesInStyleText(body).map(({ index, property, value }) => {
+    const before = body.slice(0, index);
+    const line = before.split('\n').length;
+    return {
+      rule: 'css/chrome-alternates',
+      file,
+      line,
+      column: index - before.lastIndexOf('\n'),
+      message: MESSAGES['css/chrome-alternates'],
+      text: `${property}: ${value}`.slice(0, 160),
+    };
+  });
 }

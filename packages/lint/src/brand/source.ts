@@ -15,6 +15,7 @@ import ts from 'typescript';
 
 import {
   ALTERNATES_OWNERS,
+  ALTERNATES_ROOTS,
   BUTTON_ELEMENTS,
   BUTTON_LABEL_PROPS,
   NUMERALS_OWNERS,
@@ -80,7 +81,7 @@ const MESSAGES: Record<string, string> = {
   inlineNumerals:
     'Tabular figures written by hand (docs/DESIGN.md 4.5): use the .pt-num class or var(--pt-numerals).',
   inlineAlternates:
-    "General Translation's alternates cv11 and ss01 belong to its theme's slides (docs/DESIGN.md 4.2); the chrome draws Inter's defaults.",
+    "A stylistic set, a character variant (ss01 to ss20, cv01 to cv99, salt, swsh, aalt), a font-variant-alternates or var(--display-features) outside a slide: General Translation's alternates belong to its theme's slides (docs/DESIGN.md 4.2, docs/POLISH-2.md 2.3); the chrome, the pages, the marks and the card draw Inter's defaults.",
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -381,9 +382,101 @@ export function shadowHasBlurOrOffset(value: string): boolean {
   return false;
 }
 
-/** True when a feature list turns on General Translation's alternates `cv11` or `ss01`. */
+/**
+ * True when a feature value names a stylistic set, a character variant or another alternate
+ * feature: `ss01` to `ss20`, `cv01` to `cv99`, `salt`, `swsh` or `aalt` (docs/POLISH-2.md 2.3
+ * item 1). Read only inside a feature value; `case`, `calt`, `kern` and the numeric features are
+ * not alternates (`tnum` and `zero` are `css/numerals`').
+ */
 export function hasAlternates(value: string): boolean {
-  return /\b(?:cv11|ss01)\b/.test(value);
+  return /\b(?:ss\d\d|cv\d\d|salt|swsh|aalt)\b/.test(value);
+}
+
+/** True when a value reads the theme's `--display-features` token. */
+export function readsDisplayFeatures(value: string): boolean {
+  return /var\(\s*--display-features\b/.test(value);
+}
+
+/**
+ * True when every selector of a list is scoped to a slide: each names a `.ts-sheet` compound, the
+ * one place `var(--display-features)` may be read outside the theme's files (docs/POLISH-2.md
+ * 2.3 item 3).
+ */
+export function isSlideScoped(selector: string): boolean {
+  const list = splitTopLevel(selector, /,/);
+  return list.length > 0 && list.every((one) => /\.ts-sheet(?![\w-])/.test(one));
+}
+
+/** True when a font-variant-alternates value (or the font-variant shorthand) picks an alternate. */
+export function picksVariantAlternates(property: string, value: string): boolean {
+  const v = value.replace(/\s*!important\s*$/i, '').trim();
+  if (property === 'font-variant-alternates')
+    return !/^(?:normal|inherit|initial|unset|revert|revert-layer)$/.test(v);
+  if (property === 'font-variant')
+    return /\b(?:stylistic|styleset|character-variant|swash|ornaments|annotation)\(|\bhistorical-forms\b/.test(
+      v,
+    );
+  return false;
+}
+
+/**
+ * True when a feature declaration breaks `css/chrome-alternates`: a feature value (the property or
+ * a custom property whose name holds "feature") naming an alternate, or reading
+ * `var(--display-features)` in a rule that is not scoped to a slide; or a font-variant-alternates
+ * other than normal.
+ */
+export function breaksAlternates(property: string, value: string, selector: string): boolean {
+  const feature =
+    property === 'font-feature-settings' ||
+    (property.startsWith('--') && property.includes('feature'));
+  if (feature && hasAlternates(value)) return true;
+  if (feature && readsDisplayFeatures(value) && !isSlideScoped(selector)) return true;
+  return picksVariantAlternates(property, value);
+}
+
+/**
+ * The declarations of a style string (an inline `style` attribute, a stylesheet in a template, a
+ * generated HTML or SVG file read as text) that break `css/chrome-alternates`, with their offsets.
+ * The selector of a declaration is the prelude of the block it sits in, or none in a `style`
+ * attribute.
+ */
+export function alternatesInStyleText(
+  text: string,
+): { index: number; property: string; value: string }[] {
+  const declaration =
+    /(?:^|[\s;{"'`])(font-feature-settings|font-variant-alternates|font-variant|--[\w-]*feature[\w-]*)\s*:\s*([^;}<>]*)/gi;
+  const out: { index: number; property: string; value: string }[] = [];
+  for (const m of text.matchAll(declaration)) {
+    const property = (m[1] ?? '').toLowerCase();
+    /* an attribute's closing quote is not part of the value */
+    const value = (m[2] ?? '').trim().replace(/["'`]+$/, '');
+    const index = (m.index ?? 0) + m[0].indexOf(m[1] ?? '');
+    /* inside a block when the last brace before it opens one and no tag sits between */
+    const open = text.lastIndexOf('{', index);
+    const inBlock =
+      open >= 0 && text.lastIndexOf('}', index) < open && !text.slice(open, index).includes('<');
+    const selector = inBlock
+      ? text
+          .slice(text.lastIndexOf('}', open) + 1, open)
+          .replace(/^[\s\S]*<style[^>]*>/i, '')
+          .trim()
+      : '';
+    if (breaksAlternates(property, value, selector)) out.push({ index, property, value });
+  }
+  return out;
+}
+
+/** True when a style string breaks `css/chrome-alternates` in one of its declarations. */
+export function styleTextBreaksAlternates(text: string): boolean {
+  return alternatesInStyleText(text).length > 0;
+}
+
+/**
+ * True when a file of ALTERNATES_ROOTS outside the chrome's trees is read by
+ * `css/chrome-alternates` alone (docs/POLISH-2.md 2.3 item 4).
+ */
+export function isAlternatesOnly(file: string): boolean {
+  return isOwnedBy(file, ALTERNATES_ROOTS);
 }
 
 /** True when a file path sits under one of the owners (a file, or a folder ending in `/`). */
@@ -731,7 +824,9 @@ export function lintSource(
   }
   if (out.length > 0) return out;
 
-  const on = (rule: SourceRuleId | InlineCssRuleId): boolean => rules.has(rule);
+  const alternatesOnly = isAlternatesOnly(file);
+  const on = (rule: SourceRuleId | InlineCssRuleId): boolean =>
+    rules.has(rule) && (!alternatesOnly || rule === 'css/chrome-alternates');
   const report = (rule: BrandRuleId, node: ts.Node, message: string, snippet?: string): void => {
     const at = source.getLineAndCharacterOfPosition(node.getStart(source));
     const raw = snippet ?? node.getText(source);
@@ -748,13 +843,18 @@ export function lintSource(
   const checkString = (node: ts.Node, value: string, template: boolean): void => {
     if (on('css/numerals') && !isOwnedBy(file, NUMERALS_OWNERS) && hasTabularLiteral(value))
       report('css/numerals', node, MESSAGES.inlineNumerals ?? '');
-    if (
-      on('css/chrome-alternates') &&
-      !isOwnedBy(file, ALTERNATES_OWNERS) &&
-      (/font-feature-settings\s*:[^;}]*\b(?:cv11|ss01)\b/.test(value) ||
-        (enclosingPropertyName(node) === 'fontFeatureSettings' && hasAlternates(value)))
-    )
-      report('css/chrome-alternates', node, MESSAGES.inlineAlternates ?? '');
+    if (on('css/chrome-alternates') && !isOwnedBy(file, ALTERNATES_OWNERS)) {
+      const property = enclosingPropertyName(node);
+      if (
+        styleTextBreaksAlternates(value) ||
+        (property === 'fontFeatureSettings' &&
+          (hasAlternates(value) || readsDisplayFeatures(value))) ||
+        (property === 'fontVariantAlternates' &&
+          picksVariantAlternates('font-variant-alternates', value)) ||
+        (property === 'fontVariant' && picksVariantAlternates('font-variant', value))
+      )
+        report('css/chrome-alternates', node, MESSAGES.inlineAlternates ?? '');
+    }
     if (on('css/scrollbar') && !isOwnedBy(file, SCROLLBAR_OWNERS)) {
       const rest = value.replace(HIDDEN_SCROLLBAR, '');
       if (/::-webkit-scrollbar|scrollbar-color\s*:|scrollbar-width\s*:\s*(?!none)/.test(rest))

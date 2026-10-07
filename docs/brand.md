@@ -158,8 +158,10 @@ the print bar once it passes 24 (request 3).
 
 The lockup follows brand A's rules (`docs/gslides-parity/next/brand-a.md` 32 to 43): the word's cap
 equals the mark's cap, the baselines meet, and the gap from the mark's ink to the word's T is half
-the cap. The word is live text in Inter 500 with `font-feature-settings: 'cv11', 'ss01'`, tracked
--0.01 em from 16 to 27 px and -0.025 em at 28 px and above. `PROPER_NOUNS` in
+the cap. The word is live text in Inter 500 in Inter's default glyphs, tracked -0.01 em from 16 to
+27 px and -0.025 em at 28 px and above. Until polish two (`docs/POLISH-2.md` 2.2) the word and the
+social card's sentence set `font-feature-settings: 'cv11', 'ss01'`; no glyph of the word changed
+when the declaration left, since "Turboslide" has no a and no figure. `PROPER_NOUNS` in
 `packages/theme/src/copy.ts` carries "Turboslide" so the sentence case lint keeps its capital.
 
 Inter's cap height is 1490 of 2048 units, 0.727539 em. The mark is therefore 0.727539 em tall and
@@ -423,6 +425,21 @@ Berkeley Mono is not used anywhere and no file of it is in the tree. The chrome,
 landing draw Inter's default glyphs; the deck's alternates `cv11` and `ss01` belong to the General
 Translation theme's slides (`--display-features`). Numbers that align or change in place take
 Inter's tabular figures through `--pt-numerals`. Code and commands keep `--pt-mono`.
+
+Since polish two (`docs/POLISH-2.md` 2.3) one lint rule keeps the alternates on the slides:
+`css/chrome-alternates` (`packages/lint/src/brand/`) fails on any stylistic set or character
+variant (`ss01` to `ss20`, `cv01` to `cv99`), `salt`, `swsh` or `aalt` named in a feature value
+(`font-feature-settings`, a custom property whose name holds "feature", a JSX
+`fontFeatureSettings`, an inline `style` string), on any `font-variant-alternates` other than
+`normal`, and on `var(--display-features)` in a rule whose selector is not scoped to a slide (a
+`.ts-sheet` compound in every selector). The General Translation theme's files
+(`packages/theme/src/gt-ink-paper/`, `tokens.ts`, `themes.ts`) own the alternates. Besides the
+chrome's trees the rule alone reads three roots: the people marks' renderer
+(`packages/identity/src`), the brand build (`scripts/build-brand.ts`) and the brand sources it
+writes (`packages/theme/brand/`), whose HTML and SVG `lintAlternatesText` reads as text
+(`css.test.ts` runs it on the committed files). `case`, `calt` and `kern` are not alternates;
+`tnum` and `zero` belong to `css/numerals`. The people marks' initials, the lockup's word and the
+social card draw Inter's default glyphs since P2-F#3.
 
 Since DR-D1#3 the page loads the release files cut into unicode-range subsets by
 `scripts/build-fonts.py`, every OpenType feature and both axes kept: the Latin upright is

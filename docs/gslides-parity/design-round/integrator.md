@@ -1,5 +1,130 @@
 # The design round: the integrator
 
+## The ship grouping
+
+Written by the design round's integrator from 03:26 to 06:30 PDT on 2026-10-07 in `/Users/kevinliu/repos/Turboslide-design` on `design/round`. Read first: `docs/DESIGN.md` 7.9, 10.0 and 12, "Design round, pass 5" in `docs/gslides-parity/focus/VERIFICATION.md`, `requests.md` and this file's sections below. Three scratch worktrees of the session's scratchpad held the work, each detached with its own `pnpm install --offline --frozen-lockfile`: `integ3/wt` for the first run of the reorder and the typechecks, `integ3/wt3` for the second run and the five builds of section 7, `integ3/wt2` for the unit tests and the checks of the generated files. Port 4670 served the node-server build of section 6 and then the five of section 7, one at a time. Nothing was pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, and production was not read or written. Times are PDT and loads are one minute load averages (142 to 410 from other sessions' jobs, never stopped), so no timing reading here is a verdict. No picture was taken: the round folder holds 24,991,158 B of its 25,000,000 B line.
+
+### 1. The state at the start
+
+- `design/round` stood at `1f2ccd08` (DR-verify5, pass 5: ready, no finding of severity 2 or 3), 89 commits over origin/main `0a79db8e` with no merge. `git ls-remote` read origin/main at `0a79db8e` at 03:26 and again at 04:54, and `gt-follow.last` holds the same sha, so origin/main had not moved since the finishing step's rebase and no second rebase ran.
+- The checkout was clean, no git, build or e2e lock was held, and no lane process was running. A dev server on port 4699 from this checkout (`preview-overlay`, not this step's) was left running; the branch move changes no file under it.
+
+### 2. The order
+
+One push per lane in the order D1, D2, D5, D3, D4, with D3 in two pushes: DESIGN.md 7.9 and question 31 ship the tree through DR-D3#1 (the reader) to production before the tree that holds DR-D3#2 (the writers and the migration), so a rollback of the later ship never meets a deck it cannot read. The guard deploys each push to production before the next one is pushed, so the D3 reader push is that ship.
+
+Each fix and verifier commit sits in the push of the lane it serves, moved only where a dependency asks:
+
+- D2's three later fixes (Tools > Tailor's pencil, Version history's tabular times, the lane's note of pass 2) join D2's push. D2's Logo dialog fix (`5a6d4612`) reads the deck's theme under its kit, so it stays in D3's push after the theme writers.
+- D5's fix round (DR-D5#1b and #3b, the one Sign in dialog, DR-D1#4 made by D5, the notes) joins D5's push. DR-D1#4 stays there as D5's commit; it lands before DR-D3#1, as the export spec's owner order asks (DESIGN.md 10.6).
+- D5's template card fix (`f82ca1aa`) imports `themeName` from DR-D3#1's `@turboslide/theme/themes`, and it carries the line `back: HOME.back` whose string `HOME.back` lands with D3's Title Case commit (`7a52846b`, its message says so). A first order put it in the reader push, and `tsc -b` at that head (`125b91e3`, never on the branch) read `decks.templates.tsx(78,14): error TS2339: Property 'back' does not exist`. It now follows `7a52846b` in D3's push, and D5's driver fix for the same row (`829a066e`) keeps its old place after D3's notes of finishing round 2, so the reader push is DR-D3#1 and its driver fix alone.
+- The integrator's fix of the PowerPoint mode word (`fc39b76d`) writes the landing's generated menus and Download dialog, so it stays in D4's push.
+- DR-D1#5 (the round's lint rules to enforce) and D1's note of finishing round 3 stay last in D4's push: DESIGN.md 10.0 lands DR-D1#5 after every other lane's last push.
+- The integrator's notes and the verifier's five passes are docs and stay in their places among D4's commits, so every one of them ships in D4's push.
+
+### 3. The reorder
+
+`git -c rerere.enabled=false rebase -i origin/main` in a scratch worktree at `1f2ccd08`, the todo written by `GIT_SEQUENCE_EDITOR` (`scratchpad/integ3/seq-editor.mjs`) from the order file (`order-v3.txt`), each pick followed by an `exec` of `after-pick.sh`: the matrix parses with unique ids, README.md's block is current unless the original commit's block was stale, and no tracked file holds a conflict marker. 17 steps stopped, each resolved by `resolve.mjs` with no file edited by hand:
+
+| File | Steps | Resolution |
+| --- | --- | --- |
+| `core-matrix.json` | 3: DR-D5#1b, DR-D4#4, DR-D4#7 (part) | The picked commit's own rows (added, changed and removed by id) applied to HEAD's matrix, each row's text byte for byte from its side; no row changed on both sides |
+| `README.md` | 14: the matrix steps, DR-D3#1 to #4, the colour pickers, DR-D4#1, #2, #5 and #7, and D4's two README commits | The text outside the generated block by `git merge-file` (clean in every step), the block rendered by `docs/readme/what-works.mjs` from the matrix |
+| `requests.md` | 3: D3's notes of finishing rounds 2 and 3, the integrator's fix | By `## ` section, each section from the side that changed it, in the section order of the final file |
+
+DR-D3#1's hunks in the landing's `copy.test.ts` and `facts-data.ts` (the action counts, 193 to 194) applied to main's versions of both files with no conflict, and the unit tests read them green at the D3 heads (section 5).
+
+Checks before the branch moved:
+
+- The head `72f5a491` has the tree of `1f2ccd08` (`66482590`).
+- Each of the 89 commits keeps its message, author and author date, touches the same files, and has the same patch outside the three files above (`git patch-id --stable`); each commit's rows (added, changed and removed, by id and value) equal the original commit's. The committer of all 89 is kevin@generaltranslation.com.
+- README.md's block is current at every commit but `0f67a644` and `29efa083` (DR-D4#6, the agents band and the people band), stale in the original too, each followed by its README commit.
+- The heads of D1, D2, D5, D3 and D4 have the trees of the first order's heads (`b06bad5c`, `4edecd8c`, `1821cee8`, `dc65ff20`, `66482590`), so the readings of section 5 taken on the first order's heads hold for them.
+
+The move: `git update-ref` under the git lock at 04:54, after reading the branch at `1f2ccd08`, the checkout clean and the two trees equal. The old order is kept as the local branch `design/round-prereorder3` (`1f2ccd08`).
+
+### 4. The groups
+
+| Group | Commits, old (new) | Head | Rows from its matrix diff |
+| --- | --- | --- | --- |
+| D1 | `39c0a9d4` DR-spec, `3f5807bf` DR-D1#1, `19d0a36b` DR-D1#2, `2feb9761` DR-D1#3, `6973fa9f` D1 notes (unchanged) | `6973fa9f` | entered `chrome.colors.pairs-at-floor`, `chrome.font.one-subset`, `chrome.font.on-demand`; restated `fonts.inter.italic-release` |
+| D2 | `ad310a97` DR-D2#1, `caf5e13e` DR-D2#2, `064ed3cc` DR-D2#3, `3276b8ef` and `e0b6e9b1` the integrator, `a30c379a` and `4e178207` D2 fixes (unchanged); `aa4f40d3` (`ae56868f`) Tailor's pencil, `b264c645` (`487bc689`) tabular times, `d0a65e57` (`19bd3de7`) D2's note | `19bd3de7` | entered the five `chrome.layers.*`, the four `chrome.radius.*`, `chrome.plates.separation`, `versions.field.corner`, `chrome.scroll.default-everywhere`, `chrome.scroll.stage-track`, `chrome.numerals.tabular`, `chrome.type.default-glyphs`, `chrome.appearance.system-until-picked`; restated `chrome.split.one-box`, `chrome.cluster.gaps-heights`, `chrome.buttons.one-rule`, `chrome.colors.pairs-at-floor`; retired `versions.field.square` |
+| D5 | `7cf0caf1` (`c7557efb`) DR-D5#3, `67b7f0eb` (`24c3dd28`) DR-D5#2a, `5cd472e8` (`0f300e72`) DR-D5#1a, `fdcf8d66` (`8525a143`) D5 notes, `ca7a1261` (`925c00c5`) and `8d520b16` (`d7d010ce`) the integrator, `56b9e94b` (`e04f65c8`) DR-D5#1b and #3b, `b2be71de` (`9cbffa7b`) DR-D5#2b, `ca651125` (`ec06e796`) DR-D1#4, `247aca82` (`147b945f`) D5's fix notes | `147b945f` | entered `present.presenter.surfaces`, `view.deck.surfaces`, `decks.pages.access-plates`, `decks.pages.radius`, `.numerals`, `.default-glyphs`, `.scrollbar`, `.pictures-load`, `accounts.signin.one-dialog`, `export.fonts.upstream-names` |
+| D3 reader | `8f4583d4` (`e7f7cf55`) DR-D3#1, `96a97fdb` (`9fe261d6`) its driver | `9fe261d6` | entered `themes.render.each-theme`, `themes.agent.theme-list`, `themes.export.pptx-token-colours` |
+| D3 | `94afb71d` (`16c55d77`) DR-D3#2, `cf2e8112` (`b997e9f1`) DR-D3#3, `b9aa15c2` (`60049aab`) DR-D3#4, `8e2833eb` (`ffc0b66f`), `328c90ff` (`c7b48d72`), `f571d1a0` (`dc1dd4e4`), `bc58fcd9` (`e58515af`) notes, `d99b27f0` (`2b59c92e`), `7a52846b` (`4f10eff2`) Title Case, `f82ca1aa` (`642c450c`) D5's template card, `fc8dd7e3` (`48655574`) the colour pickers, `e587c44d` (`54aa1705`) notes, `829a066e` (`0c5b0d5b`) D5's driver, `e2e37c96` (`da78d441`), `5a6d4612` (`baff31e9`) D2's Logo dialog, `2d04af1d` (`49692188`), `db4c5876` (`2fef8880`), `a8c48c04` (`a6f8f9b5`), `f3a834a7` (`1be9cf7f`) notes | `1be9cf7f` | entered the 14 other `themes.*` rows (`default.new-is-simple`, `appearance.theme-default`, `agent.create-default`, `migration.gt-unchanged`, `closing.no-gt-mark-on-simple`, `layouts.no-gt-pictures-on-simple`, `picker.lists-library`, `picker.apply-one-commit`, `picker.keyboard`, `gt.selectable`, `reset.returns-to-theme`, `reset.field-returns-to-theme`, `logo.theme-logo-only`, `pickers.follow-theme`); restated `slides.layout.plate-four-columns`, `brand.panel.opens`, `brand.logo.replace-every-slide`, `brand.background.enter-keeps-open`, `fonts.display-features.inter-only`, `brand.template.blank-no-gt-mark`, `brand.template.blank-plain`, `themes.export.pptx-token-colours`; retired `brand.reset.default-kit` |
+| D4 | D4's 7 first pass commits (with the integrator's two), its 25 fix commits, the integrator's fix `fc39b76d` (`609461f4`), DR-D1#5 `aace7c20` (`107cac48`) and D1's note `9696fdb5` (`6ffd5362`), the integrator's 3 notes and the verifier's 5 passes, in their old relative order; the last is DR-verify5 `1f2ccd08` (`72f5a491`), then this note | this note's commit | entered `home.nav.icons`, `home.type.default-glyphs`, `home.radius.ladder`, `home.scroll.regions`, `home.pictures.all-load`, `home.hero.frame-chrome`, `home.hero.terminal-never-empty`, `home.hero.steps`, `home.menus.icons`, `home.canvas.panel`, `home.tailor.dialog`, `home.diagrams.flows`, `home.present.figure`, `home.export.dialog`, `home.patterns.stills`, `home.kits.themes`, `home.agents.history-panel`, `home.people.share-dialog`, `home.hero.font-swap`, `home.kits.colors`; restated `decks.home.seller-lead`, `decks.home.pictures-three-widths`, `decks.home.capture-plain`, `home.page.order`, `home.hero.type`, `home.budget.bytes-first`, `home.canvas.log`, `home.menus.bar`, `home.tailor.filmstrip`, `home.kits.restyle`, `home.agents.rest`, `home.agents.history`, `home.hero.stage`, `home.numbers.row`, `home.features.table`, `home.motion.pause`, `home.export.pdf-appearance` |
+
+No group is docs only: each changes paths outside `docs/`, README.md and Markdown files, so the guard runs its whole check on every push (the hosted smoke, the walk areas `decks,text,fonts,versions`, its nine spec rows, then the production realtime rows). No group touches the Worker's paths (`apps/realtime-worker/`, `packages/realtime/src/room-core.ts`, `frames.ts`).
+
+### 5. Gates per group head
+
+| Group head | `tsc -b` (clean tree, routes generated) | `vitest run` over the workspace | The failed files again alone, 180 s bounds, two workers | Generated files and the brand lint (enforce) |
+| --- | --- | --- | --- | --- |
+| D1 `6973fa9f` | exit 0, 665 s, load 164 | 5,460 passed, 4 failed (3 files), 7 skipped, 2 todo; 373 s, load 160 to 178 | 32 of 34 passed | README, tokens, landing assets and contracts current; lint exit 0, 0 open, 22 accepted |
+| D2 `19bd3de7` | exit 0, 566 s, load 162 to 315 | 5,454 passed, 8 failed (8 files); 502 s, load 180 to 161 | 88 of 90 passed | as D1, but the landing's `menus.generated.ts` reads stale (below); lint 20 accepted |
+| D5 `147b945f` | exit 0, 614 s, load 311 to 269 | 5,461 passed, 6 failed (6 files); 369 s, load 188 to 181 | 69 of 71 passed | as D2; lint 19 accepted |
+| D3 reader `9fe261d6` | exit 0, 597 s, load 220 to 231 | 5,476 passed, 14 failed (10 files); 578 s, load 410 to 194 | 108 of 110 passed | as D2; lint 19 accepted |
+| D3 `1be9cf7f` | exit 0, 459 s, load 156 to 382 | 5,511 passed, 8 failed (7 files); 414 s, load 156 to 161 | 93 of 95 passed | as D2; lint 19 accepted |
+| D4 `72f5a491` and this note | exit 0, 788 s, load 383 to 198 | not run again: pass 5 read it on `9696fdb5`, whose tree differs from this head's by the two notes alone: 5,488 passed, 28 failed in 24 files | pass 5: 22 of the 24 files passed alone | section 6 |
+
+- The two tests red at every head after the narrowed run are the standing pair of every pass: `packages/import` `import.test.ts` reads 93 slides from the read only Prototemplate checkout where it pins 95, and `apps/cli` `banner.test.ts` reads the CLI's `2026.1001.3` against `docs/updates.md`'s `2026.1006.1` (origin/main `0a79db8e` reads both red; D1's request of finishing round 3 and pass 5 finding 5 leave the version line to the round's release note, which moves it). Every other file that failed in a whole run passed alone: the failures were 5 s test bounds at these loads (the contracts, editor shell, inspector sections, presence slot, mark agreement, geometry, effects parity, materials capture, CLI canvas, dither and freeform commands, the CLI parity actions, agent actions, authorize and index facts tests), one wait for a dialog in the editor shell test and the blob tier's poll timing.
+- The landing's `menus.generated.ts` at the D2, D5, D3 reader and D3 heads: `build-home-assets.ts --check` reads it stale because its recorded sha256 of `packages/chrome/src/menus/model.ts` predates D2's Tailor glyph (`ae56868f`). Regenerated at the D2 head (`build-home-assets.ts --slides` in the scratch worktree, then put back), the file differs in that one line, so the menus band draws the same rows. D4's `58d165d0` (the landing's outputs follow Tailor's pencil) records the new hash, and the D4 head reads 67 outputs current.
+
+### 6. The D4 head: the budgets on its node-server build (port 4670)
+
+The build of the design checkout, whose tree equals the D4 head's (`NITRO_PRESET=node-server vite build -c vite.deploy.config.ts` under `.turboslide/build.lock`): exit 0, 117 s, 03:43 to 03:45, load 151 to 156. Served on 4670 with the round's environment (a tmp store in `.turboslide/integrator3-overlay`, the memory tier, the fake Google client pair, secrets made per start and never printed). One run, 03:46 to 03:53, `core-gate --only specs --rows` with the seven `home.budget.*` rows, `home.page.bands-after-load`, `home.pictures.all-load`, `decks.home.pictures-three-widths` and `decks.home.layout-shift`, `TURBOSLIDE_OVERLAY_DIR` given: 9 passed, 0 failed, 2 not driven (`home.budget.frame` and `home.budget.main-thread`, "not read: load 161.9"), retries zero, load 151 to 168.
+
+| Measure (DESIGN.md 8.16) | Reading | Line |
+| --- | --- | --- |
+| Document | 99,756 B decoded; 16,742 to 16,762 B brotli | 100,000 B (244 B of room); 20 KB |
+| Page CSS | 18,570 B brotli | 20 KB |
+| Route chunk | 68,248 B decoded, 16,079 B brotli | 70 KB; 22 KB |
+| Live core with its imports | 55,621 B decoded, 19,841 B gzip | 64 KB; 20,480 B (639 B of room) |
+| Largest band chunk | menus, 42,756 B decoded, 14,192 B gzip | 56 KB; 16 KB |
+| The page's own script after a full scroll | 358,110 B decoded, 118,547 B gzip | 360,000 B (1,890 B of room); 120,000 B (1,453 B) |
+| Pictures after a full scroll | 25 files, 152,025 B at x1 and 194,629 B at x2; 0 before load | 200 KB (5,371 B of room at x2) |
+| Font | one request, `InterVariable-latin` 113,752 B | reported against 120 KB |
+| Shared script | entry 1,210,171 B; all shared 1,364,132 B | reported |
+| Page height | 13,751 px at 1440, 13,700 at 1280, 14,861 at 390, 14,705 at 320 | 14,000 and 15,000 |
+| CLS | 0 at 1440, 1280 and 390 in both appearances; 0 over every band's insert | 0 |
+| LCP | the h1, 140 to 164 ms cold and 76 to 84 ms warm (load 162, not a verdict) | 400 ms; 200 ms |
+| Pictures | 22 shown and 26 `/home` files requested in each of the four cells, each decoded and answered 200 | none broken |
+
+Every byte line holds with the same readings as pass 5, as the tree is the same. The quick gates on the same tree (03:48 to 03:53, load 157 to 163): the brand lint in enforce mode exit 0 (0 open, 22 accepted, 0 stale, 524 scripts and 119 stylesheets read); `core-matrix.test.mjs`, `what-works.test.mjs`, `evidence-policy.test.mjs`, `docs-index.test.mjs` and the competitor guard `competitor.test.ts`, 5 files, 66 passed; `what-works.mjs --check`, `build-colors.ts --check`, `build-home-assets.ts --check` (67 outputs, 43 files named by the page) and `generate --check` current; `turboslide fonts build --check` 0 stale files (version 4.001+build.3).
+
+### 7. The guard's seller path on each earlier head
+
+The guard checks each push's preview with the walk areas `decks,text,fonts,versions` and its nine spec rows (`decks.list.read`, `decks.list.open-title`, `share.dialog.open`, `share.copy-view-link`, `comments.reply`, `comments.resolve`, `present.keys.arrow-right`, `export.download.pdf-direct`, `export.download.pptx-direct`) with the newest parked list (`ship-4300058d.json`). The D1 to D3 heads are trees no build has served before, so each was built in `integ3/wt3` (`NITRO_PRESET=node-server vite build -c vite.deploy.config.ts`), served on 4670 with the round's environment and a fresh tmp store, and read with the same two `core-gate` runs, one head after the other; each server was stopped by its pid before the next build. The D4 head's tree is pass 5's, whose run B3 read these areas and whose runs read these rows.
+
+| Head | Build | Walk (131 rows) | Spec rows (9) |
+| --- | --- | --- | --- |
+| D1 `6973fa9f` | exit 0, 109 s, load 223 to 288 | 06:02 to 06:13: 128 passed, 1 failed, 2 not driven, retries zero; load 306 to 147 | 06:13 to 06:19: 9 passed; load 159 |
+| D2 `19bd3de7` | exit 0, 96 s, load 139 to 156 | 05:42 to 05:54: 128 passed, 1 failed, 2 not driven, retries zero; load 154 to 143 | 05:54 to 06:00: 9 passed; load 234 |
+| D5 `147b945f` | exit 0, 105 s, load 153 to 201 | 05:07 to 05:18: 128 passed, 1 failed, 2 not driven, retries zero; load 195 to 157 | 05:18 to 05:23: 9 passed; load 160 |
+| D3 reader `9fe261d6` | exit 0, 151 s, load 174 to 248 | 04:47 to 04:59: 128 passed, 1 failed, 2 not driven, retries zero; load 254 to 229 | 04:59 to 05:04: 9 passed; load 137 |
+| D3 `1be9cf7f` | exit 0, 80 s, load 161 to 185 | 05:25 to 05:36: 128 passed, 1 failed, 2 not driven, retries zero; load 184 to 138 | 05:36 to 05:41: 9 passed; load 140 |
+
+In every walk the one failed row is `versions.show-changes-marks` ("marks with Show changes on 0"), which the gate names as a row that would park `file.versionHistory.showChanges` and leaves out of its verdict; the two rows not driven are `text.clipboard.paste-without-formatting` (manual: headless Chromium does not send Cmd+Shift+V as a paste) and `fonts.table.takes-family` (standing, not on this build); the verdict's one failure is that standing row, which the guard allows by id. That is the ledger the guard wrote for origin/main `0a79db8e`'s preview on 2026-10-06 (128 passed, 1 failed, 2 not driven, the same three rows), the pass that put `0a79db8e` on production. Timings in these runs are not verdicts at these loads; no row failed on a timing bound.
+
+### 8. Dependencies between the pushes
+
+- D3 reader then D3: the guard must read `deployed <D3 reader sha>` before the D3 push (DESIGN.md 7.9). If the reader is held or rolled back, the D3 push waits.
+- `decks.pages.pictures-load` (D5, feature `decks`, unparkable): the earlier readings of this file ("After the fix round of pass 1", section 4) found it passing on a tree with D5's fixes and no theme library, where `theme.list` does not answer and the row skips its theme clause, and failing from DR-D3#1 on with "a template card names no theme" until the card names its theme. That card lands in D3's push (`642c450c`), so the row is expected red at the D3 reader head (not read again here). It is not among the guard's rows, so it holds no push; pass 5 read it green on the head's tree.
+- `decks.pages.access-plates` (D5) reads the refused page's and Not found's buttons at 6 px through `page-frame.css`, which DR-D4#1 (`a224b0de`) changes from `border-radius: 0` to `var(--pt-radius)`. Before D4's push those two pages keep their square buttons and the row is expected red, as the first pass of this file found at D5's head before D4's group (not read again here); it is not among the guard's rows, and pass 5 read it green on the head's tree.
+- The landing's menus file stale by its source hash at the D2 to D3 heads (section 5); nothing drawn changes.
+- `home.radius.ladder` (D4) reads the shared tooltip that D2 draws, `home.kits.themes` (DR-D4#5) the theme library of DR-D3#1, and `home.export.pdf-appearance` the theme button of DR-D4#1 with its driver in DR-D4#1b: each lands in or after its dependency.
+
+### 9. For the ship
+
+1. Push the six heads in order: `6973fa9f`, `19bd3de7`, `147b945f`, `9fe261d6`, `1be9cf7f`, then D4's head (this note's commit), each after the guard's `deployed` line for the one before.
+2. The CLI's version line (`apps/cli/package.json` `2026.1001.3`) moves with the round's release note, so `banner.test.ts` reads green after it (pass 5 finding 5).
+3. Pass 5's finding 1 stands: the export spec's download bounds and `decks.card.thumbnail-slide-1` have no reading at a load of 24 or less. The guard reads `export.download.pdf-direct` and `export.download.pptx-direct` on each preview at its own load.
+
+### 10. Notes
+
+- The commit ids in the sections below are the ones before this reorder; section 4 gives each new id beside the old one. The first order (`order-v2.txt`, head `f929cbfd`) was not moved to the branch; its heads' typechecks and tests are the ones section 5 cites for the trees they share.
+- Every server on 4670 was stopped by its own pid (section 6's at 04:03, when the build lock was released; the last of section 7's at 06:19). The run logs are under `.turboslide/integrator3-gate-1` of the checkout and `scratchpad/integ3/guard-runs/`; the scripts, ledgers and logs are under `scratchpad/integ3/`. The three scratch worktrees were removed after the last run.
+
 ## Finishing round 1: the fixes
 
 Written by the design round's integrator from 10:13 to 10:58 PDT on 2026-10-06 in `/Users/kevinliu/repos/Turboslide-design` on `design/round`. The finding is pass 2's finding 1 (the integrator's), which D4 also asked for under "Requests" in `d4.md`. Port 4694 served a node-server build of the head with this fix applied, from a scratch worktree of the session's scratchpad (`drint/wt`, detached at the head, its own `pnpm install --offline`), with the round's environment (a tmp store in its own overlay, the memory tier, secrets made per start and never printed). Nothing was pushed or deployed. Loads are one minute load averages.

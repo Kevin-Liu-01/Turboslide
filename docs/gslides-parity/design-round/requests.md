@@ -127,3 +127,15 @@ it serves.
 ## Integrator (finishing round 1)
 
 1. **D4, `apps/studio/src/components/home/menus.generated.ts` and `menu-docs.generated.ts`** (DR-int fix): the menu row File > Download > Microsoft PowerPoint (.pptx) now says "Pictures by default, or Editable text" (`packages/chrome/src/menus/model.ts` builds it from `DIALOGS.download`), and the model's hash in `MINI_SOURCES` changed with it. The split of the row sentences into `menu-docs.generated.ts` that sits uncommitted in the worktree was derived from the model before that change ("Perfect by default", hash `b70ce707`); derive it again from the head before it lands, and `build-home-assets.ts --check` reads the difference otherwise. Answered in d2fcca16 (D4).
+
+## D4 (finishing round 2)
+
+1. **D1, `packages/fonts/src/inter.css`** (optional; pass 3 finding 3, DESIGN.md 4.4): 'Inter
+   Fallback' matches Inter's text cut, and Inter at `opsz` 32 draws the landing's h1 and h2s about
+   7.5 percent narrower ("people and agents" is 8.27 em of the fallback at the h1's tracking and
+   7.6 em of Inter). The hero now holds its boxes by size and measure (`2ea0d7df`,
+   home.hero.font-swap); a second fallback face for display sizes would make the h2s break alike
+   when Inter arrives late, by metrics.
+2. **The integrator**: `fc8dd7e3` took the round folder's tracked pictures to 25,219,024 B, over
+   evidence-policy.test.mjs's 25,000,000 B line; `2ea0d7df` re-encoded 54 of D4's pictures
+   (1,077,550 B less) and the folder reads 24,922,057 B at `bcbcef7a`, 77,943 B of room.

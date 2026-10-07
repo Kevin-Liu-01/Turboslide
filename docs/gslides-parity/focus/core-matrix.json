@@ -5658,10 +5658,11 @@
     {
       "id": "brand.logo.replace-every-slide",
       "feature": "brand",
-      "interaction": "Logo > Replace with a PNG; the title slide's logo slot and every slide's footer draw the picture within 5 s; a new slide carries it; Position > Top right moves the title slide's logo",
+      "interaction": "Logo > Replace with a PNG; the title slide's logo slot and every slide's footer draw the picture within 5 s; a new slide carries it; Position > Top right moves the title slide's logo; brand.reset of the four fields the row wrote takes the picture off the footer and the title slide",
       "driver": "core/brand.spec.ts",
       "today": "not driven",
-      "evidence": "audit-brand 2"
+      "evidence": "audit-brand 2",
+      "note": "The kit's logo of audit-brand 2; restated in the design round, DR-D3#4 (the deck is Simple, which draws no Use the theme's logo button, docs/DESIGN.md 7.5, so the row puts its logo back through brand.reset; the DR-D3 fix of the verifier's pass 4 finding 3)"
     },
     {
       "id": "brand.logo.use-on-every-slide",
@@ -9016,22 +9017,22 @@
     {
       "id": "brand.template.blank-no-gt-mark",
       "feature": "brand",
-      "interaction": "A deck from Blank shows no GT mark and no GT wordmark band in the editor, the PDF and the PPTX",
+      "interaction": "A deck from Blank is the Simple theme with no kit (deck.info names simple and no kit field) and shows no GT mark and no GT wordmark band in the editor, the PDF and the PPTX; the same deck set to General Translation for a moment draws the GT mark and adds it to the PDF and the PPTX (the control), and goes back to Simple",
       "driver": "core/brand.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-brand-surfaces 27",
-      "note": "docs/NEXT.md 3.2 H6 and 4.1.5: the blank template carries a record whose title mark and footer logo are none; GT_BAND stays for the GT template"
+      "note": "docs/NEXT.md 3.2 H6 and 4.1.5: the blank template carries a record whose title mark and footer logo are none; GT_BAND stays for the GT template; restated in the design round, DR-D3#2 (Blank is Simple with no kit, docs/DESIGN.md 7.3: the row reads the theme and the drawn parts, and General Translation is its control; the DR-D3 fix of the verifier's pass 4 finding 3)"
     },
     {
       "id": "brand.template.blank-plain",
       "feature": "brand",
-      "interaction": "A deck from Blank shows no rails, crosses or counter on its slide in the editor, the PDF and the PPTX",
+      "interaction": "A deck from Blank is the Simple theme with no kit (deck.info names simple and no kit field) and shows no rails, crosses or counter on its slide in the editor, the PDF and the PPTX; the kit's frame and counter turned on for a moment draw them and add them to the PDF and the PPTX (the control)",
       "driver": "core/brand.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "brand-judge-2 178",
-      "note": "docs/NEXT.md 4.1.3 item 23 and 4.1.5 (B4a): the blank template's record turns the GT frame's rails, rules and crosses off and the counter off; the GT template keeps them"
+      "note": "docs/NEXT.md 4.1.3 item 23 and 4.1.5 (B4a): the blank template's record turns the GT frame's rails, rules and crosses off and the counter off; the GT template keeps them; restated in the design round, DR-D3#2 (Blank is Simple with no kit, docs/DESIGN.md 7.3: the row reads the theme and the drawn parts in place of the record; the DR-D3 fix of the verifier's pass 4 finding 3)"
     },
     {
       "id": "brand.template.blank-mark-not-an-object",

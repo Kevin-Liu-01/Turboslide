@@ -434,6 +434,25 @@ async function record(p: Page): Promise<Record<string, unknown> | null> {
 }
 
 /**
+ * The deck's theme and kit as deck.info answers them: a deck from Blank is Simple with no kit
+ * (docs/DESIGN.md 7.3), so `kit` is null or a record with no field.
+ */
+async function themeAndKit(
+  p: Page,
+): Promise<{ theme: string; kit: Record<string, unknown> | null; kitFields: string[] }> {
+  const info = await invoke<{ theme?: string; brand?: Record<string, unknown> }>(p, 'deck.info');
+  const kit = info.brand ?? null;
+  return { theme: info.theme ?? '', kit, kitFields: kit === null ? [] : Object.keys(kit) };
+}
+
+/** Sets the deck's theme through the agent surface and waits for the commit. */
+async function setTheme(p: Page, value: string): Promise<void> {
+  const s = await settled(p);
+  await invoke(p, 'deck.set', { path: '/theme', value, baseRevision: s.revision });
+  await settled(p);
+}
+
+/**
  * The GT glyph the editor draws for the current slide: `<use href="#gt-mark">` on the stage and in
  * the filmstrip's cards (the sprite's own `<symbol>` is no drawing), and a drawn `.wordmark`.
  */
@@ -506,17 +525,21 @@ async function downloadAs(p: Page, kind: 'pdf' | 'pptx'): Promise<Buffer> {
 }
 
 /*
- * docs/NEXT.md 3.2 H6 (audit-brand-surfaces 27): the file's deck comes from /new, the Blank
- * template, with a second slide (beforeAll), and this row reads it before any row writes its kit.
- * The editor draws no GT glyph on either slide, on the stage or in the filmstrip, and no wordmark;
- * the PDF and the native PowerPoint carry none. The control proves the reads can see the glyph:
- * the kit's default logo (the GT mark) set for a moment adds filled paths to the PDF and the
- * wordmark and mark objects to the PowerPoint, and the record goes back to none.
+ * docs/NEXT.md 3.2 H6 (audit-brand-surfaces 27), restated in the design round (docs/DESIGN.md
+ * 7.3): the file's deck comes from /new, the Blank template, with a second slide (beforeAll), and
+ * this row reads it before any row writes its kit. Blank is the Simple theme with no kit, so
+ * deck.info names `simple` and no kit field; the editor draws no GT glyph on either slide, on the
+ * stage or in the filmstrip, and no wordmark; the PDF and the native PowerPoint carry none. The
+ * control proves the reads can see the glyph: the deck set to General Translation for a moment
+ * (the theme whose title slide draws the GT mark and whose band draws the wordmark) draws the
+ * glyph on the stage, adds filled paths to the PDF and the wordmark and mark objects to the
+ * PowerPoint, and the deck goes back to Simple. Simple draws no logo for the kit's default logo
+ * (DESIGN.md 7.5), so the kit's logo is no control here.
  */
 test(title('brand.template.blank-no-gt-mark'), async () => {
   test.setTimeout(480_000);
   await openEditor(page, deck);
-  const kit = await record(page);
+  const own = await themeAndKit(page);
   const slides = await slideOrder(page);
   const drawn: { slide: string; stage: number; filmstrip: number; wordmark: number }[] = [];
   for (const slide of slides) {
@@ -526,62 +549,40 @@ test(title('brand.template.blank-no-gt-mark'), async () => {
   }
   const pdfNone = await downloadAs(page, 'pdf');
   const pptxNone = await downloadAs(page, 'pptx');
-  /* the control: the GT mark as the kit's logo in both slots, read, then none again */
-  const s1 = await settled(page);
-  await invoke(page, 'brand.set', {
-    path: '/mark',
-    value: { kind: 'default' },
-    baseRevision: s1.revision,
-  });
-  const s2 = await settled(page);
-  await invoke(page, 'brand.set', {
-    path: '/footer/logo',
-    value: 'default',
-    baseRevision: s2.revision,
-  });
-  await settled(page);
+  /* the control: the deck in General Translation, read, then Simple again */
+  await setTheme(page, 'general-translation');
   await clickCard(page, slides[0]!);
   await page.waitForTimeout(500);
   const controlDrawn = await gtMarksDrawn(page);
   let pdfGt: Buffer | null = null;
   let pptxGt: Buffer | null = null;
+  let back = '';
   try {
     pdfGt = await downloadAs(page, 'pdf');
     pptxGt = await downloadAs(page, 'pptx');
   } finally {
-    const s3 = await settled(page);
-    await invoke(page, 'brand.set', {
-      path: '/mark',
-      value: { kind: 'none' },
-      baseRevision: s3.revision,
-    }).catch(() => undefined);
-    const s4 = await settled(page);
-    await invoke(page, 'brand.set', {
-      path: '/footer/logo',
-      value: 'none',
-      baseRevision: s4.revision,
-    }).catch(() => undefined);
-    await settled(page);
+    await setTheme(page, own.theme || 'simple').catch(() => undefined);
+    back = (await themeAndKit(page).catch(() => ({ theme: 'unread' }))).theme;
   }
   const fills = { none: pdfFills(pdfNone), gt: pdfFills(pdfGt) };
   const objects = { none: pptxGtObjects(pptxNone), gt: pptxGtObjects(pptxGt) };
   test.info().annotations.push({
     type: 'blank',
-    description: `record ${JSON.stringify(kit)}; the editor per slide ${drawn.map((d) => `${d.slide}: stage ${d.stage}, filmstrip ${d.filmstrip}, wordmark ${d.wordmark}`).join('; ')}; with the GT logo set the title slide drew stage ${controlDrawn.stage}; PDF fills ${fills.none} against ${fills.gt} with the GT logo; PowerPoint GT objects ${objects.none.length} (${objects.none.join(', ') || 'none'}) against ${objects.gt.length} (${objects.gt.slice(0, 4).join(', ')})`,
+    description: `theme ${own.theme}, kit ${JSON.stringify(own.kit)}; the editor per slide ${drawn.map((d) => `${d.slide}: stage ${d.stage}, filmstrip ${d.filmstrip}, wordmark ${d.wordmark}`).join('; ')}; in General Translation the title slide drew stage ${controlDrawn.stage}, wordmark ${controlDrawn.wordmark}; PDF fills ${fills.none} against ${fills.gt} in General Translation; PowerPoint GT objects ${objects.none.length} (${objects.none.join(', ') || 'none'}) against ${objects.gt.length} (${objects.gt.slice(0, 4).join(', ')}); the theme after the control ${back}`,
   });
-  expect((kit?.['mark'] as { kind?: string } | undefined)?.kind, 'the record names no mark').toBe(
-    'none',
-  );
+  expect(own.theme, 'deck.info names the Simple theme').toBe('simple');
+  expect(own.kitFields, 'the deck carries no kit field').toEqual([]);
+  expect(back, 'the deck is Simple again after the control').toBe(own.theme);
   for (const d of drawn) {
     expect(d.stage, `no GT glyph on the stage of ${d.slide}`).toBe(0);
     expect(d.filmstrip, `no GT glyph in the filmstrip with ${d.slide} open`).toBe(0);
     expect(d.wordmark, `no wordmark on ${d.slide}`).toBe(0);
   }
-  expect(controlDrawn.stage, 'the control: the GT logo set draws the glyph').toBeGreaterThan(0);
-  expect(fills.gt, 'the control: the GT logo adds filled paths to the PDF').toBeGreaterThan(
+  expect(controlDrawn.stage, 'the control: General Translation draws the glyph').toBeGreaterThan(0);
+  expect(fills.gt, 'the control: General Translation adds filled paths to the PDF').toBeGreaterThan(
     fills.none,
   );
-  expect(objects.gt.length, 'the control: the GT logo is in the PowerPoint').toBeGreaterThan(0);
+  expect(objects.gt.length, 'the control: the GT glyph is in the PowerPoint').toBeGreaterThan(0);
   expect(objects.none, 'no GT wordmark or mark in the PowerPoint').toEqual([]);
 });
 
@@ -651,14 +652,16 @@ function pdfTextRuns(bytes: Buffer): number {
 }
 
 /*
- * docs/NEXT.md 4.1.3 item 23 (brand-judge-2 178): a deck from /new, the Blank template, with a
- * second slide, and its slide is plain: no rail, rule or cross of the GT frame and no counter on
- * the stage or in the filmstrip on either slide, and none in the PDF or the native PowerPoint.
+ * docs/NEXT.md 4.1.3 item 23 (brand-judge-2 178), restated in the design round (docs/DESIGN.md
+ * 7.3): a deck from /new, the Blank template, with a second slide, is the Simple theme with no
+ * kit (deck.info), and its slide is plain: no rail, rule or cross of the GT frame and no counter
+ * on the stage or in the filmstrip on either slide, and none in the PDF or the native PowerPoint.
  * The control proves the reads can see them: the kit's frame and counter turned on for a moment
- * draw them in the editor, add filled paths and text runs to the PDF and frame objects and
- * counter runs to the PowerPoint; the record goes back to off. The row makes its own deck in its
- * own context: its four downloads and the four of `brand.template.blank-no-gt-mark` would pass
- * an anonymous person's five exports a day (server/ratelimit.ts `exportsPerDay`) on one identity.
+ * (a kit field draws over any theme, DESIGN.md 7.5) draw them in the editor, add filled paths and
+ * text runs to the PDF and frame objects and counter runs to the PowerPoint; the kit goes back to
+ * off. The row makes its own deck in its own context: its four downloads and the four of
+ * `brand.template.blank-no-gt-mark` would pass an anonymous person's five exports a day
+ * (server/ratelimit.ts `exportsPerDay`) on one identity.
  */
 test(title('brand.template.blank-plain'), async ({ browser }) => {
   test.setTimeout(480_000);
@@ -676,7 +679,7 @@ async function blankPlainRow(page: Page, ownScratch: Scratch): Promise<void> {
   const deck = await newDeck(page, ownScratch, 'Blank plain deck');
   await addSlide(page);
   await openEditor(page, deck);
-  const kit = await record(page);
+  const own = await themeAndKit(page);
   const slides = await slideOrder(page);
   const drawn: { slide: string; read: Awaited<ReturnType<typeof frameDrawnInEditor>> }[] = [];
   for (const slide of slides) {
@@ -730,14 +733,10 @@ async function blankPlainRow(page: Page, ownScratch: Scratch): Promise<void> {
   const pptx = { plain: pptxFrameObjects(pptxPlain), framed: pptxFrameObjects(pptxFramed) };
   test.info().annotations.push({
     type: 'blank-plain',
-    description: `record ${JSON.stringify(kit)}; the editor per slide ${drawn.map((d) => `${d.slide}: stage ${JSON.stringify(d.read.stage)}, cards ${JSON.stringify(d.read.cards)}, counter "${d.read.counter}"`).join('; ')}; with the frame and the counter on: stage ${JSON.stringify(controlDrawn.stage)}, counter "${controlDrawn.counter}"; PDF fills ${pdf.fills.plain} against ${pdf.fills.framed}, text runs ${pdf.text.plain} against ${pdf.text.framed}; PowerPoint frame objects ${pptx.plain.frame.length} against ${pptx.framed.frame.length} (${pptx.plain.frame.slice(0, 4).join(', ') || 'none'}), counter runs ${pptx.plain.counter.length} against ${pptx.framed.counter.length} (${pptx.plain.counter.slice(0, 2).join(', ') || 'none'})`,
+    description: `theme ${own.theme}, kit ${JSON.stringify(own.kit)}; the editor per slide ${drawn.map((d) => `${d.slide}: stage ${JSON.stringify(d.read.stage)}, cards ${JSON.stringify(d.read.cards)}, counter "${d.read.counter}"`).join('; ')}; with the frame and the counter on: stage ${JSON.stringify(controlDrawn.stage)}, counter "${controlDrawn.counter}"; PDF fills ${pdf.fills.plain} against ${pdf.fills.framed}, text runs ${pdf.text.plain} against ${pdf.text.framed}; PowerPoint frame objects ${pptx.plain.frame.length} against ${pptx.framed.frame.length} (${pptx.plain.frame.slice(0, 4).join(', ') || 'none'}), counter runs ${pptx.plain.counter.length} against ${pptx.framed.counter.length} (${pptx.plain.counter.slice(0, 2).join(', ') || 'none'})`,
   });
-  expect(kit?.['frame'], 'the record turns the frame off').toEqual({
-    rails: false,
-    rules: false,
-    crosses: false,
-  });
-  expect(kit?.['counter'], 'the record turns the counter off').toEqual({ show: false });
+  expect(own.theme, 'deck.info names the Simple theme').toBe('simple');
+  expect(own.kitFields, 'the deck carries no kit field').toEqual([]);
   for (const d of drawn) {
     expect(d.read.stage, `no rail, rule or cross on the stage of ${d.slide}`).toEqual({
       rails: 0,
@@ -1084,15 +1083,37 @@ test(title('brand.logo.replace-every-slide'), async () => {
   await expect
     .poll(async () => (await drawnLogo()).markBox?.x ?? 0, { timeout: 8000 })
     .toBeGreaterThan((before?.x ?? 0) + 200);
+  /* the logo back to the deck's theme, so the rows after read the deck as the beforeAll made it:
+     brand.reset of the four fields Replace and Position wrote. The panel's "Use the theme's logo"
+     is drawn only on a theme that has a logo (docs/DESIGN.md 7.5), and this deck is Simple, so a
+     click on it waited out the row's time (the verifier's pass 4). Each reset has its own bound. */
+  const moved = (await drawnLogo()).markBox;
+  const useTheme = await ctl(page, 'panel.brand.logo.default').count();
+  const reset: string[] = [];
+  for (const path of ['/mark', '/footer/logo', '/footer/assetId', '/positions/mark']) {
+    const s = await settled(page);
+    const done = await Promise.race([
+      invoke<{ changed?: boolean }>(page, 'brand.reset', { path, baseRevision: s.revision }).then(
+        (r) => (r?.changed === false ? 'unchanged' : 'reset'),
+        (error: unknown) => `refused (${error instanceof Error ? error.message : String(error)})`,
+      ),
+      page.waitForTimeout(15_000).then(() => 'no answer in 15 s'),
+    ]);
+    reset.push(`${path} ${done}`);
+  }
+  await settled(page);
+  await expect
+    .poll(async () => (await drawnLogo()).footer, {
+      timeout: 8000,
+      message: 'after brand.reset the footer draws no picture',
+    })
+    .toBe(false);
+  const after = await drawnLogo();
   test.info().annotations.push({
     type: 'logo',
-    description: `the footer drew the picture ${ms} ms after the chooser; the title logo moved from x ${Math.round(before?.x ?? 0)} to ${Math.round((await drawnLogo()).markBox?.x ?? 0)}`,
+    description: `the footer drew the picture ${ms} ms after the chooser; the title logo moved from x ${Math.round(before?.x ?? 0)} to ${Math.round(moved?.x ?? 0)}; "Use the theme's logo" drawn ${useTheme}; brand.reset ${reset.join(', ')}; after it the footer picture ${after.footer}, the title picture ${after.mark}`,
   });
-  /* the default logo back, so the rows after read the deployment's kit */
-  await ctl(page, 'panel.brand.logo.default')
-    .click()
-    .catch(() => undefined);
-  await settled(page);
+  expect(after.mark, 'after brand.reset the title slide draws no picture').toBe(false);
 });
 
 test(title('fonts.budget.no-load-before-ready'), async ({ browser }) => {

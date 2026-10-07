@@ -3,8 +3,9 @@ import type { ReactNode } from 'react';
 /**
  * The band shell every band of /home below the first screen uses (docs/LANDING.md 2.0 "The
  * column"; 6.1): a `section[data-band]` labelled by its h2, 96 px of padding above and below at
- * 1,024 px and over (64 px under 720 px), the 1,104 px column inside it, and the band closed by
- * `.ts-seam` with its 9 px crosses where the seam meets the rails. The band's own layout is its
+ * 1,024 px and over (48 px under 720 px, docs/DESIGN.md 8.16), the 1,104 px column inside it, and
+ * the band closed by `.ts-seam` with its 9 px crosses where the seam meets the rails. The band's
+ * own layout is its
  * children; its instrument sits in one `Reserve` box at its final size (4.2).
  */
 export type HomeSectionProps = {

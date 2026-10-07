@@ -156,7 +156,9 @@ describe('the boot script', () => {
       read.push(stand.lead.textContent);
     }
     /* the sentence changes and the rest of the lead stays in the same run of text */
-    expect(read).toEqual([SENTENCES[0], SENTENCES[1], SENTENCES[2], SENTENCES[0]].map((s) => s + REST));
+    expect(read).toEqual(
+      [SENTENCES[0], SENTENCES[1], SENTENCES[2], SENTENCES[0]].map((s) => s + REST),
+    );
   });
 
   it('reads the first sentence and plays when storage throws, and the button still works', () => {

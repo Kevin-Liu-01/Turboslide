@@ -7,8 +7,8 @@ import { HomeSheet, ServerHtml } from './HomeSheet';
 import { HOME_RUN } from './run.generated';
 
 /**
- * Agents run the same actions (docs/LANDING.md 2.9, Kevin's picks "A+B" and "C"; docs/DESIGN.md
- * 8.8): under the lead, the agent to deck diagram (`HomeDiagram.tsx`); slide 5, the slide above,
+ * Agents run the same actions (docs/DESIGN.md 8.8; docs/LANDING.md 2.9, Kevin's picks "A+B" and
+ * "C"): slide 5, the slide above,
  * over the one `#101010` console with its CLI, MCP and HTTP tabs and the typed line; under it the
  * four chips, each with the editor's glyph, that run recorded commands on slide 5, and their
  * caption. Beside them the editor's Version history panel in an 8 px window: its head with the
@@ -21,7 +21,10 @@ import { HOME_RUN } from './run.generated';
  * its chunk after `load` (4.2); the console's screens are V3's chunk's (`live/agents.ts` writes
  * the resting `version list`), the Today rows `live/history.ts`'s and the scrubber
  * `live/versions.ts`'s. The recorded rows are words and stay in the document, written by the
- * server alone so the route's script does not carry the run. The band's look is `agents.css`.
+ * server alone so the route's script does not carry the run. Under the panel, the agent to deck
+ * diagram (`HomeDiagram.tsx`): it sat under the lead until the design round's finishing round 2
+ * moved it into the column's empty foot beside the console, 205 px off the band at 1440. The
+ * band's look is `agents.css`.
  */
 
 const esc = (text: string): string =>
@@ -84,9 +87,7 @@ export function HomeAgents() {
   const ssr = import.meta.env.SSR;
   return (
     <HomeSection id="agents">
-      <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS_ROUND.lead} span={7}>
-        <Diagram id="agents" label={DIAGRAMS_ROUND.agents.label} />
-      </BandHead>
+      <BandHead id="agents" heading={AGENTS.h2} lead={AGENTS_ROUND.lead} span={7} />
       <Reserve band="agents" className="ts-agents-grid">
         <div className="ts-agents-left">
           <div className="ts-agents-stage" data-agents-stage="">
@@ -186,6 +187,7 @@ export function HomeAgents() {
               html={ssr ? historyHtml() : ''}
             />
           </section>
+          <Diagram id="agents" label={DIAGRAMS_ROUND.agents.label} />
         </div>
       </Reserve>
       <p className="ts-sr" aria-live="polite" data-announce="" />

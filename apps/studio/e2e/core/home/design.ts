@@ -645,7 +645,10 @@ async function scrollRegions(): Promise<void> {
             }
             const fn = /^rgba?\(([^)]+)\)$/.exec(value);
             if (fn === null) return null;
-            const parts = (fn[1] ?? '').split(/[\s,/]+/).filter(Boolean).map(Number);
+            const parts = (fn[1] ?? '')
+              .split(/[\s,/]+/)
+              .filter(Boolean)
+              .map(Number);
             return [parts[0] ?? NaN, parts[1] ?? NaN, parts[2] ?? NaN, parts[3] ?? 1];
           };
           const sameColour = (a: string, b: string): boolean => {
@@ -1603,6 +1606,9 @@ const FLOWS = [
     label: DIAGRAMS_ROUND.present.label,
     words: DIAGRAM_WORDS.present,
     markers: 2,
+    /* under the buttons, in the band's head */
+    within: '.ts-band-head',
+    after: '.ts-buttons',
   },
   {
     band: 'export',
@@ -1610,6 +1616,9 @@ const FLOWS = [
     label: DIAGRAMS_ROUND.export.label,
     words: DIAGRAM_WORDS.export,
     markers: 2,
+    /* at the head of the column beside the Download dialog, over the reading (finishing round 2) */
+    within: '.ts-export-facts',
+    after: null,
   },
   {
     band: 'agents',
@@ -1617,6 +1626,9 @@ const FLOWS = [
     label: DIAGRAMS_ROUND.agents.label,
     words: DIAGRAM_WORDS.agents,
     markers: 4,
+    /* under Version history, in the column beside the console (finishing round 2) */
+    within: '.ts-agents-right',
+    after: '.ts-home-vh',
   },
 ] as const;
 
@@ -1666,13 +1678,25 @@ async function diagramsFlows(browser: Browser): Promise<void> {
             failures.push(`${label}: ${flow.band} holds ${await svg.count()} diagrams`);
             continue;
           }
-          const read = await svg.evaluate((el) => ({
-            role: el.getAttribute('role'),
-            name: el.getAttribute('aria-label'),
-            href: el.querySelector('use')?.getAttribute('href') ?? '',
-            width: el.getBoundingClientRect().width,
-            font: getComputedStyle(el).fontFamily,
-          }));
+          const read = await svg.evaluate(
+            (el, place) => ({
+              role: el.getAttribute('role'),
+              name: el.getAttribute('aria-label'),
+              href: el.querySelector('use')?.getAttribute('href') ?? '',
+              width: el.getBoundingClientRect().width,
+              font: getComputedStyle(el).fontFamily,
+              placed:
+                el.parentElement?.matches(place.within) === true &&
+                (place.after === null
+                  ? el.previousElementSibling === null
+                  : el.previousElementSibling?.matches(place.after) === true),
+            }),
+            { within: flow.within, after: flow.after },
+          );
+          if (!read.placed)
+            failures.push(
+              `${label}: ${flow.band}'s diagram is not in ${flow.within}${flow.after ? ` after ${flow.after}` : ' first'}`,
+            );
           if (read.role !== 'img' || read.name !== flow.label)
             failures.push(`${label}: ${flow.band}'s diagram is ${read.role} "${read.name}"`);
           if (read.href !== `${HOME_SPRITE}#${flow.id}`)
@@ -1749,7 +1773,11 @@ async function presentFigure(browser: Browser): Promise<void> {
           const frame = el.querySelector('.pt-window');
           const shown = el.querySelector<HTMLImageElement>(`img.ts-only-${t}`);
           const box = shown?.getBoundingClientRect();
+          const framed = frame?.getBoundingClientRect();
           return {
+            /* the frame's width over its height: 1024 by 544, the capture's top 544 rows */
+            frameRatio:
+              framed === undefined || framed.height === 0 ? 0 : framed.width / framed.height,
             radius: frame === null ? '' : getComputedStyle(frame).borderTopLeftRadius,
             src: shown === null ? '' : new URL(shown.currentSrc || shown.src).pathname,
             natural: shown?.naturalWidth ?? 0,
@@ -1768,6 +1796,12 @@ async function presentFigure(browser: Browser): Promise<void> {
         if (read.attrs[0] !== '1024' || read.attrs[1] !== '640')
           failures.push(`${label}: width and height ${read.attrs.join(' by ')}`);
         if (Math.abs(read.ratio - 1.6) > 0.02) failures.push(`${label}: ratio ${read.ratio}`);
+        /* restated in the design round's finishing round 2 (DESIGN.md 8.10): the frame crops the
+           capture's empty foot under the previous and next slides */
+        if (Math.abs(read.frameRatio - 1024 / 544) > 0.02)
+          failures.push(
+            `${label}: the frame's ratio ${read.frameRatio.toFixed(3)}, not 1024 by 544`,
+          );
         if (read.alt !== FIGURES_ROUND.presenter.alt) failures.push(`${label}: alt "${read.alt}"`);
         if (read.caption !== FIGURES_ROUND.presenter.caption)
           failures.push(`${label}: caption "${read.caption}"`);
@@ -1825,7 +1859,9 @@ async function exportDialog(browser: Browser): Promise<void> {
           .catch(() => failures.push(`${label}: the Download dialog did not decode`));
         const read = await page.evaluate((t) => {
           const band = document.querySelector('[data-band="export"]')!;
-          const img = band.querySelector<HTMLImageElement>(`figure[data-figure="download"] img.ts-only-${t}`);
+          const img = band.querySelector<HTMLImageElement>(
+            `figure[data-figure="download"] img.ts-only-${t}`,
+          );
           const glyph = band.querySelector<HTMLElement>('.ts-export-readout > .ts-icon');
           const probe = document.createElement('i');
           probe.style.color = 'var(--pt-status-done)';
@@ -1857,7 +1893,8 @@ async function exportDialog(browser: Browser): Promise<void> {
           failures.push(`${label}: width and height ${read.attrs.join(' by ')}`);
         if (read.natural === 0) failures.push(`${label}: natural width 0`);
         if (read.alt !== FIGURES_ROUND.download.alt) failures.push(`${label}: alt "${read.alt}"`);
-        if (!read.readout.includes(sentence)) failures.push(`${label}: the readout "${read.readout}"`);
+        if (!read.readout.includes(sentence))
+          failures.push(`${label}: the readout "${read.readout}"`);
         if (read.glyph !== 'check-circle' || read.glyphColour !== read.done)
           failures.push(`${label}: the readout's glyph ${read.glyph} in ${read.glyphColour}`);
         if (read.pdf !== 1 || read.record !== 1)
@@ -1892,7 +1929,8 @@ async function heroBoxes(page: Page) {
     };
     /* the words on each line of an element's first text run, as counts: "6,7,6,4" */
     const lines = (el: Element | null): string => {
-      const text = el === null ? null : document.createTreeWalker(el, NodeFilter.SHOW_TEXT).nextNode();
+      const text =
+        el === null ? null : document.createTreeWalker(el, NodeFilter.SHOW_TEXT).nextNode();
       if (text === null || text === undefined) return '';
       const data = text.textContent ?? '';
       const tops: number[] = [];
@@ -2000,10 +2038,14 @@ async function fontSwap(browser: Browser): Promise<void> {
             })[])
               if (!e.hadRecentInput)
                 w.__shifts.push(
-                  `${(e.value ?? 0).toFixed(6)} at ${Math.round(e.startTime)} ms on ${(e.sources ?? [])
+                  `${(e.value ?? 0).toFixed(6)} at ${Math.round(e.startTime)} ms on ${(
+                    e.sources ?? []
+                  )
                     .map((src) => {
                       const el = src.node instanceof Element ? src.node : src.node?.parentElement;
-                      return el ? `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}` : '?';
+                      return el
+                        ? `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}`
+                        : '?';
                     })
                     .join(' ')}`,
                 );
@@ -2023,8 +2065,11 @@ async function fontSwap(browser: Browser): Promise<void> {
       const shifts = await page.evaluate(
         () => (window as unknown as { __shifts: string[] }).__shifts,
       );
-      notes.push(`${size.width}: Inter after 2.5 s, ${shifts.length} shifts${shifts.length > 0 ? ` (${shifts.join('; ')})` : ''}`);
-      if (shifts.length > 0) failures.push(`${size.width}: Inter after 2.5 s moved ${shifts.join('; ')}`);
+      notes.push(
+        `${size.width}: Inter after 2.5 s, ${shifts.length} shifts${shifts.length > 0 ? ` (${shifts.join('; ')})` : ''}`,
+      );
+      if (shifts.length > 0)
+        failures.push(`${size.width}: Inter after 2.5 s moved ${shifts.join('; ')}`);
     } finally {
       await context.close();
     }
@@ -2117,7 +2162,9 @@ async function patternsStills(browser: Browser): Promise<void> {
           if (status !== 200) failures.push(`${label}: ${path} answered ${status}`);
         const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
         if (cls > 0) failures.push(`${label}: CLS ${cls} while the cards loaded`);
-        notes.push(`${label}: ${read.names.length} cards in ${read.tops} rows, ${asked.size} requested, CLS ${cls}`);
+        notes.push(
+          `${label}: ${read.names.length} cards in ${read.tops} rows, ${asked.size} requested, CLS ${cls}`,
+        );
       } finally {
         await context.close();
       }
@@ -2181,10 +2228,12 @@ async function shareDialog(browser: Browser): Promise<void> {
         if (read.radius !== '8px') failures.push(`${label}: the dialog's corner is ${read.radius}`);
         if (read.screenRadii.length !== 2 || read.screenRadii.some((r) => r !== '8px'))
           failures.push(`${label}: the screens' corners ${read.screenRadii.join(', ')}`);
-        if (read.title !== W.title(HOME_DECK.title)) failures.push(`${label}: the title "${read.title}"`);
+        if (read.title !== W.title(HOME_DECK.title))
+          failures.push(`${label}: the title "${read.title}"`);
         if (read.label !== W.generalAccess) failures.push(`${label}: the label "${read.label}"`);
         for (const words of [W.anyoneWithLink, W.anyoneCanEdit, W.roles.editor])
-          if (!read.access.includes(words)) failures.push(`${label}: the access row lacks "${words}"`);
+          if (!read.access.includes(words))
+            failures.push(`${label}: the access row lacks "${words}"`);
         if (read.field !== new URL('/home', page.url()).href)
           failures.push(`${label}: the link field reads ${read.field}`);
         if (read.copy !== W.copyLink) failures.push(`${label}: Copy Link reads "${read.copy}"`);
@@ -2196,7 +2245,8 @@ async function shareDialog(browser: Browser): Promise<void> {
         if (JSON.stringify(read.people.map((p) => [p.name, p.role])) !== JSON.stringify(want))
           failures.push(`${label}: the people ${JSON.stringify(read.people)}`);
         for (const p of read.people.slice(1))
-          if (!/^Editing slide \d+$/.test(p.sub)) failures.push(`${label}: ${p.name}'s slide "${p.sub}"`);
+          if (!/^Editing slide \d+$/.test(p.sub))
+            failures.push(`${label}: ${p.name}'s slide "${p.sub}"`);
         if (read.done !== W.done) failures.push(`${label}: Done reads "${read.done}"`);
         if (read.glyphs.some((g) => !g.mask || g.w === 0))
           failures.push(`${label}: a glyph draws no mask (${JSON.stringify(read.glyphs)})`);
@@ -2279,7 +2329,9 @@ async function historyPanel(browser: Browser): Promise<void> {
                 radius: getComputedStyle(restore).borderTopLeftRadius,
                 glyph: glyph(restore.querySelector('.ts-icon')),
               },
-              days: [...root.querySelectorAll('.ts-home-history-day')].map((d) => d.textContent ?? ''),
+              days: [...root.querySelectorAll('.ts-home-history-day')].map(
+                (d) => d.textContent ?? '',
+              ),
               empty: root.querySelector<HTMLElement>('[data-history-empty]')?.hidden ?? null,
               today: rows('today'),
               recorded: rows('recorded'),
@@ -2293,7 +2345,8 @@ async function historyPanel(browser: Browser): Promise<void> {
           `${label}: ${rest.title}, ${rest.days.join(' / ')}; recorded ${rest.recorded.map((r) => `${r.when} ${r.words}`).join(', ')}; chips ${rest.chips.map((c) => c?.name).join(',')}`,
         );
         if (rest.radius !== '8px') failures.push(`${label}: the panel's corner is ${rest.radius}`);
-        if (rest.title !== AGENTS.historyLabel) failures.push(`${label}: the head reads ${rest.title}`);
+        if (rest.title !== AGENTS.historyLabel)
+          failures.push(`${label}: the head reads ${rest.title}`);
         if (rest.clock?.name !== 'clock' || !rest.clock.mask || rest.clock.w === 0)
           failures.push(`${label}: the head's clock does not draw`);
         if (!rest.slider) failures.push(`${label}: no scrubber`);
@@ -2311,20 +2364,26 @@ async function historyPanel(browser: Browser): Promise<void> {
         )
           failures.push(`${label}: the groups read ${rest.days.join(', ')}`);
         if (rest.today.length !== 0 || rest.empty !== false)
-          failures.push(`${label}: Today at rest holds ${rest.today.length} rows, sentence hidden ${rest.empty}`);
+          failures.push(
+            `${label}: Today at rest holds ${rest.today.length} rows, sentence hidden ${rest.empty}`,
+          );
         const wantRecorded = [...HOME_RUN.steps]
           .reverse()
           .map((s) => s.history)
           .concat(HOME_DECK.title);
         if (JSON.stringify(rest.recorded.map((r) => r.words)) !== JSON.stringify(wantRecorded))
-          failures.push(`${label}: the recorded rows read ${rest.recorded.map((r) => r.words).join(', ')}`);
+          failures.push(
+            `${label}: the recorded rows read ${rest.recorded.map((r) => r.words).join(', ')}`,
+          );
         rest.recorded.forEach((r, i) => {
           if (r.when !== AGENTS_ROUND.history.version(4 - i) || !r.figures.includes('tabular-nums'))
             failures.push(`${label}: recorded row ${i + 1} reads "${r.when}" in ${r.figures}`);
           if (r.author !== AGENTS.author.agent || r.glyph?.name !== 'command-line' || !r.glyph.mask)
             failures.push(`${label}: recorded row ${i + 1} by ${r.author} with ${r.glyph?.name}`);
-          if (r.chipRadius !== '0px') failures.push(`${label}: an identity chip at ${r.chipRadius}`);
-          if (r.current !== (i === 0)) failures.push(`${label}: recorded row ${i + 1} current ${r.current}`);
+          if (r.chipRadius !== '0px')
+            failures.push(`${label}: an identity chip at ${r.chipRadius}`);
+          if (r.current !== (i === 0))
+            failures.push(`${label}: recorded row ${i + 1} current ${r.current}`);
         });
         const plate = rest.recorded[0]?.plate ?? '';
         if (plate === '' || plate === 'rgba(0, 0, 0, 0)')
@@ -2341,7 +2400,8 @@ async function historyPanel(browser: Browser): Promise<void> {
           .waitFor({ timeout: 30_000 });
         await page.waitForFunction(
           () =>
-            document.querySelector('[data-band="agents"] [data-chip][aria-disabled="true"]') === null,
+            document.querySelector('[data-band="agents"] [data-chip][aria-disabled="true"]') ===
+            null,
           undefined,
           { timeout: 30_000 },
         );
@@ -2357,7 +2417,9 @@ async function historyPanel(browser: Browser): Promise<void> {
           after.empty !== true ||
           after.recorded.some((r) => r.current)
         )
-          failures.push(`${label}: after a chip, Today ${JSON.stringify(after.today)}, sentence hidden ${after.empty}`);
+          failures.push(
+            `${label}: after a chip, Today ${JSON.stringify(after.today)}, sentence hidden ${after.empty}`,
+          );
       } finally {
         await context.close();
       }
@@ -2391,7 +2453,10 @@ async function kitsThemes(browser: Browser): Promise<void> {
             paper: getComputedStyle(el.querySelector('.ts-home-theme-swatch')!).backgroundColor,
           })),
         );
-        if (JSON.stringify(rest.map((t) => t.name)) !== JSON.stringify(HOME_THEME_TILES.map((t) => t.name)))
+        if (
+          JSON.stringify(rest.map((t) => t.name)) !==
+          JSON.stringify(HOME_THEME_TILES.map((t) => t.name))
+        )
           failures.push(`${label}: the tiles read ${rest.map((t) => t.name).join(', ')}`);
         const pressed = rest.filter((t) => t.pressed === 'true').map((t) => t.id);
         if (pressed.join() !== HOME_THEME_AT_REST)
@@ -2424,7 +2489,10 @@ async function kitsThemes(browser: Browser): Promise<void> {
             `${label}: ${off.length} of ${after.length} slides off Swiss's ${want.paper} and ${want.ink} (${off[0]?.paper} ${off[0]?.ink})`,
           );
         const sheet = await page.evaluate(
-          () => document.querySelector<HTMLStyleElement>('style[data-home-theme]')?.dataset['homeTheme'] ?? '',
+          () =>
+            document.querySelector<HTMLStyleElement>('style[data-home-theme]')?.dataset[
+              'homeTheme'
+            ] ?? '',
         );
         if (sheet !== 'swiss') failures.push(`${label}: the theme sheet reads "${sheet}"`);
         const cross = await page.evaluate(() => {

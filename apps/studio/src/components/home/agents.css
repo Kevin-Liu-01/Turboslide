@@ -18,6 +18,12 @@
   min-width: 0;
 }
 
+/* the agent to deck diagram under Version history (DESIGN.md 8.8), in the column's empty foot
+   beside the console at 1440 and after the panel under 720 px */
+.ts-agents-right > .ts-diagram {
+  margin-top: 32px;
+}
+
 /* the slide above: slide 5 at 588 by 331, unframed, the box V2's scrubber view sits in (v2.md R11) */
 .ts-agents-stage {
   position: relative;

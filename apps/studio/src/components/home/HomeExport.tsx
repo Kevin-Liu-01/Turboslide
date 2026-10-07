@@ -12,8 +12,8 @@ import { ServerHtml } from './HomeSheet';
 
 /**
  * Export to PDF and PowerPoint (docs/LANDING.md 2.12, Kevin's picks "C: Export seam" and "B:
- * Export loupe", the loupe V3#17's; the slide to pitch.pdf and pitch.pptx diagram under the lead,
- * DESIGN.md 8.11): slide 7 (the opener field's slide) at the column's width,
+ * Export loupe", the loupe V3#17's; DESIGN.md 8.11): slide 7 (the opener field's slide) at the
+ * column's width,
  * unframed, in the band's reserved box, as the two files the CLI writes meet at a
  * seam: left of the cut, the Perfect file's picture of the whole slide (its part, served as
  * lossless WebP of the same pixels; the file lays the deck's footer logo, the Turboslide mark the
@@ -23,7 +23,10 @@ import { ServerHtml } from './HomeSheet';
  * selectable. The cut is one CSS variable, `--seam-cut`, on a clip of the picture layer, at 50
  * percent at rest; the handle is a slider. Under it (DESIGN.md 8.11), the editor's Download dialog
  * as `scripts/home/capture.ts` captured it on the page deck (one picture per appearance at 1x and
- * 2x), beside it the Perfect file's reading with the done glyph, the record's link and Download
+ * 2x), beside it the slide to pitch.pdf and pitch.pptx diagram (`HomeDiagram.tsx`; it sat under
+ * the lead until the design round's finishing round 2 moved it into the dialog's empty column,
+ * 256 px off the band at 1440), then the Perfect file's reading with the done glyph, the record's
+ * link and Download
  * the PDF, a link with `download` to the file in the page's appearance, requested only on the
  * click: the markup names
  * the light file, and the live module (`live/seam.ts`) names the shown appearance's from the band's
@@ -40,9 +43,7 @@ export function HomeExport() {
   const size = { width: HOME_EXPORT_FACTS.perfectWidth, height: HOME_EXPORT_FACTS.perfectHeight };
   return (
     <HomeSection id="export">
-      <BandHead id="export" heading={EXPORT.h2} lead={EXPORT.lead} span={7}>
-        <Diagram id="export" label={DIAGRAMS_ROUND.export.label} />
-      </BandHead>
+      <BandHead id="export" heading={EXPORT.h2} lead={EXPORT.lead} span={7} />
       <Reserve band="export" className="ts-export-reserve">
         <div
           className="ts-seam-slide"
@@ -117,6 +118,7 @@ export function HomeExport() {
           })}
         </figure>
         <div className="ts-export-facts">
+          <Diagram id="export" label={DIAGRAMS_ROUND.export.label} />
           <p className="ts-export-readout">
             <i className="ts-icon" data-icon="check-circle" />
             <span>{EXPORT.rows.perfect.sentence(size, HOME_FACTS)}</span>

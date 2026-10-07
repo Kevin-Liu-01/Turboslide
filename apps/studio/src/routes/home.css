@@ -386,7 +386,9 @@ main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
 }
 
 /* ---- the bands (LANDING.md 2.0 "The column"): 96 px above and below at 1,024 px and over, 80
-   between 720 and 1,023, 64 under 720 ---- */
+   between 720 and 1,023, 48 under 720 (64 until the design round's finishing round 2 brought the
+   page under its 15,000 px line at 390, DESIGN.md 8.16; with the 80 px interlude two bands' words
+   stay 176 px apart) ---- */
 .ts-band {
   padding: 96px 0;
 }
@@ -1935,9 +1937,15 @@ code.ts-command:not([data-printed]) {
 }
 
 /* the presenter view as the product draws it (DESIGN.md 8.10): a capture in a .pt-window figure
-   frame across the band, its picture in the shown appearance, its caption under it */
+   frame across the band, its picture in the shown appearance, its caption under it; the frame
+   shows the capture's top 544 of its 640 rows, down to 20 px under the previous and next slides,
+   so the empty foot of the notes and the slide column leaves the band (96 px at 1440, 34 at 390) */
 .ts-present-figure {
   margin: 40px 0 0;
+}
+
+.ts-present-figure > .ts-figure-frame {
+  aspect-ratio: 1024 / 544;
 }
 
 .ts-figure-frame {
@@ -2259,6 +2267,12 @@ code.ts-command:not([data-printed]) {
   display: block;
   max-width: 100%;
   height: auto;
+}
+
+/* the slide to pitch.pdf and pitch.pptx diagram heads the column beside the Download dialog
+   (DESIGN.md 8.11), over the reading */
+.ts-export-facts > .ts-diagram {
+  margin: 0 0 24px;
 }
 
 .ts-export-readout {
@@ -2676,7 +2690,7 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   }
 
   .ts-band {
-    padding: 64px 0;
+    padding: 48px 0;
   }
 
   .ts-lead {
@@ -2692,6 +2706,11 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   .ts-product .ts-button {
     height: 44px;
     width: 100%;
+  }
+
+  /* Download the PDF and Read the record share one row */
+  .ts-product .ts-export-links .ts-button {
+    width: auto;
   }
 
   .ts-product-foot-closing {

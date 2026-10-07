@@ -11321,22 +11321,22 @@
     {
       "id": "home.diagrams.flows",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the Present band draws the editor to presenter view (the S key) and to a phone's show (the present link) under its buttons, the export band a slide to pitch.pdf and pitch.pptx under its lead, and the agents band the CLI, the MCP server and the HTTP API into one action and the deck with Version history under its lead: each an svg named by one sentence (role img) whose one use of the landing's sprite (answering 200) draws the symbol: 1 px strokes and fills in the tokens alone, the window boxes at the 8 px corner, 11 unit square markers at each flow's end and no arrowhead, the labels in Inter; Present carries the play glyph and View > Slideshow's key chips, Print This Deck the printer glyph",
+      "interaction": "At 1440 and 390 in both appearances the Present band draws the editor to presenter view (the S key) and to a phone's show (the present link) under its buttons, the export band a slide to pitch.pdf and pitch.pptx at the head of the column beside the Download dialog, over the reading, and the agents band the CLI, the MCP server and the HTTP API into one action and the deck with Version history under the Version history panel: each an svg named by one sentence (role img) whose one use of the landing's sprite (answering 200) draws the symbol: 1 px strokes and fills in the tokens alone, the window boxes at the 8 px corner, 11 unit square markers at each flow's end and no arrowhead, the labels in Inter; Present carries the play glyph and View > Slideshow's key chips, Print This Deck the printer glyph",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-landing F9 and F10: the Present band is half empty; the export band ends in three rows of text",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7, the agents flow in DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7, the agents flow in DR-D4#6; driven by apps/studio/e2e/core/home/design.ts. Restated in the finishing round 2 of DR-D4 (pass 3 finding 1): the export and agents diagrams moved from under the lead into the empty columns beside the Download dialog and the console"
     },
     {
       "id": "home.present.figure",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the Present band shows the product's presenter view of the page deck as scripts/home/capture.ts captured it from /present on the node-server build (assets.json `presenter`, 1024 by 640 at x1 and 2048 by 1280 at x2, at most 25,000 B and 60,000 B): in a .pt-window figure frame at the 8 px corner, the shown appearance's file by its srcset with width and height on the img, decoded with a natural width over 0 in an 8 by 5 box, answering 200, named by its alt and captioned in one sentence; nothing of it is requested at the top of the page and the hidden appearance's twin is never requested; the editor to presenter view to show diagram stays under the buttons",
+      "interaction": "At 1440 and 390 in both appearances the Present band shows the product's presenter view of the page deck as scripts/home/capture.ts captured it from /present on the node-server build (assets.json `presenter`, 1024 by 640 at x1 and 2048 by 1280 at x2, at most 25,000 B and 60,000 B): in a .pt-window figure frame at the 8 px corner that shows the capture's top 544 of its 640 rows (a 1024 by 544 frame, the empty foot under the previous and next slides cropped), the shown appearance's file by its srcset with width and height on the img, decoded with a natural width over 0 in an 8 by 5 box, answering 200, named by its alt and captioned in one sentence; nothing of it is requested at the top of the page and the hidden appearance's twin is never requested; the editor to presenter view to show diagram stays under the buttons",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "research-landing F9: the Present band shows no presenter view; VERIFICATION.md design round pass 1 finding 3 (the one product picture Kevin asked for)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts. Restated in the finishing round 2 of DR-D4 (pass 3 finding 1): the frame crops the capture's empty foot"
     },
     {
       "id": "home.export.dialog",

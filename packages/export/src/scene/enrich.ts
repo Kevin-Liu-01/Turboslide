@@ -33,6 +33,8 @@ import type { Scene, SceneBullet, SceneDither, SceneShadow, SceneText } from './
  * A Color as the theme's hex (no hash), for the shadow and outline the builder writes. A token
  * reads the deck's theme under its brand kit (render/theme-css.ts `deckTokens`, the values the
  * page computes; docs/DESIGN.md 7.5, G12), General Translation's sheet when no deck is given.
+ * `blue` is the kit's Primary and reads the deck's `--blue`, as `colorCss` writes it (Mint's
+ * `#11734f`); green, amber and red are the fixed semantic hues.
  */
 export function colorHexFor(
   color: Color,
@@ -40,11 +42,12 @@ export function colorHexFor(
   deck?: Pick<Deck, 'brand' | 'theme'>,
 ): string {
   if (isColorToken(color)) {
-    if (color === 'green' || color === 'amber' || color === 'red' || color === 'blue')
+    if (color === 'green' || color === 'amber' || color === 'red')
       return SEMANTIC_PALETTE[color].slice(1).toUpperCase();
     const tokens: Record<string, string> =
       deck === undefined ? { ...TOKENS[theme] } : deckTokens(deck, theme);
-    const value = tokens[color] ?? tokens['ink'] ?? '#070707';
+    const fallback = color === 'blue' ? SEMANTIC_PALETTE.blue : (tokens['ink'] ?? '#070707');
+    const value = tokens[color] ?? fallback;
     return cssToHex(value, tokens['paper'] ?? TOKENS[theme].paper);
   }
   return color.slice(1).toUpperCase();

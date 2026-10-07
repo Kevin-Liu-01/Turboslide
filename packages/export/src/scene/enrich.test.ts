@@ -30,4 +30,15 @@ describe('colorHexFor', () => {
     expect(colorHexFor('green', 'dark', deck('swiss'))).toBe('12A37A');
     expect(sceneShadow({ color: 'ink' }, 'dark', deck('night')).colorHex).toBe('EDF1F7');
   });
+
+  it("reads the blue token as the deck's Primary, as the stage draws it", () => {
+    expect(colorHexFor('blue', 'light')).toBe('2F5CE0');
+    expect(colorHexFor('blue', 'dark', deck('general-translation'))).toBe('2F5CE0');
+    expect(colorHexFor('blue', 'light', deck('mint'))).toBe('11734F');
+    expect(colorHexFor('blue', 'dark', deck('mint'))).toBe('4CC59A');
+    expect(sceneShadow({ color: 'blue' }, 'light', deck('mint')).colorHex).toBe('11734F');
+    expect(
+      colorHexFor('blue', 'light', deck('mint', { colors: { light: { primary: '#0b3d91' } } })),
+    ).toBe('0B3D91');
+  });
 });

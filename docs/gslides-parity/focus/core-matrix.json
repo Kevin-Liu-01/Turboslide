@@ -11298,12 +11298,12 @@
     {
       "id": "themes.export.pptx-token-colours",
       "feature": "decks",
-      "interaction": "On a Swiss deck in the dark appearance, a shape whose shadow names the ink token and a word art text whose outline names the hair token export to PowerPoint (Editable text) with Swiss's dark ink (F4F4F2) as the shadow colour and Swiss's dark hair composited on Swiss's dark paper (#111111) as the outline colour, where General Translation's sheet gives F2F2F0 and its own composite",
+      "interaction": "On a Swiss deck in the dark appearance, a shape whose shadow names the ink token and a word art text whose outline names the hair token export to PowerPoint (Editable text) with Swiss's dark ink (F4F4F2) as the shadow colour and Swiss's dark hair composited on Swiss's dark paper (#111111) as the outline colour, where General Translation's sheet gives F2F2F0 and its own composite; the same deck in Mint, light, with both colours set to the blue token exports Mint's Primary (11734F) as both, the --blue the stage computes, where a fixed table gives 2F5CE0",
       "driver": "core/export.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-themes G12 (packages/export/src/scene/enrich.ts colorHexFor read GT's TOKENS and GT's paper)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D3#1; enrich.ts colorHexFor reads render/theme-css.ts deckTokens, the deck's theme under its kit"
+      "note": "Design round (docs/DESIGN.md 11), DR-D3#1; enrich.ts colorHexFor reads render/theme-css.ts deckTokens, the deck's theme under its kit, the blue token included since the DR-D3 fix of the verifier's pass 4 finding 4"
     },
     {
       "id": "themes.default.new-is-simple",

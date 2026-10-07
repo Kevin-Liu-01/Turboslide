@@ -3652,9 +3652,12 @@ test(title('export.fonts.upstream-names'), async () => {
 /*
  * The design round's theme under the kit in the PowerPoint (docs/DESIGN.md 7.5 G12, 11; lane D3):
  * a Swiss deck in the dark appearance with a shape whose shadow names the ink token and a word art
- * text whose outline names the hair token, exported as Editable text in its own context (one
- * download of a fresh identity's five). The shadow's colour is Swiss's dark ink and the outline's
+ * text whose outline names the hair token, exported as Editable text in its own context (two
+ * downloads of a fresh identity's five). The shadow's colour is Swiss's dark ink and the outline's
  * is Swiss's dark hair composited on Swiss's dark paper, where the GT sheet would give its own.
+ * Then the same deck in Mint, light, with both colours set to the blue token: the shadow and the
+ * outline are Mint's Primary (`#11734f`), the `--blue` the stage computes, where a fixed table
+ * would give `#2F5CE0` on every theme (the verifier's pass 4 finding 4).
  */
 test(title('themes.export.pptx-token-colours'), async ({ browser }) => {
   test.setTimeout(300_000);
@@ -3729,6 +3732,68 @@ test(title('themes.export.pptx-token-colours'), async ({ browser }) => {
     expect(outline, 'the outline in Swiss dark hair over Swiss dark paper').toBe(want.outline);
     expect(want.shadow).not.toBe(gtWould.shadow);
     expect(want.outline).not.toBe(gtWould.outline);
+    /* the blue token on Mint, light: the kit's Primary, as the stage draws it */
+    const mintBlue = hex(themeRecord('mint').tokens.light.blue);
+    s = await settled(page);
+    await invoke(page, 'deck.set', { path: '/theme', value: 'mint', baseRevision: s.revision });
+    s = await settled(page);
+    await invoke(page, 'deck.set', {
+      path: '/defaults/appearance',
+      value: 'light',
+      baseRevision: s.revision,
+    });
+    s = await settled(page);
+    await invoke(page, 'block.set', {
+      slideId: second,
+      blockId: 'theme-shadow',
+      path: '/shadow',
+      value: { color: 'blue', opacity: 0.5, distance: 8, blur: 4 },
+      baseRevision: s.revision,
+    });
+    s = await settled(page);
+    await invoke(page, 'block.set', {
+      slideId: second,
+      blockId: 'theme-outline',
+      path: '/outline',
+      value: { color: 'blue', width: 2 },
+      baseRevision: s.revision,
+    });
+    await settled(page);
+    await clickCard(page, second);
+    const readBlue = () =>
+      page.evaluate(() => {
+        const sheet = document
+          .querySelector('.ts-stagewrap.ts-editor .ts-stage')
+          ?.closest('.ts-sheet');
+        const v =
+          sheet === null || sheet === undefined
+            ? ''
+            : getComputedStyle(sheet).getPropertyValue('--blue').trim().toLowerCase();
+        return /^#[0-9a-f]{3}$/.test(v) ? `#${[...v.slice(1)].map((c) => c + c).join('')}` : v;
+      });
+    await expect
+      .poll(readBlue, { timeout: 10_000, message: "the stage computes Mint's Primary as --blue" })
+      .toBe(`#${mintBlue.toLowerCase()}`);
+    const stageBlue = await readBlue();
+    await openPptx(page);
+    await ctl(page, 'dialog.download.mode.native').click({ force: true });
+    const mintFile = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+    await closeDialogs(page);
+    const mintXml = pptxSlideXml(mintFile.bytes);
+    const blueShadow = /<a:outerShdw[^>]*>\s*<a:srgbClr val="([0-9A-Fa-f]{6})"/
+      .exec(mintXml)?.[1]
+      ?.toUpperCase();
+    const blueOutline =
+      /<a:rPr[^>]*>(?:(?!<\/a:rPr>)[\s\S])*?<a:ln[^>]*>\s*<a:solidFill>\s*<a:srgbClr val="([0-9A-Fa-f]{6})"/
+        .exec(mintXml)?.[1]
+        ?.toUpperCase();
+    test.info().annotations.push({
+      type: 'blue',
+      description: `Mint light, the blue token: the stage's --blue ${stageBlue}; the PowerPoint's shadow ${blueShadow ?? 'none'} and word art outline ${blueOutline ?? 'none'}; Mint's Primary ${mintBlue}; ${mintFile.bytes.length} B in ${mintFile.ms} ms`,
+    });
+    expect(blueShadow, "the blue shadow in Mint's Primary").toBe(mintBlue);
+    expect(blueOutline, "the blue outline in Mint's Primary").toBe(mintBlue);
+    expect(mintBlue).not.toBe('2F5CE0');
   } finally {
     try {
       await teardownAll(own.page, scratch);

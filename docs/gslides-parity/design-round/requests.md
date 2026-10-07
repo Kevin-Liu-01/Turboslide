@@ -97,3 +97,30 @@ it serves.
    names, would read right on every theme; `packages/chrome/src/__tests__/inspector-sections.test.tsx`
    208 pins the label.
 
+## D3 (finishing round 3)
+
+1. **D2, `packages/chrome/src/dialogs/Background.tsx` and the dialog field's tooltip**: in the
+   Background dialog a pointer over a colour swatch shows the field's tooltip ("Color / A theme
+   colour behind the slide, or none") and never the swatch's own name, at 1440 and 390, although
+   each swatch carries its `tipProps` name (`data-tip` "Primary" on
+   `dialog.background.color.blue`, read on 4696). The text colour plate shows the swatch's name.
+   The swatch's tooltip would answer the pointer and the field's the label.
+2. **D2 or the integrator, Format options' Layout section**: on a Simple deck's title slide the
+   section lists "Mark width 132" and "Mark height 84" (`packages/schema/src/deck.ts` 319 to
+   320, the title kind's mark box), which size a mark Simple never draws (DESIGN.md 7.2: Simple
+   has no logo). The two rows could show only where the theme or the kit draws a title mark.
+3. **The integrator, `charts.export.pdf`**: on 4696 the PDF text of the chart slide reads the
+   legend words cut, "Nor…" and "Sou…", and the row fails "North is in the PDF text". The PDF
+   path does not run `scene/enrich.ts` (`pdf/build.ts` imports only `READY_SELECTOR` from
+   `scene/extract.ts`), so the PowerPoint colour fix of this round does not reach it; the
+   verifier's pass 4 runs did not include the export spec whole.
+4. **The integrator, `scripts/probes/core-walk/areas/export.mjs`** (`export.pptx.dialog`): the
+   walk's row looks for a mode label matching "Perfect", which `fc39b76d` renamed Pictures in the
+   Download dialog, so the row is red on 4696 with the dialog right ("Pictures" and "Editable
+   text" both listed, Pictures checked on a deck with no table or chart). The row's text and its
+   matrix entry would read Pictures.
+5. **The integrator, `export.print.layout-with-notes`** (walk area `export`): on 4696 the print
+   page with one slide that has notes read "layout slides; notes blocks 0; talk track shown
+   false". The verifier's pass 4 walk run did not include the export area; the row's owner is
+   the print page's.
+

@@ -2,8 +2,8 @@
 // tracks or would track (new files of a lane included, ignored files never), the source rules on
 // each script, the CSS rules on each stylesheet, the credits check over decks/ and
 // apps/studio/public/, then the overrides and, in enforce mode, the acceptances of config.ts. The
-// rules of REPORT_RULES (the design round's five checks until DR-D1#5) print their findings apart
-// and never fail a run.
+// rules of REPORT_RULES (empty since DR-D1#5, when the design round's five checks turned to
+// enforce) print their findings apart and never fail a run.
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

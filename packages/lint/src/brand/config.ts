@@ -12,8 +12,9 @@
 // The design round (docs/DESIGN.md 2.6, 3.5, 4.2, 4.5, 6.5) adds five CSS checks, the stacking
 // scale (`css/z-index`), the drop shadows (`css/no-shadow`), the one scrollbar (`css/scrollbar`),
 // the numerals token (`css/numerals`) and the chrome's alternates (`css/chrome-alternates`), and
-// widens `css/radius` to the ladder. The five report until DR-D1#5 (REPORT_RULES), while the lanes
-// of the round move their files onto the tokens; the source rules read their inline style forms.
+// widens `css/radius` to the ladder; the source rules read their inline style forms. The five
+// reported from DR-D1#1 while the lanes of the round moved their files onto the tokens, and fail
+// in enforce mode since DR-D1#5, with `css/radius` and its named exceptions gone.
 
 /**
  * `report` prints every finding and passes; `enforce` fails on any finding that ACCEPTED does not
@@ -92,17 +93,13 @@ export const CSS_RULES: readonly CssRuleId[] = [
 ];
 
 /**
- * The rules that print their findings and never fail a run, whatever the mode: the design round's
- * five checks from DR-D1#1 until DR-D1#5 turns them to enforce, after every other lane's last push
- * (docs/DESIGN.md 10.1, 12 item 3). The run lists their findings apart as `reported`.
+ * The rules that print their findings and never fail a run, whatever the mode; the run lists their
+ * findings apart as `reported`. Empty since DR-D1#5 (docs/DESIGN.md 10.1, 12 item 3): the design
+ * round's five checks reported from DR-D1#1 and fail in enforce mode after every other lane's last
+ * push. A rule that lands before the tree is clean of it is named here until the push that clears
+ * the tree.
  */
-export const REPORT_RULES: readonly BrandRuleId[] = [
-  'css/z-index',
-  'css/no-shadow',
-  'css/scrollbar',
-  'css/numerals',
-  'css/chrome-alternates',
-];
+export const REPORT_RULES: readonly BrandRuleId[] = [];
 
 /**
  * The stacking scale (docs/DESIGN.md 2.2, 2.6; packages/theme/src/scale.ts LAYERS): the layer
@@ -226,25 +223,10 @@ export const RADIUS_VALUES: readonly RegExp[] = [
 /** A named corner outside RADIUS_VALUES: the file, the rule's selector as written, the value. */
 export type RadiusException = { file: string; selector: string; value: string; reason: string };
 
-/* The design round (docs/DESIGN.md 3.5): both entries leave in DR-D1#5, once DR-D2#2 draws the
-   Slideshow box and the search key chip from the ladder's tokens. Until then they name the two
-   literal corners the tree still writes. */
-export const RADIUS_EXCEPTIONS: readonly RadiusException[] = [
-  {
-    file: 'packages/chrome/src/TitleRow.css',
-    selector: '.ts-title-slideshow',
-    value: '8px',
-    reason:
-      'NEXT.md 4.1.2 "Corners": 8 px on Slideshow with its label first (P:DESIGN.md section 15, Present).',
-  },
-  {
-    file: 'packages/chrome/src/Toolbar.css',
-    selector: '.pt-search-kbd',
-    value: '4px',
-    reason:
-      'The search key chip, an exception P:DESIGN.md section 15 names; audit-brand-source 308 counts it as sanctioned and NEXT.md 4.1.3 item 14 leaves it out of the thirteen radii it squares.',
-  },
-];
+/* Empty since DR-D1#5 (docs/DESIGN.md 3.5). The two literal corners named here until then draw
+   the ladder since DR-D2#2: the Slideshow box (8 px) reads --pt-radius, and the search key chip
+   (4 px) takes .pt-kbd, which reads --pt-radius-sm. */
+export const RADIUS_EXCEPTIONS: readonly RadiusException[] = [];
 
 /**
  * The code surfaces where monospace is the instrument voice (DECK-GRAMMAR.md:31 "Code sits on the

@@ -12,7 +12,7 @@ import {
   RADIUS_EXCEPTIONS,
   REPORT_RULES,
 } from './config.ts';
-import type { Acceptance, BrandFinding } from './config.ts';
+import type { Acceptance, BrandFinding, BrandRuleId } from './config.ts';
 import {
   applyAcceptances,
   formatBrandLint,
@@ -84,43 +84,79 @@ describe('the brand lint run', () => {
     );
   });
 
-  test('the design round rules report apart and never fail an enforce run until DR-D1#5', () => {
-    expect([...REPORT_RULES].sort()).toEqual(
-      [
-        'css/chrome-alternates',
-        'css/no-shadow',
-        'css/numerals',
-        'css/scrollbar',
-        'css/z-index',
-      ].sort(),
-    );
-    for (const rule of REPORT_RULES) expect(CSS_RULES).toContain(rule);
+  test('the design round rules fail an enforce run since DR-D1#5, and report only when listed', () => {
+    const round = [
+      'css/chrome-alternates',
+      'css/no-shadow',
+      'css/numerals',
+      'css/scrollbar',
+      'css/z-index',
+    ] as const;
+    for (const rule of round) expect(CSS_RULES).toContain(rule);
+    expect(REPORT_RULES).toEqual([]);
+    expect(RADIUS_EXCEPTIONS).toEqual([]);
     // 0d75ab90 is the tree the design round was cut from: Menu.css and Dialog.css draw the old
     // z-index values, the dialog's drop shadow, tabular figures by hand and the alternates
     const files = ['packages/chrome/src/Menu.css', 'packages/chrome/src/Dialog.css'];
-    const before = runBrandLint({ root: ROOT, mode: 'enforce', ref: '0d75ab90', files });
-    expect(before.reported.length).toBeGreaterThan(0);
-    expect(new Set(before.reported.map((f) => f.rule))).toEqual(
+    const enforced = runBrandLint({ root: ROOT, mode: 'enforce', ref: '0d75ab90', files });
+    expect(enforced.reported).toEqual([]);
+    expect(new Set(enforced.open.map((f) => f.rule))).toEqual(
       new Set(['css/z-index', 'css/no-shadow', 'css/numerals', 'css/chrome-alternates']),
     );
-    expect(before.open.filter((f) => REPORT_RULES.includes(f.rule))).toEqual([]);
-    expect(before.failed).toBe(before.open.length > 0 || before.stale.length > 0);
-    expect(formatBrandLint(before).some((line) => line.startsWith('reported, never failing'))).toBe(
-      true,
-    );
-    /* DR-D1#5 turns them to enforce: the same findings are then open */
-    const enforced = runBrandLint({
+    expect(enforced.failed).toBe(true);
+    expect(
+      formatBrandLint(enforced).some((line) => line.startsWith('reported, never failing')),
+    ).toBe(false);
+    /* the rules as they ran from DR-D1#1 to DR-D1#5: the same findings reported apart, none open */
+    const reported = runBrandLint({
       root: ROOT,
       mode: 'enforce',
       ref: '0d75ab90',
       files,
-      reportOnly: [],
+      reportOnly: [...round],
     });
-    expect(enforced.reported).toEqual([]);
-    expect(enforced.open.filter((f) => REPORT_RULES.includes(f.rule)).length).toBe(
-      before.reported.length,
+    expect(reported.reported.length).toBe(
+      enforced.open.filter((f) => (round as readonly string[]).includes(f.rule)).length,
     );
-    expect(enforced.failed).toBe(true);
+    expect(reported.open.filter((f) => (round as readonly string[]).includes(f.rule))).toEqual([]);
+    expect(
+      formatBrandLint(reported).some((line) => line.startsWith('reported, never failing')),
+    ).toBe(true);
+  });
+
+  test('since DR-D1#5 the three accepted inline z-index lines are weighed, so none is open or stale', () => {
+    // the verifier's pass 4 read these three lines as the round's only reported findings; read from
+    // the committed tree, each is weighed against its acceptance in config.ts
+    const files = [
+      'apps/studio/src/components/home/live/paint.ts',
+      'apps/studio/src/components/home/live/theme.ts',
+      'packages/viewer/src/MaterialMount.tsx',
+    ];
+    const result = runBrandLint({
+      root: ROOT,
+      mode: 'enforce',
+      ref: 'HEAD',
+      files,
+      rules: new Set<BrandRuleId>(['css/z-index']),
+    });
+    expect(result.accepted.map((f) => f.file).sort()).toEqual([...files].sort());
+    expect(result.open).toEqual([]);
+    expect(result.stale).toEqual([]);
+    expect(result.failed).toBe(false);
+    const unaccepted = runBrandLint({
+      root: ROOT,
+      mode: 'enforce',
+      ref: 'HEAD',
+      files,
+      rules: new Set<BrandRuleId>(['css/z-index']),
+      accepted: [],
+    });
+    expect(unaccepted.open.map((f) => f.rule)).toEqual([
+      'css/z-index',
+      'css/z-index',
+      'css/z-index',
+    ]);
+    expect(unaccepted.failed).toBe(true);
   });
 
   test("a run on a commit reads git's objects, not the working tree", () => {
@@ -140,9 +176,10 @@ describe('the brand lint run', () => {
   });
 
   test('a run narrowed to named files weighs only the acceptances of those files', () => {
-    // 2108dad4 is the tree B5b#20 read: Toolbar.tsx holds two sentence case labels, TitleRow.css
+    // 2108dad4 is the tree B5b#20 read: Toolbar.tsx holds two sentence case labels, TitleRow.tsx
     // none. "Exit fullscreen" is still accepted; "Copy link" left the list when the toolbar's label
-    // became "Copy Link" in the design round, so on that tree it is an open finding, not a stale one
+    // became "Copy Link" in the design round, so on that tree it is an open finding, not a stale one.
+    // (TitleRow.css of that tree fails since DR-D1#5: the round's rules and Slideshow's 8 px.)
     const toolbar = runBrandLint({
       root: ROOT,
       mode: 'enforce',
@@ -156,7 +193,7 @@ describe('the brand lint run', () => {
       root: ROOT,
       mode: 'enforce',
       ref: '2108dad4',
-      files: ['packages/chrome/src/TitleRow.css'],
+      files: ['packages/chrome/src/TitleRow.tsx'],
     });
     expect(clean.stale).toEqual([]);
     expect(clean.failed).toBe(false);
@@ -164,12 +201,15 @@ describe('the brand lint run', () => {
 
   test('enforce mode fails on a finding a lane fixed in Round 1 if it came back', () => {
     // ea5fec35 is the tree before B3b#10 squared the thirteen radii and dropped the book view's
-    // smooth scroll; read in enforce mode with today's acceptances, those findings are open
+    // smooth scroll; read in enforce mode with today's acceptances, those findings are open, and
+    // since DR-D1#5 so is Slideshow's 8 px, the named exception of those days. The design round's
+    // five rules also read that tree's old z-index, figures and alternates; they are left out here
     const before = runBrandLint({
       root: ROOT,
       mode: 'enforce',
       ref: 'ea5fec35',
       files: ['packages/chrome/src/TitleRow.css', 'packages/viewer/src/BookView.css'],
+      rules: new Set<BrandRuleId>(['css/no-smooth-scroll', 'css/radius']),
     });
     expect(before.failed).toBe(true);
     expect(before.open.map((f) => f.rule).sort()).toEqual([
@@ -178,6 +218,8 @@ describe('the brand lint run', () => {
       'css/radius',
       'css/radius',
       'css/radius',
+      'css/radius',
     ]);
+    expect(before.open.map((f) => f.text)).toContain('.ts-title-slideshow { border-radius: 8px }');
   });
 });

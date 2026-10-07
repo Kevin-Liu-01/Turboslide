@@ -47,7 +47,8 @@ acceptance commands per milestone are in the milestone plan; the M1 acceptance i
   `scale.test.ts`. A floating surface enters its layer through `packages/chrome/src/Layer.ts`
   (`useLayer`) and is placed by `packages/chrome/src/place.ts`; no file writes a z-index of 5 or
   more, a drop shadow, a scrollbar rule or `tabular-nums` of its own (the brand lint's
-  `css/z-index`, `css/no-shadow`, `css/scrollbar` and `css/numerals`). From DR-D1#2 the colour
+  `css/z-index`, `css/no-shadow`, `css/scrollbar` and `css/numerals`, which fail `pnpm check`
+  since DR-D1#5, as do `css/chrome-alternates` and a corner off the ladder). From DR-D1#2 the colour
   declarations of `tokens.css` sit between `/* colors:generated:start */` and
   `/* colors:generated:end */` and are written by `node scripts/build-colors.ts` from
   `packages/theme/src/palette.ts`; edit the palette and regenerate, never the block by hand.

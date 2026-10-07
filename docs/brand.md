@@ -406,8 +406,9 @@ numbers are data in `packages/theme/src/scale.ts`, and `scale.test.ts` pins the 
 | `.pt-icon`                                                 | Inter's default glyphs                                      | The chrome leaves the deck's alternates `cv11` and `ss01`, which belong to the General Translation theme's slides (decision C6, question 8)                                                                                                                                         |
 
 The brand lint (`packages/lint/src/brand/`) reads the new rules: `css/z-index`, `css/no-shadow`,
-`css/scrollbar`, `css/numerals` and `css/chrome-alternates` report from DR-D1#1 and fail from
-DR-D1#5; `css/radius` accepts the three rungs.
+`css/scrollbar`, `css/numerals` and `css/chrome-alternates` reported from DR-D1#1 and fail in
+enforce mode since DR-D1#5; `css/radius` accepts the three rungs and, since DR-D1#5, names no
+exception (Slideshow and the search key chip draw the rungs).
 
 From DR-D1#2 the colour declarations of `tokens.css` are generated (`scripts/build-colors.ts` over
 `packages/theme/src/palette.ts` with colorjs.io): `--pt-titanium` is solved to 4.5:1 on the hover

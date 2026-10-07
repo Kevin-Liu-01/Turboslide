@@ -36,7 +36,7 @@ describe('the CSS checks', () => {
     expect(rulesOf('html { scroll-behavior: auto; }')).toEqual([]);
   });
 
-  test('css/radius passes the rule and the named exceptions, and reads every other corner', () => {
+  test('css/radius passes the ladder and reads every other corner', () => {
     expect(
       rulesOf(
         '.a { border-radius: 0 } .b { border-radius: 50% } .c { border-radius: var(--pt-radius) } .d { border-top-left-radius: calc(var(--pt-radius) - 1px) } .e { border-radius: var(--pt-radius, 6px) }',
@@ -45,15 +45,19 @@ describe('the CSS checks', () => {
     expect(rulesOf('.a { border-radius: 4px }')).toEqual(['css/radius']);
     expect(rulesOf('.a { --ts-card-radius: 4px }')).toEqual(['css/radius']);
     expect(rulesOf(':root { --pt-radius: 6px }')).toEqual([]);
+    /* the two named exceptions left in DR-D1#5: Slideshow and the search key chip draw the
+       ladder's tokens, so their old literals are findings in their own files too */
     expect(
       rulesOf('.ts-title-slideshow { border-radius: 8px }', 'packages/chrome/src/TitleRow.css'),
-    ).toEqual([]);
-    expect(
-      rulesOf('.ts-title-share { border-radius: 8px }', 'packages/chrome/src/TitleRow.css'),
     ).toEqual(['css/radius']);
-    expect(rulesOf('.ts-title-slideshow { border-radius: 8px }')).toEqual(['css/radius']);
     expect(
       rulesOf('.pt-search-kbd { border-radius: 4px }', 'packages/chrome/src/Toolbar.css'),
+    ).toEqual(['css/radius']);
+    expect(
+      rulesOf(
+        '.ts-title-slideshow { border-radius: var(--pt-radius) } .pt-kbd { border-radius: var(--pt-radius-sm) } .pt-window { border-radius: var(--pt-radius-lg) }',
+        'packages/chrome/src/TitleRow.css',
+      ),
     ).toEqual([]);
   });
 

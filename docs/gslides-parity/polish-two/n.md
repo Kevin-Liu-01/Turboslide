@@ -235,3 +235,13 @@ the row's 1.5 px.
   186 px floor; DESIGN.md has no owner in this round (POLISH-2.md 7.5), so lane N leaves it.
 - `apps/studio/src/components/home/copy.test.ts` (not lane N's) lists the page's buttons for the
   Title Case check; `MOTION_BUTTON.pause` and `.play` could join that list.
+
+## After the three pushes
+
+With every row of lane N in the matrix (4bf8cc37), `core-gate --only specs --rows
+home.nav.theme-first-paint,home.hero.side-fits-headline` on 4722 passed both with zero retries
+(16:33 to 16:35, load 117.3 to 102.0). Every row of lane N has now passed through the gate on the
+dev server: `home.nav.no-pause`, `home.nav.fits-320`, `home.nav.theme-first-paint`,
+`home.hero.side-fits-headline`, `home.nav.icons`, `home.motion.reduced`, `home.hero.type`, with
+`home.motion.pause` not read at load 147.7 after its functional checks passed. The servers on 4722
+and 4732 were stopped.

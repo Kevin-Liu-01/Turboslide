@@ -14,19 +14,23 @@ import './page-frame.css';
  * with a cross at each rail, then the page's content in the column. The caller names the root's
  * classes (`.ts-notfound` for Not found and the refused page, the root the brand lint's one rail
  * check reads) and its element: a `main` for the pages that own the document, a `div` around a
- * component that draws its own `main` (YouNeedAccess.tsx).
+ * component that draws its own `main` (YouNeedAccess.tsx). `bar` fills the bar's row after the
+ * lockup for a page with controls of its own (the docs: docs/POLISH-2.md 5.6); the plain pages
+ * pass none and the bar draws the lockup alone.
  */
 export function PageFrame({
   as = 'main',
   className,
   control,
   linkComponent,
+  bar,
   children,
 }: {
   as?: 'main' | 'div';
   className?: string;
   control?: string;
   linkComponent?: LinkComponent;
+  bar?: ReactNode;
   children: ReactNode;
 }) {
   const Root = as;
@@ -43,6 +47,7 @@ export function PageFrame({
             homeTo="/decks"
             aboutTo="/home"
           />
+          {bar}
         </div>
       </header>
       <div className="ts-col ts-page-frame-body">{children}</div>

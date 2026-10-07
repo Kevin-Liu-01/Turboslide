@@ -1,6 +1,7 @@
 import { devtools } from '@tanstack/devtools-vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
@@ -75,10 +76,32 @@ const CLIENT_BUILD = {
   },
 };
 
+// The docs at /docs (docs/POLISH-2.md 5.1): fumadocs-mdx compiles apps/studio/content/docs at build
+// through its macro API (src/docs/source.ts), headless. No index files are written (`index: false`,
+// the macro needs none), and the MDX preset drops the steps that would bring colour or pictures the
+// chrome's tokens do not name: Shiki's highlighting (code is one ink on its code surface), the image
+// imports, the npm tabs and the code tabs. The plugin leaves the rest of this config as it is
+// (`updateViteConfig: false`): with its own dependency settings merged in, the client build began
+// honouring the vendor group below and renamed the shared entry chunk `vendor` (measured on the
+// node-server build of 2026-10-07: the same 1,427 KB, under the other name, with the largest chunk
+// ceiling of check-client-bundle.mjs then asserted). vite.deploy.config.ts carries the same options.
+const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
+  index: false,
+  updateViteConfig: false,
+  globalOptions: {
+    mdxOptions: {
+      rehypeCodeOptions: false,
+      remarkImageOptions: false,
+      remarkNpmOptions: false,
+      remarkCodeTabOptions: false,
+    },
+  },
+};
+
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   environments: { client: CLIENT_BUILD },
-  plugins: [externalServerOnly(), devtools(), tanstackStart(), viteReact()],
+  plugins: [externalServerOnly(), fumadocsMdx(DOCS_MDX), devtools(), tanstackStart(), viteReact()],
   server: {
     port: 4321,
     strictPort: true,

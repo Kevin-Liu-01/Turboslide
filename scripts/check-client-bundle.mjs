@@ -54,7 +54,15 @@ const ROUTE_PRELOAD_CEILINGS = {
   '/signin': 600_000,
   '/deck/gt-brand': 1_000_000,
   '/edit/gt-brand': 2_000_000,
+  /* polish two (docs/POLISH-2.md 5.2): the docs, 384,020 B measured on the research trial */
+  '/docs': 450_000,
 };
+/**
+ * Polish two (docs/POLISH-2.md 5.2): the routes whose preloads must name no docs module. A docs
+ * component writes its `ts-docs-` class names into its chunk, so a chunk holding one is the docs'.
+ */
+const DOCS_FREE_ROUTES = ['/home', '/decks', '/edit/gt-brand'];
+const DOCS_MODULE = /["'`]ts-docs-/;
 /**
  * The builtins a page must never name (SPEC-2 8.3), matched as module specifiers in quotes. The
  * three of the specification, plus node:child_process: the render worker's cli.ts imports it,
@@ -257,6 +265,37 @@ if (base !== null) {
     if (total > ceiling)
       failures.push(
         `${route} preloads ${total} B of chunks, over the ${ceiling} B ceiling (SPEC-4 3.12, 4.1)`,
+      );
+  }
+  for (const route of DOCS_FREE_ROUTES) {
+    let html;
+    try {
+      const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(60_000) });
+      html = response.status === 200 ? await response.text() : null;
+      if (html === null) {
+        failures.push(`${route} answered ${response.status} on ${base}; no head to read (POLISH-2 5.2)`);
+        continue;
+      }
+    } catch (error) {
+      failures.push(`${route} on ${base}: ${error instanceof Error ? error.message : String(error)}`);
+      continue;
+    }
+    const named = new Set();
+    for (const m of html.matchAll(/<script\b[^>]*\bsrc="([^"]+\.(?:m?js))"/g)) named.add(m[1]);
+    for (const m of html.matchAll(/<link\b[^>]*\brel="modulepreload"[^>]*\bhref="([^"]+)"/g))
+      named.add(m[1]);
+    for (const m of html.matchAll(/<link\b[^>]*\bhref="([^"]+)"[^>]*\brel="modulepreload"/g))
+      named.add(m[1]);
+    const docs = [...named]
+      .map((href) => href.replace(/^https?:\/\/[^/]+/, '').split('?')[0])
+      .filter((path) => {
+        const file = join(chunkDir, path);
+        return existsSync(file) && DOCS_MODULE.test(readFileSync(file, 'utf8'));
+      });
+    notes.push(`${route} preloads ${docs.length} docs module(s) of ${named.size} chunk(s)`);
+    if (docs.length > 0)
+      failures.push(
+        `${route} preloads a docs module: ${docs.join(', ')} (POLISH-2 5.2: only /docs carries the docs)`,
       );
   }
 }

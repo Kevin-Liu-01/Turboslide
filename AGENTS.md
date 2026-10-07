@@ -434,6 +434,10 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
   `@turboslide/theme` (`TurboslideMark.tsx` imports the geometry module); both point down the one
   way direction. A builder names a package and its version in
   `docs/gslides-parity/build-4/<key>.md` and the integrator installs once.
+- Polish two catalog entries (`docs/POLISH-2.md` 5.1; P2-D#1): `fumadocs-core` 16.16.2 and
+  `fumadocs-mdx` 15.4.6, pinned exactly and attached to `apps/studio` for `/docs` (the MDX pages
+  under `apps/studio/content/docs`, compiled at build, headless: no fumadocs-ui, Tailwind or
+  Pagefind).
 
 ## Ownership and git
 

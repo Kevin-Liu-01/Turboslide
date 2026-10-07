@@ -1,0 +1,86 @@
+---
+title: Getting started
+description: Turboslide is a slides editor in the browser. Make a presentation, present it and send the link. No account is needed.
+---
+
+Open [turboslide.com/new](/new) to start a blank presentation. It is saved in this browser as you type. If you sign in later, the presentations you made in this browser move to your account.
+
+<Callout title="No account is needed">
+  You can make, present and download a presentation without an account. Sign in to share a
+  presentation with people by name and to open it on another computer.
+</Callout>
+
+## Make your first presentation
+
+<Steps>
+  <Step title="Start a presentation">
+    Go to [/new](/new), or pick a template from Your Presentations at [/decks](/decks).
+  </Step>
+  <Step title="Add and arrange slides">
+    Press Ctrl+M to add a slide after the current one. Press Cmd+D (Ctrl+D on Windows) to duplicate
+    it and Delete to remove it. Drag a card in the filmstrip on the left to move a slide.
+  </Step>
+  <Step title="Write on the slide">
+    Click a text box on the slide and type. Click under the slide, where it reads Click to add
+    speaker notes, to write what you will say.
+  </Step>
+  <Step title="Present it">
+    Click Slideshow, or press Cmd+Enter (Ctrl+F5 on Windows). Open the arrow beside Slideshow and
+    choose Presenter view to see your notes and the next slide in a second window.
+  </Step>
+</Steps>
+
+## What you need to know first
+
+- Every change is saved as you make it. There is no Save button. File > Version history lists earlier versions and restores one.
+- The menus at the top hold every command. Help > Search the menus (Alt+/) finds a command by its name, and Help > Keyboard shortcuts lists the keys.
+- A presentation you made without an account lives in this browser. Clearing the browser's site data removes it. Sign in, or download a Turboslide file under File > Download, to keep a copy elsewhere.
+- Share gives a link. Anyone with a view link can open the presentation; an edit link lets them change it.
+
+## Common tasks
+
+| Task                                      | How                                                                         |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| Open a presentation                       | Click its card on [Your Presentations](/decks), or press Cmd+O and pick it. |
+| Make a copy for a customer                | File > Make a copy, type the name, press Enter.                             |
+| Change a name across the presentation     | Edit > Find and replace, type the old and the new name, click Replace all.  |
+| Swap a logo                               | Drop the file on the picture, or right click it and choose Replace image.   |
+| Add, duplicate, delete and reorder slides | Ctrl+M adds, Cmd+D duplicates, Delete removes, drag a card to move it.      |
+| Hide slides that do not apply             | Select the cards, right click, choose Skip slide.                           |
+| Update a table or a number                | Click a cell and type; Tab moves to the next cell.                          |
+| Write what you will say                   | Click under the slide where it reads Click to add speaker notes.            |
+| Present over a call                       | Slideshow arrow > Presenter view, then share the slideshow window.          |
+| Send a PDF or a link                      | Share > Copy link, or File > Download > PDF Document.                       |
+
+## Agents use the same actions
+
+Every command in the menus is also an action that a program or an AI agent can run. The same actions are reachable four ways, and each one checks its input the same way.
+
+<Tabs>
+  <Tab title="Command line">
+    The `turboslide` command line works on a presentation folder on your computer:
+
+    ```sh
+    turboslide info --json
+    turboslide slide new --layout split --after title
+    ```
+
+  </Tab>
+  <Tab title="MCP">
+    `turboslide mcp` runs an MCP server over standard input and output, and a hosted studio answers MCP at `/mcp`. Each action is a tool whose name starts with `deck_`.
+  </Tab>
+  <Tab title="HTTP">
+    Send the action's input as JSON:
+
+    ```sh
+    curl -X POST "https://www.turboslide.com/api/actions/deck.info?deck=<id>" \
+      -H "authorization: Bearer <token>" \
+      -H "content-type: application/json" \
+      -d '{}'
+    ```
+
+  </Tab>
+  <Tab title="Browser">
+    An open editor page exposes `window.turboslide.studio`, so a script in the page can call `invoke(<action>, input)`.
+  </Tab>
+</Tabs>

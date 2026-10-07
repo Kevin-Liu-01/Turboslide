@@ -312,6 +312,8 @@ export const CORE_SPEC_DRIVERS = Object.freeze([
   /* the landing round (docs/LANDING.md 6.1, 6.7): the /home rows, one driver over the lane modules
      of apps/studio/e2e/core/home/ */
   'core/home.spec.ts',
+  /* polish two (docs/POLISH-2.md 6.1, 6.5): the /docs rows, lane D's */
+  'core/docs.spec.ts',
 ]);
 
 /**

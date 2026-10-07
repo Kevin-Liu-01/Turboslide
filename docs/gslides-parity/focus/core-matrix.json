@@ -11895,6 +11895,36 @@
       "today": "not driven",
       "evidence": "research-auth S4 (the code in the subject); docs/NEXT.md 4.3.2 item 8",
       "note": "Polish two (docs/POLISH-2.md 6), P2-A#5"
+    },
+    {
+      "id": "help.docs.page",
+      "feature": "help",
+      "interaction": "/docs and every docs page answer 200 at 1440 and 390 in both appearances and draw the page frame's 58 px bar (the lockup, Documentation, the search pill, the theme button, New Presentation) and rails, the sidebar's three groups with the current page marked, the title in sentence case, the description, Copy Page, the article at most 640 px wide, the table of contents from 1180 px, previous and next; at 390 a Menu button opens the sidebar and search is an icon button; corners on the ladder (buttons, fields, tabs and menus 6 px; code, callouts, cards and the search window 8 px; key chips and step numbers 4 px; rows square); no box-shadow with a blur or an offset; the shared scrollbar; a miss under /docs draws the docs layout with the three closest pages",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-docs 3.1 (/docs answers the Not found page on production, ts-docs-404-1440.jpg), 6 P8",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#1"
+    },
+    {
+      "id": "help.docs.prerendered",
+      "feature": "help",
+      "interaction": "With JavaScript off every docs page's document holds its title, description, every heading and the article's text; every docs page answers with the cache-control of /home",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-docs 5 item 6, 6 P4",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#1"
+    },
+    {
+      "id": "help.docs.nav-client",
+      "feature": "help",
+      "interaction": "A click on a sidebar link and on Next swaps the article and the address and requests that page's script chunk alone: no request to /_serverFn, none to /__tsr/staticServerFnCache and no document",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-docs 5 items 3 to 5 (a server function per click; the static variant answered 404 and left the page blank)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#1"
     }
   ]
 }

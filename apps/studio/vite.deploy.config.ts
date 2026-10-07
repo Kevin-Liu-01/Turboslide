@@ -1,9 +1,11 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { devtools } from '@tanstack/devtools-vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
+import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
@@ -171,6 +173,61 @@ const TRACE_DEPS = [
   ...(NATIVE_ADDON_PRESENT ? [NATIVE_ADDON] : []),
 ];
 
+// The docs (docs/POLISH-2.md 5.2, C23): every page under content/docs, its markdown twin and the
+// search index, read from the content folder when the config loads, so a page added to the folder
+// is prerendered with no list to edit. A page's address drops `.mdx` and a folder's `index`; its
+// twin is the address with `.md` (/docs/index.md for /docs). The twins are files on the CDN, so the
+// two headers their route writes (the markdown type with its charset and the canonical Link) are
+// route rules here, one per twin, which Nitro writes in front of the static file on Vercel and
+// applies in h3 on the node server.
+const DOCS_DIR = fileURLToPath(new URL('./content/docs', import.meta.url));
+const DOCS_ORIGIN = (
+  process.env.TURBOSLIDE_PUBLIC_ORIGIN?.trim() || 'https://www.turboslide.com'
+).replace(/\/+$/, '');
+
+function mdxFiles(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const name of readdirSync(dir).sort()) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) out.push(...mdxFiles(full));
+    else if (name.endsWith('.mdx')) out.push(full);
+  }
+  return out;
+}
+
+/** Every docs page's address and twin, from the content folder. */
+function docsAddresses(): { page: string; twin: string }[] {
+  return mdxFiles(DOCS_DIR).map((file) => {
+    const parts = relative(DOCS_DIR, file).slice(0, -'.mdx'.length).split(sep);
+    if (parts[parts.length - 1] === 'index') parts.pop();
+    return parts.length === 0
+      ? { page: '/docs', twin: '/docs/index.md' }
+      : { page: `/docs/${parts.join('/')}`, twin: `/docs/${parts.join('/')}.md` };
+  });
+}
+
+const DOCS = docsAddresses();
+
+/** The prerendered docs files: each page, each twin and the search index (5.2). */
+const DOCS_PRERENDER = [
+  ...DOCS.flatMap(({ page, twin }) => [{ path: page }, { path: twin }]),
+  { path: '/docs/search.json' },
+];
+
+/** The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two). */
+const DOCS_TWIN_RULES = Object.fromEntries(
+  DOCS.map(({ page, twin }) => [
+    twin,
+    {
+      headers: {
+        'content-type': 'text/markdown; charset=utf-8',
+        link: `<${DOCS_ORIGIN}${page}>; rel="canonical"`,
+      },
+    },
+  ]),
+);
+
 // The route rules Nitro compiles into the deployment's config.json (gslides-parity SPEC-4 0.43,
 // 1.6, 3.13; R02 section 8; scripts/check-vercel-output.mjs asserts one route per rule): the icon
 // set and the card a day in the browser with a week of stale service, the manifest a day, the
@@ -185,8 +242,16 @@ const TRACE_DEPS = [
 const DAY = 'public, max-age=86400, stale-while-revalidate=604800';
 const WEEK = 'public, max-age=604800, stale-while-revalidate=2592000';
 const IMMUTABLE = 'public, max-age=31536000, immutable';
+/** A prerendered page: the CDN's copy, revalidated by the browser on every visit. */
+const PAGE = 'public, max-age=0, must-revalidate';
 const ROUTE_RULES = {
   '/': { redirect: { to: '/new', status: 307 as const }, headers: { 'x-robots-tag': 'noindex' } },
+  /* the prerendered pages (docs/POLISH-2.md 5.2): the header Vercel gives /home's static file, so the
+     CDN serves a page and a browser asks again before using its copy; written for /home too, which
+     the node server otherwise answered with the /home/** rule's year (h3 matches the page itself) */
+  '/home': { headers: { 'cache-control': PAGE } },
+  '/docs/**': { headers: { 'cache-control': PAGE } },
+  ...DOCS_TWIN_RULES,
   '/favicon.ico': { headers: { 'cache-control': DAY } },
   '/icon.svg': { headers: { 'cache-control': DAY } },
   '/apple-touch-icon.png': { headers: { 'cache-control': DAY } },
@@ -206,16 +271,25 @@ const ROUTE_RULES = {
 // 6): the page has no loader and no per request data, so its first byte is the CDN's. The entry
 // is added once B2's route file is in the tree, so the deploy build passes before that and
 // prerenders the page from then on; the other routes are never prerendered
-// (`autoStaticPathsDiscovery: false`; /new, /decks and /deck carry per request data).
+// (`autoStaticPathsDiscovery: false`; /new, /decks and /deck carry per request data). The docs join
+// the list with their twins and their search index (docs/POLISH-2.md 5.2, DOCS_PRERENDER above).
 const HOME_ROUTE = fileURLToPath(new URL('./src/routes/home.tsx', import.meta.url));
 const PRERENDER = existsSync(HOME_ROUTE)
   ? {
-      pages: [{ path: '/home' }],
+      pages: [{ path: '/home' }, ...DOCS_PRERENDER],
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: false,
         crawlLinks: false,
         failOnError: true,
+        /* the docs add some seventy files (POLISH-2.md 5.2): at the default of one request per core a
+           loaded machine timed the preview server out on two of them, and the start plugin logs
+           such a failure as an unhandled rejection rather than failing the build (measured
+           2026-10-07, load 112 to 141), so the requests go four at a time and a failed one is tried
+           again three times */
+        concurrency: 4,
+        retryCount: 3,
+        retryDelay: 2000,
       },
     }
   : {};
@@ -243,11 +317,27 @@ const CLIENT_BUILD = {
   },
 };
 
+// The docs' MDX (docs/POLISH-2.md 5.1), the options vite.config.ts carries and says why: no index
+// files, no Shiki, image imports, npm tabs or code tabs, and no change to this config.
+const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
+  index: false,
+  updateViteConfig: false,
+  globalOptions: {
+    mdxOptions: {
+      rehypeCodeOptions: false,
+      remarkImageOptions: false,
+      remarkNpmOptions: false,
+      remarkCodeTabOptions: false,
+    },
+  },
+};
+
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   environments: { client: CLIENT_BUILD },
   plugins: [
     externalServerOnly(),
+    fumadocsMdx(DOCS_MDX),
     devtools(),
     tanstackStart(PRERENDER),
     nitro({

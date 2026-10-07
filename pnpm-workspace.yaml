@@ -63,6 +63,12 @@ catalog:
   colorjs.io: 0.7.1
   dompurify: 3.4.15
   eslint: 10.10.0
+  # Polish two (docs/POLISH-2.md 5.1, decision C22): /docs in apps/studio, headless. fumadocs-core
+  # gives the loader, the page tree, the table of contents and the markdown twins; fumadocs-mdx
+  # compiles the MDX at build through its Vite plugin. No fumadocs-ui, Tailwind or Pagefind.
+  # Pinned exactly: fumadocs-core shipped 29 releases between 2026-07-27 and 2026-10-05
+  fumadocs-core: 16.16.2
+  fumadocs-mdx: 15.4.6
   ioredis: 6.0.0
   jsdom: 30.0.1
   jszip: 3.10.2

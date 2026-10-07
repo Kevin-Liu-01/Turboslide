@@ -1,0 +1,941 @@
+/* The docs at /docs (docs/POLISH-2.md 5.6), linked in the head of routes/docs.tsx alone. The page
+   frame's bar and rails (page-frame.css, grammar.css) with the docs' controls in the bar; under it
+   the sidebar (184 px), the article (about 600 px, at most 640) and the table of contents (168 px)
+   from 1180 px, inside the 1104 px column. Chrome tokens only, both appearances through
+   :root[data-theme]; corners on the ladder (DESIGN.md 3.1): buttons, fields, tabs and the menu
+   plate 6 px, code, callouts, cards and the search window 8 px through .pt-window, key chips and
+   step numbers 4 px through .pt-kbd, sidebar and contents rows square. No blurred shadow: a
+   floating plate separates by --pt-edge and --pt-ring. Inter's defaults; numbers that align in
+   --pt-numerals; code in --pt-mono on its code surface. */
+
+.ts-docs .ts-page-frame-body {
+  padding-top: 40px;
+}
+
+/* ---- the bar ---- */
+.ts-docs .ts-page-frame-row {
+  gap: 12px;
+}
+
+.ts-docs-bar-rule {
+  flex: 0 0 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--pt-hair);
+}
+
+.ts-docs-bar-title {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  margin-left: -8px;
+  font-size: 14px;
+  color: var(--pt-ink);
+  text-decoration: none;
+  border-radius: var(--pt-radius);
+  white-space: nowrap;
+}
+
+.ts-docs-bar-title:hover {
+  background: var(--pt-plate);
+}
+
+.ts-docs-bar-title:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-docs-bar-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.ts-docs-bar-end .pt-ib {
+  color: var(--pt-ink);
+}
+
+/* the search pill: the field's frame and plate, 6 px, the key chip at its end */
+.ts-docs-search.pt-ib {
+  width: 280px;
+  height: 36px;
+  padding: 0 6px 0 10px;
+  justify-content: flex-start;
+  border-color: var(--pt-field);
+  background: var(--pt-plate);
+  color: var(--pt-ink-2);
+  font-size: 14px;
+}
+
+.ts-docs-search.pt-ib:hover {
+  border-color: var(--pt-edge);
+  color: var(--pt-ink);
+}
+
+.ts-docs-search-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.ts-docs-search-label.is-short {
+  display: none;
+}
+
+.ts-docs-search-key {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  font: 12px/1.2 var(--pt-text);
+}
+
+.ts-docs-new.pt-ib {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.ts-docs-bar-end .ts-docs-new.pt-ib {
+  color: var(--pt-paper);
+}
+
+.ts-docs-pages.pt-ib {
+  display: none;
+}
+
+/* ---- the body: the sidebar beside the page ---- */
+.ts-docs-body {
+  display: grid;
+  grid-template-columns: 184px minmax(0, 1fr);
+  column-gap: 40px;
+  align-items: start;
+}
+
+.ts-docs-side {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  margin-left: -8px;
+  padding-bottom: 24px;
+}
+
+.ts-docs-nav {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.ts-docs-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-docs-nav-group + .ts-docs-nav-group {
+  margin-top: 24px;
+}
+
+.ts-docs-nav-label,
+.ts-docs-nav-folder {
+  margin: 0 0 6px;
+  padding: 0 8px;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--pt-ink);
+}
+
+.ts-docs-nav-link {
+  display: block;
+  padding: 6px 8px;
+  color: var(--pt-ink-2);
+  text-decoration: none;
+}
+
+.ts-docs-nav-link:hover {
+  color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-docs-nav-link[aria-current='page'] {
+  color: var(--pt-ink);
+  font-weight: 500;
+  background: var(--pt-plate);
+}
+
+.ts-docs-nav-link:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-docs-nav-sub {
+  margin: 2px 0 4px 8px;
+  padding-left: 0;
+  border-left: 1px solid var(--pt-hair);
+}
+
+/* ---- a page: the article beside its table of contents ---- */
+.ts-docs-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 168px;
+  column-gap: 40px;
+  align-items: start;
+  min-width: 0;
+}
+
+.ts-docs-article {
+  min-width: 0;
+  max-width: 640px;
+}
+
+.ts-docs-head {
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-docs-title {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: var(--ts-h2);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.ts-docs-lead {
+  margin: 12px 0 0;
+  font-size: var(--ts-lead);
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+}
+
+/* Copy Page: one 6 px split button, its two halves joined on a shared edge */
+.ts-docs-copy {
+  display: inline-flex;
+  margin-top: 20px;
+}
+
+.ts-docs-copy .pt-ib {
+  height: 32px;
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+}
+
+.ts-docs-copy-main.pt-ib {
+  padding: 0 12px 0 10px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ts-docs-copy-more.pt-ib {
+  margin-left: -1px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.ts-docs-copy .pt-ib:hover {
+  border-color: var(--pt-edge);
+}
+
+.ts-docs-copy-more[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+
+/* a label that changes on a press keeps one width: the three words share one grid cell */
+.ts-docs-swap {
+  display: inline-grid;
+}
+
+.ts-docs-swap > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.ts-docs-swap[data-state='idle'] > .is-idle,
+.ts-docs-swap[data-state='copied'] > .is-copied,
+.ts-docs-swap[data-state='failed'] > .is-failed {
+  visibility: visible;
+}
+
+/* ---- the article's text ---- */
+.ts-docs-body-text {
+  font-size: var(--ts-body);
+  line-height: 1.65;
+}
+
+.ts-docs-body-text > :first-child {
+  margin-top: 0;
+}
+
+.ts-docs-body-text p,
+.ts-docs-body-text ul,
+.ts-docs-body-text ol {
+  margin: 0 0 16px;
+}
+
+.ts-docs-body-text ul,
+.ts-docs-body-text ol {
+  padding-left: 22px;
+}
+
+.ts-docs-body-text li + li {
+  margin-top: 6px;
+}
+
+.ts-docs-body-text h2,
+.ts-docs-body-text h3,
+.ts-docs-body-text h4 {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  scroll-margin-top: 24px;
+}
+
+.ts-docs-body-text h2 {
+  margin: 48px 0 12px;
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.ts-docs-body-text h3 {
+  margin: 32px 0 8px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.ts-docs-body-text h4 {
+  margin: 24px 0 8px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.ts-docs-body-text a,
+.ts-docs-foot a:not(.pt-ib):not(.pt-window) {
+  color: var(--pt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--pt-edge);
+}
+
+.ts-docs-body-text a:hover {
+  text-decoration-color: var(--pt-ink);
+}
+
+.ts-docs-body-text strong {
+  font-weight: 600;
+}
+
+.ts-docs-body-text :not(pre) > code {
+  padding: 1px 5px;
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-plate);
+  font: 0.875em/1 var(--pt-mono);
+}
+
+.ts-docs-body-text hr {
+  margin: 32px 0;
+  border: 0;
+  border-top: 1px solid var(--pt-hair);
+}
+
+/* code: the code surface, one ink, with its Copy button */
+.ts-docs-code.pt-window {
+  position: relative;
+  margin: 0 0 20px;
+  background: var(--pt-plate);
+  box-shadow: none;
+  border-color: var(--pt-hair);
+}
+
+.ts-docs-code pre {
+  margin: 0;
+  padding: 14px 72px 14px 16px;
+  color: var(--pt-ink);
+  font: 13px/1.6 var(--pt-mono);
+  white-space: pre;
+}
+
+.ts-docs-code pre code {
+  font: inherit;
+}
+
+.ts-docs-code-copy.pt-ib {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+  background: var(--pt-paper);
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+}
+
+/* tables: square, hairlines, figures that align */
+.ts-docs-table {
+  margin: 0 0 20px;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-docs-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ts-docs-table th,
+.ts-docs-table td {
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-docs-table th {
+  font-weight: 500;
+  background: var(--pt-plate);
+  border-bottom-color: var(--pt-hair);
+}
+
+.ts-docs-table tr:last-child td {
+  border-bottom: 0;
+}
+
+/* key chips: the 4 px chip of the shortcuts */
+.ts-docs-body-text kbd.pt-kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 0.8125em/1.4 var(--pt-text);
+  text-align: center;
+}
+
+/* a callout: an 8 px window with its mark */
+.ts-docs-callout.pt-window {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  box-shadow: none;
+  border-color: var(--pt-hair);
+  background: var(--pt-plate);
+}
+
+.ts-docs-callout[data-callout='warning'].pt-window {
+  border-color: var(--pt-edge);
+}
+
+.ts-docs-callout-mark {
+  display: flex;
+  padding-top: 4px;
+  color: var(--pt-ink);
+}
+
+.ts-docs-callout-mark svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-docs-callout-body > :last-child {
+  margin-bottom: 0;
+}
+
+.ts-docs-callout-title {
+  font-weight: 500;
+}
+
+.ts-docs-callout-body .ts-docs-callout-title {
+  margin: 0 0 4px;
+}
+
+/* steps: a numbered list whose numbers are 4 px chips */
+.ts-docs-steps {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+}
+
+.ts-docs-body-text .ts-docs-steps {
+  padding-left: 0;
+}
+
+.ts-docs-step {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.ts-docs-body-text li.ts-docs-step + li.ts-docs-step {
+  margin-top: 20px;
+}
+
+.ts-docs-step-n.pt-kbd {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--pt-hair);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.ts-docs-step-body > :last-child {
+  margin-bottom: 0;
+}
+
+.ts-docs-body-text .ts-docs-step-title {
+  margin: 0 0 4px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+/* tabs: 6 px buttons over their panels */
+.ts-docs-tabs {
+  margin: 0 0 20px;
+}
+
+.ts-docs-tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-docs-tablist .pt-ib {
+  font-size: 14px;
+}
+
+.ts-docs-tablist .pt-ib[aria-selected='true'] {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-docs-tabpanel > :last-child {
+  margin-bottom: 0;
+}
+
+/* cards: a list of links, each an 8 px window */
+.ts-docs-cards {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0;
+}
+
+.ts-docs-body-text .ts-docs-cards {
+  padding-left: 0;
+}
+
+.ts-docs-body-text .ts-docs-cards li + li {
+  margin-top: 0;
+}
+
+.ts-docs-card.pt-window {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  box-shadow: none;
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+.ts-docs-body-text a.ts-docs-card {
+  text-decoration: none;
+}
+
+.ts-docs-card.pt-window:hover {
+  border-color: var(--pt-edge);
+}
+
+.ts-docs-card-title {
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.ts-docs-card-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+/* the foot: previous and next, then the repository's links */
+.ts-docs-foot {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-docs-pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ts-docs-pager-link.pt-window {
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+  box-shadow: none;
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+.ts-docs-pager-link.pt-window:hover {
+  border-color: var(--pt-edge);
+}
+
+.ts-docs-pager-link.is-next {
+  grid-column: 2;
+  text-align: right;
+}
+
+.ts-docs-pager-dir {
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-docs-pager-title {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.ts-docs-repo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 0;
+}
+
+.ts-docs-repo .pt-ib {
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+/* the table of contents */
+.ts-docs-toc {
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.ts-docs-toc-head {
+  margin: 0 0 8px;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-docs-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0;
+  max-height: calc(100vh - 96px);
+  border-left: 1px solid var(--pt-hair);
+}
+
+.ts-docs-toc a {
+  display: block;
+  padding: 4px 0 4px 12px;
+  color: var(--pt-ink-2);
+  text-decoration: none;
+}
+
+.ts-docs-toc li[data-depth='3'] a {
+  padding-left: 24px;
+}
+
+.ts-docs-toc a:hover {
+  color: var(--pt-ink);
+}
+
+/* ---- the floating parts ---- */
+
+/* the scrim under the search window and the pages sheet; the Layer primitive gives it the dialog
+   layer and puts it in the top layer */
+.ts-docs-scrim {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  height: auto;
+  display: grid;
+  justify-items: center;
+  align-items: start;
+  padding: 72px 16px 16px;
+  background: var(--pt-scrim);
+  box-sizing: border-box;
+}
+
+.ts-docs-search-window.pt-window {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  width: min(640px, 100%);
+  max-height: min(560px, calc(100vh - 120px));
+  overflow: hidden;
+}
+
+.ts-docs-search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-docs-search-field svg {
+  position: absolute;
+  left: 16px;
+  width: 16px;
+  height: 16px;
+  fill: var(--pt-ink-2);
+  pointer-events: none;
+}
+
+.ts-docs-search-field input {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px 0 42px;
+  border: 0;
+  background: transparent;
+  color: var(--pt-ink);
+  font: 16px var(--pt-text);
+  outline: none;
+}
+
+.ts-docs-search-field input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.ts-docs-search-status {
+  margin: 0;
+  padding: 10px 16px 6px;
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-docs-search-hits {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 8px;
+}
+
+.ts-docs-search-hit {
+  display: grid;
+  gap: 2px;
+  padding: 10px 16px;
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+.ts-docs-search-hit[aria-current='true'] {
+  background: var(--pt-plate);
+}
+
+.ts-docs-search-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ts-docs-search-page {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--pt-ink-2);
+}
+
+.ts-docs-search-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+/* the Copy Page menu: a 6 px plate, square rows */
+.ts-docs-menu.pt-float {
+  position: fixed;
+  width: 304px;
+  padding: 4px 0;
+}
+
+.ts-docs-menu-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 14px;
+  align-items: start;
+  gap: 12px;
+  padding: 8px 12px;
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+.ts-docs-menu-row:hover,
+.ts-docs-menu-row:focus-visible {
+  background: var(--pt-plate);
+  outline: none;
+}
+
+.ts-docs-menu-icon {
+  display: flex;
+  padding-top: 2px;
+}
+
+.ts-docs-menu-icon svg,
+.ts-docs-menu-out svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-docs-menu-out {
+  display: flex;
+  padding-top: 2px;
+  color: var(--pt-ink-2);
+}
+
+.ts-docs-menu-out svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ts-docs-menu-text {
+  display: grid;
+  gap: 2px;
+}
+
+.ts-docs-menu-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ts-docs-menu-sentence {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--pt-ink-2);
+}
+
+/* the pages sheet on a phone: a window under the bar */
+.ts-docs-scrim.is-sheet {
+  padding: 66px 16px 16px;
+}
+
+.ts-docs-sheet.pt-window {
+  width: 100%;
+  max-height: calc(100vh - 82px);
+  box-sizing: border-box;
+  padding: 16px 8px;
+}
+
+/* ---- widths ---- */
+@media (max-width: 1179px) {
+  .ts-docs-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-docs-toc {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ts-docs-search.pt-ib {
+    width: 128px;
+  }
+
+  .ts-docs-search-label.is-long {
+    display: none;
+  }
+
+  .ts-docs-search-label.is-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 719px) {
+  .ts-docs .ts-page-frame-body {
+    padding-top: 32px;
+  }
+
+  .ts-docs .ts-page-frame-row {
+    gap: 8px;
+  }
+
+  .ts-docs-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-docs-side,
+  .ts-docs-bar-rule,
+  .ts-docs-bar-title {
+    display: none;
+  }
+
+  .ts-docs-bar-end {
+    gap: 4px;
+  }
+
+  .ts-docs-search.pt-ib {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+    border-color: transparent;
+    background: none;
+    color: var(--pt-ink);
+  }
+
+  .ts-docs-search-label.is-short,
+  .ts-docs-search-key {
+    display: none;
+  }
+
+  .ts-docs-pages.pt-ib {
+    display: inline-flex;
+  }
+
+  .ts-docs-cards,
+  .ts-docs-pager {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-docs-pager-link.is-next {
+    grid-column: 1;
+  }
+
+  .ts-docs-scrim {
+    padding-top: 66px;
+  }
+}
+
+@media (max-width: 559px) {
+  .ts-docs-new.pt-ib {
+    display: none;
+  }
+}

@@ -44,6 +44,8 @@
     "@upstash/redis": "catalog:",
     "@vercel/functions": "catalog:",
     "better-auth": "catalog:",
+    "fumadocs-core": "catalog:",
+    "fumadocs-mdx": "catalog:",
     "ioredis": "catalog:",
     "kysely": "catalog:",
     "pg": "catalog:",

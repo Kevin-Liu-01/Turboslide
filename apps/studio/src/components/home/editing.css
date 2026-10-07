@@ -449,10 +449,14 @@
   margin: 8px 0 0;
 }
 
-/* the kit's six colours (DESIGN.md 8.7): a swatch, the role and its hex value, three to a row (two
-   under 720 px), and the contrast of the text on the background under them; the list and the line
-   hold their height before the kits chunk writes them, so nothing under them moves */
+/* the kit's six colours (DESIGN.md 8.7): a swatch, the role and its hex value in a column of their
+   own, and the contrast of the text on the background under them. A cell takes 168 px, the 14 px
+   swatch, "Background" in a 6em column and "#070707" in tabular figures with the 8 px gaps and
+   room for the fallback face, so the number of columns follows the list's own width: three from
+   536 px, two from 352 px (1440, 1280 and 390), one under it (320). The list and the line hold
+   their height before the kits chunk writes them, so nothing under them moves */
 .ts-kit-roles {
+  container: kit-roles / inline-size;
   flex: 1 1 auto;
   min-width: 0;
   padding: 10px 0;
@@ -461,17 +465,32 @@
 [data-kit-roles] {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px 12px;
+  gap: 6px 16px;
   min-height: 46px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+@container kit-roles (width < 536px) {
+  [data-kit-roles] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 72px;
+  }
+}
+
+@container kit-roles (width < 352px) {
+  [data-kit-roles] {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 150px;
+  }
+}
+
 [data-kit-roles] > li {
-  display: flex;
+  display: grid;
+  grid-template-columns: 14px minmax(6em, max-content) max-content;
   align-items: center;
-  gap: 6px;
+  column-gap: 8px;
   min-width: 0;
   height: 20px;
   font-size: 13px;
@@ -480,7 +499,6 @@
 }
 
 [data-kit-roles] > li > i {
-  flex: none;
   box-sizing: border-box;
   width: 14px;
   height: 14px;
@@ -732,11 +750,6 @@
     flex: 1 1 auto;
     width: auto;
     min-width: 0;
-  }
-
-  [data-kit-roles] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    min-height: 72px;
   }
 
   .ts-kit-roles {

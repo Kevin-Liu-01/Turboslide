@@ -11400,11 +11400,11 @@
     {
       "id": "home.kits.colors",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the kits band at rest lists the kit's six colours in a Colors row under the kits, as the Brand kit panel names them (Text, Background, Captions, Hints, Primary, Accent), three to a line at 1440 and two at 390: each a swatch painted in its hex value, the value the token the grid's slides draw, in tabular figures with the slashed zero; under them \"Text on background reads N to 1\", N the contrast of the text on the background floored to a tenth; at 1440 Kestrel, a typed background and the Swiss theme each change the six values and the readout to what the slides then draw",
+      "interaction": "At 1440 and 390 in both appearances the kits band at rest lists the kit's six colours in a Colors row under the kits, as the Brand kit panel names them (Text, Background, Captions, Hints, Primary, Accent), as many to a line as the list's width holds at 168 px a cell (two at 1440, 1280 and 390, one at 320): each a swatch painted in its hex value, the value the token the grid's slides draw, in tabular figures with the slashed zero; under them \"Text on background reads N to 1\", N the contrast of the text on the background floored to a tenth; at 1440 Kestrel, a typed background and the Swiss theme each change the six values and the readout to what the slides then draw; at 1440, 1280, 390 and 320 in both appearances, at rest and on each of the nine themes, each value's text ends inside its cell and the window, after its label, and the list draws the height it holds before the chunk writes it",
       "driver": "core/home.spec.ts",
       "today": "broken",
       "severity": 1,
-      "evidence": "VERIFICATION.md design round pass 3 finding 6: the kits band draws no contrast readout and no six colours with hex values at rest, which DESIGN.md 8.7 lists",
+      "evidence": "VERIFICATION.md design round pass 3 finding 6: the kits band draws no contrast readout and no six colours with hex values at rest, which DESIGN.md 8.7 lists; pass 4 finding 2: in dark at 1440 and 1280 \"Background #070707\" ran under the next cell's swatch, and at 320 past the window",
       "note": "Design round (docs/DESIGN.md 11), DR-D4#5, entered in its finishing round 2 for pass 3 finding 6; driven by apps/studio/e2e/core/home/design.ts"
     },
     {

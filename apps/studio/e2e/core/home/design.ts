@@ -2086,12 +2086,21 @@ async function fontSwap(browser: Browser): Promise<void> {
 async function readColors(page: Page) {
   return page.evaluate(() => {
     const band = document.querySelector('[data-band="kits"]')!;
+    /* a text's own box, which runs past its element's box when the element is too narrow */
+    const textBox = (node: Node | null): { left: number; right: number } => {
+      if (node === null) return { left: 0, right: 0 };
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const r = range.getBoundingClientRect();
+      return { left: r.left, right: r.right };
+    };
     const rows = [...band.querySelectorAll<HTMLElement>('[data-kit-roles] > li')].map((li) => {
       const swatch = li.querySelector('i');
       const code = li.querySelector<HTMLElement>('.pt-num');
+      const label = [...li.childNodes].filter((n) => n.nodeType === Node.TEXT_NODE);
+      const cell = li.getBoundingClientRect();
       return {
-        name: [...li.childNodes]
-          .filter((n) => n.nodeType === Node.TEXT_NODE)
+        name: label
           .map((n) => n.textContent)
           .join('')
           .trim(),
@@ -2099,6 +2108,9 @@ async function readColors(page: Page) {
         num: code === null ? '' : getComputedStyle(code).fontVariantNumeric,
         paint: swatch === null ? '' : getComputedStyle(swatch).backgroundColor,
         h: Math.round(li.getBoundingClientRect().height),
+        cell: { left: cell.left, right: cell.right },
+        label: textBox(label[0] ?? null),
+        value: textBox(code),
       };
     });
     const slide = band.querySelector<HTMLElement>('[data-kit-grid] [data-home-slides]');
@@ -2111,12 +2123,18 @@ async function readColors(page: Page) {
         .replace(/^#(\w)(\w)(\w)$/, '#$1$1$2$2$3$3'),
     );
     const list = band.querySelector('[data-kit-roles]');
+    const listStyle = list === null ? null : getComputedStyle(list);
     return {
       rows,
       tokens,
       ratio: (band.querySelector('[data-kit-ratio]')?.textContent ?? '').trim(),
       ratioNum: getComputedStyle(band.querySelector('[data-kit-ratio]')!).fontVariantNumeric,
       listHeight: list === null ? 0 : Math.round(list.getBoundingClientRect().height),
+      listWidth: list === null ? 0 : list.getBoundingClientRect().width,
+      /* the height the list holds before the kits chunk writes it */
+      listReserved: listStyle === null ? 0 : Math.round(parseFloat(listStyle.minHeight)),
+      columns: listStyle === null ? 0 : listStyle.gridTemplateColumns.split(' ').length,
+      window: document.documentElement.clientWidth,
     };
   });
 }
@@ -2140,11 +2158,25 @@ const rgbOf = (hex: string): string => {
   return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
 };
 
+/** The kits band's Colors row at 1280 and 320 besides SIZES: the widths the row's cells change at. */
+const COLOR_SIZES: readonly Size[] = [
+  DESKTOP,
+  { width: 1280, height: 800 },
+  PHONE,
+  { width: 320, height: 700 },
+];
+
+/** The columns of the Colors row for the list's width (editing.css: a cell takes 168 px). */
+const colorColumns = (width: number): number => (width >= 536 ? 3 : width >= 352 ? 2 : 1);
+
 /**
  * The kits band at rest lists the kit's six colours as the Brand kit panel names them, each a
  * swatch painted in its hex value, which is the token the grid's slides draw, in tabular figures
  * with the slashed zero, and the contrast of the text on the background; Kestrel, a typed
- * background and the Swiss theme each change them to the colours the slides then draw.
+ * background and the Swiss theme each change them to the colours the slides then draw. Each
+ * value's text sits inside its cell, after its label, and inside the window, at 1440, 1280, 390
+ * and 320 in both appearances, at rest and on each of the nine themes (the design round's pass 4
+ * finding 2: "#070707" ran under the next swatch at 1440 and past the window at 320).
  */
 async function kitsColors(browser: Browser): Promise<void> {
   const failures: string[] = [];
@@ -2168,8 +2200,38 @@ async function kitsColors(browser: Browser): Promise<void> {
     if (read.ratio !== want) failures.push(`${label}: the readout "${read.ratio}", not "${want}"`);
     if (!read.ratioNum.includes('tabular-nums'))
       failures.push(`${label}: the readout in ${read.ratioNum}`);
+    /* every value fits its cell: its text ends inside the cell and the window, after its label */
+    const px = (n: number): string => n.toFixed(1);
+    for (const row of read.rows) {
+      if (row.value.right > row.cell.right + 0.5)
+        failures.push(
+          `${label}: ${row.name} ${row.hex} ends at ${px(row.value.right)}, its cell at ${px(row.cell.right)}`,
+        );
+      if (row.value.right > read.window + 0.5)
+        failures.push(
+          `${label}: ${row.name} ${row.hex} ends at ${px(row.value.right)}, past the window`,
+        );
+      if (row.label.right > row.value.left - 4)
+        failures.push(
+          `${label}: ${row.name} ends at ${px(row.label.right)}, its value starts at ${px(row.value.left)}`,
+        );
+    }
+    /* the columns follow the list's width, and the rows fill the height the list holds before the
+       chunk writes them, so nothing under them moves */
+    const columns = colorColumns(read.listWidth);
+    if (read.columns !== columns)
+      failures.push(
+        `${label}: ${read.columns} columns in ${px(read.listWidth)} px, not ${columns}`,
+      );
+    const lines = Math.ceil(read.rows.length / Math.max(1, read.columns));
+    if (Math.abs(read.listHeight - (lines * 20 + (lines - 1) * 6)) > 1)
+      failures.push(`${label}: the list is ${read.listHeight} px for ${lines} rows`);
+    if (read.listReserved !== read.listHeight)
+      failures.push(
+        `${label}: the list holds ${read.listReserved} px and draws ${read.listHeight}`,
+      );
   };
-  for (const size of SIZES)
+  for (const size of COLOR_SIZES)
     for (const theme of THEMES) {
       const { context, page } = await homeContext(browser, size, theme);
       const label = `${size.width} ${theme}`;
@@ -2184,12 +2246,9 @@ async function kitsColors(browser: Browser): Promise<void> {
         );
         const rest = await readColors(page);
         check(`${label} at rest`, rest);
-        /* the rows fill the height the list holds before the chunk writes them */
-        const wantRows = size.width < 720 ? 3 : 2;
-        if (Math.abs(rest.listHeight - (wantRows * 20 + (wantRows - 1) * 6)) > 1)
-          failures.push(`${label}: the list is ${rest.listHeight} px for ${wantRows} rows`);
+        const room = Math.min(...rest.rows.map((r) => r.cell.right - r.value.right));
         notes.push(
-          `${label}: ${rest.rows.map((r) => `${r.name} ${r.hex}`).join(', ')}; ${rest.ratio}`,
+          `${label}: ${rest.columns} column${rest.columns === 1 ? '' : 's'}, ${rest.listHeight} px, ${room.toFixed(1)} px of room; ${rest.rows.map((r) => `${r.name} ${r.hex}`).join(', ')}; ${rest.ratio}`,
         );
         if (size.width === DESKTOP.width) {
           await band.locator('[data-kit="kestrel"]').click();
@@ -2223,6 +2282,23 @@ async function kitsColors(browser: Browser): Promise<void> {
             `${label}: Kestrel ${kestrel.ratio}; typed ${typed.rows[1]?.hex}; Swiss ${swiss.rows.map((r) => r.hex).join(' ')}`,
           );
         }
+        /* each of the nine themes: its six values in their cells */
+        const tiles = await band
+          .locator('[data-theme-id]')
+          .evaluateAll((all) => all.map((t) => (t as HTMLElement).dataset['themeId'] ?? ''));
+        let least = Infinity;
+        for (const id of tiles) {
+          await band.locator(`[data-theme-id="${id}"]`).click();
+          /* a press applies the theme's sheet, then marks its tile pressed */
+          await band
+            .locator(`[data-theme-id="${id}"][aria-pressed="true"]`)
+            .waitFor({ timeout: 30_000 });
+          await page.waitForTimeout(250);
+          const read = await readColors(page);
+          check(`${label} ${id}`, read);
+          least = Math.min(least, ...read.rows.map((r) => r.cell.right - r.value.right));
+        }
+        notes.push(`${label}: ${tiles.length} themes, the least room ${least.toFixed(1)} px`);
       } finally {
         await context.close();
       }
@@ -2781,7 +2857,7 @@ export function rows(): void {
     });
   if (entered('home.kits.colors'))
     test(title('home.kits.colors'), async ({ browser }) => {
-      test.setTimeout(360_000);
+      test.setTimeout(720_000);
       await kitsColors(browser);
     });
   if (entered('home.patterns.stills'))

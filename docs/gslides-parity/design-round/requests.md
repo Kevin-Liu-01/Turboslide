@@ -88,7 +88,9 @@ it serves.
    Logo dialog's two tile grounds (`dialogs/Logo.tsx` 315 to 318) and the server's tint of a one
    colour logo (`apps/studio/src/server/logos.ts` 937) read `#070707` and `#ffffff` where the slide
    draws `#0d271d` on `#e8f3ee`. `deckTokens(deck, appearance)` (`render/theme-css.ts`) answers
-   the theme's value under the kit.
+   the theme's value under the kit. Answered in DR-D2 fix 5 (D2, finishing round 3): both
+   functions take the deck and read `deckTokens`; the Logo dialog, Tailor's logo pair and
+   `logo.insert`'s tint pass the deck (d2.md).
 3. **The integrator, `packages/schema/src/color.ts`**: `COLOR_LABELS.blue` reads "GT blue", the
    name of the token row's swatch in the colour plate, the Background dialog and Format options,
    which now paints each theme's Primary (Mint's `#11734f`). "Primary", the kit role the token

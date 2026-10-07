@@ -1,13 +1,14 @@
 // The logo picker's pure rules (docs/archive/rounds/FEATURES.md 4.2 to 4.6, 4.11; audit-logos 5, 6, 12, 17): the
 // row shape the cached index holds and `logo.search` answers, the ranking over title, slug,
 // aliases and categories, the licence classes with the seller's sentence for each recorded string,
-// the appearance rule that picks a variant for a light or a dark deck, the Mono decision, the kit's
+// the appearance rule that picks a variant for a light or a dark deck, the Mono decision, the deck's
 // text colour a mono mark is tinted with, the logo size an insert takes and the words the dialog,
 // the Tailor button and the snackbar read. The studio server imports it for the search and the
 // insert (apps/studio/src/server/logos.ts) and B1's dialog for the tiles, so one module decides on
 // both sides. No React, no DOM, no network: logo-model.test.ts runs in Node.
-import type { BrandKit, KitAppearance } from '@turboslide/schema/brand';
-import { TOKENS } from '@turboslide/theme/tokens';
+import type { ThemeDeck } from '@turboslide/render/theme-css';
+import { deckTokens } from '@turboslide/render/theme-css';
+import type { KitAppearance } from '@turboslide/schema/brand';
 
 /** The one source this round reads (audit-logos section 1; 4.10 names the fallback). */
 export const LOGO_SOURCE = 'thesvg.org';
@@ -364,16 +365,24 @@ export function monoOffered(svgText: string): boolean {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The kit's colours a logo is drawn with (4.3, 4.4)
+// The deck's colours a logo is drawn with: the kit's over its theme's (4.3, 4.4)
 
-/** The kit's text color for an appearance, else the theme's ink (the tint colour of a mono mark). */
-export function kitTextColour(kit: BrandKit | undefined, appearance: KitAppearance): string {
-  return kit?.colors?.[appearance]?.text ?? TOKENS[appearance].ink;
+/**
+ * The text colour a deck's slides draw in an appearance (the tint colour of a mono mark): the
+ * kit's Text, else the ink of the deck's theme (docs/DESIGN.md 7.5; `deckTokens`, the values the
+ * slide's sheet computes). A Mint deck without a kit reads Mint's ink, never General
+ * Translation's.
+ */
+export function kitTextColour(deck: ThemeDeck, appearance: KitAppearance): string {
+  return deckTokens(deck, appearance).ink;
 }
 
-/** The kit's background for an appearance, else the theme's paper (the two grounds of a tile). */
-export function kitBackgroundColour(kit: BrandKit | undefined, appearance: KitAppearance): string {
-  return kit?.colors?.[appearance]?.background ?? TOKENS[appearance].paper;
+/**
+ * The ground a deck's slides draw in an appearance (the two grounds of a tile): the kit's
+ * Background, else the paper of the deck's theme.
+ */
+export function kitBackgroundColour(deck: ThemeDeck, appearance: KitAppearance): string {
+  return deckTokens(deck, appearance).paper;
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -932,9 +932,12 @@ export async function rasterizeLogoPng(
   };
 }
 
-/** The kit's text colour per appearance a tinted mono takes (4.4). */
+/**
+ * The text colour per appearance a tinted mono takes (4.4): the kit's Text, else the ink of the
+ * deck's theme (logo-model.ts `kitTextColour`; docs/DESIGN.md 7.5).
+ */
 function tintColours(deck: Deck): { light: string; dark: string } {
-  return { light: kitTextColour(deck.brand, 'light'), dark: kitTextColour(deck.brand, 'dark') };
+  return { light: kitTextColour(deck, 'light'), dark: kitTextColour(deck, 'dark') };
 }
 
 /**

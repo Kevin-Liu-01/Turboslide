@@ -177,7 +177,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
   const hasLogo = replaceAlt && (file !== null || storedLogo !== null) && from.trim() !== '';
   const hasSkip = skip.size > 0;
   const canApply = (hasName || hasLogo || hasSkip) && busy === null && !storing;
-  const grounds = useMemo(() => kitGrounds(input.document.deck.brand), [input.document]);
+  const grounds = useMemo(() => kitGrounds(input.document.deck), [input.document]);
 
   /* the To field rests, then the cache is asked; a stored mark of another name is dropped */
   useEffect(() => {

@@ -280,6 +280,12 @@ function insertRequest(
   return JSON.parse(String(call?.init?.body));
 }
 
+/** A hex as jsdom serializes an inline colour. */
+function rgbOf(hex: string): string {
+  const n = Number.parseInt(hex.slice(1), 16);
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+}
+
 function noTitles(): void {
   for (const el of document.querySelectorAll('[title]')) expect(el, 'no native titles').toBeNull();
 }
@@ -574,6 +580,51 @@ describe('LogoDialog', () => {
     expect(control('dialog.logo.licence')?.getAttribute('data-tip')).toBe(
       'Recorded on thesvg.org as CC-BY-ND-2.0',
     );
+  });
+
+  it('draws the tiles on the paper and ink of the deck’s theme and tints a mono with its ink, the kit’s colours over them (docs/DESIGN.md 7.5)', async () => {
+    stubRoute();
+    /* a Mint deck without a kit: Mint's light paper and ink, never General Translation's */
+    const mint = documentWith();
+    mint.deck.theme = 'mint';
+    delete mint.deck.brand;
+    const first = makeHost({ document: mint });
+    const view = render(
+      <first.Host>
+        <LogoDialog />
+      </first.Host>,
+    );
+    await search('github');
+    const paper = control('dialog.logo.tile.github.paper');
+    const ink = control('dialog.logo.tile.github.ink');
+    expect(paper?.style.background).toBe(rgbOf('#e8f3ee'));
+    expect(paper?.style.color).toBe(rgbOf('#0d271d'));
+    expect(ink?.style.background).toBe(rgbOf('#0b1f18'));
+    expect(ink?.style.color).toBe(rgbOf('#e4f2eb'));
+    expect(
+      ink
+        ?.querySelector<HTMLElement>('.ts-logo-mark.is-tinted')
+        ?.style.getPropertyValue('--ts-logo-tint'),
+    ).toBe('#e4f2eb');
+    view.unmount();
+    /* the kit's Background and Text win over the theme where it names them */
+    const kitted = documentWith();
+    kitted.deck.theme = 'mint';
+    kitted.deck.brand = { colors: { dark: { background: '#101820', text: '#fafafa' } } };
+    const second = makeHost({ document: kitted });
+    render(
+      <second.Host>
+        <LogoDialog />
+      </second.Host>,
+    );
+    await search('github');
+    expect(control('dialog.logo.tile.github.paper')?.style.background).toBe(rgbOf('#e8f3ee'));
+    expect(control('dialog.logo.tile.github.ink')?.style.background).toBe(rgbOf('#101820'));
+    expect(
+      control('dialog.logo.tile.github.ink')
+        ?.querySelector<HTMLElement>('.ts-logo-mark.is-tinted')
+        ?.style.getPropertyValue('--ts-logo-tint'),
+    ).toBe('#fafafa');
   });
 
   it('answers a name the index lacks with the empty sentence and Upload, and names the kit when the query is its name', async () => {

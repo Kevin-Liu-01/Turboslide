@@ -873,11 +873,16 @@ describe('the refresh (4.2, 4.9)', () => {
 // ---------------------------------------------------------------------------------------------
 // The insert (4.4)
 
-function deckDir(name: string, appearance: 'light' | 'dark' = 'light'): string {
+function deckDir(
+  name: string,
+  appearance: 'light' | 'dark' = 'light',
+  theme: Deck['theme'] = WORKED_DECK.theme,
+): string {
   const dir = join(tmp, name, 'decks', 'gt-brand');
   mkdirSync(join(dir, 'slides'), { recursive: true });
   const deck: Deck = {
     ...WORKED_DECK,
+    theme,
     defaults: { ...(WORKED_DECK.defaults ?? {}), appearance },
     sections: [
       {
@@ -973,6 +978,30 @@ describe('the insert (4.4, 4.11)', () => {
     /* the version log holds one entry for the insert */
     const versions = await store.listVersions();
     expect(versions[versions.length - 1]?.note).toBe('Logo: Figma');
+  });
+
+  it('tints a mono with the ink of the deck’s theme where the kit names no Text (docs/DESIGN.md 7.5)', async () => {
+    const dir = deckDir('insert-mono-mint', 'dark', 'mint');
+    const store = openFileStore({ dir });
+    const service = await serviceFor();
+    const output = await logoInsert(
+      { service, store, deckId: 'gt-brand', now: () => NOW, rasterizePng: fakePng },
+      ctx,
+      {
+        slug: 'figma',
+        variant: 'mono',
+        baseRevision: (await store.read()).document.deck.revision,
+      },
+    );
+    const asset = output.asset;
+    if (asset.source.kind !== 'logo') throw new Error('logo source');
+    /* Mint's light and dark ink, never General Translation's #070707 and #f2f2f0 */
+    expect(asset.source.tint).toEqual({ light: '#0d271d', dark: '#e4f2eb' });
+    if (asset.vector === undefined || !('light' in asset.vector))
+      throw new Error('two vector files');
+    expect(readFileSync(join(dir, asset.vector.light), 'utf8')).toContain('fill="#0d271d"');
+    expect(readFileSync(join(dir, asset.vector.dark), 'utf8')).toContain('fill="#e4f2eb"');
+    expect(readFileSync(join(dir, asset.vector.dark), 'utf8')).not.toContain('#f2f2f0');
   });
 
   it('tints a mono with the kit’s text colour per appearance and records it; a CC BY-ND mark inserts unmodified', async () => {

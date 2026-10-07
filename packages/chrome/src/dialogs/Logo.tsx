@@ -1,9 +1,10 @@
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, RefObject } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import type { ThemeDeck } from '@turboslide/render/theme-css';
 import { isActionId } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
-import type { BrandKit, DefaultKit, KitAppearance } from '@turboslide/schema/brand';
+import type { DefaultKit, KitAppearance } from '@turboslide/schema/brand';
 import { CATALOG } from '@turboslide/schema/catalog';
 import { deckAppearance } from '@turboslide/schema/deck';
 
@@ -43,10 +44,10 @@ import './Logo.css';
  * picks on this browser; item 46); the foot holds the check "Use as this presentation's logo on
  * every slide" with its sentence, the selected tile's license row as a seller's sentence with the
  * recorded string in its tooltip, the source sentence with the cache's date, and Insert. A tile is
- * the mark drawn twice, on a paper half and an ink half whose grounds are the kit's two Background
- * colors, with the title under it; each half draws the variant the appearance rule of
- * logo-model.ts picks for its appearance (`chooseVariant`, B6's, with the tint rule of question
- * 2). The first result is preselected so Enter inserts it; the arrows move; Escape closes; a
+ * the mark drawn twice, on a paper half and an ink half whose grounds are the deck's two
+ * Background colors (the kit's, else its theme's), with the title under it; each half draws the
+ * variant the appearance rule of logo-model.ts picks for its appearance (`chooseVariant`, B6's,
+ * with the tint rule of question 2). The first result is preselected so Enter inserts it; the arrows move; Escape closes; a
  * click inserts at once and the dialog closes with the picture selected.
  *
  * The data (build/b6.md R10): the rows come from the same origin route `GET /api/logo/search`
@@ -299,9 +300,9 @@ function storageOf(): Storage | null {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The kit's grounds and the words of the foot
+// The deck's grounds and the words of the foot
 
-/** The two grounds and the two text colors of a tile, from the kit's Background and Text roles. */
+/** The two grounds and the two text colors of a tile: the Background and Text the deck's slides draw. */
 export type Grounds = {
   paper: string;
   ink: string;
@@ -309,13 +310,17 @@ export type Grounds = {
   inkText: string;
 };
 
-/** The grounds a kit gives the tiles: its light and dark Background and Text, the theme's when silent. */
-export function kitGrounds(kit: BrandKit | undefined): Grounds {
+/**
+ * The grounds of a deck's tiles: the light and dark Background and Text its slides draw, the
+ * kit's where it names them and its theme's where it is silent (docs/DESIGN.md 7.5), so a tile on
+ * a Mint deck sits on Mint's paper and ink.
+ */
+export function kitGrounds(deck: ThemeDeck): Grounds {
   return {
-    paper: kitBackgroundColour(kit, 'light'),
-    ink: kitBackgroundColour(kit, 'dark'),
-    paperText: kitTextColour(kit, 'light'),
-    inkText: kitTextColour(kit, 'dark'),
+    paper: kitBackgroundColour(deck, 'light'),
+    ink: kitBackgroundColour(deck, 'dark'),
+    paperText: kitTextColour(deck, 'light'),
+    inkText: kitTextColour(deck, 'dark'),
   };
 }
 
@@ -635,7 +640,7 @@ export function LogoDialog({ target }: { target?: PictureTarget }) {
   const editor = input.editor as PlacingEditor | undefined;
   const everySlideAvailable = editor?.insertLogoAsset !== undefined;
   const assetUrl = input.assetUrl ?? ((path: string) => `/decks/${input.deckId}/${path}`);
-  const grounds = useMemo<Grounds>(() => kitGrounds(kit), [kit]);
+  const grounds = useMemo<Grounds>(() => kitGrounds(deck), [deck]);
 
   /* Your brand (4.3; audit-logos 15; docs/archive/rounds/POLISH.md item 46): the default kit's logo and the deck's
      kit logo when it is a picture, one brand. The deck's other logo assets (a customer's mark

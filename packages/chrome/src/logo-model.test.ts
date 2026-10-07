@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import type { ThemeDeck } from '@turboslide/render/theme-css';
+
 import {
   LICENCE_SENTENCES,
   LOGO_PLATE_LINES,
@@ -7,6 +9,7 @@ import {
   chooseVariant,
   findCustomerLogo,
   isOpenLicence,
+  kitBackgroundColour,
   kitTextColour,
   licenceClassOf,
   licenceSentenceOf,
@@ -283,11 +286,32 @@ describe('the appearance rule (4.3, 4.4)', () => {
     );
   });
 
-  it('tints with the kit’s text color for the appearance, else the theme’s ink', () => {
-    expect(kitTextColour(undefined, 'light')).toBe('#070707');
-    expect(kitTextColour(undefined, 'dark')).toBe('#f2f2f0');
-    expect(kitTextColour({ colors: { light: { text: '#0b3d91' } } }, 'light')).toBe('#0b3d91');
-    expect(kitTextColour({ colors: { light: { text: '#0b3d91' } } }, 'dark')).toBe('#f2f2f0');
+  it('tints with the kit’s text color for the appearance, else the ink of the deck’s theme (docs/DESIGN.md 7.5)', () => {
+    const gt = { theme: 'general-translation' } as const;
+    expect(kitTextColour(gt, 'light')).toBe('#070707');
+    expect(kitTextColour(gt, 'dark')).toBe('#f2f2f0');
+    const blue: ThemeDeck = { ...gt, brand: { colors: { light: { text: '#0b3d91' } } } };
+    expect(kitTextColour(blue, 'light')).toBe('#0b3d91');
+    expect(kitTextColour(blue, 'dark')).toBe('#f2f2f0');
+    /* a Mint deck reads Mint's ink, never General Translation's, and a kit's Text over it wins */
+    const mint = { theme: 'mint' } as const;
+    expect(kitTextColour(mint, 'light')).toBe('#0d271d');
+    expect(kitTextColour(mint, 'dark')).toBe('#e4f2eb');
+    expect(
+      kitTextColour({ ...mint, brand: { colors: { dark: { text: '#fafafa' } } } }, 'dark'),
+    ).toBe('#fafafa');
+  });
+
+  it('draws a tile on the kit’s background for the appearance, else the paper of the deck’s theme', () => {
+    const gt = { theme: 'general-translation' } as const;
+    expect(kitBackgroundColour(gt, 'light')).toBe('#ffffff');
+    expect(kitBackgroundColour(gt, 'dark')).toBe('#070707');
+    const mint = { theme: 'mint' } as const;
+    expect(kitBackgroundColour(mint, 'light')).toBe('#e8f3ee');
+    expect(kitBackgroundColour(mint, 'dark')).toBe('#0b1f18');
+    const kitted: ThemeDeck = { ...mint, brand: { colors: { dark: { background: '#101820' } } } };
+    expect(kitBackgroundColour(kitted, 'dark')).toBe('#101820');
+    expect(kitBackgroundColour(kitted, 'light')).toBe('#e8f3ee');
   });
 });
 

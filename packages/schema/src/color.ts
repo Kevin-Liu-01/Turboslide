@@ -54,7 +54,11 @@ export const colorSchema = z.union([
   hexColorSchema,
 ]) satisfies z.ZodType<Color>;
 
-/** The one label per token the inspector's palette shows. */
+/**
+ * The one label per token the inspector's palette shows. `blue` reads "Primary", the brand kit's
+ * role it paints in every theme (Mint's `#11734f`, General Translation's `#2f5ce0`), so the
+ * swatch's name matches the colour it draws.
+ */
 export const COLOR_LABELS: Readonly<Record<ColorToken, string>> = {
   ink: 'Ink',
   paper: 'Paper',
@@ -67,7 +71,7 @@ export const COLOR_LABELS: Readonly<Record<ColorToken, string>> = {
   green: 'Green',
   amber: 'Amber',
   red: 'Red',
-  blue: 'GT blue',
+  blue: 'Primary',
   accent: 'Accent',
 };
 
@@ -82,7 +86,7 @@ export function isHexColor(value: string): value is HexColor {
 /**
  * The CSS value of a Color: a theme token becomes `var(--token)`, a semantic hue its hex, a
  * custom color its hex as written. The renderer writes this inline; the exporter reads the
- * computed color back from the page, so it never needs a theme here. GT blue is the brand kit's
+ * computed color back from the page, so it never needs a theme here. `blue` is the brand kit's
  * Primary role (docs/archive/rounds/PRODUCT.md 4.1: "links and the key colour of charts and highlights"), so it
  * reads the sheet's `--blue` with its own hex as the fallback; `accent` is the kit's second
  * colour, the sheet's `--accent`.

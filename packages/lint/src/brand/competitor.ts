@@ -79,6 +79,8 @@ export const TEXT_ROOTS: readonly string[] = [
   'apps/studio/public/manifest.webmanifest',
   'decks/templates',
   'decks/gt-brand',
+  /* polish two (docs/POLISH-2.md 5.6, C29): the docs at /docs, their MDX read whole */
+  'apps/studio/content/docs',
 ];
 
 /**
@@ -118,7 +120,7 @@ export const COMPETITOR_LITERALS: readonly { file: string; literal: string; reas
 ];
 
 const SCRIPT = /\.(?:[cm]?[jt]sx?)$/;
-const TEXT = /\.(?:md|json|txt|webmanifest)$/;
+const TEXT = /\.(?:mdx?|json|txt|webmanifest)$/;
 const CSS = /\.css$/;
 const JSON_FILE = /\.json$/;
 const FIXTURES = /(^|\/)(?:__fixtures__|fixtures)\//;

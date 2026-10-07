@@ -1,0 +1,15 @@
+---
+title: Skills
+description: Four skills that teach an AI agent how to write slides, call the actions, drive an open page and check its work.
+---
+
+A skill is a folder with a `SKILL.md` file that an agent reads before it starts a task. Turboslide has four, in the repository's `skills/` folder. Each one has a `references/` folder with generated tables of the actions it uses.
+
+| Skill                                                                                                       | Use it to                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [turboslide-create](https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-create/SKILL.md) | Write or revise slides in the deck grammar: typed blocks in named slots, with no coordinates.                                                     |
+| [turboslide-api](https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md)       | Read a presentation and make the smallest typed write over the command line, MCP or HTTP, with `baseRevision`, a lease, and a read of the result. |
+| [turboslide-studio](https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md) | Drive an open studio page through `window.turboslide.studio`: its controls, the source of a slide, the view and presenting.                       |
+| [turboslide-verify](https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md) | Check a presentation by its output: render both appearances, read the contact sheet, run the linter, and compare downloads with the web render.   |
+
+Give an agent the skill that matches its task. For most tasks that is turboslide-api, with turboslide-verify before the agent says the work is done.

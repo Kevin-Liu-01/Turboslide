@@ -1,4 +1,18 @@
 {
   "title": "Turboslide documentation",
-  "pages": ["---Use Turboslide---", "index", "editor", "presenting"]
+  "pages": [
+    "---Use Turboslide---",
+    "index",
+    "editor",
+    "presenting",
+    "sharing",
+    "themes",
+    "export",
+    "shortcuts",
+    "self-hosting",
+    "---Agents---",
+    "...agents",
+    "---Reference---",
+    "reference"
+  ]
 }

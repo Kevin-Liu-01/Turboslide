@@ -1,0 +1,56 @@
+---
+title: Run Turboslide yourself
+description: Run the Turboslide studio from its repository on your own computer or server, and choose where presentations are stored.
+---
+
+Turboslide is open source under the MIT license. The repository holds the studio, the command line and every package they use.
+
+## Run it on your computer
+
+You need Node 24 and pnpm 11, which `corepack` installs. Renders, downloads and the tests also need a Chromium build, which `playwright-core` installs.
+
+```sh
+git clone https://github.com/Kevin-Liu-01/Turboslide.git
+cd Turboslide
+corepack enable
+pnpm install
+pnpm exec playwright-core install --with-deps chromium
+pnpm dev
+```
+
+`pnpm dev` starts the studio at http://localhost:4321. Presentations are folders under `decks/` in the repository, and every change is written there.
+
+## Build it for a server
+
+```sh
+NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy
+node apps/studio/.output/server/index.mjs
+```
+
+The build writes a Node server to `apps/studio/.output`. The same build with `NITRO_PRESET=vercel` writes a Vercel deployment.
+
+## Where presentations are stored
+
+The studio picks one store when it starts:
+
+| Store  | When                               | Where presentations are kept | Edits last                    |
+| ------ | ---------------------------------- | ---------------------------- | ----------------------------- |
+| `file` | A checkout of the repository       | The `decks/` folder          | Yes                           |
+| `tmp`  | A hosted server with no Blob store | A temporary folder           | No, until the server restarts |
+| `blob` | A hosted server with a Blob store  | Vercel Blob                  | Yes                           |
+
+Set `TURBOSLIDE_STORE` to `file`, `tmp` or `blob` to choose one yourself. `TURBOSLIDE_OVERLAY_DIR` moves the temporary folder.
+
+## Settings
+
+| Variable                                   | What it sets                                                                                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `TURBOSLIDE_STORE`                         | The store, as above.                                                                                         |
+| `BLOB_READ_WRITE_TOKEN`                    | The Blob store's token, for the `blob` store.                                                                |
+| `TURBOSLIDE_TOKEN`                         | The bearer token agents send to the HTTP actions and MCP. Without it, those routes answer only on localhost. |
+| `TURBOSLIDE_SESSION_SECRET`                | The key that signs sign in sessions, 32 characters or more.                                                  |
+| `TURBOSLIDE_DOWNLOAD_SECRET`               | The key that signs download addresses, 32 characters or more.                                                |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google. Without both, the studio offers no sign in.                                             |
+| `TURBOSLIDE_PUBLIC_ORIGIN`                 | The site's address, for links in the page head and the sign in mail.                                         |
+
+Keep every token and secret out of the repository.

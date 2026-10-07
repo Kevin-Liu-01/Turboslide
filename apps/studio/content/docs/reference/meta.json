@@ -1,0 +1,21 @@
+{
+  "title": "Action reference",
+  "pages": [
+    "deck",
+    "slide",
+    "block",
+    "asset",
+    "render",
+    "lint",
+    "version",
+    "export",
+    "view",
+    "studio",
+    "presence",
+    "sync",
+    "comment",
+    "share",
+    "account",
+    "admin"
+  ]
+}

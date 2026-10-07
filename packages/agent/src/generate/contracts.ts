@@ -1,7 +1,8 @@
 // Every generated contract surface by repo-relative path (SPEC 7.1; MILESTONES M1 item 4, M4
 // item 1): packages/agent/generated/{cli,mcp-tools,describe,openapi,manifest}.json, the two
-// llms guides, docs/grammar.md, the rule ids as JSON with the lint fixture index (M5) and the four
-// skills' reference files. generateAll() is pure; writeAll() writes; staleFiles() is what
+// llms guides, docs/grammar.md, the rule ids as JSON with the lint fixture index (M5), the four
+// skills' reference files and, since polish two, the docs' action reference and grammar pages
+// under apps/studio/content/docs (docs.ts). generateAll() is pure; writeAll() writes; staleFiles() is what
 // the test and `--check` use. Outputs are deterministic so `git diff --exit-code` passes after a
 // fresh generation.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -9,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateCli } from './cli.ts';
 import { generateDescribe } from './describe.ts';
+import { generateDocsGrammar, generateDocsReference } from './docs.ts';
 import {
   FIXTURE_INDEX_PATH,
   RULES_JSON_PATH,
@@ -29,18 +31,29 @@ export const REPO_ROOT = fileURLToPath(new URL('../../../../', import.meta.url))
 export const GENERATED_DIR = 'packages/agent/generated';
 
 export function generateAll(): Record<string, string> {
+  /* the five contracts once: the docs' reference reads its counts from these same objects */
+  const contracts = {
+    cli: generateCli(),
+    mcp: generateMcpTools(),
+    describe: generateDescribe(),
+    openapi: generateOpenApi(),
+    manifest: generateManifest(),
+  };
   return {
-    [`${GENERATED_DIR}/cli.json`]: stableJson(generateCli()),
-    [`${GENERATED_DIR}/mcp-tools.json`]: stableJson(generateMcpTools()),
-    [`${GENERATED_DIR}/describe.json`]: stableJson(generateDescribe()),
-    [`${GENERATED_DIR}/openapi.json`]: stableJson(generateOpenApi()),
-    [`${GENERATED_DIR}/manifest.json`]: stableJson(generateManifest()),
+    [`${GENERATED_DIR}/cli.json`]: stableJson(contracts.cli),
+    [`${GENERATED_DIR}/mcp-tools.json`]: stableJson(contracts.mcp),
+    [`${GENERATED_DIR}/describe.json`]: stableJson(contracts.describe),
+    [`${GENERATED_DIR}/openapi.json`]: stableJson(contracts.openapi),
+    [`${GENERATED_DIR}/manifest.json`]: stableJson(contracts.manifest),
     [`${GENERATED_DIR}/llms.txt`]: generateLlms(),
     [`${GENERATED_DIR}/llms-full.txt`]: generateLlmsFull(),
     'docs/grammar.md': generateGrammar(),
     [RULES_JSON_PATH]: generateRulesJson(),
     [FIXTURE_INDEX_PATH]: generateFixtureIndex(),
     ...generateSkillReferences(),
+    /* polish two (docs/POLISH-2.md 5.3, 5.4): the docs' action reference and grammar pages */
+    ...generateDocsReference(contracts),
+    ...generateDocsGrammar(),
   };
 }
 

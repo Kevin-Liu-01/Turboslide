@@ -1,0 +1,29 @@
+---
+title: Advanced tools
+description: The Tools > Advanced tools switch shows more commands in the menus, on the toolbar and in the right click menus.
+---
+
+Turboslide shows a core set of commands by default, the ones a person uses to edit and present a presentation. **Tools > Advanced tools** is a switch that shows more. The setting is remembered in this browser.
+
+## What the switch does
+
+- **Off**, the default: the menus, the toolbar, the right click menus, Search the menus and the Keyboard shortcuts dialog show the core set.
+- **On**: every other command appears in its place in the menus. Some of these commands may not work yet.
+
+A hidden command is not removed. A presentation that already holds one of its objects (a chart, a diagram or an animated pattern, for example) still draws it on the slide, in the slideshow and in every download, and you can still select, move, resize and delete the object.
+
+The keyboard shortcut of a hidden command does nothing while the switch is off.
+
+## What the switch shows
+
+Among the commands behind the switch:
+
+- File: Publish to the web, more download formats and Page setup.
+- View: Grid view, Show sections and Edit guides.
+- Insert: special characters, icons and the line kinds beyond Line and Arrow.
+- Format: Drop shadow, Dither and Edit HTML.
+- Tools: Spelling, Notification settings, and an Advanced submenu with Show source and Run an action.
+
+## For agents
+
+Agents do not need the switch. Every action is available on the command line, over MCP, over HTTP and in the page whether or not its menu row is shown. An open editor page reports the setting as `window.turboslide.studio.describe().state.settings.advancedTools`.

@@ -1,0 +1,44 @@
+---
+title: HTTP actions
+description: Call any action with one POST request, read its contract, and render slides and export files over HTTP.
+---
+
+Every action has an HTTP endpoint: `POST /api/actions/<id>`. The body is the action's input as one JSON object.
+
+```sh
+curl -X POST "https://www.turboslide.com/api/actions/slide.list?deck=<id>" \
+  -H "authorization: Bearer <token>" \
+  -H "x-turboslide-author: agent:my-run" \
+  -H "content-type: application/json" \
+  -d '{}'
+```
+
+## The request
+
+| Part         | What to send                                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Presentation | `?deck=<id>` names the presentation.                                                                               |
+| Author       | The `x-turboslide-author: agent:<runId>` header, or `?author=`. Without it the write is recorded as `agent:http`.  |
+| Force        | `?force=1` writes to a slide another author has leased. Without it, that write is refused with 409 and the holder. |
+| Token        | `Authorization: Bearer <token>` on a hosted studio. On localhost the routes answer without one.                    |
+| Size         | At most 1 MB per write and 25 MB per picture.                                                                      |
+
+`GET /api/actions/<id>` returns the action's contract: the input and output JSON Schema, the transports and whether this studio runs it. `/openapi.json` is the OpenAPI 3.1 document of every endpoint, and `/api/agent` describes the studio.
+
+## Errors
+
+An error answers with `{ "error": { "name", "status", "message", "code", "pointer", "currentRevision", "current", "holder" } }`; only the fields that apply are present.
+
+| Status | Means                                                                                                                      |
+| ------ | -------------------------------------------------------------------------------------------------------------------------- |
+| 400    | The input is wrong. `code` and `pointer` name the field.                                                                   |
+| 401    | No token, or a token this studio does not accept.                                                                          |
+| 404    | No such presentation, slide or object.                                                                                     |
+| 409    | The presentation changed since `baseRevision`, or another author holds the slide. The answer carries the current document. |
+| 501    | This studio does not run the action.                                                                                       |
+
+## Renders and downloads
+
+- `GET /api/render/<slideId>?deck=<id>&theme=light&scale=1` answers the slide as a PNG. `?format=json` answers the render record instead.
+- `POST /api/export/<id>?sync=1` with the `export.run` input answers the file. Send `?sync=1` every time: a hosted studio always works that way.
+- A file over 4.5 MB cannot be returned directly. The studio answers 302 to a stored copy when it has a Blob store, or 413; export one theme or fewer slides then.

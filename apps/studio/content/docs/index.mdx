@@ -65,9 +65,11 @@ Every command in the menus is also an action that a program or an AI agent can r
     turboslide slide new --layout split --after title
     ```
 
+    See [The command line](/docs/agents/cli).
+
   </Tab>
   <Tab title="MCP">
-    `turboslide mcp` runs an MCP server over standard input and output, and a hosted studio answers MCP at `/mcp`. Each action is a tool whose name starts with `deck_`.
+    `turboslide mcp` runs an MCP server over standard input and output, and a hosted studio answers MCP at `/mcp`. Each action is a tool whose name starts with `deck_`. See [MCP](/docs/agents/mcp).
   </Tab>
   <Tab title="HTTP">
     Send the action's input as JSON:
@@ -79,8 +81,10 @@ Every command in the menus is also an action that a program or an AI agent can r
       -d '{}'
     ```
 
+    See [HTTP actions](/docs/agents/http).
+
   </Tab>
   <Tab title="Browser">
-    An open editor page exposes `window.turboslide.studio`, so a script in the page can call `invoke(<action>, input)`.
+    An open editor page exposes `window.turboslide.studio`, so a script in the page can call `invoke(<action>, input)`. See [The page API](/docs/agents/browser).
   </Tab>
 </Tabs>

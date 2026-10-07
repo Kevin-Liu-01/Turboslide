@@ -1,0 +1,42 @@
+---
+title: The page API
+description: Drive an open editor or viewer page with window.turboslide.studio, the same actions with access to the page's controls and view.
+---
+
+An open Turboslide page exposes `window.turboslide.studio`. It is ready after the `turboslide:studio-api-ready` event, whose detail is the result of `describe()`.
+
+```js
+window.addEventListener('turboslide:studio-api-ready', async () => {
+  const studio = window.turboslide.studio;
+  const facts = studio.describe();
+  const slides = await studio.invoke('slide.list', {});
+});
+```
+
+## Methods
+
+| Method                  | What it does                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| `version`               | The API version, 1.                                                                      |
+| `describe()`            | The active page, its actions, and whether the source of a slide can be read and applied. |
+| `controls()`            | The visible controls with their labels, their `data-control` ids and their values.       |
+| `activate(label)`       | Clicks a control by its label or its `data-control` id.                                  |
+| `set(label, value)`     | Sets a control's value and sends the input and change events.                            |
+| `readSource()`          | The exact source document of the current slide.                                          |
+| `applySource(doc)`      | Applies a document through the validator, then waits two frames.                         |
+| `invoke(action, input)` | Runs an action.                                                                          |
+| `download(artifact)`    | Saves a file an action returned.                                                         |
+
+## Which page answers
+
+| Page          | Answers when                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| The editor    | A presentation is open at `/edit/<id>`. It runs every action.                                                             |
+| The viewer    | `/deck/<id>` is open. It runs the view actions: go to a slide, change the view, the appearance, present, zoom and render. |
+| The presenter | `/present/<id>` is open. It runs go to a slide and present.                                                               |
+
+`describe().state` carries the page's facts, such as the current slide, the selection and the settings.
+
+## Use the supported surface
+
+Drive the page through these methods and the `data-control` ids. Do not read the page's internal state or click by screen position: those change between releases, and the API does not.

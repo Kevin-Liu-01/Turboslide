@@ -1,0 +1,49 @@
+---
+title: Agents
+description: Every command in Turboslide is an action that a program or an AI agent can run, over the command line, MCP, HTTP or an open page.
+---
+
+Turboslide keeps every operation in one table of actions. The menus, the command line, the MCP tools, the HTTP endpoints and the page API are all made from that table, so an agent can do anything a person can, and each action checks its input the same way on every transport.
+
+## The four ways in
+
+<Cards>
+  <Card title="The command line" href="/docs/agents/cli">
+    `turboslide <command>` on a presentation folder, with `--json` output.
+  </Card>
+  <Card title="MCP" href="/docs/agents/mcp">
+    The same actions as MCP tools, over standard input and output or HTTP.
+  </Card>
+  <Card title="HTTP actions" href="/docs/agents/http">
+    `POST /api/actions/<id>` with the input as JSON.
+  </Card>
+  <Card title="The page API" href="/docs/agents/browser">
+    `window.turboslide.studio` in an open editor page.
+  </Card>
+</Cards>
+
+The [action reference](/docs/reference) lists every action with its input fields and the name it has on each transport.
+
+## Rules every agent follows
+
+- Every action that changes a presentation takes `baseRevision`, the revision the agent read. If the presentation changed since, the action is refused with status 409 and the current document. Read the response, then try again once.
+- Every write returns the normalized result. Read the new state from the response, not from memory.
+- An unknown field is refused with `unknown_field` and a JSON pointer to it.
+- Name yourself as the author: `--author agent:<runId>` on the command line, the `x-turboslide-author: agent:<runId>` header over HTTP.
+- A claim about a presentation names the revision it was checked at.
+
+## Leases
+
+`slide.lease` reserves a slide for ten minutes. While another author holds a slide, an agent's write to it is refused with 409 and the holder's name, unless the write sets `force`. A person's write to a leased slide goes through with a warning.
+
+## Tokens
+
+On a hosted studio such as turboslide.com, the HTTP actions and MCP need a bearer token: `Authorization: Bearer <token>`. `turboslide login --to https://www.turboslide.com` gets one: it prints a code, you approve the code at `/device` while signed in, and the command line stores the token. On your own computer the routes answer on localhost without a token.
+
+<Callout type="warning" title="Keep tokens secret">
+  A token acts as you. Do not paste it into a presentation, a commit or a chat.
+</Callout>
+
+## Skills
+
+Four skills teach an agent how to work with Turboslide. See [Skills](/docs/agents/skills).

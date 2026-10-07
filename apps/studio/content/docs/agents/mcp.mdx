@@ -1,0 +1,36 @@
+---
+title: MCP
+description: Use Turboslide's actions as MCP tools, over standard input and output from the command line or over HTTP from a hosted studio.
+---
+
+Every action that runs over MCP is a tool whose name starts with `deck_`, such as `deck_get_info` for `deck.info`. A tool takes the same input as its action and returns the same result. The [action reference](/docs/reference) names the tool of every action.
+
+## Over standard input and output
+
+```sh
+turboslide mcp --deck decks/my-presentation
+```
+
+Add this command to your MCP client's server list. The server works on the folder named by `--deck`.
+
+## Over HTTP
+
+A hosted studio answers MCP at `/mcp` with the streamable HTTP transport.
+
+<Steps>
+  <Step title="Initialize">
+    `POST /mcp` with the JSON-RPC `initialize` request. Name the presentation with `?deck=<id>` and the author with the `x-turboslide-author` header. On a hosted studio, send `Authorization: Bearer <token>`.
+  </Step>
+  <Step title="Keep the session">
+    The answer carries an `mcp-session-id` header. Send it on every request after.
+  </Step>
+  <Step title="Call tools">
+    `tools/list` lists the tools and `tools/call` runs one. `GET /mcp` opens the stream of notifications, and `DELETE /mcp` ends the session.
+  </Step>
+</Steps>
+
+One session is bound to one presentation and one author, both chosen at initialize.
+
+## Driving an open page
+
+`deck_goto_slide` (the action `view.goto`) runs in an open page: the editor while it is visible, or a `/deck`, `/present` or `/embed` page opened with `?agent=1` while it is visible. A page hidden for 10 seconds detaches, and the call answers 404 until the page is shown again.

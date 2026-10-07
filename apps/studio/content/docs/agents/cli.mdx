@@ -1,0 +1,56 @@
+---
+title: The command line
+description: Run every action from a terminal with the turboslide command, read its JSON output and exit codes, and move presentations to and from a studio.
+---
+
+The `turboslide` command works on a presentation folder (a `deck.json` and its `slides/`). It finds the folder from the current directory upward, or from `--deck <dir>`. In a checkout of the repository, run it as `pnpm exec turboslide`.
+
+```sh
+turboslide info --json
+turboslide slides --json
+turboslide slide new --layout split --after title
+turboslide render all --theme light,dark --out renders --json
+turboslide lint all --json
+turboslide export pptx --mode flatten --theme both --out exports
+```
+
+## Flags every command takes
+
+| Flag                  | What it does                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| `--deck <dir>`        | The presentation folder. Without it, the nearest `deck.json` upward.               |
+| `--json`              | Machine output on standard output; messages for people go to standard error.       |
+| `--author <name>`     | Who made the change. Agents pass `agent:<runId>`.                                  |
+| `--base-revision <n>` | For writes, the revision the change is based on. Without it, the current revision. |
+
+## Exit codes
+
+| Code | Means                                                   |
+| ---- | ------------------------------------------------------- |
+| 0    | Success.                                                |
+| 1    | The lint gate found problems, or a verification failed. |
+| 2    | A usage or validation error.                            |
+
+## Command groups
+
+| Group               | Commands                                                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Presentation        | `info`, `validate`, `deck create`, `deck rename`, `deck set`, `deck list`, `deck copy`, `deck trash`, `deck restore`, `deck remove --confirm` |
+| Files and transfer  | `deck pack <id>`, `deck unpack <file.zip>`, `deck push <id> --to <url>`, `deck pull <id> --from <url>`                                        |
+| Slides              | `slides`, `slide get`, `slide new --layout`, `slide duplicate`, `slide skip`, `slide move`, `slide apply-layout`, `slide import`              |
+| Objects             | `block set`, `block insert`, `block remove`, `block align`, `block group`, `block rotate`, `block crop`                                       |
+| Text                | `text style`, `text list`, `text spacing`, `text replace`                                                                                     |
+| Tables and charts   | `table merge`, `table insert-rows`, `chart set-data`, `chart set-kind`                                                                        |
+| Pictures            | `asset add <file or url> --alt`, `asset dither`                                                                                               |
+| Check               | `render`, `sheet`, `lint`, `fix`, `diff`                                                                                                      |
+| Versions and leases | `version save`, `version list`, `version restore`, `lease <slideId>`                                                                          |
+| Download            | `export pptx`, `export pdf`, `export txt`, `export jpeg`                                                                                      |
+| Agents              | `mcp`, `login`, `logout`                                                                                                                      |
+
+`turboslide <command> --help` prints a command's options. The [action reference](/docs/reference) lists the usage of every action.
+
+## Connect to a studio
+
+`turboslide login --to <url>` connects the command line to a hosted studio. It prints a code and the address `<url>/device`; open it while signed in, check that the code matches and click Approve. The command line then stores a token for that studio. `turboslide logout --to <url>` revokes it.
+
+`deck push <id> --to <url>` uploads a presentation folder to a studio, and `deck pull <id> --from <url>` downloads one.

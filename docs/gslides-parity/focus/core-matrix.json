@@ -11935,6 +11935,26 @@
       "severity": 2,
       "evidence": "research-docs 2.3 (General Translation's excerpts carry its meta row), 6 P7",
       "note": "Polish two (docs/POLISH-2.md 6), P2-D#3"
+    },
+    {
+      "id": "help.docs.twin",
+      "feature": "help",
+      "interaction": "For every docs page /docs/<path>.md (and /docs/index.md for /docs) answers 200 with text/markdown; charset=utf-8 and a Link header naming the page as canonical; the twin holds no JSX tag, no import and no [#id] or {#id} heading suffix; callouts are block quotes, steps a numbered list, tabs one subheading per tab, cards a list of links; the page's head names the twin with rel=alternate type=text/markdown; /llms.txt has a Documentation section listing every twin; /docs/llms-full.txt holds every written page",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-docs 2.3 (raw MDX in General Translation's twins), 5 item 8, 6 P4",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#4"
+    },
+    {
+      "id": "help.docs.copy-page",
+      "feature": "help",
+      "interaction": "Copy Page writes the page's twin to the clipboard (read back equal to the .md response); its menu, a 6 px plate on the popover layer, lists View as Markdown, llms.txt, Full documentation for agents, Open in Claude and Open in ChatGPT, and the OpenAPI document on reference pages, each a link with its address",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "research-docs 2.2 (gt-docs-copy-menu.jpg), 6 P8",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#4"
     }
   ]
 }

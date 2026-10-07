@@ -209,10 +209,15 @@ function docsAddresses(): { page: string; twin: string }[] {
 
 const DOCS = docsAddresses();
 
-/** The prerendered docs files: each page, each twin and the search index (5.2). */
+/**
+ * The prerendered docs files: each page, each twin, the search index, the agents' full text and the
+ * sitemap (5.2, 5.7).
+ */
 const DOCS_PRERENDER = [
   ...DOCS.flatMap(({ page, twin }) => [{ path: page }, { path: twin }]),
   { path: '/docs/search.json' },
+  { path: '/docs/llms-full.txt' },
+  { path: '/sitemap.xml' },
 ];
 
 /** The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two). */

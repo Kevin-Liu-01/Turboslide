@@ -11925,6 +11925,16 @@
       "severity": 1,
       "evidence": "research-docs 5 items 3 to 5 (a server function per click; the static variant answered 404 and left the page blank)",
       "note": "Polish two (docs/POLISH-2.md 6), P2-D#1"
+    },
+    {
+      "id": "help.docs.search",
+      "feature": "help",
+      "interaction": "Cmd+K, Ctrl+K and / open the search window (8 px, on the dialog layer) with its field focused; /docs/search.json is requested on the first open and never before; typing \"theme\" lists Themes and brand kits first; Enter opens the first hit at its heading; no result's text holds the page header's words (Copy Page); Escape closes and returns the focus",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-docs 2.3 (General Translation's excerpts carry its meta row), 6 P7",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#3"
     }
   ]
 }

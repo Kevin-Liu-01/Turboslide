@@ -2678,7 +2678,11 @@ test(title('decks.home.capture-plain'), async ({ browser }) => {
   test.setTimeout(240_000);
   /* no selection ring, chip, handle, caret or guide is drawn at rest (docs/LANDING.md 6.7): the
      page, read itself, draws nothing in the selection colour and holds no overlay and no focused
-     text field after a full scroll (Kevin's answer 3: the blue only while something is worked on) */
+     text field after a full scroll (Kevin's answer 3: the blue only while something is worked on).
+     Restated in the design round (DESIGN.md 8.0 "Colour" and 8.7, question 34): the kits band's
+     Colors row shows the kit's six colours, and General Translation's Primary and Accent are
+     #2f5ce0, so a swatch of that row painted in the value its row reads is left out of the scan,
+     as home.kits.restyle leaves it out; a swatch in any other colour is read as before */
   const failures: string[] = [];
   const notes: string[] = [];
   for (const theme of ['light', 'dark'] as const) {
@@ -2693,8 +2697,22 @@ test(title('decks.home.capture-plain'), async ({ browser }) => {
         await p.waitForTimeout(600);
         const facts = await p.evaluate((blue) => {
           const blues: string[] = [];
+          /* the Colors row's swatches painted in their row's value, and of those the blue ones */
+          const swatches = { shown: 0, blue: 0 };
+          const paintOf = (hex: string): string => {
+            const n = Number.parseInt(hex.slice(1), 16);
+            return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+          };
           for (const el of document.querySelectorAll<HTMLElement>('body *')) {
             const cs = getComputedStyle(el);
+            if (el.matches('[data-kit-roles] > li > i')) {
+              const hex = (el.parentElement?.querySelector('.pt-num')?.textContent ?? '').trim();
+              if (/^#[0-9a-f]{6}$/.test(hex) && cs.backgroundColor === paintOf(hex)) {
+                swatches.shown += 1;
+                if (cs.backgroundColor === blue) swatches.blue += 1;
+                continue;
+              }
+            }
             const hits = [
               cs.color,
               cs.backgroundColor,
@@ -2708,6 +2726,7 @@ test(title('decks.home.capture-plain'), async ({ browser }) => {
           const active = document.activeElement;
           return {
             blues,
+            swatches,
             /* drawn ones: the version view waits hidden in the agents band until a row is shown.
                The two people band's presence marks (`.ts-people-marks`, one layer a screen) are the
                staged sequence's ink outline and flag, which 2.10 draws at rest as B's still; they
@@ -2725,8 +2744,14 @@ test(title('decks.home.capture-plain'), async ({ browser }) => {
         }, SELECTION_BLUE);
         const label = `${size.width} ${theme}`;
         notes.push(
-          `${label}: ${facts.blues.length} elements in the selection blue, ${facts.overlays} overlays, focus on ${facts.focused}`,
+          `${label}: ${facts.blues.length} elements in the selection blue, ${facts.overlays} overlays, focus on ${facts.focused}; the Colors row's ${facts.swatches.shown} swatches in their values (${facts.swatches.blue} of them #2f5ce0) left out`,
         );
+        /* the row's six swatches are drawn and painted in their values, so the scan leaves out
+           exactly them */
+        if (facts.swatches.shown !== 6)
+          failures.push(
+            `${label}: ${facts.swatches.shown} of the Colors row's 6 swatches painted in their values`,
+          );
         if (facts.blues.length > 0)
           failures.push(
             `${label}: the selection blue at rest on ${facts.blues.slice(0, 5).join(', ')}`,

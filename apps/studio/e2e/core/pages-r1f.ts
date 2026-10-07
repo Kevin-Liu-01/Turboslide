@@ -59,8 +59,8 @@ type Rect = { x: number; y: number; right: number; bottom: number; w: number; h:
 
 /**
  * The open Sign in dialog's band: the distance from the bottom of the last thing the body draws
- * (a button, a field, a line of text, the reserved error row) to the action bar's top rule. The
- * body's own bottom padding is 20 px, so a dialog sized to its content reads 20 or 21.
+ * (a button, a field, a line of text, an error row) to the action bar's top rule. The body's own
+ * bottom padding is 20 px, so a dialog sized to its content reads 20 or 21.
  */
 async function signInBand(page: Page) {
   return page.evaluate(() => {
@@ -118,7 +118,9 @@ export function pagesR1f(): string[] {
   });
 
   /* item 1: the dialog's fixed 400 by 320 box drew Continue with Google over an empty band of
-     about 150 px where Google is the only method (production) */
+     about 150 px where Google is the only method (production); restated in polish two, P2-A#1
+     (docs/POLISH-2.md 6.6): at most 24 px from the body's last line (a method or the field) to
+     the action bar, and no reserved error row on the methods step */
   row('accounts.sign-in-fits', async ({ browser }) => {
     test.setTimeout(240_000);
     const readings: string[] = [];
@@ -156,11 +158,11 @@ export function pagesR1f(): string[] {
         `at most the body's 20 px padding under the last line at ${width} (${facts!.band} px)`,
       ).toBeLessThanOrEqual(24);
       expect(facts!.dialog.right, 'the dialog is inside the viewport').toBeLessThanOrEqual(width);
-      if (!facts!.controls.includes('dialog.signIn.email'))
-        expect(
-          facts!.controls,
-          'no reserved error row where the methods leave the page',
-        ).not.toContain('dialog.signIn.error');
+      /* polish two, P2-A#1: no reserved error row on the methods step, the field drawn or not
+         (the row under the field was part of the empty band of Kevin's screenshot, K4) */
+      expect(facts!.controls, 'no reserved error row on the methods step').not.toContain(
+        'dialog.signIn.error',
+      );
       await page.keyboard.press('Escape');
     }
     test.info().annotations.push({ type: 'sign in dialog', description: readings.join(' | ') });

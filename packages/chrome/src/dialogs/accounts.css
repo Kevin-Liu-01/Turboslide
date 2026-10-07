@@ -71,12 +71,8 @@
 /* ---- the sign in dialog: 400 px wide, as tall as its content ---- */
 /* The fixed 320 px box and the body's 180 px minimum left an empty band of about 150 px under
    Continue with Google where Google is the only method (production, TURBOSLIDE_MAIL=off; the Round
-   1 follow-up, lane C item 1). The box now takes its content's height. The email method's two
-   steps (the field over Google, 99 px; then the sentence, the code and Back, 125 px) hold the
-   code step's height between them, so Continue does not move the box. */
-.ts-sign-in-body[data-email='on'] {
-  min-height: 125px;
-}
+   1 follow-up, lane C item 1). The box takes its content's height on both steps: the email step's
+   minimum of the code step's 125 px left 69 px empty under the field (polish two, P2-A#1, K4). */
 
 .ts-sign-in-methods {
   margin: 8px 0 0;
@@ -113,9 +109,10 @@
   border-color: var(--pt-ink);
 }
 
+/* the chrome's one focus rule: 1 px ink, inset (Dialog.css; polish two, P2-A#1) */
 .ts-sign-in-method:focus-visible {
   outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+  outline-offset: -1px;
 }
 
 .ts-sign-in-method:disabled {
@@ -162,7 +159,9 @@
   color: var(--pt-titanium);
 }
 
-.ts-sign-in-sent {
+/* under the body's own paragraph rule (Dialog.css `.ts-dialog-body p`, 0,1,1), which set its
+   margin to 0 and left the sentence flush on the field's label (research-auth S4) */
+.ts-dialog-body .ts-sign-in-sent {
   margin: 0 0 8px;
   color: var(--pt-ink-2);
 }

@@ -24,10 +24,10 @@ import './accounts.css';
  * (`TURBOSLIDE_MAIL=off`, the production default of REALTIME.md 7.7) the field and Continue are
  * absent and Google is the primary action: first in the list, focused on open so Enter runs it,
  * and it may be the only method. No passwords. A reserved 20 px error row speaks without moving
- * the box where an answer can arrive inside the dialog (the email method, a passkey); a dialog of
- * methods that leave the page draws no row. The exchanges run through the route's handlers over
- * better-auth's own routes; without them the dialog says sign in is not available on this
- * deployment.
+ * the box on the code step, where the answer to a typed code arrives; the methods step draws the
+ * row only once it has a sentence (polish two, P2-A#1). The exchanges run through the route's
+ * handlers over better-auth's own routes; without them the dialog says sign in is not available
+ * on this deployment.
  *
  * The design round (docs/DESIGN.md 9; DR-D5#2): one dialog component on every surface.
  * `SignInView` is the dialog itself and reads no shell; the editor's `SignInDialog` hands it the
@@ -127,10 +127,11 @@ export function SignInView({
     : noMethod
       ? 'No sign in method is configured on this deployment'
       : '';
-  /* the row is reserved only where an answer can arrive inside the dialog (the email method's
-     request and code, a passkey's ceremony); Google and GitHub leave the page, so a dialog of
-     those alone draws no empty row under its buttons (the Round 1 follow-up, lane C item 1) */
-  const answers = showEmail || passkeyOffered;
+  /* the row is reserved only on the code step, where the answer to a typed code arrives inside
+     the dialog; the methods step draws it only once there is a sentence to say (polish two,
+     P2-A#1: the reserved row under the field was part of the empty band of Kevin's screenshot,
+     K4). Google and GitHub leave the page (the Round 1 follow-up, lane C item 1) */
+  const answers = state === 'code';
   const id = (part: string) => `${control}.${part}`;
 
   const fail = (err: unknown) => setError(err instanceof Error ? err.message : String(err));
@@ -377,5 +378,7 @@ export function SignInDialog() {
       ? { passkey: account.passkey }
       : {}),
   };
-  return <SignInView methods={methods} onClose={shell.closeDialog} onSignedIn={shell.closeDialog} />;
+  return (
+    <SignInView methods={methods} onClose={shell.closeDialog} onSignedIn={shell.closeDialog} />
+  );
 }

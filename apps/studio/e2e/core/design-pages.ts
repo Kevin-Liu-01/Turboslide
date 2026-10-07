@@ -17,6 +17,7 @@ import {
   waitEditor,
 } from './lib';
 import { isCoreId } from './matrix';
+import { labelContrast, readSurface, surfaceFaults } from './auth-plate';
 
 // Lane D5's rows of the design round (docs/DESIGN.md 9, 10.5, 11): the pages other than the editor
 // and the landing. The spec files call one function each and spread its ids into their coverage
@@ -1105,6 +1106,39 @@ export function designSignIn(): string[] {
           .first()
           .waitFor({ timeout: 30_000 });
         await page.waitForTimeout(300);
+        /* polish two, P2-A#1 (docs/POLISH-2.md 4.1, 6.6): the reads the row lacked. The ring of
+           the control the dialog focused on open, then an address typed where the field is drawn
+           and every button's label against its own ground, the lead's and each control's inset,
+           and the gap under the last control */
+        const card = `[data-control="${surface.dialog}"]`;
+        const sel = {
+          root: card,
+          lead: '.ts-dialog-lead',
+          controls: '.ts-dialog-body input, .ts-dialog-body .ts-sign-in-method',
+          buttons: 'button:not(.ts-dialog-x)',
+          next: '.ts-dialog-actions',
+        };
+        const onOpen = await readSurface(page, sel);
+        const email = page.locator(`[data-control="${surface.dialog}.email"]`);
+        if ((await email.count()) > 0) await email.fill('ada@example.com');
+        await page.keyboard.press('Tab');
+        /* the buttons' colours move over the fast duration once the address enables Continue */
+        await page.waitForTimeout(400);
+        const typed = await readSurface(page, sel);
+        const plate = [
+          /* the labels are the row's with an address typed: before it Continue is disabled */
+          ...surfaceFaults(onOpen, {
+            inset: 24,
+            maxGap: 32,
+            where: `${where} on open`,
+            labels: false,
+          }),
+          ...surfaceFaults(typed, { inset: 24, maxGap: 32, where: `${where} typed` }),
+        ];
+        failures.push(...plate);
+        facts.push(
+          `${where}: lead at ${onOpen.leadLeft === null ? 'none' : Math.round(onOpen.leadLeft - onOpen.box.left)}; rings ${onOpen.focused?.control ?? 'none'} ${onOpen.focused?.width ?? ''} ${onOpen.focused?.offset ?? ''}, ${typed.focused?.control ?? 'none'} ${typed.focused?.width ?? ''} ${typed.focused?.offset ?? ''}; labels ${typed.buttons.map((b) => `"${b.label}" ${labelContrast(b).toFixed(1)}`).join(', ')}; gap ${Math.round(typed.nextTop - typed.lastBottom)}`,
+        );
         const read = await signInFacts(page, surface.dialog);
         const google = read.methods.find((m) => m.label === 'Continue with Google');
         facts.push(

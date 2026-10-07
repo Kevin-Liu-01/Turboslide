@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
@@ -97,16 +97,17 @@ describe('the sign in methods (docs/NEXT.md 3.2 H4)', () => {
   });
 });
 
-// The dialog is as tall as its content (the Round 1 follow-up, lane C item 1): production offers
-// Google alone (TURBOSLIDE_MAIL=off), and the fixed 400 by 320 box drew Continue with Google over
-// an empty band of about 150 px. The sheet holds no fixed height for the dialog, and the reserved
-// error row is drawn only where an answer can arrive inside the dialog.
-describe('the sign in dialog sizes to its content (Round 1 follow-up, lane C item 1)', () => {
+// The dialog is as tall as its content (the Round 1 follow-up, lane C item 1; polish two, P2-A#1):
+// production offers Google alone (TURBOSLIDE_MAIL=off), and the fixed 400 by 320 box drew Continue
+// with Google over an empty band of about 150 px. The sheet holds no fixed height and no minimum
+// for the dialog or either step, and the reserved error row is drawn on the code step alone, where
+// the answer to a typed code arrives inside the dialog (Kevin's screenshot of 2026-10-07, K4).
+describe('the sign in dialog sizes to its content (Round 1 follow-up, lane C item 1; P2-A#1)', () => {
   const sheet = readFileSync(resolve(import.meta.dirname, '../dialogs/accounts.css'), 'utf8');
 
-  it('gives the dialog no fixed height and the body no minimum without the email method', () => {
+  it('gives the dialog no fixed height and neither step a minimum', () => {
     expect(sheet).not.toMatch(/\.ts-sign-in\s*\{[^}]*\bheight\s*:/);
-    expect(sheet).not.toMatch(/\.ts-sign-in-body\s*\{[^}]*min-height/);
+    expect(sheet).not.toMatch(/\.ts-sign-in-body[^{]*\{[^}]*min-height/);
   });
 
   it('draws Google and no reserved error row where Google is the only method', () => {
@@ -117,19 +118,27 @@ describe('the sign in dialog sizes to its content (Round 1 follow-up, lane C ite
     expect(container.querySelector('.ts-sign-in-body')?.getAttribute('data-email')).toBe('off');
   });
 
-  it('keeps the reserved error row where the email method can answer inside the dialog', () => {
-    const { container } = draw();
+  it('draws no reserved error row on the email step, and reserves it on the code step', async () => {
+    const { container } = draw({ verifyCode: vi.fn(() => Promise.resolve(null)) });
     expect(container.querySelector('[data-control="dialog.signIn.email"]')).not.toBeNull();
+    expect(container.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
+    fireEvent.change(container.querySelector('[data-control="dialog.signIn.email"]')!, {
+      target: { value: 'ada@example.com' },
+    });
+    fireEvent.click(container.querySelector('[data-control="dialog.signIn.continue"]')!);
+    await vi.waitFor(() =>
+      expect(container.querySelector('[data-control="dialog.signIn.code"]')).not.toBeNull(),
+    );
     expect(container.querySelector('[data-control="dialog.signIn.error"]')).not.toBeNull();
   });
 
-  it('keeps the reserved error row where a passkey can answer inside the dialog', () => {
+  it('draws no reserved error row on the methods step where a passkey is offered', () => {
     const { container } = draw({
       requestCode: undefined,
       passkeysAvailable: true,
       passkey: vi.fn(() => Promise.resolve(null)),
     });
-    expect(container.querySelector('[data-control="dialog.signIn.error"]')).not.toBeNull();
+    expect(container.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
   });
 
   it('says the standing sentence when no method is configured', () => {

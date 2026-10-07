@@ -11459,12 +11459,12 @@
     {
       "id": "accounts.signin.one-dialog",
       "feature": "share",
-      "interaction": "Sign In from /home, /decks and the editor opens one dialog component: the 8 px window, 6 px buttons, \"Continue with Google\" with the provider's mark, Title Case buttons, a body as tall as its content that does not scroll, both appearances",
+      "interaction": "Sign In from /home, /decks and the editor opens one dialog component: the 8 px window, 6 px buttons, \"Continue with Google\" with the provider's mark, Title Case buttons, a body as tall as its content that does not scroll, both appearances; the lead and every control start at the window's 24 px inset; with an address typed every button's label reads 4.5:1 or more on its own ground; the focus ring is 1 px ink, inset; no gap over 32 px between the last control and the next box",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-surfaces 3.1; VERIFICATION.md design round pass 1 finding 6 (the editor's body scrolled 35 px)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D5#2"
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#2; restated in polish two, P2-A#1"
     },
     {
       "id": "export.fonts.upstream-names",
@@ -11645,12 +11645,12 @@
     {
       "id": "accounts.sign-in-fits",
       "feature": "share",
-      "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method, the field or the reserved error row) to the action bar, and no reserved error row where every method leaves the page; a deployment that offers no sign in draws no dialog and the row reads the title row",
+      "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method or the field) to the action bar; no reserved error row on the methods step; a deployment that offers no sign in draws no dialog and the row reads the title row",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "verify-r1.md finding 7 (production 2026-10-05: Continue with Google over an empty band of about 150 px in a 400 by 320 box, signin-editor-dialog-390-*.jpg, signin2-editor-dialog-1440-*.jpg)",
-      "note": "Round 1 follow-up, lane C item 1: the dialog takes its content's height (packages/chrome/src/dialogs/accounts.css); the email method's two steps hold the code step's 125 px between them, and the reserved error row is drawn where an answer can arrive inside the dialog, the email method or a passkey (SignIn.tsx)"
+      "note": "Round 1 follow-up, lane C item 1: the dialog takes its content's height (packages/chrome/src/dialogs/accounts.css); the email method's two steps hold the code step's 125 px between them, and the reserved error row is drawn where an answer can arrive inside the dialog, the email method or a passkey (SignIn.tsx); restated in polish two, P2-A#1"
     },
     {
       "id": "decks.refused.address-words",

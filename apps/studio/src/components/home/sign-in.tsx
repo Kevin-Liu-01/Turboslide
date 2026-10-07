@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
@@ -117,11 +118,18 @@ export function SignInButton({
       >
         <span className="pt-lb">{SIGN_IN_WORDS.button}</span>
       </button>
-      {open ? (
-        <Suspense fallback={null}>
-          <PageSignInDialog facts={facts} onClose={() => setOpen(false)} />
-        </Suspense>
-      ) : null}
+      {/* the dialog enters the document at the body, out of the page's own tree: on /home the
+          button sits inside main.ts-product, whose descendant rules (home.css: the paragraph's
+          margin, the nav slot's ink, the landing's blue focus ring) reached the dialog there
+          (docs/POLISH-2.md 4.1, K1 to K3) */}
+      {open
+        ? createPortal(
+            <Suspense fallback={null}>
+              <PageSignInDialog facts={facts} onClose={() => setOpen(false)} />
+            </Suspense>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

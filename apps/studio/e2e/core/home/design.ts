@@ -2103,8 +2103,12 @@ async function readColors(page: Page) {
     });
     const slide = band.querySelector<HTMLElement>('[data-kit-grid] [data-home-slides]');
     const style = slide === null ? null : getComputedStyle(slide);
+    /* the build's minifier may write a token in three digits (#fff): read in six */
     const tokens = ['ink', 'paper', 'ink-2', 'titanium', 'blue', 'accent'].map((t) =>
-      (style?.getPropertyValue(`--${t}`) ?? '').trim().toLowerCase(),
+      (style?.getPropertyValue(`--${t}`) ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/^#(\w)(\w)(\w)$/, '#$1$1$2$2$3$3'),
     );
     const list = band.querySelector('[data-kit-roles]');
     return {

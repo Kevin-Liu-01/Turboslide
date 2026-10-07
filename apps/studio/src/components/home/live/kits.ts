@@ -127,7 +127,14 @@ export function startKits(ctx: LiveContext): void {
     const slide = grid?.querySelector<HTMLElement>('[data-home-slides]');
     if (roles === null || ratioLine === null || slide == null) return;
     const style = getComputedStyle(slide);
-    const hex = ROLE_TOKENS.map((t) => style.getPropertyValue(`--${t}`).trim().toLowerCase());
+    /* the build's minifier writes #ffffff as #fff in the sheet: each value in its six digits */
+    const hex = ROLE_TOKENS.map((t) =>
+      style
+        .getPropertyValue(`--${t}`)
+        .trim()
+        .toLowerCase()
+        .replace(/^#(\w)(\w)(\w)$/, '#$1$1$2$2$3$3'),
+    );
     roles.replaceChildren(
       ...KITS_ROUND.roles.map((name, i) => {
         const li = document.createElement('li');

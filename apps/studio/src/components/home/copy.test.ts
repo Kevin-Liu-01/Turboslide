@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DIALOGS, forbiddenWordsIn } from '@turboslide/chrome/menus/strings';
+import { TAILOR as EDITOR_TAILOR } from '@turboslide/chrome/panels/assist-strings';
 import { KIT_COLORS, KIT_COLOR_WORDS } from '@turboslide/schema/brand';
 import { SITE } from '@turboslide/theme/brand/site';
 import {
@@ -54,6 +55,7 @@ import {
   NUMBERS_ROUND,
 } from './design-copy';
 import { FACTS_DATA } from './facts-data';
+import { TAILOR_WORDS } from './tailor-words';
 import { HOME_FACTS, formatCount } from './facts';
 import type { HomeFacts } from './facts';
 import { REQUEST_ONLY } from './panel-format';
@@ -668,6 +670,33 @@ describe('the export band and the Download dialog', () => {
     expect(EXPORT.slider(50)).toBe(
       'The Pictures file fills 50 percent of the slide and the Editable text file the rest',
     );
+  });
+});
+
+/* the Tailor words the live modules use are the editor's (tailor-words.ts) */
+describe('the Tailor words', () => {
+  it("are the editor's, the functions on a table of counts", () => {
+    for (const key of ['title', 'lead', 'from', 'to', 'apply', 'cancel'] as const)
+      expect(TAILOR_WORDS[key], key).toBe(EDITOR_TAILOR[key]);
+    for (const [places, slides] of [
+      [0, 0],
+      [1, 1],
+      [2, 1],
+      [13, 6],
+      [1, 3],
+    ] as const)
+      expect(TAILOR_WORDS.count(places, slides)).toBe(EDITOR_TAILOR.count(places, slides));
+    for (const to of ['', 'Globex'])
+      for (const [places, slides, skipped] of [
+        [0, 0, 0],
+        [1, 1, 0],
+        [13, 6, 0],
+        [0, 0, 1],
+        [2, 2, 3],
+      ] as const)
+        expect(TAILOR_WORDS.result(to, places, slides, skipped)).toBe(
+          EDITOR_TAILOR.result(to, places, slides, skipped),
+        );
   });
 });
 

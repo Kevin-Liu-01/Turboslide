@@ -1,6 +1,5 @@
-import { TAILOR as PRODUCT } from '@turboslide/chrome/panels/assist-strings';
-
 import { HISTORY, TAILOR } from '../copy';
+import { TAILOR_WORDS as PRODUCT } from '../tailor-words';
 import { startFilmstrip } from './filmstrip';
 import type { LiveContext } from './index';
 import { ms, play, reduced, sequence, slowFactor } from './motion';
@@ -9,7 +8,7 @@ import type { AgentStep, HomeDeckState, SlideKey } from './state';
 
 /**
  * Tools > Tailor for a customer on the page (docs/LANDING.md 2.5; the product's words are
- * `packages/chrome/src/panels/assist-strings.ts` TAILOR): a name typed in With and Apply or Enter
+ * `packages/chrome/src/panels/assist-strings.ts` TAILOR, copied in `tailor-words.ts`): a name typed in With and Apply or Enter
  * replaces every "Northwind" in the deck's text and notes, on every slide, as one change, in
  * reading order; the stage, the thumbnails and every other slide on the page show it; Undo puts
  * every name back. The count is the product's `TAILOR.count` with the figures the CLI recorded for

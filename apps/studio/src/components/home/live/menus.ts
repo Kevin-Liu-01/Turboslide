@@ -1,11 +1,10 @@
-import { TAILOR as PRODUCT_TAILOR } from '@turboslide/chrome/panels/assist-strings';
-
 import { HISTORY, KITS as KIT_WORDS, MENUS as WORDS } from '../copy';
 import { HOME_DECK } from '../deck.generated';
 import type { HomeSlideId, SheetBox } from '../deck.generated';
 import { HOME_SLIDE_MARKUP } from '../bands/deck.generated';
 import { MINI_BLANK, MINI_BLOCKS, MINI_MENUS, MINI_SIZES } from '../menus.generated';
 import type { MiniMenu, MiniRow } from '../menus.generated';
+import { TAILOR_WORDS as PRODUCT_TAILOR } from '../tailor-words';
 import { cloneSlide, registerDeckSlides, registerSlide } from './index';
 import type { LiveContext } from './index';
 import { ease, finishBand, ms, play } from './motion';
@@ -1170,9 +1169,7 @@ export function startMenus(ctx: LiveContext): void {
       group.append(b);
     }
     const lead = docNow(row);
-    const el = dialog('Brand kit', lead || null, [group], [
-      { label: 'Close', act: closeDialog },
-    ]);
+    const el = dialog('Brand kit', lead || null, [group], [{ label: 'Close', act: closeDialog }]);
     // pressed before the sentences arrived (a key on the row): the lead joins under the title
     if (lead === '')
       void docOf(row).then((doc) => {

@@ -114,7 +114,9 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   color: var(--pt-ink-2);
 }
 
-.ts-share-access,
+/* the editor's Share dialog draws .ts-share-access, -role, -address, -people and -foot too, and
+   this sheet reaches every page, so those five rules name the band's dialog (-home-css.test.ts) */
+.ts-people-share .ts-share-access,
 .ts-share-person {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr) auto;
@@ -181,12 +183,12 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   display: none;
 }
 
-.ts-share-role {
+.ts-people-share .ts-share-role {
   font-size: 13px;
   color: var(--pt-ink-2);
 }
 
-.ts-share-address {
+.ts-people-share .ts-share-address {
   display: flex;
   gap: 8px;
   margin: 12px 0 8px;
@@ -211,13 +213,13 @@ html.ts-intro [data-field='hero']:not([data-field-state]) > .ts-field-still {
   font-size: 13px;
 }
 
-.ts-share-people {
+.ts-people-share .ts-share-people {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.ts-share-foot {
+.ts-people-share .ts-share-foot {
   display: flex;
   align-items: center;
   justify-content: flex-end;

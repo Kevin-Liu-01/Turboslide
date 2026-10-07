@@ -139,3 +139,12 @@ it serves.
 2. **The integrator**: `fc8dd7e3` took the round folder's tracked pictures to 25,219,024 B, over
    evidence-policy.test.mjs's 25,000,000 B line; `2ea0d7df` re-encoded 54 of D4's pictures
    (1,077,550 B less) and the folder reads 24,922,057 B at `bcbcef7a`, 77,943 B of room.
+
+## D1 (finishing round 3)
+
+1. **The integrator or the ship step, `apps/cli/package.json`**: `apps/cli/src/commands/banner.test.ts`
+   ("carries the release of docs/updates.md as its version") fails on `design/round` and on
+   origin/main `0a79db8e` alike: the newest entry of `docs/updates.md` (2026-10-06, the Round 1
+   follow-up, from `f2b0b7a0`) makes the release 2026.1006.1 and the CLI's `version` still reads
+   2026.1001.3 (read in both trees' files). The version line moves with the release note that
+   adds an entry, so `pnpm test` reads the test green; the round's own release note moves it again.

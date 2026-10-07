@@ -266,3 +266,28 @@ type changed since); prettier clean.
 
 Pictures (`a/`): `a5-mail-1440.jpg` and `a5-mail-390.jpg`, the HTML body of a captured mail with
 the code and the link's token masked; a mail draws one appearance, its own white ground.
+
+## The lane at its end
+
+Commits: `c39fc745` P2-A#1, `6bb60368` P2-A#2, `01a382e4` P2-A#3, `d2aca415` P2-A#4, `59a6a2fb`
+P2-A#5, and this note with the older menu test's word (`accounts.spec.ts` 502, Sessions to
+Profile; that test runs on the file store alone).
+
+The whole unit suite (`vitest run --testTimeout 60000`, the root `pnpm test` with a timeout for a
+load near 100): 542 of 545 files and 5,684 tests pass; the three that fail are outside lane A's
+files and changes: `packages/import` reads 93 slides in the Prototemplate deck where it pins 95
+(that repository moved), `apps/cli` `banner.test.ts` pins the release of `docs/updates.md`
+(2026.1001.3 against 2026.1006.1), and `editor-shell-render.test.tsx`'s Shader gallery dialog did
+not appear in time (it passed in the chrome project's own run of A#4).
+
+Open:
+
+- `accounts.device-flow` stays red on the terminal's side, requests A-R2 (the CSRF filter refuses
+  `turboslide login`'s device requests) and A-R3 (the granted token is not an API key); the page's
+  side passes.
+- Every route ceiling of `scripts/check-client-bundle.mjs`, `/signin`'s with them, fails on the
+  shared vendor chunk of the tree (request A-R1), and `home.budget.bytes-first` on `/home`'s
+  document (request A-R5); lane A's own bytes are named in A#2 and A#4.
+- The gallery draws the 37 plate states of 4.4; the account menu's two states are read in the
+  editor by `accounts.menu.words` and pictured as `a4-menu-*`, not in the gallery.
+- Kevin's hand pass with the real Google client stays `accounts.google-roundtrip`'s.

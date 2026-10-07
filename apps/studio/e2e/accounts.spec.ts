@@ -499,7 +499,7 @@ test.describe('the chrome surfaces of section 7 (B6 days 3 to 6, B2 day 4)', () 
     await expect(page.getByRole('menuitem', { name: 'Change name' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Change avatar' })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Forget this browser' })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: 'Sessions' })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Profile' })).toBeVisible();
   });
 });
 

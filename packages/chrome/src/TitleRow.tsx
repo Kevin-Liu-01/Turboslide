@@ -538,6 +538,10 @@ export function titleMoreItems(panel: string | null): MenuItem[] {
     { ...itemById('title.slideshow.presenterView'), dividerBefore: true },
     itemById('title.slideshow.startFromBeginning'),
     { ...titleSignInItem(), label: 'Sign in', dividerBefore: true },
+    /* a signed in person's account rows (docs/POLISH-2.md 4.3, question Q9): Sign out was three
+       taps away through Collaborators and the own row (research-auth S8) */
+    { ...itemById('title.account.changeName'), when: 'signedIn', dividerBefore: true },
+    { ...itemById('title.account.signOut'), dividerBefore: undefined },
   ];
   return rows;
 }

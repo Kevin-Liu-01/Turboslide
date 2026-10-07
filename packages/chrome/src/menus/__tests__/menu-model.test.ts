@@ -901,7 +901,8 @@ describe('the SPEC rows', () => {
       'Sign in',
       'Sign out',
       'Forget this browser',
-      'Sessions',
+      /* polish two (docs/POLISH-2.md 4.3; P2-A#4): the row reads Profile, the dialog it opens */
+      'Profile',
     ]);
     expect(itemById('title.account.signIn').when).toBe('canSignIn');
     expect(itemById('title.account.signOut').when).toBe('signedIn');

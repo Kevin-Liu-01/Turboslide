@@ -937,11 +937,13 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
         turboslide: true,
         doc: 'Clears your name, avatar and unsaved changes from this browser; earlier edits keep the old name',
       }),
-      now('title.account.sessions', 'Sessions', dialog('Sessions'), {
+      /* polish two (docs/POLISH-2.md 4.3; research-auth S8): the row reads Profile, the dialog
+         it opens; its id and the shell's dialog key stay */
+      now('title.account.sessions', 'Profile', dialog('Sessions'), {
         turboslide: true,
         when: 'signedIn',
         dividerBefore: true,
-        doc: 'The browsers signed in as you, with Sign out for each',
+        doc: 'Your account, the browsers signed in as you and your API keys',
       }),
     ],
     { google: 'Account avatar', doc: 'Your name and avatar; nothing else asks for an account' },

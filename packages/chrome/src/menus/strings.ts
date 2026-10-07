@@ -7,6 +7,7 @@
  * Case appears only where Google's own label is Title Case. Relative imports in this folder carry
  * the `.ts` extension so the parity audit script can load the model under Node.
  */
+import { AUTH_WORDS } from '../auth/auth-words.ts';
 
 /** The first sentence of every stub tooltip (SPEC "How to read this specification", Later). */
 export const STUB_PREFIX = 'Not available in Turboslide yet';
@@ -232,8 +233,11 @@ export const ACCOUNT = {
   signOut: 'Sign out',
   forget: 'Forget this browser',
   forgetConfirm:
-    'Forget this browser? Your name, avatar and unsaved changes here are cleared; earlier edits keep the old name',
-  sessions: 'Sessions',
+    'Your name, avatar and unsaved changes in this browser are cleared. Earlier edits keep the old name.',
+  /* the confirming button, Title Case as every button is (docs/POLISH-2.md 4.5) */
+  forgetButton: 'Forget This Browser',
+  /* the row opens the Profile dialog, so it reads Profile (docs/POLISH-2.md 4.3; research-auth S8) */
+  sessions: 'Profile',
   namePrompt: {
     title: 'How should others see you?',
     name: 'Name',
@@ -241,23 +245,17 @@ export const ACCOUNT = {
     /* the bar's button, Title Case as the title row's Sign In (design round request 7) */
     signIn: 'Sign In',
   },
+  /* the sign in window's words are the auth plate's (packages/chrome/src/auth/auth-words.ts,
+     docs/POLISH-2.md 4.5); the readers of this table name them here */
   signInDialog: {
-    title: 'Sign in',
-    email: 'Email',
-    continue: 'Continue',
-    /* the same answer whether or not the address exists (7.3) */
-    sent: 'If that address can sign in, a message with a link and a six digit code is on its way',
-    code: 'Six digit code',
-    verify: 'Verify',
-    passkey: 'Use a Passkey',
-    github: 'Continue with GitHub',
-    google: 'Continue with Google',
-    /* the library's own error redirect after a social sign in (`?error=<reason>`, docs/REALTIME.md
-       4.1); the reason in words, as Google or the library named it */
-    socialFailed: (reason: string) =>
-      `Sign in did not complete (${reason}). Try again or use another method`,
-    back: 'Back',
-    failed: 'That code did not match. Try again or request a new one',
+    title: AUTH_WORDS.windowTitle,
+    email: AUTH_WORDS.email,
+    continue: AUTH_WORDS.continue,
+    code: AUTH_WORDS.sent.code,
+    verify: AUTH_WORDS.sent.verify,
+    github: AUTH_WORDS.github,
+    google: AUTH_WORDS.google,
+    another: AUTH_WORDS.sent.another,
   },
   profile: {
     title: 'Profile',

@@ -8,7 +8,7 @@ import { composite, contrastRatio, parseColor } from '@turboslide/theme/contrast
 import type { Rgba } from '@turboslide/theme/contrast';
 
 import { competitorMentions } from '../../../../packages/lint/src/brand/competitor';
-import { extraHTTPHeaders, isLocalBase, title } from './lib';
+import { extraHTTPHeaders, isLocalBase, title, waitEditor } from './lib';
 import { isCoreId } from './matrix';
 
 // The reads of polish two's auth rows (docs/POLISH-2.md 4.1, 6.4 and 6.6): what a person sees on a
@@ -126,7 +126,7 @@ export async function readSurface(
       .map(readOne);
     const active = document.activeElement;
     const focused =
-      active instanceof HTMLElement && root.contains(active)
+      active instanceof HTMLElement && root.contains(active) && active.matches(':focus-visible')
         ? {
             control: active.getAttribute('data-control') ?? active.tagName.toLowerCase(),
             width: getComputedStyle(active).outlineWidth,
@@ -370,7 +370,12 @@ export async function readPlate(page: Page): Promise<PlateRead> {
     }
     const active = document.activeElement;
     const focused =
-      active instanceof HTMLElement && scope.contains(active) && active !== scope
+      active instanceof HTMLElement &&
+      scope.contains(active) &&
+      active !== scope &&
+      /* the ring is drawn for a keyboard's focus: a click that opened a window focuses its first
+         control with no ring, as the browser decides */
+      active.matches(':focus-visible')
         ? {
             control: active.getAttribute('data-control') ?? active.tagName.toLowerCase(),
             width: getComputedStyle(active).outlineWidth,
@@ -392,6 +397,21 @@ export async function readPlate(page: Page): Promise<PlateRead> {
       title: document.querySelector('.ts-dialog-title')?.textContent ?? '',
     };
   });
+}
+
+/**
+ * Whether a computed box-shadow casts a shadow: an offset or a blur in any of its layers. The
+ * plates' ring (`--pt-ring`, rings of spread alone) casts none (docs/DESIGN.md 3.2, 3.4).
+ */
+export function castsShadow(shadow: string): boolean {
+  if (shadow === 'none') return false;
+  return shadow
+    .replace(/rgba?\([^)]*\)/g, '')
+    .split(',')
+    .some((layer) => {
+      const [x = 0, y = 0, blur = 0] = (layer.match(/-?[\d.]+px/g) ?? []).map((v) => parseFloat(v));
+      return x !== 0 || y !== 0 || blur !== 0;
+    });
 }
 
 /** Title Case as the brand writes a button: every word capitalised but the small words. */
@@ -518,9 +538,15 @@ export async function contextAt(
   width: number,
   appearance: Appearance,
 ): Promise<{ context: BrowserContext; page: Page }> {
+  /* on a local server each context counts its sign in mails apart (the library's limiter keys
+     them by x-forwarded-for, ten an hour); a deployment's own proxy sets the header */
+  const local = baseURL === undefined || isLocalBase(baseURL);
+  const forwarded = `10.78.${Math.floor(Math.random() * 250) + 1}.${Math.floor(Math.random() * 250) + 1}`;
   const context = await browser.newContext({
     ...(baseURL === undefined ? {} : { baseURL }),
-    extraHTTPHeaders,
+    extraHTTPHeaders: local
+      ? { ...extraHTTPHeaders, 'x-forwarded-for': forwarded }
+      : extraHTTPHeaders,
     viewport: { width, height: width < 720 ? 844 : 900 },
     colorScheme: appearance,
   });
@@ -879,73 +905,85 @@ export function authPlateRows(): string[] {
     } as const;
     const G_FILLS = ['#EA4335', '#4285F4', '#FBBC05', '#34A853'];
     let drawn = false;
-    for (const appearance of APPEARANCES) {
-      const { context, page } = await contextAt(browser, baseURL, 1440, appearance);
-      try {
-        await page.goto('/signin?next=/decks', { timeout: 240_000 });
-        await page.locator('[data-auth-plate]').waitFor({ timeout: 120_000 });
-        const google = page.locator('[data-control="page.signIn.google"]');
-        if ((await google.count()) === 0) continue;
-        drawn = true;
-        const facts = await google.evaluate((el) => {
-          const cs = getComputedStyle(el);
-          const label = el.querySelector<HTMLElement>('.ts-auth-label');
-          const svg = el.querySelector('svg');
-          const grounds: string[] = [];
-          for (let node: Element | null = label; node !== null; node = node.parentElement)
-            grounds.push(getComputedStyle(node).backgroundColor);
-          return {
-            fill: cs.backgroundColor,
-            edge: cs.borderTopColor,
-            edgeWidth: cs.borderTopWidth,
-            mark: svg
-              ? { w: svg.getBoundingClientRect().width, h: svg.getBoundingClientRect().height }
-              : null,
-            fills: [...(svg?.querySelectorAll('path') ?? [])].map((p) =>
-              (p.getAttribute('fill') ?? '').toUpperCase(),
-            ),
-            text: (label?.textContent ?? '').trim(),
-            weight: label ? getComputedStyle(label).fontWeight : '',
-            family: label ? getComputedStyle(label).fontFamily : '',
-            color: label ? getComputedStyle(label).color : '',
-            grounds,
-          };
-        });
-        const ratio = labelContrast({
-          control: 'page.signIn.google',
-          tag: 'button',
-          label: facts.text,
-          left: 0,
-          top: 0,
-          bottom: 0,
-          disabled: false,
-          color: facts.color,
-          grounds: facts.grounds,
-        });
-        readings.push(
-          `${appearance}: fill ${facts.fill}, edge ${facts.edgeWidth} ${facts.edge}, mark ${facts.mark?.w}x${facts.mark?.h} ${facts.fills.join(' ')}, "${facts.text}" ${facts.weight} ${ratio.toFixed(2)}:1`,
-        );
-        if (facts.fill !== WANT[appearance].fill)
-          failures.push(`${appearance}: the fill is ${facts.fill}`);
-        if (facts.edge !== WANT[appearance].edge || facts.edgeWidth !== '1px')
-          failures.push(`${appearance}: the edge is ${facts.edgeWidth} ${facts.edge}`);
-        if (
-          facts.mark === null ||
-          Math.round(facts.mark.w) !== 18 ||
-          Math.round(facts.mark.h) !== 18
-        )
-          failures.push(`${appearance}: the G is ${facts.mark?.w}x${facts.mark?.h}`);
-        if (G_FILLS.some((fill) => !facts.fills.includes(fill)))
-          failures.push(`${appearance}: the G is not the four colour mark`);
-        if (facts.text !== 'Continue with Google')
-          failures.push(`${appearance}: the label reads "${facts.text}"`);
-        if (facts.weight !== '500' || !/Inter/.test(facts.family))
-          failures.push(`${appearance}: the label is ${facts.weight} ${facts.family}`);
-        if (ratio < 4.5) failures.push(`${appearance}: the label reads ${ratio.toFixed(2)}:1`);
-      } finally {
-        await context.close();
+    /* the page, and since P2-A#4 the editor's window, which draws the same plate */
+    const surfaces = [
+      { name: 'the page', path: '/signin?next=/decks', control: 'page.signIn.google' },
+      { name: 'the window', path: '/new', control: 'dialog.signIn.google' },
+    ];
+    for (const appearance of APPEARANCES)
+      for (const surface of surfaces) {
+        const { context, page } = await contextAt(browser, baseURL, 1440, appearance);
+        try {
+          await page.goto(surface.path, { timeout: 240_000 });
+          if (surface.path === '/new') {
+            await waitEditor(page);
+            const opener = page.locator('[data-control="title.signIn"]');
+            if ((await opener.count()) === 0) continue;
+            await opener.click();
+          }
+          await page.locator('[data-auth-plate]').waitFor({ timeout: 120_000 });
+          const google = page.locator(`[data-control="${surface.control}"]`);
+          if ((await google.count()) === 0) continue;
+          drawn = true;
+          const facts = await google.evaluate((el) => {
+            const cs = getComputedStyle(el);
+            const label = el.querySelector<HTMLElement>('.ts-auth-label');
+            const svg = el.querySelector('svg');
+            const grounds: string[] = [];
+            for (let node: Element | null = label; node !== null; node = node.parentElement)
+              grounds.push(getComputedStyle(node).backgroundColor);
+            return {
+              fill: cs.backgroundColor,
+              edge: cs.borderTopColor,
+              edgeWidth: cs.borderTopWidth,
+              mark: svg
+                ? { w: svg.getBoundingClientRect().width, h: svg.getBoundingClientRect().height }
+                : null,
+              fills: [...(svg?.querySelectorAll('path') ?? [])].map((p) =>
+                (p.getAttribute('fill') ?? '').toUpperCase(),
+              ),
+              text: (label?.textContent ?? '').trim(),
+              weight: label ? getComputedStyle(label).fontWeight : '',
+              family: label ? getComputedStyle(label).fontFamily : '',
+              color: label ? getComputedStyle(label).color : '',
+              grounds,
+            };
+          });
+          const ratio = labelContrast({
+            control: 'page.signIn.google',
+            tag: 'button',
+            label: facts.text,
+            left: 0,
+            top: 0,
+            bottom: 0,
+            disabled: false,
+            color: facts.color,
+            grounds: facts.grounds,
+          });
+          readings.push(
+            `${appearance} ${surface.name}: fill ${facts.fill}, edge ${facts.edgeWidth} ${facts.edge}, mark ${facts.mark?.w}x${facts.mark?.h} ${facts.fills.join(' ')}, "${facts.text}" ${facts.weight} ${ratio.toFixed(2)}:1`,
+          );
+          if (facts.fill !== WANT[appearance].fill)
+            failures.push(`${appearance}: the fill is ${facts.fill}`);
+          if (facts.edge !== WANT[appearance].edge || facts.edgeWidth !== '1px')
+            failures.push(`${appearance}: the edge is ${facts.edgeWidth} ${facts.edge}`);
+          if (
+            facts.mark === null ||
+            Math.round(facts.mark.w) !== 18 ||
+            Math.round(facts.mark.h) !== 18
+          )
+            failures.push(`${appearance}: the G is ${facts.mark?.w}x${facts.mark?.h}`);
+          if (G_FILLS.some((fill) => !facts.fills.includes(fill)))
+            failures.push(`${appearance}: the G is not the four colour mark`);
+          if (facts.text !== 'Continue with Google')
+            failures.push(`${appearance}: the label reads "${facts.text}"`);
+          if (facts.weight !== '500' || !/Inter/.test(facts.family))
+            failures.push(`${appearance}: the label is ${facts.weight} ${facts.family}`);
+          if (ratio < 4.5) failures.push(`${appearance}: the label reads ${ratio.toFixed(2)}:1`);
+        } finally {
+          await context.close();
+        }
       }
-    }
     test.skip(
       !drawn,
       'not driven: this server offers no Google client, so no Continue with Google is drawn',
@@ -953,6 +991,209 @@ export function authPlateRows(): string[] {
     test
       .info()
       .annotations.push({ type: 'Continue with Google', description: readings.join(' | ') });
+    expect(failures, readings.join(' | ')).toEqual([]);
+  });
+
+  row('accounts.sign-in-everywhere', async ({ browser, baseURL }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    const { context, page } = await contextAt(browser, baseURL, 1440, 'light');
+    try {
+      /* the pages: a link to /signin with the page to return to, answering 200 */
+      const links: [string, string, string, string][] = [
+        ['/home', 'home.nav.signIn', '[data-control="home.nav.signIn"]', '/home'],
+        ['/decks', 'home.signIn', '.ts-home-page[data-hydrated]', '/decks'],
+      ];
+      const missing = `/edit/no-such-deck-plate-${Date.now()}`;
+      links.push([missing, 'access.signin.link', '[data-control="access.page"]', missing]);
+      for (const [path, control, ready, next] of links) {
+        await page.goto(path, { timeout: 240_000 });
+        await page.locator(ready).first().waitFor({ timeout: 120_000 });
+        const link = page.locator(`[data-control="${control}"]`).first();
+        await link.waitFor({ timeout: 120_000 });
+        const facts = await link.evaluate((el) => ({
+          tag: el.tagName,
+          href: el.getAttribute('href'),
+        }));
+        const want = `/signin?next=${encodeURIComponent(next)}`;
+        const answer = facts.href === null ? 0 : (await page.request.get(facts.href)).status();
+        readings.push(`${path}: ${facts.tag} ${facts.href} answered ${answer}`);
+        if (facts.tag !== 'A' || facts.href !== want)
+          failures.push(`${path}: Sign In is ${facts.tag} ${facts.href}, not a link to ${want}`);
+        if (answer !== 200) failures.push(`${path}: the sign in page answered ${answer}`);
+      }
+      /* the editor: the title row's Sign In, the account menu's row and the name prompt's open one window */
+      await page.goto('/new', { timeout: 240_000 });
+      await waitEditor(page);
+      const opens = async (how: string, open: () => Promise<void>) => {
+        await open();
+        const card = page.locator('[data-control="dialog.signIn"]');
+        await card.waitFor({ timeout: 30_000 });
+        const plate = await card.locator('[data-auth-plate]').getAttribute('data-auth-plate');
+        const windows = await page.locator('[data-control="dialog.signIn"]').count();
+        readings.push(`${how}: ${windows} window, ${plate}`);
+        if (windows !== 1 || plate === null || !plate.startsWith('methods.'))
+          failures.push(`${how}: ${windows} windows, plate ${plate}`);
+        await page.keyboard.press('Escape');
+        await card.waitFor({ state: 'detached', timeout: 10_000 }).catch(() => undefined);
+      };
+      await opens('the title row', () => page.locator('[data-control="title.signIn"]').click());
+      await opens('the account menu', async () => {
+        await page.locator('[data-control="title.account"]').first().click();
+        await page.locator('#ts-menu-account [data-control="account.signIn"]').click();
+      });
+      await opens('the name prompt', async () => {
+        await page.locator('[data-control="title.account"]').first().click();
+        await page.locator('#ts-menu-account [data-control="account.changeName"]').click();
+        await page.locator('[data-control="dialog.namePrompt.signIn"]').click();
+      });
+      /* under 480 px More holds Sign in for an anonymous person */
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.waitForTimeout(500);
+      await opens('More at 390', async () => {
+        await page.locator('[data-control="title.more"]').click();
+        await page
+          .locator(
+            '#ts-menu-title-more [data-menu-item="title.signIn"], #ts-menu-title-more [data-menu-item="title.account.signIn"]',
+          )
+          .first()
+          .click();
+      });
+    } finally {
+      await context.close();
+    }
+    test.info().annotations.push({ type: 'sign in everywhere', description: readings.join(' | ') });
+    expect(failures, readings.join(' | ')).toEqual([]);
+  });
+
+  row('accounts.dialog-in-brand', async ({ browser, baseURL }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const failures: string[] = [];
+    for (const appearance of APPEARANCES) {
+      const { context, page } = await contextAt(browser, baseURL, 1440, appearance);
+      try {
+        for (const host of ['page', 'window'] as const) {
+          const where = `${appearance} ${host}`;
+          if (host === 'page') {
+            await page.goto('/signin?next=/decks', { timeout: 240_000 });
+            await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+          } else {
+            await page.goto('/new', { timeout: 240_000 });
+            await waitEditor(page);
+            await page.locator('[data-control="title.signIn"]').click();
+            await page
+              .locator('[data-control="dialog.signIn"] [data-auth-plate]')
+              .waitFor({ timeout: 30_000 });
+            await page.waitForTimeout(400);
+          }
+          const facts = await page.evaluate(() => {
+            const plate = document.querySelector<HTMLElement>('[data-auth-plate]');
+            if (!plate) return null;
+            const text = [
+              ...plate.querySelectorAll<HTMLElement>('h1, p, button, input, label span'),
+            ].filter((el) => el.getClientRects().length > 0);
+            const shadow = (el: Element) => getComputedStyle(el).boxShadow;
+            const card = plate.closest<HTMLElement>('.ts-dialog');
+            const column = plate.closest<HTMLElement>('.ts-auth-column');
+            const providers = [...plate.querySelectorAll<HTMLElement>('.ts-auth-provider')].map(
+              (b) => {
+                const mark = b.querySelector('svg')?.getBoundingClientRect();
+                const label = b.querySelector('.ts-auth-label')?.getBoundingClientRect();
+                const r = b.getBoundingClientRect();
+                return {
+                  justify: getComputedStyle(b).justifyContent,
+                  markIn: mark ? mark.left - r.left : -1,
+                  labelAfter: mark && label ? label.left > mark.right : false,
+                };
+              },
+            );
+            return {
+              features: [...new Set(text.map((el) => getComputedStyle(el).fontFeatureSettings))],
+              families: [
+                ...new Set(text.map((el) => getComputedStyle(el).fontFamily.split(',')[0] ?? '')),
+              ],
+              radii: [
+                ...new Set(
+                  [...plate.querySelectorAll<HTMLElement>('button:not(.ts-auth-text), input')].map(
+                    (el) => getComputedStyle(el).borderTopLeftRadius,
+                  ),
+                ),
+              ],
+              card: card
+                ? {
+                    radius: getComputedStyle(card).borderTopLeftRadius,
+                    shadow: shadow(card),
+                    actions: card.querySelector('.ts-dialog-actions') !== null,
+                  }
+                : null,
+              column: column
+                ? {
+                    border: getComputedStyle(column).borderTopWidth,
+                    background: getComputedStyle(column).backgroundColor,
+                    shadow: shadow(column),
+                  }
+                : null,
+              mark: document.querySelector('.ts-auth-home svg') !== null,
+              providers,
+              or: plate.querySelectorAll('.ts-auth-or').length,
+              email: plate.querySelector('input[type="email"]') !== null,
+              buttons: [...plate.querySelectorAll('button')]
+                .map((b) => (b.textContent ?? '').trim())
+                .filter((t) => t !== ''),
+              cancel: [...document.querySelectorAll('button')].some(
+                (b) => (b.textContent ?? '').trim() === 'Cancel',
+              ),
+              shadows: [...plate.querySelectorAll<HTMLElement>('*')]
+                .map(shadow)
+                .filter((s) => s !== 'none'),
+            };
+          });
+          if (facts === null) {
+            failures.push(`${where}: no plate`);
+            continue;
+          }
+          readings.push(`${where}: ${JSON.stringify(facts)}`);
+          if (facts.features.some((f) => f !== 'normal'))
+            failures.push(`${where}: font features ${facts.features.join(' ')}`);
+          if (facts.families.some((f) => !/Inter/.test(f)))
+            failures.push(`${where}: faces ${facts.families.join(' ')}`);
+          if (facts.radii.some((r) => r !== '6px'))
+            failures.push(`${where}: control corners ${facts.radii.join(' ')}`);
+          if (host === 'window') {
+            if (facts.card?.radius !== '8px')
+              failures.push(`${where}: the window computes ${facts.card?.radius}`);
+            if (facts.card?.actions) failures.push(`${where}: an action row`);
+            if (facts.card && castsShadow(facts.card.shadow))
+              failures.push(`${where}: the window casts ${facts.card.shadow}`);
+          } else {
+            if (
+              facts.column === null ||
+              facts.column.border !== '0px' ||
+              facts.column.shadow !== 'none' ||
+              !/rgba\(0, 0, 0, 0\)|transparent/.test(facts.column.background)
+            )
+              failures.push(`${where}: a box around the column ${JSON.stringify(facts.column)}`);
+            if (!facts.mark) failures.push(`${where}: no mark at the head`);
+          }
+          for (const p of facts.providers)
+            if (p.justify !== 'flex-start' || Math.abs(p.markIn - 13) > 1.5 || !p.labelAfter)
+              failures.push(`${where}: a provider row ${JSON.stringify(p)}`);
+          if (facts.email && facts.providers.length > 0 && facts.or !== 1)
+            failures.push(`${where}: ${facts.or} or rows`);
+          for (const b of facts.buttons)
+            if (!titleCased(b)) failures.push(`${where}: "${b}" is not Title Case`);
+          if (facts.cancel) failures.push(`${where}: a Cancel button`);
+          if (facts.shadows.length > 0)
+            failures.push(`${where}: shadows ${facts.shadows.join(' | ')}`);
+          if (host === 'window') await page.keyboard.press('Escape');
+        }
+      } finally {
+        await context.close();
+      }
+    }
+    test.info().annotations.push({ type: 'in brand', description: readings.join(' | ') });
     expect(failures, readings.join(' | ')).toEqual([]);
   });
 

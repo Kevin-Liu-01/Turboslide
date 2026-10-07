@@ -3031,7 +3031,8 @@ test(title('accounts.no-dead-method'), async () => {
       await signIn.first().click();
       await ctl(page, 'dialog.signIn').waitFor({ timeout: 8000 });
       methods = await ctl(page, 'dialog.signIn').evaluate((card) =>
-        [...card.querySelectorAll('.ts-sign-in-methods [data-control]')].map((el) => ({
+        /* the auth plate's provider rows since polish two (docs/POLISH-2.md 4.2) */
+        [...card.querySelectorAll('.ts-auth-providers [data-control]')].map((el) => ({
           control: el.getAttribute('data-control') ?? '',
           disabled:
             el.getAttribute('aria-disabled') === 'true' ||

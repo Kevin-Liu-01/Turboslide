@@ -5,8 +5,9 @@ import { useEditorShell } from '../editor-shell-context';
 import { ACCOUNT } from '../menus/strings';
 
 /**
- * Forget this browser (gslides-parity SPEC-3 7.4; VERIFICATION-3 finding 12): the question of
- * ACCOUNT.forgetConfirm, Cancel and one solid Forget this browser button. Forget runs the route's
+ * Forget this browser (gslides-parity SPEC-3 7.4; VERIFICATION-3 finding 12): the lede of
+ * ACCOUNT.forgetConfirm (two sentences, docs/POLISH-2.md 4.5), Cancel and one solid Forget This
+ * Browser button (Title Case on a button, research-auth S11). Forget runs the route's
  * `account.forget`, which mints the new anonymous principal and its cookie on the server, clears
  * the localStorage and IndexedDB mirrors together and reloads the page as the new visitor; the
  * old edits keep the old label and nothing links the two.
@@ -41,7 +42,7 @@ export function ForgetBrowserDialog() {
       cancel
       actions={[
         {
-          label: ACCOUNT.forget,
+          label: ACCOUNT.forgetButton,
           primary: true,
           disabled: busy,
           onClick: run,

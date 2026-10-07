@@ -207,6 +207,9 @@ describe('the More key', () => {
       'title.slideshow.presenterView',
       'title.slideshow.startFromBeginning',
       titleSignInItem().id,
+      /* a signed in person's account rows (docs/POLISH-2.md 4.3, Q9; P2-A#4) */
+      'title.account.changeName',
+      'title.account.signOut',
     ]);
     expect(titleMoreItems('comments').find((item) => item.id === 'title.sidePanel')?.label).toBe(
       'Hide side panel',

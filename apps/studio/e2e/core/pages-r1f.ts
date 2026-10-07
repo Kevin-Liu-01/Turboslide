@@ -58,9 +58,10 @@ async function contextAt(
 type Rect = { x: number; y: number; right: number; bottom: number; w: number; h: number };
 
 /**
- * The open Sign in dialog's band: the distance from the bottom of the last thing the body draws
- * (a button, a field, a line of text, an error row) to the action bar's top rule. The body's own
- * bottom padding is 20 px, so a dialog sized to its content reads 20 or 21.
+ * The open sign in window's band (polish two, P2-A#4: the auth plate's window): the distance from
+ * the bottom of the last thing the plate draws (a button, a field, a line of text) to the window's
+ * bottom edge. The body's own bottom padding is 20 px and the frame 1 px, so a window sized to its
+ * content reads 21; there is no action row.
  */
 async function signInBand(page: Page) {
   return page.evaluate(() => {
@@ -70,17 +71,16 @@ async function signInBand(page: Page) {
       const r = el.getBoundingClientRect();
       return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, w: r.width, h: r.height };
     };
-    const body = d.querySelector('.ts-dialog-body');
-    const actions = d.querySelector('.ts-dialog-actions');
     const drawn = [
-      ...(body?.querySelectorAll('button, input, label, p, .ts-dialog-error-row') ?? []),
+      ...d.querySelectorAll('.ts-auth-plate button, .ts-auth-plate input, .ts-auth-plate p'),
     ].filter((el) => el.getClientRects().length > 0);
     const last = Math.max(...drawn.map((el) => el.getBoundingClientRect().bottom));
     return {
       dialog: rect(d),
-      actions: actions ? rect(actions) : null,
+      actions: d.querySelector('.ts-dialog-actions') !== null,
+      state: d.querySelector('[data-auth-plate]')?.getAttribute('data-auth-plate') ?? null,
       last,
-      band: actions ? Math.round(actions.getBoundingClientRect().top - last) : null,
+      band: Math.round(d.getBoundingClientRect().bottom - last),
       controls: [...d.querySelectorAll('[data-control]')].map(
         (el) => el.getAttribute('data-control') ?? '',
       ),
@@ -119,8 +119,8 @@ export function pagesR1f(): string[] {
 
   /* item 1: the dialog's fixed 400 by 320 box drew Continue with Google over an empty band of
      about 150 px where Google is the only method (production); restated in polish two, P2-A#1
-     (docs/POLISH-2.md 6.6): at most 24 px from the body's last line (a method or the field) to
-     the action bar, and no reserved error row on the methods step */
+     and P2-A#4 (docs/POLISH-2.md 6.6): the window of the auth plate is as tall as its content,
+     with no action row and no error line on the methods */
   row('accounts.sign-in-fits', async ({ browser }) => {
     test.setTimeout(240_000);
     const readings: string[] = [];
@@ -151,18 +151,17 @@ export function pagesR1f(): string[] {
       await page.waitForTimeout(300);
       const facts = await signInBand(page);
       readings.push(`${width}: ${JSON.stringify(facts)}`);
-      expect(facts, 'the dialog is open').not.toBeNull();
-      expect(facts!.band, `the band under the body's last line at ${width}`).not.toBeNull();
+      expect(facts, 'the window is open').not.toBeNull();
+      /* polish two, P2-A#4 (docs/POLISH-2.md 6.6): at most the 24 px padding under the last box,
+         no action row, and no error line on the methods (it is reserved only where a code answers) */
       expect(
-        facts!.band!,
-        `at most the body's 20 px padding under the last line at ${width} (${facts!.band} px)`,
-      ).toBeLessThanOrEqual(24);
-      expect(facts!.dialog.right, 'the dialog is inside the viewport').toBeLessThanOrEqual(width);
-      /* polish two, P2-A#1: no reserved error row on the methods step, the field drawn or not
-         (the row under the field was part of the empty band of Kevin's screenshot, K4) */
-      expect(facts!.controls, 'no reserved error row on the methods step').not.toContain(
-        'dialog.signIn.error',
-      );
+        facts!.band,
+        `at most 24 px under the last box at ${width} (${facts!.band} px)`,
+      ).toBeLessThanOrEqual(25);
+      expect(facts!.actions, 'no action row').toBe(false);
+      expect(facts!.dialog.right, 'the window is inside the viewport').toBeLessThanOrEqual(width);
+      expect(facts!.state ?? '', 'the methods').toMatch(/^methods\./);
+      expect(facts!.controls, 'no error line on the methods').not.toContain('dialog.signIn.error');
       await page.keyboard.press('Escape');
     }
     test.info().annotations.push({ type: 'sign in dialog', description: readings.join(' | ') });

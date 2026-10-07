@@ -80,7 +80,6 @@
     "./NotesPane": "./src/NotesPane.tsx",
     "./Dialog": "./src/Dialog.tsx",
     "./dialogs/DeleteForever": "./src/dialogs/DeleteForever.tsx",
-    "./dialogs/SignIn": "./src/dialogs/SignIn.tsx",
     "./auth/auth-model": "./src/auth/auth-model.ts",
     "./auth/auth-words": "./src/auth/auth-words.ts",
     "./auth/AuthPlate": "./src/auth/AuthPlate.tsx",

@@ -341,10 +341,11 @@
     {
       "id": "decks.access.sign-in-link",
       "feature": "decks",
-      "interaction": "Sign in from your presentations opens /decks where the deployment offers a method; without one the page draws no sign in sentence",
+      "interaction": "You need access draws one sentence and Sign In, a link to /signin?next=/edit/<deck>, where the deployment offers a method; without one the page draws no sign in sentence",
       "driver": "core/decks.spec.ts",
       "today": "works",
-      "evidence": "audit-decks row 58"
+      "evidence": "audit-decks row 58",
+      "note": "Restated in polish two, P2-A#4"
     },
     {
       "id": "decks.access.unknown-deck",
@@ -10307,11 +10308,11 @@
     {
       "id": "accounts.google-error-sentence",
       "feature": "share",
-      "interaction": "Local: /edit/<deck>?error=account_not_linked draws the dialog's failed sentence in the snackbar and the address loses the parameter",
+      "interaction": "Local: /edit/<deck>?error=account_not_linked opens the sign in window in its account error state with that sentence and Try Again, and the address loses the parameter",
       "driver": "e2e/accounts.spec.ts",
       "today": "not driven",
       "evidence": "design-google-login.md 6.2 row 3, 4.3",
-      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4. Cloudflare phase; docs/CLOUDFLARE.md 2.1, 4.3: the local run on the e2e server stands; a second narrowed run against the preview Worker's D1 (TURBOSLIDE_ACCOUNTS=d1, the OTP read with wrangler d1 execute --remote --json) is R4's harness mode"
+      "note": "Realtime round; docs/REALTIME.md section 2; section 4.4; R4. Cloudflare phase; docs/CLOUDFLARE.md 2.1, 4.3: the local run on the e2e server stands; a second narrowed run against the preview Worker's D1 (TURBOSLIDE_ACCOUNTS=d1, the OTP read with wrangler d1 execute --remote --json) is R4's harness mode; restated in polish two, P2-A#4"
     },
     {
       "id": "accounts.email-hidden-without-mail",
@@ -11459,12 +11460,12 @@
     {
       "id": "accounts.signin.one-dialog",
       "feature": "share",
-      "interaction": "Sign In from /home, /decks and the editor opens one dialog component: the 8 px window, 6 px buttons, \"Continue with Google\" with the provider's mark, Title Case buttons, a body as tall as its content that does not scroll, both appearances; the lead and every control start at the window's 24 px inset; with an address typed every button's label reads 4.5:1 or more on its own ground; the focus ring is 1 px ink, inset; no gap over 32 px between the last control and the next box",
+      "interaction": "Sign In on /home, /decks and You need access is a link to /signin?next=<page>; in the editor it opens one window; both draw the one plate (data-auth-plate with the state id); in the window the lead and every control start at the 24 px inset, every label reads 4.5:1 or more on its own ground enabled, disabled and after typing, the focus ring is 1 px ink, inset, and the window ends at most 24 px under its last control; both appearances",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-surfaces 3.1; VERIFICATION.md design round pass 1 finding 6 (the editor's body scrolled 35 px)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D5#2; restated in polish two, P2-A#1"
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#2; restated in polish two, P2-A#1; restated in polish two, P2-A#4"
     },
     {
       "id": "export.fonts.upstream-names",
@@ -11645,12 +11646,12 @@
     {
       "id": "accounts.sign-in-fits",
       "feature": "share",
-      "interaction": "The editor's Sign in dialog is as tall as its content at 1440 and 390: at most 24 px from the body's last line (a method or the field) to the action bar; no reserved error row on the methods step; a deployment that offers no sign in draws no dialog and the row reads the title row",
+      "interaction": "The editor's sign in window is as tall as its content at 1440 and 390: at most its 24 px padding under the last control, no action bar, and an error line only in the states that can answer; a deployment that offers no sign in draws no Sign In and the row reads the title row",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "verify-r1.md finding 7 (production 2026-10-05: Continue with Google over an empty band of about 150 px in a 400 by 320 box, signin-editor-dialog-390-*.jpg, signin2-editor-dialog-1440-*.jpg)",
-      "note": "Round 1 follow-up, lane C item 1: the dialog takes its content's height (packages/chrome/src/dialogs/accounts.css); the email method's two steps hold the code step's 125 px between them, and the reserved error row is drawn where an answer can arrive inside the dialog, the email method or a passkey (SignIn.tsx); restated in polish two, P2-A#1"
+      "note": "Round 1 follow-up, lane C item 1: the dialog takes its content's height (packages/chrome/src/dialogs/accounts.css); the email method's two steps hold the code step's 125 px between them, and the reserved error row is drawn where an answer can arrive inside the dialog, the email method or a passkey (SignIn.tsx); restated in polish two, P2-A#1; restated in polish two, P2-A#4"
     },
     {
       "id": "decks.refused.address-words",
@@ -11838,6 +11839,53 @@
       "today": "not driven",
       "evidence": "research-auth S7 (an email form with no Google, a dead end with mail off, on production too), 11 and 12",
       "note": "Polish two (docs/POLISH-2.md 6), P2-A#3"
+    },
+    {
+      "id": "accounts.sign-in-everywhere",
+      "feature": "share",
+      "interaction": "Sign In is a link to /signin?next=<page> on /home's bar, /decks' bar and You need access (next=/edit/<deck>), each answering 200; in the editor the title row's Sign In, the account menu's Sign in row and the name prompt's Sign In (an anonymous person only) open the one sign in window; under 480 px More holds Sign in for an anonymous person",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-auth S2, S8, S10, S13, 14-access-page-detour-1440-light.jpg; docs/NEXT.md 4.3.2 item 6",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4"
+    },
+    {
+      "id": "accounts.dialog-in-brand",
+      "feature": "share",
+      "interaction": "The plate on /signin and in the editor's window, in both appearances: Inter's defaults, the chrome's tokens, 6 px controls, the 8 px window and no box around the page's column, provider rows with the mark and the words aligned left, one hairline \"or\" row, Title Case buttons, the mark at the page's head, no Cancel, no footer and no shadow",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-auth K6, 4.2; docs/NEXT.md 4.3.2 item 7 (its \"no radius\" read under the DESIGN.md 3.1 ladder)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4"
+    },
+    {
+      "id": "accounts.failure-says-why",
+      "feature": "share",
+      "interaction": "Local, mail capture, from /signin and from the editor's window: a wrong code, the fourth code after three wrong tries, a used link and an invalid address each draw their own sentence of docs/POLISH-2.md 4.5 under the control that caused it; Send Another reads \"Send another in 0:45\" counting down in tabular figures and sends one mail when it ends; the fourth mail to one address in 10 minutes draws the quota sentence; the expired code's state is pinned by auth-model.test.ts",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "research-auth S4, 10-code-step-1440-light.jpg; docs/NEXT.md 4.3.2 item 5",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4"
+    },
+    {
+      "id": "accounts.anonymous-deck-kept",
+      "feature": "share",
+      "interaction": "Local, mail capture: an anonymous browser makes and titles a deck; Sign In on /decks goes to /signin?next=/decks; the mailed code signs in and lands on /decks, which lists the deck as the account's, and it opens with Share; the same from the editor's window keeps the deck open with no reload of the draft",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/NEXT.md 4.3.3 (audit-auth 66); research-auth 4.7",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4"
+    },
+    {
+      "id": "accounts.menu.words",
+      "feature": "share",
+      "interaction": "Local, signed in by the mailed code: the account menu's rows read Change name, Change avatar, Sign out, Forget this browser and Profile, which opens Profile; the name prompt draws no Sign In; under 480 px More holds Change name and Sign out; Forget this browser's lede is two sentences with periods and its button reads Forget This Browser",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "research-auth S8, S10, S11, pictures 16 to 19 and 26",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4"
     }
   ]
 }

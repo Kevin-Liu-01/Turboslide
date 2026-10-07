@@ -1151,8 +1151,8 @@ test(title('decks.access.unknown-edit'), async () => {
       await other.close();
     }
   })();
-  if (offered) await expect(ctl(page, 'access.signin.decks')).toBeVisible();
-  else await expect(ctl(page, 'access.signin.decks')).toHaveCount(0);
+  if (offered) await expect(ctl(page, 'access.signin.link')).toBeVisible();
+  else await expect(ctl(page, 'access.signin.link')).toHaveCount(0);
 });
 
 test(title('decks.access.paint'), async () => {
@@ -1225,18 +1225,29 @@ test(title('decks.access.paint'), async () => {
 });
 
 test(title('decks.access.sign-in-link'), async () => {
-  /* Round 1 (docs/NEXT.md 4.1.3 item 11): the sentence exists only where a method does */
+  /* Round 1 (docs/NEXT.md 4.1.3 item 11): the sentence exists only where a method does; polish
+     two, P2-A#4 (docs/POLISH-2.md 4.3, 6.6): one sentence and Sign In, a link to /signin that
+     comes back to this presentation */
   if (!(await signInOffered())) {
     await page.goto('/edit/no-such-deck-core-spec');
     await ctl(page, 'access.page').waitFor({ timeout: 30_000 });
     await page.waitForTimeout(1500);
-    await expect(ctl(page, 'access.signin.decks')).toHaveCount(0);
+    await expect(ctl(page, 'access.signin.line')).toHaveCount(0);
+    await expect(ctl(page, 'access.signin.link')).toHaveCount(0);
     return;
   }
   await page.goto('/edit/no-such-deck-core-spec');
-  await ctl(page, 'access.signin.decks').click();
-  await page.waitForURL(/\/decks/, { timeout: 20_000 });
-  await page.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 30_000 });
+  await expect(ctl(page, 'access.signin.line')).toHaveText(
+    'If you were invited by email, sign in with that address.',
+    { timeout: 30_000 },
+  );
+  const link = ctl(page, 'access.signin.link');
+  await expect(link).toHaveAttribute('href', '/signin?next=%2Fedit%2Fno-such-deck-core-spec');
+  await expect(link).toHaveText('Sign In');
+  await link.click();
+  await page.waitForURL((url) => url.pathname === '/signin', { timeout: 30_000 });
+  expect(new URL(page.url()).searchParams.get('next')).toBe('/edit/no-such-deck-core-spec');
+  await page.locator('[data-auth-plate]').waitFor({ timeout: 60_000 });
 });
 
 test(title('decks.access.unknown-deck'), async () => {

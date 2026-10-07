@@ -170,6 +170,23 @@ export function errorCallbackURL(next: string): string {
   return signInHref(next);
 }
 
+/* the error an editor's address carried (`?error=`), held for the sign in window that opens
+   next: the route reads the address, the window reads this once (dialogs/SignIn.tsx) */
+let heldError: AuthState | null = null;
+
+/** Holds the error state of a code for the next sign in window; null codes are ignored. */
+export function holdSignInError(code: string | null | undefined): AuthState | null {
+  heldError = errorState(code);
+  return heldError;
+}
+
+/** The held error state, once: the next call answers null. */
+export function takeHeldSignInError(): AuthState | null {
+  const held = heldError;
+  heldError = null;
+  return held;
+}
+
 /** The id a state draws as `data-auth-plate`, the gallery's and the rows' name for it (4.4). */
 export function stateId(state: AuthState, methods: AuthMethods, purpose: AuthPurpose): string {
   switch (state.step) {

@@ -1,6 +1,7 @@
-import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 
+import { signInHref } from '@turboslide/chrome/auth/auth-model';
+import { AUTH_WORDS } from '@turboslide/chrome/auth/auth-words';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 // the chrome package's `./YouNeedAccess` export landed at merge 2 (build-4/b3.md R6, applied by
 // the integrator with the one line change B3 named)
@@ -40,6 +41,10 @@ import './-access-page.css';
  * read after hydration), so production before the sign in flip no longer tells a stranger to
  * sign in where no method exists. The /decks bar carries Sign In since the same round, so the
  * sentence's link leads where signing in happens.
+ *
+ * Polish two (docs/POLISH-2.md 4.3, 4.5; research-auth S13): one sentence and Sign In, a link to
+ * /signin with this presentation's editor as the page to return to, so a person invited by email
+ * signs in and comes back here in one step instead of a detour through /decks.
  */
 export function AccessPage({ deckId }: { deckId: string }) {
   /* the deployment's mode: undefined until read, then whether the form has someone to reach */
@@ -93,22 +98,24 @@ export function AccessPage({ deckId }: { deckId: string }) {
         linkComponent={RouterLinkSlot}
         signIn={
           canSignIn ? (
-            /* one sentence with the link in ink (docs/archive/rounds/POLISH.md item 98; audit-pages item 35) */
-            <p className="ts-access-signin-line" data-control="access.signin.line">
-              If you were invited by email, sign in with that address from{' '}
-              <Link
-                to="/decks"
-                data-control="access.signin.decks"
-                style={{ color: 'var(--pt-ink)' }}
-                {...tipProps({
-                  name: 'Your presentations',
-                  doc: 'Sign In is at the end of the bar there; then open this address again',
-                })}
-              >
-                your presentations
-              </Link>
-              , then open this address again.
-            </p>
+            /* one sentence, then Sign In: a document navigation to the sign in page, which comes
+               back to this presentation (docs/POLISH-2.md 4.5) */
+            <>
+              <p className="ts-access-signin-line" data-control="access.signin.line">
+                If you were invited by email, sign in with that address.
+              </p>
+              {/* in the page's own row of links, so it draws as their 40 px outline button */}
+              <div className="ts-access-links">
+                <a
+                  href={signInHref(`/edit/${deckId}`)}
+                  className="pt-ib"
+                  data-control="access.signin.link"
+                  {...tipProps({ name: AUTH_WORDS.link.label, doc: AUTH_WORDS.link.doc })}
+                >
+                  <span className="pt-lb">{AUTH_WORDS.link.label}</span>
+                </a>
+              </div>
+            </>
           ) : undefined
         }
       />

@@ -54,7 +54,8 @@ describe('the button words are Title Case (pass 2 finding 6, request 7)', () => 
       [HOME.deleteForever, 'Delete Forever'],
       [DIALOGS.deleteForever.ok, 'Delete Forever'],
       [ACCOUNT.namePrompt.signIn, 'Sign In'],
-      [ACCOUNT.signInDialog.passkey, 'Use a Passkey'],
+      /* the passkey row left with the auth plate (docs/POLISH-2.md 4.2; P2-A#4) */
+      [ACCOUNT.forgetButton, 'Forget This Browser'],
     ];
     for (const [word, expected] of buttons) {
       expect(word).toBe(expected);

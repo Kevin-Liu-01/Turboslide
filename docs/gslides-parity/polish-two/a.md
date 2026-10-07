@@ -167,3 +167,81 @@ Gates: `tsc -b` exit 0; the brand lint in enforce mode 0 open findings; prettier
 
 Pictures (`a/`): `a3-device-anonymous-*`, `a3-device-signed-in-*` and `a3-device-mail-off-*` at 1440
 and 390 in both appearances (12, looked at on one contact sheet).
+
+## P2-A#4: every surface on the plate
+
+Items (docs/POLISH-2.md 4.3, 4.5, C13, C16, C17, questions Q1, Q4, Q9): the editor's sign in is the
+plate's window (`packages/chrome/src/dialogs/SignIn.tsx` hands the shell's account to `AuthWindow`:
+no Cancel, no action row, the close glyph and Escape close it); the editor's `?error=` opens the
+window in its error state (`holdSignInError` in `auth-model.ts`, read once) and leaves the address;
+a social refusal is said in the window under the provider's row; Sign In is drawn where a method
+can complete (`signInAvailable` reads the methods); `/home` and `/decks` Sign In and You need
+access link to `/signin?next=<page>` (the lazy dialog chunk, `sign-in-dialog.tsx` and
+`sign-in-words.ts` leave; the access page draws one sentence and its 40 px Sign In); the account
+menu's Sessions row reads Profile; the name prompt draws Sign In only for an anonymous person;
+under 480 px More holds Change name and Sign out for a signed in person; Forget this browser's lede
+is two sentences and its button reads Forget This Browser; `ACCOUNT.signInDialog` reads the plate's
+words; the sign in dialog's rules leave `accounts.css`; `./dialogs/SignIn` leaves the chrome's
+exports (the shell imports it in place); `docs/NEXT.md` 4.3.4 names what polish two took.
+
+Rows, on 4743 (and 4744 for `accounts.email-hidden-without-mail`), load 85 to 157, every one passed
+with zero retries on its reading run:
+
+| Row | Reading |
+| --- | ------- |
+| `accounts.sign-in-everywhere` | /home, /decks and You need access: an `A` to `/signin?next=%2Fhome`, `%2Fdecks` and `%2Fedit%2F<deck>`, each answering 200; the title row, the account menu, the name prompt and More at 390 each open one window on `methods.google-email` |
+| `accounts.dialog-in-brand` | the page and the window in both appearances: features `normal`, Inter, controls at 6 px, the window at 8 px with the ring alone (no offset, no blur), no action row, no box around the page's column, the mark at the page's head, the provider row from the left (the mark 13 px in, the words after it), one "or" row, Title Case buttons, no Cancel, no shadow in the plate |
+| `accounts.signin.one-dialog` (restated) | the three links as above in both appearances; `/signin` draws the plate; in the editor one window on `methods.google-email` read on open, after typing and busy (Continue with Google leaving, accounts.google.com answered by nothing, two disabled controls), with no fault: the 24 px inset, labels at 4.5:1 or more, at most 24 px under the last box, the ring where the keyboard's focus is |
+| `accounts.sign-in-fits` (restated) | 1440: the window 400 by 381, 21 px under the last box, no action row, no error line on `methods.google-email`; 390: 358 by 399, 21 px |
+| `accounts.google-button-guideline` | `/signin` and the editor's window: light #FFFFFF with a 1 px #747775 edge, 20.14:1; dark #131314 with a 1 px #8E918F edge, 16.57:1; the four colour G at 18 px |
+| `accounts.google-error-sentence` (restated) | `/edit/<deck>?error=account_not_linked` opens the window on `error.account` titled "Sign in did not complete" with its sentence and Try Again, which returns to the methods; the address loses the parameter |
+| `decks.access.sign-in-link` (restated) | the one sentence and Sign In, `/signin?next=%2Fedit%2Fno-such-deck-core-spec`, which lands on the plate |
+| `accounts.failure-says-why` | an invalid address, three wrong codes, then the right one (`email.code-spent`), Send Another "Send another in 0:44" then "0:42" in tabular figures and one mail when it ends, the fourth mail to one address (the quota sentence, three mails sent), a used link (`/signin?error=INVALID_TOKEN&next=/decks`, `error.link`), and in the editor's window the invalid address and the wrong code, each with its sentence of 4.5 |
+| `accounts.anonymous-deck-kept` | from /decks: Sign In to `/signin?next=%2Fdecks`, the mailed code, back on /decks with the anonymous deck listed as the account's, which opens with Share; from the editor's window: the code signs the tab in, the editor loads the deck again as the account at the same address with the same title |
+| `accounts.menu.words` | the menu reads Change name, Change avatar, Sign out, Forget this browser, Profile; Profile opens the Profile dialog; the name prompt has no Sign In; Forget's lede and Forget This Browser; More at 390 holds Change name and Sign out and no Sign in |
+
+Also read on the same server, the rows the plate's markup touches: `decks.access.unknown-edit`,
+`accounts.no-dead-method`, `accounts.google-button`, `accounts.google-leaves` and
+`accounts.email-hidden-without-mail` passed (the last two on the window's band in place of the
+dialog's fixed heights: 21 px under the last box).
+
+First runs that failed, on the drivers: `accounts.signin.one-dialog` read a ring on the control a
+click had focused (the browser draws none for a click; the read now judges the keyboard's focus);
+`accounts.dialog-in-brand` read the window's ring as a shadow (the read now parses each layer's
+offset and blur); `accounts.anonymous-deck-kept` and `accounts.menu.words` were refused their mails
+by the library's limit of ten an hour per address on a lane server that counts as hosted (the tmp
+store), so the switch that turns the limit off does not apply; the rows' browsers now forward
+addresses of their own, as different people's do.
+
+Bytes, on the node-server build at 16:00Z (253 s at a load of 127 to 131): `/signin` preloads
+1,433,469 B, of which its own 3,455 B (`AuthPage` 1,605, `sign-in-auth` 1,230, the route 591, the
+entry 29); the plate's 11,835 B chunk is shared with the editor's window since this push; every
+route's ceiling still fails on the shared vendor chunk (1,430,014 B, request A-R1). `home.budget.*`
+on the same build: `bytes-page`, `live-module`, `shared` and `lcp` pass; `bytes-first` fails on
+the document, 100,588 B against 100,000, which lane A does not touch (request A-R5).
+
+Gates: `tsc -b` exit 0; `vitest run --project chrome` 110 files and 1,017 tests pass and
+`--project studio` 119 files and 1,005 tests pass (with a 60 s test timeout at a load over 100);
+the brand lint in enforce mode 0 open findings; `competitor.test.ts` passes; prettier clean.
+
+Pictures (`a/`), at 1440 and 390 in both appearances: `a4-home-bar-*` and `a4-decks-bar-*` (the
+Sign In links), `a4-access-*`, `a4-window-*` (the editor's window; at 390 through More),
+`a4-menu-anonymous-*` and `a4-menu-signed-in-*` (1440), `a4-more-anonymous-*` and
+`a4-more-signed-in-*` (390), `a4-name-prompt-signed-in-*` and `a4-forget-*` (1440); 28 files,
+looked at on two contact sheets and three crops. The frame of Kevin's screenshot after this push is
+`/signin` itself (`a2-signin-*`), where `/home`'s Sign In now leads.
+
+Deviations:
+
+- `packages/chrome/src/dialogs/SignIn.tsx` stays as the shell's adapter (40 lines) instead of
+  leaving: `EditorShell.tsx`, outside lane A's files, imports it lazily for the `signIn` dialog.
+- The account menu's row reads Profile while its effect keeps the shell's dialog key `Sessions`
+  (`editor-shell.ts` `dialogIdOf`, outside lane A's files); no person reads the key.
+- Four tests outside the listed files pinned the words and rows this push changes, by the spec's
+  order, and change by one line each: `packages/chrome/src/menus/__tests__/menu-model.test.ts` and
+  `strings.test.ts` (Sessions to Profile), `packages/chrome/src/__tests__/button-words.test.ts` (the
+  passkey label left with the plate; Forget This Browser in its place) and
+  `title-row-round1.test.tsx` (More's two rows for a signed in person).
+- `accounts.anonymous-deck-kept` reads "keeps the deck open with no reload of the draft" as: the
+  stored deck stays at its address with its title; the editor's code exchange reloads the page once
+  to take the account's identity, as it did before the plate (the calls are unchanged, 4.7).

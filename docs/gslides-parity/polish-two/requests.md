@@ -59,6 +59,15 @@ The own row is in the default view since the people round, so a person alone sho
   key for the account (the `account.tokens.create` path) or the bearer check needs to accept the
   device session; `account me` then answers the account.
 
+- A-R4 (to the integrator; `apps/studio/e2e/roles.spec.ts` 562): the access page's sign in
+  sentence links to `/signin` since P2-A#4, as `access.signin.link` with the href
+  `/signin?next=%2Fedit%2F<deck>`; the spec still reads `access.signin.decks` with the href `/decks`.
+- A-R5 (to N; read on lane A's node-server build of 2026-10-07 at 16:00Z, the tree as it stood):
+  `home.budget.bytes-first` fails on the document, 100,588 B decoded against the 100,000 B line
+  (DESIGN.md 8.16 read 99,756 B). Lane A adds nothing to `/home`'s document: the Sign In slot is
+  the same empty span until the facts arrive after hydration, and the link it then draws is in the
+  route's chunk. The other four `home.budget.*` rows pass on the same build.
+
 ## N
 
 ### P2-N-1, to the integrator: the route stops passing the nonce to the bar

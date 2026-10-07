@@ -870,12 +870,17 @@ function HomePage() {
           </label>
           {/* Sign In as text for an anonymous visitor (docs/NEXT.md 4.1.2, B's graft), drawn only
             where the deployment offers a method; the loader read the facts, so it is in the
-            server's HTML */}
+            server's HTML; a link to /signin with this page to return to (docs/POLISH-2.md 4.3) */}
           <span
             className="ts-appbar-end"
             data-sign-in={offersSignIn(signIn) && !signIn.signedIn ? 'offered' : 'none'}
           >
-            <SignInButton facts={signIn} control="home.signIn" className="pt-ib ts-appbar-signin" />
+            <SignInButton
+              facts={signIn}
+              control="home.signIn"
+              className="pt-ib ts-appbar-signin"
+              next="/decks"
+            />
           </span>
         </div>
       </header>

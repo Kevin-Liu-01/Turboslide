@@ -12,6 +12,7 @@ import {
 } from 'node:fs';
 import { loadavg, tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 
 import { expect, test } from '@playwright/test';
 import type { APIRequestContext, BrowserContext, Locator, Page } from '@playwright/test';
@@ -21,6 +22,7 @@ import {
   Scratch,
   clickCard,
   ctl,
+  extraHTTPHeaders,
   headingRun,
   invoke,
   newDeck,
@@ -2060,7 +2062,7 @@ const GOOGLE_ROWS = {
   ],
   error: [
     'accounts.google-error-sentence',
-    "Local: /edit/<deck>?error=account_not_linked draws the dialog's failed sentence in the snackbar and the address loses the parameter",
+    'Local: /edit/<deck>?error=account_not_linked opens the sign in window in its account error state with that sentence and Try Again, and the address loses the parameter',
   ],
   hidden: [
     'accounts.email-hidden-without-mail',
@@ -2078,13 +2080,25 @@ async function openSignIn(p: Page): Promise<string | null> {
   return done === null ? null : done.route;
 }
 
-/** The method buttons of the open dialog in document order, by their data-control ids. */
+/** The controls of the open window's plate in document order, by their data-control ids. */
 async function methodOrder(p: Page): Promise<string[]> {
   return ctl(p, 'dialog.signIn').evaluate((card) =>
-    [...card.querySelectorAll('.ts-sign-in-methods [data-control]')].map(
+    [...card.querySelectorAll('.ts-auth-plate [data-control]')].map(
       (el) => el.getAttribute('data-control') ?? '',
     ),
   );
+}
+
+/** The space under the window's last box: the body's 20 px padding and the 1 px frame (P2-A#4). */
+async function windowBand(p: Page): Promise<number> {
+  return ctl(p, 'dialog.signIn').evaluate((card) => {
+    const boxes = [
+      ...card.querySelectorAll('.ts-auth-plate button, .ts-auth-plate input, .ts-auth-plate p'),
+    ]
+      .filter((el) => el.getClientRects().length > 0)
+      .map((el) => el.getBoundingClientRect().bottom);
+    return Math.round(card.getBoundingClientRect().bottom - Math.max(...boxes));
+  });
 }
 
 /**
@@ -2154,10 +2168,14 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
     /* the e2e mail mode is capture: the email field and Continue are present */
     await expect(ctl(A, 'dialog.signIn.email')).toHaveCount(1);
     await expect(ctl(A, 'dialog.signIn.continue')).toHaveCount(1);
-    /* the field, the methods and the reserved error row: under the 320 px box it replaced */
+    /* the window of the auth plate (polish two, P2-A#4): 400 px wide and as tall as its content */
     const box = await dialogBox(A);
+    const band = await windowBand(A);
     expect(box.width).toBe(400);
-    expect(box.height, `as tall as its content (${box.height} px)`).toBeLessThanOrEqual(320);
+    expect(
+      band,
+      `at most 24 px under the last box (${band} px, ${box.height} px tall)`,
+    ).toBeLessThanOrEqual(25);
     await A.keyboard.press('Escape');
     await expect(ctl(A, 'dialog.signIn')).toHaveCount(0);
   });
@@ -2165,13 +2183,28 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
   test(localTitle(...GOOGLE_ROWS.error), async () => {
     test.setTimeout(120_000);
     await A.goto(`/edit/${deck}?error=account_not_linked`);
-    /* the sentence is said at the editor's mount and holds 5 s (SNACKBAR_HOLD_MS): read at once */
-    const snackbar = A.locator('[data-control="snackbar"]');
-    await expect(snackbar).toContainText('Sign in did not complete', { timeout: 30_000 });
-    await expect(snackbar).toContainText('account not linked');
+    /* polish two, P2-A#4 (docs/POLISH-2.md 4.3, 6.6): the sign in window opens in the account
+       error state with its sentence and Try Again */
+    const card = ctl(A, 'dialog.signIn');
+    await card.waitFor({ timeout: 60_000 });
+    await expect(card.locator('[data-auth-plate]')).toHaveAttribute(
+      'data-auth-plate',
+      'error.account',
+    );
+    await expect(card.locator('.ts-dialog-title')).toHaveText('Sign in did not complete');
+    await expect(ctl(A, 'dialog.signIn.reason')).toHaveText(
+      'That Google account cannot be joined to the account signed in here.',
+    );
+    await expect(ctl(A, 'dialog.signIn.retry')).toHaveText('Try Again');
     await waitEditor(A);
     await expect.poll(() => A.url(), { timeout: 10_000 }).not.toContain('error=');
     expect(new URL(A.url()).pathname).toBe(`/edit/${deck}`);
+    await ctl(A, 'dialog.signIn.retry').click();
+    await expect(card.locator('[data-auth-plate]')).toHaveAttribute(
+      'data-auth-plate',
+      /^methods\./,
+    );
+    await A.keyboard.press('Escape');
   });
 
   test(localTitle(...GOOGLE_ROWS.leaves), async () => {
@@ -2232,16 +2265,16 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
       await expect(ctl(page, 'dialog.signIn.email')).toHaveCount(0);
       await expect(ctl(page, 'dialog.signIn.continue')).toHaveCount(0);
       expect(order[0], 'Google is the first method').toBe('dialog.signIn.google');
-      await expect(ctl(page, 'dialog.signIn.google')).toHaveAttribute('data-primary', 'true');
       /* the focus on open, so Enter runs Google */
       const focused = await page.evaluate(
         () => document.activeElement?.getAttribute('data-control') ?? null,
       );
       expect(focused, 'the Google button holds the focus').toBe('dialog.signIn.google');
-      /* the title, Continue with Google and the action bar: no empty band under the button */
+      /* the title, the lede, Continue with Google and the foot sentence: no band under them */
       const box = await dialogBox(page);
+      const band = await windowBand(page);
       expect(box.width).toBe(400);
-      expect(box.height, `as tall as its content (${box.height} px)`).toBeLessThanOrEqual(200);
+      expect(band, `at most 24 px under the last box (${band} px)`).toBeLessThanOrEqual(25);
       await page.keyboard.press('Escape');
     } finally {
       await context.close();
@@ -2779,6 +2812,7 @@ test.describe('polish two: the device page (docs/POLISH-2.md 4.3, C15)', () => {
     const readings: string[] = [];
     const config = mkdtempSync(join(tmpdir(), 'ts-device-'));
     const { context, page } = await ownerContext(browser);
+    await ownAddress(context);
     try {
       const probe = await page.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
       expect(probe.status(), 'the server has an identity database').toBe(200);
@@ -2909,6 +2943,385 @@ test.describe('polish two: the device page (docs/POLISH-2.md 4.3, C15)', () => {
       test.info().annotations.push({ type: 'device', description: readings.join(' | ') });
       await context.close();
       rmSync(config, { recursive: true, force: true });
+    }
+  });
+});
+
+/* ---------------------------------------------------------------------------------------------
+   Polish two, P2-A#4 (docs/POLISH-2.md 4.3, 4.5, 6.4): every surface on the auth plate, read on
+   the capture server: the sentences a refusal says, the anonymous deck kept through a sign in, the
+   account menu's words. The mails are read from the server's own capture table. */
+
+const POLISH2_A4 = {
+  failure: [
+    'accounts.failure-says-why',
+    'Local, mail capture, from /signin and from the editor\'s window: a wrong code, the fourth code after three wrong tries, a used link and an invalid address each draw their own sentence of docs/POLISH-2.md 4.5 under the control that caused it; Send Another reads "Send another in 0:45" counting down in tabular figures and sends one mail when it ends; the fourth mail to one address in 10 minutes draws the quota sentence; the expired code\'s state is pinned by auth-model.test.ts',
+  ],
+  kept: [
+    'accounts.anonymous-deck-kept',
+    "Local, mail capture: an anonymous browser makes and titles a deck; Sign In on /decks goes to /signin?next=/decks; the mailed code signs in and lands on /decks, which lists the deck as the account's, and it opens with Share; the same from the editor's window keeps the deck open with no reload of the draft",
+  ],
+  words: [
+    'accounts.menu.words',
+    "Local, signed in by the mailed code: the account menu's rows read Change name, Change avatar, Sign out, Forget this browser and Profile, which opens Profile; the name prompt draws no Sign In; under 480 px More holds Change name and Sign out; Forget this browser's lede is two sentences with periods and its button reads Forget This Browser",
+  ],
+} as const;
+
+/**
+ * A forwarded address of its own for a context: the library's limiter keys the sign in mails by
+ * `x-forwarded-for` (better-auth.ts `ipAddressHeaders`), ten per address an hour, and a lane's
+ * server on a tmp store counts as hosted, so the switch that turns the limiter off does not apply.
+ * Each row's browsers then count apart, as different people do.
+ */
+async function ownAddress(context: BrowserContext): Promise<void> {
+  const n = Math.floor(Math.random() * 250) + 1;
+  const m = Math.floor(Math.random() * 250) + 1;
+  await context.setExtraHTTPHeaders({ ...extraHTTPHeaders, 'x-forwarded-for': `10.77.${n}.${m}` });
+}
+
+/** The sign in mails the server captured for an address, newest first. */
+function signInMails(email: string): { subject: string; text: string; html: string | null }[] {
+  const db = new DatabaseSync(AUTH_DB, { readOnly: true });
+  try {
+    return db
+      .prepare(
+        "select subject, text, html from ts_mail where toAddress = ? and kind = 'sign-in' order by createdAt desc",
+      )
+      .all(email.toLowerCase()) as { subject: string; text: string; html: string | null }[];
+  } finally {
+    db.close();
+  }
+}
+
+/** The six digit code of the newest sign in mail to an address. */
+function newestCode(email: string): string {
+  const text = signInMails(email)[0]?.text ?? '';
+  return /Code: (\d{6})/.exec(text)?.[1] ?? '';
+}
+
+/** Signs in on /signin by the mailed code and waits for the return path. */
+async function signInOnPage(p: Page, email: string, next: string): Promise<void> {
+  await p.goto(`/signin?next=${encodeURIComponent(next)}`);
+  await p.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+  await ctl(p, 'page.signIn.email').fill(email);
+  await ctl(p, 'page.signIn.continue').click();
+  await ctl(p, 'page.signIn.code').waitFor({ timeout: 60_000 });
+  await ctl(p, 'page.signIn.code').fill(newestCode(email));
+  await ctl(p, 'page.signIn.verify').click();
+  await p.waitForURL((url) => url.pathname === next.split('?')[0], { timeout: 120_000 });
+}
+
+test.describe('polish two: every surface on the plate (docs/POLISH-2.md 4.3, 6.4)', () => {
+  test.use({ actionTimeout: 15_000 });
+  test.describe.configure({ mode: 'default' });
+
+  test(localTitle(...POLISH2_A4.failure), async ({ browser }) => {
+    test.setTimeout(1_200_000);
+    const readings: string[] = [];
+    const scratch = new Scratch();
+    const { context, page } = await ownerContext(browser);
+    await ownAddress(context);
+    try {
+      const stamp = Date.now();
+      await page.goto('/signin?next=/decks');
+      await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+      /* an invalid address: its sentence under Continue */
+      await ctl(page, 'page.signIn.email').fill('not-an-address');
+      await ctl(page, 'page.signIn.continue').click();
+      await expect(ctl(page, 'page.signIn.error')).toHaveText(
+        'That is not an email address. Check it and try again.',
+      );
+      readings.push('invalid address: its sentence under Continue');
+      /* a wrong code three times, then the right one: the three tries' sentence, then the spent one */
+      const e1 = `failure-a-${stamp}@example.test`;
+      await ctl(page, 'page.signIn.email').fill(e1);
+      await ctl(page, 'page.signIn.continue').click();
+      await ctl(page, 'page.signIn.code').waitFor({ timeout: 60_000 });
+      const right = newestCode(e1);
+      const wrong = right === '000000' ? '111111' : '000000';
+      for (let i = 0; i < 3; i += 1) {
+        await ctl(page, 'page.signIn.code').fill(wrong);
+        await ctl(page, 'page.signIn.verify').click();
+        await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+          'data-auth-plate',
+          'email.code-wrong',
+          { timeout: 60_000 },
+        );
+        await expect(ctl(page, 'page.signIn.error')).toHaveText(
+          'That code does not match. Check the newest message and try again.',
+        );
+      }
+      await ctl(page, 'page.signIn.code').fill(right);
+      await ctl(page, 'page.signIn.verify').click();
+      await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+        'data-auth-plate',
+        'email.code-spent',
+        { timeout: 60_000 },
+      );
+      await expect(ctl(page, 'page.signIn.error')).toHaveText(
+        'That code had three wrong tries. Send another to get a new one.',
+      );
+      readings.push(
+        'three wrong codes, then the right one: code-wrong three times, then code-spent',
+      );
+      /* Send Another: the countdown in tabular figures, then one mail when it ends */
+      const resend = ctl(page, 'page.signIn.resend');
+      const first = (await resend.textContent()) ?? '';
+      const numerals = await resend.evaluate((el) => getComputedStyle(el).fontVariantNumeric);
+      expect(first).toMatch(/^Send another in 0:[0-4]\d$/);
+      expect(numerals).toContain('tabular-nums');
+      await page.waitForTimeout(2_000);
+      const later = (await resend.textContent()) ?? '';
+      expect(later, 'the countdown runs').not.toBe(first);
+      await expect(resend).toHaveText('Send Another', { timeout: 90_000 });
+      const before = signInMails(e1).length;
+      await resend.click();
+      await expect(resend).toHaveText(/^Send another in 0:4\d$/, { timeout: 60_000 });
+      await expect.poll(() => signInMails(e1).length, { timeout: 30_000 }).toBe(before + 1);
+      readings.push(
+        `Send Another: "${first}" then "${later}" in ${numerals}, then one mail (${before} to ${before + 1})`,
+      );
+      /* the fourth mail to one address in 10 minutes: the quota sentence, and no fourth mail */
+      const e2 = `failure-b-${stamp}@example.test`;
+      for (let i = 0; i < 3; i += 1) {
+        await ctl(page, 'page.signIn.back')
+          .click()
+          .catch(() => undefined);
+        await ctl(page, 'page.signIn.email').fill(e2);
+        await ctl(page, 'page.signIn.continue').click();
+        await ctl(page, 'page.signIn.code').waitFor({ timeout: 60_000 });
+      }
+      await ctl(page, 'page.signIn.back').click();
+      await ctl(page, 'page.signIn.email').fill(e2);
+      await ctl(page, 'page.signIn.continue').click();
+      await expect(ctl(page, 'page.signIn.error')).toHaveText(
+        'That address had three messages in the last 10 minutes. Wait, then send another.',
+      );
+      expect(signInMails(e2).length, 'three mails reached the address').toBe(3);
+      readings.push('the fourth mail in 10 minutes: the quota sentence, three mails sent');
+      /* a used link: the second visit lands on /signin with its sentence */
+      const e3 = `failure-c-${stamp}@example.test`;
+      const { context: other, page: second } = await otherContext(browser);
+      await ownAddress(other);
+      try {
+        await second.goto('/signin?next=/decks');
+        await second.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+        await ctl(second, 'page.signIn.email').fill(e3);
+        await ctl(second, 'page.signIn.continue').click();
+        await ctl(second, 'page.signIn.code').waitFor({ timeout: 60_000 });
+        const link =
+          /(https?:\/\/\S+magic-link\/verify\S+)/.exec(signInMails(e3)[0]?.text ?? '')?.[1] ?? '';
+        expect(link).not.toBe('');
+        await second.goto(link);
+        await second.waitForURL((url) => url.pathname === '/decks', { timeout: 120_000 });
+        await second.goto(link);
+        await second.waitForURL((url) => url.pathname === '/signin', { timeout: 120_000 });
+        await expect(second.locator('[data-auth-plate]')).toHaveAttribute(
+          'data-auth-plate',
+          'error.link',
+        );
+        await expect(ctl(second, 'page.signIn.reason')).toHaveText(
+          'That link was used or has expired. Ask for a new one.',
+        );
+        const url = new URL(second.url());
+        readings.push(
+          `a used link: ${url.pathname}?error=${url.searchParams.get('error')}&next=${url.searchParams.get('next')}`,
+        );
+      } finally {
+        await other.close();
+      }
+      /* from the editor's window: a wrong code and an invalid address */
+      const deck = await newDeck(page, scratch, 'Failure sentences');
+      await openEditor(page, deck);
+      await ctl(page, 'title.signIn').click();
+      await ctl(page, 'dialog.signIn.email').fill('not-an-address');
+      await ctl(page, 'dialog.signIn.continue').click();
+      await expect(ctl(page, 'dialog.signIn.error')).toHaveText(
+        'That is not an email address. Check it and try again.',
+      );
+      const e4 = `failure-d-${stamp}@example.test`;
+      await ctl(page, 'dialog.signIn.email').fill(e4);
+      await ctl(page, 'dialog.signIn.continue').click();
+      await ctl(page, 'dialog.signIn.code').waitFor({ timeout: 60_000 });
+      const right4 = newestCode(e4);
+      await ctl(page, 'dialog.signIn.code').fill(right4 === '000000' ? '111111' : '000000');
+      await ctl(page, 'dialog.signIn.verify').click();
+      await expect(ctl(page, 'dialog.signIn.error')).toHaveText(
+        'That code does not match. Check the newest message and try again.',
+        { timeout: 60_000 },
+      );
+      readings.push("the editor's window: the invalid address and the wrong code sentences");
+      await page.keyboard.press('Escape');
+    } finally {
+      test
+        .info()
+        .annotations.push({ type: 'failure sentences', description: readings.join(' | ') });
+      try {
+        await teardownAll(page, scratch);
+      } finally {
+        await context.close();
+      }
+    }
+  });
+
+  test(localTitle(...POLISH2_A4.kept), async ({ browser }) => {
+    test.setTimeout(1_200_000);
+    const readings: string[] = [];
+    const scratchA = new Scratch();
+    const scratchB = new Scratch();
+    const { context: aCtx, page: A } = await ownerContext(browser);
+    const { context: bCtx, page: B } = await otherContext(browser);
+    await ownAddress(aCtx);
+    await ownAddress(bCtx);
+    const stamp = Date.now();
+    try {
+      /* from /decks: the page's Sign In link, the mailed code, back on /decks with the deck */
+      const deck = await newDeck(A, scratchA, `Kept deck ${stamp}`);
+      await A.goto('/decks');
+      await A.waitForSelector('.ts-home-page[data-hydrated]', { timeout: 60_000 });
+      const href = await ctl(A, 'home.signIn').getAttribute('href');
+      expect(href).toBe('/signin?next=%2Fdecks');
+      await ctl(A, 'home.signIn').click();
+      await A.waitForURL((url) => url.pathname === '/signin', { timeout: 60_000 });
+      const email = `kept-a-${stamp}@example.test`;
+      await A.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+      await ctl(A, 'page.signIn.email').fill(email);
+      await ctl(A, 'page.signIn.continue').click();
+      await ctl(A, 'page.signIn.code').waitFor({ timeout: 60_000 });
+      await ctl(A, 'page.signIn.code').fill(newestCode(email));
+      await ctl(A, 'page.signIn.verify').click();
+      await A.waitForURL((url) => url.pathname === '/decks', { timeout: 120_000 });
+      const cards = await homeCards(A);
+      readings.push(
+        `/decks: signed in, the deck ${cards.includes(deck) ? 'listed' : 'missing'} among ${cards.length}`,
+      );
+      expect(cards, "the anonymous deck is the account's").toContain(deck);
+      await openEditor(A, deck);
+      await openShare(A);
+      readings.push('the deck opens with Share');
+      await closeShare(A);
+      /* from the editor's window: the deck stays open at its address with its title */
+      const deckB = await newDeck(B, scratchB, `Kept window ${stamp}`);
+      await openEditor(B, deckB);
+      const titleBefore = ((await ctl(B, 'deck.name').first().textContent()) ?? '').trim();
+      await ctl(B, 'title.signIn').click();
+      const emailB = `kept-b-${stamp}@example.test`;
+      await ctl(B, 'dialog.signIn.email').fill(emailB);
+      await ctl(B, 'dialog.signIn.continue').click();
+      await ctl(B, 'dialog.signIn.code').waitFor({ timeout: 60_000 });
+      await ctl(B, 'dialog.signIn.code').fill(newestCode(emailB));
+      /* the code signs the tab in and the editor loads the deck again as the account (EditorRoot's
+         exchange, unchanged by the plate): the same address, the same title */
+      const reloaded = B.waitForEvent('load', { timeout: 120_000 });
+      await ctl(B, 'dialog.signIn.verify').click();
+      await reloaded;
+      await waitEditor(B);
+      await expect
+        .poll(
+          async () => {
+            try {
+              return (await peopleState(B)).account?.signedIn ?? false;
+            } catch {
+              return false;
+            }
+          },
+          { timeout: 60_000 },
+        )
+        .toBe(true);
+      const after = { title: ((await ctl(B, 'deck.name').first().textContent()) ?? '').trim() };
+      readings.push(
+        `the window: ${new URL(B.url()).pathname} signed in, the title "${after.title}" (was "${titleBefore}")`,
+      );
+      expect(new URL(B.url()).pathname).toBe(`/edit/${deckB}`);
+      expect(after.title).toBe(titleBefore);
+      expect(await homeCards(B), "the deck is the account's").toContain(deckB);
+    } finally {
+      test.info().annotations.push({ type: 'deck kept', description: readings.join(' | ') });
+      try {
+        await teardownAll(A, scratchA);
+        await teardownAll(B, scratchB);
+      } finally {
+        await aCtx.close();
+        await bCtx.close();
+      }
+    }
+  });
+
+  test(localTitle(...POLISH2_A4.words), async ({ browser }) => {
+    test.setTimeout(900_000);
+    const readings: string[] = [];
+    const scratch = new Scratch();
+    const { context, page } = await ownerContext(browser);
+    await ownAddress(context);
+    try {
+      const email = `words-${Date.now()}@example.test`;
+      await signInOnPage(page, email, '/decks');
+      const deck = await newDeck(page, scratch, 'Menu words');
+      await openEditor(page, deck);
+      /* the account menu's rows */
+      await ctl(page, 'title.account').first().click();
+      const menu = page.locator('#ts-menu-account');
+      await menu.waitFor({ timeout: 15_000 });
+      const rows = await menu
+        .locator('[role="menuitem"]')
+        .evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
+      readings.push(`menu: ${rows.join(', ')}`);
+      expect(rows).toEqual([
+        'Change name',
+        'Change avatar',
+        'Sign out',
+        'Forget this browser',
+        'Profile',
+      ]);
+      await menu.locator('[data-control="account.sessions"]').click();
+      await ctl(page, 'dialog.profile').waitFor({ timeout: 15_000 });
+      readings.push('Profile opens the Profile dialog');
+      await page.keyboard.press('Escape');
+      /* the name prompt draws no Sign In for a signed in person */
+      await ctl(page, 'title.account').first().click();
+      await page.locator('#ts-menu-account [data-control="account.changeName"]').click();
+      await ctl(page, 'dialog.namePrompt').waitFor({ timeout: 15_000 });
+      await expect(ctl(page, 'dialog.namePrompt.signIn')).toHaveCount(0);
+      readings.push('the name prompt: no Sign In');
+      await page.keyboard.press('Escape');
+      /* Forget this browser's words, read and closed */
+      await ctl(page, 'title.account').first().click();
+      await page.locator('#ts-menu-account [data-control="account.forget"]').click();
+      await ctl(page, 'dialog.forgetBrowser').waitFor({ timeout: 15_000 });
+      const lede =
+        (await page
+          .locator('[data-control="dialog.forgetBrowser"] .ts-dialog-lead')
+          .textContent()) ?? '';
+      const button = (await ctl(page, 'dialog.forgetBrowser.confirm').textContent()) ?? '';
+      readings.push(`Forget: "${lede}" with "${button}"`);
+      expect(lede).toBe(
+        'Your name, avatar and unsaved changes in this browser are cleared. Earlier edits keep the old name.',
+      );
+      expect(button.trim()).toBe('Forget This Browser');
+      await page.keyboard.press('Escape');
+      await expect(ctl(page, 'dialog.forgetBrowser')).toHaveCount(0);
+      /* under 480 px More holds Change name and Sign out */
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.waitForTimeout(500);
+      await ctl(page, 'title.more').click();
+      const more = page.locator('#ts-menu-title-more');
+      await more.waitFor({ timeout: 15_000 });
+      const moreRows = await more
+        .locator('[role="menuitem"]')
+        .evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
+      readings.push(`More at 390: ${moreRows.join(', ')}`);
+      expect(moreRows.some((r) => r.startsWith('Change name'))).toBe(true);
+      expect(moreRows.some((r) => r.startsWith('Sign out'))).toBe(true);
+      expect(moreRows.some((r) => r.startsWith('Sign in'))).toBe(false);
+      await page.keyboard.press('Escape');
+      await page.setViewportSize({ width: 1440, height: 900 });
+    } finally {
+      test.info().annotations.push({ type: 'menu words', description: readings.join(' | ') });
+      try {
+        await teardownAll(page, scratch);
+      } finally {
+        await context.close();
+      }
     }
   });
 });

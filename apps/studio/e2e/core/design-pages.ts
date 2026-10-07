@@ -17,7 +17,7 @@ import {
   waitEditor,
 } from './lib';
 import { isCoreId } from './matrix';
-import { labelContrast, readSurface, surfaceFaults } from './auth-plate';
+import { plateFaults, readPlate } from './auth-plate';
 
 // Lane D5's rows of the design round (docs/DESIGN.md 9, 10.5, 11): the pages other than the editor
 // and the landing. The spec files call one function each and spread its ids into their coverage
@@ -1010,52 +1010,14 @@ export function designDecks(): string[] {
   return declared;
 }
 
-/** The facts of one open Sign in dialog: its card, its body's heights, its methods and buttons. */
-type SignInFacts = {
-  found: boolean;
-  classes: string;
-  radius: string;
-  /** the body's scroll and client heights: a body that fits its content scrolls by 0 */
-  body: { scroll: number; client: number };
-  methods: { label: string; radius: string; mark: boolean }[];
-  actions: { label: string; radius: string }[];
-};
-
-async function signInFacts(page: Page, control: string): Promise<SignInFacts> {
-  return page.evaluate((id) => {
-    const card = document.querySelector<HTMLElement>(`[data-control="${id}"]`);
-    if (!card)
-      return {
-        found: false,
-        classes: '',
-        radius: '',
-        body: { scroll: 0, client: 0 },
-        methods: [],
-        actions: [],
-      };
-    const body = card.querySelector<HTMLElement>('.ts-dialog-body');
-    const label = (el: Element) => (el.textContent ?? '').replace(/\s+/g, ' ').trim();
-    return {
-      found: true,
-      classes: card.className,
-      radius: getComputedStyle(card).borderTopLeftRadius,
-      body: { scroll: body?.scrollHeight ?? 0, client: body?.clientHeight ?? 0 },
-      methods: [...card.querySelectorAll<HTMLElement>('.ts-sign-in-method')].map((b) => ({
-        label: label(b),
-        radius: getComputedStyle(b).borderTopLeftRadius,
-        mark: b.querySelector('svg') !== null,
-      })),
-      actions: [...card.querySelectorAll<HTMLElement>('.ts-dialog-actions button')].map((b) => ({
-        label: label(b),
-        radius: getComputedStyle(b).borderTopLeftRadius,
-      })),
-    };
-  }, control);
-}
-
 /**
- * Lane D5's row in core/share.spec.ts: Sign In from /home, /decks and the editor opens the one
- * Sign in dialog (DR-D5#2b, `accounts.signin.one-dialog`).
+ * Lane D5's row in core/share.spec.ts (DR-D5#2b, `accounts.signin.one-dialog`), restated in polish
+ * two, P2-A#4 (docs/POLISH-2.md 6.6): Sign In on /home, /decks and You need access is a link to
+ * /signin with the page to return to, and the editor's Sign In opens one window; both draw the one
+ * plate. In the window the row reads what a person sees (auth-plate.ts `plateFaults`): the lead and
+ * every control at the 24 px inset, every label at 4.5:1 or more enabled, disabled (Continue with
+ * Google busy while the browser leaves, accounts.google.com answered by nothing) and after typing,
+ * the ring 1 px ink inset, the window at most 24 px under its last box.
  */
 export function designSignIn(): string[] {
   const { declared, row } = rowsOf('D5 sign in');
@@ -1063,111 +1025,89 @@ export function designSignIn(): string[] {
   row('accounts.signin.one-dialog', async ({ baseURL }) => {
     test.setTimeout(900_000);
     const person = await personAt(baseURL, 1440, 900, 'light');
-    const { page } = person;
-    /* each surface's Sign In is pressed once the page has hydrated: /decks draws the button from
-       its loader before React attaches the click (/home draws it after hydration) */
-    const surfaces = [
-      {
-        name: '/home',
-        path: '/home',
-        button: 'home.nav.signIn',
-        dialog: 'page.signIn',
-        ready: '[data-control="home.nav.signIn"]',
-      },
-      {
-        name: '/decks',
-        path: '/decks',
-        button: 'home.signIn',
-        dialog: 'page.signIn',
-        ready: '.ts-home-page[data-hydrated]',
-      },
-      {
-        name: 'the editor',
-        path: '/new',
-        button: 'title.signIn',
-        dialog: 'dialog.signIn',
-        ready: '[data-control="title.signIn"]',
-      },
-    ];
+    const { page, context } = person;
     const facts: string[] = [];
     const failures: string[] = [];
+    const missing = `/edit/no-such-deck-one-dialog-${Date.now()}`;
+    const links = [
+      {
+        path: '/home',
+        control: 'home.nav.signIn',
+        ready: '[data-control="home.nav.signIn"]',
+        next: '/home',
+      },
+      {
+        path: '/decks',
+        control: 'home.signIn',
+        ready: '.ts-home-page[data-hydrated]',
+        next: '/decks',
+      },
+      {
+        path: missing,
+        control: 'access.signin.link',
+        ready: '[data-control="access.page"]',
+        next: missing,
+      },
+    ];
     for (const appearance of APPEARANCES) {
       await appearanceOf(person, baseURL, appearance);
-      for (const surface of surfaces) {
-        const where = `${appearance} ${surface.name}`;
-        await page.goto(surface.path);
-        await page.locator(surface.ready).first().waitFor({ timeout: 120_000 });
-        if (surface.path === '/new') await waitEditor(page);
-        const button = page.locator(`[data-control="${surface.button}"]`).first();
-        await button.waitFor({ state: 'visible', timeout: 120_000 });
-        await button.click();
+      for (const link of links) {
+        const where = `${appearance} ${link.path === missing ? 'You need access' : link.path}`;
+        await page.goto(link.path);
+        await page.locator(link.ready).first().waitFor({ timeout: 120_000 });
+        const el = page.locator(`[data-control="${link.control}"]`).first();
+        await el.waitFor({ timeout: 120_000 });
+        const read = await el.evaluate((a) => ({ tag: a.tagName, href: a.getAttribute('href') }));
+        const want = `/signin?next=${encodeURIComponent(link.next)}`;
+        facts.push(`${where}: ${read.tag} ${read.href}`);
+        if (read.tag !== 'A' || read.href !== want)
+          failures.push(`${where}: Sign In is ${read.tag} ${read.href}, not a link to ${want}`);
+      }
+      /* the link's page draws the plate */
+      await page.goto(`/signin?next=${encodeURIComponent('/home')}`);
+      const plate = await page
+        .locator('[data-auth-plate]')
+        .getAttribute('data-auth-plate', { timeout: 120_000 });
+      facts.push(`${appearance} /signin: ${plate}`);
+      if (plate === null) failures.push(`${appearance} /signin: no plate`);
+      /* the editor: one window with the plate, read on open, after typing and busy */
+      await page.goto('/new');
+      await waitEditor(page);
+      await page.locator('[data-control="title.signIn"]').click();
+      await page
+        .locator('[data-control="dialog.signIn"] [data-auth-plate]')
+        .waitFor({ timeout: 30_000 });
+      await page.waitForTimeout(400);
+      const windows = await page.locator('[data-control="dialog.signIn"]').count();
+      if (windows !== 1) failures.push(`${appearance} the editor: ${windows} windows`);
+      const onOpen = await readPlate(page);
+      failures.push(...plateFaults(onOpen, `${appearance} the editor on open`));
+      const email = page.locator('[data-control="dialog.signIn.email"]');
+      if ((await email.count()) > 0) await email.fill('ada@example.com');
+      await page.waitForTimeout(400);
+      const typed = await readPlate(page);
+      failures.push(...plateFaults(typed, `${appearance} the editor typed`));
+      await context.route('https://accounts.google.com/**', (route) => route.abort('aborted'));
+      try {
+        await page.locator('[data-control="dialog.signIn.google"]').click();
         await page
-          .locator(`[data-control="${surface.dialog}"]`)
-          .first()
+          .locator('[data-control="dialog.signIn.google"]:disabled')
           .waitFor({ timeout: 30_000 });
-        await page.waitForTimeout(300);
-        /* polish two, P2-A#1 (docs/POLISH-2.md 4.1, 6.6): the reads the row lacked. The ring of
-           the control the dialog focused on open, then an address typed where the field is drawn
-           and every button's label against its own ground, the lead's and each control's inset,
-           and the gap under the last control */
-        const card = `[data-control="${surface.dialog}"]`;
-        const sel = {
-          root: card,
-          lead: '.ts-dialog-lead',
-          controls: '.ts-dialog-body input, .ts-dialog-body .ts-sign-in-method',
-          buttons: 'button:not(.ts-dialog-x)',
-          next: '.ts-dialog-actions',
-        };
-        const onOpen = await readSurface(page, sel);
-        const email = page.locator(`[data-control="${surface.dialog}.email"]`);
-        if ((await email.count()) > 0) await email.fill('ada@example.com');
-        await page.keyboard.press('Tab');
-        /* the buttons' colours move over the fast duration once the address enables Continue */
         await page.waitForTimeout(400);
-        const typed = await readSurface(page, sel);
-        const plate = [
-          /* the labels are the row's with an address typed: before it Continue is disabled */
-          ...surfaceFaults(onOpen, {
-            inset: 24,
-            maxGap: 32,
-            where: `${where} on open`,
-            labels: false,
-          }),
-          ...surfaceFaults(typed, { inset: 24, maxGap: 32, where: `${where} typed` }),
-        ];
-        failures.push(...plate);
+        const busy = await readPlate(page);
+        failures.push(...plateFaults(busy, `${appearance} the editor busy`));
         facts.push(
-          `${where}: lead at ${onOpen.leadLeft === null ? 'none' : Math.round(onOpen.leadLeft - onOpen.box.left)}; rings ${onOpen.focused?.control ?? 'none'} ${onOpen.focused?.width ?? ''} ${onOpen.focused?.offset ?? ''}, ${typed.focused?.control ?? 'none'} ${typed.focused?.width ?? ''} ${typed.focused?.offset ?? ''}; labels ${typed.buttons.map((b) => `"${b.label}" ${labelContrast(b).toFixed(1)}`).join(', ')}; gap ${Math.round(typed.nextTop - typed.lastBottom)}`,
-        );
-        const read = await signInFacts(page, surface.dialog);
-        const google = read.methods.find((m) => m.label === 'Continue with Google');
-        facts.push(
-          `${where}: card ${read.radius} (${read.classes
-            .split(' ')
-            .filter((c) => c.startsWith('ts-sign-in') || c === 'pt-window')
+          `${appearance} the editor: ${onOpen.state}, ${onOpen.boxes.length} boxes, focus ${onOpen.focused?.control}; typed ${typed.boxes
+            .filter((b) => b.kind === 'button')
+            .map((b) => `"${b.text}"`)
             .join(
               ' ',
-            )}); body ${read.body.scroll} over ${read.body.client}; methods ${read.methods.map((m) => `"${m.label}" ${m.radius}${m.mark ? ' with its mark' : ''}`).join(', ')}; buttons ${read.actions.map((a) => `"${a.label}" ${a.radius}`).join(', ')}`,
+            )}; busy ${busy.state}, ${busy.boxes.filter((b) => b.disabled).length} disabled`,
         );
-        if (!read.classes.split(' ').includes('ts-sign-in'))
-          failures.push(`${where}: the dialog is not the one Sign in dialog (${read.classes})`);
-        if (read.radius !== '8px') failures.push(`${where}: the window computes ${read.radius}`);
-        if (read.body.scroll > read.body.client + 1)
-          failures.push(
-            `${where}: the body scrolls by ${read.body.scroll - read.body.client} px (${read.body.scroll} over ${read.body.client})`,
-          );
-        if (google === undefined || !google.mark)
-          failures.push(`${where}: no "Continue with Google" with the provider's mark`);
-        for (const b of [...read.methods, ...read.actions]) {
-          if (b.radius !== '6px') failures.push(`${where}: "${b.label}" computes ${b.radius}`);
-          if (!isTitleCase(b.label)) failures.push(`${where}: "${b.label}" is not Title Case`);
-        }
-        await page.keyboard.press('Escape');
-        await page
-          .locator(`[data-control="${surface.dialog}"]`)
-          .waitFor({ state: 'detached', timeout: 10_000 })
-          .catch(() => undefined);
+      } finally {
+        await context.unroute('https://accounts.google.com/**');
       }
+      await page.goto('about:blank');
     }
     test.info().annotations.push({ type: 'sign in', description: facts.join('; ') });
     expect(failures, facts.join('; ')).toEqual([]);

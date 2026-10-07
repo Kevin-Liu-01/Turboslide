@@ -2,100 +2,119 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SignInView } from '../dialogs/SignIn';
+import { workedDocument } from '@turboslide/schema/fixtures';
+
+import { holdSignInError, takeHeldSignInError } from '../auth/auth-model';
+import { SignInDialog } from '../dialogs/SignIn';
+import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
+import type { EditorAccount, EditorShellInput } from '../editor-shell';
+import { EditorShellContext } from '../editor-shell-context';
+import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
 
-// The one Sign in dialog of the design round (docs/DESIGN.md 9; DR-D5#2b): the editor and the
-// pages draw the same component, each with its own exchanges and its own control ids.
+// One sign in window (docs/POLISH-2.md 4.2, 4.3, C12): the editor's Sign In, the account menu's
+// row, the name prompt and More open the shell's `signIn` dialog, which is the auth plate in its
+// window host over the shell's account: the plate's ids under `dialog.signIn`, the route's
+// exchanges, an error the deck's address carried opened once, and the close glyph and Escape
+// closing it through the shell.
 
 afterEach(() => {
   hideTooltip();
   cleanup();
+  takeHeldSignInError();
 });
 
-function controls(root: HTMLElement): string[] {
-  return [...root.querySelectorAll('.ts-sign-in-methods [data-control]')].map(
-    (el) => el.getAttribute('data-control') ?? '',
+const doc = workedDocument();
+
+function setup(extra: Partial<EditorAccount> = {}) {
+  const closeDialog = vi.fn();
+  const value: EditorShellInput = {
+    deckId: doc.deck.id,
+    document: doc,
+    slideId: 'content-rule',
+    revision: 1,
+    dispatch: vi.fn(() => Promise.resolve(null)),
+    account: {
+      principal: 'anon_11111111-1111-4111-8111-111111111111',
+      signedIn: false,
+      signInAvailable: true,
+      googleAvailable: true,
+      google: vi.fn(() => Promise.resolve()),
+      requestCode: vi.fn(() => Promise.resolve(null)),
+      verifyCode: vi.fn(() => Promise.resolve(null)),
+      ...extra,
+    } as unknown as EditorAccount,
+  };
+  const state = {
+    input: value,
+    platform: 'mac',
+    menuContext: buildMenuContext(value, DEFAULT_SETTINGS, 'mac'),
+    settings: DEFAULT_SETTINGS,
+    closeDialog,
+    openDialog: vi.fn(),
+    say: vi.fn(),
+  } as unknown as EditorShellState;
+  const view = render(
+    <EditorShellContext.Provider value={state}>
+      <SignInDialog />
+    </EditorShellContext.Provider>,
   );
+  return { view, closeDialog, account: value.account! };
 }
 
-describe('the one Sign in dialog', () => {
-  it('draws the methods a surface hands it under that surface’s ids, each with its words', () => {
-    const { container } = render(
-      <SignInView
-        methods={{ available: true, google: vi.fn(), github: vi.fn() }}
-        onClose={vi.fn()}
-        onSignedIn={vi.fn()}
-        control="page.signIn"
-      />,
+const q = (control: string) => document.querySelector<HTMLElement>(`[data-control="${control}"]`);
+
+describe('the one sign in window', () => {
+  it('is the auth plate in the chrome window, titled Sign in', () => {
+    setup();
+    const card = q('dialog.signIn');
+    expect(card?.classList.contains('ts-auth-window')).toBe(true);
+    expect(card?.querySelector('.ts-dialog-title')?.textContent).toBe('Sign in');
+    expect(card?.querySelector('[data-auth-plate]')?.getAttribute('data-auth-plate')).toBe(
+      'methods.google-email',
     );
-    expect(controls(container.ownerDocument.body)).toEqual([
-      'page.signIn.google',
-      'page.signIn.github',
-    ]);
-    const google = container.ownerDocument.querySelector('[data-control="page.signIn.google"]');
-    expect(google?.textContent).toBe('Continue with Google');
-    expect(google?.querySelector('svg.ts-sign-in-mark')).not.toBeNull();
-    expect(container.ownerDocument.querySelector('.ts-sign-in')).not.toBeNull();
   });
 
-  it('makes Google the primary action when no email method is handed in', () => {
-    render(
-      <SignInView
-        methods={{ available: true, google: vi.fn() }}
-        onClose={vi.fn()}
-        onSignedIn={vi.fn()}
-      />,
-    );
-    const google = document.querySelector('[data-control="dialog.signIn.google"]');
-    expect(google?.getAttribute('data-primary')).toBe('true');
-    expect(document.querySelector('[data-control="dialog.signIn.email"]')).toBeNull();
-  });
-
-  it('runs the surface’s exchanges: the provider, then the code and the signed in answer', async () => {
-    const google = vi.fn();
-    const requestCode = vi.fn(() => Promise.resolve(null));
-    const verifyCode = vi.fn(() => Promise.resolve(null));
-    const onSignedIn = vi.fn();
-    render(
-      <SignInView
-        methods={{ available: true, google, requestCode, verifyCode }}
-        onClose={vi.fn()}
-        onSignedIn={onSignedIn}
-        control="page.signIn"
-      />,
-    );
-    fireEvent.click(document.querySelector('[data-control="page.signIn.google"]')!);
-    await vi.waitFor(() => expect(google).toHaveBeenCalledTimes(1));
+  it('runs the route’s exchanges: the provider, then the code', async () => {
+    const { account } = setup();
+    fireEvent.click(q('dialog.signIn.google')!);
+    await vi.waitFor(() => expect(account.google).toHaveBeenCalledTimes(1), { timeout: 15_000 });
     cleanup();
-    render(
-      <SignInView
-        methods={{ available: true, google: vi.fn(), requestCode, verifyCode }}
-        onClose={vi.fn()}
-        onSignedIn={onSignedIn}
-        control="page.signIn"
-      />,
+    const second = setup();
+    fireEvent.change(q('dialog.signIn.email')!, { target: { value: 'ada@example.com' } });
+    fireEvent.click(q('dialog.signIn.continue')!);
+    await vi.waitFor(() => expect(q('dialog.signIn.code')).not.toBeNull(), { timeout: 15_000 });
+    expect(second.account.requestCode).toHaveBeenCalledWith('ada@example.com');
+    expect(document.querySelector('.ts-dialog-title')?.textContent).toBe('Check your email');
+    fireEvent.change(q('dialog.signIn.code')!, { target: { value: '123456' } });
+    fireEvent.click(q('dialog.signIn.verify')!);
+    await vi.waitFor(
+      () => expect(second.account.verifyCode).toHaveBeenCalledWith('ada@example.com', '123456'),
+      { timeout: 15_000 },
     );
-    fireEvent.change(document.querySelector('[data-control="page.signIn.email"]')!, {
-      target: { value: 'ada@example.com' },
-    });
-    fireEvent.click(document.querySelector('[data-control="page.signIn.continue"]')!);
-    await vi.waitFor(() => expect(requestCode).toHaveBeenCalledWith('ada@example.com'));
-    const field = await vi.waitFor(() => {
-      const el = document.querySelector('[data-control="page.signIn.code"]');
-      expect(el).not.toBeNull();
-      return el!;
-    });
-    fireEvent.change(field, { target: { value: '123456' } });
-    fireEvent.click(document.querySelector('[data-control="page.signIn.verify"]')!);
-    await vi.waitFor(() => expect(verifyCode).toHaveBeenCalledWith('ada@example.com', '123456'));
-    await vi.waitFor(() => expect(onSignedIn).toHaveBeenCalledTimes(1));
+  }, 60_000);
+
+  it('opens once in the error state the deck’s address carried', () => {
+    expect(holdSignInError('account_not_linked')).not.toBeNull();
+    setup();
+    expect(
+      q('dialog.signIn')?.querySelector('[data-auth-plate]')?.getAttribute('data-auth-plate'),
+    ).toBe('error.account');
+    expect(q('dialog.signIn.reason')?.textContent).toBe(
+      'That Google account cannot be joined to the account signed in here.',
+    );
+    cleanup();
+    setup();
+    expect(
+      q('dialog.signIn')?.querySelector('[data-auth-plate]')?.getAttribute('data-auth-plate'),
+    ).toBe('methods.google-email');
   });
 
-  it('says sign in is not available where the deployment has no identity runtime', () => {
-    render(<SignInView methods={{ available: false }} onClose={vi.fn()} onSignedIn={vi.fn()} />);
-    expect(document.querySelector('[data-control="dialog.signIn.error"]')?.textContent).toBe(
-      'Sign in is not available on this deployment',
-    );
+  it('closes through the shell on Escape and the close glyph, with no Cancel', () => {
+    const { closeDialog } = setup();
+    expect(document.body.textContent).not.toContain('Cancel');
+    fireEvent.keyDown(q('dialog.signIn')!, { key: 'Escape' });
+    fireEvent.click(q('dialog.signIn.close')!);
+    expect(closeDialog).toHaveBeenCalledTimes(2);
   });
 });

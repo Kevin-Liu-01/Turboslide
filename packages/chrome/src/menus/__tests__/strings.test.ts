@@ -231,7 +231,8 @@ describe('the default view strings of SPEC-3 15', () => {
       'Change name',
       'Change avatar',
       'Forget this browser',
-      'Sessions',
+      /* the Sessions row reads Profile, the dialog it opens (docs/POLISH-2.md 4.3; P2-A#4) */
+      'Profile',
       'Dither',
     ])
       expect(ours.has(label), label).toBe(true);

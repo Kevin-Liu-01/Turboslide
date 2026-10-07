@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
@@ -14,9 +14,11 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { hideTooltip } from '../Tooltip';
 
-// The sign in dialog draws no method that cannot complete (docs/NEXT.md 3.2 H4; audit-auth
-// finding 12, audit-brand-surfaces rank 23): the passkey row is absent until the deployment offers
-// passkeys, and the roadmap sentence "Passkeys arrive once the address is final" is gone.
+// The editor's sign in window draws the methods the deployment offers and no other (docs/NEXT.md
+// 3.2 H4; docs/POLISH-2.md 4.2 to 4.4): Google alone where mail is off (production), the field and
+// Continue where it is on, no passkey row, one sentence and no control without a method. The
+// window is as tall as its content (the Round 1 follow-up, lane C item 1; P2-A#1 and A#4): no
+// fixed height, no action row and no Cancel, the error line reserved only where a code answers.
 
 afterEach(() => {
   hideTooltip();
@@ -68,83 +70,54 @@ function draw(extra: Partial<EditorAccount> = {}) {
   );
 }
 
-function methods(root: HTMLElement): string[] {
-  return [...root.querySelectorAll('.ts-sign-in-methods [data-control]')].map(
+function controls(root: ParentNode): string[] {
+  return [...root.querySelectorAll('.ts-auth-plate [data-control]')].map(
     (el) => el.getAttribute('data-control') ?? '',
   );
 }
 
-describe('the sign in methods (docs/NEXT.md 3.2 H4)', () => {
-  it('draws no passkey row and no roadmap sentence while the deployment offers no passkeys', () => {
-    const { container } = draw();
-    expect(methods(container)).toEqual(['dialog.signIn.google']);
-    expect(container.querySelector('[data-control="dialog.signIn.passkey"]')).toBeNull();
-    expect(container.textContent).not.toContain('Passkeys arrive');
-    expect(container.querySelector('.is-later, [aria-disabled="true"]')).toBeNull();
+describe('the methods of the sign in window (docs/NEXT.md 3.2 H4)', () => {
+  it('draws Google, the or row, the field and Continue where mail is on, and no passkey row', () => {
+    const { container } = draw({ passkeysAvailable: true, passkey: vi.fn() });
+    expect(controls(container.ownerDocument)).toEqual([
+      'dialog.signIn.google',
+      'dialog.signIn.email',
+      'dialog.signIn.continue',
+    ]);
+    expect(container.ownerDocument.body.textContent).not.toContain('Passkey');
+    expect(container.ownerDocument.body.textContent).not.toContain('Passkeys arrive');
   });
 
-  it('draws the passkey row, enabled, where the deployment offers passkeys', () => {
-    const { container } = draw({
-      passkeysAvailable: true,
-      passkey: vi.fn(() => Promise.resolve(null)),
-    });
-    expect(methods(container)).toEqual(['dialog.signIn.google', 'dialog.signIn.passkey']);
-    const row = container.querySelector<HTMLButtonElement>(
-      '[data-control="dialog.signIn.passkey"]',
+  it('draws Google alone where mail is off, first and focused', () => {
+    const { container } = draw({ requestCode: undefined });
+    expect(controls(container.ownerDocument)).toEqual(['dialog.signIn.google']);
+    expect(container.ownerDocument.activeElement?.getAttribute('data-control')).toBe(
+      'dialog.signIn.google',
     );
-    expect(row?.disabled).toBe(false);
-    expect(row?.getAttribute('aria-disabled')).toBeNull();
+  });
+
+  it('says sign in is not available, with no control, where no method is configured', () => {
+    const { container } = draw({ requestCode: undefined, googleAvailable: false });
+    expect(controls(container.ownerDocument)).toEqual(['dialog.signIn.none']);
+    expect(
+      container.ownerDocument.querySelector('[data-control="dialog.signIn.none"]')?.textContent,
+    ).toBe('Sign in is not available on this deployment.');
   });
 });
 
-// The dialog is as tall as its content (the Round 1 follow-up, lane C item 1; polish two, P2-A#1):
-// production offers Google alone (TURBOSLIDE_MAIL=off), and the fixed 400 by 320 box drew Continue
-// with Google over an empty band of about 150 px. The sheet holds no fixed height and no minimum
-// for the dialog or either step, and the reserved error row is drawn on the code step alone, where
-// the answer to a typed code arrives inside the dialog (Kevin's screenshot of 2026-10-07, K4).
-describe('the sign in dialog sizes to its content (Round 1 follow-up, lane C item 1; P2-A#1)', () => {
-  const sheet = readFileSync(resolve(import.meta.dirname, '../dialogs/accounts.css'), 'utf8');
+describe('the window is as tall as its content (lane C item 1; P2-A#1, A#4)', () => {
+  const sheet = readFileSync(resolve(import.meta.dirname, '../auth/auth.css'), 'utf8');
 
-  it('gives the dialog no fixed height and neither step a minimum', () => {
-    expect(sheet).not.toMatch(/\.ts-sign-in\s*\{[^}]*\bheight\s*:/);
-    expect(sheet).not.toMatch(/\.ts-sign-in-body[^{]*\{[^}]*min-height/);
+  it('gives the window and the plate no fixed height and no minimum', () => {
+    expect(sheet).not.toMatch(/\.ts-auth-window\s*\{[^}]*\b(min-)?height\s*:/);
+    expect(sheet).not.toMatch(/\.ts-auth-plate\s*\{[^}]*\b(min-)?height\s*:/);
   });
 
-  it('draws Google and no reserved error row where Google is the only method', () => {
-    const { container } = draw({ requestCode: undefined });
-    expect(methods(container)).toEqual(['dialog.signIn.google']);
-    expect(container.querySelector('[data-control="dialog.signIn.email"]')).toBeNull();
-    expect(container.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
-    expect(container.querySelector('.ts-sign-in-body')?.getAttribute('data-email')).toBe('off');
-  });
-
-  it('draws no reserved error row on the email step, and reserves it on the code step', async () => {
-    const { container } = draw({ verifyCode: vi.fn(() => Promise.resolve(null)) });
-    expect(container.querySelector('[data-control="dialog.signIn.email"]')).not.toBeNull();
-    expect(container.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
-    fireEvent.change(container.querySelector('[data-control="dialog.signIn.email"]')!, {
-      target: { value: 'ada@example.com' },
-    });
-    fireEvent.click(container.querySelector('[data-control="dialog.signIn.continue"]')!);
-    await vi.waitFor(() =>
-      expect(container.querySelector('[data-control="dialog.signIn.code"]')).not.toBeNull(),
-    );
-    expect(container.querySelector('[data-control="dialog.signIn.error"]')).not.toBeNull();
-  });
-
-  it('draws no reserved error row on the methods step where a passkey is offered', () => {
-    const { container } = draw({
-      requestCode: undefined,
-      passkeysAvailable: true,
-      passkey: vi.fn(() => Promise.resolve(null)),
-    });
-    expect(container.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
-  });
-
-  it('says the standing sentence when no method is configured', () => {
-    const { container } = draw({ requestCode: undefined, googleAvailable: false });
-    expect(container.querySelector('[data-control="dialog.signIn.error"]')?.textContent).toBe(
-      'No sign in method is configured on this deployment',
-    );
+  it('draws no action row, no Cancel and no reserved error line on the methods', () => {
+    const { container } = draw();
+    const doc = container.ownerDocument;
+    expect(doc.querySelector('[data-control="dialog.signIn"] .ts-dialog-actions')).toBeNull();
+    expect(doc.body.textContent).not.toContain('Cancel');
+    expect(doc.querySelector('[data-control="dialog.signIn.error"]')).toBeNull();
   });
 });

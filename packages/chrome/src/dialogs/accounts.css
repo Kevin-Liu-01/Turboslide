@@ -1,6 +1,7 @@
 /* The account dialogs (gslides-parity SPEC-3 7.2 to 7.6, 9.3; research 11 8 P6 to P9): fixed
    boxes for every state (the name prompt 360 by 168, the profile and the avatar builder 560 by
-   640), the sign in dialog 400 px wide and as tall as its content, a reserved 20 px error row, the
+   640), a reserved 20 px error row (the sign in window is the auth plate's since polish two,
+   packages/chrome/src/auth/auth.css), the
    preview strip's eight fixed boxes from first paint, the session list at 40 px rows with a three
    row minimum. Monochrome, but for the sign in providers' own marks. The design round (docs/DESIGN.md
    3.1, 4.5; DR-D5#2b): the dialogs are the chrome's 8 px windows, the fields and the method buttons
@@ -66,104 +67,6 @@
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
-}
-
-/* ---- the sign in dialog: 400 px wide, as tall as its content ---- */
-/* The fixed 320 px box and the body's 180 px minimum left an empty band of about 150 px under
-   Continue with Google where Google is the only method (production, TURBOSLIDE_MAIL=off; the Round
-   1 follow-up, lane C item 1). The box takes its content's height on both steps: the email step's
-   minimum of the code step's 125 px left 69 px empty under the field (polish two, P2-A#1, K4). */
-
-.ts-sign-in-methods {
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* one method: a 40 px button at the control corner, the provider's mark before its words, both
-   centred, on every surface that draws the dialog (the editor, /home, /decks, the access page) */
-.ts-sign-in-method {
-  appearance: none;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 40px;
-  padding: 6px 12px;
-  border: 1px solid var(--pt-field);
-  border-radius: var(--pt-radius);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 500 13px/1.2 var(--pt-text);
-  text-align: center;
-  cursor: pointer;
-}
-
-.ts-sign-in-method:hover:not(:disabled) {
-  border-color: var(--pt-ink);
-}
-
-/* the chrome's one focus rule: 1 px ink, inset (Dialog.css; polish two, P2-A#1) */
-.ts-sign-in-method:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: -1px;
-}
-
-.ts-sign-in-method:disabled {
-  cursor: default;
-  opacity: 0.6;
-}
-
-/* the provider's mark, 18 px, in its own colours (the GitHub mark in the button's ink) */
-.ts-sign-in-mark {
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-}
-
-/* on the ink of the primary button the mark sits on a paper disc, so its colours keep their ground */
-.ts-sign-in-method.is-primary .ts-sign-in-mark {
-  box-sizing: content-box;
-  padding: 3px;
-  border-radius: 50%;
-  background: var(--pt-paper);
-}
-
-.ts-sign-in-method.is-later {
-  color: var(--pt-titanium);
-  cursor: default;
-}
-
-/* the primary method when the email field is hidden (the realtime round, docs/REALTIME.md 4.1,
-   default 7.7; build/r4.md request R4-INTb): with TURBOSLIDE_MAIL=off the dialog has no field
-   and Continue with Google is the first action, drawn filled as .pt-ib.is-solid draws it; the
-   ring inverts the same way so it is not ink on ink */
-.ts-sign-in-method.is-primary {
-  background: var(--pt-ink);
-  color: var(--pt-paper);
-  border-color: var(--pt-ink);
-}
-
-.ts-sign-in-method.is-primary:focus-visible {
-  outline-color: var(--pt-paper);
-}
-
-.ts-sign-in-note {
-  font-size: 11px;
-  color: var(--pt-titanium);
-}
-
-/* under the body's own paragraph rule (Dialog.css `.ts-dialog-body p`, 0,1,1), which set its
-   margin to 0 and left the sentence flush on the field's label (research-auth S4) */
-.ts-dialog-body .ts-sign-in-sent {
-  margin: 0 0 8px;
-  color: var(--pt-ink-2);
 }
 
 /* ---- the profile and the avatar builder: 560 by 640 ---- */

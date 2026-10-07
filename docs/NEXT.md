@@ -660,6 +660,8 @@ Checks outside the matrix: `GET /v1/security/firewall/config/active` for `turbos
 
 The push list, one mechanism each (13 pushes): A1a Sign out rotates the cookie; A1b revocation within 5 s; A1c the Profile dialog and Delete account; A1d the label through the alias; A2a the refusal sentences; A2b Sign in outside the editor; A2c the dialog in the brand; A3a the branded mail; A3b the sender, when question 12 has one; A3c the limiter's hosted flag; A4 the legal pages, after Kevin's yes on the text; A5 passkeys, after question 14; A6 the mention picker.
 
+Polish two took items 5 to 8 (A2a, A2b, A2c and A3a) and the device page's sign in first, as one auth plate on every surface (`docs/POLISH-2.md` section 4; lane A's notes in `docs/gslides-parity/polish-two/a.md`); A2 here is done, and items 1 to 4 and 9 to 13 stay Round 3's.
+
 #### 4.3.5 Gates and size
 
 - Local: every `accounts.*` row with the local D1 and `TURBOSLIDE_MAIL=capture` in the second harness mode (`R:docs/CLOUDFLARE.md` 504 to 505), from `http://localhost:<port>` (`R:docs/gslides-parity/realtime/build/integrator.md` 188), carrying the server's `TURBOSLIDE_SESSION_SECRET` (189).

@@ -151,7 +151,7 @@ export function NamePromptPlate() {
       >
         <span className="pt-lb">{ACCOUNT.namePrompt.continue}</span>
       </button>
-      {account?.signInAvailable === true ? (
+      {account?.signInAvailable === true && account.signedIn !== true ? (
         <button
           type="button"
           className="ts-name-prompt-signin"
@@ -240,7 +240,7 @@ export function NamePromptDialog({ modal = false, title, onDone }: NamePromptDia
             setError(null);
           }}
         />
-        {account?.signInAvailable === true ? (
+        {account?.signInAvailable === true && account.signedIn !== true ? (
           <button
             type="button"
             className="ts-name-prompt-signin"

@@ -9,7 +9,7 @@ import {
 } from '@turboslide/agent/window/registry';
 import type { ExportCapabilities } from '@turboslide/chrome/ExportMenu';
 import { ContextMenu, contextMenuLabel } from '@turboslide/chrome/ContextMenu';
-import { errorCallbackURL } from '@turboslide/chrome/auth/auth-model';
+import { errorCallbackURL, holdSignInError } from '@turboslide/chrome/auth/auth-model';
 import type { EditorDispatch } from '@turboslide/chrome/dispatch';
 import type {
   AvatarChoiceView,
@@ -36,7 +36,7 @@ import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
 import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
 import type { MenuContext } from '@turboslide/chrome/menus/model';
-import { ACCOUNT, HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import { HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { NOTES_DEFAULT_HEIGHT, NotesPane } from '@turboslide/chrome/NotesPane';
 import type { SidebarEdit } from '@turboslide/chrome/Sidebar';
 import type { SnackbarAction } from '@turboslide/chrome/Snackbar';
@@ -685,21 +685,24 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       releaseDraft();
     };
   });
-  /* the library's own error redirect after a social sign in (`?error=account_not_linked`,
-     `state_mismatch`; better-auth link-account.mjs): said once through the snackbar and dropped
-     from the address, so the next sign in's return address does not carry it (docs/REALTIME.md
-     4.1, 4.2; design-google-login.md 4.3). The route's search validator never reads the key, so
-     the location alone carries it */
+  /* an error the address carries (`?error=account_not_linked`, `state_mismatch`; a magic link
+     or a provider that named this deck as its error address before polish two): the sign in
+     window opens in the matching error state with its sentence and Try Again (docs/POLISH-2.md
+     4.3), and the parameter leaves the address, so the next sign in's return address does not
+     carry it. The route's search validator never reads the key, so the location alone carries
+     it; the shell's API is the bridge's, set once the shell has mounted */
   useMountEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const reason = params.get('error');
     if (reason === null) return;
-    const words =
-      reason
-        .replace(/[^a-z0-9_]/gi, '')
-        .replace(/_/g, ' ')
-        .slice(0, 64) || 'refused';
-    controller.say(ACCOUNT.signInDialog.socialFailed(words));
+    if (holdSignInError(reason) !== null) {
+      let tries = 0;
+      const open = () => {
+        if (shellApi.current !== null) shellApi.current.openDialog('signIn');
+        else if ((tries += 1) < 300) window.setTimeout(open, 100);
+      };
+      open();
+    }
     params.delete('error');
     const search = params.toString();
     window.history.replaceState(
@@ -1024,23 +1027,27 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   /* one helper for the two social providers (docs/REALTIME.md 4.1; design-google-login.md 4.2):
      the library answers the provider's URL and the browser leaves for it; the person returns to
      this deck (signInReturnAddress) and the page reloads with the account's identity; a refusal
-     before the hand off is said through the snackbar, the dialog having already handed off */
-  const socialSignIn = (provider: 'github' | 'google') => {
-    void authPost('sign-in/social', {
+     before the hand off rejects, and the sign in window says it under the provider's row
+     (docs/POLISH-2.md 4.3) */
+  const socialSignIn = (provider: 'github' | 'google'): Promise<void> =>
+    authPost('sign-in/social', {
       provider,
       callbackURL: signInReturnAddress(),
       errorCallbackURL: signInErrorAddress(),
-    })
-      .then((answer) => {
-        const url = (answer as { url?: string } | null)?.url;
-        if (typeof url === 'string') window.location.assign(url);
-      })
-      .catch((error: unknown) => controller.say(errorMessage(error)));
-  };
+    }).then((answer) => {
+      const url = (answer as { url?: string } | null)?.url;
+      /* the window says a refusal under the provider's row (the plate's request-failed line) */
+      if (typeof url !== 'string') throw new Error('Sign in did not complete.');
+      window.location.assign(url);
+    });
   const account: EditorAccount = {
     principal,
     signedIn: payload.identity?.kind === 'account',
-    signInAvailable: auth?.signIn ?? false,
+    /* Sign In is drawn where a method can complete (docs/NEXT.md 3.2 H4; docs/POLISH-2.md 6.6,
+       accounts.sign-in-fits): a database with no Google, GitHub or mail sender offers none */
+    signInAvailable:
+      (auth?.signIn ?? false) &&
+      (auth?.google === true || auth?.github === true || auth?.email === true),
     passkeysAvailable: auth?.passkeys ?? false,
     githubAvailable: auth?.github ?? false,
     googleAvailable: auth?.google ?? false,

@@ -20,6 +20,7 @@ import {
   title,
 } from './lib';
 import { chromeFoundation } from './chrome-foundation';
+import { chromeFontP2 } from './font-p2';
 import { chromeMenus } from './chrome-menus';
 import { chromePages } from './chrome-pages';
 import { chromeRound1 } from './chrome-round1';
@@ -587,8 +588,12 @@ const FOUNDATION_ROWS = chromeFoundation();
 /* lane D2 of the design round (docs/DESIGN.md 10.2, 11): its rows live in chrome-surfaces.ts */
 const SURFACE_ROWS = chromeSurfaces();
 
+/* lane F of polish two (docs/POLISH-2.md 2.4, 2.5, 6.2): its rows live in font-p2.ts */
+const FONT_ROWS = chromeFontP2();
+
 coverage(import.meta.filename, [
   ...FOUNDATION_ROWS,
+  ...FONT_ROWS,
   ...SURFACE_ROWS,
   ...ROUND1_ROWS,
   ...PAGE_ROWS,

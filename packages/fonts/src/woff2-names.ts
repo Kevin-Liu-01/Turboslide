@@ -1,10 +1,11 @@
 // A reader of the tables a test or a fetch needs from a woff2 file (docs/archive/rounds/FEATURES.md 3.1 items 1
 // and 4; ported from the audit's `docs/gslides-parity/features/audit-fonts/woff2-names.mjs`): the
 // table directory with its variable length sizes, one brotli stream over every table, then the
-// `name` table's Windows strings, the `head` table's units per em and the GSUB feature tags. The
-// glyf and loca tables arrive transformed and are not read. Node only (`node:zlib`); inter.test.ts
-// reads the italic file's version string from its bytes and catalog.test.ts the `tnum` flag of
-// every family from the committed files.
+// `name` table's Windows strings, the `head` table's units per em, the GSUB and GPOS feature tags
+// and the `fvar` axes (docs/POLISH-2.md 2.4; fvar is never transformed in woff2). The glyf and
+// loca tables arrive transformed and are not read. Node only (`node:zlib`); inter.test.ts reads
+// the italic file's version string from its bytes, inter-release.test.ts every Inter file's
+// release facts and catalog.test.ts the `tnum` flag of every family from the committed files.
 import { brotliDecompressSync } from 'node:zlib';
 
 /** The tags the woff2 directory names by index (the WOFF2 specification's known table tags). */
@@ -145,7 +146,41 @@ export function nameStrings(tables: ReadonlyMap<string, Buffer>): ReadonlyMap<nu
 
 /** The GSUB feature tags a file carries, sorted and unique; empty without a GSUB table. */
 export function gsubFeatures(tables: ReadonlyMap<string, Buffer>): string[] {
-  const tbl = tables.get('GSUB');
+  return layoutFeatures(tables, 'GSUB');
+}
+
+/** The GPOS feature tags a file carries (kern, mark, mkmk, cpsp), sorted and unique. */
+export function gposFeatures(tables: ReadonlyMap<string, Buffer>): string[] {
+  return layoutFeatures(tables, 'GPOS');
+}
+
+/** One axis of the `fvar` table: its tag and its minimum, default and maximum. */
+export type FvarAxis = { tag: string; min: number; default: number; max: number };
+
+/** The `fvar` axes in the file's order; empty for a static face. */
+export function fvarAxes(tables: ReadonlyMap<string, Buffer>): FvarAxis[] {
+  const tbl = tables.get('fvar');
+  if (tbl === undefined) return [];
+  const axesOffset = tbl.readUInt16BE(4);
+  const axisCount = tbl.readUInt16BE(8);
+  const axisSize = tbl.readUInt16BE(10);
+  const fixed = (offset: number): number => tbl.readInt32BE(offset) / 65536;
+  const out: FvarAxis[] = [];
+  for (let i = 0; i < axisCount; i += 1) {
+    const o = axesOffset + i * axisSize;
+    out.push({
+      tag: tbl.toString('latin1', o, o + 4),
+      min: fixed(o + 4),
+      default: fixed(o + 8),
+      max: fixed(o + 12),
+    });
+  }
+  return out;
+}
+
+/** The feature tags of a GSUB or GPOS table, sorted and unique; empty without the table. */
+function layoutFeatures(tables: ReadonlyMap<string, Buffer>, tag: 'GSUB' | 'GPOS'): string[] {
+  const tbl = tables.get(tag);
   if (tbl === undefined) return [];
   const flOff = tbl.readUInt16BE(6);
   const count = tbl.readUInt16BE(flOff);
@@ -155,12 +190,17 @@ export function gsubFeatures(tables: ReadonlyMap<string, Buffer>): string[] {
   return [...tags].sort();
 }
 
-/** The facts the tests read from one woff2: the name table's family, subfamily and version and the GSUB tags. */
+/**
+ * The facts the tests read from one woff2: the name table's family, subfamily and version, the
+ * GSUB tags, the GPOS tags and the fvar axes.
+ */
 export function woff2Facts(buf: Buffer): {
   family: string | undefined;
   subfamily: string | undefined;
   version: string | undefined;
   features: string[];
+  positioning: string[];
+  axes: FvarAxis[];
 } {
   const { tables } = readWoff2(buf);
   const names = nameStrings(tables);
@@ -169,5 +209,7 @@ export function woff2Facts(buf: Buffer): {
     subfamily: names.get(17) ?? names.get(2),
     version: names.get(5),
     features: gsubFeatures(tables),
+    positioning: gposFeatures(tables),
+    axes: fvarAxes(tables),
   };
 }

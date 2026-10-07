@@ -124,3 +124,54 @@ Pictures, each opened and looked at:
 - `f/editor-390-light-roster-open.jpg` and `f/editor-390-dark-roster-open.jpg`: under 480 px the
   presence slot folds into More and draws no chip; More, Collaborators opened. Observed, not this
   lane's: the roster plate draws as an empty outlined pill about 240 CSS px wide under the title row, with no row for a person alone. Reported to the integrator as an observation.
+
+## P2-F#4a, the proof of the release and the drivers of the three face rows
+
+`docs/POLISH-2.md` 2.4, 2.5 and 6.2. P2-F#4 lands after P2-A#4 and P2-D#2, whose pages its rows
+read. At this commit neither had landed (the branch held P2-A#1), so the push is split: this part
+carries everything that reads no page of theirs, and P2-F#4b enters the three rows in
+`core-matrix.json` once both have landed. A row of `font-p2.ts` registers only when its id is in the
+matrix (the shape of `chrome-surfaces.ts`), so the drivers are inert until P2-F#4b.
+
+- `packages/fonts/src/woff2-names.ts`: `fvarAxes(tables)` (fvar is never transformed in woff2),
+  `gposFeatures(tables)`, and `woff2Facts` returns `positioning` and `axes` beside the GSUB tags.
+- `packages/fonts/src/inter-release.test.ts` (new): the fourteen `InterVariable*.woff2` files (seven
+  upright, seven italic) each read "Version 4.001;git-9221beed3", family "Inter Variable", the
+  subfamily of its style, the axes opsz 14 to 32 (default 14) and wght 100 to 900 (default 400),
+  and the bytes and sha256 of its record (`INTER`, `INTER_ITALIC`, `fonts.json` `web`); the whole
+  upright is 352,240 B with sha256 `693b77d4...a8e3`; the Latin upright subset carries the 42
+  features of 2.1 across GSUB and GPOS (`kern`, `mark`, `mkmk` and `cpsp` are GPOS features), the
+  whole upright adds cv14, and the italic files carry the same set less cv11 (cv14 again in the
+  whole italic).
+- `apps/studio/e2e/core/font-p2.ts` (new) with its import and coverage spread in `chrome.spec.ts`:
+  `chrome.font.official-inter`, `chrome.font.no-stylistic-sets` and `chrome.font.tabular-figures`
+  as 6.2 states them.
+- `docs/brand.md` section 10, the face: the proof paragraph.
+
+Deviations in the drivers, each recorded in the row's annotation:
+
+1. `chrome.font.official-inter` counts font files, not responses: on a vite dev server `/new` and
+   `/signin` draw the head's preload link again after hydration and the dev server's no-cache turns
+   that into a 304 revalidation of the same file with no body. The row asserts one font file, one
+   full answer of the Latin upright with the record's bytes and sha256, and lists every response.
+   A 304 of a second file would still fail it.
+2. "A slide" is `.ts-sheet` and also `.pt-slide`, `.ts-thumb` and `.pt-preview-frame` (the editor's
+   stage, filmstrip and previews draw a deck's theme, which may be General Translation's), as
+   `chrome.type.default-glyphs` of `chrome-surfaces.ts` reads it. A code surface is `code`, `pre`,
+   `kbd`, `samp` and `.ts-home-panel` (`CODE_SURFACES`), and any element in a monospace face.
+3. `chrome.font.tabular-figures` reads every rendered element (one with a client rect); its docs
+   pages are the links of `/docs`'s sidebar.
+
+| Check                                                                                                         | Reading                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Load       |
+| ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `vitest run packages/fonts/src/inter-release.test.ts inter.test.ts catalog.test.ts`                          | 26 of 26                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 135        |
+| `tsc -b`                                                                                                     | exit 0; `apps/studio/tsconfig.json` up to date after a build that read `font-p2.ts` and `chrome.spec.ts`                                                                                                                                                                                                                                                                                                                                                                                       | 113        |
+| `pnpm test` (`vitest run --testTimeout=60000`, every project)                                                 | 5,682 passed, 7 failed, 6 skipped in 9 min 59 s; none of the 7 reads this lane's files: lane N's uncommitted `theme-button.test.tsx` (4), `import.test.ts` (the Prototemplate deck now holds 93 slides against 95), `banner.test.ts` (the CLI reads 2026.1001.3 against `docs/updates.md`'s 2026.1006.1) and `mcp.test.ts` `deck_import_slides` (its own 30 s budget at load 113 to 140) | 113 to 140 |
+| `pnpm exec turboslide fonts build --check`                                                                    | 0 stale files, version 4.001+build.3 (39 min, most of it making `.turboslide/venv`)                                                                                                                                                                                                                                                                                                                                                                                                             | 135 to 300 |
+| The three rows before they enter the matrix: a scratch copy of `font-p2.ts` with the matrix gate off, run by Playwright against lane F's memory tier dev server on 4741, which serves the working tree with lanes A's and D's uncommitted `/signin`, `/device` and `/docs` | all three passed. `chrome.font.official-inter`: on `/home`, `/decks`, `/new`, `/signin` and `/docs` one font file, `InterVariable-latin.woff2`, 200 with 113,752 B and sha256 `eed1304968c9...` (the record's), plus a 304 of the same file on `/new` and `/signin`; one loaded Inter face (normal, 100 to 900, the Latin range); 6969 248.05 px and 232.63 with ss01 (4 x 1,270 and 4 x 1,191 units: 248.05 and 232.62), aaaa 224.61 and 244.92 with cv11 (224.61 and 244.92), tnum 1111 and 0000 259.38 each. `chrome.font.no-stylistic-sets`: 0 elements with an alternate on all eight pages at 1440 and 390 in both appearances; 4 initials read on `/new`, each `normal` with no style. `chrome.font.tabular-figures`: 0 proportional numbers in both appearances on `/home` (45 and 51 read), `/decks`, `/new`, `/signin`, `/device` and the 19 docs pages of the sidebar (80 on `/docs/reference`) | 120 to 300 |
+| The memory tier reading of P2-F#2's rows (one origin, `core-gate --only specs`)                               | `realtime.join.chip-within-1s` passed: chips 938 and 933, 59 and 56, 477 and 475 ms; instance `0aeecdc7` on both reads (one origin, recorded); tier memory, "no object on this tier"; colos unnamed and absent, recorded. `setup.do.two-instances` skipped with "one origin: the row needs A and B on two app instances"                                                                                                                                                                                  | 144 to 158 |
+
+Pictures, each opened and looked at: `f/specimen-1440-light.png`, `f/specimen-1440-dark.png`,
+`f/specimen-390-light.png` and `f/specimen-390-dark.png`, the specimen spans on `/home` of 4741
+drawn visible (100 px at 1440, 44 px at 390), each with and without its feature and its measured
+width: the open 6 and 9 with ss01, the single storey a with cv11, and 1111 and 0000 equal under tnum.

@@ -441,6 +441,17 @@ writes (`packages/theme/brand/`), whose HTML and SVG `lintAlternatesText` reads 
 `tnum` and `zero` belong to `css/numerals`. The people marks' initials, the lockup's word and the
 social card draw Inter's default glyphs since P2-F#3.
 
+The proof that the served face is the release: `packages/fonts/src/inter-release.test.ts` reads
+every `InterVariable*.woff2` under `packages/fonts/assets` (seven upright, seven italic) from its
+own bytes: the name table's version "Version 4.001;git-9221beed3", the axes opsz 14 to 32 with
+the default 14 and wght 100 to 900 with the default 400, the 42 features of the Latin upright
+subset (GSUB and GPOS; the whole upright adds cv14, and the italic files carry no cv11), and each
+file's bytes and sha256 against `packages/fonts/export/fonts.json`; the whole upright is 352,240 B
+with sha256
+`693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3`. The browser row
+`chrome.font.official-inter` reads the one served file and the features by measured advance widths
+(`apps/studio/e2e/core/font-p2.ts`).
+
 Since DR-D1#3 the page loads the release files cut into unicode-range subsets by
 `scripts/build-fonts.py`, every OpenType feature and both axes kept: the Latin upright is
 113,752 B (the whole file 352,240 B), the Latin italic 126,000 B, and Latin Extended, Cyrillic,

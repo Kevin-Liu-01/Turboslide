@@ -1,15 +1,16 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   cpSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { loadavg, tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { expect, test } from '@playwright/test';
@@ -389,13 +390,20 @@ test('the device authorization flow: a code from the terminal, the /device page,
     (path) => window.location.assign(path),
     `/device?user_code=${encodeURIComponent(code.user_code)}`,
   );
-  await expect(page.locator('main[data-step]')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Sign in a device' })).toBeVisible();
-  await expect(page.locator('[data-control="device.code"]')).toHaveValue(
-    code.user_code.toUpperCase(),
-  );
+  /* the auth plate's page host since polish two (docs/POLISH-2.md 4.3, P2-A#3): the code in two
+     groups of four, prefilled */
+  await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 60_000 });
+  await expect(page.locator('[data-auth-plate]')).toHaveAttribute('data-auth-plate', 'device.code');
+  await expect(page.getByRole('heading', { name: 'Connect the command line' })).toBeVisible();
+  const groups =
+    (await page.locator('[data-control="device.code.first"]').inputValue()) +
+    (await page.locator('[data-control="device.code.last"]').inputValue());
+  expect(groups).toBe(code.user_code.toUpperCase().replace(/[^A-Z0-9]/g, ''));
   await page.locator('[data-control="device.approve"]').click();
-  await expect(page.locator('main[data-step="approved"]')).toBeVisible();
+  await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+    'data-auth-plate',
+    'device.approved',
+  );
   // the terminal polls at the interval the code named (RFC 8628 3.5; a faster poll is slow_down)
   let granted = pending;
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -2628,5 +2636,279 @@ test.describe('polish two: the auth plate (docs/POLISH-2.md 4, 6.4)', () => {
       }
     test.info().annotations.push({ type: 'states', description: readings.join(' | ') });
     expect(failures, `${failures.length} faults`).toEqual([]);
+  });
+});
+
+/* ---------------------------------------------------------------------------------------------
+   Polish two, P2-A#3 (docs/POLISH-2.md 4.3, C15): /device on the auth plate, driven from the
+   terminal's side. The CLI keeps its key in a scratch configuration folder of this run
+   (TURBOSLIDE_CONFIG_DIR), never the person's ~/.config/turboslide; no key is printed. */
+
+const DEVICE_ROW = [
+  'accounts.device-flow',
+  'Local, mail capture: turboslide login against the server prints an address and a code; an anonymous browser at /device?user_code=<code> draws "Connect the command line" with the methods and next back to the device page; signed in by the mailed code it draws the code in two groups of four, prefilled; Approve signs the CLI in and its next deck.list runs as the account within 10 s; Deny draws the denied state; on a second server with TURBOSLIDE_MAIL=off the anonymous page offers Continue with Google and no email form',
+] as const;
+
+const CLI = join(ROOT, 'apps', 'cli', 'bin', 'turboslide.mjs');
+
+/** One `turboslide login --to ORIGIN`: its printed address and code (null when it ended first). */
+function startLogin(config: string): {
+  printed: Promise<{ url: string; code: string } | null>;
+  exit: Promise<{ code: number | null; out: string }>;
+} {
+  const child = spawn('node', [CLI, 'login', '--to', ORIGIN, '--timeout', '600'], {
+    env: { ...process.env, TURBOSLIDE_CONFIG_DIR: config },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  let out = '';
+  let resolvePrinted: (value: { url: string; code: string } | null) => void = () => undefined;
+  const printed = new Promise<{ url: string; code: string } | null>((resolve) => {
+    resolvePrinted = resolve;
+  });
+  const read = (chunk: Buffer) => {
+    out += chunk.toString('utf8');
+    const m = /Open (\S+) and enter the code (\S+)/.exec(out);
+    if (m) resolvePrinted({ url: m[1] ?? '', code: m[2] ?? '' });
+  };
+  child.stdout.on('data', read);
+  child.stderr.on('data', read);
+  const exit = new Promise<{ code: number | null; out: string }>((resolve) =>
+    child.on('close', (code) => {
+      resolvePrinted(null);
+      resolve({ code, out });
+    }),
+  );
+  return { printed, exit };
+}
+
+/**
+ * The terminal's side of the device flow as `turboslide login` runs it (apps/cli/src/commands/
+ * login.ts deviceFlow), with the `Origin` header of a page on the server: the studio's CSRF filter
+ * refuses the CLI's own requests, which carry neither `Sec-Fetch-Site` nor `Origin` (request A-R2),
+ * so the row reads the page's part through this terminal and records the CLI's refusal.
+ */
+async function terminalFlow(request: APIRequestContext): Promise<{
+  url: string;
+  userCode: string;
+  poll: () => Promise<{ token: string | null; error: string | null }>;
+}> {
+  const started = await request.post('/api/auth/device/code', {
+    data: { client_id: 'turboslide-cli', scope: 'read comment write export share' },
+    headers: { origin: ORIGIN },
+  });
+  expect(started.status(), 'the device code').toBe(200);
+  const code = (await started.json()) as {
+    device_code: string;
+    user_code: string;
+    verification_uri: string;
+    verification_uri_complete?: string;
+  };
+  const poll = async () => {
+    const answer = await request.post('/api/auth/device/token', {
+      data: {
+        grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+        device_code: code.device_code,
+        client_id: 'turboslide-cli',
+      },
+      headers: { origin: ORIGIN },
+    });
+    const body = (await answer.json().catch(() => ({}))) as {
+      access_token?: string;
+      error?: string;
+    };
+    return { token: body.access_token ?? null, error: body.error ?? null };
+  };
+  return {
+    url: code.verification_uri_complete ?? code.verification_uri,
+    userCode: code.user_code,
+    poll,
+  };
+}
+
+/** A CLI command against the server with a key in its environment (never printed). */
+function cliRun(config: string, args: string[], token?: string): { code: number; out: string } {
+  try {
+    const out = execFileSync('node', [CLI, ...args, '--to', ORIGIN, '--json'], {
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        TURBOSLIDE_CONFIG_DIR: config,
+        ...(token === undefined ? {} : { TURBOSLIDE_TOKEN: token }),
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return { code: 0, out };
+  } catch (error) {
+    const failed = error as { status?: number; stdout?: string; stderr?: string };
+    return { code: failed.status ?? 1, out: `${failed.stdout ?? ''}${failed.stderr ?? ''}` };
+  }
+}
+
+/** The caller `account me` names: its principal and trust. */
+function whoAmI(
+  config: string,
+  token?: string,
+): { principal: string; trust: string; said?: string } | null {
+  const run = cliRun(config, ['account', 'me'], token);
+  if (run.code !== 0)
+    return { principal: '', trust: '', said: `exit ${run.code}: ${run.out.trim().slice(0, 160)}` };
+  try {
+    /* --json prints the answer, then the human line */
+    const json = run.out.slice(run.out.indexOf('{'), run.out.indexOf('\n}\n') + 2);
+    const answer = JSON.parse(json) as Record<string, unknown>;
+    const me = (answer.result ?? answer) as { principal?: { id?: string }; trust?: string };
+    return { principal: me.principal?.id ?? '', trust: me.trust ?? '' };
+  } catch {
+    return null;
+  }
+}
+
+/** The plate's controls on the page, by their ids. */
+async function plateControls(p: Page): Promise<string[]> {
+  return p
+    .locator('.ts-auth-plate [data-control]')
+    .evaluateAll((els) => els.map((el) => el.getAttribute('data-control') ?? ''));
+}
+
+test.describe('polish two: the device page (docs/POLISH-2.md 4.3, C15)', () => {
+  test.use({ actionTimeout: 15_000 });
+  test.describe.configure({ mode: 'default' });
+
+  test(localTitle(...DEVICE_ROW), async ({ browser }) => {
+    test.setTimeout(1_200_000);
+    const readings: string[] = [];
+    const config = mkdtempSync(join(tmpdir(), 'ts-device-'));
+    const { context, page } = await ownerContext(browser);
+    try {
+      const probe = await page.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
+      expect(probe.status(), 'the server has an identity database').toBe(200);
+      /* the terminal: turboslide login itself, then the same requests with a page's Origin */
+      const login = startLogin(config);
+      const byCli = await login.printed;
+      const ended = byCli === null ? await login.exit : null;
+      readings.push(
+        byCli === null
+          ? `turboslide login: exit ${ended?.code}, "${(ended?.out ?? '').trim().slice(0, 120)}"`
+          : `turboslide login printed ${new URL(byCli.url).pathname} and a code`,
+      );
+      expect
+        .soft(byCli, 'turboslide login prints an address and a code (request A-R2)')
+        .not.toBeNull();
+      const terminal = await terminalFlow(page.request);
+      const userCode = terminal.userCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      readings.push(
+        `the terminal's address ${new URL(terminal.url).pathname}, a code of ${userCode.length} characters`,
+      );
+      expect(terminal.url.startsWith(`${ORIGIN}/device`), 'the address is the device page').toBe(
+        true,
+      );
+      /* the anonymous browser at the address: sign in first, the methods, next back here */
+      const target = `/device?user_code=${userCode}`;
+      await page.goto(target);
+      await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+      await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+        'data-auth-plate',
+        'device.sign-in-first',
+      );
+      await expect(page.locator('.ts-auth-heading')).toHaveText('Connect the command line');
+      const methods = await plateControls(page);
+      readings.push(`anonymous: ${methods.join(', ')}`);
+      expect(methods).toContain('device.google');
+      expect(methods).toContain('device.email');
+      /* the sign in returns to the device page: the mail's link names it, and /signin on failure */
+      const asked = page.waitForRequest((r) => r.url().endsWith('/api/auth/sign-in/magic-link'));
+      const email = `device-${Date.now()}@example.test`;
+      await ctl(page, 'device.email').fill(email);
+      await ctl(page, 'device.continue').click();
+      const body = JSON.parse((await asked).postData() ?? '{}') as {
+        callbackURL?: string;
+        errorCallbackURL?: string;
+      };
+      readings.push(
+        `the mail's return ${(body.callbackURL ?? '').replace(ORIGIN, '').replace(/=.*/, '=<code>')}`,
+      );
+      expect(body.callbackURL).toBe(`${ORIGIN}${target}`);
+      expect(body.errorCallbackURL).toBe(`${ORIGIN}/signin?next=${encodeURIComponent(target)}`);
+      await ctl(page, 'device.code').waitFor({ timeout: 60_000 });
+      const mail = seed('mail', AUTH_DB, email) as { code: string | null };
+      expect(mail.code).toMatch(/^\d{6}$/);
+      await ctl(page, 'device.code').fill(mail.code ?? '');
+      await ctl(page, 'device.verify').click();
+      /* signed in: the page loads again at the code, in two groups of four, prefilled */
+      await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+        'data-auth-plate',
+        'device.code',
+        { timeout: 120_000 },
+      );
+      await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+      const groups = [
+        await ctl(page, 'device.code.first').inputValue(),
+        await ctl(page, 'device.code.last').inputValue(),
+      ];
+      readings.push(
+        `signed in: the code in groups of ${groups.map((g) => g.length).join(' and ')}, prefilled ${groups.join('') === userCode}`,
+      );
+      expect(groups.join('')).toBe(userCode);
+      expect(groups.map((g) => g.length)).toEqual([4, 4]);
+      /* Approve: the terminal is signed in and acts as the account */
+      const approvedAt = Date.now();
+      await ctl(page, 'device.approve').click();
+      await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+        'data-auth-plate',
+        'device.approved',
+        { timeout: 60_000 },
+      );
+      await expect(ctl(page, 'device.outcome')).toHaveText(
+        `It acts as ${email}. You can close this tab.`,
+      );
+      const granted = await terminal.poll();
+      /* the key's first call as the account: `account me` (the CLI's `deck list` reads a decks
+         folder and proves nothing about the key) */
+      const me = whoAmI(config, granted.token ?? undefined);
+      const ms = Date.now() - approvedAt;
+      readings.push(
+        `approved: a key ${granted.token === null ? `refused (${granted.error})` : 'granted'}; account me ${ms} ms after Approve (load ${(loadavg()[0] ?? 0).toFixed(0)}): ${me?.principal.slice(0, 4) ?? ''} ${me?.trust ?? ''}${me?.said === undefined ? '' : ` (${me.said})`}`,
+      );
+      expect(granted.token, 'the approved code grants a token').not.toBeNull();
+      expect
+        .soft(me?.principal ?? '', 'the CLI acts as the account (request A-R3)')
+        .toMatch(/^usr_/);
+      if ((loadavg()[0] ?? 0) <= 24) expect.soft(ms, 'within 10 s').toBeLessThanOrEqual(10_000);
+      /* Deny: a second code, denied */
+      const second = await terminalFlow(page.request);
+      const code2 = second.userCode.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+      await page.goto(`/device?user_code=${code2}`);
+      await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+      await ctl(page, 'device.deny').click();
+      await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+        'data-auth-plate',
+        'device.denied',
+        { timeout: 60_000 },
+      );
+      await expect(page.locator('.ts-auth-heading')).toHaveText('The terminal was not signed in');
+      const denied = await second.poll();
+      readings.push(`denied: the terminal reads ${denied.error}`);
+      expect(denied.error, 'the terminal hears the denial').toBe('access_denied');
+      /* the mail off server: Continue with Google and no email form */
+      if (MAIL_OFF_BASE === null) {
+        readings.push('mail off: not read (no second server named by TURBOSLIDE_MAIL_OFF_BASE)');
+      } else {
+        const { context: off, page: offPage } = await otherContext(browser);
+        try {
+          await offPage.goto(`${MAIL_OFF_BASE}/device?user_code=ABCDEFGH`);
+          await offPage.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+          const offMethods = await plateControls(offPage);
+          readings.push(`mail off: ${offMethods.join(', ')}`);
+          expect(offMethods).toContain('device.google');
+          expect(offMethods).not.toContain('device.email');
+        } finally {
+          await off.close();
+        }
+      }
+    } finally {
+      test.info().annotations.push({ type: 'device', description: readings.join(' | ') });
+      await context.close();
+      rmSync(config, { recursive: true, force: true });
+    }
   });
 });

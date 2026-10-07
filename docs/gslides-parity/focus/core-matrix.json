@@ -11829,6 +11829,15 @@
       "today": "not driven",
       "evidence": "research-auth 4.3, 4.4; Kevin's screenshot of 2026-10-07",
       "note": "Polish two (docs/POLISH-2.md 6), P2-A#2"
+    },
+    {
+      "id": "accounts.device-flow",
+      "feature": "share",
+      "interaction": "Local, mail capture: turboslide login against the server prints an address and a code; an anonymous browser at /device?user_code=<code> draws \"Connect the command line\" with the methods and next back to the device page; signed in by the mailed code it draws the code in two groups of four, prefilled; Approve signs the CLI in and its next deck.list runs as the account within 10 s; Deny draws the denied state; on a second server with TURBOSLIDE_MAIL=off the anonymous page offers Continue with Google and no email form",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "research-auth S7 (an email form with no Google, a dead end with mail off, on production too), 11 and 12",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#3"
     }
   ]
 }

@@ -1,288 +1,108 @@
 import { createFileRoute } from '@tanstack/react-router';
-import type { CSSProperties } from 'react';
-import { useState } from 'react';
+import { createServerFn } from '@tanstack/react-start';
+import { getRequest } from '@tanstack/react-start/server';
 
-import { ACCOUNT } from '@turboslide/chrome/menus/strings';
+import { AuthPage } from '@turboslide/chrome/auth/AuthPage';
+import { AuthRefusal, cleanDeviceCode } from '@turboslide/chrome/auth/auth-model';
 
-import { useMountEffect } from '../components/useMountEffect';
+import { MoodFigure } from '../components/home/MoodFigure';
+import { NO_SIGN_IN } from '../components/home/sign-in';
+import type { SignInFacts } from '../components/home/sign-in';
+import { methodsOf, pageActions } from '../components/home/sign-in-auth';
+import { RouterLinkSlot } from './-link-slot';
 
-// /device (gslides-parity SPEC-3 7.7; research 09 6.2): the verification page of the device
-// authorization flow `turboslide login` runs. The CLI asks /api/auth/device/code for a device
-// code and an 8 character user code, prints the code and this address, and polls
-// /api/auth/device/token; the person opens this page, signs in when they are not (the email
-// and code form of 7.3, the same one mail with a link and a code), types the code and approves
-// or denies. Five attempts per code, then a new code (RFC 8628 5.1); the library's rate limit
-// holds the same number per minute on the approve route. Every state is one fixed box with a
-// reserved error row (layout shift rule 9.1), and the words are the sign in dialog's where they
-// exist (ACCOUNT.signInDialog) and this page's own for the rest.
+// /device (gslides-parity SPEC-3 7.7; docs/POLISH-2.md 4.3, C15): the verification page of the
+// device authorization flow `turboslide login` runs. The CLI asks /api/auth/device/code for a
+// device code and an 8 character user code, prints the code and this address, and polls
+// /api/auth/device/token; the person opens this page. On the auth plate's page host: an anonymous
+// visitor signs in first through the deployment's methods (Continue with Google on production,
+// where mail is off) with the return path back to this page and its code, then sees the code in
+// two groups of four, prefilled from `user_code`, with Approve and Deny, then the outcome. The
+// calls are unchanged: `GET /api/auth/device?user_code=` binds the code to the session, then
+// `POST /api/auth/device/approve` or `deny` decides it. Five tries per code (RFC 8628 5.1; the
+// library's limit holds the same number per minute on the approve route), then a new code.
 
+/** The tries a code has before the page asks for a new one (better-auth.ts DEVICE_ATTEMPTS). */
 export const DEVICE_ATTEMPTS = 5;
-
-export const DEVICE_WORDS = {
-  title: 'Sign in a device',
-  code: 'Code from the terminal',
-  approve: 'Sign In the Device',
-  deny: 'Deny',
-  approved: 'The device is signed in. You can close this tab.',
-  denied: 'The device was denied. You can close this tab.',
-  noCode: 'That code did not match. Check the terminal and try again',
-  spent: 'Too many attempts. Ask the terminal for a new code',
-  signInFirst: 'Sign in first, then confirm the code',
-} as const;
 
 type DeviceSearch = { user_code?: string };
 
+/** The deployment's methods and the address of the session, read once on the server. */
+type DeviceFacts = SignInFacts & { address: string | null };
+
+const readDeviceFacts = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<DeviceFacts> => {
+    try {
+      const { accountSession, identityRuntime } = await import('../server/auth/identity');
+      const runtime = identityRuntime();
+      if (runtime.auth === null) return { ...NO_SIGN_IN, address: null };
+      const session = await accountSession(runtime, getRequest());
+      return {
+        google: runtime.methods.google,
+        github: runtime.methods.github,
+        email: runtime.methods.email,
+        signedIn: session !== null,
+        address: session?.account.email ?? null,
+      };
+    } catch {
+      return { ...NO_SIGN_IN, address: null };
+    }
+  },
+);
+
 export const Route = createFileRoute('/device')({
   validateSearch: (search: Record<string, unknown>): DeviceSearch =>
-    typeof search.user_code === 'string' ? { user_code: search.user_code.toUpperCase() } : {},
+    typeof search.user_code === 'string' ? { user_code: cleanDeviceCode(search.user_code) } : {},
+  loader: () => readDeviceFacts(),
+  head: () => ({
+    meta: [
+      { title: 'Connect the command line, Turboslide' },
+      { name: 'robots', content: 'noindex' },
+    ],
+  }),
   component: DevicePage,
 });
 
-type Step = 'loading' | 'email' | 'otp' | 'code' | 'approved' | 'denied' | 'spent';
-
-async function postJson(path: string, body: unknown): Promise<Response> {
-  return fetch(path, {
+/** The claim, then the decision; a refusal carries the library's `error` as its code. */
+async function decideDevice(code: string, approve: boolean): Promise<void> {
+  const refused = async (response: Response) => {
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    return new AuthRefusal(response.status, body?.error ?? '', body?.error ?? 'refused');
+  };
+  /* the library binds the code to the verifying session first, then takes the decision; a code
+     nobody asked for fails here and counts as a try */
+  const claimed = await fetch(`/api/auth/device?user_code=${encodeURIComponent(code)}`, {
+    credentials: 'same-origin',
+  });
+  if (!claimed.ok) throw await refused(claimed);
+  const decided = await fetch(`/api/auth/device/${approve ? 'approve' : 'deny'}`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     credentials: 'same-origin',
-    body: JSON.stringify(body),
+    body: JSON.stringify({ userCode: code }),
   });
+  if (!decided.ok) throw await refused(decided);
 }
 
-/* the box is the shared window plate (tokens.css .pt-window: paper, the edge frame, the ring, the
-   8 px window corner of docs/DESIGN.md 3.1); the buttons the shell's .pt-ib at the 6 px control
-   corner, the confirming one solid */
-const box: CSSProperties = {
-  width: 400,
-  maxWidth: 'calc(100vw - 32px)',
-  minHeight: 320,
-  margin: '48px auto',
-  padding: 24,
-  boxSizing: 'border-box',
-  font: '13px/1.45 var(--pt-text)',
-  display: 'grid',
-  gridTemplateRows: 'auto 1fr 20px',
-  gap: 12,
-};
-
-/* a field on the field boundary (3:1) at the control corner */
-const field: CSSProperties = {
-  width: '100%',
-  boxSizing: 'border-box',
-  height: 36,
-  padding: '0 10px',
-  border: '1px solid var(--pt-field)',
-  borderRadius: 'var(--pt-radius)',
-  background: 'var(--pt-paper)',
-  color: 'inherit',
-  font: 'inherit',
-};
-
-const SOLID = 'pt-ib is-solid';
-const QUIET = 'pt-ib';
-
 function DevicePage() {
+  const facts = Route.useLoaderData();
   const search = Route.useSearch();
-  const [step, setStep] = useState<Step>('loading');
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [code, setCode] = useState(search.user_code ?? '');
-  const [attempts, setAttempts] = useState(0);
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  useMountEffect(() => {
-    void (async () => {
-      try {
-        const response = await fetch('/api/auth/get-session', { credentials: 'same-origin' });
-        const body = response.ok ? ((await response.json()) as unknown) : null;
-        setStep(body !== null && typeof body === 'object' ? 'code' : 'email');
-      } catch {
-        setStep('email');
-      }
-    })();
-  });
-
-  const askForCode = async (): Promise<void> => {
-    setBusy(true);
-    setError('');
-    try {
-      const response = await postJson('/api/auth/sign-in/magic-link', {
-        email: email.trim(),
-        callbackURL: `/device${code ? `?user_code=${encodeURIComponent(code)}` : ''}`,
-      });
-      // the same answer whether or not the address exists (7.3)
-      if (response.ok || response.status === 429) setStep('otp');
-      else setError(ACCOUNT.signInDialog.failed);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const verifyOtp = async (): Promise<void> => {
-    setBusy(true);
-    setError('');
-    try {
-      const response = await postJson('/api/auth/sign-in/email-otp', {
-        email: email.trim(),
-        otp: otp.trim(),
-      });
-      if (response.ok) setStep('code');
-      else setError(ACCOUNT.signInDialog.failed);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const decide = async (approve: boolean): Promise<void> => {
-    setBusy(true);
-    setError('');
-    try {
-      const userCode = code.trim().toUpperCase();
-      // the library binds the code to the verifying session first (GET /device?user_code=), then
-      // takes the decision; a code nobody asked for fails here and counts as an attempt
-      const claimed = await fetch(`/api/auth/device?user_code=${encodeURIComponent(userCode)}`, {
-        credentials: 'same-origin',
-      });
-      const response = claimed.ok
-        ? await postJson(`/api/auth/device/${approve ? 'approve' : 'deny'}`, { userCode })
-        : claimed;
-      if (response.ok) {
-        setStep(approve ? 'approved' : 'denied');
-        return;
-      }
-      if (response.status === 401) {
-        setStep('email');
-        setError(DEVICE_WORDS.signInFirst);
-        return;
-      }
-      const next = attempts + 1;
-      setAttempts(next);
-      if (next >= DEVICE_ATTEMPTS) setStep('spent');
-      else setError(DEVICE_WORDS.noCode);
-    } finally {
-      setBusy(false);
-    }
-  };
-
+  const code = search.user_code ?? '';
+  const next = code === '' ? '/device' : `/device?user_code=${code}`;
+  const methods = methodsOf(facts);
   return (
-    <main className="pt-window" style={box} data-step={step}>
-      <h1 style={{ fontSize: 16, fontWeight: 500, margin: 0 }}>{DEVICE_WORDS.title}</h1>
-      <div style={{ display: 'grid', gap: 12, alignContent: 'start' }}>
-        {step === 'loading' ? <p style={{ margin: 0 }}>Checking your session.</p> : null}
-        {step === 'email' ? (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void askForCode();
-            }}
-            style={{ display: 'grid', gap: 12 }}
-          >
-            <label style={{ display: 'grid', gap: 4 }}>
-              <span>{ACCOUNT.signInDialog.email}</span>
-              <input
-                style={field}
-                type="email"
-                name="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                data-control="device.email"
-              />
-            </label>
-            <button
-              className={SOLID}
-              style={{ justifySelf: 'start' }}
-              type="submit"
-              disabled={busy}
-              data-control="device.continue"
-            >
-              {ACCOUNT.signInDialog.continue}
-            </button>
-          </form>
-        ) : null}
-        {step === 'otp' ? (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void verifyOtp();
-            }}
-            style={{ display: 'grid', gap: 12 }}
-          >
-            <p style={{ margin: 0 }}>{ACCOUNT.signInDialog.sent}</p>
-            <label style={{ display: 'grid', gap: 4 }}>
-              <span>{ACCOUNT.signInDialog.code}</span>
-              <input
-                style={field}
-                inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                required
-                value={otp}
-                onChange={(event) => setOtp(event.target.value)}
-                data-control="device.otp"
-              />
-            </label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className={SOLID} type="submit" disabled={busy} data-control="device.verify">
-                {ACCOUNT.signInDialog.verify}
-              </button>
-              <button className={QUIET} type="button" onClick={() => setStep('email')}>
-                {ACCOUNT.signInDialog.back}
-              </button>
-            </div>
-          </form>
-        ) : null}
-        {step === 'code' ? (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void decide(true);
-            }}
-            style={{ display: 'grid', gap: 12 }}
-          >
-            <label style={{ display: 'grid', gap: 4 }}>
-              <span>{DEVICE_WORDS.code}</span>
-              <input
-                className="pt-num"
-                data-num="code"
-                style={{ ...field, letterSpacing: '0.08em' }}
-                autoComplete="one-time-code"
-                maxLength={12}
-                required
-                value={code}
-                onChange={(event) => setCode(event.target.value.toUpperCase())}
-                data-control="device.code"
-              />
-            </label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className={SOLID} type="submit" disabled={busy} data-control="device.approve">
-                {DEVICE_WORDS.approve}
-              </button>
-              <button
-                className={QUIET}
-                type="button"
-                disabled={busy}
-                onClick={() => void decide(false)}
-                data-control="device.deny"
-              >
-                {DEVICE_WORDS.deny}
-              </button>
-            </div>
-          </form>
-        ) : null}
-        {step === 'approved' ? <p style={{ margin: 0 }}>{DEVICE_WORDS.approved}</p> : null}
-        {step === 'denied' ? <p style={{ margin: 0 }}>{DEVICE_WORDS.denied}</p> : null}
-        {step === 'spent' ? <p style={{ margin: 0 }}>{DEVICE_WORDS.spent}</p> : null}
-      </div>
-      <p
-        role="alert"
-        style={{ margin: 0, height: 20, lineHeight: '20px', fontSize: 13 }}
-        data-control="device.error"
-      >
-        {error}
-      </p>
-    </main>
+    <AuthPage
+      purpose="device"
+      control="device"
+      methods={methods}
+      actions={{ ...pageActions(methods, next), decideDevice }}
+      initial={facts.signedIn ? { step: 'device' } : { step: 'methods' }}
+      linkComponent={RouterLinkSlot}
+      figure={<MoodFigure size="page" control="device.figure" />}
+      deviceCode={code}
+      deviceEmail={facts.address ?? ''}
+      /* the code signed this browser in: the page loads again as the account, at the code step */
+      onSignedIn={() => window.location.assign(next)}
+    />
   );
 }

@@ -44,6 +44,21 @@ The own row is in the default view since the people round, so a person alone sho
   docs' modules belong in the docs routes' own chunks (DESIGN.md 8.16 and POLISH-2.md 5.1 name
   13.0 KB gzip of script on docs pages and nothing on `/home`).
 
+- A-R2 (to the integrator; `apps/studio/src/server/headers.ts` or `apps/cli/src/commands/login.ts`):
+  `turboslide login` cannot start. The CSRF filter validates every `/api/auth/*` request, and the
+  CLI's `POST /api/auth/device/code` and `/api/auth/device/token` carry neither `Sec-Fetch-Site` nor
+  `Origin`, so the TanStack CSRF middleware answers 403 ("does not offer the device flow (403)").
+  The two device endpoints are RFC 8628's endpoints for clients that are not browsers and read no
+  cookie; exempting `POST /api/auth/device/code` and `/api/auth/device/token` from `csrfFilter` (as
+  the bearer routes are) fixes it without touching a browser path. Read on lane A's server with
+  `accounts.device-flow` on 2026-10-07; production carries the same filter.
+- A-R3 (to the integrator; `apps/cli/src/commands/login.ts` and the studio's token check,
+  `apps/studio/src/server/auth/tokens.ts`): the token `/api/auth/device/token` grants is a
+  better-auth session token, which the CLI stores as `kind: 'api-key'` and the agent surface refuses
+  as a bearer ("the bearer is not an API key of this deployment"). The grant needs to mint an API
+  key for the account (the `account.tokens.create` path) or the bearer check needs to accept the
+  device session; `account me` then answers the account.
+
 ## N
 
 ### P2-N-1, to the integrator: the route stops passing the nonce to the bar

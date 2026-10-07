@@ -128,3 +128,42 @@ Deviations:
   request exactly as the first and drops the mail.
 - `accounts.google-button-guideline` reads `/signin` in this push; the editor's window joins it in
   A#4, where the window draws the plate.
+
+## P2-A#3: /device on the plate, sign in first
+
+Items (docs/POLISH-2.md 4.3, C15): `/device` draws the plate's page host
+(`apps/studio/src/routes/device.tsx`; its 288 lines of inline styles and `DEVICE_WORDS` leave). The
+loader reads the deployment's methods and the session's address once. An anonymous visitor sees
+"Connect the command line" with the deployment's methods (Continue with Google on production, where
+mail is off) and the return path back to the page and its code; signed in, the code in two inputs of
+four (44 px, `data-num="code"`, a paste of eight characters into the first fills both), prefilled
+from `user_code`, Approve and Deny, then the outcome ("It acts as <address>. You can close this
+tab." or "You can close this tab."). The calls are unchanged: `GET /api/auth/device?user_code=` then
+`POST /api/auth/device/approve` or `deny`; five tries per code, then "That code had five wrong tries".
+The old device test of `accounts.spec.ts` (skipped on a tmp store) reads the plate's markup.
+
+Row `accounts.device-flow`, on 4743 with captured mail and 4744 with `TURBOSLIDE_MAIL=off`, load 169
+to 177: failed, on the terminal's two parts alone, both outside lane A's files:
+
+- `turboslide login --to http://localhost:4743` exits 2 with "does not offer the device flow (403)":
+  the studio's CSRF filter validates `/api/auth/*` (`server/headers.ts` `CSRF_ROUTE_PATTERNS`), and
+  the CLI's `POST /api/auth/device/code` carries neither `Sec-Fetch-Site` nor `Origin`, so the
+  TanStack CSRF middleware answers 403. Request A-R2.
+- The token `POST /api/auth/device/token` grants after Approve is a better-auth session token; the
+  CLI stores it as `kind: 'api-key'` and the agent surface refuses it as a bearer ("the bearer is not
+  an API key of this deployment"), so `account me` with it exits 2. Request A-R3.
+
+Everything on the page reads as the row says, the terminal's requests sent with a page's `Origin`
+(the way the spec's older device test sends them): the address `/device?user_code=<code>` and a code
+of eight characters; anonymous, `device.google`, `device.email` and `device.continue`; the mail's
+`callbackURL` is the device page with its code and its `errorCallbackURL` is
+`/signin?next=/device?user_code=<code>`; signed in by the mailed code, the page loads again at
+`device.code` with the code in groups of 4 and 4, prefilled; Approve draws "It acts as <address>.
+You can close this tab." and the terminal's poll is granted a token; a second code denied draws
+"The terminal was not signed in" and the terminal's poll reads `access_denied`; on 4744 with mail
+off the anonymous page offers `device.google` alone.
+
+Gates: `tsc -b` exit 0; the brand lint in enforce mode 0 open findings; prettier clean.
+
+Pictures (`a/`): `a3-device-anonymous-*`, `a3-device-signed-in-*` and `a3-device-mail-off-*` at 1440
+and 390 in both appearances (12, looked at on one contact sheet).

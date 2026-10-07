@@ -11955,6 +11955,16 @@
       "severity": 1,
       "evidence": "research-docs 2.2 (gt-docs-copy-menu.jpg), 6 P8",
       "note": "Polish two (docs/POLISH-2.md 6), P2-D#4"
+    },
+    {
+      "id": "help.docs.reference",
+      "feature": "help",
+      "interaction": "/docs/reference lists every group with the count of actions per transport equal to manifest.json, cli.json, mcp-tools.json and openapi.json; every action of describe.json has one section on its group's page with its id as anchor, its sentence, its input fields, its CLI usage, its MCP tool name and its HTTP endpoint; no written page types a count of actions",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-docs 3.2 (194, 181, 170, 173 and 178 in the five generated files), 6 P6",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-D#5"
     }
   ]
 }

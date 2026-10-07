@@ -5662,7 +5662,7 @@
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "audit-brand 2",
-      "note": "The kit's logo of audit-brand 2; restated in the design round, DR-D3#4 (the deck is Simple, which draws no Use the theme's logo button, docs/DESIGN.md 7.5, so the row puts its logo back through brand.reset; the DR-D3 fix of the verifier's pass 4 finding 3)"
+      "note": "The kit's logo of audit-brand 2; restated in the design round, DR-D3#4 (the deck is Simple, which draws no Use the theme's logo button, docs/DESIGN.md 7.5, so the row puts its logo back through brand.reset; the DR-D3 fix of the verifier's pass 4 finding 5)"
     },
     {
       "id": "brand.logo.use-on-every-slide",
@@ -9022,7 +9022,7 @@
       "today": "broken",
       "severity": 3,
       "evidence": "audit-brand-surfaces 27",
-      "note": "docs/NEXT.md 3.2 H6 and 4.1.5: the blank template carries a record whose title mark and footer logo are none; GT_BAND stays for the GT template; restated in the design round, DR-D3#2 (Blank is Simple with no kit, docs/DESIGN.md 7.3: the row reads the theme and the drawn parts, and General Translation is its control; the DR-D3 fix of the verifier's pass 4 finding 3)"
+      "note": "docs/NEXT.md 3.2 H6 and 4.1.5: the blank template carries a record whose title mark and footer logo are none; GT_BAND stays for the GT template; restated in the design round, DR-D3#2 (Blank is Simple with no kit, docs/DESIGN.md 7.3: the row reads the theme and the drawn parts, and General Translation is its control; the DR-D3 fix of the verifier's pass 4 finding 5)"
     },
     {
       "id": "brand.template.blank-plain",
@@ -9032,7 +9032,7 @@
       "today": "broken",
       "severity": 2,
       "evidence": "brand-judge-2 178",
-      "note": "docs/NEXT.md 4.1.3 item 23 and 4.1.5 (B4a): the blank template's record turns the GT frame's rails, rules and crosses off and the counter off; the GT template keeps them; restated in the design round, DR-D3#2 (Blank is Simple with no kit, docs/DESIGN.md 7.3: the row reads the theme and the drawn parts in place of the record; the DR-D3 fix of the verifier's pass 4 finding 3)"
+      "note": "docs/NEXT.md 4.1.3 item 23 and 4.1.5 (B4a): the blank template's record turns the GT frame's rails, rules and crosses off and the counter off; the GT template keeps them; restated in the design round, DR-D3#2 (Blank is Simple with no kit, docs/DESIGN.md 7.3: the row reads the theme and the drawn parts in place of the record; the DR-D3 fix of the verifier's pass 4 finding 5)"
     },
     {
       "id": "brand.template.blank-mark-not-an-object",

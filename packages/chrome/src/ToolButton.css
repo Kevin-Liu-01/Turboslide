@@ -15,6 +15,14 @@
   font-weight: 400;
 }
 
+/* the glyph html[data-theme] names, from the first paint (docs/POLISH-2.md 3.3): ThemeButton
+   renders both half discs, so the server's markup draws the right one before any script runs;
+   without script the page has no data-theme, draws its light tokens and shows the light disc */
+:root[data-theme='dark'] .pt-theme-glyph.is-light,
+:root:not([data-theme='dark']) .pt-theme-glyph.is-dark {
+  display: none;
+}
+
 /* a labeled button with no icon keeps its word through every collapse:
    the rules that hide .pt-lb (Toolbar.css) exclude .is-text, and this one
    holds the geometry a text-only button needs */

@@ -186,7 +186,7 @@ The Rosetta Stone leaves the fixture and `public/home/` (its stills and tone map
 - **Interaction.** Light and Dark store `gt-theme` and restyle at once; every printed field reprints in one frame. Pause Motion (`[data-motion-toggle]`, `aria-pressed`) pauses or plays every automatic motion on the page (3.2) and is remembered across visits. It is hidden under reduced motion, where nothing moves on its own. The skip link moves focus to the hero section.
 - **Motion.** B1 and B2 only (3.6).
 - **Kind.** Live product code (`HomeNav.tsx`); Pause Motion's behaviour is V4's (`live/motion.ts`, `boot.ts`).
-- **Polish two (docs/POLISH-2.md 3.1 and 3.2, P2-N#1).** The bar draws no motion toggle: it reads the lockup, Documentation from 720 px, the shared theme button, one hairline, Sign In and New Presentation. Under 360 px the row's gap is 4 px and the hairline hides, so the row takes 318 px of 320. Pause Motion is the hero terminal's 28 px icon toggle and the footer's text button (3.2).
+- **Polish two (docs/POLISH-2.md 3.1 and 3.2, P2-N#1).** The bar draws no motion toggle: it reads the lockup, Documentation from 720 px, the shared theme button, one hairline, Sign In and New Presentation. Under 360 px the row's gap is 4 px and the hairline hides, so the row takes 318 px of 320. Pause Motion is the hero terminal's 28 px icon toggle and the footer's text button (3.2). Since P2-N#2 (3.3) the shared theme button draws both half discs and CSS shows the one `html[data-theme]` names from the first paint, ◐ on a light page and ◑ on a dark one, with no script needed; its name is "Dark or light" for every visitor.
 
 ### 2.2 Hero
 

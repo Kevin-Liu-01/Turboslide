@@ -11761,6 +11761,16 @@
       "severity": 1,
       "evidence": "research-header 1.2 finding 3 (the pause glyph and a hairline inside Sign In at 320), nav-320-light-today.jpg",
       "note": "Polish two (docs/POLISH-2.md 6), P2-N#1"
+    },
+    {
+      "id": "home.nav.theme-first-paint",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances, with the page's module scripts aborted (the root's inline boot script runs and nothing hydrates): the navigation's theme button draws one glyph, ◐ in light and ◑ in dark, matching html[data-theme], and its accessible name is \"Dark or light\"; with JavaScript off it draws ◐ on the light page; after hydration and after each press the glyph follows html[data-theme]",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-header 1.2 finding 4 (an empty square until hydration at every width in both appearances, 0.8 s warm and 5.8 s cold at a load over 100), nav-1440-dark-before-hydration.jpg, nav-1440-dark-no-script.jpg",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-N#2"
     }
   ]
 }

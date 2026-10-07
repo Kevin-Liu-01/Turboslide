@@ -321,6 +321,100 @@ export async function fits320(browser: Browser): Promise<void> {
   expect(failures).toEqual([]);
 }
 
+// ---------------------------------------------------------------------------------------------
+// home.nav.theme-first-paint (P2-N#2)
+
+/** The theme button's drawn glyph (the one span that computes a display) and its name. */
+function readThemeButton(page: Page) {
+  return page.evaluate(() => {
+    const button = document.querySelector<HTMLElement>('header [data-control="view.theme"]')!;
+    const drawn = [...button.querySelectorAll<HTMLElement>('.pt-theme-glyph')].filter(
+      (g) => getComputedStyle(g).display !== 'none' && g.getClientRects().length > 0,
+    );
+    return {
+      theme: document.documentElement.getAttribute('data-theme'),
+      hydrated: document.querySelector('main#top')?.hasAttribute('data-hydrated') ?? false,
+      glyphs: drawn.map((g) => g.textContent ?? ''),
+      visible: drawn.every((g) => getComputedStyle(g).visibility === 'visible'),
+      name: button.getAttribute('aria-label'),
+      paper: getComputedStyle(document.body).backgroundColor,
+    };
+  });
+}
+
+const GLYPH: Record<Theme, string> = { light: '◐', dark: '◑' };
+
+export async function themeFirstPaint(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  for (const width of [1440, 390])
+    for (const theme of THEMES) {
+      const label = `${width} ${theme}`;
+      /* the page's module scripts aborted: the root's inline boot script sets html[data-theme]
+         and nothing hydrates */
+      const blocked = await homeContext(browser, width, theme);
+      try {
+        await blocked.page.route('**/*', (route) =>
+          route.request().resourceType() === 'script' ? route.abort() : route.continue(),
+        );
+        const response = await blocked.page.goto('/home', { waitUntil: 'load' });
+        expect(response?.status(), '/home answers 200').toBe(200);
+        const read = await readThemeButton(blocked.page);
+        notes.push(`${label} before hydration: ${JSON.stringify(read)}`);
+        if (read.hydrated) failures.push(`${label}: the page hydrated with its scripts aborted`);
+        if (read.theme !== theme) failures.push(`${label}: html[data-theme] is ${read.theme}`);
+        if (read.glyphs.join('') !== GLYPH[theme] || !read.visible)
+          failures.push(
+            `${label} before hydration: the button draws ${JSON.stringify(read.glyphs)}`,
+          );
+        if (read.name !== 'Dark or light')
+          failures.push(`${label} before hydration: the button is named "${read.name}"`);
+      } finally {
+        await blocked.context.close();
+      }
+      /* hydrated, then each press: the glyph follows html[data-theme] */
+      const live = await homeContext(browser, width, theme);
+      try {
+        await openHome(live.page);
+        const order: Theme[] =
+          theme === 'light' ? ['light', 'dark', 'light'] : ['dark', 'light', 'dark'];
+        for (const [i, want] of order.entries()) {
+          if (i > 0) await live.page.locator('header [data-control="view.theme"]').click();
+          await expect(live.page.locator('html')).toHaveAttribute('data-theme', want);
+          const read = await readThemeButton(live.page);
+          if (read.glyphs.join('') !== GLYPH[want] || read.name !== 'Dark or light')
+            failures.push(`${label} hydrated, ${want}: ${JSON.stringify(read)}`);
+        }
+        await expect(live.page.locator('header [data-control="view.theme"]')).toHaveAccessibleName(
+          'Dark or light',
+        );
+      } finally {
+        await live.context.close();
+      }
+    }
+  /* JavaScript off: no html[data-theme], the light page, and the button draws ◐ */
+  for (const width of [1440, 390]) {
+    const context = await browser.newContext({
+      extraHTTPHeaders,
+      viewport: { width, height: 900 },
+      javaScriptEnabled: false,
+    });
+    try {
+      const page = await context.newPage();
+      const response = await page.goto('/home', { waitUntil: 'load' });
+      expect(response?.status(), '/home answers 200').toBe(200);
+      const read = await readThemeButton(page);
+      notes.push(`${width} without script: ${JSON.stringify(read)}`);
+      if (read.theme !== null || read.glyphs.join('') !== GLYPH.light || !read.visible)
+        failures.push(`${width} without script: ${JSON.stringify(read)}`);
+    } finally {
+      await context.close();
+    }
+  }
+  test.info().annotations.push({ type: 'theme', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
 export function rows(): void {
   if (entered('home.nav.no-pause'))
     test(title('home.nav.no-pause'), async ({ browser }) => {
@@ -333,5 +427,11 @@ export function rows(): void {
       test.setTimeout(420_000);
       test.info().annotations.push({ type: 'load', description: `${oneMinuteLoad()}` });
       await fits320(browser);
+    });
+  if (entered('home.nav.theme-first-paint'))
+    test(title('home.nav.theme-first-paint'), async ({ browser }) => {
+      test.setTimeout(420_000);
+      test.info().annotations.push({ type: 'load', description: `${oneMinuteLoad()}` });
+      await themeFirstPaint(browser);
     });
 }

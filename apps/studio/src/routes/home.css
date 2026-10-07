@@ -313,7 +313,10 @@ html:has(.ts-product) {
   min-width: 0;
 }
 
+/* the bar's links draw no underline at rest, Sign In's among them once it is a link to /signin
+   (docs/POLISH-2.md 4.3, C13) */
 .ts-product-nav-links a,
+.ts-product-nav-signin a,
 .ts-product-nav-new {
   text-decoration: none;
 }
@@ -347,12 +350,6 @@ html:has(.ts-product) {
 .ts-product-nav .ts-product-nav-icon {
   color: var(--pt-ink);
   border-radius: var(--pt-radius);
-}
-
-/* the theme button's glyph is the shared component's text half disc, which only the client knows:
-   it shows once the page has hydrated, so a light visit never paints the dark glyph first */
-main:not([data-hydrated]) .ts-product-nav-icon .pt-theme-glyph {
-  visibility: hidden;
 }
 
 /* Sign In arrives after hydration in a slot drawn at its width from the first paint (sign-in.tsx),

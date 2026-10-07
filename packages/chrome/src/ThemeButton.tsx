@@ -1,9 +1,5 @@
-import { useState } from 'react';
+import { toggleTheme } from '@turboslide/viewer/theme';
 
-import { readTheme, toggleTheme } from '@turboslide/viewer/theme';
-import type { Theme } from '@turboslide/viewer/theme';
-
-import { useMountEffect } from './lib/useMountEffect';
 import { tipOf, tipProps } from './Tooltip';
 
 import './ToolButton.css';
@@ -17,12 +13,20 @@ import './ToolButton.css';
  * remaps its tokens under [data-theme='dark']; the boot script in the studio
  * root applies the saved choice before first paint and dark is the default
  * when nothing is saved. The D key in useShellKeys calls toggleTheme()
- * directly and the button follows through a MutationObserver on the
- * attribute.
+ * directly.
  *
  * The glyph is the deck's (directive 8.4): the half discs ◐ in light mode
  * and ◑ in dark mode, rendered as text at 16px, the one place in chrome a
- * text glyph stands for an icon. ToolButton.css sizes it (.pt-theme-glyph).
+ * text glyph stands for an icon. The button renders both and ToolButton.css
+ * shows the one html[data-theme] names (docs/POLISH-2.md 3.3), so the
+ * server's markup draws the right glyph from the first paint, before any
+ * script runs, and a press changes no markup. Without script the page has no
+ * data-theme, draws its light tokens and the button draws ◐.
+ *
+ * The icon button's name is "Dark or light", the tooltip's words, which are
+ * true for every visitor before and after hydration. The labelled button's
+ * name is its visible word "Theme", set as its label too so the name stays
+ * when the toolbar's tier three hides the word (Toolbar.css).
  *
  * The button is the markup ToolButton draws for a text glyph (the .pt-ib,
  * .pt-icon without a label, the shared tooltip), written here so the button
@@ -30,10 +34,7 @@ import './ToolButton.css';
  * table (51,136 B decoded) to /home, whose navigation draws this button
  * (docs/DESIGN.md 8.1; build/d4.md request to D2).
  */
-const DEFAULT_THEME: Theme = 'dark';
-
-/** The glyph names the theme the button is in: the left half filled in light, the right half in dark. */
-const GLYPH: Record<Theme, string> = { light: '◐', dark: '◑' };
+const NAME = 'Dark or light';
 
 export type ThemeButtonProps = {
   className?: string;
@@ -42,33 +43,23 @@ export type ThemeButtonProps = {
 };
 
 export function ThemeButton({ className, label = className === undefined }: ThemeButtonProps) {
-  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
-
-  useMountEffect(() => {
-    setTheme(readTheme());
-    const observer = new MutationObserver(() => setTheme(readTheme()));
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
-    return () => observer.disconnect();
-  });
-
-  const name = theme === 'dark' ? 'Switch to light' : 'Switch to dark';
   const classes = ['pt-ib', label ? '' : 'pt-icon', className ?? ''].filter(Boolean).join(' ');
   return (
     <button
       type="button"
       className={classes}
-      aria-label={name}
+      aria-label={label ? 'Theme' : NAME}
       data-control="view.theme"
       onClick={() => {
         toggleTheme();
       }}
-      {...tipProps(tipOf(label ? 'Dark or light (D)' : 'Dark or light', label ? 'Theme' : name))}
+      {...tipProps(tipOf(label ? `${NAME} (D)` : NAME, label ? 'Theme' : NAME))}
     >
-      <span className="pt-theme-glyph" aria-hidden="true">
-        {GLYPH[theme]}
+      <span className="pt-theme-glyph is-light" aria-hidden="true">
+        ◐
+      </span>
+      <span className="pt-theme-glyph is-dark" aria-hidden="true">
+        ◑
       </span>
       {label ? <span className="pt-lb">Theme</span> : null}
     </button>

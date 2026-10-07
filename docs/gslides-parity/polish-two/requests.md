@@ -58,3 +58,13 @@ Two ways out for the integrator with lanes A and D: keep the shared chrome modul
 (`ThemeButton`, `ToolButton.css`, `Tooltip`) in one group of `output.codeSplitting.groups` in
 `apps/studio/vite.config.ts` so a second importer adds no link to `/home`, and keep the docs'
 styles out of the vendor stylesheet; or ask Kevin to move the line. The line is not raised here.
+
+### P2-N-3, to the integrator: the theme button's name in `e2e/home-page.spec.ts`
+
+Since P2-N#2 the shared `ThemeButton`'s icon button is named "Dark or light" in both appearances,
+before and after hydration and after a press (`docs/POLISH-2.md` 3.3, C10, question Q27); the
+labelled button in the editor's toolbar is named "Theme". `apps/studio/e2e/home-page.spec.ts` 152
+and 156 (`pnpm check`'s `ROUND_THREE_SPECS`) still expect `Switch to ${other}` and `Switch to
+${theme}`. Both lines become `await expect(button).toHaveAttribute('aria-label', 'Dark or light');`,
+and the test can read the drawn glyph instead: the `.pt-theme-glyph` whose computed `display` is not
+`none` reads ◐ in light and ◑ in dark (`apps/studio/e2e/core/home/header.ts` `readThemeButton`).

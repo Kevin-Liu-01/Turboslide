@@ -101,3 +101,61 @@ Deviations: the theme button's wrapper span `.ts-product-nav-icons` left (its ru
 script is a `for` loop without a `try`; `HomeNav` keeps an unused `_props` until request P2-N-1
 lands. The footer's toggle is a `.pt-ib` with its 10 px sides in the gutter (`margin-right: -10px`
 from 720 px, `margin-left: -10px` under it) so its word sits on the column's edge.
+
+After the commit (3f8ff6e2), with both rows in the matrix, `core-gate --only specs --rows
+home.nav.no-pause,home.nav.fits-320` on 4722 passed both with zero retries (15:18 to 15:27, load
+131.3 to 229.3).
+
+## P2-N#2: the theme glyph from the first paint
+
+Items (docs/POLISH-2.md 3.3; C10, Q27): the shared `ThemeButton` renders both half discs, `.pt-
+theme-glyph.is-light` ◐ and `.is-dark` ◑, and `ToolButton.css` shows the one `html[data-theme]`
+names, so the server's markup draws the right glyph before any script runs and a press changes no
+markup; the React state, the MutationObserver and the `readTheme` import left. The icon button
+(the bar's, `label` false) is named "Dark or light", its tooltip's words, for every visitor; the
+labelled button (the editor's toolbar) is named "Theme", its visible word. `home.css`'s rule that
+hid the glyph until hydration left. One more rule in the bar: `.ts-product-nav-signin a` draws no
+underline, since lane A's work in the tree turns Sign In into a link to `/signin` (C13) and the
+first hydrated pictures showed it underlined.
+
+Files: `packages/chrome/src/ThemeButton.tsx`, `ToolButton.css`,
+`packages/chrome/src/__tests__/theme-button.test.tsx` (new: the server markup's two glyphs and the
+name, the same markup across presses while `html[data-theme]` flips, the labelled button's name,
+the CSS rule); `apps/studio/src/routes/home.css`; `apps/studio/e2e/core/home/header.ts`
+(`home.nav.theme-first-paint`), `home/design.ts` (`home.nav.icons` reads the tooltip "Dark or
+light"); `docs/LANDING.md` 2.1; the matrix and README's block.
+
+Rows, on 4722:
+
+| Row | Reading | Load |
+| --- | --- | --- |
+| `home.nav.theme-first-paint` (new) | passed: with the module scripts aborted (the page not hydrated) the bar draws one glyph, ◐ on the light page and ◑ on the dark one at 1440 and 390, named "Dark or light"; without script ◐ on the light page at both widths; hydrated and after each of two presses the glyph follows `html[data-theme]` | 123.2 to 119.3 |
+| `home.nav.icons` (as restated in P2-N#1, the tooltip now "Dark or light") | passed through core-gate, zero retries | 119.3 |
+
+The node-server build (shared tree, 15:41 to 15:47, load 98.3 to 132.4) on 4732 with mail off:
+`home.budget.bytes-page`, `live-module` and `shared` passed; `lcp`, `frame` and `main-thread` not
+read (load 94 to 96); `bytes-first` failed on the document alone, 100,650 B decoded (16,993 B
+brotli), the page CSS 18,551 B brotli and the route chunk 41,068 B decoded, 9,079 B brotli. This
+push adds 71 B to the document, all in the theme button (the second glyph span, the `is-light`
+class, the name "Dark or light" two bytes shorter than "Switch to light" in the label and the
+tooltip), read by diffing this build's document against P2-N#1's; with P2-N#1's -51 B lane N's
+pushes stand at +20 B against the design round's tree, and P2-N#3's lead gives 62 B back.
+`check-client-bundle.mjs` reads every ceiling crossed on the shared vendor chunk (1,430,014 B).
+Other gates: `tsc -p apps/studio --noEmit` reports one error, in lane A's work in progress
+(`e2e/core/auth-plate.ts` 1134), and `tsc -b packages/chrome` one, in lane A's `TitleRow.tsx` 544;
+none in this push's files. The chrome package's unit tests: `theme-button.test.tsx` 4 passed; the
+whole package at load 278 failed 17 tests, the sign in ones in lane A's work in progress and the
+rest 5 s timeouts (the eight other files pass with a 60 s timeout: 133 tests). Brand lint in
+enforce mode 0 open findings; `competitor.test.ts` passed; prettier clean.
+
+Pictures (`n/`): `n2-bar-<1440|390>-<light|dark>-before-hydration.jpg` (the module scripts
+aborted), `-no-script.jpg` (JavaScript off) and `-hydrated.jpg` (the tooltip "Dark or light" shown
+by the pointer). Each was opened: ◐ on the light page and ◑ on the dark one before hydration, ◐ on
+the light page without script whatever the system's appearance, the plate after hydration, and
+Sign In without an underline.
+
+Deviation: the labelled button carries `aria-label="Theme"`, its visible word, where 3.3 says it
+carries none: the toolbar's tier three hides the word with `display: none` (`Toolbar.css` 332), and
+a button whose only text is hidden and whose glyphs are `aria-hidden` would have no name. The name
+equals the visible label, so WCAG 2.5.3 holds. Request P2-N-3: `apps/studio/e2e/home-page.spec.ts`
+152 and 156 still expect "Switch to ...".

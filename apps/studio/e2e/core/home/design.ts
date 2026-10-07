@@ -267,9 +267,9 @@ async function navIcons(browser: Browser): Promise<void> {
           failures.push(`${label}: the bar reads ${nav.order.join(', ')}`);
         if (!nav.themeIcon)
           failures.push(`${label}: the theme button is not the shell's icon square`);
-        /* the shared component's own words: its name says the next appearance, its sentence the
-           control (ThemeButton.tsx) */
-        const nextAppearance = theme === 'light' ? 'Switch to dark' : 'Switch to light';
+        /* the shared component's own words, true before and after hydration (restated in polish
+           two, P2-N#2; ThemeButton.tsx) */
+        const nextAppearance = 'Dark or light';
         if (nav.themeTip !== nextAppearance)
           failures.push(`${label}: the theme button's tooltip reads "${nav.themeTip}"`);
         const boxed = nav.boxed.filter((b) => b.control !== 'home.nav.new');
@@ -284,7 +284,7 @@ async function navIcons(browser: Browser): Promise<void> {
         await page.mouse.move(tb.x + tb.width / 2, tb.y + tb.height / 2, { steps: 6 });
         await expect(page.locator('#pt-tip')).toBeVisible({ timeout: 3_000 });
         const tip = await page.locator('#pt-tip').innerText();
-        if (!tip.startsWith(nextAppearance) || !tip.includes('Dark or light'))
+        if (!tip.startsWith(nextAppearance))
           failures.push(`${label}: the tooltip plate reads "${tip}"`);
         await page.mouse.move(tb.x - 40, tb.y + 200);
       } finally {

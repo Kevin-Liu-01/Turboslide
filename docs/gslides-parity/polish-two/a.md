@@ -245,3 +245,24 @@ Deviations:
 - `accounts.anonymous-deck-kept` reads "keeps the deck open with no reload of the draft" as: the
   stored deck stays at its address with its title; the editor's code exchange reloads the page once
   to take the account's identity, as it did before the plate (the calls are unchanged, 4.7).
+
+## P2-A#5: the sign in mail
+
+Items (docs/POLISH-2.md 4.3, 4.5, C21; docs/NEXT.md 4.3.2 item 8): the sign in mail's subject is
+"Sign in to Turboslide" (it carried the code, which a lock screen shows); the HTML body opens with
+the wordmark, the word "Turboslide" as the lockup sets it (Inter 500 at 22 px, -0.025em, ink) as
+text, so no client blocks a picture; the links are ink; the body's sentences are unchanged.
+
+Files: `apps/studio/src/server/auth/mail/templates.ts`, its test `templates.test.ts` (the subject
+holds no digit; the body opens with the wordmark; the link's ink), `apps/studio/e2e/accounts.spec.ts`
+(`accounts.mail-branded`, reading the server's capture table), the matrix row.
+
+Row `accounts.mail-branded` on 4743, load 110: passed, zero retries: the subject "Sign in to
+Turboslide", the body opening `<p data-wordmark="turboslide" ...>Turboslide</p>`, one link in
+`color: #070707`, the text body with the link and the code.
+
+Gates: `vitest run apps/studio/src/server/auth/mail` 13 passed; `tsc -b` exit 0 (A#4's run, no
+type changed since); prettier clean.
+
+Pictures (`a/`): `a5-mail-1440.jpg` and `a5-mail-390.jpg`, the HTML body of a captured mail with
+the code and the link's token masked; a mail draws one appearance, its own white ground.

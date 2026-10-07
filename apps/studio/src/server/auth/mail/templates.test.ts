@@ -20,14 +20,21 @@ describe('the mail templates', () => {
       code: '482913',
       minutes: 5,
     });
-    expect(mail.subject).toBe('Your Turboslide sign in code is 482913');
+    /* the subject names the product and never the code, which a lock screen shows (P2-A#5) */
+    expect(mail.subject).toBe('Sign in to Turboslide');
+    expect(mail.subject).not.toMatch(/\d/);
     expect(mail.text).toContain('Code: 482913');
     expect(mail.text).toContain('https://studio.example.test/api/auth/magic-link/verify?token=t');
     expect(mail.text).toContain('expire in 5 minutes');
     expect(mail.html).toContain(
-      '<a href="https://studio.example.test/api/auth/magic-link/verify?token=t" rel="noreferrer">Sign in</a>',
+      '<a href="https://studio.example.test/api/auth/magic-link/verify?token=t" rel="noreferrer" style="color: #070707;">Sign in</a>',
     );
     expect(mail.html.startsWith('<!doctype html>')).toBe(true);
+    /* the body opens with the wordmark */
+    const body = mail.html.slice(mail.html.indexOf('<body'));
+    expect(body.slice(body.indexOf('>') + 1).trimStart()).toMatch(
+      /^<p data-wordmark="turboslide"[^>]*>Turboslide<\/p>/,
+    );
   });
 
   test('names are escaped in the HTML and left as text in the plain body', () => {

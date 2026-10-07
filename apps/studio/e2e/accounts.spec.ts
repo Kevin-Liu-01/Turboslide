@@ -3325,3 +3325,45 @@ test.describe('polish two: every surface on the plate (docs/POLISH-2.md 4.3, 6.4
     }
   });
 });
+
+/* ---------------------------------------------------------------------------------------------
+   Polish two, P2-A#5 (docs/POLISH-2.md 4.3, 4.5, C21): the sign in mail, read from the server's
+   capture table. */
+
+const MAIL_ROW = [
+  'accounts.mail-branded',
+  'Local, mail capture: the sign in mail\'s subject is "Sign in to Turboslide" and holds no digit; its HTML body starts with the Turboslide wordmark and its links are ink; its text body carries the link and the code',
+] as const;
+
+test.describe('polish two: the sign in mail (docs/POLISH-2.md C21)', () => {
+  test(localTitle(...MAIL_ROW), async ({ request }) => {
+    test.setTimeout(300_000);
+    const email = `mail-${Date.now()}@example.test`;
+    const asked = await request.post('/api/auth/sign-in/magic-link', {
+      data: { email, callbackURL: '/decks' },
+      /* a forwarded address of the row's own: the library counts ten mails an hour per address */
+      headers: {
+        ...SAME_ORIGIN,
+        'x-forwarded-for': `10.80.${Math.floor(Math.random() * 250) + 1}.9`,
+      },
+    });
+    expect(asked.status()).toBe(200);
+    await expect.poll(() => signInMails(email).length, { timeout: 60_000 }).toBe(1);
+    const mail = signInMails(email)[0]!;
+    const html = mail.html ?? '';
+    const body = html.slice(html.indexOf('<body'));
+    const first = body.slice(body.indexOf('>') + 1).trimStart();
+    const links = [...html.matchAll(/<a\s[^>]*>/g)].map((m) => m[0]);
+    test.info().annotations.push({
+      type: 'mail',
+      description: `subject "${mail.subject}"; the body opens ${first.slice(0, 60).replace(/</g, '[')}; ${links.length} link(s) ${links.map((a) => /style="([^"]*)"/.exec(a)?.[1] ?? 'no style').join(', ')}; the text has the link ${/magic-link\/verify/.test(mail.text)} and the code ${/Code: \d{6}/.test(mail.text)}`,
+    });
+    expect(mail.subject).toBe('Sign in to Turboslide');
+    expect(mail.subject).not.toMatch(/\d/);
+    expect(first).toMatch(/^<p data-wordmark="turboslide"[^>]*>Turboslide<\/p>/);
+    expect(links.length).toBeGreaterThan(0);
+    for (const a of links) expect(a, 'the link is ink').toMatch(/color: #070707/);
+    expect(mail.text).toMatch(/https?:\/\/\S+magic-link\/verify\S+/);
+    expect(mail.text).toMatch(/Code: \d{6}/);
+  });
+});

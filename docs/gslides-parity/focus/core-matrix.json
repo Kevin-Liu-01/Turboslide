@@ -11886,6 +11886,15 @@
       "today": "not driven",
       "evidence": "research-auth S8, S10, S11, pictures 16 to 19 and 26",
       "note": "Polish two (docs/POLISH-2.md 6), P2-A#4"
+    },
+    {
+      "id": "accounts.mail-branded",
+      "feature": "share",
+      "interaction": "Local, mail capture: the sign in mail's subject is \"Sign in to Turboslide\" and holds no digit; its HTML body starts with the Turboslide wordmark and its links are ink; its text body carries the link and the code",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "research-auth S4 (the code in the subject); docs/NEXT.md 4.3.2 item 8",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#5"
     }
   ]
 }

@@ -23,8 +23,15 @@ function paragraphs(lines: readonly string[]): string {
 }
 
 function link(url: string, label: string): string {
-  return `<p><a href="${escapeHtml(url)}" rel="noreferrer">${escapeHtml(label)}</a></p>`;
+  return `<p><a href="${escapeHtml(url)}" rel="noreferrer" style="color: #070707;">${escapeHtml(label)}</a></p>`;
 }
+
+/**
+ * The wordmark at the head of a mail (docs/POLISH-2.md C21; docs/NEXT.md 4.3.2 item 8): the word
+ * "Turboslide" as the lockup sets it, Inter 500 at 22 px with -0.025em tracking in ink, as text, so
+ * every mail client draws it with no picture to fetch and nothing a client blocks.
+ */
+export const MAIL_WORDMARK = `<p data-wordmark="turboslide" style="margin: 0 0 24px; font: 500 22px/1 Inter, system-ui, sans-serif; letter-spacing: -0.025em; color: #070707;">${MAIL_PRODUCT}</p>`;
 
 function document(title: string, body: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title></head><body style="font-family: Inter, system-ui, sans-serif; color: #070707; background: #ffffff; padding: 24px;">\n${body}\n</body></html>`;
@@ -44,7 +51,9 @@ export function roleSentence(role: GrantRole): string {
 
 /**
  * One mail with the magic link and the six digit code (SPEC-3 7.3 item 1); without a link when
- * only a code was asked for (the email OTP route called on its own).
+ * only a code was asked for (the email OTP route called on its own). The subject names the
+ * product and never the code, which a lock screen would show (docs/POLISH-2.md C21); the HTML
+ * body opens with the wordmark.
  */
 export function signInMail(input: { url?: string; code: string; minutes: number }): MailContent {
   const withLink = input.url !== undefined;
@@ -59,11 +68,12 @@ export function signInMail(input: { url?: string; code: string; minutes: number 
     'If you did not ask to sign in, ignore this message.',
   ];
   return {
-    subject: `Your ${MAIL_PRODUCT} sign in code is ${input.code}`,
+    subject: `Sign in to ${MAIL_PRODUCT}`,
     text: [lines[0], ...(withLink ? [input.url] : []), ...lines.slice(1)].join('\n\n'),
     html: document(
       `Sign in to ${MAIL_PRODUCT}`,
       [
+        MAIL_WORDMARK,
         paragraphs([lines[0] ?? '']),
         ...(input.url !== undefined ? [link(input.url, 'Sign in')] : []),
         paragraphs(lines.slice(1)),

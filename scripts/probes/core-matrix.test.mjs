@@ -69,6 +69,13 @@ const DESIGN_NOTE = /^Design round \(docs\/DESIGN\.md 11\), DR-D[1-5]#\d+[a-z]?\
 const DESIGN_RETIRED = ['versions.field.square', 'brand.reset.default-kit'];
 const isDesignRow = (row) => (row.note ?? '').startsWith('Design round');
 
+/* Polish two (docs/POLISH-2.md 6.1): a row a push of the round entered carries a note that starts
+   "Polish two"; a restated row keeps its note and gains "; restated in polish two, P2-<lane>#<n>"
+   at its end, so it is never counted as entered. No row retires in this round. */
+const POLISH2_NOTE = /^Polish two \(docs\/POLISH-2\.md 6\), P2-[FNAD]#\d+[a-z]?\b/;
+const POLISH2_RETIRED = [];
+const isPolish2Row = (row) => (row.note ?? '').startsWith('Polish two');
+
 describe('the committed matrix', () => {
   it('loads with every row on the scheme and no duplicate id', () => {
     expect(CORE_MATRIX.length).toBeGreaterThan(300);
@@ -536,12 +543,16 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order; the design
            round's home rows are counted by its own term */
-        CORE_MATRIX.filter((r) => areaOf(r.id) === 'home' && !isDesignRow(r)).length +
+        CORE_MATRIX.filter((r) => areaOf(r.id) === 'home' && !isDesignRow(r) && !isPolish2Row(r))
+          .length +
         /* the design round (docs/DESIGN.md 10.6, 11): each push enters its own rows and retires
            the two rows DESIGN_RETIRED names in the push that enters their replacement, so the
            count reads the rows entered and the retired ones gone */
         CORE_MATRIX.filter(isDesignRow).length -
-        DESIGN_RETIRED.filter((id) => !isCoreId(id)).length,
+        DESIGN_RETIRED.filter((id) => !isCoreId(id)).length +
+        /* polish two (docs/POLISH-2.md 6.1): each push enters its own rows; none retires */
+        CORE_MATRIX.filter(isPolish2Row).length -
+        POLISH2_RETIRED.filter((id) => !isCoreId(id)).length,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -1386,8 +1397,10 @@ describe('the realtime round (docs/REALTIME.md section 2)', () => {
     expect(rowsForFeature('realtime').map((row) => row.id)).toEqual(REALTIME_IDS);
     expect(AREA_FEATURE.accounts).toBe('share');
     for (const id of ACCOUNTS_IDS) expect(coreRow(id).feature).toBe('share');
+    /* polish two's local rows (docs/POLISH-2.md 6.4) are appended after these five */
     expect(
       localRows()
+        .filter((row) => !isPolish2Row(row))
         .map((row) => row.id)
         .slice(-5),
     ).toEqual(ACCOUNTS_IDS);
@@ -1471,7 +1484,12 @@ describe('the realtime round (docs/REALTIME.md section 2)', () => {
       { id: 'cost.redis.commands', feature: 'cost', result: 'failed' },
     ]);
     /* the five accounts rows are listed apart on a deployment run like the people round's ten */
-    expect(run.local.map((row) => row.id).slice(-5)).toEqual(ACCOUNTS_IDS);
+    expect(
+      run.local
+        .filter((row) => !isPolish2Row(coreRow(row.id)))
+        .map((row) => row.id)
+        .slice(-5),
+    ).toEqual(ACCOUNTS_IDS);
     expect(() => shipVerdict(results, ['realtime'])).toThrow(/realtime cannot be parked/);
     const verdict = shipVerdict({ ...results, 'realtime.card.chip-painted': 'failed' });
     expect(verdict.ok).toBe(false);
@@ -1741,9 +1759,10 @@ describe('the landing round', () => {
 
   it('enters the home rows in push order, each on the driver with its note', () => {
     /* the design round's home rows (docs/DESIGN.md 11) are its own block's, below */
-    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home' && !isDesignRow(row)).map(
-      (row) => row.id,
-    );
+    /* and polish two's (docs/POLISH-2.md 6.3) are its block's, at the end */
+    const home = CORE_MATRIX.filter(
+      (row) => areaOf(row.id) === 'home' && !isDesignRow(row) && !isPolish2Row(row),
+    ).map((row) => row.id);
     const ids = new Set(home);
     /* the second pass's rows entered are a prefix of its push order (no push's row before an
        earlier push's), wherever in the home rows a lane placed them (beside its band's first
@@ -1758,11 +1777,12 @@ describe('the landing round', () => {
     expect(home.length).toBe(firstKept.length + second.length + followup.length);
     expect(
       rowsForDriver('core/home.spec.ts')
-        .filter((row) => !isDesignRow(row))
+        .filter((row) => !isDesignRow(row) && !isPolish2Row(row))
         .map((row) => row.id),
     ).toEqual(home);
     for (const row of CORE_MATRIX.filter(
-      (candidate) => areaOf(candidate.id) === 'home' && !isDesignRow(candidate),
+      (candidate) =>
+        areaOf(candidate.id) === 'home' && !isDesignRow(candidate) && !isPolish2Row(candidate),
     )) {
       expect(row.feature, row.id).toBe('decks');
       expect(row.driver, row.id).toBe('core/home.spec.ts');
@@ -1816,5 +1836,38 @@ describe('the design round', () => {
       /; restated in the design round, DR-D/.test(r.note ?? ''),
     ))
       expect(isDesignRow(row), row.id).toBe(false);
+  });
+});
+
+// Polish two (docs/POLISH-2.md 6): day 0 (P2-F#1) adds the count term above and keeps the landing
+// and the realtime blocks reading their own rows; every push of the round enters its rows at the
+// end of the file with the round's note on a driver that exists, restates rows in place, and a
+// local row is not driven (production holds no account).
+describe('polish two', () => {
+  it('enters each row at the end with the round note, a known driver and the scheme', () => {
+    const polish2 = CORE_MATRIX.filter(isPolish2Row);
+    expect(POLISH2_RETIRED).toEqual([]);
+    for (const row of polish2) {
+      expect(row.note, row.id).toMatch(POLISH2_NOTE);
+      expect(row.id, row.id).toMatch(CORE_ID_PATTERN);
+      expect(CORE_DRIVERS, row.id).toContain(row.driver);
+      expect(row.feature, row.id).toBe(
+        ROW_FEATURE[row.id] ?? AREA_FEATURE[areaOf(row.id)] ?? areaOf(row.id),
+      );
+      if (isLocalRow(row)) {
+        expect(row.today, row.id).toBe('not driven');
+        expect(row.severity, row.id).toBeUndefined();
+      }
+      expect(isMeasureRow(row), row.id).toBe(false);
+    }
+    /* the round's rows sit after every row that is not the round's, in push order */
+    const first = CORE_MATRIX.findIndex(isPolish2Row);
+    if (first >= 0)
+      expect(CORE_MATRIX.slice(first).every(isPolish2Row), 'polish two rows last').toBe(true);
+    /* a restated row is not counted as entered */
+    for (const row of CORE_MATRIX.filter((r) =>
+      /(?:; restated|^Restated) in polish two, P2-/.test(r.note ?? ''),
+    ))
+      expect(isPolish2Row(row), row.id).toBe(false);
   });
 });

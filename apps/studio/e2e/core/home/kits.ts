@@ -131,12 +131,18 @@ function expectReadable(samples: readonly Sample[], kit: string): void {
   }
 }
 
-/** Every colour on /home with a hue (paper and ink are grey), and where it is painted. */
+/**
+ * Every colour on /home with a hue (paper and ink are grey), and where it is painted. The kits
+ * band's six colour swatches show the kit's colours, its Primary among them (DESIGN.md 8.0
+ * "Colour" and 8.7, restated in the design round's finishing round 2); home.kits.colors reads each
+ * against the token the slides draw, so they are left out here.
+ */
 const hues = (page: Page) =>
   page.evaluate(() => {
     const out = new Set<string>();
     for (const el of document.querySelectorAll<HTMLElement>('body *')) {
       if (!el.checkVisibility({ visibilityProperty: true, opacityProperty: true })) continue;
+      if (el.closest('[data-kit-roles]') !== null) continue;
       const cs = getComputedStyle(el);
       const paints = [cs.backgroundColor];
       if ([...el.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? '').trim()))

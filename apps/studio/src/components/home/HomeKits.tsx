@@ -19,7 +19,11 @@ import { HOME_THEME_AT_REST, HOME_THEME_TILES } from './theme-tiles.generated';
  * stylesheet the renderer writes for that theme (`themes.generated.ts`, a chunk of its own asked
  * for on a tile's first hover, focus or press), so
  * every slide on the page takes it, and a kit's colors stay over it. General Translation, the
- * page deck's theme, is pressed at rest.
+ * page deck's theme, is pressed at rest. Under the kits, the kit's six colours as the Brand kit
+ * panel names them (Text, Background, Captions, Hints, Primary, Accent), each a swatch and its hex
+ * value in tabular figures, and the contrast of its text on its background (DESIGN.md 8.7), read
+ * by the band's chunk from a slide of the grid, so they follow the theme, the kit, a typed colour
+ * and the page's appearance.
  */
 const SWATCHES: readonly { id: KitId; pressed: boolean }[] = [
   { id: 'gt', pressed: true },
@@ -78,6 +82,15 @@ export function HomeKits() {
                 </button>
               ))}
             </span>
+          </div>
+          {/* the kit's six colours and its text's contrast (DESIGN.md 8.7), written by the
+              band's chunk from a slide's tokens into boxes that hold their height at rest */}
+          <div className="ts-row ts-kit-colors">
+            <span className="ts-row-key">{KITS_ROUND.colorsKey}</span>
+            <div className="ts-kit-roles">
+              <ul data-kit-roles="" aria-label={KITS_ROUND.colorsKey} />
+              <p className="ts-kit-ratio pt-num" data-kit-ratio="" />
+            </div>
           </div>
           <div className="ts-row">
             <label className="ts-row-key" htmlFor="ts-kit-color">

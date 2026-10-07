@@ -11398,6 +11398,16 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D4#2, entered in its finishing round 2 for pass 3 finding 3; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
+      "id": "home.kits.colors",
+      "feature": "decks",
+      "interaction": "At 1440 and 390 in both appearances the kits band at rest lists the kit's six colours in a Colors row under the kits, as the Brand kit panel names them (Text, Background, Captions, Hints, Primary, Accent), three to a line at 1440 and two at 390: each a swatch painted in its hex value, the value the token the grid's slides draw, in tabular figures with the slashed zero; under them \"Text on background reads N to 1\", N the contrast of the text on the background floored to a tenth; at 1440 Kestrel, a typed background and the Swiss theme each change the six values and the readout to what the slides then draw",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "VERIFICATION.md design round pass 3 finding 6: the kits band draws no contrast readout and no six colours with hex values at rest, which DESIGN.md 8.7 lists",
+      "note": "Design round (docs/DESIGN.md 11), DR-D4#5, entered in its finishing round 2 for pass 3 finding 6; driven by apps/studio/e2e/core/home/design.ts"
+    },
+    {
       "id": "decks.pages.radius",
       "feature": "decks",
       "interaction": "On /decks, /decks/trash and /decks/templates at 1440 and 390 in both appearances: buttons, fields, the search pill, selects, the view switch and the card menus compute 6 px; dialogs 8 px; cards, thumbnails and rows 0",

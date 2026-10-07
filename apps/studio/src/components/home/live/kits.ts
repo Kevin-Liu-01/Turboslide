@@ -7,6 +7,7 @@ import { finishBand } from './motion';
 import {
   applyKit,
   backgroundColors,
+  contrastRatio,
   drawStills,
   HEX,
   paintSlide,
@@ -32,8 +33,16 @@ import '../editing.css';
  * Escape or leaving the field without Enter puts the kit's back. A typed colour takes the light or
  * the dark ink, whichever reads higher on it, and a colour whose best text reads under 4.5:1 is
  * refused with the sentence that names its ratio. Undo takes the band's newest change back. The grid
- * holds every slide of the deck as a thumbnail, in the deck's order. V2's file, the kits band's chunk.
+ * holds every slide of the deck as a thumbnail, in the deck's order. The Colors row lists the six
+ * colours in force with their hex values and the contrast of the text on the background (DESIGN.md
+ * 8.7). V2's file, the kits band's chunk.
  */
+
+/**
+ * The sheet token each of the kit's six colour roles sets, in KITS_ROUND.roles' order (Text,
+ * Background, Captions, Hints, Primary, Accent; packages/schema/src/brand.ts KIT_COLOR_TOKENS).
+ */
+const ROLE_TOKENS = ['ink', 'paper', 'ink-2', 'titanium', 'blue', 'accent'] as const;
 
 /** The band entry the loader starts (LANDING.md 6.3 "The band loader"). */
 export function start(ctx: LiveContext): void {
@@ -108,6 +117,42 @@ export function startKits(ctx: LiveContext): void {
     renumber(grid, state);
   };
 
+  // ---- the kit's six colours and its text's contrast on its background (DESIGN.md 8.7): read
+  // from a slide of the grid as the theme's sheet and the kit set its tokens, so they follow the
+  // theme, the kit, a typed colour and the page's appearance; the ratio by the page's one contrast
+  // function, floored to a tenth as the refusal sentence reads it ----
+  const roles = band.querySelector<HTMLElement>('[data-kit-roles]');
+  const ratioLine = band.querySelector<HTMLElement>('[data-kit-ratio]');
+  const drawColors = (): void => {
+    const slide = grid?.querySelector<HTMLElement>('[data-home-slides]');
+    if (roles === null || ratioLine === null || slide == null) return;
+    const style = getComputedStyle(slide);
+    const hex = ROLE_TOKENS.map((t) => style.getPropertyValue(`--${t}`).trim().toLowerCase());
+    roles.replaceChildren(
+      ...KITS_ROUND.roles.map((name, i) => {
+        const li = document.createElement('li');
+        const swatch = document.createElement('i');
+        const code = document.createElement('span');
+        swatch.style.background = hex[i] ?? '';
+        code.className = 'pt-num';
+        code.dataset['num'] = 'code';
+        code.textContent = hex[i] ?? '';
+        li.append(swatch, name, code);
+        return li;
+      }),
+    );
+    const [text = '', paper = ''] = hex;
+    ratioLine.textContent =
+      HEX.test(text) && HEX.test(paper)
+        ? KITS_ROUND.ratio(Math.floor(contrastRatio(text, paper) * 10) / 10)
+        : '';
+  };
+  new MutationObserver(drawColors).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawColors);
+
   // ---- the themes (DESIGN.md 8.7): a pick swaps in the renderer's stylesheet of that theme for
   // every slide on the page, one style element after the page's own sheets; a kit's colours are
   // inline on each slide, so they stay over any theme ----
@@ -143,6 +188,7 @@ export function startKits(ctx: LiveContext): void {
         }
         themeSheet.textContent = css[id] ?? '';
         themeSheet.dataset['homeTheme'] = id;
+        drawColors();
         for (const other of tiles) other.setAttribute('aria-pressed', String(other === tile));
         say(KITS_ROUND.status.theme(tile.textContent?.trim() ?? id));
       });
@@ -185,13 +231,12 @@ export function startKits(ctx: LiveContext): void {
   const showPreview = (hex: string | null): void => {
     preview = hex;
     const state = store.get();
-    if (hex === null) {
-      paintSlides(root, state);
-      return;
-    }
+    if (hex === null) paintSlides(root, state);
     // K2: a cut on every slide of the page, before the change is made
-    for (const slide of root.querySelectorAll<HTMLElement>('[data-home-slides]'))
-      if (slide.closest('[data-live-overlay]') === null) applyKit(slide, state.kit, hex);
+    else
+      for (const slide of root.querySelectorAll<HTMLElement>('[data-home-slides]'))
+        if (slide.closest('[data-live-overlay]') === null) applyKit(slide, state.kit, hex);
+    drawColors();
   };
   /** the field's value as a colour: `#` and six hex digits, a missing `#` added */
   const read = (): string => {
@@ -256,6 +301,7 @@ export function startKits(ctx: LiveContext): void {
   store.subscribe((state, event) => {
     syncGrid(state);
     paintSwatches(state);
+    drawColors();
     if (preview !== null && event.change.band !== 'kits') showPreview(preview);
     if (event.kind === 'undo' && event.change.band === 'kits') {
       if (field !== null && document.activeElement !== field) field.value = '';
@@ -269,4 +315,5 @@ export function startKits(ctx: LiveContext): void {
   const state = store.get();
   syncGrid(state);
   paintSwatches(state);
+  drawColors();
 }

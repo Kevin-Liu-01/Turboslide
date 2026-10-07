@@ -79,6 +79,7 @@ export const ROWS: readonly string[] = [
   'home.agents.history-panel',
   'home.people.share-dialog',
   'home.hero.font-swap',
+  'home.kits.colors',
 ];
 
 type Theme = 'light' | 'dark';
@@ -2079,6 +2080,154 @@ async function fontSwap(browser: Browser): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------------------------
+// home.kits.colors (DESIGN.md 8.7; the design round's pass 3 finding 6)
+
+/** The Colors row as drawn, and the six tokens of the grid's first slide as the renderer set them. */
+async function readColors(page: Page) {
+  return page.evaluate(() => {
+    const band = document.querySelector('[data-band="kits"]')!;
+    const rows = [...band.querySelectorAll<HTMLElement>('[data-kit-roles] > li')].map((li) => {
+      const swatch = li.querySelector('i');
+      const code = li.querySelector<HTMLElement>('.pt-num');
+      return {
+        name: [...li.childNodes]
+          .filter((n) => n.nodeType === Node.TEXT_NODE)
+          .map((n) => n.textContent)
+          .join('')
+          .trim(),
+        hex: (code?.textContent ?? '').trim(),
+        num: code === null ? '' : getComputedStyle(code).fontVariantNumeric,
+        paint: swatch === null ? '' : getComputedStyle(swatch).backgroundColor,
+        h: Math.round(li.getBoundingClientRect().height),
+      };
+    });
+    const slide = band.querySelector<HTMLElement>('[data-kit-grid] [data-home-slides]');
+    const style = slide === null ? null : getComputedStyle(slide);
+    const tokens = ['ink', 'paper', 'ink-2', 'titanium', 'blue', 'accent'].map((t) =>
+      (style?.getPropertyValue(`--${t}`) ?? '').trim().toLowerCase(),
+    );
+    const list = band.querySelector('[data-kit-roles]');
+    return {
+      rows,
+      tokens,
+      ratio: (band.querySelector('[data-kit-ratio]')?.textContent ?? '').trim(),
+      ratioNum: getComputedStyle(band.querySelector('[data-kit-ratio]')!).fontVariantNumeric,
+      listHeight: list === null ? 0 : Math.round(list.getBoundingClientRect().height),
+    };
+  });
+}
+
+/** The WCAG ratio of two #rrggbb colours, floored to a tenth as the page reads it. */
+function floorRatio(a: string, b: string): number {
+  const lum = (hex: string): number => {
+    const n = Number.parseInt(hex.slice(1), 16);
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      const s = v / 255;
+      return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * c[0]! + 0.7152 * c[1]! + 0.0722 * c[2]!;
+  };
+  const [x, y] = [lum(a) + 0.05, lum(b) + 0.05];
+  return Math.floor((Math.max(x, y) / Math.min(x, y)) * 10) / 10;
+}
+
+const rgbOf = (hex: string): string => {
+  const n = Number.parseInt(hex.slice(1), 16);
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+};
+
+/**
+ * The kits band at rest lists the kit's six colours as the Brand kit panel names them, each a
+ * swatch painted in its hex value, which is the token the grid's slides draw, in tabular figures
+ * with the slashed zero, and the contrast of the text on the background; Kestrel, a typed
+ * background and the Swiss theme each change them to the colours the slides then draw.
+ */
+async function kitsColors(browser: Browser): Promise<void> {
+  const failures: string[] = [];
+  const notes: string[] = [];
+  const check = (label: string, read: Awaited<ReturnType<typeof readColors>>): void => {
+    const names = read.rows.map((r) => r.name);
+    if (JSON.stringify(names) !== JSON.stringify(KITS_ROUND.roles))
+      failures.push(`${label}: the roles read ${names.join(', ')}`);
+    read.rows.forEach((row, i) => {
+      if (row.hex !== read.tokens[i])
+        failures.push(`${label}: ${row.name} reads ${row.hex}, the slides draw ${read.tokens[i]}`);
+      if (!/^#[0-9a-f]{6}$/.test(row.hex))
+        failures.push(`${label}: ${row.name} reads "${row.hex}"`);
+      else if (row.paint !== rgbOf(row.hex))
+        failures.push(`${label}: ${row.name}'s swatch paints ${row.paint} for ${row.hex}`);
+      if (!row.num.includes('tabular-nums') || !row.num.includes('slashed-zero'))
+        failures.push(`${label}: ${row.name}'s value in ${row.num}`);
+    });
+    const [text = '', paper = ''] = read.tokens;
+    const want = KITS_ROUND.ratio(floorRatio(text, paper));
+    if (read.ratio !== want) failures.push(`${label}: the readout "${read.ratio}", not "${want}"`);
+    if (!read.ratioNum.includes('tabular-nums'))
+      failures.push(`${label}: the readout in ${read.ratioNum}`);
+  };
+  for (const size of SIZES)
+    for (const theme of THEMES) {
+      const { context, page } = await homeContext(browser, size, theme);
+      const label = `${size.width} ${theme}`;
+      try {
+        await openHome(page);
+        await bandReady(page, 'kits');
+        const band = page.locator('[data-band="kits"]');
+        await page.waitForFunction(
+          () => document.querySelectorAll('[data-band="kits"] [data-kit-roles] > li').length === 6,
+          undefined,
+          { timeout: 30_000 },
+        );
+        const rest = await readColors(page);
+        check(`${label} at rest`, rest);
+        /* the rows fill the height the list holds before the chunk writes them */
+        const wantRows = size.width < 720 ? 3 : 2;
+        if (Math.abs(rest.listHeight - (wantRows * 20 + (wantRows - 1) * 6)) > 1)
+          failures.push(`${label}: the list is ${rest.listHeight} px for ${wantRows} rows`);
+        notes.push(
+          `${label}: ${rest.rows.map((r) => `${r.name} ${r.hex}`).join(', ')}; ${rest.ratio}`,
+        );
+        if (size.width === DESKTOP.width) {
+          await band.locator('[data-kit="kestrel"]').click();
+          await page.waitForTimeout(800);
+          const kestrel = await readColors(page);
+          check(`${label} Kestrel`, kestrel);
+          if (kestrel.rows[1]?.hex !== '#f3efe6')
+            failures.push(`${label}: Kestrel's background reads ${kestrel.rows[1]?.hex}`);
+          const field = band.locator('[data-kit-color]');
+          await field.fill('#e6e0d2');
+          await page.waitForTimeout(300);
+          const typed = await readColors(page);
+          check(`${label} typed`, typed);
+          if (typed.rows[1]?.hex !== '#e6e0d2')
+            failures.push(`${label}: a typed background reads ${typed.rows[1]?.hex}`);
+          await field.press('Escape');
+          await band.locator('[data-kit="gt"]').click();
+          await page.waitForTimeout(800);
+          await band.locator('[data-theme-id="swiss"]').click();
+          await page.waitForFunction(
+            () => document.querySelector('style[data-home-theme="swiss"]') !== null,
+            undefined,
+            { timeout: 30_000 },
+          );
+          await page.waitForTimeout(300);
+          const swiss = await readColors(page);
+          check(`${label} Swiss`, swiss);
+          if (swiss.rows[4]?.hex === rest.rows[4]?.hex)
+            failures.push(`${label}: Swiss's primary reads the sheet's ${swiss.rows[4]?.hex}`);
+          notes.push(
+            `${label}: Kestrel ${kestrel.ratio}; typed ${typed.rows[1]?.hex}; Swiss ${swiss.rows.map((r) => r.hex).join(' ')}`,
+          );
+        }
+      } finally {
+        await context.close();
+      }
+    }
+  test.info().annotations.push({ type: 'colors', description: notes.join(' | ') });
+  expect(failures).toEqual([]);
+}
+
+// ---------------------------------------------------------------------------------------------
 // home.patterns.stills (DESIGN.md 8.12)
 
 async function patternsStills(browser: Browser): Promise<void> {
@@ -2625,6 +2774,11 @@ export function rows(): void {
       test.setTimeout(480_000);
       test.info().annotations.push({ type: 'load', description: `${oneMinuteLoad()}` });
       await fontSwap(browser);
+    });
+  if (entered('home.kits.colors'))
+    test(title('home.kits.colors'), async ({ browser }) => {
+      test.setTimeout(360_000);
+      await kitsColors(browser);
     });
   if (entered('home.patterns.stills'))
     test(title('home.patterns.stills'), async ({ browser }) => {

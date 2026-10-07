@@ -119,7 +119,8 @@ export const DIAGRAM_WORDS = {
 export const FIGURES_ROUND = {
   presenter: {
     alt: "Presenter view of this page's deck on slide 2, with the timer, the next slide and the speaker notes.",
-    caption: 'Presenter view opens in a second window with the timer, the next slide and your notes.',
+    caption:
+      'Presenter view opens in a second window with the timer, the next slide and your notes.',
   },
   download: {
     alt: "The editor's Download dialog with Microsoft PowerPoint (.pptx) in Pictures or Editable text, and PDF Document (.pdf)",
@@ -136,6 +137,15 @@ export const KITS_ROUND = {
   lead: 'Pick one of nine themes, then put your colors and logo over it.',
   themeKey: 'Theme',
   status: { theme: (name: string): string => `Every slide is in the ${name} theme now.` },
+  /** the row of the kit's six colours (DESIGN.md 8.7) */
+  colorsKey: 'Colors',
+  /**
+   * the six colour roles in the Brand kit panel's order and words (packages/schema/src/brand.ts
+   * KIT_COLORS and KIT_COLOR_WORDS; copy.test.ts pins them; the page does not import the schema)
+   */
+  roles: ['Text', 'Background', 'Captions', 'Hints', 'Primary', 'Accent'],
+  /** the contrast of the kit's text on its background, by the page's one contrast function */
+  ratio: (ratio: number): string => `Text on background reads ${ratio.toFixed(1)} to 1`,
 } as const;
 
 /** The agents band's lead without the figures the numbers row says (DESIGN.md 8.3, 8.8). */

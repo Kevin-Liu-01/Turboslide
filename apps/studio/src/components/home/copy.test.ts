@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DIALOGS, forbiddenWordsIn } from '@turboslide/chrome/menus/strings';
+import { KIT_COLORS, KIT_COLOR_WORDS } from '@turboslide/schema/brand';
 import { SITE } from '@turboslide/theme/brand/site';
 import {
   CONTRAST_PAIR_PATTERN,
@@ -667,6 +668,13 @@ describe('the export band and the Download dialog', () => {
     expect(EXPORT.slider(50)).toBe(
       'The Pictures file fills 50 percent of the slide and the Editable text file the rest',
     );
+  });
+});
+
+/* the kits band's Colors row names the six roles as the Brand kit panel does (DESIGN.md 8.7) */
+describe("the kits band's six colours", () => {
+  it("are the schema's roles in its order and words", () => {
+    expect(KITS_ROUND.roles).toEqual(KIT_COLORS.map((role) => KIT_COLOR_WORDS[role].name));
   });
 });
 

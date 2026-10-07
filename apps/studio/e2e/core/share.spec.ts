@@ -38,6 +38,7 @@ import {
 import { shareRound1 } from './share-round1';
 import { shareChromeRows } from './b3b-dialogs';
 import { designSignIn } from './design-pages';
+import { authPlateRows } from './auth-plate';
 
 // Share and collaboration, the spec rows (docs/FOCUS.md 2.7, section 5 rank 1, 6.4 `share.*`,
 // `collab.*`, `comments.reaches-second-browser` and `versions.restore` with the driver
@@ -3070,10 +3071,14 @@ const B3B_ROWS = shareChromeRows();
 /* lane D5 of the design round (docs/DESIGN.md 10.5, 11): its row lives in design-pages.ts */
 const DESIGN_D5_ROWS = designSignIn();
 
+/* lane A of polish two (docs/POLISH-2.md 6.4): the auth plate's spec rows live in auth-plate.ts */
+const AUTH_PLATE_ROWS = authPlateRows();
+
 coverage(import.meta.filename, [
   ...B3B_ROWS,
   ...ACCESS_ROWS,
   ...DESIGN_D5_ROWS,
+  ...AUTH_PLATE_ROWS,
   'share.dialog.open',
   'share.copy-view-link',
   'share.copy-edit-link',

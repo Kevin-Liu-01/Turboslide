@@ -11781,6 +11781,54 @@
       "severity": 2,
       "evidence": "Kevin, 2026-10-07: \"the right side paragraph + the buttons is too tall\"; research-header 2.1 (the side 34, 51 and 78 px taller than the h1 at 1440, 1280 and 1024), 2.3, measure.json",
       "note": "Polish two (docs/POLISH-2.md 6), P2-N#3"
+    },
+    {
+      "id": "accounts.plate.signin-page",
+      "feature": "share",
+      "interaction": "/signin at 1440 and 390 in both appearances answers 200 and draws the plate: the mark (a link to /decks) 40 px over the 30 px heading \"Sign in to Turboslide\", the lede, every provider row and the email rows the deployment offers (Continue with Google first where it is a method), 44 px controls the column's width at the 6 px corner, the foot sentence, the theme button; the column min(464px, 100vw - 40px); from 1024 px the Blue Marble twin of the shown appearance with its credit, and none under 1024; a signed in visitor is redirected to next; on a hosted deployment /dev/auth answers 404",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-auth S3 (/signin answers 404 on production), 3 (General Translation's plate, pictures 20 to 24), 4.2",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2"
+    },
+    {
+      "id": "accounts.provider-error-sentence",
+      "feature": "share",
+      "interaction": "/signin?next=/decks&error=<code> for access_denied, state_mismatch, INVALID_TOKEN, account_not_linked and an unknown code each draws the heading \"Sign in did not complete\", its own sentence of docs/POLISH-2.md 4.5 (the unknown code named in small type) and Try Again, which returns to the methods with next=/decks",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "research-auth S5 (/decks and /home silent on ?error=INVALID_TOKEN), S6; docs/NEXT.md 4.3.3",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2"
+    },
+    {
+      "id": "accounts.google-button-guideline",
+      "feature": "share",
+      "interaction": "On /signin and in the editor's sign in window, in both appearances: Continue with Google draws #FFFFFF with a 1 px #747775 edge on light and #131314 with a 1 px #8E918F edge on dark, the standard four colour G at 18 px, and the label \"Continue with Google\" in Inter 500 at 4.5:1 or more on that fill; not driven with the reason on a server without a Google client",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "docs/NEXT.md question 4 and 4.3.3; research-auth question 3, 09-editor-dialog-mailoff-1440-dark.jpg (the ink fill)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2"
+    },
+    {
+      "id": "accounts.plate.cancel-comes-home",
+      "feature": "share",
+      "interaction": "Local, the fake Google pair: Continue with Google from /signin?next=/decks, then Google's Cancel replayed as a cross site navigation to /api/auth/callback/google?error=access_denied&state=<the minted state>: the browser lands on /signin with error=access_denied and next=/decks, status 200, drawing the cancelled sentence; no response on the way answers 403; from the editor's window the same lands on /signin?next=/edit/<deck>",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "research-auth S6 and 13-cancel-at-google-403-1440-light.jpg (403 {\"error\":\"forbidden\"} locally and on production)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2"
+    },
+    {
+      "id": "accounts.plate.states",
+      "feature": "share",
+      "interaction": "Local: /dev/auth?state=<id>&host=page and host=window with chrome=0, for every state of docs/POLISH-2.md 4.4 at 1440 and 390 in both appearances: the lede and every control start at the column's inset (24 px in the window); every button label reads 4.5:1 or more on its own ground, enabled and disabled; no vertical gap over 32 px between two content boxes and, in the window, at most its 24 px padding under the last control; the focus ring is 1 px ink, inset; headings in sentence case, buttons in Title Case, a period after every sentence; the device code and the countdown in tabular figures; no word the competitor guard matches",
+      "driver": "e2e/accounts.spec.ts",
+      "today": "not driven",
+      "evidence": "research-auth 4.3, 4.4; Kevin's screenshot of 2026-10-07",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2"
     }
   ]
 }

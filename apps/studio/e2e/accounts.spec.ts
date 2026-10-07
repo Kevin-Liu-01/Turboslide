@@ -35,6 +35,7 @@ import {
   waitEditor,
 } from './core/lib';
 import { coreTitle, isCoreId } from './core/matrix';
+import { contextAt, guardWords, plateFaults, readPlate, ringFault } from './core/auth-plate';
 
 // MILESTONES-3 B3 acceptance, accounts.spec.ts (gslides-parity SPEC-3 16.3): the identity
 // surfaces of round three against the builder's dev server on 4332, started from apps/studio
@@ -2440,5 +2441,192 @@ test.describe("the next program's hotfix H3: sign out in one click (docs/NEXT.md
         await aCtx.close();
       }
     }
+  });
+});
+
+/* ---------------------------------------------------------------------------------------------
+   Polish two, lane A (docs/POLISH-2.md 4, 6.4): the auth plate's local rows. They read the
+   server's own pages (/signin, /dev/auth, the editor) on a local server with the fake Google pair
+   and captured mail; Google is never reached (accounts.google.com is answered by a stub page). */
+
+const POLISH2 = {
+  cancel: [
+    'accounts.plate.cancel-comes-home',
+    "Local, the fake Google pair: Continue with Google from /signin?next=/decks, then Google's Cancel replayed as a cross site navigation to /api/auth/callback/google?error=access_denied&state=<the minted state>: the browser lands on /signin with error=access_denied and next=/decks, status 200, drawing the cancelled sentence; no response on the way answers 403; from the editor's window the same lands on /signin?next=/edit/<deck>",
+  ],
+  states: [
+    'accounts.plate.states',
+    'Local: /dev/auth?state=<id>&host=page and host=window with chrome=0, for every state of docs/POLISH-2.md 4.4 at 1440 and 390 in both appearances',
+  ],
+} as const;
+
+/** Every state of docs/POLISH-2.md 4.4 the gallery draws (the account menu's two are the editor's). */
+const PLATE_STATES = [
+  'methods.google',
+  'methods.google-email',
+  'methods.all',
+  'methods.email',
+  'methods.none',
+  'methods.leaving',
+  'email.sent',
+  'email.code-wrong',
+  'email.code-expired',
+  'email.code-spent',
+  'error.cancelled',
+  'error.expired',
+  'error.link',
+  'error.account',
+  'error.other',
+  'device.sign-in-first',
+  'device.code',
+  'device.code-wrong',
+  'device.spent',
+  'device.expired',
+  'device.approved',
+  'device.denied',
+] as const;
+
+/**
+ * Answers accounts.google.com with a stub page whose one link is Google's Cancel: the callback
+ * with `error=access_denied` and the state the server minted, followed from Google's origin, so
+ * the browser's navigation back is cross site as it is from Google itself.
+ */
+async function stubGoogleCancel(
+  context: BrowserContext,
+): Promise<{ authorize: () => string | null }> {
+  let seen: string | null = null;
+  await context.route('https://accounts.google.com/**', async (route) => {
+    const url = new URL(route.request().url());
+    seen = seen ?? url.toString();
+    const state = url.searchParams.get('state') ?? '';
+    const back = `${url.searchParams.get('redirect_uri') ?? `${ORIGIN}/api/auth/callback/google`}?error=access_denied&state=${encodeURIComponent(state)}`;
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/html',
+      body: `<!doctype html><title>Stub</title><a id="cancel" href="${back.replace(/"/g, '&quot;')}">Cancel</a>`,
+    });
+  });
+  return { authorize: () => seen };
+}
+
+test.describe('polish two: the auth plate (docs/POLISH-2.md 4, 6.4)', () => {
+  test.use({ actionTimeout: 15_000 });
+  test.describe.configure({ mode: 'default' });
+
+  test(localTitle(...POLISH2.cancel), async ({ browser }) => {
+    test.setTimeout(600_000);
+    const scratch = new Scratch();
+    const { context, page } = await ownerContext(browser);
+    const readings: string[] = [];
+    try {
+      const probe = await page.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
+      expect(probe.status(), 'the server has an identity database').toBe(200);
+      const google = await stubGoogleCancel(context);
+      const answers: { url: string; status: number }[] = [];
+      page.on('response', (response) => {
+        const url = response.url();
+        if (url.startsWith(ORIGIN) && response.request().isNavigationRequest())
+          answers.push({ url: url.slice(ORIGIN.length), status: response.status() });
+      });
+      /* from the sign in page */
+      await page.goto('/signin?next=/decks');
+      await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+      test.skip(
+        (await ctl(page, 'page.signIn.google').count()) === 0,
+        'not driven: the server has no Google client (start it with the fake Google pair)',
+      );
+      await ctl(page, 'page.signIn.google').click();
+      await page.waitForURL(/accounts\.google\.com/, { timeout: 60_000 });
+      await page.locator('#cancel').click();
+      await page.waitForURL(/\/signin\?/, { timeout: 60_000 });
+      await page.locator('[data-auth-plate]').waitFor({ timeout: 60_000 });
+      let url = new URL(page.url());
+      const sentence = await ctl(page, 'page.signIn.reason').textContent();
+      readings.push(
+        `from /signin: ${answers.map((a) => `${a.status} ${a.url.split('?')[0]}`).join(', ')}; landed ${url.pathname}${url.search}; "${sentence}"`,
+      );
+      expect(google.authorize(), 'the browser left for the provider').not.toBeNull();
+      expect(url.pathname).toBe('/signin');
+      expect(url.searchParams.get('error')).toBe('access_denied');
+      expect(url.searchParams.get('next')).toBe('/decks');
+      expect(answers[answers.length - 1]?.status, 'the sign in page answers 200').toBe(200);
+      expect(
+        answers.filter((a) => a.status === 403),
+        'no 403 on the way',
+      ).toEqual([]);
+      expect(sentence).toBe('The sign in was cancelled at Google.');
+      /* from the editor's window, on a stored deck */
+      answers.length = 0;
+      const deck = await newDeck(page, scratch, 'Cancel at Google');
+      await openEditor(page, deck);
+      const opener = ctl(page, 'title.signIn');
+      await opener.waitFor({ timeout: 60_000 });
+      await opener.click();
+      await ctl(page, 'dialog.signIn.google').click();
+      await page.waitForURL(/accounts\.google\.com/, { timeout: 60_000 });
+      await page.locator('#cancel').click();
+      await page.waitForURL(/\/signin\?/, { timeout: 60_000 });
+      url = new URL(page.url());
+      readings.push(
+        `from the editor: ${answers.map((a) => `${a.status} ${a.url.split('?')[0]}`).join(', ')}; landed ${url.pathname}${url.search}`,
+      );
+      expect(url.searchParams.get('next')).toBe(`/edit/${deck}`);
+      expect(url.searchParams.get('error')).toBe('access_denied');
+      expect(
+        answers.filter((a) => a.status === 403),
+        'no 403 on the way',
+      ).toEqual([]);
+    } finally {
+      test.info().annotations.push({ type: 'cancel at Google', description: readings.join(' | ') });
+      try {
+        await teardownAll(page, scratch);
+      } finally {
+        await context.close();
+      }
+    }
+  });
+
+  test(localTitle(...POLISH2.states), async ({ browser }) => {
+    test.setTimeout(1_800_000);
+    const failures: string[] = [];
+    const readings: string[] = [];
+    for (const appearance of ['light', 'dark'] as const)
+      for (const width of [1440, 390]) {
+        const { context, page } = await contextAt(browser, undefined, width, appearance);
+        try {
+          for (const state of PLATE_STATES)
+            for (const host of state.startsWith('device.') ? ['page'] : ['page', 'window']) {
+              const where = `${appearance} ${width} ${state} in the ${host}`;
+              const response = await page.goto(`/dev/auth?state=${state}&host=${host}&chrome=0`, {
+                timeout: 240_000,
+              });
+              if (response?.status() !== 200) {
+                failures.push(`${where}: /dev/auth answered ${response?.status()}`);
+                continue;
+              }
+              await page.locator(`[data-auth-plate="${state}"]`).waitFor({ timeout: 120_000 });
+              await page.waitForTimeout(400);
+              const read = await readPlate(page);
+              const faults = plateFaults(read, where);
+              /* the next control by the keyboard draws the same ring */
+              await page.keyboard.press('Tab');
+              const tabbed = await readPlate(page);
+              if (tabbed.focused !== null) {
+                const fault = ringFault(tabbed.focused, tabbed.ink, tabbed.paper);
+                if (fault !== null) faults.push(`${where}: after Tab, the focus ring ${fault}`);
+              }
+              for (const word of await guardWords(page))
+                faults.push(`${where}: the guard's word "${word}"`);
+              failures.push(...faults);
+              readings.push(
+                `${where}: ${read.boxes.length} boxes, focus ${read.focused?.control ?? 'none'}${faults.length > 0 ? `, ${faults.length} faults` : ''}`,
+              );
+            }
+        } finally {
+          await context.close();
+        }
+      }
+    test.info().annotations.push({ type: 'states', description: readings.join(' | ') });
+    expect(failures, `${failures.length} faults`).toEqual([]);
   });
 });

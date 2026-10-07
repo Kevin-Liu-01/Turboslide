@@ -58,3 +58,73 @@ worktree is shared, so any build reads every lane's work in progress); the push 
 `createPortal` from `react-dom`, which every page's chunk already carries, and the ceilings are read
 on the A#2 build with `/signin`'s line. The editor's Cancel and footer stay until A#4 replaces the
 dialog with the plate, as 4.1 orders.
+
+## P2-A#2: the plate, /signin, the error addresses, the gallery
+
+Items (docs/POLISH-2.md 4.2 to 4.6, C12, C14, C16, C18, C19): one auth plate in
+`packages/chrome/src/auth/` (`auth-model.ts` the states, the events, the reasons of the library's
+codes, `safeNext`, the per address mail count and the countdown; `auth-words.ts` every sentence of
+4.5; `AuthPlate.tsx` the content of a state; `AuthPage.tsx` the page host with the mark, the column,
+the foot row with the shared theme button and the picture region from 1024 px; `AuthWindow.tsx` the
+window host, the chrome's Dialog with no action row; `auth.css` under `.ts-auth`, Google's fills as
+custom properties), exported from `packages/chrome/package.json`; `/signin`
+(`apps/studio/src/routes/signin.tsx`) rendered on the server with the methods and the session read
+once, a signed in visitor sent to `next`, `?error=` drawn as its state with Try Again; every social
+and magic link call names `errorCallbackURL: /signin?next=<return>` (the pages' calls in
+`sign-in-auth.ts` and `sign-in-dialog.tsx`, the editor's in `EditorRoot.tsx`), and better-auth's
+`onAPIError.errorURL` is `/signin`; the gallery `/dev/auth` (`dev.auth.tsx`); the `/signin` line of
+`scripts/check-client-bundle.mjs` (600,000 B).
+
+Rows (on 4743, Playwright with `TURBOSLIDE_ROWS_AHEAD=1`, the push's rows declared by id before the
+commit enters them in the matrix; the commit's critical section then runs the core matrix tests):
+
+| Row | Reading |
+| --- | ------- |
+| `accounts.plate.signin-page` | passed, 15 s: at 1440 and 390 in both appearances `/signin?next=/decks` answers 200 and draws `methods.google-email`; the column 464 px at 1440 and 350 at 390; 40 px from the mark to the heading; the heading 30 px; Google, the field and Continue 44 px tall, the column's width, at 6 px; from 1024 the twin of the shown appearance loaded, one twin request; at 390 no figure and no twin request; signed in by the mailed code, `/signin?next=/decks` lands on `/decks`; `/dev/auth` answers 200 on the checkout opened with `TURBOSLIDE_LOCAL_OPEN=1` |
+| `accounts.provider-error-sentence` | passed, 6 s: `access_denied` `error.cancelled`, `state_mismatch` `error.expired`, `INVALID_TOKEN` `error.link`, `account_not_linked` `error.account`, `a_code_nobody_names` `error.other` with "Code: a_code_nobody_names", each with its sentence of 4.5; Try Again lands on `/signin?next=/decks` with no `error` |
+| `accounts.google-button-guideline` | passed, 5 s: light the fill rgb(255, 255, 255), the edge 1 px rgb(116, 119, 117); dark rgb(19, 19, 20) and 1 px rgb(142, 145, 143); the G 18 by 18 in #EA4335, #4285F4, #FBBC05, #34A853; "Continue with Google" at 500, 20.14:1 light and 16.57:1 dark |
+| `accounts.plate.cancel-comes-home` | passed, 91 s: from `/signin`: 200 `/signin`, 302 `/api/auth/callback/google`, 200 `/signin?next=%2Fdecks&error=access_denied`, "The sign in was cancelled at Google."; from the editor's dialog on a stored deck: 302 the callback, then 200 `/signin?next=%2Fedit%2F<deck>&error=access_denied`; no 403 on the way |
+| `accounts.plate.states` | passed, 318 s: the 37 states of 4.4 the gallery draws (the account menu's two are the editor's, read by `accounts.menu.words` in A#4), the sign in states in both hosts and the device states on the page, at 1440 and 390 in both appearances, 148 readings with no fault: insets, labels at 4.5:1 or more enabled and disabled, no gap over 32 px, the window at most 24 px under its last box, the ring 1 px ink inset on the control focused on open and after Tab, the words' case and periods, the device code and the countdown in tabular figures, no word the guard matches. Its first two runs failed on the figures alone: the plate's `font` shorthand reset the numerals `.pt-num` sets (the second run was served the old sheet by a server that had not stopped); the sheet now sets the type by longhands and pins the codes' numerals over the window's field rule |
+
+The one minute load was 108 to 160 through these runs. The first run of the three spec rows at
+13:32Z also passed `accounts.provider-error-sentence` and `accounts.google-button-guideline`; its
+`accounts.plate.signin-page` failed on the driver, whose wait for the return path matched the sign
+in page's own `next` parameter; the driver now waits on the pathname.
+
+Bytes, on the node-server build of the tree at 13:31Z (served on 4750; the build took 359 s at a
+load of 139 to 233): `/signin` preloads five chunks, 1,541,704 B: its own are 17,505 B (`AuthPage`
+15,663, `sign-in-auth` 1,251, the route 591, the entry 29) and the shared `vendor` chunk is
+1,524,170 B. The vendor chunk holds zod, `fumadocs` and the docs' source on this tree (lane D's work
+in progress), so every route's ceiling fails on the same build (`/decks` 1,577,115 of 600,000,
+`/deck/gt-brand` 1,538,826 of 1,000,000, `/edit/gt-brand` 2,045,184 of 2,000,000); the `/signin`
+line fails with them on the vendor chunk alone. Request A-R1 names it.
+
+Gates: `tsc -b` exit 0; the chrome's auth tests (`auth-model.test.ts` 18, `sign-in-plate.test.tsx`
+9) pass; `vitest run apps/studio/src/server/auth` passes with a 60 s test timeout (with the default
+5 s, `actions.test.ts` and `authorize.test.ts` time out at a load of 285); the brand lint in enforce
+mode 0 open findings (it found `text-transform: uppercase` on the device code, `css/no-eyebrow`,
+and the push draws the code's letters as typed upper case instead); `competitor.test.ts` passes;
+prettier clean.
+
+Pictures (`a/`): every gallery state in the page host and the window host (the device states on the
+page alone) at 1440 and 390 in both appearances, `a2-<state>-<host>-<width>-<appearance>.jpg`, 148
+files, each looked at on contact sheets of 20 and 37; `/signin` at 1440, 1024, 768 and 390 in both
+appearances, `a2-signin-<width>-<appearance>.jpg`; Cancel at Google's landing,
+`a2-signin-cancelled-<width>-<appearance>.jpg`.
+
+Deviations:
+
+- The gallery's 404 rule reads `TURBOSLIDE_LOCAL_OPEN=1`, no `VERCEL` and a loopback host instead of
+  `isHosted()`: `isHosted()` is true for the tmp store, which the round's own server recipe uses, so
+  the gallery would answer 404 on every lane server.
+- The mark is the 24 px drawing step of `TurboslideMark` (its steps are 16, 24 and 32 and over), not
+  25 px.
+- The plate draws no tooltips: every control names itself in words, and the page's chunk stays small.
+- The quota sentence (the fourth mail to one address in 10 minutes) and the invalid address sentence
+  are new words, written in 4.5's grammar: "That address had three messages in the last 10 minutes.
+  Wait, then send another." and "That is not an email address. Check it and try again." The plate
+  counts the mails it asked for each address in this browser (a hash of the address in
+  `localStorage`, the visit's count where storage throws), because the server answers the fourth
+  request exactly as the first and drops the mail.
+- `accounts.google-button-guideline` reads `/signin` in this push; the editor's window joins it in
+  A#4, where the window draws the plate.

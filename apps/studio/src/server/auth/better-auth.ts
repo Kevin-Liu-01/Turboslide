@@ -60,6 +60,8 @@ export const SOCIAL_PER_MINUTE = 10;
 export const PASSKEY_RPID_VARIABLE = 'TURBOSLIDE_PASSKEY_RPID';
 
 export const AUTH_BASE_PATH = '/api/auth';
+/** The sign in page, where a callback error with no flow of its own lands (docs/POLISH-2.md C14). */
+export const SIGN_IN_PAGE = '/signin';
 export const COOKIE_PREFIX = 'ts';
 /** 7 days idle, refreshed daily, fresh for 10 minutes (SPEC-3 0.20, 7.4). */
 export const SESSION_IDLE_S = 7 * 24 * 60 * 60;
@@ -248,6 +250,12 @@ function buildAuth(deps: AuthDeps): Auth {
     // (REALTIME.md 4.1): no boot warning and no redirect URI on a host Google would refuse
     baseURL: authBaseURL(deps.env, deps.hosted),
     secret: betterAuthSecret(deps.env, deps.sessionSecret),
+    // a callback error with no flow of its own to return to (`state_not_found`,
+    // `invalid_callback_request`) lands on the sign in page, which says it in one sentence; every
+    // social and magic link call also names `/signin?next=<return>` as its own `errorCallbackURL`
+    // (docs/POLISH-2.md C14). The library's `/api/auth/error` page is no longer a destination: a
+    // browser sent there from Google is cross site and the CSRF filter answered it 403
+    onAPIError: { errorURL: SIGN_IN_PAGE },
     // on the `d1` kind the library takes the binding shaped facade over the proxy and runs its own
     // D1 dialect and index introspector (d1-proxy-dialect.ts: D1 refuses the generic SQLite index
     // read of getMigrations); on the other kinds the Kysely of db.ts with its type

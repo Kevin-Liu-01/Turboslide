@@ -50,6 +50,8 @@ const LARGEST_CHUNK_BYTES = 600_000;
 /** SPEC-4 3.12: the per route preload ceilings (bytes of the chunks the served document names). */
 const ROUTE_PRELOAD_CEILINGS = {
   '/decks': 600_000,
+  /* polish two, P2-A#2 (docs/POLISH-2.md 4.8): the auth plate's page */
+  '/signin': 600_000,
   '/deck/gt-brand': 1_000_000,
   '/edit/gt-brand': 2_000_000,
 };

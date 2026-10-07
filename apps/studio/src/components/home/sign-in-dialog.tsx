@@ -3,7 +3,7 @@ import type { SignInMethods } from '@turboslide/chrome/dialogs/SignIn';
 
 import type { SignInFacts } from './sign-in';
 import { SIGN_IN_WORDS } from './sign-in-words';
-import { authPost, returnAddress, socialSignIn } from './sign-in-auth';
+import { requestSignInCode, socialSignIn, verifySignInCode } from './sign-in-auth';
 
 /**
  * The pages' Sign in dialog (sign-in.tsx): loaded on the first click of Sign In, so /home's and
@@ -13,20 +13,15 @@ import { authPost, returnAddress, socialSignIn } from './sign-in-auth';
  * the address the provider and the mail link return to, and a reload once the code signs in. The
  * controls keep the pages' ids (`page.signIn.*`).
  */
-export function PageSignInDialog({
-  facts,
-  onClose,
-}: {
-  facts: SignInFacts;
-  onClose: () => void;
-}) {
+export function PageSignInDialog({ facts, onClose }: { facts: SignInFacts; onClose: () => void }) {
   const methods: SignInMethods = {
     available: true,
     ...(facts.email
       ? {
-          requestCode: (email: string) =>
-            authPost('sign-in/magic-link', { email, callbackURL: returnAddress() }),
-          verifyCode: (email: string, otp: string) => authPost('sign-in/email-otp', { email, otp }),
+          /* the mail's link returns to this page, and to /signin with this page as its return
+             path when the link is used or expired (errorCallbackURL, docs/POLISH-2.md C14) */
+          requestCode: (email: string) => requestSignInCode(email),
+          verifyCode: (email: string, otp: string) => verifySignInCode(email, otp),
         }
       : {}),
     ...(facts.google ? { google: () => socialSignIn('google') } : {}),

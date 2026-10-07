@@ -1,0 +1,433 @@
+/* The auth plate (AuthPlate.tsx, AuthPage.tsx, AuthWindow.tsx; docs/POLISH-2.md 4.2): one sheet
+   under the .ts-auth root class, on the chrome's tokens, for the page host (/signin, /device) and
+   the window host (the editor's sign in). General Translation's plate geometry on Turboslide's
+   ladder (docs/DESIGN.md 3.1): controls at the 6 px control corner, the window at 8 px, no box
+   around the page's column and no shadow. Inter's defaults. Google's button fills are the one
+   colour outside the tokens, held as custom properties local to .ts-auth (C16; Google's sign in
+   button guidelines: white with a #747775 edge on light, #131314 with a #8E918F edge on dark). */
+
+.ts-auth {
+  --ts-auth-google-fill: #ffffff;
+  --ts-auth-google-edge: #747775;
+  --ts-auth-control-h: 44px;
+  --ts-auth-gap: 20px;
+}
+
+:root[data-theme='dark'] .ts-auth {
+  --ts-auth-google-fill: #131314;
+  --ts-auth-google-edge: #8e918f;
+}
+
+.ts-auth-window {
+  --ts-auth-control-h: 40px;
+  --ts-auth-gap: 14px;
+}
+
+/* ---- the plate: a column of the state's parts ---- */
+/* the type is set with the longhands throughout: the font shorthand would reset the numerals that
+   .pt-num gives the device code, the six digit code and the countdown (tokens.css, DESIGN.md 4.5) */
+.ts-auth .ts-auth-plate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ts-auth-gap);
+  min-width: 0;
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+}
+
+.ts-auth .ts-auth-heading {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--pt-ink);
+}
+
+/* the lede sits 12 px under the heading; every other part keeps the plate's gap */
+.ts-auth .ts-auth-plate > .ts-auth-heading + .ts-auth-lede {
+  margin-top: calc(12px - var(--ts-auth-gap));
+}
+
+.ts-auth .ts-auth-lede {
+  margin: 0;
+  max-width: 58ch;
+  color: var(--pt-ink-2);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.ts-auth-window .ts-auth-lede {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.ts-auth .ts-auth-providers,
+.ts-auth .ts-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ---- the controls: the column's width, 44 px on the page and 40 px in the window ---- */
+.ts-auth .ts-auth-provider,
+.ts-auth .ts-auth-button {
+  appearance: none;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--ts-auth-control-h);
+  margin: 0;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
+  background: transparent;
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+/* a provider row: the provider's mark and its words aligned left */
+.ts-auth .ts-auth-provider {
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.ts-auth .ts-auth-provider.is-google {
+  border-color: var(--ts-auth-google-edge);
+  background: var(--ts-auth-google-fill);
+}
+
+.ts-auth .ts-auth-mark {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.ts-auth .ts-auth-button {
+  justify-content: center;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.ts-auth .ts-auth-button.is-solid {
+  border-color: var(--pt-ink);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.ts-auth .ts-auth-provider:hover:not(:disabled),
+.ts-auth .ts-auth-button:hover:not(:disabled, .is-solid) {
+  border-color: var(--pt-ink);
+}
+
+/* busy or spent: titanium words on the plate ground, which reads 4.5:1 or more in both
+   appearances (the shared disabled token reads 3.3:1 on paper) */
+.ts-auth .ts-auth-provider:disabled,
+.ts-auth .ts-auth-button:disabled,
+.ts-auth .ts-auth-button.is-solid:disabled {
+  border-color: var(--pt-hair);
+  background: var(--pt-plate);
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-auth .ts-auth-provider[aria-busy='true'] {
+  cursor: progress;
+}
+
+/* the chrome's one focus rule: 1 px ink, inset; on the ink of a solid button the ring is paper */
+.ts-auth .ts-auth-provider:focus-visible,
+.ts-auth .ts-auth-button:focus-visible,
+.ts-auth .ts-auth-plate .ts-auth-input:focus-visible,
+.ts-auth .ts-auth-text:focus-visible,
+.ts-auth-home:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-auth .ts-auth-button.is-solid:focus-visible {
+  outline-color: var(--pt-paper);
+}
+
+/* ---- the field: the label over a 44 px box on the field boundary ---- */
+.ts-auth .ts-auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ts-auth .ts-auth-field-label {
+  display: block;
+  padding: 0;
+  margin: 0 0 6px;
+  color: var(--pt-ink-2);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.ts-auth .ts-auth-field > .ts-auth-field-label {
+  margin: 0;
+}
+
+.ts-auth .ts-auth-plate .ts-auth-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--ts-auth-control-h);
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.ts-auth-window .ts-auth-plate .ts-auth-input {
+  font-size: 13px;
+}
+
+/* the codes' tabular figures over the window's field rule (Dialog.css `.ts-dialog input`, whose
+   font shorthand resets them) */
+.ts-auth .ts-auth-plate .ts-auth-input.pt-num {
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-auth .ts-auth-plate .ts-auth-input.pt-num[data-num='code'] {
+  font-variant-numeric: var(--pt-numerals) slashed-zero;
+}
+
+.ts-auth .ts-auth-plate .ts-auth-input::placeholder {
+  color: var(--pt-titanium);
+  opacity: 1;
+}
+
+.ts-auth .ts-auth-plate .ts-auth-input[aria-invalid='true'] {
+  border-color: var(--pt-ink);
+}
+
+/* ---- the "or" row: one hairline each side of the word ---- */
+.ts-auth .ts-auth-or {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  color: var(--pt-titanium);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.ts-auth .ts-auth-or::before,
+.ts-auth .ts-auth-or::after {
+  content: '';
+  height: 1px;
+  background: var(--pt-hair);
+}
+
+/* ---- the error line: one line under the control that caused it ---- */
+.ts-auth .ts-auth-error {
+  margin: 0;
+  color: var(--pt-ink);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.ts-auth .ts-auth-error[data-reserved] {
+  min-height: 20px;
+}
+
+/* ---- the sent state's two text buttons ---- */
+.ts-auth .ts-auth-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+}
+
+.ts-auth .ts-auth-text {
+  appearance: none;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--pt-radius-sm);
+  background: none;
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-decoration-color: var(--pt-hair);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ts-auth .ts-auth-text:hover:not(:disabled) {
+  text-decoration-color: currentColor;
+}
+
+.ts-auth .ts-auth-text:disabled {
+  color: var(--pt-titanium);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* ---- the error state's code, the foot sentence ---- */
+.ts-auth .ts-auth-code {
+  margin: calc(8px - var(--ts-auth-gap)) 0 0;
+  color: var(--pt-titanium);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.ts-auth .ts-auth-foot-line {
+  margin: 0;
+  max-width: 58ch;
+  color: var(--pt-titanium);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ts-auth-window .ts-auth-foot-line {
+  font-size: 12px;
+}
+
+/* ---- the device code: two groups of four ---- */
+.ts-auth .ts-auth-code-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ts-auth .ts-auth-code-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-auth .ts-auth-plate .ts-auth-code-groups .ts-auth-input {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+}
+
+.ts-auth .ts-auth-code-dash {
+  color: var(--pt-titanium);
+}
+
+.ts-auth .ts-auth-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* ---- the page host ---- */
+.ts-auth-page {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-auth-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 48px 0 24px;
+  box-sizing: border-box;
+}
+
+/* the column: centred between the top and the foot row, at least 48 px from the top */
+.ts-auth-column {
+  box-sizing: border-box;
+  width: min(464px, 100% - 48px);
+  margin: auto;
+}
+
+.ts-auth-home {
+  display: inline-flex;
+  margin: 0 0 40px;
+  border-radius: var(--pt-radius-sm);
+  color: var(--pt-ink);
+}
+
+.ts-auth-foot {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(464px, 100% - 48px);
+  margin: 24px auto 0;
+}
+
+.ts-auth-figure {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .ts-auth-column,
+  .ts-auth-foot {
+    width: min(464px, 100% - 40px);
+  }
+}
+
+/* from 1024 px: the column in a left region of min(584px, 56vw), the picture region beside it */
+@media (min-width: 1024px) {
+  .ts-auth-page {
+    grid-template-columns: min(584px, 56vw) minmax(0, 1fr);
+  }
+
+  .ts-auth-column,
+  .ts-auth-foot {
+    width: min(464px, 100vw - 40px);
+    margin-left: max(24px, (min(584px, 56vw) - min(464px, 100vw - 40px)) / 2);
+  }
+
+  .ts-auth-column {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .ts-auth-figure {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 48px 48px 24px 0;
+    box-sizing: border-box;
+  }
+
+  .ts-auth-figure > * {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* the gallery's state select (apps/studio/src/routes/dev.auth.tsx), on a local server alone */
+.ts-auth-gallery-pick {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: var(--ts-layer-bar);
+}

@@ -32,6 +32,18 @@ wide under the title row, with no row for a person alone
 (`docs/gslides-parity/polish-two/f/editor-390-light-roster-open.jpg`, `editor-390-dark-roster-open.jpg`).
 The own row is in the default view since the people round, so a person alone should read one row.
 
+## A
+
+- A-R1 (to D or the integrator; read on lane A's node-server build of 2026-10-07 13:31Z, with the
+  tree as it stood): the shared entry chunk `vendor-*.js` is 1,524,170 B, and it holds zod
+  (`ZodError`), the docs' source (`Use Turboslide`, `Action reference`) and `fumadocs`, so every
+  route's preload is over its ceiling in `scripts/check-client-bundle.mjs` (`/decks` 1,577,115 B of
+  600,000; `/deck/gt-brand` 1,538,826 of 1,000,000; `/edit/gt-brand` 2,045,184 of 2,000,000) and
+  the largest chunk ceiling fails. `/signin`'s own chunks are 17,505 B (`AuthPage` 15,663,
+  `sign-in-auth` 1,251, the route 591); its line of 600,000 B fails on the vendor chunk alone. The
+  docs' modules belong in the docs routes' own chunks (DESIGN.md 8.16 and POLISH-2.md 5.1 name
+  13.0 KB gzip of script on docs pages and nothing on `/home`).
+
 ## N
 
 ### P2-N-1, to the integrator: the route stops passing the nonce to the bar

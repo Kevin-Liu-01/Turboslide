@@ -9,6 +9,7 @@ import {
 } from '@turboslide/agent/window/registry';
 import type { ExportCapabilities } from '@turboslide/chrome/ExportMenu';
 import { ContextMenu, contextMenuLabel } from '@turboslide/chrome/ContextMenu';
+import { errorCallbackURL } from '@turboslide/chrome/auth/auth-model';
 import type { EditorDispatch } from '@turboslide/chrome/dispatch';
 import type {
   AvatarChoiceView,
@@ -298,6 +299,15 @@ async function authPost(path: string, body: unknown): Promise<unknown> {
 /** The address the sign in mail's link and the social callbacks return to: this deck, no token. */
 function signInReturnAddress(): string {
   return `${window.location.origin}${window.location.pathname}${window.location.search}`;
+}
+
+/**
+ * Where a provider or the mail's link lands when the sign in fails: the sign in page with this
+ * deck as its return path (docs/POLISH-2.md C14), so Cancel at Google comes back to a sentence
+ * and Try Again instead of the library's error route.
+ */
+function signInErrorAddress(): string {
+  return `${window.location.origin}${errorCallbackURL(`${window.location.pathname}${window.location.search}`)}`;
 }
 
 function toSections(
@@ -1016,7 +1026,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      this deck (signInReturnAddress) and the page reloads with the account's identity; a refusal
      before the hand off is said through the snackbar, the dialog having already handed off */
   const socialSignIn = (provider: 'github' | 'google') => {
-    void authPost('sign-in/social', { provider, callbackURL: signInReturnAddress() })
+    void authPost('sign-in/social', {
+      provider,
+      callbackURL: signInReturnAddress(),
+      errorCallbackURL: signInErrorAddress(),
+    })
       .then((answer) => {
         const url = (answer as { url?: string } | null)?.url;
         if (typeof url === 'string') window.location.assign(url);
@@ -1055,7 +1069,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     ...(auth?.email === true
       ? {
           requestCode: (email) =>
-            authPost('sign-in/magic-link', { email, callbackURL: signInReturnAddress() }),
+            authPost('sign-in/magic-link', {
+              email,
+              callbackURL: signInReturnAddress(),
+              errorCallbackURL: signInErrorAddress(),
+            }),
           verifyCode: async (email, code) => {
             await authPost('sign-in/email-otp', { email, otp: code });
             window.location.reload();

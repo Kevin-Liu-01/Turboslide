@@ -10161,12 +10161,12 @@
     {
       "id": "realtime.join.chip-within-1s",
       "feature": "realtime",
-      "interaction": "B opens the link; B's chip is in A's title row within 1 s of B's editor being ready and A's chip in B's within 1 s, three of three, the two tabs on different instances (sync.status names the instance); on the do tier sync.status also names the object's colo, one across both tabs",
+      "interaction": "B opens the link; B's chip is in A's title row within 1 s of B's editor being ready and A's chip in B's within 1 s, three of three, the two tabs on different instances (sync.status names the instance); on the do tier both tabs' room frames name one object id (describe().state.sync.room.object), and the colos are recorded beside it, never compared",
       "driver": "core/realtime.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "audit-sync.md defect 3 (2.6 to 9.9 s); audit-people.md 3 \"Join\" (0.42 to 0.55 s after ready, 1.8 to 2.0 s after navigation)",
-      "note": "Realtime round; docs/REALTIME.md section 2; the two instance reading is asserted on the two process run (REALTIME_BASES names two origins) and recorded on one base; R1. Cloudflare phase; docs/CLOUDFLARE.md 2.1: the two instances are the two Vercel instances the loaders ran on (locally the two node ports) and the object is one, named by its colo (sync.status.room.colo of build/r2.md R2-C10, or sync.status.colo; the room frame of build/r1.md R1-R2e carries it); R5 reads either"
+      "note": "Realtime round; docs/REALTIME.md section 2; the two instance reading is asserted on the two process run (REALTIME_BASES names two origins) and recorded on one base; R1. Cloudflare phase; docs/CLOUDFLARE.md 2.1: the two instances are the two Vercel instances the loaders ran on (locally the two node ports) and the object is one, named by its colo (sync.status.room.colo of build/r2.md R2-C10, or sync.status.colo; the room frame of build/r1.md R1-R2e carries it); R5 reads either; restated in polish two, P2-F#2"
     },
     {
       "id": "realtime.follow.for-everyone",
@@ -10414,12 +10414,12 @@
     {
       "id": "setup.do.two-instances",
       "feature": "setup",
-      "interaction": "A and B on one deck through two app instances (sync.status.storeCalls.instance differs; locally A on one node port and B on another): A types five words into one block and B five into another; both documents are byte equal at the live revision within 3 s of the later last keystroke, sync.covered and sync.seq agree across both tabs, and one object answers both by its colo in sync.status",
+      "interaction": "A and B on one deck through two app instances (sync.status.storeCalls.instance differs; locally A on one node port and B on another): A types five words into one block and B five into another; both documents are byte equal at the live revision within 3 s of the later last keystroke, sync.covered and sync.seq agree across both tabs, and one object answers both: each tab's room frame names the same object id (describe().state.sync.room.object, eight characters), with the colos recorded beside it and never compared",
       "driver": "core/realtime.spec.ts",
       "today": "not driven",
       "evidence": "docs/CLOUDFLARE.md 2.3, 5.4 item 2",
       "setup": "block.insert of the two body blocks",
-      "note": "Cloudflare phase; docs/CLOUDFLARE.md 2.3; R1 (the object, the room frame's colo), R2 (sync.covered and sync.room.colo on describe().state.sync, build/r2.md R2-C10), R5 (the spec); not driven with the reason on one origin or on a tier other than do"
+      "note": "Cloudflare phase; docs/CLOUDFLARE.md 2.3; R1 (the object, the room frame's colo), R2 (sync.covered and sync.room.colo on describe().state.sync, build/r2.md R2-C10), R5 (the spec); not driven with the reason on one origin or on a tier other than do; restated in polish two, P2-F#2"
     },
     {
       "id": "setup.free-plan.caps",

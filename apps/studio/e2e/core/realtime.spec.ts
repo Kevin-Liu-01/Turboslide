@@ -59,15 +59,18 @@ import {
 // milliseconds in the reason. Retries stay 0, one worker, 1440 by 900.
 //
 // The Cloudflare phase (docs/CLOUDFLARE.md 2.1, 2.3, 5.4): on the `do` tier the two origins are
-// two app instances in front of one Durable Object, so `statusOf` also reads the object's colo
-// from `sync.status` (`colo`, R1's field; "unnamed" until it lands) and the join row records one
-// colo across both reads. The setup row `setup.do.two-instances` (the `setup` feature, the do
-// tier's) runs here: A and B type five words each into two blocks through the two instances, the
-// documents are byte equal at the live revision within 3 s, `sync.covered` and `sync.seq` agree
-// across both tabs (R2's two fields on `describe().state.sync`; a field absent fails the row with
-// its name, never passes it) and one colo answers both; on one origin or on another tier the row
-// is not driven with the reason. The gate passes B's origin as PLAYWRIGHT_SECOND_BASE_URL and
-// REALTIME_BASES from `--second-base`.
+// two app instances in front of one Durable Object. Each tab's room frame names the object it
+// reached (`describe().state.sync.room.object`, the first eight hex characters of the object's id,
+// deck-room.ts), so the join row asserts one object id across both tabs on the do tier; the colo
+// (`sync.status` and the room frame) names the edge each request entered, which differs by origin,
+// so it is recorded in the measure annotation and never compared (docs/POLISH-2.md 2.6). The setup
+// row `setup.do.two-instances` (the `setup` feature, the do tier's) runs here: A and B type five
+// words each into two blocks through the two instances, the documents are byte equal at the live
+// revision within 3 s, `sync.covered` and `sync.seq` agree across both tabs (R2's two fields on
+// `describe().state.sync`; a field absent fails the row with its name, never passes it) and both
+// room frames name one object id; on one origin or on another tier the row is not driven with the
+// reason. The gate passes B's origin as PLAYWRIGHT_SECOND_BASE_URL and REALTIME_BASES from
+// `--second-base`.
 //
 // PLAYWRIGHT_BASE_URL=<origin> [REALTIME_BASES=<originA>,<originB>] node_modules/.bin/playwright test apps/studio/e2e/core/realtime.spec.ts
 
@@ -228,6 +231,26 @@ type Facts = {
   settings?: Record<string, unknown>;
 };
 const facts = (p: Page): Promise<Facts> => state(p) as unknown as Promise<Facts>;
+/** The object a tab's room frame named (eight hex characters of the object's id, the do tier's). */
+const OBJECT_ID = /^[0-9a-f]{8}$/;
+type Room = { object: string | null; colo: string | null };
+/** The tab's room frame once it arrived (it follows the hello), or nulls after the timeout. */
+async function roomOf(p: Page, timeout = 10_000): Promise<Room> {
+  const seen: Room = { object: null, colo: null };
+  await expect
+    .poll(
+      async () => {
+        const room = (await facts(p)).sync?.room ?? null;
+        seen.object = room?.object ?? null;
+        seen.colo = room?.colo ?? null;
+        return seen.object !== null && seen.object !== '';
+      },
+      { timeout },
+    )
+    .toBe(true)
+    .catch(() => undefined);
+  return seen;
+}
 async function connected(p: Page, timeout = 45_000): Promise<void> {
   await expect.poll(async () => (await facts(p)).sync?.connected ?? false, { timeout }).toBe(true);
 }
@@ -1093,6 +1116,10 @@ test(title('realtime.join.chip-within-1s'), async ({ browser }) => {
     const failures: string[] = [];
     const statuses = { a: await statusOf(A_BASE), b: await statusOf(B_BASE) };
     const instances = { a: statuses.a.instance, b: statuses.b.instance };
+    /* the do tier's object: each tab's room frame names it (docs/POLISH-2.md 2.6) */
+    const tier = (await facts(A)).sync?.tier ?? statuses.a.tier;
+    const roomA: Room = tier === 'do' ? await roomOf(A) : { object: null, colo: null };
+    const roomsB: Room[] = [];
     for (let round = 1; round <= 3; round += 1) {
       const { page: B, ready, person } = await joinB(browser);
       const bId = await clientIdOf(B);
@@ -1125,6 +1152,7 @@ test(title('realtime.join.chip-within-1s'), async ({ browser }) => {
         failures.push(`round ${round}: B's chip in A ${inA ?? 'not within 10 s'} ms`);
       if (inB === null || inB > 1000)
         failures.push(`round ${round}: A's chip in B ${inB ?? 'not within 10 s'} ms`);
+      if (tier === 'do') roomsB.push(await roomOf(B));
       /* B leaves and A's roster drops it before the next join */
       others.splice(others.indexOf(person), 1);
       await leaveB(person);
@@ -1140,14 +1168,23 @@ test(title('realtime.join.chip-within-1s'), async ({ browser }) => {
     }
     test.info().annotations.push({
       type: 'measure',
-      description: `${rounds.join('; ')}; instances: ${A_BASE} answered ${instances.a}, ${B_BASE} answered ${instances.b}${TWO_ORIGINS ? ' (two origins)' : " (one origin: the instance of each request is the deployment's choice and is recorded, not asserted)"}; tier ${statuses.a.tier}; the object's colo ${statuses.a.colo} and ${statuses.b.colo}${statuses.a.tier === 'do' ? ' (one object on the do tier)' : ' (no object on this tier)'}`,
+      description: `${rounds.join('; ')}; instances: ${A_BASE} answered ${instances.a}, ${B_BASE} answered ${instances.b}${TWO_ORIGINS ? ' (two origins)' : " (one origin: the instance of each request is the deployment's choice and is recorded, not asserted)"}; tier ${tier}${tier === 'do' ? `; the object in A's room frame ${roomA.object ?? 'absent'}, in B's ${roomsB.map((r) => r.object ?? 'absent').join(', ')}` : ' (no object on this tier)'}; colos, recorded and not compared: sync.status ${statuses.a.colo} and ${statuses.b.colo}, room frames ${roomA.colo ?? 'absent'} and ${roomsB.map((r) => r.colo ?? 'absent').join(', ') || 'absent'}`,
     });
-    /* the Cloudflare phase: on the do tier one object orders the deck, named by its colo on both origins */
-    if (statuses.a.tier === 'do' && statuses.b.tier === 'do') {
-      expect(statuses.a.colo, "sync.status names the object's colo on the do tier").not.toBe(
-        'unnamed',
-      );
-      expect(statuses.b.colo, 'one object across both origins').toBe(statuses.a.colo);
+    /* on the do tier one object orders the deck: every tab's room frame names the same object id
+       (the colo names the edge each request entered and differs by origin, so it is never compared) */
+    if (tier === 'do') {
+      expect(
+        roomA.object,
+        "A's room frame names the object (describe().state.sync.room.object)",
+      ).toMatch(OBJECT_ID);
+      for (const [index, roomB] of roomsB.entries()) {
+        expect(roomB.object, `round ${index + 1}: B's room frame names the object`).toMatch(
+          OBJECT_ID,
+        );
+        expect(roomB.object, `round ${index + 1}: one object across both origins`).toBe(
+          roomA.object,
+        );
+      }
     }
     expect(
       failures,
@@ -1777,17 +1814,19 @@ test(title('setup.do.two-instances'), async ({ browser }) => {
       a: {
         seq: fa.sync?.seq ?? null,
         covered: fa.sync?.covered,
+        object: fa.sync?.room?.object ?? null,
         colo: fa.sync?.room?.colo ?? fa.sync?.colo,
       },
       b: {
         seq: fb.sync?.seq ?? null,
         covered: fb.sync?.covered,
+        object: fb.sync?.room?.object ?? null,
         colo: fb.sync?.room?.colo ?? fb.sync?.colo,
       },
     };
     test.info().annotations.push({
       type: 'measure',
-      description: `instances ${statuses.a.instance} and ${statuses.b.instance} (${statuses.a.instance === statuses.b.instance ? 'one instance' : 'two instances'}); the object's colo ${statuses.a.colo} and ${statuses.b.colo}; every word in both ${converged ? 'within' : 'not within'} 3 s of the later last keystroke (${convergedMs} ms); revisions ${da.revision}, ${db.revision} against the live ${live}; sync.seq ${hello.a.seq} and ${hello.b.seq}, sync.covered ${hello.a.covered ?? 'absent'} and ${hello.b.covered ?? 'absent'}, sync.colo ${hello.a.colo ?? 'absent'} and ${hello.b.colo ?? 'absent'}`,
+      description: `instances ${statuses.a.instance} and ${statuses.b.instance} (${statuses.a.instance === statuses.b.instance ? 'one instance' : 'two instances'}); the object in the room frames ${hello.a.object ?? 'absent'} and ${hello.b.object ?? 'absent'}; colos, recorded and not compared: sync.status ${statuses.a.colo} and ${statuses.b.colo}; every word in both ${converged ? 'within' : 'not within'} 3 s of the later last keystroke (${convergedMs} ms); revisions ${da.revision}, ${db.revision} against the live ${live}; sync.seq ${hello.a.seq} and ${hello.b.seq}, sync.covered ${hello.a.covered ?? 'absent'} and ${hello.b.covered ?? 'absent'}, sync.colo ${hello.a.colo ?? 'absent'} and ${hello.b.colo ?? 'absent'}`,
     });
     expect(statuses.a.instance, 'the two origins are two app instances').not.toBe(
       statuses.b.instance,
@@ -1803,8 +1842,12 @@ test(title('setup.do.two-instances'), async ({ browser }) => {
       'sync.covered is on describe().state.sync (R2, docs/CLOUDFLARE.md 2.3)',
     ).not.toBeUndefined();
     expect(hello.a.covered, 'sync.covered agrees across both tabs').toBe(hello.b.covered);
-    expect(statuses.a.colo, "sync.status names the object's colo").not.toBe('unnamed');
-    expect(statuses.b.colo, 'one object answers both origins').toBe(statuses.a.colo);
+    expect(
+      hello.a.object,
+      "A's room frame names the object (describe().state.sync.room.object)",
+    ).toMatch(OBJECT_ID);
+    expect(hello.b.object, "B's room frame names the object").toMatch(OBJECT_ID);
+    expect(hello.b.object, 'one object answers both origins').toBe(hello.a.object);
   } finally {
     await cleanUp();
   }

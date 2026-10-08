@@ -107,8 +107,8 @@
       "kind": "built"
     },
     "apps/studio/public/og/turboslide.png": {
-      "bytes": 156855,
-      "sha256": "4063a19afc27deedbc774dccbb35af6a9d50804ee6eeb93acdbad3468e1ef635",
+      "bytes": 172931,
+      "sha256": "d04a36ed7916254fd73088948f884a9b0638fc6b6134e2281091c93006404d2e",
       "kind": "rendered"
     },
     "apps/studio/public/robots.txt": {

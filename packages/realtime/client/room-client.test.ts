@@ -3146,4 +3146,116 @@ describe("a cover's conversion in the tab's frame (build/r1.md R1-R2k; the realt
     await a.stop();
     await b.stop();
   });
+
+  it("moves the op's word in the field past a word on the block another person's conversion made, before the op goes out on the newer base", async () => {
+    const document = normalized();
+    document.slides[COVER] = { ...(document.slides[COVER] as TitleSlide), heading: 'Two typers' };
+    const server = fakeRoomServer({ deckId: 'gt-brand', channel: memoryChannel(), document });
+    let hold: Promise<void> | null = null;
+    let release: () => void = () => undefined;
+    const base = tabTransport(server, kevin);
+    const held: RoomTransport = {
+      ...base,
+      async postOps(body) {
+        if (hold !== null) await hold;
+        return base.postOps(body);
+      },
+    };
+    const make = (transport: RoomTransport) =>
+      createRoomClient({
+        deckId: 'gt-brand',
+        transport,
+        document: server.document(),
+        seq: server.seq(),
+        onChange: () => undefined,
+        onResync: async () => server.document(),
+      });
+    const a = make(held);
+    const b = make(tabTransport(server, maya));
+    a.start();
+    b.start();
+    await until(() => a.status().connected && b.status().connected);
+    // A's write on another slide waits on the wire, so A's word in the field queues behind it
+    hold = new Promise((resolve) => {
+      release = resolve;
+    });
+    a.apply([splice(0, 0, 'x')], 'type', 'now');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    a.apply([fieldRun(10, ' ta')], 'type', 'now');
+    // B's Escape converts the cover, then B types on the canvas's block in front of A's point
+    const converted = toCanvas(b.document().slides[COVER] as TitleSlide, {
+      blocks: { heading: [137, 300, 1646, 180], lead: [137, 520, 1200, 80] },
+      mark: [137, 137, 132, 84],
+      prompted: [],
+    });
+    if (converted === null) throw new Error('the cover did not convert');
+    b.apply(
+      [
+        { op: 'slide.replace', slideId: COVER, slide: converted.slide },
+        {
+          op: 'block.set',
+          slideId: COVER,
+          blockId: 'heading',
+          path: '/typography',
+          value: { size: 72 },
+        },
+      ],
+      'type',
+      'now',
+    );
+    await settled([b]);
+    b.apply(
+      [
+        {
+          op: 'text.splice',
+          slideId: COVER,
+          blockId: 'heading',
+          path: '/text',
+          at: 0,
+          remove: 0,
+          insert: 'B ',
+        },
+      ],
+      'type',
+      'now',
+    );
+    await settled([b]);
+    await until(() => a.status().seq >= b.status().seq);
+    release();
+    hold = null;
+    await settled([a, b]);
+    // before this A's word kept 10 in the field, went out at 10 on the canvas and cut "typers"
+    expect(headingOf(server.document())).toBe('B Two typers ta');
+    expect(headingOf(a.document())).toBe('B Two typers ta');
+    expect(headingOf(b.document())).toBe('B Two typers ta');
+    await a.stop();
+    await b.stop();
+  });
+
+  it("carries the run end in a field to the block a conversion made of it, so the next letter there still continues the tab's word", () => {
+    const runEnds: RunEnds = new Map();
+    const blockRun = (at: number, insert: string): Mutation => ({
+      op: 'text.splice',
+      slideId: COVER,
+      blockId: 'heading',
+      path: '/text',
+      at,
+      remove: 0,
+      insert,
+    });
+    const converted = toCanvas(normalized().slides[COVER] as TitleSlide, {
+      blocks: { heading: [137, 300, 1646, 180], lead: [137, 520, 1200, 80] },
+      mark: [137, 137, 132, 84],
+      prompted: [],
+    });
+    if (converted === null) throw new Error('the cover did not convert');
+    expect(advanceRunEnds(runEnds, [fieldRun(10, ' ua')], true)).toBe(false);
+    // another person's conversion lands: the next letter is on the block, at the same offset
+    advanceRunEnds(
+      runEnds,
+      [{ op: 'slide.replace', slideId: COVER, slide: converted.slide }],
+      false,
+    );
+    expect(advanceRunEnds(runEnds, [blockRun(13, '2')], true)).toBe(true);
+  });
 });

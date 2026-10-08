@@ -61,6 +61,7 @@ import {
   landCandidate,
   landedOf,
   landedOwn,
+  landedPast,
   overEditingCeiling,
   reanchor,
   reanchorAll,
@@ -1852,9 +1853,9 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   const landed =
     post.base.seq < head ? await channel.since(deckId, post.base.seq, head - post.base.seq) : [];
   // what the later entries of this POST are transformed past: what landed since the base (each
-  // with the tie the POST declared, landedOf), then the undo of every entry refused before them
-  // (undoOfSplices)
-  const landedMutations = landedOf(landed, post);
+  // with the tie the POST declared, landedOf) moved past the entries before them (landedPast),
+  // then the undo of every entry refused before them (undoOfSplices)
+  let landedMutations = landedOf(landed, post);
   // a retried POST (a fetch that failed after the server admitted it, a tab that resends its
   // persisted queue) carries the op ids of the first one: an id already in the stream's tail is
   // answered with its entry and never appended twice (SPEC-3 3.4; report 10 F29). Measured
@@ -1899,6 +1900,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       entryRun(entry),
       running,
     );
+    landedMutations = landedPast(landedMutations, entry.mutations ?? [], entryRun(entry), running);
     if (transformed === null) {
       rejected.push({ opId: entry.opId, reason: 'stale' });
       continue;
@@ -1934,7 +1936,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   const result = await appendWithRetry(channel, deckId, head, candidates, (entries, more) => {
     // the head moved while this request transformed: transform once more against what landed
     // (SPEC-3 3.4 step 5); a candidate that cannot be placed is dropped and rejected
-    const moreMutations = landedOf(more, post);
+    let moreMutations = landedOf(more, post);
     const base = applyEntries(running, []);
     let document = base;
     try {
@@ -1954,6 +1956,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
         runOf.get(entry.opId),
         document,
       );
+      moreMutations = landedPast(moreMutations, entry.mutations, runOf.get(entry.opId), document);
       if (transformed === null) {
         rejected.push({ opId: entry.opId, reason: 'stale' });
         continue;
@@ -2224,8 +2227,9 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
     const rejected: Rejected[] = [];
     const candidates: NewEntry[] = [];
     let running = live.document;
-    // each landed row with the tie this POST's inserts take against it (landedOf)
-    const landedMutations = landedOf(landed, post);
+    // each landed row with the tie this POST's inserts take against it (landedOf), moved past
+    // the entries before the one placed (landedPast)
+    let landedMutations = landedOf(landed, post);
     // the undo of every entry refused so far, which the later entries are transformed past
     const refusedUndo: Landed[] = [];
     const freshLive = async (): Promise<boolean> => {
@@ -2297,6 +2301,12 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
       const moved = transformEntry(
         entry.mutations ?? [],
         landedMutations,
+        entryRun(entry),
+        running,
+      );
+      landedMutations = landedPast(
+        landedMutations,
+        entry.mutations ?? [],
         entryRun(entry),
         running,
       );
@@ -2612,6 +2622,7 @@ export {
   grantHueSlot,
   landedOf,
   landedOwn,
+  landedPast,
   overEditingCeiling,
   reanchor,
   reanchorAll,

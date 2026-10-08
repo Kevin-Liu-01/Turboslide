@@ -132,6 +132,28 @@ describe('DeckRoom over the socket', () => {
     b.close();
   });
 
+  it('moves what landed past the earlier entries of a frame, so a word split over two entries stays whole (realtime.title.two-typers)', async () => {
+    const a = await connect(deck, await mint({ deck, cid: CID_A }));
+    const b = await connect(deck, await mint({ deck, cid: CID_B, id: ANON_B, pid: ANON_B }));
+    await a.next(isEvent('hello'));
+    await b.next(isEvent('hello'));
+    b.send(opsFrame(CID_B, 1, 0, 1, [[splice(0, 0, 'tb2 ')]]));
+    expect((await b.next(isAck(1))).kind).toBe('ack');
+    // A's "t" and "a2 " continue A's own text at B's point (the run rule), written on base 0
+    const frame = opsFrame(CID_A, 1, 0, 1, [[splice(0, 0, 't')], [splice(1, 0, 'a2 ')]]);
+    a.send({ ...frame, entries: frame.entries.map((entry) => ({ ...entry, run: true })) });
+    const ack = await a.next(isAck(1));
+    expect(ack.kind === 'ack' && ack.frame.ok).toBe(true);
+    // before this "a2 " was moved past B's word as it stood at the base: 5, inside it
+    if (ack.kind === 'ack' && ack.frame.ok)
+      expect(ack.frame.entries.map((entry) => entry.mutations)).toEqual([
+        [splice(0, 0, 't')],
+        [splice(1, 0, 'a2 ')],
+      ]);
+    a.close();
+    b.close();
+  });
+
   it('answers resync on a base above the head or more than the window behind, and refuses a foreign client id', async () => {
     const a = await connect(deck, await mint({ deck, cid: CID_A }));
     await a.next(isEvent('hello'));

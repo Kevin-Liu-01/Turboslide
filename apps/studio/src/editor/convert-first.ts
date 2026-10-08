@@ -132,3 +132,34 @@ export function retargetFieldRuns(
     return { ...mutation, blockId, path: '/text' };
   });
 }
+
+/**
+ * A write that converts a slide, split around the conversion's measure (realtime.title.two-typers):
+ * the typed letters on the fields of a slide that is not converted yet (`text.splice` field runs,
+ * which the reducer writes on the slide as it stands), and the rest, which waits for the measured
+ * `slide.replace` as before (a mark rides the conversion, one undo step with it). The cover's
+ * title converts with its session's final write (the shrunk size of a title that wrapped,
+ * Editor.tsx growAfterBurst), and that write carried the session's last letters: they waited for
+ * the measure, and another person's write that landed meanwhile left them at offsets the title no
+ * longer had (" t2a2 ua" for " ta2 ua2"), or, when that write had converted the cover first, made
+ * them a field run on a canvas that was refused and lost (" ua2" read " ua"). Written first, they
+ * are an ordinary pending write the room client and the admission move past what lands.
+ */
+export function fieldRunsFirst(
+  document: DeckDocument,
+  mutations: ReadonlyArray<Mutation>,
+): { runs: Mutation[]; rest: Mutation[] } {
+  const runs: Mutation[] = [];
+  const rest: Mutation[] = [];
+  for (const mutation of mutations) {
+    const slide = 'slideId' in mutation ? document.slides[mutation.slideId] : undefined;
+    if (
+      slide !== undefined &&
+      mutation.op === 'text.splice' &&
+      isSlideFieldTextRun(slide, mutation)
+    )
+      runs.push(mutation);
+    else rest.push(mutation);
+  }
+  return { runs, rest };
+}

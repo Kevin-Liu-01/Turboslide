@@ -57,6 +57,7 @@ import {
   landCandidate,
   landedOf,
   landedOwn,
+  landedPast,
   overEditingCeiling,
   rosterEntryForReader,
   touchedSlides,
@@ -969,7 +970,8 @@ export class DeckRoom extends DurableObject<Env> {
       };
     const landed =
       post.base.seq < head ? this.entriesAbove(post.base.seq, head - post.base.seq) : [];
-    const landedMutations = landedOf(landed, post);
+    // what landed, moved past each entry of this POST before the next is placed (landedPast)
+    let landedMutations = landedOf(landed, post);
     const canReadSlide = (slideId: string): boolean => {
       const slide = live.document.slides[slideId];
       if (slide === undefined) return true;
@@ -1009,6 +1011,12 @@ export class DeckRoom extends DurableObject<Env> {
       const transformed = transformEntry(
         entry.mutations ?? [],
         landedMutations,
+        entryRun(entry),
+        running,
+      );
+      landedMutations = landedPast(
+        landedMutations,
+        entry.mutations ?? [],
         entryRun(entry),
         running,
       );
@@ -1923,7 +1931,7 @@ export class DeckRoom extends DurableObject<Env> {
       .filter((record) => record.revision > meta.revision && record.mutations !== undefined)
       .sort((a, b) => a.revision - b.revision)
       .flatMap((record) => record.mutations ?? []);
-    const landed = landedOwn(foreign);
+    let landed = landedOwn(foreign);
     const stale = this.entriesAbove(meta.covered, meta.head - meta.covered);
     let running = document;
     const moved: Entry[] = [];
@@ -1935,6 +1943,7 @@ export class DeckRoom extends DurableObject<Env> {
           continue;
         }
         const transformed = transformEntry(entry.mutations, landed, false, running);
+        landed = landedPast(landed, entry.mutations, false, running);
         if (transformed === null) {
           this.deleteEntry(entry);
           continue;
@@ -1946,6 +1955,7 @@ export class DeckRoom extends DurableObject<Env> {
         );
         if (!placed.ok) {
           this.deleteEntry(entry);
+          landed.push(...landedOwn(undoOfSplices(transformed)));
           continue;
         }
         running = placed.document;

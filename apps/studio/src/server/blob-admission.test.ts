@@ -867,6 +867,20 @@ describe('the server transforms before it places, on the blob tier too (the sync
     ]);
   });
 
+  it('moves the records past the earlier entries of a POST, so a word split over two entries stays whole (realtime.title.two-typers)', async () => {
+    // another person's "tb2 " landed at 0; "t" and "a2 " continue this tab's own text there
+    const { room, appends } = roomOf([landed(8, [splice(0, 0, 'tb2 ')])], [8]);
+    const post = input(7, [
+      { opId: 'c1:1', mutations: [splice(0, 0, 't')] },
+      { opId: 'c1:2', mutations: [splice(1, 0, 'a2 ')] },
+    ]);
+    const entries = post.post.entries.map((entry) => ({ ...entry, run: true as const }));
+    const result = await admitOnBlob(room, { ...post, post: { ...post.post, entries } });
+    expect(result.ok).toBe(true);
+    // before this "a2 " was moved past the record as it stood at the base: 5, inside "tb2 "
+    expect(appends).toEqual([{ base: 8, mutations: [[splice(0, 0, 't')], [splice(1, 0, 'a2 ')]] }]);
+  });
+
   it('re-places from the original mutations past every record between the base and the new head after a moved head, not the transformed candidates past the delta', async () => {
     // the mirror is at 8 when the POST arrives (record 8 landed); record 9 lands under the
     // append; the retry syncs to 9 and transforms the original splice at 0 past both records

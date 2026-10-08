@@ -40,7 +40,12 @@ import type {
 } from '../src/channel.ts';
 import { runTieSide } from '../src/channel.ts';
 import { foldMutation } from '../src/coalesce.ts';
-import { carryFieldText, fieldRunsOnCanvas, yieldConcurrentConversion } from '../src/conversion.ts';
+import {
+  canvasFieldBlocks,
+  carryFieldText,
+  fieldRunsOnCanvas,
+  yieldConcurrentConversion,
+} from '../src/conversion.ts';
 import {
   CLIENT_ID_PATTERN,
   ENTRY_NOTE_MAX,
@@ -747,7 +752,11 @@ function runTextKey(text: RunText): string {
  * rule when it starts at its text's run end, and every insert sets its text's run end at the
  * insert's end. Every other splice moves a run end by `shiftPoint`, so another author's insert
  * exactly at the point leaves it (the point stays at the end of this tab's own text). A write
- * that rewrites a whole text drops that text's run end.
+ * that rewrites a whole text drops that text's run end. A cover's conversion to a canvas, this
+ * tab's or another person's, moves a field's run end to the block the canvas made of the field at
+ * the same offset (conversion.ts `fieldRunsOnCanvas`): before this the tab's next letters on the
+ * block declared nothing after another person's conversion landed, tied after a third person's
+ * word at their point and left the word they continued (" ta2 ua tc2 uc22" for " ua2").
  */
 export function advanceRunEnds(
   runEnds: RunEnds,
@@ -772,6 +781,15 @@ export function advanceRunEnds(
       if (row !== undefined) row.end = shiftPoint(row.end, mutation);
       continue;
     }
+    if (mutation.op === 'slide.replace')
+      for (const [field, blockId] of canvasFieldBlocks(mutation.slide) ?? []) {
+        const key = runTextKey({ slideId: mutation.slideId, blockId: field, path: `/${field}` });
+        const row = runEnds.get(key);
+        if (row === undefined) continue;
+        runEnds.delete(key);
+        const text = { slideId: mutation.slideId, blockId, path: '/text' };
+        runEnds.set(runTextKey(text), { ...text, end: row.end });
+      }
     for (const [key, row] of runEnds) {
       const probe: Mutation = {
         op: 'text.splice',
@@ -1499,15 +1517,21 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       // server places it (room-core.ts transformEntry); every other op lands after it
       const tie = runTieSide(op.run, 'right');
       const side: Side = tie === 'left' ? 'right' : 'left';
-      // a remote word in a cover's field and the op's words on the block its conversion made
-      // are one text (conversion.ts fieldRunsOnCanvas; build/r1.md R1-R2k): before this the
-      // op's word kept its offset past the other person's word and landed inside it
-      // (" tb2b2 u" for " tb2 ub2", the memory tier's two typers row in fix round 3)
+      // a cover's field and the block a conversion made of it are one text (conversion.ts
+      // fieldRunsOnCanvas; build/r1.md R1-R2k), on both sides: a remote word in the field and
+      // the op's words on the block its own conversion made (" tb2b2 u" for " tb2 ub2", the
+      // memory tier's two typers row in fix round 3), and the op's words in the field and a
+      // remote word on the block another person's conversion made, whose replacement is in this
+      // entry or already in the document (" ua1b2 tb2 u" for " ua1 tb2 ub2": the op kept its
+      // offset in front of the remote word)
       const opMutations = op.mutations;
-      const onCanvas = (against: Mutation): Mutation =>
-        fieldRunsOnCanvas(opMutations, [{ mutation: against }], running).read(against);
+      const onCanvas = fieldRunsOnCanvas(
+        opMutations,
+        bridged.map((mutation) => ({ mutation })),
+        running,
+      ).read;
       const moved = transformPast(op.mutations, bridged, (mutation, against) =>
-        transform(mutation, onCanvas(against), tie),
+        transform(onCanvas(mutation), onCanvas(against), tie),
       );
       if (moved === null) {
         runEnds.clear();
@@ -1519,7 +1543,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       bridged =
         transformPast(bridged, op.mutations, (mutation, against) =>
-          transform(onCanvas(mutation), against, side),
+          transform(onCanvas(mutation), onCanvas(against), side),
         ) ?? [];
       // the next op was written on this one, before the entry: its document carries this op
       try {

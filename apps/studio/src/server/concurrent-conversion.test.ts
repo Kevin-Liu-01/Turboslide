@@ -14,6 +14,7 @@ import {
   entryRun,
   landedOf,
   landedOwn,
+  landedPast,
   transformEntry,
   undoOfSplices,
   yieldConcurrentConversion,
@@ -86,8 +87,9 @@ describe('yieldConcurrentConversion (docs/REALTIME.md row realtime.title.two-typ
 // cover whose title wraps, so each tab's Escape converts the cover to a canvas with its own copy.
 // The admission below is the object's loop (apps/realtime-worker deck-room.ts `admit`) and the
 // function's (room.ts `admitOps`): every entry of a POST transformed past what landed since the
-// base with the running document, placed by the reducer and the validator, a refused entry's
-// undo added to what the later entries move past.
+// base with the running document, what landed then moved past the entry (`landedPast`), placed
+// by the reducer and the validator, a refused entry's undo added to what the later entries move
+// past.
 
 const COVER_ID = 'title';
 const BOXES: CanvasBoxes = {
@@ -166,7 +168,7 @@ function admit(
       ...(entry.run ? { run: true as const } : {}),
     })),
   };
-  const landed = landedOf(
+  let landed = landedOf(
     room.log.filter((entry) => entry.seq > base),
     post,
   );
@@ -175,6 +177,7 @@ function admit(
   let running = room.document;
   for (const entry of post.entries) {
     const transformed = transformEntry(entry.mutations ?? [], landed, entryRun(entry), running);
+    landed = landedPast(landed, entry.mutations ?? [], entryRun(entry), running);
     if (transformed === null) {
       rejected.push({ opId: entry.opId });
       continue;
@@ -282,6 +285,22 @@ describe('a cover that converts while two people type into it (fix round 3)', ()
     expect(replacement?.op).toBe('slide.replace');
     expect(titleOf(room.document)).toBe('Two typers ta1 ua1 ub1');
     expect(isCanvasSlide(room.document.slides[COVER_ID]!)).toBe(true);
+  });
+
+  it("keeps a word whose letters ride its conversion and the entry after it, when the other person's word landed at its point (realtime.title.two-typers)", () => {
+    const room: Room = { document: deckWithCover('Two typers ta1 tb1'), log: [] };
+    admit(room, 'b', 0, [{ mutations: [fieldSplice(18, ' tb2')] }]);
+    // A heard nothing of it: its Escape converts its copy with " t", then "a2" follows on the block
+    const a = admit(room, 'a', 0, [
+      {
+        mutations: [conversionOf('Two typers ta1 tb1'), blockSplice(18, ' t'), ...SIZE],
+        run: true,
+      },
+      { mutations: [blockSplice(20, 'a2')], run: true },
+    ]);
+    expect(a.rejected).toEqual([]);
+    // B's word in the field and A's on the block are one text: before this "a2" landed past it
+    expect(titleOf(room.document)).toBe('Two typers ta1 tb1 ta2 tb2');
   });
 
   it('leaves a lone conversion and a bare replacement as they were', () => {

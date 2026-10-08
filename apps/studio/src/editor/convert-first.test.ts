@@ -4,7 +4,12 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Mutation } from '@turboslide/schema/mutations';
 
-import { fieldObjectIds, retargetFieldRuns, slideToConvertFor } from './convert-first';
+import {
+  fieldObjectIds,
+  fieldRunsFirst,
+  retargetFieldRuns,
+  slideToConvertFor,
+} from './convert-first';
 import { toCanvas } from '@turboslide/schema/canvas';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import type { Slide } from '@turboslide/schema/deck';
@@ -202,5 +207,45 @@ describe('retargetFieldRuns', () => {
     expect(retargetFieldRuns(title, title, [splice, size])).toEqual([splice, size]);
     const onBlock: Mutation = { ...splice, path: '/text' };
     expect(retargetFieldRuns(title, canvas, [onBlock])).toEqual([onBlock]);
+  });
+});
+
+describe('fieldRunsFirst', () => {
+  const run: Mutation = {
+    op: 'text.splice',
+    slideId: 'title',
+    blockId: 'heading',
+    path: '/heading',
+    at: 24,
+    remove: 0,
+    insert: 'a2',
+  };
+  const size: Mutation = {
+    op: 'block.set',
+    slideId: 'title',
+    blockId: 'heading',
+    path: '/typography',
+    value: { size: 72 },
+  };
+
+  it("takes the typed letters of the Escape that converts the cover out of the conversion's write", () => {
+    // the session's final write: its last letters and the shrunk size (Editor.tsx growAfterBurst)
+    expect(fieldRunsFirst(document, [run, size])).toEqual({ runs: [run], rest: [size] });
+  });
+
+  it("leaves a mark and a block's run with the conversion's write", () => {
+    const mark: Mutation = {
+      op: 'text.mark',
+      slideId: 'title',
+      blockId: 'heading',
+      path: '/heading',
+      range: [0, 4],
+      edit: { kind: 'marks', set: { b: true } },
+    };
+    const onBlock: Mutation = { ...run, slideId: 'content-rule', blockId: 'p1', path: '/text' };
+    expect(fieldRunsFirst(document, [mark, size, onBlock])).toEqual({
+      runs: [],
+      rest: [mark, size, onBlock],
+    });
   });
 });

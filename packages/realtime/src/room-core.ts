@@ -192,23 +192,62 @@ export function transformEntry(
     const onCanvas = canvas.read(row.mutation);
     const insertTie = row.own === true ? row.insertTie : runTieSide(run, row.insertTie);
     const next: Mutation[] = [];
-    for (const mutation of out) {
+    for (const mutation of out)
       // a field run the entry still carries is on a cover that is not a canvas before it
-      const against = isFieldRun(mutation) ? row.mutation : onCanvas;
-      if (rewritesText(against, mutation)) continue;
-      if (isTextOp(mutation) && isTextOp(against) && sameText(mutation, against)) {
-        try {
-          next.push(...transformMutation(mutation, against, 'right', insertTie));
-        } catch (error) {
-          if (error instanceof NotImplementedError) next.push(mutation);
-          else throw error;
-        }
-        continue;
-      }
-      next.push(mutation);
-    }
+      next.push(
+        ...movedPast(mutation, isFieldRun(mutation) ? row.mutation : onCanvas, 'right', insertTie),
+      );
     out = next;
     if (out.length === 0) return null;
+  }
+  return out;
+}
+
+/** One mutation moved past one that landed before it in the same frame: dropped when that rewrote its Text. */
+function movedPast(mutation: Mutation, against: Mutation, side: Side, insertTie: Side): Mutation[] {
+  if (rewritesText(against, mutation)) return [];
+  if (!isTextOp(mutation) || !isTextOp(against) || !sameText(mutation, against)) return [mutation];
+  try {
+    return transformMutation(mutation, against, side, insertTie);
+  } catch (error) {
+    if (error instanceof NotImplementedError) return [mutation];
+    throw error;
+  }
+}
+
+/**
+ * What landed since a POST's base, moved past one entry of that POST (`mutations` as its client
+ * wrote them, `run` its declaration), so the next entry of the POST meets it in the frame it was
+ * written in. A client writes each entry after the entries before it, so the second entry's
+ * offsets count the first entry's characters. Before this every entry of a POST was moved past
+ * what landed as the other writers wrote it: A's " t" and "a1" in one POST after B's " tb1"
+ * landed at A's point, " t" kept the left by the run rule, "a1" was pushed past B's word, and
+ * both browsers read " t tb1a1" (realtime.title.two-typers; request R2-F3a of the realtime
+ * round). Each landed row meets the entry as it stands after the rows before it and takes the
+ * other side of the entry's tie against it; a text op the entry rewrote away leaves the frame. A
+ * cover's field run and the block its canvas made of the field are one text (`fieldRunsOnCanvas`),
+ * so both sides are read on the canvas when there is one. `document` is the one `transformEntry`
+ * placed the entry on. Pure.
+ */
+export function landedPast(
+  landed: ReadonlyArray<Landed>,
+  mutations: readonly Mutation[],
+  run = false,
+  document?: DeckDocument,
+): Landed[] {
+  const canvas = fieldRunsOnCanvas(mutations, landed, document);
+  let written = mutations.map((mutation) => canvas.read(mutation));
+  const out: Landed[] = [];
+  for (const row of landed) {
+    const tie = row.own === true ? row.insertTie : runTieSide(run, row.insertTie);
+    const against = canvas.read(row.mutation);
+    let moved = [against];
+    for (const mutation of written)
+      moved = moved.flatMap((m) =>
+        movedPast(m, mutation, 'left', tie === 'left' ? 'right' : 'left'),
+      );
+    for (const mutation of moved) out.push({ ...row, mutation });
+    written = written.flatMap((mutation) => movedPast(mutation, against, 'right', tie));
   }
   return out;
 }

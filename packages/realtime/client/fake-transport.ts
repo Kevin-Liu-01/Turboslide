@@ -10,10 +10,8 @@
 // stream route does, until set back (the focus round, cycle 3 stream fix round, C3-F1). Test
 // code and the dev only page harness import it; nothing in production does.
 import type { DeckDocument } from '@turboslide/schema/deck';
-import { NotImplementedError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
-import { isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
 
 import { appendWithRetry, checkBaseWindow, replayPlan } from '../src/admission.ts';
 import type {
@@ -24,10 +22,16 @@ import type {
   RoomEvent,
   RosterEntry,
 } from '../src/channel.ts';
-import { entryRun, runTieSide } from '../src/channel.ts';
-import type { PresencePost } from '../src/protocol.ts';
-import { rewritesText } from './room-client.ts';
-import type { Rejected, RoomTransport, StreamFailure, StreamHandle } from './room-client.ts';
+import { entryRun } from '../src/channel.ts';
+import type { OpsPost, PresencePost } from '../src/protocol.ts';
+import { landedOf, landedPast, transformEntry } from '../src/room-core.ts';
+import type {
+  OpsResponse,
+  Rejected,
+  RoomTransport,
+  StreamFailure,
+  StreamHandle,
+} from './room-client.ts';
 
 export type FakeIdentity = {
   principalId: string;
@@ -43,6 +47,11 @@ export type FakeRoomServerOptions = {
   now?: () => number;
   /** the store the checkpointer would write; the fake commits nothing, it only moves the revision */
   onCheckpoint?: (entries: Entry[]) => void;
+  /**
+   * An admission in place of the fake's own, past the binding check: a test runs a real one
+   * (apps/studio room.ts `admitOps` over this channel), so the clients meet the room's own rules
+   */
+  admit?: (body: OpsPost, identity: FakeIdentity) => Promise<OpsResponse>;
 };
 
 type Connection = {
@@ -52,66 +61,6 @@ type Connection = {
   onError: (error: unknown) => void;
   unsubscribe: () => void;
 };
-
-/** The admission's transform (room-core.ts transformEntry): an entry that declares the run rule keeps the left of a landed insert at its offset. */
-function transformPast(
-  mutations: readonly Mutation[],
-  landed: readonly Mutation[],
-  run = false,
-): Mutation[] | null {
-  return movePast(mutations, landed, runTieSide(run, 'right'));
-}
-
-/**
- * What landed since a POST's base, moved past one entry of that POST the admission placed (the
- * entry's mutations as its client wrote them, `run` its declaration): the next entry of the POST
- * was written after this one, so it meets what landed in that frame. The landed inserts take the
- * other side of the entry's tie. Every mutation that landed stays; one the entry rewrote away is
- * dropped from the frame (realtime.title.two-typers; the realtime round's fix round 3).
- */
-function landedPast(
-  landed: readonly Mutation[],
-  entry: readonly Mutation[],
-  run = false,
-): Mutation[] {
-  const tie = runTieSide(run, 'right');
-  const side = tie === 'left' ? 'right' : 'left';
-  // each landed row meets the entry as it stands after the rows before it
-  let written: Mutation[] = [...entry];
-  const out: Mutation[] = [];
-  for (const row of landed) {
-    out.push(...(movePast([row], written, side) ?? []));
-    written = movePast(written, [row], tie) ?? [];
-  }
-  return out;
-}
-
-function movePast(
-  mutations: readonly Mutation[],
-  landed: readonly Mutation[],
-  tie: 'left' | 'right',
-): Mutation[] | null {
-  let out = [...mutations];
-  for (const against of landed) {
-    const next: Mutation[] = [];
-    for (const mutation of out) {
-      if (rewritesText(against, mutation)) continue;
-      if (isTextOp(mutation) && isTextOp(against) && sameText(mutation, against)) {
-        try {
-          next.push(...transformMutation(mutation, against, 'right', tie));
-        } catch (error) {
-          if (error instanceof NotImplementedError) next.push(mutation);
-          else throw error;
-        }
-        continue;
-      }
-      next.push(mutation);
-    }
-    out = next;
-    if (out.length === 0) return null;
-  }
-  return out;
-}
 
 /** The transport of one tab over the fake server, with the test's knobs. */
 export type FakeTabTransport = RoomTransport & {
@@ -292,6 +241,7 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             return { ok: false, status: 403, code: 'client_unbound', message: 'unbound' };
           if (identity.role === 'viewer' || identity.role === 'commenter')
             return { ok: false, status: 403, code: 'forbidden', message: 'forbidden' };
+          if (options.admit !== undefined) return options.admit(body, identity);
           await syncLive();
           const head = liveSeq;
           const window = checkBaseWindow(body.base.seq, head);
@@ -301,7 +251,8 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             body.base.seq < head
               ? await channel.since(deckId, body.base.seq, head - body.base.seq)
               : [];
-          let landedMutations = landed.flatMap((entry) => entry.mutations ?? []);
+          // what landed, moved past each entry of this POST the way room.ts admitOps moves it
+          let landedRows = landedOf(landed, body);
           const rejected: Rejected[] = [];
           const candidates: NewEntry[] = [];
           let running = live;
@@ -319,11 +270,13 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
               });
               continue;
             }
-            const transformed = transformPast(
+            const transformed = transformEntry(
               entry.mutations ?? [],
-              landedMutations,
+              landedRows,
               entryRun(entry),
+              running,
             );
+            landedRows = landedPast(landedRows, entry.mutations ?? [], entryRun(entry), running);
             if (transformed === null) {
               rejected.push({ opId: entry.opId, reason: 'stale' });
               continue;
@@ -338,8 +291,6 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
               });
               continue;
             }
-            // the next entry of this POST was written after this one: what landed meets it there
-            landedMutations = landedPast(landedMutations, entry.mutations ?? [], entryRun(entry));
             candidates.push({
               rev: live.deck.revision,
               kind: 'edit',
@@ -361,27 +312,20 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
             head,
             candidates,
             (entries, more) => {
-              let moreMutations = more.flatMap((entry) => entry.mutations ?? []);
+              let moreRows = landedOf(more, body);
               const out: NewEntry[] = [];
               for (const entry of entries) {
                 if (entry.kind !== 'edit') {
                   out.push(entry);
                   continue;
                 }
-                const moved = transformPast(
-                  entry.mutations ?? [],
-                  moreMutations,
-                  runOf.get(entry.opId),
-                );
+                const run = runOf.get(entry.opId);
+                const moved = transformEntry(entry.mutations ?? [], moreRows, run);
+                moreRows = landedPast(moreRows, entry.mutations ?? [], run);
                 if (moved === null) {
                   rejected.push({ opId: entry.opId, reason: 'stale' });
                   continue;
                 }
-                moreMutations = landedPast(
-                  moreMutations,
-                  entry.mutations ?? [],
-                  runOf.get(entry.opId),
-                );
                 out.push({ ...entry, mutations: moved });
               }
               return out;

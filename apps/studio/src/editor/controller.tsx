@@ -10,7 +10,7 @@ import { readAccessWithRetries } from './access-refresh';
 import type { MissingAccessPolicy } from './access-refresh';
 import { awaitAcknowledged } from './ack-wait';
 import { foldListedThreads, withAnsweredThread } from './comments-fold';
-import { retargetFieldRuns, slideToConvertFor } from './convert-first';
+import { fieldRunsFirst, retargetFieldRuns, slideToConvertFor } from './convert-first';
 import { createExportModeGate } from './export-mode';
 import {
   agentEntriesOf,
@@ -2671,8 +2671,16 @@ export function createEditorController(init: {
           !isSlideFieldTextRun(snapshot.document, mutation),
       ),
     );
-    if (convert !== null) return convertThenCommit(convert, mutations, label, answer);
-    return commitAs(withAutoTitle(mutations), label, 'edit', answer);
+    if (convert === null) return commitAs(withAutoTitle(mutations), label, 'edit', answer);
+    /* the write's text runs on the fields land now, on the cover as it stands, and the conversion
+       carries the rest after its measure (convert-first.ts `fieldRunsFirst`): the title's last
+       letters riding the converting Escape were lost when another person's write landed during
+       the measure (realtime.title.two-typers) */
+    const { runs, rest } = fieldRunsFirst(snapshot.document, mutations);
+    if (runs.length === 0) return convertThenCommit(convert, mutations, label, answer);
+    const typed = commitAs(runs, label, 'edit', answer);
+    const converted = convertThenCommit(convert, rest, label, answer);
+    return Promise.all([typed, converted]).then(([, done]) => done);
   };
 
   /**

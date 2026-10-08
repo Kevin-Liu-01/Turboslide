@@ -7,7 +7,7 @@
     },
     "rows16": {
       "bytes": 192,
-      "sha256": "9e27f058584026bbf51a2494ed0040b560adc06405a08e0d82875c38056ec7c2"
+      "sha256": "f892bd1fbb83e22737a5da3d9e41bad48fe9e620bb6a2a7fbdde39dacbe10018"
     },
     "aspect": 1.4715
   },
@@ -19,7 +19,7 @@
       "form": "rows",
       "cap": 12,
       "top": 2,
-      "ink": 68,
+      "ink": 71,
       "colours": 3,
       "plate": "paper"
     },

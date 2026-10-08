@@ -202,20 +202,21 @@ export const MARK_VIEWBOX = `${roundTo(MARK_BOX.minX - 4, 1)} ${CAP_TOP - 4} ${r
 /**
  * The mark at 16 px as rows of `#` (ink) and `.`. At 16 px the slant and the 8 unit cut fall
  * between pixels, so the form is set as whole pixels on a 12 px cap in rows 2 to 13: the crossbar
- * three rows from column 2 to 12 with the top bar folded into a left arm of 5 px against a right
- * arm of 3 px; the stem 3 px, stepped one pixel left after the cut and again at the bottom bar
+ * three rows from column 2 to 13 with the top bar folded into a left arm of 5 px against a right
+ * arm of 4 px; the stem 3 px, stepped one pixel left after the cut and again at the bottom bar
  * (the slant as two steps over the cap); the cut one clear row through the stem and the middle
  * bar; the bars starting at column 2 and ending one pixel before the stem, so they step 4, 3 and
- * 2 px. The T sits one pixel left of the drawing's first form (Kevin, 2026-10-08: "scooch the t
- * inside the box a little to the left"), so column 1 stays clear on the left and columns 13 and
- * 14 on the right, beside the tile's frame.
+ * 2 px. The T sits one pixel left of the drawing's first form and its crossbar is one column
+ * longer on the right (Kevin, 2026-10-08: "scooch the t inside the box a little to the left",
+ * then "add an extra column of black on the top part"), so columns 1 and 14 stay clear beside the
+ * tile's frame.
  */
 export const ROWS16: readonly string[] = [
   '................',
   '................',
-  '..###########...',
-  '..###########...',
-  '..###########...',
+  '..############..',
+  '..############..',
+  '..############..',
   '.......###......',
   '.......###......',
   '..####.###......',
@@ -250,11 +251,11 @@ export function rowsPath(rows: readonly string[] = ROWS16, ox = 0, oy = 0): stri
 
 /** The rows' path at the origin (the 16 px drawing's own file), committed as data with its sha256. */
 export const ROWS16_PATH =
-  'M2 2h11v1h-11zM2 3h11v1h-11zM2 4h11v1h-11zM7 5h3v1h-3zM7 6h3v1h-3zM2 7h4v1h-4zM7 7h3v1h-3zM2 9h3v1h-3zM6 9h3v1h-3zM6 10h3v1h-3zM6 11h3v1h-3zM2 12h2v1h-2zM5 12h3v1h-3zM2 13h2v1h-2zM5 13h3v1h-3z';
+  'M2 2h12v1h-12zM2 3h12v1h-12zM2 4h12v1h-12zM7 5h3v1h-3zM7 6h3v1h-3zM2 7h4v1h-4zM7 7h3v1h-3zM2 9h3v1h-3zM6 9h3v1h-3zM6 10h3v1h-3zM6 11h3v1h-3zM2 12h2v1h-2zM5 12h3v1h-3zM2 13h2v1h-2zM5 13h3v1h-3z';
 
 /** sha256 of ROWS16_PATH's UTF-8 bytes. */
 export const ROWS16_PATH_SHA256 =
-  '9e27f058584026bbf51a2494ed0040b560adc06405a08e0d82875c38056ec7c2';
+  'f892bd1fbb83e22737a5da3d9e41bad48fe9e620bb6a2a7fbdde39dacbe10018';
 
 /** The number of ink pixels of a rows drawing. */
 export function rowsInk(rows: readonly string[] = ROWS16): number {

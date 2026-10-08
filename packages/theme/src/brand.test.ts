@@ -218,20 +218,19 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
     );
   });
 
-  it('draws 16 px as the one hand drawing: a 12 px cap on rows 2 to 13, columns 0, 1, 13, 14 and 15 clear', () => {
+  it('draws 16 px as the one hand drawing: a 12 px cap on rows 2 to 13, columns 0, 1, 14 and 15 clear', () => {
     expect(ROWS16).toHaveLength(16);
     for (const row of ROWS16) {
       expect(row).toHaveLength(16);
       expect(row).toMatch(/^[#.]+$/);
       expect(row[0]).toBe('.');
       expect(row[1]).toBe('.');
-      expect(row[13]).toBe('.');
       expect(row[14]).toBe('.');
       expect(row[15]).toBe('.');
     }
     for (const y of [0, 1, 8, 14, 15]) expect(ROWS16[y]).toBe('.'.repeat(16));
-    expect(ROWS16[2]).toBe('..###########...');
-    expect(rowsInk()).toBe(68);
+    expect(ROWS16[2]).toBe('..############..');
+    expect(rowsInk()).toBe(71);
     expect(rowsPath()).toBe(ROWS16_PATH);
     expect(sha256(ROWS16_PATH)).toBe(ROWS16_PATH_SHA256);
   });
@@ -308,8 +307,8 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
 
   it('prints the rows as six lines of half blocks for the terminal', () => {
     expect(markBlocks()).toEqual([
-      '███████████ ',
-      '▀▀▀▀▀███▀▀▀ ',
+      '████████████',
+      '▀▀▀▀▀███▀▀▀▀',
       '▄▄▄▄ ███    ',
       '▄▄▄ ▄▄▄     ',
       '    ███     ',

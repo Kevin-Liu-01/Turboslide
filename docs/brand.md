@@ -93,9 +93,9 @@ the tile's frame and its 1 px margin.
 ```
 ................
 ................
-..###########...
-..###########...
-..###########...
+..############..
+..############..
+..############..
 .......###......
 .......###......
 ..####.###......
@@ -109,16 +109,17 @@ the tile's frame and its 1 px margin.
 ................
 ```
 
-The crossbar is three rows from column 2 to 12, with the top bar folded into a left arm of 5 px
-against a right arm of 3 px. The stem is 3 px and steps one pixel left after the cut and again at
+The crossbar is three rows from column 2 to 13, with the top bar folded into a left arm of 5 px
+against a right arm of 4 px. The stem is 3 px and steps one pixel left after the cut and again at
 the bottom bar: the slant as two steps over the cap, where tan(12 degrees) gives 2.55 px. The cut
 is one clear row through the stem and the middle bar. The bars start at column 2 and end one pixel
 before the stem, so they step 4, 3 and 2 px. On 2026-10-08 Kevin asked for the T one pixel left
 inside the box, so the T moved and the bars kept their start column and their 1 px gap to the
-frame; columns 13 and 14 are clear on the right. The 32 and 48 px tiles move their vector mark
+frame, and then for one more column on the crossbar, which now ends at column 13 with column 14
+clear, a 1 px gap on each side. The 32 and 48 px tiles move their vector mark
 left of centre by the same share of the tile, 3/64 (`TileGeometry.dx`: 1.5 and 2.25 px). The rows
-draw 68 ink pixels. `ROWS16_PATH` is their path, 192 bytes, with the sha256
-`9e27f058584026bbf51a2494ed0040b560adc06405a08e0d82875c38056ec7c2`. The rows draw with
+draw 71 ink pixels. `ROWS16_PATH` is their path, 192 bytes, with the sha256
+`f892bd1fbb83e22737a5da3d9e41bad48fe9e620bb6a2a7fbdde39dacbe10018`. The rows draw with
 `shape-rendering: crispEdges`; the vector does not.
 
 ### The hinted placement

@@ -1214,7 +1214,8 @@ mints and the Worker verifies before a socket reaches an object, CLOUDFLARE.md 3
 `TURBOSLIDE_ROOM_BEARER` (the bearer of the function's calls to the Worker, `/rooms/:id/*`,
 `/db/*`, `/control/*`, and of the object's calls to the function, the checkpoint and seed routes).
 `docs/security.md` section 12 has their reach and rotation; `TURBOSLIDE_TOKEN` never reaches the
-Worker.
+Worker. Since AUTH-3 (13.8) each environment holds its own values, and the Worker's `/db` routes
+take a third secret, `TURBOSLIDE_DB_BEARER`, in place of the room bearer.
 
 ### 13.2 The runbook: turning the tier on (CLOUDFLARE.md 3.7 and section 6)
 
@@ -1431,10 +1432,13 @@ after it has checked out a sha with `apps/realtime-worker`) and the keyring cred
 
 `pnpm exec wrangler dev --port 87<lane digit>` in `apps/realtime-worker` runs the Worker, the
 object and the D1 simulated locally (workerd); `.dev.vars` (600, ignored by git) carries test
-values of `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` and `TURBOSLIDE_APP_ORIGIN=http://127.0.0.1:<the
-first node port>`; `realtime-env.mjs worker-migrate --local` makes the control tables in the local
-D1 before the first run; alarms may fail after a hot reload, so the Worker is restarted rather
-than edited live. The two process run is two node servers (`apps/studio/.output/server/index.mjs`
+values of `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER`, `TURBOSLIDE_DB_BEARER` (13.8; the
+node servers take the same three) and `TURBOSLIDE_APP_ORIGIN=http://127.0.0.1:<the
+first node port>`; `realtime-env.mjs worker-migrate --local` makes the control tables, the
+accounts tables and the schema's version row in the local D1 before the first run (without the
+row the accounts read anonymous: `/db` refuses the boot's schema statements); alarms may fail
+after a hot reload, so the Worker is restarted rather than edited live. The Worker's tests carry
+their own test secrets (`vitest.config.ts`) and need no `.dev.vars`. The two process run is two node servers (`apps/studio/.output/server/index.mjs`
 after one `scripts/check.mjs` build) on the lane's two ports over one `TURBOSLIDE_STORE=tmp
 TURBOSLIDE_OVERLAY_DIR=<folder>` with `TURBOSLIDE_REALTIME=do TURBOSLIDE_ROOM_HOST=127.0.0.1:87<lane>
 TURBOSLIDE_ROOM_INSECURE=1` (the socket is `ws://` instead of `wss://`) and the same two test
@@ -1459,3 +1463,185 @@ sets, never a flag), `--known-skew <sha>` (a Worker commit the ship note names a
 probe). The production table of 13.2 step 9 is `node scripts/probes/core-gate.mjs --base
 https://www.turboslide.com --tier do --room-host turboslide-realtime.kk23907751.workers.dev`; the
 guard's three realtime rows need no new flag.
+
+### 13.8 The accounts database bearer and the secrets per environment (AUTH-3, 2026-10-08)
+
+AUTH-3 (`docs/hardening/research/auth-verify.md`, severity 3): the Worker's `POST /db/query` and
+`POST /db/batch` ran any SQL on the accounts D1 under the room bearer, the `session` table holds
+the session token in plain text, and one ticket secret and one room bearer served both
+environments from one `room.env`, so a leak from any preview build reached production's accounts.
+Kevin approved the setting changes on 2026-10-08 ("Yes, do it"). Since this change:
+
+- Each environment holds three secrets of its own: `TURBOSLIDE_ROOM_SECRET` (the ticket key),
+  `TURBOSLIDE_ROOM_BEARER` (the room and control routes, both directions) and
+  `TURBOSLIDE_DB_BEARER` (the Worker's `/db/query` and `/db/batch`). `room.env` keeps them as
+  `<NAME>_PRODUCTION` and `<NAME>_PREVIEW`. The unsuffixed pair is the shared pair of before:
+  production's values until its rotation ends, never sent to the preview (`realtime-env.mjs`
+  refuses with exit 2, and refuses a database bearer equal to its environment's room bearer).
+- The Worker takes the database bearer alone on `/db` once it holds one. Without one it takes the
+  room bearer and logs `db.bearer.fallback` once per isolate, which is how production runs until
+  step 3 below. `/health` answers `db` (`own`, `rotating` or `fallback`) and `statements`
+  (`enforce` or `report`), never a value.
+- `/db` runs only the statements of `apps/realtime-worker/src/db-statements.json`. Anything else
+  answers 403 `statement_not_allowed` and logs `db.statement.refused` with the first 12 hex
+  characters of the text's SHA-256. A new statement of the accounts code is recorded with
+  `TURBOSLIDE_RECORD_STATEMENTS=write node_modules/.bin/vitest run
+apps/studio/src/server/auth/record-statements.test.ts` and committed with the code that sends
+  it. The hand switch for a statement the recording missed: `pnpm exec wrangler secret put
+TURBOSLIDE_DB_STATEMENTS [--env preview]` from `apps/realtime-worker` with the value `report`
+  on stdin. The Worker then runs an unlisted statement and logs `db.statement.unlisted`; delete
+  the secret once the list carries the statement. `/db` refuses every schema statement: a schema
+  change is a wrangler migration (`realtime-env.mjs worker-migrate [--env preview]`) that also
+  writes the `ts_schema` row, applied on both databases before the push that needs it.
+- A rotation never refuses a call. The receiver of a secret also takes a second value, its
+  `<NAME>_PREVIOUS`, for the window of the rotation: the Worker for all three, and the app for the
+  room bearer, which both hosts send. `/health` `db: rotating` says the Worker's window is open;
+  `realtime-env.mjs status` names `TURBOSLIDE_ROOM_BEARER_PREVIOUS` present while the app's is.
+
+Where each value lives (the room.env key it comes from):
+
+| Name                              | Preview Worker and Vercel preview | Production Worker                               | Vercel production                                 |
+| --------------------------------- | --------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| `TURBOSLIDE_ROOM_SECRET`          | `_PREVIEW`                        | the shared pair, then `_PRODUCTION` from step 3 | the shared pair, then `_PRODUCTION` from step 4   |
+| `TURBOSLIDE_ROOM_BEARER`          | `_PREVIEW`                        | the shared pair, then `_PRODUCTION` from step 3 | the shared pair, then `_PRODUCTION` from step 4   |
+| `TURBOSLIDE_DB_BEARER`            | `_PREVIEW`                        | `_PRODUCTION` from step 3                       | `_PRODUCTION` from step 4                         |
+| `TURBOSLIDE_ROOM_SECRET_PREVIOUS` | never                             | the shared ticket secret, steps 3 to 5          | never                                             |
+| `TURBOSLIDE_ROOM_BEARER_PREVIOUS` | never                             | the shared room bearer, steps 3 to 5            | `TURBOSLIDE_ROOM_BEARER_PRODUCTION`, steps 1 to 4 |
+| `TURBOSLIDE_DB_BEARER_PREVIOUS`   | never                             | the shared room bearer, steps 3 to 5            | never                                             |
+| `TURBOSLIDE_DB_STATEMENTS`        | unset (`report` by hand only)     | unset (`report` by hand only)                   | never                                             |
+
+Every command below is `node scripts/hosting/realtime-env.mjs <subcommand>` from a root linked to
+`turboslide-gt`, with `--dry-run` to print the plan first; the output names variables and Workers,
+never a value. A Vercel variable reaches a deployment at its next build; a Worker secret serves at
+once (each `wrangler secret put` or `delete` deploys a new version).
+
+**The preview half** (lane K2, 2026-10-08; the readings follow the list):
+
+1. The database: none created. `turboslide-accounts-preview` exists (created 2026-10-01, bound
+   as `ACCOUNTS` under `env.preview` in `apps/realtime-worker/wrangler.jsonc`) with the accounts
+   schema of migrations 0001 and 0002 and the current `ts_schema` row, so it is reused.
+2. `mint --environments preview`: the three `_PREVIEW` keys into `room.env`.
+3. `worker-secrets --env preview`: the database bearer, the ticket secret and the room bearer on
+   the preview Worker (and `VERCEL_AUTOMATION_BYPASS_SECRET` when `vercel-bypass.env` exists).
+4. `do --environments preview --force`: the preview Worker's host and the three values on Vercel
+   preview.
+5. `status`: `distinct` for the ticket secret and the room bearer.
+
+The preview Worker keeps main's code until the guard deploys this change: that code ignores
+`TURBOSLIDE_DB_BEARER` and takes the preview's own room bearer on `/db`, which the preview
+deployments built after step 4 send. From this change on it takes the database bearer alone. A
+preview deployment built before step 4 carries the shared pair and is refused by the preview
+Worker from step 3; the guard builds a new one per push.
+
+**The production half**, for the orchestrator, in this order. No step refuses a call: at every
+moment each value a host sends is one its receiver takes.
+
+1. Before pushing this change (room.env and Vercel only; the running deployment is untouched):
+   `mint --environments production`, then `app-partner --environments production`
+   (`TURBOSLIDE_ROOM_BEARER_PREVIOUS` on Vercel production is the coming room bearer).
+2. Push through the guard. The guard deploys the Worker, then the app, which now takes the coming
+   room bearer beside the shared one. Read: `GET https://turboslide-realtime.kk23907751.workers.dev/health`
+   answers `db: fallback` and `statements: enforce`; Google sign in on `www.turboslide.com`; an
+   API key through `turboslide login`; the Worker's logs carry no `db.statement.refused`.
+3. Only once step 2's deployment serves on `www.turboslide.com` (it carries the app's partner;
+   before it, the objects' checkpoint and seed calls would be refused until a deploy, the entries
+   waiting in the objects), the Worker switches: `worker-secrets --from-shared`. It puts the
+   shared ticket secret and room
+   bearer as `TURBOSLIDE_ROOM_SECRET_PREVIOUS`, `TURBOSLIDE_ROOM_BEARER_PREVIOUS` and
+   `TURBOSLIDE_DB_BEARER_PREVIOUS` first, then production's own database bearer, ticket secret
+   and room bearer. The app still sends the shared pair, which the Worker takes as the previous
+   values; the objects now send production's own room bearer, which the app takes as its partner.
+   Read: `/health` `db: rotating`; sign in; `~/.config/turboslide/gt-follow.sh --check
+https://www.turboslide.com` (the realtime rows).
+4. The app switches: `do --environments production --force` (it sets the three only because
+   `/health` answers `rotating`), then `app-settle --environments production`, then a push
+   through the guard (the commit of the readings). Read as in step 2.
+5. The window closes: `worker-settle`. Read: `/health` `db: own`; `status` answers `distinct` for
+   all three names.
+6. A later push removes the fallback from the code (HARDENING.md HR-K2#4): `/db` then refuses
+   every call on a Worker without a database bearer.
+
+The window is bounded by steps 4 and 5, not by a deploy: the Worker's three `_PREVIOUS` names and
+the app's partner are deleted by hand, and both are visible until then.
+
+Rollback, per step:
+
+- Step 1: `app-settle --environments production`. The room.env keys are inert.
+- Step 2: the guard's own (a red production smoke promotes the previous deployment and redeploys
+  the previous sha's Worker); the secrets are untouched, so the previous code runs as before. A
+  refused statement alone: `TURBOSLIDE_DB_STATEMENTS=report` on the production Worker, as above.
+- Step 3: `worker-rollback`: the shared pair back as the Worker's ticket secret and room bearer,
+  then `TURBOSLIDE_DB_BEARER` and the three `_PREVIOUS` names deleted; `/health` answers
+  `db: fallback` and the app of step 2 runs as before.
+- Step 4: promote the step 2 deployment (`~/.config/turboslide/README.md` "Rolling back by hand");
+  the Worker in its window takes it. Before step 5 only.
+- Step 5: `worker-secrets --from-shared` reopens the window; then any deployment from step 2 on
+  may be promoted.
+- Below this change (a deployment or a Worker from before step 2): run `worker-rollback` first,
+  since that code knows neither the database bearer nor the previous names.
+
+What the narrowing leaves (the next fix is AUTH-3's other option, better-auth on a D1 binding in the
+Worker's own runtime, or the session token hashed at rest): the database bearer still acts as the
+auth server for an account whose id or address its holder knows, because the library's own
+statements read a user's sessions by user id and insert a session. The list also carries three
+reads without a key column: `select * from "ts_api_key"` (the key cache: hashes, owners and
+scopes), the verification cleanup read (`expiresAt < ?`, whose values are hashed codes and OAuth
+state) and the captured mail list (the preview's capture mode only; production runs
+`TURBOSLIDE_MAIL=off`). What it removes: a bulk read of the session, account, user and
+verification tables, every schema statement (a table, a trigger, a drop), a write of anything but
+a parameter, and any reach of the room bearer, which the objects and the probes carry, into the
+accounts.
+
+The preview half's readings, 2026-10-08 (no value is recorded anywhere; names, ids and
+statuses only):
+
+- `wrangler d1 list`: `turboslide-accounts` (87d3f46e-ef12-428d-b115-5c34fd322b5b) and
+  `turboslide-accounts-preview` (9b66676e-55ac-4d14-a063-5cc7f0091789, created
+  2026-10-01T21:42Z). On the preview database: the twelve accounts tables, the two control
+  tables and the seven indexes, `ts_schema` at `better-auth 1.7.4; turboslide 2026-10-01.1`,
+  no user and no session row. Production's database, read the same way (names and the version
+  row only): the same tables and version.
+- `mint --environments preview` wrote `TURBOSLIDE_ROOM_SECRET_PREVIEW`,
+  `TURBOSLIDE_ROOM_BEARER_PREVIEW` and `TURBOSLIDE_DB_BEARER_PREVIEW` into `room.env` (600); the
+  file before is kept as `room.env.before-k2` (600) beside it.
+- `worker-secrets --env preview` (20:02Z): the preview Worker's secrets are
+  `TURBOSLIDE_DB_BEARER`, `TURBOSLIDE_ROOM_BEARER` and `TURBOSLIDE_ROOM_SECRET`; the three puts
+  made versions ab1d5e26, e37fa638 and 63040c46 over the guard's upload 4d9f4b12 (main at
+  8be64284). The production Worker's secrets are unchanged: `TURBOSLIDE_ROOM_BEARER` and
+  `TURBOSLIDE_ROOM_SECRET`.
+- `do --environments preview --force`: `/health` on the preview Worker answered ok, realtime on,
+  commit 8be64284 (main's code, so no `db` field yet); then `TURBOSLIDE_ROOM_HOST` (the preview
+  host from `cloudflare.env`), `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` replaced and
+  `TURBOSLIDE_DB_BEARER` added on Vercel preview. `status`: production has no
+  `TURBOSLIDE_DB_BEARER` and no `TURBOSLIDE_ROOM_BEARER_PREVIOUS`, the preview has the database
+  bearer; `TURBOSLIDE_ROOM_SECRET` and `TURBOSLIDE_ROOM_BEARER`: production and preview
+  `distinct`.
+- `GET /control/flags` on the preview Worker: 401 under the shared (production) room bearer, 200
+  under the preview's own, 401 under the preview's database bearer.
+- `worker-migrate --env preview` applied `0003_schema_version.sql` (the version row; the insert
+  changed nothing there): `d1_migrations` lists 0001 to 0003.
+
+The local run of the code (lane K2, 2026-10-08): `wrangler dev --port 8771` with test values in
+`.dev.vars` (the three secrets, `TURBOSLIDE_APP_ORIGIN=http://127.0.0.1:4871`) over a local D1
+made by `wrangler d1 migrations apply turboslide-accounts --local`, and the studio by `vite dev`
+on 4871 (4854 was another lane's) with `TURBOSLIDE_REALTIME=do`, `TURBOSLIDE_ACCOUNTS=d1`,
+`TURBOSLIDE_ROOM_HOST=127.0.0.1:8771`, `TURBOSLIDE_ROOM_INSECURE=1`, `TURBOSLIDE_MAIL=capture`
+and `TURBOSLIDE_LOCAL_OPEN` and `TURBOSLIDE_AUTH_RATE_LIMIT` unset. The Worker's `/health`
+answered `db: own`, `statements: enforce`. The first boot found no version row (migrations 0001
+and 0002 make none) and its three `create table` statements were refused, which is why
+`0003_schema_version.sql` exists; after it every flow passed: the code sign in (the captured
+code read by `e2e/identity-seed.mts` through the narrowed `/db`), `account.me` as the address,
+`account.sessions`, `account.tokens.create` and the new key alone as the bearer of
+`account.tokens.list`, a fresh magic link (302 with the session cookie), `account.signOut` of
+the current session (then `account.me` reads anonymous) and `/api/auth/sign-out`. An editor tab
+on `/edit/gt-brand` opened its socket through the Worker (101 under the app's ticket), and a
+typed note was committed by the object's checkpoint call into the app under the room bearer
+(`versions/8.json` with `ops` 1 to 1). Straight at the Worker: `select * from session`,
+`select "token" from "session"` and a `create trigger` under the database bearer answered 403
+`statement_not_allowed`; the version read answered 200 under the database bearer and 401 under
+the room bearer, as did `select * from session`. The Worker's log over the run: 98 `/db/query`
+calls, 6 refused (the boot's three before 0003 and the three above), 2 answered 401.
+
+Optional on production, a no-op: `worker-migrate` applies `0003_schema_version.sql`, whose row
+production already has; by the round's rules a remote migration on production is the ship
+step's.

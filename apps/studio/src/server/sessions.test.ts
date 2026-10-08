@@ -12,6 +12,11 @@ import {
   redisSessionDirectory,
 } from './sessions';
 import type { SessionBinding, SessionDirectory } from './sessions';
+import { viewScopeOf, visibleSessions } from './sessions.server';
+import type { StudioSession } from '@turboslide/agent/http/sessions';
+import type { Scope } from '@turboslide/schema/access';
+
+import type { RequestIdentity } from './auth/identity';
 
 const T0 = Date.parse('2026-09-13T10:00:00.000Z');
 const at = (ms: number): string => new Date(T0 + ms).toISOString();
@@ -84,5 +89,52 @@ describe('the session directory', () => {
 
   it('answers the same over Redis (a fake of GET and SET PX)', async () => {
     await exercise(redisSessionDirectory(fakeKv()));
+  });
+});
+
+describe("an agent's reach over the attached pages (security hotfix H3)", () => {
+  const page = (id: string, principalId?: string): StudioSession => ({
+    id,
+    deckId: 'q4-review',
+    owner: 'editor',
+    actions: ['view.goto'],
+    ...(principalId === undefined ? {} : { principalId }),
+    attachedAt: at(0),
+    lastSeenAt: at(0),
+    state: {},
+  });
+  const pages = [page('a', 'usr_alice'), page('b', 'usr_bob'), page('c')];
+  const key = (
+    owner: string,
+    admin = false,
+    scopes: Scope[] = ['read'],
+  ): Pick<RequestIdentity, 'kind' | 'ctx'> => ({
+    kind: 'agent',
+    ctx: {
+      principal: { id: owner, kind: 'account', admin },
+      agent: { tokenId: 'tok_1', ownerId: owner, scopes, name: 'key' },
+      linkGrants: [],
+    },
+  });
+
+  it("lists and drives a key's own pages alone, and every page for the admin", () => {
+    const alice = viewScopeOf({ identity: key('usr_alice'), caller: {} });
+    expect(alice).toEqual({ allowed: true, principalId: 'usr_alice' });
+    expect(visibleSessions(pages, alice).map((p) => p.id)).toEqual(['a']);
+    /* an admin account's key needs the admin scope to reach other pages */
+    const adminRead = viewScopeOf({ identity: key('usr_root', true), caller: {} });
+    expect(visibleSessions(pages, adminRead).map((p) => p.id)).toEqual([]);
+    const admin = viewScopeOf({ identity: key('usr_root', true, ['admin']), caller: {} });
+    expect(visibleSessions(pages, admin).map((p) => p.id)).toEqual(['a', 'b', 'c']);
+    const bearer = viewScopeOf({
+      identity: { kind: 'bootstrap', ctx: { principal: null, linkGrants: [] } },
+      caller: {},
+    });
+    expect(visibleSessions(pages, bearer)).toHaveLength(3);
+    /* no identity: the checkout's holder reaches every page, anyone else none */
+    expect(
+      visibleSessions(pages, viewScopeOf({ identity: null, caller: { admin: true } })),
+    ).toHaveLength(3);
+    expect(visibleSessions(pages, viewScopeOf({ identity: null, caller: {} }))).toEqual([]);
   });
 });

@@ -1,5 +1,8 @@
 import { getRequest } from '@tanstack/react-start/server';
 
+import type { StudioSession } from '@turboslide/agent/http/sessions';
+
+import type { RequestIdentity } from './auth/identity';
 import type { SessionBinding, SessionDirectory } from './sessions';
 import { memorySessionDirectory, redisSessionDirectory } from './sessions';
 
@@ -64,4 +67,45 @@ export async function admitAttach(deckId: string): Promise<void> {
   const identity = await room.requestIdentity(getRequest());
   const decision = await room.decideFor(identity, deckId, 'read', 'session.attach');
   if (!decision.ok) throw new RangeError(`No deck ${deckId}`);
+}
+
+/** Whose attached pages a caller reaches: all of them (`principalId` undefined), its own, or none. */
+export type ViewScope = { allowed: boolean; principalId: string | undefined };
+
+/**
+ * Whose pages a caller may drive and list (security hotfix H3): every page for the deployment's
+ * admin (the bootstrap bearer, a checkout's holder, an admin account, an admin account's key with
+ * the admin scope), else the pages attached as the caller's principal (an API key's owner), else
+ * none.
+ */
+export function viewScopeOf(facts: {
+  identity: Pick<RequestIdentity, 'kind' | 'ctx'> | null;
+  caller: { admin?: boolean };
+}): ViewScope {
+  const id = facts.identity;
+  if (id === null) return { allowed: facts.caller.admin === true, principalId: undefined };
+  const admin =
+    id.kind === 'bootstrap' ||
+    id.kind === 'checkout' ||
+    (id.ctx.principal?.admin === true &&
+      (id.kind !== 'agent' || id.ctx.agent?.scopes.includes('admin') === true));
+  if (admin) return { allowed: true, principalId: undefined };
+  const principalId = id.ctx.principal?.id ?? id.ctx.agent?.ownerId;
+  return principalId === undefined
+    ? { allowed: false, principalId: undefined }
+    : { allowed: true, principalId };
+}
+
+/**
+ * The attached pages a caller may see (`/api/agent`'s `sessions`; H3): every page for the
+ * admin, the caller's own otherwise, none for a caller with no principal. The session id is a
+ * capability (the poll and the answer take it alone), so another person's page is never listed.
+ */
+export function visibleSessions(
+  sessions: readonly StudioSession[],
+  scope: ViewScope,
+): StudioSession[] {
+  if (!scope.allowed) return [];
+  if (scope.principalId === undefined) return [...sessions];
+  return sessions.filter((session) => session.principalId === scope.principalId);
 }

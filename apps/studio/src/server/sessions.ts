@@ -230,7 +230,12 @@ const attachFn = createServerFn({ method: 'POST' })
     const who = await identityOfRequest();
     const directory = await sessionDirectory();
     const now = new Date().toISOString();
-    const session = studioSessions().attach(rest, id);
+    // the principal the page attached as, from the request and never the body (SPEC-3 8.2): an
+    // agent's view.goto and /api/agent reach the pages of its own principal alone (H3)
+    const session = studioSessions().attach(
+      { ...rest, ...(who.kind === 'unknown' ? {} : { principalId: who.identity }) },
+      id,
+    );
     const bound = await directory.bind({
       id: session.id,
       deckId: session.deckId,

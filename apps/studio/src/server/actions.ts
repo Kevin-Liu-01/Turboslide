@@ -95,6 +95,7 @@ import type { ActionRequestFacts } from './auth/actions';
 import { selectAvatarStore } from './auth/avatar-tier';
 import { requestIdentity } from './auth/identity';
 import type { RequestIdentity } from './auth/identity';
+import { viewScopeOf } from './sessions.server';
 import { isSecureRequest } from './auth/session';
 import {
   COMMENT_ACTION_IDS,
@@ -922,9 +923,19 @@ function registerRecordActionsFor(
 }
 
 /** view.goto runs in the attached page; the latest attached session at call time answers. */
-function registerViewActions(dispatcher: Dispatcher, deckId: string): void {
+/**
+ * `view.goto` drives a page attached to the deck (SPEC 7.3). Since security hotfix H3 the page is
+ * the caller's own (`viewer`, the principal the page attached as: the key's owner for an API key)
+ * unless the caller is the deployment's admin (`viewer` undefined): any key that read the deck
+ * moved anyone's page before.
+ */
+function registerViewActions(
+  dispatcher: Dispatcher,
+  deckId: string,
+  viewer: string | undefined,
+): void {
   dispatcher.register('view.goto', async (input) => {
-    const session = studioSessions().attached(deckId, 'view.goto');
+    const session = studioSessions().attached(deckId, 'view.goto', viewer);
     if (session === undefined) {
       throw new RangeError(
         `No studio page is attached to deck ${deckId}; open /deck/${deckId} or /edit/${deckId}`,
@@ -975,7 +986,6 @@ function registerHostedDeckActions(
   // id (H3, DATA-V1): on a hosted store 128 random bits, unless the deployment's admin names one
   // (the bootstrap bearer's `deck.create --id`); on a checkout's file store the id named or the
   // slug of the name, the CLI's rule
-  const explicitIds = !isHosted() || creator?.principal?.admin === true;
   const made = async <T extends { deckId: string; dir: string }>(
     named: string | undefined,
     slug: () => string,
@@ -989,11 +999,14 @@ function registerHostedDeckActions(
         );
       return (await import('./paths-out')).publicDeckAnswer(await make(named ?? slug()));
     }
-    const [{ createWithFreshId, createWithRecord }, { publicDeckAnswer }] = await Promise.all([
-      import('./access'),
-      import('./paths-out'),
-    ]);
-    const fixed = named !== undefined && explicitIds ? named : isHosted() ? undefined : slug();
+    const [{ createWithFreshId, createWithRecord, plannedDeckId }, { publicDeckAnswer }] =
+      await Promise.all([import('./access'), import('./paths-out')]);
+    const fixed =
+      plannedDeckId(named, {
+        hosted: isHosted(),
+        admin: creator.principal?.admin === true,
+        slug,
+      }) ?? undefined;
     // the answer carries no path of this instance, `dir` the store's `decks/<id>` (H3, DATA-V6)
     if (fixed !== undefined)
       return publicDeckAnswer((await createWithRecord(fixed, creator, () => make(fixed))).made);
@@ -1067,6 +1080,7 @@ function registerTemplateActions(
   dispatcher: Dispatcher,
   decks: HostedDecks,
   caller: AuthContext | null,
+  requestBound: boolean,
 ): void {
   const decksDir = decks.decksDir;
   const identity = caller === null ? 'anonymous' : (identityLabel(caller) ?? 'anonymous');
@@ -1079,6 +1093,12 @@ function registerTemplateActions(
   };
   const copier = async (action: string, deckId: string, baseRevision: number): Promise<void> => {
     await assertFlag('readOnly', { identity, action, deckId });
+    // a request with no identity saves nothing (H3, DATA-1); outside a request (the CLI) no
+    // decision is made
+    if (caller === null && requestBound)
+      throw new ForbiddenError(
+        'Sign in or send the bearer to save this presentation as a template',
+      );
     if (caller !== null) {
       const decision = await authorize(caller, deckId, 'copy', { action, transport: 'http' });
       if (!decision.ok) {
@@ -1394,7 +1414,12 @@ export async function deckDispatcher(
     request !== undefined,
   );
   // the templates of the product round over the collection's folder (docs/archive/rounds/PRODUCT.md 4.3)
-  registerTemplateActions(dispatcher, decks, creatorContextOf(request, facts));
+  registerTemplateActions(
+    dispatcher,
+    decks,
+    creatorContextOf(request, facts),
+    request !== undefined,
+  );
   // the assistant's two actions on this deck (docs/archive/rounds/PRODUCT.md 6.2; build/b6.md R3): the route
   // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP
   registerAssistActions(dispatcher, { store: liveStore, deckId });
@@ -1452,8 +1477,12 @@ export async function deckDispatcher(
   });
   registerWorkerActions(dispatcher, deckId, store);
   registerAdminActions(dispatcher);
-  const session = options.withView ? studioSessions().attached(deckId, 'view.goto') : undefined;
-  if (session !== undefined) registerViewActions(dispatcher, deckId);
+  const view = viewScopeOf(facts);
+  const session =
+    options.withView && view.allowed
+      ? studioSessions().attached(deckId, 'view.goto', view.principalId)
+      : undefined;
+  if (session !== undefined) registerViewActions(dispatcher, deckId, view.principalId);
   const source: DeckSource = {
     deckId,
     manifest: async () => (await load()).deck,

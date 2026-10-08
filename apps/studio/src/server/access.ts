@@ -779,6 +779,20 @@ export async function createWithRecord<T>(
   }
 }
 
+/**
+ * The id a create on the dispatcher takes (H3, DATA-V1): on a hosted store a fresh random id
+ * (`null`), whatever id the input names, unless the caller is the deployment's admin; on a
+ * checkout's file store the id named or the slug of the name, the CLI's rule. So no answer of a
+ * hosted store tells a caller that an id it named exists.
+ */
+export function plannedDeckId(
+  named: string | undefined,
+  options: { hosted: boolean; admin: boolean; slug: () => string },
+): string | null {
+  if (!options.hosted) return named ?? options.slug();
+  return named !== undefined && options.admin ? named : null;
+}
+
 /** How many fresh ids a create tries before it gives up (128 random bits that collide are a fault). */
 export const FRESH_ID_ATTEMPTS = 3;
 

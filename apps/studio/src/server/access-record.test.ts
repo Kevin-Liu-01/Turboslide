@@ -24,6 +24,7 @@ import {
   createWithFreshId,
   createWithRecord,
   creatorFromRecords,
+  plannedDeckId,
   creatorOf,
   missingRecordRule,
   recordNewDeck,
@@ -283,6 +284,21 @@ describe('createWithFreshId (H3, DATA-V1)', () => {
       }),
     ).rejects.toBeInstanceOf(DeckIdTakenError);
     expect(asked).toBe(FRESH_ID_ATTEMPTS);
+  });
+});
+
+describe('plannedDeckId (H3, DATA-V1)', () => {
+  const slug = () => 'q4-review';
+  it('gives every hosted create a fresh id, whatever id it names, unless the caller is the admin', () => {
+    expect(plannedDeckId('gt-brand', { hosted: true, admin: false, slug })).toBeNull();
+    expect(plannedDeckId(undefined, { hosted: true, admin: false, slug })).toBeNull();
+    expect(plannedDeckId(undefined, { hosted: true, admin: true, slug })).toBeNull();
+    expect(plannedDeckId('smoke-1', { hosted: true, admin: true, slug })).toBe('smoke-1');
+  });
+
+  it("keeps the CLI's rule on a checkout's file store", () => {
+    expect(plannedDeckId('named', { hosted: false, admin: false, slug })).toBe('named');
+    expect(plannedDeckId(undefined, { hosted: false, admin: false, slug })).toBe('q4-review');
   });
 });
 

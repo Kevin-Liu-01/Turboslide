@@ -156,6 +156,23 @@ async function decideDeck(
   if (!decision.ok) throw refusal(decision, deckId, capability);
 }
 
+/**
+ * The decks an input names, decided for a browser caller as the gate decides them for an agent
+ * (security hotfix H3: the editor's runDeckAction decided the page's deck alone, so the owner of
+ * any deck trashed, removed, copied, saved as a template or imported from any other). A deck the
+ * caller cannot see and one that does not exist answer `deckNotFound`.
+ */
+export async function gateInputDecks(
+  ctx: AuthContext,
+  action: string,
+  input: unknown,
+): Promise<void> {
+  const named = INPUT_DECKS.get(action);
+  const target = named === undefined ? undefined : inputDeck(input, named.field);
+  if (named === undefined || target === undefined) return;
+  await decideDeck({ kind: 'agent', ctx }, target, named.capability, { action, transport: 'http' });
+}
+
 /** The deployment admin: the admin bearers, or a key with the admin scope of an admin account (auth/actions.ts requireAdmin). */
 export function isDeploymentAdmin(caller: AgentCaller): boolean {
   if (caller.kind === 'admin') return true;

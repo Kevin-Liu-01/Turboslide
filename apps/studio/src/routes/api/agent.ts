@@ -8,8 +8,16 @@ import { describeBackends } from '@turboslide/effects/select';
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
 import { agentAuth, requireAgentAuth } from '../../server/auth';
 import { buildCommit } from '../../server/build-commit';
+import {
+  agentCaller,
+  deckNotFound,
+  gateDeckRead,
+  isDeploymentAdmin,
+} from '../../server/agent-gate';
 import { refuseForeignOrigin } from '../../server/headers';
+import { scrubServerPaths } from '../../server/paths-out';
 import { studioSessions } from '../../server/sessions';
+import { visibleSessions } from '../../server/sessions.server';
 
 // GET /api/agent (SPEC 3.4, 7.4, 7.5; MILESTONES M4 item 1): the manifest an agent reads first.
 // The generated document (packages/agent/generated/manifest.json: transports, rules, execution
@@ -82,17 +90,38 @@ export const Route = createFileRoute('/api/agent')({
         if (foreign !== null) return foreign;
         const url = new URL(request.url);
         const deckId = url.searchParams.get('deck') || DEFAULT_DECK;
+        /* the caller as the gate reads it (server/agent-gate.ts): the deck described is read for
+           it first, so a deck it may not read and one that does not exist answer the one note,
+           and the pages listed are its own unless it is the deployment's admin (H3: the list
+           named every open page, its session id and its deck, to any key) */
+        let caller: Awaited<ReturnType<typeof agentCaller>> | null = null;
+        try {
+          caller = await agentCaller(request);
+        } catch {
+          caller = null;
+        }
+        const admin = caller !== null && isDeploymentAdmin(caller);
         let dispatcher;
         let note: string | undefined;
         try {
+          if (!admin) {
+            if (caller === null) throw new RangeError(deckNotFound(deckId));
+            await gateDeckRead(caller, deckId, 'http', 'agent.describe');
+          }
           dispatcher = (await deckDispatcher(deckId, { withView: true })).dispatcher;
         } catch (error) {
           dispatcher = createDispatcher();
-          note = error instanceof Error ? error.message : String(error);
+          note = admin
+            ? scrubServerPaths(error instanceof Error ? error.message : String(error))
+            : deckNotFound(deckId);
         }
+        const principalId = caller?.ctx.principal?.id ?? caller?.ctx.agent?.ownerId;
         const manifest = runtimeManifest({
           dispatcher,
-          sessions: studioSessions().list(),
+          sessions: visibleSessions(studioSessions().list(), {
+            allowed: admin || principalId !== undefined,
+            principalId: admin ? undefined : principalId,
+          }),
           defaultDeck: deckId,
         });
         const answer = { ...manifest, instance: instanceFacts() };

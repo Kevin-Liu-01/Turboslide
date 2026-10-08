@@ -11,7 +11,7 @@ import { accountPrincipalId } from '@turboslide/identity/ids';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { ACTIONS, actionsOn } from '@turboslide/schema/actions';
 
-import { INPUT_DECKS, gateAgentAction } from './agent-gate';
+import { INPUT_DECKS, gateAgentAction, gateInputDecks } from './agent-gate';
 import type { AgentCaller } from './agent-gate';
 import { ensureUserByEmail } from './auth/actions';
 import { buildIdentityRuntime, setIdentityRuntime } from './auth/identity';
@@ -594,5 +594,41 @@ describe('the agent routes through the gate', () => {
       body: { error: 'rate_limited' },
     });
     expect(reached).toEqual([]);
+  });
+});
+
+describe("the decks an input names, on the editor's runDeckAction (H3)", () => {
+  it("refuses a browser on another person's deck with a missing deck's answer, and admits its own", async () => {
+    restrictedDeck('alpha', 'usr_alice');
+    restrictedDeck('beta', 'usr_bob');
+    const alice: AuthContext = {
+      principal: { id: 'usr_alice', kind: 'account', admin: false },
+      linkGrants: [],
+    };
+    expect([...INPUT_DECKS.keys()].sort()).toEqual([
+      'deck.copy',
+      'deck.remove',
+      'deck.restore',
+      'deck.trash',
+      'slide.import',
+      'template.create',
+      'template.update',
+    ]);
+    for (const action of INPUT_DECKS.keys()) {
+      expect(
+        await refusalOf(gateInputDecks(alice, action, inputNaming(action, 'beta'))),
+        action,
+      ).toEqual({ status: 404, message: 'No deck beta' });
+      expect(
+        await refusalOf(gateInputDecks(alice, action, inputNaming(action, 'gamma'))),
+        action,
+      ).toEqual({ status: 404, message: 'No deck gamma' });
+      expect(
+        await refusalOf(gateInputDecks(alice, action, inputNaming(action, 'alpha'))),
+        action,
+      ).toBeNull();
+    }
+    // an action that names no deck decides nothing more
+    expect(await refusalOf(gateInputDecks(alice, 'slide.duplicate', { id: 'beta' }))).toBeNull();
   });
 });

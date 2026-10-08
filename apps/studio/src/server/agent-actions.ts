@@ -388,6 +388,11 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
         transport: 'window',
       });
       if (!decision.ok) throw new DeniedError(decision.status, denialBody(decision, decided));
+      // the decks the input names (deck.copy, deck.trash, deck.restore, deck.remove,
+      // template.create and template.update by deckId, slide.import by sourceDeckId), decided at
+      // their capabilities as the agent gate decides them (H3)
+      const { gateInputDecks } = await import('./agent-gate');
+      await gateInputDecks(ctx, data.action, data.input);
     }
     if (ctx.principal === null && ctx.agent === undefined) {
       logSecurityEvent({

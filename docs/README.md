@@ -12,6 +12,7 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 | [LANDING.md](LANDING.md)                                      | The landing redesign of `/home`: one eight slide deck the visitor edits, tailors, runs and presents                             |
 | [DESIGN.md](DESIGN.md)                                        | The design round of 2026-10-05: layers, corners, Inter, colour, scrollbars, the theme library and the landing on every page     |
 | [POLISH-2.md](POLISH-2.md)                                    | Polish two of 2026-10-07: the face, the landing's bar and hero, the docs at `/docs` and the auth plate on every sign in surface |
+| [DROPDOWNS.md](DROPDOWNS.md)                                  | The dropdown round of 2026-10-08: one dropdown drawn by Turboslide in place of every native select                              |
 | [FOCUS.md](FOCUS.md)                                          | The rule, the core set, the parked set, the matrix and the ship gate (section 6.2)                                              |
 | [REALTIME.md](REALTIME.md) and [CLOUDFLARE.md](CLOUDFLARE.md) | The realtime round: the realtime channel, presence and Google sign in, with the move to Cloudflare                              |
 | [hosting.md](hosting.md) and [security.md](security.md)       | How the studio is hosted, deployed, verified and protected                                                                      |

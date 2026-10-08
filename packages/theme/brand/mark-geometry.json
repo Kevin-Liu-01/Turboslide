@@ -7,7 +7,7 @@
     },
     "rows16": {
       "bytes": 192,
-      "sha256": "b21e4d461ce314206d0ba3bae1e952c458d4cd07d56cdca82421467a21fae72b"
+      "sha256": "9e27f058584026bbf51a2494ed0040b560adc06405a08e0d82875c38056ec7c2"
     },
     "aspect": 1.4715
   },
@@ -19,7 +19,7 @@
       "form": "rows",
       "cap": 12,
       "top": 2,
-      "ink": 72,
+      "ink": 68,
       "colours": 3,
       "plate": "paper"
     },
@@ -30,7 +30,7 @@
       "cap": 16,
       "top": 8,
       "ink": 190.7,
-      "colours": 49,
+      "colours": 47,
       "plate": "paper"
     },
     {
@@ -40,7 +40,7 @@
       "cap": 24,
       "top": 12,
       "ink": 425.6,
-      "colours": 66,
+      "colours": 64,
       "plate": "paper"
     },
     {

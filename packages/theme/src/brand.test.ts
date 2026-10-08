@@ -56,6 +56,7 @@ import {
   rowsInk,
   rowsPath,
   tileMarkPath,
+  tileVectorQuads,
 } from './brand.ts';
 import { customProperties, declarationsOf, parseCss } from './css.ts';
 import { TOKENS } from './tokens.ts';
@@ -217,19 +218,20 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
     );
   });
 
-  it('draws 16 px as the one hand drawing: a 12 px cap on rows 2 to 13, columns 0, 1, 14 and 15 clear', () => {
+  it('draws 16 px as the one hand drawing: a 12 px cap on rows 2 to 13, columns 0, 1, 13, 14 and 15 clear', () => {
     expect(ROWS16).toHaveLength(16);
     for (const row of ROWS16) {
       expect(row).toHaveLength(16);
       expect(row).toMatch(/^[#.]+$/);
       expect(row[0]).toBe('.');
       expect(row[1]).toBe('.');
+      expect(row[13]).toBe('.');
       expect(row[14]).toBe('.');
       expect(row[15]).toBe('.');
     }
     for (const y of [0, 1, 8, 14, 15]) expect(ROWS16[y]).toBe('.'.repeat(16));
-    expect(ROWS16[2]).toBe('...###########..');
-    expect(rowsInk()).toBe(72);
+    expect(ROWS16[2]).toBe('..###########...');
+    expect(rowsInk()).toBe(68);
     expect(rowsPath()).toBe(ROWS16_PATH);
     expect(sha256(ROWS16_PATH)).toBe(ROWS16_PATH_SHA256);
   });
@@ -306,24 +308,42 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
 
   it('prints the rows as six lines of half blocks for the terminal', () => {
     expect(markBlocks()).toEqual([
-      ' ███████████',
-      ' ▀▀▀▀▀███▀▀▀',
-      '▄▄▄▄▄ ███   ',
-      '▄▄▄▄ ▄▄▄    ',
-      '     ███    ',
-      '███ ███     ',
+      '███████████ ',
+      '▀▀▀▀▀███▀▀▀ ',
+      '▄▄▄▄ ███    ',
+      '▄▄▄ ▄▄▄     ',
+      '    ███     ',
+      '██ ███      ',
     ]);
   });
 });
 
 describe('the tile (SPEC-4 0.4)', () => {
   it('carries the rows at 16 px and the hinted vector at a 16 and a 24 px cap at 32 and 48 px', () => {
-    expect(TILE_SIZES[16]).toEqual({ size: 16, frame: 1, form: 'rows', cap: 12, top: 2 });
-    expect(TILE_SIZES[32]).toEqual({ size: 32, frame: 1, form: 'vector', cap: 16, top: 8 });
-    expect(TILE_SIZES[48]).toEqual({ size: 48, frame: 1, form: 'vector', cap: 24, top: 12 });
+    expect(TILE_SIZES[16]).toEqual({ size: 16, frame: 1, form: 'rows', cap: 12, top: 2, dx: 0 });
+    expect(TILE_SIZES[32]).toEqual({
+      size: 32,
+      frame: 1,
+      form: 'vector',
+      cap: 16,
+      top: 8,
+      dx: -1.5,
+    });
+    expect(TILE_SIZES[48]).toEqual({
+      size: 48,
+      frame: 1,
+      form: 'vector',
+      cap: 24,
+      top: 12,
+      dx: -2.25,
+    });
     expect(tileMarkPath(TILE_SIZES[16])).toBe(ROWS16_PATH);
     for (const tile of [TILE_SIZES[32], TILE_SIZES[48]]) {
-      const quads = markQuadsAt(tile.size, tile.cap, tile.top);
+      const quads = tileVectorQuads(tile);
+      /* the centred mark moved left by 3/64 of the tile, as the rows move the T */
+      const centred = quadXs(markQuadsAt(tile.size, tile.cap, tile.top));
+      expect(tile.dx).toBe((-3 / 64) * tile.size);
+      quadXs(quads).forEach((x, i) => expect(x).toBeCloseTo((centred[i] ?? 0) + tile.dx, 9));
       /* clear of the 1 px frame and its 1 px margin */
       expect(Math.min(...quadXs(quads))).toBeGreaterThan(2);
       expect(Math.max(...quadXs(quads))).toBeLessThan(tile.size - 2);

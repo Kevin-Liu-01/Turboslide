@@ -57,14 +57,14 @@ describe('the banner (SPEC-4 1.11)', () => {
 
   test('draws the 16 px rows of the tab icon: the crossbar, the stem, the cut and the three bars', () => {
     /* the glyph is the rows' mark area (rows 2 to 13, columns 2 to 13), two pixel rows a line */
-    expect(ROWS16[2]).toBe('...###########..');
+    expect(ROWS16[2]).toBe('..###########...');
     expect(markBlocks()).toEqual([
-      ' ███████████',
-      ' ▀▀▀▀▀███▀▀▀',
-      '▄▄▄▄▄ ███   ',
-      '▄▄▄▄ ▄▄▄    ',
-      '     ███    ',
-      '███ ███     ',
+      '███████████ ',
+      '▀▀▀▀▀███▀▀▀ ',
+      '▄▄▄▄ ███    ',
+      '▄▄▄ ▄▄▄     ',
+      '    ███     ',
+      '██ ███      ',
     ]);
   });
 

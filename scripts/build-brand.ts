@@ -107,6 +107,7 @@ import {
   TILE_SIZES,
   markQuads,
   markQuadsAt,
+  tileVectorQuads,
   markQuadsInBox,
   markSvg,
   quadPath,
@@ -254,7 +255,7 @@ function inkOf(quads: readonly Quad[], size: number): number {
 
 /** The quads of a tile's vector mark in tile px. */
 function tileQuads(tile: TileGeometry): Quad[] {
-  return markQuadsAt(tile.size, tile.cap, tile.top, { hinted: true });
+  return tileVectorQuads(tile);
 }
 
 /**

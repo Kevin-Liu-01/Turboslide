@@ -58,12 +58,12 @@
     },
     "apps/studio/public/favicon.ico": {
       "bytes": 15086,
-      "sha256": "6e572d8fb2c1d0fa3fdabbc0f3d6d614a9cd81968dd2900ae448bc7f1b2bdb3a",
+      "sha256": "140805d85b3a06f0aeb3cbb1bdcf0fb30b42ede987f32a94a97e651cd70c6f31",
       "kind": "built"
     },
     "apps/studio/public/icon.svg": {
       "bytes": 1201,
-      "sha256": "6e04b07da62b88947f34baa2f615fd1317a54e9e84919e6f723fbbe41d71a53f",
+      "sha256": "8d2bbc3427325214a4b6cc7893005cddbfddfb710d69e2d996519d73905fb54c",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-192.png": {
@@ -128,7 +128,7 @@
     },
     "packages/theme/brand/icon-tile.svg": {
       "bytes": 1201,
-      "sha256": "6e04b07da62b88947f34baa2f615fd1317a54e9e84919e6f723fbbe41d71a53f",
+      "sha256": "8d2bbc3427325214a4b6cc7893005cddbfddfb710d69e2d996519d73905fb54c",
       "kind": "built"
     },
     "packages/theme/brand/mark-24.svg": {
@@ -138,12 +138,12 @@
     },
     "packages/theme/brand/mark-geometry.json": {
       "bytes": 2886,
-      "sha256": "618ba43d4153e1c41eec1dacd8b2ae0a7df9ddbc0feccced8040550bde96bb24",
+      "sha256": "7b59cc0406fc50581d2d0bf478b8eeb6d89d55dda4e98646d443a9946ac81696",
       "kind": "built"
     },
     "packages/theme/brand/mark-small.svg": {
       "bytes": 774,
-      "sha256": "b0b57a3ed4ced61c7f7be40c0115a985d384c9a6975237c31a23954284a6363e",
+      "sha256": "2701ce1802faa977bf71e59ee85f8a89ea99a128b6eca203c7dc60d43a65702c",
       "kind": "built"
     },
     "packages/theme/brand/mark.svg": {

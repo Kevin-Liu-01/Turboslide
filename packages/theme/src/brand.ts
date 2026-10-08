@@ -202,27 +202,29 @@ export const MARK_VIEWBOX = `${roundTo(MARK_BOX.minX - 4, 1)} ${CAP_TOP - 4} ${r
 /**
  * The mark at 16 px as rows of `#` (ink) and `.`. At 16 px the slant and the 8 unit cut fall
  * between pixels, so the form is set as whole pixels on a 12 px cap in rows 2 to 13: the crossbar
- * three rows from column 3 to 13 with the top bar folded into a left arm of 5 px against a right
+ * three rows from column 2 to 12 with the top bar folded into a left arm of 5 px against a right
  * arm of 3 px; the stem 3 px, stepped one pixel left after the cut and again at the bottom bar
  * (the slant as two steps over the cap); the cut one clear row through the stem and the middle
- * bar; the bars starting at column 2 and ending one pixel before the stem, so they step 5, 4 and
- * 3 px. Columns 1 and 14 stay clear for the tile's frame and its 1 px margin.
+ * bar; the bars starting at column 2 and ending one pixel before the stem, so they step 4, 3 and
+ * 2 px. The T sits one pixel left of the drawing's first form (Kevin, 2026-10-08: "scooch the t
+ * inside the box a little to the left"), so column 1 stays clear on the left and columns 13 and
+ * 14 on the right, beside the tile's frame.
  */
 export const ROWS16: readonly string[] = [
   '................',
   '................',
-  '...###########..',
-  '...###########..',
-  '...###########..',
-  '........###.....',
-  '........###.....',
-  '..#####.###.....',
-  '................',
+  '..###########...',
+  '..###########...',
+  '..###########...',
+  '.......###......',
+  '.......###......',
   '..####.###......',
-  '.......###......',
-  '.......###......',
+  '................',
   '..###.###.......',
-  '..###.###.......',
+  '......###.......',
+  '......###.......',
+  '..##.###........',
+  '..##.###........',
   '................',
   '................',
 ];
@@ -248,11 +250,11 @@ export function rowsPath(rows: readonly string[] = ROWS16, ox = 0, oy = 0): stri
 
 /** The rows' path at the origin (the 16 px drawing's own file), committed as data with its sha256. */
 export const ROWS16_PATH =
-  'M3 2h11v1h-11zM3 3h11v1h-11zM3 4h11v1h-11zM8 5h3v1h-3zM8 6h3v1h-3zM2 7h5v1h-5zM8 7h3v1h-3zM2 9h4v1h-4zM7 9h3v1h-3zM7 10h3v1h-3zM7 11h3v1h-3zM2 12h3v1h-3zM6 12h3v1h-3zM2 13h3v1h-3zM6 13h3v1h-3z';
+  'M2 2h11v1h-11zM2 3h11v1h-11zM2 4h11v1h-11zM7 5h3v1h-3zM7 6h3v1h-3zM2 7h4v1h-4zM7 7h3v1h-3zM2 9h3v1h-3zM6 9h3v1h-3zM6 10h3v1h-3zM6 11h3v1h-3zM2 12h2v1h-2zM5 12h3v1h-3zM2 13h2v1h-2zM5 13h3v1h-3z';
 
 /** sha256 of ROWS16_PATH's UTF-8 bytes. */
 export const ROWS16_PATH_SHA256 =
-  'b21e4d461ce314206d0ba3bae1e952c458d4cd07d56cdca82421467a21fae72b';
+  '9e27f058584026bbf51a2494ed0040b560adc06405a08e0d82875c38056ec7c2';
 
 /** The number of ink pixels of a rows drawing. */
 export function rowsInk(rows: readonly string[] = ROWS16): number {
@@ -431,26 +433,37 @@ export const TILE_COLORS = {
   dark: { plate: '#070707', ink: '#f2f2f0', frame: '#888887' },
 } as const;
 
-/** A tile: its size, the 1 px frame, and the mark it carries (the rows at 16, the hinted vector at 32 and 48). */
+/**
+ * A tile: its size, the 1 px frame, and the mark it carries (the rows at 16, the hinted vector at
+ * 32 and 48). `dx` moves the vector mark left of centre by the same share of the tile as the rows
+ * move the T (3/64 of the tile), so every tile places the T alike.
+ */
 export type TileGeometry = {
   size: 16 | 32 | 48;
   frame: 1;
   form: 'rows' | 'vector';
   cap: number;
   top: number;
+  dx: number;
 };
 
 /** The three tiles of the icon set: the rows at 16, a 16 px cap at 32 and a 24 px cap at 48, all hinted. */
 export const TILE_SIZES: Readonly<Record<16 | 32 | 48, TileGeometry>> = {
-  16: { size: 16, frame: 1, form: 'rows', cap: 12, top: 2 },
-  32: { size: 32, frame: 1, form: 'vector', cap: 16, top: 8 },
-  48: { size: 48, frame: 1, form: 'vector', cap: 24, top: 12 },
+  16: { size: 16, frame: 1, form: 'rows', cap: 12, top: 2, dx: 0 },
+  32: { size: 32, frame: 1, form: 'vector', cap: 16, top: 8, dx: -1.5 },
+  48: { size: 48, frame: 1, form: 'vector', cap: 24, top: 12, dx: -2.25 },
 };
 
 /** A tile's mark as path data in tile px. */
 export function tileMarkPath(tile: TileGeometry): string {
   if (tile.form === 'rows') return ROWS16_PATH;
-  return quadPath(markQuadsAt(tile.size, tile.cap, tile.top, { hinted: true }), 2);
+  return quadPath(tileVectorQuads(tile), 2);
+}
+
+/** A vector tile's mark quads in tile px: centred, then moved by the tile's `dx`. */
+export function tileVectorQuads(tile: TileGeometry): Quad[] {
+  const left = (tile.size - MARK_BOX.width * (tile.cap / CAP_UNITS)) / 2 + tile.dx;
+  return markQuadsInBox(tile.cap, left, tile.top, { hinted: true });
 }
 
 // ---------------------------------------------------------------------------------------------

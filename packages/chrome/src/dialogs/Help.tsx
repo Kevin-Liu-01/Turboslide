@@ -76,6 +76,7 @@ export function HelpDialog() {
         {/* the docs at /docs (docs/POLISH-2.md 5.8), in a new tab so the editor stays open */}
         <a
           href="/docs"
+          className="ts-dialog-link"
           target="_blank"
           rel="noopener"
           data-control="dialog.help.docs"

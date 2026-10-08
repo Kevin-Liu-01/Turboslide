@@ -790,6 +790,14 @@ row('help.docs.links', async () => {
   const help = { href: await link.getAttribute('href'), target: await link.getAttribute('target') };
   if (help.href !== '/docs' || help.target !== '_blank')
     faults.push(`Help's Documentation ${JSON.stringify(help)}`);
+  /* the link is drawn in the dialog's ink with an underline, not the browser's link blue */
+  const ink = await link.evaluate((element) => ({
+    link: getComputedStyle(element).color,
+    title: getComputedStyle(document.querySelector('.ts-dialog-title') ?? element).color,
+    line: getComputedStyle(element).textDecorationLine,
+  }));
+  if (ink.link !== ink.title || ink.line !== 'underline')
+    faults.push(`Help's Documentation is drawn ${JSON.stringify(ink)}`);
   const [tab] = await Promise.all([page.context().waitForEvent('page'), link.click()]);
   await tab.waitForLoadState('domcontentloaded');
   if (new URL(tab.url()).pathname !== '/docs') faults.push(`the new tab opened ${tab.url()}`);

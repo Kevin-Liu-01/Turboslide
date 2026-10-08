@@ -536,6 +536,24 @@
   font-weight: 500;
 }
 
+/* a link in a dialog's text: the ink with a 1 px underline, visited or not (the docs' links) */
+.ts-dialog-link {
+  color: var(--pt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--pt-edge);
+}
+
+.ts-dialog-link:hover {
+  text-decoration-color: var(--pt-ink);
+}
+
+.ts-dialog-link:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
 /* the facts table of Details */
 .ts-dialog-facts {
   display: grid;

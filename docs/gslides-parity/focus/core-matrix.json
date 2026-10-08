@@ -8063,7 +8063,7 @@
     {
       "id": "tables.cells.empty-grid-guides",
       "feature": "tables",
-      "interaction": "An empty 3 by 3 table on the editor's stage draws a hairline on every inner column seam of every row and under the last row, in --pt-hair; the filmstrip card draws none",
+      "interaction": "An empty 3 by 3 table on the editor's stage draws a hairline on every inner column seam of every row and under the last row, in the deck's --hair; the filmstrip card draws none",
       "driver": "probe --core",
       "today": "broken",
       "evidence": "docs/gslides-parity/objects/audit/b01-table-inserted-empty.png (four horizontal rules)",

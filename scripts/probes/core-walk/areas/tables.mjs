@@ -2664,8 +2664,9 @@ async function objectsRound(t, S, h) {
   /**
    * The guide grid of a table (docs/archive/rounds/OBJECTS.md 3.3 item 2; B2's numbers in build/b2.md): an inset
    * box shadow on every `.td` but the last of its row (`rgba(...) -1px 0px 0px 0px inset` in the
-   * --pt-hair colour), never a border, on the editor's stage alone; the last cell, the filmstrip
-   * card, the show and the print document read `none`. A border right or a `::after` guide is
+   * deck's --hair, the sheet's ink for the deck's appearance; polish two P2-V1.4 finding 2),
+   * never a border, on the editor's stage alone; the last cell, the filmstrip card, the show and
+   * the print document read `none`. A border right or a `::after` guide is
    * read as well, so the row judges the guide whichever way a build draws it. `under` is the rule
    * under the last row (a border on the row or the root, or the root's inset shadow).
    */
@@ -2749,8 +2750,8 @@ async function objectsRound(t, S, h) {
     );
   /**
    * The contrast of a hairline with an alpha over the ground (B2's reading, build/b2.md: the
-   * --pt-hair token is an rgba at 0.18 light and 0.22 dark, composited over the paper); an opaque
-   * colour reads as the toolkit's contrast.
+   * deck's --hair token is an rgba at 0.18 light and 0.22 dark, composited over the paper); an
+   * opaque colour reads as the toolkit's contrast.
    */
   const hairContrast = (colour, ground) => {
     const m = /rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(colour ?? '');
@@ -2954,12 +2955,12 @@ async function objectsRound(t, S, h) {
   await t.step(
     'tables.cells.empty-grid-guides',
     "read the empty table's inner column seams and the rule under its last row on the stage and on the filmstrip card",
-    'a hairline on every inner seam of every row and under the last row, in --pt-hair; the card draws none',
+    "a hairline on every inner seam of every row and under the last row, in the deck's --hair; the card draws none",
     async () => {
       await t.clearAll();
       const stage = await guides(T5, 'stage');
       const card = await guides(T5, 'card');
-      const hair = await t.sheetVar('--pt-hair');
+      const hair = await t.sheetVar('--hair');
       const every = stage.found && stage.seams > 0 && stage.drawn === stage.seams;
       const lastNone = stage.found && stage.lastDrawn === 0;
       const under = stage.found && stage.under > 0;
@@ -2967,7 +2968,7 @@ async function objectsRound(t, S, h) {
       const ok = every && lastNone && under && cardNone;
       return {
         ok,
-        observed: `stage: ${stage.found ? `${stage.drawn} of ${stage.seams} inner seams drawn as a ${stage.how} (${stage.color ?? 'no colour'}), the last cells drawn ${stage.lastDrawn}, the rule under the last row ${stage.under} px (${stage.underColor})` : 'no table'}; --pt-hair ${hair ?? 'unread'}; the filmstrip card: ${card.found ? `${card.drawn} seam(s) drawn` : card.image ? 'an image, no seams read' : 'no table markup'}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 2, ${LANE})`}`,
+        observed: `stage: ${stage.found ? `${stage.drawn} of ${stage.seams} inner seams drawn as a ${stage.how} (${stage.color ?? 'no colour'}), the last cells drawn ${stage.lastDrawn}, the rule under the last row ${stage.under} px (${stage.underColor})` : 'no table'}; the deck's --hair ${hair ?? 'unread'}; the filmstrip card: ${card.found ? `${card.drawn} seam(s) drawn` : card.image ? 'an image, no seams read' : 'no table markup'}${ok ? '' : ` (docs/archive/rounds/OBJECTS.md 3.3 item 2, ${LANE})`}`,
       };
     },
   );

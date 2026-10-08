@@ -678,6 +678,9 @@
   padding: 4px 0 4px 12px;
   color: var(--pt-ink-2);
   text-decoration: none;
+  /* an action name longer than the 168 px column (slide.setBackgroundMaterial) breaks inside it
+     and is never cut at the list's edge */
+  overflow-wrap: break-word;
 }
 
 .ts-docs-toc li[data-depth='3'] a {

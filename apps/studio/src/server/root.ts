@@ -72,6 +72,11 @@ export function workspaceRoot(): string | null {
 /** The seed folders a checkout offers the hosted backends: the templates and the GT deck. */
 const SEED_FOLDERS = ['templates', 'gt-brand'] as const;
 
+/** True for a deck the deployment's bundle seeds (the GT deck), which no person created. */
+export function isSeedDeck(deckId: string): boolean {
+  return deckId !== 'templates' && (SEED_FOLDERS as readonly string[]).includes(deckId);
+}
+
 type Runtime = {
   selection: StoreSelection;
   decks: HostedDecks;

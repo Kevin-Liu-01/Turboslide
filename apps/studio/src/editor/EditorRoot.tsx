@@ -1251,7 +1251,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
             })),
           settings: record.settings,
           published: null,
-          claimable: record.owner === null && payload.identity?.kind === 'account',
+          // the admin's alone (H3, DATA-V3)
+          claimable:
+            record.owner === null &&
+            payload.identity?.kind === 'account' &&
+            payload.via === 'admin',
           ...(payload.via !== undefined ? { via: payload.via } : {}),
         };
 

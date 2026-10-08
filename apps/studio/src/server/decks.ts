@@ -14,7 +14,7 @@ import type {
   DeckHead,
   TrashState,
 } from '@turboslide/store/templates';
-import { StaleRevisionError } from '@turboslide/store/templates';
+import { StaleRevisionError, deckIdFor } from '@turboslide/store/templates';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind } from '@turboslide/viewer/model';
@@ -460,11 +460,14 @@ const createDeckFn = createServerFn({ method: 'POST' })
       action: 'deck.create',
       transport: 'window',
     });
-    const created = await createStoredDeck(data);
-    // the record of SPEC-3 6.1: restricted, the creator its owner (VERIFICATION-3 finding 4)
-    const { recordNewDeck } = await import('./access');
-    await recordNewDeck(created.deckId, ctx);
-    return created;
+    // the record of SPEC-3 6.1 first, then the deck (H3, DATA-V3): restricted, the creator its
+    // owner; a caller with no identity is refused, and no deck is ever made without its record
+    const { createWithRecord } = await import('./access');
+    const deckId = deckIdFor({ ...data, name: data.name.trim() });
+    const { made } = await createWithRecord(deckId, ctx, () =>
+      createStoredDeck({ ...data, id: deckId }),
+    );
+    return made;
   });
 
 export async function createNewDeck(input: CreateDeckInput): Promise<CreateDeckResult> {
@@ -573,11 +576,14 @@ const copyDeckFn = createServerFn({ method: 'POST' })
       ...(data.removeNotes === true ? { removeNotes: true } : {}),
       ...(data.copyComments === true ? { copyComments: true } : {}),
     };
-    const copied = await mapStale(async () => (await ensureDecks()).copy(input, data.baseRevision));
-    // the copy is a new deck: restricted, the copier its owner (SPEC-3 6.1; VERIFICATION-3 finding 4)
-    const { recordNewDeck } = await import('./access');
-    await recordNewDeck(copied.deckId, ctx);
-    return copied;
+    // the copy is a new deck: its record first, restricted, the copier its owner (SPEC-3 6.1;
+    // VERIFICATION-3 finding 4; H3, DATA-V3)
+    const { createWithRecord } = await import('./access');
+    const newId = deckIdFor({ name: data.name, from: 'blank' });
+    const { made } = await createWithRecord(newId, ctx, () =>
+      mapStale(async () => (await ensureDecks()).copy({ ...input, newId }, data.baseRevision)),
+    );
+    return made;
   });
 
 export async function copyStoredDeck(input: CopyDeckRequest): Promise<CopyDeckResult> {

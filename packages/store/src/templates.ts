@@ -948,6 +948,17 @@ export function deleteTemplate(
   return { id: input.id, removed: true };
 }
 
+/**
+ * Whether decks/<id> is taken: a folder that holds anything but the deck's state folder. The
+ * studio writes a new deck's access record (`<id>/.turboslide/access.json` on a file store) before
+ * the deck itself (security hotfix H3, DATA-V3), so a folder holding that alone is the deck being
+ * made, not another deck.
+ */
+export function deckFolderTaken(dir: string): boolean {
+  if (!existsSync(dir)) return false;
+  return readdirSync(dir).some((name) => name !== STATE_DIR);
+}
+
 /** The deck id a name gives: its slug, or a TypeError when nothing slug-like survives. */
 export function deckIdFor(input: CreateDeckInput): string {
   const id = input.id ?? slugify(input.name);
@@ -1021,7 +1032,8 @@ export function createDeck(
   if (deckId === TEMPLATES_DIR)
     throw new TypeError(`"${TEMPLATES_DIR}" is the templates folder, not a deck id`);
   const dir = resolve(decksDir, deckId);
-  if (existsSync(dir)) throw new TypeError(`decks/${deckId} exists already; pick another name`);
+  if (deckFolderTaken(dir))
+    throw new TypeError(`decks/${deckId} exists already; pick another name`);
   const now = (options.now ?? (() => new Date().toISOString()))();
   const from = input.from;
 
@@ -1281,7 +1293,8 @@ export function copyDeck(
   if (deckId === input.id)
     throw new TypeError(`the copy needs an id other than ${input.id}; pass newId`);
   const dir = resolve(decksDir, deckId);
-  if (existsSync(dir)) throw new TypeError(`decks/${deckId} exists already; pick another name`);
+  if (deckFolderTaken(dir))
+    throw new TypeError(`decks/${deckId} exists already; pick another name`);
   const now = (options.now ?? (() => new Date().toISOString()))();
   const source = loadDeckDir(sourceDir).document;
   const document = copyDocument(

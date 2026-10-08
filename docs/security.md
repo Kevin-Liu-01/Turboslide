@@ -71,10 +71,22 @@ a request with no identity gets 401; a revoked publish token gets 410. Bodies ar
 'not_found' }`, `{ error: 'forbidden', capability }`, `{ error: 'unauthorized' }`, `{ error: 'gone'
 }` and carry nothing else.
 
-| Variable                    | Values                        | What it does                                                                                                                                                 |
-| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `TURBOSLIDE_AUTHORIZE`      | `shadow` (default), `enforce` | `shadow` logs a denial as `authorize.deny` and lets the call proceed with the legacy role (`open: editor` for a deck without a record); `enforce` refuses it |
-| `TURBOSLIDE_MISSING_RECORD` | `open` (default), `notFound`  | what a deck without a record means: today's open editor deck, or after R8 a 404                                                                              |
+| Variable                    | Values                        | What it does                                                                                                                                                        |
+| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TURBOSLIDE_AUTHORIZE`      | `shadow` (default), `enforce` | `shadow` logs a denial as `authorize.deny` and lets the call proceed with the legacy role (`open: editor` for a deck without a record); `enforce` refuses it        |
+| `TURBOSLIDE_MISSING_RECORD` | `open` (default), `notFound`  | a checkout's file store only: what a deck without a record means there (the folder holder's open editor deck, or a 404). A hosted store ignores it since H3 (below) |
+
+A deck without a stored record (security hotfix H3, DATA-V3; `server/access.ts`
+`missingRecordRule`). On a hosted store the loader `authorize()` binds answers, in this order: the
+seed deck (`gt-brand`) open to everyone as a viewer, read and copy, owned by nobody but the
+deployment's admin; a deck the store does not hold as nothing, which `decide()` answers with the
+same 404 a restricted deck gives a stranger; a deck whose first version record names a person (an
+anonymous or an account principal id) restricted with that person as owner; any other deck closed
+(restricted, no owner, the admin alone, and `admin.assignOwner` gives it to someone). The creator
+and closed records are written once, so the rule runs once per deck. A new deck's record is written
+before the deck (`createWithRecord`: the draft's first save, `deck.create`, `deck.copy`, the first
+picture or logo on a draft), a request with no identity creates nothing (401), and a record is
+never written over a deck the store already holds. `share.claim` is the admin's alone.
 
 Where the call sits: every server function of `decks.ts`, `download.ts`, `bundle.ts`, `render.ts`
 and `agent-actions.ts`; the routes `/api/actions/*`, `/api/render/*`, `/api/export/*`, the bundle

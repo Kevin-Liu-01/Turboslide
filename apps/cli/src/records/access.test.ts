@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { legacyAssetKey, linkIsLive, newDeckRecord } from '@turboslide/schema/access';
 
-import { shareGet, shareSetGeneralAccess, standing } from './access.ts';
+import { shareClaim, shareGet, shareSetGeneralAccess, standing } from './access.ts';
 import type { AccessDeps, Caller } from './access.ts';
 
 // The general access writes (docs/archive/rounds/POLISH.md items 79 and 96; the rows share.role-change.keeps-link
@@ -156,5 +156,46 @@ describe('the alias table at the share records', () => {
     await expect(shareGet(deps)).rejects.toThrow(
       'This presentation is not available to you, or does not exist.',
     );
+  });
+});
+
+describe('share.claim (security hotfix H3, DATA-V3)', () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+
+  function unowned(caller: Caller): { deps: AccessDeps; stored: { record: AccessRecord | null } } {
+    const dir = mkdtempSync(join(tmpdir(), 'ts-claim-'));
+    dirs.push(dir);
+    const stored: { record: AccessRecord | null } = {
+      record: {
+        ...newDeckRecord('q4-review', 'nobody', legacyAssetKey('q4-review'), NOW),
+        owner: null,
+        createdBy: 'legacy',
+        generalAccess: { mode: 'open', role: 'viewer' },
+      },
+    };
+    return { deps: { ...depsFor(dir, stored), caller }, stored };
+  }
+
+  it('refuses a signed in person who is not the admin, and an anonymous one; the record keeps no owner', async () => {
+    for (const caller of [
+      { principalId: 'usr_stranger', kind: 'account', email: 's@example.test' },
+      { principalId: 'anon_stranger', kind: 'anonymous' },
+    ] satisfies Caller[]) {
+      const { deps, stored } = unowned(caller);
+      await expect(shareClaim(deps, { baseRevision: 0 })).rejects.toThrow(/deployment admin/);
+      expect(stored.record?.owner).toBeNull();
+      expect(stored.record?.revision).toBe(0);
+    }
+  });
+
+  it("gives the deck to the admin, open as a viewer's afterwards", async () => {
+    const { deps } = unowned({ principalId: 'usr_admin', kind: 'account', admin: true });
+    const { record } = await shareClaim(deps, { baseRevision: 0 });
+    expect(record.owner).toBe('usr_admin');
+    expect(record.createdBy).toBe('usr_admin');
+    expect(record.generalAccess).toEqual({ mode: 'open', role: 'viewer' });
   });
 });

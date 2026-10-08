@@ -5,10 +5,16 @@ import { ACTIONS } from '@turboslide/schema/actions';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { DEFAULT_BLANK_TITLE } from '@turboslide/store/templates';
 
-import { recordNewDeck } from '../../server/access';
+import { DeckIdTakenError, createWithRecord } from '../../server/access';
 import { deckDispatcher } from '../../server/actions';
 import { agentAuth, agentAuthor } from '../../server/auth';
-import { authorFor, authorize, denialBody, requestContext } from '../../server/authorize';
+import {
+  DeniedError,
+  authorFor,
+  authorize,
+  denialBody,
+  requestContext,
+} from '../../server/authorize';
 import { assertFlag } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
 import { isLogoSlug, isLogoVariantKey } from '../../server/logo-index';
@@ -311,10 +317,19 @@ async function serveInsert(request: Request): Promise<Response> {
   const input = parsed.data as LogoInsertInput;
   try {
     const ctx = await requestContext(request);
-    // the draft's first write may be a logo (docs/FOCUS.md rank 6; agent-actions.ts createsDraft)
+    // the draft's first write may be a logo (docs/FOCUS.md rank 6; agent-actions.ts createsDraft):
+    // its record first, then the deck (H3, DATA-V3); no identity creates nothing
     if (await isUnsavedDraft(deckId)) {
-      await createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: 'blank', id: deckId });
-      await recordNewDeck(deckId, ctx);
+      try {
+        await createWithRecord(deckId, ctx, () =>
+          createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: 'blank', id: deckId }),
+        );
+      } catch (error) {
+        if (error instanceof DeniedError) return jsonResponse(error.body, error.status);
+        if (error instanceof DeckIdTakenError)
+          return jsonResponse({ error: 'not_found' as const }, 404);
+        throw error;
+      }
     }
     const decision = await authorize(ctx, deckId, 'write', {
       action: 'logo.insert',

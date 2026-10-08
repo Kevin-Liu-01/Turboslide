@@ -843,7 +843,12 @@ export async function shareDeclineOwnership(
   return { record };
 }
 
-/** A signed in principal claims an unowned deck; an admin any unowned deck; `open: viewer` afterwards (SPEC-3 6.1). */
+/**
+ * The deployment's admin (or a checkout's folder holder) claims an unowned deck; `open: viewer`
+ * afterwards (SPEC-3 6.1). Since security hotfix H3 (DATA-V3) nobody else may: a deck without an
+ * owner is the seed deck or a deck nobody can be shown to have made, and any signed in person
+ * could take one (production's `gt-brand` among them) by claiming it.
+ */
 export async function shareClaim(
   deps: AccessDeps,
   input: { baseRevision: number },
@@ -855,8 +860,11 @@ export async function shareClaim(
       if (next.owner !== null && !idsOf(deps.caller).has(next.owner)) {
         throw new ForbiddenError('this presentation has an owner already', 'transfer');
       }
-      if (deps.caller.kind === 'anonymous' && deps.caller.admin !== true) {
-        throw new ForbiddenError('sign in to claim a presentation', 'transfer');
+      if (deps.caller.admin !== true && deps.caller.kind !== 'local') {
+        throw new ForbiddenError(
+          'claiming a presentation without an owner is the deployment admin’s',
+          'transfer',
+        );
       }
       next.owner = deps.caller.principalId;
       if (next.createdBy === 'legacy') next.createdBy = deps.caller.principalId;

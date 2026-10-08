@@ -365,7 +365,9 @@ export function accessViewOfRecord(
       })),
     ...(record.settings === undefined ? {} : { settings: record.settings }),
     published: null,
-    claimable: record.owner === null && options.signedIn,
+    /* the claim is the deployment admin's alone (security hotfix H3, DATA-V3: any signed in
+       person took an unowned deck, production's seed deck among them) */
+    claimable: record.owner === null && options.signedIn && options.via === 'admin',
     ...(options.via !== undefined && options.via !== null ? { via: options.via } : {}),
   };
 }

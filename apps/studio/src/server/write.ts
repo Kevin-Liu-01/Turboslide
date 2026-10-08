@@ -372,6 +372,11 @@ function isGoneDeck(error: unknown): boolean {
   return /no deck|not found|ENOENT|does not exist|is not in the store/i.test(message);
 }
 
+/** True for authorize.ts `DeniedError` by name (that module stays out of this file's client graph). */
+function isDenied(error: unknown): boolean {
+  return error instanceof Error && error.name === 'DeniedError';
+}
+
 const readEditorDeckFn = createServerFn({ method: 'GET' })
   .validator((input: string) => {
     const parsed = parseJsonInput<{ deckId: unknown; atLeast?: unknown; since?: unknown }>(input);
@@ -843,20 +848,25 @@ const writeDeckFn = createServerFn({ method: 'POST' })
     };
     if (data.write.baseRevision === 0 && (await isUnsavedDraft(data.deckId))) {
       phase('draft check');
-      await createStoredDeck({
-        name: DEFAULT_BLANK_TITLE,
-        from: await draftTemplateId(),
-        id: data.deckId,
-      });
+      const from = await draftTemplateId();
+      // the new deck's record (SPEC-3 6.1) before the deck (H3, DATA-V3): restricted, this
+      // session its owner, so the decision below reads it (VERIFICATION-3 finding 4) and a failed
+      // record write leaves no deck behind; a request with no identity creates nothing
+      const access = await import('./access');
+      let recorded: Awaited<ReturnType<typeof access.createWithRecord>>['recorded'];
+      try {
+        ({ recorded } = await access.createWithRecord(data.deckId, identity.ctx, () =>
+          createStoredDeck({ name: DEFAULT_BLANK_TITLE, from, id: data.deckId }),
+        ));
+      } catch (error) {
+        if (error instanceof access.DeckIdTakenError || isDenied(error))
+          throw new RangeError(`No deck ${data.deckId}`);
+        throw error;
+      }
       created = true;
-      phase('create');
-      // the new deck's record (SPEC-3 6.1): restricted, this session its owner, written before
-      // the decision below reads it (VERIFICATION-3 finding 4)
-      const { recordNewDeck } = await import('./access');
-      const recorded = await recordNewDeck(data.deckId, identity.ctx);
-      if (recorded?.general !== undefined)
+      if (recorded.general !== undefined)
         minted = { id: recorded.general.linkId, token: recorded.general.token };
-      phase('record');
+      phase('record and create');
     }
     const decision = await room.decideFor(identity, data.deckId, 'write', 'writeDeck');
     if (!decision.ok) {

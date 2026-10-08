@@ -45,6 +45,7 @@ import { AssetExistsError } from '@turboslide/store/store';
 import type { DeckStore } from '@turboslide/store/store';
 import {
   StaleRevisionError,
+  deckIdFor,
   deleteTemplate,
   readDefaultTemplateId,
   readTemplateIndex,
@@ -77,7 +78,13 @@ import { registerAssistActions } from './assist';
 import { requestRunId } from '@turboslide/agent/http/auth';
 
 import { agentAuth } from './auth';
-import { authorize, bootstrapAgentContext, denialBody, identityLabel } from './authorize';
+import {
+  DeniedError,
+  authorize,
+  bootstrapAgentContext,
+  denialBody,
+  identityLabel,
+} from './authorize';
 import type { AuthContext } from './authorize';
 import {
   registerAccountActions,
@@ -957,15 +964,23 @@ function registerHostedDeckActions(
   decks: HostedDecks,
   creator: AuthContext | null,
   listing: ListingScope,
+  requestBound: boolean,
 ): void {
-  // a deck this caller creates or copies gets its record at once (SPEC-3 6.1; VERIFICATION-3
-  // finding 4): restricted, the caller its owner; a caller with no identity leaves none
-  const record = async <T extends { deckId: string }>(made: T): Promise<T> => {
-    if (creator !== null) {
-      const { recordNewDeck } = await import('./access');
-      await recordNewDeck(made.deckId, creator);
+  // a deck this caller creates or copies gets its record first (SPEC-3 6.1; VERIFICATION-3
+  // finding 4; H3, DATA-V3): restricted, the caller its owner, written before the deck so a
+  // failed record write leaves no deck. A request with no identity creates nothing; a dispatcher
+  // built outside a request (the CLI's rule, a unit test) makes the deck without a record
+  const recorded = async <T>(deckId: string, make: () => Promise<T>): Promise<T> => {
+    if (creator === null) {
+      if (requestBound)
+        throw new DeniedError(
+          401,
+          denialBody({ ok: false, status: 401, code: 'unauthorized' }, 'write'),
+        );
+      return make();
     }
-    return made;
+    const { createWithRecord } = await import('./access');
+    return (await createWithRecord(deckId, creator, make)).made;
   };
   // deck.create lands in the store (HostedDecks.create is what createStoredDeck calls), not in
   // the instance's overlay the folder handler wrote to (docs/archive/status/EDITOR-DEPTH-STATUS.md section 10)
@@ -978,7 +993,8 @@ function registerHostedDeckActions(
       await decks.templates.pull();
       from = readDefaultTemplateId(decks.decksDir);
     }
-    return record(await decks.create({ ...given, from }));
+    const id = deckIdFor({ ...given, name: given.name.trim(), from });
+    return recorded(id, () => decks.create({ ...given, from, id }));
   });
   // the listing scoped to the caller (docs/NEXT.md 3.2 H2; server/deck-scope.ts): the admin
   // bearer and a checkout list the store, anyone else their own and shared decks; the collection
@@ -992,7 +1008,12 @@ function registerHostedDeckActions(
   });
   dispatcher.register('deck.copy', async (input) => {
     const { baseRevision, ...rest } = input as DeckCopyInput;
-    return record(await mapStale(() => decks.copy(rest, baseRevision)));
+    const newId = deckIdFor({
+      name: rest.name.trim(),
+      from: 'blank',
+      ...(rest.newId !== undefined ? { id: rest.newId } : {}),
+    });
+    return recorded(newId, () => mapStale(() => decks.copy({ ...rest, newId }, baseRevision)));
   });
   dispatcher.register('deck.trash', (input) => {
     const { id, baseRevision } = input as DeckIdInput;
@@ -1343,6 +1364,7 @@ export async function deckDispatcher(
     decks,
     creatorContextOf(request, facts),
     listingScopeOf(request, facts),
+    request !== undefined,
   );
   // the templates of the product round over the collection's folder (docs/archive/rounds/PRODUCT.md 4.3)
   registerTemplateActions(dispatcher, decks, creatorContextOf(request, facts));

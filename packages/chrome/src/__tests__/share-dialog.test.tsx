@@ -341,7 +341,14 @@ describe('the pure rules of the Share dialog', () => {
     expect(view.requests?.map((request) => request.id)).toEqual(['req_1']);
     expect(view.claimable).toBe(false);
     expect(view.via).toBe('owner');
-    expect(accessViewOfRecord(record({ owner: null }), { signedIn: true }).claimable).toBe(true);
+    /* the claim is the admin's alone (security hotfix H3, DATA-V3) */
+    expect(
+      accessViewOfRecord(record({ owner: null }), { signedIn: true, via: 'admin' }).claimable,
+    ).toBe(true);
+    expect(
+      accessViewOfRecord(record({ owner: null }), { signedIn: true, via: 'open' }).claimable,
+    ).toBe(false);
+    expect(accessViewOfRecord(record({ owner: null }), { signedIn: true }).claimable).toBe(false);
     expect(accessViewOfRecord(record({ owner: null }), { signedIn: false }).claimable).toBe(false);
   });
 

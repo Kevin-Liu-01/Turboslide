@@ -98,27 +98,42 @@ describe('the mode', () => {
     expect(authorizeMode({})).toBe('shadow');
     expect(authorizeMode({ TURBOSLIDE_AUTHORIZE: 'ENFORCE ' })).toBe('enforce');
     expect(authorizeMode({ TURBOSLIDE_AUTHORIZE: 'yes' })).toBe('shadow');
+    // the checkout's file store alone reads it since H3 (access.ts missingRecordRule)
     expect(missingRecordMode({})).toBe('open');
     expect(missingRecordMode({ TURBOSLIDE_MISSING_RECORD: 'notFound' })).toBe('notFound');
   });
 });
 
 describe('the bound decide() (the identity package, SPEC-3 6.2)', () => {
-  it('reads a missing record as open: editor with the owner rows withheld; nobody may read it and nothing else', () => {
-    expect(boundDecide(null, STRANGER, 'write')).toMatchObject({ ok: true, role: 'editor' });
-    expect(boundDecide(null, STRANGER, 'remove')).toMatchObject({ ok: false, status: 403 });
-    // the focus round (the enforce preview; packages/identity/src/access.ts decide()): a caller with
-    // no identity at all (a browser's very first request, before the cookie the answer mints) reads
-    // an open deck as its general access role, the way the same caller reads it one request later
-    // with the cookie; before, the first visit to /deck/<id> of an open deck answered You need
-    // access and the reload answered the deck. Every write, and every read of a restricted or link
-    // mode deck, still needs an identity and stays 401 for nobody.
-    expect(boundDecide(null, anonymousContext(), 'read')).toMatchObject({
+  it('reads a null record as a deck that does not exist: one 404 for a principal, 401 with no identity (H3, DATA-V3)', () => {
+    /* the bound loader answers the record of every deck the store holds (access.ts
+       missingRecordRule), so null is a missing deck, never the legacy open editor deck */
+    for (const capability of CAPABILITIES) {
+      expect(boundDecide(null, STRANGER, capability)).toEqual({
+        ok: false,
+        status: 404,
+        code: 'not_found',
+      });
+      expect(boundDecide(null, OWNER, capability)).toMatchObject({ ok: false, status: 404 });
+    }
+    expect(boundDecide(null, anonymousContext(), 'read')).toEqual({
+      ok: false,
+      status: 401,
+      code: 'unauthorized',
+    });
+    // a caller with no identity at all reads an open deck as its general access role (the focus
+    // round's enforce preview, packages/identity/src/access.ts decide()), the way the same caller
+    // reads it one request later with the cookie; a restricted deck stays 401 for nobody
+    const open = {
+      ...restricted(),
+      generalAccess: { mode: 'open' as const, role: 'viewer' as const },
+    };
+    expect(boundDecide(open, anonymousContext(), 'read')).toMatchObject({
       ok: true,
-      role: 'editor',
+      role: 'viewer',
       via: 'open',
     });
-    expect(boundDecide(null, anonymousContext(), 'write')).toMatchObject({
+    expect(boundDecide(open, anonymousContext(), 'write')).toMatchObject({
       ok: false,
       status: 401,
     });
@@ -143,9 +158,14 @@ describe('the bound decide() (the identity package, SPEC-3 6.2)', () => {
       role: 'owner',
       via: 'admin',
     });
-    expect(boundDecide(null, bootstrapAgentContext('localhost'), 'transfer')).toMatchObject({
+    expect(boundDecide(record, bootstrapAgentContext('localhost'), 'transfer')).toMatchObject({
       ok: true,
       via: 'admin',
+    });
+    // a deck that does not exist is nothing to administer
+    expect(boundDecide(null, bootstrapAgentContext('token'), 'read')).toMatchObject({
+      ok: false,
+      status: 404,
     });
   });
 });
@@ -344,7 +364,10 @@ describe('the request context and the derived author (SPEC-3 8.2)', () => {
     const { principalStore } = await import('./room');
     const { newPrincipalRecord } = await import('@turboslide/identity/principal');
     const grants = [{ linkId: 'lnk_view01', deckId: 'q4-review', role: 'viewer' as const }];
-    await principalStore().put({ ...newPrincipalRecord(STRANGER.principal!.id), linkGrants: grants });
+    await principalStore().put({
+      ...newPrincipalRecord(STRANGER.principal!.id),
+      linkGrants: grants,
+    });
     const sealed = await sealPrincipalCookie(STRANGER.principal!.id, studioSessionSecret());
     const withCookie = new Request('https://studio.example.test/x', {
       headers: { cookie: `__Host-ts_id=${sealed}` },

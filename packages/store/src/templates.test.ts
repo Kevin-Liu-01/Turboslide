@@ -21,6 +21,7 @@ import {
   byNewest,
   copyDeck,
   createDeck,
+  deckFolderTaken,
   deckIdFor,
   listDeckHeads,
   listTemplates,
@@ -193,6 +194,18 @@ describe('createDeck', () => {
     expect(() => createDeck(decksDir, { name: 'From tiny', from: 'gt-brand' })).toThrow(
       /exists already/,
     );
+  });
+
+  it("makes a deck in a folder that holds its access record alone, the studio's order since H3", () => {
+    const dir = join(decksDir, 'record-first');
+    mkdirSync(join(dir, '.turboslide'), { recursive: true });
+    writeFileSync(join(dir, '.turboslide', 'access.json'), '{}');
+    expect(deckFolderTaken(dir)).toBe(false);
+    const result = createDeck(decksDir, { name: 'Record first', from: 'gt-brand' });
+    expect(result.deckId).toBe('record-first');
+    expect(existsSync(join(dir, '.turboslide', 'access.json'))).toBe(true);
+    expect(deckFolderTaken(dir)).toBe(true);
+    rmSync(dir, { recursive: true, force: true });
   });
 });
 

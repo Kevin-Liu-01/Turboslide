@@ -4511,7 +4511,11 @@ export function createEditorController(init: {
               grants: record.grants,
               requests: record.requests,
               settings: record.settings,
-              claimable: record.owner === null && init.payload.identity?.kind === 'account',
+              // the admin's alone (H3, DATA-V3)
+              claimable:
+                record.owner === null &&
+                init.payload.identity?.kind === 'account' &&
+                snapshot.access.via === 'admin',
             }),
         role: snapshot.access.role,
         via: snapshot.access.via,

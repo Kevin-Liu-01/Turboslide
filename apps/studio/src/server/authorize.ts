@@ -40,8 +40,9 @@ import { deckDir } from './root';
  * Day three (merge 1b, build-3/integrator.md section 4): the types are the identity package's,
  * `decide` is bound by default, and the record loader reads `decks/<id>/.turboslide/access.json`
  * (the checkout's record of SPEC-3 6.9, validated by the schema package) until B2's access store
- * of day five is bound through `bindAuthorize({ loadRecord })`; a deck without a record is the
- * legacy synthesis inside `decide()` (`open: editor`) until R8 sets `TURBOSLIDE_MISSING_RECORD`.
+ * of day five is bound through `bindAuthorize({ loadRecord })`. A deck without a stored record is
+ * the bound loader's to describe (`access.ts` `missingRecordRule`, security hotfix H3) and a null
+ * record is a deck that does not exist.
  * The request's identity comes from `requestContext()` (the room's `requestIdentity`: the
  * bootstrap bearer, the account session, the sealed anonymous cookie and the link grants), never
  * from the body or a query parameter (SPEC-3 8.2: `?author=` and the body author are refused on
@@ -81,7 +82,11 @@ export function authorizeMode(env: Env = process.env): AuthorizeMode {
   return 'shadow';
 }
 
-/** What a deck without a record means: today's open editor deck, or after R8 nothing (SPEC-3 11.5 R8). */
+/**
+ * What a deck without a record means on a checkout's file store (SPEC-3 09 1.6, 11.5 R8): the
+ * folder holder's open editor deck, or nothing. A hosted store never reads the variable since H3
+ * (DATA-V3): `access.ts` `missingRecordRule` gives such a deck the seed, creator or closed record.
+ */
 export function missingRecordMode(env: Env = process.env): 'open' | 'notFound' {
   const value = env[MISSING_RECORD_ENV]?.trim().toLowerCase();
   return value === 'notfound' || value === 'not_found' || value === '404' ? 'notFound' : 'open';
@@ -119,11 +124,16 @@ function holder(): Record<symbol, AuthorizeDeps<unknown> | undefined> {
   return globalThis as unknown as Record<symbol, AuthorizeDeps<unknown> | undefined>;
 }
 
-/** The identity package's `decide()` with the deployment's missing record rule and the clock. */
+/**
+ * The identity package's `decide()` with the clock. A null record is a deck that does not exist:
+ * the bound loader (`access.ts` `loadAccessRecord`) answers the record of every deck the store
+ * holds, a deck without a stored record included (H3, DATA-V3), so null is one 404 for everyone,
+ * the same answer a restricted deck gives a stranger.
+ */
 export const boundDecide: DecideFn = (record, ctx, capability) =>
   decide(record, ctx, capability, {
     now: deps().now(),
-    missingRecord: missingRecordMode(),
+    missingRecord: 'notFound',
   });
 
 function deps(): AuthorizeDeps<unknown> {

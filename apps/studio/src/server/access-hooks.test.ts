@@ -27,6 +27,7 @@ import {
   bindEmailGrants,
   findShareLink,
   hostedAccessHooks,
+  seedDeckRecord,
 } from './access';
 import { authorize, bindAuthorize, contextForIdentity } from './authorize';
 import { setSecurityLogSink } from './log';
@@ -148,7 +149,7 @@ describe('bindEmailGrants (docs/archive/rounds/PEOPLE.md 3.10; SPEC-3 6.5)', () 
 });
 
 describe('hostedAccessHooks', () => {
-  it('synthesizes the legacy record for an unclaimed deck, indexes the links a save mints before the write, and announces the change', async () => {
+  it('reads an unclaimed deck as the record authorize() reads, indexes the links a save mints before the write, and announces the change', async () => {
     const inner = memoryAccessStore();
     const deps = instance(inner);
     const puts: string[] = [];
@@ -163,9 +164,24 @@ describe('hostedAccessHooks', () => {
       order.push('record');
       return memoryAccessStore().write(deckId, record, options);
     });
-    const hooks = hostedAccessHooks(DECK, deps);
-    const legacy = await hooks.load();
-    expect(legacy).toMatchObject({ deckId: DECK, owner: null, generalAccess: { mode: 'open' } });
+    /* since H3 (DATA-V3) a deck without a stored record is never the legacy open editor deck:
+       the seed deck reads as open to viewers, a deck nobody can be shown to have made as closed */
+    const seeded = await hostedAccessHooks(DECK, {
+      ...deps,
+      missing: async (deckId) => seedDeckRecord(deckId, NOW),
+    }).load();
+    expect(seeded).toMatchObject({
+      deckId: DECK,
+      owner: null,
+      generalAccess: { mode: 'open', role: 'viewer' },
+    });
+    const hooks = hostedAccessHooks(DECK, { ...deps, missing: async () => null });
+    const closed = await hooks.load();
+    expect(closed).toMatchObject({
+      deckId: DECK,
+      owner: null,
+      generalAccess: { mode: 'restricted' },
+    });
     const minted = { ...recordBy('anon_owner'), links: [link('lnk_first1', TOKEN)], revision: 1 };
     await hooks.save(minted);
     expect(puts).toEqual([tokenHash(TOKEN)]);

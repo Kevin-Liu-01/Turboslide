@@ -348,10 +348,21 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
       const { createStoredDeck, isUnsavedDraft } = await import('./root');
       if (await isUnsavedDraft(data.deckId)) {
         const { DEFAULT_BLANK_TITLE } = await import('@turboslide/store/templates');
-        await createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: 'blank', id: data.deckId });
+        // the record first, then the deck (H3, DATA-V3); no identity creates nothing (401)
+        const { DeckIdTakenError, createWithRecord } = await import('./access');
+        try {
+          await createWithRecord(data.deckId, ctx, () =>
+            createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: 'blank', id: data.deckId }),
+          );
+        } catch (error) {
+          if (error instanceof DeckIdTakenError)
+            throw new DeniedError(
+              404,
+              denialBody({ ok: false, status: 404, code: 'not_found' }, 'write'),
+            );
+          throw error;
+        }
         created = true;
-        const { recordNewDeck } = await import('./access');
-        await recordNewDeck(data.deckId, ctx);
       }
     }
     const capability = capabilityForAction(data.action);

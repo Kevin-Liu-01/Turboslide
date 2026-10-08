@@ -4,6 +4,7 @@ import {
   accessRecordSchema,
   capabilitiesForRole,
   legacyAssetKey,
+  newDeckRecord,
   synthesizeLegacyRecord,
 } from '@turboslide/schema/access';
 import type { Capability, Role, Via } from '@turboslide/schema/access';
@@ -37,17 +38,27 @@ import type {
 } from '@turboslide/store/hosted';
 
 import type { DropBus, DropTopic } from '@turboslide/realtime/bus';
+import type { VersionRecord } from '@turboslide/store/store';
 import { isDoChannel } from '@turboslide/realtime/do';
 
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
 import { isPendingEmailGrantFor } from '@turboslide/identity/access';
+import { parsePrincipalId } from '@turboslide/identity/ids';
 import type { LinkGrant, Principal } from '@turboslide/identity/access';
 import type { PrincipalRecord } from '@turboslide/identity/principal';
-import { denialBody } from './authorize';
+import { DeniedError, denialBody, missingRecordMode } from './authorize';
 import type { RequestIdentity } from './room';
-import { decksDir, exportBlobClient, stateDir, storeSelection } from './root';
+import {
+  decksDir,
+  exportBlobClient,
+  hasStoredDeck,
+  isSeedDeck,
+  openDeckStore,
+  stateDir,
+  storeSelection,
+} from './root';
 
 /**
  * The access record on this studio (gslides-parity SPEC-3 2.2, 6.1; MILESTONES-3 B2 day 5): the
@@ -468,28 +479,32 @@ export async function settleHeldLinks(
   );
 }
 
-/** The record `decide()` reads: the stored one, or null (the legacy synthesis is the decider's). */
+/** The stored record of a deck, or null when the store holds none (`missingRecordFor` says what that means). */
 export async function readAccess(deckId: string): Promise<AccessRecord | null> {
   const stored = await readStoredAccess(deckId);
   return stored === null ? null : stored.record;
 }
 
-/** The loader `bindAuthorize({ loadRecord })` takes (build-3/integrator.md section 4, B4 R3). */
+/**
+ * The loader `bindAuthorize({ loadRecord })` takes (build-3/integrator.md section 4, B4 R3): the
+ * stored record, else the record `missingRecordFor` gives a deck without one, else null, which
+ * `decide()` reads as a deck that does not exist (one 404 for a missing and a restricted deck).
+ */
 export async function loadAccessRecord(deckId: string): Promise<AccessRecord | null> {
-  return readAccess(deckId);
+  return (await readAccess(deckId)) ?? (await missingRecordFor(deckId));
 }
 
-/** The record as the surfaces read it: stored, or the legacy synthesis of SPEC-3 6.1. */
+/** The record as the surfaces read it: stored, or what a deck without one reads as. */
 export async function effectiveAccess(
   deckId: string,
   now: string = new Date().toISOString(),
 ): Promise<AccessRecord> {
-  return (await readAccess(deckId)) ?? synthesizeLegacyRecord(deckId, now);
+  return (await loadAccessRecord(deckId)) ?? closedDeckRecord(deckId, now);
 }
 
 /**
- * The record past this instance's cache, or the legacy synthesis: what `share.get` and
- * `GET /api/access/<id>` answer, since the Share dialog bases its next write on it (the cycle 2
+ * The record past this instance's cache, or what a deck without one reads as: what `share.get`
+ * and `GET /api/access/<id>` answer, since the Share dialog bases its next write on it (the cycle 2
  * preview: the dialog reopened on an instance whose 5 s entry was the record from before another
  * instance's mint, minted again with the old base and was refused with "the access record is at
  * revision 1, not 0", and its Copy link minted a second token where the first was remembered).
@@ -499,7 +514,136 @@ export async function effectiveAccessFresh(
   now: string = new Date().toISOString(),
 ): Promise<AccessRecord> {
   const stored = await readStoredAccessFresh(deckId);
-  return stored?.record ?? synthesizeLegacyRecord(deckId, now);
+  if (stored !== null) return stored.record;
+  return (await missingRecordFor(deckId)) ?? closedDeckRecord(deckId, now);
+}
+
+// ---------------------------------------------------------------------------------------------
+// A deck without a record (security hotfix H3, DATA-V3)
+//
+// Before H3 a deck with no stored record was the legacy open editor deck (`decide()`'s synthesis
+// while `TURBOSLIDE_MISSING_RECORD=open`, production's setting), and any signed in person could
+// `share.claim` it. Production holds such decks: the seed deck `gt-brand`, decks made before the
+// round three records, decks made by a request with no identity, and a deck whose record write
+// failed after the deck was made (write.ts and decks.ts wrote the deck first). On a hosted store
+// the rule is now, in this order: the seed deck reads as open to everyone as a viewer and is owned
+// by nobody but the deployment's admin; a deck the store does not hold reads as nothing (404); a
+// deck whose first version record names a person (an anonymous or an account principal id) is
+// that person's, restricted, and the record is written so the rule runs once; any other deck is
+// closed (restricted, no owner: the admin alone reaches it, and `admin.assignOwner` gives it to
+// someone), also written. A store that cannot be read answers the closed record without writing
+// it. A checkout's file store keeps the folder holder's rule (every deck open to the checkout's
+// own browser, SPEC-3 09 1.6) unless `TURBOSLIDE_MISSING_RECORD=notFound`.
+
+/** What a deck without a record reads as, by which rule (the tests read the word). */
+export type MissingRecordRule = 'checkout' | 'seed' | 'creator' | 'closed';
+
+/** The seed deck's record: open to everyone as a viewer (read and copy), owned by nobody. */
+export function seedDeckRecord(deckId: string, now: string): AccessRecord {
+  return {
+    ...synthesizeLegacyRecord(deckId, now),
+    createdBy: 'seed',
+    generalAccess: { mode: 'open', role: 'viewer' },
+  };
+}
+
+/** The record of a deck nobody can be shown to have made: restricted, no owner, the admin alone. */
+export function closedDeckRecord(deckId: string, now: string): AccessRecord {
+  return {
+    ...synthesizeLegacyRecord(deckId, now),
+    generalAccess: { mode: 'restricted', role: 'viewer' },
+  };
+}
+
+/**
+ * The person a stored deck's first version record names, or null when it names none (a record of
+ * the rounds before principals, an agent, no record at all: a deck at revision 0).
+ */
+export function creatorFromRecords(records: readonly VersionRecord[]): string | null {
+  let first: VersionRecord | undefined;
+  for (const record of records)
+    if (first === undefined || record.revision < first.revision) first = record;
+  const id = first?.author.principalId;
+  if (id === undefined) return null;
+  const parsed = parsePrincipalId(id);
+  return parsed?.kind === 'anonymous' || parsed?.kind === 'account' ? id : null;
+}
+
+export type MissingRecordDeps = {
+  /** the store's kind: a checkout's `file` store keeps the folder holder's rule */
+  kind: () => 'file' | 'tmp' | 'blob';
+  isSeed: (deckId: string) => boolean;
+  has: (deckId: string) => Promise<boolean>;
+  /** the deck's version records, oldest included */
+  records: (deckId: string) => Promise<readonly VersionRecord[]>;
+  store: () => Promise<Pick<AccessStore, 'write'>>;
+  /** `TURBOSLIDE_MISSING_RECORD` on a checkout */
+  checkoutMode: () => 'open' | 'notFound';
+  now: () => string;
+};
+
+function defaultMissingDeps(): MissingRecordDeps {
+  return {
+    kind: () => storeSelection().kind,
+    isSeed: isSeedDeck,
+    has: hasStoredDeck,
+    records: async (deckId) => (await openDeckStore(deckId)).records(),
+    store: accessStore,
+    checkoutMode: () => missingRecordMode(),
+    now: () => new Date().toISOString(),
+  };
+}
+
+/**
+ * The record a deck without a stored one reads as (the rules above), with the rule's word, or
+ * null for a deck the store does not hold. The creator and closed records are written with
+ * `ifMatch: null`, so a record another request wrote first is the answer.
+ */
+export async function missingRecordRule(
+  deckId: string,
+  given?: MissingRecordDeps,
+): Promise<{ record: AccessRecord; rule: MissingRecordRule } | null> {
+  const deps = given ?? defaultMissingDeps();
+  const now = deps.now();
+  if (deps.kind() === 'file') {
+    if (deps.checkoutMode() === 'notFound' || !(await deps.has(deckId))) return null;
+    return { record: synthesizeLegacyRecord(deckId, now), rule: 'checkout' };
+  }
+  if (deps.isSeed(deckId)) return { record: seedDeckRecord(deckId, now), rule: 'seed' };
+  if (!(await deps.has(deckId))) return null;
+  let creator: string | null;
+  try {
+    creator = creatorFromRecords(await deps.records(deckId));
+  } catch (error) {
+    warn(
+      `the first version of ${deckId} was not read, so it reads closed: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return { record: closedDeckRecord(deckId, now), rule: 'closed' };
+  }
+  const record =
+    creator === null
+      ? closedDeckRecord(deckId, now)
+      : newDeckRecord(deckId, creator, legacyAssetKey(deckId), now);
+  const rule: MissingRecordRule = creator === null ? 'closed' : 'creator';
+  try {
+    const stored = await (await deps.store()).write(deckId, record, { ifMatch: null });
+    return { record: stored.record, rule };
+  } catch (error) {
+    if (isAccessPrecondition(error) && error.current !== null)
+      return { record: error.current.record, rule };
+    warn(
+      `the ${rule} record of ${deckId} was not written: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return { record, rule };
+  }
+}
+
+/** `missingRecordRule`'s record alone: what `authorize()` and the surfaces read. */
+export async function missingRecordFor(
+  deckId: string,
+  deps?: MissingRecordDeps,
+): Promise<AccessRecord | null> {
+  return (await missingRecordRule(deckId, deps))?.record ?? null;
 }
 
 /** Writes a record with the etag the caller read (an AccessPreconditionError when stale). */
@@ -515,7 +659,7 @@ export async function writeAccess(
 /**
  * The principal a deck the studio creates belongs to (SPEC-3 6.1 "New decks start restricted
  * with their creator as owner"): the session's principal (anonymous or account), else the agent's
- * owner as `decide()` derives it, else nobody (a request with no identity writes no record).
+ * owner as `decide()` derives it, else nobody (a request with no identity creates nothing).
  */
 export function creatorOf(ctx: AuthContext): string | null {
   if (ctx.principal !== null) return ctx.principal.id;
@@ -523,22 +667,49 @@ export function creatorOf(ctx: AuthContext): string | null {
   return null;
 }
 
+/** The ids a context answers to as an owner: the principal, its aliases, an agent's owner. */
+function ownIds(ctx: AuthContext): Set<string> {
+  const ids = new Set<string>(ctx.principal?.aliases ?? []);
+  const creator = creatorOf(ctx);
+  if (creator !== null) ids.add(creator);
+  return ids;
+}
+
+/** The id names a deck, or another principal's record, already (H3): the caller picks another id. */
+export class DeckIdTakenError extends TypeError {
+  readonly deckId: string;
+  constructor(deckId: string) {
+    super(`decks/${deckId} exists already; pick another name`);
+    this.name = 'DeckIdTakenError';
+    this.deckId = deckId;
+  }
+}
+
+export type RecordedDeck = StoredAccess & {
+  general?: MintedGeneralLink;
+  /** this call wrote the record (false: the caller's own record of an earlier attempt) */
+  written: boolean;
+};
+
 /**
- * Writes the access record of a deck the studio just created (the draft's first save, `deck.create`,
- * `deck.copy`): restricted, the creator its owner, the asset key of the pre migration layout, at
- * revision 0 so the first share write bases on 0 (VERIFICATION-3 finding 4: without it the loader
- * synthesized the legacy open record while `share.get` synthesized a restricted one, the Share
- * dialog opened on the legacy row for a fresh copy, and enforce mode refused the creator's own
- * `share.createLink` and `deck.trash`). A record that exists already is kept; a caller with no
- * identity leaves the deck unrecorded, which `decide()` reads as the legacy open deck.
+ * Writes the access record of a deck the studio is about to create (the draft's first save,
+ * `deck.create`, `deck.copy`): restricted, the creator its owner, the asset key of the pre
+ * migration layout, at revision 0 so the first share write bases on 0 (VERIFICATION-3 finding 4).
+ * Since H3 (DATA-V3) a caller with no identity is refused (401) instead of leaving the deck
+ * unrecorded, and a record another principal holds under the id is `DeckIdTakenError`; the
+ * caller's own record (a retried first save) is kept and answered.
  */
 export async function recordNewDeck(
   deckId: string,
   ctx: AuthContext,
-  options: { now?: string; store?: AccessStore } = {},
-): Promise<(StoredAccess & { general?: MintedGeneralLink }) | null> {
+  options: { now?: string; store?: Pick<AccessStore, 'write'> } = {},
+): Promise<RecordedDeck> {
   const owner = creatorOf(ctx);
-  if (owner === null) return null;
+  if (owner === null)
+    throw new DeniedError(
+      401,
+      denialBody({ ok: false, status: 401, code: 'unauthorized' }, 'write'),
+    );
   const now = options.now ?? new Date().toISOString();
   /* the deployment's default general access (the polish round, docs/archive/rounds/POLISH.md item 78): every
      new deck starts Restricted with Viewer for the link, as Google's does; the product round's
@@ -555,9 +726,53 @@ export async function recordNewDeck(
   const store = options.store ?? (await accessStore());
   try {
     const stored = await store.write(deckId, record, { ifMatch: null });
-    return general === null ? stored : { ...stored, general };
+    return { ...stored, ...(general === null ? {} : { general }), written: true };
   } catch (error) {
-    if (isAccessPrecondition(error)) return error.current;
+    if (!isAccessPrecondition(error)) throw error;
+    const current = error.current;
+    if (current !== null && current.record.owner !== null && ownIds(ctx).has(current.record.owner))
+      return { ...current, written: false };
+    throw new DeckIdTakenError(deckId);
+  }
+}
+
+export type CreateWithRecordDeps = {
+  has: (deckId: string) => Promise<boolean>;
+  store: () => Promise<Pick<AccessStore, 'write' | 'remove'>>;
+  now?: string;
+};
+
+/**
+ * Creates a deck with its record first (H3, DATA-V3): a deck the store holds already is
+ * `DeckIdTakenError` before anything is written (a record is never written over a deck that has
+ * none, which would hand a legacy deck to the caller), then the record, then the deck. When the
+ * deck is not made the record this call wrote leaves with it, unless the store holds the deck
+ * after all (a create that failed half way keeps its owner). So a failed record write leaves no
+ * deck, and no deck is ever made without a record.
+ */
+export async function createWithRecord<T>(
+  deckId: string,
+  ctx: AuthContext,
+  make: () => Promise<T>,
+  given?: CreateWithRecordDeps,
+): Promise<{ made: T; recorded: RecordedDeck }> {
+  const deps: CreateWithRecordDeps = given ?? { has: hasStoredDeck, store: accessStore };
+  if (creatorOf(ctx) === null)
+    throw new DeniedError(
+      401,
+      denialBody({ ok: false, status: 401, code: 'unauthorized' }, 'write'),
+    );
+  if (await deps.has(deckId)) throw new DeckIdTakenError(deckId);
+  const store = await deps.store();
+  const recorded = await recordNewDeck(deckId, ctx, {
+    store,
+    ...(deps.now === undefined ? {} : { now: deps.now }),
+  });
+  try {
+    return { made: await make(), recorded };
+  } catch (error) {
+    if (recorded.written && !(await deps.has(deckId).catch(() => true)))
+      await store.remove(deckId).catch(() => undefined);
     throw error;
   }
 }
@@ -595,6 +810,8 @@ export type AccessHookDeps = {
   /** announces the change to the room's open tabs (SPEC-3 2.2, 6.3); the realtime channel by default */
   announce: (deckId: string, revision: number) => Promise<void>;
   now?: () => string;
+  /** what a deck without a stored record reads as; `missingRecordFor` by default (H3) */
+  missing?: (deckId: string) => Promise<AccessRecord | null>;
 };
 
 async function defaultHookDeps(): Promise<AccessHookDeps> {
@@ -711,15 +928,17 @@ export function hostedAccessHooks(
       // instance's write has made stale (finding 34: "access.json changed in the Blob store since
       // it was read" on the second link a rep minted within a minute)
       loaded = await fresh(d.store);
-      // one record on the studio (VERIFICATION-3 finding 4): a deck nobody claimed is the legacy
-      // open record `decide()` and the loader read, never the checkout's "the folder's holder is
-      // the owner" synthesis of the record functions (that one stands on a checkout's CLI, where
-      // no hooks are passed); the first save of a claim or a share write then lands with
-      // `ifMatch: null`, so two instances cannot both create the record
-      return (
-        loaded?.record ??
-        synthesizeLegacyRecord(deckId, (d.now ?? (() => new Date().toISOString()))())
-      );
+      if (loaded !== null) return loaded.record;
+      // one record on the studio (VERIFICATION-3 finding 4): a deck without a stored record is
+      // the record `authorize()`'s loader reads (H3: the seed's open viewer record, the creator's
+      // record, the closed record), never the checkout's "the folder's holder is the owner"
+      // synthesis of the record functions (that one stands on a checkout's CLI, where no hooks
+      // are passed). The rule may write the record, so the store is read again for its etag; a
+      // first save on nothing lands with `ifMatch: null`, so two instances cannot both create it
+      const now = (d.now ?? (() => new Date().toISOString()))();
+      const synthesized = await (d.missing ?? missingRecordFor)(deckId);
+      loaded = await fresh(d.store);
+      return loaded?.record ?? synthesized ?? closedDeckRecord(deckId, now);
     },
     async save(record) {
       const d = await resolved();

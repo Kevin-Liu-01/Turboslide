@@ -239,4 +239,31 @@ describe('the More key', () => {
     fireEvent.click(menu.querySelector('[data-menu-item="title.presence"]')!);
     expect(document.getElementById('ts-menu-roster')).not.toBeNull();
   });
+
+  it('opens a roster that says so for a person alone and lists the others once one is present', () => {
+    const roster = (extra: Partial<EditorShellInput>) => {
+      const { container, unmount } = render(<Harness input={input(extra)} />);
+      fireEvent.click(container.querySelector('[data-control="title.more"]')!);
+      fireEvent.click(
+        document.getElementById(TITLE_MORE_MENU_ID)!.querySelector('[data-menu-item="title.presence"]')!,
+      );
+      const rows = Array.from(
+        document.getElementById('ts-menu-roster')!.querySelectorAll('[role="menuitem"]'),
+      ).map((row) => row.textContent);
+      unmount();
+      return rows;
+    };
+    expect(roster({ presence: { others: [] } })).toEqual(['Nobody else has it open']);
+    const other = {
+      ...principal,
+      principalId: 'anon_2',
+      label: 'Bismuth 168',
+      clientId: 'c2',
+      role: 'editor' as const,
+      lastSeenAt: '2026-10-08T00:00:00.000Z',
+    };
+    const rows = roster({ presence: { others: [other] } });
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toContain('Bismuth 168');
+  });
 });

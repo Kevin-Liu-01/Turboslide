@@ -84,7 +84,7 @@ export function presenceSlotTip(others: number): { name: string; doc: string } {
     name: PRESENCE.collaborators,
     doc:
       others === 0
-        ? 'Who is in this presentation now. Nobody else has it open'
+        ? `Who is in this presentation now. ${PRESENCE.alone}`
         : `Who is in this presentation now. ${others === 1 ? 'One other person has' : `${others} other people have`} it open`,
   };
 }

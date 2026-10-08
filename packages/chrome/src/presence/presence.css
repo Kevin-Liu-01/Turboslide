@@ -290,6 +290,16 @@
   background: none;
 }
 
+/* the one line of a roster with nobody else in it */
+.ts-roster-row.is-alone {
+  color: var(--pt-ink-2);
+  cursor: default;
+}
+
+.ts-roster-row.is-alone:hover {
+  background: none;
+}
+
 .ts-roster-text {
   display: flex;
   flex-direction: column;

@@ -107,6 +107,20 @@ export function RosterMenu({
         ) : undefined
       }
     >
+      {/* a person alone opens it from the More key under 720 px, where the slot's opener is
+          folded; the plate says so instead of drawing an empty box */}
+      {rows.length === 0 ? (
+        <button
+          type="button"
+          role="menuitem"
+          className="ts-roster-row is-plain is-alone"
+          aria-disabled="true"
+          data-focusable=""
+          data-control="presence.roster.alone"
+        >
+          <span className="ts-roster-name">{PRESENCE.alone}</span>
+        </button>
+      ) : null}
       {rows.map((participant) => {
         const self = participant.clientId === presence.self?.clientId;
         const n = slideNumberOf(document, participant.slideId);

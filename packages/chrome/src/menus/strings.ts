@@ -101,6 +101,9 @@ export const PRESENCE = {
       .filter((part) => part !== null)
       .join(' · '),
   you: '(you)',
+  /* the roster's one line while nobody else is present: the More key under 720 px opens the
+     roster whatever the count, and the own row is parked (docs/FOCUS.md 3.2) */
+  alone: 'Nobody else has it open',
   /* Round 1 (docs/NEXT.md 4.1.3 item 21; audit-clutter 119): the own chip's tooltip name and the
      roster's own row read this word alone once presence/PresenceSlot.tsx and RosterMenu.tsx draw
      it (round1/build/b3a.md request 3) */

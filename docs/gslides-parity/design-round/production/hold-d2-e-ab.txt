@@ -1,0 +1,9 @@
+6973fa9f-1 start 2026-10-07T22:11:43Z  105.67 108.33 121.37  end-load  175.46 140.93 132.70 : failed    ERR Error:  ua1 once, no word lost / expect(received).toBe(expected) // Object.is equal
+19bd3de7-1 start 2026-10-07T22:14:13Z  175.46 140.93 132.70  end-load  168.74 160.00 142.90 : failed    ERR Error:  tb3 once, no word lost / expect(received).toBe(expected) // Object.is equal
+6973fa9f-2 start 2026-10-07T22:17:20Z  168.74 160.00 142.90  end-load  129.54 143.44 138.71 : failed    ERR Error:  ub2 once, no word lost / expect(received).toBe(expected) // Object.is equal
+19bd3de7-2 start 2026-10-07T22:19:57Z  130.13 143.34 138.70  end-load  214.47 174.86 153.51 : failed    ERR Error: both words within 500 ms, three rounds / expect(received).toEqual(expected) 
+6973fa9f-3 start 2026-10-07T22:26:13Z  214.47 174.86 153.51  end-load  284.64 212.23 172.49 : failed    ERR Error:  ta2 once, no word lost / expect(received).toBe(expected) // Object.is equal
+19bd3de7-3 start 2026-10-07T22:29:21Z  287.71 214.07 173.37  end-load  178.77 198.37 171.71 : failed    ERR Error:  ta1 once, no word lost / expect(received).toBe(expected) // Object.is equal
+6973fa9f-4 start 2026-10-07T22:30:59Z  178.77 198.37 171.71  end-load  123.96 174.43 165.68 : failed    ERR Error:  ta1 once, no word lost / expect(received).toBe(expected) // Object.is equal
+19bd3de7-4 start 2026-10-07T22:32:51Z  123.96 174.43 165.68  end-load  110.85 161.14 161.35 : failed    ERR Error:  tb2 once, no word lost / expect(received).toBe(expected) // Object.is equal
+DONE

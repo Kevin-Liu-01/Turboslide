@@ -1,0 +1,177 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T00:19:23.385Z",
+  "ms": 626907,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 625907,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/the-design-round-part-2-D5-r2/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.pages.access-plates",
+      "export.fonts.upstream-names",
+      "decks.pages.radius",
+      "decks.pages.numerals",
+      "decks.pages.pictures-load"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 5,
+  "passed": 0,
+  "failed": 5,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "decks.pages.radius": "failed",
+    "decks.pages.numerals": "failed",
+    "decks.pages.pictures-load": "failed",
+    "decks.pages.access-plates": "failed",
+    "export.fonts.upstream-names": "failed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.pages.access-plates",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.radius",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.numerals",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.pictures-load",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "export.fonts.upstream-names",
+        "feature": "export",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.pages.access-plates",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "export.fonts.upstream-names",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.pages.access-plates",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: light You need access: \"Your Presentations\" 6px, \"New Presentation\" 6px, \"Request Access\" 6px; words normal; light the refused page: \"Your Presentations\" 0px; words \"cv11\", \"ss01\"/normal; light Not found: \"New Presentation\" 0px, \"Your Presentations\" 0px, \"About Turboslide\" 0px; words \"cv11\", "
+    },
+    {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-c069"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-ylmc"
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-ez7v"
+    },
+    {
+      "id": "export.fonts.upstream-names",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: page.evaluate: ConflictError: Your change was not applied. Try again"
+    }
+  ]
+}

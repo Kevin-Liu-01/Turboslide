@@ -1,0 +1,265 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T02:09:56.740Z",
+  "ms": 650866,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 649977,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/the-design-round-part-2-D3/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "themes.default.new-is-simple",
+      "themes.appearance.theme-default",
+      "themes.agent.create-default",
+      "themes.migration.gt-unchanged",
+      "themes.closing.no-gt-mark-on-simple",
+      "themes.layouts.no-gt-pictures-on-simple",
+      "themes.picker.lists-library",
+      "themes.picker.apply-one-commit",
+      "themes.picker.keyboard",
+      "themes.gt.selectable",
+      "themes.reset.returns-to-theme",
+      "themes.reset.field-returns-to-theme",
+      "themes.logo.theme-logo-only",
+      "themes.pickers.follow-theme",
+      "slides.layout.plate-four-columns",
+      "brand.logo.replace-every-slide",
+      "brand.template.blank-no-gt-mark",
+      "brand.template.blank-plain",
+      "themes.export.pptx-token-colours"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 19,
+  "passed": 19,
+  "failed": 0,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "themes.agent.create-default": "passed",
+    "brand.template.blank-no-gt-mark": "passed",
+    "brand.template.blank-plain": "passed",
+    "brand.logo.replace-every-slide": "passed",
+    "themes.default.new-is-simple": "passed",
+    "themes.appearance.theme-default": "passed",
+    "themes.migration.gt-unchanged": "passed",
+    "themes.closing.no-gt-mark-on-simple": "passed",
+    "themes.layouts.no-gt-pictures-on-simple": "passed",
+    "themes.picker.lists-library": "passed",
+    "themes.picker.apply-one-commit": "passed",
+    "themes.picker.keyboard": "passed",
+    "themes.gt.selectable": "passed",
+    "themes.reset.returns-to-theme": "passed",
+    "themes.reset.field-returns-to-theme": "passed",
+    "themes.logo.theme-logo-only": "passed",
+    "themes.pickers.follow-theme": "passed",
+    "slides.layout.plate-four-columns": "passed",
+    "themes.export.pptx-token-colours": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "slides.layout.plate-four-columns",
+      "feature": "slides",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.logo.replace-every-slide",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.template.blank-no-gt-mark",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.template.blank-plain",
+      "feature": "brand",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.export.pptx-token-colours",
+      "feature": "decks",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.default.new-is-simple",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.appearance.theme-default",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.agent.create-default",
+      "feature": "decks",
+      "driver": "e2e/agent-http.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.migration.gt-unchanged",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.closing.no-gt-mark-on-simple",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.layouts.no-gt-pictures-on-simple",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.picker.lists-library",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.picker.apply-one-commit",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.picker.keyboard",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.gt.selectable",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.reset.returns-to-theme",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.reset.field-returns-to-theme",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.logo.theme-logo-only",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "themes.pickers.follow-theme",
+      "feature": "decks",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

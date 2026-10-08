@@ -1,0 +1,938 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T05:15:40.917Z",
+  "ms": 590953,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 590448,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/prodverify/runs/p1/core-walk.json",
+    "deckId": "untitled-20261008-fyif",
+    "steps": 99
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "brand",
+      "fonts",
+      "versions",
+      "chrome"
+    ],
+    "costRows": null
+  },
+  "rows": 74,
+  "passed": 58,
+  "failed": 1,
+  "notDriven": 15,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "share.file-menu-share-with-others": "passed",
+    "versions.open-from-last-edit": "passed",
+    "versions.pick": "passed",
+    "versions.name-current": "passed",
+    "versions.undo-restore": "passed",
+    "chrome.split.one-box": "passed",
+    "chrome.split.hover-no-inversion": "passed",
+    "chrome.split.click-show": "passed",
+    "chrome.split.chevron-menu-aligned": "passed",
+    "chrome.split.enter-chevron": "passed",
+    "chrome.split.enter-label": "passed",
+    "chrome.split.space-both": "passed",
+    "chrome.split.arrow-down-label": "passed",
+    "chrome.split.tab-order": "passed",
+    "chrome.split.aria": "passed",
+    "chrome.split.collapse-900": "passed",
+    "chrome.separators.once": "passed",
+    "chrome.separators.toolbar-dividers": "passed",
+    "chrome.cluster.gaps-heights": "passed",
+    "chrome.comments-glyph.toggle": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "versions.show-changes-toggle": "passed",
+    "versions.show-changes-marks": "failed",
+    "comments.panel.empty-gesture": "passed",
+    "versions.panel.author-you": "passed",
+    "chrome.bottom-bar.removed": "passed",
+    "chrome.menu.no-tooltip-with-submenu": "passed",
+    "chrome.menu.escape-focus-stage": "passed",
+    "chrome.presence.tooltip": "passed",
+    "chrome.contrast.titanium-light": "passed",
+    "chrome.disabled.token-both-appearances": "passed",
+    "chrome.field.boundary-3-1": "passed",
+    "chrome.hover.ground": "passed",
+    "chrome.floating.edge-frame": "passed",
+    "chrome.focus.one-ring-rule": "passed",
+    "chrome.filmstrip.one-ring": "passed",
+    "chrome.tooltip.none-on-focus-in-menus": "passed",
+    "chrome.menu.plate-fits-labels": "passed",
+    "chrome.menu.no-mnemonics-mac": "passed",
+    "chrome.select.one-rule": "passed",
+    "chrome.check.draws-check": "passed",
+    "chrome.toolbar.bold-follows-selection": "passed",
+    "menus.icons.insert-rows": "passed",
+    "menus.icons.format-rows": "passed",
+    "menus.icons.one-family": "passed",
+    "brand.panel.opens": "not driven",
+    "brand.logo.use-on-every-slide": "not driven",
+    "brand.logo.remove": "not driven",
+    "brand.colors.primary-live": "not driven",
+    "brand.colors.palette-row": "not driven",
+    "brand.colors.control-ids-unique": "not driven",
+    "brand.colors.version-history-entry": "not driven",
+    "brand.colors.role-tooltips": "not driven",
+    "brand.background.enter-keeps-open": "not driven",
+    "brand.fonts.roles": "not driven",
+    "brand.counter.format": "not driven",
+    "brand.layout.tiles-in-kit": "not driven",
+    "brand.agent.set-get": "not driven",
+    "fonts.dropdown.opens": "passed",
+    "fonts.dropdown.apply-selection": "passed",
+    "fonts.dropdown.search": "passed",
+    "fonts.format-menu.row": "passed",
+    "fonts.more-fonts.licence": "passed",
+    "fonts.face.reload-and-show": "passed",
+    "fonts.agent.font-list": "passed",
+    "brand.objects.kit-colours-first": "not driven",
+    "fonts.links.licence-v4-1": "passed",
+    "fonts.fallback.in-stack": "passed",
+    "fonts.display-features.inter-only": "passed",
+    "fonts.catalog.geist": "passed",
+    "fonts.catalog.six-families": "passed",
+    "fonts.picker.search-category": "passed",
+    "fonts.table.takes-family": "not driven",
+    "fonts.field.own-face": "passed",
+    "versions.window-mark-column": "passed",
+    "versions.restore-in-more": "passed",
+    "versions.field.corner": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "brand.panel.opens",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.logo.use-on-every-slide",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.logo.remove",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.colors.primary-live",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.colors.palette-row",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.colors.control-ids-unique",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.colors.version-history-entry",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.colors.role-tooltips",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.background.enter-keeps-open",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.fonts.roles",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.counter.format",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.layout.tiles-in-kit",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.agent.set-get",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "brand.objects.kit-colours-first",
+        "feature": "brand",
+        "result": "not driven"
+      },
+      {
+        "id": "fonts.table.takes-family",
+        "feature": "fonts",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [
+    "brand",
+    "fonts"
+  ],
+  "wouldParkRows": [
+    {
+      "id": "versions.show-changes-marks",
+      "parks": [
+        "file.versionHistory.showChanges"
+      ],
+      "result": "failed"
+    },
+    {
+      "id": "brand.panel.opens",
+      "parks": [
+        "slide.changeTheme"
+      ],
+      "result": "not driven"
+    },
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "parks": [
+        "format.image.useOnEverySlide"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "versions.open-from-last-edit",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.pick",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.name-current",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.undo-restore",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.one-box",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.hover-no-inversion",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.click-show",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.chevron-menu-aligned",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.enter-chevron",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.enter-label",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.space-both",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.arrow-down-label",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.tab-order",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "flaky",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.aria",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.split.collapse-900",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.separators.once",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.separators.toolbar-dividers",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.cluster.gaps-heights",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.comments-glyph.toggle",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-toggle",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.show-changes-marks",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "failed",
+      "reason": "a heading edit and an added box after the named version; pick the older version with Show changes on; then off: picked versionHistory.12.pick (named row versionHistory.12.pick); marks with Show changes on 0 (); off 0"
+    },
+    {
+      "id": "versions.panel.author-you",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.bottom-bar.removed",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.no-tooltip-with-submenu",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.escape-focus-stage",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.presence.tooltip",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.contrast.titanium-light",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.disabled.token-both-appearances",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.field.boundary-3-1",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.hover.ground",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.floating.edge-frame",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.focus.one-ring-rule",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.filmstrip.one-ring",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.tooltip.none-on-focus-in-menus",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.plate-fits-labels",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.menu.no-mnemonics-mac",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.select.one-rule",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.check.draws-check",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.toolbar.bold-follows-selection",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "menus.icons.insert-rows",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "menus.icons.format-rows",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "menus.icons.one-family",
+      "feature": "chrome",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.panel.opens",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.logo.use-on-every-slide",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.logo.remove",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.colors.primary-live",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.colors.palette-row",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.colors.control-ids-unique",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.colors.version-history-entry",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.colors.role-tooltips",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.background.enter-keeps-open",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.fonts.roles",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.counter.format",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.layout.tiles-in-kit",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "brand.agent.set-get",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "fonts.dropdown.opens",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.apply-selection",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.dropdown.search",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.format-menu.row",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.more-fonts.licence",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.face.reload-and-show",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.agent.font-list",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "brand.objects.kit-colours-first",
+      "feature": "brand",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "setup failed: a slide for the brand rows"
+    },
+    {
+      "id": "fonts.links.licence-v4-1",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.fallback.in-stack",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.display-features.inter-only",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.catalog.geist",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.catalog.six-families",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.picker.search-category",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "fonts.table.takes-family",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: toolbar.font (docs/archive/rounds/PRODUCT.md 7.1, B1); the Font control on a selected table is drawn disabled (\"Inter\"); takesFamily is P1 (FEATURES.md 3.5)"
+    },
+    {
+      "id": "fonts.field.own-face",
+      "feature": "fonts",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.window-mark-column",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.restore-in-more",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "versions.field.corner",
+      "feature": "versions",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

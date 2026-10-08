@@ -1,0 +1,230 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T05:17:20.977Z",
+  "ms": 486808,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 486030,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/prodverify/runs/s1-red-a/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "decks.pages.radius",
+      "decks.pages.numerals",
+      "decks.pages.pictures-load",
+      "home.motion.pause"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 4,
+  "passed": 0,
+  "failed": 3,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "decks.pages.radius": "failed",
+    "decks.pages.numerals": "failed",
+    "decks.pages.pictures-load": "failed",
+    "home.motion.pause": "not driven"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "home.motion.pause",
+        "feature": "decks",
+        "result": "not driven"
+      },
+      {
+        "id": "decks.pages.radius",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.numerals",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.pictures-load",
+        "feature": "decks",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "result": "not driven"
+    },
+    {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 140.5 (the functional checks passed)"
+    },
+    {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-bjys"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-9wgp"
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-xnz1"
+    }
+  ]
+}

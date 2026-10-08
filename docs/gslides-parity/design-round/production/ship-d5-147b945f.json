@@ -1,0 +1,227 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T00:01:17.025Z",
+  "ms": 954501,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 953632,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/the-design-round-part-2-D5/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "present.presenter.surfaces",
+      "view.deck.surfaces",
+      "decks.pages.access-plates",
+      "decks.pages.radius",
+      "decks.pages.numerals",
+      "decks.pages.default-glyphs",
+      "decks.pages.scrollbar",
+      "decks.pages.pictures-load",
+      "accounts.signin.one-dialog",
+      "export.fonts.upstream-names"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 10,
+  "passed": 5,
+  "failed": 5,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "view.deck.surfaces": "passed",
+    "decks.pages.radius": "failed",
+    "decks.pages.numerals": "failed",
+    "decks.pages.default-glyphs": "passed",
+    "decks.pages.scrollbar": "passed",
+    "decks.pages.pictures-load": "failed",
+    "decks.pages.access-plates": "failed",
+    "export.fonts.upstream-names": "failed",
+    "present.presenter.surfaces": "passed",
+    "accounts.signin.one-dialog": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "decks.pages.access-plates",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.radius",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.numerals",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "decks.pages.pictures-load",
+        "feature": "decks",
+        "result": "failed"
+      },
+      {
+        "id": "export.fonts.upstream-names",
+        "feature": "export",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "decks.pages.access-plates",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "result": "failed"
+    },
+    {
+      "id": "export.fonts.upstream-names",
+      "feature": "export",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "present.presenter.surfaces",
+      "feature": "present",
+      "driver": "core/present.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "view.deck.surfaces",
+      "feature": "view",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.pages.access-plates",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: light You need access: \"Your Presentations\" 6px, \"New Presentation\" 6px, \"Request Access\" 6px; words normal; light the refused page: \"Your Presentations\" 0px; words \"cv11\", \"ss01\"/normal; light Not found: \"New Presentation\" 0px, \"Your Presentations\" 0px, \"About Turboslide\" 0px; words \"cv11\", "
+    },
+    {
+      "id": "decks.pages.radius",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-75av"
+    },
+    {
+      "id": "decks.pages.numerals",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-mira"
+    },
+    {
+      "id": "decks.pages.default-glyphs",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.pages.scrollbar",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "decks.pages.pictures-load",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "failed",
+      "reason": "Error: the trash stamp of untitled-20261008-dwxw"
+    },
+    {
+      "id": "accounts.signin.one-dialog",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "export.fonts.upstream-names",
+      "feature": "export",
+      "driver": "core/export.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: page.evaluate: ConflictError: Your change was not applied. Try again"
+    }
+  ]
+}

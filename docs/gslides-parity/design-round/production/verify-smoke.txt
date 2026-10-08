@@ -1,0 +1,50 @@
+skip  /s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)
+skip  410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)
+skip  private document 403: the private store of SPEC-3 11.5 R2 is not connected this round
+skip  twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration
+skip  restricted 404: pass --restricted <deck id> with an access record
+skip  template copy: pass --template-copy (the row writes one deck and removes it)
+path                                          status  ms     result  detail
+/                                             307     452    pass    location /new; x-robots-tag noindex
+/new                                          200     470    pass    67698 chars; 3/3 shell marks; noindex
+/deck/gt-brand                                200     1845   pass    181113 chars; 0 notes key(s)
+/edit/<unknown> access                        404     266    pass    30497 chars; access page in the HTML false (drawn in the browser)
+/deck/<unknown> access                        404     258    pass    30967 chars; access page true
+/<no route> not found                         404     154    pass    27645 chars; 4 of 4 controls
+/edit/gt-brand                                200     1274   pass    294872 chars; 3/3 shell marks
+/decks                                        200     100    pass    0 card(s)
+/decks/trash                                  200     154    pass    33625 chars
+/print/gt-brand                               200     795    pass    85 page(s)
+/present/gt-brand                             200     3281   pass    293158 chars
+/home                                         200     19     FAIL    expected a 200 product page: main.ts-product, the hero sentence, a speculationrules script, no noindex; 99738 chars; 2/3 marks; no noindex meta; x-robots-tag none
+/decks/gt-brand/assets/cover-fumadocs.png     200     33     pass    image/png 335538 B
+/api/agent                                    401     113    pass    bearer rule
+headers /edit/gt-brand                        200     1132   pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /deck/gt-brand                        200     578    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /embed/gt-brand                       200     667    pass    x-frame-options none; https://prototemplate.com https://*.prototemplate.com
+json asset attachment                         200     11     pass    attachment; sandbox; default-src 'none'
+cross site text/plain POST                    415     84     pass    415
+unsigned thumbnail                            302     268    pass    shadow: the stored object (https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.)
+csp report endpoint                           204     98     pass    204
+cdn /favicon.ico                              200     25     pass    image/vnd.microsoft.icon 15086 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /icon.svg                                 200     16     pass    image/svg+xml 1201 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /apple-touch-icon.png                     200     14     pass    image/png 1381 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /manifest.webmanifest                     200     25     pass    application/manifest+json; charset=utf-8 987 B; first 200 HIT, second 200 HIT; public, max-age=86400
+cdn /icons/icon-512.png                       200     12     pass    image/png 3409 B; first 200 HIT, second 200 HIT; public, max-age=604800, stale-while-revalidate=2592000
+cdn /og/turboslide.png                        200     31     pass    image/png 173321 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/hero-dark.png                      200     20     pass    image/png 13679 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/hero-light.png                     200     17     pass    image/png 13689 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/figure-dark.png                    200     16     pass    image/png 13873 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/figure-light.png                   200     35     pass    image/png 13892 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/notfound-dark.png                  200     80     pass    image/png 13866 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/notfound-light.png                 200     51     pass    image/png 13862 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/og-screen-dark.png                 200     12     pass    image/png 1885 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /brand/og-screen-light.png                200     11     pass    image/png 1887 B; first 200 HIT, second 200 HIT; public, max-age=86400, stale-while-revalidate=604800
+cdn /home                                     200     107    pass    text/html; charset=utf-8 99738 B; first 200 HIT, second 200 HIT; public, max-age=0, must-revalidate
+thumbnail without r                           302     18     pass    302 -> https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/deck; public; STALE; stamp 0f2ed0d8; source blob; fresh 1
+thumbnail with r twice                        302     443    pass    first 302 MISS blob; second 302 MISS blob -> https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/decks/gt-brand/.thumbs/0; public, max-age=31536000, immutable
+Tools > Preferences > Play animated patterns  200     357    pass    in /assets/index-DjG1IGBw.js; 1 module read from 5 shell scripts, 1181 KB
+build commit                                  200     146    pass    serves f2d48868b478b33baa744c5ffd5c091a385b966f
+effects backend                               200     119    pass    typescript; glibc 2.34; node v24.21.0 linux (the TypeScript or wasm stages: the Linux addon is not committed, SPEC-4 0.38)
+deck.info snapshots                           200     665    pass    1 snapshot(s), revision 26
+41/42 passed against https://www.turboslide.com/

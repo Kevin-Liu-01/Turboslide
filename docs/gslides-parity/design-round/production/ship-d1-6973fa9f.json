@@ -1,0 +1,127 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-07T17:54:54.097Z",
+  "ms": 141509,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 139786,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/d1-prod/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "chrome.colors.pairs-at-floor",
+      "chrome.font.one-subset",
+      "chrome.font.on-demand",
+      "fonts.inter.italic-release"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 4,
+  "passed": 3,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-07",
+  "results": {
+    "fonts.inter.italic-release": "passed",
+    "chrome.colors.pairs-at-floor": "failed",
+    "chrome.font.one-subset": "passed",
+    "chrome.font.on-demand": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "chrome.colors.pairs-at-floor",
+        "feature": "chrome",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "chrome.colors.pairs-at-floor",
+      "feature": "chrome",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "fonts.inter.italic-release",
+      "feature": "fonts",
+      "driver": "core/brand.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.colors.pairs-at-floor",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: light the tooltip's key chip \"Cmd Z\""
+    },
+    {
+      "id": "chrome.font.one-subset",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.font.on-demand",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

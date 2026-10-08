@@ -1,0 +1,257 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-07T23:16:06.437Z",
+  "ms": 533614,
+  "parked": {
+    "commit": null,
+    "parkedFeatures": [],
+    "parkedRows": []
+  },
+  "probe": null,
+  "specs": {
+    "exit": 1,
+    "ms": 532029,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/the-design-round-part-2-D2/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "chrome.layers.tooltip-over-bar",
+      "chrome.layers.toast-over-dialog",
+      "chrome.layers.menu-over-dialog",
+      "chrome.layers.top-layer",
+      "chrome.layers.follows-anchor",
+      "chrome.radius.floating",
+      "chrome.radius.windows",
+      "chrome.radius.controls",
+      "chrome.radius.structure-square",
+      "chrome.plates.separation",
+      "chrome.scroll.default-everywhere",
+      "chrome.scroll.stage-track",
+      "chrome.numerals.tabular",
+      "chrome.type.default-glyphs",
+      "chrome.appearance.system-until-picked",
+      "chrome.buttons.one-rule",
+      "chrome.colors.pairs-at-floor"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 17,
+  "passed": 16,
+  "failed": 1,
+  "notDriven": 0,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "f2d48868",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-07",
+  "results": {
+    "chrome.buttons.one-rule": "failed",
+    "chrome.colors.pairs-at-floor": "passed",
+    "chrome.layers.tooltip-over-bar": "passed",
+    "chrome.layers.toast-over-dialog": "passed",
+    "chrome.layers.menu-over-dialog": "passed",
+    "chrome.layers.top-layer": "passed",
+    "chrome.layers.follows-anchor": "passed",
+    "chrome.radius.floating": "passed",
+    "chrome.radius.windows": "passed",
+    "chrome.radius.controls": "passed",
+    "chrome.radius.structure-square": "passed",
+    "chrome.plates.separation": "passed",
+    "chrome.scroll.default-everywhere": "passed",
+    "chrome.scroll.stage-track": "passed",
+    "chrome.numerals.tabular": "passed",
+    "chrome.type.default-glyphs": "passed",
+    "chrome.appearance.system-until-picked": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "chrome.buttons.one-rule",
+        "feature": "chrome",
+        "result": "failed"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "chrome.buttons.one-rule",
+      "feature": "chrome",
+      "result": "failed"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "chrome.buttons.one-rule",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "failed",
+      "reason": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m"
+    },
+    {
+      "id": "chrome.colors.pairs-at-floor",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.layers.tooltip-over-bar",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.layers.toast-over-dialog",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.layers.menu-over-dialog",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.layers.top-layer",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.layers.follows-anchor",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.radius.floating",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.radius.windows",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.radius.controls",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.radius.structure-square",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.plates.separation",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.scroll.default-everywhere",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.scroll.stage-track",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.numerals.tabular",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.type.default-glyphs",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.appearance.system-until-picked",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

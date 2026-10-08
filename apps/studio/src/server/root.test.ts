@@ -3,11 +3,18 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
+
 import {
+  DECK_ID_RANDOM_LENGTH,
   DERIVED_GRACE_MS,
   DERIVED_KEEP_MS,
+  DRAFT_ID_PATTERN,
   DiskFullError,
   isDiskFull,
+  isDraftDeckId,
+  newDeckId,
+  newDraftDeckId,
   retryWhenDiskFull,
   sweepDerived,
   treeBytes,
@@ -261,5 +268,36 @@ describe('retryWhenDiskFull (finding 20)', () => {
     );
     await expect(other).rejects.toThrow(RangeError);
     expect(sweeps).toBe(1);
+  });
+});
+
+describe('the ids of new decks (security hotfix H3, DATA-V1)', () => {
+  it('is 26 base32 characters of 128 random bits, a slug, never the same twice', () => {
+    const ids = new Set<string>();
+    for (let i = 0; i < 2000; i += 1) {
+      const id = newDeckId();
+      expect(id).toMatch(/^[a-z2-7]{26}$/);
+      expect(id).toHaveLength(DECK_ID_RANDOM_LENGTH);
+      expect(SLUG_PATTERN.test(id)).toBe(true);
+      ids.add(id);
+    }
+    expect(ids.size).toBe(2000);
+    // every bit of the 16 bytes reaches the id: two inputs one bit apart answer two ids
+    const zero = new Uint8Array(16);
+    const last = new Uint8Array(16);
+    last[15] = 1;
+    expect(newDeckId(zero)).toBe('a'.repeat(26));
+    expect(newDeckId(last)).not.toBe(newDeckId(zero));
+    expect(newDeckId(new Uint8Array(16).fill(255))).toBe(`${'7'.repeat(25)}4`);
+  });
+
+  it("gives a draft the day and 26 random characters, the draft shape's only form", () => {
+    const id = newDraftDeckId(new Date('2026-10-08T12:00:00Z'));
+    expect(id).toMatch(/^untitled-20261008-[a-z2-7]{26}$/);
+    expect(DRAFT_ID_PATTERN.test(id)).toBe(true);
+    expect(isDraftDeckId(id)).toBe(true);
+    // the four character drafts of before H3 are no longer drafts a first write may create
+    expect(isDraftDeckId('untitled-20261008-vq7k')).toBe(false);
+    expect(newDraftDeckId()).not.toBe(newDraftDeckId());
   });
 });

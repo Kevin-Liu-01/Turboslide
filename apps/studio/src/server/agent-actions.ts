@@ -364,12 +364,30 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
       }
     }
     const capability = capabilityForAction(data.action);
-    if (capability !== null) {
-      const decision = await authorize(ctx, data.deckId, capability, {
+    if (data.action === 'share.requestAccess') {
+      // the one sentence for a deck that exists and one that does not (SPEC-3 6.5; H3, DATA-V1:
+      // the dispatcher's open of a missing deck answered "No deck", which named the others)
+      const [{ hasStoredDeck }, { REQUEST_ACCESS_ANSWER }] = await Promise.all([
+        import('./root'),
+        import('@turboslide/schema/access'),
+      ]);
+      if (!(await hasStoredDeck(data.deckId))) {
+        const answer: RunDeckActionAnswer = {
+          output: { ok: true, message: REQUEST_ACCESS_ANSWER },
+          created: false,
+        };
+        return JSON.stringify(answer);
+      }
+    } else {
+      // an action with no deck of its own (accounts, notifications, admin, deck.list) still runs
+      // on the page's deck, which the dispatcher opens: the read cell on it, so a deck the caller
+      // may not read and one that does not exist answer alike (H3, DATA-V1)
+      const decided = capability ?? 'read';
+      const decision = await authorize(ctx, data.deckId, decided, {
         action: data.action,
         transport: 'window',
       });
-      if (!decision.ok) throw new DeniedError(decision.status, denialBody(decision, capability));
+      if (!decision.ok) throw new DeniedError(decision.status, denialBody(decision, decided));
     }
     if (ctx.principal === null && ctx.agent === undefined) {
       logSecurityEvent({

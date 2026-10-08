@@ -94,6 +94,10 @@ async function serveState(
   identity: RequestIdentity,
   state: PresencePost,
 ): Promise<Response> {
+  // the decision first (H3, DATA-V1): the binding's 403 answered for any deck that exists and
+  // the 404 for one that does not, so the route named every deck to anyone
+  const decision = await decideFor(identity, deckId, 'presence', 'presence');
+  if (!decision.ok) return jsonResponse(denialBody(decision, 'presence'), decision.status);
   let room;
   try {
     room = await roomFor(deckId);
@@ -106,8 +110,6 @@ async function serveState(
   if (!(await clientBoundTo(room, state.clientId, identity))) {
     return jsonResponse({ error: 'client_unbound', message: 'Open the stream first' }, 403);
   }
-  const decision = await decideFor(identity, deckId, 'presence', 'presence');
-  if (!decision.ok) return jsonResponse(denialBody(decision, 'presence'), decision.status);
   const url = new URL(request.url);
   if (url.searchParams.get('leave') === '1') {
     await leavePresence(room, state.clientId, state.clock);

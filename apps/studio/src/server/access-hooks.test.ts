@@ -28,7 +28,9 @@ import {
   findShareLink,
   hostedAccessHooks,
   seedDeckRecord,
+  shareGetFor,
 } from './access';
+import type { RequestIdentity } from './room';
 import { authorize, bindAuthorize, contextForIdentity } from './authorize';
 import { setSecurityLogSink } from './log';
 
@@ -402,6 +404,31 @@ describe('authorize() and a revoked publish token (SPEC-3 6.4)', () => {
         status: 404,
         code: 'not_found',
       });
+    } finally {
+      bindAuthorize(previous);
+      setSecurityLogSink(restore);
+    }
+  });
+});
+
+describe('share.get and /api/access for a stranger (H3, DATA-V1)', () => {
+  it('answers a restricted deck and a deck that does not exist with one status and one body', async () => {
+    const restore = setSecurityLogSink(() => undefined);
+    const previous = bindAuthorize({
+      loadRecord: (deckId) => Promise.resolve(deckId === DECK ? recordBy('anon_owner') : null),
+    });
+    try {
+      const id = 'anon_7e2f0000-0000-4000-8000-000000000000';
+      const stranger = {
+        ctx: contextForIdentity(id),
+        principalId: id,
+        identity: id,
+        kind: 'anonymous',
+        record: null,
+      } as RequestIdentity;
+      const restricted = await shareGetFor(stranger, DECK);
+      expect(restricted).toEqual({ ok: false, status: 404, body: { error: 'not_found' } });
+      expect(await shareGetFor(stranger, 'no-such-deck-xyz')).toEqual(restricted);
     } finally {
       bindAuthorize(previous);
       setSecurityLogSink(restore);

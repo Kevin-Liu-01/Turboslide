@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, rmSync, rmdirSync, statSync } from 'node:fs';
 import { statfs } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -387,23 +388,46 @@ export async function templateDir(templateId: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------------------------
+// The ids of new decks (security hotfix H3, DATA-V1). A deck the studio makes from a browser
+// (the draft of /new, deck.create, deck.copy, a bundle upload) is named by 128 random bits, never
+// by the slug of its title or four characters of `Math.random`: the slug ids were a dictionary
+// away from every deck on the store, and a day's drafts were 1,679,616 ids. The title lives in the
+// manifest; the templates and the seed deck keep their slugs.
+
+/** The length of a new deck's id: 26 lower case base32 characters carrying 128 random bits. */
+export const DECK_ID_RANDOM_LENGTH = 26;
+
+const BASE32 = 'abcdefghijklmnopqrstuvwxyz234567';
+
+/** A new deck's id: 16 random bytes in lower case base32, a slug that names nothing guessable. */
+export function newDeckId(bytes: Uint8Array = randomBytes(16)): string {
+  let bits = 0;
+  let value = 0;
+  let out = '';
+  for (const byte of bytes) {
+    // at most 12 bits are pending after a byte, so 12 are kept
+    value = ((value << 8) | byte) & 0xfff;
+    bits += 8;
+    while (bits >= 5) {
+      out += BASE32[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += BASE32[(value << (5 - bits)) & 31];
+  return out;
+}
+
 // The fresh presentation (gslides-parity SPEC 6.1): /new edits a draft the store has not seen,
 // under an id of this shape, and the first write creates the deck under that id.
 
-/** `untitled-<yyyymmdd>-<4 chars>`: the id a draft takes and the store gains on its first write. */
-export const DRAFT_ID_PATTERN = /^untitled-\d{8}-[a-z0-9]{4}$/;
+/** `untitled-<yyyymmdd>-<26 base32 characters>`: a draft's id, the store's on its first write. */
+export const DRAFT_ID_PATTERN = /^untitled-\d{8}-[a-z2-7]{26}$/;
 
-const DRAFT_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-/** A fresh draft id for the day; two tabs on /new get two ids (SPEC 6.1). */
+/** A fresh draft id: the day, then 128 random bits (H3); two tabs on /new get two ids (SPEC 6.1). */
 export function newDraftDeckId(now: Date = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   const day = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}`;
-  let tail = '';
-  for (let i = 0; i < 4; i += 1) {
-    tail += DRAFT_ALPHABET[Math.floor(Math.random() * DRAFT_ALPHABET.length)] ?? 'a';
-  }
-  return `untitled-${day}-${tail}`;
+  return `untitled-${day}-${newDeckId()}`;
 }
 
 /** True for an id of the draft shape; with `hasStoredDeck` false it names a draft nothing has saved. */

@@ -441,8 +441,8 @@ const judged = judgedBefore.filter((row) => !tierRowsApart.includes(row));
 /**
  * The scratch decks under a decks folder: every folder git does not track (`git ls-files` from
  * the repository), or, when git does not answer, every folder named like a run's deck
- * (`e2e-*`, `untitled-*`, `scratch-*`, `<template>-<date>-<suffix>`). A tracked deck (the GT
- * brand deck, the fixture, the templates) is never scratch.
+ * (`e2e-*`, `untitled-*`, `scratch-*`, `<template>-<date>-<suffix>`, a random id). A tracked deck
+ * (the GT brand deck, the fixture, the templates) is never scratch.
  */
 export function scratchDecks(dir = DECKS_DIR) {
   if (!existsSync(dir)) return [];
@@ -460,7 +460,8 @@ export function scratchDecks(dir = DECKS_DIR) {
     );
     return folders.filter((name) => !tracked.has(name));
   }
-  const runDeck = /^(e2e-|untitled-|scratch-|[a-z-]+-\d{8}-[a-z0-9]{4}$)/;
+  // a new deck's id is 26 random base32 characters since security hotfix H3 (DATA-V1)
+  const runDeck = /^(e2e-|untitled-|scratch-|[a-z-]+-\d{8}-[a-z0-9]{4}$|[a-z2-7]{26}$)/;
   return folders.filter((name) => runDeck.test(name));
 }
 

@@ -14,7 +14,7 @@ import type {
   DeckHead,
   TrashState,
 } from '@turboslide/store/templates';
-import { StaleRevisionError, deckIdFor } from '@turboslide/store/templates';
+import { StaleRevisionError } from '@turboslide/store/templates';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind } from '@turboslide/viewer/model';
@@ -392,7 +392,11 @@ export const getHostingFacts = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HostingFacts> => hostingFacts(),
 );
 
-/** `from` is a built in id or any id of the template index (docs/archive/rounds/PRODUCT.md 4.3); createDeck refuses an unknown one naming the index. */
+/**
+ * `from` is a built in id or any id of the template index (docs/archive/rounds/PRODUCT.md 4.3);
+ * createDeck refuses an unknown one naming the index. `id` is accepted from an older page and
+ * ignored: a new deck's id is random (H3, DATA-V1).
+ */
 export type CreateDeckInput = { name: string; from: DeckTemplateId | string; id?: string };
 
 function isTemplateId(value: unknown): value is string {
@@ -461,11 +465,12 @@ const createDeckFn = createServerFn({ method: 'POST' })
       transport: 'window',
     });
     // the record of SPEC-3 6.1 first, then the deck (H3, DATA-V3): restricted, the creator its
-    // owner; a caller with no identity is refused, and no deck is ever made without its record
-    const { createWithRecord } = await import('./access');
-    const deckId = deckIdFor({ ...data, name: data.name.trim() });
-    const { made } = await createWithRecord(deckId, ctx, () =>
-      createStoredDeck({ ...data, id: deckId }),
+    // owner; a caller with no identity is refused, and no deck is ever made without its record.
+    // The id is 128 random bits whatever the page sent (H3, DATA-V1): a slug of the title was
+    // guessable, and a taken one answered "exists already" for a deck the caller may not read
+    const { createWithFreshId } = await import('./access');
+    const { made } = await createWithFreshId(ctx, (deckId) =>
+      createStoredDeck({ name: data.name, from: data.from, id: deckId }),
     );
     return made;
   });
@@ -577,10 +582,9 @@ const copyDeckFn = createServerFn({ method: 'POST' })
       ...(data.copyComments === true ? { copyComments: true } : {}),
     };
     // the copy is a new deck: its record first, restricted, the copier its owner (SPEC-3 6.1;
-    // VERIFICATION-3 finding 4; H3, DATA-V3)
-    const { createWithRecord } = await import('./access');
-    const newId = deckIdFor({ name: data.name, from: 'blank' });
-    const { made } = await createWithRecord(newId, ctx, () =>
+    // VERIFICATION-3 finding 4; H3, DATA-V3), under a fresh random id (H3, DATA-V1)
+    const { createWithFreshId } = await import('./access');
+    const { made } = await createWithFreshId(ctx, (newId) =>
       mapStale(async () => (await ensureDecks()).copy({ ...input, newId }, data.baseRevision)),
     );
     return made;

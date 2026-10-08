@@ -493,11 +493,6 @@ type CardMenuState = { deckId: string; anchor: HTMLElement };
 // ---------------------------------------------------------------------------------------------
 // The page
 
-/** The id a GT brand deck copy takes: unique per click, so the card works more than once. */
-function gtBrandDeckId(now: Date = new Date()): string {
-  return `gt-brand-${now.getTime().toString(36)}`;
-}
-
 /** The words of the page Round 1 added (docs/NEXT.md 4.1.3 item 10), in the page's own module. */
 export const DECKS_PAGE = {
   name: 'Name',
@@ -781,11 +776,8 @@ function HomePage() {
     if (creating) return;
     setCreating(true);
     try {
-      const created = await createNewDeck({
-        name: HOME.gtBrand,
-        from: 'gt-brand',
-        id: gtBrandDeckId(),
-      });
+      // the server names the copy with a random id (H3, DATA-V1), so the card works every click
+      const created = await createNewDeck({ name: HOME.gtBrand, from: 'gt-brand' });
       recordDeckOpened(created.deckId);
       await navigate({ to: '/edit/$deckId', params: { deckId: created.deckId } });
     } catch (error) {

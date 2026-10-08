@@ -162,8 +162,8 @@ test('the first write from /new can be undone and the address stays on the saved
   /* the deck is created and the address moves without a route change */
   await expect
     .poll(() => page.url(), { timeout: 30_000 })
-    .toMatch(/\/edit\/untitled-\d{8}-[a-z0-9]{4}/);
-  const deckId = /\/edit\/(untitled-\d{8}-[a-z0-9]{4})/.exec(page.url())![1]!;
+    .toMatch(/\/edit\/untitled-\d{8}-[a-z2-7]{26}/);
+  const deckId = /\/edit\/(untitled-\d{8}-[a-z2-7]{26})/.exec(page.url())![1]!;
   createdDrafts.push(deckId);
   await allChangesSaved(page);
   const saved = await state(page);

@@ -17,7 +17,7 @@ import type { Page } from '@playwright/test';
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECKS = join(ROOT, 'decks');
-const DRAFT_ID = /^untitled-\d{8}-[a-z0-9]{4}$/;
+const DRAFT_ID = /^untitled-\d{8}-[a-z2-7]{26}$/;
 
 /** The draft decks on disk: the spec's own and any a visit left behind (there must be none). */
 function draftDecks(): string[] {

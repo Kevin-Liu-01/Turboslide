@@ -393,7 +393,7 @@ test.describe.serial('the dither pipeline in the editor', () => {
 /** Removes the run's deck from a file store's decks/ folder (a tmp overlay holds nothing here). */
 async function removeDitherDeck(page: Page): Promise<void> {
   const id = /\/edit\/([^/?#]+)/.exec(page.url())?.[1];
-  if (id === undefined || !/^untitled-\d{8}-[a-z0-9]{4}$/.test(decodeURIComponent(id))) return;
+  if (id === undefined || !/^untitled-\d{8}-[a-z2-7]{26}$/.test(decodeURIComponent(id))) return;
   const deckId = decodeURIComponent(id);
   /* the room writes the folder again with its checkpoint (SPEC-3 0.8): wait until every write
      is covered before the folder goes */

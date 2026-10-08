@@ -99,6 +99,16 @@ before the deck (`createWithRecord`: the draft's first save, `deck.create`, `dec
 picture or logo on a draft), a request with no identity creates nothing (401), and a record is
 never written over a deck the store already holds. `share.claim` is the admin's alone.
 
+The ids of new decks are 128 random bits (security hotfix H3, DATA-V1; `server/root.ts`
+`newDeckId`, 26 lower case base32 characters): the draft of /new (`untitled-<yyyymmdd>-<26>`),
+`deck.create`, `deck.copy` and a bundle upload, whatever id the page sends; a taken id is passed
+over for another fresh one and never named. The templates and the seed deck keep their slugs, and
+the deployment's admin may still name an id on the agent surface. A deck a caller may not read
+and a deck that does not exist answer the same status and body on every route and server
+function: the decision runs before the store is asked whether the deck exists (the stream, ops,
+presence and ticket routes, `deckRevision`), the record loader answers null for a missing deck
+(one 404 from `decide()`), and `share.requestAccess` answers its one sentence for both.
+
 Where the call sits: every server function of `decks.ts`, `download.ts`, `bundle.ts`, `render.ts`
 and `agent-actions.ts`; the routes `/api/actions/*`, `/api/render/*`, `/api/export/*`, the bundle
 routes and `/api/x/*`; the assets route through the page's `assetBase`. B2's `write.ts`,

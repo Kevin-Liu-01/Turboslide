@@ -695,7 +695,8 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
   const { document } = loadDeckDir(dir);
   const now = new Date();
   let deckId = newDraftDeckId(now);
-  // the four characters make a collision unlikely; a saved deck under the id is skipped anyway
+  // 128 random bits make a collision a non event (H3, DATA-V1); a saved deck under the id is
+  // skipped anyway
   while (await hasStoredDeck(deckId)) deckId = newDraftDeckId(now);
   const stamp = now.toISOString();
   const defaultKit = readDefaultKit(decks.decksDir);

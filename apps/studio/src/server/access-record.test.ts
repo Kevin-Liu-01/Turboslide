@@ -19,7 +19,9 @@ import type { VersionRecord } from '@turboslide/store/store';
 
 import {
   DeckIdTakenError,
+  FRESH_ID_ATTEMPTS,
   HELD_LINK_READS,
+  createWithFreshId,
   createWithRecord,
   creatorFromRecords,
   creatorOf,
@@ -240,6 +242,47 @@ describe('createWithRecord (H3, DATA-V3)', () => {
       createWithRecord('q4-review', anonymousContext(), async () => ({}), w.deps),
     ).rejects.toMatchObject({ status: 401 });
     expect(w.store.records.size).toBe(0);
+  });
+});
+
+describe('createWithFreshId (H3, DATA-V1)', () => {
+  const OWNER = contextForIdentity('anon_7e2f0000-0000-4000-8000-000000000000');
+
+  it('passes over an id the store holds for a fresh one, and never names the deck it passed', async () => {
+    const decks = new Set(['taken-one']);
+    const store = memoryAccessStore();
+    const ids = ['taken-one', 'fresh-two'];
+    const made: string[] = [];
+    const out = await createWithFreshId(
+      OWNER,
+      async (deckId) => {
+        made.push(deckId);
+        decks.add(deckId);
+        return { deckId };
+      },
+      {
+        newId: () => ids.shift() ?? 'never',
+        deps: { has: async (id) => decks.has(id), store: async () => store, now: NOW },
+      },
+    );
+    expect(out.deckId).toBe('fresh-two');
+    expect(made).toEqual(['fresh-two']);
+    expect(store.records.has('taken-one')).toBe(false);
+  });
+
+  it('gives up after a few taken ids rather than looping', async () => {
+    const store = memoryAccessStore();
+    let asked = 0;
+    await expect(
+      createWithFreshId(OWNER, async () => ({}), {
+        newId: () => {
+          asked += 1;
+          return 'always-taken';
+        },
+        deps: { has: async () => true, store: async () => store, now: NOW },
+      }),
+    ).rejects.toBeInstanceOf(DeckIdTakenError);
+    expect(asked).toBe(FRESH_ID_ATTEMPTS);
   });
 });
 

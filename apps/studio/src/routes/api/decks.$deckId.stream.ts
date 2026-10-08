@@ -102,6 +102,11 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const identity = await requestIdentity(request);
   const cookieHeaders: Record<string, string> =
     identity.setCookie === undefined ? {} : { 'set-cookie': identity.setCookie };
+  // the decision before the room's open (H3, DATA-V1): one refusal for a deck the caller may not
+  // read and one that does not exist, and no room opened for either
+  const decision = await decideFor(identity, deckId, 'read', 'stream');
+  if (!decision.ok)
+    return jsonResponse(denialBody(decision, 'read'), decision.status, cookieHeaders);
   let room;
   try {
     room = await roomFor(deckId);
@@ -110,9 +115,6 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       return jsonResponse({ error: 'not_found' }, 404, cookieHeaders);
     throw error;
   }
-  const decision = await decideFor(identity, deckId, 'read', 'stream');
-  if (!decision.ok)
-    return jsonResponse(denialBody(decision, 'read'), decision.status, cookieHeaders);
   const url = new URL(request.url);
   // the id is minted before the cap is judged so the slot is counted under it, and the tab's
   // earlier ids release their slots on this instance first (C3-F1: a reload or a reconnect

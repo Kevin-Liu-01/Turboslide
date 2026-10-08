@@ -971,18 +971,29 @@ function registerHostedDeckActions(
   // a deck this caller creates or copies gets its record first (SPEC-3 6.1; VERIFICATION-3
   // finding 4; H3, DATA-V3): restricted, the caller its owner, written before the deck so a
   // failed record write leaves no deck. A request with no identity creates nothing; a dispatcher
-  // built outside a request (the CLI's rule, a unit test) makes the deck without a record
-  const recorded = async <T>(deckId: string, make: () => Promise<T>): Promise<T> => {
+  // built outside a request (the CLI's rule, a unit test) makes the deck without a record. The
+  // id (H3, DATA-V1): on a hosted store 128 random bits, unless the deployment's admin names one
+  // (the bootstrap bearer's `deck.create --id`); on a checkout's file store the id named or the
+  // slug of the name, the CLI's rule
+  const explicitIds = !isHosted() || creator?.principal?.admin === true;
+  const made = async <T>(
+    named: string | undefined,
+    slug: () => string,
+    make: (deckId: string) => Promise<T>,
+  ): Promise<T> => {
     if (creator === null) {
       if (requestBound)
         throw new DeniedError(
           401,
           denialBody({ ok: false, status: 401, code: 'unauthorized' }, 'write'),
         );
-      return make();
+      return make(named ?? slug());
     }
-    const { createWithRecord } = await import('./access');
-    return (await createWithRecord(deckId, creator, make)).made;
+    const { createWithFreshId, createWithRecord } = await import('./access');
+    const fixed = named !== undefined && explicitIds ? named : isHosted() ? undefined : slug();
+    if (fixed !== undefined)
+      return (await createWithRecord(fixed, creator, () => make(fixed))).made;
+    return (await createWithFreshId(creator, make)).made;
   };
   // deck.create lands in the store (HostedDecks.create is what createStoredDeck calls), not in
   // the instance's overlay the folder handler wrote to (docs/archive/status/EDITOR-DEPTH-STATUS.md section 10)
@@ -995,8 +1006,11 @@ function registerHostedDeckActions(
       await decks.templates.pull();
       from = readDefaultTemplateId(decks.decksDir);
     }
-    const id = deckIdFor({ ...given, name: given.name.trim(), from });
-    return recorded(id, () => decks.create({ ...given, from, id }));
+    return made(
+      given.id,
+      () => deckIdFor({ name: given.name.trim(), from }),
+      (id) => decks.create({ ...given, from, id }),
+    );
   });
   // the listing scoped to the caller (docs/NEXT.md 3.2 H2; server/deck-scope.ts): the admin
   // bearer and a checkout list the store, anyone else their own and shared decks; the collection
@@ -1011,12 +1025,11 @@ function registerHostedDeckActions(
   dispatcher.register('deck.copy', async (input) => {
     const { baseRevision, ...rest } = input as DeckCopyInput;
     await allowed(rest.id, 'copy', 'deck.copy');
-    const newId = deckIdFor({
-      name: rest.name.trim(),
-      from: 'blank',
-      ...(rest.newId !== undefined ? { id: rest.newId } : {}),
-    });
-    return recorded(newId, () => mapStale(() => decks.copy({ ...rest, newId }, baseRevision)));
+    return made(
+      rest.newId,
+      () => deckIdFor({ name: rest.name.trim(), from: 'blank' }),
+      (newId) => mapStale(() => decks.copy({ ...rest, newId }, baseRevision)),
+    );
   });
   dispatcher.register('deck.trash', async (input) => {
     const { id, baseRevision } = input as DeckIdInput;

@@ -49,7 +49,6 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const given = url.searchParams.get('client');
   if (given !== null && !CLIENT_ID_PATTERN.test(given))
     return jsonResponse({ error: 'invalid', message: 'client is a server issued client id' }, 400);
-  if (!(await hasStoredDeck(deckId))) return jsonResponse({ error: 'not_found' }, 404);
   // the hand off of 3.8 first (the Worker's `/health`, cached 60 s per instance): a Worker that is
   // off, unreachable or whose objects cannot reach this app names the blob tier here, which the
   // transport switches to after its 30 s of failed opens (VERIFICATION.md realtime pass 1 finding
@@ -66,6 +65,10 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const decision = await decideFor(identity, deckId, 'read', 'stream');
   if (!decision.ok)
     return jsonResponse(denialBody(decision, 'read'), decision.status, cookieHeaders);
+  // the store's word after the decision (H3, DATA-V1): a deck the caller may not read and one
+  // that does not exist answer the one refusal above
+  if (!(await hasStoredDeck(deckId)))
+    return jsonResponse({ error: 'not_found' }, 404, cookieHeaders);
   // a tab without a client id yet (a /new deck whose first write made it, R2-C3) is minted one
   // here as the stream route mints at its open; a tab that holds one refreshes its own alone
   if (given !== null && !clientIdMatches(deckId, given, identity.identity)) {

@@ -5,6 +5,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES } from '@turboslide/store/bundle';
 
 import {
+  DeniedError,
   authorize,
   contextForIdentity,
   denialBody,
@@ -29,11 +30,13 @@ import { ensureDecks } from '../../server/root';
 // page's form), or `{ "url": "<stored copy>" }` as JSON, in which case the studio fetches the zip
 // from the deck store's Blob host (the way past a function's 4.5 MB request body cap). `?as=<id>`
 // names the deck id to write under and `?replace=1` removes the deck that holds it first; without
-// it a taken id gets a free sibling (`<id>-2`). The bundle is validated with validateDeck, every
-// digest is checked and every asset is scanned for its image type before a byte is written
-// (@turboslide/store/unpack); bodies are capped at 200 MB. The answer is the unpack result with
-// `editUrl`, 201 for a new deck and 200 for a replaced one, or the one error body of the agent
-// surface (400 for a refused bundle, 413 over the cap, 401 without the bearer).
+// it a taken id gets a free sibling (`<id>-2`). Since security hotfix H3 (DATA-V1) those two are
+// the deployment admin's: anyone else replaces only a deck they may write, and a new deck of
+// theirs takes a fresh random id with its record written first. The bundle is validated with
+// validateDeck, every digest is checked and every asset is scanned for its image type before a
+// byte is written (@turboslide/store/unpack); bodies are capped at 200 MB. The answer is the
+// unpack result with `editUrl`, 201 for a new deck and 200 for a replaced one, or the one error
+// body of the agent surface (400 for a refused bundle, 413 over the cap, 401 without the bearer).
 //
 // Authentication (SPEC 11): the bearer token when TURBOSLIDE_TOKEN is set, or the short-lived
 // ticket the studio's own page gets from the bundleUploadTicket server function (`?t=`), so the
@@ -175,13 +178,16 @@ export const Route = createFileRoute('/api/decks/bundle')({
         const url = new URL(request.url);
         const options = optionsOf(url, read.body);
         if (options instanceof Response) return options;
-        // replacing a deck that exists needs `write` on it for the identity behind the ticket
-        if (
-          options.as !== undefined &&
-          options.replace &&
-          (await (await ensureDecks()).has(options.as))
-        ) {
-          const decision = await authorize(ctx, options.as, 'write', {
+        /* who names the deck (security hotfix H3, DATA-V1): the deployment's admin (the bootstrap
+           bearer, a checkout's holder) keeps `?as=` as it was; anyone else replaces only a deck
+           they may write, decided before the store is asked whether it exists, so a deck they may
+           not write and one that does not exist answer the one 404, and a new deck takes a fresh
+           random id, never `?as=` or the bundle's own id (whose "-2" sibling named the deck it
+           passed over) */
+        const admin = ctx.principal?.admin === true;
+        const replacing = options.as !== undefined && options.replace;
+        if (replacing && (!admin || (await (await ensureDecks()).has(options.as!)))) {
+          const decision = await authorize(ctx, options.as!, 'write', {
             action: 'deck.unpack',
             transport: 'route',
           });
@@ -189,22 +195,27 @@ export const Route = createFileRoute('/api/decks/bundle')({
             return Response.json(denialBody(decision, 'write'), { status: decision.status });
         }
         try {
-          const result = await importDeckBundle(read.zip, options);
           // the deck a bundle upload makes is the uploader's, as a deck.create or deck.copy is its
-          // caller's (server/decks.ts, actions.ts registerHostedDeckActions record()): without the
-          // record decide() synthesized the legacy open record, the uploader stood on the copy as
-          // editor by open access, and enforce refused their deck.trash and deck.remove, so the
-          // Open and Import slides copies stayed on the shared store (return/build/b4.md, the fix
-          // round, request 1; VERIFICATION.md R1-F2). A replaced deck keeps its record.
-          if (!result.replaced) {
-            const { recordNewDeck } = await import('../../server/access');
-            await recordNewDeck(result.deckId, ctx);
-          }
+          // caller's (return/build/b4.md, the fix round, request 1; VERIFICATION.md R1-F2), with
+          // its record written first (H3, DATA-V3); a replaced deck keeps its record
+          const { createWithFreshId, recordNewDeck } = await import('../../server/access');
+          let result: Awaited<ReturnType<typeof importDeckBundle>>;
+          if (replacing || admin) {
+            result = await importDeckBundle(read.zip, options);
+            if (!result.replaced) await recordNewDeck(result.deckId, ctx);
+          } else
+            result = (
+              await createWithFreshId(ctx, (deckId) =>
+                importDeckBundle(read.zip, { as: deckId, replace: false }),
+              )
+            ).made;
           return Response.json(result, {
             status: result.replaced ? 200 : 201,
             headers: { location: result.editUrl, 'cache-control': 'no-store' },
           });
         } catch (error) {
+          if (error instanceof DeniedError)
+            return Response.json(error.body, { status: error.status });
           const message = error instanceof Error ? error.message : String(error);
           if (error instanceof TypeError) return badRequest(message);
           if (error instanceof RangeError) return refuse(404, 'unknown_deck', message);

@@ -69,6 +69,17 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const caps = checkPostCaps(parsed.data.entries.length, body.bytes);
   if (!caps.ok) return jsonResponse({ error: caps.reason, message: caps.message }, caps.status);
   const identity = await requestIdentity(request);
+  // the decision before the room's open (H3, DATA-V1): a deck the caller may not write and one
+  // that does not exist answer the one refusal
+  const hasEdits = parsed.data.entries.some((entry) => entry.kind === 'edit');
+  const hasComments = parsed.data.entries.some((entry) => entry.kind === 'comment');
+  const decision = await decideFor(identity, deckId, hasEdits ? 'write' : 'comment', 'ops');
+  if (!decision.ok)
+    return jsonResponse(denialBody(decision, hasEdits ? 'write' : 'comment'), decision.status);
+  if (hasEdits && hasComments) {
+    const comment = await decideFor(identity, deckId, 'comment', 'ops');
+    if (!comment.ok) return jsonResponse(denialBody(comment, 'comment'), comment.status);
+  }
   let room;
   try {
     room = await roomFor(deckId);
@@ -80,15 +91,6 @@ async function serve(request: Request, deckId: string): Promise<Response> {
     if (busy !== null)
       return jsonResponse(busy.body, busy.status, { 'retry-after': String(busy.retryAfterS) });
     throw error;
-  }
-  const hasEdits = parsed.data.entries.some((entry) => entry.kind === 'edit');
-  const hasComments = parsed.data.entries.some((entry) => entry.kind === 'comment');
-  const decision = await decideFor(identity, deckId, hasEdits ? 'write' : 'comment', 'ops');
-  if (!decision.ok)
-    return jsonResponse(denialBody(decision, hasEdits ? 'write' : 'comment'), decision.status);
-  if (hasEdits && hasComments) {
-    const comment = await decideFor(identity, deckId, 'comment', 'ops');
-    if (!comment.ok) return jsonResponse(denialBody(comment, 'comment'), comment.status);
   }
   let result: Awaited<ReturnType<typeof admitOps>>;
   try {

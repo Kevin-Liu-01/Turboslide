@@ -210,7 +210,7 @@ try {
   await editorReady(A);
   const before = await invoke(A, 'deck.info');
   deckId = before.id;
-  step(/^untitled-\d{8}-[a-z0-9]{4}$/.test(deckId), 'the draft has an untitled id', deckId);
+  step(/^untitled-\d{8}-[a-z2-7]{26}$/.test(deckId), 'the draft has an untitled id', deckId);
   step(
     (await state(A)).sync?.connected === false,
     'a draft is not connected before its first write',

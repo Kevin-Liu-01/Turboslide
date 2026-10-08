@@ -1,6 +1,7 @@
 import type { AccessRecord } from '@turboslide/schema/access';
 import type { ActionId } from '@turboslide/schema/actions';
 import {
+  REQUEST_ACCESS_ANSWER,
   accessRecordSchema,
   capabilitiesForRole,
   legacyAssetKey,
@@ -55,6 +56,7 @@ import {
   exportBlobClient,
   hasStoredDeck,
   isSeedDeck,
+  newDeckId,
   openDeckStore,
   stateDir,
   storeSelection,
@@ -777,6 +779,35 @@ export async function createWithRecord<T>(
   }
 }
 
+/** How many fresh ids a create tries before it gives up (128 random bits that collide are a fault). */
+export const FRESH_ID_ATTEMPTS = 3;
+
+/**
+ * `createWithRecord` under a fresh random id (H3, DATA-V1): the ids of new decks are never
+ * guessable, and an id the store or another principal's record already holds is passed over for
+ * another fresh one instead of naming the existing deck to the caller.
+ */
+export async function createWithFreshId<T>(
+  ctx: AuthContext,
+  make: (deckId: string) => Promise<T>,
+  options: { newId?: () => string; deps?: CreateWithRecordDeps } = {},
+): Promise<{ made: T; recorded: RecordedDeck; deckId: string }> {
+  for (let attempt = 1; ; attempt += 1) {
+    const deckId = (options.newId ?? newDeckId)();
+    try {
+      const { made, recorded } = await createWithRecord(
+        deckId,
+        ctx,
+        () => make(deckId),
+        options.deps,
+      );
+      return { made, recorded, deckId };
+    } catch (error) {
+      if (!(error instanceof DeckIdTakenError) || attempt >= FRESH_ID_ATTEMPTS) throw error;
+    }
+  }
+}
+
 /** The capabilities a role holds on a record (SPEC-3 6.2), as the editor and `share.get` list them. */
 export function capabilitiesOf(role: Role | null, record: AccessRecord): Capability[] {
   if (role === null) return [];
@@ -1131,6 +1162,10 @@ export async function shareWriteFor(
   if (!decision.ok && action !== 'share.requestAccess') {
     return { ok: false, status: decision.status, body: denialBody(decision, capability) };
   }
+  // the one sentence for a deck that exists and one that does not (SPEC-3 6.5; H3, DATA-V1: the
+  // dispatcher's open of a missing deck answered "No deck", which named the others)
+  if (!decision.ok && !(await hasStoredDeck(deckId)))
+    return { ok: true, value: { ok: true, message: REQUEST_ACCESS_ANSWER } };
   // the record functions of apps/cli/src/records/access.ts over `hostedAccessHooks`, registered
   // on the deck dispatcher by server/actions.ts with the request's identity as the caller (the
   // integrator at merge 2, b2.md R8): one implementation for this route, the window, HTTP and MCP

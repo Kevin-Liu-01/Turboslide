@@ -22,7 +22,7 @@ import { setAdvancedTools } from './advanced-tools';
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECKS = join(ROOT, 'decks');
-const DRAFT_ID = /^untitled-\d{8}-[a-z0-9]{4}$/;
+const DRAFT_ID = /^untitled-\d{8}-[a-z2-7]{26}$/;
 
 function draftDecks(): string[] {
   if (!existsSync(DECKS)) return [];

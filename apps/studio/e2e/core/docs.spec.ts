@@ -93,6 +93,24 @@ async function hydrated(page: Page): Promise<void> {
   await page.locator('[data-control="docs"][data-hydrated]').waitFor({ timeout: 120_000 });
 }
 
+/**
+ * Waits out the router's view transition after a client navigation: while its snapshots fade the
+ * document reads up to a scrollbar's width wider than the window.
+ */
+async function settled(page: Page): Promise<void> {
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every(
+        (animation) =>
+          !(
+            animation.effect instanceof KeyframeEffect &&
+            (animation.effect.pseudoElement ?? '').startsWith('::view-transition')
+          ),
+      ),
+  );
+}
+
 /** The facts of one docs view that the page row judges. */
 type View = {
   bar: number;
@@ -116,6 +134,10 @@ type View = {
   shadows: string[];
   scrollbar: number;
   sideScroll: boolean;
+  /** how far the document runs past the window, in px (0 when it fits) */
+  overflow: number;
+  /** short inline code and kept words (mdx.tsx `Code`) drawn over two lines */
+  brokenCode: string[];
 };
 
 async function viewOf(page: Page): Promise<View> {
@@ -196,6 +218,10 @@ async function viewOf(page: Page): Promise<View> {
       shadows,
       scrollbar: window.innerWidth - document.documentElement.clientWidth,
       sideScroll: side?.classList.contains('pt-scroll') ?? false,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      brokenCode: [...document.querySelectorAll('code.is-short, code > .ts-docs-keep')]
+        .filter((element) => element.getClientRects().length > 1)
+        .map((element) => element.textContent ?? ''),
     };
   });
 }
@@ -259,6 +285,8 @@ function judgeView(
   }
   if (view.shadows.length > 0) faults.push(`shadows ${view.shadows.slice(0, 3).join('; ')}`);
   if (!view.sideScroll) faults.push('the sidebar is not .pt-scroll');
+  if (view.overflow > 0) faults.push(`the document is ${view.overflow} px wider than the window`);
+  if (view.brokenCode.length > 0) faults.push(`code over two lines: ${view.brokenCode.join(', ')}`);
   return faults.map((fault) => `${url} at ${width}: ${fault}`);
 }
 
@@ -289,6 +317,7 @@ row('help.docs.page', async () => {
         await expect(page.locator('.ts-docs-title')).toHaveText(pages[at]?.title ?? '', {
           timeout: 60_000,
         });
+        await settled(page);
         const view = await viewOf(page);
         faults.push(...judgeView(view, width, url, at === 0, at === pages.length - 1));
         if (at === 0) {
@@ -319,6 +348,27 @@ row('help.docs.page', async () => {
         await expect(sheet).toBeHidden();
       }
     }
+  /* no page scrolls sideways at 320 and 768 either (1440 and 390 are read above) */
+  for (const width of [320, 768]) {
+    const page = await open(width, 'light');
+    await page.goto(pages[0]?.url ?? '/docs');
+    await hydrated(page);
+    for (const [at, { url, title: name }] of pages.entries()) {
+      if (at > 0) {
+        await page.locator('[data-control="docs.next"]').click();
+        await page.waitForURL((address) => address.pathname.replace(/\/$/, '') === url, {
+          timeout: 60_000,
+        });
+      }
+      await expect(page.locator('.ts-docs-title')).toHaveText(name, { timeout: 60_000 });
+      await settled(page);
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      if (overflow > 0)
+        faults.push(`${url} at ${width}: the document is ${overflow} px wider than the window`);
+    }
+  }
   /* a miss under /docs: the docs layout with the three closest pages, 404 */
   const miss = await open(1440, 'light');
   const response = await miss.goto('/docs/editr');

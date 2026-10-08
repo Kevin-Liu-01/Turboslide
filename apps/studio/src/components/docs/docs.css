@@ -192,6 +192,9 @@
 .ts-docs-article {
   min-width: 0;
   max-width: 640px;
+  /* a word longer than its line (an action name in a heading, a long code token) breaks inside
+     it, so no page scrolls sideways at 320 px; a table keeps its widths and scrolls in its box */
+  overflow-wrap: break-word;
 }
 
 .ts-docs-head {
@@ -334,11 +337,19 @@
   font-weight: 600;
 }
 
+/* inline code: code of 24 characters or fewer (`.is-short`, a flag such as `--deck <dir>`) stays
+   on one line, and in longer code a word of 24 characters or fewer (`.ts-docs-keep`, mdx.tsx)
+   stays whole, so no line ends after a flag's hyphens; a longer word breaks where its line ends */
 .ts-docs-body-text :not(pre) > code {
   padding: 1px 5px;
   border-radius: var(--pt-radius-sm);
   background: var(--pt-plate);
   font: 0.875em/1 var(--pt-mono);
+}
+
+.ts-docs-body-text :not(pre) > code.is-short,
+.ts-docs-body-text :not(pre) > code > .ts-docs-keep {
+  white-space: nowrap;
 }
 
 .ts-docs-body-text hr {

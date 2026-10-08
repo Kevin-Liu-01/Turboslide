@@ -262,6 +262,33 @@ function Pre(props: ComponentProps<'pre'>) {
   );
 }
 
+/**
+ * Inline code (docs.css): code of 24 characters or fewer, a flag such as `--deck <dir>`, stays on
+ * one line; in longer code each word of 24 characters or fewer stays whole, so a line never ends
+ * after a flag's hyphens. A code block (its text ends in a newline) is left as it is.
+ */
+const KEEP = 24;
+
+function Code(props: ComponentProps<'code'>) {
+  const text = props.children;
+  if (typeof text !== 'string' || text.includes('\n')) return <code {...props} />;
+  if (text.length <= KEEP)
+    return <code {...props} className={`${props.className ?? ''} is-short`.trim()} />;
+  return (
+    <code {...props}>
+      {text.split(/(\s+)/).map((part, at) =>
+        part !== '' && part.length <= KEEP && !/\s/.test(part) ? (
+          <span key={at} className="ts-docs-keep">
+            {part}
+          </span>
+        ) : (
+          part
+        ),
+      )}
+    </code>
+  );
+}
+
 function Table(props: ComponentProps<'table'>) {
   return (
     <div className="ts-docs-table pt-scroll-x">
@@ -281,6 +308,7 @@ function Anchor(props: ComponentProps<'a'>) {
 export const DOCS_COMPONENTS: MdxComponents = {
   a: Anchor as ComponentType<ComponentProps<'a'>>,
   pre: Pre,
+  code: Code,
   table: Table,
   Callout,
   Steps,

@@ -30,7 +30,8 @@ import { extraHTTPHeaders, title } from '../lib';
 // served, brotli)"): on a Vite dev server the route chunk, the page's CSS files and brotli do not
 // exist as shipped, so those lines read "not read: a dev server" and the row fails there; it is
 // read on the node-server output of scripts/check.mjs or on the preview. Times are read at a one
-// minute load under 20 (measure rows); above it the reading is recorded "not read: load".
+// minute load under 20 (measure rows); above it the reading is recorded "not read: load". The LCP's
+// times are the preview's and are recorded "not read: a local server" on this machine.
 
 export const ROWS: readonly string[] = [
   'home.page.order',
@@ -234,6 +235,18 @@ const brotli = (bytes: Buffer): number =>
 function measureLoad(): { load: number; read: boolean } {
   const load = Math.round((loadavg()[0] ?? 0) * 10) / 10;
   return { load, read: load < MEASURE_LOAD_LINE };
+}
+
+/**
+ * A server on this machine (localhost, 127.0.0.1, [::1] or a .localhost name). The LCP lines are
+ * the preview's (the row: "on the preview"): a local server shares the machine's cores with the
+ * browser and with other jobs, and one cold load read 516 and 752 ms at a load of 19.9 where
+ * another run read 140 ms (polish two P2-V1.4 finding 5), so on a local server the times are
+ * recorded and not judged. The guard reads them on the preview at its own load.
+ */
+function isLocalServer(page: Page): boolean {
+  const host = new URL(page.url()).hostname;
+  return ['localhost', '127.0.0.1', '[::1]'].includes(host) || host.endsWith('.localhost');
 }
 
 /* ---- the byte lines of home.budget.bytes-first and bytes-page (LANDING.md 4.1, 7 questions 21 and
@@ -2074,7 +2087,8 @@ export function rows(): void {
 
   test(title('home.budget.lcp'), async ({ browser }) => {
     test.setTimeout(240_000);
-    /* a measure row: the LCP element is the h1, never the hero's field; the time at a load under 20 */
+    /* a measure row: the LCP element is the h1, never the hero's field; the time on the preview at
+       a load under 20 (isLocalServer) */
     const failures: string[] = [];
     for (const [size, scale] of [
       [DESKTOP, 1],
@@ -2094,11 +2108,13 @@ export function rows(): void {
         const warm = await page.evaluate(
           () => (window as unknown as { __lcp: { ms: number; element: string } | null }).__lcp,
         );
-        const { load, read } = measureLoad();
+        const { load, read: quiet } = measureLoad();
+        const local = isLocalServer(page);
+        const read = quiet && !local;
         const label = `${size.width} x${scale}`;
         test.info().annotations.push({
-          type: read ? 'measure' : 'not read: load',
-          description: `${label}: LCP cold ${cold?.ms} ms on ${cold?.element}, warm ${warm?.ms} ms on ${warm?.element} (lines 400 and 200) at load ${load}`,
+          type: read ? 'measure' : local ? 'not read: a local server' : 'not read: load',
+          description: `${label}: LCP cold ${cold?.ms} ms on ${cold?.element}, warm ${warm?.ms} ms on ${warm?.element} (lines 400 and 200, the preview's) at load ${load}`,
         });
         if (!/^h1#ts-product-h1$/.test(cold?.element ?? ''))
           failures.push(`${label}: the LCP element is ${cold?.element}`);

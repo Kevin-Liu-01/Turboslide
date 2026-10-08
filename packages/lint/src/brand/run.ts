@@ -1,6 +1,7 @@
 // The brand lint over the tree (docs/NEXT.md 4.1.3 item 25): the files of LINT_ROOTS that git
 // tracks or would track (new files of a lane included, ignored files never), the source rules on
-// each script, the CSS rules on each stylesheet, the credits check over decks/ and
+// each script, the CSS rules on each stylesheet, css/chrome-alternates on the generated HTML and SVG
+// of ALTERNATES_ROOTS read as text, the credits check over decks/ and
 // apps/studio/public/, then the overrides and, in enforce mode, the acceptances of config.ts. The
 // rules of REPORT_RULES (empty since DR-D1#5, when the design round's five checks turned to
 // enforce) print their findings apart and never fail a run.
@@ -21,8 +22,8 @@ import {
 } from './config.ts';
 import type { Acceptance, BrandFinding, BrandLintMode, BrandRuleId } from './config.ts';
 import { checkCredits } from './credits.ts';
-import { lintCss } from './css.ts';
-import { lintSource } from './source.ts';
+import { lintAlternatesText, lintCss } from './css.ts';
+import { isAlternatesOnly, lintSource } from './source.ts';
 
 export type BrandLintOptions = {
   /** the tree's root */
@@ -47,7 +48,7 @@ export type BrandLintOptions = {
 export type BrandLintResult = {
   mode: BrandLintMode;
   /** how many files each part read */
-  read: { scripts: number; stylesheets: number; pictures: number };
+  read: { scripts: number; stylesheets: number; texts: number; pictures: number };
   /** every finding after the overrides, the reported ones included */
   findings: BrandFinding[];
   /** the findings of a report-only rule: printed, never failing */
@@ -67,6 +68,7 @@ export type BrandLintResult = {
 const SCRIPT = /\.(?:[cm]?[jt]sx?)$/;
 const isPicture = (file: string): boolean => CREDITS.pictures.test(file);
 const STYLESHEET = /\.css$/;
+const TEXT = /\.(?:html|svg)$/;
 
 /** The files git tracks or would track under `paths`, that exist on disk. */
 export function listFiles(root: string, paths: readonly string[]): string[] {
@@ -192,6 +194,7 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
   const findings: BrandFinding[] = [];
   let scripts = 0;
   let stylesheets = 0;
+  let texts = 0;
   for (const file of files) {
     const text = read(file);
     if (text === null) continue;
@@ -201,6 +204,9 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
     } else if (STYLESHEET.test(file)) {
       stylesheets += 1;
       findings.push(...lintCss(file, text, rules));
+    } else if (TEXT.test(file) && isAlternatesOnly(file)) {
+      texts += 1;
+      findings.push(...lintAlternatesText(file, text, rules));
     }
   }
   let pictures = 0;
@@ -237,7 +243,7 @@ export function runBrandLint(options: BrandLintOptions): BrandLintResult {
       : { accepted: [], open: judged, stale: [] };
   return {
     mode,
-    read: { scripts, stylesheets, pictures },
+    read: { scripts, stylesheets, texts, pictures },
     findings: all,
     reported,
     accepted: split.accepted,
@@ -257,7 +263,7 @@ export function formatBrandLint(result: BrandLintResult): string[] {
   for (const f of result.open) count.set(f.rule, (count.get(f.rule) ?? 0) + 1);
   const files = new Set(result.open.map((f) => f.file)).size;
   lines.push(
-    `brand lint (${result.mode} mode): ${result.read.scripts} scripts, ${result.read.stylesheets} stylesheets and ${result.read.pictures} mood pictures read; ${result.open.length} open finding(s) in ${files} file(s), ${result.accepted.length} accepted, ${result.stale.length} stale acceptance(s), ${result.broken.length} file(s) that do not parse`,
+    `brand lint (${result.mode} mode): ${result.read.scripts} scripts, ${result.read.stylesheets} stylesheets, ${result.read.texts} HTML and SVG files and ${result.read.pictures} mood pictures read; ${result.open.length} open finding(s) in ${files} file(s), ${result.accepted.length} accepted, ${result.stale.length} stale acceptance(s), ${result.broken.length} file(s) that do not parse`,
   );
   for (const [rule, n] of [...count.entries()].sort()) lines.push(`  ${rule}: ${n}`);
   if (result.reported.length > 0) {

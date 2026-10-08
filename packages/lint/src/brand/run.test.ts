@@ -162,8 +162,15 @@ describe('the brand lint run', () => {
   test("a run on a commit reads git's objects, not the working tree", () => {
     const files = ['packages/viewer/src/BookView.css', 'packages/chrome/src/ToolButton.tsx'];
     const result = runBrandLint({ root: ROOT, mode: 'report', ref: 'HEAD', files });
-    expect(result.read).toEqual({ scripts: 1, stylesheets: 1, pictures: 0 });
+    expect(result.read).toEqual({ scripts: 1, stylesheets: 1, texts: 0, pictures: 0 });
     expect(result.broken).toEqual([]);
+  });
+
+  test('the generated brand HTML and SVG are read as text by css/chrome-alternates', () => {
+    const files = ['packages/theme/brand/og-template.html', 'packages/theme/brand/wordmark.svg'];
+    const result = runBrandLint({ root: ROOT, mode: 'enforce', files, accepted: [] });
+    expect(result.read).toEqual({ scripts: 0, stylesheets: 0, texts: 2, pictures: 0 });
+    expect(result.findings).toEqual([]);
   });
 
   test('the configured mode is enforce, and every acceptance names its owner and its reason', () => {

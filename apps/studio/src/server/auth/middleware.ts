@@ -2,8 +2,9 @@
 // SPEC-3 7.1): `principalMiddleware()` joins `requestMiddleware` in apps/studio/src/start.ts
 // ahead of the CSRF middleware (b3.md request R3). It reads the cookie, mints one when the
 // request carries none and no bearer, and sets it through the framework so the header lands on
-// whatever response the handler returns. Routes and server functions read the principal with
-// `readPrincipal(getRequest(), secret)` from session.ts; nothing is put on the request context.
+// whatever response the handler returns. Routes and server functions read the principal through
+// room.ts `requestIdentity` (authorize.ts `requestContext` for the server functions), which takes
+// the principal bound here before the cookie; nothing is put on the request context.
 import { createMiddleware } from '@tanstack/react-start';
 import { setCookie } from '@tanstack/react-start/server';
 

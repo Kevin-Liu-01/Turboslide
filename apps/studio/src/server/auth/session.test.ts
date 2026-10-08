@@ -5,7 +5,6 @@ import {
   ANON_COOKIE_INSECURE,
   ANON_COOKIE_MAX_AGE_S,
   anonymousCookieName,
-  authContextFor,
   ensurePrincipal,
   expireAnonymousCookie,
   isSecureRequest,
@@ -167,18 +166,6 @@ describe('readPrincipal and ensurePrincipal', () => {
     expect(await ensurePrincipal(agent, SECRET)).toBeNull();
   });
 
-  test('authContextFor carries the principal and no grants yet', async () => {
-    const value = await sealPrincipalCookie(ID, SECRET);
-    const ctx = await authContextFor(
-      request('https://x/', { cookie: `${ANON_COOKIE}=${value}` }),
-      SECRET,
-    );
-    expect(ctx).toEqual({ principal: { id: ID, kind: 'anonymous', admin: false }, linkGrants: [] });
-    expect(await authContextFor(request('https://x/'), SECRET)).toEqual({
-      principal: null,
-      linkGrants: [],
-    });
-  });
 });
 
 describe('the link grant cookie', () => {

@@ -8,6 +8,7 @@ import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { boundPrincipal } from '../../server/auth/session';
 import { authorize, authorizeMode, denialBody, requestContext } from '../../server/authorize';
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
@@ -151,11 +152,13 @@ export const Route = createFileRoute('/api/render/$slideId')({
             });
             if (!decision.ok)
               return Response.json(denialBody(decision, 'read'), { status: decision.status });
-            if (
-              authorizeMode() === 'enforce' &&
-              ctx.principal === null &&
-              ctx.agent === undefined
-            ) {
+            // a caller with no identity of its own: no cookie, or only the principal the request
+            // middleware minted for this very request (the context resolves it since H3, so the
+            // cookieless request the rule was written for is named here as before)
+            const ownIdentity =
+              ctx.agent !== undefined ||
+              (ctx.principal !== null && boundPrincipal(request)?.minted !== true);
+            if (authorizeMode() === 'enforce' && !ownIdentity) {
               logSecurityEvent({
                 event: 'http.403',
                 deckId,

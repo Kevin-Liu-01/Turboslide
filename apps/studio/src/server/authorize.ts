@@ -23,7 +23,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Author } from '@turboslide/schema/mutations';
 
 import { studioSessionSecret } from './auth/middleware';
-import { authContextFor, readLinkGrantCookie } from './auth/session';
+import { readLinkGrantCookie } from './auth/session';
 import { logSecurityEvent } from './log';
 import { deckDir } from './root';
 
@@ -42,9 +42,10 @@ import { deckDir } from './root';
  * (the checkout's record of SPEC-3 6.9, validated by the schema package) until B2's access store
  * of day five is bound through `bindAuthorize({ loadRecord })`; a deck without a record is the
  * legacy synthesis inside `decide()` (`open: editor`) until R8 sets `TURBOSLIDE_MISSING_RECORD`.
- * The request's identity comes from B3's sealed cookie (`authContextFor`) or the bootstrap
- * bearer, never from the body or a query parameter (SPEC-3 8.2: `?author=` and the body author are
- * refused on browser transports). Server only.
+ * The request's identity comes from `requestContext()` (the room's `requestIdentity`: the
+ * bootstrap bearer, the account session, the sealed anonymous cookie and the link grants), never
+ * from the body or a query parameter (SPEC-3 8.2: `?author=` and the body author are refused on
+ * browser transports). Server only.
  */
 
 export type { AccessRecord, AuthContext, Capability, Decision, Principal, Role, Scope, Via };
@@ -356,10 +357,16 @@ export function carriesBootstrapToken(request: Request, env: Env = process.env):
 }
 
 /**
- * The caller of a request (SPEC-3 6.2, 8.2): the bootstrap bearer as the admin agent, else the
- * anonymous principal of B3's sealed cookie, else a stranger. The account session, the exchanged
- * link grants and the API key records join through B3's `authContextFor` as they land. `request`
- * defaults to the request being served; outside one (a unit test) the answer is the stranger.
+ * The caller of a request (SPEC-3 6.2, 8.2), for the server functions and the routes that answer
+ * a Response: the context of `room.requestIdentity`, the one builder the room routes use (security
+ * hotfix H3, DATA-V4). The bootstrap bearer is the admin agent, a signed in browser is its account
+ * with its verified address and its aliases, an anonymous browser is its sealed cookie's principal
+ * (the one the request middleware minted for a first request included), each with the link grants
+ * of the principal record, the deck index and the grant cookie; anything else is a stranger.
+ * Before H3 this read the anonymous cookie alone, so in enforce mode a signed in owner was a
+ * stranger to `/deck/<id>`, rename, trash and every other server function. Nothing is minted here
+ * (the function has no answer to carry the cookie). `request` defaults to the request being
+ * served; outside one (a unit test) the answer is the stranger, and so is a failed resolution.
  */
 export async function requestContext(request?: Request): Promise<AuthContext> {
   let req = request;
@@ -370,44 +377,13 @@ export async function requestContext(request?: Request): Promise<AuthContext> {
       return anonymousContext();
     }
   }
-  if (carriesBootstrapToken(req)) {
-    const runId = req.headers.get('x-turboslide-author')?.trim() || undefined;
-    return bootstrapAgentContext('token', runId?.replace(/^agent:/, ''));
-  }
-  const request_ = req;
   try {
-    return await withLinkGrants(
-      await authContextFor(request_, studioSessionSecret()),
-      async (principalId) =>
-        unionLinkGrants(
-          await linkGrantsOf(principalId),
-          await cookieLinkGrants(request_, principalId),
-        ),
-    );
+    // room.ts imports this module, so the builder loads late
+    const { requestIdentity } = await import('./room');
+    return (await requestIdentity(req, { mint: false })).ctx;
   } catch {
     return anonymousContext();
   }
-}
-
-/**
- * The link grants a principal holds (SPEC-3 6.4): the exchange at `/s/<token>` writes them on the
- * principal record and `room.requestIdentity` reads them for the room routes, while the server
- * functions' `requestContext()` read the cookie alone (`authContextFor` answers no grants), so in
- * enforce mode a viewer who arrived by the View link was a stranger to `/deck/<id>` and to every
- * server function that authorizes through this path (the focus round's enforce run of
- * roles.spec.ts: `deck.view` denied `not_found` for the link holder; shadow mode's floor hid it).
- * The store is the room's, loaded late because room.ts imports this module; a store that cannot
- * be read leaves the grants empty, which is the refusal, never an admission.
- */
-async function linkGrantsOf(principalId: string): Promise<LinkGrant[]> {
-  let record: { linkGrants: LinkGrant[] } | null = null;
-  try {
-    const { principalStore } = await import('./room');
-    record = await principalStore().get(principalId);
-  } catch {
-    record = null;
-  }
-  return linkGrantsFor(principalId, record);
 }
 
 /**
@@ -471,16 +447,6 @@ export async function cookieLinkGrants(
     // the reads only refresh the cache; the decision reads the record either way
   }
   return grants;
-}
-
-/** The context with the principal's link grants loaded when it carries none; a stranger and a bearer pass through. */
-export async function withLinkGrants(
-  ctx: AuthContext,
-  load: (principalId: string) => Promise<readonly LinkGrant[]>,
-): Promise<AuthContext> {
-  if (ctx.principal === null || ctx.agent !== undefined || ctx.linkGrants.length > 0) return ctx;
-  const grants = await load(ctx.principal.id);
-  return grants.length === 0 ? ctx : { ...ctx, linkGrants: [...grants] };
 }
 
 /**

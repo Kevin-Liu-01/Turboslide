@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { Redis } from 'ioredis';
 
-import { authorize as bearerAuthorize } from '@turboslide/agent/http/auth';
+import { authorize as bearerAuthorize, requestRunId } from '@turboslide/agent/http/auth';
 import type { AuthContext, Principal, Role } from '@turboslide/identity/access';
 import { isPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import { markSpec } from '@turboslide/identity/marks';
@@ -541,15 +541,22 @@ export type RequestIdentityOptions = {
    * instance at once (docs/archive/rounds/PEOPLE.md 6.4); the routes between keep the row
    */
   freshIndex?: boolean;
+  /**
+   * mint an anonymous principal when the request carries none (default true). The server
+   * functions' `requestContext()` passes false: it has no answer to carry the cookie on, and the
+   * request middleware has already minted and bound the principal of every browser request.
+   */
+  mint?: boolean;
 };
 
 /**
- * The identity of a request on the room routes: the bearer as the bootstrap admin agent (SPEC-3
- * 0.23), else the account session when the deployment has an identity database (docs/archive/rounds/PEOPLE.md
- * 3.6: a signed in browser is its account on the editor boot, presence, ops, the stream, share,
- * access, notify, assist and the version authors, one id with the comments the actions transport
- * writes), else the sealed anonymous cookie (minted here when absent, so a stream opened before
- * the middleware ran still gets an id), else a stranger.
+ * The identity of a request, for the routes and the server functions alike (security hotfix H3,
+ * DATA-V4: `authorize.ts` `requestContext` is this function's `ctx`): the bearer as the bootstrap
+ * admin agent (SPEC-3 0.23), else the account session when the deployment has an identity
+ * database (docs/archive/rounds/PEOPLE.md 3.6: a signed in browser is its account on the editor
+ * boot, presence, ops, the stream, share, access, notify, assist and the version authors, one id
+ * with the comments the actions transport writes), else the sealed anonymous cookie (minted here
+ * when absent, so a stream opened before the middleware ran still gets an id), else a stranger.
  */
 export async function requestIdentity(
   request: Request,
@@ -559,7 +566,7 @@ export async function requestIdentity(
   if (request.headers.get('authorization') !== null) {
     const bearer = bearerAuthorize(request, process.env);
     if (bearer.ok) {
-      const ctx = bootstrapAgentContext(bearer.mode);
+      const ctx = bootstrapAgentContext(bearer.mode, requestRunId(request));
       return {
         ctx,
         principalId: null,
@@ -589,7 +596,7 @@ export async function requestIdentity(
   if (signedIn !== null) return signedIn;
   let principal: Principal | null = existing;
   let setCookie: string | undefined;
-  if (principal === null) {
+  if (principal === null && options.mint !== false) {
     const ensured = await ensurePrincipal(request, secret);
     if (ensured !== null) {
       principal = ensured.principal;

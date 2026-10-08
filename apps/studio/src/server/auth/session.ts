@@ -15,7 +15,7 @@
 // localhost. A dev server reached over plain http from another machine cannot set it, so the
 // name falls back to `ts_id` there with the same attributes minus `Secure`; the reader accepts
 // both names and the hosted deployment only ever sees the prefixed one.
-import type { AuthContext, LinkGrant, Principal } from '@turboslide/identity/access';
+import type { LinkGrant, Principal } from '@turboslide/identity/access';
 import { anonymousPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import { GRANT_ROLES } from '@turboslide/schema/access';
 
@@ -390,14 +390,4 @@ export function bindRequestPrincipal(request: Request, ensured: EnsuredPrincipal
 
 export function boundPrincipal(request: Request): EnsuredPrincipal | undefined {
   return BOUND.get(request);
-}
-
-/**
- * The AuthContext of a browser request for `decide()` (SPEC-3 6.2): the anonymous principal
- * from the cookie; the account session, the exchanged link grants and the bearer resolution
- * join in later stages (b3.md).
- */
-export async function authContextFor(request: Request, secret: string): Promise<AuthContext> {
-  const principal = await readPrincipal(request, secret);
-  return { principal, linkGrants: [] };
 }

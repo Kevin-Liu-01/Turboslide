@@ -26,7 +26,6 @@ import {
   requestContext,
   roleOf,
   shadowStanding,
-  withLinkGrants,
 } from './authorize';
 import type { AccessRecord, AuthContext, Capability } from './authorize';
 import { studioSessionSecret } from './auth/middleware';
@@ -303,8 +302,12 @@ describe('the shadow fallback role', () => {
 describe('the request context and the derived author (SPEC-3 8.2)', () => {
   it('is the stranger outside a request and with no cookie, the admin agent with the bearer, the cookie principal otherwise', async () => {
     expect(await requestContext()).toEqual(anonymousContext());
-    const bare = new Request('http://localhost:4333/x');
+    const bare = new Request('https://studio.example.test/x');
     expect(await requestContext(bare)).toEqual(anonymousContext());
+    /* the room routes' rule, now the server functions' as well (H3, DATA-V4): a cookieless
+       request the localhost rule admits is the checkout holder */
+    const local = await requestContext(new Request('http://localhost:4333/x'));
+    expect(local.agent?.tokenId).toBe('localhost');
     process.env.TURBOSLIDE_TOKEN = 'fake-bootstrap-token-for-the-test';
     try {
       const bearer = new Request('http://localhost:4333/x', {
@@ -337,16 +340,18 @@ describe('the request context and the derived author (SPEC-3 8.2)', () => {
     expect(ctx.agent).toBeUndefined();
   });
 
-  it('loads the link grants of a cookie principal for the server functions, and nothing for a stranger or a bearer (SPEC-3 6.4)', async () => {
+  it('loads the link grants of a cookie principal for the server functions, as the routes do (SPEC-3 6.4; H3)', async () => {
+    const { principalStore } = await import('./room');
+    const { newPrincipalRecord } = await import('@turboslide/identity/principal');
     const grants = [{ linkId: 'lnk_view01', deckId: 'q4-review', role: 'viewer' as const }];
-    const calls: string[] = [];
-    const load = async (id: string) => {
-      calls.push(id);
-      return grants;
-    };
-    const loaded = await withLinkGrants(STRANGER, load);
-    expect(loaded.linkGrants).toEqual(grants);
-    expect(calls).toEqual([STRANGER.principal!.id]);
+    await principalStore().put({ ...newPrincipalRecord(STRANGER.principal!.id), linkGrants: grants });
+    const sealed = await sealPrincipalCookie(STRANGER.principal!.id, studioSessionSecret());
+    const withCookie = new Request('https://studio.example.test/x', {
+      headers: { cookie: `__Host-ts_id=${sealed}` },
+    });
+    const loaded = await requestContext(withCookie);
+    expect(loaded.principal?.id).toBe(STRANGER.principal!.id);
+    expect(loaded.linkGrants).toEqual(expect.arrayContaining(grants));
     /* the grants make the difference between 404 and the viewer role on a restricted deck */
     bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'enforce' });
     expect(await authorize(loaded, 'q4-review', 'read')).toEqual({
@@ -358,14 +363,6 @@ describe('the request context and the derived author (SPEC-3 8.2)', () => {
       ok: false,
       status: 404,
     });
-    /* a context that carries grants, a stranger and a bearer are not loaded again */
-    expect(await withLinkGrants(loaded, load)).toBe(loaded);
-    expect(await withLinkGrants(anonymousContext(), load)).toEqual(anonymousContext());
-    const bearer = bootstrapAgentContext('token');
-    expect(await withLinkGrants(bearer, load)).toBe(bearer);
-    expect(calls).toHaveLength(1);
-    /* a loader that finds nothing leaves the context as it was */
-    expect(await withLinkGrants(STRANGER, async () => [])).toBe(STRANGER);
   });
 
   it('derives the author from the identity, never from the body', () => {

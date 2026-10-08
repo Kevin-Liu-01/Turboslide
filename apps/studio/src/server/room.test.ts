@@ -284,6 +284,30 @@ describe('the account session on the room routes', () => {
     expect((await resolvePrincipalId('usr_missing')).displayName).toBe('Deleted account');
   });
 
+  it('gives the server functions the context the routes read: the account, its address, its standing (H3, DATA-V4)', async () => {
+    const { authorize, bindAuthorize, requestContext } = await import('./authorize');
+    const { newDeckRecord } = await import('@turboslide/schema/access');
+    const { cookie, userId } = await signIn('maya@example.test');
+    const ctx = await requestContext(request('/_serverFn/decks', { cookie }));
+    const route = await requestIdentity(request('/api/decks/q4/presence', { cookie }));
+    expect(ctx).toEqual(route.ctx);
+    expect(ctx.principal).toMatchObject({
+      id: `usr_${userId}`,
+      kind: 'account',
+      email: 'maya@example.test',
+    });
+    /* before H3 the server functions read the anonymous cookie alone, and the owner of a deck
+       made on /new while signed in was a stranger to rename, trash and /deck/<id> */
+    const record = newDeckRecord('q4', `usr_${userId}`, 'q40000000000000000000a', '2026-10-08T00:00:00.000Z');
+    const previous = bindAuthorize({ loadRecord: async () => record });
+    try {
+      expect(await authorize(ctx, 'q4', 'trash')).toEqual({ ok: true, role: 'owner', via: 'owner' });
+      expect(await authorize(ctx, 'q4', 'read')).toMatchObject({ ok: true, role: 'owner' });
+    } finally {
+      bindAuthorize(previous);
+    }
+  });
+
   it('a request without a session is anonymous as before', async () => {
     const identity = await requestIdentity(
       request('/api/decks/q4/presence', { cookie: 'ts.session_token=nonsense' }),

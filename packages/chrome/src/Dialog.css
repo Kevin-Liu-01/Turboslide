@@ -177,6 +177,11 @@
   width: 100%;
 }
 
+/* a dropdown's trigger fills its field row as the select did (Select.css, docs/DROPDOWNS.md 3.7) */
+.ts-dialog .ts-dropdown-trigger {
+  width: 100%;
+}
+
 .ts-dialog input:disabled,
 .ts-dialog textarea:disabled {
   color: var(--pt-disabled);

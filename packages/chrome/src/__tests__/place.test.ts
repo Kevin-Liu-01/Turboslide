@@ -198,6 +198,77 @@ describe('placeOnce', () => {
   });
 });
 
+describe('the dropdown options (docs/DROPDOWNS.md 3.6)', () => {
+  /* a plate whose box follows the max-height and min-width place() writes, as a browser's does */
+  function listOf(width: number, height: number): HTMLElement {
+    const plate = plateOf(width, height);
+    Object.defineProperty(plate, 'offsetWidth', {
+      configurable: true,
+      get: () => Math.max(width, parseFloat(plate.style.minWidth) || 0),
+    });
+    Object.defineProperty(plate, 'offsetHeight', {
+      configurable: true,
+      get: () => Math.min(height, parseFloat(plate.style.maxHeight) || height),
+    });
+    return plate;
+  }
+
+  it('makes the list at least as wide as its trigger with matchWidth, and leaves a wider list alone', async () => {
+    const narrow = listOf(120, 200);
+    await placeOnce(anchorAt({ x: 100, y: 40, width: 260, height: 32 }), narrow, {
+      matchWidth: true,
+    });
+    expect(narrow.style.minWidth).toBe('260px');
+    const plain = listOf(120, 200);
+    await placeOnce(anchorAt({ x: 100, y: 40, width: 260, height: 32 }), plain);
+    expect(plain.style.minWidth).toBe('');
+  });
+
+  it('caps the fitted height at maxHeight, ten rows, and fits it to a shorter room', async () => {
+    const tall = listOf(200, 17 * 28 + 8);
+    const placed = await placeOnce(anchorAt({ x: 100, y: 40, width: 200, height: 32 }), tall, {
+      fit: true,
+      maxHeight: 288,
+    });
+    expect(placed).toMatchObject({ top: 74, side: 'below', maxHeight: 288 });
+    setViewport(1440, 300);
+    const short = listOf(200, 17 * 28 + 8);
+    const fitted = await placeOnce(anchorAt({ x: 100, y: 40, width: 200, height: 32 }), short, {
+      fit: true,
+      maxHeight: 288,
+    });
+    expect(fitted.maxHeight).toBe(300 - 74 - VIEWPORT_MARGIN);
+  });
+
+  it('flips the list above a trigger near the bottom, at the trigger left edge and inside the window', async () => {
+    setViewport(1440, 600);
+    const plate = listOf(200, 288);
+    const placed = await placeOnce(anchorAt({ x: 300, y: 500, width: 240, height: 32 }), plate, {
+      side: 'below',
+      align: 'start',
+      gap: 2,
+      fit: true,
+      matchWidth: true,
+      maxHeight: 288,
+    });
+    expect(placed).toMatchObject({ side: 'above', left: 300, top: 500 - 2 - 288 });
+    expect(plate.style.minWidth).toBe('240px');
+  });
+
+  it('keeps the list 8 px inside both edges at phone width', async () => {
+    setViewport(390, 844);
+    const plate = listOf(300, 200);
+    const placed = await placeOnce(anchorAt({ x: 16, y: 300, width: 358, height: 32 }), plate, {
+      fit: true,
+      matchWidth: true,
+      maxHeight: 288,
+    });
+    expect(plate.style.minWidth).toBe('358px');
+    expect(placed.left).toBeGreaterThanOrEqual(VIEWPORT_MARGIN);
+    expect(placed.left + 358).toBeLessThanOrEqual(390 - VIEWPORT_MARGIN);
+  });
+});
+
 describe('place', () => {
   it('writes the fixed position and data-place, follows the anchor, and stops on cleanup', async () => {
     let rect = { x: 100, y: 40, width: 80, height: 28 };

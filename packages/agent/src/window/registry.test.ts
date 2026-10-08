@@ -125,4 +125,87 @@ describe('window.turboslide.studio ownership', () => {
     expect(() => window.turboslide!.studio.set('nothing here', 1)).toThrow(RangeError);
     expect(() => window.turboslide!.studio.activate('list: Size')).toThrow(TypeError);
   });
+
+  it('reads and sets the shared dropdown by label and by id, one change per new value (docs/DROPDOWNS.md 3.11)', () => {
+    /* the DOM of packages/chrome/src/Select.tsx, closed: the listbox hidden right after its
+       trigger; a click on an option chooses, as the component's own listener does */
+    const root = mount(`
+      <span class="editor"></span>
+      <button type="button" role="combobox" aria-label="General access" aria-expanded="false"
+        aria-haspopup="listbox" aria-controls="mode-list" data-control="dialog.share.mode"
+        value="restricted">Restricted</button>
+      <div id="mode-list" role="listbox" hidden>
+        <div role="option" data-value="restricted" data-tip="Restricted" aria-selected="true"
+          data-control="dialog.share.mode.restricted">Restricted</div>
+        <div role="option" data-value="link" data-tip="Anyone with the link" aria-selected="false"
+          data-control="dialog.share.mode.link">Anyone with the link</div>
+        <div role="option" data-value="domain" data-tip="Your domain" aria-selected="false"
+          aria-disabled="true">Your domain</div>
+      </div>
+      <div role="group" aria-label="table: Border">
+        <button type="button" data-control="block.table.border.on" aria-pressed="true">On</button>
+        <button type="button" role="combobox" aria-label="table: Border weight"
+          aria-controls="weight-list" data-control="block.table.border.weight" value="1">1 pt</button>
+        <div id="weight-list" role="listbox" hidden>
+          <div role="option" data-value="1" data-tip="1 pt" aria-selected="true">1 pt</div>
+          <div role="option" data-value="2" data-tip="2 pt" aria-selected="false">2 pt</div>
+        </div>
+      </div>
+    `);
+    disposers.push(
+      registerStudioAutomation({ owner: 'editor' }, root.querySelector<HTMLElement>('.editor')),
+    );
+    const trigger = root.querySelector<HTMLButtonElement>('[data-control="dialog.share.mode"]')!;
+    const changes: string[] = [];
+    for (const option of root.querySelectorAll<HTMLElement>('[role="option"]')) {
+      option.addEventListener('click', () => {
+        const box = option.closest('[role="listbox"]')!;
+        const owner = root.querySelector<HTMLElement>(`[aria-controls="${box.id}"]`)!;
+        for (const row of box.querySelectorAll('[role="option"]'))
+          row.setAttribute('aria-selected', String(row === option));
+        owner.setAttribute('value', option.dataset.value ?? '');
+        changes.push(`${owner.dataset.control}=${option.dataset.value}`);
+      });
+    }
+    expect(matchControl('General access')).toBe(trigger);
+    expect(matchControl('dialog.share.mode')).toBe(trigger);
+    expect(listControls()).toEqual([
+      {
+        kind: 'select',
+        label: 'General access',
+        control: 'dialog.share.mode',
+        value: 'restricted',
+      },
+      { kind: 'select', label: 'table: Border', control: 'block.table.border', value: 'on' },
+      {
+        kind: 'select',
+        label: 'table: Border weight',
+        control: 'block.table.border.weight',
+        value: '1',
+      },
+    ]);
+    window.turboslide!.studio.set('dialog.share.mode', 'link');
+    expect(trigger.getAttribute('value')).toBe('link');
+    window.turboslide!.studio.set('dialog.share.mode', 'link');
+    window.turboslide!.studio.set('General access', 'Restricted');
+    expect(trigger.getAttribute('value')).toBe('restricted');
+    expect(changes).toEqual(['dialog.share.mode=link', 'dialog.share.mode=restricted']);
+    expect(() => window.turboslide!.studio.set('dialog.share.mode', 'public')).toThrow(
+      /"General access" control has no option "public"/,
+    );
+    expect(() => window.turboslide!.studio.set('dialog.share.mode', 'domain')).toThrow(
+      /option "domain" is disabled/,
+    );
+    /* the dropdown inside the Border group is a control of its own, never the group's option */
+    expect(matchControl('table: Border weight').getAttribute('role')).toBe('combobox');
+    window.turboslide!.studio.set('block.table.border.weight', 2);
+    expect(changes.at(-1)).toBe('block.table.border.weight=2');
+    setControlValue('table: Border', 'on');
+    expect(changes).toHaveLength(3);
+    /* activate() clicks the trigger, which opens its list */
+    let opened = 0;
+    trigger.addEventListener('click', () => (opened += 1));
+    window.turboslide!.studio.activate('General access');
+    expect(opened).toBe(1);
+  });
 });

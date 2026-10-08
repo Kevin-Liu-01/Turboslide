@@ -42,6 +42,10 @@ export type UsePlateOptions = {
   fit?: boolean;
   /** keeps the plate on its anchor while it is open; true when absent */
   follow?: boolean;
+  /** writes the plate's min-width from the anchor's width (a dropdown's list, DROPDOWNS.md 3.6) */
+  matchWidth?: boolean;
+  /** the largest max-height written, in px (a dropdown's ten rows) */
+  maxHeight?: number;
 };
 
 function samePlace(a: Placed | null, b: Placed): boolean {
@@ -63,7 +67,18 @@ export function usePlate(
   ref: RefObject<HTMLElement | null>,
   options: UsePlateOptions,
 ): Placed | null {
-  const { layer, anchor, open = true, side, align, gap, fit, follow } = options;
+  const {
+    layer,
+    anchor,
+    open = true,
+    side,
+    align,
+    gap,
+    fit,
+    follow,
+    matchWidth,
+    maxHeight,
+  } = options;
   useLayer(ref, { layer, open });
   const [placed, setPlaced] = useState<Placed | null>(null);
   useLayoutEffect(() => {
@@ -75,9 +90,11 @@ export function usePlate(
       ...(gap === undefined ? {} : { gap }),
       ...(fit === undefined ? {} : { fit }),
       ...(follow === undefined ? {} : { follow }),
+      ...(matchWidth === undefined ? {} : { matchWidth }),
+      ...(maxHeight === undefined ? {} : { maxHeight }),
       onPlace: (next) => setPlaced((last) => (samePlace(last, next) ? last : next)),
     });
-  }, [ref, anchor, open, side, align, gap, fit, follow]);
+  }, [ref, anchor, open, side, align, gap, fit, follow, matchWidth, maxHeight]);
   return open ? placed : null;
 }
 

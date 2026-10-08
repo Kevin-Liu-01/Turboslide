@@ -30,6 +30,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { inflateRawSync, inflateSync } from 'node:zlib';
 
+import { chooseOption } from '../../../apps/studio/e2e/choose-option.ts';
+
 /** Thrown by `setup()` on a failed setup step; `section()` turns it into the not driven cascade. */
 export class SetupFailed extends Error {
   constructor(stepName) {
@@ -129,6 +131,18 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   t.newPage = async () => {
     options?.expectPage?.();
     return context.newPage();
+  };
+  /**
+   * Chooses an option of the shared dropdown `control` the way a person does, through the one e2e
+   * helper (apps/studio/e2e/choose-option.ts; docs/DROPDOWNS.md 5.3): a click on the trigger, a
+   * click on the row whose data-value is `choice` (or whose label is `choice.label`), the list
+   * closed. On the editor it then waits for the deck to settle and returns the state; on a page
+   * with no window API (/print, /decks) it returns null.
+   */
+  t.chooseOption = async (control, choice) => {
+    await chooseOption(page, control, choice);
+    const editor = await page.evaluate(() => Boolean(window.turboslide?.studio)).catch(() => false);
+    return editor ? t.settled() : null;
   };
   /** The section running (`{ name, ids, driven }`) and the step running, for the stall record. */
   let current = null;

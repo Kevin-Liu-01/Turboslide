@@ -65,12 +65,15 @@ const TEXT_INPUT_TYPES: ReadonlySet<string> = new Set([
  * control that takes no text (the Tabular figures checkbox of Format options, a radio, a range)
  * is not a field: Cmd+Z from it reaches `edit.undo` through the key table, Google's behaviour
  * from the sidebar (the features round's fix round, VERIFICATION.md pass 1 F7; build/b1.md R6).
- * A `<select>` stays a field because its arrow keys are its own.
+ * A `<select>` stays a field because its arrow keys are its own, and so does the shared dropdown's
+ * trigger (`role="combobox"`, docs/DROPDOWNS.md 3.12): Backspace on it in Format options must
+ * not delete the selected object.
  */
 function isChromeField(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   if (target instanceof HTMLInputElement) return TEXT_INPUT_TYPES.has(target.type);
   if (target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return true;
+  if (target.getAttribute('role') === 'combobox') return true;
   if (target.isContentEditable && target.closest('.ts-sheet, .ts-stage') === null) return true;
   return false;
 }

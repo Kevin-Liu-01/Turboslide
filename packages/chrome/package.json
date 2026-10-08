@@ -28,6 +28,7 @@
     "./ToolButton": "./src/ToolButton.tsx",
     "./Tooltip": "./src/Tooltip.tsx",
     "./Seg": "./src/Seg.tsx",
+    "./Select": "./src/Select.tsx",
     "./Toolbar": "./src/Toolbar.tsx",
     "./InsertMenu": "./src/InsertMenu.tsx",
     "./Sidebar": "./src/Sidebar.tsx",

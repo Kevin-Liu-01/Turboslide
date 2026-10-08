@@ -196,13 +196,18 @@ export function chipLabel(slide: Slide, blockId: string): string {
   return type === undefined ? blockId : `${type} · ${blockId}`;
 }
 
-/** True when an event target is a field or an editable region; the shell keys are inert there (SPEC 6.9). */
+/**
+ * True when an event target is a field or an editable region; the shell keys are inert there (SPEC
+ * 6.9). The shared dropdown's trigger (`role="combobox"`, docs/DROPDOWNS.md 3.12) counts as the
+ * select it replaces did.
+ */
 export function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return (
     target.tagName === 'INPUT' ||
     target.tagName === 'TEXTAREA' ||
     target.tagName === 'SELECT' ||
+    target.getAttribute('role') === 'combobox' ||
     target.isContentEditable
   );
 }

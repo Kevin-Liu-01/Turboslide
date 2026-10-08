@@ -11,12 +11,17 @@
    mnemonics (3.1.1). Radius 0, no shadow, the fade over the fast duration; reduced motion drops
    it. The plate itself is tokens.css's .pt-float (the design round, docs/DESIGN.md 3.1, 3.2): paper,
    the --pt-edge frame, the 6 px corner and the ring with no blur or offset; the rows stay square,
-   the 4 px of padding above and below keeping them clear of the corners. Colors are tokens only. */
+   the 4 px of padding above and below keeping them clear of the corners. Colors are tokens only.
+   The dropdown's list and rows (Select.tsx, docs/DROPDOWNS.md 3.7) share these rules through
+   `.ts-dropdown-list` and `.ts-dropdown-option`, so a row's height, padding, colours, lit ground
+   and disabled ink stay in one place; the list never carries `.ts-menu` itself, because two
+   readers take a `.ts-menu` in the document for an open menu (InlineText.tsx, lint/chrome.ts). */
 .ts-menu-root {
   display: contents;
 }
 
-.ts-menu {
+.ts-menu,
+.ts-dropdown-list {
   position: fixed;
   box-sizing: border-box;
   width: max-content;
@@ -46,7 +51,8 @@
   background: var(--pt-hair-soft);
 }
 
-.ts-menu-item {
+.ts-menu-item,
+.ts-dropdown-option {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) auto;
   align-items: center;
@@ -65,7 +71,8 @@
    item 48: Paste, Cut and Insert row above read as hovered the moment the menu opened) */
 .ts-menu-item:hover,
 .ts-menu-item:focus-visible,
-.ts-menu-item.is-open {
+.ts-menu-item.is-open,
+.ts-dropdown-option.is-active {
   background: var(--pt-plate);
   color: var(--pt-ink);
 }
@@ -75,7 +82,8 @@
   outline-offset: -1px;
 }
 
-.ts-menu-item.is-disabled {
+.ts-menu-item.is-disabled,
+.ts-dropdown-option[aria-disabled='true'] {
   color: var(--pt-disabled);
   cursor: default;
 }
@@ -94,12 +102,14 @@
 }
 
 .ts-menu-item:hover .ts-menu-ic,
-.ts-menu-item:focus .ts-menu-ic {
+.ts-menu-item:focus .ts-menu-ic,
+.ts-dropdown-option.is-active .ts-menu-ic {
   color: var(--pt-ink);
 }
 
 .ts-menu-item.is-disabled .ts-menu-ic,
-.ts-menu-item.is-disabled .ts-menu-key {
+.ts-menu-item.is-disabled .ts-menu-key,
+.ts-dropdown-option[aria-disabled='true'] .ts-menu-ic {
   color: var(--pt-disabled);
 }
 
@@ -159,7 +169,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ts-menu {
+  .ts-menu,
+  .ts-dropdown-list {
     animation: none;
   }
 }

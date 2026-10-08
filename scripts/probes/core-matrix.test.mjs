@@ -76,6 +76,13 @@ const POLISH2_NOTE = /^Polish two \(docs\/POLISH-2\.md 6\), P2-[FNAD]#\d+[a-z]?\
 const POLISH2_RETIRED = [];
 const isPolish2Row = (row) => (row.note ?? '').startsWith('Polish two');
 
+/* The dropdown round (docs/DROPDOWNS.md 7.1): a row a push of the round entered carries a note
+   that starts "Dropdowns"; its rows follow polish two's at the end of the file. No row is
+   restated or retired. */
+const DROPDOWNS_NOTE = /^Dropdowns \(docs\/DROPDOWNS\.md 7\), DD-C#\d+[a-z]?\b/;
+const DROPDOWNS_RETIRED = [];
+const isDropdownsRow = (row) => (row.note ?? '').startsWith('Dropdowns');
+
 describe('the committed matrix', () => {
   it('loads with every row on the scheme and no duplicate id', () => {
     expect(CORE_MATRIX.length).toBeGreaterThan(300);
@@ -552,7 +559,10 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         DESIGN_RETIRED.filter((id) => !isCoreId(id)).length +
         /* polish two (docs/POLISH-2.md 6.1): each push enters its own rows; none retires */
         CORE_MATRIX.filter(isPolish2Row).length -
-        POLISH2_RETIRED.filter((id) => !isCoreId(id)).length,
+        POLISH2_RETIRED.filter((id) => !isCoreId(id)).length +
+        /* the dropdown round (docs/DROPDOWNS.md 7.1): DD-C#2 enters its eight rows; none retires */
+        CORE_MATRIX.filter(isDropdownsRow).length -
+        DROPDOWNS_RETIRED.filter((id) => !isCoreId(id)).length,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -1860,14 +1870,41 @@ describe('polish two', () => {
       }
       expect(isMeasureRow(row), row.id).toBe(false);
     }
-    /* the round's rows sit after every row that is not the round's, in push order */
+    /* the round's rows sit after every row that is not the round's, in push order; the dropdown
+       round's rows may follow them (docs/DROPDOWNS.md 7.1) */
     const first = CORE_MATRIX.findIndex(isPolish2Row);
     if (first >= 0)
-      expect(CORE_MATRIX.slice(first).every(isPolish2Row), 'polish two rows last').toBe(true);
+      expect(
+        CORE_MATRIX.slice(first).every((row) => isPolish2Row(row) || isDropdownsRow(row)),
+        'polish two rows last',
+      ).toBe(true);
     /* a restated row is not counted as entered */
     for (const row of CORE_MATRIX.filter((r) =>
       /(?:; restated|^Restated) in polish two, P2-/.test(r.note ?? ''),
     ))
       expect(isPolish2Row(row), row.id).toBe(false);
+  });
+});
+
+// The dropdown round (docs/DROPDOWNS.md 7): day 0 (DD-C#1) adds the count term above and lets the
+// round's rows follow polish two's; DD-C#2 enters the eight rows of 7.2 at the end of the file
+// with the round's note on a driver that exists. No row is restated or retired.
+describe('dropdowns', () => {
+  it('enters each row at the end with the round note, a known driver and the scheme', () => {
+    expect(DROPDOWNS_RETIRED).toEqual([]);
+    for (const row of CORE_MATRIX.filter(isDropdownsRow)) {
+      expect(row.note, row.id).toMatch(DROPDOWNS_NOTE);
+      expect(row.id, row.id).toMatch(CORE_ID_PATTERN);
+      expect(CORE_DRIVERS, row.id).toContain(row.driver);
+      expect(row.feature, row.id).toBe(
+        ROW_FEATURE[row.id] ?? AREA_FEATURE[areaOf(row.id)] ?? areaOf(row.id),
+      );
+      expect(isMeasureRow(row), row.id).toBe(false);
+      expect(row.measure, row.id).toBeUndefined();
+    }
+    /* the round's rows sit after every row that is not the round's */
+    const first = CORE_MATRIX.findIndex(isDropdownsRow);
+    if (first >= 0)
+      expect(CORE_MATRIX.slice(first).every(isDropdownsRow), 'dropdown rows last').toBe(true);
   });
 });

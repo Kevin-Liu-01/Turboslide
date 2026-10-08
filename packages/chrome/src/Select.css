@@ -1,0 +1,159 @@
+/* The dropdown (Select.tsx, docs/DROPDOWNS.md 3.7). The trigger is a field: the --pt-field
+   boundary, the 6 px corner, paper, ink in Inter with tabular figures, the sprite's chevron on the
+   right; 32 px for dialogs, panels and pages (`is-field`, the old tokens.css select rule) and 22 px
+   for the inspector's rows (`is-compact`, the old inspector select). A site's own class sets its
+   width, margin, or a row height of its own. The list and its rows are the menu's (Menu.css shares
+   `.ts-dropdown-list` and `.ts-dropdown-option` with `.ts-menu` and `.ts-menu-item`); this file
+   adds the list's height cap, the tabular figures of its rows, the description row and the
+   heading row. Every class carries the `ts-dropdown` prefix: `.ts-select` is the editor's
+   selection ring (Overlay.css). Colours are tokens only, so the dropdown draws the same in every
+   theme and follows both appearances. */
+.ts-dropdown {
+  display: contents;
+}
+
+.ts-dropdown-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  height: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  font-variant-numeric: var(--pt-numerals);
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+}
+
+.ts-dropdown-trigger.is-compact {
+  height: 22px;
+  min-height: 22px;
+  min-width: 96px;
+  max-width: 220px;
+  padding: 0 24px 0 8px;
+  font-size: 12px;
+}
+
+.ts-dropdown-trigger:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-dropdown-trigger:focus-visible,
+.ts-dropdown-trigger[aria-expanded='true'] {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-dropdown-trigger:disabled {
+  color: var(--pt-disabled);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
+}
+
+.ts-dropdown-value {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ts-dropdown-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ts-dropdown-trigger.is-placeholder .ts-dropdown-text {
+  color: var(--pt-titanium);
+}
+
+.ts-dropdown-trigger:disabled .ts-dropdown-text {
+  color: var(--pt-disabled);
+}
+
+.ts-dropdown-icon,
+.ts-dropdown-chevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--pt-ink-2);
+}
+
+.ts-dropdown-chevron {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.ts-dropdown-trigger.is-compact .ts-dropdown-chevron {
+  right: 5px;
+}
+
+.ts-dropdown-trigger:disabled .ts-dropdown-chevron {
+  color: var(--pt-disabled);
+}
+
+.ts-dropdown-icon svg,
+.ts-dropdown-chevron svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* the list: as wide as its longest row from its trigger's width (place() writes min-width, which
+   wins over this max-width when the trigger is wider) to 320 px; ten rows tall at most, longer
+   lists scroll in the shared scrollbar (tokens.css, no rule here) */
+.ts-dropdown-list {
+  min-width: 0;
+  max-height: 288px;
+}
+
+.ts-dropdown-list[hidden] {
+  display: none;
+}
+
+.ts-dropdown-option {
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-dropdown-option.has-description {
+  height: auto;
+  min-height: 28px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  row-gap: 2px;
+}
+
+.ts-dropdown-description {
+  grid-column: 2 / 4;
+  color: var(--pt-titanium);
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.ts-dropdown-group {
+  display: block;
+}
+
+.ts-dropdown-heading {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 12px 0 38px;
+  color: var(--pt-titanium);
+  font-size: 12px;
+}

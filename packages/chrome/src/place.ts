@@ -43,6 +43,14 @@ export type PlaceOptions = {
   margin?: number;
   /** writes the plate's max-height from the room on its side, never under 56 px */
   fit?: boolean;
+  /**
+   * writes the plate's min-width from the anchor's width, so a dropdown's list is never narrower
+   * than its trigger (docs/DROPDOWNS.md 3.6); the plate's own max-width yields to it, as CSS lets
+   * a min-width win over a smaller max-width
+   */
+  matchWidth?: boolean;
+  /** the largest max-height written, in px: with `fit` the room on the plate's side is capped by it */
+  maxHeight?: number;
   /** keeps the plate on its anchor while it scrolls or the window resizes; true when absent */
   follow?: boolean;
   /** called after each placement with where the plate went */
@@ -153,12 +161,20 @@ function middlewareOf(options: PlaceOptions): Middleware[] {
      (the font picker at 884 px from top 8, over its control; build/d2.md request 1). Before
      `shift` it writes the room on the side the plate took, the plate scrolls inside it, and
      `shift` then finds nothing to move on that axis. */
-  if (options.fit === true)
+  if (options.fit === true || options.matchWidth === true || options.maxHeight !== undefined)
     list.push(
       size({
         padding: margin,
-        apply({ availableHeight, elements }) {
-          elements.floating.style.maxHeight = `${Math.max(MIN_FIT_HEIGHT, Math.floor(availableHeight))}px`;
+        apply({ availableHeight, elements, rects }) {
+          const style = elements.floating.style;
+          if (options.fit === true) {
+            const room = Math.max(MIN_FIT_HEIGHT, Math.floor(availableHeight));
+            const cap = options.maxHeight;
+            style.maxHeight = `${cap === undefined ? room : Math.min(cap, room)}px`;
+          } else if (options.maxHeight !== undefined) style.maxHeight = `${options.maxHeight}px`;
+          /* the trigger's width as the list's least width (a dropdown, DROPDOWNS.md 3.6) */
+          if (options.matchWidth === true)
+            style.minWidth = `${Math.round(rects.reference.width)}px`;
         },
       }),
     );
@@ -186,7 +202,10 @@ export async function placeOnce(
     top: Math.round(result.y),
     placement: result.placement,
     side: sideOf(result.placement, result.middlewareData.phoneSubmenu?.under === true),
-    maxHeight: options.fit === true ? parseFloat(plate.style.maxHeight) || null : null,
+    maxHeight:
+      options.fit === true || options.maxHeight !== undefined
+        ? parseFloat(plate.style.maxHeight) || null
+        : null,
   };
   return placed;
 }

@@ -38,6 +38,7 @@ import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
 import type { MenuContext } from '@turboslide/chrome/menus/model';
 import { HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { NOTES_DEFAULT_HEIGHT, NotesPane } from '@turboslide/chrome/NotesPane';
+import { Select } from '@turboslide/chrome/Select';
 import type { SidebarEdit } from '@turboslide/chrome/Sidebar';
 import type { SnackbarAction } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
@@ -77,6 +78,7 @@ import { BookView } from '@turboslide/viewer/BookView';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
 import { PRESENCE_BATCH_MS, SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/realtime/protocol';
 import { Editor as StageEditor } from '@turboslide/viewer/Editor';
+import { SelectSlot } from '@turboslide/viewer/select-slot';
 import type { DragFrame } from '@turboslide/viewer/Editor';
 import type {
   EditorContextMenu,
@@ -2175,80 +2177,86 @@ function EditorStage({
   return (
     <>
       {editStage ? (
-        <StageEditor
-          document={snap.document}
-          slideId={slide.id}
-          /* the sheet draws the presentation's own appearance whatever the chrome's (docs/archive/rounds/POLISH.md
+        /* the stage's link popover draws its slide field with the chrome's dropdown, through the
+           slot the viewer declares (docs/DROPDOWNS.md 3.13): the viewer cannot import chrome */
+        <SelectSlot.Provider value={Select}>
+          <StageEditor
+            document={snap.document}
+            slideId={slide.id}
+            /* the sheet draws the presentation's own appearance whatever the chrome's (docs/archive/rounds/POLISH.md
              2.5 item 49; polish/build/b4.md R18: the Brand kit's Dark tile changes the slides and
              leaves the chrome light, as Google's theme does); the chrome's theme is the chrome's */
-          theme={deckAppearance(snap.document.deck)}
-          /* Tools > Preferences > Link detection reaches the stage (docs/archive/rounds/POLISH.md item 114) */
-          linkDetection={editorShell.settings.linkDetection !== false}
-          assetBase={ASSET_BASE(snap.deckId)}
-          stageSize={stageSize}
-          index={Math.max(0, shell.index)}
-          total={shell.total}
-          present={shell.present}
-          narrow={shell.narrow}
-          dispatch={controller.invoke}
-          /* the parked ways in of the vector round (docs/archive/rounds/VECTOR.md 4.8): a parked way is off */
-          parked={(id) => isParked(id, editorShell.settings)}
-          /* the objects round (docs/archive/rounds/OBJECTS.md 2.4; objects/build/b1.md request 1): the last gesture's
+            theme={deckAppearance(snap.document.deck)}
+            /* Tools > Preferences > Link detection reaches the stage (docs/archive/rounds/POLISH.md item 114) */
+            linkDetection={editorShell.settings.linkDetection !== false}
+            assetBase={ASSET_BASE(snap.deckId)}
+            stageSize={stageSize}
+            index={Math.max(0, shell.index)}
+            total={shell.total}
+            present={shell.present}
+            narrow={shell.narrow}
+            dispatch={controller.invoke}
+            /* the parked ways in of the vector round (docs/archive/rounds/VECTOR.md 4.8): a parked way is off */
+            parked={(id) => isParked(id, editorShell.settings)}
+            /* the objects round (docs/archive/rounds/OBJECTS.md 2.4; objects/build/b1.md request 1): the last gesture's
              frame record reaches describe().state.gesture through the controller */
-          onGesture={(report) => controller.setGestureRecord(report)}
-          /* the realtime round (docs/REALTIME.md 3.4 `drag`, 3.5; realtime/build/r2.md R2-R8):
+            onGesture={(report) => controller.setGestureRecord(report)}
+            /* the realtime round (docs/REALTIME.md 3.4 `drag`, 3.5; realtime/build/r2.md R2-R8):
              the viewer's move and resize sessions tell the dragged block's box at every preview
              frame and null at the release, reported as the presence `drag` field; the state
              that follows the release carries no drag, and the `pos` write lands as before */
-          onDragFrame={(frame) => controller.reportPresence({ drag: dragFieldOf(frame) })}
-          selection={toStageSelection(snap.selection, slide.id)}
-          onSelectionChange={(next) => controller.select(fromStageSelection(next, slide.id))}
-          onMultiSelectionChange={onMultiSelection}
-          findings={findings}
-          lintLayer={lintLayer}
-          overlay={(view) => <Overlay view={view} />}
-          onError={(error) => controller.say(errorMessage(error))}
-          onRemoved={(block) => editorShell.say(`${deletedWord(block.type)} deleted`, undoAction)}
-          zoom={snap.zoom}
-          zoomCenter={snap.zoomCenter}
-          onZoom={(zoom, center) => {
-            void controller
-              .invoke('view.zoom', { zoom, ...(center === undefined ? {} : { center }) })
-              .catch((error: unknown) => controller.say(errorMessage(error)));
-          }}
-          /* the canvas (SPEC-2 6.1 rows 29 to 31): the deck's guides, the View toggles, the snaps */
-          {...(snap.document.deck.guides !== undefined
-            ? { guides: snap.document.deck.guides }
-            : {})}
-          onGuides={(input) => {
-            const current = controller.getSnapshot();
-            void controller
-              .invoke('deck.guides', {
-                ...input,
-                baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
-              })
-              .catch((error: unknown) => controller.say(errorMessage(error)));
-          }}
-          showRuler={editorShell.settings.showRuler === true}
-          showGuides={editorShell.settings.showGuides === true}
-          snapGuides={editorShell.settings.snapGuides !== false}
-          snapGrid={editorShell.settings.snapGrid === true}
-          onCaret={onCaret}
-          tool={tool}
-          onToolDone={onToolDone}
-          showIds={editorShell.settings.showIds === true}
-          onContextMenu={(menu) => {
-            /* Delete guide reads the guide under the pointer from the shell (B3's plan fills `remove`) */
-            editorShell.setGuideUnderPointer(menu.target === 'guide' ? (menu.guide ?? null) : null);
-            setCanvasMenu(menu);
-          }}
-          onNotice={notice}
-          onUndo={() => void controller.undo()}
-          onRedo={() => void controller.redo()}
-          handle={onHandle}
-          clipboard={clipboardStore}
-          deckId={snap.deckId}
-        />
+            onDragFrame={(frame) => controller.reportPresence({ drag: dragFieldOf(frame) })}
+            selection={toStageSelection(snap.selection, slide.id)}
+            onSelectionChange={(next) => controller.select(fromStageSelection(next, slide.id))}
+            onMultiSelectionChange={onMultiSelection}
+            findings={findings}
+            lintLayer={lintLayer}
+            overlay={(view) => <Overlay view={view} />}
+            onError={(error) => controller.say(errorMessage(error))}
+            onRemoved={(block) => editorShell.say(`${deletedWord(block.type)} deleted`, undoAction)}
+            zoom={snap.zoom}
+            zoomCenter={snap.zoomCenter}
+            onZoom={(zoom, center) => {
+              void controller
+                .invoke('view.zoom', { zoom, ...(center === undefined ? {} : { center }) })
+                .catch((error: unknown) => controller.say(errorMessage(error)));
+            }}
+            /* the canvas (SPEC-2 6.1 rows 29 to 31): the deck's guides, the View toggles, the snaps */
+            {...(snap.document.deck.guides !== undefined
+              ? { guides: snap.document.deck.guides }
+              : {})}
+            onGuides={(input) => {
+              const current = controller.getSnapshot();
+              void controller
+                .invoke('deck.guides', {
+                  ...input,
+                  baseRevision: Math.max(current.document.deck.revision, current.serverRevision),
+                })
+                .catch((error: unknown) => controller.say(errorMessage(error)));
+            }}
+            showRuler={editorShell.settings.showRuler === true}
+            showGuides={editorShell.settings.showGuides === true}
+            snapGuides={editorShell.settings.snapGuides !== false}
+            snapGrid={editorShell.settings.snapGrid === true}
+            onCaret={onCaret}
+            tool={tool}
+            onToolDone={onToolDone}
+            showIds={editorShell.settings.showIds === true}
+            onContextMenu={(menu) => {
+              /* Delete guide reads the guide under the pointer from the shell (B3's plan fills `remove`) */
+              editorShell.setGuideUnderPointer(
+                menu.target === 'guide' ? (menu.guide ?? null) : null,
+              );
+              setCanvasMenu(menu);
+            }}
+            onNotice={notice}
+            onUndo={() => void controller.undo()}
+            onRedo={() => void controller.redo()}
+            handle={onHandle}
+            clipboard={clipboardStore}
+            deckId={snap.deckId}
+          />
+        </SelectSlot.Provider>
       ) : showTwin ? (
         <TwinStage
           slide={slide}

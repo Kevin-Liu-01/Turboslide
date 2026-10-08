@@ -4,7 +4,10 @@
 // and produce one action call. A missing label throws RangeError naming it. set() writes native
 // values and dispatches input and change (glyphfield studioAutomation.ts, setNativeValue) and, on
 // a segmented control (role="group": the inspector's Seg for an enum of four or fewer values,
-// SPEC 6.5), clicks the option whose data-control suffix or label is the value. Framework free.
+// SPEC 6.5), clicks the option whose data-control suffix or label is the value. On the shared
+// dropdown (a `role="combobox"` trigger with its `role="listbox"`, docs/DROPDOWNS.md 3.11) set()
+// clicks the option of the value in the list, which chooses through the component's own change in
+// the same call; controls() lists the dropdown as kind select with its value. Framework free.
 import type { StudioControl, StudioValue } from './adapter.ts';
 
 /** Ancestors that take a control and its owner out of the active set (SPEC 7.4). */
@@ -47,6 +50,11 @@ export function controlId(element: Element): string | undefined {
   return element.getAttribute('data-control') ?? undefined;
 }
 
+/** True for the shared dropdown's trigger (Select.tsx): a button with `role="combobox"`. */
+function isCombobox(element: Element): boolean {
+  return element.getAttribute('role') === 'combobox';
+}
+
 /** True for an owner or control element that is connected and under no inactive ancestor. */
 export function elementIsActive(element: Element | null | undefined): boolean {
   if (element === undefined) return true;
@@ -57,13 +65,18 @@ function isDisabled(element: Element): boolean {
   return element.hasAttribute('disabled') || element.getAttribute('aria-disabled') === 'true';
 }
 
-/** The active, enabled controls under root, in document order; options inside a group are left out. */
+/**
+ * The active, enabled controls under root, in document order; options inside a group are left
+ * out, and a dropdown inside a group (the table's Border group) is a control of its own.
+ */
 export function interactiveControls(root: ParentNode = document): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(CONTROL_SELECTOR)).filter(
     (element) =>
       !isDisabled(element) &&
       elementIsActive(element) &&
-      (element.getAttribute('role') === 'group' || element.closest('[role="group"]') === null),
+      (element.getAttribute('role') === 'group' ||
+        isCombobox(element) ||
+        element.closest('[role="group"]') === null),
   );
 }
 
@@ -71,9 +84,11 @@ function isGroup(element: Element): boolean {
   return element.getAttribute('role') === 'group';
 }
 
-/** The option buttons of a segmented control. */
+/** The option buttons of a segmented control; a dropdown inside the group is never one. */
 function groupOptions(group: Element): HTMLElement[] {
-  return Array.from(group.querySelectorAll<HTMLElement>('button, [role="button"]'));
+  return Array.from(group.querySelectorAll<HTMLElement>('button, [role="button"]')).filter(
+    (option) => !isCombobox(option),
+  );
 }
 
 function isPressed(option: Element): boolean {
@@ -159,8 +174,46 @@ function writeNative(
   element.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
-/** set() on a resolved element (glyphfield setNativeValue, plus the group case). */
+/** The options of a dropdown: the rows of the listbox its trigger's aria-controls names. */
+function comboboxOptions(element: Element): HTMLElement[] {
+  const id = element.getAttribute('aria-controls');
+  const list = id === null ? null : element.ownerDocument.getElementById(id);
+  return list === null ? [] : Array.from(list.querySelectorAll<HTMLElement>('[role="option"]'));
+}
+
+/**
+ * set() on a dropdown (DROPDOWNS.md 3.11): the option whose data-value is the value, else the one
+ * whose label is; a click on it chooses through the component in the same call. An option
+ * already chosen stays (no change, as a native select set to its own value); a missing or
+ * disabled one is a RangeError naming the control and the value.
+ */
+function setCombobox(element: HTMLElement, value: StudioValue): void {
+  const wanted = String(value);
+  const options = comboboxOptions(element);
+  const option =
+    options.find((row) => row.dataset.value === wanted) ??
+    options.find(
+      (row) =>
+        /* the row's label is its data-tip (a description line would join its text) */
+        normalizedLabel(row.getAttribute('data-tip') ?? row.textContent) ===
+        normalizedLabel(wanted),
+    );
+  if (option === undefined)
+    throw new RangeError(`The "${controlLabel(element)}" control has no option "${wanted}".`);
+  if (option.getAttribute('aria-disabled') === 'true')
+    throw new RangeError(
+      `The "${controlLabel(element)}" control's option "${wanted}" is disabled.`,
+    );
+  if (option.getAttribute('aria-selected') === 'true') return;
+  option.click();
+}
+
+/** set() on a resolved element (glyphfield setNativeValue, plus the group and dropdown cases). */
 export function setNativeValue(element: HTMLElement, value: StudioValue): void {
+  if (isCombobox(element)) {
+    setCombobox(element, value);
+    return;
+  }
   if (isGroup(element)) {
     const option = optionFor(element, value);
     if (!option) {
@@ -227,6 +280,9 @@ export function listControls(root: ParentNode = document): StudioControl[] {
       ];
     }
     const id = controlId(element);
+    /* the shared dropdown reads as the select it replaced, its value from its value attribute */
+    if (isCombobox(element))
+      return [withId({ kind: 'select', label, value: element.getAttribute('value') ?? '' }, id)];
     if (element instanceof HTMLInputElement && element.type === 'checkbox') {
       return [withId({ kind: 'checkbox', label, value: element.checked }, id)];
     }
@@ -243,7 +299,10 @@ export function listControls(root: ParentNode = document): StudioControl[] {
   });
 }
 
-/** activate(): clicks the control; on a group with one option per value, the caller wants set(). */
+/**
+ * activate(): clicks the control; on a group with one option per value, the caller wants set().
+ * A click on a dropdown's trigger opens its list.
+ */
 export function activateControl(labelOrId: string, root: ParentNode = document): void {
   const element = matchControl(labelOrId, root);
   if (isGroup(element)) {

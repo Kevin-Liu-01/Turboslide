@@ -10,7 +10,7 @@ import {
   typingEntry,
 } from '../keys';
 import type { EditorKeyContext, TypingEntryContext } from '../keys';
-import { escapeSelection } from '../Selection';
+import { escapeSelection, isEditableTarget } from '../Selection';
 
 // The stage's edit keys and the chrome's controls (this round): a key pressed on an inspector
 // button, a palette swatch, a field or a menu row is that control's, so Enter activates the
@@ -30,6 +30,7 @@ function tree(): { stage: HTMLElement; inspector: HTMLElement; overlay: HTMLElem
       <button type="button" data-control="block.p.fill.plate">plate</button>
       <span class="ts-ctl-color"><span data-control="block.p.fill.contrast">4.5:1</span></span>
       <select data-control="block.p.size"><option>22</option></select>
+      <button type="button" role="combobox" aria-label="p: Line end" data-control="block.p.end">None</button>
     </aside>
     <div role="menu" id="menu"><button type="button" role="menuitem">Box</button></div>
     <div role="listbox" id="filmstrip"><div role="option" tabindex="0" data-id="s1">1</div></div>
@@ -129,6 +130,18 @@ describe('isChromeControlTarget', () => {
     expect(isChromeControlTarget(select, stage)).toBe(true);
     expect(isChromeControlTarget(row, stage)).toBe(true);
     expect(isChromeControlTarget(card, stage)).toBe(true);
+  });
+
+  it('counts the shared dropdown trigger as a control and a field, as the select it replaces (docs/DROPDOWNS.md 3.12)', () => {
+    const { stage } = tree();
+    const dropdown = document.querySelector('[role="combobox"]');
+    expect(isChromeControlTarget(dropdown, stage)).toBe(true);
+    expect(isEditableTarget(dropdown)).toBe(true);
+    expect(isEditableTarget(document.querySelector('select'))).toBe(true);
+    /* a plain button is no field (jsdom leaves isContentEditable undefined, hence falsy) */
+    expect(
+      isEditableTarget(document.querySelector('[data-control="block.p.fill.plate"]')),
+    ).toBeFalsy();
   });
 
   it('is false for the body and the stage; an overlay handle counts as a control', () => {

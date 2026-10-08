@@ -35,6 +35,9 @@ function Host({ context, handlers }: { context: MenuContext; handlers: EditorKey
       <aside className="ts-panel">
         <input data-testid="field" aria-label="Width" />
         <input type="checkbox" data-testid="check" aria-label="Tabular figures" />
+        <button type="button" role="combobox" data-testid="dropdown" aria-label="Line end">
+          None
+        </button>
       </aside>
       <div className="ts-stagewrap ts-sheet ts-editor ts-stage">
         <p data-block="p">
@@ -205,6 +208,25 @@ describe('useEditorKeys and the indent chords', () => {
     const field = view.getByTestId('field');
     field.focus();
     fireEvent.keyDown(field, { key: 'b', metaKey: true });
+    expect(runItem).toHaveBeenCalledTimes(1);
+  });
+});
+
+// The shared dropdown's trigger (docs/DROPDOWNS.md 3.12): a field for the editor's keys, as the
+// select it replaces was, so Backspace on it in Format options never deletes the selected object
+// and the chords stay the field's.
+describe('useEditorKeys and the dropdown trigger', () => {
+  it('runs no row from a focused dropdown and leaves its keys unprevented', () => {
+    const runItem = vi.fn();
+    const view = render(<Host context={withText} handlers={handlers(runItem)} />);
+    const dropdown = view.getByTestId('dropdown');
+    dropdown.focus();
+    for (const key of ['Backspace', 'Delete', 'b']) {
+      expect(fireEvent.keyDown(dropdown, { key })).toBe(true);
+    }
+    expect(fireEvent.keyDown(dropdown, { key: 'b', metaKey: true })).toBe(true);
+    expect(runItem).not.toHaveBeenCalled();
+    fireEvent.keyDown(document.body, { key: 'b', metaKey: true });
     expect(runItem).toHaveBeenCalledTimes(1);
   });
 });

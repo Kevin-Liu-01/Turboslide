@@ -90,7 +90,7 @@ import {
   zeroCounters,
 } from './sql.ts';
 import type { Counters, EntryRow, Meta, MetaRow } from './sql.ts';
-import { verifyTicket } from './ticket.ts';
+import { verifyTicketRotating } from './ticket.ts';
 
 /** The headers the router stamps on what it forwards (index.ts). */
 export const CLAIMS_HEADER = 'x-turboslide-claims';
@@ -825,7 +825,7 @@ export class DeckRoom extends DurableObject<Env> {
       this.closeMember(member, CLOSE_CODES.forbidden, 'join refused: no origin');
       return;
     }
-    const verdict = await verifyTicket(ticket, this.env.TURBOSLIDE_ROOM_SECRET, {
+    const verdict = await verifyTicketRotating(ticket, this.ticketSecrets(), {
       deck: deckId,
       origin: member.origin,
       now,
@@ -877,7 +877,7 @@ export class DeckRoom extends DurableObject<Env> {
       this.closeMember(member, CLOSE_CODES.error, 'the room does not know its deck');
       return;
     }
-    const verdict = await verifyTicket(ticket, this.env.TURBOSLIDE_ROOM_SECRET, {
+    const verdict = await verifyTicketRotating(ticket, this.ticketSecrets(), {
       deck: deckId,
       origin: member.claims?.org ?? null,
       now,
@@ -2429,6 +2429,14 @@ export class DeckRoom extends DurableObject<Env> {
 
   // -------------------------------------------------------------------------------------------
   // The environment
+
+  /** The ticket secret and, while a rotation is in flight, the previous one (ticket.ts `verifyTicketRotating`). */
+  private ticketSecrets(): { current: string; previous: string | undefined } {
+    return {
+      current: this.env.TURBOSLIDE_ROOM_SECRET,
+      previous: this.env.TURBOSLIDE_ROOM_SECRET_PREVIOUS,
+    };
+  }
 
   private appOrigin(): string {
     return this.env.TURBOSLIDE_APP_ORIGIN.replace(/\/$/, '');

@@ -1,14 +1,15 @@
 // The identity database and where it comes from (gslides-parity SPEC-3 2.5, 7.3, 11.4;
 // research 03 D1, D2; docs/CLOUDFLARE.md 4.1, 4.2): D1 through the realtime Worker's bearer
 // routes behind `TURBOSLIDE_ACCOUNTS=d1` (the hosted engine of the Cloudflare move; the dialect
-// is d1-proxy-dialect.ts over `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_BEARER`, the channel's
-// pair), Postgres behind `DATABASE_URL` (a self hosted Postgres; the dialect is Kysely's over `pg`
+// is d1-proxy-dialect.ts over `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`, or the room
+// bearer where the database bearer is not set yet), Postgres behind `DATABASE_URL` (a self hosted
+// Postgres; the dialect is Kysely's over `pg`
 // and is exercised against the SQLite engine's behaviour and the schema builder only; never set on
 // either Vercel project this round), `node:sqlite` behind `TURBOSLIDE_AUTH_DB` on a checkout, and
 // none otherwise, in which case the studio runs anonymous only and the Sign in row is absent
 // (7.3). One place decides, from the environment alone, in the shape of `selectStore` and
 // `selectRealtime`, and never prints a URL or a bearer: `DATABASE_URL` carries a password and the
-// room bearer reaches the whole account database (CLOUDFLARE.md 3.3). The `d1` kind says nothing
+// database bearer reaches the account database (CLOUDFLARE.md 3.3, AUTH-3). The `d1` kind says nothing
 // about the realtime tier: a server may run `TURBOSLIDE_ACCOUNTS=d1` with `TURBOSLIDE_REALTIME`
 // forced to `memory` (the hand row of CLOUDFLARE.md 2.1).
 import { mkdirSync } from 'node:fs';
@@ -20,6 +21,7 @@ import pg from 'pg';
 
 import {
   D1ProxyDialect,
+  DB_BEARER_VARIABLE,
   ROOM_BEARER_VARIABLE,
   ROOM_HOST_VARIABLE,
   ROOM_INSECURE_VARIABLE,
@@ -52,9 +54,15 @@ function isSet(value: string | undefined): value is string {
   return value !== undefined && value !== '';
 }
 
+/** The bearer the D1 proxy sends: the database bearer, else the room bearer (a Worker before AUTH-3's rotation takes it). */
+export function dbBearerOf(env: Env): string {
+  const own = env[DB_BEARER_VARIABLE];
+  return isSet(own) ? own : (env[ROOM_BEARER_VARIABLE] ?? '');
+}
+
 /**
  * The engine for this process: D1 through the Worker when `TURBOSLIDE_ACCOUNTS=d1` (it needs
- * `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_BEARER`, else a TypeError at the first request in
+ * `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER` or `TURBOSLIDE_ROOM_BEARER`, else a TypeError at the first request in
  * the shape of the SQLite refusal; the bearer is read at open time and never kept in the
  * selection), Postgres when `DATABASE_URL` is set, SQLite when `TURBOSLIDE_AUTH_DB` names a file
  * (relative to `root`, the repository root or the overlay), none otherwise. A hosted process may
@@ -73,9 +81,9 @@ export function selectAuthDb(
         `${ACCOUNTS_VARIABLE} takes ${ACCOUNTS_D1} and nothing else, not ${JSON.stringify(accounts)}`,
       );
     const host = env[ROOM_HOST_VARIABLE];
-    if (!isSet(host) || !isSet(env[ROOM_BEARER_VARIABLE]))
+    if (!isSet(host) || dbBearerOf(env) === '')
       throw new TypeError(
-        `${ACCOUNTS_VARIABLE}=${ACCOUNTS_D1} needs ${ROOM_HOST_VARIABLE} and ${ROOM_BEARER_VARIABLE}, the realtime Worker's host and bearer (docs/CLOUDFLARE.md 4.2)`,
+        `${ACCOUNTS_VARIABLE}=${ACCOUNTS_D1} needs ${ROOM_HOST_VARIABLE} and ${DB_BEARER_VARIABLE} (or ${ROOM_BEARER_VARIABLE} before the database bearer is set), the realtime Worker's host and bearer (docs/CLOUDFLARE.md 4.2)`,
       );
     const insecure = env[ROOM_INSECURE_VARIABLE] === '1' || env[ROOM_INSECURE_VARIABLE] === 'true';
     return {
@@ -131,7 +139,7 @@ export function openAuthDb(
   options: { fetch?: typeof fetch } = {},
 ): AuthDb {
   if (selection.kind === 'd1') {
-    const bearer = env[ROOM_BEARER_VARIABLE] ?? '';
+    const bearer = dbBearerOf(env);
     const dialect = new D1ProxyDialect({
       host: selection.host,
       bearer,

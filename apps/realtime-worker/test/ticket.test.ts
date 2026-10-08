@@ -3,7 +3,14 @@ import { describe, expect, it } from 'vitest';
 
 import { encodeTicket, splitTicket } from '@turboslide/realtime/frames';
 
-import { authorizationToken, secretsMatch, timingSafeEqual, verifyTicket } from '../src/ticket.ts';
+import {
+  authorizationToken,
+  secretsMatch,
+  secretsMatchAny,
+  timingSafeEqual,
+  verifyTicket,
+  verifyTicketRotating,
+} from '../src/ticket.ts';
 import { CID_A, ORIGIN, mint } from './lib.ts';
 
 // The ticket's checks (docs/CLOUDFLARE.md 3.3): the MAC first, then the shape of the claims, the
@@ -121,5 +128,42 @@ describe('verifyTicket', () => {
     expect(timingSafeEqual(new Uint8Array([1, 2]), new Uint8Array([1, 2]))).toBe(true);
     expect(timingSafeEqual(new Uint8Array([1, 2]), new Uint8Array([1, 3]))).toBe(false);
     expect(timingSafeEqual(new Uint8Array([1]), new Uint8Array([1, 2]))).toBe(false);
+  });
+});
+
+// A rotation in flight (docs/hosting.md 13.8): the previous secret verifies a ticket the current
+// refused for its signature alone, and the previous bearer is taken beside the current one.
+describe('the rotation partners', () => {
+  const now = 1_800_000_000_000;
+  const check = { deck: 'gt-brand', origin: ORIGIN, now: now + 1000 };
+
+  it('verifies a ticket signed with the previous secret only while the previous secret is set', async () => {
+    const old = env.TURBOSLIDE_ROOM_SECRET;
+    const next = 'test-room-secret-next-0000000000000000000000000000000000000000';
+    const token = await mint({ deck: 'gt-brand', cid: CID_A }, { now });
+    expect((await verifyTicketRotating(token, { current: next, previous: old }, check)).ok).toBe(
+      true,
+    );
+    expect(await verifyTicketRotating(token, { current: next }, check)).toEqual({
+      ok: false,
+      reason: 'signature',
+    });
+    expect(await verifyTicketRotating(token, { current: next, previous: '' }, check)).toEqual({
+      ok: false,
+      reason: 'signature',
+    });
+    // a refusal for anything but the signature is the current secret's answer
+    expect(
+      await verifyTicketRotating(token, { current: old, previous: next }, { ...check, deck: 'x' }),
+    ).toEqual({ ok: false, reason: 'deck' });
+  });
+
+  it('takes any set expected bearer and nothing else', async () => {
+    expect(await secretsMatchAny('a1', ['a1', 'b2'])).toBe(true);
+    expect(await secretsMatchAny('b2', ['a1', 'b2'])).toBe(true);
+    expect(await secretsMatchAny('c3', ['a1', 'b2'])).toBe(false);
+    expect(await secretsMatchAny('', ['', undefined])).toBe(false);
+    expect(await secretsMatchAny(null, ['a1'])).toBe(false);
+    expect(await secretsMatchAny('a1', [undefined, 'a1'])).toBe(true);
   });
 });

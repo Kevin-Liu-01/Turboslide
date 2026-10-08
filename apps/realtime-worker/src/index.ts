@@ -7,12 +7,19 @@
 // is forwarded as a join (the fallback carrier of 3.3) and the object waits 5 s for the frame.
 // `POST /rooms/:id/ops` and `/presence` carry `Authorization: Ticket` and are verified the same
 // way. The bearer routes (`/rooms/:id/{write,comment,flush,external,publish,roster,document,
-// counters,access-changed}`, `/db/{query,batch,counters}`, `/control/{open,flags,counters}`) compare the
-// bearer in constant time and forward. `GET /health` answers `{ ok, protocol, commit, realtime,
-// appOrigin }`. `OPTIONS` answers CORS for the ticket POSTs. A refused upgrade is accepted and
+// counters,access-changed}`, `/control/{open,flags,counters}`) compare the room bearer in
+// constant time and forward. The database routes (`/db/{query,batch}`) take their own bearer,
+// `TURBOSLIDE_DB_BEARER` (AUTH-3), so the room bearer, which the object also sends to the app and
+// the probes carry, reaches no account row; `/db/counters` reads no database and takes either.
+// Each secret has an optional `_PREVIOUS` value the Worker also accepts while a rotation is in
+// flight (docs/hosting.md 13.8); it is never sent. A Worker without `TURBOSLIDE_DB_BEARER` (a
+// deployment before the rotation) takes the room bearer on `/db` and logs `db.bearer.fallback`
+// once per isolate. `GET /health` answers `{ ok, protocol, commit, realtime, appOrigin,
+// callbacks, db, statements }`, the last two naming the bearer mode and the allowlist mode,
+// never a value. `OPTIONS` answers CORS for the ticket POSTs. A refused upgrade is accepted and
 // closed with its code so the browser reads it (3.6.3). The Worker's own work per request stays
 // under the Free plan's 10 ms: one HMAC verify and one JSON parse per upgrade, one digest compare
-// per bearer call. Request counts by class ride `GET /control/counters`.
+// per bearer value. Request counts by class ride `GET /control/counters`.
 import {
   ROOM_PROTOCOL,
   ROOM_SUBPROTOCOL,
@@ -31,7 +38,8 @@ import {
   writeFlags,
 } from './control.ts';
 import type { CallbacksState } from './control.ts';
-import { dbBatch, dbCountersAnswer, dbQuery } from './db.ts';
+import { dbBatch, dbCountersAnswer, dbQuery, statementMode } from './db.ts';
+import type { StatementMode } from './db.ts';
 import {
   ADDRESS_HEADER,
   CLAIMS_HEADER,
@@ -41,7 +49,7 @@ import {
   ORIGIN_HEADER,
   REALTIME_HEADER,
 } from './deck-room.ts';
-import { authorizationToken, secretsMatch, verifyTicket } from './ticket.ts';
+import { authorizationToken, secretsMatchAny, verifyTicketRotating } from './ticket.ts';
 
 export { DeckRoom };
 
@@ -59,7 +67,27 @@ export type HealthBody = {
   appOrigin: string;
   /** whether the deck objects reach `appOrigin` (control.ts `CallbacksState`; 3.8) */
   callbacks: CallbacksState;
+  /** which bearer guards `/db` (`dbBearerMode`); never a value */
+  db: DbBearerMode;
+  /** whether `/db` refuses an unlisted statement or runs and logs it (db.ts) */
+  statements: StatementMode;
 };
+
+/**
+ * Which bearer `/db/query` and `/db/batch` take (AUTH-3): `own` the database bearer alone,
+ * `rotating` the database bearer and its previous value (a rotation in flight, docs/hosting.md
+ * 13.8), `fallback` the room bearer (no `TURBOSLIDE_DB_BEARER` on this Worker yet).
+ */
+export type DbBearerMode = 'own' | 'rotating' | 'fallback';
+
+function isSet(value: string | undefined): value is string {
+  return value !== undefined && value !== '';
+}
+
+function dbBearerMode(env: Env): DbBearerMode {
+  if (!isSet(env.TURBOSLIDE_DB_BEARER)) return 'fallback';
+  return isSet(env.TURBOSLIDE_DB_BEARER_PREVIOUS) ? 'rotating' : 'own';
+}
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,62}$/;
 
@@ -135,6 +163,8 @@ async function health(env: Env): Promise<HealthBody> {
     realtime: await realtimeFlag(env.ACCOUNTS),
     appOrigin: env.TURBOSLIDE_APP_ORIGIN ?? '',
     callbacks: await callbacksState(env.ACCOUNTS),
+    db: dbBearerMode(env),
+    statements: statementMode(env.TURBOSLIDE_DB_STATEMENTS),
   };
 }
 
@@ -190,7 +220,11 @@ async function verifyClaims(
   deckId: string,
   request: Request,
 ): Promise<{ ok: true; claims: TicketClaims } | { ok: false; reason: string }> {
-  const verdict = await verifyTicket(token, env.TURBOSLIDE_ROOM_SECRET, {
+  const secrets = {
+    current: env.TURBOSLIDE_ROOM_SECRET,
+    previous: env.TURBOSLIDE_ROOM_SECRET_PREVIOUS,
+  };
+  const verdict = await verifyTicketRotating(token, secrets, {
     deck: deckId,
     origin: request.headers.get('origin'),
     now: Date.now(),
@@ -290,12 +324,18 @@ async function serve(request: Request, env: Env): Promise<Response> {
   }
   if (parts[0] === 'db') {
     workerCounters.dbCalls += 1;
-    if (!(await bearerOk(request, env))) return json({ error: 'bearer' }, 401);
-    if (parts[1] === 'counters' && request.method === 'GET') return dbCountersAnswer();
+    if (parts[1] === 'counters' && request.method === 'GET') {
+      // the isolate's sums and no database read: either bearer (the cost probe carries the room one)
+      if (!(await bearerOk(request, env)) && !(await dbBearerOk(request, env)))
+        return json({ error: 'bearer' }, 401);
+      return dbCountersAnswer();
+    }
+    if (!(await dbBearerOk(request, env))) return json({ error: 'bearer' }, 401);
+    const mode = statementMode(env.TURBOSLIDE_DB_STATEMENTS);
     if (parts[1] === 'query' && request.method === 'POST')
-      return dbQuery(env.ACCOUNTS, await request.json().catch(() => null));
+      return dbQuery(env.ACCOUNTS, await request.json().catch(() => null), mode);
     if (parts[1] === 'batch' && request.method === 'POST')
-      return dbBatch(env.ACCOUNTS, await request.json().catch(() => null));
+      return dbBatch(env.ACCOUNTS, await request.json().catch(() => null), mode);
     return json({ error: 'not_found' }, 404);
   }
   if (parts[0] === 'control') {
@@ -336,11 +376,37 @@ async function serve(request: Request, env: Env): Promise<Response> {
   return json({ error: 'not_found' }, 404);
 }
 
+/** The room bearer, or its previous value while a rotation is in flight: the room and control routes. */
 async function bearerOk(request: Request, env: Env): Promise<boolean> {
-  return secretsMatch(
-    authorizationToken(request.headers.get('authorization'), 'Bearer'),
+  return secretsMatchAny(authorizationToken(request.headers.get('authorization'), 'Bearer'), [
     env.TURBOSLIDE_ROOM_BEARER,
-  );
+    env.TURBOSLIDE_ROOM_BEARER_PREVIOUS,
+  ]);
+}
+
+let fallbackLogged = false;
+
+/**
+ * The database bearer of `/db/query` and `/db/batch` (AUTH-3): `TURBOSLIDE_DB_BEARER` or, while a
+ * rotation is in flight, `TURBOSLIDE_DB_BEARER_PREVIOUS`. A Worker without the database bearer
+ * takes the room bearer, as every Worker did before AUTH-3, and logs `db.bearer.fallback` once per
+ * isolate; once the database bearer is set the room bearer is refused here.
+ */
+async function dbBearerOk(request: Request, env: Env): Promise<boolean> {
+  const given = authorizationToken(request.headers.get('authorization'), 'Bearer');
+  if (isSet(env.TURBOSLIDE_DB_BEARER))
+    return secretsMatchAny(given, [env.TURBOSLIDE_DB_BEARER, env.TURBOSLIDE_DB_BEARER_PREVIOUS]);
+  const ok = await bearerOk(request, env);
+  if (ok && !fallbackLogged) {
+    fallbackLogged = true;
+    console.warn(
+      JSON.stringify({
+        message: 'db.bearer.fallback',
+        reason: 'TURBOSLIDE_DB_BEARER is not set on this Worker; /db takes the room bearer',
+      }),
+    );
+  }
+  return ok;
 }
 
 export default {

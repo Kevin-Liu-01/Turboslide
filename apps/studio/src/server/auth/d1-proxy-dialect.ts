@@ -2,9 +2,11 @@
 // the account database is D1 `turboslide-accounts`, bound to the Worker as `ACCOUNTS`, and a D1
 // binding exists inside a Worker alone, so the Vercel function reaches it through the Worker's
 // bearer routes. Every `executeQuery` posts one compiled statement, `{ sql, params }`, to
-// `POST /db/query` under `Authorization: Bearer <TURBOSLIDE_ROOM_BEARER>` on
-// `TURBOSLIDE_ROOM_HOST` (the channel's host and bearer, shared on purpose: one Worker, one
-// bearer, 3.3) with a 10 s deadline, and maps the answer's `results`, `meta.changes` and
+// `POST /db/query` under `Authorization: Bearer <TURBOSLIDE_DB_BEARER>` on `TURBOSLIDE_ROOM_HOST`
+// (the channel's host; the database bearer is its own since AUTH-3, so the room bearer the object
+// and the probes carry reaches no account row; a deployment without it sends
+// `TURBOSLIDE_ROOM_BEARER`, which a Worker without the database bearer still takes, db.ts
+// `selectAuthDb`) with a 10 s deadline, and maps the answer's `results`, `meta.changes` and
 // `meta.last_row_id` onto Kysely's result; several statements that do not depend on each other
 // go to `POST /db/batch` as one transaction (the introspector's per table reads). The SQLite
 // grammar is Kysely's own (`SqliteQueryCompiler`, `SqliteAdapter`), the one better-auth takes
@@ -47,6 +49,8 @@ import type {
 
 export const ROOM_HOST_VARIABLE = 'TURBOSLIDE_ROOM_HOST';
 export const ROOM_BEARER_VARIABLE = 'TURBOSLIDE_ROOM_BEARER';
+/** The database bearer of the Worker's `/db` routes (AUTH-3); the room bearer stands in when unset. */
+export const DB_BEARER_VARIABLE = 'TURBOSLIDE_DB_BEARER';
 /** `1` on a checkout: the Worker under `wrangler dev` answers plain http. */
 export const ROOM_INSECURE_VARIABLE = 'TURBOSLIDE_ROOM_INSECURE';
 /** The deadline of one statement over the proxy (docs/CLOUDFLARE.md 4.2). */
@@ -188,7 +192,8 @@ export class D1ProxyClient {
   };
 
   constructor(config: D1ProxyConfig) {
-    if (config.bearer === '') throw new TypeError(`${ROOM_BEARER_VARIABLE} is empty`);
+    if (config.bearer === '')
+      throw new TypeError(`${DB_BEARER_VARIABLE} and ${ROOM_BEARER_VARIABLE} are empty`);
     this.origin = roomOrigin(config.host, config.insecure ?? false);
     this.#bearer = config.bearer;
     this.#fetch = config.fetch ?? ((input, init) => fetch(input, init));

@@ -28,6 +28,12 @@ export const ROOM_HOST_VARIABLE = 'TURBOSLIDE_ROOM_HOST';
 export const ROOM_SECRET_VARIABLE = 'TURBOSLIDE_ROOM_SECRET';
 /** The bearer between the two hosts, both directions (3.3). */
 export const ROOM_BEARER_VARIABLE = 'TURBOSLIDE_ROOM_BEARER';
+/**
+ * A second room bearer the app accepts on the object's calls while a rotation is in flight, and
+ * never sends (docs/hosting.md 13.8): the coming value before the Worker switches, the old one
+ * after.
+ */
+export const ROOM_BEARER_PREVIOUS_VARIABLE = 'TURBOSLIDE_ROOM_BEARER_PREVIOUS';
 /** `1` makes the room URL `ws://` and the Worker calls `http://` (a checkout against `wrangler dev`). */
 export const ROOM_INSECURE_VARIABLE = 'TURBOSLIDE_ROOM_INSECURE';
 

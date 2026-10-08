@@ -90,6 +90,23 @@ export async function verifyTicket(
   return { ok: true, claims };
 }
 
+/**
+ * The ticket's verdict under the current secret, then under the previous one when the current
+ * refused the signature and a rotation is in flight (`TURBOSLIDE_ROOM_SECRET_PREVIOUS`, docs/hosting.md
+ * 13.8): the function signs with one secret at a time, so a ticket it minted before it switched
+ * still verifies until the previous secret is deleted.
+ */
+export async function verifyTicketRotating(
+  token: string,
+  secrets: { current: string; previous?: string | undefined },
+  check: TicketCheck,
+): Promise<TicketVerdict> {
+  const verdict = await verifyTicket(token, secrets.current, check);
+  if (verdict.ok || verdict.reason !== 'signature') return verdict;
+  if (secrets.previous === undefined || secrets.previous === '') return verdict;
+  return verifyTicket(token, secrets.previous, check);
+}
+
 /** The token of an `Authorization: <scheme> <token>` header, or null. */
 export function authorizationToken(
   header: string | null,
@@ -119,4 +136,21 @@ export async function secretsMatch(given: string | null, expected: string): Prom
     crypto.subtle.digest('SHA-256', bufferOf(encoder.encode(expected))),
   ]);
   return timingSafeEqual(new Uint8Array(a), new Uint8Array(b));
+}
+
+/**
+ * True when the given secret equals one of the expected values that are set (the current value
+ * and, while a rotation is in flight, the previous one). Every set candidate is compared, so the
+ * time taken does not say which one matched.
+ */
+export async function secretsMatchAny(
+  given: string | null,
+  expected: ReadonlyArray<string | undefined>,
+): Promise<boolean> {
+  const checks = await Promise.all(
+    expected.map((value) =>
+      value === undefined || value === '' ? false : secretsMatch(given, value),
+    ),
+  );
+  return checks.includes(true);
 }

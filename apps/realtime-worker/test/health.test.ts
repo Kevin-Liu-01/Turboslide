@@ -32,6 +32,8 @@ describe('the realtime worker router', () => {
       realtime: 'on',
       appOrigin: env.TURBOSLIDE_APP_ORIGIN,
       callbacks: 'ok',
+      db: 'own',
+      statements: 'enforce',
     });
   });
 
@@ -148,34 +150,38 @@ describe('the realtime worker router', () => {
     expect(counters.controlCalls).toBeGreaterThan(0);
   });
 
-  it('runs a D1 statement and a batch under the bearer and sums the counters', async () => {
+  it('runs a listed D1 statement and a batch under the database bearer and sums the counters', async () => {
     const headers = {
-      authorization: `Bearer ${env.TURBOSLIDE_ROOM_BEARER}`,
+      authorization: `Bearer ${env.TURBOSLIDE_DB_BEARER}`,
       'content-type': 'application/json',
     };
     const query = await SELF.fetch('https://rooms.test/db/query', {
       method: 'POST',
       headers,
-      body: JSON.stringify({ sql: 'SELECT k, v FROM rt_flags WHERE k = ?', params: ['realtime'] }),
+      body: JSON.stringify({ sql: 'select "v" from "ts_schema" where "k" = ?', params: ['none'] }),
     });
     expect(query.status).toBe(200);
     const body = (await query.json()) as { results: unknown[]; meta: { rows_read: number } };
-    expect(body.results).toEqual([{ k: 'realtime', v: 'on' }]);
-    expect(body.meta.rows_read).toBeGreaterThanOrEqual(1);
+    expect(body.results).toEqual([]);
     const batch = await SELF.fetch('https://rooms.test/db/batch', {
       method: 'POST',
       headers,
       body: JSON.stringify({
         statements: [
-          { sql: 'CREATE TABLE IF NOT EXISTS t_probe (id INTEGER PRIMARY KEY, v TEXT)' },
-          { sql: 'INSERT INTO t_probe (v) VALUES (?)', params: ['a'] },
-          { sql: 'SELECT COUNT(*) AS n FROM t_probe' },
+          {
+            sql: 'insert into "ts_quota" ("key", "count", "resetAt") values (?, ?, ?)',
+            params: ['health:probe', 1, '2099-01-01T00:00:00.000Z'],
+          },
+          { sql: 'select * from "ts_quota" where "key" = ?', params: ['health:probe'] },
+          { sql: 'delete from "ts_quota" where "key" = ?', params: ['health:probe'] },
         ],
       }),
     });
     expect(batch.status).toBe(200);
     const results = (await batch.json()) as { results: { results: unknown[] }[] };
-    expect(results.results[2]?.results).toEqual([{ n: 1 }]);
+    expect(results.results[1]?.results).toEqual([
+      { key: 'health:probe', count: 1, resetAt: '2099-01-01T00:00:00.000Z' },
+    ]);
     const counters = (await (
       await SELF.fetch('https://rooms.test/db/counters', { headers })
     ).json()) as Record<string, number>;

@@ -9,14 +9,23 @@ import { defineConfig } from 'vitest/config';
 // of migrations/ ride a test binding and test/setup.ts applies them before each file (the
 // plugin's D1 guide), so the control tables exist as a deployed Worker has them.
 // `R1_WRANGLER_CONFIG` points the plugin at another config file (the lane's local copy of the
-// requested bindings until the owner's wrangler.jsonc carries them, build/r1.md R1-R6c).
+// requested bindings until the owner's wrangler.jsonc carries them, build/r1.md R1-R6c). The
+// three secrets carry test values here, so the suite runs on a checkout with no `.dev.vars`; a test
+// that needs another value (a rotation, a Worker without the database bearer) hands the router
+// its own env.
+const TEST_SECRETS = {
+  TURBOSLIDE_ROOM_SECRET: 'test-room-secret-not-a-deployment-value-0000000000000000000000',
+  TURBOSLIDE_ROOM_BEARER: 'test-room-bearer-not-a-deployment-value-0000000000000000000000',
+  TURBOSLIDE_DB_BEARER: 'test-db-bearer-not-a-deployment-value-00000000000000000000000000',
+};
+
 export default defineConfig(async () => {
   const migrations = await readD1Migrations('./migrations');
   return {
     plugins: [
       cloudflareTest({
         wrangler: { configPath: process.env.R1_WRANGLER_CONFIG ?? './wrangler.jsonc' },
-        miniflare: { bindings: { TEST_MIGRATIONS: migrations } },
+        miniflare: { bindings: { TEST_MIGRATIONS: migrations, ...TEST_SECRETS } },
       }),
     ],
     test: {

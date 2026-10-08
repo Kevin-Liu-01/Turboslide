@@ -7,9 +7,13 @@
 // statement's run, `rows_read` as the rows returned and `rows_written` as the changes, since
 // `node:sqlite` counts no scanned rows; the real counts come from the Worker's D1 and the local
 // `wrangler dev` run of the lane. The fake can be told to refuse or to hang, for the row that
-// maps a dead proxy onto an anonymous request (CLOUDFLARE.md 4.3). Test code; nothing of the
-// studio's runtime imports it.
+// maps a dead proxy onto an anonymous request (CLOUDFLARE.md 4.3). Given the Worker's
+// allowlist (`allowed`, AUTH-3), it refuses an unlisted statement with the Worker's 403
+// `statement_not_allowed` and keeps its text in `refused`, so a test reads what the Worker would
+// refuse. Test code; nothing of the studio's runtime imports it.
 import { DatabaseSync } from 'node:sqlite';
+
+import { statementAllowed } from '@turboslide/realtime/d1-statements';
 
 /** Statements that answer rows, as sqlite-dialect.ts reads them. */
 const READS = /^\s*(select|with|pragma|explain)\b/i;
@@ -31,6 +35,8 @@ export type FakeD1 = {
   fetch: typeof fetch;
   /** The statements seen, in order; parameters are never kept, as the Worker never logs them. */
   statements: string[];
+  /** The statements refused as unlisted, when the fake was given an allowlist. */
+  refused: string[];
   /** The calls to each route. */
   calls: { query: number; batch: number; unauthorized: number };
   behaviour: FakeD1Behaviour;
@@ -89,14 +95,32 @@ function isStatement(value: unknown): value is Statement {
 export function fakeD1(
   bearer: string,
   sqlite: DatabaseSync = new DatabaseSync(':memory:'),
+  options: { allowed?: ReadonlySet<string> } = {},
 ): FakeD1 {
+  /** The Worker's refusal of an unlisted statement (apps/realtime-worker/src/db.ts), or null. */
+  const refusal = (sqls: string[]): Response | null => {
+    if (options.allowed === undefined) return null;
+    const index = sqls.findIndex((sql) => !statementAllowed(sql, options.allowed!));
+    if (index === -1) return null;
+    fake.refused.push(sqls[index]!);
+    return Response.json(
+      {
+        error: 'statement_not_allowed',
+        message: `statement ${index} is not in the accounts allowlist`,
+        index,
+      },
+      { status: 403 },
+    );
+  };
   const fake: FakeD1 = {
     sqlite,
     statements: [],
+    refused: [],
     calls: { query: 0, batch: 0, unauthorized: 0 },
     behaviour: {},
     reset() {
       fake.statements.length = 0;
+      fake.refused.length = 0;
       fake.calls = { query: 0, batch: 0, unauthorized: 0 };
       fake.behaviour = {};
     },
@@ -140,12 +164,19 @@ export function fakeD1(
           if (!isStatement(body))
             return Response.json({ error: 'sql and params' }, { status: 400 });
           fake.statements.push(body.sql);
+          const refused = refusal([body.sql]);
+          if (refused !== null) return refused;
           return Response.json(runOne(sqlite, body));
         }
         if (url.pathname === '/db/batch') {
           const statements = (body as { statements?: unknown }).statements;
           if (!Array.isArray(statements) || !statements.every(isStatement))
             return Response.json({ error: 'statements' }, { status: 400 });
+          const refused = refusal(statements.map((s) => s.sql));
+          if (refused !== null) {
+            fake.statements.push(...statements.map((s) => s.sql));
+            return refused;
+          }
           /* D1's batch is one transaction: all or nothing */
           sqlite.exec('begin');
           try {

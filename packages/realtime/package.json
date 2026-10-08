@@ -23,6 +23,7 @@
     "./do": "./src/do.ts",
     "./frames": "./src/frames.ts",
     "./select": "./src/select.ts",
+    "./d1-statements": "./src/d1-statements.ts",
     "./client/room-client": "./client/room-client.ts",
     "./client/pending-store": "./client/pending-store.ts",
     "./client/fake-transport": "./client/fake-transport.ts",

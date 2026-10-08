@@ -141,3 +141,43 @@ and 156 (`pnpm check`'s `ROUND_THREE_SPECS`) still expect `Switch to ${other}` a
 ${theme}`. Both lines become `await expect(button).toHaveAttribute('aria-label', 'Dark or light');`,
 and the test can read the drawn glyph instead: the `.pt-theme-glyph` whose computed `display` is not
 `none` reads ◐ in light and ◑ in dark (`apps/studio/e2e/core/home/header.ts` `readThemeButton`).
+
+## Integrator
+
+The answers of polish two's integrator, 2026-10-07, each in the push of the lane it serves
+(`docs/gslides-parity/polish-two/integrator.md` has the readings).
+
+- P2-F-1, done in `P2-integrator (F)` (`516fb670`): `runBrandLint` hands an HTML or SVG file under
+  `ALTERNATES_ROOTS` to `lintAlternatesText`; the summary reads 6 HTML and SVG files, 0 findings.
+- P2-F-2, recorded, not changed: `RosterMenu` draws the own row from `presence.self` alone, while
+  the own chip reads `meOf` (the account's principal, then `presence.self`), so a plate opened when
+  the shell has no `presence.self` lists nobody; lane F's pictures show that under 480 px for a
+  person alone. It is older than this round and outside its files; `integrator.md` names it as a
+  follow up.
+- A-R1 and P2-D-2, done in `P2-integrator (D)` (`f3b49f8a`): the vendor group's test matched
+  `react-dom/server.edge`, which fumadocs-core imports on demand, so 207 KB of React DOM's server
+  renderer joined the chunk every route preloads. The test leaves out the server renderers: the
+  shared chunk is 1,221,208 B (1,430,037 B before, the design round's entry 1,210,171 B) and the
+  renderer is a lazy chunk that no route preloads. zod and the schema were in the design round's
+  entry already, and fumadocs and the docs' text are not in the shared chunk. The largest chunk line
+  stays asserted: it reads the shared chunk over 600,000 B, as `/decks` and `/deck/gt-brand` have
+  read over their ceilings since before the design round; `/signin` and `/docs` read over theirs on
+  the same chunk. The diet of SPEC-4 3.12 is the fix and is not this round's.
+- A-R2 and A-R3, done in `P2-integrator (A)` (`bc582877`): the CSRF filter lets a POST to exactly
+  `/api/auth/device/code` and `/api/auth/device/token` through (neither reads or sets a cookie;
+  `/device`, approve and deny stay filtered), and the token poll answers an API key of the account
+  named `turboslide login` in place of the session token (`server/auth/device-grant.ts`). A key acts
+  as its account's agent, so `account me` names `agent:<tokenId>`; `accounts.device-flow` reads that
+  and the key in the account's list, and now approves the CLI's own printed code: `turboslide login`
+  stores the key, exits 0, and `account me` answers through the stored key.
+- A-R4, done in `P2-integrator (A)` (`bc582877`): `roles.spec.ts` reads `access.signin.link` with the
+  href `/signin?next=%2Fedit%2F<deck>`.
+- A-R5 and P2-N-2, done in `P2-integrator (D)` (`f3b49f8a`): with the docs' lazy chunks in the graph
+  the build split the nine modules `/home`'s route shares with its live bands into seven chunks,
+  seven preload links in the document. A second group, `home-shared`, keeps them in one chunk:
+  `/home`'s document is 99,784 B (100,588 B before) and every `home.budget.*` byte row passes.
+- P2-D-1, done in `P2-integrator (D)` (`f3b49f8a`): `ROBOTS.sitemap`, the `Sitemap:` line at
+  `SITE.productionOrigin`, the regenerated `robots.txt` and manifest record, the unit test; it sits
+  in D's push because `/sitemap.xml` arrives with P2-D#4. `help.docs.links` passed.
+- P2-N-1 and P2-N-3, done in `P2-integrator (N)` (`695f995a`): `<HomeNav />` with no props, and
+  `home-page.spec.ts` reads "Dark or light" and the drawn half disc before and after the press.

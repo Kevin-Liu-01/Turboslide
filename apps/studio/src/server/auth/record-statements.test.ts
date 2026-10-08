@@ -12,9 +12,9 @@ import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 
 // The accounts allowlist of the realtime Worker's `/db` routes (AUTH-3; docs/security.md section
 // 12; HARDENING.md HR-K2#3). Every statement the accounts code sends through the D1 dialect is
-// recorded here over a database in production's state: the Worker's migrations applied and the
-// `ts_schema` row current, so a cold instance sends no schema statement, as on both D1 databases
-// today. The flows are the ones a browser, the CLI or an agent can reach: the magic link and the
+// recorded here over a database in production's state, made by the Worker's migrations alone:
+// the schema and the current `ts_schema` row, so a cold instance sends no schema statement, as
+// on both D1 databases today. The flows are the ones a browser, the CLI or an agent can reach: the magic link and the
 // code, the session reads and refresh, the sign outs, Google's callback (a new account with a
 // picture and a refresh token, the return without either, an address account linking Google),
 // the device flow, the API keys, the profile, the quotas, the captured mail, the admin actions
@@ -71,16 +71,23 @@ let dispatcher: Dispatcher;
 let facts: ActionRequestFacts;
 const setCookies: string[] = [];
 
-/** A database in production's state: the Worker's migrations, then the version row a boot wrote. */
+/**
+ * A database in production's state, made by the Worker's migrations alone: the schema and the
+ * version row (0003), which must equal the code's AUTH_SCHEMA_VERSION, since `/db` refuses the
+ * schema statements a boot would otherwise send.
+ */
 function productionShaped(): DatabaseSync {
   const sqlite = new DatabaseSync(':memory:');
   for (const file of readdirSync(MIGRATIONS)
     .filter((name) => name.endsWith('.sql'))
     .sort())
     sqlite.exec(readFileSync(join(MIGRATIONS, file), 'utf8'));
-  sqlite
-    .prepare('insert into ts_schema (k, v) values (?, ?)')
-    .run(AUTH_SCHEMA_KEY, AUTH_SCHEMA_VERSION);
+  const row = sqlite.prepare('select v from ts_schema where k = ?').get(AUTH_SCHEMA_KEY) as
+    { v: string } | undefined;
+  if (row?.v !== AUTH_SCHEMA_VERSION)
+    throw new Error(
+      `the migrations write ts_schema ${JSON.stringify(row?.v)}, the code expects ${JSON.stringify(AUTH_SCHEMA_VERSION)}: a schema change is a new migration with its statements and the new version row (docs/hosting.md 13.8)`,
+    );
   return sqlite;
 }
 

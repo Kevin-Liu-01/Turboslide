@@ -3,6 +3,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Theme } from '@turboslide/schema/render';
 
 import { authorize, identityLabel, requestContext } from '../../server/authorize';
+import { withoutServerPaths } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
 import { renderSlideImages } from '../../server/render';
 
@@ -16,7 +17,11 @@ import { renderSlideImages } from '../../server/render';
 const BODY_LIMIT = 256 * 1024;
 
 function json(value: unknown, status = 200): Response {
-  return Response.json(value, { status, headers: { 'cache-control': 'no-store' } });
+  // no path of this instance in an answer (H3, DATA-V6): a render record names its cache file
+  return Response.json(withoutServerPaths(value), {
+    status,
+    headers: { 'cache-control': 'no-store' },
+  });
 }
 
 function isTheme(value: unknown): value is Theme {

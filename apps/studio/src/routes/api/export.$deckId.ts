@@ -41,6 +41,7 @@ import {
 import type { AuthContext, Capability } from '../../server/authorize';
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
+import { withoutServerPaths } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
 import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/root';
 import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
@@ -133,7 +134,7 @@ async function jobFile(
     // a deck deleted forever takes its copies along (docs/NEXT.md 3.2 H7): the file this
     // instance still holds for it is not served
     if (!(await deckHoldsCopies(deckId)))
-      return Response.json(
+      return pathlessJson(
         { error: { message: `No deck ${deckId}; its exports left with it`, status: 404 } },
         { status: 404 },
       );
@@ -141,7 +142,7 @@ async function jobFile(
     // a worker job of another deck is no file of this one (H3, DATA-1: the decision above is
     // the path's deck's)
     if (batched === null && !(await jobOfDeck(jobId, deckId)))
-      return Response.json({ error: { message: `no job ${jobId}`, status: 404 } }, { status: 404 });
+      return pathlessJson({ error: { message: `no job ${jobId}`, status: 404 } }, { status: 404 });
     const data = batched?.data ?? (await worker().readJobFile(jobId, `export/${name}`));
     return new Response(data, {
       headers: {
@@ -155,7 +156,7 @@ async function jobFile(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof RangeError ? 404 : 502;
-    return Response.json(
+    return pathlessJson(
       {
         error: {
           message:
@@ -177,6 +178,14 @@ function sameToken(given: string, expected: string): boolean {
 }
 
 /** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, open otherwise. */
+/**
+ * Every JSON answer of the route without a path of this instance (H3, DATA-V6): a job record
+ * names its folder (`dir`), its log lines and its report name the worker's files.
+ */
+function pathlessJson(value: unknown, init?: ResponseInit): Response {
+  return Response.json(withoutServerPaths(value), init);
+}
+
 /** True when the worker's job was submitted for this deck. */
 async function jobOfDeck(jobId: string, deckId: string): Promise<boolean> {
   const job = await worker()
@@ -198,14 +207,14 @@ function unauthorized(request: Request): Response | null {
 }
 
 function badRequest(message: string): Response {
-  return Response.json({ error: { message, status: 400 } }, { status: 400 });
+  return pathlessJson({ error: { message, status: 400 } }, { status: 400 });
 }
 
 /** A batch step's error as the route answers it: 404 for a missing deck or job, 400 for a bad input, 502 otherwise. */
 function batchError(error: unknown): Response {
   const message = error instanceof Error ? error.message : String(error);
   const status = error instanceof RangeError ? 404 : error instanceof TypeError ? 400 : 502;
-  return Response.json({ error: { message, status } }, { status });
+  return pathlessJson({ error: { message, status } }, { status });
 }
 
 /** authorize() for a route caller: the 6.2 body as the Response when refused, else null. */
@@ -217,7 +226,7 @@ async function refusedBy(
 ): Promise<Response | null> {
   const decision = await authorize(ctx, deckId, capability, { action, transport: 'route' });
   if (decision.ok) return null;
-  return Response.json(denialBody(decision, capability), { status: decision.status });
+  return pathlessJson(denialBody(decision, capability), { status: decision.status });
 }
 
 type BatchField = { index: number; of: number; jobId: string } | undefined;
@@ -240,7 +249,7 @@ async function batchedPost(
   if (cancel !== null) {
     if (!isJobId(cancel)) return badRequest('cancel must name a job id');
     try {
-      return Response.json(await cancelBatchedExport(deckId, cancel));
+      return pathlessJson(await cancelBatchedExport(deckId, cancel));
     } catch (error) {
       return batchError(error);
     }
@@ -249,7 +258,7 @@ async function batchedPost(
   if (merge !== undefined) {
     if (!isJobId(merge)) return badRequest('merge must name a job id');
     try {
-      return Response.json(await mergeExport(deckId, merge), {
+      return pathlessJson(await mergeExport(deckId, merge), {
         headers: { 'cache-control': 'no-store', 'x-turboslide-sync': 'batched' },
       });
     } catch (error) {
@@ -265,7 +274,7 @@ async function batchedPost(
       return badRequest('batch must be a non negative integer');
     if (jobId === undefined || !isJobId(jobId)) return badRequest('job must name a job id');
     try {
-      return Response.json(await exportBatch(deckId, jobId, index, bodyBatch?.of), {
+      return pathlessJson(await exportBatch(deckId, jobId, index, bodyBatch?.of), {
         headers: { 'cache-control': 'no-store', 'x-turboslide-sync': 'batched' },
       });
     } catch (error) {
@@ -275,7 +284,7 @@ async function batchedPost(
   if (query('start') === '1') {
     const { batch: _b, merge: _m, ...input } = fields;
     try {
-      return Response.json(await startBatchedExport(deckId, input), {
+      return pathlessJson(await startBatchedExport(deckId, input), {
         headers: { 'cache-control': 'no-store', 'x-turboslide-sync': 'batched' },
       });
     } catch (error) {
@@ -311,7 +320,7 @@ async function syncExport(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof RangeError ? 404 : 502;
-    return Response.json(
+    return pathlessJson(
       { error: { message, status } },
       { status, headers: { 'x-turboslide-sync': mode } },
     );
@@ -325,14 +334,14 @@ async function syncExport(
     'x-turboslide-exec': result.exec,
     'x-turboslide-export-report': headerJson(summary),
   };
-  if (wantsJson(request, url)) return Response.json(jsonBody(result), { headers: common });
+  if (wantsJson(request, url)) return pathlessJson(jsonBody(result), { headers: common });
   const attachment = attachmentOf(result);
   if (inFunction() && overBodyCap(attachment.data.byteLength)) {
     // one stored file can be fetched from where it is; several would need one zip there
     const stored = result.files.length === 1 ? result.files[0] : undefined;
     if (stored?.stored === true && stored.url !== undefined)
       return new Response(null, { status: 302, headers: { ...common, location: stored.url } });
-    return Response.json(
+    return pathlessJson(
       {
         error: {
           message: `the export is ${attachment.data.byteLength} bytes and a function answers at most ${VERCEL_BODY_CAP}; export one theme or a slide subset, or fetch the stored copy`,
@@ -375,7 +384,7 @@ export const Route = createFileRoute('/api/export/$deckId')({
               status: 403,
               transport: 'route',
             });
-            return Response.json({ error: 'forbidden', capability: 'export' }, { status: 403 });
+            return pathlessJson({ error: 'forbidden', capability: 'export' }, { status: 403 });
           }
         }
         const denied = cancelling ? null : unauthorized(request);
@@ -395,14 +404,14 @@ export const Route = createFileRoute('/api/export/$deckId')({
         }
         const length = Number(request.headers.get('content-length') ?? 0);
         if (length > BODY_LIMIT)
-          return Response.json(
+          return pathlessJson(
             { error: { message: 'body over 1 MB', status: 413 } },
             { status: 413 },
           );
         let body: unknown = {};
         const text = await request.text();
         if (text.length > BODY_LIMIT)
-          return Response.json(
+          return pathlessJson(
             { error: { message: 'body over 1 MB', status: 413 } },
             { status: 413 },
           );
@@ -469,13 +478,13 @@ export const Route = createFileRoute('/api/export/$deckId')({
           await ensureDeckAssets(params.deckId);
           const job = await worker().submit('export', { deckId: params.deckId, ...rest });
           const location = `/api/export/${params.deckId}?job=${job.id}`;
-          return Response.json(
+          return pathlessJson(
             { job, location, worker: worker().mode, exec: worker().exec },
             { status: 202, headers: { location } },
           );
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          return Response.json({ error: { message, status: 502 } }, { status: 502 });
+          return pathlessJson({ error: { message, status: 502 } }, { status: 502 });
         }
       },
       GET: async ({ params, request }) => {
@@ -498,7 +507,7 @@ export const Route = createFileRoute('/api/export/$deckId')({
             const job = await worker().job(jobId);
             // the job of another deck answers as a missing one (H3, DATA-1)
             if (!job || (job.input as { deckId?: string } | undefined)?.deckId !== params.deckId)
-              return Response.json(
+              return pathlessJson(
                 { error: { message: `no job ${jobId}`, status: 404 } },
                 { status: 404 },
               );
@@ -506,15 +515,15 @@ export const Route = createFileRoute('/api/export/$deckId')({
               job.status === 'done'
                 ? (job.result as { report?: unknown } | undefined)?.report
                 : undefined;
-            return Response.json({ job, report: report ?? null, worker: worker().mode });
+            return pathlessJson({ job, report: report ?? null, worker: worker().mode });
           }
           const jobs = (await worker().list('export')).filter(
             (job) => (job.input as { deckId?: string } | undefined)?.deckId === params.deckId,
           );
-          return Response.json({ deckId: params.deckId, jobs, worker: worker().mode });
+          return pathlessJson({ deckId: params.deckId, jobs, worker: worker().mode });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          return Response.json({ error: { message, status: 502 } }, { status: 502 });
+          return pathlessJson({ error: { message, status: 502 } }, { status: 502 });
         }
       },
     },

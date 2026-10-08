@@ -156,7 +156,9 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
       }
     }
     const result: RenderSlidesResult = { records, images };
-    return JSON.stringify(result);
+    // no path of this instance in the answer (H3, DATA-V6)
+    const { withoutServerPaths } = await import('./paths-out');
+    return JSON.stringify(withoutServerPaths(result));
   });
 
 /** render.slide through the worker; JSON text on the wire (see write.ts on why). */

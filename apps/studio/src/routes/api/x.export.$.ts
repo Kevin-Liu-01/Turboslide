@@ -5,6 +5,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { authorize, identityLabel, requestContext } from '../../server/authorize';
 import type { AuthContext, Capability } from '../../server/authorize';
 import { requireFlag } from '../../server/flags';
+import { withoutServerPaths } from '../../server/paths-out';
 import {
   RateLimitedError,
   checkQuota,
@@ -28,7 +29,11 @@ import { ensureDeckAssets } from '../../server/root';
 const BODY_LIMIT = 1024 * 1024;
 
 function json(value: unknown, status = 200, headers: Record<string, string> = {}): Response {
-  return Response.json(value, { status, headers: { 'cache-control': 'no-store', ...headers } });
+  // no path of this instance in an answer (H3, DATA-V6): the report names the worker's files
+  return Response.json(withoutServerPaths(value), {
+    status,
+    headers: { 'cache-control': 'no-store', ...headers },
+  });
 }
 
 async function denied(

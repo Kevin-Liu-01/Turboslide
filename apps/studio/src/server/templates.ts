@@ -242,7 +242,9 @@ const createFromTemplateFn = createServerFn({ method: 'POST' })
     const { made } = await createWithFreshId(ctx, (id) =>
       createStoredDeck({ name, from: data.from, id }),
     );
-    return made;
+    // no path of this instance in the answer, `dir` the store's `decks/<id>` (H3, DATA-V6)
+    const { publicDeckAnswer } = await import('./paths-out');
+    return publicDeckAnswer(made);
   });
 
 /** A new deck from any template of the index (the gallery's cards, the /decks strip). */

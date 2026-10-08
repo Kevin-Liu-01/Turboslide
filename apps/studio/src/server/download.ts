@@ -321,6 +321,12 @@ export async function startExport(input: StartExportInput): Promise<StartExportR
 /** The answer of a synchronous export: the report and the files' URLs, never the bytes. */
 export type SyncExportAnswer = ReturnType<typeof jsonBody>;
 
+/** The answer with no path of this instance in it (H3, DATA-V6; paths-out.ts). */
+async function pathless<T>(value: T): Promise<T> {
+  const { withoutServerPaths } = await import('./paths-out');
+  return withoutServerPaths(value);
+}
+
 const syncExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
   .handler(async ({ data }): Promise<SyncExportAnswer> => {
@@ -346,7 +352,9 @@ const syncExportFn = createServerFn({ method: 'POST' })
               await import('./export-batch')
             ).runSyncExportWithProgress(client, data.progressJobId, data.deckId, data.input);
       // the wait's row replaces the exporter's own in the report the dialog reads (5.5)
-      return body({ ...produced, report: await reportWithShaderWait(produced.report, wait) });
+      return pathless(
+        body({ ...produced, report: await reportWithShaderWait(produced.report, wait) }),
+      );
     } finally {
       if (data.progressJobId !== undefined) shaderWaits.delete(data.progressJobId);
       await releaseQuota('exportConcurrency', quota);
@@ -417,7 +425,7 @@ const exportBatchFn = createServerFn({ method: 'POST' })
     await authorizeExport(data.deckId, {}, 'export.run', null);
     await requireDeck(data.deckId);
     const { exportBatch: run } = await import('./export-batch');
-    return run(data.deckId, data.jobId, data.index);
+    return pathless(await run(data.deckId, data.jobId, data.index));
   });
 
 /** Step two: one batch of the plan into the part store; `stale` when the job must restart. */
@@ -437,7 +445,7 @@ const mergeExportFn = createServerFn({ method: 'POST' })
     // the plan's wait, when this process took it (docs/archive/rounds/FEATURES.md 5.5)
     const wait = shaderWaits.get(data.jobId);
     shaderWaits.delete(data.jobId);
-    return { ...merged, report: await reportWithShaderWait(merged.report, wait) };
+    return pathless({ ...merged, report: await reportWithShaderWait(merged.report, wait) });
   });
 
 /** Step three: the file from the stored parts, with the merge's peak memory. */
@@ -657,12 +665,12 @@ const pollExportFn = createServerFn({ method: 'POST' })
     // by the page's progress id; docs/archive/rounds/FEATURES.md 5.5): its row on every answer while the export
     // runs, and in the report once the job is done
     const wait = shaderWaits.get(data.jobId);
-    if (wait === undefined) return poll;
+    if (wait === undefined) return pathless(poll);
     const rows = await shaderRowsOf(wait);
     const withRows: ExportPoll = rows.length > 0 ? { ...poll, rows } : poll;
-    if (poll.report === undefined) return withRows;
+    if (poll.report === undefined) return pathless(withRows);
     shaderWaits.delete(data.jobId);
-    return { ...withRows, report: await reportWithShaderWait(poll.report, wait) };
+    return pathless({ ...withRows, report: await reportWithShaderWait(poll.report, wait) });
   });
 
 /** export.run, step two: the job's state, and the report with its download URLs once done. */
@@ -703,8 +711,10 @@ const signDownloadFn = createServerFn({ method: 'POST' })
       }
       const job = await (await worker()).job(data.jobId);
       const deckOfJob = (job?.input as { deckId?: string } | undefined)?.deckId;
-      if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob))
-        await authorizeRequest(deckOfJob, 'export', { action: 'export.sign' });
+      // a job that names no deck has no decision to pass, so it signs nothing (H3, DATA-1)
+      if (typeof deckOfJob !== 'string' || !SLUG_PATTERN.test(deckOfJob))
+        throw new RangeError(`No export job ${data.jobId}`);
+      await authorizeRequest(deckOfJob, 'export', { action: 'export.sign' });
     }
     if ((await worker()).mode !== 'local')
       throw new RangeError('The render worker runs elsewhere; its files are not served from here');
@@ -787,8 +797,9 @@ const runBuildFn = createServerFn({ method: 'POST' })
     );
     const built = parseJsonResult<BuildCliResult>(run, 'build.run');
     const bytes = existsSync(out) ? statSync(out).size : built.bytes;
-    return {
-      path: out,
+    return pathless({
+      // the file's name, never the builds folder's path on this instance (H3, DATA-V6)
+      path: name,
       bytes,
       budgetBytes: built.budgetBytes,
       ok: built.ok,
@@ -812,7 +823,7 @@ const runBuildFn = createServerFn({ method: 'POST' })
       ],
       ms: run.ms,
       download: existsSync(out) ? await builtFileLink(data.deckId, name, out, bytes) : null,
-    };
+    });
   });
 
 /**

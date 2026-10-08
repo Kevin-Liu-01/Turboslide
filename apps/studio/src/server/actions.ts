@@ -976,7 +976,7 @@ function registerHostedDeckActions(
   // (the bootstrap bearer's `deck.create --id`); on a checkout's file store the id named or the
   // slug of the name, the CLI's rule
   const explicitIds = !isHosted() || creator?.principal?.admin === true;
-  const made = async <T>(
+  const made = async <T extends { deckId: string; dir: string }>(
     named: string | undefined,
     slug: () => string,
     make: (deckId: string) => Promise<T>,
@@ -987,13 +987,17 @@ function registerHostedDeckActions(
           401,
           denialBody({ ok: false, status: 401, code: 'unauthorized' }, 'write'),
         );
-      return make(named ?? slug());
+      return (await import('./paths-out')).publicDeckAnswer(await make(named ?? slug()));
     }
-    const { createWithFreshId, createWithRecord } = await import('./access');
+    const [{ createWithFreshId, createWithRecord }, { publicDeckAnswer }] = await Promise.all([
+      import('./access'),
+      import('./paths-out'),
+    ]);
     const fixed = named !== undefined && explicitIds ? named : isHosted() ? undefined : slug();
+    // the answer carries no path of this instance, `dir` the store's `decks/<id>` (H3, DATA-V6)
     if (fixed !== undefined)
-      return (await createWithRecord(fixed, creator, () => make(fixed))).made;
-    return (await createWithFreshId(creator, make)).made;
+      return publicDeckAnswer((await createWithRecord(fixed, creator, () => make(fixed))).made);
+    return publicDeckAnswer((await createWithFreshId(creator, make)).made);
   };
   // deck.create lands in the store (HostedDecks.create is what createStoredDeck calls), not in
   // the instance's overlay the folder handler wrote to (docs/archive/status/EDITOR-DEPTH-STATUS.md section 10)

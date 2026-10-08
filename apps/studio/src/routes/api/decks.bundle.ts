@@ -21,6 +21,7 @@ import {
   importDeckBundle,
 } from '../../server/bundle-core';
 import { assertFlag } from '../../server/flags';
+import { publicDeckAnswer } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
 import { ensureDecks } from '../../server/root';
 
@@ -209,7 +210,8 @@ export const Route = createFileRoute('/api/decks/bundle')({
                 importDeckBundle(read.zip, { as: deckId, replace: false }),
               )
             ).made;
-          return Response.json(result, {
+          // no path of this instance in the answer, `dir` the store's `decks/<id>` (H3, DATA-V6)
+          return Response.json(publicDeckAnswer(result), {
             status: result.replaced ? 200 : 201,
             headers: { location: result.editUrl, 'cache-control': 'no-store' },
           });

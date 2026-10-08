@@ -472,7 +472,9 @@ const createDeckFn = createServerFn({ method: 'POST' })
     const { made } = await createWithFreshId(ctx, (deckId) =>
       createStoredDeck({ name: data.name, from: data.from, id: deckId }),
     );
-    return made;
+    // no path of this instance in the answer, `dir` the store's `decks/<id>` (H3, DATA-V6)
+    const { publicDeckAnswer } = await import('./paths-out');
+    return publicDeckAnswer(made);
   });
 
 export async function createNewDeck(input: CreateDeckInput): Promise<CreateDeckResult> {
@@ -587,7 +589,9 @@ const copyDeckFn = createServerFn({ method: 'POST' })
     const { made } = await createWithFreshId(ctx, (newId) =>
       mapStale(async () => (await ensureDecks()).copy({ ...input, newId }, data.baseRevision)),
     );
-    return made;
+    // no path of this instance in the answer, `dir` the store's `decks/<id>` (H3, DATA-V6)
+    const { publicDeckAnswer } = await import('./paths-out');
+    return publicDeckAnswer(made);
   });
 
 export async function copyStoredDeck(input: CopyDeckRequest): Promise<CopyDeckResult> {

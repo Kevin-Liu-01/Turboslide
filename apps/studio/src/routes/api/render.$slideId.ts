@@ -12,6 +12,7 @@ import { boundPrincipal } from '../../server/auth/session';
 import { authorize, denialBody, requestContext } from '../../server/authorize';
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
+import { scrubServerPaths, withoutServerPaths } from '../../server/paths-out';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import { getThumbnail, isThumbStamp, isThumbWidth, thumbResponse } from '../../server/thumbs';
 import type { ThumbRequest } from '../../server/thumbs';
@@ -227,8 +228,9 @@ export const Route = createFileRoute('/api/render/$slideId')({
             ...(jpg ? { format: 'jpg' as const } : {}),
           });
           if (wantsJson) {
+            // the record's image is a cache file of this instance: its name alone (H3, DATA-V6)
             return Response.json({
-              record: rendered.record,
+              record: withoutServerPaths(rendered.record),
               image: `/api/render/${slideId}?deck=${deckId}&theme=${theme}&scale=${scale}${jpg ? '&format=jpg' : ''}`,
               job: rendered.jobId,
               cached: rendered.cached,
@@ -251,7 +253,7 @@ export const Route = createFileRoute('/api/render/$slideId')({
               'content-type': jpg ? 'image/jpeg' : 'image/png',
               'content-length': String(rendered.png.byteLength),
               ...download,
-              'x-turboslide-record': JSON.stringify(rendered.record),
+              'x-turboslide-record': JSON.stringify(withoutServerPaths(rendered.record)),
               'x-turboslide-job': rendered.jobId,
               'x-turboslide-worker': worker().mode,
               'x-turboslide-exec': worker().exec,
@@ -261,7 +263,10 @@ export const Route = createFileRoute('/api/render/$slideId')({
           const message = error instanceof Error ? error.message : String(error);
           const status =
             error instanceof RangeError || /no deck|no slide/.test(message) ? 404 : 502;
-          return Response.json({ error: { message, status } }, { status });
+          return Response.json(
+            { error: { message: scrubServerPaths(message), status } },
+            { status },
+          );
         }
       },
     },

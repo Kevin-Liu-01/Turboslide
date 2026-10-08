@@ -109,6 +109,12 @@ function: the decision runs before the store is asked whether the deck exists (t
 presence and ticket routes, `deckRevision`), the record loader answers null for a missing deck
 (one 404 from `decide()`), and `share.requestAccess` answers its one sentence for both.
 
+No answer carries a path of this instance's file system (security hotfix H3, DATA-V6;
+`server/paths-out.ts`): the create, copy, template and bundle answers drop `dir`, a standalone
+build answers its file's name, and the job records, render records and export reports the
+studio's routes and server functions pass on have every path under the instance's folders cut to
+its last segment.
+
 Where the call sits: every server function of `decks.ts`, `download.ts`, `bundle.ts`, `render.ts`
 and `agent-actions.ts`; the routes `/api/actions/*`, `/api/render/*`, `/api/export/*`, the bundle
 routes and `/api/x/*`; the assets route through the page's `assetBase`. B2's `write.ts`,

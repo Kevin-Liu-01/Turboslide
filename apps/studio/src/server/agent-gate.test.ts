@@ -133,7 +133,6 @@ beforeEach(() => {
   bindAuthorize({
     decide: boundDecide,
     loadRecord: (deckId) => Promise.resolve(records.get(deckId) ?? null),
-    mode: () => 'shadow',
     now: () => Date.now(),
   });
   flagsOn = () => true;

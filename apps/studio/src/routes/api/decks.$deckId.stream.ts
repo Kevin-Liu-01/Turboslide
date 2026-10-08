@@ -184,9 +184,9 @@ async function serve(request: Request, deckId: string): Promise<Response> {
           // the event is process local and the drop repeats what the writer's hooks did.
           if (fresh) (await accessStore()).drop(deckId);
           const again = await decideFor(identity, deckId, 'read', 'stream');
-          if (!again.ok || again.shadow !== undefined) {
+          if (!again.ok) {
             write(sseFrame({ type: 'access', revision: 0 }));
-            if (!again.ok) close();
+            close();
           }
         };
         const deliver = (event: RoomEvent): void => {

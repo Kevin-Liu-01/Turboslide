@@ -51,3 +51,17 @@ export async function identityOfRequest(): Promise<{
 export async function attachedPagesOf(identity: string): Promise<SessionBinding[]> {
   return (await sessionDirectory()).forIdentity(identity);
 }
+
+/**
+ * Whether the request may attach a page to a deck (security hotfix H3, DATA-1: a page attached to
+ * any deck and heard the commands an agent sent that deck): the read cell, except an unsaved
+ * draft of /new, which nothing can read yet. A refusal reads as the store's missing deck.
+ */
+export async function admitAttach(deckId: string): Promise<void> {
+  const root = await import('./root');
+  if (await root.isUnsavedDraft(deckId)) return;
+  const room = await import('./room');
+  const identity = await room.requestIdentity(getRequest());
+  const decision = await room.decideFor(identity, deckId, 'read', 'session.attach');
+  if (!decision.ok) throw new RangeError(`No deck ${deckId}`);
+}

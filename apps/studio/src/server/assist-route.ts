@@ -7,7 +7,7 @@ import {
   errorStatus,
 } from '@turboslide/schema/errors';
 
-import type { ShadowedDecision } from './authorize';
+import type { Decision } from './authorize';
 import { denialBody } from './authorize';
 import { FLAG_REFUSALS } from './flags';
 import type { QuotaContext, RateLimitedError } from './ratelimit';
@@ -58,7 +58,7 @@ export type AssistRouteDeps = {
     deckId: string,
     capability: 'comment' | 'write',
     action: AssistAction,
-  ) => Promise<ShadowedDecision>;
+  ) => Promise<Decision>;
   flagOn: (name: 'assist' | 'readOnly') => Promise<boolean>;
   quotas: (ctx: QuotaContext) => Promise<RateLimitedError | null>;
   tierOf: (identity: RequestIdentity) => QuotaContext['tier'];

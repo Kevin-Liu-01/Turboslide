@@ -378,7 +378,7 @@ describe('findShareLink', () => {
 });
 
 describe('authorize() and a revoked publish token (SPEC-3 6.4)', () => {
-  it('answers 410 in shadow mode too, while every other denial still passes with the legacy role', async () => {
+  it('answers 410 for the revoked token and the 404 of a stranger without it (every denial refused since H3)', async () => {
     const restore = setSecurityLogSink(() => undefined);
     const published: AccessRecord = {
       ...recordBy('anon_owner'),
@@ -391,17 +391,17 @@ describe('authorize() and a revoked publish token (SPEC-3 6.4)', () => {
     };
     const previous = bindAuthorize({
       loadRecord: () => Promise.resolve(published),
-      mode: () => 'shadow',
       now: () => Date.parse('2026-09-14T00:02:00.000Z'),
     });
     try {
       const stranger = contextForIdentity('anon_7e2f0000-0000-4000-8000-000000000000');
       const gone = await authorize({ ...stranger, publishToken: TOKEN }, DECK, 'read');
       expect(gone).toEqual({ ok: false, status: 410, code: 'gone' });
-      // the same stranger without the token: admitted in shadow mode with the denial attached
-      const admitted = await authorize(stranger, DECK, 'read');
-      expect(admitted.ok).toBe(true);
-      expect(admitted.ok && admitted.shadow).toEqual({ status: 404, code: 'not_found' });
+      expect(await authorize(stranger, DECK, 'read')).toEqual({
+        ok: false,
+        status: 404,
+        code: 'not_found',
+      });
     } finally {
       bindAuthorize(previous);
       setSecurityLogSink(restore);

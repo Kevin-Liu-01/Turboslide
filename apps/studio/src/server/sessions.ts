@@ -11,7 +11,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
-import { identityOfRequest, sessionDirectory } from './sessions.server';
+import { admitAttach, identityOfRequest, sessionDirectory } from './sessions.server';
 
 /**
  * Attached studio pages (SPEC 7.3 "the view tools when a studio session is attached"; MILESTONES
@@ -226,6 +226,7 @@ const attachFn = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data }): Promise<string> => {
     const { id, ...rest } = data;
+    await admitAttach(data.deckId);
     const who = await identityOfRequest();
     const directory = await sessionDirectory();
     const now = new Date().toISOString();

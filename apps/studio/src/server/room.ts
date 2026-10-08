@@ -108,7 +108,7 @@ import {
   linkGrantsFor,
   unionLinkGrants,
 } from './authorize';
-import type { Capability, ShadowedDecision } from './authorize';
+import type { Capability, Decision } from './authorize';
 import {
   accountSession,
   bindIdentityRedis,
@@ -932,7 +932,7 @@ export async function decideFor(
   deckId: string,
   capability: Capability,
   action?: string,
-): Promise<ShadowedDecision> {
+): Promise<Decision> {
   const options = { transport: 'route' as const, ...(action !== undefined ? { action } : {}) };
   const decision = await authorize(identity.ctx, deckId, capability, options);
   if (decision.ok || identity.principalId === null || realtimeTier() !== 'do') return decision;
@@ -2659,7 +2659,7 @@ export function filterEventForReader(event: RoomEvent, reader: ViewerFacts): Roo
 /** The facts of a reader from the access record and the decision. */
 export async function viewerFacts(
   deckId: string,
-  decision: Extract<ShadowedDecision, { ok: true }>,
+  decision: Extract<Decision, { ok: true }>,
   ctx: AuthContext,
   principalId?: string,
 ): Promise<ViewerFacts> {
@@ -2669,7 +2669,7 @@ export async function viewerFacts(
     role: decision.role,
     via: decision.via,
     showNames: record?.settings.showNamesToLinkVisitors ?? false,
-    readComments: readComments.ok && readComments.shadow === undefined,
+    readComments: readComments.ok,
     ...(principalId === undefined ? {} : { principalId }),
   };
 }

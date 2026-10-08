@@ -83,6 +83,13 @@ const lintSlidesFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
+    // the read cell first (security hotfix H3, DATA-1): a refusal reads as a missing deck
+    const { authorizeRequest } = await import('./authorize');
+    try {
+      await authorizeRequest(data.deckId, 'read', { action: 'lint.run' });
+    } catch {
+      throw new RangeError(`No deck ${data.deckId}`);
+    }
     // a RangeError when the deck is missing; the open syncs the store's copy first
     const { document } = await (await openDeckStore(data.deckId)).read();
     const order = document.deck.sections.flatMap((section) => section.slideIds);

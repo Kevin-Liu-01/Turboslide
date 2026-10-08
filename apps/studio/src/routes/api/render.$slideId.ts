@@ -9,7 +9,7 @@ import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { boundPrincipal } from '../../server/auth/session';
-import { authorize, authorizeMode, denialBody, requestContext } from '../../server/authorize';
+import { authorize, denialBody, requestContext } from '../../server/authorize';
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
@@ -138,8 +138,8 @@ export const Route = createFileRoute('/api/render/$slideId')({
               { status: 400 },
             );
           // the thumbnail grant (gslides-parity SPEC-3 8.13; report 04 F6): the page's `<img>`
-          // carries no header, so the loader's grant travels as `s`; without one the request
-          // is refused in enforce mode and logged in shadow mode, and the renderThumbs switch
+          // carries no header, so the loader's grant travels as `s`; without one a request with
+          // no identity of its own is refused (403), and the renderThumbs switch
           // answers 503 with plates in the filmstrip
           const flagged = await requireFlag('renderThumbs', { deckId, action: 'render.thumb' });
           if (flagged !== null) return flagged;
@@ -158,7 +158,7 @@ export const Route = createFileRoute('/api/render/$slideId')({
             const ownIdentity =
               ctx.agent !== undefined ||
               (ctx.principal !== null && boundPrincipal(request)?.minted !== true);
-            if (authorizeMode() === 'enforce' && !ownIdentity) {
+            if (!ownIdentity) {
               logSecurityEvent({
                 event: 'http.403',
                 deckId,

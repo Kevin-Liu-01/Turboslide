@@ -82,7 +82,7 @@ async function serve(request: Request, splat: string): Promise<Response> {
     const decision = await decideFor(identity, deck, 'read', action);
     if (!decision.ok) return jsonResponse({ error: 'not_found' }, 404, cookie);
     const owner = await decideFor(identity, deck, 'settings', action);
-    settingsCapability = owner.ok && owner.shadow === undefined;
+    settingsCapability = owner.ok;
   }
   const caller: NotificationCaller = {
     principalId: identity.principalId ?? identity.identity,

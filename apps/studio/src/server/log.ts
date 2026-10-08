@@ -14,7 +14,7 @@ import { createHmac, randomBytes } from 'node:crypto';
  * client bundle imports this module.
  */
 
-/** The events of SPEC-3 8.11 and report 10 6.1, plus the authorization events of the shadow week (11.5 R3). */
+/** The events of SPEC-3 8.11 and report 10 6.1, plus the authorization events (11.5 R3; every one enforced since H3). */
 export const SECURITY_EVENT_NAMES = [
   'authorize.deny',
   'authorize.error',
@@ -108,8 +108,6 @@ export type SecurityEvent = {
   reason?: string;
   role?: string;
   via?: string;
-  /** True when the event was logged and not enforced (TURBOSLIDE_AUTHORIZE=shadow). */
-  shadow?: boolean;
   /** The transport the request arrived on. */
   transport?: 'window' | 'http' | 'mcp' | 'cli' | 'route';
   /** The per surface fields of report 10 6.1. */

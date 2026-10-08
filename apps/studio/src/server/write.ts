@@ -377,6 +377,20 @@ function isDenied(error: unknown): boolean {
   return error instanceof Error && error.name === 'DeniedError';
 }
 
+/**
+ * `authorize()` for a server function of this module, over the room's identity (security hotfix
+ * H3, DATA-1: `saveVersion`, `listVersions`, `leaseSlide` and `watchDeck` read or wrote any deck
+ * with no decision at all). A refusal and a deck the store does not hold answer one sentence,
+ * `No deck <id>`, the one `writeDeck` answers.
+ */
+async function admitRequest(deckId: string, capability: Capability, action: string) {
+  const room = await import('./room');
+  const identity = await room.requestIdentity(getRequest());
+  const decision = await room.decideFor(identity, deckId, capability, action);
+  if (!decision.ok) throw new RangeError(`No deck ${deckId}`);
+  return identity;
+}
+
 const readEditorDeckFn = createServerFn({ method: 'GET' })
   .validator((input: string) => {
     const parsed = parseJsonInput<{ deckId: unknown; atLeast?: unknown; since?: unknown }>(input);
@@ -982,9 +996,10 @@ const saveVersionFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    // a named version pins the live document (SPEC-3 0.3: version.save forces a checkpoint)
+    // a named version pins the live document (SPEC-3 0.3: version.save forces a checkpoint);
+    // the history cell first (H3)
+    const identity = await admitRequest(data.deckId, 'history', 'version.save');
     const room = await import('./room');
-    const identity = await room.requestIdentity(getRequest());
     const author = identity.ctx.agent !== undefined ? data.author : room.authorOf(identity);
     const deckRoom = await room.roomFor(data.deckId);
     if (deckRoom.tier !== 'blob') await deckRoom.checkpointer.run({ force: true });
@@ -1005,9 +1020,10 @@ const listVersionsFn = createServerFn({ method: 'GET' })
     const input = parseJsonInput<{ deckId: unknown }>(raw);
     return { deckId: requireSlug(input.deckId, 'deckId') };
   })
-  .handler(async ({ data }): Promise<string> =>
-    JSON.stringify(await (await storeFor(data.deckId)).listVersions()),
-  );
+  .handler(async ({ data }): Promise<string> => {
+    await admitRequest(data.deckId, 'history', 'version.list');
+    return JSON.stringify(await (await storeFor(data.deckId)).listVersions());
+  });
 
 /** version.list: every log entry, oldest first; the server log the undo spec counts. */
 export async function listVersions(input: { deckId: string }): Promise<Version[]> {
@@ -1048,6 +1064,7 @@ const leaseSlideFn = createServerFn({ method: 'POST' })
       };
       return JSON.stringify(lease);
     }
+    await admitRequest(data.deckId, 'write', 'slide.lease');
     const store = await storeFor(data.deckId);
     if (data.release === true) {
       const released = await store.release(data.slideId, data.author);
@@ -1152,6 +1169,7 @@ const watchDeckFn = createServerFn({ method: 'POST' })
         return JSON.stringify(empty);
       }
     }
+    await admitRequest(data.deckId, 'read', 'watchDeck');
     const store = await storeFor(data.deckId);
     const now = await snapshot(store, data.since);
     if (now.changed) return JSON.stringify(now);

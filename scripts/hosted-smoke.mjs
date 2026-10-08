@@ -35,9 +35,10 @@
 // carry no svg twin, pass `--asset <file>.svg` when one exists); a restricted deck id answers 404
 // on `/deck` and the JSON routes without saying whether it exists (`--restricted <id>` names one
 // the verifier prepared, else the row is skipped by name); a cross site `text/plain` POST to
-// `/api/actions/slide.remove` is refused; a thumbnail request without its grant is 403 in enforce
-// mode and 200 in shadow mode (the row records which); the CSP report endpoint answers 204 to a
-// report and 400 to garbage. The `/s/` exchange, the 410 after unpublish, the private document
+// `/api/actions/slide.remove` is refused; a thumbnail request without its grant is 403 (401 with
+// no identity), and since security hotfix H3 the shadow answers (200, a 302 to the stored object)
+// fail the row, because no deployment serves a denied request any more; the CSP report endpoint
+// answers 204 to a report and 400 to garbage. The `/s/` exchange, the 410 after unpublish, the private document
 // 403 and the twin URL derivability rows need B2's and B3's routes and the private store; they run
 // when `--share-token <token>` and `--publish-token <token>` are given and are otherwise listed
 // as skipped, never as passed.
@@ -589,25 +590,23 @@ function securityChecks(base, deck, args) {
     pass: (r) => r.status === 401 || r.status === 403 || r.status === 415,
     detail: (r) => `${r.status}`,
   });
+  /* security hotfix H3 (DATA-1): every deployment enforces, so the shadow answers this row once
+     accepted (a 200, or a 302 to the stored object, served and logged) are failures now: the
+     probe's request carries no cookie and no grant */
   rows.push({
     name: 'unsigned thumbnail',
     path: `/api/render/title?deck=${encodeURIComponent(deck)}&theme=light&w=160`,
     expect:
-      '403 (or 401 for a caller with no identity) in enforce mode (SPEC-3 8.13), 200 or a 302 to the stored object in shadow mode (SPEC-4 0.31), or 404 for a deck without that slide',
-    pass: (r) =>
-      r.status === 403 ||
-      r.status === 401 ||
-      r.status === 200 ||
-      r.status === 404 ||
-      (r.status === 302 && /\.blob\.vercel-storage\.com\//.test(r.location)),
+      '403 (or 401 for a caller with no identity) without the grant (SPEC-3 8.13; enforced on every deployment since H3), or 404 for a deck without that slide',
+    pass: (r) => r.status === 403 || r.status === 401 || r.status === 404,
     detail: (r) =>
       r.status === 403 || r.status === 401
-        ? `enforce: refused without the grant (${r.status})`
-        : r.status === 200
-          ? 'shadow: served and logged'
+        ? `refused without the grant (${r.status})`
+        : r.status === 404
+          ? 'no such slide'
           : r.status === 302
-            ? `shadow: the stored object (${r.location.replace(/\?.*$/, '').slice(0, 72)})`
-            : 'no such slide',
+            ? `served without the grant: the stored object (${r.location.replace(/\?.*$/, '').slice(0, 72)})`
+            : `served without the grant (${r.status})`,
   });
   rows.push({
     name: 'csp report endpoint',

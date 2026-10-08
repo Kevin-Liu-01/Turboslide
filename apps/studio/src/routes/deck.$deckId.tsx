@@ -122,7 +122,9 @@ export async function loadDeckView(
   deckId: string,
   deps: { theme?: Theme; p?: string },
 ): Promise<DeckLoaderData> {
-  const head = await deckRevision({ data: { deckId } });
+  const head = await deckRevision({
+    data: { deckId, ...(deps.p === undefined ? {} : { publishToken: deps.p }) },
+  });
   if (!head) throw notFound();
   const input: GetDeckInput = {
     deckId,

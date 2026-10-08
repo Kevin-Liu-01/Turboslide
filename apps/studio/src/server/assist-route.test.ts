@@ -6,7 +6,7 @@ import type { Author } from '@turboslide/schema/mutations';
 import { RateLimitedError } from './ratelimit';
 import type { QuotaContext } from './ratelimit';
 import { anonymousContext } from './authorize';
-import type { ShadowedDecision } from './authorize';
+import type { Decision } from './authorize';
 import {
   ASSIST_BODY_MAX_BYTES,
   assistCapability,
@@ -31,13 +31,13 @@ const identity: RequestIdentity = {
   kind: 'anonymous',
   record: null,
 };
-const ok: ShadowedDecision = {
+const ok: Decision = {
   ok: true,
   role: 'editor',
   via: 'open',
   status: 200,
-} as ShadowedDecision;
-const denied: ShadowedDecision = { ok: false, code: 'forbidden', status: 403 } as ShadowedDecision;
+} as Decision;
+const denied: Decision = { ok: false, code: 'forbidden', status: 403 } as Decision;
 
 type Call = { deckId: string; action: string; input: unknown; author: Author };
 

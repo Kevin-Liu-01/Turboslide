@@ -84,8 +84,9 @@ import {
   bootstrapAgentContext,
   denialBody,
   identityLabel,
+  namedDeckCheck,
 } from './authorize';
-import type { AuthContext } from './authorize';
+import type { AuthContext, NamedDeckCheck } from './authorize';
 import {
   registerAccountActions,
   registerAdminActions as registerAccountAdminActions,
@@ -840,7 +841,7 @@ function registerNotificationHandlers(dispatcher: Dispatcher, request: Request, 
     return {
       principalId: identity.principalId ?? identity.identity,
       deckId,
-      settingsCapability: owner.ok && owner.shadow === undefined,
+      settingsCapability: owner.ok,
       redis: redisCommands(),
     };
   };
@@ -966,6 +967,7 @@ function registerHostedDeckActions(
   listing: ListingScope,
   requestBound: boolean,
 ): void {
+  const allowed = namedDeckCheck(creator, requestBound);
   // a deck this caller creates or copies gets its record first (SPEC-3 6.1; VERIFICATION-3
   // finding 4; H3, DATA-V3): restricted, the caller its owner, written before the deck so a
   // failed record write leaves no deck. A request with no identity creates nothing; a dispatcher
@@ -1008,6 +1010,7 @@ function registerHostedDeckActions(
   });
   dispatcher.register('deck.copy', async (input) => {
     const { baseRevision, ...rest } = input as DeckCopyInput;
+    await allowed(rest.id, 'copy', 'deck.copy');
     const newId = deckIdFor({
       name: rest.name.trim(),
       from: 'blank',
@@ -1015,17 +1018,20 @@ function registerHostedDeckActions(
     });
     return recorded(newId, () => mapStale(() => decks.copy({ ...rest, newId }, baseRevision)));
   });
-  dispatcher.register('deck.trash', (input) => {
+  dispatcher.register('deck.trash', async (input) => {
     const { id, baseRevision } = input as DeckIdInput;
+    await allowed(id, 'trash', 'deck.trash');
     return mapStale(() => decks.trash(id, baseRevision));
   });
-  dispatcher.register('deck.restore', (input) => {
+  dispatcher.register('deck.restore', async (input) => {
     const { id, baseRevision } = input as DeckIdInput;
+    await allowed(id, 'restore', 'deck.restore');
     return mapStale(() => decks.restore(id, baseRevision));
   });
-  dispatcher.register('deck.remove', (input) => {
+  dispatcher.register('deck.remove', async (input) => {
     const { id, confirm, baseRevision } = input as DeckIdInput & { confirm?: boolean };
     if (confirm !== true) throw new TypeError('deck.remove needs confirm: true');
+    await allowed(id, 'remove', 'deck.remove');
     return mapStale(() => decks.remove(id, baseRevision));
   });
 }
@@ -1172,6 +1178,7 @@ function registerSlideImport(
   targetDir: string,
   targetStore: DeckStore,
   decks: HostedDecks,
+  allowed: NamedDeckCheck,
 ): void {
   dispatcher.register('slide.import', async (input, context: ActionContext) => {
     const request = input as SlideImportInput;
@@ -1180,6 +1187,9 @@ function registerSlideImport(
       throw new RangeError(
         'slide.import copies from another deck; slide.duplicate copies within one',
       );
+    // the source is read and copied from (H3, DATA-1): the copy cell on it, a refusal and a
+    // missing source answer alike
+    await allowed(sourceDeckId, 'copy', 'slide.import');
     const sourceStore = await decks.open(sourceDeckId);
     const document = (await sourceStore.read()).document;
     await decks.ensureAssets(sourceDeckId);
@@ -1374,7 +1384,15 @@ export async function deckDispatcher(
   // the logo picker's three actions over this deck (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R4), so
   // /api/actions/logo.search, deck_logo_search and the window transport answer them
   registerLogoActionsLazily(dispatcher, deckId, liveStore);
-  registerSlideImport(dispatcher, deckId, storeDeps, store.dir, liveStore, decks);
+  registerSlideImport(
+    dispatcher,
+    deckId,
+    storeDeps,
+    store.dir,
+    liveStore,
+    decks,
+    namedDeckCheck(creatorContextOf(request, facts), request !== undefined),
+  );
   const assets = assetDispatcherLoader(dispatcher, deckId, store, liveStore);
   registerRecordActionsFor(dispatcher, deckId, store, liveStore, storeDeps, facts, assets);
   // the store's view of the deck for the HTTP and MCP transports (docs/archive/rounds/SYNC.md 6.3, 3.6; the sync

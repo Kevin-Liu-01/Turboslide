@@ -14,7 +14,7 @@ import type {
   Scope,
   Via,
 } from '@turboslide/identity/access';
-import { CAPABILITIES, decide, standingOf } from '@turboslide/identity/access';
+import { CAPABILITIES, decide } from '@turboslide/identity/access';
 import { labelFor } from '@turboslide/identity/labels';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import type { ActionId } from '@turboslide/schema/actions';
@@ -32,10 +32,12 @@ import { deckDir } from './root';
  * 11.5 R3; MILESTONES-3 "The seams every builder types against", B4 days 1 and 3): `authorize(ctx,
  * deckId, capability)` loads the deck's access record and asks the identity package's pure
  * `decide()` (packages/identity/src/access.ts, B3, table tested) for the decision, and sits first
- * in every server function and route B4 owns. The mode is `TURBOSLIDE_AUTHORIZE`: `shadow` (the
- * default this round) logs a denial and lets the call proceed as today, so the shadow week of R3
- * shows what enforcement will refuse without refusing it; `enforce` refuses it with the status and
- * body of SPEC-3 6.2.
+ * in every server function and route B4 owns. A denial is refused with the status and body of
+ * SPEC-3 6.2 on every deployment. The shadow mode of R3 (`TURBOSLIDE_AUTHORIZE=shadow`, the
+ * default until security hotfix H3) logged a denial and let the call proceed; production kept it
+ * long past its week, so a stranger who knew a deck id read, renamed, copied, trashed and removed
+ * it (DATA-1). No environment variable weakens a decision since H3: `authorizeMode()` answers
+ * `enforce` whatever the variable says and logs once when it names anything else.
  *
  * Day three (merge 1b, build-3/integrator.md section 4): the types are the identity package's,
  * `decide` is bound by default, and the record loader reads `decks/<id>/.turboslide/access.json`
@@ -55,11 +57,6 @@ export { CAPABILITIES };
 export type DenyCode = Extract<Decision, { ok: false }>['code'];
 export type DenyStatus = Extract<Decision, { ok: false }>['status'];
 
-/** The `ok` branch with the denial shadow mode let through attached (SPEC-3 11.5 R3). */
-export type ShadowedDecision =
-  | (Extract<Decision, { ok: true }> & { shadow?: { status: DenyStatus; code: DenyCode } })
-  | Extract<Decision, { ok: false }>;
-
 export type DecideFn<R = AccessRecord> = (
   record: R | null,
   ctx: AuthContext,
@@ -71,15 +68,27 @@ export type LoadRecordFn<R = AccessRecord> = (deckId: string) => Promise<R | nul
 export const AUTHORIZE_MODE_ENV = 'TURBOSLIDE_AUTHORIZE';
 export const MISSING_RECORD_ENV = 'TURBOSLIDE_MISSING_RECORD';
 
-export type AuthorizeMode = 'shadow' | 'enforce';
+/** The one mode since H3 (DATA-1); the word stays because `/api/access` and the logs name it. */
+export type AuthorizeMode = 'enforce';
 
 export type Env = Readonly<Record<string, string | undefined>>;
 
-/** `shadow` unless the variable spells `enforce`; anything else is `shadow`. */
+let ignoredModeLogged = false;
+
+/**
+ * `enforce`, whatever `TURBOSLIDE_AUTHORIZE` says (H3, DATA-1). Production carried
+ * `TURBOSLIDE_AUTHORIZE=shadow` from the R3 week on, so a variable that names anything but
+ * `enforce` (or nothing) is logged once per process as ignored and changes nothing.
+ */
 export function authorizeMode(env: Env = process.env): AuthorizeMode {
   const value = env[AUTHORIZE_MODE_ENV]?.trim().toLowerCase();
-  if (value === 'enforce') return 'enforce';
-  return 'shadow';
+  if (value !== undefined && value !== '' && value !== 'enforce' && !ignoredModeLogged) {
+    ignoredModeLogged = true;
+    console.error(
+      `turboslide authorize: ${AUTHORIZE_MODE_ENV}=${value} is ignored; every decision is enforced since security hotfix H3`,
+    );
+  }
+  return 'enforce';
 }
 
 /**
@@ -113,7 +122,6 @@ export const fileRecordLoader: LoadRecordFn = (deckId) => {
 export type AuthorizeDeps<R = AccessRecord> = {
   decide: DecideFn<R>;
   loadRecord: LoadRecordFn<R>;
-  mode: () => AuthorizeMode;
   /** The clock, for tests. */
   now: () => number;
 };
@@ -140,7 +148,6 @@ function deps(): AuthorizeDeps<unknown> {
   return (holder()[DEPS] ??= {
     decide: boundDecide as DecideFn<unknown>,
     loadRecord: fileRecordLoader,
-    mode: () => authorizeMode(),
     now: () => Date.now(),
   });
 }
@@ -163,8 +170,8 @@ export type AuthorizeOptions = {
   transport?: Transport;
   requestId?: string;
   /**
-   * The mode of this call, over `TURBOSLIDE_AUTHORIZE`: the agent surface passes `enforce`
-   * (server/agent-gate.ts), because an API key's reach must not wait for the enforce flip.
+   * The mode of this call: the agent surface passes `enforce` (server/agent-gate.ts, H2). Since
+   * H3 every call is enforced and `enforce` is the one value; the field stays for the callers.
    */
   mode?: AuthorizeMode;
 };
@@ -175,55 +182,18 @@ export function identityLabel(ctx: AuthContext): string | undefined {
   return ctx.principal?.id;
 }
 
-/** The role and via the record gives the caller outside `decide()`, for the shadow fallback. */
-export function roleOf(
-  record: AccessRecord | null,
-  ctx: AuthContext,
-  now: number = Date.now(),
-): { role: Role; via: Via } | null {
-  const principal: Principal | null =
-    ctx.principal ??
-    (ctx.agent !== undefined ? { id: ctx.agent.ownerId, kind: 'account', admin: false } : null);
-  if (record === null) return { role: 'editor', via: 'open' };
-  if (principal === null)
-    return record.generalAccess.mode === 'open'
-      ? { role: record.generalAccess.role, via: 'open' }
-      : null;
-  return standingOf(record, principal, ctx.linkGrants, now);
-}
-
-/**
- * The role a denied caller is handed in shadow mode (docs/FOCUS.md section 5 rank 1): the standing
- * the record gives them when it gives one (an editor refused `remove`, a viewer refused `write`),
- * the legacy open editor for a deck with no record, and otherwise the floor, `viewer`. Before the
- * focus round the floor was `editor`, so a stranger on a restricted deck and a viewer who changed
- * `/deck/` to `/edit/` both received the full editor on production (`audit-present` rows 26 and
- * 29); with the floor at `viewer` the payload and the editor's mode follow the role the record
- * grants, whatever the address, while the server still refuses no write in this mode.
- */
-export function shadowStanding(
-  record: AccessRecord | null,
-  ctx: AuthContext,
-  now: number = Date.now(),
-): { role: Role; via: Via } {
-  return roleOf(record, ctx, now) ?? { role: 'viewer', via: 'open' };
-}
-
 /**
  * The call every server function and route makes first (SPEC-3 6.2). Deny by default: a loader
- * failure is a denial (404 in enforce mode, logged either way). In shadow mode a denial comes
- * back as `ok: true` with the role `shadowStanding` gives and the denial attached under `shadow`,
- * so the caller proceeds and the log shows what enforcement will refuse; the one denial shadow
- * mode refuses is the 410 of a revoked publish token (the comment at the check says why).
+ * failure is a 404. Every denial is refused and logged as one `authorize.deny` line; no mode lets
+ * a denial through (H3, DATA-1).
  */
 export async function authorize(
   ctx: AuthContext,
   deckId: string,
   capability: Capability,
   options: AuthorizeOptions = {},
-): Promise<ShadowedDecision> {
+): Promise<Decision> {
   const d = deps();
-  const mode = options.mode ?? d.mode();
   const base = {
     identity: identityLabel(ctx),
     deckId,
@@ -241,33 +211,18 @@ export async function authorize(
       event: 'authorize.error',
       status: 404,
       reason: error instanceof Error ? error.name : 'load failed',
-      shadow: mode === 'shadow',
     });
-    if (mode === 'enforce') return { ok: false, status: 404, code: 'not_found' };
-    return { ok: true, role: 'editor', via: 'open', shadow: { status: 404, code: 'not_found' } };
+    return { ok: false, status: 404, code: 'not_found' };
   }
   const decision = d.decide(record, ctx, capability);
   if (decision.ok) return decision;
-  // a revoked publish token is refused in shadow mode as well (SPEC-3 6.4: the player "answers
-  // 410 'This presentation is no longer published' after deck.unpublish"): publishing is a round
-  // three construct, so the shadow week has no earlier behaviour to keep for it, and a dead
-  // published link must not open the deck it once showed; every other denial passes as before
-  const refused = mode === 'enforce' || decision.code === 'gone';
   logSecurityEvent({
     ...base,
     event: 'authorize.deny',
     status: decision.status,
     reason: decision.code,
-    shadow: !refused,
   });
-  if (refused) return decision;
-  const standing = shadowStanding((record as AccessRecord | null) ?? null, ctx, d.now());
-  return {
-    ok: true,
-    role: standing.role,
-    via: standing.via,
-    shadow: { status: decision.status, code: decision.code },
-  };
+  return decision;
 }
 
 /** The body of a refused request (SPEC-3 6.2, report 09 8.2): no detail beyond the capability. */
@@ -501,11 +456,11 @@ export function bindAuthorNamer(namer: ((principal: Principal) => string) | unde
   (globalThis as unknown as Record<symbol, unknown>)[NAMER] = namer;
 }
 
-export type Authorized = { ctx: AuthContext; decision: ShadowedDecision; author: Author };
+export type Authorized = { ctx: AuthContext; decision: Decision; author: Author };
 
 /**
  * `authorize()` for the request being served: the context from the request, the decision, and
- * the author the write is attributed to. Throws `DeniedError` on a refusal (enforce mode). The
+ * the author the write is attributed to. Throws `DeniedError` on a refusal. The
  * server functions call this first; the routes call `requestContext()` and `authorize()`
  * themselves because they answer a Response.
  */
@@ -522,6 +477,35 @@ export async function authorizeRequest(
   });
   if (!decision.ok) throw new DeniedError(decision.status, denialBody(decision, capability));
   return { ctx, decision, author: authorFor(ctx, fallbackAuthor) };
+}
+
+/**
+ * The decision on a deck an action names in its input (security hotfix H3, DATA-1): the window
+ * transport authorizes the deck the page is on and the HTTP transport the `?deck=` one, while
+ * `deck.copy`, `deck.trash`, `deck.restore`, `deck.remove` and `slide.import` name another deck,
+ * so an owner of any deck trashed, removed or read any other. Each is decided on the deck it
+ * names with the caller's context; a request with no identity is refused, and a dispatcher built
+ * outside a request (the CLI's rule, a unit test) is not checked.
+ */
+export type NamedDeckCheck = (
+  deckId: string,
+  capability: Capability,
+  action: string,
+) => Promise<void>;
+
+export function namedDeckCheck(caller: AuthContext | null, requestBound: boolean): NamedDeckCheck {
+  return async (deckId, capability, action) => {
+    if (caller === null) {
+      if (requestBound)
+        throw new DeniedError(
+          401,
+          denialBody({ ok: false, status: 401, code: 'unauthorized' }, capability),
+        );
+      return;
+    }
+    const decision = await authorize(caller, deckId, capability, { action, transport: 'http' });
+    if (!decision.ok) throw new DeniedError(decision.status, denialBody(decision, capability));
+  };
 }
 
 /**

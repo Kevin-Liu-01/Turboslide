@@ -1001,8 +1001,10 @@ const deckInputValidator = (input: GetDeckInput): GetDeckInput => {
  * carry the revision in their URL, which is the CDN key.
  */
 export const deckRevision = createServerFn({ method: 'GET' })
-  .validator((input: { deckId: string }) => {
+  .validator((input: { deckId: string; publishToken?: string }) => {
     if (!/^[a-z0-9][a-z0-9-]*$/i.test(input.deckId)) throw new Error('deckId must be a slug');
+    if (input.publishToken !== undefined && !/^[A-Za-z0-9_-]{16,64}$/.test(input.publishToken))
+      throw new Error('publishToken must be a token');
     return input;
   })
   .handler(async ({ data }): Promise<{ revision: number } | null> => {
@@ -1012,6 +1014,20 @@ export const deckRevision = createServerFn({ method: 'GET' })
       } catch {
         // outside a request: nothing to set
       }
+    }
+    // the read cell first (H3, DATA-1 and DATA-V1): a refusal is the missing deck's null, so the
+    // revision of a restricted deck never reaches a stranger and its existence neither
+    const { DeniedError, authorize, denialBody, requestContext } = await import('./authorize');
+    const ctx = await requestContext();
+    if (data.publishToken !== undefined) ctx.publishToken = data.publishToken;
+    const read = await authorize(ctx, data.deckId, 'read', {
+      action: 'deck.revision',
+      transport: 'window',
+    });
+    if (!read.ok) {
+      // a revoked publish token travels to the page as getDeck's does (SPEC-3 6.4)
+      if (read.status === 410) throw new DeniedError(410, denialBody(read, 'read'));
+      return null;
     }
     try {
       return { revision: await (await openDeckStore(data.deckId)).revision() };

@@ -37,6 +37,15 @@ export const warmThumbnails = createServerFn({ method: 'POST' })
     // after the stream connected had not left the browser 10 s later). The filmstrip reads the
     // captures through /api/render as they land, so nothing waits on this answer.
     if (await isUnsavedDraft(data.deckId)) return warmThumbs(data);
+    // the read cell first (security hotfix H3, DATA-1): no render work for a deck the caller
+    // may not read, and the answer of a refusal is the queued answer every call gets
+    const { authorize, requestContext } = await import('./authorize');
+    const read = await authorize(await requestContext(), data.deckId, 'read', {
+      action: 'render.warm',
+      transport: 'window',
+    });
+    if (!read.ok)
+      return { revision: -1, ready: [], failed: [], rendered: 0, cached: 0, ms: 0, queued: true };
     void warmThumbs(data).catch((error: unknown) => {
       console.error(
         `turboslide warm: ${data.deckId} ${data.theme}: ${error instanceof Error ? error.message : String(error)}`,

@@ -15,9 +15,8 @@ import { refuseCrossSite, requestIdentity } from '../../server/room';
  * re-reads it on every `access` event of the stream.
  *
  * The focus round (docs/FOCUS.md section 5 rank 1): the answer also names the deployment's
- * `TURBOSLIDE_AUTHORIZE` mode as `authorize`, `shadow` or `enforce`, so the Share dialog can say
- * which mode the deployment runs and promise nothing shadow mode does not enforce, and so a
- * driven row can record the mode it ran in. The mode is deployment wide and not a secret.
+ * authorization mode as `authorize`, so a driven row can record the mode it ran in. Since security
+ * hotfix H3 (DATA-1) the word is always `enforce`; `TURBOSLIDE_AUTHORIZE` no longer changes it.
  */
 
 export const Route = createFileRoute('/api/access/$')({

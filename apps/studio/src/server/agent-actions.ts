@@ -326,7 +326,6 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
       DeniedError,
       authorFor,
       authorize,
-      authorizeMode,
       capabilityForAction,
       denialBody,
       identityLabel,
@@ -335,10 +334,9 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
     const { assertFlag } = await import('./flags');
     const { logSecurityEvent } = await import('./log');
     const { assertQuota, tierOf } = await import('./ratelimit');
-    // authorize() first (gslides-parity SPEC-3 6.2, 11.5 R3) with the request's identity: in
-    // shadow mode a denial is logged and the call proceeds; in enforce mode it is refused with
-    // the body of 6.2. The author is the session's; the body's author is the fallback of a
-    // request with no session behind it, logged so the shadow week shows how often that happens.
+    // authorize() first (gslides-parity SPEC-3 6.2, 11.5 R3) with the request's identity: a
+    // denial is refused with the body of 6.2 (every deployment since H3, DATA-1). The author is
+    // the session's; a request with no identity behind it is refused and logged.
     const ctx = await requestContext();
     // the draft's first write may be a picture (docs/FOCUS.md rank 6): the deck is created from
     // the blank template under the draft's id with this session as its owner, before the
@@ -380,13 +378,11 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
         action: data.action,
         transport: 'window',
         reason: data.author.kind,
-        shadow: authorizeMode() === 'shadow',
       });
-      if (authorizeMode() === 'enforce')
-        throw new DeniedError(
-          401,
-          denialBody({ ok: false, status: 401, code: 'unauthorized' }, capability ?? 'read'),
-        );
+      throw new DeniedError(
+        401,
+        denialBody({ ok: false, status: 401, code: 'unauthorized' }, capability ?? 'read'),
+      );
     }
     const author = authorFor(ctx, data.author);
     if (ACTIONS[data.action].mutates) {

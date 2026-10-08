@@ -23,9 +23,8 @@ import {
   denialBody,
   fileRecordLoader,
   missingRecordMode,
+  namedDeckCheck,
   requestContext,
-  roleOf,
-  shadowStanding,
 } from './authorize';
 import type { AccessRecord, AuthContext, Capability } from './authorize';
 import { studioSessionSecret } from './auth/middleware';
@@ -33,11 +32,11 @@ import { sealPrincipalCookie } from './auth/session';
 import { setSecurityLogSink } from './log';
 import type { SecurityLine } from './log';
 
-// The server wrapper of gslides-parity SPEC-3 6.2 in shadow and enforce mode (11.5 R3) over the
-// identity package's decide() (merge 1b, build-3/integrator.md section 4): the file record
-// loader of a checkout, the request context from the bootstrap bearer or the sealed cookie, the
-// server derived author (8.2), the shadow fallback role, and every denial as one log line. The
-// matrix itself is pinned cell by cell in packages/identity/src/access.test.ts.
+// The server wrapper of gslides-parity SPEC-3 6.2 over the identity package's decide() (merge 1b,
+// build-3/integrator.md section 4): the file record loader of a checkout, the request context
+// from the bootstrap bearer or the sealed cookie, the server derived author (8.2), and every
+// denial refused and logged as one line whatever TURBOSLIDE_AUTHORIZE says (security hotfix H3,
+// DATA-1). The matrix itself is pinned cell by cell in packages/identity/src/access.test.ts.
 
 const OWNER: AuthContext = {
   principal: { id: 'usr_owner', kind: 'account', email: 'owner@example.test', admin: false },
@@ -87,17 +86,17 @@ afterEach(() => {
   bindAuthorize({
     decide: boundDecide,
     loadRecord: () => Promise.resolve(null),
-    mode: () => 'shadow',
     now: () => Date.now(),
   });
   bindAuthorNamer(undefined);
 });
 
 describe('the mode', () => {
-  it('is shadow by default and enforce only when spelled', () => {
-    expect(authorizeMode({})).toBe('shadow');
+  it('is enforce whatever TURBOSLIDE_AUTHORIZE says (H3, DATA-1: production carried shadow)', () => {
+    expect(authorizeMode({})).toBe('enforce');
     expect(authorizeMode({ TURBOSLIDE_AUTHORIZE: 'ENFORCE ' })).toBe('enforce');
-    expect(authorizeMode({ TURBOSLIDE_AUTHORIZE: 'yes' })).toBe('shadow');
+    expect(authorizeMode({ TURBOSLIDE_AUTHORIZE: 'shadow' })).toBe('enforce');
+    expect(authorizeMode({ TURBOSLIDE_AUTHORIZE: 'yes' })).toBe('enforce');
     // the checkout's file store alone reads it since H3 (access.ts missingRecordRule)
     expect(missingRecordMode({})).toBe('open');
     expect(missingRecordMode({ TURBOSLIDE_MISSING_RECORD: 'notFound' })).toBe('notFound');
@@ -195,80 +194,76 @@ describe('the file record loader (a checkout, SPEC-3 6.9)', () => {
   });
 });
 
-describe('authorize() in shadow and enforce mode (SPEC-3 11.5 R3)', () => {
-  it('logs a denial and lets the call proceed in shadow mode, with the denial attached', async () => {
-    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'shadow' });
-    const decision = await authorize(STRANGER, 'q4-review', 'write', {
-      action: 'slide.update',
-      transport: 'window',
-    });
-    expect(decision.ok).toBe(true);
-    if (decision.ok) {
-      expect(decision.shadow).toEqual({ status: 404, code: 'not_found' });
-      // the floor of the focus round (docs/FOCUS.md rank 1): a stranger on a restricted deck is
-      // handed the viewer role in shadow mode, never the editor the parity rounds let through
-      expect(decision.role).toBe('viewer');
-      expect(decision.via).toBe('open');
+describe('authorize() refuses every denial (SPEC-3 6.2; H3, DATA-1)', () => {
+  it('refuses with the status of the decision and one log line, with TURBOSLIDE_AUTHORIZE=shadow set', async () => {
+    const before = process.env.TURBOSLIDE_AUTHORIZE;
+    process.env.TURBOSLIDE_AUTHORIZE = 'shadow';
+    try {
+      bindAuthorize({ loadRecord: () => Promise.resolve(restricted()) });
+      const denied = await authorize(STRANGER, 'q4-review', 'write', {
+        action: 'slide.update',
+        transport: 'window',
+      });
+      expect(denied).toEqual({ ok: false, status: 404, code: 'not_found' });
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toMatchObject({
+        event: 'authorize.deny',
+        status: 404,
+        reason: 'not_found',
+        deckId: 'q4-review',
+        action: 'slide.update',
+        capability: 'write',
+        identity: STRANGER.principal?.id,
+        transport: 'window',
+      });
+      expect(lines[0]).not.toHaveProperty('shadow');
+      for (const capability of ['read', 'rename', 'copy', 'trash', 'remove'] as const)
+        expect(await authorize(STRANGER, 'q4-review', capability)).toMatchObject({
+          ok: false,
+          status: 404,
+        });
+      const editor: AuthContext = {
+        principal: { id: 'usr_editor', kind: 'account', admin: false },
+        linkGrants: [],
+      };
+      const forbidden = await authorize(editor, 'q4-review', 'remove');
+      expect(forbidden).toMatchObject({ ok: false, status: 403, code: 'forbidden' });
+      if (!forbidden.ok) {
+        expect(denialBody(forbidden, 'remove')).toEqual({
+          error: 'forbidden',
+          capability: 'remove',
+        });
+        expect(denialBody(denied as typeof forbidden, 'read')).toEqual({ error: 'not_found' });
+      }
+      expect(await authorize(anonymousContext(), 'q4-review', 'read')).toEqual({
+        ok: false,
+        status: 401,
+        code: 'unauthorized',
+      });
+      expect(await authorize(OWNER, 'q4-review', 'remove')).toEqual({
+        ok: true,
+        role: 'owner',
+        via: 'owner',
+      });
+    } finally {
+      if (before === undefined) delete process.env.TURBOSLIDE_AUTHORIZE;
+      else process.env.TURBOSLIDE_AUTHORIZE = before;
     }
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toMatchObject({
-      event: 'authorize.deny',
-      status: 404,
-      reason: 'not_found',
-      shadow: true,
-      deckId: 'q4-review',
-      action: 'slide.update',
-      capability: 'write',
-      identity: STRANGER.principal?.id,
-      transport: 'window',
-    });
-    const allowed = await authorize(OWNER, 'q4-review', 'remove');
-    expect(allowed).toEqual({ ok: true, role: 'owner', via: 'owner' });
-    expect(lines).toHaveLength(1);
   });
 
-  it('refuses in enforce mode with the status of the decision and one log line', async () => {
-    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'enforce' });
-    const denied = await authorize(STRANGER, 'q4-review', 'read');
-    expect(denied).toEqual({ ok: false, status: 404, code: 'not_found' });
-    const editor: AuthContext = {
-      principal: { id: 'usr_editor', kind: 'account', admin: false },
-      linkGrants: [],
-    };
-    const forbidden = await authorize(editor, 'q4-review', 'remove');
-    expect(forbidden).toMatchObject({ ok: false, status: 403, code: 'forbidden' });
-    if (!forbidden.ok) {
-      expect(denialBody(forbidden, 'remove')).toEqual({ error: 'forbidden', capability: 'remove' });
-      expect(denialBody(denied as typeof forbidden, 'read')).toEqual({ error: 'not_found' });
-    }
-    expect(lines.map((line) => line.shadow)).toEqual([false, false]);
-    expect(await authorize(anonymousContext(), 'q4-review', 'read')).toEqual({
-      ok: false,
-      status: 401,
-      code: 'unauthorized',
-    });
-  });
-
-  it('treats a loader failure as a denial: logged, 404 in enforce mode, through in shadow mode', async () => {
-    bindAuthorize({
-      loadRecord: () => Promise.reject(new TypeError('bad json')),
-      mode: () => 'enforce',
-    });
+  it('treats a loader failure as a 404, logged', async () => {
+    bindAuthorize({ loadRecord: () => Promise.reject(new TypeError('bad json')) });
     expect(await authorize(OWNER, 'q4-review', 'read')).toEqual({
       ok: false,
       status: 404,
       code: 'not_found',
     });
     expect(lines[0]).toMatchObject({ event: 'authorize.error', reason: 'TypeError' });
-    bindAuthorize({ mode: () => 'shadow' });
-    const through = await authorize(OWNER, 'q4-review', 'read');
-    expect(through.ok).toBe(true);
   });
 
   it('uses the bound decide() and never writes an address into the log', async () => {
     bindAuthorize({
       decide: () => ({ ok: false, status: 403, code: 'forbidden', capability: 'write' }),
-      mode: () => 'enforce',
     });
     const leaky: AuthContext = {
       principal: { id: 'someone@example.test', kind: 'account', admin: false },
@@ -278,44 +273,52 @@ describe('authorize() in shadow and enforce mode (SPEC-3 11.5 R3)', () => {
     expect(lines[0]?.identity).toBe('[redacted]');
     expect(JSON.stringify(lines)).not.toContain('example.test');
   });
-});
 
-describe('the shadow fallback role', () => {
-  it('reads a missing record as the open editor and a restricted record by standing', () => {
-    expect(roleOf(null, STRANGER)).toEqual({ role: 'editor', via: 'open' });
-    expect(roleOf(restricted(), STRANGER)).toBeNull();
-    expect(roleOf(restricted(), OWNER)).toEqual({ role: 'owner', via: 'owner' });
-    expect(roleOf(restricted(), anonymousContext())).toBeNull();
-  });
-
-  it('hands a caller with no standing the viewer floor, and every other caller their standing (docs/FOCUS.md rank 1)', async () => {
-    expect(shadowStanding(null, STRANGER)).toEqual({ role: 'editor', via: 'open' });
-    expect(shadowStanding(restricted(), STRANGER)).toEqual({ role: 'viewer', via: 'open' });
-    expect(shadowStanding(restricted(), anonymousContext())).toEqual({
-      role: 'viewer',
-      via: 'open',
-    });
-    expect(shadowStanding(restricted(), OWNER)).toEqual({ role: 'owner', via: 'owner' });
+  it('gives a link viewer the viewer role and refuses its write', async () => {
+    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()) });
     const viewerByLink: AuthContext = {
       ...STRANGER,
       linkGrants: [{ linkId: 'lnk_view01', deckId: 'q4-review', role: 'viewer' }],
     };
-    expect(shadowStanding(restricted(), viewerByLink)).toEqual({ role: 'viewer', via: 'link' });
-    // through authorize(): the viewer who changed /deck/ to /edit/ is refused `write` and handed
-    // the viewer role the record grants, so the editor opens in Viewing mode (audit-present row
-    // 29); the stranger is handed the floor (row 26); the editor refused `remove` keeps `editor`
-    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'shadow' });
-    const viewer = await authorize(viewerByLink, 'q4-review', 'write');
-    expect(viewer).toMatchObject({ ok: true, role: 'viewer', via: 'link' });
-    const stranger = await authorize(STRANGER, 'q4-review', 'read');
-    expect(stranger).toMatchObject({ ok: true, role: 'viewer', via: 'open' });
-    const editor: AuthContext = {
-      principal: { id: 'usr_editor', kind: 'account', admin: false },
-      linkGrants: [],
-    };
-    const refusedRemove = await authorize(editor, 'q4-review', 'remove');
-    expect(refusedRemove).toMatchObject({ ok: true, role: 'editor', via: 'grant' });
-    expect(lines.map((line) => line.shadow)).toEqual([true, true, true]);
+    expect(await authorize(viewerByLink, 'q4-review', 'read')).toEqual({
+      ok: true,
+      role: 'viewer',
+      via: 'link',
+    });
+    expect(await authorize(viewerByLink, 'q4-review', 'write')).toMatchObject({
+      ok: false,
+      status: 403,
+    });
+  });
+});
+
+describe('the deck an action names (H3, DATA-1)', () => {
+  it('decides deck.copy, trash, restore, remove and slide.import on the deck the input names', async () => {
+    bindAuthorize({
+      loadRecord: (deckId) => Promise.resolve(deckId === 'q4-review' ? restricted() : null),
+    });
+    /* the stranger's own deck passes the transport's decision; the deck it names does not */
+    const stranger = namedDeckCheck(STRANGER, true);
+    for (const capability of ['copy', 'trash', 'restore', 'remove'] as const) {
+      const refused = stranger('q4-review', capability, `deck.${capability}`);
+      await expect(refused).rejects.toBeInstanceOf(DeniedError);
+      await expect(refused).rejects.toMatchObject({ status: 404, body: { error: 'not_found' } });
+      /* a deck that does not exist answers the same */
+      await expect(stranger('no-such-deck', capability, 'deck')).rejects.toMatchObject({
+        status: 404,
+        body: { error: 'not_found' },
+      });
+    }
+    await expect(namedDeckCheck(OWNER, true)('q4-review', 'remove', 'deck.remove')).resolves.toBe(
+      undefined,
+    );
+    /* a request with no identity is refused; outside a request (the CLI) nothing is decided */
+    await expect(
+      namedDeckCheck(null, true)('q4-review', 'copy', 'deck.copy'),
+    ).rejects.toMatchObject({ status: 401 });
+    await expect(namedDeckCheck(null, false)('q4-review', 'copy', 'deck.copy')).resolves.toBe(
+      undefined,
+    );
   });
 });
 
@@ -376,7 +379,7 @@ describe('the request context and the derived author (SPEC-3 8.2)', () => {
     expect(loaded.principal?.id).toBe(STRANGER.principal!.id);
     expect(loaded.linkGrants).toEqual(expect.arrayContaining(grants));
     /* the grants make the difference between 404 and the viewer role on a restricted deck */
-    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()), mode: () => 'enforce' });
+    bindAuthorize({ loadRecord: () => Promise.resolve(restricted()) });
     expect(await authorize(loaded, 'q4-review', 'read')).toEqual({
       ok: true,
       role: 'viewer',

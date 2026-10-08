@@ -138,6 +138,10 @@ async function jobFile(
         { status: 404 },
       );
     const batched = await batchedJobFile(deckId, jobId, name);
+    // a worker job of another deck is no file of this one (H3, DATA-1: the decision above is
+    // the path's deck's)
+    if (batched === null && !(await jobOfDeck(jobId, deckId)))
+      return Response.json({ error: { message: `no job ${jobId}`, status: 404 } }, { status: 404 });
     const data = batched?.data ?? (await worker().readJobFile(jobId, `export/${name}`));
     return new Response(data, {
       headers: {
@@ -173,6 +177,14 @@ function sameToken(given: string, expected: string): boolean {
 }
 
 /** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, open otherwise. */
+/** True when the worker's job was submitted for this deck. */
+async function jobOfDeck(jobId: string, deckId: string): Promise<boolean> {
+  const job = await worker()
+    .job(jobId)
+    .catch(() => null);
+  return (job?.input as { deckId?: string } | undefined)?.deckId === deckId;
+}
+
 function unauthorized(request: Request): Response | null {
   const token = process.env.TURBOSLIDE_TOKEN;
   if (token === undefined || token === '') return null;
@@ -484,7 +496,8 @@ export const Route = createFileRoute('/api/export/$deckId')({
         try {
           if (jobId) {
             const job = await worker().job(jobId);
-            if (!job)
+            // the job of another deck answers as a missing one (H3, DATA-1)
+            if (!job || (job.input as { deckId?: string } | undefined)?.deckId !== params.deckId)
               return Response.json(
                 { error: { message: `no job ${jobId}`, status: 404 } },
                 { status: 404 },

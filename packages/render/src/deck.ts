@@ -17,6 +17,7 @@ import type { SlideId } from '@turboslide/schema/ids';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { deckCounterFormat } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
+import { safeStyleText } from '@turboslide/schema/style-text';
 
 /**
  * What a document needs from the theme and the fonts. The CLI and the headless driver load these
@@ -154,7 +155,7 @@ export function renderDeck(deck: Deck, slides: Slide[], options: RenderDeckOptio
     `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
     `<title>${escapeText(title ?? deck.title)}</title>` +
     `<style>${bundle.fontsCss}</style><style>${bundle.sheetCss}</style><style>${bundle.stageCss}</style>` +
-    `<style>${BLOCK_CSS}</style>${extraCss ? `<style>${extraCss}</style>` : ''}`;
+    `<style>${BLOCK_CSS}</style>${extraCss ? `<style>${safeStyleText(extraCss)}</style>` : ''}`;
   const html =
     `<!doctype html><html lang="en" data-theme="${options.theme}"><head>${head}</head>` +
     `<body class="ts-render-surface">${stage}<script>${runtime ?? RENDER_SURFACE_SCRIPT}</script></body></html>\n`;

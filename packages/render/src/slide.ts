@@ -20,6 +20,7 @@ import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box, Theme } from '@turboslide/schema/render';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
+import { safeStyleText } from '@turboslide/schema/style-text';
 import { grammarRecordOf } from '@turboslide/schema/canvas';
 import { slideFieldTypography } from '@turboslide/schema/field-typography';
 import { typographyDeclarations } from '@turboslide/schema/typography';
@@ -265,7 +266,9 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
   const kitCss = options.noKitCss === true ? '' : kitStyle(deck, slide, options);
   const scopedCss =
     kitCss +
-    (residual?.css ? `<style>${rewriteSlideScope(residual.css, `.ts-x-${slide.id}`)}</style>` : '');
+    (residual?.css
+      ? `<style>${safeStyleText(rewriteSlideScope(residual.css, `.ts-x-${slide.id}`))}</style>`
+      : '');
   // The residual rules are written against `.ts-x-<slideId>`; rewriteSlideScope prefixes `.ts-sheet`
   // so they keep the cascade weight they had in the deck, where the theme's rules had one class less.
   const themeId = themeIdOf(deck.theme);
@@ -449,7 +452,7 @@ export function kitStyle(deck: Deck, slide: Slide, options: RenderOptions): stri
   ]
     .filter((part) => part !== '')
     .join('\n');
-  return css === '' ? '' : `<style class="${THEME_CSS_CLASS}">${css}</style>`;
+  return css === '' ? '' : `<style class="${THEME_CSS_CLASS}">${safeStyleText(css)}</style>`;
 }
 
 /**

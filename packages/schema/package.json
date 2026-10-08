@@ -42,6 +42,7 @@
     "./findings": "./src/findings.ts",
     "./render": "./src/render.ts",
     "./ext": "./src/ext.ts",
+    "./style-text": "./src/style-text.ts",
     "./export": "./src/export.ts",
     "./errors": "./src/errors.ts",
     "./jitless": "./src/jitless.ts",

@@ -19,6 +19,7 @@ import type { AssetId, SlideId } from '@turboslide/schema/ids';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { deckAppearance, unskippedSlideOrder } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
+import { safeStyleText } from '@turboslide/schema/style-text';
 
 /** PowerPoint's page in points: 13.333333 in by 7.5 in (packages/export units.ts PAGE_IN). */
 export const PRINT_PAGE_PT = { width: 960, height: 540 } as const;
@@ -146,7 +147,7 @@ export function renderPrintDocument(
     `<meta charset="utf-8"><meta name="viewport" content="width=1600,initial-scale=1">` +
     `<title>${escapeText(title)}</title><meta name="robots" content="noindex">` +
     `<style>${options.bundle.fontsCss}</style><style>${options.bundle.sheetCss}</style><style>${options.bundle.stageCss}</style>` +
-    `<style>${BLOCK_CSS}</style><style>${PRINT_CSS}</style>${options.extraCss ? `<style>${options.extraCss}</style>` : ''}`;
+    `<style>${BLOCK_CSS}</style><style>${PRINT_CSS}</style>${options.extraCss ? `<style>${safeStyleText(options.extraCss)}</style>` : ''}`;
   const html =
     `<!doctype html><html lang="en" data-theme="${theme}"><head>${head}</head>` +
     `<body class="ts-print">${pages.join('\n')}</body></html>\n`;

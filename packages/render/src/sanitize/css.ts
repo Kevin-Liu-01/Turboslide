@@ -5,9 +5,12 @@
 // `url()` whose target is not a deck asset (`assets/...`) or an inline image (`data:image/`);
 // `expression(`, `behavior:` and `-moz-binding` (legacy script vectors); `position: fixed` and
 // `position: sticky` (a block that paints over the editor chrome); and `!important` on `z-index`
-// (the same trick with a stacking order). Everything else passes untouched, so the GT deck's
-// imported escape blocks render as before. Framework free, no DOM, runs on the server, in the
-// CLI and in the browser.
+// (the same trick with a stacking order). A `<` that opens markup (`</style`, `<!--`, `<script`)
+// is written as `\3c ` (schema style-text.ts, hardening H1 WEBV-1), so the CSS cannot close the
+// style element it lands in. Everything else passes untouched, so the GT deck's imported escape
+// blocks render as before. Framework free, no DOM, runs on the server, in the CLI and in the
+// browser.
+import { safeStyleText } from '@turboslide/schema/style-text';
 
 export type SanitizedCss = {
   css: string;
@@ -203,6 +206,8 @@ function serialize(rules: Rule[], dropped: string[]): string {
  */
 export function sanitizeCss(css: string): SanitizedCss {
   const dropped: string[] = [];
-  const out = serialize(parseRules(stripComments(css)), dropped);
+  const serialized = serialize(parseRules(stripComments(css)), dropped);
+  const out = safeStyleText(serialized);
+  if (out !== serialized) dropped.push('a < that opens markup, written as \\3c');
   return { css: out, dropped };
 }

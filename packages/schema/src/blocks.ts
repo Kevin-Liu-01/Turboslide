@@ -15,6 +15,7 @@ import { z } from 'zod';
 import { annotate } from './annotate.ts';
 import type { Color } from './color.ts';
 import { colorField } from './color.ts';
+import { withSafeImportCss } from './ext.ts';
 import type { AssetId, BlockId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import type { Dash, LineEnd, LineKind, ShapePresetId, LegacyShapeId } from './shapes.ts';
@@ -45,6 +46,7 @@ import {
 } from './text.ts';
 import type { Typography } from './typography.ts';
 import { typographySchema } from './typography.ts';
+import { safeStyleText } from './style-text.ts';
 import type { MaterialBlock } from './blocks/material.ts';
 import { materialBlockSchema } from './blocks/material.ts';
 import type { TableFields } from './blocks/table.ts';
@@ -124,8 +126,11 @@ export {
   materialUniformsSchema,
 } from './blocks/material.ts';
 
-/** Unknown fields survive under `ext` on exactly three levels: Slide, Block and Asset (SPEC 4.1). */
-export const extSchema = z.record(z.string(), z.unknown()).optional();
+/**
+ * Unknown fields survive under `ext` on exactly three levels: Slide, Block and Asset (SPEC 4.1).
+ * The importer's residual CSS is made safe inside a style element on the way in (ext.ts).
+ */
+export const extSchema = z.record(z.string(), z.unknown()).overwrite(withSafeImportCss).optional();
 
 // ---------------------------------------------------------------------------------------------
 // Types
@@ -1688,7 +1693,7 @@ export const logoPlatesBlockSchema = z.strictObject({
 export const htmlBlockSchema = z.strictObject({
   ...base,
   type: z.literal('html'),
-  css: annotate(z.string(), {
+  css: annotate(z.string().overwrite(safeStyleText), {
     label: 'CSS',
     control: 'textarea',
     group: 'Advanced',

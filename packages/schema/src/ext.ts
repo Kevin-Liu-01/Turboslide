@@ -5,12 +5,17 @@
 // imported deck keeps pixel parity; a lint pass lists them so they can be retired one by one.
 import { z } from 'zod';
 
+import { safeStyleText } from './style-text.ts';
+
 export type ImportResidual = {
   /** Inline CSS declarations applied to the block root, for example `gap:10px`. */
   style?: string;
   /** Extra class names kept on the block root so residual rules can target them. */
   classes?: string[];
-  /** Scoped CSS rules; on a slide they are rewritten under `.ts-x-<slideId>`. */
+  /**
+   * Scoped CSS rules; on a slide they are rewritten under `.ts-x-<slideId>`. Made safe inside a
+   * style element when parsed (style-text.ts).
+   */
   css?: string;
   /** The original scoped class of the source section, for the report. */
   scope?: string;
@@ -19,9 +24,23 @@ export type ImportResidual = {
 export const importResidualSchema = z.strictObject({
   style: z.string().optional(),
   classes: z.array(z.string()).optional(),
-  css: z.string().optional(),
+  css: z.string().overwrite(safeStyleText).optional(),
   scope: z.string().optional(),
 }) satisfies z.ZodType<ImportResidual>;
+
+/**
+ * `ext` with `import.css` made safe inside a style element (style-text.ts), the same object when
+ * there is nothing to change. `extSchema` runs it on every slide, block and asset it parses, so a
+ * write cannot store the breakout and a deck stored before the check loads with it neutralised.
+ */
+export function withSafeImportCss(ext: Record<string, unknown>): Record<string, unknown> {
+  const residual = ext['import'];
+  if (typeof residual !== 'object' || residual === null || Array.isArray(residual)) return ext;
+  const css: unknown = (residual as Record<string, unknown>)['css'];
+  if (typeof css !== 'string') return ext;
+  const safe = safeStyleText(css);
+  return safe === css ? ext : { ...ext, import: { ...residual, css: safe } };
+}
 
 /** An `ext` record that may carry the importer's residual. */
 export type ExtWithImport = Record<string, unknown> & { import?: ImportResidual };

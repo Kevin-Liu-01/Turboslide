@@ -11,6 +11,7 @@
 // presentation") decides between the frame and the block's note in a plate (`htmlBlockPolicy`).
 // Framework free; the CSS text the caller passes comes from the theme package.
 import type { BlockOf } from '@turboslide/schema/blocks';
+import { safeStyleText } from '@turboslide/schema/style-text';
 import type { BlockContext, HtmlFrameSource } from '../blocks/context.ts';
 import type { RenderOptions } from '../slide.ts';
 import { escapeAttr } from '../html.ts';
@@ -85,8 +86,8 @@ export function frameDocument(options: FrameDocumentOptions): string {
     '<style>',
     'html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }',
     `body { color: var(--ink, ${ink}); font-family: Inter, system-ui, sans-serif; }`,
-    options.themeCss ?? '',
-    options.css,
+    safeStyleText(options.themeCss ?? ''),
+    safeStyleText(options.css),
     '</style>',
     '</head>',
     `<body><div class="ts-sheet ${options.scope}" data-theme="${options.theme}">${options.html}</div></body>`,

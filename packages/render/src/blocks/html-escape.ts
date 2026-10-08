@@ -7,6 +7,7 @@
 // sandboxed frame instead (blocks/html-frame.ts, sanitize/frame.ts).
 import { el, escapeAttr } from '../html.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
+import { safeStyleText } from '@turboslide/schema/style-text';
 import { raster, rootAttrs } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { sanitizeCss } from '../sanitize/css.ts';
@@ -59,7 +60,7 @@ export function renderHtmlEscape(block: BlockOf<'html'>, ctx: BlockContext): str
   const scope = escapeScopeClass(ctx.slideId, block.id);
   // the tokenizer before the scope prefix (SPEC-3 8.4): @import, foreign url(), fixed positions go
   const css = scopeCss(sanitizeCss(block.css).css, `.${scope}`);
-  const styleTag = css ? `<style>${css}</style>` : '';
+  const styleTag = css ? `<style>${safeStyleText(css)}</style>` : '';
   return el(
     'div',
     {

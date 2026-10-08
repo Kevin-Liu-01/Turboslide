@@ -23,7 +23,7 @@ import {
 import { assertFlag } from '../../server/flags';
 import { publicDeckAnswer } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
-import { ensureDecks } from '../../server/root';
+import { ensureDecks, newDeckId } from '../../server/root';
 
 // POST /api/decks/bundle (docs/deck-transfer.md): uploads a deck bundle and creates the deck it
 // holds on this studio, or replaces one. The body is the zip itself (`application/zip` or
@@ -33,7 +33,7 @@ import { ensureDecks } from '../../server/root';
 // names the deck id to write under and `?replace=1` removes the deck that holds it first; without
 // it a taken id gets a free sibling (`<id>-2`). Since security hotfix H3 (DATA-V1) those two are
 // the deployment admin's: anyone else replaces only a deck they may write, and a new deck of
-// theirs takes a fresh random id with its record written first. The bundle is validated with
+// theirs takes a fresh random id and its record with it. The bundle is validated with
 // validateDeck, every digest is checked and every asset is scanned for its image type before a
 // byte is written (@turboslide/store/unpack); bodies are capped at 200 MB. The answer is the
 // unpack result with `editUrl`, 201 for a new deck and 200 for a replaced one, or the one error
@@ -197,19 +197,33 @@ export const Route = createFileRoute('/api/decks/bundle')({
         }
         try {
           // the deck a bundle upload makes is the uploader's, as a deck.create or deck.copy is its
-          // caller's (return/build/b4.md, the fix round, request 1; VERIFICATION.md R1-F2), with
-          // its record written first (H3, DATA-V3); a replaced deck keeps its record
-          const { createWithFreshId, recordNewDeck } = await import('../../server/access');
+          // caller's (return/build/b4.md, the fix round, request 1; VERIFICATION.md R1-F2); a
+          // replaced deck keeps its record. A new deck of anyone but the admin takes a fresh
+          // random id that nobody holds until this answer names it, so its record follows the
+          // unpack (which never writes into a folder that exists, the record's own on a file
+          // store) and a failed record write takes the deck away again (H3, DATA-V3)
+          const { creatorOf, recordNewDeck } = await import('../../server/access');
           let result: Awaited<ReturnType<typeof importDeckBundle>>;
           if (replacing || admin) {
             result = await importDeckBundle(read.zip, options);
             if (!result.replaced) await recordNewDeck(result.deckId, ctx);
-          } else
-            result = (
-              await createWithFreshId(ctx, (deckId) =>
-                importDeckBundle(read.zip, { as: deckId, replace: false }),
-              )
-            ).made;
+          } else {
+            if (creatorOf(ctx) === null)
+              return Response.json(
+                denialBody({ ok: false, status: 401, code: 'unauthorized' }, 'write'),
+                { status: 401 },
+              );
+            const decks = await ensureDecks();
+            let deckId = newDeckId();
+            while (await decks.has(deckId)) deckId = newDeckId();
+            result = await importDeckBundle(read.zip, { as: deckId, replace: false });
+            try {
+              await recordNewDeck(result.deckId, ctx);
+            } catch (error) {
+              await decks.remove(result.deckId).catch(() => undefined);
+              throw error;
+            }
+          }
           // no path of this instance in the answer, `dir` the store's `decks/<id>` (H3, DATA-V6)
           return Response.json(publicDeckAnswer(result), {
             status: result.replaced ? 200 : 201,

@@ -99,7 +99,7 @@ function pdfPages(bytes: Buffer): { pages: number; boxes: string[] } {
 
 export function rows(): void {
   test(title('home.present.show'), async ({ browser }) => {
-    test.setTimeout(90_000);
+    test.setTimeout(150_000);
     const page = await freshPage(browser);
     await openHome(page);
     /* a change of the visitor's and an agent's before the show */
@@ -308,48 +308,53 @@ export function rows(): void {
     }
     await page.context().close();
 
-    /* at 390, where the band runs taller than the screen, the show covers the screen: the slide
-       and the bar at its middle, the bar inside the column's 16 px gutter */
-    const phone = await freshPage(browser);
-    await openHome(phone, 'phone');
-    await bandReady(phone, 'present');
-    await phone.evaluate(() => {
-      const top = document.querySelector('[data-band="present"]')!.getBoundingClientRect().top;
-      window.scrollBy(0, top - 58);
-    });
-    await presentButton(phone).click();
-    await expect(stage(phone)).toBeFocused();
-    await phone.waitForFunction(
-      () =>
-        document
-          .querySelector('[data-band="present"] [data-show]')
-          ?.getAnimations({ subtree: true }).length === 0,
-    );
-    const fit = await phone.evaluate(() => {
-      const show = document.querySelector('[data-band="present"] [data-show]')!;
-      const box = (sel: string) => show.querySelector(sel)!.getBoundingClientRect();
-      const stage = box('[data-show-stage]');
-      const bar = box('.ts-home-show-bar');
-      return {
-        width: innerWidth,
-        height: innerHeight,
-        barLeft: bar.left,
-        barRight: bar.right,
-        top: stage.top,
-        bottom: bar.bottom,
-      };
-    });
-    test.info().annotations.push({
-      type: 'reading',
-      description: `the show at 390 by 844: the slide from y ${Math.round(fit.top)}, the bar to y ${Math.round(fit.bottom)}, the bar from x ${Math.round(fit.barLeft)} to ${Math.round(fit.barRight)}`,
-    });
-    expect(fit.barLeft).toBeGreaterThanOrEqual(16 - 0.5);
-    expect(fit.barRight).toBeLessThanOrEqual(fit.width - 16 + 0.5);
-    expect(Math.abs(fit.top - (fit.height - fit.bottom))).toBeLessThanOrEqual(2);
-    await phone.keyboard.press('Escape');
-    await expect(show(phone)).toHaveCount(0);
-    await expect(presentButton(phone)).toBeFocused();
-    await phone.context().close();
+    /* the band runs taller than the screen at 1440 by 900 (since DR-D4#7) and at 390, so the show
+       covers the screen at both: the slide and the bar inside the window at its middle wherever
+       the band is scrolled, the bar inside the column's 16 px gutter */
+    for (const width of ['desktop', 'phone'] as const) {
+      const viewer = await freshPage(browser);
+      await openHome(viewer, width);
+      await bandReady(viewer, 'present');
+      await viewer.evaluate(() => {
+        const top = document.querySelector('[data-band="present"]')!.getBoundingClientRect().top;
+        window.scrollBy(0, top - 58);
+      });
+      await presentButton(viewer).click();
+      await expect(stage(viewer)).toBeFocused();
+      await viewer.waitForFunction(
+        () =>
+          document
+            .querySelector('[data-band="present"] [data-show]')
+            ?.getAnimations({ subtree: true }).length === 0,
+      );
+      const fit = await viewer.evaluate(() => {
+        const show = document.querySelector('[data-band="present"] [data-show]')!;
+        const box = (sel: string) => show.querySelector(sel)!.getBoundingClientRect();
+        const stage = box('[data-show-stage]');
+        const bar = box('.ts-home-show-bar');
+        return {
+          width: innerWidth,
+          height: innerHeight,
+          barLeft: bar.left,
+          barRight: bar.right,
+          top: stage.top,
+          bottom: bar.bottom,
+        };
+      });
+      test.info().annotations.push({
+        type: 'reading',
+        description: `the show at ${fit.width} by ${fit.height}: the slide from y ${Math.round(fit.top)}, the bar to y ${Math.round(fit.bottom)}, the bar from x ${Math.round(fit.barLeft)} to ${Math.round(fit.barRight)}`,
+      });
+      expect(fit.top).toBeGreaterThanOrEqual(0);
+      expect(fit.bottom).toBeLessThanOrEqual(fit.height);
+      expect(fit.barLeft).toBeGreaterThanOrEqual(16 - 0.5);
+      expect(fit.barRight).toBeLessThanOrEqual(fit.width - 16 + 0.5);
+      expect(Math.abs(fit.top - (fit.height - fit.bottom))).toBeLessThanOrEqual(2);
+      await viewer.keyboard.press('Escape');
+      await expect(show(viewer)).toHaveCount(0);
+      await expect(presentButton(viewer)).toBeFocused();
+      await viewer.context().close();
+    }
   });
 
   test(title('home.present.focus'), async ({ browser }) => {
@@ -511,8 +516,9 @@ export function rows(): void {
         .poll(() =>
           page.evaluate(
             () =>
-              (window as unknown as { tsHomeStore: { get(): { agentStep: number } } }).tsHomeStore.get()
-                .agentStep,
+              (
+                window as unknown as { tsHomeStore: { get(): { agentStep: number } } }
+              ).tsHomeStore.get().agentStep,
           ),
         )
         .toBe(version - 1);
@@ -539,7 +545,9 @@ export function rows(): void {
         'aria-label',
         PRESENT.stageName(placeOf('next-steps'), N),
       );
-      expect(await stage(page).locator('[data-prompt]').count(), `show, version ${version}`).toBe(0);
+      expect(await stage(page).locator('[data-prompt]').count(), `show, version ${version}`).toBe(
+        0,
+      );
       await expect(stage(page)).not.toContainText('Click to add');
       await page.keyboard.press('Escape');
       await expect(show(page)).toHaveCount(0);

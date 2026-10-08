@@ -181,3 +181,22 @@ The answers of polish two's integrator, 2026-10-07, each in the push of the lane
   in D's push because `/sitemap.xml` arrives with P2-D#4. `help.docs.links` passed.
 - P2-N-1 and P2-N-3, done in `P2-integrator (N)` (`695f995a`): `<HomeNav />` with no props, and
   `home-page.spec.ts` reads "Dark or light" and the drawn half disc before and after the press.
+
+### The regroup after fix round 1 (2026-10-08)
+
+The hashes above are the first pass's. `integrator.md` section 4 maps each to its commit on the
+regrouped branch, which is rebased onto `origin/main` at `a3f646d8`. No request was filed after
+verifier pass 1. What the regroup adds:
+
+- P2-F-2 is now answered on `main` by `925f12f6` (Turboslide hotfix: the roster opened by a person
+  alone draws one disabled row, "Nobody else has it open"). This branch carries that commit as part
+  of its base, and the merge of `strings.ts` and `title-row-round1.test.tsx` keeps both changes.
+- The design round's note "Polish two updates the row" (`docs/updates.md`, the hosted smoke's
+  `/home` row): done in `P2-integrator (N)` (`6325e756`). The row's mark is polish two's hero lead.
+- The findings of verifier pass 1, each in the group of its owner: finding 1 and finding 3 in
+  `c5026c2f` (D), finding 4 in `922ce75b` (D), finding 2 in `269ca06c` (F, the first push, so no
+  push's walk parks `tables`), finding 5 in `da011ea0` (N), finding 6 in `fc0de84f` (D, after the
+  vendor group of `beb8ffd0`). Finding 7 (lane A, severity 1: `/home`'s Sign In draws after the
+  methods arrive) has no change and stays recorded.
+- Seen on the regroup's pictures, not filed: the docs' table of contents cut two long action names
+  at its edge on `/docs/reference/slide` at 1440 and 1280. Done in `P2-integrator (D)` (`6f83e8f2`).

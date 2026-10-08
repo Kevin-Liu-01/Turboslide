@@ -7,8 +7,8 @@
    the scrim fades over the toast duration and the card rises 8 px over the enter duration; off
    under reduced motion. The product round (docs/archive/rounds/PRODUCT.md 3.1): every field is ruled in
    --pt-field (3:1), every control's focus ring is the one inset ring of tokens.css, the X takes
-   the plate ground on hover, a checked box draws a check and not a dash, and every select is the
-   one select of tokens.css. Colors are tokens only. */
+   the plate ground on hover, a checked box draws a check and not a dash, and every dropdown is the
+   shared Select (Select.css, docs/DROPDOWNS.md). Colors are tokens only. */
 .ts-dialog-scrim {
   position: fixed;
   inset: 0;
@@ -172,11 +172,6 @@
   font: 13px/1.4 var(--pt-text);
 }
 
-/* a select fills its field row; the drawing is tokens.css's one select rule */
-.ts-dialog select {
-  width: 100%;
-}
-
 /* a dropdown's trigger fills its field row as the select did (Select.css, docs/DROPDOWNS.md 3.7) */
 .ts-dialog .ts-dropdown-trigger {
   width: 100%;
@@ -200,7 +195,6 @@
 }
 
 .ts-dialog input:focus-visible,
-.ts-dialog select:focus-visible,
 .ts-dialog textarea:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: -1px;

@@ -538,24 +538,63 @@ describe('the pointer (3.4)', () => {
     expect(arrive(outside, trigger(), 120)).toBe(false);
   });
 
-  it('closes with no change when anything that holds the trigger scrolls, and stays open while its own list scrolls', () => {
+  it('closes with no change when anything that holds the trigger scrolls it away, and stays open while its own list scrolls', () => {
     render(
       <div data-testid="panel" style={{ overflow: 'auto' }}>
         <Harness initial="next" />
       </div>,
     );
+    /* jsdom lays nothing out: the trigger's box is stood in, and a scroll moves it */
+    let top = 300;
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: top,
+        left: 40,
+        top,
+        right: 240,
+        bottom: top + 32,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
     fireEvent.click(trigger());
     fireEvent.scroll(list());
     expect(isOpen()).toBe(true);
+    top = 180;
     fireEvent.scroll(screen.getByTestId('panel'));
     expect(isOpen()).toBe(false);
     fireEvent.click(trigger());
+    top = 60;
     fireEvent.scroll(document);
     expect(isOpen()).toBe(false);
     fireEvent.click(trigger());
     fireEvent.blur(window);
     expect(isOpen()).toBe(false);
     expect(trigger().value).toBe('next');
+  });
+
+  it('stays open through a scroll event that left its trigger where it opened (the late event of the scroll that brought it into view)', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: 120,
+        left: 40,
+        top: 120,
+        right: 240,
+        bottom: 152,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
+    fireEvent.click(trigger());
+    fireEvent.scroll(screen.getByTestId('panel'));
+    fireEvent.scroll(document);
+    expect(isOpen()).toBe(true);
+    key('Escape');
   });
 });
 

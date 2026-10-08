@@ -268,9 +268,15 @@ export function Select<T extends string>({
 
   /* while open: a press outside closes with no change and goes on to what it hit (the menus'
      rule, question 6); a scroll of anything that holds the trigger closes it, as the system popup
-     does (question 7; the list's own scroll does not count); the window losing focus closes it */
+     does (question 7; the list's own scroll does not count), once the trigger has moved since the
+     list opened: a browser dispatches a scroll event at its next frame, so the scroll that brought
+     a clipped trigger into view on the press that opened it (the focus scroll of a mousedown, a
+     driver's scroll into view) arrives after the open, and closed the list it had just drawn (read
+     on the Format options panel at 1440: the first click on a trigger below the fold); the window
+     losing focus closes it */
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open || trigger === null) return undefined;
+    const opened = trigger.getBoundingClientRect();
     const onDown = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
@@ -283,9 +289,12 @@ export function Select<T extends string>({
     };
     const onScroll = (event: Event) => {
       const target = event.target;
-      if (!(target instanceof Node) || trigger === null) return;
+      if (!(target instanceof Node)) return;
       if (list.current?.contains(target)) return;
-      if (target === document || target.contains(trigger)) setOpen(false);
+      if (target !== document && !target.contains(trigger)) return;
+      const now = trigger.getBoundingClientRect();
+      if (Math.abs(now.top - opened.top) > 0.5 || Math.abs(now.left - opened.left) > 0.5)
+        setOpen(false);
     };
     const onWindowBlur = () => setOpen(false);
     document.addEventListener('pointerdown', onDown, true);

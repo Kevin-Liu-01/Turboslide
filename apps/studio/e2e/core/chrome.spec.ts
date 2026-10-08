@@ -19,6 +19,7 @@ import {
   teardownAll,
   title,
 } from './lib';
+import { chromeDropdowns } from './dropdowns';
 import { chromeFoundation } from './chrome-foundation';
 import { chromeFontP2 } from './font-p2';
 import { chromeMenus } from './chrome-menus';
@@ -591,9 +592,13 @@ const SURFACE_ROWS = chromeSurfaces();
 /* lane F of polish two (docs/POLISH-2.md 2.4, 2.5, 6.2): its rows live in font-p2.ts */
 const FONT_ROWS = chromeFontP2();
 
+/* the dropdown round (docs/DROPDOWNS.md 7.2, DD-C#2): its rows live in dropdowns.ts */
+const DROPDOWN_ROWS = chromeDropdowns();
+
 coverage(import.meta.filename, [
   ...FOUNDATION_ROWS,
   ...FONT_ROWS,
+  ...DROPDOWN_ROWS,
   ...SURFACE_ROWS,
   ...ROUND1_ROWS,
   ...PAGE_ROWS,

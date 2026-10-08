@@ -12004,6 +12004,85 @@
       "today": "not driven",
       "evidence": "docs/DESIGN.md 4.5; research-header 4.3 (every aligned number on /home tabular on this tree)",
       "note": "Polish two (docs/POLISH-2.md 6), P2-F#4"
+    },
+    {
+      "id": "chrome.select.every-site",
+      "feature": "chrome",
+      "interaction": "At 1440 in the light appearance, as the owner of a scratch deck on a local server, each surface of DROPDOWNS.md 2.1 a guest owner reaches opened in turn: /decks, /print/<deck>, /dev/auth, the Share dialog in both access modes, Download with More options open, Insert link, More fonts, Publish to the web, Special characters, the Comments panel, the Theme panel, Format options for the deck's line, table, chart and text box, and a text run's link popover. On every surface the document holds no `select` element; every dropdown drawn is a `button.ts-dropdown-trigger` with `role=\"combobox\"`, `aria-haspopup=\"listbox\"`, `aria-expanded=\"false\"`, an accessible name, a `value` attribute and `aria-controls` naming a `role=\"listbox\"` whose options carry `data-value` with `aria-selected=\"true\"` on the chosen one alone; a click opens each list in the popover layer and Escape closes it with the trigger's value unchanged",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "Kevin's screenshot of 2026-10-08; DROPDOWNS.md 2.1",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the access page, the Request access dialog and the person row's role and expiry fields draw only where sharing is enforced or for an invited account, and the asset intake and picker need assets: the S1 and S2 lanes' rows and unit tests read them (DROPDOWNS.md 7.3)"
+    },
+    {
+      "id": "chrome.select.keyboard",
+      "feature": "chrome",
+      "interaction": "The Link dialog (Insert > Link) on the twelve slide deck: Tab from the link field reaches the trigger; Down opens with None active and `aria-activedescendant` naming it; Down, Up, End (\"12. ...\"), Home, PageDown (ten rows on), PageUp move the active option; \"n\" from None reaches Next slide and \"n\" again None, \"l\" reaches Last slide, \"pr\" within a second reaches Previous slide; Escape closes with no change; Enter opens, Enter chooses \"3. ...\" and the link field empties; Space opens and Space chooses; Alt+Down opens and Alt+Up chooses; Tab with the list open chooses the active option and moves the focus to the next control; `document.activeElement` is the trigger at every step but the last. On /print/<deck> the disabled handout rows are skipped by Down and by type ahead. In the Share dialog, Escape on the open General access list sends no `share.setGeneralAccess` request within 2 s and leaves the dialog open; a second Escape closes the dialog",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "DROPDOWNS.md 3.3",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2"
+    },
+    {
+      "id": "chrome.select.pointer",
+      "feature": "chrome",
+      "interaction": "The Share dialog: a click on General access opens the list under the trigger, its left edge within 1 px of the trigger's and its width at least the trigger's; the chosen row draws the check and `aria-selected`; a hovered row draws `--pt-plate`; a click on Anyone with the link closes the list, sends one `share.setGeneralAccess` and draws the link role field; a click on the open trigger closes the list with no request; a press on the dialog's title closes the list with no request and leaves the dialog open (the open list covers the sentence under the field). The Download dialog's Appearance field, inside its `label`: a click on Dark closes the list, which stays closed 500 ms later, and the trigger reads Dark",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "DROPDOWNS.md 3.4, 3.5",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2"
+    },
+    {
+      "id": "chrome.select.over-dialog",
+      "feature": "chrome",
+      "interaction": "In both appearances at 1440: the open General access list matches `:popover-open` with `data-layer=\"popover\"`; `elementsFromPoint` at each row's centre returns the row or its child first, above the dialog card and the scrim; the Download dialog's Fonts list inside More options draws whole with every row first at its centre; choosing keeps the dialog open",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "Kevin's screenshot of 2026-10-08; DESIGN.md 2.2",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the person row's role list of 7.2 needs an invited account and is read by the S1 lane's rows"
+    },
+    {
+      "id": "chrome.select.placement",
+      "feature": "chrome",
+      "interaction": "A window of 1440 by 600: Format options' Line end field with its trigger within 120 px of the bottom opens its list above it, 8 px inside the viewport, at least as wide as its trigger and at most the larger of 320 px and the trigger's width; scrolling the panel by 120 px closes the list with no change; the Link dialog's list of seventeen options is at most 288 px tall, scrolls, stays 8 px inside the viewport, and keeps the active row in view as PageDown moves it; a resize from 1440 to 900 wide keeps an open Share list inside the viewport and under its trigger",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "DROPDOWNS.md 3.6",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; a trigger wider than 320 px gives its list its own width, as place() writes min-width and CSS lets it win over the 320 px max-width"
+    },
+    {
+      "id": "chrome.select.phone",
+      "feature": "chrome",
+      "interaction": "At 390 by 844 with touch, in both appearances: the Share dialog's General access field opens the same list, inside the viewport with 8 px on each side, at least as wide as the trigger, rows at least 28 px tall; a tap on a row chooses it with one write; the page holds no `select` element and no horizontal scroll while the list is open",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "DROPDOWNS.md 3.8",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the person row's role field needs an invited account and the table's Border weight field the phone editor's Format options; the S1 and S2 lanes' rows read them"
+    },
+    {
+      "id": "chrome.select.look",
+      "feature": "chrome",
+      "interaction": "At 1440 and 390 in both appearances, the Share dialog's General access field: the trigger is 32 px, radius 6 px, a 1 px `--pt-field` border, `--pt-paper` ground, `--pt-ink` text in Inter with tabular figures and the sprite's chevron; the open list computes radius 6 px, a 1 px `--pt-edge` border and `--pt-ring` with no blur or offset; rows are square and 28 px with tabular figures; the lit row draws `--pt-plate`; row text on paper and the lit row's ink on `--pt-plate` hold 4.5:1. In the light appearance at 1440 the compact trigger of the table's Format options is 22 px, and in the Publish size list the figures \"480\" of Small and \"960\" of Medium measure the same width",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 1,
+      "evidence": "DESIGN.md 3.1, 3.2, 4.5, 5.3",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the nine deck themes of 7.2 leave the chrome's tokens as they are (the chrome draws its own appearance), so the row reads the two appearances"
+    },
+    {
+      "id": "chrome.select.agent-set",
+      "feature": "chrome",
+      "interaction": "With the Share dialog open, `window.turboslide.studio.set('dialog.share.mode', 'link')` chooses through the dropdown with one `share.setGeneralAccess` and the list closed, and `set('General access', 'Restricted')` returns it with one more; `controls()` lists `{ kind: 'select', label: 'General access', control: 'dialog.share.mode', value }`; `set('dialog.share.mode', 'public')` throws `RangeError` naming the field and the value. In Format options, `set()` on the table's Border weight dropdown by its id writes once",
+      "driver": "core/chrome.spec.ts",
+      "today": "works",
+      "evidence": "`controls.ts` 150 to 245; `registry.test.ts` 90 to 130",
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the Seg, palette, icon and dither fields that the native mirrors served are set by the S2 lane's unit tests per mirror (DROPDOWNS.md 4)"
     }
   ]
 }

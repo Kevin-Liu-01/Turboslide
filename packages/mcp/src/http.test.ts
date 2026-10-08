@@ -268,6 +268,36 @@ describe('createMcpHttpHandler', () => {
     expect((await client.listTools()).tools).toHaveLength(1);
   });
 
+  it('answers a refusal the factory throws (the host gate, hardening H2) with its status', async () => {
+    const handler = createMcpHttpHandler({
+      createServer: () => {
+        throw Object.assign(new Error('This API key may not read this deck'), { status: 403 });
+      },
+    });
+    closers.push(() => handler.close());
+    const answer = await handler.handle(
+      new Request('http://localhost:4321/mcp', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json, text/event-stream',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'initialize',
+          params: {
+            protocolVersion: '2025-06-18',
+            capabilities: {},
+            clientInfo: { name: 'x', version: '0' },
+          },
+        }),
+      }),
+    );
+    expect(answer.status).toBe(403);
+    expect(handler.sessions()).toHaveLength(0);
+  });
+
   describe('the key binding of round three (SPEC-3 3.10, 7.7)', () => {
     const keys: Record<string, KeyBinding> = {
       'Bearer ts_one': {
@@ -324,6 +354,27 @@ describe('createMcpHttpHandler', () => {
       // another key is not held back
       await connect(handler, '/mcp', { authorization: 'Bearer ts_two' });
       expect(handler.sessions()).toHaveLength(3);
+    });
+
+    it('never lets a key ride a session opened without one (hardening H2)', async () => {
+      const { handler } = handlerWith({ resolveKey });
+      const { transport } = await connect(handler, '/mcp', { authorization: 'Bearer static' });
+      const ridden = await handler.handle(
+        new Request('http://localhost:4321/mcp', {
+          method: 'POST',
+          headers: {
+            authorization: 'Bearer ts_one',
+            'content-type': 'application/json',
+            accept: 'application/json, text/event-stream',
+            'mcp-session-id': transport.sessionId ?? '',
+            'mcp-protocol-version': '2025-06-18',
+          },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 9, method: 'tools/list' }),
+        }),
+      );
+      expect(ridden.status).toBe(401);
+      // the session stays its opener's
+      expect(handler.sessions()).toHaveLength(1);
     });
 
     it("closes a key's sessions on revoke and refuses a bound session whose key stopped resolving", async () => {

@@ -151,6 +151,11 @@ export type AuthorizeOptions = {
   action?: string;
   transport?: Transport;
   requestId?: string;
+  /**
+   * The mode of this call, over `TURBOSLIDE_AUTHORIZE`: the agent surface passes `enforce`
+   * (server/agent-gate.ts), because an API key's reach must not wait for the enforce flip.
+   */
+  mode?: AuthorizeMode;
 };
 
 /** The identity field of a log line: a principal id or the agent's token id, never an address. */
@@ -207,7 +212,7 @@ export async function authorize(
   options: AuthorizeOptions = {},
 ): Promise<ShadowedDecision> {
   const d = deps();
-  const mode = d.mode();
+  const mode = options.mode ?? d.mode();
   const base = {
     identity: identityLabel(ctx),
     deckId,

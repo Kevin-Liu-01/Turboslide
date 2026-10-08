@@ -1,19 +1,27 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { handleActionRequest, refuseSpoofedLocalhost } from '@turboslide/agent/http/dispatch';
+import {
+  WRITE_BODY_LIMIT,
+  handleActionRequest,
+  readJsonBody,
+  refuseSpoofedLocalhost,
+} from '@turboslide/agent/http/dispatch';
 import { errorResponse, jsonResponse, refuse } from '@turboslide/agent/http/errors';
+import { ForbiddenError } from '@turboslide/schema/errors';
 
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
-import { agentAuth, HTTP_DEFAULT_AUTHOR, requireAgentAuth } from '../../server/auth';
 import {
-  authorize,
-  bootstrapAgentContext,
-  capabilityForAction,
-  denialBody,
-  identityLabel,
-} from '../../server/authorize';
-import { assertFlag } from '../../server/flags';
+  INPUT_DECKS,
+  agentCaller,
+  deckNotFound,
+  gateAgentAction,
+  gateDeckRead,
+} from '../../server/agent-gate';
+import type { AgentCaller } from '../../server/agent-gate';
+import { agentAuth, HTTP_DEFAULT_AUTHOR, requireAgentAuth } from '../../server/auth';
+import { capabilityForAction } from '../../server/authorize';
+import { FlagOffError } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
-import { RateLimitedError, checkQuota, rateLimitedResponse } from '../../server/ratelimit';
+import { RateLimitedError, rateLimitedResponse } from '../../server/ratelimit';
 import { flushRoom } from '../../server/room';
 import { deckDir } from '../../server/root';
 
@@ -32,6 +40,14 @@ import { deckDir } from '../../server/root';
 // runs before the deck is opened, in shadow mode this round: the bootstrap bearer and a
 // checkout's localhost surface act as the admin (SPEC-3 0.23) until B3's key resolver binds
 // API key records (day four).
+//
+// Hardening H2 (AUTH-1, AV-1): the caller is the identity the bearer resolves to, an API key
+// acting for its owner with its scopes, and every call goes through the gate /mcp uses
+// (server/agent-gate.ts), which enforces in shadow mode too: the deck read before it is opened, the
+// action's capability on it and on the decks its input names, the read only switch and the write
+// quota. The handler takes the studio's bearer rule, so an API key reaches this route under that
+// gate (before H2 the agent package's token only rule answered every key 401). A deck the caller
+// cannot see and a deck that does not exist answer the same 404.
 
 export const Route = createFileRoute('/api/actions/$action')({
   server: {
@@ -43,6 +59,30 @@ export const Route = createFileRoute('/api/actions/$action')({
     },
   },
 });
+
+/** The answer for a refusal of the gate: the 503 and 429 bodies the route always gave, else the error body. */
+function gateRefusal(error: unknown, action: string): Response {
+  if (error instanceof FlagOffError)
+    return jsonResponse({ error: 'unavailable', message: error.message }, 503, {
+      'retry-after': '60',
+    });
+  if (error instanceof RateLimitedError) return rateLimitedResponse(error);
+  if (error instanceof RangeError) return refuse(404, 'unknown_deck', error.message, { action });
+  if (error instanceof ForbiddenError)
+    return jsonResponse(
+      {
+        error: {
+          name: error.name,
+          status: 403,
+          message: error.message,
+          action,
+          ...(error.capability !== undefined ? { capability: error.capability } : {}),
+        },
+      },
+      403,
+    );
+  return errorResponse(error, action);
+}
 
 async function serve(request: Request, action: string): Promise<Response> {
   // the token check runs before the deck is looked up, so a probe off localhost learns nothing
@@ -58,43 +98,34 @@ async function serve(request: Request, action: string): Promise<Response> {
   if (foreign !== null) return foreign;
   const url = new URL(request.url);
   const deckId = url.searchParams.get('deck') || DEFAULT_DECK;
-  if (request.method === 'POST' || request.method === 'PUT' || request.method === 'DELETE') {
-    const capability = capabilityForAction(action);
-    if (auth.ok) {
-      const ctx = bootstrapAgentContext(auth.mode);
-      if (capability !== null) {
-        const decision = await authorize(ctx, deckId, capability, { action, transport: 'http' });
-        if (!decision.ok) return jsonResponse(denialBody(decision, capability), decision.status);
-      }
-      if (capability !== null && capability !== 'read' && capability !== 'readComments') {
-        // the read only switch and the writes per minute per deck quota (SPEC-3 8.3, 8.12)
-        const identity = identityLabel(ctx) ?? 'agent:http';
-        try {
-          await assertFlag('readOnly', { identity, deckId, action });
-        } catch (error) {
-          return jsonResponse(
-            { error: 'unavailable', message: error instanceof Error ? error.message : 'read only' },
-            503,
-            { 'retry-after': '60' },
-          );
-        }
-        const refused = await checkQuota('writesPerMinutePerDeck', {
-          identity,
-          tier: 'agent',
-          deckId,
-          action,
-          transport: 'http',
-        });
-        if (refused instanceof RateLimitedError) return rateLimitedResponse(refused);
-      }
-    }
+  let caller: AgentCaller;
+  try {
+    caller = await agentCaller(request);
+    await gateDeckRead(caller, deckId, 'http', action);
+  } catch (error) {
+    return gateRefusal(error, action);
   }
   let dispatcher;
   try {
     dispatcher = (await deckDispatcher(deckId)).dispatcher;
   } catch (error) {
-    if (error instanceof RangeError) return refuse(404, 'unknown_deck', error.message, { action });
+    if (error instanceof RangeError)
+      return refuse(404, 'unknown_deck', deckNotFound(deckId), { action });
     return errorResponse(error, action);
+  }
+  if (request.method === 'POST' || request.method === 'PUT' || request.method === 'DELETE') {
+    // the decks an input names (deck.copy, deck.trash, slide.import, ...) are read from a copy of
+    // the body; a body that does not parse is the handler's 400 below
+    let input: unknown;
+    if (INPUT_DECKS.has(action)) {
+      const read = await readJsonBody(request.clone(), WRITE_BODY_LIMIT);
+      input = read.ok ? read.value : undefined;
+    }
+    try {
+      await gateAgentAction(caller, { action, deckId, input, transport: 'http' });
+    } catch (error) {
+      return gateRefusal(error, action);
+    }
   }
   // what the open editor wrote a moment ago reaches the store before an agent reads it (room.ts
   // flushRoom; the product round fix round, pass 1 finding 12: deck.tailor planned over a store
@@ -115,6 +146,7 @@ async function serve(request: Request, action: string): Promise<Response> {
     defaultDeck: deckId,
     deckDir: (id) => deckDir(id),
     defaultAuthor: HTTP_DEFAULT_AUTHOR,
+    authorize: (req) => agentAuth(req),
     onDispatch: (event) => {
       if (process.env.TURBOSLIDE_AGENT_LOG === '1') {
         console.error(

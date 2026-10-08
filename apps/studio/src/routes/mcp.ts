@@ -5,7 +5,16 @@ import type { McpHttpHandler } from '@turboslide/mcp/http';
 import { createMcpServer } from '@turboslide/mcp/server';
 
 import { DEFAULT_DECK, deckDispatcher, readRenderUrl } from '../server/actions';
+import {
+  agentCaller,
+  deckNotFound,
+  gateDeckRead,
+  gatedDispatcher,
+  gatedSource,
+  keyBindingOf,
+} from '../server/agent-gate';
 import { agentAuthor, MCP_DEFAULT_AUTHOR, requireAgentAuth } from '../server/auth';
+import { refuseForeignOrigin } from '../server/headers';
 
 // /mcp (SPEC 7.3 "streamable HTTP at /mcp in the studio (M4) for hosted clients"; MILESTONES M4
 // item 1): the same MCP server `turboslide mcp` serves over stdio, over the SDK's web-standard
@@ -16,20 +25,38 @@ import { agentAuthor, MCP_DEFAULT_AUTHOR, requireAgentAuth } from '../server/aut
 // (server/sessions.ts), and it runs in that page. The bearer token rule applies before the
 // transport sees the request. The handler and its sessions live on globalThis so the dev
 // server's module reloads keep open sessions.
+//
+// Hardening H2 (AUTH-2, AV-2): the session acts for the identity its bearer resolves to, decided
+// by the gate /api/actions uses (server/agent-gate.ts). Initialize reads the deck before the store
+// opens it (a deck the key cannot see answers the not found of a missing deck), every tool call
+// and resource read is decided again for the action's capability and the decks its input names,
+// with the key's scopes, the read only switch and the write quota, and a session is bound to the
+// key that opened it, so another key or bearer never rides it.
 
 const HANDLER = Symbol.for('turboslide.studio.mcp');
 
 function handler(): McpHttpHandler {
   const holder = globalThis as unknown as Record<symbol, McpHttpHandler | undefined>;
   holder[HANDLER] ??= createMcpHttpHandler({
-    authorize: (request) => requireAgentAuth(request),
+    authorize: (request) => requireAgentAuth(request) ?? refuseForeignOrigin(request) ?? undefined,
+    resolveKey: (request) => keyBindingOf(request),
     createServer: async (request, sessionId) => {
       const deckId = requestDeckId(request, DEFAULT_DECK) ?? DEFAULT_DECK;
       const author = agentAuthor(request, MCP_DEFAULT_AUTHOR);
-      const deck = await deckDispatcher(deckId, { withView: true });
+      const caller = await agentCaller(request);
+      await gateDeckRead(caller, deckId, 'mcp');
+      let deck;
+      try {
+        deck = await deckDispatcher(deckId, { withView: true });
+      } catch (error) {
+        if (error instanceof RangeError) throw new RangeError(deckNotFound(deckId));
+        throw error;
+      }
       const created = createMcpServer({
-        dispatcher: deck.dispatcher,
-        source: deck.source,
+        dispatcher: gatedDispatcher(deck.dispatcher, caller, { deckId, transport: 'mcp' }),
+        source: gatedSource(deck.source, () =>
+          gateDeckRead(caller, deckId, 'mcp', 'resource.read'),
+        ),
         author,
         deckDir: deck.store.dir,
         version: '0.0.0',

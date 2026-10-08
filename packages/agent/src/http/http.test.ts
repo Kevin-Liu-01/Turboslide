@@ -227,6 +227,38 @@ describe('handleActionRequest', () => {
     expect(put.status).toBe(405);
   });
 
+  it("takes the host's bearer rule in place of the token rule (hardening H2, AV-1)", async () => {
+    const env = { TURBOSLIDE_TOKEN: 'static-token-of-this-test' };
+    const keyed = post(
+      '/api/actions/deck.info',
+      {},
+      { authorization: 'Bearer ts_a-key-the-host-knows' },
+    );
+    // the token rule alone refuses a bearer that is not the token
+    expect((await handleActionRequest(keyed, 'deck.info', { ...options, env })).status).toBe(401);
+    const host = (request: Request) =>
+      request.headers.get('authorization') === 'Bearer ts_a-key-the-host-knows'
+        ? ({ ok: true, mode: 'token' } as const)
+        : ({ ok: false, status: 401, code: 'unauthorized', message: 'not a key' } as const);
+    const again = post(
+      '/api/actions/deck.info',
+      {},
+      { authorization: 'Bearer ts_a-key-the-host-knows' },
+    );
+    expect(
+      (await handleActionRequest(again, 'deck.info', { ...options, env, authorize: host })).status,
+    ).toBe(200);
+    const stranger = post(
+      '/api/actions/deck.info',
+      {},
+      { authorization: 'Bearer static-token-of-this-test' },
+    );
+    expect(
+      (await handleActionRequest(stranger, 'deck.info', { ...options, env, authorize: host }))
+        .status,
+    ).toBe(401);
+  });
+
   it('dispatches, maps 409 with the current document and the holder, and honors force', async () => {
     const ok = await handleActionRequest(post('/api/actions/deck.info', {}), 'deck.info', options);
     expect(ok.status).toBe(200);

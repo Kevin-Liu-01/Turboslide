@@ -14,7 +14,7 @@ import { z } from 'zod';
 
 import type { ActionContext, Dispatcher } from '../dispatch.ts';
 import { authorize, isLocalHost, requestAuthor, requestDeckId, requestForce } from './auth.ts';
-import type { Env } from './auth.ts';
+import type { AuthResult, Env } from './auth.ts';
 import { errorResponse, jsonResponse, refuse } from './errors.ts';
 
 /** Request bodies are capped at 1 MB for writes and 25 MB for asset uploads (SPEC 11). */
@@ -116,6 +116,12 @@ export type ActionRequestOptions = {
   defaultAuthor?: string;
   /** Called after every dispatch, for the request log. */
   onDispatch?: (event: DispatchEvent) => void;
+  /**
+   * The bearer rule; the round one rule of auth.ts when absent. The studio passes its own, which
+   * admits API keys, after its gate decided the call for the key's owner and scopes
+   * (apps/studio/src/server/agent-gate.ts; hardening H2, AV-1).
+   */
+  authorize?: (request: Request, env: Env) => AuthResult;
 };
 
 export type ReadBodyResult = { ok: true; value: unknown } | { ok: false; response: Response };
@@ -194,7 +200,7 @@ export async function handleActionRequest(
   options: ActionRequestOptions,
 ): Promise<Response> {
   const env = options.env ?? process.env;
-  const auth = authorize(request, env);
+  const auth = (options.authorize ?? authorize)(request, env);
   if (!auth.ok) return refuse(auth.status, auth.code, auth.message);
   if (auth.mode === 'localhost') {
     // the localhost rule holds only when every host the request names is local (SPEC-3 8.8)

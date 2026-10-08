@@ -168,6 +168,10 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RangeError) return rpcError(404, -32004, message);
+      // a refusal the factory decided (the host's gate: 401, 403) keeps its status
+      const status = (error as { status?: unknown } | null)?.status;
+      if (typeof status === 'number' && status >= 400 && status < 500)
+        return rpcError(status, -32000, message);
       log(`mcp http: createServer failed: ${message}`);
       return rpcError(500, -32603, message);
     }
@@ -316,6 +320,13 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
             'this MCP session was bound to a key that no longer resolves; initialize again',
           );
         }
+        if (entry.session.key === undefined && key !== null)
+          // a session opened without a key acts for the static bearer: a key never rides it
+          return rpcError(
+            401,
+            -32001,
+            'this MCP session was opened without an API key; initialize again with this key',
+          );
         entry.session.lastSeenAt = stamp();
         return entry.transport.handleRequest(request);
       }

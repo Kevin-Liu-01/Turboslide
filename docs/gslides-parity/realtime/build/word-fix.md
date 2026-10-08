@@ -93,3 +93,75 @@ No character was lost or doubled in any row. The matrix's own `today` column lis
 - A tab of the build before this fix keeps mechanisms 2 to 4 until it reloads. The server fix covers mechanism 1 for it. No protocol field changed.
 - On the local do pair, the latency rows above miss their bounds at load 95 to 116, as they did before this change. The memory tier met the two typers row's 500 ms bound in all ten readings.
 - `textBurstMutation` and `absorbedText` still compute a splice as a diff of two strings when the session has no caret or splice to place it by: a re-send outside a session, or an announce without the room client's splices. No order the simulation produced reached that path with a word at stake.
+
+## Verifier
+
+The verifier's pass of 2026-10-07, 20:30 to 22:00 PDT, on `486b10b2` in the same worktree. Nothing was pushed or deployed and no setting was changed. The rig was the verifier's own: `wrangler dev` of `apps/realtime-worker` on 8781 over a copy of its config with its own local state and its own test secrets (64 hex characters each, never a real one), and the node-server build of this commit on 4781 and 4782 over one tmp overlay with `TURBOSLIDE_REALTIME=do` and `TURBOSLIDE_ROOM_HOST=127.0.0.1:8781`. All of it was stopped before this note was committed. The machine's one-minute load, from other sessions' jobs, ran from 65 to 468 during the pass.
+
+**Verdict: ready to ship.** The four mechanisms are fixed. No reading of this pass lost or doubled a word that the tree before the fix kept, and every comparison with `19bd3de7` reads the same number of red orders or fewer. The pass found three word-loss mechanisms that the hotfix does not touch (F1 to F3 below). Each one exists on production today, `realtime.title.two-typers` does not exercise any of them, and each needs its own fix. F2 was read in two browsers on this build.
+
+### Readings
+
+**`realtime.title.two-typers` on the do pair**, A on 4781 and B on 4782, 13 runs. Twelve were driven. In all twelve, every word was in both browsers once and the two browsers were equal. None passed whole: each failed the row's last assertion, the 500 ms bound, which runs after the word assertions. Run 9 also hit the test's 300 s timeout after its word assertions held. Run 10 was not driven: at load 468 the title's run did not appear within 20 s of setup.
+
+| Run | Load at start | Slowest word in the other browser |
+| --- | --- | --- |
+| 1 | 64.9 | 956 ms |
+| 2 | 91.2 | 878 ms |
+| 3 | 95.7 | 792 ms |
+| 4 | 100.1 | 1,097 ms |
+| 5 | 113.5 | 682 ms |
+| 6 | 106.5 | 512 ms |
+| 7 | 99.7 | 1,146 ms |
+| 8 | 137.7 | 2,237 ms |
+| 9 | 157.2 | 3,843 ms |
+| 10 | 468.0 | not driven |
+| 11 | 241.5 | 2,342 ms |
+| 12 | 202.5 | 2,764 ms |
+| 13 | 153.1 | 2,944 ms |
+
+**`core-gate.mjs --tier do --only realtime --second-base http://localhost:4782`**, 21:27 to 21:40, load 125 at the start and 95 at the end: 16 rows judged, 11 passed and 5 failed. `realtime.title.two-typers` passed whole, as did `reload.loses-nothing`, `reconnect.loses-nothing`, `caret.offset-after-merge`, `block.drag-live`, `join.chip-within-1s`, `follow.for-everyone`, `selection.outline-within-300ms`, `share-link.every-instance`, `departed-guest.name-stable` and `card.chip-painted`. All five reds are latency bounds: `keystroke.within-300ms` (374 to 721 ms; its every-letter-once assertions run first and held), `caret.within-300ms` (311 to 349 ms), `agent.write-announced` (1 s), `pointer.second-browser` (300 ms) and `caret.dims-and-leaves` (2 s).
+
+**`tsc -b`** over the workspace (load 202 to 275): exit 0.
+
+**Unit tests.**
+- `packages/realtime`: 187 of 193 green at load 165 to 195. The six reds were timeouts (`run-tie.test.ts` at 6.4 s, four poll-pace tests in `blob.test.ts`, the room client's 2,000-entry resync). Their three files then read 92 of 92 green at load 168 to 221.
+- `apps/realtime-worker`: 46 of 46 green.
+- `apps/studio` without `two-typers.test.ts`: 888 of 892 green at load 100 to 124. `authorize.test.ts`, `flags.test.ts` and `auth/actions.test.ts` were 5 s timeouts and read 37 of 37 green with `--testTimeout 120000`. `index-facts.test.ts` read red twice, also with the long timeout: "expected { variant: 'glyph', salt: 7 } to be undefined". The test's 5 s link-grant cache window expires under this load before its second read, and nothing in its import graph is in this diff.
+
+**The fixer's simulation, widened** (`TWO_TYPERS_SEEDS=2400`: seeds 1 to 2,400 in each of its three property runs, 7,200 orders): 5 of 5 tests green, every order green, 4,948 s from 20:47 to 22:09 at load 86 to 468.
+
+**The verifier's simulation.** This is the fixer's harness with what it does not drive: Backspace typos, deletes of the deck's own letters, POST answers lost after admission, stream drops and reopens, the `19bd3de7` room client and controller commit, an undo after the merge, and seeds from 10,001. The same file was also run against the tree before the fix (the `19bd3de7` `admitOps`, room client and commit) for each comparison. On the row's own shapes it reads that tree red ("ta3 ua tb3 ub33"), so it sees the class the hotfix fixes.
+
+| Property | `486b10b2` | `19bd3de7` | Mechanism of the reds |
+| --- | --- | --- | --- |
+| Cover, two people, three rounds | 0 of 400 | 6 of 100 | the four fixed |
+| Three people, three rounds, early wrap, mixed points | 0 of 400 | 15 of 100 | the four fixed |
+| One tab on the `19bd3de7` client and commit beside a new tab, new admission | 200 of 200 converged | not run | |
+| Both tabs on the `19bd3de7` client, new admission | 200 of 200 converged | not run | |
+| A Backspace typo inside every word, two and three people | 32 of 300 | 65 of 300 | F2 |
+| One person deletes the deck's letters at the others' point | 22 of 300 | 50 of 300 | F2 |
+| Undo of one person's last round after the merge | 115 of 300 | 123 of 300 | F3 |
+| A quarter of POST answers lost after admission | 52 of 60 | 53 of 60 | F1, then R |
+| The same, the answer ordered behind the stream (the socket) | 48 of 60 | 52 of 60 | F1 |
+| Stream drops, answers ordered behind the stream | 29 of 60 | 39 of 60 | F1, D |
+| Stream drops, answers apart from the stream | 35 of 60 | 35 of 60 (`19bd3de7` client) | D, F1 |
+
+### Findings
+
+None of these is caused by `486b10b2`. The reproductions are written out below; their files are kept in the verifier's session scratchpad (`wordfix-verify/harness/`, wiped on reboot) and are not committed.
+
+**F1. A resent POST's new entries are moved past the POST's own first entry (server: `admitOps`, `admitOnBlob` and the object's `admit`; pre-existing).** A retried POST answers an op id already in the log from the log and skips it before `transformEntry`, but that entry's rows stay in the landed set. The new entries after it were written on top of it, so they are moved past their own author's letters. Reproduction on the memory tier, a body text reading "Realtime title": a POST on base 0 with A:1 (splice at 14, " t") is admitted as seq 1 and its answer is lost. The tab resends on base 0 with A:1 again and A:2 (run, splice at 16, "a1"). A:1 is answered from the log. A:2 is moved past seq 1 to 18 and refused with "text.splice: 18 plus 0 is outside a text of 16 characters", and the text stays "Realtime title t". With " t" at 8 and "a1" at 10, the text reads "Realtime t ta1itle". On the object, an ops frame on base 0 with "t" at 0 is acknowledged; the frame resent on base 0 with "t" at 0 and "a1" at 1 places "a1" at 2. `19bd3de7` reads the same. The room client resends its unsettled ops on its last base after any `postOps` that threw: a lost HTTP answer, a 5xx after the append, or a socket closed after admission (`transport.ts` rejectAcks), resent over the HTTP belt. The loss happens when the stream has not brought the tab's own entry first. The suggested fix: when an entry is answered from the log and its seq is above the base, take its rows out of the landed set and move the rows that landed before it past it with `landedPast`. A diagnostic copy of `admitOps` with that change brought the lost-answer property from 52 to 24 of 60, and the ordered drop property from 29 to 14 of 60.
+
+**F2. The session's absorb swallows a word that lands right after a letter the person just deleted or replaced (client: InlineText `absorbedText`; pre-existing).** `absorbedText` moves the end of the unflushed local change with `shift(local.end)`. An end equal to the point where another person's insertion landed is moved past the insertion, so the local delete or replace covers the other person's word. The next burst then writes the removal to the document. Reproduction with the real function: `absorbedSession({ base: 'Realtime title tqx', raw: 'Realtime title tq', trimmed: 'Realtime title tq', remote: 'Realtime title tqx tb1', selection: [17, 17], splices: [{ at: 18, remove: 0, insert: ' tb1' }] })` returns 'Realtime title tq' where 'Realtime title tq tb1' is expected. With base '…ubx', raw '…ub1' and " ta1" landing at 22, it returns '…ub1', and the harness's next burst writes `[21, 4, '']`: A's " ta" is removed and A's "1" reads as B's. In two browsers on this build (the do pair, load 86 to 103), B typed " b<i>x". Once the "x" was in A's document, A opened the title at its end and typed " a<i>w", and B pressed Backspace 100 to 850 ms later and typed "yqqqq". Two of six attempts lost A's word in both browsers: "b2yqqqq2w" for " b2yqqqq a2w", and " a5w" was gone. The row types no Backspace, so it does not see this. The note's line that the string diffs lost no word holds only for typing that inserts.
+
+**F3. The undo of a person's own word is moved onto the other person's word typed at the same point (client: room-client `transformSince`, which undo-bursts `stepBursts` calls; pre-existing).** `transformSince` moves an inverse past every remote entry after the burst's clock as if both were written on one document, with the default tie. The room placed the person's run to the left of the other insert at that offset (the run rule), so the inverse moves onto the other person's letters. Reproduction from the harness's undo seed 10014, a body text with two people: A's bursts are " t" at 30 (run), "a2" at 32 and " ua2" at 34. B's " tb2" at 30 landed as seq 5 before A's " t" (seq 6), and the room kept A's word left of it: "…ua1 ta2 ua2 tb2 ub2". A's undo inverses [30, 2], [32, 2] and [34, 4] are moved to [34, 2], [36, 2] and [34, 4], and the result reads "…ua1 ta2 ub2". A's " ta2" stays and B's " tb2" is gone. 115 of 300 undo orders read red on this commit and 123 of 300 on `19bd3de7`.
+
+**R. A residual under lost answers that this pass did not isolate.** With F1 fixed in the diagnostic copy, 24 of 60 lost-answer orders stay red, and 26 of 60 with the `19bd3de7` client. In seed 10004 the tab resends " u" at 23 and "a1" at 25 on base 3 without the op ("1", admitted as seq 4, its answer lost) whose letter they count, and the room refuses both as outside the text. The pass did not read the mechanism.
+
+**D. A stale hello in the harness's drop mode with answers apart from the stream.** A reopened stream's hello names a position below the one the tab's POST answers already reached. The client reads it as a reset (`event.seq < seq`), resyncs, and applies the replay over a document that already holds it ("tc1 ucc1 uc1"). This needs the hello to arrive after the answer of a later POST, which the socket's single ordered channel excludes for frames sent on it. The harness's resync answer is a model of the store read, so this is reported as unconfirmed. The `19bd3de7` client reads the same 35 of 60.
+
+### Notes on the diff
+
+- `landedPast` was also read on the paths the fixer's tests do not name. On a refused entry, the undo rows appended after the landed set moved past the entry are in the frame the next entry was written in. The retry callback moves the rows past the placed candidates, and `readmit` past the log's own order. No defect was found.
+- Read from `recordEdit` and not driven in a browser: after this change the Escape's typed letters join the typing group (a text-run key) and the conversion is its own history entry. The first Cmd+Z after a converting Escape takes back the size and the conversion, and the second takes back the word. Before, the Escape's last letters rode the conversion's entry. No letter is lost either way.

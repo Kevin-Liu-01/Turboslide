@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import type { TemplateIndexEntry } from '@turboslide/schema/actions';
 import type { Appearance } from '@turboslide/schema/deck';
 import { deckAppearance } from '@turboslide/schema/deck';
-import { SLUG_PATTERN, slugify } from '@turboslide/schema/slug';
+import { SLUG_PATTERN } from '@turboslide/schema/slug';
 import type { HostingFacts } from '@turboslide/store/hosted';
 import type {
   CreateDeckResult,
@@ -205,14 +205,6 @@ export type CreateFromTemplateInput = {
   name?: string;
 };
 
-/** The deck id a copy of a template takes: the slug of the name with a short stamp, so two copies never collide. */
-export function deckIdForTemplateCopy(name: string, now: Date = new Date()): string {
-  const slug = slugify(name).slice(0, 40).replace(/-+$/g, '');
-  const stamp = now.getTime().toString(36);
-  const suffix = Math.random().toString(36).slice(2, 6);
-  return `${slug === '' ? 'presentation' : slug}-${stamp}${suffix}`;
-}
-
 const createFromTemplateFn = createServerFn({ method: 'POST' })
   .validator((input: CreateFromTemplateInput): CreateFromTemplateInput => {
     const from = requireSlug(input.from, 'from');
@@ -243,15 +235,14 @@ const createFromTemplateFn = createServerFn({ method: 'POST' })
       action: 'deck.create',
       transport: 'window',
     });
-    const created = await createStoredDeck({
-      name,
-      from: data.from,
-      id: deckIdForTemplateCopy(name),
-    });
-    // the record of SPEC-3 6.1: the creator its owner (VERIFICATION-3 finding 4)
-    const { recordNewDeck } = await import('./access');
-    await recordNewDeck(created.deckId, ctx);
-    return created;
+    // the record of SPEC-3 6.1 first, the creator its owner (VERIFICATION-3 finding 4; H3,
+    // DATA-V3), under a fresh random id (H3, DATA-V1: the slug of the name with the time and four
+    // characters of Math.random was guessable)
+    const { createWithFreshId } = await import('./access');
+    const { made } = await createWithFreshId(ctx, (id) =>
+      createStoredDeck({ name, from: data.from, id }),
+    );
+    return made;
   });
 
 /** A new deck from any template of the index (the gallery's cards, the /decks strip). */

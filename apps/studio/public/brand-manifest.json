@@ -112,8 +112,8 @@
       "kind": "rendered"
     },
     "apps/studio/public/robots.txt": {
-      "bytes": 99,
-      "sha256": "8489ce7043095c84c9a48bfa1fe7168421f3249b1b214d0fabd6f63b24983266",
+      "bytes": 148,
+      "sha256": "45fcbea4ac3c0356434eb1155f3cb329e88b3c70abad136c961115147209f9f4",
       "kind": "built"
     },
     "packages/theme/brand/facts.json": {

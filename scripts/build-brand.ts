@@ -514,6 +514,7 @@ function robotsTxt(): string {
   const lines = ['User-agent: *'];
   for (const path of SITE.robots.allow) lines.push(`Allow: ${path}`);
   for (const path of SITE.robots.disallow) lines.push(`Disallow: ${path}`);
+  lines.push('', `Sitemap: ${SITE.productionOrigin}${SITE.robots.sitemap}`);
   return `${lines.join('\n')}\n`;
 }
 

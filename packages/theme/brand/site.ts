@@ -111,10 +111,14 @@ const MANIFEST_ICONS: readonly ManifestIcon[] = [
   { src: ICON_PATHS.mono512, sizes: '512x512', type: 'image/png', purpose: 'monochrome' },
 ];
 
-/** The routes robots.txt disallows (the `NOINDEX_ROUTES` of __root.tsx as path prefixes) and the one it allows. */
+/**
+ * The routes robots.txt disallows (the `NOINDEX_ROUTES` of __root.tsx as path prefixes), the one it
+ * allows, and the sitemap's path, named at `SITE.productionOrigin` (docs/POLISH-2.md 5.2).
+ */
 export const ROBOTS = {
   allow: ['/og/'],
   disallow: ['/new', '/decks/trash', '/print/', '/edit/'],
+  sitemap: '/sitemap.xml',
 } as const;
 
 function envOrigin(): string | undefined {

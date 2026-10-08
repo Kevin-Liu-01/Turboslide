@@ -304,8 +304,19 @@ const PRERENDER = existsSync(HOME_ROUTE)
 // deployments while the app's chunks change. One group and no split by package: the boundary
 // between the editor and the viewer is the import graph's (the round four editor split), not a
 // chunking rule's. The client environment alone; the server bundle is Nitro's.
+// React DOM's server renderers stay out of the group: fumadocs-core's loader imports
+// `react-dom/server.edge` on demand (its page tree serializer), and the test pulled those 207 KB
+// into the chunk every route preloads (polish two, requests A-R1 and P2-D-2; the node-server build
+// of 2026-10-07). With the docs' lazy chunks in the graph the group takes effect, so the chunk
+// every route preloads is named `vendor` and holds the app's shared modules with the libraries.
 const VENDOR_TEST =
-  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/]/;
+  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
+// The landing's shared modules (polish two, request P2-N-2): the copy, the facts, the generated
+// assets and timings that /home's route and its live bands both import, in one chunk, so /home's
+// document names one preload for them where it named one per module (seven links, about 0.8 KB of
+// its 100,000 B line). Only the landing imports them (components/home and its live/ folder).
+const HOME_SHARED_TEST =
+  /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
 // Hidden source maps for the client chunks, opt in (the focus round, cycle 3 stream fix round's
 // fix round; VERIFICATION C2-F18): `TURBOSLIDE_CLIENT_SOURCEMAP=1` writes a `.map` beside every
 // chunk with no `sourceMappingURL` comment, so the served bytes are the same and
@@ -317,7 +328,14 @@ const CLIENT_BUILD = {
   build: {
     sourcemap: CLIENT_SOURCEMAP,
     rolldownOptions: {
-      output: { codeSplitting: { groups: [{ name: 'vendor', test: VENDOR_TEST, priority: 10 }] } },
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'vendor', test: VENDOR_TEST, priority: 10 },
+            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
+          ],
+        },
+      },
     },
   },
 };

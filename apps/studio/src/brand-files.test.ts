@@ -89,6 +89,7 @@ describe('the brand files (SPEC-4 0.13, 6.4)', () => {
     const robots = readFileSync(resolve(ROOT, `${PUBLIC_DIR}${ICON_PATHS.robots}`), 'utf8');
     for (const path of SITE.robots.allow) expect(robots).toContain(`Allow: ${path}`);
     for (const path of SITE.robots.disallow) expect(robots).toContain(`Disallow: ${path}`);
+    expect(robots).toContain(`Sitemap: ${SITE.productionOrigin}/sitemap.xml`);
   });
 
   it('keeps the card under a megabyte at 1200 by 630', () => {

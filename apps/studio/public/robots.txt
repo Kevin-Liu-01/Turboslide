@@ -4,3 +4,5 @@ Disallow: /new
 Disallow: /decks/trash
 Disallow: /print/
 Disallow: /edit/
+
+Sitemap: https://www.turboslide.com/sitemap.xml

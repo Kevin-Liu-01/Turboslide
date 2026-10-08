@@ -1,0 +1,606 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T10:25:47.733Z",
+  "ms": 380541,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": {
+    "exit": 1,
+    "ms": 380022,
+    "json": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/ship-now/p2-F-walk-r1/core-walk.json",
+    "deckId": "untitled-20261008-42iv",
+    "steps": 76
+  },
+  "specs": null,
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "probe",
+    "spec": null,
+    "rows": null,
+    "areas": [
+      "tables"
+    ],
+    "costRows": null
+  },
+  "rows": 48,
+  "passed": 47,
+  "failed": 0,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "6fd18a49",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "decks.new.draft": "passed",
+    "decks.new.ground-paint": "passed",
+    "decks.new.first-write": "passed",
+    "decks.title.save-words": "passed",
+    "decks.title.rename-enter": "passed",
+    "decks.title.rename-escape": "passed",
+    "decks.title.rename-blur": "passed",
+    "decks.title.rename-empty": "passed",
+    "decks.title.file-rename": "passed",
+    "decks.title.tab-title-after-rename": "passed",
+    "decks.title.mark-to-list": "passed",
+    "decks.edit.reload-keeps-slide": "passed",
+    "decks.save.acknowledged": "passed",
+    "tables.insert.grid": "passed",
+    "tables.cell.double-click-type": "passed",
+    "tables.cell.tab-from-written": "passed",
+    "tables.cell.tab-from-empty": "passed",
+    "tables.cell.shift-tab": "passed",
+    "tables.cell.tab-last-appends-row": "passed",
+    "tables.menu.format-table-with-session": "passed",
+    "tables.menu.format-table-selected": "passed",
+    "tables.menu.format-table-rows": "passed",
+    "tables.context.rows": "passed",
+    "tables.context.insert-delete": "passed",
+    "tables.column.insert-keeps-widths": "passed",
+    "tables.column.resize-seam": "passed",
+    "tables.cell.align-menu": "passed",
+    "tables.cell.align-toolbar": "passed",
+    "tables.select.resize": "passed",
+    "tables.cell.fill-border-tail": "passed",
+    "tables.cells.merge-unmerge": "passed",
+    "tables.tail.merge-unmerge-buttons": "passed",
+    "tables.distribute.rows-columns": "passed",
+    "tables.light-appearance": "passed",
+    "tables.present": "passed",
+    "tables.reload": "passed",
+    "decks.name.follows-heading": "passed",
+    "decks.file.open-list-search": "passed",
+    "decks.file.import-slides-deck": "passed",
+    "decks.file.details": "passed",
+    "tables.cell.click-places-caret": "passed",
+    "tables.cell.click-then-type": "passed",
+    "tables.range.drag-from-selected": "passed",
+    "tables.selected.typing-appends": "passed",
+    "tables.cell.arrows-cross-cells": "passed",
+    "tables.range.shift-arrows": "passed",
+    "tables.range.bold-italic": "passed",
+    "tables.range.size-color": "passed",
+    "tables.panel.table-first": "passed",
+    "tables.seam.row-drag": "passed",
+    "tables.edge.add-row-column": "passed",
+    "tables.heads.select-row-column": "passed",
+    "tables.bar.row-column-buttons": "not driven",
+    "tables.command.keeps-caret": "passed",
+    "tables.cells.tabular-figures": "passed",
+    "tables.select.ring-with-cell-open": "passed",
+    "tables.cell.ring-on-cell": "passed",
+    "tables.cells.empty-grid-guides": "passed",
+    "tables.light-appearance-guides": "passed",
+    "tables.insert.box-fits-rows": "passed",
+    "tables.rows.grow-with-text": "passed",
+    "tables.resize.rows-share-extra": "passed",
+    "tables.seam.visible-with-cell-open": "passed",
+    "tables.heads.header-toggle": "passed",
+    "tables.panel.section-words": "passed"
+  },
+  "verdict": {
+    "ok": true,
+    "failures": [],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [
+    {
+      "id": "tables.bar.row-column-buttons",
+      "parks": [
+        "bar.table"
+      ],
+      "result": "not driven"
+    }
+  ],
+  "blocking": [],
+  "retriesOk": true,
+  "exitCode": 0,
+  "table": [
+    {
+      "id": "tables.insert.grid",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.double-click-type",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.tab-from-written",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.tab-from-empty",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.shift-tab",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.tab-last-appends-row",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.menu.format-table-with-session",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.menu.format-table-selected",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.menu.format-table-rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.context.rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.context.insert-delete",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.column.insert-keeps-widths",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.column.resize-seam",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.align-menu",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.align-toolbar",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.select.resize",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.fill-border-tail",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.merge-unmerge",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.tail.merge-unmerge-buttons",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.distribute.rows-columns",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.light-appearance",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.present",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.reload",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.click-places-caret",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.click-then-type",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.drag-from-selected",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.selected.typing-appends",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.arrows-cross-cells",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.shift-arrows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.bold-italic",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.range.size-color",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.panel.table-first",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.seam.row-drag",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.edge.add-row-column",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.heads.select-row-column",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.bar.row-column-buttons",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "not driven",
+      "reason": "not on this build: bar.table (docs/archive/rounds/PRODUCT.md 7.1, B3); no bar under the selected table (P1, FEATURES.md 2.3 item 3)"
+    },
+    {
+      "id": "tables.command.keeps-caret",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.tabular-figures",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.select.ring-with-cell-open",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cell.ring-on-cell",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.cells.empty-grid-guides",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.light-appearance-guides",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.insert.box-fits-rows",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.rows.grow-with-text",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.resize.rows-share-extra",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.seam.visible-with-cell-open",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.heads.header-toggle",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "tables.panel.section-words",
+      "feature": "tables",
+      "driver": "probe --core",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

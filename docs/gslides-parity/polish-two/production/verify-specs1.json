@@ -1,0 +1,440 @@
+{
+  "base": "https://www.turboslide.com",
+  "tier": null,
+  "secondBase": null,
+  "roomHost": null,
+  "health": null,
+  "freePlanCaps": null,
+  "memoryReading": null,
+  "tierRows": {
+    "reason": "a do tier row; this run's tier is not named (no --tier)",
+    "ids": [
+      "setup.worker.health",
+      "setup.do.two-instances",
+      "setup.free-plan.caps",
+      "setup.do.memory"
+    ]
+  },
+  "defaultTemplate": {
+    "read": "blank",
+    "reset": false
+  },
+  "seedTwins": null,
+  "startedAt": "2026-10-08T12:19:28.646Z",
+  "ms": 665885,
+  "parked": {
+    "commit": "4300058d",
+    "parkedFeatures": [
+      "inbox",
+      "templates"
+    ],
+    "parkedRows": [
+      {
+        "id": "arrange.group.tail-text-controls",
+        "parks": [
+          "toolbar.group.text"
+        ]
+      },
+      {
+        "id": "logos.kit.find-a-logo",
+        "parks": [
+          "panel.brand.logo.find"
+        ]
+      },
+      {
+        "id": "logos.picker.variants",
+        "parks": [
+          "dialog.logo.kind.wordmark",
+          "dialog.logo.tone.mono"
+        ]
+      },
+      {
+        "id": "shaders.background.add-to-theme",
+        "parks": [
+          "dialog.background.shader.addToTheme"
+        ]
+      },
+      {
+        "id": "shaders.background.place-answers",
+        "parks": [
+          "dialog.background.shader"
+        ]
+      },
+      {
+        "id": "shaders.frame.scrubber-capture",
+        "parks": [
+          "formatOptions.shader.frame.scrubber",
+          "formatOptions.shader.frame.capture"
+        ]
+      },
+      {
+        "id": "shaders.library.glyph-engines-render",
+        "parks": [
+          "dialog.shader.engine.glyph"
+        ]
+      },
+      {
+        "id": "svg.copy.markup",
+        "parks": [
+          "picture.svg.copy"
+        ]
+      },
+      {
+        "id": "tables.bar.row-column-buttons",
+        "parks": [
+          "bar.table"
+        ]
+      },
+      {
+        "id": "versions.show-changes-marks",
+        "parks": [
+          "file.versionHistory.showChanges"
+        ]
+      },
+      {
+        "id": "view.live-pointers.second-browser",
+        "parks": [
+          "view.livePointers.mine",
+          "view.livePointers.others"
+        ]
+      }
+    ]
+  },
+  "probe": null,
+  "specs": {
+    "exit": 0,
+    "ms": 665295,
+    "report": "/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/production/gate/specs1/specs.json",
+    "retries": 0,
+    "retried": 0
+  },
+  "cost": null,
+  "accounts": null,
+  "costOverCeiling": [],
+  "narrowed": {
+    "only": "specs",
+    "spec": null,
+    "rows": [
+      "chrome.font.official-inter",
+      "chrome.font.no-stylistic-sets",
+      "chrome.font.tabular-figures",
+      "home.nav.no-pause",
+      "home.nav.fits-320",
+      "home.nav.theme-first-paint",
+      "home.hero.side-fits-headline",
+      "home.hero.type",
+      "home.motion.reduced",
+      "home.motion.pause",
+      "home.nav.icons",
+      "accounts.signin.one-dialog",
+      "accounts.sign-in-fits",
+      "accounts.plate.signin-page",
+      "accounts.provider-error-sentence",
+      "accounts.google-button-guideline",
+      "accounts.sign-in-everywhere",
+      "accounts.dialog-in-brand",
+      "decks.access.sign-in-link",
+      "help.docs.page",
+      "help.docs.prerendered",
+      "help.docs.nav-client",
+      "help.docs.search",
+      "help.docs.twin",
+      "help.docs.copy-page",
+      "help.docs.reference",
+      "help.docs.links",
+      "realtime.join.chip-within-1s"
+    ],
+    "areas": null,
+    "costRows": null
+  },
+  "rows": 28,
+  "passed": 27,
+  "failed": 0,
+  "notDriven": 1,
+  "manual": [],
+  "measured": [],
+  "noStep": [],
+  "local": [],
+  "commit": "6fd18a49",
+  "origin": "https://www.turboslide.com",
+  "date": "2026-10-08",
+  "results": {
+    "chrome.font.official-inter": "passed",
+    "chrome.font.no-stylistic-sets": "passed",
+    "chrome.font.tabular-figures": "passed",
+    "decks.access.sign-in-link": "passed",
+    "accounts.sign-in-fits": "passed",
+    "help.docs.page": "passed",
+    "help.docs.prerendered": "passed",
+    "help.docs.nav-client": "passed",
+    "help.docs.search": "passed",
+    "help.docs.twin": "passed",
+    "help.docs.copy-page": "passed",
+    "help.docs.reference": "passed",
+    "help.docs.links": "passed",
+    "home.hero.type": "passed",
+    "home.motion.pause": "not driven",
+    "home.motion.reduced": "passed",
+    "home.nav.icons": "passed",
+    "home.nav.no-pause": "passed",
+    "home.nav.fits-320": "passed",
+    "home.nav.theme-first-paint": "passed",
+    "home.hero.side-fits-headline": "passed",
+    "realtime.join.chip-within-1s": "passed",
+    "accounts.signin.one-dialog": "passed",
+    "accounts.plate.signin-page": "passed",
+    "accounts.provider-error-sentence": "passed",
+    "accounts.google-button-guideline": "passed",
+    "accounts.sign-in-everywhere": "passed",
+    "accounts.dialog-in-brand": "passed"
+  },
+  "verdict": {
+    "ok": false,
+    "failures": [
+      {
+        "id": "home.motion.pause",
+        "feature": "decks",
+        "result": "not driven"
+      }
+    ],
+    "measured": [],
+    "local": []
+  },
+  "wouldPark": [],
+  "wouldParkRows": [],
+  "blocking": [
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "result": "not driven"
+    }
+  ],
+  "retriesOk": true,
+  "exitCode": 1,
+  "table": [
+    {
+      "id": "decks.access.sign-in-link",
+      "feature": "decks",
+      "driver": "core/decks.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "realtime.join.chip-within-1s",
+      "feature": "realtime",
+      "driver": "core/realtime.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.type",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.reduced",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.motion.pause",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "not driven",
+      "reason": "not read: load 57.1 (the functional checks passed)"
+    },
+    {
+      "id": "home.nav.icons",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.signin.one-dialog",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.sign-in-fits",
+      "feature": "share",
+      "driver": "core/decks.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.nav.no-pause",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.nav.fits-320",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.nav.theme-first-paint",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "home.hero.side-fits-headline",
+      "feature": "decks",
+      "driver": "core/home.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.plate.signin-page",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.provider-error-sentence",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.google-button-guideline",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.sign-in-everywhere",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "accounts.dialog-in-brand",
+      "feature": "share",
+      "driver": "core/share.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.page",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.prerendered",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.nav-client",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.search",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.twin",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.copy-page",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.reference",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "help.docs.links",
+      "feature": "help",
+      "driver": "core/docs.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.font.official-inter",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "works",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.font.no-stylistic-sets",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "result": "passed",
+      "reason": ""
+    },
+    {
+      "id": "chrome.font.tabular-figures",
+      "feature": "chrome",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "result": "passed",
+      "reason": ""
+    }
+  ]
+}

@@ -195,4 +195,30 @@ drivers with the matrix gate off (the same code; the rows register only once the
 | `chrome.font.no-stylistic-sets` | passed, 371 s: 0 elements with an alternate outside a slide on `/home`, `/decks`, `/decks/templates`, `/new`, `/signin`, `/device`, `/docs` and `/docs/agents` at 1440 and 390 in both appearances; the 4 initials read on `/new` compute `normal` and carry no style                                                                                             | 99 to 120 |
 | `chrome.font.tabular-figures`   | passed, 95 s: 0 proportional numbers alone in both appearances; numbers read per appearance: `/home` 54, `/new` 1, the 19 docs pages of the sidebar 105 (80 on `/docs/reference`, 4 on `/docs`), none on `/decks`, `/signin` and `/device`                                                                                                                                       | 99 to 120 |
 
-The run of record through the gate with the committed rows is below, after the commit.
+The run of record, after the commit (`f86e342d`), through the gate with the committed rows and the
+real driver: `node scripts/probes/core-gate.mjs --base http://localhost:4741 --only specs --rows
+chrome.font.official-inter,chrome.font.no-stylistic-sets,chrome.font.tabular-figures
+--allow-scratch` (the scratch deck `decks/e2e-accounts` is another lane's; the server reads the tmp
+store): 3 rows, 3 passed, 0 failed, retries zero, verdict ok, 517 s at a load of 88 to 135
+(`official-inter` 25 s, `no-stylistic-sets` 202 s, `tabular-figures` 251 s), with the same readings as above (4 initials read on `/new`, each `normal` with no style). `.turboslide/f-gate-f4/` holds
+the table and the JSON.
+
+No node-server build for P2-F#4a and P2-F#4b: they change tests, the e2e drivers, a node only
+reader of `packages/fonts` (`woff2-names.ts` imports `node:zlib` and no page imports it), the
+matrix and notes; P2-F#3's build reading stands for the client output.
+
+## Requests and state
+
+- `requests.md` P2-F-1 (to the integrator): `packages/lint/src/brand/run.ts` dispatches the HTML
+  and SVG under `ALTERNATES_ROOTS` to `lintAlternatesText`, so the CLI reads the generated brand
+  sources as text; until then `css.test.ts` reads the committed ones.
+- `requests.md` P2-F-2 (to the integrator, an observation): at 390 the editor's More,
+  Collaborators draws an empty roster plate for a person alone.
+- Observed at P2-F#3's build, for the integrator: the node-server build of the working tree then
+  (lanes A, D and N uncommitted) had a 1,524,170 B `vendor-*.js` chunk and route preloads over
+  every ceiling of `check-client-bundle.mjs`; the form `check-client-bundle.mjs apps/studio/dist
+  --base ... --client apps/studio/.output/public` also fails on the absent `apps/studio/dist/client`
+  of a deploy build. Lane D's notes own the `/docs` ceiling.
+- Lane F's servers are stopped: the memory tier dev server on 4741, and the do tier run's two dev
+  servers (4741, 4731) and `wrangler dev` (8741), whose local D1 and object state are in the
+  session's scratch folder. Production was not read and no deck was made there.

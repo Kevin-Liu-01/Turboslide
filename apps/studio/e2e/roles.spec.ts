@@ -496,7 +496,8 @@ test('decks.access.paint: the You need access page paints clean in a browser tha
   expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe(
     'light',
   );
-  const response = await page.goto(`/edit/nope-${Date.now().toString(36)}`);
+  const missing = `nope-${Date.now().toString(36)}`;
+  const response = await page.goto(`/edit/${missing}`);
   expect(response?.status()).toBe(404);
   const form = page.locator('[data-control="access.page"]');
   await expect(form).toBeVisible();
@@ -558,9 +559,10 @@ test('decks.access.paint: the You need access page paints clean in a browser tha
   expect(facts.background).not.toBe('rgba(0, 0, 0, 0)');
   expect(facts.zIndex).toBe('2');
   expect(facts.figures).toBe(0);
-  /* the sign in line reads and links to the presentations */
-  await expect(page.locator('[data-control="access.signin.decks"]')).toHaveAttribute(
+  /* the sign in sentence, then Sign In: a link to the sign in page that comes back to this
+     presentation (docs/POLISH-2.md 4.3, P2-A#4) */
+  await expect(page.locator('[data-control="access.signin.link"]')).toHaveAttribute(
     'href',
-    '/decks',
+    `/signin?next=${encodeURIComponent(`/edit/${missing}`)}`,
   );
 });

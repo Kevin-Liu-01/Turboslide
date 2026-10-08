@@ -481,6 +481,14 @@ describe('the widened CSRF filter and the JSON rule (SPEC-3 8.7; report 04 F13)'
       expect(csrfFilter(ctx(`/api/auth/callback/${provider}`, 'POST')), provider).toBe(true);
     }
     expect(csrfFilter(ctx('/api/auth/callback/google/extra', 'GET'))).toBe(true);
+    // the terminal's two device flow endpoints read no cookie, so `turboslide login`'s POSTs with
+    // no Origin pass; approving and denying a code stay filtered (polish two, request A-R2)
+    expect(csrfFilter(ctx('/api/auth/device/code', 'POST'))).toBe(false);
+    expect(csrfFilter(ctx('/api/auth/device/token', 'POST'))).toBe(false);
+    expect(csrfFilter(ctx('/api/auth/device/token', 'GET'))).toBe(true);
+    expect(csrfFilter(ctx('/api/auth/device/approve', 'POST'))).toBe(true);
+    expect(csrfFilter(ctx('/api/auth/device/deny', 'POST'))).toBe(true);
+    expect(csrfFilter(ctx('/api/auth/device/code/extra', 'POST'))).toBe(true);
     // a bearer agent on the room routes sends no Sec-Fetch-Site; the bearer is its proof (b2.md R14)
     for (const path of ['/api/decks/q4/stream', '/api/decks/q4/ops', '/api/decks/q4/presence']) {
       const bearer = {

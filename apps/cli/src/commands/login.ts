@@ -5,7 +5,8 @@
 // interval the server names until the person approves at `/device`, and stores the API key the
 // grant answers in ~/.config/turboslide/hosts.json as `kind: 'api-key'` with the key's record id.
 // `logout` revokes that key through `account.tokens.revoke` and forgets the record. The server
-// side is B3's (apps/studio/src/server/auth/device.ts); the flow here is tested against a fake.
+// mints that key from the library's grant (apps/studio/src/server/auth/device-grant.ts); the flow
+// here is tested against a fake.
 import type { CommandContext } from '../context.ts';
 import { flagNumber, flagString } from '../args.ts';
 import { UsageError } from '../exit.ts';

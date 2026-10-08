@@ -2688,6 +2688,7 @@ const CLI = join(ROOT, 'apps', 'cli', 'bin', 'turboslide.mjs');
 function startLogin(config: string): {
   printed: Promise<{ url: string; code: string } | null>;
   exit: Promise<{ code: number | null; out: string }>;
+  stop: () => void;
 } {
   const child = spawn('node', [CLI, 'login', '--to', ORIGIN, '--timeout', '600'], {
     env: { ...process.env, TURBOSLIDE_CONFIG_DIR: config },
@@ -2711,19 +2712,19 @@ function startLogin(config: string): {
       resolve({ code, out });
     }),
   );
-  return { printed, exit };
+  return { printed, exit, stop: () => child.kill() };
 }
 
 /**
  * The terminal's side of the device flow as `turboslide login` runs it (apps/cli/src/commands/
- * login.ts deviceFlow), with the `Origin` header of a page on the server: the studio's CSRF filter
- * refuses the CLI's own requests, which carry neither `Sec-Fetch-Site` nor `Origin` (request A-R2),
- * so the row reads the page's part through this terminal and records the CLI's refusal.
+ * login.ts deviceFlow), with the `Origin` header of a page on the server, so the row reads the
+ * grant it answers (the token and its key id) beside the CLI's own run of the same requests with no
+ * `Origin`, which the CSRF filter lets through since request A-R2.
  */
 async function terminalFlow(request: APIRequestContext): Promise<{
   url: string;
   userCode: string;
-  poll: () => Promise<{ token: string | null; error: string | null }>;
+  poll: () => Promise<{ token: string | null; tokenId: string | null; error: string | null }>;
 }> {
   const started = await request.post('/api/auth/device/code', {
     data: { client_id: 'turboslide-cli', scope: 'read comment write export share' },
@@ -2747,9 +2748,14 @@ async function terminalFlow(request: APIRequestContext): Promise<{
     });
     const body = (await answer.json().catch(() => ({}))) as {
       access_token?: string;
+      token_id?: string;
       error?: string;
     };
-    return { token: body.access_token ?? null, error: body.error ?? null };
+    return {
+      token: body.access_token ?? null,
+      tokenId: body.token_id ?? null,
+      error: body.error ?? null,
+    };
   };
   return {
     url: code.verification_uri_complete ?? code.verification_uri,
@@ -2813,11 +2819,13 @@ test.describe('polish two: the device page (docs/POLISH-2.md 4.3, C15)', () => {
     const config = mkdtempSync(join(tmpdir(), 'ts-device-'));
     const { context, page } = await ownerContext(browser);
     await ownAddress(context);
+    let started: ReturnType<typeof startLogin> | null = null;
     try {
       const probe = await page.request.get('/api/auth/get-session', { headers: SAME_ORIGIN });
       expect(probe.status(), 'the server has an identity database').toBe(200);
       /* the terminal: turboslide login itself, then the same requests with a page's Origin */
       const login = startLogin(config);
+      started = login;
       const byCli = await login.printed;
       const ended = byCli === null ? await login.exit : null;
       readings.push(
@@ -2904,9 +2912,49 @@ test.describe('polish two: the device page (docs/POLISH-2.md 4.3, C15)', () => {
         `approved: a key ${granted.token === null ? `refused (${granted.error})` : 'granted'}; account me ${ms} ms after Approve (load ${(loadavg()[0] ?? 0).toFixed(0)}): ${me?.principal.slice(0, 4) ?? ''} ${me?.trust ?? ''}${me?.said === undefined ? '' : ` (${me.said})`}`,
       );
       expect(granted.token, 'the approved code grants a token').not.toBeNull();
+      /* the grant is an API key of the account (request A-R3, server/auth/device-grant.ts): the
+         CLI acts as that key's agent with the account's rights, and the key is in the account's
+         list under the name `turboslide login` */
       expect
-        .soft(me?.principal ?? '', 'the CLI acts as the account (request A-R3)')
-        .toMatch(/^usr_/);
+        .soft(me?.principal ?? '', "the CLI acts through the account's key (request A-R3)")
+        .toBe(`agent:${granted.tokenId ?? ''}`);
+      const keys = await page.request.post('/api/actions/account.tokens.list', {
+        data: {},
+        headers: { authorization: `Bearer ${granted.token ?? ''}` },
+      });
+      const listed = JSON.stringify(await keys.json().catch(() => ({})));
+      readings.push(
+        `the key in the account's list: ${keys.status()} ${listed.includes(granted.tokenId ?? '-') && listed.includes('turboslide login')}`,
+      );
+      expect
+        .soft(listed, "the key is the account's, named turboslide login")
+        .toContain(granted.tokenId ?? '-');
+      expect.soft(listed).toContain('turboslide login');
+      /* the CLI's own code, approved on the signed in page: turboslide login stores the key and
+         exits 0, and `account me` with the stored key (no TURBOSLIDE_TOKEN) answers through it */
+      if (byCli !== null) {
+        const cliCode = byCli.code.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        await page.goto(`/device?user_code=${cliCode}`);
+        await page.locator('.ts-auth-page[data-hydrated]').waitFor({ timeout: 120_000 });
+        await ctl(page, 'device.approve').click();
+        await expect(page.locator('[data-auth-plate]')).toHaveAttribute(
+          'data-auth-plate',
+          'device.approved',
+          { timeout: 60_000 },
+        );
+        const loggedIn = await Promise.race([
+          login.exit,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 120_000)),
+        ]);
+        const stored = whoAmI(config);
+        readings.push(
+          `turboslide login after Approve: exit ${loggedIn?.code ?? 'still polling'}; account me with the stored key: ${stored?.principal.slice(0, 10) ?? ''} ${stored?.trust ?? ''}`,
+        );
+        expect.soft(loggedIn?.code, 'turboslide login stores the key and exits 0').toBe(0);
+        expect
+          .soft(stored?.principal ?? '', "the stored key acts as the account's agent")
+          .toMatch(/^agent:tok_/);
+      }
       if ((loadavg()[0] ?? 0) <= 24) expect.soft(ms, 'within 10 s').toBeLessThanOrEqual(10_000);
       /* Deny: a second code, denied */
       const second = await terminalFlow(page.request);
@@ -2941,6 +2989,7 @@ test.describe('polish two: the device page (docs/POLISH-2.md 4.3, C15)', () => {
       }
     } finally {
       test.info().annotations.push({ type: 'device', description: readings.join(' | ') });
+      started?.stop();
       await context.close();
       rmSync(config, { recursive: true, force: true });
     }

@@ -431,8 +431,18 @@ export function csrfFilter(ctx: {
   // runs its own origin and state checks there (SPEC-3 7.3, 7.5; b3.md R11)
   if (method === 'GET' && NAVIGATION_GET_PATTERNS.some((pattern) => pattern.test(path)))
     return false;
+  // the device flow's two endpoints for the terminal (RFC 8628 3.1 and 3.4): `turboslide login`
+  // posts there with no Origin and no Sec-Fetch-Site, and neither endpoint reads a cookie or sets
+  // one; the code's approval stays on /device, which the filter keeps (polish two, request A-R2)
+  if (method === 'POST' && DEVICE_CLIENT_PATHS.has(path)) return false;
   return CSRF_ROUTE_PATTERNS.some((pattern) => pattern.test(path));
 }
+
+/** The device flow's endpoints a terminal calls: the code request and the token poll. */
+const DEVICE_CLIENT_PATHS: ReadonlySet<string> = new Set([
+  '/api/auth/device/code',
+  '/api/auth/device/token',
+]);
 
 /** The three room routes of SPEC-3 3.3 (the stream, the ops, the presence). */
 const ROOM_ROUTE_PATTERN = /^\/api\/decks\/[^/]+\/(?:stream|ops|presence|checkpoint|seed|ticket)$/;

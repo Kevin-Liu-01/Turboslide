@@ -175,3 +175,24 @@ Pictures, each opened and looked at: `f/specimen-1440-light.png`, `f/specimen-14
 `f/specimen-390-light.png` and `f/specimen-390-dark.png`, the specimen spans on `/home` of 4741
 drawn visible (100 px at 1440, 44 px at 390), each with and without its feature and its measured
 width: the open 6 and 9 with ss01, the single storey a with cv11, and 1111 and 0000 equal under tnum.
+
+## P2-F#4b, the three face rows enter the matrix
+
+After P2-A#4 (`d2aca415`) and P2-D#2 (`ce2d9edd`) landed. `docs/gslides-parity/focus/core-matrix.json`
+gains `chrome.font.official-inter`, `chrome.font.no-stylistic-sets` and
+`chrome.font.tabular-figures` at the end of `rows`, as `docs/POLISH-2.md` 6.2 writes them (`today`
+works, broken with severity 2, and not driven; their evidence and notes). `font-p2.ts` takes the
+specimen again when a dev server's optimizer reload interrupts it: the first run after a server
+restart read `document.body` null on `/home` 3 s in, and the second passed.
+
+Readings on lane F's memory tier dev server on 4741, restarted at `d2aca415` (the tree held two
+uncommitted files of lane A's mail push, which no row reads), through the scratch copy of the
+drivers with the matrix gate off (the same code; the rows register only once they are committed):
+
+| Row                             | Reading                                                                                                                                                                                                                                                                                                                                                         | Load      |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `chrome.font.official-inter`    | passed, 18 s: on `/home`, `/decks`, `/new`, `/signin` and `/docs` one font file, `InterVariable-latin.woff2`, one 200 of 113,752 B with the record's sha256 (`eed1304968c9...`), a 304 of the same file on some pages; one loaded Inter face; 6969 248.05 px and 232.63 with ss01, aaaa 224.61 and 244.92 with cv11, 1111 and 0000 259.38 under tnum, on every page | 88 to 99  |
+| `chrome.font.no-stylistic-sets` | passed, 371 s: 0 elements with an alternate outside a slide on `/home`, `/decks`, `/decks/templates`, `/new`, `/signin`, `/device`, `/docs` and `/docs/agents` at 1440 and 390 in both appearances; the 4 initials read on `/new` compute `normal` and carry no style                                                                                             | 99 to 120 |
+| `chrome.font.tabular-figures`   | passed, 95 s: 0 proportional numbers alone in both appearances; numbers read per appearance: `/home` 54, `/new` 1, the 19 docs pages of the sidebar 105 (80 on `/docs/reference`, 4 on `/docs`), none on `/decks`, `/signin` and `/device`                                                                                                                                       | 99 to 120 |
+
+The run of record through the gate with the committed rows is below, after the commit.

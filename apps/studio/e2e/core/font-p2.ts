@@ -201,34 +201,44 @@ export function chromeFontP2(): string[] {
             .filter((f) => f.family.replace(/["']/g, '') === 'Inter' && f.status === 'loaded')
             .map((f) => `${f.style} ${f.weight} ${f.unicodeRange.slice(0, 24)}`),
         );
-        /* the specimen spans of docs/DESIGN.md 4.2's units, in the page's own Inter face */
-        const widths = await page.evaluate((px) => {
-          const box = document.createElement('div');
-          box.setAttribute('data-face-specimen', '');
-          box.style.cssText =
-            'position:absolute;left:-20000px;top:0;visibility:hidden;white-space:pre;';
-          const span = (text: string, features: string): HTMLSpanElement => {
-            const s = document.createElement('span');
-            s.textContent = text;
-            s.style.cssText = `font-family:Inter;font-size:${px}px;font-weight:400;font-style:normal;font-optical-sizing:none;font-kerning:none;letter-spacing:0;font-variant-numeric:normal;font-feature-settings:${features};`;
-            box.append(s, document.createElement('br'));
-            return s;
-          };
-          const spans = {
-            six9: span('6969', 'normal'),
-            six9Open: span('6969', "'ss01'"),
-            a: span('aaaa', 'normal'),
-            aSingle: span('aaaa', "'cv11'"),
-            ones: span('1111', "'tnum'"),
-            zeros: span('0000', "'tnum'"),
-          };
-          document.body.append(box);
-          const out = Object.fromEntries(
-            Object.entries(spans).map(([k, s]) => [k, s.getBoundingClientRect().width]),
-          );
-          box.remove();
-          return out as Record<keyof typeof spans, number>;
-        }, SPECIMEN_PX);
+        /* the specimen spans of docs/DESIGN.md 4.2's units, in the page's own Inter face; a dev
+           server reloads the page once when its optimizer finds a new dependency after a restart,
+           so a measurement that reload interrupts is taken again on the settled page */
+        const specimen = (): Promise<
+          Record<'six9' | 'six9Open' | 'a' | 'aSingle' | 'ones' | 'zeros', number>
+        > =>
+          page.evaluate((px) => {
+            const box = document.createElement('div');
+            box.setAttribute('data-face-specimen', '');
+            box.style.cssText =
+              'position:absolute;left:-20000px;top:0;visibility:hidden;white-space:pre;';
+            const span = (text: string, features: string): HTMLSpanElement => {
+              const s = document.createElement('span');
+              s.textContent = text;
+              s.style.cssText = `font-family:Inter;font-size:${px}px;font-weight:400;font-style:normal;font-optical-sizing:none;font-kerning:none;letter-spacing:0;font-variant-numeric:normal;font-feature-settings:${features};`;
+              box.append(s, document.createElement('br'));
+              return s;
+            };
+            const spans = {
+              six9: span('6969', 'normal'),
+              six9Open: span('6969', "'ss01'"),
+              a: span('aaaa', 'normal'),
+              aSingle: span('aaaa', "'cv11'"),
+              ones: span('1111', "'tnum'"),
+              zeros: span('0000', "'tnum'"),
+            };
+            document.body.append(box);
+            const out = Object.fromEntries(
+              Object.entries(spans).map(([k, s]) => [k, s.getBoundingClientRect().width]),
+            );
+            box.remove();
+            return out as Record<keyof typeof spans, number>;
+          }, SPECIMEN_PX);
+        const widths = await specimen().catch(async () => {
+          await page.waitForLoadState('load');
+          await page.evaluate(() => document.fonts.ready.then(() => undefined));
+          return specimen();
+        });
         /* one file: every font response names the Latin upright, and one of them carries its bytes */
         const files = [...new Set(fonts.map((f) => f.url))];
         const latin = fonts.filter(

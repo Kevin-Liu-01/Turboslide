@@ -11976,6 +11976,34 @@
       "severity": 2,
       "evidence": "research-docs 3.1 (the link opens the repository's engineering index, ts-documentation-link-target.jpg; no sitemap line)",
       "note": "Polish two (docs/POLISH-2.md 6), P2-D#6"
+    },
+    {
+      "id": "chrome.font.official-inter",
+      "feature": "chrome",
+      "interaction": "Cold at 1440 on /home, /decks, /new, /signin and /docs: exactly one font request, InterVariable-latin.woff2, whose bytes and sha256 equal its web record in packages/fonts/export/fonts.json; document.fonts holds one loaded Inter face; in spans of that face at 100 px, weight 400, font-optical-sizing none, font-kerning none, '6969' measures 4 x 1,191 / 2,048 x 100 px with 'ss01' and 4 x 1,270 / 2,048 x 100 px without, 'aaaa' 4 x 1,254 / 2,048 x 100 px with 'cv11' and 4 x 1,150 / 2,048 x 100 px without, each within 1 px, and with 'tnum' '1111' and '0000' measure the same width",
+      "driver": "core/chrome.spec.ts",
+      "today": "works",
+      "evidence": "research-header 4.1 (Version 4.001;git-9221beed3, opsz 14 to 32, wght 100 to 900, 42 features in the Latin subset); docs/DESIGN.md 4.2 (the advance widths)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4"
+    },
+    {
+      "id": "chrome.font.no-stylistic-sets",
+      "feature": "chrome",
+      "interaction": "At 1440 and 390 in both appearances on /home, /decks, /decks/templates, the editor from /new, /signin, /device, /docs and /docs/agents: no element outside a slide (an element with a .ts-sheet ancestor) computes a font-feature-settings that names ss01 to ss20, cv01 to cv99, salt, swsh or aalt, and none computes a font-variant-alternates other than normal; the presence chips' initials draw with no feature list",
+      "driver": "core/chrome.spec.ts",
+      "today": "broken",
+      "severity": 2,
+      "evidence": "The orchestrator's reading of production on 2026-10-07: cv11 and ss01 in 19 rules of the shared index CSS; research-header 4.2 (marks-render.ts 353 on this tree)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4"
+    },
+    {
+      "id": "chrome.font.tabular-figures",
+      "feature": "chrome",
+      "interaction": "At 1440 in both appearances on /home, /decks, the editor from /new, /signin, /device and every /docs page: every element outside a slide and outside a code surface whose own text is a number alone (digits with . , : / % + and minus signs and spaces, and at most one unit of up to two letters, as '1 / 9', '2.5 s', '0:45', '120') computes a font-variant-numeric with tabular-nums",
+      "driver": "core/chrome.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/DESIGN.md 4.5; research-header 4.3 (every aligned number on /home tabular on this tree)",
+      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4"
     }
   ]
 }

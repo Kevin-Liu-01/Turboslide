@@ -12,12 +12,15 @@ import {
   deviceGroups,
   errorCallbackURL,
   errorState,
+  holdSignInError,
   nextState,
+  peekHeldSignInError,
   reasonOf,
   resendWait,
   safeNext,
   signInHref,
   stateId,
+  takeHeldSignInError,
 } from './auth-model';
 import type { AuthMethods, AuthState } from './auth-model';
 import { AUTH_WORDS } from './auth-words';
@@ -273,5 +276,17 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     const all = JSON.stringify(AUTH_WORDS);
     expect(all).not.toMatch(/Google (Slides|Docs|Drive)/);
     expect(all).not.toMatch(/Google's/);
+  });
+});
+
+describe("the editor's held error (docs/POLISH-2.md 4.3)", () => {
+  it('stays held through any number of reads until the window that opened spends it', () => {
+    expect(holdSignInError('account_not_linked')).toEqual(errorState('account_not_linked'));
+    expect(peekHeldSignInError()).toEqual(errorState('account_not_linked'));
+    expect(peekHeldSignInError()).toEqual(errorState('account_not_linked'));
+    expect(takeHeldSignInError()).toEqual(errorState('account_not_linked'));
+    expect(peekHeldSignInError()).toBeNull();
+    expect(takeHeldSignInError()).toBeNull();
+    expect(holdSignInError(null)).toBeNull();
   });
 });

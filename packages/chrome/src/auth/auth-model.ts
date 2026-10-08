@@ -180,6 +180,11 @@ export function holdSignInError(code: string | null | undefined): AuthState | nu
   return heldError;
 }
 
+/** The held error state, left held: a render React discards must not spend it. */
+export function peekHeldSignInError(): AuthState | null {
+  return heldError;
+}
+
 /** The held error state, once: the next call answers null. */
 export function takeHeldSignInError(): AuthState | null {
   const held = heldError;

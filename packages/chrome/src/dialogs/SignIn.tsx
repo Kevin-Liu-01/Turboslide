@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
-import { takeHeldSignInError } from '../auth/auth-model';
+import { peekHeldSignInError, takeHeldSignInError } from '../auth/auth-model';
 import type { AuthMethods, AuthState } from '../auth/auth-model';
 import type { AuthActions } from '../auth/AuthPlate';
 import { AuthWindow } from '../auth/AuthWindow';
 import { useEditorShell } from '../editor-shell-context';
+import { useMountEffect } from '../lib/useMountEffect';
 
 /**
  * The editor's sign in (docs/POLISH-2.md 4.3, C12, C13, C17): the auth plate in its window host
@@ -31,7 +32,13 @@ export function SignInDialog() {
     ...(account?.requestCode === undefined ? {} : { requestCode: account.requestCode }),
     ...(account?.verifyCode === undefined ? {} : { verifyCode: account.verifyCode }),
   };
-  const [initial] = useState<AuthState>(() => takeHeldSignInError() ?? { step: 'methods' });
+  /* the held error is read on every render and spent once the window has mounted, so a render
+     React discards does not spend it (on the node-server build of 2026-10-07 the window opened on
+     the methods after the error had been taken: accounts.google-error-sentence) */
+  const [initial] = useState<AuthState>(() => peekHeldSignInError() ?? { step: 'methods' });
+  useMountEffect(() => {
+    takeHeldSignInError();
+  });
   return (
     <AuthWindow
       methods={methods}

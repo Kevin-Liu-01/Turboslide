@@ -148,12 +148,22 @@ for (const theme of ['dark', 'light'] as const) {
     const other: Theme = theme === 'dark' ? 'light' : 'dark';
     /* the navigation's one control in place of the Light and Dark pair (DESIGN.md 8.1) */
     const button = page.locator('header [data-control="view.theme"]');
+    /* one name for every visitor and the glyph html[data-theme] names (docs/POLISH-2.md 3.3) */
+    const drawnGlyph = () =>
+      button.evaluate((el) =>
+        [...el.querySelectorAll<HTMLElement>('.pt-theme-glyph')]
+          .filter((g) => getComputedStyle(g).display !== 'none')
+          .map((g) => g.textContent ?? '')
+          .join(''),
+      );
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-    await expect(button).toHaveAttribute('aria-label', `Switch to ${other}`);
+    await expect(button).toHaveAttribute('aria-label', 'Dark or light');
+    expect(await drawnGlyph()).toBe(theme === 'light' ? '◐' : '◑');
     await button.click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', other);
     expect(await page.evaluate(() => localStorage.getItem('gt-theme'))).toBe(other);
-    await expect(button).toHaveAttribute('aria-label', `Switch to ${theme}`);
+    await expect(button).toHaveAttribute('aria-label', 'Dark or light');
+    expect(await drawnGlyph()).toBe(other === 'light' ? '◐' : '◑');
     /* the meta follows the stored theme (SPEC-4 1.6); the first meta is the one a browser reads */
     expect(await page.locator('meta[name="theme-color"]').first().getAttribute('content')).toBe(
       other === 'light' ? '#ffffff' : '#070707',

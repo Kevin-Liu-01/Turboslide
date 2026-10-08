@@ -133,7 +133,7 @@ function HomePage() {
       </svg>
       {/* the column's two rails, drawn once for the whole page (grammar.css .ts-rails) */}
       <div className="ts-rails" aria-hidden="true" />
-      <HomeNav nonce={nonce} />
+      <HomeNav />
       <HomeHero />
       <HomeNumbers />
       <HomeInterlude next="menus" />

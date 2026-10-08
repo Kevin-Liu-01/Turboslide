@@ -89,12 +89,9 @@ export function MotionToggle({
  * Sign In is drawn for an anonymous visitor once the deployment answers that it offers a method
  * (sign-in.tsx), in a slot drawn at its width from the first paint, so its arrival moves nothing
  * already drawn (the layout shift rows). The skip link comes first in the Tab order and is shown on
- * focus; it moves focus to the hero section.
- *
- * The bar renders no script since P2-N#1, so `nonce` is unused until the route stops passing it
- * (docs/gslides-parity/polish-two/requests.md, N-1).
+ * focus; it moves focus to the hero section. The bar renders no script, so it takes no nonce.
  */
-export function HomeNav(_props: { nonce?: string }) {
+export function HomeNav() {
   return (
     <header className="ts-product-nav ts-seam">
       <a className="ts-skip" href="#hero" data-control="home.nav.skip">

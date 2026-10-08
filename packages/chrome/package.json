@@ -91,6 +91,7 @@
     "./LayoutGrid": "./src/LayoutGrid.tsx",
     "./editor-shell": "./src/editor-shell.ts",
     "./editor-shell-context": "./src/editor-shell-context.ts",
+    "./menus/default-titles": "./src/menus/default-titles.ts",
     "./menus/model": "./src/menus/model.ts",
     "./parked-controls": "./src/parked-controls.ts",
     "./menus/strings": "./src/menus/strings.ts",

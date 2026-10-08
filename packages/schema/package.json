@@ -9,6 +9,7 @@
   },
   "exports": {
     "./ids": "./src/ids.ts",
+    "./slug": "./src/slug.ts",
     "./pointer": "./src/pointer.ts",
     "./text": "./src/text.ts",
     "./icons": "./src/icons.ts",
@@ -43,6 +44,7 @@
     "./ext": "./src/ext.ts",
     "./export": "./src/export.ts",
     "./errors": "./src/errors.ts",
+    "./jitless": "./src/jitless.ts",
     "./json": "./src/json.ts",
     "./rules": "./src/rules.ts",
     "./catalog": "./src/catalog.ts",

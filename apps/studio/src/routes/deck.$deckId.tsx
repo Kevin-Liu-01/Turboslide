@@ -5,7 +5,7 @@ import type { ShellMode } from '@turboslide/chrome/shell-data';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { DeckViewer } from '../components/DeckViewer';
-import { agentSessionRequested } from '../components/useStudioSession';
+import { agentSessionRequested } from '../components/agent-search';
 import { refusalSentence } from '../editor/refusal';
 import { deckRevision, getDeck } from '../server/decks';
 import type { DeckPayload, GetDeckInput } from '../server/decks';

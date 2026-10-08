@@ -5,7 +5,7 @@ import type { ErrorComponentProps } from '@tanstack/react-router';
 
 import type { LinkComponent } from '@turboslide/chrome/editor-shell';
 import { tipProps } from '@turboslide/chrome/Tooltip';
-import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import { SLUG_PATTERN } from '@turboslide/schema/slug';
 
 import { PageFrame } from '../components/home/PageFrame';
 import { refusalSentence } from '../editor/refusal';

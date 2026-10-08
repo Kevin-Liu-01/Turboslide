@@ -37,6 +37,15 @@
 //      the entry from 914,233 to 577,949 bytes without the vendor group, by taking the schema
 //      package and zod out of the root graph (render/dither-walk.ts) and the page copy out of
 //      routes/home.tsx's head (components/home/home-meta.ts); build-4/integrator.md section 22.
+//      Polish two's first fix round (P2-V1.4 finding 6) took them out again, with the menu model:
+//      the shared `vendor-*.js` chunk read 1,221,252 B, the schema 521 KB, zod 99 KB and the model
+//      67 KB of it, and reads 515,646 B. They had come back through the root's jitless import
+//      (schema/errors.ts, now schema/jitless.ts without zod), the viewer routes' agent flag (the
+//      session hook, now components/agent-search.ts), two exports of server/write.ts that named
+//      the realtime protocol and the identity marks (now server/origins.ts and module private), the
+//      slug pattern's module (schema/ids.ts builds two zod schemas; schema/slug.ts has none) and
+//      the editor skeleton's menu titles (chrome/menus/default-titles.ts);
+//      scripts/entry-graph.test.mjs pins each cut.
 //
 // The default server output is <dist>/server. A Nitro deploy build (apps/studio/.output/server)
 // is checked too when it exists, or pass it with --server. Source maps are skipped: a client map

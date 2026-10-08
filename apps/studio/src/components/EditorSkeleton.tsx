@@ -18,16 +18,11 @@
  * never shows it. Nothing here carries `data-settled`: the specs and the audit wait for the real
  * shell's mark.
  */
-import { DEFAULT_MENU_CONTEXT, visibleMenus } from '@turboslide/chrome/menus/model';
-
-/**
- * The editor's own menu list in the default view (docs/archive/rounds/POLISH.md item 106; audit-collab item
- * 10: the skeleton drew an Extensions menu the editor has not got), read from the model once so
- * the row's type sits where the menu bar's will.
- */
-const MENU_TITLES: ReadonlyArray<string> = visibleMenus(DEFAULT_MENU_CONTEXT).map(
-  (menu) => menu.label,
-);
+/* The editor's own menu list in the default view (docs/archive/rounds/POLISH.md item 106; audit-collab
+   item 10: the skeleton drew an Extensions menu the editor has not got), so the row's type sits
+   where the menu bar's will: the chrome's list, pinned to the menu model by a test, since the
+   skeleton is in the chunk every route loads and the model is not (polish two, P2-V1.4 finding 6). */
+import { DEFAULT_MENU_TITLES } from '@turboslide/chrome/menus/default-titles';
 
 /** The notes pane's default height (packages/chrome/src/NotesPane.tsx NOTES_DEFAULT_HEIGHT): the plate centres in the stage above it, as the sheet does. */
 const NOTES_HEIGHT = 64;
@@ -63,7 +58,7 @@ export function EditorSkeleton({ frames = DEFAULT_FRAMES }: EditorSkeletonProps 
       </header>
       <nav className="ts-menubar ts-skeleton-row" aria-hidden="true">
         <div className="ts-menubar-titles">
-          {MENU_TITLES.map((title) => (
+          {DEFAULT_MENU_TITLES.map((title) => (
             <span key={title} className="ts-skeleton-menu">
               {title}
             </span>

@@ -5,19 +5,11 @@
 // the table whose implementation lands in a later milestone (MILESTONES M1 item 3).
 // ForbiddenError (403) and GoneError (410) are round three's (gslides-parity SPEC-3 6.2, 6.4): a
 // capability the caller lacks on a record, and a revoked publish token.
-import * as z from 'zod';
-
 import type { Author } from './mutations.ts';
 
-/* zod's JIT compiles object parsers with the Function constructor and probes for it with
-   `new Function("")`; a page under the studio's script-src policy reports both as `eval` on
-   every parse (docs/archive/rounds/POLISH.md item 112: the polish round's verifier read two to four CSP reports
-   a page, and the fix round captured every one as script-src / eval from zod's util and its
-   compiled parser). The browser runs zod jitless; the server keeps the JIT. This module is the
-   studio root route's first import (apps/studio/src/routes/__root.tsx), so the flag is set
-   before any schema parses on a page, and it is the module every transport shares, so the CLI
-   and the workers never see it (no window). */
-if (typeof window !== 'undefined') z.config({ jitless: true });
+/* The browser's zod jitless flag lives in ./jitless.ts, without zod, as the studio root route's
+   first import; this module imports no zod, so the pages that read an error class or its status
+   load no schema with it (polish two, P2-V1.4 finding 6). */
 
 export class ConflictError extends Error {
   readonly status = 409;

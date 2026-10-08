@@ -2,7 +2,7 @@ import { createFileRoute, notFound, redirect } from '@tanstack/react-router';
 
 import { PresenterPage } from '../components/PresenterPage';
 import { PresenterSkeleton } from '../components/PresenterSkeleton';
-import { agentSessionRequested } from '../components/useStudioSession';
+import { agentSessionRequested } from '../components/agent-search';
 import { readEditorDeck } from '../server/write';
 import { AccessPage } from './-access-page';
 

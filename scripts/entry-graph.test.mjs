@@ -77,4 +77,55 @@ describe('the entry chunk graph stays without zod', () => {
     expect(presenter).not.toContain('@turboslide/chrome/icons');
     expect(runtimeImports(read('apps/studio/src/components/presenter-icons.tsx'))).toEqual([]);
   });
+
+  /* polish two, P2-V1.4 finding 6: on the tree it read, the schema (521 KB) and zod (99 KB) were
+     back in the chunk every route loads through four modules the route files reach */
+  it('the root sets the jitless flag without zod, and the error classes import no zod', () => {
+    const root = runtimeImports(read('apps/studio/src/routes/__root.tsx'));
+    expect(read('apps/studio/src/routes/__root.tsx')).toContain(
+      "import '@turboslide/schema/jitless';",
+    );
+    expect(root).not.toContain('@turboslide/schema/errors');
+    expect(runtimeImports(read('packages/schema/src/jitless.ts'))).toEqual([]);
+    expect(runtimeImports(read('packages/schema/src/errors.ts'))).not.toContain('zod');
+  });
+
+  it('the viewer routes read the agent flag from a module without imports, not the session hook', () => {
+    expect(runtimeImports(read('apps/studio/src/components/agent-search.ts'))).toEqual([]);
+    for (const path of [
+      'apps/studio/src/routes/deck.$deckId.tsx',
+      'apps/studio/src/routes/present.$deckId.tsx',
+    ]) {
+      const imports = runtimeImports(read(path));
+      expect(imports, path).toContain('../components/agent-search');
+      expect(imports, path).not.toContain('../components/useStudioSession');
+    }
+  });
+
+  it('server/write.ts exports nothing that names the realtime protocol or the identity marks', () => {
+    const write = read('apps/studio/src/server/write.ts');
+    expect(runtimeImports(write)).not.toContain('@turboslide/realtime/protocol');
+    expect(write).not.toMatch(/^export (?:async )?function (?:ownIdentityOf|peopleOf)\b/m);
+    expect(runtimeImports(read('apps/studio/src/server/origins.ts'))).toContain(
+      '@turboslide/realtime/protocol',
+    );
+  });
+
+  it('the refused page and the template copy read a slug from the module without zod', () => {
+    expect(runtimeImports(read('packages/schema/src/slug.ts'))).toEqual([]);
+    for (const path of [
+      'apps/studio/src/routes/-refused-page.tsx',
+      'apps/studio/src/server/templates.ts',
+    ]) {
+      const imports = runtimeImports(read(path));
+      expect(imports, path).toContain('@turboslide/schema/slug');
+      expect(imports, path).not.toContain('@turboslide/schema/ids');
+    }
+  });
+
+  it("the editor's skeleton reads the default menu titles, not the menu model", () => {
+    const imports = runtimeImports(read('apps/studio/src/components/EditorSkeleton.tsx'));
+    expect(imports).toEqual(['@turboslide/chrome/menus/default-titles']);
+    expect(runtimeImports(read('packages/chrome/src/menus/default-titles.ts'))).toEqual([]);
+  });
 });

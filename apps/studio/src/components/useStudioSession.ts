@@ -42,8 +42,8 @@ import type { AnswerSessionInput, AttachSessionInput } from '../server/sessions'
  *   visible the page attaches again under the same id and polls at once. A page that loads hidden
  *   attaches when it is first shown.
  * - A viewer or a show page attaches only when its address was opened for an agent
- *   (`agentSessionRequested`, `?agent=1`); the editor attaches as before. The routes read the
- *   flag and pass `enabled`.
+ *   (`agentSessionRequested` in ./agent-search.ts, `?agent=1`); the editor attaches as before.
+ *   The routes read the flag and pass `enabled`.
  *
  * The loop is `startStudioSession` over injected dependencies so useStudioSession.test.ts drives
  * it with fakes and fake timers; the hook wires the browser's document, window and server
@@ -73,21 +73,6 @@ export const HIDDEN_DETACH_MS = 10_000;
 const RETRY_MS = 2_000;
 /** How long the hook waits for a window API owner before it gives up on this mount. */
 const READY_TIMEOUT_MS = 30_000;
-
-/** The search key that opens a viewer or a show page for an agent: `/deck/<id>?agent=1`. */
-export const AGENT_SEARCH_KEY = 'agent';
-
-/**
- * Whether the address asks the page to attach a studio session (docs/archive/rounds/SYNC.md 3.10, open question
- * 3's default): `?agent=1` on /deck, /present and /embed. The route validators call this and the
- * viewer routes pass the answer as the hook's `enabled`, so a seller's show costs no function
- * request after its load and `deck_goto_slide` reaches a viewer tab only when it was opened for
- * an agent.
- */
-export function agentSessionRequested(search: Record<string, unknown>): boolean {
-  const value = search[AGENT_SEARCH_KEY];
-  return value === 1 || value === '1' || value === true;
-}
 
 export type StudioSessionOptions = {
   deckId: string;

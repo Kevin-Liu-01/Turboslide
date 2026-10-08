@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import type { TemplateIndexEntry } from '@turboslide/schema/actions';
 import type { Appearance } from '@turboslide/schema/deck';
 import { deckAppearance } from '@turboslide/schema/deck';
-import { SLUG_PATTERN, slugify } from '@turboslide/schema/ids';
+import { SLUG_PATTERN, slugify } from '@turboslide/schema/slug';
 import type { HostingFacts } from '@turboslide/store/hosted';
 import type {
   CreateDeckResult,

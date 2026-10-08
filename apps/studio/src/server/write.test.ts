@@ -4,14 +4,8 @@ import type { Version } from '@turboslide/schema/mutations';
 
 import type { VersionRecord } from '@turboslide/store/store';
 
-import {
-  EDITOR_VERSIONS_KEPT,
-  RESYNC_ORIGINS_MAX,
-  originsSince,
-  shapeByRole,
-  trimVersionLog,
-  withTrashStamp,
-} from './write';
+import { RESYNC_ORIGINS_MAX, originsSince } from './origins';
+import { EDITOR_VERSIONS_KEPT, shapeByRole, trimVersionLog, withTrashStamp } from './write';
 import type { EditorDeck } from './write';
 
 // The editor payload's version log (gslides-parity SPEC-4 0.34; PP 3.5 item 3): the loader

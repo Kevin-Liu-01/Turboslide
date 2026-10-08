@@ -9,8 +9,8 @@ import {
 import type { SessionCommand } from '@turboslide/agent/http/sessions';
 import type { StudioAutomation } from '@turboslide/agent/window/adapter';
 
+import { agentSessionRequested } from './agent-search';
 import {
-  agentSessionRequested,
   EMPTY_ANSWER_PAUSE_MS,
   HIDDEN_DETACH_MS,
   HOT_PAUSE_MS,

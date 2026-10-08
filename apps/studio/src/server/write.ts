@@ -23,12 +23,13 @@ import {
 import type { DefaultKit } from '@turboslide/store/templates';
 import { toVersion } from '@turboslide/store/versions';
 import type { RealtimeTier } from '@turboslide/realtime/channel';
-import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 
 import type { MailMode } from './auth/mail/mailer';
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
+import { originsSince } from './origins';
+import type { RecordOrigin } from './origins';
 import {
   createStoredDeck,
   ensureDecks,
@@ -124,7 +125,7 @@ export type EditorIdentity = {
 };
 
 /** The own identity of a payload: the view with `self` on its mark and the choice beside it. */
-export function ownIdentityOf(resolved: ResolvedIdentity): EditorIdentity {
+function ownIdentityOf(resolved: ResolvedIdentity): EditorIdentity {
   const view = toIdentityView(resolved, {
     mark: markSpec(resolved, { self: true }),
     showEmail: true,
@@ -145,7 +146,7 @@ export function ownIdentityOf(resolved: ResolvedIdentity): EditorIdentity {
  * authors when the reader may read comments, the record's owner, pending owner, grants and
  * requests. Pure; the order is the order of first appearance the label suffix reads.
  */
-export function peopleOf(input: {
+function peopleOf(input: {
   versions: ReadonlyArray<Version>;
   commentAuthors: ReadonlyArray<string>;
   access: AccessRecord | null | undefined;
@@ -272,48 +273,6 @@ export type EditorDeck = {
 
 /** How many version records the editor's loader carries (SPEC-4 0.34). */
 export const EDITOR_VERSIONS_KEPT = 50;
-
-/**
- * How many records above the caller's `since` the resync read answers the origins of (docs/
- * SYNC.md 3.2, invariants 3 and 10): the stream's replay bound (`REPLAY_MAX_ENTRIES`, realtime
- * protocol.ts), so a pending op whose first attempt is further behind the head than a stream
- * could replay is dropped with the queue and returned to its author, never acknowledged blind.
- */
-export const RESYNC_ORIGINS_MAX = REPLAY_MAX_ENTRIES;
-
-/**
- * A record above the resync read's `since` that names its origin (docs/archive/rounds/SYNC.md 3.2): the seq
- * its admission made (the revision on the blob tier), the client id and the op ids it folded,
- * mutations stripped. The room client drops every pending op named here as acknowledged at
- * `seq` before it re-folds the rest on the fresh document.
- */
-export type RecordOrigin = { seq: number; n: number; clientId: string; opIds: string[] };
-
-/**
- * The origins of the records above `since`, oldest first, at most `max` records considered
- * (the newest ones when the log above `since` is longer than that, so the bound reads as
- * "within REPLAY_MAX_ENTRIES of the head"). A record without an origin (a write from the CLI,
- * an agent's strict write, a record from before the round) names nothing and is skipped. Pure.
- */
-export function originsSince(
-  records: ReadonlyArray<VersionRecord>,
-  since: number,
-  max: number = RESYNC_ORIGINS_MAX,
-): RecordOrigin[] {
-  const above = records.filter((record) => record.revision > since);
-  const considered = above.slice(Math.max(0, above.length - max));
-  const out: RecordOrigin[] = [];
-  for (const record of considered) {
-    if (record.origin === undefined) continue;
-    out.push({
-      seq: record.revision,
-      n: record.n,
-      clientId: record.origin.clientId,
-      opIds: [...record.origin.opIds],
-    });
-  }
-  return out;
-}
 
 /**
  * The version log trimmed for the loader (SPEC-4 0.34; PP 3.5 item 3): the newest

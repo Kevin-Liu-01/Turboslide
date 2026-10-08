@@ -54,9 +54,18 @@ const SCRIPT = join(import.meta.dirname, 'realtime-env.mjs');
 const SECRET_ID = 'client-id-1234567890.apps.googleusercontent.com';
 const SECRET_KEY = 'GOCSPX-this-is-a-fake-secret-value-0001';
 const RESEND = 're_fake_resend_key_000000000000';
+// the shared pair of before AUTH-3 (production's until its rotation) and the preview's own three
 const ROOM_SECRET = 'a'.repeat(64);
 const ROOM_BEARER = 'b'.repeat(64);
 const BYPASS = 'c'.repeat(32);
+const PREVIEW_SECRET = 'd'.repeat(64);
+const PREVIEW_BEARER = 'e'.repeat(64);
+const PREVIEW_DB = 'f'.repeat(64);
+const PRODUCTION_SECRET = '1'.repeat(64);
+const PRODUCTION_BEARER = '2'.repeat(64);
+const PRODUCTION_DB = '3'.repeat(64);
+const PREVIEW_KEYS = `TURBOSLIDE_ROOM_SECRET_PREVIEW=${PREVIEW_SECRET}\nTURBOSLIDE_ROOM_BEARER_PREVIEW=${PREVIEW_BEARER}\nTURBOSLIDE_DB_BEARER_PREVIEW=${PREVIEW_DB}\n`;
+const PRODUCTION_KEYS = `TURBOSLIDE_ROOM_SECRET_PRODUCTION=${PRODUCTION_SECRET}\nTURBOSLIDE_ROOM_BEARER_PRODUCTION=${PRODUCTION_BEARER}\nTURBOSLIDE_DB_BEARER_PRODUCTION=${PRODUCTION_DB}\n`;
 const ACCOUNT_ID = '0123456789abcdef0123456789abcdef';
 
 let dir;
@@ -185,7 +194,7 @@ beforeEach(() => {
   );
   writePrivateFile(
     FILES.room.name,
-    `TURBOSLIDE_ROOM_SECRET=${ROOM_SECRET}\nTURBOSLIDE_ROOM_BEARER=${ROOM_BEARER}\n`,
+    `TURBOSLIDE_ROOM_SECRET=${ROOM_SECRET}\nTURBOSLIDE_ROOM_BEARER=${ROOM_BEARER}\n${PREVIEW_KEYS}`,
   );
   writePrivateFile(
     FILES.cloudflare.name,
@@ -341,12 +350,24 @@ describe('the plan', () => {
       'TURBOSLIDE_ROOM_HOST preview plain',
       'TURBOSLIDE_ROOM_SECRET preview sensitive',
       'TURBOSLIDE_ROOM_BEARER preview sensitive',
+      'TURBOSLIDE_DB_BEARER preview sensitive',
     ]);
     expect(adds[3].source).toMatchObject({
       file: 'cloudflare',
       key: 'TURBOSLIDE_ROOM_HOST_PREVIEW',
     });
+    // production before its rotation keeps the shared pair and gains no database bearer
     expect(adds[1].source).toEqual({ file: 'room', key: 'TURBOSLIDE_ROOM_SECRET' });
+    expect(adds[1].gate).toBeUndefined();
+    expect(
+      steps.find((s) => s.kind === 'note' && s.text.startsWith('TURBOSLIDE_DB_BEARER production')),
+    ).toBeDefined();
+    // the preview takes its own three and never the shared pair
+    expect(adds.slice(4).map((s) => s.source)).toEqual([
+      { file: 'room', key: 'TURBOSLIDE_ROOM_SECRET_PREVIEW' },
+      { file: 'room', key: 'TURBOSLIDE_ROOM_BEARER_PREVIEW' },
+      { file: 'room', key: 'TURBOSLIDE_DB_BEARER_PREVIEW' },
+    ]);
   });
 
   it('do stops with exit 1 when room.env is absent or loose', () => {
@@ -482,7 +503,8 @@ describe('the plan', () => {
     expect(EXPECTED_NAMES).not.toContain('REDIS_URL');
     expect(EXPECTED_NAMES).not.toContain('DATABASE_URL');
     expect(EXPECTED_NAMES).toEqual(expect.arrayContaining([...ROOM_NAMES, 'TURBOSLIDE_ACCOUNTS']));
-    expect(steps.filter((s) => s.kind === 'note').length).toBe(Object.keys(FILES).length + 1);
+    // the files, the expectation, and the three names compared across the environments
+    expect(steps.filter((s) => s.kind === 'note').length).toBe(Object.keys(FILES).length + 4);
   });
 
   it('drain and do-flag name the Worker of --env; worker-migrate names the database and the remote or local switch; worker-secrets puts the two secrets and the bypass on the preview alone', () => {
@@ -543,10 +565,13 @@ describe('the plan', () => {
       filesOf(),
     );
     expect(preview.filter((s) => s.kind === 'wrangler').map((s) => s.args)).toEqual([
+      ['secret', 'put', 'TURBOSLIDE_DB_BEARER', '--env', 'preview'],
       ['secret', 'put', 'TURBOSLIDE_ROOM_SECRET', '--env', 'preview'],
       ['secret', 'put', 'TURBOSLIDE_ROOM_BEARER', '--env', 'preview'],
     ]);
-    expect(preview.find((s) => s.kind === 'note').text).toContain('vercel-bypass.env is absent');
+    expect(
+      preview.find((s) => s.kind === 'note' && s.text.includes('vercel-bypass')).text,
+    ).toContain('vercel-bypass.env is absent');
     writePrivateFile(FILES.bypass.name, `VERCEL_AUTOMATION_BYPASS_SECRET=${BYPASS}\n`);
     const withBypass = planFor(
       'worker-secrets',
@@ -792,11 +817,12 @@ describe('execute', () => {
       'POST https://turboslide-realtime-preview.sub.workers.dev/rooms/deck-a/flush',
       'POST https://turboslide-realtime-preview.sub.workers.dev/rooms/deck-b/flush',
     ]);
-    expect(requests.every((r) => r.auth === `Bearer ${ROOM_BEARER}`)).toBe(true);
+    // the preview Worker takes the preview's own room bearer
+    expect(requests.every((r) => r.auth === `Bearer ${PREVIEW_BEARER}`)).toBe(true);
     expect(lines.at(-1)).toBe(
       'preview: 2 of 2 open decks flushed on turboslide-realtime-preview.sub.workers.dev',
     );
-    expect(lines.join('\n')).not.toContain(ROOM_BEARER);
+    expect(lines.join('\n')).not.toContain(PREVIEW_BEARER);
     requests.length = 0;
     const g = real('do-flag', { flag: 'off' });
     const flagLines = [];
@@ -812,6 +838,7 @@ describe('execute', () => {
       method: 'POST',
       url: 'https://turboslide-realtime.sub.workers.dev/control/flags',
       body: '{"realtime":"off"}',
+      auth: `Bearer ${ROOM_BEARER}`,
     });
     expect(flagLines.at(-1)).toContain('realtime flag off on turboslide-realtime.sub.workers.dev');
     // a flush that fails reads exit 1 with the deck named
@@ -851,11 +878,12 @@ describe('execute', () => {
       ),
     ).toBe(0);
     expect(ran.map((r) => [r.args.join(' '), r.input])).toEqual([
-      ['secret put TURBOSLIDE_ROOM_SECRET --env preview', ROOM_SECRET],
-      ['secret put TURBOSLIDE_ROOM_BEARER --env preview', ROOM_BEARER],
+      ['secret put TURBOSLIDE_DB_BEARER --env preview', PREVIEW_DB],
+      ['secret put TURBOSLIDE_ROOM_SECRET --env preview', PREVIEW_SECRET],
+      ['secret put TURBOSLIDE_ROOM_BEARER --env preview', PREVIEW_BEARER],
     ]);
-    expect(lines.join('\n')).not.toContain(ROOM_SECRET);
-    expect(lines.join('\n')).not.toContain(ROOM_BEARER);
+    for (const value of [PREVIEW_DB, PREVIEW_SECRET, PREVIEW_BEARER, ROOM_SECRET, ROOM_BEARER])
+      expect(lines.join('\n')).not.toContain(value);
     const failLines = [];
     expect(
       execute(
@@ -864,14 +892,367 @@ describe('execute', () => {
         files,
         quietIo({
           out: (l) => failLines.push(l),
-          wrangler: () => ({ status: 1, stdout: '', stderr: `not logged in ${ROOM_SECRET}` }),
+          wrangler: () => ({ status: 1, stdout: '', stderr: `not logged in ${PREVIEW_DB}` }),
         }),
       ),
     ).toBe(2);
     expect(failLines.at(-1)).toContain(
-      'wrangler secret put TURBOSLIDE_ROOM_SECRET --env preview failed (exit 1)',
+      'wrangler secret put TURBOSLIDE_DB_BEARER --env preview failed (exit 1)',
     );
-    expect(failLines.at(-1)).not.toContain(ROOM_SECRET);
+    expect(failLines.at(-1)).not.toContain(PREVIEW_DB);
+  });
+});
+
+// AUTH-3: one set of values per environment; the preview never takes a production value; the
+// production rotation of docs/hosting.md 13.8 in its order; nothing printed but names and words.
+describe('the values per environment (AUTH-3)', () => {
+  const real = (sub, extra = {}) =>
+    options(sub, { dryRun: false, environments: ['production'], ...extra });
+  const withRoom = (extra) =>
+    writePrivateFile(
+      FILES.room.name,
+      `TURBOSLIDE_ROOM_SECRET=${ROOM_SECRET}\nTURBOSLIDE_ROOM_BEARER=${ROOM_BEARER}\n${extra}`,
+    );
+  const ALL = [
+    ROOM_SECRET,
+    ROOM_BEARER,
+    PREVIEW_SECRET,
+    PREVIEW_BEARER,
+    PREVIEW_DB,
+    PRODUCTION_SECRET,
+    PRODUCTION_BEARER,
+    PRODUCTION_DB,
+  ];
+
+  it('the preview never takes the shared pair or a production value, and a database bearer is never the room bearer', () => {
+    withRoom('');
+    for (const sub of ['do', 'worker-secrets']) {
+      const stop = planFor(
+        sub,
+        options(sub, { env: 'preview', environments: ['preview'] }),
+        filesOf(),
+      )[0];
+      expect(stop).toMatchObject({ kind: 'stop', exit: 1 });
+      expect(stop.text).toContain('mint --environments preview');
+    }
+    const refused = (extra, sub = 'worker-secrets', env = 'preview') => {
+      withRoom(extra);
+      const steps = planFor(sub, options(sub, { env, environments: [env] }), filesOf());
+      expect(steps).toHaveLength(1);
+      expect(steps[0]).toMatchObject({ kind: 'stop', exit: 2 });
+      for (const value of ALL) expect(steps[0].text).not.toContain(value);
+      return steps[0].text;
+    };
+    expect(
+      refused(
+        `TURBOSLIDE_ROOM_SECRET_PREVIEW=${ROOM_SECRET}\nTURBOSLIDE_ROOM_BEARER_PREVIEW=${PREVIEW_BEARER}\nTURBOSLIDE_DB_BEARER_PREVIEW=${PREVIEW_DB}\n`,
+      ),
+    ).toContain(
+      'TURBOSLIDE_ROOM_SECRET_PREVIEW equals the production value TURBOSLIDE_ROOM_SECRET',
+    );
+    expect(
+      refused(
+        `${PRODUCTION_KEYS}TURBOSLIDE_ROOM_SECRET_PREVIEW=${PREVIEW_SECRET}\nTURBOSLIDE_ROOM_BEARER_PREVIEW=${PREVIEW_BEARER}\nTURBOSLIDE_DB_BEARER_PREVIEW=${PRODUCTION_DB}\n`,
+        'do',
+      ),
+    ).toContain(
+      'TURBOSLIDE_DB_BEARER_PREVIEW equals the production value TURBOSLIDE_DB_BEARER_PRODUCTION',
+    );
+    expect(
+      refused(
+        `TURBOSLIDE_ROOM_SECRET_PREVIEW=${PREVIEW_SECRET}\nTURBOSLIDE_ROOM_BEARER_PREVIEW=${PREVIEW_BEARER}\nTURBOSLIDE_DB_BEARER_PREVIEW=${PREVIEW_BEARER}\n`,
+      ),
+    ).toContain('the preview database bearer equals its room bearer');
+    // production refuses a value the preview holds
+    expect(
+      refused(
+        `${PREVIEW_KEYS}TURBOSLIDE_ROOM_SECRET_PRODUCTION=${PRODUCTION_SECRET}\nTURBOSLIDE_ROOM_BEARER_PRODUCTION=${PREVIEW_BEARER}\nTURBOSLIDE_DB_BEARER_PRODUCTION=${PRODUCTION_DB}\n`,
+        'worker-secrets',
+        'production',
+      ),
+    ).toContain('TURBOSLIDE_ROOM_BEARER_PRODUCTION equals the preview value');
+  });
+
+  it('status says distinct or shared per name, by digest, and prints no value', () => {
+    const vercel = () => ({ status: 0, stdout: JSON.stringify({ envs: [] }), stderr: '' });
+    const lines = [];
+    const o = real('status', { environments: ['production', 'preview'] });
+    let files = filesOf();
+    expect(
+      execute(
+        planFor('status', o, files),
+        o,
+        files,
+        quietIo({ out: (l) => lines.push(l), vercel }),
+      ),
+    ).toBe(0);
+    expect(lines).toEqual(
+      expect.arrayContaining([
+        'TURBOSLIDE_ROOM_SECRET: production and preview distinct',
+        'TURBOSLIDE_ROOM_BEARER: production and preview distinct',
+        // production holds no database bearer before its rotation
+        'TURBOSLIDE_DB_BEARER: production and preview unknown',
+      ]),
+    );
+    // before the preview half: the preview holds the shared pair, which status calls shared
+    withRoom('');
+    files = filesOf();
+    lines.length = 0;
+    execute(planFor('status', o, files), o, files, quietIo({ out: (l) => lines.push(l), vercel }));
+    expect(lines).toEqual(
+      expect.arrayContaining([
+        'TURBOSLIDE_ROOM_SECRET: production and preview shared',
+        'TURBOSLIDE_ROOM_BEARER: production and preview shared',
+      ]),
+    );
+    withRoom(`${PREVIEW_KEYS}${PRODUCTION_KEYS}`);
+    files = filesOf();
+    lines.length = 0;
+    execute(planFor('status', o, files), o, files, quietIo({ out: (l) => lines.push(l), vercel }));
+    expect(lines).toContain('TURBOSLIDE_DB_BEARER: production and preview distinct');
+    for (const value of ALL) expect(lines.join('\n')).not.toContain(value);
+  });
+
+  it('mint writes the three keys of each environment once, into a 600 file, and prints none', () => {
+    withRoom('');
+    const files = filesOf();
+    const written = [];
+    let n = 0;
+    const lines = [];
+    const o = real('mint', { environments: ['production', 'preview'] });
+    expect(
+      execute(
+        planFor('mint', o, files),
+        o,
+        files,
+        quietIo({
+          out: (l) => lines.push(l),
+          mint: () => (n += 1).toString(16).padStart(64, '0'),
+          writeFile: (path, text) => {
+            written.push(path);
+            writeFileSync(path, text);
+            chmodSync(path, 0o600);
+          },
+        }),
+      ),
+    ).toBe(0);
+    expect(n).toBe(6);
+    const after = readSecretFile(join(config, FILES.room.name));
+    expect(after.private).toBe(true);
+    expect(after.keys).toEqual([
+      'TURBOSLIDE_ROOM_SECRET',
+      'TURBOSLIDE_ROOM_BEARER',
+      'TURBOSLIDE_ROOM_SECRET_PRODUCTION',
+      'TURBOSLIDE_ROOM_BEARER_PRODUCTION',
+      'TURBOSLIDE_DB_BEARER_PRODUCTION',
+      'TURBOSLIDE_ROOM_SECRET_PREVIEW',
+      'TURBOSLIDE_ROOM_BEARER_PREVIEW',
+      'TURBOSLIDE_DB_BEARER_PREVIEW',
+    ]);
+    // the shared pair stands: production's rotation reads it as the previous values
+    expect(after.values.get('TURBOSLIDE_ROOM_BEARER')).toBe(ROOM_BEARER);
+    for (const value of after.values.values()) expect(lines.join('\n')).not.toContain(value);
+    // a second run mints nothing
+    const again = filesOf();
+    expect(
+      planFor('mint', o, again)
+        .filter((s) => s.kind === 'mint')
+        .every((s) => s.when === 'present'),
+    ).toBe(true);
+  });
+
+  it('the production rotation: --from-shared keeps the shared pair as the previous names, then puts production’s own three; settle deletes the previous names', () => {
+    withRoom(`${PREVIEW_KEYS}${PRODUCTION_KEYS}`);
+    const files = filesOf();
+    const ran = [];
+    const o = real('worker-secrets', { fromShared: true });
+    const wrangler = (args, input) => {
+      ran.push([args.join(' '), input]);
+      return { status: 0, stdout: '', stderr: '' };
+    };
+    const lines = [];
+    expect(
+      execute(
+        planFor('worker-secrets', o, files),
+        o,
+        files,
+        quietIo({ out: (l) => lines.push(l), wrangler }),
+      ),
+    ).toBe(0);
+    expect(ran).toEqual([
+      ['secret put TURBOSLIDE_ROOM_SECRET_PREVIOUS', ROOM_SECRET],
+      ['secret put TURBOSLIDE_ROOM_BEARER_PREVIOUS', ROOM_BEARER],
+      ['secret put TURBOSLIDE_DB_BEARER_PREVIOUS', ROOM_BEARER],
+      ['secret put TURBOSLIDE_DB_BEARER', PRODUCTION_DB],
+      ['secret put TURBOSLIDE_ROOM_SECRET', PRODUCTION_SECRET],
+      ['secret put TURBOSLIDE_ROOM_BEARER', PRODUCTION_BEARER],
+    ]);
+    for (const value of ALL) expect(lines.join('\n')).not.toContain(value);
+    ran.length = 0;
+    const settle = real('worker-settle');
+    expect(
+      execute(planFor('worker-settle', settle, files), settle, files, quietIo({ wrangler })),
+    ).toBe(0);
+    expect(ran.map(([args, input]) => [args, input])).toEqual([
+      ['secret delete TURBOSLIDE_ROOM_SECRET_PREVIOUS', undefined],
+      ['secret delete TURBOSLIDE_ROOM_BEARER_PREVIOUS', undefined],
+      ['secret delete TURBOSLIDE_DB_BEARER_PREVIOUS', undefined],
+    ]);
+    // without production's own keys there is nothing to rotate to
+    withRoom(PREVIEW_KEYS);
+    expect(planFor('worker-secrets', o, filesOf())[0]).toMatchObject({ kind: 'stop', exit: 1 });
+    expect(() => parseArgs(['worker-secrets', '--env', 'preview', '--from-shared'])).toThrow(
+      UsageError,
+    );
+    expect(() => parseArgs(['do', '--from-shared'])).toThrow(UsageError);
+    expect(parseArgs(['worker-secrets', '--from-shared']).fromShared).toBe(true);
+  });
+
+  it('worker-rollback puts the shared pair back on production and deletes the database bearer and the previous names, passing a name the Worker lacks', () => {
+    withRoom(`${PREVIEW_KEYS}${PRODUCTION_KEYS}`);
+    const files = filesOf();
+    const ran = [];
+    const lines = [];
+    const o = real('worker-rollback');
+    expect(
+      execute(
+        planFor('worker-rollback', o, files),
+        o,
+        files,
+        quietIo({
+          out: (l) => lines.push(l),
+          wrangler: (args, input) => {
+            ran.push([args.join(' '), input]);
+            return {
+              status: args.includes('TURBOSLIDE_DB_BEARER_PREVIOUS') ? 1 : 0,
+              stdout: '',
+              stderr: '',
+            };
+          },
+        }),
+      ),
+    ).toBe(0);
+    expect(ran).toEqual([
+      ['secret put TURBOSLIDE_ROOM_SECRET', ROOM_SECRET],
+      ['secret put TURBOSLIDE_ROOM_BEARER', ROOM_BEARER],
+      ['secret delete TURBOSLIDE_DB_BEARER', undefined],
+      ['secret delete TURBOSLIDE_ROOM_SECRET_PREVIOUS', undefined],
+      ['secret delete TURBOSLIDE_ROOM_BEARER_PREVIOUS', undefined],
+      ['secret delete TURBOSLIDE_DB_BEARER_PREVIOUS', undefined],
+    ]);
+    expect(
+      lines.some((l) => l.includes('TURBOSLIDE_DB_BEARER_PREVIOUS') && l.includes('passed')),
+    ).toBe(true);
+    for (const value of ALL) expect(lines.join('\n')).not.toContain(value);
+    expect(
+      planFor('worker-rollback', real('worker-rollback', { env: 'preview' }), files)[0],
+    ).toMatchObject({
+      kind: 'stop',
+      exit: 2,
+    });
+  });
+
+  it('do on production sends its own values and the database bearer only once its Worker takes them', () => {
+    withRoom(`${PREVIEW_KEYS}${PRODUCTION_KEYS}`);
+    const files = filesOf();
+    const run = (db) => {
+      const adds = [];
+      const lines = [];
+      const o = real('do', { force: true });
+      const code = execute(
+        planFor('do', o, files),
+        o,
+        files,
+        quietIo({
+          out: (l) => lines.push(l),
+          fetch: () => ({
+            status: 200,
+            json: {
+              ok: true,
+              realtime: 'on',
+              commit: 'abc',
+              appOrigin: 'x',
+              ...(db ? { db } : {}),
+            },
+          }),
+          vercel: (args, input) => {
+            if (args[1] === 'ls')
+              return {
+                status: 0,
+                stdout: JSON.stringify({
+                  envs: [
+                    'TURBOSLIDE_ROOM_HOST',
+                    'TURBOSLIDE_ROOM_SECRET',
+                    'TURBOSLIDE_ROOM_BEARER',
+                  ].map((key) => ({ key })),
+                }),
+                stderr: '',
+              };
+            adds.push([args[2], input, args.includes('--force')]);
+            return { status: 0, stdout: '', stderr: '' };
+          },
+        }),
+      );
+      expect(code).toBe(0);
+      for (const value of ALL) expect(lines.join('\n')).not.toContain(value);
+      return { adds, lines };
+    };
+    // an older Worker (no db in /health) and a Worker in fallback: nothing of the new values
+    for (const db of [undefined, 'fallback']) {
+      const { adds, lines } = run(db);
+      expect(adds.map(([name]) => name)).toEqual(['TURBOSLIDE_ROOM_HOST']);
+      expect(
+        lines.filter((l) => l.startsWith('skip ') && l.includes('worker-secrets --from-shared')),
+      ).toHaveLength(3);
+    }
+    // the Worker rotating: production's own three
+    const { adds } = run('rotating');
+    expect(adds).toEqual([
+      ['TURBOSLIDE_ROOM_HOST', 'turboslide-realtime.sub.workers.dev', true],
+      ['TURBOSLIDE_ROOM_SECRET', PRODUCTION_SECRET, true],
+      ['TURBOSLIDE_ROOM_BEARER', PRODUCTION_BEARER, true],
+      ['TURBOSLIDE_DB_BEARER', PRODUCTION_DB, false],
+    ]);
+  });
+
+  it('app-partner sets the coming room bearer as the app’s partner on production; app-settle removes it', () => {
+    withRoom(PREVIEW_KEYS);
+    expect(
+      planFor(
+        'app-partner',
+        options('app-partner', { environments: ['production'] }),
+        filesOf(),
+      )[0],
+    ).toMatchObject({
+      kind: 'stop',
+      exit: 1,
+    });
+    withRoom(`${PREVIEW_KEYS}${PRODUCTION_KEYS}`);
+    const files = filesOf();
+    const calls = [];
+    const vercel = (args, input) => {
+      calls.push([args.slice(0, 4).join(' '), input]);
+      return args[1] === 'ls'
+        ? {
+            status: 0,
+            stdout: JSON.stringify({ envs: [{ key: 'TURBOSLIDE_ROOM_BEARER_PREVIOUS' }] }),
+            stderr: '',
+          }
+        : { status: 0, stdout: '', stderr: '' };
+    };
+    const o = real('app-partner');
+    expect(execute(planFor('app-partner', o, files), o, files, quietIo({ vercel }))).toBe(0);
+    expect(calls.filter(([args]) => args.startsWith('env add'))).toEqual([
+      ['env add TURBOSLIDE_ROOM_BEARER_PREVIOUS production', PRODUCTION_BEARER],
+    ]);
+    calls.length = 0;
+    const settle = real('app-settle');
+    expect(execute(planFor('app-settle', settle, files), settle, files, quietIo({ vercel }))).toBe(
+      0,
+    );
+    expect(calls.filter(([args]) => args.startsWith('env rm'))).toEqual([
+      ['env rm TURBOSLIDE_ROOM_BEARER_PREVIOUS production', undefined],
+    ]);
   });
 });
 
@@ -939,10 +1320,13 @@ describe('the command', () => {
     const log = calls();
     expect(log).toContain('wrangler-argv: secret put TURBOSLIDE_ROOM_SECRET --env preview');
     expect(log).toContain('wrangler-argv: secret put TURBOSLIDE_ROOM_BEARER --env preview');
+    expect(log).toContain('wrangler-argv: secret put TURBOSLIDE_DB_BEARER --env preview');
     expect(log).toContain(`wrangler-account: ${ACCOUNT_ID}`);
     expect(log).toContain('wrangler-stdin-bytes: 64');
-    expect(log).not.toContain(ROOM_SECRET);
-    expect(r.stdout).not.toContain(ROOM_SECRET);
+    for (const value of [PREVIEW_SECRET, PREVIEW_BEARER, PREVIEW_DB, ROOM_SECRET]) {
+      expect(log).not.toContain(value);
+      expect(r.stdout).not.toContain(value);
+    }
     expect(r.stdout).toContain('ran wrangler secret put TURBOSLIDE_ROOM_SECRET --env preview');
     expect(r.stdout).toContain('worker environment preview');
     expect(VERCEL_SUBCOMMANDS).not.toContain('worker-secrets');

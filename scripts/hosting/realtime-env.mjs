@@ -12,14 +12,20 @@
 //   node scripts/hosting/realtime-env.mjs <subcommand> [--dry-run] [--scope <team>]
 //     [--project <name>] [--cwd <linked root>] [--environments production,preview]
 //     [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview]
-//     [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>]
+//     [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>] [--from-shared]
 //
 //   status          the expected names per environment (present or absent), the names that must
 //                   never be set (REDIS_URL, DATABASE_URL, the Upstash pair; CLOUDFLARE.md 4.4), the
 //                   600 files and their keys, the tree's tier expectation; sets nothing
 //   do              section 6 step 14: reads /health on each environment's Worker, then sets
-//                   TURBOSLIDE_ROOM_HOST (plain, from cloudflare.env), TURBOSLIDE_ROOM_SECRET and
-//                   TURBOSLIDE_ROOM_BEARER (sensitive, from room.env) on production and preview
+//                   TURBOSLIDE_ROOM_HOST (plain, from cloudflare.env) and the environment's own
+//                   TURBOSLIDE_ROOM_SECRET, TURBOSLIDE_ROOM_BEARER and TURBOSLIDE_DB_BEARER
+//                   (sensitive, from room.env) on production and preview. On production a value
+//                   that is not the shared pair, and the database bearer, wait for a Worker whose
+//                   /health names a database bearer (docs/hosting.md 13.8)
+//   mint            AUTH-3: mints the three secrets of each --environments environment into
+//                   room.env (<NAME>_PRODUCTION, <NAME>_PREVIEW) with `openssl rand -hex 32` when
+//                   absent; never replaces a key
 //   database        4.4 step 2: requires the host and the bearer on each environment (run `do`
 //                   first); mints BETTER_AUTH_SECRET per environment into better-auth.env with
 //                   `openssl rand -hex 32` when absent; sets TURBOSLIDE_ACCOUNTS=d1 (plain) and
@@ -40,10 +46,27 @@
 //   do-flag on|off  3.8 item 1: POST /control/flags { realtime } on the Worker, then reads it back
 //   worker-migrate  3.6.2: `wrangler d1 migrations apply <database> --remote` (--local for a
 //                   checkout's wrangler dev; --env preview for the preview database)
-//   worker-secrets  3.6.2 and section 6 step 11: pipes TURBOSLIDE_ROOM_SECRET and
-//                   TURBOSLIDE_ROOM_BEARER from room.env into `wrangler secret put <NAME>` one at a
-//                   time (--env preview for the preview Worker, which also takes
-//                   VERCEL_AUTOMATION_BYPASS_SECRET from vercel-bypass.env when the file exists)
+//   worker-secrets  3.6.2 and section 6 step 11: pipes the environment's TURBOSLIDE_ROOM_SECRET,
+//                   TURBOSLIDE_ROOM_BEARER and TURBOSLIDE_DB_BEARER from room.env into `wrangler
+//                   secret put <NAME>` one at a time (--env preview for the preview Worker, which also
+//                   takes VERCEL_AUTOMATION_BYPASS_SECRET from vercel-bypass.env when the file
+//                   exists). `--from-shared` (production, docs/hosting.md 13.8 phase 2) first puts
+//                   the shared pair as the three <NAME>_PREVIOUS secrets the Worker keeps taking
+//   worker-settle   13.8 phase 4: `wrangler secret delete` of the three <NAME>_PREVIOUS secrets
+//   worker-rollback 13.8 step 3's way back on production: the shared pair put back as the current
+//                   ticket secret and room bearer, then TURBOSLIDE_DB_BEARER and the three
+//                   <NAME>_PREVIOUS secrets deleted (a name the Worker lacks is said and passed)
+//   app-partner     13.8 phase 1: TURBOSLIDE_ROOM_BEARER_PREVIOUS on the Vercel environments, the
+//                   coming room bearer the app accepts from the objects before the Worker sends it
+//   app-settle      13.8 phase 3: removes TURBOSLIDE_ROOM_BEARER_PREVIOUS from the environments
+//
+// AUTH-3: each environment holds its own three values (room.env's <NAME>_PRODUCTION and
+// <NAME>_PREVIEW keys). Production falls back to the shared pair of before (the unsuffixed
+// TURBOSLIDE_ROOM_SECRET and TURBOSLIDE_ROOM_BEARER, the values it holds until its rotation);
+// the preview never does. Every subcommand that sends a preview value refuses (exit 2) when one
+// equals a production value, the shared pair included, and every one that sends an environment's
+// values refuses when its database bearer equals its room bearer or ticket secret. `status`
+// compares the two environments' values by SHA-256 in memory and prints `distinct` or `shared`.
 //
 // Rules. The Vercel subcommands run from a root whose linked project (.vercel/project.json) is
 // `--project` (turboslide-gt by default), else a real run refuses; a dry run says so and goes on.
@@ -57,6 +80,7 @@
 // output), 2 on usage or a refusal. Node only; no dependency. Tested by realtime-env.test.mjs
 // against a fake `vercel` on PATH, a fake wrangler and a fake fetch.
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { chmodSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -82,6 +106,11 @@ export const SUBCOMMANDS = Object.freeze([
   'do-flag',
   'worker-migrate',
   'worker-secrets',
+  'worker-settle',
+  'worker-rollback',
+  'mint',
+  'app-partner',
+  'app-settle',
 ]);
 /** The subcommands that touch the Vercel project and need the linked root. */
 export const VERCEL_SUBCOMMANDS = Object.freeze([
@@ -92,6 +121,8 @@ export const VERCEL_SUBCOMMANDS = Object.freeze([
   'mail',
   'flip',
   'rollback',
+  'app-partner',
+  'app-settle',
 ]);
 /** Subcommands of the first realtime round that this phase retired, with the reason the output gives. */
 export const RETIRED = Object.freeze({
@@ -131,7 +162,19 @@ export const FILES = Object.freeze({
     name: 'better-auth.env',
     keys: ['BETTER_AUTH_SECRET_PRODUCTION', 'BETTER_AUTH_SECRET_PREVIEW'],
   },
-  room: { name: 'room.env', keys: ['TURBOSLIDE_ROOM_SECRET', 'TURBOSLIDE_ROOM_BEARER'] },
+  room: {
+    name: 'room.env',
+    keys: [
+      'TURBOSLIDE_ROOM_SECRET',
+      'TURBOSLIDE_ROOM_BEARER',
+      'TURBOSLIDE_ROOM_SECRET_PRODUCTION',
+      'TURBOSLIDE_ROOM_BEARER_PRODUCTION',
+      'TURBOSLIDE_DB_BEARER_PRODUCTION',
+      'TURBOSLIDE_ROOM_SECRET_PREVIEW',
+      'TURBOSLIDE_ROOM_BEARER_PREVIEW',
+      'TURBOSLIDE_DB_BEARER_PREVIEW',
+    ],
+  },
   bypass: { name: 'vercel-bypass.env', keys: ['VERCEL_AUTOMATION_BYPASS_SECRET'] },
   cloudflare: {
     name: 'cloudflare.env',
@@ -154,6 +197,8 @@ export const EXPECTED_NAMES = Object.freeze([
   'TURBOSLIDE_ROOM_HOST',
   'TURBOSLIDE_ROOM_SECRET',
   'TURBOSLIDE_ROOM_BEARER',
+  'TURBOSLIDE_DB_BEARER',
+  'TURBOSLIDE_ROOM_BEARER_PREVIOUS',
   'TURBOSLIDE_ACCOUNTS',
   'BETTER_AUTH_SECRET',
   'GOOGLE_CLIENT_ID',
@@ -178,7 +223,25 @@ export const ROOM_NAMES = Object.freeze([
   'TURBOSLIDE_ROOM_BEARER',
 ]);
 
-const USAGE = `usage: node scripts/hosting/realtime-env.mjs <${SUBCOMMANDS.join('|')}> [on|off for do-flag] [--dry-run] [--scope <team>] [--project <name>] [--cwd <linked root>] [--environments production,preview] [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview] [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>]`;
+/**
+ * The three secrets each environment holds since AUTH-3: the ticket secret, the room bearer and
+ * the database bearer of the Worker's `/db` routes.
+ */
+export const PAIR_NAMES = Object.freeze([
+  'TURBOSLIDE_ROOM_SECRET',
+  'TURBOSLIDE_ROOM_BEARER',
+  'TURBOSLIDE_DB_BEARER',
+]);
+/** The shared pair of room.env before AUTH-3: both environments held it; production's until its rotation. */
+export const SHARED_NAMES = Object.freeze(['TURBOSLIDE_ROOM_SECRET', 'TURBOSLIDE_ROOM_BEARER']);
+/** The Worker secret a rotation adds beside each of the three, taken and never sent (docs/hosting.md 13.8). */
+export const PREVIOUS_SUFFIX = '_PREVIOUS';
+/** The app's rotation partner of the room bearer (packages/realtime/src/select.ts). */
+export const APP_PARTNER_NAME = 'TURBOSLIDE_ROOM_BEARER_PREVIOUS';
+/** The /health `db` answers of a Worker that holds a database bearer (apps/realtime-worker/src/index.ts). */
+export const WORKER_DB_READY = Object.freeze(['own', 'rotating']);
+
+const USAGE = `usage: node scripts/hosting/realtime-env.mjs <${SUBCOMMANDS.join('|')}> [on|off for do-flag] [--dry-run] [--scope <team>] [--project <name>] [--cwd <linked root>] [--environments production,preview] [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview] [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>] [--from-shared]`;
 
 export class UsageError extends Error {}
 
@@ -200,6 +263,7 @@ export function parseArgs(argv) {
     host: null,
     wrangler: null,
     workerDir: null,
+    fromShared: false,
     help: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
@@ -212,6 +276,7 @@ export function parseArgs(argv) {
     if (arg === '--dry-run') out.dryRun = true;
     else if (arg === '--force') out.force = true;
     else if (arg === '--local') out.local = true;
+    else if (arg === '--from-shared') out.fromShared = true;
     else if (arg === '--help' || arg === '-h') out.help = true;
     else if (arg === '--scope') out.scope = value();
     else if (arg === '--project') out.project = value();
@@ -253,6 +318,10 @@ export function parseArgs(argv) {
   if (!out.help && out.subcommand === null) throw new UsageError(USAGE);
   if (out.subcommand === 'do-flag' && out.flag === null)
     throw new UsageError(`do-flag wants on or off\n${USAGE}`);
+  if (out.fromShared && (out.subcommand !== 'worker-secrets' || out.env !== 'production'))
+    throw new UsageError(
+      '--from-shared belongs to worker-secrets on production: the shared pair was never the preview’s to keep',
+    );
   return out;
 }
 
@@ -362,22 +431,109 @@ export function databaseFor(environment, files) {
   return files.cloudflare.values.get(key) ?? DEFAULT_DATABASES[environment];
 }
 
+/** The room.env key of an environment's own value of one of the three secrets. */
+export function roomKey(name, environment) {
+  return `${name}_${environment.toUpperCase()}`;
+}
+
+/**
+ * Where an environment's value of one of the three secrets comes from in room.env: its own key;
+ * production alone falls back to the shared key of the room pair, the value it holds until its
+ * rotation. Null when there is none.
+ */
+export function roomSource(name, environment, room) {
+  const own = roomKey(name, environment);
+  if (room.values.has(own)) return { file: 'room', key: own };
+  if (environment === 'production' && SHARED_NAMES.includes(name) && room.values.has(name))
+    return { file: 'room', key: name };
+  return null;
+}
+
+/** True when the production source of a name is its own key and not the shared pair. */
+const rotated = (source) => source !== null && source.key.endsWith('_PRODUCTION');
+
+/**
+ * The reasons an environment's values may not be sent (AUTH-3), compared in memory and named by
+ * key, never by value: on the preview, a value equal to any production value (the shared pair
+ * included); on production, a value equal to a preview value; in either, a database bearer equal
+ * to the room bearer or the ticket secret, or a room bearer equal to the ticket secret.
+ */
+export function separationProblems(environment, room) {
+  const problems = [];
+  const value = (key) => room.values.get(key);
+  const own = PAIR_NAMES.map((name) => roomSource(name, environment, room)).filter(Boolean);
+  const productionKeys = [...SHARED_NAMES, ...PAIR_NAMES.map((n) => roomKey(n, 'production'))];
+  const previewKeys = PAIR_NAMES.map((n) => roomKey(n, 'preview'));
+  const others = environment === 'preview' ? productionKeys : previewKeys;
+  for (const source of own) {
+    const mine = value(source.key);
+    for (const key of others)
+      if (value(key) !== undefined && value(key) === mine)
+        problems.push(
+          environment === 'preview'
+            ? `${source.key} equals the production value ${key}; the preview never takes a production value (mint --environments preview)`
+            : `${source.key} equals the preview value ${key}; mint new production values`,
+        );
+  }
+  const at = (name) => {
+    const source = roomSource(name, environment, room);
+    return source === null ? undefined : value(source.key);
+  };
+  const [secret, bearer, db] = PAIR_NAMES.map(at);
+  if (db !== undefined && (db === bearer || db === secret))
+    problems.push(
+      `the ${environment} database bearer equals its room bearer or ticket secret; the database bearer is its own (AUTH-3)`,
+    );
+  if (bearer !== undefined && bearer === secret)
+    problems.push(`the ${environment} room bearer equals its ticket secret`);
+  return problems;
+}
+
+const digestOf = (text) => createHash('sha256').update(text, 'utf8').digest('hex');
+
+/**
+ * Whether the two environments hold the same value of a name, by SHA-256 in memory: `distinct`,
+ * `shared`, or `unknown` when room.env lacks one of the two. The preview without its own key is
+ * read as holding the shared pair, which is what it held before AUTH-3.
+ */
+export function sharingOf(name, room) {
+  const at = (environment) => {
+    const source =
+      roomSource(name, environment, room) ??
+      (SHARED_NAMES.includes(name) && room.values.has(name) ? { key: name } : null);
+    return source === null ? undefined : room.values.get(source.key);
+  };
+  const production = at('production');
+  const preview = at('preview');
+  if (production === undefined || preview === undefined) return 'unknown';
+  return digestOf(production) === digestOf(preview) ? 'shared' : 'distinct';
+}
+
 // ---------------------------------------------------------------------------------------------
 // the plan: one list of steps per subcommand, executed or printed
 
 const step = (kind, fields) => ({ kind, ...fields });
 
-const roomFileMissing = (room) =>
+/** True when room.env cannot give the environment its ticket secret and room bearer. */
+const roomFileMissing = (room, environment = 'production') =>
   !room.exists ||
   !room.private ||
-  !room.values.has('TURBOSLIDE_ROOM_SECRET') ||
-  !room.values.has('TURBOSLIDE_ROOM_BEARER');
+  roomSource('TURBOSLIDE_ROOM_SECRET', environment, room) === null ||
+  roomSource('TURBOSLIDE_ROOM_BEARER', environment, room) === null;
 
-const roomFileStop = (room) =>
+const roomFileStop = (room, environment = 'production') =>
   step('stop', {
     exit: 1,
-    text: `${FILES.room.name} ${room.exists ? (room.private ? 'lacks TURBOSLIDE_ROOM_SECRET or TURBOSLIDE_ROOM_BEARER' : `has mode ${octal(room.mode)}; chmod 600 it`) : 'is absent'}: mint both with \`openssl rand -hex 32\` into ~/.config/turboslide/room.env (docs/CLOUDFLARE.md section 6 step 10)`,
+    text: `${FILES.room.name} ${room.exists ? (room.private ? `lacks the ${environment} TURBOSLIDE_ROOM_SECRET or TURBOSLIDE_ROOM_BEARER` : `has mode ${octal(room.mode)}; chmod 600 it`) : 'is absent'}: \`realtime-env.mjs mint --environments ${environment}\` writes the environment's own values (docs/hosting.md 13.8)`,
   });
+
+/** The refusal of an environment's values that break the separation of AUTH-3, or null. */
+const separationStop = (environment, room) => {
+  const problems = separationProblems(environment, room);
+  return problems.length === 0
+    ? null
+    : step('stop', { exit: 2, text: `refused: ${problems.join('; ')}` });
+};
 
 /**
  * The steps of a subcommand. `files` is `{ google, mail, auth, room, bypass, cloudflare }` as
@@ -415,11 +571,25 @@ export function planFor(sub, options, files) {
           text: `${EXPECTATION_REL}: realtime ${readExpectation(options.root ?? ROOT)}`,
         }),
       );
+      // AUTH-3: the two environments' values compared by digest in memory, never printed
+      for (const name of PAIR_NAMES)
+        steps.push(
+          step('note', { text: `${name}: production and preview ${sharingOf(name, room)}` }),
+        );
+      for (const e of ENVIRONMENTS)
+        for (const problem of separationProblems(e, room))
+          steps.push(step('note', { text: `${e}: ${problem}` }));
       break;
     }
     case 'do': {
-      if (roomFileMissing(room)) {
-        steps.push(roomFileStop(room));
+      const missing = envs.find((e) => roomFileMissing(room, e));
+      if (missing !== undefined) {
+        steps.push(roomFileStop(room, missing));
+        break;
+      }
+      const refused = envs.map((e) => separationStop(e, room)).find(Boolean);
+      if (refused !== undefined) {
+        steps.push(refused);
         break;
       }
       for (const e of envs)
@@ -445,26 +615,34 @@ export function planFor(sub, options, files) {
             when: 'absent',
           }),
         );
-        steps.push(
-          step('add', {
-            name: 'TURBOSLIDE_ROOM_SECRET',
-            environment: e,
-            source: { file: 'room', key: 'TURBOSLIDE_ROOM_SECRET' },
-            when: 'absent',
-          }),
-        );
-        steps.push(
-          step('add', {
-            name: 'TURBOSLIDE_ROOM_BEARER',
-            environment: e,
-            source: { file: 'room', key: 'TURBOSLIDE_ROOM_BEARER' },
-            when: 'absent',
-          }),
-        );
+        for (const name of PAIR_NAMES) {
+          const source = roomSource(name, e, room);
+          if (source === null) {
+            steps.push(
+              step('note', {
+                text: `${name} ${e}: room.env has no ${roomKey(name, e)}, so nothing is set (mint --environments ${e}); the Worker keeps taking the room bearer on /db`,
+              }),
+            );
+            continue;
+          }
+          steps.push(
+            step('add', {
+              name,
+              environment: e,
+              source,
+              when: 'absent',
+              // production switches off the shared pair, or gains the database bearer, only once
+              // its Worker takes the new values (13.8 phase 2 before phase 3)
+              ...(e === 'production' && (rotated(source) || name === 'TURBOSLIDE_DB_BEARER')
+                ? { gate: 'worker-db' }
+                : {}),
+            }),
+          );
+        }
       }
       steps.push(
         step('note', {
-          text: 'the forced TURBOSLIDE_REALTIME=blob row stands, so the next main deploy reads the host and stays on blob (docs/CLOUDFLARE.md 3.7 item 2); `flip --tier do` removes it after the gates of 5.5',
+          text: 'a Vercel variable reaches a deployment at its next build; the guard’s next push deploys it (docs/hosting.md 13.8)',
         }),
       );
       break;
@@ -476,7 +654,7 @@ export function planFor(sub, options, files) {
             environment: e,
             names: ['TURBOSLIDE_ROOM_HOST', 'TURBOSLIDE_ROOM_BEARER'],
             reason:
-              'the d1 accounts kind reaches the database through the Worker under the room bearer (docs/CLOUDFLARE.md 4.2, auth/db.ts); run `do` first (section 6 step 14)',
+              'the d1 accounts kind reaches the database through the Worker under TURBOSLIDE_DB_BEARER, or the room bearer before the database bearer is set (docs/CLOUDFLARE.md 4.2, auth/db.ts, AUTH-3); run `do` first (section 6 step 14)',
           }),
         );
       for (const e of envs) {
@@ -697,8 +875,8 @@ export function planFor(sub, options, files) {
       break;
     }
     case 'drain': {
-      if (roomFileMissing(room)) {
-        steps.push(roomFileStop(room));
+      if (roomFileMissing(room, options.env)) {
+        steps.push(roomFileStop(room, options.env));
         break;
       }
       steps.push(
@@ -710,8 +888,8 @@ export function planFor(sub, options, files) {
       break;
     }
     case 'do-flag': {
-      if (roomFileMissing(room)) {
-        steps.push(roomFileStop(room));
+      if (roomFileMissing(room, options.env)) {
+        steps.push(roomFileStop(room, options.env));
         break;
       }
       steps.push(
@@ -742,20 +920,73 @@ export function planFor(sub, options, files) {
       break;
     }
     case 'worker-secrets': {
-      if (roomFileMissing(room)) {
-        steps.push(roomFileStop(room));
+      const e = options.env;
+      if (roomFileMissing(room, e)) {
+        steps.push(roomFileStop(room, e));
         break;
       }
-      const envArgs = options.env === 'preview' ? ['--env', 'preview'] : [];
-      for (const name of ['TURBOSLIDE_ROOM_SECRET', 'TURBOSLIDE_ROOM_BEARER'])
+      const refused = separationStop(e, room);
+      if (refused !== null) {
+        steps.push(refused);
+        break;
+      }
+      const envArgs = e === 'preview' ? ['--env', 'preview'] : [];
+      const put = (name, source, label) =>
+        step('wrangler', { args: ['secret', 'put', name, ...envArgs], source, label });
+      if (options.fromShared) {
+        // 13.8 phase 2: the Worker keeps taking the shared pair (the ticket secret, the room
+        // bearer, and the room bearer on /db, which is what the app sends there today) while it
+        // switches to production's own values; the previous names go first, so no moment takes
+        // neither
+        const own = PAIR_NAMES.map((name) => roomSource(name, e, room));
+        if (!own.every(rotated) || !SHARED_NAMES.every((name) => room.values.has(name))) {
+          steps.push(
+            step('stop', {
+              exit: 1,
+              text: `--from-shared needs the shared pair and the three production keys in room.env (${PAIR_NAMES.map((n) => roomKey(n, e)).join(', ')}): run \`mint --environments production\` first`,
+            }),
+          );
+          break;
+        }
         steps.push(
-          step('wrangler', {
-            args: ['secret', 'put', name, ...envArgs],
-            source: { file: 'room', key: name },
-            label: `${name} on the ${options.env} Worker (the value on stdin)`,
-          }),
+          put(
+            `TURBOSLIDE_ROOM_SECRET${PREVIOUS_SUFFIX}`,
+            { file: 'room', key: 'TURBOSLIDE_ROOM_SECRET' },
+            'the shared ticket secret as the previous one (tickets the app mints before it switches)',
+          ),
+          put(
+            `TURBOSLIDE_ROOM_BEARER${PREVIOUS_SUFFIX}`,
+            { file: 'room', key: 'TURBOSLIDE_ROOM_BEARER' },
+            'the shared room bearer as the previous one (the app’s room calls before it switches)',
+          ),
+          put(
+            `TURBOSLIDE_DB_BEARER${PREVIOUS_SUFFIX}`,
+            { file: 'room', key: 'TURBOSLIDE_ROOM_BEARER' },
+            'the shared room bearer as the previous database bearer (the app’s /db calls before it switches)',
+          ),
         );
-      if (options.env === 'preview') {
+      }
+      // the database bearer before the room pair: on production the bearer the objects send
+      // changes last
+      for (const name of [
+        'TURBOSLIDE_DB_BEARER',
+        'TURBOSLIDE_ROOM_SECRET',
+        'TURBOSLIDE_ROOM_BEARER',
+      ]) {
+        const source = roomSource(name, e, room);
+        if (source === null) {
+          steps.push(
+            step('note', {
+              text: `${name}: room.env has no ${roomKey(name, e)}; the ${e} Worker keeps ${name === 'TURBOSLIDE_DB_BEARER' ? 'taking the room bearer on /db' : 'its value'} (mint --environments ${e})`,
+            }),
+          );
+          continue;
+        }
+        steps.push(
+          put(name, source, `${name} on the ${e} Worker (the value on stdin, from ${source.key})`),
+        );
+      }
+      if (e === 'preview') {
         const bypass = files.bypass;
         if (bypass.exists && bypass.private && bypass.values.has('VERCEL_AUTOMATION_BYPASS_SECRET'))
           steps.push(
@@ -775,9 +1006,123 @@ export function planFor(sub, options, files) {
       }
       steps.push(
         step('note', {
-          text: 'each `wrangler secret put` creates and deploys a new version of the Worker at once (the wrangler skill); the ticket secret and the bearer must equal the Vercel environment’s TURBOSLIDE_ROOM_SECRET and TURBOSLIDE_ROOM_BEARER (`do`), both from room.env',
+          text: 'each `wrangler secret put` creates and deploys a new version of the Worker at once (the wrangler skill); the Vercel environment takes the same three values with `do` (docs/hosting.md 13.8)',
         }),
       );
+      break;
+    }
+    case 'worker-rollback': {
+      if (options.env !== 'production' || !SHARED_NAMES.every((name) => room.values.has(name))) {
+        steps.push(
+          step('stop', {
+            exit: 2,
+            text: 'worker-rollback puts the shared pair back on the production Worker; it needs room.env’s TURBOSLIDE_ROOM_SECRET and TURBOSLIDE_ROOM_BEARER and runs on production alone (docs/hosting.md 13.8 step 3)',
+          }),
+        );
+        break;
+      }
+      for (const name of SHARED_NAMES)
+        steps.push(
+          step('wrangler', {
+            args: ['secret', 'put', name],
+            source: { file: 'room', key: name },
+            label: `${name} back to the shared value on the production Worker (the value on stdin)`,
+          }),
+        );
+      for (const name of [
+        'TURBOSLIDE_DB_BEARER',
+        ...PAIR_NAMES.map((n) => `${n}${PREVIOUS_SUFFIX}`),
+      ])
+        steps.push(
+          step('wrangler', {
+            args: ['secret', 'delete', name],
+            label: `${name} deleted from the production Worker`,
+            tolerate: true,
+          }),
+        );
+      steps.push(
+        step('note', {
+          text: '/health answers db: fallback again: /db takes the shared room bearer, as before step 3; valid while the production app sends the shared pair (before step 4’s deploy)',
+        }),
+      );
+      break;
+    }
+    case 'worker-settle': {
+      const envArgs = options.env === 'preview' ? ['--env', 'preview'] : [];
+      for (const name of PAIR_NAMES)
+        steps.push(
+          step('wrangler', {
+            args: ['secret', 'delete', `${name}${PREVIOUS_SUFFIX}`, ...envArgs],
+            label: `${name}${PREVIOUS_SUFFIX} deleted from the ${options.env} Worker: the rotation's window closes (docs/hosting.md 13.8 phase 4)`,
+          }),
+        );
+      steps.push(
+        step('note', {
+          text: '/health answers db: own once the Worker version without the previous names serves; a Worker that never held one answers the delete with an error, which reads exit 2',
+        }),
+      );
+      break;
+    }
+    case 'mint': {
+      if (room.exists && !room.private) {
+        steps.push(roomFileStop(room, envs[0]));
+        break;
+      }
+      for (const e of envs)
+        for (const name of PAIR_NAMES) {
+          const key = roomKey(name, e);
+          steps.push(
+            step('mint', { file: 'room', key, when: room.values.has(key) ? 'present' : 'absent' }),
+          );
+        }
+      steps.push(
+        step('note', {
+          text: 'a minted value reaches nothing until `worker-secrets` and `do` send it, in the order of docs/hosting.md 13.8',
+        }),
+      );
+      break;
+    }
+    case 'app-partner': {
+      for (const e of envs) {
+        const source = roomSource('TURBOSLIDE_ROOM_BEARER', e, room);
+        if (source === null || (e === 'production' && !rotated(source))) {
+          steps.push(
+            step('stop', {
+              exit: 1,
+              text: `app-partner needs the coming ${e} room bearer ${roomKey('TURBOSLIDE_ROOM_BEARER', e)} in room.env: run \`mint --environments ${e}\` first`,
+            }),
+          );
+          return steps;
+        }
+        const refused = separationStop(e, room);
+        if (refused !== null) {
+          steps.push(refused);
+          return steps;
+        }
+        steps.push(
+          step('add', {
+            name: APP_PARTNER_NAME,
+            environment: e,
+            source,
+            when: 'always',
+            force: true,
+            reason:
+              'the coming room bearer the app accepts from the objects before the Worker sends it (docs/hosting.md 13.8 phase 1)',
+          }),
+        );
+      }
+      break;
+    }
+    case 'app-settle': {
+      for (const e of envs)
+        steps.push(
+          step('rm', {
+            name: APP_PARTNER_NAME,
+            environment: e,
+            reason:
+              'the room bearer’s rotation is over on the app side (docs/hosting.md 13.8 phase 3)',
+          }),
+        );
       break;
     }
     default:
@@ -857,11 +1202,17 @@ export function execute(steps, options, files, io) {
     }
     return source.literal;
   };
-  const bearer = () => files.room.values.get('TURBOSLIDE_ROOM_BEARER');
-  const call = (host, path, init = {}) => {
-    const headers = { authorization: `Bearer ${bearer()}`, ...(init.headers ?? {}) };
+  /** The environment's room bearer: its own key, or the shared one on production before the rotation. */
+  const bearer = (environment) => {
+    const source = roomSource('TURBOSLIDE_ROOM_BEARER', environment, files.room);
+    return source === null ? undefined : files.room.values.get(source.key);
+  };
+  const call = (environment, host, path, init = {}) => {
+    const headers = { authorization: `Bearer ${bearer(environment)}`, ...(init.headers ?? {}) };
     return io.fetch(`https://${host}${path}`, { ...init, headers });
   };
+  /** The `db` answer of each environment's /health this run read (the gate of `do` on production). */
+  const workerDb = new Map();
   for (const s of steps) {
     switch (s.kind) {
       case 'report': {
@@ -948,6 +1299,12 @@ export function execute(steps, options, files, io) {
           say(`skip ${s.name} ${s.environment}: present (pass --force to replace)`);
           break;
         }
+        if (s.gate === 'worker-db' && !WORKER_DB_READY.includes(workerDb.get(s.environment))) {
+          say(
+            `skip ${s.name} ${s.environment}: the ${s.environment} Worker's /health answers db ${workerDb.get(s.environment) ?? 'unread'}, so it does not take the new values yet; run \`worker-secrets --from-shared\` first (docs/hosting.md 13.8 phase 2)`,
+          );
+          break;
+        }
         const force = present && (s.force || options.force);
         const args = ['env', 'add', s.name, s.environment];
         if (!s.plain) args.push('--sensitive');
@@ -1022,8 +1379,9 @@ export function execute(steps, options, files, io) {
           );
           return 1;
         }
+        workerDb.set(s.environment, typeof body.db === 'string' ? body.db : 'fallback');
         say(
-          `${s.environment}: https://${s.host}/health ok, realtime ${body.realtime}, commit ${body.commit || '(empty)'}, appOrigin ${body.appOrigin || '(empty)'}`,
+          `${s.environment}: https://${s.host}/health ok, realtime ${body.realtime}, commit ${body.commit || '(empty)'}, appOrigin ${body.appOrigin || '(empty)'}, db ${workerDb.get(s.environment)}`,
         );
         break;
       }
@@ -1034,7 +1392,7 @@ export function execute(steps, options, files, io) {
           );
           break;
         }
-        const open = call(s.host, '/control/open', { method: 'GET' });
+        const open = call(s.environment, s.host, '/control/open', { method: 'GET' });
         if (open.status !== 200) {
           say(`${s.environment}: GET https://${s.host}/control/open answered ${open.status}`);
           return 2;
@@ -1047,7 +1405,7 @@ export function execute(steps, options, files, io) {
         let flushed = 0;
         const failed = [];
         for (const id of ids) {
-          const r = call(s.host, `/rooms/${id}/flush`, {
+          const r = call(s.environment, s.host, `/rooms/${id}/flush`, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: '{}',
@@ -1068,7 +1426,7 @@ export function execute(steps, options, files, io) {
           );
           break;
         }
-        const r = call(s.host, '/control/flags', {
+        const r = call(s.environment, s.host, '/control/flags', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ realtime: s.realtime }),
@@ -1077,7 +1435,7 @@ export function execute(steps, options, files, io) {
           say(`${s.environment}: POST https://${s.host}/control/flags answered ${r.status}`);
           return 2;
         }
-        const back = call(s.host, '/control/flags', { method: 'GET' });
+        const back = call(s.environment, s.host, '/control/flags', { method: 'GET' });
         const value = back.json?.realtime ?? back.json?.flags?.realtime;
         say(
           `${s.environment}: realtime flag ${value ?? 'unread'} on ${s.host} (read within 30 s by the router and every awake object, docs/CLOUDFLARE.md 3.8 item 1)`,
@@ -1092,6 +1450,12 @@ export function execute(steps, options, files, io) {
           break;
         }
         const r = io.wrangler(s.args, s.source ? valueOf(s.source) : undefined);
+        if (r.status !== 0 && s.tolerate === true) {
+          say(
+            `${shown} answered exit ${r.status}; passed (${s.label}: the Worker may not hold it)`,
+          );
+          break;
+        }
         if (r.status !== 0) {
           say(`${shown} failed (exit ${r.status}): ${lastLine(r.stderr) || lastLine(r.stdout)}`);
           return 2;
@@ -1193,7 +1557,7 @@ export function run(options, io = {}) {
   );
   const vercelSide = VERCEL_SUBCOMMANDS.includes(options.subcommand);
   out(
-    `realtime-env ${options.subcommand}${options.flag ? ` ${options.flag}` : ''}${options.dryRun ? ' --dry-run' : ''} (${vercelSide ? `project ${options.project}, scope ${options.scope}, environments ${options.environments.join(', ')}` : `worker environment ${options.env}`}, config ${options.configDir})`,
+    `realtime-env ${options.subcommand}${options.flag ? ` ${options.flag}` : ''}${options.dryRun ? ' --dry-run' : ''} (${vercelSide ? `project ${options.project}, scope ${options.scope}, environments ${options.environments.join(', ')}` : options.subcommand === 'mint' ? `environments ${options.environments.join(', ')}` : `worker environment ${options.env}`}, config ${options.configDir})`,
   );
   if (vercelSide) {
     const linked = linkedProject(options.cwd);

@@ -42,7 +42,7 @@ export type MiniMenu = {
 
 /** sha256 of packages/chrome/src/menus/model.ts and keys.ts the menus were read from */
 export const MINI_SOURCES = {
-  model: 'f67ac33a597ed55cb8b58eff77dd91a6b0783ae48c0b447b6804176432137252',
+  model: '5c934e685ebbc0a030381db5decc98eb7f984c22435cab99b2d30003b53fdda8',
   keys: 'eb1d94f9a045bb345a280f9df1636aa72388fbd2acc24363c73d4951000ea669',
 } as const;
 

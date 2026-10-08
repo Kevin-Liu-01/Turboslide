@@ -72,8 +72,8 @@
 // the seller's noun of question 10); on a Vite dev server (the shell's
 // entry under `/@id/`) it reads the menu model through `/@fs/<checkout>/packages/chrome/src/menus/model.ts`.
 // The `/home` row's marks are the remade page's (section 3): the root `class="ts-product"` (the
-// element carries `id="top"` first), the hero lead's second sentence as React escapes it, and the
-// Speculation Rules script.
+// element carries `id="top"` first), the hero lead as React writes it (polish two's two sentences,
+// docs/POLISH-2.md 3.4), and the Speculation Rules script.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -343,12 +343,13 @@ const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 
 /**
  * What the served /home carries (SPEC-4 2.6; the polish round's page, docs/archive/rounds/POLISH.md section 3,
- * b7.md request 2): the root's class (`<main id="top" class="ts-product"`), the hero lead's second
- * sentence as React writes it, the Speculation Rules script.
+ * b7.md request 2): the root's class (`<main id="top" class="ts-product"`), the hero lead as React
+ * writes it (polish two, docs/POLISH-2.md 3.4; the description metas carry a longer sentence, so
+ * this text is the hero's alone), the Speculation Rules script.
  */
 const HOME_MARKS = [
   'class="ts-product"',
-  'It has menus and keyboard shortcuts. No account is needed.',
+  'Turboslide is a slides editor in the browser. No account is needed.',
   '<script type="speculationrules"',
 ];
 

@@ -158,6 +158,8 @@ export type RecordDeps = {
   access?: {
     load: () => Promise<AccessRecord | null> | AccessRecord | null;
     save: (record: AccessRecord) => Promise<void> | void;
+    /** another principal's id as a reader without share reads it (hardening HR-SD#1) */
+    standIn?: (principalId: string) => string;
   };
   now?: () => string;
   id?: () => string;
@@ -231,6 +233,7 @@ function accessDeps(deps: RecordDeps) {
     origin: deps.origin,
     ...(deps.now !== undefined ? { now: deps.now } : {}),
     ...(deps.access !== undefined ? { load: deps.access.load, save: deps.access.save } : {}),
+    ...(deps.access?.standIn !== undefined ? { standIn: deps.access.standIn } : {}),
   };
 }
 

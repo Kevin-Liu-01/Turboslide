@@ -62,6 +62,8 @@ import {
   stateDir,
   storeSelection,
 } from './root';
+import { standInsFor } from './stand-ins';
+import type { StandIns } from './stand-ins';
 
 /**
  * The access record on this studio (gslides-parity SPEC-3 2.2, 6.1; MILESTONES-3 B2 day 5): the
@@ -968,6 +970,7 @@ export function hostedAccessHooks(
 ): {
   load: () => Promise<AccessRecord | null>;
   save: (record: AccessRecord) => Promise<void>;
+  standIn: (principalId: string) => string;
 } {
   // undefined until load() ran; null for a deck with no stored record
   let loaded: StoredAccess | null | undefined;
@@ -1004,6 +1007,8 @@ export function hostedAccessHooks(
       loaded = await writeBasedOn(d.store, deckId, parsed, loaded);
       await d.announce(deckId, parsed.revision).catch(() => undefined);
     },
+    // `share.get` over HTTP and MCP names no other principal to a reader without share (HR-SD#1)
+    standIn: standInsFor(deckId, []),
   };
 }
 
@@ -1121,25 +1126,61 @@ export type ShareGetView = {
 
 export type ShareResult<T> = { ok: true; value: T } | { ok: false; status: number; body: unknown };
 
-/** The record shaped for one caller (`share.get`, `/api/access/<id>`): whole for share holders, three fields and the own grant otherwise. */
+/** True for a role that holds the `share` capability on the record: the owner, and an editor while editors may share. */
+export function sharesDeck(record: AccessRecord, role: Role | null): boolean {
+  return role === 'owner' || (role === 'editor' && record.settings.editorsCanShare);
+}
+
+/**
+ * The record as a reader who may not share the deck sees it (hardening HR-SD#1, DATA-V2): no
+ * other person's principal id (stand-ins.ts), so the owner is a stand-in the page's people map
+ * names, and only the reader's own grants and requests. The links, the pending owner and the
+ * publisher's id are a sharer's business. The shape stays a whole record, because the editor's
+ * loader hands it to a page that reads every list.
+ */
+export function recordForReader(
+  record: AccessRecord,
+  own: ReadonlySet<string>,
+  people: StandIns = standInsFor(record.deckId, own),
+): AccessRecord {
+  const mine = (id: string | null): boolean => id !== null && own.has(id);
+  return {
+    ...record,
+    owner: record.owner === null ? null : people(record.owner),
+    pendingOwner: null,
+    createdBy: people(record.createdBy),
+    links: [],
+    publish:
+      record.publish === null
+        ? null
+        : { ...record.publish, publishedBy: people(record.publish.publishedBy) },
+    grants: record.grants
+      .filter((grant) => mine(grant.principalId))
+      .map((grant) => ({ ...grant, invitedBy: people(grant.invitedBy) })),
+    requests: record.requests.filter((request) => mine(request.principalId)),
+  };
+}
+
+/**
+ * The record shaped for one caller (`share.get`, `/api/access/<id>`): whole for share holders;
+ * for anyone else the deck, the owner as a stand-in (HR-SD#1), the general access, the settings,
+ * the revision and the own grant.
+ */
 export function shapeRecordFor(
   record: AccessRecord,
   role: Role | null,
   principalId: string | null,
 ): ShareGetView['record'] {
-  const holder = role === 'owner' || (role === 'editor' && record.settings.editorsCanShare);
-  if (holder) return record;
-  const own =
-    principalId === null
-      ? undefined
-      : record.grants.find((grant) => grant.principalId === principalId);
+  if (sharesDeck(record, role)) return record;
+  const reader = recordForReader(record, new Set(principalId === null ? [] : [principalId]));
+  const own = reader.grants[0];
   return {
-    schemaVersion: record.schemaVersion,
-    deckId: record.deckId,
-    owner: record.owner,
-    generalAccess: record.generalAccess,
-    settings: record.settings,
-    revision: record.revision,
+    schemaVersion: reader.schemaVersion,
+    deckId: reader.deckId,
+    owner: reader.owner,
+    generalAccess: reader.generalAccess,
+    settings: reader.settings,
+    revision: reader.revision,
     ...(own === undefined ? {} : { grants: [own] }),
   };
 }

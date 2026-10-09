@@ -30,6 +30,7 @@ import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
 import { originsSince } from './origins';
 import type { RecordOrigin } from './origins';
+import type { StandIns } from './stand-ins';
 import {
   createStoredDeck,
   ensureDecks,
@@ -344,6 +345,59 @@ export function shapeByRole(
   };
 }
 
+/** An author with another person's principal id as its stand-in (hardening HR-SD#1). */
+function authorWithStandIn(author: Author, people: StandIns): Author {
+  return author.principalId === undefined
+    ? author
+    : { ...author, principalId: people(author.principalId) };
+}
+
+/** The version log with each author's id as its stand-in (HR-SD#1). Pure. */
+export function versionsWithStandIns(
+  versions: ReadonlyArray<Version>,
+  people: StandIns,
+): Version[] {
+  return versions.map((version) => ({
+    ...version,
+    author: authorWithStandIn(version.author, people),
+  }));
+}
+
+/**
+ * The loader's answer for a reader who may not share the deck (hardening HR-SD#1, DATA-V2): no
+ * other person's principal id. The access record is the reader's (access.ts recordForReader,
+ * which the caller passes as `readerRecord` with the stand-ins applied), the version authors and
+ * the lease holders carry stand-ins, and the people map is keyed by them, so the version rows and
+ * the Share dialog's owner row still find the name and the mark. A comment author keeps the id
+ * key as well while the comments surface names comment authors by id (`keep`). Pure.
+ */
+export function withStandIns(
+  payload: EditorDeck,
+  identities: Readonly<Record<string, EditorIdentity>>,
+  people: StandIns,
+  options: { readerRecord: AccessRecord | undefined; keep: ReadonlySet<string> },
+): { payload: EditorDeck; identities: Record<string, EditorIdentity> } {
+  const views: Record<string, EditorIdentity> = {};
+  for (const [id, view] of Object.entries(identities)) {
+    const standIn = people(id);
+    const { accountId: _accountId, ...rest } = view;
+    views[standIn] = standIn === id ? view : { ...rest, principalId: standIn };
+    if (standIn !== id && options.keep.has(id)) views[id] = view;
+  }
+  return {
+    payload: {
+      ...payload,
+      versions: versionsWithStandIns(payload.versions, people),
+      leases: payload.leases.map((lease) => ({
+        ...lease,
+        holder: authorWithStandIn(lease.holder, people),
+      })),
+      ...(options.readerRecord === undefined ? {} : { access: options.readerRecord }),
+    },
+    identities: views,
+  };
+}
+
 /** Sets the identity cookie a server function minted (the Set-Cookie value of session.ts). */
 function sendMintedCookie(setCookieValue: string | undefined): void {
   if (setCookieValue === undefined) return;
@@ -383,12 +437,31 @@ function isDenied(error: unknown): boolean {
  * with no decision at all). A refusal and a deck the store does not hold answer one sentence,
  * `No deck <id>`, the one `writeDeck` answers.
  */
-async function admitRequest(deckId: string, capability: Capability, action: string) {
+async function admitDecision(deckId: string, capability: Capability, action: string) {
   const room = await import('./room');
   const identity = await room.requestIdentity(getRequest());
   const decision = await room.decideFor(identity, deckId, capability, action);
   if (!decision.ok) throw new RangeError(`No deck ${deckId}`);
-  return identity;
+  return { identity, decision };
+}
+
+async function admitRequest(deckId: string, capability: Capability, action: string) {
+  return (await admitDecision(deckId, capability, action)).identity;
+}
+
+/** The reader's own principal ids: the request's, the context's and its aliases (HR-SD#1). */
+function ownIdsOf(identity: {
+  principalId: string | null;
+  ctx: { principal: { id: string; aliases?: readonly string[] } | null };
+}): Set<string> {
+  const own = new Set<string>();
+  if (identity.principalId !== null) own.add(identity.principalId);
+  const principal = identity.ctx.principal;
+  if (principal !== null) {
+    own.add(principal.id);
+    for (const alias of principal.aliases ?? []) own.add(alias);
+  }
+  return own;
 }
 
 const readEditorDeckFn = createServerFn({ method: 'GET' })
@@ -562,23 +635,37 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
           .catch(() => [] as string[])
       : [];
     const byLink = standing.via === 'link' || standing.via === 'open';
-    const identities = await timed('views', () =>
-      room.identityViewsFor(
-        peopleOf({ versions: shaped.versions, commentAuthors, access: record }),
-        {
-          showEmail: standing.via === 'owner' || standing.via === 'grant',
-          roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
-          access: record,
-        },
-      ),
+    /* a reader who may not share the deck reads no other person's principal id (hardening
+       HR-SD#1, DATA-V2): the record is the reader's (the own grants and requests, no links), and
+       the people it names, the version authors and the lease holders carry stand-ins */
+    const own = ownIdsOf(identity);
+    const sharer = standing.capabilities.includes('share');
+    const seen = sharer ? record : access.recordForReader(record, own, (id) => id);
+    const views = await timed('views', () =>
+      room.identityViewsFor(peopleOf({ versions: shaped.versions, commentAuthors, access: seen }), {
+        showEmail: standing.via === 'owner' || standing.via === 'grant',
+        roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
+        access: record,
+      }),
     );
+    let answer: { payload: EditorDeck; identities: Record<string, EditorIdentity> } = {
+      payload: shaped,
+      identities: views,
+    };
+    if (!sharer) {
+      const people = (await import('./stand-ins')).standInsFor(data.deckId, own);
+      answer = withStandIns(shaped, views, people, {
+        readerRecord: access.recordForReader(record, own, people),
+        keep: new Set(commentAuthors),
+      });
+    }
     // the trim after the shaping: a role without history carries an empty log and no count
     return JSON.stringify({
-      ...shaped,
-      identities,
-      versions: trimVersionLog(shaped.versions),
-      ...(shaped.versions.length > 0 || standing.capabilities.includes('history')
-        ? { versionCount: shaped.versions.length }
+      ...answer.payload,
+      identities: answer.identities,
+      versions: trimVersionLog(answer.payload.versions),
+      ...(answer.payload.versions.length > 0 || standing.capabilities.includes('history')
+        ? { versionCount: answer.payload.versions.length }
         : {}),
     });
   });
@@ -1022,8 +1109,19 @@ const listVersionsFn = createServerFn({ method: 'GET' })
     return { deckId: requireSlug(input.deckId, 'deckId') };
   })
   .handler(async ({ data }): Promise<string> => {
-    await admitRequest(data.deckId, 'history', 'version.list');
-    return JSON.stringify(await (await storeFor(data.deckId)).listVersions());
+    const { identity, decision } = await admitDecision(data.deckId, 'history', 'version.list');
+    const versions = await (await storeFor(data.deckId)).listVersions();
+    // the authors of a reader who may not share the deck are stand-ins (hardening HR-SD#1)
+    const [access, { standInsFor }] = await Promise.all([
+      import('./access'),
+      import('./stand-ins'),
+    ]);
+    const record = await access.effectiveAccess(data.deckId);
+    if (access.standingOf(decision, record).capabilities.includes('share'))
+      return JSON.stringify(versions);
+    return JSON.stringify(
+      versionsWithStandIns(versions, standInsFor(data.deckId, ownIdsOf(identity))),
+    );
   });
 
 /** version.list: every log entry, oldest first; the server log the undo spec counts. */

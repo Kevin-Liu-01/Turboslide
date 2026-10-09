@@ -66,6 +66,33 @@ Readings.
 
 The production scratch deck `zolaofjiembwdqzgye63olttaa` was trashed and removed (trash 200, remove 200, `deck.info` 404).
 
+## HR-SD#1, no principal ids in answers to a reader without share (DATA-V2)
+
+Commit: the `HR-SD#1` commit, on SD#6 (`6365685b`). It waits on K1#3 (`961dfe0e`), which shares `apps/studio/src/server/access.ts` and comes first in the order of section 5; K1#5a (#11) touches none of its files.
+
+What changed. One module, `apps/studio/src/server/stand-ins.ts`, makes a stand-in for a principal id: `ref_` and 22 characters of an HMAC over the deck id and the principal id under `TURBOSLIDE_DOWNLOAD_SECRET`. It is the same for one person on one deck on every instance and differs between decks, and it is no principal id, so no store path, lookup or index takes it. The reader's own ids, and strings that are no principal id (`seed`, `legacy`, a round one author name), pass through. A reader without the `share` capability (a viewer, a commenter, an editor while editors may not share) now reads:
+
+- `/api/access/<deck>` and the `share.get` route (`access.ts` `shapeRecordFor`): the owner as a stand-in and the own grant with its inviter as a stand-in;
+- `share.get` over HTTP and MCP (the record function in `apps/cli/src/records/access.ts`, which the studio runs with `hostedAccessHooks`): the same, through an optional `standIn` the studio passes and a checkout does not;
+- the editor loader (`write.ts` `readEditorDeck`): the record as `access.ts` `recordForReader` shapes it (the owner and the creator as stand-ins, the own grants and requests alone, no links, no pending owner, the publisher as a stand-in), the version authors and the lease holders as stand-ins, and the people map keyed by the stand-ins, so the version rows and the Share dialog's owner row still show the name and the mark;
+- `version.list` (`write.ts` `listVersions`): the authors as stand-ins.
+
+A share holder's answers are unchanged. The page's code is unchanged: it reads the stand-in as an id and finds the person in the people map by it, which is why the stand-in, and not a missing field, is the shape (the Share dialog and `EditorRoot.tsx` are DROPDOWNS files until DD-C#2).
+
+Readings.
+
+| Reading | Before | After | Load |
+| --- | --- | --- | --- |
+| `stand-ins.test.ts` (the module, `recordForReader`, `shapeRecordFor`, `withStandIns`, `versionsWithStandIns`) and `access-stand-in.test.ts` (`share.get` over HTTP and MCP) | | 7 of 7 and 2 of 2 | 98, 116 |
+| The lane's tests with SD#6 on `7cfab1bb` | | 60 of 60 | 60 |
+| Port 4855, production's settings, a person makes a deck, opens it by a view link and leaves; a second browser exchanges the link and reads the deck (`apps/studio/e2e/sd-stand-ins.repro.spec.ts`, kept in the lane's checkout, not committed) | `/api/access` names the owner's principal id; 1 of 6 server answers (the loader's) names it | `/api/access` names a stand-in; neither it, `share.get`, the 7 server answers nor the editor page names the owner's id | 207 to 335 before; 208 to 223, and 86 to 281 on `f8b68cd2` |
+| The viewer's Share dialog | | the owner's row reads the owner's own generated label and the word Owner (the run checked the label against `labelFor` of the owner's id) | 86 |
+| `tsc -b` on `f8b68cd2` with this push | | exit 0, 6 min 52 s | 100 to 150 |
+
+![The viewer's Share dialog after HR-SD#1: the owner's row reads "Nickel 116" and Owner.](../SD/sd1-viewer-share.jpg)
+
+What a reader still reads. With the owner's browser open on the deck, the viewer's page drew the owner's presence chip with `data-principal` set to the owner's id: the room's presence and its stream entries name every participant and author to every reader, on the memory tier through `room.ts` and on the do tier through the Worker's deck room. The comments surface names authors, mentions and assignees by id to every reader who may read comments, so the loader keeps a comment author's id key beside the stand-in. Both are residuals of DATA-V2 this push does not close (request 5). The private store (K1) closes the index itself: `users/` leaves the public store at the cutover, after which an id names nothing a stranger can read.
+
 ## Requests
 
 1. To the orchestrator and HR-0: SD#5, SD#6 and SD#1 ship before HR-0, so HR-0 enters their rows (8.2). The bodies the lane would write. `security.thumbnail.restricted-not-cached`: as a person, make a deck from `/new` (restricted to its creator), read one of its thumbnail URLs with the page's grant and assert `public, s-maxage=N` with N at most 600 and no `immutable`; read it with the cookie and no `s` and assert `private, no-store`; read `gt-brand`'s with the cookie and assert a public value, or `private, no-store` on a 302. `security.assets.by-name-404`: on a blob deployment only (a local tmp store keeps names), add a picture with `asset.add`, read it by name from a second browser that has no standing (404) and by `/decks/<id>/assets/<assetKey>/<file>` (200, or a 302 to `/d/<id>/<assetKey>/`). `security.access.no-principal-ids`: as `sd-stand-ins.repro.spec.ts` does, with the owner's browser off the deck before the viewer reads it (request 5 says why).

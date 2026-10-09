@@ -74,6 +74,12 @@ export type AccessDeps = {
   load?: () => Promise<AccessRecord | null> | AccessRecord | null;
   /** Saves the record; the file under the deck by default. */
   save?: (record: AccessRecord) => Promise<void> | void;
+  /**
+   * Another principal's id as a reader without the share capability reads it (hardening HR-SD#1,
+   * DATA-V2): the studio passes its stand-in (apps/studio/src/server/stand-ins.ts); a checkout
+   * passes none and answers the id.
+   */
+  standIn?: (principalId: string) => string;
 };
 
 function accessPath(deckDir: string): string {
@@ -263,19 +269,24 @@ export async function shareGet(deps: AccessDeps): Promise<{
   const capabilities = [...capabilitiesOf(record, mine)];
   if (!capabilities.includes('share')) {
     const ids = idsOf(deps.caller);
-    const own = record.grants.filter(
-      (grant) =>
-        (grant.principalId !== null && ids.has(grant.principalId)) ||
-        (grant.email !== null &&
-          deps.caller.email !== undefined &&
-          grant.email === deps.caller.email),
-    );
+    // another principal's id is its stand-in where the studio gives one (HR-SD#1)
+    const shown = (id: string): string =>
+      ids.has(id) || deps.standIn === undefined ? id : deps.standIn(id);
+    const own = record.grants
+      .filter(
+        (grant) =>
+          (grant.principalId !== null && ids.has(grant.principalId)) ||
+          (grant.email !== null &&
+            deps.caller.email !== undefined &&
+            grant.email === deps.caller.email),
+      )
+      .map((grant) => ({ ...grant, invitedBy: shown(grant.invitedBy) }));
     return {
       // the revision travels with the partial view so a grantee's writes (accept, decline,
       // request) base on the current record without the share right
       record: {
         deckId: record.deckId,
-        owner: record.owner,
+        owner: record.owner === null ? null : shown(record.owner),
         revision: record.revision,
         generalAccess: { mode: record.generalAccess.mode, role: record.generalAccess.role },
         grants: own,

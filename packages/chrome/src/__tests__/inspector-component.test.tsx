@@ -167,17 +167,19 @@ describe('Inspector', () => {
       ],
     });
     /* the layout branch and its discriminator are generated too */
-    expect(screen.getByLabelText('slide: Type').getAttribute('data-control')).toBe(
-      'slide.layout.type',
-    );
-    expect(screen.getByLabelText('slide: Ratio')).toBeTruthy();
+    expect(
+      screen
+        .getByLabelText('slide: Type', { selector: '[role="combobox"]' })
+        .getAttribute('data-control'),
+    ).toBe('slide.layout.type');
+    expect(screen.getByLabelText('slide: Ratio', { selector: '[role="combobox"]' })).toBeTruthy();
   });
 
   it('draws an enum of five or more values as the shared dropdown, the trigger the control', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     render(<Inspector deck={WORKED_DECK} slide={slide()} revision={5} dispatch={dispatch} />);
     /* docs/DROPDOWNS.md 3, site 34: the trigger carries the label, the id and the value */
-    const type = screen.getByLabelText('slide: Type');
+    const type = screen.getByLabelText('slide: Type', { selector: '[role="combobox"]' });
     expect(type.getAttribute('role')).toBe('combobox');
     expect(type.getAttribute('data-control')).toBe('slide.layout.type');
     expect(type.getAttribute('value')).toBe('cols');
@@ -198,7 +200,7 @@ describe('Inspector', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     render(<Inspector deck={WORKED_DECK} slide={slide()} revision={5} dispatch={dispatch} />);
     /* docs/DROPDOWNS.md 3, 4.1: the trigger carries the label, the id and the value; no select */
-    const counter = screen.getByLabelText('slide: Slide number');
+    const counter = screen.getByLabelText('slide: Slide number', { selector: '[role="combobox"]' });
     expect(counter.getAttribute('role')).toBe('combobox');
     expect(counter.getAttribute('data-control')).toBe('slide.counter');
     expect(counter.getAttribute('value')).toBe('');

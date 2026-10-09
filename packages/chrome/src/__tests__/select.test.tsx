@@ -98,7 +98,7 @@ afterEach(() => {
 });
 
 describe('the DOM and its ARIA (3.2)', () => {
-  it('draws a combobox button with a hidden listbox right after it, labelled by the trigger', () => {
+  it('draws a combobox button with a hidden listbox right after it, both named by the field label', async () => {
     render(<Harness initial="next" />);
     const button = trigger();
     expect(button.tagName).toBe('BUTTON');
@@ -116,10 +116,21 @@ describe('the DOM and its ARIA (3.2)', () => {
     const box = list();
     expect(box.getAttribute('role')).toBe('listbox');
     expect(box.hidden).toBe(true);
-    expect(box.getAttribute('aria-labelledby')).toBe(button.id);
+    /* the list is named by the field's label, never through the trigger: a combobox referenced
+       by aria-labelledby gives its value, so the list read "Next slide" (the keyboard verifier's
+       pass 1, finding 3) */
+    expect(box.getAttribute('aria-label')).toBe('Slide');
+    expect(box.hasAttribute('aria-labelledby')).toBe(false);
     expect(button.nextElementSibling).toBe(box);
     expect(box.classList.contains('ts-menu')).toBe(false);
-    expect(screen.getAllByLabelText('Slide')).toEqual([button]);
+    expect(screen.getAllByLabelText('Slide')).toEqual([button, box]);
+    fireEvent.click(button);
+    /* the list shows once place() has placed it */
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.getByRole('listbox', { name: 'Slide' })).toBe(box);
+    expect(screen.getByRole('combobox', { name: 'Slide' })).toBe(button);
   });
 
   it('marks every option with its value, control, tip and selection, the chosen one alone selected with the check', () => {
@@ -137,22 +148,74 @@ describe('the DOM and its ARIA (3.2)', () => {
     for (const row of rows) expect(row.id).not.toBe('');
   });
 
-  it('draws a group with its heading as its name and a divider before it', () => {
+  it('draws a group with its heading as its name and a divider before it; rows with no heading are the listbox own', () => {
     render(<Harness />);
-    const group = list().querySelectorAll('[role="group"]')[1] as HTMLElement;
+    /* every group has a name: the positions before the Slides heading sit in the listbox itself
+       (an unnamed group was announced as an empty group, the keyboard verifier's finding 4) */
+    const groups = Array.from(list().querySelectorAll<HTMLElement>('[role="group"]'));
+    expect(groups).toHaveLength(1);
+    const group = groups[0]!;
     const heading = document.getElementById(group.getAttribute('aria-labelledby') ?? '');
     expect(heading?.textContent).toBe('Slides');
+    expect(screen.getByRole('group', { hidden: true, name: 'Slides' })).toBe(group);
     expect(group.querySelector('.ts-menu-divider')?.getAttribute('aria-hidden')).toBe('true');
     expect(group.querySelectorAll('[role="option"]')).toHaveLength(12);
+    expect(option('next').parentElement).toBe(list());
     expect(list().querySelectorAll('[role="separator"]')).toHaveLength(0);
   });
 
-  it('shows the placeholder while no option carries the value, and the compact size', () => {
+  it('names no group without a heading, with a hidden divider between unnamed sections', () => {
+    render(
+      <Harness
+        initial="viewer"
+        options={[
+          { options: [{ value: 'viewer', label: 'Viewer' }] },
+          { options: [{ value: 'remove', label: 'Remove access' }] },
+        ]}
+      />,
+    );
+    expect(list().querySelectorAll('[role="group"]')).toHaveLength(0);
+    const dividers = list().querySelectorAll('.ts-menu-divider');
+    expect(dividers).toHaveLength(1);
+    expect(dividers[0]?.getAttribute('aria-hidden')).toBe('true');
+    expect(option('remove').parentElement).toBe(list());
+  });
+
+  it('names an option by its label alone and describes it by its description', () => {
+    render(
+      <Harness
+        initial="standard"
+        options={[
+          {
+            value: 'standard',
+            label: 'Standard',
+            description: 'Uses the names Inter installs under',
+          },
+          { value: 'exact', label: 'Exact', description: 'Keeps one face per text size' },
+        ]}
+      />,
+    );
+    const standard = screen.getByRole('option', {
+      hidden: true,
+      name: 'Standard',
+      description: 'Uses the names Inter installs under',
+    });
+    expect(standard).toBe(option('standard'));
+    expect(
+      screen.getByRole('option', { hidden: true, name: 'Exact' }).getAttribute('aria-describedby'),
+    ).toBe(option('exact').querySelector('.ts-dropdown-description')?.id);
+  });
+
+  it('shows the placeholder while no option carries the value, never read as the value, and the compact size', () => {
     render(<Harness initial="gone" placeholder="Slides in this presentation" size="compact" />);
     expect(trigger().textContent).toBe('Slides in this presentation');
     expect(trigger().className).toContain('is-placeholder');
     expect(trigger().className).toContain('is-compact');
     expect(list().querySelector('[aria-selected="true"]')).toBeNull();
+    /* the words are hidden from the tree: the field reads its name and no value (finding 4) */
+    expect(trigger().querySelector('.ts-dropdown-text')?.getAttribute('aria-hidden')).toBe('true');
+    chooseOption('t.slide', 'next');
+    expect(trigger().querySelector('.ts-dropdown-text')?.hasAttribute('aria-hidden')).toBe(false);
   });
 
   it('carries the value in a hidden input of its name for a form', () => {

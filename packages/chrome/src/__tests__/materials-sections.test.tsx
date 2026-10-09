@@ -103,7 +103,13 @@ describe('DitherSection', () => {
       'Polarity',
       'Crop',
     ]) {
-      expect(screen.getByLabelText(`liquid-metal-diamond: ${label}`), label).toBeTruthy();
+      /* a dropdown's list carries its field's name too (docs/DROPDOWNS.md 3.2): the control itself */
+      expect(
+        screen.getByLabelText(`liquid-metal-diamond: ${label}`, {
+          selector: ':not([role="listbox"])',
+        }),
+        label,
+      ).toBeTruthy();
     }
     expect(
       screen.getByLabelText('liquid-metal-diamond: Black point').getAttribute('data-control'),

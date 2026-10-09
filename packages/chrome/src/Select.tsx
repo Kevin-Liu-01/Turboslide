@@ -577,17 +577,27 @@ export function Select<T extends string>({
               <Icon name={shown.icon} size={14} />
             </span>
           ) : null}
-          <span className="ts-dropdown-text">{words}</span>
+          {/* a placeholder is no value: a screen reader reads the field's name and an empty
+              value, never "Add expiration" as the chosen one (the verifier's finding 4) */}
+          <span
+            className="ts-dropdown-text"
+            aria-hidden={shown === undefined && words !== '' ? true : undefined}
+          >
+            {words}
+          </span>
         </span>
         <span className="ts-dropdown-chevron" aria-hidden="true">
           <Icon name="chevron-down" size={14} />
         </span>
       </button>
+      {/* named by the field's own label: an aria-labelledby on the trigger read the combobox's
+          value ("Restricted") as the list's name, since a referenced combobox gives its value
+          (the verifier's finding 3) */}
       <div
         ref={list}
         id={listId}
         role="listbox"
-        aria-labelledby={triggerId}
+        aria-label={label}
         className="ts-dropdown-list pt-float"
         hidden={!open}
         style={open && placed === null ? { visibility: 'hidden' } : undefined}
@@ -596,6 +606,8 @@ export function Select<T extends string>({
           const headingId = `${base}heading-${at}`;
           const body = section.rows.map(({ option, index }) => {
             const selected = option.value === value;
+            const described = option.description !== undefined;
+            /* a description is the option's description, never part of its name (finding 4) */
             return (
               <div
                 key={`${index}:${option.value}`}
@@ -604,10 +616,12 @@ export function Select<T extends string>({
                 className={cn(
                   'ts-dropdown-option',
                   index === active && 'is-active',
-                  option.description !== undefined && 'has-description',
+                  described && 'has-description',
                 )}
                 aria-selected={selected}
                 aria-disabled={option.disabled === true ? true : undefined}
+                aria-labelledby={described ? `${optionId(index)}-label` : undefined}
+                aria-describedby={described ? `${optionId(index)}-description` : undefined}
                 data-index={index}
                 data-value={option.value}
                 data-control={control === undefined ? undefined : `${control}.${option.value}`}
@@ -622,31 +636,43 @@ export function Select<T extends string>({
                     <Icon name={option.icon} />
                   ) : null}
                 </span>
-                <span className="ts-menu-label">{option.label}</span>
-                {option.description !== undefined ? (
-                  <span className="ts-dropdown-description">{option.description}</span>
+                <span
+                  className="ts-menu-label"
+                  id={described ? `${optionId(index)}-label` : undefined}
+                >
+                  {option.label}
+                </span>
+                {described ? (
+                  <span className="ts-dropdown-description" id={`${optionId(index)}-description`}>
+                    {option.description}
+                  </span>
                 ) : null}
               </div>
             );
           });
-          /* one section with no heading is the listbox's own rows; a separator is no child a
-             listbox may own, so the divider is drawn and hidden from the tree */
-          if (section.heading === undefined && sections.length === 1)
-            return <Fragment key={`section-${at}`}>{body}</Fragment>;
+          /* a separator is no child a listbox may own, so a divider is drawn and hidden from the
+             tree. A section with a heading is a group named by it; rows with no heading are the
+             listbox's own (a group with no name is announced as an empty group, the verifier's
+             finding 4: the first group of the Link dialog and of the person row) */
           const divider = at > 0 ? <div className="ts-menu-divider" aria-hidden="true" /> : null;
+          if (section.heading === undefined)
+            return (
+              <Fragment key={`section-${at}`}>
+                {divider}
+                {body}
+              </Fragment>
+            );
           return (
             <div
               key={`section-${at}`}
               role="group"
               className="ts-dropdown-group"
-              aria-labelledby={section.heading === undefined ? undefined : headingId}
+              aria-labelledby={headingId}
             >
               {divider}
-              {section.heading !== undefined ? (
-                <div id={headingId} className="ts-dropdown-heading" aria-hidden="true">
-                  {section.heading}
-                </div>
-              ) : null}
+              <div id={headingId} className="ts-dropdown-heading" aria-hidden="true">
+                {section.heading}
+              </div>
               {body}
             </div>
           );

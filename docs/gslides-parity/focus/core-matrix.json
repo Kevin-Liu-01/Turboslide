@@ -12048,12 +12048,12 @@
     {
       "id": "chrome.select.placement",
       "feature": "chrome",
-      "interaction": "A window of 1440 by 600: Format options' Line end field with its trigger within 120 px of the bottom opens its list above it, 8 px inside the viewport, at least as wide as its trigger and at most the larger of 320 px and the trigger's width; scrolling the panel by 120 px closes the list with no change; the Link dialog's list of seventeen options is at most 288 px tall, scrolls, stays 8 px inside the viewport, and keeps the active row in view as PageDown moves it; a resize from 1440 to 900 wide keeps an open Share list inside the viewport and under its trigger",
+      "interaction": "A window of 1440 by 600: Format options' Line end field with its trigger within 120 px of the bottom opens its list above it, 8 px inside the viewport, at least as wide as its trigger and at most the larger of 320 px and the trigger's width; a scroll of the panel by 40 px that the page makes (no wheel) leaves the list open on its trigger, and a wheel of 120 px over the panel closes it with no change; the Link dialog's list of seventeen options is at most 288 px tall, scrolls, stays 8 px inside the viewport, and keeps the active row in view as PageDown moves it; a resize from 1440 to 900 wide keeps an open Share list inside the viewport and under its trigger",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "DROPDOWNS.md 3.6",
-      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; a trigger wider than 320 px gives its list its own width, as place() writes min-width and CSS lets it win over the 320 px max-width"
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; a trigger wider than 320 px gives its list its own width, as place() writes min-width and CSS lets it win over the 320 px max-width; the scroll the page makes is DD-fix's (the keyboard verifier's pass 1, finding 5: a list opened during Format options' first layout or a smooth scroll closed by itself)"
     },
     {
       "id": "chrome.select.phone",

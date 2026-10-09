@@ -755,12 +755,16 @@ describe('the pointer (3.4)', () => {
         height: 32,
       }) as DOMRect;
     fireEvent.click(trigger());
+    fireEvent.wheel(list());
     fireEvent.scroll(list());
     expect(isOpen()).toBe(true);
+    /* the person's wheel over the panel, then the scroll it makes */
+    fireEvent.wheel(screen.getByTestId('panel'));
     top = 180;
     fireEvent.scroll(screen.getByTestId('panel'));
     expect(isOpen()).toBe(false);
     fireEvent.click(trigger());
+    fireEvent.wheel(document.body);
     top = 60;
     fireEvent.scroll(document);
     expect(isOpen()).toBe(false);
@@ -792,6 +796,43 @@ describe('the pointer (3.4)', () => {
     fireEvent.scroll(document);
     expect(isOpen()).toBe(true);
     key('Escape');
+  });
+});
+
+describe('scrolls the page makes itself (the keyboard verifier, finding 5)', () => {
+  it('stays open on its trigger through a scroll no wheel caused: a first layout, scroll anchoring, a smooth scroll already running', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    let top = 400;
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: top,
+        left: 40,
+        top,
+        right: 240,
+        bottom: top + 32,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
+    fireEvent.click(trigger());
+    for (const at of [380, 340, 300, 260]) {
+      top = at;
+      fireEvent.scroll(screen.getByTestId('panel'));
+      fireEvent.scroll(document);
+    }
+    expect(isOpen()).toBe(true);
+    /* a wheel that moves nothing (over a card that does not scroll) keeps it open too */
+    fireEvent.wheel(document.body);
+    fireEvent.scroll(document);
+    expect(isOpen()).toBe(true);
+    top = 200;
+    fireEvent.scroll(screen.getByTestId('panel'));
+    expect(isOpen()).toBe(false);
+    expect(trigger().value).toBe('next');
   });
 });
 

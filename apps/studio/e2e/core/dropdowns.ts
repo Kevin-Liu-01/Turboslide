@@ -825,13 +825,35 @@ export function chromeDropdowns(): string[] {
       expect(inside(flipped), 'inside the viewport by 8 px').toBe(true);
       expect(flipped.list.width).toBeGreaterThanOrEqual(flipped.trigger.width - 0.5);
       expect(flipped.list.width).toBeLessThanOrEqual(Math.max(320, flipped.trigger.width) + 0.5);
-      /* scrolling the panel closes the list with no change */
+      /* a scroll the page makes itself (a layout, scroll anchoring, a smooth scroll already
+         running) leaves the list open on its trigger (the keyboard verifier's pass 1 on the
+         round, finding 5); the person's wheel over the panel closes it with no change */
       const value = await end.getAttribute('value');
-      await end.evaluate((el) => {
+      /* the panel scrolls 40 px toward the side it has room on, and the wheel turns back the way
+         it came, where it has at least those 40 px */
+      const made = await end.evaluate((el) => {
         let node: HTMLElement | null = el.parentElement;
         while (node && node.scrollHeight <= node.clientHeight + 1) node = node.parentElement;
-        if (node) node.scrollTop -= 120;
+        if (!node) return { sign: 0, moved: 0 };
+        const sign = node.scrollHeight - node.clientHeight - node.scrollTop >= 40 ? 1 : -1;
+        const from = node.scrollTop;
+        node.scrollTop += sign * 40;
+        return { sign, moved: node.scrollTop - from };
       });
+      await page.waitForTimeout(300);
+      const followed = await openFacts(end);
+      readings.push(
+        `after a scroll of ${made.moved} px the page made: ${JSON.stringify({ trigger: followed.trigger, list: { open: followed.list.open, top: followed.list.top, bottom: followed.list.bottom } })}`,
+      );
+      expect(Math.abs(made.moved), 'the panel scrolled').toBeGreaterThan(0);
+      expect(followed.list.open, 'a scroll the page made leaves the list open').toBe(true);
+      expect(
+        Math.abs(followed.list.left - followed.trigger.left),
+        'on its trigger after the scroll',
+      ).toBeLessThanOrEqual(1);
+      const at = (await end.boundingBox())!;
+      await page.mouse.move(at.x + at.width / 2, at.y + at.height / 2);
+      await page.mouse.wheel(0, -made.sign * 120);
       await expect(end).toHaveAttribute('aria-expanded', 'false');
       expect(await end.getAttribute('value'), 'the scroll changes nothing').toBe(value);
       await page.keyboard.press('Escape');

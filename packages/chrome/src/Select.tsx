@@ -280,16 +280,26 @@ export function Select<T extends string>({
   }, [disabled, open]);
 
   /* while open: a press outside closes with no change and goes on to what it hit (the menus'
-     rule, question 6); a scroll of anything that holds the trigger closes it, as the system popup
-     does (question 7; the list's own scroll does not count), once the trigger has moved since the
-     list opened: a browser dispatches a scroll event at its next frame, so the scroll that brought
-     a clipped trigger into view on the press that opened it (the focus scroll of a mousedown, a
-     driver's scroll into view) arrives after the open, and closed the list it had just drawn (read
-     on the Format options panel at 1440: the first click on a trigger below the fold); the window
-     losing focus closes it */
+     rule, question 6); a scroll the person makes of anything that holds the trigger closes it, as
+     the system popup does (question 7; the list's own scroll does not count); the window losing
+     focus closes it. While the list is open the trigger takes the scrolling keys and a press
+     outside closes it first, so the wheel is the person's one road to a scroll: after a wheel
+     outside the list, a scroll that moves the trigger closes it. A scroll the page makes itself
+     leaves the list on its trigger (place()'s autoUpdate follows it), and the trigger's new place
+     is where the next one is measured from: the focus scroll that brings a clipped trigger into
+     view on the press that opens it, a panel's first layout and its scroll anchoring, a smooth
+     scroll from PageDown still running (the keyboard verifier's pass 1, finding 5: a list opened
+     within about 100 ms of Format options laying out, or during such a scroll, closed by itself
+     about 14 ms later). The place is read at the scroll events, never at the wheel: a browser
+     scrolls on its compositor and hands the page a wheel with only passive listeners after the
+     scroll has moved the trigger (read in Format options at 1440 by 600, the wheel's target was
+     the section the trigger had left) */
   useEffect(() => {
     if (!open || trigger === null) return undefined;
     const opened = trigger.getBoundingClientRect();
+    let at = { top: opened.top, left: opened.left };
+    /* the person turned the wheel outside the list since it opened */
+    let wheeled = false;
     const onDown = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
@@ -300,21 +310,28 @@ export function Select<T extends string>({
         labelPressAt.current = Date.now();
       setOpen(false);
     };
+    const onWheel = (event: Event) => {
+      if (event.target instanceof Node && list.current?.contains(event.target)) return;
+      wheeled = true;
+    };
     const onScroll = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
       if (list.current?.contains(target)) return;
       if (target !== document && !target.contains(trigger)) return;
       const now = trigger.getBoundingClientRect();
-      if (Math.abs(now.top - opened.top) > 0.5 || Math.abs(now.left - opened.left) > 0.5)
-        setOpen(false);
+      const moved = Math.abs(now.top - at.top) > 0.5 || Math.abs(now.left - at.left) > 0.5;
+      if (wheeled && moved) setOpen(false);
+      else at = { top: now.top, left: now.left };
     };
     const onWindowBlur = () => setOpen(false);
     document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('wheel', onWheel, { capture: true, passive: true });
     document.addEventListener('scroll', onScroll, true);
     window.addEventListener('blur', onWindowBlur);
     return () => {
       document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('wheel', onWheel, { capture: true });
       document.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('blur', onWindowBlur);
     };

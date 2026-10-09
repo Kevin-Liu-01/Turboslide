@@ -4,11 +4,10 @@ import type { ReactNode } from 'react';
 import { ICON_COLORS, ICON_NAMES, isIconName } from '@turboslide/schema/icon-names';
 import type { IconColor, IconName } from '@turboslide/schema/icon-names';
 
-import { Glyph, IconPicker } from '../IconPicker';
+import { Glyph, IconGrid, IconPicker } from '../IconPicker';
 import { tipProps } from '../Tooltip';
 import { usePlate, useStart } from '../usePlate';
 import type { ControlProps } from './props';
-import { HIDDEN_NATIVE_CLASS } from './props';
 
 import './icon.css';
 
@@ -17,9 +16,10 @@ import './icon.css';
  * the shared IconPicker (IconPicker.tsx: the filter, every symbol of the theme's sprite, the tone
  * Seg `none | ok | warn | no | info` and the placement note, DECK-GRAMMAR.md:40). Two field
  * shapes share it: the Icon object { name, color? } and a bare IconName string (a diagram's icon,
- * the icon block's name). A visually hidden select over the names carries the label and
- * data-control, so set(label, 'x-circle') from the window API lands in the same onChange as a
- * click.
+ * the icon block's name). The field is a group named with the label and the data-control, and
+ * the picker's tiles carry `<data-control>.<name>` (and `.none` on an optional field); while the
+ * card is closed the tiles stay mounted and hidden, so set(label, 'x-circle') from the window API
+ * clicks a tile and lands in the same onChange as a click (docs/DROPDOWNS.md 4.4).
  */
 export { Glyph } from '../IconPicker';
 
@@ -63,6 +63,8 @@ export function IconControl({ spec, onChange, disabled }: ControlProps) {
   /* the button the card hangs from while it is open */
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const open = anchor !== null;
+  /* an optional field offers None, which removes the icon */
+  const clearable = spec.optional;
 
   const write = (next: IconValue) => {
     if (disabled) return;
@@ -78,25 +80,7 @@ export function IconControl({ spec, onChange, disabled }: ControlProps) {
   };
 
   return (
-    <span className="ts-ctl-icon">
-      <select
-        className={HIDDEN_NATIVE_CLASS}
-        aria-label={spec.label}
-        data-control={spec.control}
-        value={value.name ?? ''}
-        disabled={disabled}
-        onChange={(event) => {
-          const raw = event.target.value;
-          write({ ...value, ...(isIconName(raw) ? { name: raw } : { name: undefined }) });
-        }}
-      >
-        <option value="">none</option>
-        {ICON_NAMES.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </select>
+    <span className="ts-ctl-icon" role="group" aria-label={spec.label} data-control={spec.control}>
       <button
         type="button"
         className="ts-ctl-icon-btn"
@@ -127,6 +111,14 @@ export function IconControl({ spec, onChange, disabled }: ControlProps) {
               write({ ...value, name });
               setAnchor(null);
             }}
+            onNone={
+              clearable
+                ? () => {
+                    write({ ...value, name: undefined });
+                    setAnchor(null);
+                  }
+                : undefined
+            }
             onClose={() => setAnchor(null)}
             tone={
               objectMode
@@ -142,7 +134,17 @@ export function IconControl({ spec, onChange, disabled }: ControlProps) {
             }
           />
         </IconCard>
-      ) : null}
+      ) : (
+        <IconGrid
+          hidden
+          label={spec.label}
+          value={value.name}
+          names={ICON_NAMES}
+          tileControl={spec.control}
+          onPick={(name) => write({ ...value, name })}
+          onNone={clearable ? () => write({ ...value, name: undefined }) : undefined}
+        />
+      )}
     </span>
   );
 }

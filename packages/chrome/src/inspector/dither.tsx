@@ -362,23 +362,6 @@ export function DitherSection({
       <div className="ts-insp-row">
         <span className="ts-insp-label">Plate</span>
         <div className="ts-insp-field">
-          <select
-            className="ts-native-mirror"
-            aria-label={`${asset.id}: Plate`}
-            data-control={`asset.${asset.id}.plate`}
-            value={plate ?? ''}
-            disabled={busy}
-            onChange={(event) =>
-              setPlate(event.target.value === '' ? undefined : (event.target.value as PlateSide))
-            }
-          >
-            <option value="">none</option>
-            {PLATE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
           <Seg
             options={[
               { value: 'none', label: 'none', title: `${asset.id}: no plate` },
@@ -390,9 +373,9 @@ export function DitherSection({
             ]}
             value={plate ?? 'none'}
             onChange={(next) => setPlate(next === 'none' ? undefined : next)}
-            label={`${asset.id}: Plate options`}
+            label={`${asset.id}: Plate`}
             className="is-small"
-            control={`asset.${asset.id}.plate.option`}
+            control={`asset.${asset.id}.plate`}
           />
         </div>
       </div>

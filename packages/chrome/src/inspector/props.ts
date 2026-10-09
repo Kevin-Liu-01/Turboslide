@@ -24,9 +24,6 @@ export type ControlProps = {
   disabled?: boolean;
 };
 
-/** The class every visually hidden native mirror of a composite control carries (Seg, icon). */
-export const HIDDEN_NATIVE_CLASS = 'ts-native-mirror';
-
 /**
  * The word a person reads for an option value (SPEC 12, the default view words): the values are
  * the schema's tags and stay the control's values, and one of them, the `freeform` layout tag, is

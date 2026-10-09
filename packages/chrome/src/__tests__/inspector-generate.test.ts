@@ -95,6 +95,11 @@ describe('blockControls for a rows block', () => {
     expect(kindFor({ label: 'Few', control: 'select', snap: [1, 2, 3] }, inner, [1, 2, 3])).toBe(
       'seg',
     );
+    /* an optional short set is the dropdown, whose None row removes the field (DROPDOWNS.md 4.1) */
+    expect(
+      kindFor({ label: 'Few', control: 'select', snap: [1, 2, 3] }, inner, [1, 2, 3], true),
+    ).toBe('select');
+    expect(kindFor({ label: 'Few', control: 'select' }, inner, ['a', 'b'], true)).toBe('select');
     expect(
       kindFor({ label: 'Widths', control: 'select', snap: ROWS_KEY_SNAP }, inner, ROWS_KEY_SNAP),
     ).toBe('stepper');
@@ -120,13 +125,14 @@ describe('blockControls for a rows block', () => {
 });
 
 describe('kinds for the other blocks', () => {
-  it('makes a four-option enum a seg and a snapping number a stepper', () => {
+  it('makes a required four-option enum a seg, an optional one a select and a snapping number a stepper', () => {
     const heading: HeadingBlock = { id: 'h', type: 'heading', level: 'h2', text: 'The copy test' };
     const controls = blockControls(heading).controls;
     const level = controls.find((spec) => spec.path === '/level');
     expect(level?.kind).toBe('seg');
     expect(level?.options).toEqual(['h1', 'h2', 'big', 'title']);
-    expect(controls.find((spec) => spec.path === '/marginBottom')?.kind).toBe('seg');
+    /* optional: the dropdown with its None row (docs/DROPDOWNS.md 4.1) */
+    expect(controls.find((spec) => spec.path === '/marginBottom')?.kind).toBe('select');
     expect(controls.find((spec) => spec.path === '/marginTop')?.kind).toBe('number');
     expect(controls.find((spec) => spec.path === '/text')?.text).toBe(true);
 
@@ -137,7 +143,8 @@ describe('kinds for the other blocks', () => {
 
     const plain: PlainBlock = { id: 'list', type: 'plain', size: 22, items: [{ text: 'One' }] };
     const size = blockControls(plain).controls.find((spec) => spec.path === '/size');
-    expect(size?.kind).toBe('seg');
+    expect(size?.kind).toBe('select');
+    expect(size?.optional).toBe(true);
     expect(size?.label).toBe('list: Size');
     expect(size?.control).toBe('block.list.size');
   });
@@ -146,7 +153,7 @@ describe('kinds for the other blocks', () => {
     const shot: ShotBlock = { id: 'fig', type: 'shot', asset: 'site-home', fit: 'width' };
     const controls = blockControls(shot).controls;
     expect(controls.find((spec) => spec.path === '/asset')?.kind).toBe('asset');
-    expect(controls.find((spec) => spec.path === '/fit')?.kind).toBe('seg');
+    expect(controls.find((spec) => spec.path === '/fit')?.kind).toBe('select');
     expect(controls.find((spec) => spec.path === '/caption')?.kind).toBe('textarea');
 
     const dia: DiaBlock = { id: 'd', type: 'dia', fit: 'slot', svg: '<svg/>', alt: '' };
@@ -166,7 +173,7 @@ describe('slideControls', () => {
     expect(ratio?.kind).toBe('json');
     expect(ratio?.options).toEqual(['5/7', '4/8', '1/1']);
     expect(ratio?.group).toBe('Layout');
-    expect(byPath.get('/layout/gap')?.kind).toBe('seg');
+    expect(byPath.get('/layout/gap')?.kind).toBe('select');
     expect(byPath.get('/notes')?.kind).toBe('textarea');
     expect(byPath.get('/notes')?.label).toBe('slide: Notes');
     expect(byPath.get('/title')?.control).toBe('slide.title');
@@ -186,7 +193,7 @@ describe('slideControls', () => {
     expect(byPath.get('/plate/side')?.kind).toBe('seg');
     expect(byPath.get('/plate/maxWidth')?.options).toEqual([740, 560, 720]);
     expect(byPath.get('/picture/asset')?.kind).toBe('asset');
-    expect(byPath.get('/picture/position')?.kind).toBe('seg');
+    expect(byPath.get('/picture/position')?.kind).toBe('select');
     expect(controls.some((spec) => spec.path.startsWith('/plate/blocks'))).toBe(false);
   });
 

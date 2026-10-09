@@ -1,12 +1,14 @@
 // The inspector's control generation (SPEC 6.5): the controls for a slide or a block come from
 // the Zod schema's inspector annotations, never from a hand-written form per block. The rules of
 // SPEC 6.5 are applied to the annotation and the field's type together: a z.enum (or a literal
-// set) with four or fewer options becomes a Seg, more a select; a number with a snap becomes a
-// stepper through the set, and so does a numeric snap set with more options than a Seg holds
-// (the key widths); a boolean a check row; a Text a textarea in the inline markup; an Icon
-// the sprite picker; an AssetId the asset picker. Every control carries the accessible label
-// `<block id>: <property label>` and the locale-independent data-control id `block.<id>.<path>`
-// the window API matches (SPEC 6.5, 7.4). Pure: no React, so it is unit tested in Node.
+// set) with four or fewer options becomes a Seg, more a select (the shared dropdown), and an
+// optional set of four or fewer a select with its None row (docs/DROPDOWNS.md 4.1: a Seg has no
+// way to clear a field); a number with a snap becomes a stepper through the set, and so does a
+// numeric snap set with more options than a Seg holds (the key widths); a boolean a check row; a
+// Text a textarea in the inline markup; an Icon the sprite picker; an AssetId the asset picker.
+// Every control carries the accessible label `<block id>: <property label>` and the
+// locale-independent data-control id `block.<id>.<path>` the window API matches (SPEC 6.5, 7.4).
+// Pure: no React, so it is unit tested in Node.
 import { z } from 'zod';
 
 import type { Inspector, InspectorGroup } from '@turboslide/schema/annotate';
@@ -221,12 +223,19 @@ function labelFor(target: ControlTarget, label: string, suffix: string): string 
   return `${target.noun}: ${label}${suffix}`;
 }
 
-/** The kind SPEC 6.5 assigns to an annotated field, from the annotation and the type together. */
+/**
+ * The kind SPEC 6.5 assigns to an annotated field, from the annotation, the type and whether the
+ * field may be removed: a Seg holds a required set of four or fewer options; an optional set of
+ * that size is a select, whose None row removes the field (docs/DROPDOWNS.md 4.1).
+ */
 export function kindFor(
   inspector: Inspector,
   inner: z.ZodType,
   options: ReadonlyArray<ControlOption> | undefined,
+  optional = false,
 ): ControlKind {
+  const segOrSelect = (count: number): ControlKind =>
+    count <= SEG_MAX && !optional ? 'seg' : 'select';
   switch (inspector.control) {
     case 'readonly':
       return 'readonly';
@@ -250,7 +259,7 @@ export function kindFor(
       return inspector.snap !== undefined ? 'stepper' : 'number';
     case 'select': {
       if (options === undefined) return 'select';
-      if (options.length <= SEG_MAX) return 'seg';
+      if (options.length <= SEG_MAX) return segOrSelect(options.length);
       /* a numeric snap set past a Seg's size steps through the set (SPEC 6.5: the key widths
          90 to 300), whatever the annotation names */
       const numeric =
@@ -262,7 +271,7 @@ export function kindFor(
   }
   const type = defOf(inner).type;
   if (type === 'boolean') return 'check';
-  if (options !== undefined) return options.length <= SEG_MAX ? 'seg' : 'select';
+  if (options !== undefined) return segOrSelect(options.length);
   if (type === 'number') return inspector.snap !== undefined ? 'stepper' : 'number';
   return 'text';
 }
@@ -311,7 +320,7 @@ function walk(
       control: controlId(target, path),
       label: labelFor(target, inspector.label, suffix),
       path,
-      kind: kindFor(inspector, inner, values),
+      kind: kindFor(inspector, inner, values, optional),
       inspector,
       group: inspector.group ?? 'Block',
       ...(values !== undefined ? { options: values } : {}),
@@ -489,6 +498,8 @@ export function compositeControls(spec: ControlSpec): ControlSpec[] {
       control: `${spec.control}.${key}`,
       label: `${noun}: ${inspector.label}`,
       path: pointerJoin(spec.path, key),
+      /* a composite draws its fields as a Seg or a stepper (typography.tsx), so an optional field
+         keeps its Seg here */
       kind: kindFor(inspector, inner, values),
       inspector,
       group: inspector.group ?? spec.group,

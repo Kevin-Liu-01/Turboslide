@@ -242,10 +242,11 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
   it('the Text section writes spacing, columns and a mark; lineSpacingOption reads the presets', () => {
     dispatch.mockClear();
     panel('t');
-    /* the shared dropdown (docs/DROPDOWNS.md 3) */
+    /* the shared dropdown, no native select (docs/DROPDOWNS.md 3) */
     const spacingField = control('formatOptions.text.lineSpacing');
     expect(spacingField.getAttribute('role')).toBe('combobox');
     expect(spacingField.getAttribute('value')).toBe('single');
+    expect(document.querySelector('[data-section] select')).toBeNull();
     chooseOption('formatOptions.text.lineSpacing', 'double');
     expect(dispatch).toHaveBeenLastCalledWith('text.spacing', {
       slideId: 'cv',

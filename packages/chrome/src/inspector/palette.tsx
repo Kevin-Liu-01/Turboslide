@@ -20,7 +20,6 @@ import { EditorShellContext } from '../editor-shell-context';
 import { tipProps } from '../Tooltip';
 import { LintMark } from './lint-mark';
 import type { ControlProps } from './props';
-import { HIDDEN_NATIVE_CLASS } from './props';
 
 import './palette.css';
 
@@ -32,11 +31,14 @@ import './palette.css';
  * swatch here, in the colour plate, the Background dialog, Format options and the chart's series
  * paints the colour the deck's slides draw: the deck's theme under its brand kit in the deck's
  * appearance (`useDeckTokens`, render/theme-css.ts `deckTokens` and `colorHexOf`; docs/DESIGN.md
- * 7.5), and the contrast reads against that theme's paper. A visually hidden select carries the
- * label and data-control, so the window API's set(label, 'plate') lands in the same onChange as
- * a click.
+ * 7.5), and the contrast reads against that theme's paper. The swatch group carries the field's
+ * label and data-control, so the window API's set(label, 'plate') clicks the swatch, and a hex
+ * goes through the hex field `<id>.hex` (docs/DROPDOWNS.md 4.3).
  */
 type Rgb = [number, number, number];
+
+/** A hex the field commits as it is typed: six digits, the hash optional. */
+const COMPLETE_HEX = /^#?[0-9a-f]{6}$/i;
 
 /**
  * The tokens the deck's slides draw in the deck's appearance, its theme under its brand kit
@@ -202,28 +204,12 @@ export function PaletteControl({ spec, onChange, disabled }: ControlProps) {
 
   return (
     <span className="ts-ctl-color" data-value={current || undefined}>
-      <select
-        className={HIDDEN_NATIVE_CLASS}
+      <span
+        className="ts-ctl-swatches"
+        role="group"
         aria-label={spec.label}
         data-control={spec.control}
-        value={current}
-        disabled={disabled}
-        onChange={(event) => {
-          const raw = event.target.value;
-          if (raw === '') pick(undefined);
-          else if (isColorToken(raw)) pick(raw);
-          else commitHex(raw);
-        }}
       >
-        {spec.optional || current === '' ? <option value="">none</option> : null}
-        {tokens.map((token) => (
-          <option key={token} value={token}>
-            {token}
-          </option>
-        ))}
-        {isHex ? <option value={current}>{current}</option> : null}
-      </select>
-      <span className="ts-ctl-swatches" role="group" aria-label={`${spec.label} palette`}>
         {spec.optional ? (
           <button
             type="button"
@@ -283,7 +269,14 @@ export function PaletteControl({ spec, onChange, disabled }: ControlProps) {
             value={shownHex}
             disabled={disabled}
             {...hexTip}
-            onChange={(event) => setDraft(event.target.value)}
+            onChange={(event) => {
+              const typed = event.target.value;
+              /* a complete six digit value commits at once, so the window API's set() on the
+                 field writes in one call (docs/DROPDOWNS.md 4.3); a shorter draft waits for
+                 Enter or the blur */
+              if (COMPLETE_HEX.test(typed.trim())) commitHex(typed);
+              else setDraft(typed);
+            }}
             onBlur={(event) => {
               hexTip.onBlur(event);
               if (draft !== null) commitHex(event.currentTarget.value);

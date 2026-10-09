@@ -215,6 +215,11 @@ test('set by label and by data-control id are one action call each, and the rend
   await page.locator('[data-control="menubar.format"]').click();
   await page.locator('[data-menu-item="format.formatOptions"]').click();
   await expect(page.locator('[data-control="block.list.size"]')).toBeVisible();
+  /* the Text section's Size field carries the label "list: Size" too and comes first in the
+     panel; with that section closed the label names the list's own Size alone */
+  const textSection = page.locator('[data-control="formatOptions.section.text"]');
+  if ((await textSection.getAttribute('aria-expanded')) === 'true') await textSection.click();
+  await expect(page.locator('[data-control="block.list.typography.size"]')).toHaveCount(0);
 
   // one call by accessible label
   const countA = await versionCount(page);
@@ -277,6 +282,95 @@ test('set by label and by data-control id are one action call each, and the rend
   expect(rowsAfter.length).toBeGreaterThan(1);
   expect(rowsAfter).not.toEqual(rowsBefore);
   expect(pitch(rowsAfter)).toBeLessThan(pitch(rowsBefore));
+});
+
+/** A field of the content-rule slide as readSource() has it, by block id and JSON path. */
+async function fieldInSource(page: Page, blockId: string, path: readonly (string | number)[]) {
+  return page.evaluate(
+    ([id, keys]) => {
+      const slide = JSON.parse(window.turboslide!.studio.readSource()) as {
+        slots: Record<string, { id: string }[]>;
+      };
+      const block = Object.values(slide.slots)
+        .flat()
+        .find((one) => one.id === id);
+      let at: unknown = block;
+      for (const key of keys) at = (at as Record<string | number, unknown> | undefined)?.[key];
+      return at;
+    },
+    [blockId, path] as const,
+  );
+}
+
+/** Selects a block on the stage and opens Format options, where its generated fields live. */
+async function formatOptionsFor(page: Page, blockId: string, field: string): Promise<void> {
+  await page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`).first().click();
+  if ((await page.locator(field).count()) === 0) {
+    await page.locator('[data-control="menubar.format"]').click();
+    await page.locator('[data-menu-item="format.formatOptions"]').click();
+  }
+  await expect(page.locator(field).first()).toBeAttached();
+}
+
+test('set reaches the fields whose native mirror left: one action call each, by label and by id', async ({
+  page,
+}) => {
+  /* docs/DROPDOWNS.md 4: a Seg field is set through its group, an icon field through the picker's
+     tiles, an optional short enum through the dropdown's None row */
+  test.setTimeout(240_000);
+  await openEditor(page);
+  const one = async (call: () => Promise<unknown>, read: () => Promise<unknown>, want: unknown) => {
+    const count = await versionCount(page);
+    await call();
+    await expect.poll(() => versionCount(page)).toBe(count + 1);
+    await expect.poll(read).toEqual(want);
+  };
+
+  await formatOptionsFor(page, 'list', '[data-control="block.list.items.0.icon"]');
+  const icon = () => fieldInSource(page, 'list', ['items', 0, 'icon', 'name']);
+  await one(
+    () => page.evaluate(() => window.turboslide!.studio.set('list: Icon 1', 'x-circle')),
+    icon,
+    'x-circle',
+  );
+  await one(
+    () =>
+      page.evaluate(() => window.turboslide!.studio.set('block.list.items.0.icon', 'check-circle')),
+    icon,
+    'check-circle',
+  );
+  const listed = await page.evaluate(() =>
+    window.turboslide!.studio.controls().find((row) => row.control === 'block.list.items.0.icon'),
+  );
+  expect(listed).toMatchObject({ kind: 'select', label: 'list: Icon 1', value: 'check-circle' });
+
+  /* by id: the label "list: Size" also names the Text section's Size field, which comes first */
+  const size = () => fieldInSource(page, 'list', ['size']);
+  await one(
+    () => page.evaluate(() => window.turboslide!.studio.set('block.list.size', 20)),
+    size,
+    20,
+  );
+  await one(
+    () => page.evaluate(() => window.turboslide!.studio.set('block.list.size', 'None')),
+    size,
+    undefined,
+  );
+
+  await formatOptionsFor(page, 'h', '[data-control^="block.h.level."]');
+  const level = () => fieldInSource(page, 'h', ['level']);
+  await one(
+    () => page.evaluate(() => window.turboslide!.studio.set('h: Level', 'h1')),
+    level,
+    'h1',
+  );
+  await one(
+    () => page.evaluate(() => window.turboslide!.studio.set('block.h.level', 'h2')),
+    level,
+    'h2',
+  );
+  /* no native select is left in the panel */
+  expect(await page.locator('[data-section] select').count()).toBe(0);
 });
 
 test('the source drawer is a delegating owner over the same validator', async ({ page }) => {

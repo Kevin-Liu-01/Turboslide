@@ -4,11 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { RowsBlock } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
-import { WORKED_DECK } from '@turboslide/schema/fixtures';
+import { LIQUID_METAL_DIAMOND, WORKED_DECK } from '@turboslide/schema/fixtures';
 import { snapPosition } from '@turboslide/schema/freeform';
 
 import type { EditorDispatch } from '../dispatch';
 import { Inspector, layoutForType } from '../Inspector';
+import { DitherSection } from '../inspector/dither';
 import { blockControls } from '../inspector/generate';
 import {
   SECTIONS,
@@ -175,7 +176,8 @@ describe('Inspector sections', () => {
     );
     expect(screen.getByLabelText('t: Size')).toBeTruthy();
     expect(screen.getByLabelText<HTMLInputElement>('t: Weight').value).toBe('600');
-    expect(screen.getByLabelText('t: Align options')).toBeTruthy();
+    /* the Seg is the field's group, named with its label (docs/DROPDOWNS.md 4.1) */
+    expect(screen.getByLabelText('t: Align').getAttribute('role')).toBe('group');
     expect(screen.getByLabelText('t: Tracking (em)')).toBeTruthy();
     /* Google's word since SPEC-2 0.20 (the typography label of B1's schema) */
     expect(screen.getByLabelText('t: Line spacing')).toBeTruthy();
@@ -219,13 +221,31 @@ describe('Inspector sections', () => {
       value: 'plate',
       baseRevision: 7,
     });
-    /* the hidden native mirror takes the window API's value */
-    fireEvent.change(screen.getByLabelText('t: Color'), { target: { value: 'ink-2' } });
+    /* the swatch group is the field the window API sets (docs/DROPDOWNS.md 4.3): named with the
+       label, its id on the group and `<id>.<token>` on each swatch, so set() by label or by id
+       clicks the swatch; no native mirror is left */
+    const field = screen.getByLabelText('t: Color');
+    expect(field.getAttribute('role')).toBe('group');
+    expect(field.getAttribute('data-control')).toBe('block.t.color');
+    expect(document.querySelector('[data-section="color"] select')).toBeNull();
+    const writes = dispatch.mock.calls.length;
+    field.querySelector<HTMLElement>('[data-control="block.t.color.ink-2"]')?.click();
+    expect(dispatch).toHaveBeenCalledTimes(writes + 1);
     expect(dispatch).toHaveBeenLastCalledWith('block.set', {
       slideId: 'free-demo',
       blockId: 't',
       path: '/color',
       value: 'ink-2',
+      baseRevision: 7,
+    });
+    /* a complete six digit hex commits as it is typed, so set() on `<id>.hex` writes once */
+    fireEvent.change(screen.getByLabelText('t: Color hex'), { target: { value: '#abcdef' } });
+    expect(dispatch).toHaveBeenCalledTimes(writes + 2);
+    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 'free-demo',
+      blockId: 't',
+      path: '/color',
+      value: '#abcdef',
       baseRevision: 7,
     });
   });
@@ -306,6 +326,119 @@ describe('Inspector sections', () => {
     expect(lint.getAttribute('aria-expanded')).toBe('false');
     expect(localStorage.getItem(SECTIONS_STORAGE_KEY)).toBe(
       writeClosedSections(new Set(['history', 'tokens', 'lint'])),
+    );
+  });
+});
+
+/**
+ * The group a field is set through since its native mirror left (docs/DROPDOWNS.md 4): the
+ * window API's group path finds `[role="group"]` by its label or by its data-control (or an
+ * option's id less the value) and clicks the option whose id ends in the value. Each case pins
+ * that shape and that the click writes once.
+ */
+function fieldGroup(label: string, id: string): HTMLElement {
+  const group = screen.getByLabelText(label);
+  expect(group.getAttribute('role')).toBe('group');
+  const option = group.querySelector(`[data-control^="${id}."]`);
+  expect(option, `${label} has an option ${id}.<value>`).not.toBeNull();
+  return group;
+}
+
+function optionOf(group: HTMLElement, id: string): HTMLElement {
+  const option = group.querySelector<HTMLElement>(`[data-control="${id}"]`);
+  if (option === null) throw new Error(`no option ${id}`);
+  return option;
+}
+
+describe('the fields set without a native mirror', () => {
+  const rows: Slide = {
+    schemaVersion: 1,
+    id: 'rows-demo',
+    kind: 'content',
+    layout: { type: 'cols', ratio: '5/7' },
+    slots: {
+      left: [{ id: 'h', type: 'heading', level: 'h2', text: 'What ships' }],
+      right: [
+        {
+          id: 'list',
+          type: 'rows',
+          key: 240,
+          items: [
+            { key: 'Deck', icon: { name: 'check-circle', color: 'ok' }, value: 'One file' },
+            { key: 'CLI', value: 'turboslide render all' },
+          ],
+        } satisfies RowsBlock,
+      ],
+    },
+  };
+
+  it('sets a Seg field through its group: the label and the id name the Seg itself', () => {
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    render(
+      <Inspector deck={WORKED_DECK} slide={rows} blockId="h" revision={7} dispatch={dispatch} />,
+    );
+    const group = fieldGroup('h: Level', 'block.h.level');
+    expect(document.querySelector('[data-section] select')).toBeNull();
+    expect(optionOf(group, 'block.h.level.h2').getAttribute('aria-pressed')).toBe('true');
+    optionOf(group, 'block.h.level.h1').click();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledWith('block.set', {
+      slideId: 'rows-demo',
+      blockId: 'h',
+      path: '/level',
+      value: 'h1',
+      baseRevision: 7,
+    });
+  });
+
+  it('sets an icon through the picker tiles, mounted and hidden while the card is closed', () => {
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    render(
+      <Inspector deck={WORKED_DECK} slide={rows} blockId="list" revision={7} dispatch={dispatch} />,
+    );
+    const group = fieldGroup('list: Icon 1', 'block.list.items.0.icon');
+    expect(group.getAttribute('data-control')).toBe('block.list.items.0.icon');
+    const tile = optionOf(group, 'block.list.items.0.icon.x-circle');
+    expect(tile.closest('[hidden]')).not.toBeNull();
+    expect(optionOf(group, 'block.list.items.0.icon.check-circle').classList).toContain('is-on');
+    tile.click();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 'rows-demo',
+      blockId: 'list',
+      path: '/items/0/icon',
+      value: { name: 'x-circle', color: 'ok' },
+      baseRevision: 7,
+    });
+    /* the optional field's None tile removes the icon */
+    optionOf(group, 'block.list.items.0.icon.none').click();
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 'rows-demo',
+      blockId: 'list',
+      path: '/items/0/icon',
+      baseRevision: 7,
+    });
+    /* the open card draws the same tiles and the None tile, the hidden grid gone */
+    fireEvent.click(screen.getByLabelText('list: Icon 1 picker'));
+    expect(
+      document.querySelectorAll('[data-control="block.list.items.0.icon.x-circle"]'),
+    ).toHaveLength(1);
+    expect(optionOf(group, 'block.list.items.0.icon.x-circle').closest('[hidden]')).toBeNull();
+    expect(optionOf(group, 'block.list.items.0.icon.none').getAttribute('data-tip')).toBe('None');
+  });
+
+  it('sets the dither plate through its Seg, None included', () => {
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    const id = LIQUID_METAL_DIAMOND.id;
+    render(<DitherSection asset={LIQUID_METAL_DIAMOND} revision={13} dispatch={dispatch} />);
+    const group = fieldGroup(`${id}: Plate`, `asset.${id}.plate`);
+    expect(document.querySelector('select')).toBeNull();
+    fireEvent.click(optionOf(group, `asset.${id}.plate.none`));
+    expect(optionOf(group, `asset.${id}.plate.none`).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(optionOf(group, `asset.${id}.plate.upper-left`));
+    expect(optionOf(group, `asset.${id}.plate.upper-left`).getAttribute('aria-pressed')).toBe(
+      'true',
     );
   });
 });

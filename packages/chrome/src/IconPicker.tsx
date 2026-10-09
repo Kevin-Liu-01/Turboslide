@@ -50,6 +50,101 @@ export function filterIcons(query: string): readonly IconName[] {
   return q === '' ? ICON_NAMES : ICON_NAMES.filter((name) => name.includes(q));
 }
 
+export type IconGridProps = {
+  /** the accessible name prefix: `list: Icon 1`, `Insert icon` */
+  label: string;
+  value?: IconName;
+  names: readonly IconName[];
+  onPick: (name: IconName) => void;
+  /** draws a None tile first, which removes the icon (an optional field) */
+  onNone?: () => void;
+  /** the tiles' data-control prefix: `<prefix>.<name>` and `<prefix>.none` */
+  tileControl?: string;
+  /**
+   * mounted for the window API alone while the card is closed (docs/DROPDOWNS.md 4.4): hidden,
+   * out of the accessibility tree and the Tab order, each tile its id, its picked state and its
+   * click
+   */
+  hidden?: boolean;
+};
+
+/**
+ * The 8-column grid of the sprite's symbols, one tile per name, with an optional None tile. The
+ * picker draws it in its card; the inspector's icon field keeps it mounted and hidden while the
+ * card is closed, so set('<label>', '<name>') clicks a tile in one call.
+ */
+export function IconGrid({
+  label,
+  value,
+  names,
+  onPick,
+  onNone,
+  tileControl,
+  hidden = false,
+}: IconGridProps) {
+  const tile = (name: string) => (tileControl === undefined ? undefined : `${tileControl}.${name}`);
+  if (hidden) {
+    /* the window API's tiles alone: an id, the picked state and the click; no glyph, name or tip
+       (the grid's class draws `display: grid`, which would outrank the hidden attribute) */
+    return (
+      <div hidden>
+        {onNone !== undefined ? (
+          <button
+            type="button"
+            className={value === undefined ? 'is-on' : undefined}
+            data-control={tile('none')}
+            onClick={onNone}
+          />
+        ) : null}
+        {names.map((name) => (
+          <button
+            key={name}
+            type="button"
+            className={name === value ? 'is-on' : undefined}
+            data-control={tile(name)}
+            onClick={() => onPick(name)}
+          />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="ts-iconpicker-grid pt-scroll" role="listbox" aria-label={`${label} symbols`}>
+      {onNone !== undefined ? (
+        <button
+          type="button"
+          role="option"
+          aria-selected={value === undefined}
+          className={value === undefined ? 'ts-iconpicker-cell is-on' : 'ts-iconpicker-cell'}
+          aria-label={`${label} none`}
+          data-control={tile('none')}
+          onClick={onNone}
+          {...tipProps({ name: 'None', doc: 'Removes the icon.' })}
+        >
+          {/* the dashed square of an empty icon field (inspector/icon.css) */}
+          <span className="ts-ctl-icon-none" aria-hidden="true" />
+        </button>
+      ) : null}
+      {names.map((name) => (
+        <button
+          key={name}
+          type="button"
+          role="option"
+          aria-selected={name === value}
+          className={name === value ? 'ts-iconpicker-cell is-on' : 'ts-iconpicker-cell'}
+          aria-label={`${label} ${name}`}
+          data-control={tile(name)}
+          onClick={() => onPick(name)}
+          {...tipProps({ name, doc: `Heroicons 20 solid ${name} from the theme sprite.` })}
+        >
+          <Glyph name={name} size={20} />
+        </button>
+      ))}
+      {names.length === 0 ? <p className="ts-iconpicker-empty">No symbol matches.</p> : null}
+    </div>
+  );
+}
+
 export type IconPickerProps = {
   /** the accessible name prefix: `list: Icon 1`, `Insert icon` */
   label: string;
@@ -58,8 +153,10 @@ export type IconPickerProps = {
   onClose: () => void;
   /** the tone Seg, when the field carries one (the Icon object) */
   tone?: { value: IconColor | undefined; onChange: (tone: IconColor | undefined) => void };
-  /** the data-control prefix for the filter and the tone Seg */
+  /** the data-control prefix for the filter, the tiles (`<control>.<name>`) and the tone Seg */
   control?: string;
+  /** a None tile before the symbols, which removes the icon (the inspector's optional field) */
+  onNone?: () => void;
   /** the card closes when the pointer presses outside it; off when the caller owns that */
   closeOnOutsidePress?: boolean;
   /**
@@ -78,6 +175,7 @@ export function IconPicker({
   onClose,
   tone,
   control,
+  onNone,
   closeOnOutsidePress = true,
   embedded = false,
   className,
@@ -156,24 +254,14 @@ export function IconPicker({
           />
         )}
       </div>
-      <div className="ts-iconpicker-grid pt-scroll" role="listbox" aria-label={`${label} symbols`}>
-        {names.map((name) => (
-          <button
-            key={name}
-            type="button"
-            role="option"
-            aria-selected={name === value}
-            className={name === value ? 'ts-iconpicker-cell is-on' : 'ts-iconpicker-cell'}
-            aria-label={`${label} ${name}`}
-            data-control={embedded && control ? `${control}.pick.${name}` : undefined}
-            onClick={() => onPick(name)}
-            {...tipProps({ name, doc: `Heroicons 20 solid ${name} from the theme sprite.` })}
-          >
-            <Glyph name={name} size={20} />
-          </button>
-        ))}
-        {names.length === 0 ? <p className="ts-iconpicker-empty">No symbol matches.</p> : null}
-      </div>
+      <IconGrid
+        label={label}
+        value={value}
+        names={names}
+        onPick={onPick}
+        onNone={onNone}
+        tileControl={control === undefined ? undefined : embedded ? `${control}.pick` : control}
+      />
       {tone ? (
         <div className="ts-iconpicker-tone">
           <span>Tone</span>

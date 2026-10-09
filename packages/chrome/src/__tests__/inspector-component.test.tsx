@@ -194,6 +194,44 @@ describe('Inspector', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it('draws an optional short enum as the shared dropdown whose None row removes the field', () => {
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    render(<Inspector deck={WORKED_DECK} slide={slide()} revision={5} dispatch={dispatch} />);
+    /* docs/DROPDOWNS.md 3, 4.1: the trigger carries the label, the id and the value; no select */
+    const counter = screen.getByLabelText('slide: Slide number');
+    expect(counter.getAttribute('role')).toBe('combobox');
+    expect(counter.getAttribute('data-control')).toBe('slide.counter');
+    expect(counter.getAttribute('value')).toBe('');
+    expect(document.querySelector('select')).toBeNull();
+    const list = document.getElementById(counter.getAttribute('aria-controls') ?? '');
+    expect(
+      Array.from(list?.querySelectorAll('[role="option"]') ?? []).map((row) => row.textContent),
+    ).toEqual(['None', 'on', 'off']);
+    chooseOption('slide.counter', 'off');
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenLastCalledWith('slide.update', {
+      slideId: 'rows-demo',
+      baseRevision: 5,
+      mutations: [{ op: 'slide.set', slideId: 'rows-demo', path: '/counter', value: 'off' }],
+    });
+    cleanup();
+    dispatch.mockClear();
+    render(
+      <Inspector
+        deck={WORKED_DECK}
+        slide={{ ...slide(), counter: 'on' }}
+        revision={5}
+        dispatch={dispatch}
+      />,
+    );
+    chooseOption('slide.counter', { label: 'None' });
+    expect(dispatch).toHaveBeenLastCalledWith('slide.update', {
+      slideId: 'rows-demo',
+      baseRevision: 5,
+      mutations: [{ op: 'slide.set', slideId: 'rows-demo', path: '/counter' }],
+    });
+  });
+
   it('lists the blocks when none is selected and selects one on click', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     const onSelectBlock = vi.fn();

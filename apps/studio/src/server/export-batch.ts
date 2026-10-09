@@ -39,7 +39,6 @@ import type { BlobClient } from '@turboslide/store/blob-store';
 
 import {
   EXPORT_JOB_NO_REPORT,
-  attachmentUrlOf,
   exportJobStatusOf,
   finishedExportJob,
   missingExportJobPoll,
@@ -49,7 +48,7 @@ import {
   queuedExportJob,
   runningExportJob,
 } from './export-jobs';
-import type { ExportJobDownload, ExportJobPoll, ExportJobRecord } from './export-jobs';
+import type { ExportJobFile, ExportJobPoll, ExportJobRecord, StoredFileSign } from './export-jobs';
 import { pruneExportJobs, readExportJob, writeExportJob } from './export-jobs-store';
 import {
   SYNC_EXPORT_TIMEOUT_MS,
@@ -62,6 +61,7 @@ import {
 } from './export-sync';
 import type { SyncExportFile, SyncExportInput, SyncExportResult } from './export-sync';
 import { deckDir, ensureDeckAssets, exportBlobClient, openDeckStore, stateDir } from './root';
+import { storedFileLink } from './stored-files';
 import { cancelTokenFor } from './tokens';
 
 /**
@@ -416,7 +416,8 @@ export async function mergeExport(deckId: string, jobId: string): Promise<MergeE
       const source = sources[i] ?? path;
       const name = names.get(source) ?? source;
       const data = new Uint8Array(await readFile(path));
-      const entry = await client.put(`${jobPrefix(deckId, jobId)}${name}`, data, {
+      const at = `${jobPrefix(deckId, jobId)}${name}`;
+      const entry = await client.put(at, data, {
         overwrite: true,
         contentType: contentTypeOf(source),
       });
@@ -427,8 +428,11 @@ export async function mergeExport(deckId: string, jobId: string): Promise<MergeE
         sha256: createHash('sha256').update(data).digest('hex'),
         contentType: contentTypeOf(source),
         data,
-        url: entry.url,
+        // on a deployment the download route's link for the caller, never the store's address
+        // (hardening K1#5a); on a checkout the route that streams this instance's file
+        url: stored ? await storedFileLink({ path: at, deckId, name }) : entry.url,
         stored,
+        ...(stored ? { path: at } : {}),
       });
     }
     for (const path of [merged.reportPath, ...Object.values(merged.reportPaths)]) {
@@ -567,7 +571,7 @@ export async function storeFinishedExportJob(
       finishedExportJob(current, { status: 'failed', error: EXPORT_JOB_NO_REPORT }, now()),
     );
   }
-  let downloads: ExportJobDownload[] | undefined;
+  let downloads: ExportJobFile[] | undefined;
   if (store.stored) {
     downloads = [];
     try {
@@ -582,11 +586,13 @@ export async function storeFinishedExportJob(
       for (const source of sources) {
         const name = names.get(source) ?? source;
         const data = await worker.readJobFile(job.id, `export/${source}`);
-        const entry = await store.client.put(storedExportPath(record.deckId, job.id, name), data, {
+        const path = storedExportPath(record.deckId, job.id, name);
+        await store.client.put(path, data, {
           overwrite: true,
           contentType: contentTypeOf(source),
         });
-        downloads.push({ name, bytes: data.byteLength, url: attachmentUrlOf(entry.url) });
+        // the record keeps the path; each poll links it for its own caller (hardening K1#5a)
+        downloads.push({ name, bytes: data.byteLength, path });
       }
     } catch (error) {
       // the other run stored the files and pruned the job folder first: its record stands
@@ -720,6 +726,11 @@ export type ExportPollDeps = {
    * by the exporter's name, saved as the display name when one is given
    */
   sign: (jobId: string, name: string, saveAs?: string) => string;
+  /**
+   * the link of a stored copy for the caller (hardening K1#5a; stored-files.ts
+   * `storedFileSigner`): the record keeps the path, every answer links it anew
+   */
+  link?: StoredFileSign;
 };
 
 /**
@@ -789,7 +800,10 @@ export async function pollExportJob(
         job.createdAt,
       );
     const finished = await storeFinishedExportJob(worker, store, record, job);
-    return pollOfExportJob(finished, { stored: true });
+    return pollOfExportJob(finished, {
+      stored: true,
+      ...(deps.link === undefined ? {} : { link: deps.link }),
+    });
   }
   const record = await readExportJobCached(store.client, jobId);
   if (record === null) return missingExportJobPoll(jobId);
@@ -818,7 +832,10 @@ export async function pollExportJob(
         ...(record.line !== undefined ? { line: record.line } : {}),
       };
   }
-  return pollOfExportJob(record, { stored: store.stored });
+  return pollOfExportJob(record, {
+    stored: store.stored,
+    ...(deps.link === undefined ? {} : { link: deps.link }),
+  });
 }
 
 /**
@@ -860,9 +877,15 @@ export async function runSyncExportWithProgress(
       },
     });
     end();
-    const downloads = result.files
-      .filter((file) => file.url !== undefined && file.url !== '')
-      .map((file) => ({ name: file.name, bytes: file.bytes, url: file.url ?? '' }));
+    // a stored copy by its path, which each poll links for its own caller (hardening K1#5a); a
+    // file of this instance by its route
+    const downloads: ExportJobFile[] = result.files.flatMap((file): ExportJobFile[] =>
+      file.path !== undefined
+        ? [{ name: file.name, bytes: file.bytes, path: file.path }]
+        : file.url !== undefined && file.url !== ''
+          ? [{ name: file.name, bytes: file.bytes, url: file.url }]
+          : [],
+    );
     const last = result.log[result.log.length - 1];
     await writeExportJob(
       store.client,
@@ -975,7 +998,7 @@ export async function jobFileSource(
 export async function storedExportDownload(
   jobId: string,
   name: string,
-): Promise<{ deckId: string; download: ExportJobDownload } | null> {
+): Promise<{ deckId: string; download: ExportJobFile } | null> {
   const store = await partStore();
   if (!store.stored) return null;
   const record = await readExportJob(store.client, jobId);

@@ -31,6 +31,8 @@ import {
   stateDir,
   workerPaths,
 } from './root';
+import type { AuthContext } from './authorize';
+import { storedFileLink } from './stored-files';
 
 /**
  * Deck transfer on the server (docs/deck-transfer.md; Kevin's directive of 2026-09-11: copy a
@@ -229,22 +231,26 @@ export async function exportDeckBundle(
 
 /**
  * Stores a bundle where any instance can serve it (the blob backend), for a download over a
- * function's response cap: `bundles/<deckId>/<stamp>-<random>/<fileName>`, public but unguessable.
- * Returns the URL, or null on the other backends.
+ * function's response cap: `bundles/<deckId>/<stamp>-<random>/<fileName>`. Returns the download
+ * route's link for the caller, `ctx` when the route has it (hardening K1#5a: never the store's
+ * address, which is public before the private store's cutover and unreadable after it), or null
+ * on the other backends.
  */
 export async function storeBundleCopy(
   deckId: string,
   fileName: string,
   zip: Uint8Array,
+  ctx?: AuthContext,
 ): Promise<string | null> {
   const client = await exportBlobClient();
   if (client === null) return null;
   const folder = `${Date.now().toString(36)}-${randomBytes(6).toString('hex')}`;
-  const entry = await client.put(`bundles/${deckId}/${folder}/${fileName}`, zip, {
+  const path = `bundles/${deckId}/${folder}/${fileName}`;
+  await client.put(path, zip, {
     overwrite: false,
     contentType: 'application/zip',
   });
-  return entry.url;
+  return storedFileLink({ path, deckId, name: fileName }, ctx);
 }
 
 export type ImportBundleOptions = {

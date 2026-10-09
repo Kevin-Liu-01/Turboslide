@@ -120,7 +120,11 @@ export const Route = createFileRoute('/api/x/export/$')({
           await ensureDeckAssets(deckId);
           // loaded inside the handler: the export module reaches the worker client and the browser
           const { jsonBody, runSyncExport } = await import('../../server/export-sync');
-          const result = await runSyncExport(deckId, input as Parameters<typeof runSyncExport>[1]);
+          const { storedFileLink } = await import('../../server/stored-files');
+          // a stored copy's link names this caller (hardening K1#5a)
+          const result = await runSyncExport(deckId, input as Parameters<typeof runSyncExport>[1], {
+            link: (target) => storedFileLink(target, ctx),
+          });
           return json(jsonBody(result), 200, {
             'x-turboslide-sync': 'route',
             'x-turboslide-job': result.jobId,

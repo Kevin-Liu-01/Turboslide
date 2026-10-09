@@ -20,6 +20,7 @@ import {
   openDeckStore,
   workerClientOptions,
 } from './root';
+import { storedFileLink } from './stored-files';
 
 /**
  * The synchronous export (docs/hosting-chromium.md): one call runs the export job to completion
@@ -71,10 +72,15 @@ export type SyncExportFile = {
   sha256: string;
   contentType: string;
   data: Uint8Array<ArrayBuffer>;
-  /** Where the file can be fetched again: the Blob URL when stored, else this instance's job file. */
+  /**
+   * Where the file can be fetched again: the download route's link to the stored copy (hardening
+   * K1#5a: never the store's own address), else this instance's job file.
+   */
   url?: string;
   /** true when `url` is a stored copy that any instance can serve. */
   stored?: boolean;
+  /** the stored copy's path, which a job record keeps instead of a link (stored-files.ts) */
+  path?: string;
 };
 
 export type SyncExportResult = {
@@ -169,12 +175,15 @@ export function displayNamesOf(
 }
 
 /**
- * Gives every file a URL: on the blob backend the stored copy (uploaded here, overwrite allowed
- * because a job id is unique), otherwise this instance's job file route.
+ * Gives every file a URL: on the blob backend the download route's link to the stored copy
+ * (uploaded here, overwrite allowed because a job id is unique; hardening K1#5a, the link names
+ * the caller and expires in ten minutes), otherwise this instance's job file route.
  */
 export async function storeExportFiles(
   result: SyncExportResult,
   client: BlobClient | null = null,
+  link: (target: { path: string; deckId: string; name: string }) => Promise<string> = (target) =>
+    storedFileLink(target),
 ): Promise<SyncExportResult> {
   const files: SyncExportFile[] = [];
   for (const file of result.files) {
@@ -186,13 +195,10 @@ export async function storeExportFiles(
       });
       continue;
     }
-    const entry = await putWithOneRetry(
-      client,
-      storedExportPath(result.deckId, result.jobId, file.name),
-      file.data,
-      file.contentType,
-    );
-    files.push({ ...file, url: entry.url, stored: true });
+    const path = storedExportPath(result.deckId, result.jobId, file.name);
+    await putWithOneRetry(client, path, file.data, file.contentType);
+    const url = await link({ path, deckId: result.deckId, name: file.name });
+    files.push({ ...file, url, stored: true, path });
   }
   return { ...result, files };
 }
@@ -250,6 +256,11 @@ export type SyncExportOptions = {
    * export-batch.ts `runSyncExportWithProgress` follows it by id while the export runs.
    */
   onSubmitted?: (job: PublicJob) => void;
+  /**
+   * The link of a stored copy for the caller (hardening K1#5a): a route passes its own caller's;
+   * by default the caller of the request being served (stored-files.ts `storedFileLink`).
+   */
+  link?: (target: { path: string; deckId: string; name: string }) => Promise<string>;
 };
 
 /** The `renderer: ...` residual line the exporter writes, without its prefix. */
@@ -331,6 +342,7 @@ export async function runSyncExport(
   const stored = await storeExportFiles(
     produced,
     options.blob === undefined ? await exportBlobClient() : options.blob,
+    ...(options.link === undefined ? [] : [options.link]),
   );
   // the bytes are in memory (and in the store, when there is one): free the job's disk, which a
   // function shares with the browser and the next export (measured: the second export on one

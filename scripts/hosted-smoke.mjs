@@ -90,7 +90,9 @@
 // CDN took before the documents move to the private store expires within a minute. HR-SD#6
 // (CRIT-M3): `asset by name 404` adds a picture to the scratch deck and requires 404 for it by its
 // file name with no identity, and the picture by its asset key (a deployment alone: a local tmp
-// store keeps names).
+// store keeps names). HR-K1#5a (CRIT-M4, DATA-3): `export URL signed` exports the scratch deck as
+// a one theme PDF through the sync export's JSON variant and requires every file's link to name
+// `/api/download/` and no store host.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1055,6 +1057,60 @@ async function documentCacheRow(base, scratch, timeoutMs) {
 }
 
 /**
+ * `export URL signed` (hardening HR-K1#5a; CRIT-M4, DATA-3): the scratch deck exported as a one
+ * theme PDF through `/api/export/<deck>?sync=1&format=json` with the bearer. On a deployment the
+ * file is stored and its link is the download route's, `/api/download/s.<token>`, never the
+ * store's address; on a server without stored copies the link is the instance's own export route.
+ * Either way no answer names a store host. (The web page build's link is a server function's
+ * answer, which the smoke does not call; stored-files.test.ts pins it.)
+ */
+async function exportLinkRow(base, scratch, headers) {
+  const name = 'export URL signed';
+  if (scratch.id === null) {
+    return {
+      row: { name, expect: 'a scratch deck', detail: () => scratch.detail },
+      r: { status: '-', ms: 0 },
+      ok: false,
+    };
+  }
+  const answer = await postJson(
+    base,
+    `/api/export/${encodeURIComponent(scratch.id)}?sync=1&format=json`,
+    { format: 'pdf', theme: ['light'] },
+    headers,
+    EXPORT_TIMEOUT_MS,
+  );
+  const files = Array.isArray(answer.json?.files) ? answer.json.files : [];
+  const links = files.map((file) => ({ url: file?.url, stored: file?.stored === true }));
+  const routed = (link) =>
+    typeof link.url === 'string' &&
+    !/blob\.vercel-storage\.com|^https?:/i.test(link.url) &&
+    (link.stored
+      ? link.url.startsWith('/api/download/')
+      : /^\/api\/(download|export)\//.test(link.url));
+  return {
+    row: {
+      name,
+      expect:
+        "the scratch deck's export answer: every file's link names /api/download/ (a stored copy) or the instance's export route, and no store host",
+      detail: () =>
+        answer.status !== 200
+          ? `${answer.status}: ${answer.text.slice(0, 160)}`
+          : links
+              .map(
+                (link) =>
+                  `${link.stored ? 'stored' : 'instance'} ${String(link.url)
+                    .replace(/s\.[A-Za-z0-9_-]+\.[0-9a-f]+$/, 's.<token>')
+                    .slice(0, 80)}`,
+              )
+              .join('; ') || 'no files',
+    },
+    r: { status: answer.status, ms: answer.ms },
+    ok: answer.status === 200 && links.length > 0 && links.every(routed),
+  };
+}
+
+/**
  * `restricted thumbnail private` (hardening HR-SD#5, CRIT-M2): the scratch deck is restricted, so
  * its thumbnail, asked with the bearer and no grant in the URL, answers `private, no-store`, and
  * no shared cache keeps it for the next requester of the URL. The request names no stamp, so the
@@ -1530,6 +1586,7 @@ async function main() {
       const byName = await assetByNameRow(base, scratch, headers, args.timeoutMs);
       if (byName.skip !== undefined) console.log(`skip  ${byName.skip}`);
       else results.push(byName);
+      results.push(await exportLinkRow(base, scratch, headers));
       if (scratch.id !== null) results.push(await removeScratchDeck(base, scratch, headers));
       if (args.templateCopy) {
         const copied = await templateCopyRow(base, headers);

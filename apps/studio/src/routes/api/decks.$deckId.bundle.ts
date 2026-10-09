@@ -20,7 +20,8 @@ import { VERCEL_BODY_CAP, contentDisposition } from '../../server/export-sync';
 // with the twins pulled to disk) and sent as an attachment named `<deckId>-r<revision>.zip`, with
 // the manifest facts in X-Turboslide-Bundle. Inside a function a body over 4.5 MB cannot leave, so
 // on the blob backend such a bundle is stored under `bundles/<deckId>/` and the answer is a 302 to
-// that copy (the CLI's `deck pull` follows it); on the tmp backend it is 413 with the reason.
+// the download route's link for the caller (hardening K1#5a; the CLI's `deck pull` follows it with
+// its bearer), never to the store; on the tmp backend it is 413 with the reason.
 //
 // Authentication (SPEC 11): the bearer token when TURBOSLIDE_TOKEN is set, or the short-lived
 // ticket the studio's own page gets from the bundleDownloadTicket server function (`?t=`), which
@@ -74,7 +75,12 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
           'x-turboslide-bundle': JSON.stringify(summary),
         };
         if (inFunction() && packed.zip.byteLength > VERCEL_BODY_CAP) {
-          const stored = await storeBundleCopy(packed.manifest.deckId, packed.fileName, packed.zip);
+          const stored = await storeBundleCopy(
+            packed.manifest.deckId,
+            packed.fileName,
+            packed.zip,
+            ctx,
+          );
           if (stored !== null) {
             return new Response(null, { status: 302, headers: { ...common, location: stored } });
           }

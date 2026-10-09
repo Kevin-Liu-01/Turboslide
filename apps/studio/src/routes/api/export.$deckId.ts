@@ -43,6 +43,7 @@ import { logSecurityEvent } from '../../server/log';
 import { withoutServerPaths } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
 import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/root';
+import { storedFileLink } from '../../server/stored-files';
 import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
 
 // POST /api/export/:deckId enqueues an export job on the render worker and answers 202 with the job
@@ -74,8 +75,9 @@ import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
 // the request (docs/hosting-chromium.md section 4).
 //
 // Hosted (docs/hosting.md), the produced files get URLs: on the blob backend a stored copy under
-// exports/<deckId>/<jobId>/ that any instance serves (the JSON variant lists it as `files[].url`
-// with `stored: true`, and an attachment over the body cap answers 302 to it instead of 413); on
+// exports/<deckId>/<jobId>/ that any instance serves, reached through the download route's link
+// for the caller (hardening K1#5a; the JSON variant lists it as `files[].url` with `stored: true`,
+// and an attachment over the body cap answers 302 to it instead of 413); on
 // the tmp backend GET ?job=<id>&file=<name> streams the file from this instance's job folder and
 // is 404 on another instance, which the editor answers with a second sync export. The decks are
 // materialized (server/root.ts ensureDecks) before any job runs, so a cold function whose first
@@ -309,7 +311,11 @@ async function syncExport(
 ) {
   let result;
   try {
-    result = await runSyncExport(deckId, input);
+    // a stored copy's link names this route's caller (hardening K1#5a)
+    const ctx = await requestContext(request);
+    result = await runSyncExport(deckId, input, {
+      link: (target) => storedFileLink(target, ctx),
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof RangeError ? 404 : 502;

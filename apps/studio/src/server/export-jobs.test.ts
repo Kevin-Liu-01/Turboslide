@@ -23,7 +23,7 @@ import {
   EXPORT_JOB_LOST,
   EXPORT_JOB_MISSING,
   EXPORT_JOB_NO_REPORT,
-  attachmentUrlOf,
+  downloadsOf,
   exportJobKey,
   exportJobStartedAt,
   finishedExportJob,
@@ -131,6 +131,9 @@ const noAuth = {
   // the file by the exporter's name, saved as the display name when the poll hands one
   sign: (id: string, name: string, saveAs?: string) =>
     `/api/download/${id}/${name}${saveAs !== undefined ? `/${saveAs}` : ''}`,
+  // a stored copy's link for the caller (hardening K1#5a; stored-files.ts signs the real one)
+  link: (target: { path: string; deckId: string; name: string }) =>
+    `/api/download/s.${target.deckId}/${target.path}`,
 };
 
 describe('the export job record', () => {
@@ -340,15 +343,31 @@ describe("the poll's answers from a record", () => {
       expect(sentence.endsWith('.')).toBe(true);
       expect(sentence).not.toMatch(/—/);
     }
-    expect(attachmentUrlOf('https://store.local/a.pptx')).toBe(
-      'https://store.local/a.pptx?download=1',
-    );
-    expect(attachmentUrlOf('https://store.local/a.pptx?x=1')).toBe(
-      'https://store.local/a.pptx?x=1&download=1',
-    );
-    expect(attachmentUrlOf('/api/export/q4-review?job=x&file=a.pptx')).toBe(
-      '/api/export/q4-review?job=x&file=a.pptx',
-    );
+  });
+
+  it('keeps a stored copy by its path and answers it as the caller’s link (hardening K1#5a)', () => {
+    const files = [
+      { name: 'a.pptx', bytes: 4, path: storedExportPath('q4-review', JOB, 'a.pptx') },
+      { name: 'b.pdf', bytes: 3, url: '/api/export/q4-review?job=x&file=b.pdf' },
+    ];
+    const done = finishedExportJob(queued, { status: 'done', report, downloads: files }, LATER);
+    expect(parseExportJob(JSON.parse(JSON.stringify(done)))).toEqual(done);
+    expect(JSON.stringify(done)).not.toMatch(/https?:/);
+    expect(pollOfExportJob(done, { stored: true, link: noAuth.link }).downloads).toEqual([
+      {
+        name: 'a.pptx',
+        bytes: 4,
+        url: `/api/download/s.q4-review/${storedExportPath('q4-review', JOB, 'a.pptx')}`,
+      },
+      { name: 'b.pdf', bytes: 3, url: '/api/export/q4-review?job=x&file=b.pdf' },
+    ]);
+    // without a signer a path has no link to answer
+    expect(downloadsOf(files, 'q4-review', undefined).map((file) => file.name)).toEqual(['b.pdf']);
+    // a row with neither, or an empty path, is not a record of this module
+    expect(parseExportJob({ ...done, downloads: [{ name: 'c.pptx', bytes: 1 }] })).toBeNull();
+    expect(
+      parseExportJob({ ...done, downloads: [{ name: 'c.pptx', bytes: 1, path: '' }] }),
+    ).toBeNull();
   });
 });
 
@@ -360,16 +379,17 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
     await writeExportJob(store.client, queued);
     const done = await storeFinishedExportJob(worker, store, queued, doneJob(), () => LATER);
     expect(done.status).toBe('done');
+    // the record keeps the stored paths, never the store's addresses (hardening K1#5a)
     expect(done.downloads).toEqual([
       {
         name: 'q4-review (dark).pptx',
         bytes: 4,
-        url: `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (dark).pptx')}?download=1`,
+        path: storedExportPath('q4-review', JOB, 'q4-review (dark).pptx'),
       },
       {
         name: 'q4-review (light).pptx',
         bytes: 4,
-        url: `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (light).pptx')}?download=1`,
+        path: storedExportPath('q4-review', JOB, 'q4-review (light).pptx'),
       },
     ]);
     expect(done.line).toBe('done in 912 ms');
@@ -497,7 +517,8 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
     );
     const poll = await pollExportJob(worker, JOB, deps, store);
     expect(poll.status).toBe('done');
-    expect(poll.downloads).toEqual(done.downloads);
+    expect(poll.downloads).toEqual(downloadsOf(done.downloads ?? [], 'q4-review', noAuth.link));
+    expect(poll.downloads).toHaveLength(2);
     expect(poll.report).toEqual(report);
     // on a checkout the same queued record is a lost job: the one process restarted
     const folder = checkout();
@@ -516,8 +537,8 @@ describe('the finished job across instances (storeFinishedExportJob, pollExportJ
     const poll = await pollExportJob(worker, JOB, noAuth, store);
     expect(poll.status).toBe('done');
     expect(poll.downloads?.map((file) => file.url)).toEqual([
-      `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (dark).pptx')}?download=1`,
-      `https://store.local/${storedExportPath('q4-review', JOB, 'q4-review (light).pptx')}?download=1`,
+      `/api/download/s.q4-review/${storedExportPath('q4-review', JOB, 'q4-review (dark).pptx')}`,
+      `/api/download/s.q4-review/${storedExportPath('q4-review', JOB, 'q4-review (light).pptx')}`,
     ]);
     expect((await readExportJob(store.client, JOB))?.status).toBe('done');
     expect(worker.pruned).toEqual([JOB]);

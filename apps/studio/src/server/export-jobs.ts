@@ -44,7 +44,35 @@ export const EXPORT_JOB_MAX_AGE_MS = JOB_MAX_AGE_MS;
 
 export type ExportJobStatus = 'queued' | 'running' | 'done' | 'failed';
 
+/** One produced file as the page receives it: the name it saves as, its size, its link. */
 export type ExportJobDownload = { name: string; bytes: number; url: string };
+
+/**
+ * One produced file as a job record keeps it (hardening K1#5a): a stored copy's path, which every
+ * answer turns into a link for its own caller (server/stored-files.ts), or the link of a file on
+ * this instance (a checkout). A record written before K1#5a carries a URL.
+ */
+export type ExportJobFile = { name: string; bytes: number; path?: string; url?: string };
+
+/** The link a record's stored file is answered with: signed for the caller (stored-files.ts). */
+export type StoredFileSign = (target: { path: string; deckId: string; name: string }) => string;
+
+/** A record's files as the page receives them: a path is signed for the caller, a URL kept. */
+export function downloadsOf(
+  files: ReadonlyArray<ExportJobFile>,
+  deckId: string,
+  link: StoredFileSign | undefined,
+): ExportJobDownload[] {
+  const out: ExportJobDownload[] = [];
+  for (const file of files) {
+    const url =
+      file.path !== undefined && link !== undefined
+        ? link({ path: file.path, deckId, name: file.name })
+        : file.url;
+    if (url !== undefined && url !== '') out.push({ name: file.name, bytes: file.bytes, url });
+  }
+  return out;
+}
 
 /**
  * Where a running export is (the product round, docs/archive/rounds/PRODUCT.md section 2 ranks 8 and 21; the
@@ -77,8 +105,8 @@ export type ExportJobRecord = {
   progress?: ExportProgress;
   ms?: number;
   report?: ExportReport;
-  /** one address per produced file, a stored copy any instance can serve */
-  downloads?: ExportJobDownload[];
+  /** one row per produced file: a stored copy any instance can serve, by its path */
+  downloads?: ExportJobFile[];
   error?: string;
 };
 
@@ -248,7 +276,7 @@ export type ExportJobOutcome =
   | {
       status: 'done';
       report: ExportReport;
-      downloads?: ExportJobDownload[];
+      downloads?: ExportJobFile[];
       ms?: number;
       line?: string;
     }
@@ -293,15 +321,18 @@ function isProgress(value: unknown): value is ExportProgress {
   );
 }
 
-function isDownload(value: unknown): value is ExportJobDownload {
+function isDownload(value: unknown): value is ExportJobFile {
   if (typeof value !== 'object' || value === null) return false;
   const row = value as Record<string, unknown>;
+  const path = typeof row.path === 'string' && row.path !== '';
+  const url = typeof row.url === 'string' && row.url !== '';
   return (
     typeof row.name === 'string' &&
     row.name !== '' &&
     typeof row.bytes === 'number' &&
-    typeof row.url === 'string' &&
-    row.url !== ''
+    (path || url) &&
+    (row.path === undefined || path) &&
+    (row.url === undefined || url)
   );
 }
 
@@ -364,12 +395,6 @@ export function staleExportJobPaths(
   return out.sort();
 }
 
-/** A stored copy is asked for as an attachment (Vercel Blob honours `download=1`); a route of ours already is one. */
-export function attachmentUrlOf(url: string): string {
-  if (url.startsWith('/')) return url;
-  return `${url}${url.includes('?') ? '&' : '?'}download=1`;
-}
-
 /** The poll's answer for a job no record names: a refusal the page shows, never a thrown error. */
 export function missingExportJobPoll(jobId: string): ExportJobPoll {
   return { jobId, status: 'failed', error: EXPORT_JOB_MISSING };
@@ -383,7 +408,7 @@ export function missingExportJobPoll(jobId: string): ExportJobPoll {
  */
 export function pollOfExportJob(
   record: ExportJobRecord,
-  options: { stored: boolean },
+  options: { stored: boolean; link?: StoredFileSign },
 ): ExportJobPoll {
   const running = record.status !== 'done' && record.status !== 'failed';
   // the poll's line reads "slide k of n" while the worker renders (the snackbar's sentence),
@@ -404,7 +429,11 @@ export function pollOfExportJob(
         return { ...poll, status: 'failed', error: EXPORT_JOB_NO_REPORT };
       if (record.downloads === undefined)
         return { ...poll, status: 'failed', error: EXPORT_JOB_FILES_GONE };
-      return { ...poll, report: record.report, downloads: record.downloads };
+      return {
+        ...poll,
+        report: record.report,
+        downloads: downloadsOf(record.downloads, record.deckId, options.link),
+      };
     default:
       return options.stored ? poll : { ...poll, status: 'failed', error: EXPORT_JOB_LOST };
   }

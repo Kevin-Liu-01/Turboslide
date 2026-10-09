@@ -15,7 +15,7 @@ import type {
   StartBatchedExportResult,
 } from './export-batch';
 import type { ExportJobDownload, ExportJobPoll } from './export-jobs';
-import { SYNC_PROGRESS_JOB_PATTERN } from './export-jobs';
+import { SYNC_PROGRESS_JOB_PATTERN, downloadsOf } from './export-jobs';
 import type { jsonBody } from './export-sync';
 import type { QuotaContext } from './ratelimit';
 import {
@@ -646,7 +646,10 @@ const pollExportFn = createServerFn({ method: 'POST' })
     // instance wrote, else the refusal the page shows (C3S-F7: never a thrown "No export job")
     const { pollExportJob } = await import('./export-batch');
     const { authorizeRequest } = await import('./authorize');
+    const { storedFileSigner } = await import('./stored-files');
     const poll = await pollExportJob(await worker(), data.jobId, {
+      // a stored copy's link, for this caller alone (hardening K1#5a)
+      link: await storedFileSigner(),
       // the job names its deck; the poll needs the export right on it
       authorize: async (deckId) => {
         await authorizeRequest(deckId, 'export', { action: 'export.poll' });
@@ -707,7 +710,11 @@ const signDownloadFn = createServerFn({ method: 'POST' })
       const stored = await storedExportDownload(data.jobId, data.name);
       if (stored !== null) {
         await authorizeRequest(stored.deckId, 'export', { action: 'export.sign' });
-        return { url: stored.download.url };
+        // the record's path, linked for this caller (hardening K1#5a); a record from before
+        // K1#5a carries its URL
+        const { storedFileSigner } = await import('./stored-files');
+        const [download] = downloadsOf([stored.download], stored.deckId, await storedFileSigner());
+        if (download !== undefined) return { url: download.url };
       }
       const job = await (await worker()).job(data.jobId);
       const deckOfJob = (job?.input as { deckId?: string } | undefined)?.deckId;
@@ -828,10 +835,10 @@ const runBuildFn = createServerFn({ method: 'POST' })
 
 /**
  * Where the browser downloads the built page from. On the blob backend the file is stored under
- * `builds/<deck id>/<random folder>/<name>` and the link is the stored copy, which any instance
- * serves (the sync export stores its files the same way, export-sync.ts storeExportFiles; the
- * folder is random so a restricted deck's page has no guessable address, as the export copies
- * have none). The one time token named this instance's file, and a fluid function's next request
+ * `builds/<deck id>/<random folder>/<name>` and the link is the download route's for the caller
+ * (hardening K1#5a, CRIT-M4: before it the browser received the stored copy's address, public
+ * before the private store's cutover and unreadable after it), which any instance serves (the
+ * sync export stores its files the same way, export-sync.ts storeExportFiles). The one time token named this instance's file, and a fluid function's next request
  * lands on any instance, so the download route answered 404 for the file the build had just
  * written: the return drive's three cancelled web page downloads of six (return-drive.md rows 13
  * to 16, "canceled" before the first byte, then a GET of the same url answering 200), and the
@@ -847,11 +854,13 @@ async function builtFileLink(
   const client = await exportBlobClient();
   if (client !== null) {
     const folder = `${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 12)}`;
-    const entry = await client.put(`builds/${deckId}/${folder}/${name}`, readFileSync(path), {
+    const at = `builds/${deckId}/${folder}/${name}`;
+    await client.put(at, readFileSync(path), {
       overwrite: false,
       contentType: 'text/html; charset=utf-8',
     });
-    return { name, bytes, url: entry.url };
+    const { storedFileLink } = await import('./stored-files');
+    return { name, bytes, url: await storedFileLink({ path: at, deckId, name }) };
   }
   return { name, bytes, url: downloadUrl(signDownloadToken({ k: 'build', d: deckId, n: name })) };
 }

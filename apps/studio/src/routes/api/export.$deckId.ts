@@ -1,9 +1,8 @@
-import { timingSafeEqual } from 'node:crypto';
-
 import { createFileRoute } from '@tanstack/react-router';
 
 import { bearerToken } from '@turboslide/agent/http/auth';
 import { refuse } from '@turboslide/agent/http/errors';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { ACTIONS } from '@turboslide/schema/actions';
@@ -171,12 +170,6 @@ async function jobFile(
   }
 }
 
-function sameToken(given: string, expected: string): boolean {
-  const left = Buffer.from(given);
-  const right = Buffer.from(expected);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
 /** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, open otherwise. */
 /**
  * Every JSON answer of the route without a path of this instance (H3, DATA-V6): a job record
@@ -198,7 +191,7 @@ function unauthorized(request: Request): Response | null {
   const token = process.env.TURBOSLIDE_TOKEN;
   if (token === undefined || token === '') return null;
   const given = bearerToken(request);
-  if (given !== undefined && sameToken(given, token)) return null;
+  if (given !== undefined && safeEqual(given, token)) return null;
   return refuse(
     401,
     'unauthorized',

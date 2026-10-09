@@ -358,6 +358,9 @@ importers:
       '@turboslide/export':
         specifier: workspace:*
         version: link:../../packages/export
+      '@turboslide/identity':
+        specifier: workspace:*
+        version: link:../../packages/identity
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -529,6 +532,9 @@ importers:
       '@turboslide/headless':
         specifier: workspace:*
         version: link:../headless
+      '@turboslide/identity':
+        specifier: workspace:*
+        version: link:../identity
       '@turboslide/lint':
         specifier: workspace:*
         version: link:../lint

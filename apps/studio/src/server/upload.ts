@@ -1,10 +1,11 @@
-import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 import { createWriteStream, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
 
 import { sniffImage } from '@turboslide/headless/capture/shared';
 import type { SniffedFormat } from '@turboslide/headless/capture/shared';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { authorize, identityLabel, requestContext } from './authorize';
@@ -137,8 +138,7 @@ export function verifyUploadToken(token: string, now: number = Date.now()): Toke
     .update(`upload\n${body}`)
     .digest('hex')
     .slice(0, 40);
-  if (given.length !== expected.length) return null;
-  if (!timingSafeEqual(Buffer.from(given), Buffer.from(expected))) return null;
+  if (!safeEqual(given, expected)) return null;
   let parsed: unknown;
   try {
     parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as unknown;

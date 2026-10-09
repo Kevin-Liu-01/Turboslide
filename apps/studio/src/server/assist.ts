@@ -1,7 +1,8 @@
-import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomUUID } from 'node:crypto';
 
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { TextTarget } from '@turboslide/cli/store-actions';
+import { safeEqualBytes } from '@turboslide/identity/safe-equal';
 import type {
   AssistCard,
   AssistIntent,
@@ -679,8 +680,7 @@ export function verifyCard(
   if (card.deckId !== deckId) return { ok: false, reason: 'foreign' };
   const expected = Buffer.from(signatureOf(card, secret), 'hex');
   const given = Buffer.from(card.signature, 'hex');
-  if (expected.length !== given.length || !timingSafeEqual(expected, given))
-    return { ok: false, reason: 'forged' };
+  if (!safeEqualBytes(expected, given)) return { ok: false, reason: 'forged' };
   if (Number.isNaN(Date.parse(card.expiresAt)) || Date.parse(card.expiresAt) <= now.getTime())
     return { ok: false, reason: 'expired' };
   return { ok: true };

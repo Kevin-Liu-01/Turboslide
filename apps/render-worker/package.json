@@ -24,6 +24,7 @@
   "dependencies": {
     "@turboslide/cli": "workspace:*",
     "@turboslide/export": "workspace:*",
+    "@turboslide/identity": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "zod": "catalog:"
   },

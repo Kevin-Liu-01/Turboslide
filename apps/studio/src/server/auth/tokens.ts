@@ -19,12 +19,13 @@
 // once, and accepted as a bearer on localhost; whether it is required there is
 // `TURBOSLIDE_LOCAL_TOKEN=require` this round (b3.md, deviations), `TURBOSLIDE_LOCAL_OPEN=1`
 // keeps a test run open either way.
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { Kysely } from 'kysely';
 
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import type { Scope } from '@turboslide/schema/access';
 import { SCOPES } from '@turboslide/schema/access';
 
@@ -415,12 +416,6 @@ export type BearerDeps = {
   checkoutToken?: string | null;
 };
 
-function sameSecret(a: string, b: string): boolean {
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
 /**
  * What a bearer is: an API key record, the static bootstrap bearer (with whether it is now
  * confined to `admin.bootstrap`), the per checkout token, none, or a refusal. Synchronous.
@@ -439,12 +434,12 @@ export function resolveBearerSync(
       : { kind: 'api-key', record };
   }
   const staticToken = env[STATIC_TOKEN_ENV];
-  if (staticToken !== undefined && staticToken !== '' && sameSecret(bearer, staticToken))
+  if (staticToken !== undefined && staticToken !== '' && safeEqual(bearer, staticToken))
     return { kind: 'bootstrap', bootstrapOnly: (keys?.countSync() ?? 0) > 0 };
   if (
     deps.checkoutToken !== undefined &&
     deps.checkoutToken !== null &&
-    sameSecret(bearer, deps.checkoutToken)
+    safeEqual(bearer, deps.checkoutToken)
   )
     return { kind: 'checkout' };
   return { kind: 'refused', reason: 'not_a_key' };

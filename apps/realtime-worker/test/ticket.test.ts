@@ -7,7 +7,6 @@ import {
   authorizationToken,
   secretsMatch,
   secretsMatchAny,
-  timingSafeEqual,
   verifyTicket,
   verifyTicketRotating,
 } from '../src/ticket.ts';
@@ -125,9 +124,8 @@ describe('verifyTicket', () => {
     expect(await secretsMatch('ab', 'abc')).toBe(false);
     expect(await secretsMatch(null, 'abc')).toBe(false);
     expect(await secretsMatch('', '')).toBe(false);
-    expect(timingSafeEqual(new Uint8Array([1, 2]), new Uint8Array([1, 2]))).toBe(true);
-    expect(timingSafeEqual(new Uint8Array([1, 2]), new Uint8Array([1, 3]))).toBe(false);
-    expect(timingSafeEqual(new Uint8Array([1]), new Uint8Array([1, 2]))).toBe(false);
+    // 32 é and 32 hex characters: the same length, other bytes, no throw (HR-SA#1)
+    expect(await secretsMatch('é'.repeat(32), '0123456789abcdef0123456789abcdef')).toBe(false);
   });
 });
 

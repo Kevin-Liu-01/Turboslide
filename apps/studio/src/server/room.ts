@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 
 import { Redis } from 'ioredis';
 
@@ -9,6 +9,7 @@ import { markSpec } from '@turboslide/identity/marks';
 import { newPrincipalRecord } from '@turboslide/identity/principal';
 import type { PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
 import { resolvePrincipal, toIdentityView } from '@turboslide/identity/resolve';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import type {
   AccountProfile,
   IdentityView,
@@ -2719,9 +2720,7 @@ export function mintClientId(deckId: string, identity: string): string {
 export function clientIdMatches(deckId: string, clientId: string, identity: string): boolean {
   if (!/^[0-9a-f]{32}$/.test(clientId)) return false;
   const nonce = clientId.slice(0, 16);
-  const given = Buffer.from(clientId.slice(16), 'utf8');
-  const expected = Buffer.from(clientIdMac(deckId, identity, nonce), 'utf8');
-  return given.length === expected.length && timingSafeEqual(given, expected);
+  return safeEqual(clientId.slice(16), clientIdMac(deckId, identity, nonce));
 }
 
 /**

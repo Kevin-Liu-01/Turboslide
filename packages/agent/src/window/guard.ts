@@ -9,6 +9,8 @@
 // over the HTTP and MCP transports with a key (SPEC-3 3.10), which the guard does not touch.
 // Framework free.
 
+import { safeEqual } from '@turboslide/identity/safe-equal';
+
 /** The action id prefixes and ids the guard covers (the same list apps/studio/src/server/agent-actions.ts holds). */
 export const NONCE_GUARDED_PREFIXES: ReadonlyArray<string> = [
   'share.',
@@ -52,14 +54,6 @@ function fillRandom(bytes: Uint8Array): Uint8Array {
   return bytes;
 }
 
-/** Constant time equality on two short strings. */
-function same(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
 export type GuardResult = { ok: true; input: unknown } | { ok: false; error: Error };
 
 /**
@@ -73,7 +67,7 @@ export function guardInvocation(nonce: string, action: string, input: unknown): 
   if (typeof input === 'object' && input !== null && !Array.isArray(input)) {
     const record = input as Record<string, unknown>;
     const given = record[NONCE_FIELD];
-    if (typeof given === 'string' && same(given, nonce)) {
+    if (typeof given === 'string' && safeEqual(given, nonce)) {
       const { [NONCE_FIELD]: _nonce, ...rest } = record;
       return { ok: true, input: rest };
     }

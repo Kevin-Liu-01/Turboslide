@@ -1,7 +1,8 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { existsSync, statSync } from 'node:fs';
 import { basename, join, resolve, sep } from 'node:path';
 
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { defaultPaths } from '@turboslide/render-worker/paths';
 import { downloadSpentKey } from '@turboslide/realtime/keys';
@@ -189,11 +190,6 @@ function sign(body: string, purpose = ''): string {
     .digest('hex');
 }
 
-function sameHex(given: string, expected: string): boolean {
-  if (given.length !== expected.length) return false;
-  return timingSafeEqual(Buffer.from(given, 'utf8'), Buffer.from(expected, 'utf8'));
-}
-
 /** A file name a token may carry: one path segment, no separators, with an extension. */
 export function isFileName(name: string): boolean {
   return (
@@ -241,7 +237,7 @@ export function verifyDownloadToken(token: string, now: number = Date.now()): Pa
   if (dot <= 0) return null;
   const body = token.slice(0, dot);
   const given = token.slice(dot + 1);
-  if (!sameHex(given, sign(body))) return null;
+  if (!safeEqual(given, sign(body))) return null;
   let parsed: unknown;
   try {
     parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as unknown;
@@ -352,7 +348,7 @@ export function cancelTokenFor(jobId: string): string {
 
 export function verifyCancelToken(jobId: string, token: string | null | undefined): boolean {
   if (typeof token !== 'string' || !/^[a-z0-9-]{1,80}$/.test(jobId)) return false;
-  return sameHex(token, cancelTokenFor(jobId));
+  return safeEqual(token, cancelTokenFor(jobId));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -386,7 +382,7 @@ export function verifyThumbGrant(
   const role = parts[1] ?? '';
   const mac = parts[2] ?? '';
   if (!Number.isFinite(exp) || exp < now || !/^[a-z]{1,16}$/.test(role)) return null;
-  if (!sameHex(mac, sign(`${deckId}|${role}|${exp}`, 'thumb').slice(0, 32))) return null;
+  if (!safeEqual(mac, sign(`${deckId}|${role}|${exp}`, 'thumb').slice(0, 32))) return null;
   return { deckId, role, exp };
 }
 
@@ -435,7 +431,7 @@ export function verifyRenderGrant(
   if (parts.length !== 2) return false;
   const exp = Number(parts[0]);
   if (!Number.isFinite(exp) || exp < now) return false;
-  return sameHex(parts[1] ?? '', sign(renderGrantBody(target, exp), 'render').slice(0, 32));
+  return safeEqual(parts[1] ?? '', sign(renderGrantBody(target, exp), 'render').slice(0, 32));
 }
 
 /**

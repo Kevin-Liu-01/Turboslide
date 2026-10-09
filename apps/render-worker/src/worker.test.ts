@@ -343,6 +343,11 @@ describe('server and clients', () => {
       };
       expect(health.ok).toBe(true);
       expect((await fetch(`${base}/jobs`)).status).toBe(401);
+      // wrong bearers of the right length in characters and in bytes (HR-SA#1)
+      for (const wrong of ['Bearer secreT', 'Bearer s\u00e9cret', 'Bearer s\u00e9cre'])
+        expect((await fetch(`${base}/jobs`, { headers: { authorization: wrong } })).status).toBe(
+          401,
+        );
       const auth = { authorization: 'Bearer secret' };
       const bad = await fetch(`${base}/jobs`, {
         method: 'POST',

@@ -36,7 +36,6 @@
 // asks the store again at most every SNAPSHOT_REVALIDATE_MS on a request until the store
 // answers. The 503 stays for a route that needs the store itself: the refresh, and a mark whose
 // file the store withholds and the upstream does not serve.
-import { timingSafeEqual } from 'node:crypto';
 import { join } from 'node:path';
 
 import sharp from 'sharp';
@@ -69,6 +68,7 @@ import type {
   LogoSearchRow,
   LogoUnavailable,
 } from '@turboslide/chrome/logo-model';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import type { Asset, AssetTwins, LogoAssetSource } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
 import type { BrandKit, KitAppearance } from '@turboslide/schema/brand';
@@ -832,12 +832,6 @@ export function resetLogoService(): void {
 
 export const CRON_SECRET_ENV = 'CRON_SECRET';
 
-function sameSecret(a: string, b: string): boolean {
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
-  return left.byteLength === right.byteLength && timingSafeEqual(left, right);
-}
-
 /**
  * Who may refresh (4.2): the agent bearer as every agent route decides it (the token, or a
  * checkout's localhost), or `Authorization: Bearer <CRON_SECRET>`, all a Vercel cron sends; with
@@ -850,7 +844,7 @@ export function refreshCredential(
 ): 'agent' | 'cron' | null {
   const given = bearerToken(request);
   const secret = env[CRON_SECRET_ENV];
-  if (given !== undefined && secret !== undefined && secret !== '' && sameSecret(given, secret))
+  if (given !== undefined && secret !== undefined && secret !== '' && safeEqual(given, secret))
     return 'cron';
   if (agent(request).ok) return 'agent';
   return null;

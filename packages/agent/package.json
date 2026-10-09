@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@turboslide/headless": "workspace:*",
+    "@turboslide/identity": "workspace:*",
     "@turboslide/lint": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",

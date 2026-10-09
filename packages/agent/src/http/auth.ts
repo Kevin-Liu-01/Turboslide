@@ -10,8 +10,7 @@
 // the header are ignored for such a request and the header carries a run id only (SPEC-3 0.17,
 // 8.2). The studio's resolver (apps/studio/src/server/auth.ts) makes the binding; the round one
 // bearer rule below stays for a process without identity records.
-import { timingSafeEqual } from 'node:crypto';
-
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Author } from '@turboslide/schema/mutations';
 import { parseAuthor } from '@turboslide/schema/mutations';
@@ -59,12 +58,6 @@ export function bearerToken(request: Request): string | undefined {
   return match?.[1]?.trim() || undefined;
 }
 
-function sameToken(a: string, b: string): boolean {
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
 export type AuthResult =
   | { ok: true; mode: 'localhost' | 'token' }
   | { ok: false; status: 401; code: 'unauthorized'; message: string };
@@ -78,7 +71,7 @@ export function authorize(request: Request, env: Env = process.env): AuthResult 
   const host = requestHost(request, env);
   if (token !== undefined && token !== '') {
     const given = bearerToken(request);
-    if (given !== undefined && sameToken(given, token)) return { ok: true, mode: 'token' };
+    if (given !== undefined && safeEqual(given, token)) return { ok: true, mode: 'token' };
     return {
       ok: false,
       status: 401,

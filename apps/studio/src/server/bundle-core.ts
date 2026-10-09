@@ -1,9 +1,10 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { bearerToken } from '@turboslide/agent/http/auth';
 import { refuse } from '@turboslide/agent/http/errors';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import { defaultPaths } from '@turboslide/render-worker/paths';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { deckPrefix, isBlobExistsError, pushDeckDir } from '@turboslide/store/blob-store';
@@ -118,9 +119,7 @@ export function ticketIdentity(
   if (dot <= 0) return null;
   const body = token.slice(0, dot);
   const given = token.slice(dot + 1);
-  const expected = sign(body);
-  if (given.length !== expected.length) return null;
-  if (!timingSafeEqual(Buffer.from(given, 'utf8'), Buffer.from(expected, 'utf8'))) return null;
+  if (!safeEqual(given, sign(body))) return null;
   let parsed: unknown;
   try {
     parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as unknown;
@@ -147,12 +146,6 @@ export function verifyTicket(
   now: number = Date.now(),
 ): boolean {
   return ticketIdentity(token, purpose, subject, now) !== null;
-}
-
-function sameToken(given: string, expected: string): boolean {
-  const left = Buffer.from(given);
-  const right = Buffer.from(expected);
-  return left.length === right.length && timingSafeEqual(left, right);
 }
 
 export type BundleRouteAdmission =
@@ -183,7 +176,7 @@ export function bundleRouteAdmission(
   const token = process.env.TURBOSLIDE_TOKEN;
   if (token === undefined || token === '') return { kind: 'open' };
   const given = bearerToken(request);
-  if (given !== undefined && sameToken(given, token)) return { kind: 'bearer' };
+  if (given !== undefined && safeEqual(given, token)) return { kind: 'bearer' };
   return refuse(
     401,
     'unauthorized',

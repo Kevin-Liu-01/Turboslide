@@ -3,9 +3,10 @@
 // constant time compare), then the claims' shape, the protocol version window, the deck, the
 // origin and the expiry. The codec (base64url, the split, the claims schema) is
 // @turboslide/realtime/frames, shared with the minter in apps/studio room-ticket.ts, so the two
-// hosts agree byte for byte. A bearer is compared through SHA-256 digests and
-// `crypto.subtle.timingSafeEqual`, so a wrong length leaks nothing. No `node:` import: this file
+// hosts agree byte for byte. A bearer is compared through SHA-256 digests and `safeEqualBytes`
+// (@turboslide/identity/safe-equal), so a wrong length leaks nothing. No `node:` import: this file
 // runs in the Worker, in the object and in node (the unit test).
+import { safeEqualBytes } from '@turboslide/identity/safe-equal';
 import { ROOM_PROTOCOL, parseTicketClaims, splitTicket } from '@turboslide/realtime/frames';
 import type { TicketClaims } from '@turboslide/realtime/frames';
 
@@ -120,14 +121,6 @@ export function authorizationToken(
   return token === '' ? null : token;
 }
 
-/** Constant time equality of two equal length byte strings: every byte is read whatever the first difference. */
-export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i += 1) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
-  return diff === 0;
-}
-
 /** Constant time equality of two secrets through their digests (the Workers best practice): the digests are equal length, so nothing of the lengths leaks. */
 export async function secretsMatch(given: string | null, expected: string): Promise<boolean> {
   if (given === null || expected === '') return false;
@@ -135,7 +128,7 @@ export async function secretsMatch(given: string | null, expected: string): Prom
     crypto.subtle.digest('SHA-256', bufferOf(encoder.encode(given))),
     crypto.subtle.digest('SHA-256', bufferOf(encoder.encode(expected))),
   ]);
-  return timingSafeEqual(new Uint8Array(a), new Uint8Array(b));
+  return safeEqualBytes(new Uint8Array(a), new Uint8Array(b));
 }
 
 /**

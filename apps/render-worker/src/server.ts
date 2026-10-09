@@ -12,7 +12,8 @@
 //                                         one slide: the PNG (or a JPEG at quality 92) with
 //                                         X-Turboslide-Record, or JSON
 //
-// TURBOSLIDE_WORKER_TOKEN, when set, is required as a bearer token on every route but /healthz.
+// TURBOSLIDE_WORKER_TOKEN, when set, is required as a bearer token on every route but /healthz,
+// compared in constant time (@turboslide/identity/safe-equal, HR-SA#1).
 // Bodies are capped at 1 MB. The container has no credentials and reads only the decks directory
 // and its own work directory (SPEC 11).
 import { createReadStream, existsSync, statSync } from 'node:fs';
@@ -20,6 +21,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { extname, normalize, relative, resolve, sep } from 'node:path';
 
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import type { RenderRecord } from '@turboslide/schema/render';
 import { toolVersions } from '@turboslide/export/verify/libreoffice';
 
@@ -146,7 +148,8 @@ export function createWorkerServer(options: WorkerServerOptions): Server {
   const authorize = (req: IncomingMessage): void => {
     if (!options.token) return;
     const header = req.headers.authorization ?? '';
-    if (header !== `Bearer ${options.token}`) throw new HttpError(401, 'bearer token required');
+    if (!safeEqual(header, `Bearer ${options.token}`))
+      throw new HttpError(401, 'bearer token required');
   };
 
   const submit = (kind: string, input: unknown): JobRecord => {

@@ -1,9 +1,8 @@
-import { timingSafeEqual } from 'node:crypto';
-
 import { createFileRoute } from '@tanstack/react-router';
 
 import { bearerToken } from '@turboslide/agent/http/auth';
 import { refuse } from '@turboslide/agent/http/errors';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
@@ -68,12 +67,6 @@ function worker(): WorkerClient {
   return client;
 }
 
-function sameToken(given: string, expected: string): boolean {
-  const left = Buffer.from(given);
-  const right = Buffer.from(expected);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
-
 /** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, except for thumbnails and a granted picture. */
 function unauthorized(request: Request, url: URL, granted: boolean): Response | null {
   const token = process.env.TURBOSLIDE_TOKEN;
@@ -81,7 +74,7 @@ function unauthorized(request: Request, url: URL, granted: boolean): Response | 
   if (url.searchParams.has('w')) return null;
   if (granted) return null;
   const given = bearerToken(request);
-  if (given !== undefined && sameToken(given, token)) return null;
+  if (given !== undefined && safeEqual(given, token)) return null;
   return refuse(
     401,
     'unauthorized',

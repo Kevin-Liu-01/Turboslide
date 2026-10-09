@@ -14,6 +14,9 @@
     },
     {
       "path": "../headless"
+    },
+    {
+      "path": "../identity"
     }
   ],
   "compilerOptions": {

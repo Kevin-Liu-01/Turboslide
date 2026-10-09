@@ -39,7 +39,6 @@
 }
 
 .ts-chart-field input[type='text']:focus-visible,
-.ts-chart-field select:focus-visible,
 .ts-chart-field input[type='checkbox']:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: 1px;

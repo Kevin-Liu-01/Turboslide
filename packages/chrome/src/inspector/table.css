@@ -81,7 +81,6 @@
 }
 
 .ts-table-height:focus-visible,
-.ts-table-section select:focus-visible,
 .ts-table-section input[type='checkbox']:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: 1px;

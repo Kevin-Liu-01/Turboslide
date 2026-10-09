@@ -1213,7 +1213,10 @@ async function featuresRound(t, S, h) {
                   e.parentElement,
               ),
           ).size;
-          const kindControls = [...(panel?.querySelectorAll('select, [role="radiogroup"]') ?? [])]
+          /* a dropdown is a combobox since the dropdown round (docs/DROPDOWNS.md 5.2) */
+          const kindControls = [
+            ...(panel?.querySelectorAll('[role="combobox"], [role="radiogroup"]') ?? []),
+          ]
             .filter(visible)
             .filter((e) =>
               /chart type|kind/i.test(

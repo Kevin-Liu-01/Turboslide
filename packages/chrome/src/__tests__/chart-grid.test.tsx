@@ -8,6 +8,7 @@ import { CHART_CELL_EVENT } from '@turboslide/viewer/Editor';
 import { ChartSection, chartFormatSlot } from '../inspector/chart';
 import { forbiddenWordsIn } from '../menus/strings';
 import { TIP_DELAY_MS, hideTooltip } from '../Tooltip';
+import { chooseOption } from './choose-option';
 
 // The Chart data section (gslides-parity SPEC-2 section 5 "Chart data", section 10, 11.5
 // chart-grid.test.tsx): the grid with row and column headers; the arrows, Home, End and Tab
@@ -317,17 +318,19 @@ describe('ChartSection', () => {
       value: 'Revenue',
       baseRevision: 7,
     });
+    /* the legend and the number format are the shared dropdown (docs/DROPDOWNS.md 3) */
     const legend = document.querySelector(
       '[data-control="formatOptions.chart.legend"]',
-    ) as HTMLSelectElement;
-    expect(Array.from(legend.options).map((option) => option.textContent)).toEqual([
-      'None',
-      'Right',
-      'Bottom',
-      'Top',
-      'Left',
-    ]);
-    fireEvent.change(legend, { target: { value: 'none' } });
+    ) as HTMLElement;
+    expect(legend.getAttribute('role')).toBe('combobox');
+    expect(legend.getAttribute('value')).toBe('right');
+    const legendList = document.getElementById(legend.getAttribute('aria-controls') ?? '');
+    expect(
+      Array.from(legendList?.querySelectorAll('[role="option"]') ?? []).map(
+        (option) => option.textContent,
+      ),
+    ).toEqual(['None', 'Right', 'Bottom', 'Top', 'Left']);
+    chooseOption('formatOptions.chart.legend', 'none');
     expect(dispatch).toHaveBeenLastCalledWith('block.set', {
       slideId: 's',
       blockId: 'c',
@@ -335,17 +338,11 @@ describe('ChartSection', () => {
       value: 'none',
       baseRevision: 7,
     });
-    fireEvent.change(legend, { target: { value: 'right' } });
-    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
-      slideId: 's',
-      blockId: 'c',
-      path: '/legend',
-      baseRevision: 7,
-    });
-    const format = document.querySelector(
-      '[data-control="formatOptions.chart.numberFormat"]',
-    ) as HTMLSelectElement;
-    fireEvent.change(format, { target: { value: 'percent' } });
+    /* choosing the value already shown writes nothing, as a select's change does not fire */
+    const writes = dispatch.mock.calls.length;
+    chooseOption('formatOptions.chart.legend', 'right');
+    expect(dispatch.mock.calls.length).toBe(writes);
+    chooseOption('formatOptions.chart.numberFormat', 'percent');
     expect(dispatch).toHaveBeenLastCalledWith('block.set', {
       slideId: 's',
       blockId: 'c',
@@ -362,6 +359,16 @@ describe('ChartSection', () => {
       blockId: 'c',
       path: '/labels',
       value: true,
+      baseRevision: 7,
+    });
+    /* the default legend (Right) removes the field */
+    cleanup();
+    const top = mount({ ...chart(), legend: 'top' });
+    chooseOption('formatOptions.chart.legend', 'right');
+    expect(top.dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 's',
+      blockId: 'c',
+      path: '/legend',
       baseRevision: 7,
     });
   });

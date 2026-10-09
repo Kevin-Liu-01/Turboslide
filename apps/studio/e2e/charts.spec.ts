@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 import { setAdvancedTools } from './advanced-tools';
+import { chooseOption } from './choose-option';
 
 // B5's chart spec (gslides-parity SPEC-2 11.6 `charts.spec.ts`; MILESTONES-2 B5 item 5): Insert >
 // Chart > Bar; the data grid edits a value and adds a series; Chart type to Pie keeps the first
@@ -287,11 +288,11 @@ test('the data grid edits a value and adds a series, Chart type to Pie keeps the
   const pie = await chartOf(page, slideId);
   expect(pie?.series).toEqual([{ name: 'Series 1', values: [30, 60, 20] }]);
 
-  /* the legend: the section's select, else block.set /legend */
+  /* the legend: the section's dropdown (docs/DROPDOWNS.md 5), else block.set /legend */
   section = await chartSection(page);
   const legend = section?.locator('[data-control="formatOptions.chart.legend"]');
   if (legend !== undefined && (await legend.count()) > 0) {
-    await legend.selectOption('bottom');
+    await chooseOption(page, 'formatOptions.chart.legend', 'bottom');
   } else {
     await invoke(page, 'block.set', {
       slideId,

@@ -23,6 +23,7 @@ import {
   tableWriteInput,
 } from '../table-tools';
 import type { TableCommandId, TablePlan, TableSelection } from '../table-tools';
+import { Select } from '../Select';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
 import { swatchPaint, useDeckTokens } from './palette';
@@ -300,48 +301,34 @@ export function TableSection({
         <span className="ts-table-heading">Border</span>
         <div className="ts-table-row">
           <span className="ts-table-label">Weight</span>
-          <select
-            className="ts-ctl-select"
-            aria-label="Border weight"
-            data-control={`${control}.border.weight`}
+          <Select
+            size="compact"
+            label="Border weight"
+            control={`${control}.border.weight`}
             value={String(border?.weight ?? 1)}
+            options={TABLE_BORDER_WEIGHTS.map((weight) => ({
+              value: String(weight),
+              label: WEIGHT_LABELS[weight],
+            }))}
             disabled={busy}
-            onChange={(event) =>
-              command('tableBorder', {
-                border: { weight: Number(event.target.value) as TableBorderWeight },
-              })
+            tip={{ name: 'Weight', doc: 'The rules between the cells; None removes them' }}
+            onChange={(raw) =>
+              command('tableBorder', { border: { weight: Number(raw) as TableBorderWeight } })
             }
-            {...tipProps({
-              name: 'Weight',
-              doc: 'The rules between the cells; None removes them',
-            })}
-          >
-            {TABLE_BORDER_WEIGHTS.map((weight) => (
-              <option key={weight} value={String(weight)}>
-                {WEIGHT_LABELS[weight]}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div className="ts-table-row">
           <span className="ts-table-label">Dash</span>
-          <select
-            className="ts-ctl-select"
-            aria-label="Border dash"
-            data-control={`${control}.border.dash`}
+          <Select<Dash>
+            size="compact"
+            label="Border dash"
+            control={`${control}.border.dash`}
             value={border?.dash ?? 'solid'}
+            options={DASHES.map((dash) => ({ value: dash, label: DASH_LABELS[dash] }))}
             disabled={busy}
-            onChange={(event) =>
-              command('tableBorder', { border: { dash: event.target.value as Dash } })
-            }
-            {...tipProps({ name: 'Dash', doc: 'Solid or one of the five dashes' })}
-          >
-            {DASHES.map((dash) => (
-              <option key={dash} value={dash}>
-                {DASH_LABELS[dash]}
-              </option>
-            ))}
-          </select>
+            tip={{ name: 'Dash', doc: 'Solid or one of the five dashes' }}
+            onChange={(dash) => command('tableBorder', { border: { dash } })}
+          />
         </div>
         <div className="ts-table-row is-wide">
           <span className="ts-table-label">Color</span>
@@ -462,14 +449,24 @@ export function TableSection({
         </div>
         <div className="ts-table-row">
           <span className="ts-table-label">Border weight</span>
-          <select
-            className="ts-ctl-select"
-            aria-label="Cell border weight"
-            data-control={`${control}.cell.border.weight`}
+          <Select
+            size="compact"
+            label="Cell border weight"
+            control={`${control}.cell.border.weight`}
             value={cellBorder?.weight === undefined ? '' : String(cellBorder.weight)}
+            options={[
+              { value: '', label: 'Table’s' },
+              ...TABLE_BORDER_WEIGHTS.map((weight) => ({
+                value: String(weight),
+                label: WEIGHT_LABELS[weight],
+              })),
+            ]}
             disabled={busy || !hasCell}
-            onChange={(event) => {
-              const raw = event.target.value;
+            tip={{
+              name: 'Border weight',
+              doc: cellDoc ?? 'The cell’s own rule; None draws no border',
+            }}
+            onChange={(raw) => {
               if (raw === '') {
                 const rest: CellBorder = { ...cellBorder };
                 delete rest.weight;
@@ -480,43 +477,28 @@ export function TableSection({
                 border: { ...cellBorder, weight: Number(raw) as TableBorderWeight },
               });
             }}
-            {...tipProps({
-              name: 'Border weight',
-              doc: cellDoc ?? 'The cell’s own rule; None draws no border',
-            })}
-          >
-            <option value="">Table’s</option>
-            {TABLE_BORDER_WEIGHTS.map((weight) => (
-              <option key={weight} value={String(weight)}>
-                {WEIGHT_LABELS[weight]}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div className="ts-table-row">
           <span className="ts-table-label">Border dash</span>
-          <select
-            className="ts-ctl-select"
-            aria-label="Cell border dash"
-            data-control={`${control}.cell.border.dash`}
+          <Select<Dash | ''>
+            size="compact"
+            label="Cell border dash"
+            control={`${control}.cell.border.dash`}
             value={cellBorder?.dash ?? ''}
+            options={[
+              { value: '', label: 'Table’s' },
+              ...DASHES.map((dash) => ({ value: dash, label: DASH_LABELS[dash] })),
+            ]}
             disabled={busy || !hasCell}
-            onChange={(event) => {
-              const raw = event.target.value;
+            tip={{ name: 'Border dash', doc: cellDoc ?? 'The cell’s own dash' }}
+            onChange={(raw) => {
               const next: CellBorder = { ...cellBorder };
               if (raw === '') delete next.dash;
-              else next.dash = raw as Dash;
+              else next.dash = raw;
               command('cellBorder', { border: Object.keys(next).length === 0 ? null : next });
             }}
-            {...tipProps({ name: 'Border dash', doc: cellDoc ?? 'The cell’s own dash' })}
-          >
-            <option value="">Table’s</option>
-            {DASHES.map((dash) => (
-              <option key={dash} value={dash}>
-                {DASH_LABELS[dash]}
-              </option>
-            ))}
-          </select>
+          />
         </div>
         <div className="ts-table-row is-wide">
           <span className="ts-table-label">Border color</span>

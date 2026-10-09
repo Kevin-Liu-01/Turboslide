@@ -7,6 +7,7 @@ import { emptyTable } from '@turboslide/schema/blocks/table';
 
 import { TableSection, tableFormatSlot } from '../inspector/table';
 import { forbiddenWordsIn } from '../menus/strings';
+import { chooseOption } from './choose-option';
 
 // The Table section (gslides-parity SPEC-2 section 5 "Table", 2.7, 11.5 table-section.test;
 // docs/archive/rounds/OBJECTS.md 3.3 item 6, the row tables.panel.section-words): the groups in the spec's
@@ -62,6 +63,14 @@ function control(id: string): HTMLElement {
   return document.querySelector(`[data-control="formatOptions.table.${id}"]`) as HTMLElement;
 }
 
+/** The words of a dropdown's rows, from the listbox its trigger names. */
+function optionWords(trigger: HTMLElement): string[] {
+  const list = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+  return Array.from(list?.querySelectorAll('[role="option"]') ?? []).map(
+    (option) => option.textContent ?? '',
+  );
+}
+
 describe('TableSection', () => {
   it('toggles the header row as one block.set /rows', () => {
     const { dispatch } = mount();
@@ -83,14 +92,12 @@ describe('TableSection', () => {
 
   it('writes the table border weight with None as 0, the dash and the colour over the current border', () => {
     const { dispatch } = mount(null, { ...table(), border: { weight: 1, color: 'ink' } });
-    const weight = control('border.weight') as HTMLSelectElement;
-    expect(Array.from(weight.options).map((option) => option.textContent)).toEqual([
-      'None',
-      '1 px',
-      '1.5 px',
-      '2 px',
-    ]);
-    fireEvent.change(weight, { target: { value: '0' } });
+    const weight = control('border.weight');
+    /* the shared dropdown (docs/DROPDOWNS.md 3) */
+    expect(weight.getAttribute('role')).toBe('combobox');
+    expect(weight.getAttribute('value')).toBe('1');
+    expect(optionWords(weight)).toEqual(['None', '1 px', '1.5 px', '2 px']);
+    chooseOption('formatOptions.table.border.weight', '0');
     expect(dispatch).toHaveBeenLastCalledWith('block.set', {
       slideId: 's',
       blockId: 't',
@@ -98,7 +105,7 @@ describe('TableSection', () => {
       value: { weight: 0, color: 'ink' },
       baseRevision: 3,
     });
-    fireEvent.change(control('border.dash') as HTMLSelectElement, { target: { value: 'dot' } });
+    chooseOption('formatOptions.table.border.dash', 'dot');
     expect((dispatch.mock.calls[1]?.[1] as { value: unknown }).value).toEqual({
       weight: 1,
       color: 'ink',
@@ -223,9 +230,7 @@ describe('TableSection', () => {
       fill: 'plate',
       baseRevision: 3,
     });
-    fireEvent.change(control('cell.border.weight') as HTMLSelectElement, {
-      target: { value: '0' },
-    });
+    chooseOption('formatOptions.table.cell.border.weight', '0');
     expect(dispatch).toHaveBeenLastCalledWith('table.cellStyle', {
       slideId: 's',
       blockId: 't',
@@ -254,7 +259,16 @@ describe('TableSection', () => {
   it('shows the selected cell’s own fill and border, and a range styles every cell of it', () => {
     const { dispatch } = mount({ cell: { row: 0, column: 0 } });
     expect(control('cell.fill.plate').getAttribute('aria-checked')).toBe('true');
-    expect((control('cell.border.weight') as HTMLSelectElement).value).toBe('0');
+    expect(control('cell.border.weight').getAttribute('value')).toBe('0');
+    /* Table's returns the cell to the table's rules */
+    chooseOption('formatOptions.table.cell.border.weight', { label: 'Table’s' });
+    expect(dispatch).toHaveBeenLastCalledWith('table.cellStyle', {
+      slideId: 's',
+      blockId: 't',
+      cells: [[0, 0]],
+      border: null,
+      baseRevision: 3,
+    });
     cleanup();
     const range = mount({ cells: { r0: 0, c0: 0, r1: 0, c1: 2 } });
     fireEvent.click(control('cell.fill.blue'));
@@ -269,7 +283,8 @@ describe('TableSection', () => {
       fill: 'blue',
       baseRevision: 3,
     });
-    expect(dispatch).not.toHaveBeenCalled();
+    /* the first mount wrote the Table's choice alone */
+    expect(dispatch).toHaveBeenCalledTimes(1);
   });
 
   it('merges a range and unmerges the merged cells, disabled otherwise', () => {
@@ -372,9 +387,9 @@ describe('TableSection', () => {
     mount(null);
     expect(document.body.textContent).toContain('Click a table cell first');
     expect((control('cell.fill.plate') as HTMLButtonElement).disabled).toBe(true);
-    expect((control('cell.border.weight') as HTMLSelectElement).disabled).toBe(true);
+    expect((control('cell.border.weight') as HTMLButtonElement).disabled).toBe(true);
     /* the table border, the heights and the distributes still work */
-    expect((control('border.weight') as HTMLSelectElement).disabled).toBe(false);
+    expect((control('border.weight') as HTMLButtonElement).disabled).toBe(false);
     expect((control('height') as HTMLInputElement).disabled).toBe(false);
     expect((control('distributeRows') as HTMLButtonElement).disabled).toBe(false);
   });

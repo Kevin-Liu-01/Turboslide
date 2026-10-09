@@ -45,6 +45,7 @@ import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { PANELS } from '../menus/strings';
 import { Seg } from '../Seg';
+import { Select } from '../Select';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
 import { usePlate, usePointOrElement } from '../usePlate';
@@ -790,43 +791,39 @@ export function ChartSection({
 
       <label className="ts-chart-field">
         <span className="ts-chart-label">{words.legend}</span>
-        <select
-          className="ts-ctl-select"
-          aria-label={words.legend}
-          data-control={`${control}.legend`}
+        <Select<ChartLegend>
+          size="compact"
+          label={words.legend}
+          control={`${control}.legend`}
           value={block.legend ?? 'right'}
+          options={CHART_LEGENDS.map((legend) => ({
+            value: legend,
+            label: CHART_LEGEND_LABELS[legend],
+          }))}
           disabled={busy}
-          onChange={(event) => setOption('legend', event.target.value as ChartLegend)}
-          {...tipProps({ name: words.legend, doc: 'Where the legend sits; None hides it' })}
-        >
-          {CHART_LEGENDS.map((legend) => (
-            <option key={legend} value={legend}>
-              {CHART_LEGEND_LABELS[legend]}
-            </option>
-          ))}
-        </select>
+          tip={{ name: words.legend, doc: 'Where the legend sits; None hides it' }}
+          onChange={(legend) => setOption('legend', legend)}
+        />
       </label>
 
       <label className="ts-chart-field">
         <span className="ts-chart-label">{words.numberFormat}</span>
-        <select
-          className="ts-ctl-select"
-          aria-label={words.numberFormat}
-          data-control={`${control}.numberFormat`}
+        <Select<ChartNumberFormat>
+          size="compact"
+          label={words.numberFormat}
+          control={`${control}.numberFormat`}
           value={block.numberFormat ?? 'plain'}
+          options={CHART_NUMBER_FORMATS.map((format) => ({
+            value: format,
+            label: CHART_NUMBER_FORMAT_LABELS[format],
+          }))}
           disabled={busy}
-          onChange={(event) => setOption('numberFormat', event.target.value as ChartNumberFormat)}
-          {...tipProps({
+          tip={{
             name: words.numberFormat,
             doc: 'How the axis and the values print their numbers',
-          })}
-        >
-          {CHART_NUMBER_FORMATS.map((format) => (
-            <option key={format} value={format}>
-              {CHART_NUMBER_FORMAT_LABELS[format]}
-            </option>
-          ))}
-        </select>
+          }}
+          onChange={(format) => setOption('numberFormat', format)}
+        />
       </label>
 
       <label className="ts-chart-field is-check">

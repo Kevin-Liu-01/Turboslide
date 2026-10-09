@@ -18,7 +18,6 @@
     "@paper-design/shaders": "catalog:",
     "@simplewebauthn/browser": "catalog:",
     "@simplewebauthn/server": "catalog:",
-    "@tanstack/react-devtools": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-router-devtools": "catalog:",
     "@tanstack/react-start": "catalog:",
@@ -58,6 +57,7 @@
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "catalog:",
+    "@tanstack/react-devtools": "catalog:",
     "@tanstack/router-cli": "catalog:",
     "@types/node": "catalog:",
     "@types/pg": "catalog:",

@@ -113,6 +113,11 @@ overrides:
   'fast-uri@>=3.0.0 <3.1.8': 3.1.8
   'source-map-js@<1.2.2': 1.2.2
   'brace-expansion@>=5.0.0 <5.0.12': 5.0.12
+  # HR-W#1e (WEB-2): seroval 1.5.6 (GHSA-p6vx-979v-rg4c critical, GHSA-jp82-f5mq-hwhp) comes with
+  # solid-js 1.9.15, which the devtools pull in and better-auth resolves as its optional peer, so
+  # moving the devtools to devDependencies alone leaves it in the production graph. solid-js 1.9.16
+  # is the first release on seroval ~1.6.8; the TanStack Start serializer is on seroval 1.6.7.
+  'solid-js@<1.9.16': 1.9.16
 
 # pnpm 11 refuses to run dependency build scripts it has not been told about
 # (strictDepBuilds; https://pnpm.io/settings/build). The old pnpm.onlyBuiltDependencies

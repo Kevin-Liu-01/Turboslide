@@ -64,13 +64,18 @@ describe('the database bearer (AUTH-3)', () => {
     expect((await health()).db).toBe('own');
   });
 
-  it('a Worker without the database bearer takes the room bearer on /db, and /health says fallback', async () => {
-    const before = { TURBOSLIDE_DB_BEARER: '' };
-    expect((await call('/db/query', { bearer: ROOM, body: VERSION_READ }, before)).status).toBe(
-      200,
-    );
-    expect((await call('/db/query', { bearer: DB, body: VERSION_READ }, before)).status).toBe(401);
-    expect((await health(before)).db).toBe('fallback');
+  it('a Worker without the database bearer refuses every /db call, the room bearer too, and /health says missing (HR-K2#4)', async () => {
+    const without = { TURBOSLIDE_DB_BEARER: '' };
+    for (const bearer of [ROOM, DB]) {
+      expect((await call('/db/query', { bearer, body: VERSION_READ }, without)).status).toBe(401);
+      expect(
+        (await call('/db/batch', { bearer, body: { statements: [VERSION_READ] } }, without)).status,
+      ).toBe(401);
+      expect((await call('/control/db-unlisted', { bearer }, without)).status).toBe(401);
+    }
+    expect((await health(without)).db).toBe('missing');
+    // the room and control routes keep the room bearer
+    expect((await call('/control/flags', { bearer: ROOM }, without)).status).toBe(200);
   });
 
   it('during a rotation the previous database bearer opens /db until it is deleted; the room bearer never does', async () => {
@@ -316,12 +321,10 @@ describe('the count of the statements outside the list (HR-K2#3)', () => {
     });
   });
 
-  it('opens to the database bearer alone, and to the room bearer only on a Worker without one', async () => {
+  it('opens to the database bearer alone', async () => {
     expect((await call('/control/db-unlisted', { bearer: ROOM })).status).toBe(401);
     expect((await call('/control/db-unlisted')).status).toBe(401);
     expect((await call('/control/db-unlisted', { bearer: DB })).status).toBe(200);
-    const before = { TURBOSLIDE_DB_BEARER: '' };
-    expect((await call('/control/db-unlisted', { bearer: ROOM }, before)).status).toBe(200);
   });
 
   it('keeps at most UNLISTED_ROWS_MAX rows; a known digest still counts past that', async () => {

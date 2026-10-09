@@ -53,9 +53,9 @@
 //                   exists). `--from-shared` (production, docs/hosting.md 13.8 phase 2) first puts
 //                   the shared pair as the three <NAME>_PREVIOUS secrets the Worker keeps taking
 //   worker-settle   13.8 phase 4: `wrangler secret delete` of the three <NAME>_PREVIOUS secrets
-//   worker-rollback 13.8 step 3's way back on production: the shared pair put back as the current
-//                   ticket secret and room bearer, then TURBOSLIDE_DB_BEARER and the three
-//                   <NAME>_PREVIOUS secrets deleted (a name the Worker lacks is said and passed)
+//   worker-rollback ended with HR-K2#4 (exit 2 with the reason): it was 13.8 step 3's way back,
+//                   the shared pair on a Worker that took the room bearer on /db; the way back
+//                   after the rotation is a new rotation
 //   app-partner     13.8 phase 1: TURBOSLIDE_ROOM_BEARER_PREVIOUS on the Vercel environments, the
 //                   coming room bearer the app accepts from the objects before the Worker sends it
 //   app-settle      13.8 phase 3: removes TURBOSLIDE_ROOM_BEARER_PREVIOUS from the environments
@@ -629,7 +629,7 @@ export function planFor(sub, options, files) {
           if (source === null) {
             steps.push(
               step('note', {
-                text: `${name} ${e}: room.env has no ${roomKey(name, e)}, so nothing is set (mint --environments ${e}); the Worker keeps taking the room bearer on /db`,
+                text: `${name} ${e}: room.env has no ${roomKey(name, e)}, so nothing is set (mint --environments ${e}); the Worker refuses every /db call without its database bearer (HR-K2#4)`,
               }),
             );
             continue;
@@ -1000,7 +1000,7 @@ export function planFor(sub, options, files) {
         if (source === null) {
           steps.push(
             step('note', {
-              text: `${name}: room.env has no ${roomKey(name, e)}; the ${e} Worker keeps ${name === 'TURBOSLIDE_DB_BEARER' ? 'taking the room bearer on /db' : 'its value'} (mint --environments ${e})`,
+              text: `${name}: room.env has no ${roomKey(name, e)}; the ${e} Worker keeps ${name === 'TURBOSLIDE_DB_BEARER' ? 'refusing every /db call (HR-K2#4)' : 'its value'} (mint --environments ${e})`,
             }),
           );
           continue;
@@ -1035,37 +1035,13 @@ export function planFor(sub, options, files) {
       break;
     }
     case 'worker-rollback': {
-      if (options.env !== 'production' || !SHARED_NAMES.every((name) => room.values.has(name))) {
-        steps.push(
-          step('stop', {
-            exit: 2,
-            text: 'worker-rollback puts the shared pair back on the production Worker; it needs room.env’s TURBOSLIDE_ROOM_SECRET and TURBOSLIDE_ROOM_BEARER and runs on production alone (docs/hosting.md 13.8 step 3)',
-          }),
-        );
-        break;
-      }
-      for (const name of SHARED_NAMES)
-        steps.push(
-          step('wrangler', {
-            args: ['secret', 'put', name],
-            source: { file: 'room', key: name },
-            label: `${name} back to the shared value on the production Worker (the value on stdin)`,
-          }),
-        );
-      for (const name of [
-        'TURBOSLIDE_DB_BEARER',
-        ...PAIR_NAMES.map((n) => `${n}${PREVIOUS_SUFFIX}`),
-      ])
-        steps.push(
-          step('wrangler', {
-            args: ['secret', 'delete', name],
-            label: `${name} deleted from the production Worker`,
-            tolerate: true,
-          }),
-        );
+      // HR-K2#4: the Worker takes no room bearer on /db any more, so the shared pair back and the
+      // database bearer deleted (13.8 step 3's way back, valid until step 5) would refuse every
+      // accounts call; after the rotation the way back is a new rotation
       steps.push(
-        step('note', {
-          text: '/health answers db: fallback again: /db takes the shared room bearer, as before step 3; valid while the production app sends the shared pair (before step 4’s deploy)',
+        step('stop', {
+          exit: 2,
+          text: 'worker-rollback ended with HR-K2#4: the Worker takes no room bearer on /db, so the shared pair back and TURBOSLIDE_DB_BEARER deleted would refuse every accounts call. The way back after the rotation is a new rotation: mint, worker-secrets, do --force (docs/hosting.md 13.8)',
         }),
       );
       break;
@@ -1489,6 +1465,12 @@ export function execute(steps, options, files, io) {
           say(`${s.environment}: https://${s.host}/health did not answer 200`);
           return 1;
         }
+        if (mode === 'missing') {
+          say(
+            `${s.environment}: the Worker has no database bearer, so /db and the count refuse every call (HR-K2#4); run worker-secrets${s.environment === 'preview' ? ' --env preview' : ''}`,
+          );
+          return 1;
+        }
         const own = WORKER_DB_READY.includes(mode);
         if (own && dbBearer(s.environment) === undefined) {
           say(
@@ -1546,12 +1528,6 @@ export function execute(steps, options, files, io) {
           break;
         }
         const r = io.wrangler(s.args, s.source ? valueOf(s.source) : undefined);
-        if (r.status !== 0 && s.tolerate === true) {
-          say(
-            `${shown} answered exit ${r.status}; passed (${s.label}: the Worker may not hold it)`,
-          );
-          break;
-        }
         if (r.status !== 0) {
           say(`${shown} failed (exit ${r.status}): ${lastLine(r.stderr) || lastLine(r.stdout)}`);
           return 2;

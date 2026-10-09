@@ -1109,48 +1109,42 @@ describe('the values per environment (AUTH-3)', () => {
     expect(parseArgs(['worker-secrets', '--from-shared']).fromShared).toBe(true);
   });
 
-  it('worker-rollback puts the shared pair back on production and deletes the database bearer and the previous names, passing a name the Worker lacks', () => {
+  it('worker-rollback ended with HR-K2#4: it stops with exit 2 and runs no wrangler command', () => {
     withRoom(`${PREVIEW_KEYS}${PRODUCTION_KEYS}`);
     const files = filesOf();
-    const ran = [];
     const lines = [];
-    const o = real('worker-rollback');
+    for (const env of ['production', 'preview']) {
+      const o = real('worker-rollback', { env });
+      expect(
+        execute(
+          planFor('worker-rollback', o, files),
+          o,
+          files,
+          quietIo({ out: (l) => lines.push(l) }),
+        ),
+      ).toBe(2);
+    }
+    expect(lines.at(-1)).toContain('a new rotation');
+    for (const value of ALL) expect(lines.join('\n')).not.toContain(value);
+  });
+
+  it('db-unlisted against a Worker with no database bearer says so and reads exit 1', () => {
+    const files = filesOf();
+    const lines = [];
+    const o = real('db-unlisted');
+    const fetch = (url) =>
+      url.endsWith('/health')
+        ? { status: 200, json: { ok: true, db: 'missing' } }
+        : { status: 401, json: { error: 'bearer' } };
     expect(
       execute(
-        planFor('worker-rollback', o, files),
+        planFor('db-unlisted', o, files),
         o,
         files,
-        quietIo({
-          out: (l) => lines.push(l),
-          wrangler: (args, input) => {
-            ran.push([args.join(' '), input]);
-            return {
-              status: args.includes('TURBOSLIDE_DB_BEARER_PREVIOUS') ? 1 : 0,
-              stdout: '',
-              stderr: '',
-            };
-          },
-        }),
+        quietIo({ out: (l) => lines.push(l), fetch }),
       ),
-    ).toBe(0);
-    expect(ran).toEqual([
-      ['secret put TURBOSLIDE_ROOM_SECRET', ROOM_SECRET],
-      ['secret put TURBOSLIDE_ROOM_BEARER', ROOM_BEARER],
-      ['secret delete TURBOSLIDE_DB_BEARER', undefined],
-      ['secret delete TURBOSLIDE_ROOM_SECRET_PREVIOUS', undefined],
-      ['secret delete TURBOSLIDE_ROOM_BEARER_PREVIOUS', undefined],
-      ['secret delete TURBOSLIDE_DB_BEARER_PREVIOUS', undefined],
-    ]);
-    expect(
-      lines.some((l) => l.includes('TURBOSLIDE_DB_BEARER_PREVIOUS') && l.includes('passed')),
-    ).toBe(true);
-    for (const value of ALL) expect(lines.join('\n')).not.toContain(value);
-    expect(
-      planFor('worker-rollback', real('worker-rollback', { env: 'preview' }), files)[0],
-    ).toMatchObject({
-      kind: 'stop',
-      exit: 2,
-    });
+    ).toBe(1);
+    expect(lines.at(-1)).toContain('the Worker has no database bearer');
   });
 
   it('do on production sends its own values and the database bearer only once its Worker takes them', () => {

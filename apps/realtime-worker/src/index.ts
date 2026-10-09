@@ -14,12 +14,13 @@
 // `/control/db-unlisted` (the count of statements outside the allowlist, HR-K2#3) takes the
 // database bearer.
 // Each secret has an optional `_PREVIOUS` value the Worker also accepts while a rotation is in
-// flight (docs/hosting.md 13.8); it is never sent. A Worker without `TURBOSLIDE_DB_BEARER` (a
-// deployment before the rotation) takes the room bearer on `/db` and logs `db.bearer.fallback`
-// once per isolate. `GET /health` answers `{ ok, protocol, commit, realtime, appOrigin,
-// callbacks, db, statements }`, the last two naming the bearer mode and the allowlist mode,
-// never a value. `OPTIONS` answers CORS for the ticket POSTs. A refused upgrade is accepted and
-// closed with its code so the browser reads it (3.6.3). The Worker's own work per request stays
+// flight (docs/hosting.md 13.8); it is never sent. A Worker without `TURBOSLIDE_DB_BEARER`
+// refuses every `/db` call and `/control/db-unlisted` and logs `db.bearer.missing` once per
+// isolate (HR-K2#4: the room bearer's fallback ended with the rotation). `GET /health` answers
+// `{ ok, protocol, commit, realtime, appOrigin, callbacks, db, statements }`, the last two
+// naming the bearer mode and the allowlist mode, never a value. `OPTIONS` answers CORS for the
+// ticket POSTs. A refused upgrade is accepted and closed with its code so the browser reads it
+// (3.6.3). The Worker's own work per request stays
 // under the Free plan's 10 ms: one HMAC verify and one JSON parse per upgrade, one digest compare
 // per bearer value. Request counts by class ride `GET /control/counters`.
 import {
@@ -78,16 +79,17 @@ export type HealthBody = {
 /**
  * Which bearer `/db/query` and `/db/batch` take (AUTH-3): `own` the database bearer alone,
  * `rotating` the database bearer and its previous value (a rotation in flight, docs/hosting.md
- * 13.8), `fallback` the room bearer (no `TURBOSLIDE_DB_BEARER` on this Worker yet).
+ * 13.8), `missing` none (no `TURBOSLIDE_DB_BEARER` on this Worker, so `/db` refuses every call;
+ * HR-K2#4).
  */
-export type DbBearerMode = 'own' | 'rotating' | 'fallback';
+export type DbBearerMode = 'own' | 'rotating' | 'missing';
 
 function isSet(value: string | undefined): value is string {
   return value !== undefined && value !== '';
 }
 
 function dbBearerMode(env: Env): DbBearerMode {
-  if (!isSet(env.TURBOSLIDE_DB_BEARER)) return 'fallback';
+  if (!isSet(env.TURBOSLIDE_DB_BEARER)) return 'missing';
   return isSet(env.TURBOSLIDE_DB_BEARER_PREVIOUS) ? 'rotating' : 'own';
 }
 
@@ -343,7 +345,7 @@ async function serve(request: Request, env: Env): Promise<Response> {
   if (parts[0] === 'control') {
     workerCounters.controlCalls += 1;
     // the count of the accounts statements outside the allowlist (HR-K2#3) belongs to the
-    // database: its bearer opens it, the room bearer does not (once the Worker has the former)
+    // database: its bearer opens it, the room bearer never does
     if (parts[1] === 'db-unlisted' && request.method === 'GET') {
       if (!(await dbBearerOk(request, env))) return json({ error: 'bearer' }, 401);
       return dbUnlistedAnswer(env.ACCOUNTS);
@@ -392,29 +394,31 @@ async function bearerOk(request: Request, env: Env): Promise<boolean> {
   ]);
 }
 
-let fallbackLogged = false;
+let missingLogged = false;
 
 /**
- * The database bearer of `/db/query` and `/db/batch` (AUTH-3): `TURBOSLIDE_DB_BEARER` or, while a
- * rotation is in flight, `TURBOSLIDE_DB_BEARER_PREVIOUS`. A Worker without the database bearer
- * takes the room bearer, as every Worker did before AUTH-3, and logs `db.bearer.fallback` once per
- * isolate; once the database bearer is set the room bearer is refused here.
+ * The database bearer of `/db/query`, `/db/batch` and `/control/db-unlisted` (AUTH-3):
+ * `TURBOSLIDE_DB_BEARER` or, while a rotation is in flight, `TURBOSLIDE_DB_BEARER_PREVIOUS`. The
+ * room bearer never opens them (HR-K2#4): a Worker without the database bearer refuses every
+ * call and logs `db.bearer.missing` once per isolate.
  */
 async function dbBearerOk(request: Request, env: Env): Promise<boolean> {
-  const given = authorizationToken(request.headers.get('authorization'), 'Bearer');
-  if (isSet(env.TURBOSLIDE_DB_BEARER))
-    return secretsMatchAny(given, [env.TURBOSLIDE_DB_BEARER, env.TURBOSLIDE_DB_BEARER_PREVIOUS]);
-  const ok = await bearerOk(request, env);
-  if (ok && !fallbackLogged) {
-    fallbackLogged = true;
-    console.warn(
-      JSON.stringify({
-        message: 'db.bearer.fallback',
-        reason: 'TURBOSLIDE_DB_BEARER is not set on this Worker; /db takes the room bearer',
-      }),
-    );
+  if (!isSet(env.TURBOSLIDE_DB_BEARER)) {
+    if (!missingLogged) {
+      missingLogged = true;
+      console.error(
+        JSON.stringify({
+          message: 'db.bearer.missing',
+          reason: 'TURBOSLIDE_DB_BEARER is not set on this Worker; /db refuses every call',
+        }),
+      );
+    }
+    return false;
   }
-  return ok;
+  return secretsMatchAny(authorizationToken(request.headers.get('authorization'), 'Bearer'), [
+    env.TURBOSLIDE_DB_BEARER,
+    env.TURBOSLIDE_DB_BEARER_PREVIOUS,
+  ]);
 }
 
 export default {

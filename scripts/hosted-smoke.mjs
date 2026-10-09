@@ -85,7 +85,10 @@
 // of the run (`scratch deck removed`). HR-K1#1 (DATA-2): `document cache 60 s` reads the scratch
 // deck's `deck.json` on the public store, whose host the deployment names in its policy's
 // `img-src` (TURBOSLIDE_PUBLIC_STORE_HOST), and requires `max-age=60`, so a copy a browser or the
-// CDN took before the documents move to the private store expires within a minute.
+// CDN took before the documents move to the private store expires within a minute. HR-SD#6
+// (CRIT-M3): `asset by name 404` adds a picture to the scratch deck and requires 404 for it by its
+// file name with no identity, and the picture by its asset key (a deployment alone: a local tmp
+// store keeps names).
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1069,6 +1072,74 @@ async function restrictedThumbnailRow(base, scratch, headers, timeoutMs) {
   };
 }
 
+/** A 16 px square PNG, the picture the smoke adds to its scratch deck. */
+const SMOKE_PNG =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAGUlEQVQokWPQqDhBEmIY1VAxGkoawzVpAADDSmgQUucKQgAAAABJRU5ErkJggg==';
+
+/**
+ * `asset by name 404` (hardening HR-SD#6, CRIT-M3): a picture added to the scratch deck lives
+ * under the deck's own asset key on the blob store, so the assets route answers 404 to a request
+ * by its file name with no identity, and the picture, or a 302 to the keyed store path, to a
+ * request by `/decks/<id>/assets/<assetKey>/<file>`. A local server's tmp store keeps names, so
+ * the row runs against a deployment alone. The key is never printed.
+ */
+async function assetByNameRow(base, scratch, headers, timeoutMs) {
+  const name = 'asset by name 404';
+  if (!base.startsWith('https:'))
+    return { skip: `${name}: the keyed twins are the blob store's; a local tmp store keeps names` };
+  const failed = (detail) => ({
+    row: { name, expect: 'a picture on the scratch deck', detail: () => detail },
+    r: { status: '-', ms: 0 },
+    ok: false,
+  });
+  if (scratch.id === null) return failed(scratch.detail);
+  const deck = encodeURIComponent(scratch.id);
+  const info = await postJson(base, `/api/actions/deck.info?deck=${deck}`, {}, headers, 60_000);
+  const added = await postJson(
+    base,
+    `/api/actions/asset.add?deck=${deck}`,
+    {
+      id: 'smoke-square',
+      file: SMOKE_PNG,
+      role: 'mood',
+      alt: 'A blue square the smoke adds',
+      baseRevision: info.json?.revision ?? info.json?.output?.revision,
+    },
+    headers,
+    120_000,
+  );
+  const twins = added.json?.twins ?? added.json?.output?.twins ?? {};
+  const twin = twins.neutral ?? twins.light ?? null;
+  if (added.status !== 200 || typeof twin !== 'string')
+    return failed(`asset.add ${added.status}: ${added.text.slice(0, 160)}`);
+  const shared = await postJson(
+    base,
+    `/api/actions/share.get?deck=${deck}`,
+    { id: scratch.id },
+    headers,
+    60_000,
+  );
+  const key = shared.json?.record?.assetKey ?? shared.json?.output?.record?.assetKey ?? null;
+  if (typeof key !== 'string') return failed(`share.get ${shared.status}: no asset key`);
+  const file = twin.replace(/^assets\//, '');
+  const byName = await probe(base, `/decks/${deck}/assets/${file}`, timeoutMs);
+  const byKey = await probe(base, `/decks/${deck}/assets/${key}/${file}`, timeoutMs);
+  const keyed = byKey.location.includes(`/d/${scratch.id}/${key}/`);
+  const served =
+    (byKey.status === 200 && byKey.type.startsWith('image/')) || (byKey.status === 302 && keyed);
+  return {
+    row: {
+      name,
+      expect:
+        "the scratch deck's picture by its file name with no identity 404, by its key a 200 image or a 302 to the keyed store path",
+      detail: () =>
+        `by name ${byName.status}${byName.location === '' ? '' : ' with a location'}; by key ${byKey.status}${byKey.status === 302 ? (keyed ? ' to the keyed store path' : ' to another place') : ` ${byKey.type}`}`,
+    },
+    r: byName,
+    ok: byName.error === undefined && byName.status === 404 && byName.location === '' && served,
+  };
+}
+
 /**
  * The instance facts of /api/agent with the bearer (SPEC-4 0.38, 3.9; b4.md R11): the effects
  * backend the function selected and the runtime's glibc. Reported until the Linux addon is
@@ -1418,6 +1489,9 @@ async function main() {
       const documentCache = await documentCacheRow(base, scratch, args.timeoutMs);
       if (documentCache.skip !== undefined) console.log(`skip  ${documentCache.skip}`);
       else results.push(documentCache);
+      const byName = await assetByNameRow(base, scratch, headers, args.timeoutMs);
+      if (byName.skip !== undefined) console.log(`skip  ${byName.skip}`);
+      else results.push(byName);
       if (scratch.id !== null) results.push(await removeScratchDeck(base, scratch, headers));
       if (args.templateCopy) {
         const copied = await templateCopyRow(base, headers);

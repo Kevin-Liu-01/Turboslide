@@ -101,6 +101,18 @@ catalog:
 # removed from the graph instead of an allowlist entry. Drop this when pptxgenjs stops declaring it.
 overrides:
   'pptxgenjs>image-size': '-'
+  # The hardening round (docs/hardening/HARDENING.md 4.5, HR-W#1d; WEB-2): the patched release of
+  # five packages that only reach the tree through another package, each inside the range its
+  # dependent declares. proxy-addr (GHSA-jqcg-44mw-7w3h, critical) and ip-address (GHSA-j6r3-76f7-8jcv,
+  # GHSA-h3mg-xc3c-68pw) through the MCP SDK's express; fast-uri (GHSA-hrr3-gc8f-f4qj) through its
+  # ajv; source-map-js (GHSA-68fv-2mgg-jv7q) through postcss and jsdom; brace-expansion
+  # (GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p, GHSA-q2hr-2g5m-vwhr) through eslint's minimatch.
+  # Drop an entry once its dependents resolve the patched release on their own.
+  'proxy-addr@<2.0.8': 2.0.8
+  'ip-address@<10.7.1': 10.7.3
+  'fast-uri@>=3.0.0 <3.1.8': 3.1.8
+  'source-map-js@<1.2.2': 1.2.2
+  'brace-expansion@>=5.0.0 <5.0.12': 5.0.12
 
 # pnpm 11 refuses to run dependency build scripts it has not been told about
 # (strictDepBuilds; https://pnpm.io/settings/build). The old pnpm.onlyBuiltDependencies

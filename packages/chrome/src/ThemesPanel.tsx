@@ -50,6 +50,7 @@ import type { SlideRenderer } from './LayoutGrid';
 import { cn } from './lib/cn';
 import { PANELS, SNACKBARS } from './menus/strings';
 import { Panel } from './Panel';
+import { Select } from './Select';
 import { tipProps } from './Tooltip';
 
 import './ThemesPanel.css';
@@ -58,7 +59,7 @@ import './ThemesPanel.css';
  * The Brand kit panel (docs/archive/rounds/PRODUCT.md 4.1, 4.4; formerly the Themes panel of gslides-parity SPEC
  * 5.7): the record on the deck edited in one place with live preview. Appearance (the two GT
  * tiles as before, `themes.gt.*`), Logo (the slot preview, Replace, Remove, Use the default logo,
- * a Position select for the title slide's logo and one for the footer's), Colors (the six roles,
+ * a Position dropdown for the title slide's logo and one for the footer's), Colors (the six roles,
  * Text, Background, Captions, Hints, Primary, Accent, each a swatch and a hex field in the chosen
  * appearance; typing previews on the sheet through a transient stylesheet, Enter or blur
  * commits, Escape reverts), Fonts (Display and Text, each the Font dropdown), Footer (the logo
@@ -246,14 +247,18 @@ function tileHtml(
 }
 
 /** A pair of live clones at 140 by 79 each, the theme's two slides; a plate until it renders. */
-function TilePair({ html, appearance }: { html: (string | null)[] | null; appearance: Appearance }) {
+function TilePair({
+  html,
+  appearance,
+}: {
+  html: (string | null)[] | null;
+  appearance: Appearance;
+}) {
   return (
     <span className="ts-theme-pair" aria-hidden="true">
       {[0, 1].map((index) => (
         <span key={index} className="ts-theme-clone" data-theme={appearance}>
-          {html?.[index] ? (
-            <LiveClone html={html[index] ?? ''} theme={appearance} frame />
-          ) : null}
+          {html?.[index] ? <LiveClone html={html[index] ?? ''} theme={appearance} frame /> : null}
         </span>
       ))}
     </span>
@@ -424,15 +429,11 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   const [uploading, setUploading] = useState(false);
   void render;
   /* the asset URL rule the tiles and the logo preview draw pictures with */
-  const assetUrl = useMemo(
-    () => input.assetUrl ?? ((path: string) => path),
-    [input.assetUrl],
-  );
+  const assetUrl = useMemo(() => input.assetUrl ?? ((path: string) => path), [input.assetUrl]);
   /* the deck's own tile: its theme on its two slides (docs/DESIGN.md 7.6 item 2) */
   const ownSlides = useMemo(() => tileSlides(document), [document]);
   const ownHtml = useMemo(
-    () =>
-      ownSlides.map((slide) => tileHtml(deck, slide, current, themeId, assetUrl, ownSlides)),
+    () => ownSlides.map((slide) => tileHtml(deck, slide, current, themeId, assetUrl, ownSlides)),
     [deck, ownSlides, current, themeId, assetUrl],
   );
   const kitParts = kitSummary(kit);
@@ -622,9 +623,9 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       'Brand kit: Logo',
     ).then(() => shell.say(words.logoDefault(themeTitle), undoAction()));
 
-  /* the two Position selects name what is drawn (item 49): the title slide's mark sits above the
-     heading while the record names no position, so its select reads "Above the title" then and
-     the pick of that row removes the position; the footer's logo sits bottom left by default */
+  /* the two Position dropdowns name what is drawn (item 49): the title slide's mark sits above
+     the heading while the record names no position, so its dropdown reads "Above the title" then
+     and the pick of that row removes the position; the footer's logo sits bottom left by default */
   const positionSelect = (
     pointer: '/positions/mark' | '/positions/footerLogo',
     control: string,
@@ -644,30 +645,24 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     return (
       <label className="ts-brand-field">
         <span className="ts-brand-label">{label}</span>
-        <select
+        <Select
           value={value}
-          aria-label={`${words.position}, ${label.toLowerCase()}`}
-          data-control={control}
-          {...tipProps({
+          options={options}
+          label={`${words.position}, ${label.toLowerCase()}`}
+          control={control}
+          tip={{
             name: `${words.position}, ${label.toLowerCase()}`,
             doc: isMark
               ? 'Above the title, one of the four corners of the slide, or hidden'
               : 'One of the four corners of the slide, or hidden',
-          })}
-          onChange={(event) => {
-            const picked = event.target.value;
+          }}
+          onChange={(picked) => {
             void writeKit(
               pointer,
               picked === MARK_POSITION_FLOW ? undefined : (picked as SlotPosition),
             );
           }}
-        >
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        />
       </label>
     );
   };
@@ -1018,17 +1013,22 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         </h3>
         <label className="ts-brand-field">
           <span className="ts-brand-label">{words.footerLogo}</span>
-          <select
+          <Select<LogoKind>
             value={footerLogo}
-            aria-label={`${words.footer} ${words.footerLogo.toLowerCase()}`}
-            data-control="panel.brand.footer.logo"
+            options={(themeHasLogo
+              ? (['default', 'none', 'picture'] as const)
+              : (['none', 'picture'] as const)
+            ).map((kind) => ({ value: kind, label: words.logoKinds[kind] }))}
+            label={`${words.footer} ${words.footerLogo.toLowerCase()}`}
+            control="panel.brand.footer.logo"
             disabled={commit === undefined}
-            {...tipProps({
+            tip={{
               name: `${words.footer} ${words.footerLogo.toLowerCase()}`,
               doc: words.footerLogoDoc,
-            })}
-            onChange={(event) => {
-              const next = event.target.value as LogoKind;
+            }}
+            onChange={(next) => {
+              /* Picture with no picture yet opens the file chooser inside the choice's own
+                 event, so the browser counts the person's activation (DROPDOWNS.md 3.5) */
               if (next === 'picture') {
                 if (footerAsset === undefined) {
                   fileInput.current?.click();
@@ -1045,16 +1045,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
               }
               void writeKit('/footer/logo', next);
             }}
-          >
-            {(themeHasLogo
-              ? (['default', 'none', 'picture'] as const)
-              : (['none', 'picture'] as const)
-            ).map((kind) => (
-              <option key={kind} value={kind}>
-                {words.logoKinds[kind]}
-              </option>
-            ))}
-          </select>
+          />
         </label>
         <label className="ts-brand-field">
           <span className="ts-brand-label">{words.footerText}</span>
@@ -1091,25 +1082,18 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         )}
         <label className="ts-brand-field">
           <span className="ts-brand-label">{words.counterFormat}</span>
-          <select
+          <Select<CounterFormat>
             value={format}
-            aria-label={`${words.counter} ${words.counterFormat.toLowerCase()}`}
-            data-control="panel.brand.counter.format"
+            options={COUNTER_FORMATS.map((each) => ({ value: each, label: each }))}
+            label={`${words.counter} ${words.counterFormat.toLowerCase()}`}
+            control="panel.brand.counter.format"
             disabled={commit === undefined}
-            {...tipProps({
+            tip={{
               name: `${words.counter} ${words.counterFormat.toLowerCase()}`,
               doc: 'n / N reads 03 / 12, n reads 03, Slide n reads Slide 3',
-            })}
-            onChange={(event) =>
-              void writeKit('/counter/format', event.target.value as CounterFormat)
-            }
-          >
-            {COUNTER_FORMATS.map((each) => (
-              <option key={each} value={each}>
-                {each}
-              </option>
-            ))}
-          </select>
+            }}
+            onChange={(next) => void writeKit('/counter/format', next)}
+          />
         </label>
         {check(
           words.counterSkip,

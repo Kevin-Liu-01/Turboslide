@@ -999,20 +999,8 @@ export async function run(t) {
           () =>
             document.querySelector('.ts-stagewrap.ts-editor .counter')?.textContent?.trim() ?? '',
         );
-      const setFormat = async (value) => {
-        const sel = page.locator('[data-control="panel.brand.counter.format"]').first();
-        const tag = await sel.evaluate((el) => el.tagName.toLowerCase());
-        if (tag === 'select')
-          await sel.selectOption({ label: value }).catch(() => sel.selectOption(value));
-        else {
-          await sel.click();
-          await page
-            .locator(`[data-control^="panel.brand.counter.format."]`, { hasText: value })
-            .first()
-            .click();
-        }
-        await t.settled();
-      };
+      /* the shared dropdown, chosen the way a person does (DROPDOWNS.md 5.3) */
+      const setFormat = (value) => t.chooseOption('panel.brand.counter.format', { label: value });
       if (await t.visible('panel.brand.counter.show')) {
         const on = await page.evaluate(() => {
           const el = document.querySelector('[data-control="panel.brand.counter.show"]');

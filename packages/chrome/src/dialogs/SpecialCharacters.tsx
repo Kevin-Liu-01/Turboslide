@@ -13,6 +13,7 @@ import { useEditorShell } from '../editor-shell-context';
 import { cn } from '../lib/cn';
 import { DIALOGS } from '../menus/strings';
 import { gridKey } from '../pickers/grid';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 import {
   SPECIAL_CHARACTER_CATEGORIES,
@@ -141,26 +142,17 @@ export function SpecialCharactersDialog() {
       <div className="ts-dialog-modes">
         <label className="ts-dialog-field">
           <span className="ts-dialog-field-label">Category</span>
-          <select
+          <Select<SpecialCharacterCategory>
             value={category ?? ''}
-            aria-label="Category"
-            data-control="dialog.specialCharacters.category"
-            onChange={(event) =>
-              setCategory(
-                event.target.value === '' ? null : (event.target.value as SpecialCharacterCategory),
-              )
-            }
-            {...tipProps({
+            options={SPECIAL_CHARACTER_CATEGORIES.map((each) => ({ value: each, label: each }))}
+            label="Category"
+            control="dialog.specialCharacters.category"
+            onChange={setCategory}
+            tip={{
               name: 'Category',
               doc: 'Arrows, punctuation, currency, math, symbols or emoji',
-            })}
-          >
-            {SPECIAL_CHARACTER_CATEGORIES.map((each) => (
-              <option key={each} value={each}>
-                {each}
-              </option>
-            ))}
-          </select>
+            }}
+          />
         </label>
         <label className="ts-dialog-field">
           <span className="ts-dialog-field-label">{words.search}</span>

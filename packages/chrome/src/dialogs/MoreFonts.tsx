@@ -9,6 +9,7 @@ import type { FontRow } from '../font-picker-model';
 import { FontRowLabel } from '../FontPicker';
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 
 /**
@@ -78,20 +79,20 @@ export function MoreFontsDialog({ rows, used, picked, onPick, onClose }: MoreFon
               />
             </DialogField>
             <DialogField label={words.categories}>
-              <select
+              <Select<FontCategory | 'all'>
                 value={category}
-                aria-label={words.categories}
-                data-control="dialog.moreFonts.category"
-                {...tipProps({ name: words.categories, doc: words.categoryDoc })}
-                onChange={(event) => setCategory(event.target.value as FontCategory | 'all')}
-              >
-                <option value="all">{words.allCategories}</option>
-                {FONT_CATEGORIES.map((each) => (
-                  <option key={each} value={each}>
-                    {FONT_CATEGORY_LABELS[each]}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { value: 'all', label: words.allCategories },
+                  ...FONT_CATEGORIES.map((each) => ({
+                    value: each,
+                    label: FONT_CATEGORY_LABELS[each],
+                  })),
+                ]}
+                label={words.categories}
+                control="dialog.moreFonts.category"
+                tip={{ name: words.categories, doc: words.categoryDoc }}
+                onChange={setCategory}
+              />
             </DialogField>
           </div>
           <div

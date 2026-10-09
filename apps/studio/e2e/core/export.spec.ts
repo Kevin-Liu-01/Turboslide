@@ -1466,7 +1466,8 @@ test(title('export.download.large-deck-pptx'), async () => {
             .catch(() => false))
         )
           await more.click();
-        await check(page, 'dialog.download.fonts');
+        /* the Embed fonts box the row's title names; the Fonts dropdown above it is left as it is */
+        await check(page, 'dialog.download.embedFonts');
         await ctl(page, 'dialog.download.ok').click();
       },
       600_000,

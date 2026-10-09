@@ -14,6 +14,7 @@ import {
   trustWordOf,
 } from '../presence/IdentityChip';
 import { slideNumberOf } from '../presence/presence-model';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 import { filterThreads, firstLine, shortTime, sortThreads } from './comments-model';
 import type { CommentsFilter, CommentsOrder } from './comments-model';
@@ -132,18 +133,19 @@ export function CommentsPanel({
             {...tipProps({ name: COMMENTS.search, doc: 'By words or by who wrote them' })}
           />
           <div className="ts-comments-filters">
-            <select
-              className="pt-select ts-comments-filter"
+            <Select<CommentsFilter>
+              className="ts-comments-filter"
               value={filter}
-              aria-label="Filter"
-              data-control="panel.comments.filter"
-              onChange={(event) => setFilter(event.target.value as CommentsFilter)}
-              {...tipProps({ name: 'Filter', doc: 'All, Open or Resolved threads' })}
-            >
-              <option value="all">{COMMENTS.all}</option>
-              <option value="open">{COMMENTS.open}</option>
-              <option value="resolved">{COMMENTS.resolved}</option>
-            </select>
+              options={[
+                { value: 'all', label: COMMENTS.all },
+                { value: 'open', label: COMMENTS.open },
+                { value: 'resolved', label: COMMENTS.resolved },
+              ]}
+              label="Filter"
+              control="panel.comments.filter"
+              onChange={setFilter}
+              tip={{ name: 'Filter', doc: 'All, Open or Resolved threads' }}
+            />
             <button
               type="button"
               className={cn('pt-ib is-text ts-comments-order', order === 'slide' && 'is-on')}

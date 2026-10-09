@@ -13,6 +13,7 @@ import { DIALOGS } from '../menus/strings';
 import { DOWNLOAD_WORDS } from '../download';
 import { useMountEffect } from '../lib/useMountEffect';
 import { isParked } from '../parked-controls';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 
 /**
@@ -496,33 +497,39 @@ export function DownloadDialog({ format: rowFormat, options = false }: DownloadD
           <div>
             <label className="ts-dialog-field">
               <span className="ts-dialog-field-label">Appearance</span>
-              <select
+              <Select
                 value={theme}
-                aria-label="Appearance"
-                data-control="dialog.download.theme"
-                onChange={(event) => setTheme(event.target.value as 'light' | 'dark' | 'both')}
-                {...tipProps({ name: 'Appearance', doc: 'Light, Dark, or one file of each' })}
-              >
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="both">Both</option>
-              </select>
+                options={[
+                  { value: 'light', label: 'Light' },
+                  { value: 'dark', label: 'Dark' },
+                  { value: 'both', label: 'Both' },
+                ]}
+                label="Appearance"
+                control="dialog.download.theme"
+                onChange={setTheme}
+                tip={{ name: 'Appearance', doc: 'Light, Dark, or one file of each' }}
+              />
             </label>
             <label className="ts-dialog-field">
               <span className="ts-dialog-field-label">Fonts</span>
-              <select
+              <Select<ExportFontSet>
                 value={fonts}
-                aria-label="Fonts"
-                data-control="dialog.download.fonts"
-                onChange={(event) => setFonts(event.target.value as ExportFontSet)}
-                {...tipProps({
+                options={[
+                  {
+                    value: 'standard',
+                    label: 'Standard',
+                    description: 'Uses the names Inter installs under',
+                  },
+                  { value: 'exact', label: 'Exact', description: 'Keeps one face per text size' },
+                ]}
+                label="Fonts"
+                control="dialog.download.fonts"
+                onChange={setFonts}
+                tip={{
                   name: 'Fonts',
                   doc: 'Standard uses the names Inter installs under; Exact keeps one face per text size',
-                })}
-              >
-                <option value="standard">Standard</option>
-                <option value="exact">Exact</option>
-              </select>
+                }}
+              />
             </label>
             <DialogCheck
               label="Embed fonts"

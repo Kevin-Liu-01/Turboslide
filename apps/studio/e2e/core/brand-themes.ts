@@ -533,12 +533,12 @@ export function brandThemes(): string[] {
         '[data-control="panel.theme.current"] .ts-theme-clone .ts-sheet',
       ).length,
     }));
-    /* the panel's boxed controls (its selects, text and hex fields and the words field) take the
-       control corner its buttons take (DESIGN.md 3.1; pass 1 finding 5 read 12 of them at 0) */
+    /* the panel's boxed controls (its dropdowns, text and hex fields and the words field) take
+       the control corner its buttons take (DESIGN.md 3.1; pass 1 finding 5 read 12 of them at 0) */
     const corners = await page.evaluate(() =>
       [
         ...document.querySelectorAll(
-          '.ts-themes.ts-brand select, .ts-themes.ts-brand textarea, .ts-themes.ts-brand input:not([type="color"]):not([type="checkbox"]):not([type="file"])',
+          '.ts-themes.ts-brand [role="combobox"], .ts-themes.ts-brand textarea, .ts-themes.ts-brand input:not([type="color"]):not([type="checkbox"]):not([type="file"]):not([type="hidden"])',
         ),
       ].map((el) => ({
         control: el.getAttribute('data-control') ?? el.tagName.toLowerCase(),

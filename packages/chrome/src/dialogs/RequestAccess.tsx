@@ -4,6 +4,7 @@ import { Dialog, DialogField } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
 import type { EditorRole } from '../editor-shell';
 import { ACCESS_PAGE, DIALOGS, REFUSALS } from '../menus/strings';
+import { Select } from '../Select';
 
 /**
  * Request access from inside the editor (gslides-parity SPEC-3 6.3, 6.5): the View only button's
@@ -62,16 +63,17 @@ export function RequestAccessDialog({ role: initial = 'editor' }: { role?: Edito
       ]}
     >
       <DialogField label={ACCESS_PAGE.role} doc="What you would like to do">
-        <select
+        <Select<EditorRole>
           value={role}
-          aria-label={ACCESS_PAGE.role}
-          data-control="dialog.requestAccess.role"
-          onChange={(event) => setRole(event.target.value as EditorRole)}
-        >
-          <option value="viewer">{DIALOGS.share.roles.viewer}</option>
-          <option value="commenter">{DIALOGS.share.roles.commenter}</option>
-          <option value="editor">{DIALOGS.share.roles.editor}</option>
-        </select>
+          options={[
+            { value: 'viewer', label: DIALOGS.share.roles.viewer },
+            { value: 'commenter', label: DIALOGS.share.roles.commenter },
+            { value: 'editor', label: DIALOGS.share.roles.editor },
+          ]}
+          label={ACCESS_PAGE.role}
+          control="dialog.requestAccess.role"
+          onChange={setRole}
+        />
       </DialogField>
       <DialogField label={ACCESS_PAGE.message} doc="A line for the owner">
         <textarea

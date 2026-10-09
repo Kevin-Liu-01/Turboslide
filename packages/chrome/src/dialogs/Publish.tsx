@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Dialog, DialogCheck, DialogField, DialogTabs } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
 import { DIALOGS, SNACKBARS, stubClause } from '../menus/strings';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 
 import './share.css';
@@ -159,19 +160,17 @@ export function PublishDialog({ tab: initialTab = 'link' }: { tab?: 'link' | 'em
       ) : (
         <>
           <DialogField label="Size">
-            <select
+            <Select<(typeof SIZES)[number]['id']>
               value={size}
-              aria-label="Size"
-              data-control="dialog.publish.size"
-              onChange={(event) => setSize(event.target.value as (typeof SIZES)[number]['id'])}
-              {...tipProps({ name: 'Size', doc: 'The width and height of the frame' })}
-            >
-              {SIZES.map((each) => (
-                <option key={each.id} value={each.id}>
-                  {each.id === 'custom' ? each.label : `${each.label} (${each.w} by ${each.h})`}
-                </option>
-              ))}
-            </select>
+              options={SIZES.map((each) => ({
+                value: each.id,
+                label: each.id === 'custom' ? each.label : `${each.label} (${each.w} by ${each.h})`,
+              }))}
+              label="Size"
+              control="dialog.publish.size"
+              onChange={setSize}
+              tip={{ name: 'Size', doc: 'The width and height of the frame' }}
+            />
           </DialogField>
           {size === 'custom' ? (
             <div className="ts-dialog-modes">

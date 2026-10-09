@@ -35,6 +35,7 @@ import {
   clickCard,
   zipEntries,
 } from './lib';
+import { chooseOption } from '../choose-option';
 import { brandThemes } from './brand-themes';
 
 // The brand kit and the templates, the spec rows (docs/archive/rounds/PRODUCT.md 4.1 to 4.3, 8.1 `templates.*`,
@@ -1069,16 +1070,7 @@ test(title('brand.logo.replace-every-slide'), async () => {
   /* Position > Top right moves the title slide's logo */
   await ctl(page, `filmstrip.slide.${list[0]!.id}`).click();
   const before = (await drawnLogo()).markBox;
-  const position = ctl(page, 'panel.brand.logo.position');
-  const tag = await position.evaluate((el) => el.tagName.toLowerCase());
-  if (tag === 'select') await position.selectOption({ label: 'Top right' });
-  else {
-    await position.click();
-    await page
-      .locator('[data-control^="panel.brand.logo.position."]', { hasText: 'Top right' })
-      .first()
-      .click();
-  }
+  await chooseOption(page, 'panel.brand.logo.position', { label: 'Top right' });
   await settled(page);
   await expect
     .poll(async () => (await drawnLogo()).markBox?.x ?? 0, { timeout: 8000 })
@@ -1657,10 +1649,11 @@ test(title('brand.panel.words-match-sheet'), async () => {
   await clickCard(page, order[0]!);
   await page.waitForTimeout(400);
   const position = await page.evaluate(() => {
-    const select = document.querySelector(
-      '[data-control="panel.brand.logo.position"]',
-    ) as HTMLSelectElement | null;
-    const label = select ? (select.options[select.selectedIndex]?.text ?? select.value) : null;
+    /* the dropdown's trigger draws the chosen row's words (DROPDOWNS.md 5.2) */
+    const field = document.querySelector('[data-control="panel.brand.logo.position"]');
+    const label = field
+      ? (field.querySelector('.ts-dropdown-text')?.textContent ?? field.getAttribute('value'))
+      : null;
     const stage = document.querySelector('.ts-stagewrap.ts-editor');
     const sheet = stage?.querySelector('.pt-slide:not(.is-leaving)');
     const mark = stage?.querySelector(

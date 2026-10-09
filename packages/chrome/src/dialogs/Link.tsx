@@ -6,6 +6,7 @@ import type { SlideLinkKeyword } from '@turboslide/schema/text';
 import { Dialog, DialogField } from '../Dialog';
 import { selectedBlock } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 
 /**
@@ -103,31 +104,30 @@ export function LinkDialog() {
         />
       </DialogField>
       <DialogField label="Slides in this presentation">
-        <select
+        <Select
           value={target}
-          aria-label="Slides in this presentation"
-          data-control="dialog.link.slide"
-          onChange={(event) => {
-            setTarget(event.target.value);
-            if (event.target.value !== '') setUrl('');
+          options={[
+            { options: [{ value: '', label: 'None' }, ...KEYWORDS] },
+            /* every slide under a heading of its own after the positions (DROPDOWNS.md 3.9) */
+            {
+              heading: 'Slides',
+              options: order.map((id, index) => {
+                const each = input.document.slides[id];
+                return {
+                  value: id,
+                  label: `${index + 1}. ${each === undefined ? id : slideTitle(each, index + 1)}`,
+                };
+              }),
+            },
+          ]}
+          label="Slides in this presentation"
+          control="dialog.link.slide"
+          onChange={(next) => {
+            setTarget(next);
+            if (next !== '') setUrl('');
           }}
-          {...tipProps({ name: 'Slides in this presentation', doc: 'A slide the link jumps to' })}
-        >
-          <option value="">None</option>
-          {KEYWORDS.map((keyword) => (
-            <option key={keyword.value} value={keyword.value}>
-              {keyword.label}
-            </option>
-          ))}
-          {order.map((id, index) => {
-            const each = input.document.slides[id];
-            return (
-              <option key={id} value={id}>
-                {index + 1}. {each === undefined ? id : slideTitle(each, index + 1)}
-              </option>
-            );
-          })}
-        </select>
+          tip={{ name: 'Slides in this presentation', doc: 'A slide the link jumps to' }}
+        />
       </DialogField>
       {error !== null ? (
         <p className="ts-dialog-error" role="alert">

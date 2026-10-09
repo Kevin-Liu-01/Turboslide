@@ -206,6 +206,8 @@ type SessionFactsRow = {
   value: AccountSession;
   /** The anonymous ids this instance already linked under this session, so the alias read is not repeated. */
   linked: Set<string>;
+  /** The questions this instance holds open under this session (HR-SA#2b), so the decks are counted once. */
+  asked: Map<string, MergeQuestion>;
 };
 
 export type SessionFactsCache = {
@@ -573,7 +575,7 @@ function rememberSession(
   value: AccountSession,
   now: number,
 ): SessionFactsRow {
-  const row: SessionFactsRow = { at: now, value, linked: new Set() };
+  const row: SessionFactsRow = { at: now, value, linked: new Set(), asked: new Map() };
   if (runtime.sessionFacts.ttlMs <= 0) return row;
   runtime.sessionFacts.rows.set(key, row);
   const keys = runtime.sessionFacts.byPrincipal.get(value.account.principalId) ?? new Set<string>();
@@ -680,21 +682,170 @@ export async function accountSession(
 }
 
 /**
- * Links the request's anonymous principal to the session's account once per cached session: the
- * alias read of `linkAnonymous` runs the first time this instance sees the pair and not on every
- * request of the 300 s (CLOUDFLARE.md 2.2).
+ * Links the request's anonymous principal to the session's account once per cached session when
+ * it owns no decks, and holds the question open when it does (HR-SA#2b): the alias read runs the
+ * first time this instance sees the pair and not on every request of the 300 s (CLOUDFLARE.md
+ * 2.2), and an open question is counted once.
  */
 async function linkUnderSession(
   runtime: IdentityRuntime,
   request: Request,
   found: AccountSession,
   anonymousId: string,
-): Promise<void> {
+): Promise<MergeQuestion | null> {
   const key = sessionCacheKey(request);
   const row = key === null ? undefined : runtime.sessionFacts.rows.get(key);
-  if (row?.linked.has(anonymousId)) return;
-  await linkAnonymous(runtime, anonymousId, found.account.userId);
-  row?.linked.add(anonymousId);
+  if (row?.linked.has(anonymousId)) return null;
+  const open = row?.asked.get(anonymousId);
+  if (open !== undefined) return open;
+  const outcome = await linkOrAsk(runtime, request, anonymousId, found.account);
+  if (outcome.kind === 'question') row?.asked.set(anonymousId, outcome.question);
+  else if (outcome.kind === 'settled') row?.linked.add(anonymousId);
+  return outcome.kind === 'question' ? outcome.question : null;
+}
+
+// ------------------------------------------------------------------------------------------
+// The merge asks first (docs/hardening/HARDENING.md HR-SA#2b; AUTH-4 in
+// docs/hardening/research/auth-verify.md). A browser's anonymous id joins the account it signs
+// into with no question only when it owns no decks. When it owns decks, the decks stay the
+// browser's until the person answers on /signin: "This browser has 3 decks made before you signed
+// in. Add them to <address>?" with Add Them and Keep Them Separate. Keep Them Separate is kept in
+// a cookie of the browser (the anonymous id under a MAC), so the browser is not asked again and
+// signing out shows its decks as before.
+
+/** The browser's answer Keep Them Separate: the anonymous id and a MAC under the identity secret. */
+export const KEEP_SEPARATE_COOKIE = 'ts.keep_separate';
+
+/** What the person is asked: the browser's decks and the account's address. */
+export type MergeQuestion = { anonymousId: string; userId: string; email: string; decks: number };
+
+type LinkOutcome =
+  /** linked now, linked before, or kept separate: nothing to ask */
+  | { kind: 'settled' }
+  | { kind: 'question'; question: MergeQuestion }
+  /** a store did not answer: nothing is linked, and the next request asks again */
+  | { kind: 'unknown' };
+
+function keepSeparateMac(secret: string, anonymousId: string): string {
+  return sha256Hex(`turboslide keep separate:${secret}:${anonymousId}`).slice(0, 32);
+}
+
+/** The Set-Cookie value that keeps this browser's decks out of the account (HR-SA#2b). */
+export function keepSeparateCookie(runtime: IdentityRuntime, anonymousId: string): string {
+  const value = `${anonymousId}.${keepSeparateMac(runtime.secret, anonymousId)}`;
+  return [
+    `${KEEP_SEPARATE_COOKIE}=${encodeURIComponent(value)}`,
+    'Path=/',
+    `Max-Age=${400 * 24 * 60 * 60}`,
+    'HttpOnly',
+    'SameSite=Lax',
+    ...(runtime.hosted ? ['Secure'] : []),
+  ].join('; ');
+}
+
+function keptSeparate(runtime: IdentityRuntime, request: Request, anonymousId: string): boolean {
+  const raw = parseCookies(request.headers.get('cookie')).get(KEEP_SEPARATE_COOKIE);
+  if (raw === undefined) return false;
+  let value = raw;
+  try {
+    value = decodeURIComponent(raw);
+  } catch {
+    return false;
+  }
+  return value === `${anonymousId}.${keepSeparateMac(runtime.secret, anonymousId)}`;
+}
+
+/**
+ * The decks an anonymous id owns and has not trashed, or null when the index does not answer. A
+ * checkout's file store has one person and lists every deck as the caller's, and a runtime with no
+ * deck index knows no owner: both count none, so the id links as before.
+ */
+async function ownedDeckCount(
+  runtime: IdentityRuntime,
+  anonymousId: string,
+): Promise<number | null> {
+  if (!runtime.hosted || runtime.hooks.deckIndex === null) return 0;
+  try {
+    return (await deckIndexFor(runtime, anonymousId, 'owned')).length;
+  } catch {
+    return null;
+  }
+}
+
+async function linkOrAsk(
+  runtime: IdentityRuntime,
+  request: Request,
+  anonymousId: string,
+  account: { userId: string; email: string },
+): Promise<LinkOutcome> {
+  let linkedTo: string | null;
+  try {
+    linkedTo = await runtime.aliases.accountOf(anonymousId);
+  } catch {
+    return { kind: 'unknown' };
+  }
+  if (linkedTo !== null || keptSeparate(runtime, request, anonymousId)) return { kind: 'settled' };
+  const decks = await ownedDeckCount(runtime, anonymousId);
+  if (decks === null) return { kind: 'unknown' };
+  if (decks > 0)
+    return {
+      kind: 'question',
+      question: { anonymousId, userId: account.userId, email: account.email, decks },
+    };
+  await linkAnonymous(runtime, anonymousId, account.userId);
+  return { kind: 'settled' };
+}
+
+/**
+ * The anonymous ids a signed in request acts for: the account's linked ones, and the browser's own
+ * while its question is open, for this request alone (HR-SA#2b). Before the answer the browser
+ * keeps the decks it made, as it did before the sign in, and the account's other browsers do not
+ * see them; Keep Them Separate drops the browser's id, so its decks wait for the sign out.
+ */
+export async function requestAliases(
+  runtime: IdentityRuntime,
+  request: Request,
+  found: AccountSession,
+  anonymousId: string,
+): Promise<string[]> {
+  const open = await linkUnderSession(runtime, request, found, anonymousId);
+  if (open === null || found.aliases.includes(anonymousId)) return found.aliases;
+  return [...found.aliases, anonymousId];
+}
+
+/** The open question of a signed in browser whose anonymous id owns decks, or null. */
+export async function mergeQuestion(
+  runtime: IdentityRuntime,
+  request: Request,
+): Promise<MergeQuestion | null> {
+  const anonymous = await readPrincipal(request, runtime.secret);
+  if (anonymous === null) return null;
+  const found = await accountSession(runtime, request);
+  if (found === null) return null;
+  return linkUnderSession(runtime, request, found, anonymous.id);
+}
+
+/**
+ * The person's answer: Add Them links the browser's anonymous id to the account and merges the
+ * records; Keep Them Separate answers the cookie that keeps the browser from being asked again.
+ * Null when there is nothing to answer (no session, no anonymous id, or the question is settled).
+ */
+export async function answerMerge(
+  runtime: IdentityRuntime,
+  request: Request,
+  add: boolean,
+): Promise<{ linked: boolean; setCookie?: string } | null> {
+  const question = await mergeQuestion(runtime, request);
+  if (question === null) return null;
+  const key = sessionCacheKey(request);
+  const row = key === null ? undefined : runtime.sessionFacts.rows.get(key);
+  row?.asked.delete(question.anonymousId);
+  row?.linked.add(question.anonymousId);
+  if (!add) return { linked: false, setCookie: keepSeparateCookie(runtime, question.anonymousId) };
+  await linkAnonymous(runtime, question.anonymousId, question.userId);
+  // the context carries the aliases: the next request reads them with the new one
+  if (key !== null) runtime.sessionFacts.rows.delete(key);
+  return { linked: true };
 }
 
 /** Links the browser's anonymous principal to the account and merges the records once (7.4). */
@@ -726,8 +877,9 @@ async function onSessionCreated(
   if (adminEmails(runtime.env).includes(facts.email) && !facts.profile.admin)
     await runtime.profiles.setAdmin(session.userId, true);
   if (request !== undefined) {
+    // HR-SA#2b: an anonymous id that owns decks is asked about on /signin, never linked here
     const anonymous = await readPrincipal(request, runtime.secret);
-    if (anonymous !== null) await linkAnonymous(runtime, anonymous.id, session.userId);
+    if (anonymous !== null) await linkOrAsk(runtime, request, anonymous.id, facts);
   }
   if (facts.emailVerified && runtime.hooks.bindInvitations !== null)
     await runtime.hooks.bindInvitations(session.userId, facts.email);
@@ -895,8 +1047,11 @@ export async function requestIdentity(
       ...(options.fresh === true ? { fresh: true } : {}),
     });
     if (found !== null) {
-      const { account, aliases } = found;
-      if (anonymous !== null) await linkUnderSession(runtime, request, found, anonymous.id);
+      const { account } = found;
+      const aliases =
+        anonymous === null
+          ? found.aliases
+          : await requestAliases(runtime, request, found, anonymous.id);
       const record =
         (await runtime.principals.touch(account.principalId, now, true)) ??
         newPrincipalRecord(account.principalId, now);

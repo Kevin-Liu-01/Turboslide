@@ -59,6 +59,8 @@ export type AuthState =
     }
   /** the mail's link, opened in a browser that did not ask for it (HR-SA#2a) */
   | { step: 'confirm'; token: string; problem?: Exclude<ConfirmProblem, 'link'> }
+  /** signed in, and this browser's decks made before wait for the person's answer (HR-SA#2b) */
+  | { step: 'merge'; email: string; decks: number; problem?: 'request-failed' }
   | { step: 'error'; reason: AuthReason; code: string }
   | { step: 'device'; problem?: DeviceProblem }
   | { step: 'approved'; email: string }
@@ -76,7 +78,8 @@ export type AuthEvent =
   | { type: 'device-refused'; problem: DeviceProblem }
   | { type: 'approved'; email: string }
   | { type: 'denied' }
-  | { type: 'confirm-refused'; problem: ConfirmProblem };
+  | { type: 'confirm-refused'; problem: ConfirmProblem }
+  | { type: 'merge-failed' };
 
 /** The one state machine of every host. */
 export function nextState(state: AuthState, event: AuthEvent): AuthState {
@@ -106,6 +109,8 @@ export function nextState(state: AuthState, event: AuthEvent): AuthState {
       return { step: 'approved', email: event.email };
     case 'denied':
       return { step: 'denied' };
+    case 'merge-failed':
+      return state.step === 'merge' ? { ...state, problem: 'request-failed' } : state;
     case 'confirm-refused':
       if (state.step !== 'confirm') return state;
       return event.problem === 'link'
@@ -162,6 +167,14 @@ export function errorState(code: string | null | undefined): AuthState | null {
 export function confirmState(token: string | null | undefined): AuthState | null {
   if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{16,128}$/.test(token)) return null;
   return { step: 'confirm', token };
+}
+
+/** The merge state of a signed in browser whose decks wait for an answer, or null (HR-SA#2b). */
+export function mergeState(
+  merge: { email: string; decks: number } | null | undefined,
+): AuthState | null {
+  if (merge === null || merge === undefined || merge.decks < 1) return null;
+  return { step: 'merge', email: merge.email, decks: merge.decks };
 }
 
 /** Where a page goes when nothing names a return: the person's presentations. */
@@ -244,6 +257,8 @@ export function stateId(state: AuthState, methods: AuthMethods, purpose: AuthPur
       return `error.${state.reason}`;
     case 'confirm':
       return state.problem === undefined ? 'confirm.code' : `confirm.${state.problem}`;
+    case 'merge':
+      return state.problem === undefined ? 'merge.ask' : `merge.${state.problem}`;
     case 'device':
       return state.problem === undefined ? 'device.code' : `device.${state.problem}`;
     case 'approved':

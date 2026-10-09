@@ -82,6 +82,19 @@ export const AUTH_WORDS = {
     code: (code: string) => `Code: ${code}`,
   },
 
+  /** signed in, with decks this browser made before (HR-SA#2b) */
+  merge: {
+    heading: 'Decks made in this browser',
+    question: (decks: number, address: string) =>
+      decks === 1
+        ? `This browser has 1 deck made before you signed in. Add it to ${address}?`
+        : `This browser has ${decks} decks made before you signed in. Add them to ${address}?`,
+    add: (decks: number) => (decks === 1 ? 'Add It' : 'Add Them'),
+    keep: (decks: number) => (decks === 1 ? 'Keep It Separate' : 'Keep Them Separate'),
+    foot: 'Decks you keep separate stay in this browser. Sign out to open them again.',
+    failed: 'The answer was not saved. Try again.',
+  },
+
   device: {
     heading: 'Connect the command line',
     first: 'Sign in first. This page then asks for the code your terminal shows.',

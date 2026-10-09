@@ -53,6 +53,8 @@ export type AuthActions = {
    * browser shows; it resolves as the browser leaves to open the link again
    */
   confirmBrowser?: (token: string, code: string) => Promise<unknown>;
+  /** the answer to the merge question (HR-SA#2b): true adds this browser's decks to the account */
+  answerMerge?: (add: boolean) => Promise<unknown>;
 };
 
 export type AuthHost = 'page' | 'window';
@@ -74,6 +76,8 @@ export function headingOf(state: AuthState, purpose: AuthPurpose, host: AuthHost
       return AUTH_WORDS.error.heading;
     case 'confirm':
       return AUTH_WORDS.confirm.heading;
+    case 'merge':
+      return AUTH_WORDS.merge.heading;
     case 'device':
       return AUTH_WORDS.device.heading;
     case 'approved':
@@ -318,6 +322,18 @@ export function AuthPlate({
         dispatch({ type: 'confirm-refused', problem: confirmProblemOf(error) });
       })
       .finally(() => setBusy(false));
+  };
+
+  const merge = (add: boolean) => {
+    const answer = actions.answerMerge;
+    if (state.step !== 'merge' || answer === undefined || busy) return;
+    setBusy(true);
+    answer(add)
+      .then(() => onSignedIn?.())
+      .catch(() => {
+        dispatch({ type: 'merge-failed' });
+        setBusy(false);
+      });
   };
 
   const decide = (approve: boolean) => {
@@ -570,6 +586,36 @@ export function AuthPlate({
           </button>
         </div>
         <p className="ts-auth-foot-line">{AUTH_WORDS.confirm.foot}</p>
+      </>
+    );
+  } else if (state.step === 'merge') {
+    body = (
+      <>
+        <p className="ts-auth-lede" data-control={id('merge')}>
+          {AUTH_WORDS.merge.question(state.decks, state.email)}
+        </p>
+        <div className="ts-auth-choice">
+          <button
+            type="button"
+            className="ts-auth-button is-solid"
+            data-control={id('merge.add')}
+            disabled={busy}
+            onClick={() => merge(true)}
+          >
+            <span className="ts-auth-label">{AUTH_WORDS.merge.add(state.decks)}</span>
+          </button>
+          <button
+            type="button"
+            className="ts-auth-button"
+            data-control={id('merge.keep')}
+            disabled={busy}
+            onClick={() => merge(false)}
+          >
+            <span className="ts-auth-label">{AUTH_WORDS.merge.keep(state.decks)}</span>
+          </button>
+        </div>
+        {errorLine(state.problem === undefined ? null : AUTH_WORDS.merge.failed, false)}
+        <p className="ts-auth-foot-line">{AUTH_WORDS.merge.foot}</p>
       </>
     );
   } else if (state.step === 'error') {

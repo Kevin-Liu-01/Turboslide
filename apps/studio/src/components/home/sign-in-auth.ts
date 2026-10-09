@@ -1,7 +1,13 @@
-import { AuthRefusal, errorCallbackURL, safeNext } from '@turboslide/chrome/auth/auth-model';
+import {
+  AuthRefusal,
+  errorCallbackURL,
+  safeNext,
+  signInHref,
+} from '@turboslide/chrome/auth/auth-model';
 import type { AuthMethods } from '@turboslide/chrome/auth/auth-model';
 import type { AuthActions } from '@turboslide/chrome/auth/AuthPlate';
 
+import { answerSignInMerge } from './sign-in';
 import type { SignInFacts } from './sign-in';
 
 /**
@@ -53,10 +59,17 @@ function absolute(path: string): string {
   return `${window.location.origin}${path}`;
 }
 
-/** The two addresses every social and magic link call names (docs/POLISH-2.md C14). */
+/**
+ * The two addresses every social and magic link call names (docs/POLISH-2.md C14). Both land on
+ * /signin with the return path: a signed in visitor goes on to it at once, unless this browser's
+ * decks wait for the merge question (HR-SA#2b), which the page asks first.
+ */
 export function returnAddresses(next: string): { callbackURL: string; errorCallbackURL: string } {
   const path = safeNext(next);
-  return { callbackURL: absolute(path), errorCallbackURL: absolute(errorCallbackURL(path)) };
+  return {
+    callbackURL: absolute(signInHref(path)),
+    errorCallbackURL: absolute(errorCallbackURL(path)),
+  };
 }
 
 /** Leaves for a provider: the library answers its address and the browser goes there. */
@@ -115,6 +128,11 @@ export function pageActions(methods: AuthMethods, next: string): AuthActions {
           requestCode: (email: string) => requestSignInCode(email, next),
           verifyCode: (email: string, otp: string) => verifySignInCode(email, otp),
           confirmBrowser: (token: string, code: string) => confirmBrowser(token, code, next),
+        }
+      : {}),
+    ...(methods.available
+      ? {
+          answerMerge: (add: boolean) => answerSignInMerge({ data: { add } }),
         }
       : {}),
   };

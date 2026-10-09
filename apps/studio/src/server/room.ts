@@ -119,8 +119,8 @@ import {
   bindIdentityRedis,
   forgetAccountFacts,
   identityRuntime,
-  linkAnonymous,
   principalKvOf,
+  requestAliases,
   resolveIdentity as resolveThroughRuntime,
 } from './auth/identity';
 import { studioSessionSecret } from './auth/middleware';
@@ -684,7 +684,11 @@ async function sessionIdentity(
     const found = await accountSession(runtime, request);
     if (found === null) return null;
     const facts = found.account;
-    if (anonymous !== null) await linkAnonymous(runtime, anonymous.id, facts.userId);
+    // the browser's own id joins the account only on the person's answer (HR-SA#2b, identity.ts)
+    const aliases =
+      anonymous === null
+        ? found.aliases
+        : await requestAliases(runtime, request, found, anonymous.id);
     const now = new Date();
     const record =
       (await runtime.principals.touch(facts.principalId, now, true)) ??
@@ -703,7 +707,6 @@ async function sessionIdentity(
     /* the verified address, so a pending grant by email admits the invitee (identity/access.ts
        isPendingEmailGrantFor), and the anonymous ids linked to the account, so a deck made
        before the sign in keeps its creator as the owner (standingOf; b1.md R3) */
-    const aliases = found.aliases;
     const principal: Principal = {
       id: facts.principalId,
       kind: 'account',

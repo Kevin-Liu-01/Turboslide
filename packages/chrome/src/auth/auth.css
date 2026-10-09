@@ -336,6 +336,13 @@
   gap: 8px;
 }
 
+/* ---- the merge question's two answers (HR-SA#2b): side by side, stacked when a column is narrow ---- */
+.ts-auth .ts-auth-choice {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+  gap: 8px;
+}
+
 /* ---- the code another browser asks for (HR-SA#2a) ---- */
 .ts-auth .ts-auth-pair-code {
   display: grid;

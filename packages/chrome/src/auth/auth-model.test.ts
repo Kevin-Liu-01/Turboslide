@@ -15,6 +15,7 @@ import {
   errorCallbackURL,
   errorState,
   holdSignInError,
+  mergeState,
   nextState,
   pairOf,
   peekHeldSignInError,
@@ -196,6 +197,28 @@ describe('nextState: the events between the states', () => {
     expect(confirmProblemOf(new AuthRefusal(400, 'INVALID_TOKEN', 'used'))).toBe('link');
   });
 
+  it('asks about the decks made before, and says when the answer failed (HR-SA#2b)', () => {
+    expect(mergeState(null)).toBeNull();
+    expect(mergeState({ email: 'a@b.c', decks: 0 })).toBeNull();
+    const state = mergeState({ email: 'a@b.c', decks: 3 }) as AuthState;
+    expect(state).toEqual({ step: 'merge', email: 'a@b.c', decks: 3 });
+    expect(stateId(state, ALL, 'sign-in')).toBe('merge.ask');
+    expect(stateId(nextState(state, { type: 'merge-failed' }), ALL, 'sign-in')).toBe(
+      'merge.request-failed',
+    );
+    expect(nextState({ step: 'methods' }, { type: 'merge-failed' })).toEqual({ step: 'methods' });
+    expect(AUTH_WORDS.merge.question(3, 'kevin@example.test')).toBe(
+      'This browser has 3 decks made before you signed in. Add them to kevin@example.test?',
+    );
+    expect(AUTH_WORDS.merge.question(1, 'kevin@example.test')).toBe(
+      'This browser has 1 deck made before you signed in. Add it to kevin@example.test?',
+    );
+    expect([AUTH_WORDS.merge.add(3), AUTH_WORDS.merge.keep(3)]).toEqual([
+      'Add Them',
+      'Keep Them Separate',
+    ]);
+  });
+
   it('walks the device code: wrong, spent, approved, denied', () => {
     let state: AuthState = { step: 'device' };
     state = nextState(state, { type: 'device-refused', problem: 'code-wrong' });
@@ -267,6 +290,8 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     AUTH_WORDS.sent.pair,
     AUTH_WORDS.confirm.lede,
     AUTH_WORDS.confirm.foot,
+    AUTH_WORDS.merge.foot,
+    AUTH_WORDS.merge.failed,
     ...Object.values(AUTH_WORDS.confirm.problems),
     AUTH_WORDS.device.first,
     AUTH_WORDS.device.lede,
@@ -284,6 +309,10 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     AUTH_WORDS.error.tryAgain,
     AUTH_WORDS.confirm.submit,
     AUTH_WORDS.confirm.restart,
+    AUTH_WORDS.merge.add(1),
+    AUTH_WORDS.merge.add(2),
+    AUTH_WORDS.merge.keep(1),
+    AUTH_WORDS.merge.keep(2),
     AUTH_WORDS.device.approve,
     AUTH_WORDS.device.deny,
     AUTH_WORDS.link.label,
@@ -294,6 +323,7 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     AUTH_WORDS.sent.heading,
     AUTH_WORDS.error.heading,
     AUTH_WORDS.confirm.heading,
+    AUTH_WORDS.merge.heading,
     AUTH_WORDS.device.heading,
     AUTH_WORDS.device.approvedHeading,
     AUTH_WORDS.device.deniedHeading,

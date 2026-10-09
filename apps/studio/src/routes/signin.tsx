@@ -1,7 +1,13 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
 import { AuthPage } from '@turboslide/chrome/auth/AuthPage';
-import { confirmState, errorState, safeNext } from '@turboslide/chrome/auth/auth-model';
+import {
+  confirmState,
+  errorState,
+  mergeState,
+  safeNext,
+  signInHref,
+} from '@turboslide/chrome/auth/auth-model';
 
 import { MoodFigure } from '../components/home/MoodFigure';
 import { readSignInFacts } from '../components/home/sign-in';
@@ -35,7 +41,9 @@ export const Route = createFileRoute('/signin')({
     /* a signed in visitor goes where the page was asked to return, unless the address carries
        an error to read (a failed link of a provider while signed in) */
     const { error, confirm } = location.search as SignInSearch;
-    if (facts.signedIn && error === undefined && confirm === undefined)
+    /* HR-SA#2b: a signed in browser whose decks made before wait for an answer is asked here */
+    const asking = facts.merge !== null && facts.merge !== undefined;
+    if (facts.signedIn && !asking && error === undefined && confirm === undefined)
       throw redirect({ href: deps.next });
     return { facts };
   },
@@ -54,6 +62,7 @@ function SignInPage() {
   const next = safeNext(search.next);
   const methods = methodsOf(facts);
   const initial = errorState(search.error) ??
+    mergeState(facts.merge) ??
     confirmState(search.confirm) ?? { step: 'methods' as const };
   return (
     <AuthPage
@@ -64,7 +73,8 @@ function SignInPage() {
       linkComponent={RouterLinkSlot}
       figure={<MoodFigure size="page" control="signin.figure" />}
       /* a document navigation, so the page it lands on reads the new session on the server */
-      onSignedIn={() => window.location.assign(next)}
+      /* a code that signed in comes back here, so the merge question is asked before `next` */
+      onSignedIn={() => window.location.assign(initial.step === 'merge' ? next : signInHref(next))}
       onTryAgain={() => {
         void navigate({ to: '/signin', search: { next }, replace: true });
       }}

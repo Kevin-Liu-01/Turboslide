@@ -1,4 +1,10 @@
-import type { AddressProblem, AuthReason, CodeProblem, DeviceProblem } from './auth-model';
+import type {
+  AddressProblem,
+  AuthReason,
+  CodeProblem,
+  ConfirmProblem,
+  DeviceProblem,
+} from './auth-model';
 
 /**
  * Every sentence of the auth plate (docs/POLISH-2.md 4.5): sentence case headings and labels,
@@ -31,6 +37,22 @@ export const AUTH_WORDS = {
     another: 'Use Another Address',
     resend: 'Send Another',
     resendIn: (clock: string) => `Send another in ${clock}`,
+    /** beside the code another browser asks for (HR-SA#2a) */
+    pair: 'If you open the link in another browser, enter this code there.',
+  },
+
+  /** the mail's link, opened in a browser that did not ask for it (HR-SA#2a) */
+  confirm: {
+    heading: 'Confirm this browser',
+    lede: 'This link was asked for in another browser. To sign in here, enter the code that browser shows under Check your email.',
+    code: 'Code from the other browser',
+    submit: 'Sign In Here',
+    restart: 'Start Again',
+    foot: 'If you did not ask for a sign in link, close this tab.',
+    problems: {
+      'code-wrong': 'That code does not match. Check the other browser and try again.',
+      'code-spent': 'That code had too many wrong tries. Start again from this page.',
+    } satisfies Record<Exclude<ConfirmProblem, 'link'>, string>,
   },
 
   code: {

@@ -187,7 +187,12 @@ async function signIn(email: string): Promise<string> {
   // the newest mail first (mailer.ts `list`)
   const mail = (await runtime.mailer.list()).find((m) => m.to === email);
   const otp = /Code: (\d{6})/.exec(mail?.text ?? '')?.[1] ?? '';
-  const verified = await handle(post('/api/auth/sign-in/email-otp', { email, otp }));
+  // the code signs in the browser that asked, which carries the request's cookie (HR-SA#2a)
+  const asking = sent.headers
+    .getSetCookie()
+    .map((line) => line.split(';')[0] ?? '')
+    .join('; ');
+  const verified = await handle(post('/api/auth/sign-in/email-otp', { email, otp }, asking));
   expect(verified.status).toBe(200);
   return sessionCookieOf(verified);
 }

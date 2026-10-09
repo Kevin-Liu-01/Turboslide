@@ -32,6 +32,7 @@ import { signInMail } from './mail/templates.ts';
 import type { MailMode, Mailer } from './mail/mailer.ts';
 import type { QuotaStore } from './quota.ts';
 import type { SecondaryStorage } from './secondary-storage.ts';
+import { notePairCode, signInBinding } from './signin-binding.ts';
 
 export const BETTER_AUTH_SECRET_VARIABLE = 'BETTER_AUTH_SECRET';
 export const GITHUB_ID_VARIABLE = 'GITHUB_CLIENT_ID';
@@ -341,7 +342,9 @@ function buildAuth(deps: AuthDeps): Auth {
         expiresIn: SIGN_IN_EXPIRES_S,
         storeToken: 'hashed',
         rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
-        sendMagicLink: async ({ email, url }, ctx) => {
+        sendMagicLink: async ({ email, url, token }, ctx) => {
+          // the code a second browser asks for, answered to the page that asked (HR-SA#2a)
+          notePairCode(ctx, token);
           let code = '';
           try {
             code = (await api.createOtp?.(email, ctx?.headers ?? ctx?.request?.headers)) ?? '';
@@ -370,6 +373,8 @@ function buildAuth(deps: AuthDeps): Auth {
         verificationUri: '/device',
         validateClient: (clientId) => clientId === DEVICE_CLIENT_ID,
       }),
+      // the mail's link and code sign in only the browser that asked (HR-SA#2a, signin-binding.ts)
+      signInBinding({ hosted: deps.hosted, ttlS: SIGN_IN_EXPIRES_S, signInPage: SIGN_IN_PAGE }),
       tanstackStartCookies(),
     ],
   });

@@ -37,6 +37,12 @@ export type AddressProblem = 'address-invalid' | 'address-quota' | 'request-fail
 /** What a typed device code answered. */
 export type DeviceProblem = 'code-wrong' | 'spent' | 'expired';
 
+/**
+ * What the code of the browser that asked answered, typed where its mail's link was opened
+ * (HR-SA#2a): it does not match, the tries ran out, or the link itself was used or expired.
+ */
+export type ConfirmProblem = 'code-wrong' | 'code-spent' | 'link';
+
 export type AuthState =
   | {
       step: 'methods';
@@ -44,7 +50,15 @@ export type AuthState =
       leaving?: 'google' | 'github';
       problem?: AddressProblem;
     }
-  | { step: 'sent'; email: string; problem?: CodeProblem | 'address-quota' }
+  | {
+      step: 'sent';
+      email: string;
+      problem?: CodeProblem | 'address-quota';
+      /** the code another browser asks for when the mail's link is opened there (HR-SA#2a) */
+      pair?: string;
+    }
+  /** the mail's link, opened in a browser that did not ask for it (HR-SA#2a) */
+  | { step: 'confirm'; token: string; problem?: Exclude<ConfirmProblem, 'link'> }
   | { step: 'error'; reason: AuthReason; code: string }
   | { step: 'device'; problem?: DeviceProblem }
   | { step: 'approved'; email: string }
@@ -54,14 +68,15 @@ export type AuthEvent =
   | { type: 'leave'; provider: 'google' | 'github' }
   | { type: 'left-failed' }
   | { type: 'address-refused'; problem: AddressProblem }
-  | { type: 'sent'; email: string }
+  | { type: 'sent'; email: string; pair?: string }
   | { type: 'code-refused'; problem: CodeProblem }
   | { type: 'quota' }
   | { type: 'another-address' }
   | { type: 'try-again' }
   | { type: 'device-refused'; problem: DeviceProblem }
   | { type: 'approved'; email: string }
-  | { type: 'denied' };
+  | { type: 'denied' }
+  | { type: 'confirm-refused'; problem: ConfirmProblem };
 
 /** The one state machine of every host. */
 export function nextState(state: AuthState, event: AuthEvent): AuthState {
@@ -73,7 +88,11 @@ export function nextState(state: AuthState, event: AuthEvent): AuthState {
     case 'address-refused':
       return { step: 'methods', problem: event.problem };
     case 'sent':
-      return { step: 'sent', email: event.email };
+      return {
+        step: 'sent',
+        email: event.email,
+        ...(event.pair === undefined ? {} : { pair: event.pair }),
+      };
     case 'code-refused':
       return state.step === 'sent' ? { ...state, problem: event.problem } : state;
     case 'quota':
@@ -87,6 +106,11 @@ export function nextState(state: AuthState, event: AuthEvent): AuthState {
       return { step: 'approved', email: event.email };
     case 'denied':
       return { step: 'denied' };
+    case 'confirm-refused':
+      if (state.step !== 'confirm') return state;
+      return event.problem === 'link'
+        ? { step: 'error', reason: 'link', code: 'INVALID_TOKEN' }
+        : { ...state, problem: event.problem };
   }
 }
 
@@ -132,6 +156,12 @@ export function errorState(code: string | null | undefined): AuthState | null {
   const clean = cleanCode(code);
   if (clean === '') return null;
   return { step: 'error', reason: reasonOf(clean), code: clean };
+}
+
+/** The confirm state of a link's token from the address (`?confirm=`), or null when there is none. */
+export function confirmState(token: string | null | undefined): AuthState | null {
+  if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{16,128}$/.test(token)) return null;
+  return { step: 'confirm', token };
 }
 
 /** Where a page goes when nothing names a return: the person's presentations. */
@@ -212,6 +242,8 @@ export function stateId(state: AuthState, methods: AuthMethods, purpose: AuthPur
         : `email.${state.problem}`;
     case 'error':
       return `error.${state.reason}`;
+    case 'confirm':
+      return state.problem === undefined ? 'confirm.code' : `confirm.${state.problem}`;
     case 'device':
       return state.problem === undefined ? 'device.code' : `device.${state.problem}`;
     case 'approved':
@@ -296,6 +328,20 @@ export function clock(ms: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+/** The answer of a mail request: the code another browser asks for, when the server sent one. */
+export function pairOf(answer: unknown): string | undefined {
+  const pair = (answer as { pair?: unknown } | null | undefined)?.pair;
+  return typeof pair === 'string' && /^[A-Z0-9]{8}$/.test(pair) ? pair : undefined;
+}
+
+/** What a refused confirm answered: the server's code for a wrong code, its limit, or a spent link. */
+export function confirmProblemOf(error: unknown): ConfirmProblem {
+  const { status, code } = refusalOf(error);
+  if (status === 429) return 'code-spent';
+  if (status === 400 || /invalid_token/i.test(code)) return 'link';
+  return 'code-wrong';
 }
 
 /** A device code as the person types it: letters and digits only, upper case, at most eight. */

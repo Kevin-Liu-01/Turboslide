@@ -336,6 +336,21 @@
   gap: 8px;
 }
 
+/* ---- the code another browser asks for (HR-SA#2a) ---- */
+.ts-auth .ts-auth-pair-code {
+  display: grid;
+  gap: 4px;
+}
+
+.ts-auth .ts-auth-pair-value {
+  margin: 0;
+  color: var(--pt-ink);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.16em;
+}
+
 /* ---- the page host ---- */
 .ts-auth-page {
   box-sizing: border-box;

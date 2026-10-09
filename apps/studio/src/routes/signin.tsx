@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 
 import { AuthPage } from '@turboslide/chrome/auth/AuthPage';
-import { errorState, safeNext } from '@turboslide/chrome/auth/auth-model';
+import { confirmState, errorState, safeNext } from '@turboslide/chrome/auth/auth-model';
 
 import { MoodFigure } from '../components/home/MoodFigure';
 import { readSignInFacts } from '../components/home/sign-in';
@@ -17,22 +17,26 @@ import { RouterLinkSlot } from './-link-slot';
  * `errorCallbackURL`) draws its sentence with Try Again, which returns to the methods with the
  * same `next`. Never prerendered: the methods and the session belong to the deployment and the
  * request. Every social and magic link call names `/signin?next=<next>` as its error address, so
- * Cancel at Google and a used link come back here (C14).
+ * Cancel at Google and a used link come back here (C14). A mail's link opened in a browser that did
+ * not ask for it lands here with `confirm` (the link's token, HR-SA#2a): the page asks for the
+ * code the asking browser shows, and a signed in visitor is asked as well.
  */
-type SignInSearch = { next?: string; error?: string };
+type SignInSearch = { next?: string; error?: string; confirm?: string };
 
 export const Route = createFileRoute('/signin')({
   validateSearch: (search: Record<string, unknown>): SignInSearch => ({
     ...(typeof search.next === 'string' ? { next: search.next } : {}),
     ...(typeof search.error === 'string' ? { error: search.error } : {}),
+    ...(typeof search.confirm === 'string' ? { confirm: search.confirm } : {}),
   }),
   loaderDeps: ({ search }) => ({ next: safeNext(search.next) }),
   loader: async ({ deps, location }) => {
     const facts = await readSignInFacts();
     /* a signed in visitor goes where the page was asked to return, unless the address carries
        an error to read (a failed link of a provider while signed in) */
-    const error = (location.search as SignInSearch).error;
-    if (facts.signedIn && error === undefined) throw redirect({ href: deps.next });
+    const { error, confirm } = location.search as SignInSearch;
+    if (facts.signedIn && error === undefined && confirm === undefined)
+      throw redirect({ href: deps.next });
     return { facts };
   },
   /* Try Again drops `error` from the address without asking the server again */
@@ -49,7 +53,8 @@ function SignInPage() {
   const navigate = useNavigate();
   const next = safeNext(search.next);
   const methods = methodsOf(facts);
-  const initial = errorState(search.error) ?? { step: 'methods' as const };
+  const initial = errorState(search.error) ??
+    confirmState(search.confirm) ?? { step: 'methods' as const };
   return (
     <AuthPage
       methods={methods}

@@ -8,8 +8,10 @@ import {
   cleanDeviceCode,
   clock,
   codeProblemOf,
+  confirmProblemOf,
   nextState,
   offersMethod,
+  pairOf,
   refusalOf,
   resendWait,
   sendsInWindow,
@@ -46,6 +48,11 @@ export type AuthActions = {
   verifyCode?: (email: string, code: string) => Promise<unknown>;
   /** the device page's decision on a code (claim, then approve or deny) */
   decideDevice?: (code: string, approve: boolean) => Promise<unknown>;
+  /**
+   * the mail's link opened in a browser that did not ask for it (HR-SA#2a): the code the asking
+   * browser shows; it resolves as the browser leaves to open the link again
+   */
+  confirmBrowser?: (token: string, code: string) => Promise<unknown>;
 };
 
 export type AuthHost = 'page' | 'window';
@@ -65,6 +72,8 @@ export function headingOf(state: AuthState, purpose: AuthPurpose, host: AuthHost
       return AUTH_WORDS.sent.heading;
     case 'error':
       return AUTH_WORDS.error.heading;
+    case 'confirm':
+      return AUTH_WORDS.confirm.heading;
     case 'device':
       return AUTH_WORDS.device.heading;
     case 'approved':
@@ -190,6 +199,7 @@ export function AuthPlate({
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [device, setDevice] = useState(cleanDeviceCode(deviceCode));
+  const [pairTyped, setPairTyped] = useState('');
   const [busy, setBusy] = useState(false);
   const [lastSent, setLastSent] = useState<number | null>(sentAt ?? null);
   const [tick, setTick] = useState(0);
@@ -242,18 +252,23 @@ export function AuthPlate({
       return;
     }
     setBusy(true);
+    /* a resend that failed keeps the code the browser shows for the mail before it */
+    const shown = state.step === 'sent' ? state.pair : undefined;
     ask(address)
-      .then(() => {
+      .then((answer) => {
         noteSend(address, at);
         setLastSent(at);
         setCode('');
-        dispatch({ type: 'sent', email: address });
+        const pair = pairOf(answer);
+        dispatch({ type: 'sent', email: address, ...(pair === undefined ? {} : { pair }) });
       })
       .catch((error: unknown) => {
         const problem = addressProblemOf(error);
         if (again)
           dispatch(
-            problem === 'address-quota' ? { type: 'quota' } : { type: 'sent', email: address },
+            problem === 'address-quota'
+              ? { type: 'quota' }
+              : { type: 'sent', email: address, ...(shown === undefined ? {} : { pair: shown }) },
           );
         else dispatch({ type: 'address-refused', problem });
       })
@@ -285,6 +300,22 @@ export function AuthPlate({
       .catch((error: unknown) => {
         const { code: libraryCode, message } = refusalOf(error);
         dispatch({ type: 'code-refused', problem: codeProblemOf(libraryCode, message) });
+      })
+      .finally(() => setBusy(false));
+  };
+
+  const onConfirm = (event: FormEvent) => {
+    event.preventDefault();
+    const confirm = actions.confirmBrowser;
+    if (state.step !== 'confirm' || confirm === undefined || busy) return;
+    if (pairTyped.length !== 8) {
+      dispatch({ type: 'confirm-refused', problem: 'code-wrong' });
+      return;
+    }
+    setBusy(true);
+    confirm(state.token, pairTyped)
+      .catch((error: unknown) => {
+        dispatch({ type: 'confirm-refused', problem: confirmProblemOf(error) });
       })
       .finally(() => setBusy(false));
   };
@@ -476,6 +507,69 @@ export function AuthPlate({
           </button>
         </div>
         {errorLine(quotaLine, false, 'quota')}
+        {state.pair === undefined ? null : (
+          <div className="ts-auth-pair-code" data-control={id('pair')}>
+            <p className="ts-auth-foot-line">{AUTH_WORDS.sent.pair}</p>
+            <p className="ts-auth-pair-value pt-num" data-control={id('pair.code')}>
+              {`${state.pair.slice(0, 4)}-${state.pair.slice(4)}`}
+            </p>
+          </div>
+        )}
+      </>
+    );
+  } else if (state.step === 'confirm') {
+    const line = state.problem === undefined ? null : AUTH_WORDS.confirm.problems[state.problem];
+    body = (
+      <>
+        <p className="ts-auth-lede" data-control={id('confirm')}>
+          {AUTH_WORDS.confirm.lede}
+        </p>
+        <form className="ts-auth-form" noValidate onSubmit={onConfirm}>
+          <label className="ts-auth-field">
+            <span className="ts-auth-field-label">{AUTH_WORDS.confirm.code}</span>
+            <input
+              type="text"
+              name="pair"
+              className="ts-auth-input pt-num"
+              data-num="code"
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              maxLength={9}
+              value={
+                pairTyped.length > 4 ? `${pairTyped.slice(0, 4)}-${pairTyped.slice(4)}` : pairTyped
+              }
+              data-control={id('pair')}
+              aria-invalid={line === null ? undefined : 'true'}
+              onChange={(event) => setPairTyped(cleanDeviceCode(event.target.value))}
+            />
+          </label>
+          <button
+            type="submit"
+            className="ts-auth-button is-solid"
+            data-control={id('confirm.submit')}
+            disabled={busy || state.problem === 'code-spent'}
+          >
+            <span className="ts-auth-label">{AUTH_WORDS.confirm.submit}</span>
+          </button>
+          {errorLine(line, true)}
+        </form>
+        <div className="ts-auth-links">
+          <button
+            type="button"
+            className="ts-auth-text"
+            data-control={id('restart')}
+            disabled={busy}
+            onClick={() => {
+              setPairTyped('');
+              dispatch({ type: 'try-again' });
+              onTryAgain?.();
+            }}
+          >
+            <span className="ts-auth-label">{AUTH_WORDS.confirm.restart}</span>
+          </button>
+        </div>
+        <p className="ts-auth-foot-line">{AUTH_WORDS.confirm.foot}</p>
       </>
     );
   } else if (state.step === 'error') {

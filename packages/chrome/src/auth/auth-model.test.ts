@@ -9,11 +9,14 @@ import {
   cleanDeviceCode,
   clock,
   codeProblemOf,
+  confirmProblemOf,
+  confirmState,
   deviceGroups,
   errorCallbackURL,
   errorState,
   holdSignInError,
   nextState,
+  pairOf,
   peekHeldSignInError,
   reasonOf,
   resendWait,
@@ -157,6 +160,42 @@ describe('nextState: the events between the states', () => {
     });
   });
 
+  it('keeps the code the asking browser shows, and walks the confirm step (HR-SA#2a)', () => {
+    expect(
+      nextState({ step: 'methods' }, { type: 'sent', email: 'a@b.c', pair: 'ABCD2345' }),
+    ).toEqual({ step: 'sent', email: 'a@b.c', pair: 'ABCD2345' });
+    const token = 'abcdefghijklmnopqrstuvwxyzABCDEF';
+    let state = confirmState(token) as AuthState;
+    expect(state).toEqual({ step: 'confirm', token });
+    expect(stateId(state, ALL, 'sign-in')).toBe('confirm.code');
+    state = nextState(state, { type: 'confirm-refused', problem: 'code-wrong' });
+    expect(stateId(state, ALL, 'sign-in')).toBe('confirm.code-wrong');
+    state = nextState(state, { type: 'confirm-refused', problem: 'code-spent' });
+    expect(stateId(state, ALL, 'sign-in')).toBe('confirm.code-spent');
+    expect(nextState(state, { type: 'confirm-refused', problem: 'link' })).toEqual({
+      step: 'error',
+      reason: 'link',
+      code: 'INVALID_TOKEN',
+    });
+    expect(nextState(state, { type: 'try-again' })).toEqual({ step: 'methods' });
+    // a refusal outside the step changes nothing
+    expect(
+      nextState({ step: 'methods' }, { type: 'confirm-refused', problem: 'code-wrong' }),
+    ).toEqual({ step: 'methods' });
+    expect(confirmState(undefined)).toBeNull();
+    expect(confirmState('short')).toBeNull();
+    expect(confirmState('<script>alert(1)</script>abcdefgh')).toBeNull();
+    expect(pairOf({ status: true, pair: 'ABCD2345' })).toBe('ABCD2345');
+    expect(pairOf({ status: true })).toBeUndefined();
+    expect(pairOf({ pair: '<b>' })).toBeUndefined();
+    expect(pairOf(null)).toBeUndefined();
+    expect(
+      confirmProblemOf(new AuthRefusal(403, 'WRONG_PAIR_CODE', 'That code does not match.')),
+    ).toBe('code-wrong');
+    expect(confirmProblemOf(new AuthRefusal(429, '', 'Too many requests'))).toBe('code-spent');
+    expect(confirmProblemOf(new AuthRefusal(400, 'INVALID_TOKEN', 'used'))).toBe('link');
+  });
+
   it('walks the device code: wrong, spent, approved, denied', () => {
     let state: AuthState = { step: 'device' };
     state = nextState(state, { type: 'device-refused', problem: 'code-wrong' });
@@ -225,6 +264,10 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     ...Object.values(AUTH_WORDS.code),
     ...Object.values(AUTH_WORDS.address),
     ...Object.values(AUTH_WORDS.error.reasons),
+    AUTH_WORDS.sent.pair,
+    AUTH_WORDS.confirm.lede,
+    AUTH_WORDS.confirm.foot,
+    ...Object.values(AUTH_WORDS.confirm.problems),
     AUTH_WORDS.device.first,
     AUTH_WORDS.device.lede,
     AUTH_WORDS.device.foot,
@@ -239,6 +282,8 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     AUTH_WORDS.sent.another,
     AUTH_WORDS.sent.resend,
     AUTH_WORDS.error.tryAgain,
+    AUTH_WORDS.confirm.submit,
+    AUTH_WORDS.confirm.restart,
     AUTH_WORDS.device.approve,
     AUTH_WORDS.device.deny,
     AUTH_WORDS.link.label,
@@ -248,6 +293,7 @@ describe('the words (docs/POLISH-2.md 4.5)', () => {
     AUTH_WORDS.windowTitle,
     AUTH_WORDS.sent.heading,
     AUTH_WORDS.error.heading,
+    AUTH_WORDS.confirm.heading,
     AUTH_WORDS.device.heading,
     AUTH_WORDS.device.approvedHeading,
     AUTH_WORDS.device.deniedHeading,

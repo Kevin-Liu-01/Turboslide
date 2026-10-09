@@ -80,6 +80,20 @@ export function verifySignInCode(email: string, otp: string): Promise<unknown> {
   return authPost('sign-in/email-otp', { email, otp });
 }
 
+/**
+ * The mail's link opened in a browser that did not ask for it (HR-SA#2a): the code the asking
+ * browser shows lets this browser in, then the link is opened again here with the page's return.
+ */
+export async function confirmBrowser(
+  token: string,
+  code: string,
+  next: string = currentPath(),
+): Promise<void> {
+  await authPost('sign-in/pair', { token, code });
+  const query = new URLSearchParams({ token, ...returnAddresses(next) });
+  window.location.assign(`/api/auth/magic-link/verify?${query.toString()}`);
+}
+
 /** The deployment's methods as the plate reads them, from the facts the server read. */
 export function methodsOf(facts: SignInFacts): AuthMethods {
   return {
@@ -100,6 +114,7 @@ export function pageActions(methods: AuthMethods, next: string): AuthActions {
       ? {
           requestCode: (email: string) => requestSignInCode(email, next),
           verifyCode: (email: string, otp: string) => verifySignInCode(email, otp),
+          confirmBrowser: (token: string, code: string) => confirmBrowser(token, code, next),
         }
       : {}),
   };

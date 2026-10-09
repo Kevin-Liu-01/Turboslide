@@ -158,16 +158,17 @@ async function signInWithCode(email: string, cookie = ''): Promise<string> {
      three mails in ten minutes and this file signs one address in several times */
   fake.sqlite.prepare('delete from ts_mail where toAddress = ?').run(email);
   fake.sqlite.prepare('delete from ts_quota').run();
-  await expectStatus(
-    await handle(post('/api/auth/sign-in/magic-link', { email, callbackURL: '/decks' }, cookie)),
-    200,
-    'sign-in/magic-link',
+  const asked = await handle(
+    post('/api/auth/sign-in/magic-link', { email, callbackURL: '/decks' }, cookie),
   );
+  await expectStatus(asked, 200, 'sign-in/magic-link');
+  // the code signs in the browser that asked, which carries the request's cookie (HR-SA#2a)
+  const asking = cookiesOf(asked, cookie);
   const { code } = await mailOf(email);
   expect(code).toHaveLength(6);
-  const verified = await handle(post('/api/auth/sign-in/email-otp', { email, otp: code }, cookie));
+  const verified = await handle(post('/api/auth/sign-in/email-otp', { email, otp: code }, asking));
   await expectStatus(verified, 200, 'sign-in/email-otp');
-  return cookiesOf(verified, cookie);
+  return cookiesOf(verified, asking);
 }
 
 async function actAs(cookie: string, action: string, input: unknown = {}): Promise<unknown> {
@@ -300,25 +301,48 @@ describe('the accounts statements, recorded over a database in production’s st
     const me = await requestIdentity(request('/edit/q4', { cookie }), runtime);
     expect(me.kind).toBe('account');
 
-    // the link in the mail, opened in another browser
-    await expectStatus(
-      await handle(
-        post('/api/auth/sign-in/magic-link', { email: 'lena@example.test', callbackURL: '/decks' }),
-      ),
-      200,
-      'sign-in/magic-link (link)',
+    // the link in the mail, opened in the browser that asked (HR-SA#2a)
+    const askedLink = await handle(
+      post('/api/auth/sign-in/magic-link', { email: 'lena@example.test', callbackURL: '/decks' }),
     );
+    await expectStatus(askedLink, 200, 'sign-in/magic-link (link)');
     const { link } = await mailOf('lena@example.test');
-    const opened = await handle(request(new URL(link).pathname + new URL(link).search));
+    const linkPath = new URL(link).pathname + new URL(link).search;
+    const opened = await handle(request(linkPath, { cookie: cookiesOf(askedLink) }));
     await expectStatus(opened, 302, 'magic-link/verify');
     expect(cookiesOf(opened)).toContain('ts.session_token=');
 
+    // the link of another browser: the code page, then the code the asking browser shows
+    const askedThere = await handle(
+      post('/api/auth/sign-in/magic-link', { email: 'ines@example.test', callbackURL: '/decks' }),
+    );
+    const { pair } = (await askedThere.json()) as { pair: string };
+    const { link: theirs } = await mailOf('ines@example.test');
+    const theirPath = new URL(theirs).pathname + new URL(theirs).search;
+    const elsewhere = await handle(request(theirPath));
+    await expectStatus(elsewhere, 302, 'magic-link/verify (another browser)');
+    expect(cookiesOf(elsewhere)).not.toContain('ts.session_token=');
+    const paired = await handle(
+      post('/api/auth/sign-in/pair', {
+        token: new URL(theirs).searchParams.get('token'),
+        code: pair,
+      }),
+    );
+    await expectStatus(paired, 200, 'sign-in/pair');
+    const openedThere = await handle(request(theirPath, { cookie: cookiesOf(paired) }));
+    await expectStatus(openedThere, 302, 'magic-link/verify (paired)');
+    expect(cookiesOf(openedThere)).toContain('ts.session_token=');
+
     // a wrong code counts an attempt; a fresh code by the OTP route
-    await handle(
+    const askedOmar = await handle(
       post('/api/auth/sign-in/magic-link', { email: 'omar@example.test', callbackURL: '/decks' }),
     );
     const wrong = await handle(
-      post('/api/auth/sign-in/email-otp', { email: 'omar@example.test', otp: '000000' }),
+      post(
+        '/api/auth/sign-in/email-otp',
+        { email: 'omar@example.test', otp: '000000' },
+        cookiesOf(askedOmar),
+      ),
     );
     expect(wrong.status).toBe(400);
     await expectStatus(

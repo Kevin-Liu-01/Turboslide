@@ -120,17 +120,19 @@ async function signIn(
   const mail = mails.find((m) => m.to === email && m.kind === 'sign-in');
   const code = /Code: (\d{6})/.exec(mail?.text ?? '')?.[1] ?? '';
   expect(code).toHaveLength(6);
+  // the code signs in the browser that asked, which carries the request's cookie (HR-SA#2a)
+  const asking = cookiesOf(asked, cookie);
   const verified = await runtime.auth!.handler(
     request('/api/auth/sign-in/email-otp', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email, otp: code }),
-      cookie,
+      cookie: asking,
     }),
   );
   expect(verified.status).toBe(200);
   const body = (await verified.json()) as { user: { id: string } };
-  return { cookie: cookiesOf(verified, cookie), userId: body.user.id };
+  return { cookie: cookiesOf(verified, asking), userId: body.user.id };
 }
 
 describe('the d1 engine boots through the proxy', () => {

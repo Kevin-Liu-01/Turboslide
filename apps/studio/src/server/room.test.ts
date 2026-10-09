@@ -122,16 +122,19 @@ async function signIn(email: string): Promise<{ cookie: string; userId: string }
   const mail = (await runtime.mailer.list()).find((m) => m.to === email && m.kind === 'sign-in');
   const code = /Code: (\d{6})/.exec(mail?.text ?? '')?.[1] ?? '';
   expect(code).toHaveLength(6);
+  // the code signs in the browser that asked, which carries the request's cookie (HR-SA#2a)
+  const asking = cookiesOf(asked);
   const verified = await runtime.auth!.handler(
     request('/api/auth/sign-in/email-otp', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email, otp: code }),
+      cookie: asking,
     }),
   );
   expect(verified.status).toBe(200);
   const body = (await verified.json()) as { user: { id: string } };
-  return { cookie: cookiesOf(verified), userId: body.user.id };
+  return { cookie: cookiesOf(verified, asking), userId: body.user.id };
 }
 
 function entry(principalId: string, overrides: Partial<RosterEntry> = {}): RosterEntry {
@@ -298,10 +301,19 @@ describe('the account session on the room routes', () => {
     });
     /* before H3 the server functions read the anonymous cookie alone, and the owner of a deck
        made on /new while signed in was a stranger to rename, trash and /deck/<id> */
-    const record = newDeckRecord('q4', `usr_${userId}`, 'q40000000000000000000a', '2026-10-08T00:00:00.000Z');
+    const record = newDeckRecord(
+      'q4',
+      `usr_${userId}`,
+      'q40000000000000000000a',
+      '2026-10-08T00:00:00.000Z',
+    );
     const previous = bindAuthorize({ loadRecord: async () => record });
     try {
-      expect(await authorize(ctx, 'q4', 'trash')).toEqual({ ok: true, role: 'owner', via: 'owner' });
+      expect(await authorize(ctx, 'q4', 'trash')).toEqual({
+        ok: true,
+        role: 'owner',
+        via: 'owner',
+      });
       expect(await authorize(ctx, 'q4', 'read')).toMatchObject({ ok: true, role: 'owner' });
     } finally {
       bindAuthorize(previous);

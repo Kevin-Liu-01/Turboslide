@@ -457,16 +457,18 @@ async function signInThroughLibrary(email: string, jar: string): Promise<string>
   const mail = (await runtime.mailer.list()).find((m) => m.to === email && m.kind === 'sign-in');
   const code = /Code: (\d{6})/.exec(mail?.text ?? '')?.[1] ?? '';
   expect(code).toHaveLength(6);
+  // the code signs in the browser that asked, which carries the request's cookie (HR-SA#2a)
+  const asking = applyCookies(jar, asked.headers.getSetCookie());
   const verified = await runtime.auth!.handler(
     request('/api/auth/sign-in/email-otp', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email, otp: code }),
-      cookie: jar,
+      cookie: asking,
     }),
   );
   expect(verified.status).toBe(200);
-  return applyCookies(jar, verified.headers.getSetCookie());
+  return applyCookies(asking, verified.headers.getSetCookie());
 }
 
 describe('Sign out of this browser (docs/NEXT.md 3.2 H3)', () => {

@@ -61,7 +61,7 @@ catalog:
   # OKLCH and solved to their WCAG 2.2 floors at build time and in tests (scripts/build-colors.ts);
   # a devDependency, 0 B on any page
   colorjs.io: 0.7.1
-  dompurify: 3.4.15
+  dompurify: 3.4.16
   eslint: 10.10.0
   # Polish two (docs/POLISH-2.md 5.1, decision C22): /docs in apps/studio, headless. fumadocs-core
   # gives the loader, the page tree, the table of contents and the markdown twins; fumadocs-mdx

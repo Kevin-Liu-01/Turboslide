@@ -31,7 +31,13 @@ import {
   sweepOrphanAvatars,
 } from './avatar.ts';
 import type { AvatarStore } from './avatar.ts';
-import { deckIndexFor, forgetAccountFacts, identityRuntime, identityViewFor } from './identity.ts';
+import {
+  deckIndexFor,
+  forgetAccountFacts,
+  identityRuntime,
+  identityViewFor,
+  keepsAnonymousId,
+} from './identity.ts';
 import type { AccountFacts, DeckIndexView, IdentityRuntime, RequestIdentity } from './identity.ts';
 import { ANON_COOKIE, sealPrincipalCookie, serializeAnonymousCookie } from './session.ts';
 import type { ApiKeyRecord } from './tokens.ts';
@@ -531,6 +537,9 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const target = listed.find((session) => session.id === sessionId);
     if (target === undefined) return { signedOut: 0 };
     if (target.id === identity.session?.id) {
+      /* HR-SA#2b: a browser whose anonymous id no account links (its question open, or its decks
+         kept separate) keeps that id, which owns its decks; read before the session ends */
+      const keepAnonymous = await keepsAnonymousId(rt, request);
       const cookies: string[] = [];
       try {
         const response = await rt.auth.api.signOut({ headers: request.headers, asResponse: true });
@@ -543,9 +552,11 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
       }
       /* the browser leaves as a new anonymous principal (audit-auth finding 3: the old id is
          aliased to the account, so a browser that kept it rendered as the account with the
-         badge); every cookie line goes in one call */
-      cookies.push((await freshAnonymousCookie(rt, facts, now())).cookie);
-      facts.setHeader?.('set-cookie', cookies);
+         badge), unless no account links its id: then it keeps the id and its decks (verifier
+         pass 1, the editor sign in's loss and Keep Them Separate's); every cookie line goes in
+         one call */
+      if (!keepAnonymous) cookies.push((await freshAnonymousCookie(rt, facts, now())).cookie);
+      if (cookies.length > 0) facts.setHeader?.('set-cookie', cookies);
       return { signedOut: 1 };
     }
     await rt.auth.api.revokeSession({ body: { token: target.token }, headers: request.headers });

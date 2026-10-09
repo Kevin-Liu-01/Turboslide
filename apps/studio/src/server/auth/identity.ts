@@ -29,6 +29,7 @@ import { Resend } from 'resend';
 import type { AgentContext, AuthContext, LinkGrant, Principal } from '@turboslide/identity/access';
 import { accountPrincipalId, agentPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import { labelFor } from '@turboslide/identity/labels';
+import { safeEqual } from '@turboslide/identity/safe-equal';
 import { sha256Hex } from '@turboslide/identity/sha256';
 import type { HueSlot } from '@turboslide/identity/hues';
 import { markSpec } from '@turboslide/identity/marks';
@@ -208,6 +209,8 @@ type SessionFactsRow = {
   linked: Set<string>;
   /** The questions this instance holds open under this session (HR-SA#2b), so the decks are counted once. */
   asked: Map<string, MergeQuestion>;
+  /** The anonymous ids this browser kept separate under this session (HR-SA#2b, Keep Them Separate). */
+  kept: Set<string>;
 };
 
 export type SessionFactsCache = {
@@ -575,7 +578,13 @@ function rememberSession(
   value: AccountSession,
   now: number,
 ): SessionFactsRow {
-  const row: SessionFactsRow = { at: now, value, linked: new Set(), asked: new Map() };
+  const row: SessionFactsRow = {
+    at: now,
+    value,
+    linked: new Set(),
+    asked: new Map(),
+    kept: new Set(),
+  };
   if (runtime.sessionFacts.ttlMs <= 0) return row;
   runtime.sessionFacts.rows.set(key, row);
   const keys = runtime.sessionFacts.byPrincipal.get(value.account.principalId) ?? new Set<string>();
@@ -692,16 +701,18 @@ async function linkUnderSession(
   request: Request,
   found: AccountSession,
   anonymousId: string,
-): Promise<MergeQuestion | null> {
+): Promise<LinkOutcome> {
   const key = sessionCacheKey(request);
   const row = key === null ? undefined : runtime.sessionFacts.rows.get(key);
-  if (row?.linked.has(anonymousId)) return null;
+  if (row?.linked.has(anonymousId)) return { kind: 'settled' };
+  if (row?.kept.has(anonymousId)) return { kind: 'kept' };
   const open = row?.asked.get(anonymousId);
-  if (open !== undefined) return open;
+  if (open !== undefined) return { kind: 'question', question: open };
   const outcome = await linkOrAsk(runtime, request, anonymousId, found.account);
   if (outcome.kind === 'question') row?.asked.set(anonymousId, outcome.question);
+  else if (outcome.kind === 'kept') row?.kept.add(anonymousId);
   else if (outcome.kind === 'settled') row?.linked.add(anonymousId);
-  return outcome.kind === 'question' ? outcome.question : null;
+  return outcome;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -710,8 +721,10 @@ async function linkUnderSession(
 // into with no question only when it owns no decks. When it owns decks, the decks stay the
 // browser's until the person answers on /signin: "This browser has 3 decks made before you signed
 // in. Add them to <address>?" with Add Them and Keep Them Separate. Keep Them Separate is kept in
-// a cookie of the browser (the anonymous id under a MAC), so the browser is not asked again and
-// signing out shows its decks as before.
+// a cookie of the browser (the anonymous id under a MAC), so the browser is not asked again. A
+// browser whose id is not linked (the question open, or kept separate) keeps acting for its own
+// decks while signed in, for itself alone, and keeps its anonymous id when it signs out
+// (`keepsAnonymousId`), so its decks are never left without a browser that reaches them.
 
 /** The browser's answer Keep Them Separate: the anonymous id and a MAC under the identity secret. */
 export const KEEP_SEPARATE_COOKIE = 'ts.keep_separate';
@@ -720,8 +733,10 @@ export const KEEP_SEPARATE_COOKIE = 'ts.keep_separate';
 export type MergeQuestion = { anonymousId: string; userId: string; email: string; decks: number };
 
 type LinkOutcome =
-  /** linked now, linked before, or kept separate: nothing to ask */
+  /** linked now or before (to this account or another): nothing to ask */
   | { kind: 'settled' }
+  /** the browser answered Keep Them Separate: nothing to ask, and its decks stay its own */
+  | { kind: 'kept' }
   | { kind: 'question'; question: MergeQuestion }
   /** a store did not answer: nothing is linked, and the next request asks again */
   | { kind: 'unknown' };
@@ -752,7 +767,8 @@ function keptSeparate(runtime: IdentityRuntime, request: Request, anonymousId: s
   } catch {
     return false;
   }
-  return value === `${anonymousId}.${keepSeparateMac(runtime.secret, anonymousId)}`;
+  // the one constant time compare of the codebase for a MAC (HR-SA#1; verifier pass 1 F5)
+  return safeEqual(value, `${anonymousId}.${keepSeparateMac(runtime.secret, anonymousId)}`);
 }
 
 /**
@@ -784,7 +800,8 @@ async function linkOrAsk(
   } catch {
     return { kind: 'unknown' };
   }
-  if (linkedTo !== null || keptSeparate(runtime, request, anonymousId)) return { kind: 'settled' };
+  if (linkedTo !== null) return { kind: 'settled' };
+  if (keptSeparate(runtime, request, anonymousId)) return { kind: 'kept' };
   const decks = await ownedDeckCount(runtime, anonymousId);
   if (decks === null) return { kind: 'unknown' };
   if (decks > 0)
@@ -798,9 +815,10 @@ async function linkOrAsk(
 
 /**
  * The anonymous ids a signed in request acts for: the account's linked ones, and the browser's own
- * while its question is open, for this request alone (HR-SA#2b). Before the answer the browser
- * keeps the decks it made, as it did before the sign in, and the account's other browsers do not
- * see them; Keep Them Separate drops the browser's id, so its decks wait for the sign out.
+ * while its question is open or after Keep Them Separate, for this request alone (HR-SA#2b). The
+ * browser keeps the decks it made, as it did before the sign in, and the account's other browsers
+ * do not see them. (Before the verifier's pass 1, Keep Them Separate dropped the browser's id, so
+ * its decks left /decks at once and were lost at the account menu's Sign out, F4.)
  */
 export async function requestAliases(
   runtime: IdentityRuntime,
@@ -808,8 +826,9 @@ export async function requestAliases(
   found: AccountSession,
   anonymousId: string,
 ): Promise<string[]> {
-  const open = await linkUnderSession(runtime, request, found, anonymousId);
-  if (open === null || found.aliases.includes(anonymousId)) return found.aliases;
+  const outcome = await linkUnderSession(runtime, request, found, anonymousId);
+  const own = outcome.kind === 'question' || outcome.kind === 'kept';
+  if (!own || found.aliases.includes(anonymousId)) return found.aliases;
   return [...found.aliases, anonymousId];
 }
 
@@ -822,7 +841,30 @@ export async function mergeQuestion(
   if (anonymous === null) return null;
   const found = await accountSession(runtime, request);
   if (found === null) return null;
-  return linkUnderSession(runtime, request, found, anonymous.id);
+  const outcome = await linkUnderSession(runtime, request, found, anonymous.id);
+  return outcome.kind === 'question' ? outcome.question : null;
+}
+
+/**
+ * Whether a browser signing out keeps its anonymous id (HR-SA#2b; verifier pass 1, F4 and the
+ * regression finding 1): true when the id is linked to no account, which is a browser whose
+ * question is open (asked on /signin and not answered, or never asked: the editor's own sign in
+ * window returns to the deck) or that kept its decks separate. That id still owns the browser's
+ * decks, so a fresh id would leave them with no browser that reaches them. An id linked to an
+ * account is replaced as before (audit-auth finding 3: a browser that kept it would render as the
+ * account), and so is one whose link the store did not answer.
+ */
+export async function keepsAnonymousId(
+  runtime: IdentityRuntime,
+  request: Request,
+): Promise<boolean> {
+  const anonymous = await readPrincipal(request, runtime.secret);
+  if (anonymous === null) return false;
+  try {
+    return (await runtime.aliases.accountOf(anonymous.id)) === null;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -840,8 +882,11 @@ export async function answerMerge(
   const key = sessionCacheKey(request);
   const row = key === null ? undefined : runtime.sessionFacts.rows.get(key);
   row?.asked.delete(question.anonymousId);
+  if (!add) {
+    row?.kept.add(question.anonymousId);
+    return { linked: false, setCookie: keepSeparateCookie(runtime, question.anonymousId) };
+  }
   row?.linked.add(question.anonymousId);
-  if (!add) return { linked: false, setCookie: keepSeparateCookie(runtime, question.anonymousId) };
   await linkAnonymous(runtime, question.anonymousId, question.userId);
   // the context carries the aliases: the next request reads them with the new one
   if (key !== null) runtime.sessionFacts.rows.delete(key);

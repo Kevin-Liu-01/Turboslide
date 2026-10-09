@@ -4,8 +4,11 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
+import { createDispatcher } from '@turboslide/agent/dispatch';
 import type { DeckHead } from '@turboslide/store/templates';
 
+import { registerAccountActions } from './actions.ts';
+import type { ActionRequestFacts } from './actions.ts';
 import {
   KEEP_SEPARATE_COOKIE,
   answerMerge,
@@ -71,10 +74,14 @@ afterEach(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+/** The client address the library's mail limit counts by (ten an hour per address). */
+let clientAddress = '203.0.113.1';
+
 function request(path: string, init: RequestInit & { cookie?: string } = {}): Request {
   const headers = new Headers(init.headers);
   headers.set('host', 'localhost:4853');
   headers.set('origin', ORIGIN);
+  headers.set('x-forwarded-for', clientAddress);
   if (init.cookie !== undefined && init.cookie !== '') headers.set('cookie', init.cookie);
   return new Request(`${ORIGIN}${path}`, { ...init, headers });
 }
@@ -183,9 +190,20 @@ describe('the merge asks first', () => {
     expect(answer?.setCookie).toMatch(/Secure/);
     const kept = cookiesOf([answer?.setCookie ?? ''], cookie);
     expect(await mergeQuestion(runtime, request('/signin', { cookie: kept }))).toBeNull();
+    // the browser keeps acting for its own decks, for itself alone (verifier pass 1 F4: it lost
+    // them at once, and /decks forgot them from its Recent record)
     const keptIdentity = await requestIdentity(request('/decks', { cookie: kept }), runtime);
-    expect(keptIdentity.ctx.principal?.aliases ?? []).not.toContain(browser.anonymousId);
+    expect(keptIdentity.ctx.principal?.aliases ?? []).toContain(browser.anonymousId);
     expect(await runtime.aliases.accountOf(browser.anonymousId)).toBeNull();
+    // on another instance too, which reads the answer from the browser's cookie
+    const cold = build(true);
+    await cold.ready;
+    try {
+      const there = await requestIdentity(request('/decks', { cookie: kept }), cold);
+      expect(there.ctx.principal?.aliases ?? []).toContain(browser.anonymousId);
+    } finally {
+      await cold.close();
+    }
     // a second sign in of the same browser is not asked either
     const again = await signIn('maya@example.test', kept);
     expect(await mergeQuestion(runtime, request('/signin', { cookie: again.cookie }))).toBeNull();
@@ -215,6 +233,96 @@ describe('the merge asks first', () => {
     const browser = await anonymousBrowser();
     expect(await mergeQuestion(runtime, request('/signin', { cookie: browser.cookie }))).toBeNull();
     expect(await answerMerge(runtime, request('/signin'), true)).toBeNull();
+  });
+});
+
+/** The account menu's Sign out of this browser: `account.signOut` with the current session. */
+async function signOut(cookie: string): Promise<{ signedOut: number; cookie: string }> {
+  const dispatcher = createDispatcher();
+  const set: string[] = [];
+  const current = request('/decks', { cookie });
+  const facts: ActionRequestFacts = {
+    identity: await requestIdentity(current, runtime),
+    request: current,
+    setHeader: (name, value) => {
+      if (name === 'set-cookie') set.push(...(Array.isArray(value) ? value : [value]));
+    },
+  };
+  registerAccountActions(dispatcher, { runtime, facts: () => Promise.resolve(facts) });
+  const author = { kind: 'human' as const, name: 'test' };
+  const sessions = (await dispatcher.dispatch('account.sessions', {}, { author })) as {
+    sessions: { id: string; current: boolean }[];
+  };
+  const sessionId = sessions.sessions.find((session) => session.current)?.id;
+  const answer = (await dispatcher.dispatch('account.signOut', { sessionId }, { author })) as {
+    signedOut: number;
+  };
+  return { signedOut: answer.signedOut, cookie: cookiesOf(set, cookie) };
+}
+
+/** The decks a browser reaches: its own id's and its aliases', as authorize reads them. */
+async function reaches(cookie: string): Promise<string[]> {
+  const identity = await requestIdentity(request('/decks', { cookie }), runtime);
+  const ids = [identity.principalId ?? '', ...(identity.ctx.principal?.aliases ?? [])];
+  return ids.filter((id) => (owned.get(id) ?? 0) > 0);
+}
+
+describe('the sign out keeps a browser whose decks are its own (verifier pass 1)', () => {
+  let person = 10;
+  beforeEach(() => {
+    person += 1;
+    clientAddress = `203.0.113.${person}`;
+  });
+
+  test('a question never answered: the editor sign in, then Sign out, keeps the deck', async () => {
+    const browser = await anonymousBrowser();
+    owned.set(browser.anonymousId, 1);
+    // the editor's own sign in window returns to the deck and never passes /signin
+    const { cookie } = await signIn('editor-out@example.test', browser.cookie);
+    expect(await reaches(cookie)).toEqual([browser.anonymousId]);
+    const out = await signOut(cookie);
+    expect(out.signedOut).toBe(1);
+    // the browser is anonymous again under the id that owns the deck, not a fresh one
+    const after = await requestIdentity(request('/decks', { cookie: out.cookie }), runtime);
+    expect(after.kind).toBe('anonymous');
+    expect(after.principalId).toBe(browser.anonymousId);
+    expect(await reaches(out.cookie)).toEqual([browser.anonymousId]);
+    // and the next sign in asks the question, so Add It joins the deck to the account
+    const again = await signIn('editor-out@example.test', out.cookie);
+    const question = await mergeQuestion(runtime, request('/signin', { cookie: again.cookie }));
+    expect(question?.decks).toBe(1);
+    expect(await answerMerge(runtime, request('/signin', { cookie: again.cookie }), true)).toEqual({
+      linked: true,
+    });
+    expect(await runtime.aliases.accountOf(browser.anonymousId)).toBe(again.userId);
+  });
+
+  test('Keep Them Separate, then Sign out: the browser still reaches its decks', async () => {
+    const browser = await anonymousBrowser();
+    owned.set(browser.anonymousId, 2);
+    const { cookie } = await signIn('kept-out@example.test', browser.cookie);
+    const answer = await answerMerge(runtime, request('/signin', { cookie }), false);
+    const kept = cookiesOf([answer?.setCookie ?? ''], cookie);
+    expect(await reaches(kept)).toEqual([browser.anonymousId]);
+    const out = await signOut(kept);
+    expect(out.signedOut).toBe(1);
+    const after = await requestIdentity(request('/decks', { cookie: out.cookie }), runtime);
+    expect(after.kind).toBe('anonymous');
+    expect(after.principalId).toBe(browser.anonymousId);
+    expect(await reaches(out.cookie)).toEqual([browser.anonymousId]);
+    expect(await runtime.aliases.accountOf(browser.anonymousId)).toBeNull();
+  });
+
+  test('a linked browser leaves as a new anonymous principal, as before', async () => {
+    const browser = await anonymousBrowser();
+    const { cookie, userId } = await signIn('linked-out@example.test', browser.cookie);
+    expect(await runtime.aliases.accountOf(browser.anonymousId)).toBe(userId);
+    const out = await signOut(cookie);
+    expect(out.signedOut).toBe(1);
+    const after = await requestIdentity(request('/decks', { cookie: out.cookie }), runtime);
+    expect(after.kind).toBe('anonymous');
+    expect(after.principalId).not.toBe(browser.anonymousId);
+    expect(await runtime.aliases.accountOf(after.principalId ?? '')).toBeNull();
   });
 });
 

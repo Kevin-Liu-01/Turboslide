@@ -91,7 +91,7 @@ export const AUTH_WORDS = {
         : `This browser has ${decks} decks made before you signed in. Add them to ${address}?`,
     add: (decks: number) => (decks === 1 ? 'Add It' : 'Add Them'),
     keep: (decks: number) => (decks === 1 ? 'Keep It Separate' : 'Keep Them Separate'),
-    foot: 'Decks you keep separate stay in this browser. Sign out to open them again.',
+    foot: 'Decks you keep separate stay open in this browser and do not join the account.',
     failed: 'The answer was not saved. Try again.',
   },
 

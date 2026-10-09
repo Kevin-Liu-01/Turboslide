@@ -20,6 +20,7 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 | [spec/SPEC.md](spec/SPEC.md)                                  | The base specification, cited in code as "SPEC n.n"                                                                             |
 | [grammar.md](grammar.md)                                      | The generated grammar and agent contract, written by `pnpm generate:contracts`                                                  |
 | [updates.md](updates.md)                                      | The release notes, one entry per ship                                                                                           |
+| [hardening/HARDENING.md](hardening/HARDENING.md)              | The hardening round of 2026-10-08: security of data and accounts, performance, reliability, the cleanup and the Rust verdict    |
 
 ## Reference by subsystem
 

@@ -14,7 +14,7 @@
 // the component owns the DOM. The run toolbar of the editor depth round is gone: Google's text
 // controls sit on the toolbar tail (SPEC 3.2), and the link popover stays on Cmd K.
 import type { FocusEvent as ReactFocusEvent, KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useContext, useLayoutEffect, useRef, useState } from 'react';
 
 import { renderParagraphs } from '@turboslide/render/blocks/prompt';
 import { GT_WORD_HTML } from '@turboslide/render/text';
@@ -54,6 +54,7 @@ import {
   wordRangeAt,
 } from './marks';
 import type { ToggleMark } from './marks';
+import { SelectSlot } from './select-slot';
 import { blockById, cellPointer, listItemPointer } from './Selection';
 import { tableRowsAddedMutation } from './table-fit';
 
@@ -666,11 +667,20 @@ export function blurVerdict(input: {
   return input.button ? 'park-and-refocus' : 'park';
 }
 
-/** True for an element the browser's own editing keys belong to (the chrome's fields). */
+/**
+ * True for an element the browser's own editing keys belong to (the chrome's fields), the shared
+ * dropdown's trigger among them (`role="combobox"`, DROPDOWNS.md 3.12).
+ */
 function isFieldElement(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const name = target.tagName;
-  return name === 'INPUT' || name === 'TEXTAREA' || name === 'SELECT' || target.isContentEditable;
+  return (
+    name === 'INPUT' ||
+    name === 'TEXTAREA' ||
+    name === 'SELECT' ||
+    target.getAttribute('role') === 'combobox' ||
+    target.isContentEditable
+  );
 }
 
 /** True for an element inside one of the transient chrome surfaces. */
@@ -1818,6 +1828,9 @@ export function InlineText({
   const burstTimer = useRef(0);
   const popover = useRef<HTMLDivElement>(null);
   const linkField = useRef<HTMLInputElement>(null);
+  /* the shared dropdown the studio hands the viewer (select-slot.ts; DROPDOWNS.md 3.13): absent
+     with no provider, where the URL field works alone */
+  const SlideSelect = useContext(SelectSlot);
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkValue, setLinkValue] = useState('');
   /* the popover's Slides in this presentation pick: a keyword, a slide id or none */
@@ -2833,29 +2846,30 @@ export function InlineText({
               if (e.target.value !== '') setLinkSlide('');
             }}
           />
-          <select
-            className="ts-run-link-slide"
-            value={linkSlide}
-            aria-label="Slides in this presentation"
-            data-tip="Slides in this presentation"
-            data-control="popover.link.slide"
-            onChange={(e) => {
-              setLinkSlide(e.target.value);
-              if (e.target.value !== '') setLinkValue('');
-            }}
-          >
-            <option value="">Slides in this presentation</option>
-            {SLIDE_LINK_POSITIONS.map((position) => (
-              <option key={position.value} value={position.value}>
-                {position.label}
-              </option>
-            ))}
-            {slideTargets.map((slide, index) => (
-              <option key={slide.id} value={slide.id}>
-                {index + 1}. {slide.title}
-              </option>
-            ))}
-          </select>
+          {SlideSelect !== null ? (
+            <SlideSelect
+              className="ts-run-link-slide"
+              value={linkSlide}
+              placeholder="Slides in this presentation"
+              options={[
+                { options: SLIDE_LINK_POSITIONS },
+                /* every slide under a heading of its own after the positions (DROPDOWNS.md 3.9) */
+                {
+                  heading: 'Slides',
+                  options: slideTargets.map((slide, index) => ({
+                    value: slide.id,
+                    label: `${index + 1}. ${slide.title}`,
+                  })),
+                },
+              ]}
+              label="Slides in this presentation"
+              control="popover.link.slide"
+              onChange={(next) => {
+                setLinkSlide(next);
+                if (next !== '') setLinkValue('');
+              }}
+            />
+          ) : null}
           <button
             type="button"
             className="ts-run-link-btn is-primary"

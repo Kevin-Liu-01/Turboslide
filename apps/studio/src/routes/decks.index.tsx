@@ -19,6 +19,7 @@ import { GtMark } from '@turboslide/chrome/GtMark';
 import { Icon } from '@turboslide/chrome/icons';
 import { Menu } from '@turboslide/chrome/Menu';
 import type { MenuCloseReason } from '@turboslide/chrome/Menu';
+import { Select } from '@turboslide/chrome/Select';
 import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/model';
 import type { MenuItem } from '@turboslide/chrome/menus/model';
 import { DIALOGS, HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
@@ -990,20 +991,20 @@ function HomePage() {
                   <Icon name="queue-list" />
                 </button>
               </span>
-              <label className="ts-sort">
-                <span className="ts-visually-hidden">Sort by</span>
-                <select
-                  className="pt-select"
+              <span className="ts-sort">
+                <Select<HomeSort>
                   value={settings.sort}
-                  data-control="home.sort"
-                  onChange={(event) => choose({ sort: event.target.value as HomeSort })}
-                  {...tipProps({ name: 'Sort by', doc: 'The order of the list.' })}
-                >
-                  <option value="opened">{HOME.sortOpened}</option>
-                  <option value="modified">{HOME.sortModified}</option>
-                  <option value="title">{HOME.sortTitle}</option>
-                </select>
-              </label>
+                  options={[
+                    { value: 'opened', label: HOME.sortOpened },
+                    { value: 'modified', label: HOME.sortModified },
+                    { value: 'title', label: HOME.sortTitle },
+                  ]}
+                  label="Sort by"
+                  control="home.sort"
+                  onChange={(sort) => choose({ sort })}
+                  tip={{ name: 'Sort by', doc: 'The order of the list.' }}
+                />
+              </span>
             </div>
           </div>
 
@@ -1059,22 +1060,22 @@ function AdminShowFilter({
   const allowed = useAwaited({ promise: admin });
   if (!allowed) return null;
   return (
-    <label className="ts-sort">
-      <span className="ts-visually-hidden">Show</span>
-      <select
-        className="pt-select"
+    <span className="ts-sort">
+      <Select<'own' | 'all'>
         value={show}
-        data-control="home.show"
-        onChange={(event) => onShow(event.target.value === 'all' ? 'all' : 'own')}
-        {...tipProps({
+        options={[
+          { value: 'own', label: HOME.showOwn },
+          { value: 'all', label: HOME.showAll },
+        ]}
+        label="Show"
+        control="home.show"
+        onChange={onShow}
+        tip={{
           name: 'Show',
           doc: 'Your presentations and the ones shared with you, or every presentation here.',
-        })}
-      >
-        <option value="own">{HOME.showOwn}</option>
-        <option value="all">{HOME.showAll}</option>
-      </select>
-    </label>
+        }}
+      />
+    </span>
   );
 }
 

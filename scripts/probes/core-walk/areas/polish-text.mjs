@@ -936,16 +936,15 @@ export async function run(t) {
         );
         if (!el) return null;
         const r = el.getBoundingClientRect();
-        const label =
-          el.tagName.toLowerCase() === 'select'
-            ? (el.options?.[el.selectedIndex]?.text ?? '')
-            : (el.textContent ?? '');
+        /* the shared dropdown's trigger draws its words in one span that ends in an ellipsis when
+           they do not fit (DROPDOWNS.md 3.2, 3.7): that span's widths say whether they are whole */
+        const words = el.querySelector('.ts-dropdown-text') ?? el;
         return {
           w: r.width,
-          scroll: el.scrollWidth,
-          client: el.clientWidth,
-          label: label.trim(),
-          overflow: getComputedStyle(el).textOverflow,
+          scroll: words.scrollWidth,
+          client: words.clientWidth,
+          label: (words.textContent ?? '').trim(),
+          overflow: getComputedStyle(words).textOverflow,
         };
       });
       const gap = bar && ring ? bar.y - (ring.y + ring.h) : null;

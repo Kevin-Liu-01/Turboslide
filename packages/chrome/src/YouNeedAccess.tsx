@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import type { LinkComponent } from './editor-shell';
 import { ACCESS_PAGE, DIALOGS, REFUSALS } from './menus/strings';
+import { Select } from './Select';
 import { tipProps } from './Tooltip';
 
 import './YouNeedAccess.css';
@@ -131,18 +132,21 @@ export function YouNeedAccess({
           <p className="ts-access-form-head">{ACCESS_WORDS.formHead}</p>
           <label className="ts-access-field">
             <span>{ACCESS_PAGE.role}</span>
-            <select
+            {/* the shared dropdown; its hidden input posts `role` before the page hydrates
+                (DROPDOWNS.md 3.10) */}
+            <Select
               name="role"
-              className="pt-select"
               value={role}
-              data-control="access.role"
-              onChange={(event) => setRole(event.target.value)}
-              {...tipProps({ name: ACCESS_PAGE.role, doc: 'What you would like to do' })}
-            >
-              <option value="viewer">{DIALOGS.share.roles.viewer}</option>
-              <option value="commenter">{DIALOGS.share.roles.commenter}</option>
-              <option value="editor">{DIALOGS.share.roles.editor}</option>
-            </select>
+              options={[
+                { value: 'viewer', label: DIALOGS.share.roles.viewer },
+                { value: 'commenter', label: DIALOGS.share.roles.commenter },
+                { value: 'editor', label: DIALOGS.share.roles.editor },
+              ]}
+              label={ACCESS_PAGE.role}
+              control="access.role"
+              onChange={setRole}
+              tip={{ name: ACCESS_PAGE.role, doc: 'What you would like to do' }}
+            />
           </label>
           <label className="ts-access-field">
             <span>{ACCESS_PAGE.message}</span>

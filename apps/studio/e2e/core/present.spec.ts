@@ -29,6 +29,7 @@ import {
   typeInto,
   typeNote,
 } from './lib';
+import { chooseOption } from '../choose-option';
 import { presentChromeRows } from './b3b-dialogs';
 import { designPresent } from './design-pages';
 
@@ -680,23 +681,13 @@ test(title('text.link.slide-target'), async () => {
     await page.keyboard.press('Escape');
     expect(
       shown,
-      `Cmd+K shows the popover's Slides in this presentation select (the bare field run.link.href ${bare ? 'opened alone' : 'did not open either'}; audit-gaps 4)`,
+      `Cmd+K shows the popover's Slides in this presentation dropdown (the bare field run.link.href ${bare ? 'opened alone' : 'did not open either'}; audit-gaps 4)`,
     ).toBe(true);
   }
-  const tag = await slideSelect.evaluate((e) => e.tagName.toLowerCase());
-  /* the options read "<n>. <title>" since the product round (docs/archive/rounds/PRODUCT.md section 2 rank 19,
-     InlineText.tsx slideTargets): the third slide is picked by its id, the option's value */
-  if (tag === 'select')
-    await slideSelect
-      .selectOption({ value: slides[2]! }, { timeout: 8000 })
-      .catch(() => slideSelect.selectOption({ label: 'Slide 3' }, { timeout: 8000 }));
-  else {
-    await slideSelect.click();
-    await page
-      .locator('[data-control^="popover.link.slide."], [role="option"]', { hasText: /^Slide 3$/ })
-      .first()
-      .click();
-  }
+  /* the rows read "<n>. <title>" since the product round (docs/archive/rounds/PRODUCT.md section 2 rank 19,
+     InlineText.tsx slideTargets): the third slide is chosen by its id, the row's value, through
+     the shared dropdown (DROPDOWNS.md 5.1) */
+  await chooseOption(page, 'popover.link.slide', slides[2]!);
   const apply = ctl(page, 'popover.link.apply');
   if ((await apply.count()) > 0) await apply.click();
   else await page.keyboard.press('Enter');

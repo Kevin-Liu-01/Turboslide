@@ -388,10 +388,14 @@ html:has(.ts-home-page) {
   padding: 24px 0 0;
 }
 
+/* the tools wrap inside the column: at 390 px the admin's filter, the view switch and the sort
+   dropdown ran 87 px past the page's right edge */
 .ts-recent-tools {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+  max-width: 100%;
 }
 
 .ts-seg {
@@ -402,11 +406,6 @@ html:has(.ts-home-page) {
 .ts-seg .pt-ib {
   height: 30px;
   width: 30px;
-}
-
-/* the sort select is the one select of tokens.css (.pt-select), with the strip's corner */
-.ts-sort select {
-  border-radius: var(--pt-radius);
 }
 
 /* cards: 4 up at 1120px, the thumbnail's 16:9 plate, the title row with the menu button */

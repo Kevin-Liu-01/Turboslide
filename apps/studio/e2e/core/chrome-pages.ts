@@ -69,7 +69,7 @@ async function buttonFacts(page: Page): Promise<ButtonFacts> {
     };
     const controls = [
       ...document.querySelectorAll<HTMLElement>(
-        'button, a.pt-ib, [role="button"], input[type="search"], input[type="text"], select',
+        'button, a.pt-ib, [role="button"], input[type="search"], input[type="text"], [role="combobox"]',
       ),
     ].filter(visible);
     const probe = document.createElement('div');
@@ -86,10 +86,10 @@ async function buttonFacts(page: Page): Promise<ButtonFacts> {
         `${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0] ?? ''}`;
       const tag = el.tagName.toLowerCase();
       /* a control that shows a name is not a button label: the deck's name in the title row,
-         a template's or a presentation's name on its card (DECK-GRAMMAR 22 rules the words a
-         button says, not the names of things) */
+         a template's or a presentation's name on its card, the chosen row a dropdown's trigger
+         shows (DECK-GRAMMAR 22 rules the words a button says, not the names of things) */
       const names = el.matches(
-        '[data-control="deck.name"], [data-control^="home.template."], [data-control="home.blank"], [data-control^="home.title."], [data-control^="home.open."], [data-control^="templates.card."], .ts-slide-row',
+        '[data-control="deck.name"], [data-control^="home.template."], [data-control="home.blank"], [data-control^="home.title."], [data-control^="home.open."], [data-control^="templates.card."], .ts-slide-row, [role="combobox"]',
       );
       if (!names && (tag === 'button' || tag === 'a' || el.getAttribute('role') === 'button')) {
         /* the label is the words the button shows, never an aria name of an icon button; a
@@ -148,7 +148,9 @@ export function chromePages(): string[] {
              the 6 px control corner (--pt-radius), Slideshow included; 8 px is a window's */
           const allowed = new Set(['0px', '4px', facts.ptRadius]);
           const corners = facts.radii.filter((r) =>
-            r.slideshow ? r.radius !== facts.ptRadius && r.radius !== '0px' : !allowed.has(r.radius),
+            r.slideshow
+              ? r.radius !== facts.ptRadius && r.radius !== '0px'
+              : !allowed.has(r.radius),
           );
           const slideshow = facts.radii.filter((r) => r.slideshow && r.radius === facts.ptRadius);
           const notFirst = slideshow.filter((r) => !r.labelFirst);

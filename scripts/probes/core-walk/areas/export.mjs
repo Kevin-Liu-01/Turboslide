@@ -312,7 +312,7 @@ export async function run(t) {
     'pick 1 slide with notes',
     'the talk track shows under the slide',
     async () => {
-      await page.locator('[data-control="print.layout"]').selectOption('notes');
+      await t.chooseOption('print.layout', 'notes');
       await t.sleep(600);
       const layout = await t.attr('[data-control="print.page"]', 'data-layout');
       const notes = await page.evaluate(() =>

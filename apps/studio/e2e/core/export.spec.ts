@@ -53,6 +53,7 @@ import {
   snackbarText,
 } from './lib';
 import { shapeAdjustDefaults, textInset } from '@turboslide/schema/shapes';
+import { chooseOption } from '../choose-option';
 import { canvasR1f } from './canvas-r1f';
 import { themeRecord } from '@turboslide/theme/themes';
 
@@ -528,7 +529,7 @@ test(title('export.print.download-pdf-follows-preview'), async () => {
     pdfPages(withSkipped.bytes),
     'the file has the page the preview shows for the skipped slide',
   ).toBe(unskipped + 1);
-  await page.locator('[data-control="print.layout"]').selectOption('notes');
+  await chooseOption(page, 'print.layout', 'notes');
   await expect(ctl(page, 'print.page')).toHaveAttribute('data-layout', 'notes');
   await expect.poll(() => ctl(page, 'print.pdf').isEnabled(), { timeout: 10_000 }).toBe(true);
   const withNotes = await download(page, () => ctl(page, 'print.pdf').click(), 45_000);

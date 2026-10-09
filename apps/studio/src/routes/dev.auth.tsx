@@ -8,6 +8,7 @@ import { AuthWindow } from '@turboslide/chrome/auth/AuthWindow';
 import { AuthRefusal, errorState } from '@turboslide/chrome/auth/auth-model';
 import type { AuthMethods, AuthPurpose, AuthState } from '@turboslide/chrome/auth/auth-model';
 import type { AuthActions } from '@turboslide/chrome/auth/AuthPlate';
+import { Select } from '@turboslide/chrome/Select';
 
 import { MoodFigure } from '../components/home/MoodFigure';
 import { RouterLinkSlot } from './-link-slot';
@@ -15,7 +16,7 @@ import { RouterLinkSlot } from './-link-slot';
 /**
  * The auth plate's gallery (docs/POLISH-2.md 4.6, C19): every state of 4.4 in the page host and
  * the window host, with stub methods per state and stub exchanges that resolve after 400 ms and
- * never call /api/auth (Prototemplate's plate gallery works the same way). A select of every state
+ * never call /api/auth (Prototemplate's plate gallery works the same way). A dropdown of every state
  * at the top left; `?chrome=0` hides it for pictures. Local only: the loader answers 404 unless
  * `TURBOSLIDE_LOCAL_OPEN=1`, the process is not on a deployment (no `VERCEL`) and the request
  * names a loopback host, so a deployment never draws it; never prerendered and nothing links to
@@ -147,29 +148,24 @@ function Gallery() {
   const select =
     search.chrome === '0' ? null : (
       <label className="ts-auth-gallery-pick" data-control="gallery.pick">
-        <select
-          className="pt-select"
+        <Select
           value={key}
-          aria-label="State"
-          onChange={(event) => {
-            const [state, at] = event.target.value.split(':');
+          options={Object.keys(GALLERY_STATES).flatMap((state) =>
+            (GALLERY_STATES[state]?.purpose === 'device' ? ['page'] : ['page', 'window']).map(
+              (at) => ({ value: `${state}:${at}`, label: `${state} in the ${at}` }),
+            ),
+          )}
+          label="State"
+          control="gallery.pick.state"
+          onChange={(picked) => {
+            const [state, at] = picked.split(':');
             setClosed(false);
             void navigate({
               to: '/dev/auth',
               search: { state, ...(at === 'window' ? { host: 'window' as const } : {}) },
             });
           }}
-        >
-          {Object.keys(GALLERY_STATES).flatMap((state) =>
-            (GALLERY_STATES[state]?.purpose === 'device' ? ['page'] : ['page', 'window']).map(
-              (at) => (
-                <option key={`${state}:${at}`} value={`${state}:${at}`}>
-                  {state} in the {at}
-                </option>
-              ),
-            ),
-          )}
-        </select>
+        />
       </label>
     );
   const common = {

@@ -4,6 +4,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router';
 import type { ErrorComponentProps } from '@tanstack/react-router';
 
 import { DialogCheck } from '@turboslide/chrome/Dialog';
+import { Select } from '@turboslide/chrome/Select';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 import { PRESENT, SNACKBARS, STUB_PREFIX } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
@@ -247,24 +248,23 @@ function PrintPage() {
           <TurboslideMark size={24} />
           <span>{payload.deck.title}</span>
         </span>
-        <label className="ts-print-layout">
-          <span className="ts-visually-hidden">Layout</span>
-          <select
+        <span className="ts-print-layout">
+          <Select
             value={layout}
-            data-control="print.layout"
-            onChange={(event) => setLayout(event.target.value === 'notes' ? 'notes' : 'slides')}
-            {...tipProps({
+            options={LAYOUTS.map((option) => ({
+              value: option.value,
+              label: option.label,
+              ...(option.later ? { disabled: true } : {}),
+            }))}
+            label="Layout"
+            control="print.layout"
+            onChange={(picked) => setLayout(picked === 'notes' ? 'notes' : 'slides')}
+            tip={{
               name: 'Layout',
               doc: `One slide per page, with or without its speaker notes. ${HANDOUT_STUB}.`,
-            })}
-          >
-            {LAYOUTS.map((option) => (
-              <option key={option.value} value={option.value} disabled={option.later}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            }}
+          />
+        </span>
         {/* the chrome's DialogCheck (docs/archive/rounds/POLISH.md item 83; audit-pages item 39): a tick in the
             box, not a filled square */}
         <DialogCheck

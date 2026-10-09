@@ -1460,7 +1460,7 @@ async function observeDialog(page, item, title) {
     return active !== null && active.closest('[role="dialog"]') !== null;
   });
   const tips = await page.$$eval(
-    '[role="dialog"] button, [role="dialog"] input, [role="dialog"] select, [role="dialog"] textarea, [role="dialog"] a[href], [role="dialog"] [role="button"], [role="dialog"] [role="tab"]',
+    '[role="dialog"] button, [role="dialog"] input, [role="dialog"] [role="combobox"], [role="dialog"] textarea, [role="dialog"] a[href], [role="dialog"] [role="button"], [role="dialog"] [role="tab"]',
     (els) =>
       els
         .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))
@@ -3633,7 +3633,7 @@ async function checkFormatSections(page, type, tag) {
   const order = orderedIds.map((id) => FORMAT_SECTION_ORDER.indexOf(id));
   const ordered = order.every((n, i) => i === 0 || n >= order[i - 1]);
   const untipped = await page.$$eval(
-    '.ts-rpanel [data-section] button, .ts-rpanel [data-section] input, .ts-rpanel [data-section] select, .ts-rpanel [data-section] [role="button"], .ts-rpanel [data-section] [role="radio"], .ts-rpanel [data-section] [role="checkbox"]',
+    '.ts-rpanel [data-section] button, .ts-rpanel [data-section] input, .ts-rpanel [data-section] [role="combobox"], .ts-rpanel [data-section] [role="button"], .ts-rpanel [data-section] [role="radio"], .ts-rpanel [data-section] [role="checkbox"]',
     (els) =>
       els
         .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))
@@ -5388,7 +5388,7 @@ async function checkDitherSurfaces(page, states, deckId, tag) {
   );
   const missingBg = BACKGROUND_DITHER_CONTROLS.filter((id) => !present.includes(id));
   const untippedBg = await page.$$eval(
-    '[data-control="dialog.background"] button, [data-control="dialog.background"] input, [data-control="dialog.background"] select',
+    '[data-control="dialog.background"] button, [data-control="dialog.background"] input, [data-control="dialog.background"] [role="combobox"]',
     (els) =>
       els
         .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))

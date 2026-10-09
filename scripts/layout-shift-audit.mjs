@@ -40,6 +40,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { chooseOption } from '../apps/studio/e2e/choose-option.ts';
 import { launchBrowser } from '../packages/headless/src/launch.ts';
 
 const argv = process.argv.slice(2);
@@ -263,8 +264,8 @@ const DRIVEN_STATES = {
   },
   printNotes: {
     routes: ['print'],
-    enter: async (page) => page.selectOption('[data-control="print.layout"]', 'notes'),
-    leave: async (page) => page.selectOption('[data-control="print.layout"]', 'slides'),
+    enter: async (page) => chooseOption(page, 'print.layout', 'notes'),
+    leave: async (page) => chooseOption(page, 'print.layout', 'slides'),
     sources: ['.ts-print'],
     frames: 2,
     require: '[data-control="print.layout"]',

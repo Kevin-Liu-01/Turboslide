@@ -5,7 +5,7 @@
    13.333 inch page is 1280 CSS pixels wide; the "1 slide with notes" layout gives the sheet the
    upper part of the page and the notes the rest. Colors are the chrome's tokens on screen; the
    sheet keeps the theme's own tokens (sheet.css) so the paper prints as the deck draws it. The
-   design round (docs/DESIGN.md 3.1, 4, 6): the bar's buttons and the select at the 6 px control
+   design round (docs/DESIGN.md 3.1, 4, 6): the bar's buttons and the dropdown at the 6 px control
    corner, Inter's default glyphs, the progress in tabular figures, the bar on the docked layer,
    and the document on the shared scrollbar of tokens.css. */
 .ts-print {
@@ -69,33 +69,6 @@
 .ts-print-title .ts-mark {
   width: 24px;
   height: 24px;
-}
-
-.ts-print-layout select {
-  height: 32px;
-  padding: 0 28px 0 10px;
-  border: 1px solid var(--pt-hair);
-  border-radius: var(--pt-radius);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13px var(--pt-text);
-  appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
-    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
-  background-position:
-    calc(100% - 15px) 13px,
-    calc(100% - 10px) 13px;
-  background-size:
-    5px 5px,
-    5px 5px;
-  background-repeat: no-repeat;
-  cursor: pointer;
-}
-
-.ts-print-layout select:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: -1px;
 }
 
 .ts-print-spacer {

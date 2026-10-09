@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
+import { chooseOption } from './choose-option';
+
 // The home page and the trash (gslides-parity SPEC 6.2, 6.4, 6.5; SPEC 14.3 `home.spec.ts`): the
 // template strip, the recent cards with thumbnails, search, sort, the grid and list toggle, the
 // card menu; Move to trash hides the deck and Undo or Restore brings it back; Delete forever
@@ -157,10 +159,10 @@ test('the three bands: the strip, the recent cards with thumbnails, search, sort
   let order = await titles();
   expect(order.indexOf('Home alpha')).toBeLessThan(order.indexOf('Home beta'));
   /* Title sorts beta after alpha too; Last modified keeps alpha first */
-  await page.locator('[data-control="home.sort"]').selectOption('title');
+  await chooseOption(page, 'home.sort', 'title');
   order = await titles();
   expect(order.indexOf('Home alpha')).toBeLessThan(order.indexOf('Home beta'));
-  await page.locator('[data-control="home.sort"]').selectOption('modified');
+  await chooseOption(page, 'home.sort', 'modified');
   order = await titles();
   expect(order.indexOf('Home alpha')).toBeLessThan(order.indexOf('Home beta'));
   /* search filters by title */

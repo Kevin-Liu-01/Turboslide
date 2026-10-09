@@ -21,6 +21,7 @@ import {
   state,
   teardownAll,
   title,
+  waitRevision,
 } from './lib';
 import { setAdvancedTools } from '../advanced-tools';
 import { chooseOption } from '../choose-option';
@@ -1225,6 +1226,13 @@ export function chromeDropdowns(): string[] {
     const before = (await state(page)).revision;
     await page.evaluate((id) => window.turboslide!.studio.set(id, 2), control);
     await expect(weight).toHaveAttribute('value', '2');
+    /* the trigger shows the value before the write answers: at a load of 88 the table's write
+       stood pending for 1 to 3 s with the revision unchanged, and settled() reads the realtime
+       channel's pending count, 0 on this tier, so it returned before the write (the integrator's
+       open item 2, read red here once more); the revision is read once it moves, or after 30 s,
+       and again 2 s later, so a second write would still count */
+    await waitRevision(page, before + 1);
+    await page.waitForTimeout(2000);
     const after = (await settled(page)).revision;
     test.info().annotations.push({
       type: 'agent',

@@ -5,7 +5,8 @@
 // carry a `reader` flag `node:sqlite` does not, so this file is the small driver Kysely needs:
 // one connection, one statement at a time (SQLite is single writer), the statement kind read
 // from the SQL, booleans bound as integers and dates as ISO strings because `node:sqlite` binds
-// neither. Postgres (behind `DATABASE_URL`) uses Kysely's own dialect over `pg` (db.ts).
+// neither. Postgres (behind `DATABASE_URL`) uses Kysely's own dialect over `pg` (db.ts). Every
+// statement passes token-at-rest.ts, so a checkout's session table holds token digests as D1 does.
 import { DatabaseSync } from 'node:sqlite';
 
 import { CompiledQuery, SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from 'kysely';
@@ -19,6 +20,8 @@ import type {
   QueryCompiler,
   QueryResult,
 } from 'kysely';
+
+import { openSessionRows, sealSessionStatement } from './token-at-rest.ts';
 
 /** Statements that answer rows: a select, a common table expression, a pragma, or any `returning`. */
 const READS = /^\s*(select|with|pragma|explain)\b/i;
@@ -48,9 +51,11 @@ class NodeSqliteConnection implements DatabaseConnection {
   executeQuery<O>(compiledQuery: CompiledQuery): Promise<QueryResult<O>> {
     const { sql, parameters } = compiledQuery;
     const statement = this.#db.prepare(sql);
-    const bound = parameters.map(bindable);
+    // the session table holds token digests here as on D1 (token-at-rest.ts, HR-K2#5)
+    const sealed = sealSessionStatement(sql, parameters);
+    const bound = sealed.params.map(bindable);
     if (READS.test(sql) || RETURNING.test(sql)) {
-      const rows = statement.all(...bound) as O[];
+      const rows = openSessionRows(statement.all(...bound) as O[], sealed);
       return Promise.resolve({ rows });
     }
     const result = statement.run(...bound);

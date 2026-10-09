@@ -518,8 +518,15 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
       token: string;
     }[];
     if (all === true) {
-      await rt.auth.api.revokeOtherSessions({ headers: request.headers });
-      return { signedOut: Math.max(0, listed.length - 1) };
+      /* by id, never by token: the listed tokens are digests (token-at-rest.ts, HR-K2#5), which
+         the library's revoke-other-sessions compares with the cookie's token and so would end
+         this session as well; the internal delete takes the digest as it is */
+      const others = listed.filter((session) => session.id !== identity.session?.id);
+      const context = await rt.auth.$context;
+      await Promise.all(
+        others.map((session) => context.internalAdapter.deleteSession(session.token)),
+      );
+      return { signedOut: others.length };
     }
     const target = listed.find((session) => session.id === sessionId);
     if (target === undefined) return { signedOut: 0 };

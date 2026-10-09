@@ -377,10 +377,12 @@ describe('the accounts statements, recorded over a database in production’s st
     const other = sessions.find((s) => !s.current)!;
     expect(await actAs(one, 'account.signOut', { sessionId: other.id })).toEqual({ signedOut: 1 });
     expect(await actAs(one, 'account.signOut', { all: true })).toEqual({ signedOut: 1 });
+    // the library's revoke-other-sessions is off (HR-K2#5: it would compare digests with the
+    // cookie's token); Sign out everywhere else is the action above
     const four = await signInWithCode(email);
     await expectStatus(
       await handle(post('/api/auth/revoke-other-sessions', {}, four)),
-      200,
+      404,
       'revoke-other-sessions',
     );
     const five = await signInWithCode(email);

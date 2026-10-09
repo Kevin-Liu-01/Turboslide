@@ -25,6 +25,10 @@
 // while its D1 introspector's `PRAGMA index_list('t')` and `SELECT * FROM pragma_table_info(?)`
 // statements pass. Turboslide's tables and the seed stay on the Kysely of this dialect.
 //
+// Every statement passes token-at-rest.ts on its way out (HR-K2#5): a session token it binds
+// leaves as its digest, and the rows that come back carry the token again, so the session table
+// holds digests alone whichever of the two shapes sent the statement.
+//
 // A refused or timed out call throws `D1ProxyError`, a store error the identity runtime maps to
 // anonymous for that request after one retry (identity.ts `accountSession`). The counters sum
 // `meta.rows_read` and `meta.rows_written` per process for the cost rows `cost.d1.reads` and
@@ -46,6 +50,9 @@ import type {
   SchemaMetadata,
   TableMetadata,
 } from 'kysely';
+
+import { openSessionRows, sealSessionStatement } from './token-at-rest.ts';
+import type { SealedStatement } from './token-at-rest.ts';
 
 export const ROOM_HOST_VARIABLE = 'TURBOSLIDE_ROOM_HOST';
 export const ROOM_BEARER_VARIABLE = 'TURBOSLIDE_ROOM_BEARER';
@@ -173,6 +180,12 @@ export type D1ProxyConfig = {
 
 export type D1Statement = { sql: string; params: D1Bindable[] };
 
+/** The answer with its rows opened as token-at-rest.ts reads a statement on the session table. */
+function openAnswer(answer: D1QueryAnswer, statement: SealedStatement<D1Bindable>): D1QueryAnswer {
+  if (!statement.session || !Array.isArray(answer.results)) return answer;
+  return { ...answer, results: openSessionRows(answer.results, statement) };
+}
+
 /** The HTTP client of the two routes; one per `AuthDb`, shared by the dialect and the introspector. */
 export class D1ProxyClient {
   readonly origin: string;
@@ -204,19 +217,23 @@ export class D1ProxyClient {
     return { ...this.#counters };
   }
 
-  /** One statement through `POST /db/query`. */
+  /** One statement through `POST /db/query`, its session tokens sealed (token-at-rest.ts). */
   async query(sql: string, params: D1Bindable[]): Promise<D1QueryAnswer> {
-    const answer = await this.#post(D1_QUERY_PATH, { sql, params });
+    const sealed = sealSessionStatement(sql, params);
+    const answer = await this.#post(D1_QUERY_PATH, { sql, params: sealed.params });
     if (Array.isArray(answer) || typeof answer !== 'object' || answer === null)
       throw new D1ProxyError('malformed', 200, 'the /db/query answer is not an object');
     this.#count([sql], [answer as D1QueryAnswer]);
-    return answer as D1QueryAnswer;
+    return openAnswer(answer as D1QueryAnswer, sealed);
   }
 
   /** Several statements through `POST /db/batch`, one transaction, the answers in order. */
   async batch(statements: D1Statement[]): Promise<D1QueryAnswer[]> {
     if (statements.length === 0) return [];
-    const answer = await this.#post(D1_BATCH_PATH, { statements });
+    const sealed = statements.map((s) => sealSessionStatement(s.sql, s.params));
+    const answer = await this.#post(D1_BATCH_PATH, {
+      statements: statements.map((s, i) => ({ sql: s.sql, params: sealed[i]!.params })),
+    });
     const list = Array.isArray(answer)
       ? answer
       : typeof answer === 'object' &&
@@ -234,7 +251,7 @@ export class D1ProxyClient {
       statements.map((s) => s.sql),
       list as D1QueryAnswer[],
     );
-    return list as D1QueryAnswer[];
+    return (list as D1QueryAnswer[]).map((one, i) => openAnswer(one, sealed[i]!));
   }
 
   #count(sqls: string[], answers: D1QueryAnswer[]): void {

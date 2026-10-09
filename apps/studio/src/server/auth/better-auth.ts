@@ -256,6 +256,10 @@ function buildAuth(deps: AuthDeps): Auth {
     // (docs/POLISH-2.md C14). The library's `/api/auth/error` page is no longer a destination: a
     // browser sent there from Google is cross site and the CSRF filter answered it 403
     onAPIError: { errorURL: SIGN_IN_PAGE },
+    // the stored session tokens are digests (token-at-rest.ts, HR-K2#5); this route compares them
+    // with the cookie's token and would end the caller's own session too. Sign out everywhere
+    // else is the `account.signOut` action, which ends the other sessions by id (actions.ts)
+    disabledPaths: ['/revoke-other-sessions'],
     // on the `d1` kind the library takes the binding shaped facade over the proxy and runs its own
     // D1 dialect and index introspector (d1-proxy-dialect.ts: D1 refuses the generic SQLite index
     // read of getMigrations); on the other kinds the Kysely of db.ts with its type

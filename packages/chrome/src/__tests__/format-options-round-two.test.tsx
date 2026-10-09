@@ -10,6 +10,7 @@ import { FormatOptions } from '../FormatOptions';
 import { scaleMembers } from '../inspector/geometry';
 import { lineSpacingOption } from '../inspector/text-marks';
 import { hideTooltip } from '../Tooltip';
+import { chooseOption } from './choose-option';
 
 // Format options in round two (gslides-parity SPEC-2 section 5, 6.1 row 24): Size & rotation and
 // Position on every object with the flips and the dial, Text fitting with Google's three radios
@@ -241,14 +242,18 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
   it('the Text section writes spacing, columns and a mark; lineSpacingOption reads the presets', () => {
     dispatch.mockClear();
     panel('t');
-    fireEvent.change(control('formatOptions.text.lineSpacing'), { target: { value: 'double' } });
+    /* the shared dropdown (docs/DROPDOWNS.md 3) */
+    const spacingField = control('formatOptions.text.lineSpacing');
+    expect(spacingField.getAttribute('role')).toBe('combobox');
+    expect(spacingField.getAttribute('value')).toBe('single');
+    chooseOption('formatOptions.text.lineSpacing', 'double');
     expect(dispatch).toHaveBeenLastCalledWith('text.spacing', {
       slideId: 'cv',
       blockIds: ['t'],
       line: 2,
       baseRevision: 7,
     });
-    fireEvent.change(control('formatOptions.text.columns'), { target: { value: '2' } });
+    chooseOption('formatOptions.text.columns', '2');
     expect(dispatch).toHaveBeenLastCalledWith('text.columns', {
       slideId: 'cv',
       blockIds: ['t'],
@@ -276,7 +281,7 @@ describe('Text fitting, Text, Line, Shape, Drop shadow, Adjustments, Alt text', 
        with the switch on; the Line section is core and draws either way */
     panel('ln', { advancedTools: true });
     expect(screen.getByRole('button', { name: 'Line' })).toBeTruthy();
-    fireEvent.change(control('formatOptions.line.end'), { target: { value: 'fillCircle' } });
+    chooseOption('formatOptions.line.end', 'fillCircle');
     expect(dispatch).toHaveBeenLastCalledWith('line.set', {
       slideId: 'cv',
       blockIds: ['ln'],

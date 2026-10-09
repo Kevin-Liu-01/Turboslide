@@ -1,4 +1,4 @@
-/* The asset control: the select (select.css draws it) over the asset card. The card shows the
+/* The asset control: the dropdown (Select.css draws it) over the asset card. The card shows the
    twins side by side in 16:9 frames with the frame role (--pt-edge, the one line a picture
    takes), the theme word under each in titanium, then the facts as a two-column list with no
    rules of its own (the row it sits in owns the rule below). */
@@ -7,11 +7,6 @@
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
-  width: 100%;
-}
-
-.ts-ctl-asset .ts-ctl-select {
-  max-width: none;
   width: 100%;
 }
 
@@ -74,15 +69,18 @@
   overflow-wrap: anywhere;
 }
 
-/* the select and the Browse square on one line; the picker opens under them */
+/* the dropdown and the Browse square on one line; the picker opens under them */
 .ts-ctl-asset-row {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.ts-ctl-asset-row .ts-ctl-select {
+/* the dropdown takes the row's width beside the square; three classes, so the rule outranks the
+   compact trigger's 220 px cap whatever order the two stylesheets load in */
+.ts-ctl-asset .ts-ctl-asset-row .ts-ctl-asset-select {
   flex: 1 1 auto;
+  max-width: none;
 }
 
 .ts-asset-mono {

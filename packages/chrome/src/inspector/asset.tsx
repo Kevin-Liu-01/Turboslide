@@ -6,6 +6,7 @@ import { ASSET_ROLES, isShareAlike } from '@turboslide/schema/assets';
 
 import { AssetPicker } from '../AssetPicker';
 import type { EditorDispatch } from '../dispatch';
+import { Select } from '../Select';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
@@ -13,11 +14,11 @@ import type { ControlProps } from './props';
 import './asset.css';
 
 /**
- * An AssetId as the asset picker (SPEC 6.5): a select over the deck's assets (the control the
- * window API writes), a Browse button that opens the AssetPicker with every twin under it, and
- * the chosen asset's card showing both twins (or the one neutral twin) in --pt-edge frames, the
- * alt, the credit and the license. The twins load through context.assetUrl, which the studio
- * points at /decks/<id>/.
+ * An AssetId as the asset picker (SPEC 6.5): the shared dropdown over the deck's assets (the
+ * control the window API writes), a Browse button that opens the AssetPicker with every twin
+ * under it, and the chosen asset's card showing both twins (or the one neutral twin) in --pt-edge
+ * frames, the alt, the credit and the license. The twins load through context.assetUrl, which
+ * the studio points at /decks/<id>/.
  */
 function licenseOf(asset: Asset): string | undefined {
   if (asset.source.kind === 'photo') {
@@ -118,31 +119,26 @@ export function AssetControl({ spec, onChange, context, disabled }: ControlProps
   return (
     <span className="ts-ctl-asset">
       <span className="ts-ctl-asset-row">
-        <select
-          className="ts-ctl-select"
-          aria-label={spec.label}
-          data-control={spec.control}
+        <Select
+          size="compact"
+          className="ts-ctl-asset-select"
+          label={spec.label}
+          control={spec.control}
           value={current}
+          options={[
+            ...(spec.optional || current === '' ? [{ value: '', label: 'None' }] : []),
+            ...(current !== '' && !ids.includes(current)
+              ? [{ value: current, label: current }]
+              : []),
+            ...ids.map((id) => ({ value: id, label: id })),
+          ]}
           disabled={disabled}
-          onChange={(event) => {
-            const raw = event.target.value;
-            onChange(raw === '' ? undefined : raw);
-          }}
-          {...tipProps({
+          tip={{
             name: spec.inspector.label,
             doc: spec.inspector.help ?? 'The asset this field shows, from the deck.',
-          })}
-        >
-          {spec.optional || current === '' ? <option value="">none</option> : null}
-          {current !== '' && !ids.includes(current) ? (
-            <option value={current}>{current}</option>
-          ) : null}
-          {ids.map((id) => (
-            <option key={id} value={id}>
-              {id}
-            </option>
-          ))}
-        </select>
+          }}
+          onChange={(raw) => onChange(raw === '' ? undefined : raw)}
+        />
         <ToolButton
           title={browsing ? 'Close the asset picker' : 'Browse assets'}
           doc={
@@ -239,16 +235,16 @@ export type AssetIntakeProps = {
 };
 
 const ROLE_LABEL: Record<AssetRole, string> = {
-  opener: 'opener picture',
-  mood: 'mood photograph',
-  capture: 'page capture',
-  detail: 'detail crop',
-  thumb: 'thumbnail',
-  render: 'render',
-  icon: 'icon',
-  logo: 'logo',
-  frame: 'material frame',
-  other: 'other',
+  opener: 'Opener picture',
+  mood: 'Mood photograph',
+  capture: 'Page capture',
+  detail: 'Detail crop',
+  thumb: 'Thumbnail',
+  render: 'Render',
+  icon: 'Icon',
+  logo: 'Logo',
+  frame: 'Material frame',
+  other: 'Other',
 };
 
 const SHARE_ALIKE = /BY-SA|share[- ]?alike/i;
@@ -435,29 +431,23 @@ export function AssetIntake({
       <div className="ts-insp-row">
         <span className="ts-insp-label">Role</span>
         <div className="ts-insp-field">
-          <select
-            className="ts-ctl-select"
-            aria-label="asset intake: Role"
-            data-control={`${control}.role`}
+          <Select<AssetRole>
+            size="compact"
+            label="asset intake: Role"
+            control={`${control}.role`}
             value={role}
+            options={ASSET_ROLES.map((r) => ({ value: r, label: ROLE_LABEL[r] }))}
             disabled={busy}
-            {...tipProps({
+            tip={{
               name: 'Role',
               doc: 'What the picture is for; mood and opener pictures go through the two-tone screen.',
-            })}
-            onChange={(event) => {
-              const next = event.target.value as AssetRole;
+            }}
+            onChange={(next) => {
               setRole(next);
               if (next === 'mood' && plateSide === '') setPlateSide('lower-right');
               if (next === 'opener' && plateSide === '') setPlateSide('lower-left');
             }}
-          >
-            {ASSET_ROLES.map((r) => (
-              <option key={r} value={r}>
-                {ROLE_LABEL[r]}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </div>
       {field('title', 'Title', title, setTitle, 'the picture’s name')}
@@ -524,23 +514,24 @@ export function AssetIntake({
         <div className="ts-insp-row">
           <span className="ts-insp-label">Plate</span>
           <div className="ts-insp-field">
-            <select
-              className="ts-ctl-select"
-              aria-label="asset intake: Plate"
-              data-control={`${control}.plate`}
+            <Select<PlateSide | ''>
+              size="compact"
+              label="asset intake: Plate"
+              control={`${control}.plate`}
               value={plateSide}
+              options={[
+                { value: '', label: 'None' },
+                { value: 'lower-left', label: 'Lower left' },
+                { value: 'lower-right', label: 'Lower right' },
+                { value: 'upper-left', label: 'Upper left' },
+              ]}
               disabled={busy}
-              {...tipProps({
+              tip={{
                 name: 'Plate',
                 doc: 'The plate the two-tone metrics are screened against.',
-              })}
-              onChange={(event) => setPlateSide(event.target.value as PlateSide | '')}
-            >
-              <option value="">none</option>
-              <option value="lower-left">lower left</option>
-              <option value="lower-right">lower right</option>
-              <option value="upper-left">upper left</option>
-            </select>
+              }}
+              onChange={setPlateSide}
+            />
           </div>
         </div>
       ) : null}

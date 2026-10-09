@@ -10,6 +10,7 @@ import { validateSlide } from '@turboslide/schema/validate';
 
 import type { EditorDispatch } from '../dispatch';
 import { Inspector } from '../Inspector';
+import { chooseOption } from './choose-option';
 
 // The inspector generated from the Zod annotations (SPEC 6.5): every annotated field of a rows
 // block gets a labelled control, and a change is one block.set (or one slide.update carrying one
@@ -170,6 +171,27 @@ describe('Inspector', () => {
       'slide.layout.type',
     );
     expect(screen.getByLabelText('slide: Ratio')).toBeTruthy();
+  });
+
+  it('draws an enum of five or more values as the shared dropdown, the trigger the control', () => {
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    render(<Inspector deck={WORKED_DECK} slide={slide()} revision={5} dispatch={dispatch} />);
+    /* docs/DROPDOWNS.md 3, site 34: the trigger carries the label, the id and the value */
+    const type = screen.getByLabelText('slide: Type');
+    expect(type.getAttribute('role')).toBe('combobox');
+    expect(type.getAttribute('data-control')).toBe('slide.layout.type');
+    expect(type.getAttribute('value')).toBe('cols');
+    const list = document.getElementById(type.getAttribute('aria-controls') ?? '');
+    const rows = Array.from(list?.querySelectorAll('[role="option"]') ?? []);
+    expect(rows.length).toBeGreaterThanOrEqual(5);
+    expect(
+      rows
+        .filter((row) => row.getAttribute('aria-selected') === 'true')
+        .map((row) => row.getAttribute('data-value')),
+    ).toEqual(['cols']);
+    /* the value already chosen writes nothing, as a select's change does not fire */
+    chooseOption('slide.layout.type', 'cols');
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('lists the blocks when none is selected and selects one on click', () => {

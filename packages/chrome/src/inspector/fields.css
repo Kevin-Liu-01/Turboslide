@@ -224,17 +224,12 @@
   accent-color: var(--pt-ink);
 }
 
-.ts-fo-field.is-disabled select,
-.ts-fo-field select {
-  box-sizing: border-box;
+/* the shared dropdown (Select.css draws it) fills its field at the 30 px of the number fields
+   beside it (docs/DROPDOWNS.md C6) */
+.ts-fo-field .ts-fo-select {
   width: 100%;
   height: 30px;
-  padding: 0 8px;
-  border: 1px solid var(--pt-hair);
-  border-radius: var(--pt-radius);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13px/1.4 var(--pt-text);
+  min-height: 30px;
 }
 
 .ts-fo-levels {

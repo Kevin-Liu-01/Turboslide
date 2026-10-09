@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 import { optionValue } from './props';
@@ -10,7 +11,7 @@ import './json.css';
 /**
  * A structured field as JSON (annotation control `json`): a layout ratio, a split head, a body
  * alignment, the weights of a specimen, row heights, tags. With a snap the common forms are a
- * select (5/7, 4/8, 1/1) and `custom` reveals the JSON field for the rest ({ left: 390 });
+ * dropdown (5/7, 4/8, 1/1) and Custom reveals the JSON field for the rest ({ left: 390 });
  * without one the JSON field stands alone. The field commits on Cmd Enter, Ctrl Enter or blur;
  * text that does not parse is kept in the field with a note and never written.
  */
@@ -80,18 +81,23 @@ export function JsonControl({ spec, onChange, disabled }: ControlProps) {
   return (
     <span className="ts-ctl-json">
       {options !== undefined ? (
-        <select
-          className="ts-ctl-select"
-          aria-label={showField ? `${spec.label} form` : spec.label}
-          data-control={showField ? `${spec.control}.form` : spec.control}
+        <Select
+          size="compact"
+          className="ts-ctl-json-form"
+          label={showField ? `${spec.label} form` : spec.label}
+          control={showField ? `${spec.control}.form` : spec.control}
           value={picked}
+          options={[
+            ...(spec.optional || picked === '' ? [{ value: '', label: 'None' }] : []),
+            ...options.map((option) => ({ value: String(option), label: String(option) })),
+            { value: 'custom', label: 'Custom' },
+          ]}
           disabled={disabled}
-          {...tipProps({
+          tip={{
             name: spec.inspector.label,
-            doc: spec.inspector.help ?? 'One of the common forms, or custom for a JSON value.',
-          })}
-          onChange={(event) => {
-            const raw = event.target.value;
+            doc: spec.inspector.help ?? 'One of the common forms, or Custom for a JSON value.',
+          }}
+          onChange={(raw) => {
             if (raw === 'custom') {
               setCustom(true);
               return;
@@ -102,15 +108,7 @@ export function JsonControl({ spec, onChange, disabled }: ControlProps) {
             if (raw === '') onChange(undefined);
             else onChange(optionValue(raw, options));
           }}
-        >
-          {spec.optional || picked === '' ? <option value="">none</option> : null}
-          {options.map((option) => (
-            <option key={String(option)} value={String(option)}>
-              {String(option)}
-            </option>
-          ))}
-          <option value="custom">custom</option>
-        </select>
+        />
       ) : null}
       {showField ? (
         <textarea

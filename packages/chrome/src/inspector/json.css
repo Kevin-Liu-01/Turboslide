@@ -1,6 +1,6 @@
-/* The JSON control: the select (select.css) over the mono field, which is the text control's
-   box in the mono stack. A parse error sits under the field in titanium; the field keeps the
-   text until it parses or Escape restores the value. */
+/* The JSON control: the dropdown of the common forms (Select.css) over the mono field, which is
+   the text control's box in the mono stack. A parse error sits under the field in titanium; the
+   field keeps the text until it parses or Escape restores the value. */
 .ts-ctl-json {
   display: flex;
   flex-direction: column;
@@ -10,7 +10,7 @@
   min-width: 0;
 }
 
-.ts-ctl-json .ts-ctl-select {
+.ts-ctl-json .ts-ctl-json-form {
   align-self: flex-end;
 }
 

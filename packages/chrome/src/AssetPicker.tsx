@@ -6,6 +6,7 @@ import { ASSET_ROLES } from '@turboslide/schema/assets';
 
 import { cn } from './lib/cn';
 import { Seg } from './Seg';
+import { Select } from './Select';
 import { tipProps } from './Tooltip';
 import type { SegOption } from './Seg';
 
@@ -48,6 +49,12 @@ const ROLE_WORDS: Record<AssetRole, string> = {
   frame: 'frames',
   other: 'other',
 };
+
+/** A role's word as a row of the role dropdown reads it, in sentence case: `Openers`. */
+function roleRow(role: AssetRole): string {
+  const word = ROLE_WORDS[role];
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
 
 /** The rows a filter and a role leave, in id order. */
 export function filterAssets(
@@ -178,23 +185,19 @@ export function AssetPicker({
           />
         ) : null}
         {present.length > 4 ? (
-          <select
-            className="ts-ctl-select ts-asset-picker-roles"
-            aria-label={`${label} role list`}
-            data-control={`${control}.role.list`}
+          <Select<AssetRole | 'all'>
+            size="compact"
+            className="ts-asset-picker-roles"
+            label={`${label} role list`}
+            control={`${control}.role.list`}
             value={role}
-            {...tipProps({ name: 'Role', doc: 'Shows the assets of one role, or every role.' })}
-            onChange={(event) =>
-              setRole(event.target.value === 'all' ? 'all' : (event.target.value as AssetRole))
-            }
-          >
-            <option value="all">every role</option>
-            {present.map((r) => (
-              <option key={r} value={r}>
-                {ROLE_WORDS[r]}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: 'all', label: 'Every role' },
+              ...present.map((r) => ({ value: r, label: roleRow(r) })),
+            ]}
+            tip={{ name: 'Role', doc: 'Shows the assets of one role, or every role.' }}
+            onChange={setRole}
+          />
         ) : null}
       </div>
       <ul className="ts-asset-picker-list pt-scroll" role="listbox" aria-label={`${label} list`}>

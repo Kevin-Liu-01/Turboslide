@@ -44,6 +44,7 @@ import { cn } from '../lib/cn';
 import { DITHER } from '../menus/strings';
 import { isParked } from '../parked-controls';
 import type { ParkedSettings } from '../parked-controls';
+import { Select } from '../Select';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
 import { CheckField, NumberField, PanelButton, SelectField } from './fields';
@@ -127,15 +128,16 @@ export const SHADER_WORDS = {
   twoToneDoc: 'Screens the still into a light and a dark twin through the deck’s pattern',
   plate: 'Plate',
   plateDoc: 'The corner the two-tone still keeps clear for a title plate',
-  none: 'none',
+  none: 'None',
   ground:
     'The ground of this slide. A preset, a color or a value below renders it again; Change background removes it',
 } as const;
 
+/* rows of the Plate dropdown, in sentence case like the intake's (docs/DROPDOWNS.md 3.9) */
 const PLATE_WORDS: Readonly<Record<MaterialPlateSide, string>> = {
-  'lower-left': 'lower left',
-  'lower-right': 'lower right',
-  'upper-left': 'upper left',
+  'lower-left': 'Lower left',
+  'lower-right': 'Lower right',
+  'upper-left': 'Upper left',
 };
 
 const ID = 'formatOptions.shader';
@@ -519,20 +521,20 @@ function AdvancedGroup({
                   {label}
                 </span>
                 {spec.kind === 'enum' ? (
-                  <select
+                  <Select
+                    size="compact"
                     className="ts-shader-select"
-                    aria-label={label}
-                    data-control={control}
+                    label={label}
+                    control={control}
                     value={enumName(spec, value)}
+                    options={(spec.options ?? []).map((option) => ({
+                      value: option.name,
+                      label: option.name,
+                    }))}
                     disabled={disabled}
-                    onChange={(event) => onUniform(spec.name, event.target.value)}
-                  >
-                    {(spec.options ?? []).map((option) => (
-                      <option key={option.name} value={option.name}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
+                    tip={{ name: label, doc: spec.help ?? `${label} of the shader` }}
+                    onChange={(name) => onUniform(spec.name, name)}
+                  />
                 ) : spec.kind === 'float' || spec.kind === 'int' ? (
                   <input
                     className="ts-shader-number"

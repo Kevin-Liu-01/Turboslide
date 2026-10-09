@@ -9,6 +9,7 @@ import type { EditorHandle } from '../editor-shell';
 import { Icon } from '../icons';
 import type { IconName } from '../icons';
 import { cn } from '../lib/cn';
+import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
 import { swatchPaint, useDeckTokens } from './palette';
 
@@ -17,7 +18,7 @@ import './fields.css';
 /**
  * The small controls the round two Format options sections share (gslides-parity SPEC-2 section
  * 5, section 10): a number field that commits on Enter and blur, a slider with its value field, a
- * row of toggle buttons, a radio list, a select, a colour row of swatches and a hex field, and the
+ * row of toggle buttons, a radio list, a dropdown, a colour row of swatches and a hex field, and the
  * write context every section receives. Every control carries the Tooltip primitive with its
  * label; no `title` attribute. Values are numbers and tokens; the sections turn them into one
  * action call each.
@@ -277,7 +278,7 @@ export function ToggleRow<T extends string>({
   );
 }
 
-/** A native select in the panel grammar. */
+/** The shared dropdown (docs/DROPDOWNS.md 3) in the panel grammar, 30 px like the number fields. */
 export function SelectField<T extends string>({
   label,
   value,
@@ -298,20 +299,16 @@ export function SelectField<T extends string>({
   return (
     <label className={cn('ts-fo-field', disabled && 'is-disabled')}>
       <span className="ts-fo-field-label">{label}</span>
-      <select
+      <Select<T>
+        className="ts-fo-select"
         value={value}
-        aria-label={label}
-        data-control={control}
+        options={options}
+        label={label}
+        control={control}
         disabled={disabled}
-        onChange={(event) => onChange(event.target.value as T)}
-        {...tipProps({ name: label, ...(doc === undefined ? {} : { doc }) })}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+        onChange={onChange}
+        tip={{ name: label, ...(doc === undefined ? {} : { doc }) }}
+      />
     </label>
   );
 }

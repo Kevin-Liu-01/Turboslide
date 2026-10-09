@@ -19,6 +19,7 @@ import {
   sectionOfSlideControl,
   writeClosedSections,
 } from '../inspector/sections';
+import { chooseOption } from './choose-option';
 
 // The inspector of the chrome round (Kevin, 2026-09-11): sections with an icon and a title
 // each, the Text, Color and Position and size sections generated from the color, typography and
@@ -286,7 +287,7 @@ describe('Inspector sections', () => {
   it('turns a layout type change into slide.setLayout', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     render(<Inspector deck={WORKED_DECK} slide={flow} revision={7} dispatch={dispatch} />);
-    fireEvent.change(screen.getByLabelText('slide: Type'), { target: { value: 'freeform' } });
+    chooseOption('slide.layout.type', 'freeform');
     expect(dispatch).toHaveBeenCalledWith('slide.setLayout', {
       slideId: 'flow-demo',
       layout: { type: 'freeform' },

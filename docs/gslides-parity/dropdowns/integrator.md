@@ -8,6 +8,10 @@ pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, and
 read. Loads are one minute load averages, 49 to 125 through this pass from other sessions' jobs
 (never stopped), so no timing below is a verdict; counts, boxes and attributes do not move with load.
 
+Sections 1 to 7 are the first pass, on `931f69d8`. Section 8 is the second pass, after fix round 1
+(`51ca68df` to `8b5988b1`), written on 2026-10-09 from 10:49 to 11:40 PDT; its verdict replaces the
+first one.
+
 ## 1. The state at the start
 
 - `dropdowns/round` stood at `e564bf79`: nine commits over `0d3920a3` (DD-spec, DD-C#1, DD-C#2,
@@ -150,10 +154,150 @@ The reds, each read again:
 6. The typography composite draws its Font field (`family`) as a stepper through the font ids, as
    before this round; seen while changing Align and Columns, not changed.
 
-## 7. Verdict
+## 7. Verdict of the first pass
 
-The head to ship is the commit that adds this file, on `origin/main` `71c3556d`. Ready: every row
+Replaced by section 8.6. The head to ship was the commit that adds this file, on `origin/main`
+`71c3556d`. Ready: every row
 that passes on `main` passes on the branch (the smoke's 39 rows, the walk's 131 rows row for row,
 the nine spec rows, and the five enforce rows that pass on `main`), the unit tests of the six
 packages pass, and nothing functional regressed; the eight dropdown rows passed together with zero
 retries on the build with production's settings.
+
+## 8. The second pass, after fix round 1
+
+The integrator wrote this section on 2026-10-09 from 10:49 to 11:40 PDT. Nothing was pushed or
+deployed, no Vercel, Cloudflare, GitHub or Google setting changed, production was not read, and none
+of the guard's `.env` files was opened. Loads are one minute load averages, 58 to 98 through this
+pass, so no timing below is a verdict.
+
+### 8.1 The state at the start
+
+- `dropdowns/round` stood at `8b5988b1`: the first pass's head `931f69d8` and the six commits of fix
+  round 1, written from the keyboard and assistive technology verifier's pass 1 on `931f69d8`
+  (findings 1 to 6) and from item 2 of section 6. The branch holds 23 commits over `origin/main`, each
+  authored and committed by `kevin@generaltranslation.com`.
+
+  | Commit | What |
+  | --- | --- |
+  | `51ca68df` DD-fix#1 | A trigger disabled while it holds the focus keeps it (`aria-disabled`, no `disabled` attribute until the focus leaves); Tab with the list open keeps a focus the choice moved; Share's expiry choice gives the focus to the person's role field; a modal card gives a focus dropped to the body to the control at its place; `outsideOpenModal` keeps every key and clipboard event from outside an open modal dialog off the stage and the key table |
+  | `0e375a3a` DD-fix#2 | Forced colours: the active option and the lit menu row take `Highlight` and `HighlightText`; a focused or open trigger draws a 2 px outline 1 px outside its border |
+  | `8ed44447` DD-fix#3 | The listbox is named by its field (`aria-label`); an option's description is its description; a section with a heading is a named group, rows with none are the listbox's own; a placeholder's words are hidden from the tree |
+  | `c48190c6` DD-fix#4 | A scroll the page makes leaves an open list on its trigger; after a wheel outside the list, a scroll that moves the trigger closes it |
+  | `b16c9911` DD-fix#5 | `chrome.select.agent-set` waits for the revision to move, then reads it again 2 s later |
+  | `8b5988b1` DD-fix#6 | `docs/DROPDOWNS.md` 3.2, 3.3, 3.5, 3.6 and 3.7 state the rules above |
+
+- `origin/main` stood at `71c3556d`, fetched at 10:49 and 11:32 PDT. It did not move, so the branch
+  was not rebased and `main`'s readings of sections 4 and 5 stand; this pass compares against the
+  first pass's ledgers of `main` (`base-walk.json`, `base-specs.json`, `base-smoke.txt` in its scratch
+  folder) row for row.
+- No git, build or e2e lock was held and port 4790 was free. The two untracked pictures of section 1
+  were still at the checkout's root and were left in place.
+
+### 8.2 The fix round read in the code
+
+- `outsideOpenModal` (`packages/viewer/src/Selection.tsx`) matches `[role="dialog"][aria-modal="true"]`
+  outside `[hidden]`, `[inert]` and `[aria-hidden="true"]`. Every element that carries
+  `aria-modal="true"` in `apps/studio/src` and `packages`: the chrome's `Dialog` card (only when
+  modal), `Palette` (returns null while closed), `HelpCard` (its scrim takes `aria-hidden` while it
+  closes), `PresentShortcuts`, and the docs' `SearchWindow` and `DocsShell` (outside the editor). None
+  stays in the document while closed without one of those, so the stage's keys are held back only
+  while a modal dialog is open.
+- `useEditorKeys` handles Escape before the new check, so Escape from the body still closes the
+  dialog. The modal card has `tabIndex={-1}`, so a press on the card's text focuses the card and the
+  new focusout rule of `Dialog.tsx` does not move the focus.
+- `packages/agent/src/window/controls.ts` line 65 reads `aria-disabled="true"` as disabled, so a
+  trigger that keeps the focus during its write still refuses `set()`.
+
+### 8.3 The gates
+
+The branch's readings are of `8b5988b1`.
+
+| Gate | Branch (`8b5988b1`) | First pass (`c20d80a0`) | `main` (`71c3556d`) |
+| --- | --- | --- | --- |
+| `node_modules/.bin/tsc -b` | exit 0 in 2 s (current by its build info); `tsc -b --force`: exit 0 in 468 s (load 58 to 61) | exit 0 in 199 s | not run |
+| Unit, `vitest run --testTimeout=120000` | 332 files, 3,266 passed, 1 skipped, 2 todo, 0 failed, 411 s (load 63 to 87): chrome 112 files 1,072 passed, viewer 57 and 552, lint 17 and 142, theme 9 and 161, agent 13 and 274, studio 124 and 1,065 | 331 files, 3,251 passed | not run |
+| Brand lint, `main.ts --enforce` | exit 0 (load 63): 572 scripts, 121 stylesheets, 6 HTML and SVG files, 26 mood pictures; 0 open, 22 accepted, 0 stale | the same | not run |
+| Competitor guard and the native select lint; `core-matrix.test.mjs`, `what-works.test.mjs`, `docs-index.test.mjs`, `evidence-policy.test.mjs` | 2 files, 15 passed; 4 files, 59 passed. `what-works.mjs --check`: current | 6 files, 74 passed | not run |
+| Prettier | the 115 text files the branch changes against `origin/main`: clean | 108 files: clean | not run |
+| `git grep -n "<select" -- '*.tsx'`; `.selectOption(` calls | nothing; only the lint test's fixture strings | the same | not run |
+| `NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy` | exit 0 in 40 s (load 85 to 80) | exit 0 in 64 s | exit 0 in 94 s |
+| `scripts/check-client-bundle.mjs` | exit 1 on the same three lines as `main`. `EditorRoot` 519,107 B (600,000), `vendor` 516,305, `Slideshow` 490,708. Preloads: `/decks` 695,239 B in 12 chunks (600,000), `/signin` 519,760, `/deck/gt-brand` 531,064, `/edit/gt-brand` 1,042,213 (2,000,000), `/docs` 616,379 (450,000) | `/decks` 694,099, `/edit/gt-brand` 1,042,176, `EditorRoot` 519,070 | `/decks` 686,908 in 11 chunks, `/edit/gt-brand` 1,042,098, `EditorRoot` 519,419 |
+
+The fix round adds 1,140 B to `/decks` and 37 B to `/edit/gt-brand`; against `main`, `/decks` gains
+8,331 B and one chunk over a ceiling `main` is already over, and no route crosses a ceiling it held
+on `main`.
+
+### 8.4 The rows on the node-server build
+
+The build of `8b5988b1` was served on port 4790 from the checkout's root with section 5's settings:
+`TURBOSLIDE_ROOT` the checkout, `TURBOSLIDE_STORE=tmp`, `TURBOSLIDE_OVERLAY_DIR=.turboslide/int-overlay`,
+`TURBOSLIDE_REALTIME=memory`, `TURBOSLIDE_AUTH_DB=.turboslide/auth-int.sqlite`,
+`TURBOSLIDE_MAIL=capture`, `TURBOSLIDE_BUILD_COMMIT` the full sha of `8b5988b1` (also at build time,
+as the guard's deploy sets it), the fake Google pair, session and download secrets of 48 characters made once into
+a mode 600 file and never printed, and `TURBOSLIDE_LOCAL_OPEN`, `TURBOSLIDE_AUTH_RATE_LIMIT` and
+`TURBOSLIDE_TOKEN` unset. The overlay and the identity database were removed at the start. The
+guard's commands ran as it runs them, without its token wrapper, with `--parked
+docs/gslides-parity/focus/ship-4300058d.json` (its newest ship list), one after another.
+
+| Run | Branch (`8b5988b1`) | `main` (`71c3556d`, section 5) |
+| --- | --- | --- |
+| The smoke | 39 of 41 (load 71). Red: "json asset attachment" and "deck.info snapshots", the two rows red on `main` for the reasons of section 5. `/home` passed (3/3 marks); "build commit" served `8b5988b1` | 39 of 41, the same two rows red |
+| The walk, decks, text, fonts and versions | 128 passed, 1 failed, 2 not driven, 0 no step, 657 s (load 69 to 76). The verdict's failures hold only `fonts.table.takes-family`, a standing row of the guard, so the guard reads it green; `versions.show-changes-marks` is parked by the ship list | 128, 1, 2, 0 in 654 s. The 131 rows' results equal the branch's row for row (0 differences) |
+| The nine spec rows | 9 passed, zero retries, 258 s (load 76) | 9 passed |
+| The eight dropdown rows | 8 passed, zero retries, 261 s (load 75 to 81) | the rows' driver is not on `main` |
+| Rows of DROPDOWNS.md 7.3 that the fix round's dialog, Share and key changes reach: `chrome.layers.menu-over-dialog`, `share.dialog.new-deck-restricted-viewer`, `share.role-change.keeps-link`, `share.dialog.restricted-and-more`, `text.link.slide-target`, `export.print.download-pdf-follows-preview`, `brand.panel.words-match-sheet`, `themes.picker.lists-library`, `chrome.radius.controls` | 9 passed, zero retries, 263 s (load 88 to 98) | not read; none was red on the branch |
+
+What the dropdown rows read:
+
+- `chrome.select.every-site`: no `select` element on any surface; the contract held on /decks,
+  /print, the Share dialog in both access modes, Download with More options, Insert link, More fonts,
+  Publish to the web, Special characters, the Comments panel, the Theme panel, Format options of the
+  line, table, chart and text box (with the typography Align and Columns), and the link popover;
+  "/dev/auth: closed on this server (404), not read".
+- `chrome.select.keyboard`: "Share choice by Enter: focused true, disabled attribute false, focused
+  after the write true; after Tab inside true, after a blur inside true, after Tab, Shift+Tab,
+  Delete, x inside true; behind the dialog: revision 16 to 16, selected dd-table to dd-table, table 1"
+  (DD-fix#1); "Share Escape writes 0".
+- `chrome.select.pointer`: the list 446 px wide under a 446 px trigger at the same left edge; one
+  write on choosing, none on the open trigger or the sentence.
+- `chrome.select.over-dialog`: the list on the popover layer in both appearances, each row first at
+  its centre; the Download Fonts list whole.
+- `chrome.select.placement`: Line end's list above its trigger, 288 px tall; "after a scroll of 40 px
+  the page made" the list stayed open on its trigger (DD-fix#4).
+- `chrome.select.phone`: at 390 the list 284 px wide under a 284 px trigger, no horizontal scroll,
+  no `select` element, in both appearances.
+- `chrome.select.look`: the trigger 32 px, radius 6 px, Inter with tabular figures; in forced colours
+  the active option reads Highlight `rgba(5, 0, 73, 0.8)` with HighlightText `rgb(255, 255, 255)`,
+  the chosen row's check 16 px, the ring solid 2 px with a 1 px offset, open and closed (DD-fix#2).
+- `chrome.select.agent-set`: one write each way for General access; `set('dialog.share.mode',
+  'public')` threw a `RangeError` naming the field and the value; the table's Border weight
+  "revision 16 to 17" (DD-fix#5).
+
+No dropdown row and no row the guard counts was red, so none was read again: the smoke's two red rows
+and the parked walk row are the readings `main` gives. The server was stopped at 11:32 PDT and port
+4790 is free.
+
+### 8.5 Open after the second pass
+
+1. Section 6 item 1 (`enforce.spec.ts` on an SQLite identity database) stands. It was not read
+   again: the fix round changes no server or identity file.
+2. Section 6 item 2 is closed in the driver. DD-fix#5 found that the driver's `settled()`
+   (`apps/studio/e2e/core/lib.ts`) reads the realtime channel's pending count, which is 0 on the
+   memory tier, so it returned before the table's write, which took about 3 s at a load of 60. The
+   row read "revision 16 to 17" here. The slow table write at load is left as it is and recorded here.
+3. The bundle: `/decks` 695,239 B against 600,000 (686,908 on `main`); `/docs` 616,379 against
+   450,000 (the same on the first pass, 615,878 on `main`).
+4. Section 6 item 4 (the CLI banner) stands; `apps/cli` is not among the six packages read here.
+5. Section 6 item 5: the last case, a list opened during the inspector's scroll anchoring that
+   closed by itself, is the case DD-fix#4 fixes. The other cases stand.
+6. Section 6 item 6 (the typography Font stepper) stands.
+
+### 8.6 Verdict
+
+Ready. The head to ship is the commit that adds this section, on `origin/main` `71c3556d`; it
+changes this file alone, which is not in the build, so the readings of `8b5988b1` hold for it. Every
+row that passes on `main` passes on the branch (the smoke's 39 rows, the walk's 131 rows row for
+row, the nine spec rows), the eight dropdown rows and nine rows of DROPDOWNS.md 7.3 passed with zero
+retries on the build with production's settings, the unit tests of the six packages pass with 15
+more than the first pass, and the brand lint, the competitor guard, the native select lint and
+prettier are clean.

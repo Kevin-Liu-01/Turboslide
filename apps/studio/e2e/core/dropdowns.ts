@@ -593,6 +593,9 @@ export function chromeDropdowns(): string[] {
     await page.goto(`/print/${person.deck}`);
     const layout = triggerOf(page, 'print.layout');
     await layout.waitFor({ timeout: 60_000 });
+    /* the server draws the trigger before React attaches its keys (the page's hydration mark,
+       core/export.spec.ts): keys pressed earlier opened nothing and read no active row */
+    await page.waitForSelector('[data-control="print.page"][data-hydrated]', { timeout: 60_000 });
     await layout.focus();
     await page.keyboard.press('ArrowDown');
     for (let i = 0; i < 4; i += 1) await page.keyboard.press('ArrowDown');
@@ -713,6 +716,69 @@ export function chromeDropdowns(): string[] {
     expect(after.revision, 'nothing written to the deck behind the dialog').toBe(behind.revision);
     expect(after.blockId, 'the selection behind the dialog unchanged').toBe('dd-table');
     expect(table, 'the selected table stays').toBe(1);
+    /* a focus move from a control that changes the dialog as it loses the focus lands where the
+       person aimed (the keyboard verifier's final pass 2 on the round, F1: the card moved the
+       focus in the middle of the browser's move, and Shift+Tab from the expiry field reached
+       Settings, a click into Add people by email lost the typed address, and Tab from the Image
+       by URL address reached Close) */
+    const focusedControl = () =>
+      share.evaluate(() => document.activeElement?.getAttribute('data-control') ?? null);
+    await openShare(share);
+    const more = ctl(share, 'dialog.share.more');
+    if ((await more.getAttribute('aria-expanded')) !== 'true') await more.click();
+    const guest = 'dd-keys-guest@example.test';
+    const emails = ctl(share, 'dialog.share.emails');
+    await emails.fill(guest);
+    await ctl(share, 'dialog.share.send').click();
+    const guestRole = triggerOf(share, `dialog.share.grant.${guest}.role`);
+    await guestRole.waitFor({ timeout: 15_000 });
+    await expect(guestRole).not.toHaveAttribute('aria-disabled', 'true', { timeout: 15_000 });
+    const openExpiry = async () => {
+      await guestRole.focus();
+      for (const key of ['ArrowDown', 'End', 'ArrowUp', 'Enter']) await share.keyboard.press(key);
+      const expiry = triggerOf(share, `dialog.share.grant.${guest}.expiry`);
+      await expiry.waitFor({ timeout: 10_000 });
+      await expiry.focus();
+    };
+    await openExpiry();
+    await share.keyboard.press('Shift+Tab');
+    await share.waitForTimeout(300);
+    const fromExpiry = await focusedControl();
+    await openExpiry();
+    await emails.click();
+    await share.keyboard.type('pat@example.test');
+    await share.waitForTimeout(300);
+    const clicked = { focus: await focusedControl(), value: await emails.inputValue() };
+    await emails.fill('');
+    /* the guest leaves again: Remove access, with the browser's confirmation accepted */
+    share.once('dialog', (dialog) => void dialog.accept());
+    await guestRole.focus();
+    for (const key of ['ArrowDown', 'End', 'Enter']) await share.keyboard.press(key);
+    await expect(share.locator(`li[data-control="dialog.share.grant.${guest}"]`)).toHaveCount(0, {
+      timeout: 15_000,
+    });
+    await closeDialogs(share);
+    await menuPath(share, 'insert', 'insert.image', 'insert.image.byUrl');
+    await ctl(share, 'dialog.imageByUrl.url').waitFor({ timeout: 10_000 });
+    await share.keyboard.type('https://example.test/picture.png');
+    await share.keyboard.press('Tab');
+    await share.waitForTimeout(300);
+    const fromAddress = await focusedControl();
+    await closeDialogs(share);
+    test.info().annotations.push({
+      type: 'moves',
+      description: `Shift+Tab from the expiry field to ${fromExpiry}; a click into Add people by email from the expiry field: focus ${clicked.focus}, value "${clicked.value}"; Tab from the typed Image by URL address to ${fromAddress}`,
+    });
+    expect(fromExpiry, 'Shift+Tab from the expiry field reaches the role field above it').toBe(
+      `dialog.share.grant.${guest}.role`,
+    );
+    expect(clicked, 'a click from the expiry field into the email field keeps the typing').toEqual({
+      focus: 'dialog.share.emails',
+      value: 'pat@example.test',
+    });
+    expect(fromAddress, 'Tab from the typed address reaches Cancel').toBe(
+      'dialog.imageByUrl.cancel',
+    );
   });
 
   /* DROPDOWNS.md 3.4, 3.5: the pointer in the Share dialog and inside the Download dialog's label */

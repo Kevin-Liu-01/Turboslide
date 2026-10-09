@@ -12,7 +12,12 @@ import {
   noteMenuRowActivated,
   recentMenuRow,
 } from '../Dialog';
+import { ImageByUrlDialog } from '../dialogs/ImageByUrl';
+import { EditorShellContext } from '../editor-shell-context';
+import type { EditorShellState } from '../editor-shell-context';
+import { Select } from '../Select';
 import { hideTooltip } from '../Tooltip';
+import { browserMove, nextTask } from './browser-move';
 
 // The dialog primitive (gslides-parity SPEC 13.3; R08 B9): role dialog named by its title, the
 // first field focused on open, a focus trap on Tab and Shift+Tab, Esc cancels, Enter runs the
@@ -312,6 +317,8 @@ describe('the focus never rests on the body (the keyboard verifier on the dropdo
       fireEvent.click(ben);
       await Promise.resolve();
     });
+    /* the card checks in a task of its own, after the focus move has ended (final pass 2, F1) */
+    await nextTask();
     expect(row('row.ben')).toBeNull();
     expect(document.activeElement).toBe(row('row.cy'));
     /* the last control leaves: the one before it in the order */
@@ -322,6 +329,7 @@ describe('the focus never rests on the body (the keyboard verifier on the dropdo
       add.remove();
       await Promise.resolve();
     });
+    await nextTask();
     expect(document.activeElement).toBe(row('row.cy'));
   });
 
@@ -336,6 +344,7 @@ describe('the focus never rests on the body (the keyboard verifier on the dropdo
       fireEvent.click(ben);
       await Promise.resolve();
     });
+    await nextTask();
     expect(row('row.ben')).toBeNull();
     expect(document.activeElement).toBe(row('row.cy'));
     /* the last control leaves outside React: the one before it in the order */
@@ -345,6 +354,7 @@ describe('the focus never rests on the body (the keyboard verifier on the dropdo
       add.remove();
       await Promise.resolve();
     });
+    await nextTask();
     expect(document.activeElement).toBe(row('row.cy'));
   });
 
@@ -356,7 +366,160 @@ describe('the focus never rests on the body (the keyboard verifier on the dropdo
       ana.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
       await Promise.resolve();
     });
+    await nextTask();
     expect(document.activeElement).toBe(ana);
+  });
+});
+
+/* The keyboard verifier's final pass 2 on the dropdown round, F1: the check above ran from the
+   card's MutationObserver in the gap of a focus move, where the page body is the active element,
+   whenever the control losing the focus changed the card (the Share expiry field hides, a trigger
+   takes its disabled attribute back after its write, Image by URL shows its preview). It moved
+   the focus to the control at the old place, and the browser dropped the person's Tab, Shift+Tab
+   or click. browserMove makes the gap jsdom does not have. */
+describe('a control that changes the card as it loses the focus (final pass 2, F1)', () => {
+  const ROLES = [
+    { value: 'viewer', label: 'Viewer' },
+    { value: 'commenter', label: 'Commenter' },
+  ] as const;
+
+  function Share({ busy = false }: { busy?: boolean }) {
+    const [expiring, setExpiring] = useState(true);
+    return (
+      <Dialog title="Share" onClose={() => undefined} control="dialog.moves">
+        <Select
+          value="viewer"
+          options={ROLES}
+          label="Role"
+          control="moves.role"
+          disabled={busy}
+          onChange={() => undefined}
+        />
+        {expiring ? (
+          <input
+            aria-label="Add expiration"
+            data-control="moves.expiry"
+            onBlur={() => setExpiring(false)}
+          />
+        ) : null}
+        <button type="button" data-control="moves.settings" disabled={busy}>
+          Settings
+        </button>
+        <input aria-label="Add people by email" data-control="moves.emails" />
+      </Dialog>
+    );
+  }
+
+  const at = (name: string) => document.querySelector<HTMLElement>(`[data-control="${name}"]`);
+
+  it('lets Shift+Tab from a field that hides on blur reach the control above it', async () => {
+    render(<Share />);
+    const expiry = at('moves.expiry')!;
+    act(() => expiry.focus());
+    const role = at('moves.role')!;
+    const taken = await browserMove(expiry, role);
+    expect(at('moves.expiry')).toBeNull();
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(role);
+  });
+
+  it('lets a click from a field that hides on blur reach the email field, which keeps the words typed', async () => {
+    render(<Share />);
+    const expiry = at('moves.expiry')!;
+    act(() => expiry.focus());
+    const emails = at('moves.emails') as HTMLInputElement;
+    const taken = await browserMove(expiry, emails);
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(emails);
+    fireEvent.change(emails, { target: { value: 'pat@example.test' } });
+    expect(emails.value).toBe('pat@example.test');
+    expect(document.activeElement).toBe(emails);
+  });
+
+  it('lets a click leave a trigger that kept the focus through its write and takes the disabled attribute as it leaves', async () => {
+    const view = render(<Share />);
+    act(() => at('moves.expiry')!.focus());
+    const role = at('moves.role') as HTMLButtonElement;
+    act(() => role.focus());
+    /* the write runs: every control but the focused trigger is disabled */
+    view.rerender(<Share busy />);
+    expect(document.activeElement).toBe(role);
+    expect(role.disabled).toBe(false);
+    expect(role.getAttribute('aria-disabled')).toBe('true');
+    const emails = at('moves.emails')!;
+    const taken = await browserMove(role, emails);
+    expect(role.disabled).toBe(true);
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(emails);
+  });
+
+  function ByUrl() {
+    const [preview, setPreview] = useState(false);
+    return (
+      <Dialog
+        title="Insert image"
+        onClose={() => undefined}
+        control="dialog.byUrl"
+        cancel
+        actions={[
+          { label: 'Insert', primary: true, onClick: () => undefined, control: 'dialog.byUrl.ok' },
+        ]}
+      >
+        <input
+          type="url"
+          autoFocus
+          aria-label="Image address"
+          data-control="dialog.byUrl.url"
+          onBlur={() => setPreview(true)}
+        />
+        {preview ? <img alt="" data-control="dialog.byUrl.preview" /> : null}
+      </Dialog>
+    );
+  }
+
+  it('lets Tab from a field the card focused as it opened, whose blur shows a preview, reach Cancel', async () => {
+    render(<ByUrl />);
+    const url = at('dialog.byUrl.url')!;
+    expect(document.activeElement).toBe(url);
+    const cancel = at('dialog.byUrl.cancel')!;
+    const taken = await browserMove(url, cancel);
+    expect(at('dialog.byUrl.preview')).not.toBeNull();
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(cancel);
+  });
+
+  it('gives a drop from the field the card focused as it opened to the control at its place, not to Close', async () => {
+    render(<ByUrl />);
+    const url = at('dialog.byUrl.url')!;
+    expect(document.activeElement).toBe(url);
+    /* the field leaves with the focus and no focusout (Firefox; jsdom sends none either) */
+    await act(async () => {
+      url.remove();
+      await Promise.resolve();
+    });
+    await nextTask();
+    expect(document.activeElement).toBe(at('dialog.byUrl.cancel'));
+  });
+
+  it('lets Tab from the Image by URL address, typed and not yet previewed, reach Cancel', async () => {
+    const shell = {
+      input: { slideId: 's1', revision: 1, dispatch: vi.fn() },
+      closeDialog: vi.fn(),
+    } as unknown as EditorShellState;
+    render(
+      <EditorShellContext value={shell}>
+        <ImageByUrlDialog />
+      </EditorShellContext>,
+    );
+    const address = at('dialog.imageByUrl.url') as HTMLInputElement;
+    expect(document.activeElement).toBe(address);
+    fireEvent.change(address, { target: { value: 'https://example.test/picture.png' } });
+    expect(at('dialog.imageByUrl.preview')).toBeNull();
+    const cancel = at('dialog.imageByUrl.cancel')!;
+    const taken = await browserMove(address, cancel);
+    expect(at('dialog.imageByUrl.preview')).not.toBeNull();
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(cancel);
   });
 });
 

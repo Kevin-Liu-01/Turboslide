@@ -245,11 +245,26 @@ export function Dialog({
      leaves. Firefox sends no focusout and no blur when the focused element leaves the document,
      so the card also watches its own tree and the disabled and hidden attributes in it, and
      checks after each change (the keyboard verifier's final pass 1 on the dropdown round,
-     finding 2: in Firefox, Remove access left the focus on the body) */
+     finding 2: in Firefox, Remove access left the focus on the body).
+     The check runs in a task of its own, after the task that changed the card. A browser moves
+     the focus in steps: the old control's focusout, then the new control's focus, with the page
+     body as the active element between them, and the microtasks a listener queues run in that
+     gap. A control that changes the card as it loses the focus (the Share expiry field hides,
+     a dropdown trigger that kept the focus through its write takes the disabled attribute,
+     Image by URL shows its preview) made a check in the gap read the body and move the focus,
+     and the browser then dropped the person's Tab, Shift+Tab or click (the keyboard verifier's
+     final pass 2 on the dropdown round, F1). After the task the move has ended: the focus is on
+     the control it reached, or on the body when a control dropped it. */
   const place = useRef(-1);
   useEffect(() => {
     const el = card.current;
     if (!modal || !el) return undefined;
+    /* the control the card focused as it opened (the first field, an autoFocus field) took the
+       focus before this effect listened, so its place is read here; with no place a drop from it
+       went to the first control, Close */
+    const opened = document.activeElement;
+    if (opened instanceof HTMLElement && el.contains(opened))
+      place.current = focusableIn(el).indexOf(opened);
     const onIn = (event: FocusEvent) => {
       if (event.target instanceof HTMLElement)
         place.current = focusableIn(el).indexOf(event.target);
@@ -264,11 +279,19 @@ export function Dialog({
          the browser's confirmation closed */
       (list[at] ?? list[0] ?? el).focus({ preventScroll: true, focusVisible: true });
     };
+    let timer = 0;
+    const check = () => {
+      if (timer !== 0) return;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        restore();
+      }, 0);
+    };
     const onOut = (event: FocusEvent) => {
       if (event.relatedTarget !== null) return;
-      queueMicrotask(restore);
+      check();
     };
-    const changes = new MutationObserver(restore);
+    const changes = new MutationObserver(check);
     changes.observe(el, {
       childList: true,
       subtree: true,
@@ -278,6 +301,7 @@ export function Dialog({
     el.addEventListener('focusin', onIn);
     el.addEventListener('focusout', onOut);
     return () => {
+      window.clearTimeout(timer);
       changes.disconnect();
       el.removeEventListener('focusin', onIn);
       el.removeEventListener('focusout', onOut);

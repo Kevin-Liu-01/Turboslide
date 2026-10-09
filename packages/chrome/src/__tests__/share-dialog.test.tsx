@@ -28,6 +28,7 @@ import {
   accessSentence,
 } from '../dialogs/Share';
 import type { AccessRecordJson } from '../dialogs/Share';
+import { browserMove, nextTask } from './browser-move';
 import { chooseOption } from './choose-option';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
 import type { EditorAccess, EditorShellInput } from '../editor-shell';
@@ -1416,6 +1417,8 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
       expect(document.activeElement).toBe(role);
       await answer({ record: record({ revision: 4 }) });
+      /* the card checks in a task of its own, after the focus move has ended (final pass 2, F1) */
+      await nextTask();
       expect(trigger(leeRole)).toBeNull();
       expect(document.activeElement).not.toBe(document.body);
       expect(card.contains(document.activeElement)).toBe(true);
@@ -1446,6 +1449,7 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       keys(role, 'ArrowDown', 'End', 'Enter');
       expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
       await answer({ record: record({ revision: 4 }) });
+      await nextTask();
       expect(trigger(leeRole)).toBeNull();
       expect(document.activeElement).not.toBe(document.body);
       const list = focusableIn(card);
@@ -1474,5 +1478,124 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       .getElementById(listId)
       ?.querySelector('[role="option"][aria-selected="true"]');
     expect(chosen?.textContent).toContain('Viewer');
+  });
+
+  /* the final pass 2, F1: the card's focus check ran in the gap of a focus move whenever the
+     control losing the focus changed the card, and the browser dropped the person's move: Shift+Tab
+     from the expiry field reached Settings, a click into Add people by email from the expiry field
+     or from a field whose write ran left the address field empty. browserMove makes the gap. */
+  const expiryOf = 'dialog.share.grant.lee@example.test.expiry';
+  const emailsField = () =>
+    document.querySelector<HTMLInputElement>('[data-control="dialog.share.emails"]');
+
+  /** Opens Settings and the expiry field of lee's row, with the focus on the expiry field. */
+  async function expiring(dispatch: ReturnType<typeof writes>['dispatch']) {
+    open({ ...owned(), grants: [lee] }, dispatch);
+    await flush();
+    openMore();
+    const role = trigger(leeRole)!;
+    act(() => role.focus());
+    keys(role, 'ArrowDown', 'End', 'ArrowUp', 'Enter');
+    const expiry = trigger(expiryOf)!;
+    expect(expiry).not.toBeNull();
+    act(() => expiry.focus());
+    return expiry;
+  }
+
+  it('lets Shift+Tab from the expiry field reach the role field above it', async () => {
+    const { dispatch } = writes();
+    const expiry = await expiring(dispatch);
+    const taken = await browserMove(expiry, trigger(leeRole)!);
+    expect(taken).toEqual([]);
+    expect(trigger(expiryOf)).toBeNull();
+    expect(document.activeElement).toBe(trigger(leeRole));
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('lets a click from the expiry field into Add people by email keep the address typed', async () => {
+    const { dispatch } = writes();
+    const expiry = await expiring(dispatch);
+    const emails = emailsField()!;
+    const taken = await browserMove(expiry, emails);
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(emails);
+    fireEvent.change(emails, { target: { value: 'pat@example.test' } });
+    await nextTask();
+    expect(emails.value).toBe('pat@example.test');
+    expect(document.activeElement).toBe(emails);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('lets a click into Add people by email leave a role field and General access while their writes run', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{"error":"not_found"}', { status: 404 }))),
+    );
+    try {
+      const { dispatch, answer } = writes();
+      open({ ...owned(), grants: [lee] }, dispatch);
+      await flush();
+      openMore();
+      const emails = emailsField()!;
+      /* a person's role chosen with the pointer: the field keeps the focus through the write */
+      const role = trigger(leeRole)!;
+      act(() => role.focus());
+      chooseOption(leeRole, 'commenter');
+      expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.setRole']);
+      expect(document.activeElement).toBe(role);
+      expect(role.getAttribute('aria-disabled')).toBe('true');
+      const first = await browserMove(role, emails);
+      expect(first).toEqual([]);
+      expect(role.disabled).toBe(true);
+      expect(document.activeElement).toBe(emails);
+      fireEvent.change(emails, { target: { value: 'lost words' } });
+      await answer();
+      await nextTask();
+      expect(document.activeElement).toBe(emails);
+      expect(emails.value).toBe('lost words');
+      /* General access the same */
+      const mode = trigger('dialog.share.mode')!;
+      act(() => mode.focus());
+      chooseOption('dialog.share.mode', 'link');
+      expect(dispatch.mock.calls.map(([action]) => action)).toEqual([
+        'share.setRole',
+        'share.setGeneralAccess',
+      ]);
+      expect(document.activeElement).toBe(mode);
+      const second = await browserMove(mode, emails);
+      expect(second).toEqual([]);
+      expect(document.activeElement).toBe(emails);
+      await answer({
+        record: record({ revision: 5, generalAccess: { mode: 'link', role: 'viewer' } }),
+      });
+      await nextTask();
+      expect(document.activeElement).toBe(emails);
+      expect(emails.value).toBe('lost words');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('lets Shift+Tab right after a choice by Enter go back while the write runs', async () => {
+    const { dispatch, answer } = writes();
+    open({ ...owned(), grants: [lee] }, dispatch);
+    await flush();
+    openMore();
+    const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]')!;
+    const role = trigger(leeRole)!;
+    act(() => role.focus());
+    keys(role, 'ArrowDown', 'ArrowDown', 'Enter');
+    expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.setRole']);
+    /* the browser's Shift+Tab goes to the control before the field among those the write left
+       enabled */
+    const list = focusableIn(card);
+    const back = list[list.indexOf(role) - 1]!;
+    expect(back).toBeDefined();
+    const taken = await browserMove(role, back);
+    expect(taken).toEqual([]);
+    expect(document.activeElement).toBe(back);
+    await answer();
+    await nextTask();
+    expect(document.activeElement).toBe(back);
   });
 });

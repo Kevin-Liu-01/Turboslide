@@ -29,7 +29,9 @@
 // Round three (gslides-parity SPEC-3 8.8, 16.4; report 10 P23): the security rows. Every page
 // route carries the headers of 8.8 (`x-content-type-options`, `x-frame-options` except /embed,
 // `referrer-policy`, `permissions-policy`, `x-request-id`, HSTS on https) and the nonce based
-// `content-security-policy-report-only` with `worker-src 'self' blob:`; `/embed/<deck>` names the
+// `content-security-policy-report-only` with `worker-src 'self' blob:` (enforced as
+// `content-security-policy` on the document routes since HR-W#2, the row `csp enforced /deck/<deck>`
+// of docs/hardening/HARDENING.md 8.3); `/embed/<deck>` names the
 // Prototemplate ancestors instead of `frame-ancestors 'none'`; a `.json` asset of the deck is an
 // attachment with `nosniff` and a sandboxing policy (the svg row is the same rule; the seed decks
 // carry no svg twin, pass `--asset <file>.svg` when one exists); a restricted deck id answers 404
@@ -561,7 +563,7 @@ function securityChecks(base, deck, args) {
     rows.push({
       name: `headers ${path}`,
       path,
-      expect: `the headers of 8.8${https ? ' with HSTS' : ''}, X-Frame-Options DENY, a report only CSP with worker-src blob:`,
+      expect: `the headers of 8.8${https ? ' with HSTS' : ''}, X-Frame-Options DENY, a CSP with worker-src blob:`,
       pass: (r) =>
         missingHeaders(r, PAGE_HEADERS).length === 0 &&
         (!https || 'strict-transport-security' in r.headers) &&
@@ -583,6 +585,18 @@ function securityChecks(base, deck, args) {
       /frame-ancestors https:\/\/prototemplate\.com/.test(cspOf(r)),
     detail: (r) =>
       `x-frame-options ${r.headers['x-frame-options'] ?? 'none'}; ${/frame-ancestors ([^;]+)/.exec(cspOf(r))?.[1] ?? 'no frame-ancestors'}`,
+  });
+  /* HR-W#2 (WEB-3): the document routes enforce the policy. A report only policy there is the way
+     back (TURBOSLIDE_CSP=report) and reads red here, so the switch back is never silent */
+  rows.push({
+    name: `csp enforced /deck/${deck}`,
+    path: `/deck/${deck}`,
+    expect: 'content-security-policy with a nonce, and no content-security-policy-report-only',
+    pass: (r) =>
+      /'nonce-[A-Za-z0-9+/=]+'/.test(r.headers['content-security-policy'] ?? '') &&
+      !('content-security-policy-report-only' in r.headers),
+    detail: (r) =>
+      `${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
   });
   rows.push({
     name: 'json asset attachment',

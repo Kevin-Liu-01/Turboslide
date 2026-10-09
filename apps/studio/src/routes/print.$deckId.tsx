@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { Link, createFileRoute, notFound } from '@tanstack/react-router';
+import { Link, createFileRoute, notFound, useRouter } from '@tanstack/react-router';
 import type { ErrorComponentProps } from '@tanstack/react-router';
 
 import { DialogCheck } from '@turboslide/chrome/Dialog';
@@ -134,6 +134,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 function PrintPage() {
+  /* the request's CSP nonce (router.tsx requestNonce), so the enforced policy of the document
+     routes runs the fit script below (HR-W#2); the browser hides the attribute after the run */
+  const nonce = useRouter().options.ssr?.nonce;
   const payload = Route.useLoaderData();
   const search = Route.useSearch();
   const { deckId } = Route.useParams();
@@ -324,7 +327,11 @@ function PrintPage() {
         {/* the fit before first paint (gslides-parity SPEC-3 9.2 R1): every sheet's --k from its own
             width as the parser reaches this script, so the server frame is already at scale and the
             observer above only follows resizes; the sheets suppress the hydration warning for it */}
-        <script dangerouslySetInnerHTML={{ __html: PRINT_FIT_SCRIPT }} />
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: PRINT_FIT_SCRIPT }}
+        />
       </section>
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
     </main>

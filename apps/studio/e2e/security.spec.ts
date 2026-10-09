@@ -262,13 +262,15 @@ test('the headers of 8.8 on four routes, the embed exception, and worker-src blo
   const embed = await request.get(`/embed/${DECK}`);
   expect(embed.status()).toBe(200);
   expect(embed.headers()['x-frame-options']).toBeUndefined();
-  expect(embed.headers()['content-security-policy-report-only']).toContain(
-    'frame-ancestors https://prototemplate.com https://*.prototemplate.com',
-  );
+  expect(
+    embed.headers()['content-security-policy-report-only'] ??
+      embed.headers()['content-security-policy'],
+  ).toContain('frame-ancestors https://prototemplate.com https://*.prototemplate.com');
   // an API answer is never cached and carries no page policy
   const api = await request.get('/api/agent');
   expect(api.headers()['cache-control']).toBe('no-store');
   expect(api.headers()['content-security-policy-report-only']).toBeUndefined();
+  expect(api.headers()['content-security-policy']).toBeUndefined();
   // an asset answer carries the resource policy
   const asset = await request.get(`/decks/${DECK}/assets/nothing.png`);
   expect([200, 302, 404]).toContain(asset.status());

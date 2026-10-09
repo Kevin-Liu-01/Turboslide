@@ -8,10 +8,12 @@ import {
   assetResponseHeaders,
   buildCsp,
   clientAddress,
+  cspMode,
   contentTypeRefusal,
   csrfFilter,
   effectiveHost,
   embedAncestors,
+  isDocumentPath,
   isLocalRequest,
   publicStoreHost,
   publicStoreOrigin,
@@ -337,14 +339,27 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(page['cross-origin-opener-policy']).toBe('same-origin');
     expect(page['permissions-policy']).toContain('camera=()');
     expect(page['x-request-id']).toBe('req-1');
-    expect(page['content-security-policy-report-only']).toContain("frame-ancestors 'none'");
-    expect(page['content-security-policy']).toBeUndefined();
+    // a document route enforces the policy by default (HR-W#2)
+    expect(page['content-security-policy']).toContain("frame-ancestors 'none'");
+    expect(page['content-security-policy-report-only']).toBeUndefined();
     const embed = securityHeadersFor('/embed/q4-review', base);
     expect(embed['x-frame-options']).toBeUndefined();
     expect(embed['cross-origin-opener-policy']).toBeUndefined();
-    expect(embed['content-security-policy-report-only']).toContain(
+    // the embed enforces every directive but the frame rule, which stays report only by default:
+    // a published embed is framed by whatever site its owner pastes the snippet into
+    expect(embed['content-security-policy']).toContain("script-src 'self' 'nonce-abc123'");
+    expect(embed['content-security-policy']).not.toContain('frame-ancestors');
+    expect(embed['content-security-policy-report-only']).toBe(
+      'frame-ancestors https://prototemplate.com https://*.prototemplate.com; report-uri /api/x/csp/report',
+    );
+    const embedEnforced = securityHeadersFor('/embed/q4-review', {
+      ...base,
+      env: { TURBOSLIDE_CSP: 'enforce' },
+    });
+    expect(embedEnforced['content-security-policy']).toContain(
       'frame-ancestors https://prototemplate.com https://*.prototemplate.com',
     );
+    expect(embedEnforced['content-security-policy-report-only']).toBeUndefined();
     const exchange = securityHeadersFor('/s/abcdefghijklmnopqrstuv', base);
     expect(exchange['referrer-policy']).toBe('no-referrer');
     // plain http never pins itself; API answers are never cached and carry no page policy
@@ -387,7 +402,7 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
       nonce: 'n',
       requestId: 'r',
       secure: true,
-      env: { VERCEL: '1' },
+      env: { VERCEL: '1', TURBOSLIDE_CSP: 'report' },
     });
     expect(reported['content-security-policy-report-only']).not.toContain(
       'upgrade-insecure-requests',
@@ -409,6 +424,57 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
         'content-security-policy-report-only'
       ],
     ).toBeUndefined();
+  });
+
+  it('enforces the policy on the document routes by default and report only elsewhere (HR-W#2)', () => {
+    const headerOf = (path: string, env: Record<string, string> = {}) => {
+      const headers = securityHeadersFor(path, { ...base, env });
+      return headers['content-security-policy'] !== undefined
+        ? 'enforce'
+        : headers['content-security-policy-report-only'] !== undefined
+          ? 'report'
+          : 'none';
+    };
+    for (const path of [
+      '/deck/q4',
+      '/embed/q4',
+      '/present/q4',
+      '/print/q4',
+      '/s/abcdefghijklmnopqrstuv',
+      '/edit/q4',
+      '/new',
+    ]) {
+      expect(isDocumentPath(path), path).toBe(true);
+      expect(headerOf(path), path).toBe('enforce');
+      // the way back: TURBOSLIDE_CSP=report sends every route report only
+      expect(headerOf(path, { TURBOSLIDE_CSP: 'report' }), path).toBe('report');
+      expect(headerOf(path, { TURBOSLIDE_CSP: 'off' }), path).toBe('none');
+    }
+    for (const path of [
+      '/decks',
+      '/decks/trash',
+      '/home',
+      '/docs/start',
+      '/signin',
+      '/newer',
+      '/',
+    ]) {
+      expect(isDocumentPath(path), path).toBe(false);
+      expect(headerOf(path), path).toBe('report');
+      expect(headerOf(path, { TURBOSLIDE_CSP: 'enforce' }), path).toBe('enforce');
+    }
+    // an API answer carries no page policy in any mode
+    expect(headerOf('/api/actions/deck.info')).toBe('none');
+    expect(headerOf('/api/actions/deck.info', { TURBOSLIDE_CSP: 'enforce' })).toBe('none');
+    expect(cspMode({}, '/edit/q4')).toBe('enforce');
+    expect(cspMode({}, '/decks')).toBe('report');
+    expect(cspMode({})).toBe('report');
+    expect(cspMode({ TURBOSLIDE_CSP: ' Report ' }, '/edit/q4')).toBe('report');
+    // the enforced policy carries the nonce, the report endpoint and no inline script source
+    const enforced = securityHeadersFor('/deck/q4', base)['content-security-policy'] ?? '';
+    expect(enforced).toContain("'nonce-abc123'");
+    expect(enforced).toContain('report-uri /api/x/csp/report');
+    expect(enforced).not.toMatch(/script-src[^;]*'unsafe-inline'/);
   });
 
   it('reads the extra embed ancestors from the variable, https names only', () => {

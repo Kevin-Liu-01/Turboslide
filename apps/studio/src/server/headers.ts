@@ -30,9 +30,9 @@ import {
  * middleware (`securityHeadersMiddleware`: HSTS, nosniff, the frame rule with the `/embed`
  * exception, the referrer rule with the `/s/*` exception, the permissions policy, COOP, CORP on
  * the asset routes, `no-store` on every API answer, the request id, and the nonce based CSP in
- * report only mode with the report endpoint), the widened CSRF filter (`csrfFilter`), the JSON
- * content type rule (`contentTypeMiddleware`) and the browser `Origin` refusal of the agent
- * routes (`refuseForeignOrigin`). Server only.
+ * report only mode with the report endpoint, enforced on the document routes since HR-W#2), the
+ * widened CSRF filter (`csrfFilter`), the JSON content type rule (`contentTypeMiddleware`) and the
+ * browser `Origin` refusal of the agent routes (`refuseForeignOrigin`). Server only.
  */
 export {
   TRUST_PROXY_ENV,
@@ -167,6 +167,8 @@ export type CspOptions = {
   env?: Env;
   /** the policy goes out as `Content-Security-Policy-Report-Only`; the directives a report only policy cannot carry are left out */
   reportOnly?: boolean;
+  /** false leaves `frame-ancestors` out (the enforced half of the embed's default policy) */
+  frameAncestors?: boolean;
 };
 
 /** The variable that names the public store's host (the twins' origin), for the policy. */
@@ -207,16 +209,41 @@ export function publicStoreOrigin(env: Env = process.env): string | null {
   return host === null ? null : `https://${host}`;
 }
 export const PRESIGN_HOST_ENV = 'TURBOSLIDE_PRESIGN_HOST';
-/** `report` (the default) ships the policy as `Content-Security-Policy-Report-Only`; `enforce` enforces it; `off` sends none. */
+/**
+ * The CSP switch. Unset, the policy is enforced on the document routes (`isDocumentPath`) and
+ * report only elsewhere (docs/hardening/HARDENING.md HR-W#2). `report` sends it report only on
+ * every route, the way back; `enforce` enforces it on every route; `off` sends none.
+ */
 export const CSP_MODE_ENV = 'TURBOSLIDE_CSP';
 
 export type CspMode = 'report' | 'enforce' | 'off';
 
-export function cspMode(env: Env = process.env): CspMode {
+/**
+ * The routes that render deck content into the page: the viewer, the embed, the presenter, the
+ * print page, the link exchange, the editor and the new deck page. A deck's markup reaches the
+ * document here, so an injection that slips past the sanitizers meets the enforced policy.
+ */
+export const DOCUMENT_ROUTES: ReadonlyArray<string> = [
+  '/deck',
+  '/embed',
+  '/present',
+  '/print',
+  '/s',
+  '/edit',
+  '/new',
+];
+
+export function isDocumentPath(pathname: string): boolean {
+  return DOCUMENT_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+}
+
+/** The mode of the policy on one path: the variable when it is set, else enforce on a document route. */
+export function cspMode(env: Env = process.env, pathname?: string): CspMode {
   const value = env[CSP_MODE_ENV]?.trim().toLowerCase();
   if (value === 'enforce') return 'enforce';
+  if (value === 'report') return 'report';
   if (value === 'off' || value === '0' || value === 'false') return 'off';
-  return 'report';
+  return pathname !== undefined && isDocumentPath(pathname) ? 'enforce' : 'report';
 }
 
 /** The report endpoint, a POST route under the WAF visible prefix (`x.csp.$.ts`). */
@@ -233,7 +260,8 @@ export const CSP_REPORT_PATH = '/api/x/csp/report';
  * plain http dev server, where it would break the page's own requests, and off a report only
  * policy, where a browser ignores it and Chromium logs one console error per page load for the
  * ignored directive (VERIFICATION-5 finding 16: fifteen console errors in one preview walk); it
- * ships when the policy is enforced (`TURBOSLIDE_CSP=enforce`).
+ * ships when the policy is enforced (on the document routes by default, everywhere with
+ * `TURBOSLIDE_CSP=enforce`).
  */
 export function buildCsp(options: CspOptions): string {
   const env = options.env ?? process.env;
@@ -269,12 +297,17 @@ export function buildCsp(options: CspOptions): string {
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",
-    embed ? `frame-ancestors ${embedAncestors(env).join(' ')}` : "frame-ancestors 'none'",
   ];
+  if (options.frameAncestors !== false) directives.push(frameAncestorsOf(embed, env));
   if (env.VERCEL !== undefined && env.VERCEL !== '' && options.reportOnly !== true)
     directives.push('upgrade-insecure-requests');
   if (options.reportUri !== undefined) directives.push(`report-uri ${options.reportUri}`);
   return directives.join('; ');
+}
+
+/** The frame rule: the embed's ancestors on `/embed`, none anywhere else. */
+function frameAncestorsOf(embed: boolean, env: Env): string {
+  return embed ? `frame-ancestors ${embedAncestors(env).join(' ')}` : "frame-ancestors 'none'";
 }
 
 export type SecurityHeaderOptions = {
@@ -308,17 +341,21 @@ export function securityHeadersFor(
   }
   if (isAssetPath(pathname)) headers['cross-origin-resource-policy'] = 'same-site';
   if (isApiPath(pathname)) headers['cache-control'] = 'no-store';
-  const mode = cspMode(env);
+  const mode = cspMode(env, pathname);
   if (mode !== 'off' && !isApiPath(pathname)) {
-    const name =
-      mode === 'enforce' ? 'content-security-policy' : 'content-security-policy-report-only';
-    headers[name] = buildCsp({
-      nonce: options.nonce,
-      pathname,
-      reportUri: CSP_REPORT_PATH,
-      env,
-      reportOnly: mode !== 'enforce',
-    });
+    const policy = { nonce: options.nonce, pathname, reportUri: CSP_REPORT_PATH, env };
+    if (mode === 'report') {
+      headers['content-security-policy-report-only'] = buildCsp({ ...policy, reportOnly: true });
+    } else if (embed && env[CSP_MODE_ENV]?.trim().toLowerCase() !== 'enforce') {
+      /* the published embed is framed by whatever site its owner pastes the Publish to the web
+         snippet into, so by default the embed enforces every directive but the frame rule, which
+         stays report only (HR-W#2); TURBOSLIDE_CSP=enforce enforces the frame rule too */
+      headers['content-security-policy'] = buildCsp({ ...policy, frameAncestors: false });
+      headers['content-security-policy-report-only'] =
+        `${frameAncestorsOf(true, env)}; report-uri ${CSP_REPORT_PATH}`;
+    } else {
+      headers['content-security-policy'] = buildCsp(policy);
+    }
   }
   return headers;
 }

@@ -21,6 +21,10 @@ const tokensCss = readFileSync(new URL('../../chrome/src/tokens.css', import.met
 const rules = parseCss(tokensCss);
 /** The rules outside every at-rule: the values the page reads when no media query applies. */
 const plain: CssRule[] = rules.filter((rule) => rule.media === undefined);
+/** The shared dropdown's sheet (docs/DROPDOWNS.md 3.7), which took the select rule tokens.css drew. */
+const dropdown: CssRule[] = parseCss(
+  readFileSync(new URL('../../chrome/src/Select.css', import.meta.url), 'utf8'),
+).filter((rule) => rule.media === undefined);
 const root = customProperties(plain, ':root');
 const darkRoot = customProperties(plain, ":root[data-theme='dark']");
 
@@ -93,7 +97,9 @@ describe('RADII agree with tokens.css', () => {
     /* the ring has no blur and no offset: two spreads of 1 and 2 px */
     expect(root['pt-ring']).toBe('0 0 0 1px var(--pt-paper), 0 0 0 2px var(--pt-hair-soft)');
     expect(declarationsOf(plain, '.pt-ib')['border-radius']).toBe('var(--pt-radius)');
-    expect(declarationsOf(plain, '.pt-select')['border-radius']).toBe('var(--pt-radius)');
+    expect(declarationsOf(dropdown, '.ts-dropdown-trigger')['border-radius']).toBe(
+      'var(--pt-radius)',
+    );
   });
 
   it('resets the browser popover styles at zero specificity', () => {

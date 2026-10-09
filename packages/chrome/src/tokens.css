@@ -487,53 +487,6 @@ body[data-shell] {
   color: var(--pt-paper);
 }
 
-/* The one select rule of chrome (3.1, the select row; audit-interface 22): a 32 px field with the
-   field boundary and the chrome's own chevron, drawn with two gradients so no browser arrow shows
-   (the rule the /decks sort select drew alone). Every select in a dialog takes it by element; a
-   select elsewhere (the Comments filter, the access page) takes the class. */
-.pt-select,
-.ts-dialog select {
-  box-sizing: border-box;
-  height: 32px;
-  min-height: 32px;
-  padding: 0 28px 0 10px;
-  border: 1px solid var(--pt-field);
-  border-radius: var(--pt-radius);
-  background-color: var(--pt-paper);
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
-    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
-  background-position:
-    calc(100% - 15px) 13px,
-    calc(100% - 10px) 13px;
-  background-size:
-    5px 5px,
-    5px 5px;
-  background-repeat: no-repeat;
-  color: var(--pt-ink);
-  font: 13px/1 var(--pt-text);
-  appearance: none;
-  cursor: pointer;
-}
-
-.pt-select:hover,
-.ts-dialog select:hover {
-  border-color: var(--pt-field);
-}
-
-.pt-select:focus-visible,
-.ts-dialog select:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: -1px;
-}
-
-.pt-select:disabled,
-.ts-dialog select:disabled {
-  color: var(--pt-disabled);
-  border-color: var(--pt-hair-soft);
-  cursor: default;
-}
-
 /* icon-only, 32px square */
 .pt-ib.pt-icon {
   width: 32px;

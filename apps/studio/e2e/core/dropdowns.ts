@@ -421,13 +421,18 @@ export function chromeDropdowns(): string[] {
       await page.goto(`/print/${person.deck}`);
       await triggerOf(page, 'print.layout').waitFor({ timeout: 60_000 });
     });
-    await surface('/dev/auth', async () => {
-      await page.goto('/dev/auth');
-      await page
-        .locator('[data-control^="gallery.pick"][role="combobox"]')
-        .first()
-        .waitFor({ timeout: 60_000 });
-    });
+    /* the auth gallery is a local page: a server without TURBOSLIDE_LOCAL_OPEN=1 answers 404
+       (dev.auth.tsx galleryOpen), as production does, and the row says so */
+    if ((await page.request.get('/dev/auth')).status() === 404)
+      readings.push('/dev/auth: closed on this server (404), not read');
+    else
+      await surface('/dev/auth', async () => {
+        await page.goto('/dev/auth');
+        await page
+          .locator('[data-control^="gallery.pick"][role="combobox"]')
+          .first()
+          .waitFor({ timeout: 60_000 });
+      });
     await freshEditor(person);
     await surface('Share, restricted', () => openShare(page));
     await surface('Share, anyone with the link', async () => {

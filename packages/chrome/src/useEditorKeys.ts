@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-import { outsideOpenModal } from '@turboslide/viewer/Selection';
+import { modalDialogOpen } from '@turboslide/viewer/Selection';
 
 import { RETIRED_KEYS, RETIRED_KEYS_STORAGE, retiredKeySentence } from './editor-shell';
 import type { MenuItem, Platform } from './menus/model';
@@ -23,7 +23,9 @@ import { useMountEffect } from './lib/useMountEffect';
  * fire (Bold, Find and replace, Save); the run's own keys (Enter, Esc, Tab, the arrows) are the
  * editor's. A binding whose menu item's predicate says no does nothing. Esc walks the ladder of
  * SPEC 10.2: a menu or a dialog closes itself; then the shell leaves compact mode, closes the
- * panel, or leaves present mode.
+ * panel, or leaves present mode. While a modal dialog is open no chord runs, wherever the key
+ * comes from: the dialog's own keys apply, and outside a field the deck's Cmd and Ctrl chords are
+ * prevented (Selection.tsx modalDialogOpen).
  */
 export type EditorKeyHandlers = {
   /** runs a menu item's effect */
@@ -210,7 +212,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
          and the canvas run handles its own (InlineText) */
       if (isIndentChord(event, s.platform)) {
         event.preventDefault();
-        if (inCanvasText || h.overlayOpen() || outsideOpenModal(event.target)) return;
+        if (inCanvasText || h.overlayOpen() || modalDialogOpen()) return;
         const id =
           event.key === ']'
             ? 'format.alignIndent.increaseIndent'
@@ -220,10 +222,27 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         return;
       }
 
-      /* a key from outside an open modal dialog (the body, after the dialog's focused control was
-         disabled or left) runs no chord on the deck behind it; the dialog answers it (Selection.tsx
-         outsideOpenModal; the keyboard verifier's pass 1 on the dropdown round, finding 1) */
-      if (outsideOpenModal(event.target)) return;
+      /* while a modal dialog is open no chord runs on the deck behind it: not from the body, where
+         the focus fell after the dialog's focused control was disabled or left (the keyboard
+         verifier's pass 1 on the dropdown round, finding 1), and not from a control inside the
+         card, a button or a field (its final pass 1, finding 1: from the Share dialog's Done,
+         Cmd+Z undid the deck's last edit, Cmd+D duplicated the selected table, Cmd+A selected,
+         Cmd+/ replaced the dialog with Keyboard shortcuts, and Shift+Tab ran `key.roster`, which
+         opened the Collaborators list and let the trap put the focus on Close; the menu access keys
+         and Cmd+Shift chords passed the field rule below). The dialog's own keys apply
+         (Selection.tsx modalDialogOpen). Outside a field, a Cmd or Ctrl chord the deck binds is
+         prevented as a disabled item's is, so the browser's own meaning does not fire either (Cmd+A
+         selected the text of the whole page, Cmd+D bookmarks it, Cmd+P prints it); a field keeps
+         the browser's editing keys, and the clipboard chords stay the browser's everywhere */
+      if (modalDialogOpen()) {
+        if (!inField && (event.metaKey || event.ctrlKey)) {
+          const held = bindingsFor(event, s.platform, table).some(
+            (binding) => binding.scope !== 'present' && !CLIPBOARD_CHORDS.has(binding.id),
+          );
+          if (held) event.preventDefault();
+        }
+        return;
+      }
 
       /* inside a chrome field the browser's editing keys keep their meaning; the menu access
          keys and the Find and replace chord still work */

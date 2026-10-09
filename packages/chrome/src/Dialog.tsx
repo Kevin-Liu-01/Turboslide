@@ -240,7 +240,12 @@ export function Dialog({
      from the body the editor's keys acted on the slide behind the card (the keyboard verifier's
      pass 1 on the dropdown round, finding 1). After the render that dropped it, the focus goes to
      the control that now stands at its place in the card's Tab order, else the first control. The
-     window losing focus keeps the active element, so it is no drop */
+     window losing focus keeps the active element, so it is no drop.
+     Two signals start the check. Chromium sends a focusout with no related target as the control
+     leaves. Firefox sends no focusout and no blur when the focused element leaves the document,
+     so the card also watches its own tree and the disabled and hidden attributes in it, and
+     checks after each change (the keyboard verifier's final pass 1 on the dropdown round,
+     finding 2: in Firefox, Remove access left the focus on the body) */
   const place = useRef(-1);
   useEffect(() => {
     const el = card.current;
@@ -249,20 +254,31 @@ export function Dialog({
       if (event.target instanceof HTMLElement)
         place.current = focusableIn(el).indexOf(event.target);
     };
+    const restore = () => {
+      if (!el.isConnected) return;
+      const now = document.activeElement;
+      if (now !== null && now !== document.body) return;
+      const list = focusableIn(el);
+      const at = Math.min(place.current, list.length - 1);
+      /* the ring shows where the focus went: Firefox draws none for a focus a script moves after
+         the browser's confirmation closed */
+      (list[at] ?? list[0] ?? el).focus({ preventScroll: true, focusVisible: true });
+    };
     const onOut = (event: FocusEvent) => {
       if (event.relatedTarget !== null) return;
-      queueMicrotask(() => {
-        if (!el.isConnected) return;
-        const now = document.activeElement;
-        if (now !== null && now !== document.body) return;
-        const list = focusableIn(el);
-        const at = Math.min(place.current, list.length - 1);
-        (list[at] ?? list[0] ?? el).focus({ preventScroll: true });
-      });
+      queueMicrotask(restore);
     };
+    const changes = new MutationObserver(restore);
+    changes.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['disabled', 'hidden'],
+    });
     el.addEventListener('focusin', onIn);
     el.addEventListener('focusout', onOut);
     return () => {
+      changes.disconnect();
       el.removeEventListener('focusin', onIn);
       el.removeEventListener('focusout', onOut);
     };

@@ -1426,4 +1426,53 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       vi.unstubAllGlobals();
     }
   });
+
+  /* the final pass 1, finding 2: Firefox sends no focusout as the row leaves, and the focus stayed
+     on the body; jsdom sends none either, so the removal here is Firefox's */
+  it('gives the focus to the control at the row place after Remove access when the browser sends no focusout (Firefox)', async () => {
+    const { dispatch, answer } = writes();
+    vi.stubGlobal(
+      'confirm',
+      vi.fn(() => true),
+    );
+    try {
+      open({ ...owned(), grants: [lee] }, dispatch);
+      await flush();
+      const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]')!;
+      const role = trigger(leeRole)!;
+      act(() => role.focus());
+      const place = focusableIn(card).indexOf(role);
+      expect(place).toBeGreaterThan(0);
+      keys(role, 'ArrowDown', 'End', 'Enter');
+      expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
+      await answer({ record: record({ revision: 4 }) });
+      expect(trigger(leeRole)).toBeNull();
+      expect(document.activeElement).not.toBe(document.body);
+      const list = focusableIn(card);
+      expect(document.activeElement).toBe(list[Math.min(place, list.length - 1)]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  /* the final pass 1, finding 4: the role field read "Add expiration" as its value while the
+     expiry field beside it was open, so a screen reader did not read the person's role */
+  it("keeps the person's role as the role field's value while the expiry field is open", async () => {
+    const { dispatch } = writes();
+    open({ ...owned(), grants: [lee] }, dispatch);
+    await flush();
+    const role = trigger(leeRole)!;
+    act(() => role.focus());
+    keys(role, 'ArrowDown', 'End', 'ArrowUp', 'Enter');
+    expect(trigger('dialog.share.grant.lee@example.test.expiry')).not.toBeNull();
+    expect(dispatch).not.toHaveBeenCalled();
+    const now = trigger(leeRole)!;
+    expect(now.textContent).toContain('Viewer');
+    expect(now.textContent).not.toContain('Add expiration');
+    const listId = now.getAttribute('aria-controls')!;
+    const chosen = document
+      .getElementById(listId)
+      ?.querySelector('[role="option"][aria-selected="true"]');
+    expect(chosen?.textContent).toContain('Viewer');
+  });
 });

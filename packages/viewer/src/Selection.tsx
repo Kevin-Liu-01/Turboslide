@@ -227,13 +227,31 @@ const NOT_SHOWN = '[hidden], [inert], [aria-hidden="true"]';
  * selected table and typing replaced the title's text.
  */
 export function outsideOpenModal(target: EventTarget | null): boolean {
-  if (typeof document === 'undefined') return false;
-  const open = Array.from(document.querySelectorAll(OPEN_MODAL)).filter(
-    (dialog) => dialog.closest(NOT_SHOWN) === null,
-  );
+  const open = openModals();
   if (open.length === 0) return false;
   if (!(target instanceof Node)) return true;
   return !open.some((dialog) => dialog.contains(target));
+}
+
+/** The modal dialogs in the page that are shown. */
+function openModals(): Element[] {
+  if (typeof document === 'undefined') return [];
+  return Array.from(document.querySelectorAll(OPEN_MODAL)).filter(
+    (dialog) => dialog.closest(NOT_SHOWN) === null,
+  );
+}
+
+/**
+ * True when a modal dialog is open, wherever the key comes from. The stage's keys and the
+ * document's key table take no key then: a key from outside the dialog is the case above, and a
+ * key from a control inside it (a button, a link, a field) is the dialog's and the browser's. The
+ * keyboard verifier's final pass 1 on the dropdown round, finding 1: with the focus on the Share
+ * dialog's Done, Cmd+Z undid the deck's last edit behind the dialog, Cmd+D duplicated the selected
+ * table, Cmd+A selected the slide's objects, Cmd+/ replaced the dialog with Keyboard shortcuts,
+ * and Shift+Tab opened the Collaborators list, so the focus could not go back from a button.
+ */
+export function modalDialogOpen(): boolean {
+  return openModals().length > 0;
 }
 
 /** The chrome regions that keep their own clipboard: a dialog's or a menu's fields, the Format options panel. */

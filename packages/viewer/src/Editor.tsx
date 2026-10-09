@@ -268,6 +268,7 @@ import {
   isEditableTarget,
   isTextBlockType,
   listItemPointer,
+  modalDialogOpen,
   objectContextTarget,
   objectPressPlan,
   outsideOpenModal,
@@ -5540,12 +5541,15 @@ export function Editor({
   useOnceLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (editingRef.current || isEditableTarget(e.target)) return;
-      /* no key is the stage's while a modal dialog is open and the key comes from outside it (the
-         body, after the dialog's focused control was disabled or left): the dialog answers it
-         (Selection.tsx outsideOpenModal; the keyboard verifier's pass 1 on the dropdown round:
-         Tab and Shift Tab walked the objects behind the Share dialog, Delete removed the selected
-         table, typing replaced the title's text) */
-      if (outsideOpenModal(e.target)) return;
+      /* no key is the stage's while a modal dialog is open, from outside it (the body, after the
+         dialog's focused control was disabled or left) or from a control inside it: the dialog
+         and the browser answer it (Selection.tsx modalDialogOpen; the keyboard verifier's pass 1
+         on the dropdown round: Tab and Shift Tab walked the objects behind the Share dialog,
+         Delete removed the selected table, typing replaced the title's text; its final pass 1,
+         finding 1: a key on the dialog's buttons reached the deck behind it). Crop mode's Enter
+         and Escape and the point tools' below would otherwise take a key from a dialog's button
+         before the dialog does, since this listener runs first in the window's capture phase */
+      if (modalDialogOpen()) return;
       /* a focused overlay handle nudges, orders and flips itself with the plain and Cmd arrows,
          Enter and Space (Overlay.tsx); every other chord (Delete, Esc, Option arrows, Cmd letters)
          is the stage's, so a rotate key after a drag from the chip still turns the object */

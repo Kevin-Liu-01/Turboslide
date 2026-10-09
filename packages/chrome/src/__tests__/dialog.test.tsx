@@ -325,6 +325,29 @@ describe('the focus never rests on the body (the keyboard verifier on the dropdo
     expect(document.activeElement).toBe(row('row.cy'));
   });
 
+  /* the final pass 1, finding 2: Firefox sends no focusout and no blur when the focused element
+     leaves the document, so the rule above never ran there and Remove access left the focus on
+     the body; jsdom sends none either, so this case reads the browser that sends nothing */
+  it('gives the focus to the control at the place of one that left with no focusout (Firefox)', async () => {
+    render(<People />);
+    const ben = row('row.ben')!;
+    act(() => ben.focus());
+    await act(async () => {
+      fireEvent.click(ben);
+      await Promise.resolve();
+    });
+    expect(row('row.ben')).toBeNull();
+    expect(document.activeElement).toBe(row('row.cy'));
+    /* the last control leaves outside React: the one before it in the order */
+    const add = row('people.add')!;
+    act(() => add.focus());
+    await act(async () => {
+      add.remove();
+      await Promise.resolve();
+    });
+    expect(document.activeElement).toBe(row('row.cy'));
+  });
+
   it('leaves the focus where it is when the window loses it (the active element stays)', async () => {
     render(<People />);
     const ana = row('row.ana')!;

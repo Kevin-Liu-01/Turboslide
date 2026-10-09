@@ -657,6 +657,30 @@ export function chromeDropdowns(): string[] {
     const afterBlur = await inside();
     for (const key of ['Tab', 'Shift+Tab', 'Delete', 'x']) await share.keyboard.press(key);
     const stillInside = await inside();
+    /* the chords on a plain button of the dialog (the final pass 1, finding 1): from Done, Cmd+D,
+       Cmd+A and Cmd+Z leave the deck behind the dialog, Cmd+/ leaves the dialog, and Shift+Tab
+       moves the focus back inside the dialog, neither to Close nor out to the Collaborators list */
+    const done = ctl(share, 'dialog.share.done');
+    await done.focus();
+    for (const key of ['ControlOrMeta+d', 'ControlOrMeta+a', 'ControlOrMeta+z', 'ControlOrMeta+/'])
+      await share.keyboard.press(key);
+    await share.waitForTimeout(300);
+    const onButton = await share.evaluate(() => ({
+      share: document.querySelector('[data-control="dialog.share"]') !== null,
+      shortcuts: document.querySelector('.ts-shortcuts') !== null,
+      done: document.activeElement?.getAttribute('data-control') ?? null,
+    }));
+    await share.keyboard.press('Shift+Tab');
+    await share.waitForTimeout(300);
+    const back = await share.evaluate(() => {
+      const card = document.querySelector('[data-control="dialog.share"]');
+      const now = document.activeElement;
+      return {
+        control: now?.getAttribute('data-control') ?? now?.tagName ?? null,
+        inside: now !== null && card?.contains(now) === true,
+        roster: document.querySelector('#ts-menu-roster') !== null,
+      };
+    });
     await chooseOption(share, 'dialog.share.mode', 'restricted');
     await closeDialogs(share);
     const after = await settled(share);
@@ -665,7 +689,7 @@ export function chromeDropdowns(): string[] {
       .count();
     test.info().annotations.push({
       type: 'keys',
-      description: `${steps.join('; ')}; print Down ${afterDown}, h ${afterH}; Share Escape writes ${writes}; Share choice by Enter: focused ${during.focused}, disabled attribute ${during.disabled}, focused after the write ${kept}; after Tab inside ${afterTab}, after a blur inside ${afterBlur}, after Tab, Shift+Tab, Delete, x inside ${stillInside}; behind the dialog: revision ${behind.revision} to ${after.revision}, selected ${behind.blockId} to ${after.blockId}, table ${table}`,
+      description: `${steps.join('; ')}; print Down ${afterDown}, h ${afterH}; Share Escape writes ${writes}; Share choice by Enter: focused ${during.focused}, disabled attribute ${during.disabled}, focused after the write ${kept}; after Tab inside ${afterTab}, after a blur inside ${afterBlur}, after Tab, Shift+Tab, Delete, x inside ${stillInside}; on Done after Cmd+D, Cmd+A, Cmd+Z, Cmd+/: Share ${onButton.share}, Keyboard shortcuts ${onButton.shortcuts}, focus ${onButton.done}; Shift+Tab to ${back.control}, inside ${back.inside}, Collaborators list ${back.roster}; behind the dialog: revision ${behind.revision} to ${after.revision}, selected ${behind.blockId} to ${after.blockId}, table ${table}`,
     });
     expect(writes, 'Escape sends no share.setGeneralAccess').toBe(0);
     expect(during, 'the trigger keeps the focus while its write runs').toEqual({
@@ -676,6 +700,16 @@ export function chromeDropdowns(): string[] {
     expect(afterTab, 'Tab moves inside the dialog').toBe(true);
     expect(afterBlur, 'a focus put on the body goes back into the dialog').toBe(true);
     expect(stillInside, 'the keys after it stay in the dialog').toBe(true);
+    expect(onButton, 'the chords on Done leave the dialog open and focused').toEqual({
+      share: true,
+      shortcuts: false,
+      done: 'dialog.share.done',
+    });
+    expect(back.inside, 'Shift+Tab from Done stays in the dialog').toBe(true);
+    expect(back.control, 'Shift+Tab from Done goes back, not to Close').not.toMatch(
+      /^dialog\.share\.(close|done)$/,
+    );
+    expect(back.roster, 'Shift+Tab from Done opens no Collaborators list').toBe(false);
     expect(after.revision, 'nothing written to the deck behind the dialog').toBe(behind.revision);
     expect(after.blockId, 'the selection behind the dialog unchanged').toBe('dd-table');
     expect(table, 'the selected table stays').toBe(1);

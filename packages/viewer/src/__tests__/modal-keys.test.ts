@@ -8,7 +8,7 @@ import type { Block } from '@turboslide/schema/blocks';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 
 import { Editor } from '../Editor';
-import { outsideOpenModal, stageOwnsClipboard } from '../Selection';
+import { modalDialogOpen, outsideOpenModal, stageOwnsClipboard } from '../Selection';
 
 // The stage behind a modal dialog (the keyboard verifier's pass 1 on the dropdown round, finding
 // 1): after a choice in the Share dialog the focus fell to the page body, and from the body Tab
@@ -105,11 +105,15 @@ function openModal(): HTMLElement {
   return card;
 }
 
-/** A key pressed with the focus on the body. */
-function press(key: string, init: KeyboardEventInit = {}): KeyboardEvent {
+/** A key pressed with the focus on the body, or on the element given. */
+function press(
+  key: string,
+  init: KeyboardEventInit = {},
+  on: EventTarget = document.body,
+): KeyboardEvent {
   const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
   act(() => {
-    document.body.dispatchEvent(event);
+    on.dispatchEvent(event);
   });
   return event;
 }
@@ -151,6 +155,16 @@ describe('outsideOpenModal', () => {
     expect(outsideOpenModal(document.body)).toBe(false);
   });
 
+  it('reads whether a shown modal dialog is open, wherever the key comes from (modalDialogOpen)', () => {
+    expect(modalDialogOpen()).toBe(false);
+    const card = openModal();
+    expect(modalDialogOpen()).toBe(true);
+    card.setAttribute('hidden', '');
+    expect(modalDialogOpen()).toBe(false);
+    card.remove();
+    expect(modalDialogOpen()).toBe(false);
+  });
+
   it('keeps the clipboard from the stage while a modal dialog is open and the event comes from outside it', () => {
     const stage = document.createElement('div');
     document.body.append(stage);
@@ -188,5 +202,37 @@ describe('the stage behind a modal dialog', () => {
     expect(m.selections.mock.calls.length).toBeGreaterThan(before);
     press('Delete');
     expect(m.dispatch).toHaveBeenCalled();
+  });
+
+  /* the final pass 1, finding 1: a key on the dialog's own buttons is the dialog's and the
+     browser's; the stage's listener runs first in the window's capture phase, so it must take
+     nothing from inside the card either (crop mode's Enter and Escape came before the control rule) */
+  it('takes no key from a button inside the open dialog and prevents none of them', () => {
+    mounted = mount();
+    const m = mounted;
+    select(m, 'agenda');
+    const before = m.selections.mock.calls.length;
+    const card = openModal();
+    const done = card.querySelector('button')!;
+    for (const [key, init] of [
+      ['Tab', {}],
+      ['Tab', { shiftKey: true }],
+      ['Delete', {}],
+      ['Backspace', {}],
+      [' ', {}],
+      ['x', {}],
+      ['Enter', {}],
+      ['Escape', {}],
+      ['ArrowLeft', {}],
+      ['d', { metaKey: true }],
+      ['F10', { shiftKey: true }],
+    ] as const) {
+      const event = press(key, init, done);
+      expect(event.defaultPrevented, `${key} ${JSON.stringify(init)}`).toBe(false);
+    }
+    expect(m.dispatch).not.toHaveBeenCalled();
+    expect(m.selections.mock.calls.length).toBe(before);
+    expect(m.container.querySelector('[data-editing]')).toBeNull();
+    card.remove();
   });
 });

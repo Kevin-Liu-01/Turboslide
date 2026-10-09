@@ -6,6 +6,7 @@ import { DEFAULT_MENU_CONTEXT } from '../menus/model';
 import type { MenuContext, MenuItem } from '../menus/model';
 import { CARET_KEYS, isCaretKeyInCanvasText, isIndentChord, useEditorKeys } from '../useEditorKeys';
 import type { EditorKeyHandlers } from '../useEditorKeys';
+import type { KeyBinding } from '../menus/keys';
 
 // Cmd+] and Cmd+[ (gslides-parity SPEC-2 0.55, section 9): Chrome's Forward and Back on macOS. The
 // editor takes both chords in every focus state and always prevents the default, runs the indent
@@ -226,8 +227,9 @@ describe('useEditorKeys behind a modal dialog', () => {
     card.setAttribute('aria-modal', 'true');
     document.body.appendChild(card);
     try {
-      expect(fireEvent.keyDown(document.body, { key: 'z', metaKey: true })).toBe(true);
-      expect(fireEvent.keyDown(document.body, { key: 'b', metaKey: true })).toBe(true);
+      /* run nothing, and prevented as a disabled item's chord is (DD-fix, final pass 1, finding 1) */
+      expect(fireEvent.keyDown(document.body, { key: 'z', metaKey: true })).toBe(false);
+      expect(fireEvent.keyDown(document.body, { key: 'b', metaKey: true })).toBe(false);
       expect(fireEvent.keyDown(document.body, { key: '[', metaKey: true })).toBe(false);
       expect(runItem).not.toHaveBeenCalled();
     } finally {
@@ -235,6 +237,78 @@ describe('useEditorKeys behind a modal dialog', () => {
     }
     fireEvent.keyDown(document.body, { key: 'z', metaKey: true });
     expect((runItem.mock.calls[0]?.[0] as MenuItem).id).toBe('edit.undo');
+  });
+
+  /* the final pass 1, finding 1: a plain button inside the card is not a field, so the key table
+     ran from it. From the Share dialog's Done, Cmd+Z undid the deck's last edit, Cmd+D duplicated
+     the selected table, Cmd+A selected, Cmd+/ replaced the dialog with Keyboard shortcuts and
+     Shift+Tab opened the Collaborators list (`key.roster`), so the trap put the focus on Close;
+     from a field the menu access keys and Cmd+Shift+H passed the field rule */
+  it('runs no chord from a button or a field inside an open modal dialog, prevents the deck chords on a button, and leaves Shift+Tab and the clipboard to the browser', () => {
+    const runItem = vi.fn();
+    /* the shell's runBinding answers the Collaborators list alone among Shift+Tab's matches */
+    const runBinding = vi.fn((binding: KeyBinding) => binding.id === 'key.roster');
+    const openMenu = vi.fn();
+    const h: EditorKeyHandlers = { ...handlers(runItem), runBinding, openMenu };
+    const undoable: MenuContext = { ...withText, history: { undo: true, redo: false } };
+    const view = render(<Host context={undoable} handlers={h} />);
+    const card = document.createElement('div');
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.innerHTML =
+      '<input aria-label="Add people" data-testid="address" /><button type="button">Done</button>';
+    document.body.appendChild(card);
+    const done = card.querySelector('button')!;
+    const address = card.querySelector('input')!;
+    const fromButton: KeyboardEventInit[] = [
+      { key: 'z', metaKey: true },
+      { key: 'd', metaKey: true },
+      { key: 'a', metaKey: true },
+      { key: '/', metaKey: true },
+      { key: 'Tab', shiftKey: true },
+      { key: 'Enter' },
+      { key: 'f', ctrlKey: true, altKey: true },
+    ];
+    const fromField: KeyboardEventInit[] = [
+      { key: 'h', metaKey: true, shiftKey: true },
+      { key: 'f', ctrlKey: true, altKey: true },
+    ];
+    try {
+      done.focus();
+      /* on a button the deck's Cmd and Ctrl chords are prevented, so the browser's own meaning
+         (Cmd+A selecting the page's text, Cmd+D's bookmark) does not fire behind the card; Shift+Tab,
+         Enter and the clipboard chords keep their default */
+      for (const init of fromButton) {
+        const chord = init.metaKey === true || init.ctrlKey === true;
+        expect(fireEvent.keyDown(done, init), `${JSON.stringify(init)} on Done`).toBe(!chord);
+      }
+      expect(fireEvent.keyDown(done, { key: 'c', metaKey: true }), 'Cmd+C on Done').toBe(true);
+      /* Cmd+] keeps Chrome's Forward prevented and indents nothing */
+      expect(fireEvent.keyDown(done, { key: ']', metaKey: true })).toBe(false);
+      address.focus();
+      for (const init of fromField)
+        expect(fireEvent.keyDown(address, init), `${JSON.stringify(init)} in the field`).toBe(true);
+      expect(runItem).not.toHaveBeenCalled();
+      expect(runBinding).not.toHaveBeenCalled();
+      expect(openMenu).not.toHaveBeenCalled();
+    } finally {
+      card.remove();
+    }
+    /* the dialog closed: the same chords match and run again, from the body and from a field */
+    for (const init of fromButton.filter((each) => each.key !== 'Enter'))
+      fireEvent.keyDown(document.body, init);
+    const field = view.getByTestId('field');
+    field.focus();
+    fireEvent.keyDown(field, fromField[0]!);
+    expect(runItem.mock.calls.map(([item]) => (item as MenuItem).id)).toEqual([
+      'edit.undo',
+      'edit.duplicate',
+      'edit.selectAll',
+      'help.keyboardShortcuts',
+      'edit.findReplace',
+    ]);
+    expect(runBinding.mock.calls.map(([binding]) => binding.id)).toContain('key.roster');
+    expect(openMenu).toHaveBeenCalledWith('file');
   });
 });
 

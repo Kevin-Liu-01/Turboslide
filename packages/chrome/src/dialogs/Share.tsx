@@ -1737,7 +1737,10 @@ function GrantRow({
       {canShare ? (
         <Select<EditorRole | 'transfer' | 'expiry' | 'remove'>
           className="ts-share-role"
-          value={expiring ? 'expiry' : grant.role}
+          /* the person's role stays the field's value while the expiry field beside it is open:
+             Add expiration is an action, and a screen reader read it as the role (the keyboard
+             verifier's final pass 1 on the dropdown round, finding 4) */
+          value={grant.role}
           options={[
             { options: ROLES },
             /* the row's three actions in a group of their own after a divider (DROPDOWNS.md 3.9) */

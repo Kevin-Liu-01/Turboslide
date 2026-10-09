@@ -35,6 +35,7 @@ import {
   typeNote,
   waitEditor,
 } from './lib';
+import { chooseOption } from '../choose-option';
 import { shareRound1 } from './share-round1';
 import { shareChromeRows } from './b3b-dialogs';
 import { designSignIn } from './design-pages';
@@ -235,8 +236,8 @@ async function copyRow(id: string): Promise<string> {
   const copy = ctl(page, `dialog.share.${id}.copy`);
   if ((await copy.count()) === 0) {
     const mode = ctl(page, 'dialog.share.mode');
-    if ((await mode.count()) > 0 && (await mode.inputValue().catch(() => '')) !== 'link') {
-      await mode.selectOption('link');
+    if ((await mode.count()) > 0 && (await mode.getAttribute('value').catch(() => '')) !== 'link') {
+      await chooseOption(page, 'dialog.share.mode', 'link');
       await expect(page.locator('[data-control="dialog.share"] [aria-busy="true"]')).toHaveCount(
         0,
         { timeout: 10_000 },
@@ -1377,8 +1378,8 @@ async function shareStage(p: Page) {
   return p.evaluate(() => {
     const q = (c: string) => document.querySelector(`[data-control="${c}"]`);
     const visible = (el: Element | null) => Boolean(el && el.getClientRects().length > 0);
-    const mode = q('dialog.share.mode') as HTMLSelectElement | null;
-    const role = q('dialog.share.linkRole') as HTMLSelectElement | null;
+    const mode = q('dialog.share.mode');
+    const role = q('dialog.share.linkRole');
     const address = q('dialog.share.address') as HTMLInputElement | null;
     const copies = [
       ...document.querySelectorAll(
@@ -1386,8 +1387,19 @@ async function shareStage(p: Page) {
       ),
     ].filter(visible);
     return {
-      mode: mode ? { value: mode.value, text: mode.options[mode.selectedIndex]?.text ?? '' } : null,
-      role: role ? { value: role.value, text: role.options[role.selectedIndex]?.text ?? '' } : null,
+      /* the dropdown's trigger carries the value and draws the chosen row's words (DROPDOWNS.md 5.2) */
+      mode: mode
+        ? {
+            value: mode.getAttribute('value') ?? '',
+            text: mode.querySelector('.ts-dropdown-text')?.textContent ?? '',
+          }
+        : null,
+      role: role
+        ? {
+            value: role.getAttribute('value') ?? '',
+            text: role.querySelector('.ts-dropdown-text')?.textContent ?? '',
+          }
+        : null,
       address: address
         ? { value: address.value, readOnly: address.readOnly || address.hasAttribute('readonly') }
         : null,
@@ -1421,8 +1433,8 @@ test(title('share.dialog.one-link'), async () => {
     await closeShare();
     test.skip(true, notBuiltShare);
   }
-  expect(stage.mode, 'the General access select').not.toBeNull();
-  expect(stage.role, 'the role select beside it').not.toBeNull();
+  expect(stage.mode, 'the General access dropdown').not.toBeNull();
+  expect(stage.role, 'the role dropdown beside it').not.toBeNull();
   expect(stage.address!.readOnly, 'the address in a read only field').toBe(true);
   expect(stage.copies, 'one Copy link in the first stage').toEqual(['dialog.share.copy']);
   await page.evaluate(() => navigator.clipboard.writeText('cleared before the copy'));
@@ -1960,11 +1972,10 @@ test(title('share.dialog.new-deck-restricted-viewer'), async () => {
     test.skip(true, notBuiltShare);
   }
   const first = stage.mode;
-  const select = ctl(page, 'dialog.share.mode');
-  await select.selectOption('link');
+  await chooseOption(page, 'dialog.share.mode', 'link');
   await expect(ctl(page, 'dialog.share.linkRole')).toBeVisible({ timeout: 10_000 });
   await page.waitForTimeout(800);
-  const role = await ctl(page, 'dialog.share.linkRole').inputValue();
+  const role = await ctl(page, 'dialog.share.linkRole').getAttribute('value');
   const sentence =
     (await ctl(page, 'dialog.share.accessSentence')
       .textContent({ timeout: 3000 })
@@ -1990,14 +2001,14 @@ test(title('share.role-change.keeps-link'), async () => {
     await closeShare();
     test.skip(true, notBuiltShare);
   }
-  await ctl(page, 'dialog.share.mode').selectOption('link');
+  await chooseOption(page, 'dialog.share.mode', 'link');
   await expect(ctl(page, 'dialog.share.linkRole')).toBeVisible({ timeout: 10_000 });
   await page.waitForTimeout(800);
   const before = await ctl(page, 'dialog.share.address').inputValue();
-  await ctl(page, 'dialog.share.linkRole').selectOption('commenter');
+  await chooseOption(page, 'dialog.share.linkRole', 'commenter');
   await page.waitForTimeout(1200);
   const afterCommenter = await ctl(page, 'dialog.share.address').inputValue();
-  await ctl(page, 'dialog.share.linkRole').selectOption('editor');
+  await chooseOption(page, 'dialog.share.linkRole', 'editor');
   await page.waitForTimeout(1200);
   const afterEditor = await ctl(page, 'dialog.share.address').inputValue();
   await closeShare();
@@ -2033,7 +2044,7 @@ test(title('share.dialog.restricted-and-more'), async () => {
     await closeShare();
     test.skip(true, notBuiltShare);
   }
-  await ctl(page, 'dialog.share.mode').selectOption('restricted');
+  await chooseOption(page, 'dialog.share.mode', 'restricted');
   await page.waitForTimeout(1200);
   const restricted = await page.evaluate(() => {
     const sentence = (

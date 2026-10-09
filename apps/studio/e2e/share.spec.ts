@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import type { Browser, BrowserContext, BrowserContextOptions, Page } from '@playwright/test';
 
+import { chooseOption } from './choose-option';
+
 // Sharing (gslides-parity SPEC-3 0.15, 0.16, 6.3 to 6.5, 6.8, 16.3 `share.spec.ts`; research 09
 // 12.1): the stranger receives the You need access page on four routes and 403 on the write
 // functions; the Share dialog opens on Restricted with the people field first and the footer
@@ -133,7 +135,10 @@ test('the Share dialog opens on Restricted with the people field first and the f
   await expect(dialog.locator('[data-control="dialog.share.review"]')).toHaveText(
     'No pending requests',
   );
-  await expect(dialog.locator('[data-control="dialog.share.mode"]')).toHaveValue('restricted');
+  await expect(dialog.locator('[data-control="dialog.share.mode"]')).toHaveAttribute(
+    'value',
+    'restricted',
+  );
   await expect(dialog.locator('[data-control="dialog.share.footer"]')).toHaveText(FOOTER);
   const emailsBox = await emails.boundingBox();
   const modeBox = await dialog.locator('[data-control="dialog.share.mode"]').boundingBox();
@@ -378,7 +383,7 @@ test('request access shows the dot on Share, the banner and Approve as commenter
 
 /** The request access rows of the fourth test, in enforce mode: the dot, the review, Approve as commenter. */
 async function requestAccessRows(pageS: Page, pageO: Page): Promise<void> {
-  await pageS.locator('[data-control="access.role"]').selectOption('commenter');
+  await chooseOption(pageS, 'access.role', 'commenter');
   await pageS.locator('[data-control="access.email"]').fill('reviewer@example.test');
   await pageS.locator('[data-control="access.request"]').click();
   await expect(pageS.locator('[data-control="access.answer"]')).toHaveText(
@@ -396,7 +401,8 @@ async function requestAccessRows(pageS: Page, pageO: Page): Promise<void> {
     'No pending requests',
     { timeout: 5000 },
   );
-  await expect(dialog.locator('[data-control^="dialog.share.grant."]')).toHaveCount(1);
-  await expect(dialog.locator('[data-control^="dialog.share.grant."]')).toContainText('Pending');
+  /* the people rows themselves: the row's dropdown and its options carry ids under the row's */
+  await expect(dialog.locator('li[data-control^="dialog.share.grant."]')).toHaveCount(1);
+  await expect(dialog.locator('li[data-control^="dialog.share.grant."]')).toContainText('Pending');
   await dialog.locator('[data-control="dialog.share.done"]').click();
 }

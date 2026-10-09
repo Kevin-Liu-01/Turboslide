@@ -1,12 +1,12 @@
 /* The Share dialog (gslides-parity SPEC-3 6.5, 9.3; research 09 3.6, 8.5; docs/archive/rounds/PRODUCT.md section
    2 rank 3): two stages at a fixed width of 520. The seller's stage first: the General access
-   select with the role select beside it, one sentence under them naming what the chosen access
+   dropdown with the role dropdown beside it, one sentence under them naming what the chosen access
    does on this deployment, the address in a read only field with the one Copy link, the Open as
    a slideshow checkbox, the people rows when any exist, Done. Behind the More row (Settings once
    open): Add people, the requests band, the three link rows with their dates, the links list, the
    gear. Rows of a fixed 40 px inside scroll regions of a fixed maximum height with the gutter
    reserved, Pending and Expired in a fixed width chip. Every field is ruled in --pt-field, every
-   select is the one select of tokens.css. Monochrome; every box square. */
+   dropdown is the shared Select (DROPDOWNS.md 3). Monochrome; every box square. */
 .ts-share .ts-dialog-body {
   display: flex;
   flex-direction: column;
@@ -139,15 +139,21 @@
   border-color: transparent;
 }
 
-/* the selects take the one select rule of tokens.css (32 px, the field boundary, the chrome's
-   chevron); a select inside a 40 px people row keeps 28 px so the row holds its height */
+/* the dropdowns are the shared Select (DROPDOWNS.md 3.7: 32 px, the field boundary, the sprite's
+   chevron); a dropdown inside a 40 px people row keeps 28 px so the row holds its height */
 .ts-share-row .ts-share-role,
 .ts-share-row .ts-share-expiry {
   height: 28px;
   min-height: 28px;
-  background-position:
-    calc(100% - 15px) 11px,
-    calc(100% - 10px) 11px;
+}
+
+/* while Add expiration is open its field takes the role field's cell over it, so the row keeps
+   its one line of 40 px; a fifth item wrapped into the 24 px chip column and drew its placeholder
+   in no room. Both are placed, so the role field keeps its cell under the expiry field */
+.ts-share-row .ts-share-role,
+.ts-share-row .ts-share-expiry {
+  grid-row: 1;
+  grid-column: 4;
 }
 
 /* the people and the links as ruled rows (DECK-GRAMMAR 39; docs/NEXT.md 4.1.3 item 17;
@@ -160,6 +166,10 @@
   list-style: none;
   /* the scroll and its reserved gutter are .pt-scroll's (tokens.css) */
   max-height: 200px;
+  /* a scroll box in the body's flex column may shrink to nothing: with Anyone with the link and
+     Settings open the people list was 1 px tall and its role dropdowns could not be reached; the
+     body scrolls instead */
+  flex-shrink: 0;
   border: 0;
   border-top: 1px solid var(--pt-hair-soft);
 }
@@ -319,7 +329,7 @@
 
 /* ---- the first stage (rank 3) ---- */
 
-/* the access row: the glyph, the General access select, the role select while a link is on */
+/* the access row: the glyph, the General access dropdown, the role dropdown while a link is on */
 .ts-share-access {
   display: grid;
   grid-template-columns: 16px minmax(0, 1fr) 120px;
@@ -331,7 +341,9 @@
   grid-template-columns: 16px minmax(0, 1fr);
 }
 
-.ts-share-access svg {
+/* the row's own glyph alone: the dropdowns in the row draw their chevron and their list's check
+   at the sizes of Select.css */
+.ts-share-access > svg {
   width: 16px;
   height: 16px;
   fill: currentColor;

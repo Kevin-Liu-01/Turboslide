@@ -281,7 +281,10 @@ test('share.dialog.open, share.copy-view-link, share.copy-present-link, share.co
   for (const row of ['view', 'present', 'edit']) {
     await expect(dialog.locator(`[data-control="dialog.share.${row}"]`)).toBeVisible();
   }
-  await expect(dialog.locator('[data-control="dialog.share.mode"]')).toHaveValue('restricted');
+  await expect(dialog.locator('[data-control="dialog.share.mode"]')).toHaveAttribute(
+    'value',
+    'restricted',
+  );
   await expect(dialog.locator('[data-control="dialog.share.footer"]')).toHaveText(
     'Speaker notes and skipped slides never travel with a view or comment link',
   );

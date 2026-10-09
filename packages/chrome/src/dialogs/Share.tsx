@@ -7,6 +7,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import { labelFor } from '@turboslide/identity/labels';
+import type { GrantWho } from '@turboslide/schema/access';
 
 import { Dialog, DialogCheck } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
@@ -30,6 +31,8 @@ import {
   trustWordOf,
 } from '../presence/IdentityChip';
 import { meOf } from '../presence/presence-model';
+import { Select } from '../Select';
+import type { SelectOption } from '../Select';
 import { tipProps } from '../Tooltip';
 
 import './share.css';
@@ -38,8 +41,8 @@ import './share.css';
  * The Share dialog (gslides-parity SPEC-3 0.16, 6.5, 9.3; research 09 3.6, 8.5; docs/FOCUS.md 2.7
  * and section 5 rank 1; docs/archive/rounds/PRODUCT.md section 2 rank 3): two stages at a fixed width of 520.
  *
- * The seller's stage first: the General access select (Restricted, Anyone with the link) with the
- * role select beside it (Viewer, Commenter, Editor), one sentence under them that states what the
+ * The seller's stage first: the General access dropdown (Restricted, Anyone with the link) with the
+ * role dropdown beside it (Viewer, Commenter, Editor), one sentence under them that states what the
  * chosen access does on this deployment, the address in a read only field with the one Copy link
  * beside it, a checkbox that swaps the address for the present link, the people rows when any
  * exist, Done. The address is the link for the selected access: under Anyone with the link the
@@ -52,7 +55,7 @@ import './share.css';
  * three link rows of the focus round (View link, Present link, Edit link) with their Created dates,
  * each minted on the first Copy link and remembered so a second copy sends the same address; the
  * links list with Rotate and Revoke; Stop sharing; the gear's five switches for the owner; Publish
- * to the web. The two footer sentences of the parity rounds left: the sentence under the select
+ * to the web. The two footer sentences of the parity rounds left: the sentence under the dropdown
  * carries the deployment's mode. The own row reads You (rank 4). The first Share on a browser with
  * no display name asks for one ("Your name, shown to collaborators"), once per browser, in a band at
  * the head of the body (`ShareNameAsk`): the dialog itself opens on the page's record at once, so
@@ -74,6 +77,12 @@ const ROLES: ReadonlyArray<{ value: EditorRole; label: string }> = [
   { value: 'viewer', label: DIALOGS.share.roles.viewer },
   { value: 'commenter', label: DIALOGS.share.roles.commenter },
   { value: 'editor', label: DIALOGS.share.roles.editor },
+];
+
+/** The General access field's two rows. */
+const MODES: ReadonlyArray<SelectOption<'restricted' | 'link'>> = [
+  { value: 'restricted', label: DIALOGS.share.restricted },
+  { value: 'link', label: DIALOGS.share.anyoneWithLink },
 ];
 
 const EXPIRY_DAYS: ReadonlyArray<{ id: string; label: string; days: number | null }> = [
@@ -201,7 +210,7 @@ export function authorizeSentence(mode: AuthorizeMode | undefined): string | nul
 }
 
 /**
- * The sentence under the access select (rank 3): what the chosen access does on this deployment,
+ * The sentence under the access dropdown (rank 3): what the chosen access does on this deployment,
  * in one line. The mode's words replace the footer paragraph of the parity rounds.
  */
 export function accessSentence(
@@ -502,6 +511,17 @@ function who(grant: AccessGrantView): string {
 
 function whoKey(grant: AccessGrantView): string {
   return grant.principal?.principalId ?? grant.email ?? '';
+}
+
+/**
+ * The person a share action names, in the actions' shape (`grantWhoSchema`): the principal, else
+ * the address. The bare key was refused as "invalid input at /who", so a person row's role,
+ * expiry, removal and transfer never reached the server.
+ */
+export function grantWhoOf(grant: AccessGrantView): GrantWho {
+  return grant.principal !== undefined
+    ? { principalId: grant.principal.principalId }
+    : { email: grant.email ?? '' };
 }
 
 /** The sentence of the draft's dialog: nothing to share before the first write saves the deck. */
@@ -1051,14 +1071,14 @@ export function ShareDialog() {
             data-control="dialog.share.general"
           >
             <Icon name={mode === 'restricted' ? 'lock-closed' : 'link'} />
-            <select
+            <Select
               className="ts-share-mode"
               value={mode}
+              options={MODES}
               disabled={!canShare || busy}
-              aria-label={DIALOGS.share.generalAccess}
-              data-control="dialog.share.mode"
-              onChange={(event) => {
-                const next = event.target.value;
+              label={DIALOGS.share.generalAccess}
+              control="dialog.share.mode"
+              onChange={(next) => {
                 if (next === 'link')
                   write('share.setGeneralAccess', { mode: 'link', role: 'viewer' }, (result) =>
                     setLinkUrl(rememberGeneral(result) ?? null),
@@ -1066,39 +1086,29 @@ export function ShareDialog() {
                 else
                   write('share.setGeneralAccess', { mode: 'restricted' }, () => setLinkUrl(null));
               }}
-              {...tipProps({
+              tip={{
                 name: DIALOGS.share.generalAccess,
                 doc:
                   mode === 'restricted'
                     ? 'Only you, until you pick Anyone with the link'
                     : 'No sign in needed; the link can be revoked',
-              })}
-            >
-              <option value="restricted">{DIALOGS.share.restricted}</option>
-              <option value="link">{DIALOGS.share.anyoneWithLink}</option>
-            </select>
+              }}
+            />
             {mode === 'link' ? (
-              <select
+              <Select
                 className="ts-share-role"
                 value={access.generalAccess.role}
+                options={ROLES}
                 disabled={!canShare || busy}
-                aria-label="Link role"
-                data-control="dialog.share.linkRole"
-                onChange={(event) =>
-                  write(
-                    'share.setGeneralAccess',
-                    { mode: 'link', role: event.target.value },
-                    (result) => setLinkUrl(rememberGeneral(result) ?? linkUrl),
+                label="Link role"
+                control="dialog.share.linkRole"
+                onChange={(role) =>
+                  write('share.setGeneralAccess', { mode: 'link', role }, (result) =>
+                    setLinkUrl(rememberGeneral(result) ?? linkUrl),
                   )
                 }
-                {...tipProps({ name: 'Link role', doc: 'What anyone with the link may do' })}
-              >
-                {ROLES.map((each) => (
-                  <option key={each.value} value={each.value}>
-                    {each.label}
-                  </option>
-                ))}
-              </select>
+                tip={{ name: 'Link role', doc: 'What anyone with the link may do' }}
+              />
             ) : null}
           </div>
         )}
@@ -1193,11 +1203,11 @@ export function ShareDialog() {
               busy={busy}
               expiring={expiring === whoKey(grant)}
               onExpiring={(on) => setExpiring(on ? whoKey(grant) : null)}
-              onRole={(next) => write('share.setRole', { who: whoKey(grant), role: next })}
-              onRemove={() => write('share.remove', { who: whoKey(grant) })}
-              onExpiry={(at) => write('share.setExpiry', { who: whoKey(grant), expiresAt: at })}
+              onRole={(next) => write('share.setRole', { who: grantWhoOf(grant), role: next })}
+              onRemove={() => write('share.remove', { who: grantWhoOf(grant) })}
+              onExpiry={(at) => write('share.setExpiry', { who: grantWhoOf(grant), expiresAt: at })}
               onTransfer={() =>
-                write('share.transferOwnership', { to: whoKey(grant) }, () =>
+                write('share.transferOwnership', { to: grantWhoOf(grant) }, () =>
                   shell.say('The transfer is waiting for their answer'),
                 )
               }
@@ -1301,20 +1311,15 @@ export function ShareDialog() {
                     }
                   }}
                 />
-                <select
+                <Select
                   className="ts-share-role"
                   value={inviteRole}
-                  aria-label="Role"
-                  data-control="dialog.share.inviteRole"
-                  onChange={(event) => setInviteRole(event.target.value as EditorRole)}
-                  {...tipProps({ name: 'Role', doc: 'Viewer, Commenter or Editor' })}
-                >
-                  {ROLES.map((each) => (
-                    <option key={each.value} value={each.value}>
-                      {each.label}
-                    </option>
-                  ))}
-                </select>
+                  options={ROLES}
+                  label="Role"
+                  control="dialog.share.inviteRole"
+                  onChange={setInviteRole}
+                  tip={{ name: 'Role', doc: 'Viewer, Commenter or Editor' }}
+                />
                 <button
                   type="button"
                   className="pt-ib is-solid"
@@ -1728,67 +1733,61 @@ function GrantRow({
             : ''}
       </span>
       {canShare ? (
-        <select
+        <Select<EditorRole | 'transfer' | 'expiry' | 'remove'>
           className="ts-share-role"
           value={expiring ? 'expiry' : grant.role}
+          options={[
+            { options: ROLES },
+            /* the row's three actions in a group of their own after a divider (DROPDOWNS.md 3.9) */
+            {
+              options: [
+                ...(canTransfer && identity?.kind === 'account'
+                  ? [{ value: 'transfer' as const, label: DIALOGS.share.transferOwnership }]
+                  : []),
+                { value: 'expiry' as const, label: DIALOGS.share.addExpiration },
+                { value: 'remove' as const, label: DIALOGS.share.removeAccess },
+              ],
+            },
+          ]}
           disabled={busy}
-          aria-label={`Role of ${who(grant)}`}
-          data-control={`dialog.share.grant.${key}.role`}
-          onChange={(event) => {
-            const value = event.target.value;
+          label={`Role of ${who(grant)}`}
+          control={`dialog.share.grant.${key}.role`}
+          onChange={(value) => {
             if (value === 'transfer') onTransfer();
             else if (value === 'expiry') onExpiring(true);
             else if (value === 'remove') {
               if (window.confirm(`${DIALOGS.share.removeAccess}? ${DIALOGS.share.removeNote}`))
                 onRemove();
-            } else onRole(value as EditorRole);
+            } else onRole(value);
           }}
-          {...tipProps({
+          tip={{
             name: 'Role',
             doc: 'Viewer, Commenter, Editor; Transfer ownership, Add expiration, Remove access',
-          })}
-        >
-          {ROLES.map((each) => (
-            <option key={each.value} value={each.value}>
-              {each.label}
-            </option>
-          ))}
-          {canTransfer && identity?.kind === 'account' ? (
-            <option value="transfer">{DIALOGS.share.transferOwnership}</option>
-          ) : null}
-          <option value="expiry">{DIALOGS.share.addExpiration}</option>
-          <option value="remove">{DIALOGS.share.removeAccess}</option>
-        </select>
+          }}
+        />
       ) : (
         <span className="ts-share-row-role">
           {ROLES.find((each) => each.value === grant.role)?.label ?? grant.role}
         </span>
       )}
       {expiring ? (
-        <select
+        <Select
           className="ts-share-expiry"
           autoFocus
-          aria-label={DIALOGS.share.addExpiration}
-          data-control={`dialog.share.grant.${key}.expiry`}
-          defaultValue=""
-          onChange={(event) => {
-            const chosen = EXPIRY_DAYS.find((each) => each.id === event.target.value);
+          value=""
+          placeholder={DIALOGS.share.addExpiration}
+          options={EXPIRY_DAYS.map((each) => ({ value: each.id, label: each.label }))}
+          label={DIALOGS.share.addExpiration}
+          control={`dialog.share.grant.${key}.expiry`}
+          onChange={(id) => {
+            const chosen = EXPIRY_DAYS.find((each) => each.id === id);
             onExpiring(false);
             if (chosen === undefined) return;
             onExpiry(chosen.days === null ? null : expiryDate(chosen.days));
           }}
-          {...tipProps({ name: DIALOGS.share.addExpiration, doc: 'Up to one year' })}
+          tip={{ name: DIALOGS.share.addExpiration, doc: 'Up to one year' }}
           onBlur={() => onExpiring(false)}
-        >
-          <option value="" disabled>
-            {DIALOGS.share.addExpiration}
-          </option>
-          {EXPIRY_DAYS.map((each) => (
-            <option key={each.id} value={each.id}>
-              {each.label}
-            </option>
-          ))}
-        </select>
+        />
       ) : null}
     </li>
   );

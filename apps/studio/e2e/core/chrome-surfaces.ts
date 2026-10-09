@@ -22,6 +22,7 @@ import {
   waitEditor,
   waitRevision,
 } from './lib';
+import { chooseOption } from '../choose-option';
 import { isCoreId } from './matrix';
 
 // Lane D2's rows of the design round in core/chrome.spec.ts (docs/DESIGN.md 10.2, 11): the
@@ -544,10 +545,14 @@ async function walkOf(browser: Browser, width: number, appearance: Appearance): 
       }
     } else if (phone) walk.absent.push('the hover preview (no hover on a phone layout)');
     await closeAll(page);
-    /* the Share dialog: the window, its select, field, checkbox and solid button; the snackbar */
+    /* the Share dialog: the window, its dropdown, field, checkbox and solid button; the snackbar */
     await openShare(page);
     await take(walk.windows, 'the Share dialog', '[data-control="dialog.share"]');
-    await take(walk.controls, "the dialog's select", '[data-control="dialog.share"] select');
+    await take(
+      walk.controls,
+      "the dialog's dropdown",
+      '[data-control="dialog.share"] [role="combobox"]',
+    );
     await take(walk.controls, "the dialog's field", '[data-control="dialog.share.address"]');
     await take(walk.controls, 'the solid button', '[data-control="dialog.share"] .pt-ib.is-solid');
     await take(
@@ -967,29 +972,55 @@ export function chromeSurfaces(): string[] {
   });
 
   /* DESIGN.md 2.2: a surface opened from a dialog paints above it and takes the pointer. The
-     dialogs of the editor raise the browser's own select lists (Share's General access and role)
-     and the tooltip of their controls; the select takes its change with the dialog in the top
-     layer, and the tooltip of the dialog's Done button is the first element at its centre */
+     dialogs of the editor raise the shared dropdown's list (Share's General access and role,
+     DROPDOWNS.md 3.6) and the tooltip of their controls; the list opens in the popover layer over
+     the dialog, its row is the first element at the row's centre and a click there chooses it
+     with the dialog in the top layer, and the tooltip of the dialog's Done button is the first
+     element at its centre */
   row('chrome.layers.menu-over-dialog', async ({ browser }) => {
     test.setTimeout(300_000);
     const page = await fresh(await personIn(browser, 'light'));
     await openShare(page);
-    const select = page.locator('[data-control="dialog.share"] select').first();
-    await select.waitFor({ timeout: 10_000 });
-    const box = await select.boundingBox();
-    expect(box, 'the first select of the Share dialog').not.toBeNull();
-    const hit = await topAt(page, box!.x + box!.width / 2, box!.y + box!.height / 2);
-    const before = await select.inputValue();
-    const values = await select.evaluate((el) =>
-      [...(el as HTMLSelectElement).options].map((o) => o.value),
+    const trigger = page.locator('[data-control="dialog.share"] [role="combobox"]').first();
+    await trigger.waitFor({ timeout: 10_000 });
+    const control = (await trigger.getAttribute('data-control')) ?? '';
+    const before = (await trigger.getAttribute('value')) ?? '';
+    await trigger.click();
+    await expect(trigger, 'the first dropdown of the Share dialog opens').toHaveAttribute(
+      'aria-expanded',
+      'true',
     );
+    const list = page.locator(`[id="${await trigger.getAttribute('aria-controls')}"]`);
+    const values = await list
+      .locator('[role="option"]')
+      .evaluateAll((els) => els.map((el) => el.getAttribute('data-value') ?? ''));
     const other = values.find((v) => v !== before);
     expect(other, 'a second option to pick').toBeDefined();
-    await select.selectOption(other!);
-    await expect(select).toHaveValue(other!);
+    const option = list.locator(`[role="option"][data-value="${other}"]`);
+    const box = await option.boundingBox();
+    expect(box, 'the row of the open list').not.toBeNull();
+    const at = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 };
+    const hit = await topAt(page, at.x, at.y);
+    const plate = await list.evaluate(
+      (el, { point, value }) => {
+        const first = document.elementsFromPoint(point.x, point.y)[0];
+        const row = [...el.querySelectorAll('[role="option"]')].find(
+          (each) => each.getAttribute('data-value') === value,
+        );
+        return {
+          layer: (el as HTMLElement).dataset.layer ?? null,
+          open: el.matches(':popover-open'),
+          rowFirst: Boolean(first && row?.contains(first)),
+        };
+      },
+      { point: at, value: other! },
+    );
+    await page.mouse.click(at.x, at.y);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).toHaveAttribute('value', other!);
     await page.waitForTimeout(500);
-    await select.selectOption(before);
-    await expect(select).toHaveValue(before);
+    await chooseOption(page, control, before);
+    await expect(trigger).toHaveAttribute('value', before);
     const dialog = await page.evaluate(() => {
       const scrim = document.querySelector<HTMLElement>('.ts-dialog-scrim');
       return {
@@ -1023,9 +1054,10 @@ export function chromeSurfaces(): string[] {
     });
     test.info().annotations.push({
       type: 'layers',
-      description: `the select at its centre: ${hit.join(' > ')}; values ${before} -> ${other} -> ${before}; the dialog ${JSON.stringify(dialog)}; the close button's tooltip ${JSON.stringify(tip)}`,
+      description: `the row at its centre: ${hit.join(' > ')}; the list ${JSON.stringify(plate)}; values ${before} -> ${other} -> ${before}; the dialog ${JSON.stringify(dialog)}; the close button's tooltip ${JSON.stringify(tip)}`,
     });
-    expect(hit[0] ?? '', 'the select is the first element at its centre').toMatch(/^select/);
+    expect(plate.open, 'the list is in the top layer').toBe(true);
+    expect(plate.rowFirst, 'the row is the first element at its centre').toBe(true);
     expect(dialog.open, 'the dialog is in the top layer').toBe(true);
     expect(dialog.layer).toBe('dialog');
     expect(tip?.first, "the tooltip of a dialog's control is first at its centre").toBe(true);

@@ -28,6 +28,7 @@ import {
   accessSentence,
 } from '../dialogs/Share';
 import type { AccessRecordJson } from '../dialogs/Share';
+import { chooseOption } from './choose-option';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
 import type { EditorAccess, EditorShellInput } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
@@ -689,7 +690,7 @@ describe('ShareDialog', () => {
     expect(document.querySelector('[data-control="dialog.share.loading"]')).toBeNull();
     expect(document.querySelector('[data-control="dialog.share.mode"]')).not.toBeNull();
     expect(
-      (document.querySelector('[data-control="dialog.share.mode"]') as HTMLSelectElement).value,
+      document.querySelector('[data-control="dialog.share.mode"]')?.getAttribute('value'),
     ).toBe('link');
     openMore();
     expect(document.querySelector('[data-control="dialog.share.owner"]')).not.toBeNull();
@@ -972,6 +973,56 @@ describe('ShareDialog', () => {
     ).toContain('You');
   });
 
+  it("names the person of a row's role change by address or by principal, the shape the action accepts (DROPDOWNS.md 8.2)", async () => {
+    const dispatch = vi.fn((_action: string, _input: Record<string, unknown>) =>
+      Promise.resolve({}),
+    );
+    const grants = [
+      {
+        email: 'lee@example.test',
+        role: 'viewer' as const,
+        invitedAt: '2026-09-10T00:00:00Z',
+        expiresAt: null,
+        status: 'pending' as const,
+      },
+      {
+        principal: {
+          principalId: 'usr_maya',
+          label: 'Titanium 471',
+          name: 'Maya',
+          trust: 'verified' as const,
+          kind: 'account' as const,
+        },
+        role: 'editor' as const,
+        invitedAt: '2026-09-10T00:00:00Z',
+        acceptedAt: '2026-09-10T00:00:00Z',
+        expiresAt: null,
+        status: 'active' as const,
+      },
+    ];
+    const { state } = host(
+      baseInput({
+        dispatch: dispatch as unknown as EditorShellInput['dispatch'],
+        access: restricted({ grants }),
+        capabilities: ['read', 'share'],
+      }),
+    );
+    render(
+      <Host state={state}>
+        <ShareDialog />
+      </Host>,
+    );
+    await flush();
+    chooseOption('dialog.share.grant.lee@example.test.role', 'commenter');
+    await flush();
+    chooseOption('dialog.share.grant.usr_maya.role', 'viewer');
+    await flush();
+    expect(dispatch.mock.calls.map(([action, input]) => [action, input.who, input.role])).toEqual([
+      ['share.setRole', { email: 'lee@example.test' }, 'commenter'],
+      ['share.setRole', { principalId: 'usr_maya' }, 'viewer'],
+    ]);
+  });
+
   it('maps a fetched record through the identities map when one is given, else to the label the id gives (people round)', () => {
     const resolved = {
       principalId: 'usr_owner',
@@ -1067,7 +1118,7 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(address?.readOnly).toBe(true);
     expect(address?.value).toBe('https://x.test/s/generaltokentokentokentok');
     expect(
-      (document.querySelector('[data-control="dialog.share.linkRole"]') as HTMLSelectElement).value,
+      document.querySelector('[data-control="dialog.share.linkRole"]')?.getAttribute('value'),
     ).toBe('editor');
     expect(
       document.querySelector('[data-control="dialog.share.accessSentence"]')?.textContent,
@@ -1207,9 +1258,8 @@ describe('the two stages of the Share dialog (product round)', () => {
       </Host>,
     );
     await flush();
-    const mode = document.querySelector<HTMLSelectElement>('[data-control="dialog.share.mode"]');
-    expect(mode).not.toBeNull();
-    fireEvent.change(mode!, { target: { value: 'link' } });
+    expect(document.querySelector('[data-control="dialog.share.mode"]')).not.toBeNull();
+    chooseOption('dialog.share.mode', 'link');
     await flush();
     await flush();
     expect(dispatch).toHaveBeenCalledTimes(1);

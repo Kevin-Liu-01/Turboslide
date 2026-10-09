@@ -37,6 +37,7 @@ import {
   typeInto,
   waitEditor,
 } from './core/lib';
+import { chooseOption } from './choose-option';
 import { coreTitle, isCoreId } from './core/matrix';
 import { contextAt, guardWords, plateFaults, readPlate, ringFault } from './core/auth-plate';
 
@@ -742,15 +743,15 @@ async function nameByPrompt(p: Page, name: string): Promise<boolean> {
 async function setLinkAccess(p: Page, role: 'viewer' | 'commenter' | 'editor'): Promise<string> {
   await openShare(p);
   const mode = ctl(p, 'dialog.share.mode');
-  if ((await mode.inputValue().catch(() => '')) !== 'link') {
-    await mode.selectOption('link');
+  if ((await mode.getAttribute('value').catch(() => '')) !== 'link') {
+    await chooseOption(p, 'dialog.share.mode', 'link');
     await expect(p.locator('[data-control="dialog.share"] [aria-busy="true"]')).toHaveCount(0, {
       timeout: 10_000,
     });
   }
-  const roleSelect = ctl(p, 'dialog.share.linkRole');
-  if ((await roleSelect.inputValue().catch(() => '')) !== role) {
-    await roleSelect.selectOption(role);
+  const roleField = ctl(p, 'dialog.share.linkRole');
+  if ((await roleField.getAttribute('value').catch(() => '')) !== role) {
+    await chooseOption(p, 'dialog.share.linkRole', role);
     await expect(p.locator('[data-control="dialog.share"] [aria-busy="true"]')).toHaveCount(0, {
       timeout: 10_000,
     });
@@ -805,7 +806,7 @@ async function inviteByEmail(
   await openMore(p);
   await ctl(p, 'dialog.share.emails').click();
   await p.keyboard.type(email, { delay: 30 });
-  await ctl(p, 'dialog.share.inviteRole').selectOption(role);
+  await chooseOption(p, 'dialog.share.inviteRole', role);
   await ctl(p, 'dialog.share.send').click();
   await expect(p.locator('[data-control="dialog.share"] [aria-busy="true"]')).toHaveCount(0, {
     timeout: 10_000,

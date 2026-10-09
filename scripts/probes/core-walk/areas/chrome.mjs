@@ -1092,12 +1092,12 @@ async function productRound(t) {
         await t.sleep(400);
         reads.shareSelect = contrastComposited(
           await paint(
-            '[data-control="dialog.share"] select, [data-control="dialog.share.mode"]',
+            '[data-control="dialog.share"] [role="combobox"], [data-control="dialog.share.mode"]',
             'border',
           ),
         );
-        /* a legacy deck's dialog (no access record on this store) draws a sentence and no select
-           (Share.tsx `dialog.share.legacy`): nothing to read there */
+        /* a legacy deck's dialog (no access record on this store) draws a sentence and no
+           dropdown (Share.tsx `dialog.share.legacy`): nothing to read there */
         if (reads.shareSelect === null && (await t.has('[data-control="dialog.share.legacy"]')))
           delete reads.shareSelect;
         reads.shareInput = contrastComposited(
@@ -1425,7 +1425,7 @@ async function productRound(t) {
   );
   await t.step(
     'chrome.select.one-rule',
-    "read the Share dialog's selects and the Comments filter",
+    "read the Share dialog's dropdowns and the Comments filter",
     "32 px with the chrome's own chevron",
     async () => {
       await t.clearAll();
@@ -1433,7 +1433,8 @@ async function productRound(t) {
       await t.waitControl('dialog.share', 8000);
       await t.sleep(300);
       const shareSelects = await page.evaluate(() =>
-        [...document.querySelectorAll('[data-control="dialog.share"] select')]
+        /* the shared dropdown's triggers (DROPDOWNS.md 3.2) */
+        [...document.querySelectorAll('[data-control="dialog.share"] [role="combobox"]')]
           .filter((el) => el.getClientRects().length > 0)
           .map((el) => ({
             id: el.getAttribute('data-control'),
@@ -1441,7 +1442,7 @@ async function productRound(t) {
             appearance: getComputedStyle(el).appearance,
           })),
       );
-      /* a legacy deck's dialog draws a sentence and no select (Share.tsx `dialog.share.legacy`) */
+      /* a legacy deck's dialog draws a sentence and no dropdown (Share.tsx `dialog.share.legacy`) */
       const legacyDialog = await t.has('[data-control="dialog.share.legacy"]');
       await t.press('Escape');
       await t.waitGone('[data-control="dialog.share"]', 4000);
@@ -1460,7 +1461,7 @@ async function productRound(t) {
             ? shareSelects.every((s) => s.h === 32 && own(s.appearance))
             : shareSelects.length >= 1 &&
               shareSelects.every((s) => s.h === 32 && own(s.appearance))) && filterOk !== false,
-        observed: `Share selects ${shareSelects.map((s) => `${s.id ?? 'select'} ${s.h}px appearance ${s.appearance}`).join(', ') || (legacyDialog ? 'none (a legacy deck: the dialog draws a sentence)' : 'none')}; Comments filter ${filter ? `${Math.round(filter.height)}px appearance ${filter.appearance}` : 'absent (no comments, PRODUCT.md 3.2)'}`,
+        observed: `Share dropdowns ${shareSelects.map((s) => `${s.id ?? 'dropdown'} ${s.h}px appearance ${s.appearance}`).join(', ') || (legacyDialog ? 'none (a legacy deck: the dialog draws a sentence)' : 'none')}; Comments filter ${filter ? `${Math.round(filter.height)}px appearance ${filter.appearance}` : 'absent (no comments, PRODUCT.md 3.2)'}`,
       };
     },
   );

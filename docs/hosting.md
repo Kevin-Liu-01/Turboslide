@@ -924,11 +924,13 @@ by address (research 04 F8). Layout v2 keeps the twins on the public store, beca
 
 | Store                        | Access  | Holds                                                                                                                                             |
 | ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `turboslide-decks` (today's) | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `exports/`, `bundles/`; later `d/<id>/<assetKey>/*` and `u/<avatarKey>/*`    |
+| `turboslide-decks` (today's) | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `exports/`, `bundles/`; `d/<id>/<assetKey>/*` and `u/<avatarKey>/*`          |
 | `turboslide-private` (new)   | private | `decks/<id>/{deck.json,slides/,versions/,snapshots/,leases.json,access.json,comments/,<sidecars>}`, `users/<principalId>/decks.json`, `meta.json` |
 
 The code (`packages/store/src/migrate.ts`, `blob-vercel.ts`): `vercelDocumentsClient(env)` opens
-the private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` with `access: private`; `splitBlobClient({
+the private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN`, or from `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`
+(the name the Vercel dashboard makes when the store is connected with the prefix
+`TURBOSLIDE_BLOB_PRIVATE`; hardening K1#4), with `access: private`; `splitBlobClient({
 legacy, documents })` is one `BlobClient` that routes by pathname (`isPublicPath`: twins, keyed
 twins, exports and bundles are public, everything else a document), reads a document from the
 private store first and, during the dual read window, from the public one when it is absent there,
@@ -953,12 +955,22 @@ keeps, so a function timeout never loses work:
 3. `verify`: per deck, a `head` per document compares the etags; a snapshot is compared byte for
    byte; a private copy newer than the public one (a write of the window) passes. Verified decks
    accumulate in `meta.verified`.
-4. `cutover`: refused with the list of unverified decks while any deck failed or is unverified;
+4. `rekey` (hardening K1#4): per verified deck with a record, a random key of its own (22
+   base64url characters, about 132 bits) unless the record holds one; every twin under
+   `decks/<id>/assets/` is copied to `d/<id>/<assetKey>/assets/` with `overwrite: false` and its
+   etag compared; only then is the key written to the record, with the etag read. A deck without a
+   record (the seed deck) keeps its twins. A deck whose documents are not verified is listed under
+   `failed` until they are. Run it with `--batch 1` on a deck with hundreds of twins: each twin is
+   a head, a get and a put. Rekeyed decks accumulate in `meta.rekeyed`.
+5. `cutover`: refused with the list of unverified decks while any deck failed or is unverified;
    otherwise flips `layout: 'v2'` and ends the dual read window. From here a document that exists
    on the public store only is invisible.
-5. `delete`: per deck, the public documents leave in `del` batches of at most 50 paths, off the
-   request path (the CLI runs it after the cutover verified).
-6. `rollback`: before the cutover, sets the rollback flag: reads and writes go to the public store
+6. `delete`: per deck, the public documents leave in `del` batches of at most 50 paths, off the
+   request path (the CLI runs it after the cutover verified). For a deck with a key of its own,
+   any twin written at `decks/<id>/assets/` since `rekey` (an instance that read the deck as
+   unkeyed in the minute after the switch) is copied under the key first, then the old twins
+   leave too; a deck without a key keeps them.
+7. `rollback`: before the cutover, sets the rollback flag: reads and writes go to the public store
    again, as if no plan had run; `plan` restarts the migration. After the cutover there is no
    rollback flag; `deck pull` and `deck push` still move any deck.
 
@@ -969,20 +981,35 @@ private copy fails verification and a rollback before the cutover flips the read
 on a checkout: `TURBOSLIDE_BLOB_PRIVATE_DIR=<folder>` opens a folder as the private store
 (`diskBlobClient`).
 
-Deviation from SPEC-3 11.5, recorded for the verifier: the migration does not generate an
-`assetKey` per deck or copy the twins to `d/<id>/<assetKey>/<digest name>` with an `asset.set`
-rewrite of `twins` and `sourceFile`. The twins keep their `decks/<id>/assets/` paths on the public
-store, which the assets route serves today; the keyed layout of the twins is the assets route's
-change (B4) and can run as a later step of the same command once that route reads `assetKey`.
+The keyed twins (hardening K1#3 and K1#4, `docs/hardening/HARDENING.md` 4.1). A deck created
+since K1#3 takes a random `assetKey` in its record (`newAssetKey`, packages/schema access.ts); a
+bundle upload, whose unpack writes the twins before the record, keeps the key derived from the id
+until `rekey`. The deployment's client (`layoutBlobClient`) is `keyedTwinsClient` over the store:
+every twin path `decks/<id>/assets/<file>` of a deck with a key of its own is read and written at
+`d/<id>/<assetKey>/assets/<file>`, the key read from the deck's record and kept for ten minutes (a
+deck without one is asked again after a minute), so the asset intake, the captures, the variants,
+the frames, the slide imports, the copies, the pull and the removal reach the keyed place with no
+change of their own. The manifest's twin paths stay `assets/<file>`, so `rekey` needs no
+`asset.set`; this replaces SPEC-3 11.5's rewrite of `twins` and `sourceFile`. A twin still at its
+old place is read there until `delete` moves it. The viewer payload names
+`https://<TURBOSLIDE_PUBLIC_STORE_HOST>/d/<id>/<assetKey>/` as its asset base for such a deck
+(`viewerAssetBase`, server/decks.ts), so the page loads every twin by key from the store's CDN; the
+editor's own asset base is still `/decks/<id>/` (the assets route) until its client takes the
+loader's.
 
-Turning the private store on (Kevin or the integrator; no agent creates a paid resource):
-`vercel blob create-store turboslide-private --access private --region iad1 --yes` from the linked
-project, then `vercel env add TURBOSLIDE_BLOB_PRIVATE_TOKEN preview` with the store's read write
-token (the Marketplace names it with the prefix Kevin picks; the variable the studio reads is this
-one), redeploy the preview, run the migration to its dual read window on the preview store
-(`plan`, `copy` until `done`, `verify` until `done`), watch the editor and `/decks` for a day, then
-`cutover` and `delete`. Production repeats the same steps with its own token after the preview
-verified.
+Turning the private store on (Kevin; no agent creates a paid resource). Since 2026-10-08 the
+General Translation team holds three stores, connected to the project `turboslide-gt` in the
+dashboard with prefixes: `turboslide-private-preview` to Preview and `turboslide-private` to
+Production, each as `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, and `turboslide-backup` to
+Production as `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN`. Production's public store
+`turboslide-decks` and its `BLOB_READ_WRITE_TOKEN` are unchanged. A deployment that reads the
+private token runs the split client; before `plan` it reads and writes the public store alone, as
+layout v1 does, and asks the private store for `meta.json` once every 5 s. Run the migration on an
+environment only once hardening K1#5a serves it, because before K1#5a the web page build hands the
+browser the stored copy's URL, which a private store does not serve: on the preview `plan`, `copy`
+until `done`, `verify` until `done`, `rekey` until `done`; watch the editor, `/decks`, an export and
+a web page download for a day; then `cutover` and `delete`. Production repeats the same steps
+after the preview verified, at a quiet hour.
 
 ## 11. The runbook of the round three services
 
@@ -1026,7 +1053,7 @@ its output:
 | `TURBOSLIDE_ROOM_SECRET`                             | `realtime-env.mjs do`, sensitive, from `room.env` (600, `openssl rand -hex 32`); the same value on the Worker's secrets (`worker-secrets`)                                                             | the HMAC key of the room ticket the editor loader mints and the Worker verifies before a socket reaches an object (CLOUDFLARE.md 3.3)                                                                                                                                                          |
 | `TURBOSLIDE_ROOM_BEARER`                             | the same, from `room.env`; the same value on the Worker's secrets                                                                                                                                      | the bearer of the function's calls to the Worker and of the object's calls to the function (the checkpoint and seed routes); `docs/security.md` section 12 has its reach and rotation                                                                                                          |
 | `TURBOSLIDE_ACCOUNTS`                                | `realtime-env.mjs database`, plain: `d1`                                                                                                                                                               | the accounts database is D1 behind the Worker's bearer routes (CLOUDFLARE.md 4.2; `auth/db.ts`); needs the host and the bearer; without it the Sign in row is absent (`NO_DATABASE_NOTICE`)                                                                                                    |
-| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                      | the private store                                                                                                                                                                                      | layout v2: documents in the private store through `layoutBlobClient` (section 10)                                                                                                                                                                                                              |
+| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                      | the private store; the dashboard's connection names it `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, which the studio reads too                                                                          | layout v2: documents in the private store through `layoutBlobClient` (section 10)                                                                                                                                                                                                              |
 | `TURBOSLIDE_BLOB_PRIVATE_DIR`                        | you, a checkout                                                                                                                                                                                        | a folder as the private store for a migration rehearsal                                                                                                                                                                                                                                        |
 | `DATABASE_URL`                                       | never set on either project (CLOUDFLARE.md 4.4)                                                                                                                                                        | a self hosted Postgres keeps the `postgres` kind of `auth/db.ts`; production's accounts are D1                                                                                                                                                                                                 |
 | `BETTER_AUTH_SECRET`                                 | `realtime-env.mjs database` mints and sets it, one value per environment, into `~/.config/turboslide/better-auth.env`                                                                                  | the account sessions (B3)                                                                                                                                                                                                                                                                      |

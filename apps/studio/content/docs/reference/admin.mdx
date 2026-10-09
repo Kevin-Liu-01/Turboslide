@@ -67,12 +67,12 @@ description: The actions of the admin group, with their input fields and their n
 
 ## admin.migrateStorage [#admin.migrateStorage]
 
-**Migrate storage.** Runs one step of the storage layout v2 migration (plan, copy, verify, cutover, delete or rollback) from its cursor, in batches.
+**Migrate storage.** Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.
 
-| Field   | Type                                                                | Required | Description |
-| ------- | ------------------------------------------------------------------- | -------- | ----------- |
-| `step`  | "plan" \| "copy" \| "verify" \| "cutover" \| "delete" \| "rollback" | yes      |             |
-| `batch` | integer                                                             | no       |             |
+| Field   | Type            | Required | Description |
+| ------- | --------------- | -------- | ----------- |
+| `step`  | one of 7 values | yes      |             |
+| `batch` | integer         | no       |             |
 
 - Command line: `turboslide admin migrate-storage <step> --to <to> --batch <batch>`
 - MCP tool: No MCP tool.

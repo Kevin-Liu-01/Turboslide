@@ -1019,8 +1019,16 @@ export const tokenRecordSchema = z.strictObject({
   lastUsedAt: z.string().nullable(),
 });
 
-/** The storage migration steps (SPEC-3 11.5). */
-export const MIGRATION_STEPS = ['plan', 'copy', 'verify', 'cutover', 'delete', 'rollback'] as const;
+/** The storage migration steps (SPEC-3 11.5; `rekey`, hardening K1#4). packages/store migrate.ts holds the same list. */
+export const MIGRATION_STEPS = [
+  'plan',
+  'copy',
+  'verify',
+  'rekey',
+  'cutover',
+  'delete',
+  'rollback',
+] as const;
 
 const studioUrl = z
   .string()
@@ -5607,7 +5615,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'admin.migrateStorage': action({
     id: 'admin.migrateStorage',
     label: 'Migrate storage',
-    doc: 'Runs one step of the storage layout v2 migration (plan, copy, verify, cutover, delete or rollback) from its cursor, in batches.',
+    doc: 'Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.',
     group: 'admin',
     mutates: true,
     transports: ['cli', 'http'],

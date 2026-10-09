@@ -22888,7 +22888,7 @@
       "post": {
         "operationId": "admin.migrateStorage",
         "summary": "Migrate storage",
-        "description": "Runs one step of the storage layout v2 migration (plan, copy, verify, cutover, delete or rollback) from its cursor, in batches.",
+        "description": "Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.",
         "tags": [
           "admin"
         ],
@@ -72717,6 +72717,7 @@
               "plan",
               "copy",
               "verify",
+              "rekey",
               "cutover",
               "delete",
               "rollback"
@@ -72743,6 +72744,7 @@
               "plan",
               "copy",
               "verify",
+              "rekey",
               "cutover",
               "delete",
               "rollback"

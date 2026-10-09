@@ -120,13 +120,32 @@ async function bytesOf(stream: ReadableStream<Uint8Array> | null): Promise<Uint8
 /**
  * The private store of storage layout v2 (gslides-parity SPEC-3 2.2, 11.5): its read write token.
  * Set, `vercelDocumentsClient` opens it and `splitBlobClient` (migrate.ts) puts every document
- * there; unset, the deployment runs layout v1 on the public store alone.
+ * there once `migrate-storage plan` has run; unset, the deployment runs layout v1 on the public
+ * store alone.
  */
 export const DOCUMENTS_TOKEN_VARIABLE = 'TURBOSLIDE_BLOB_PRIVATE_TOKEN';
 
+/**
+ * The names the token is read under, in order (hardening K1#4): the variable docs/hosting.md
+ * names, then the one the Vercel dashboard makes when the store is connected to the project with
+ * the prefix `TURBOSLIDE_BLOB_PRIVATE` (`<prefix>_READ_WRITE_TOKEN`).
+ */
+export const DOCUMENTS_TOKEN_VARIABLES = [
+  DOCUMENTS_TOKEN_VARIABLE,
+  'TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN',
+] as const;
+
+/** The variable that holds the private store's token in this environment, or null. */
+export function documentsTokenVariable(env: Env = process.env): string | null {
+  for (const name of DOCUMENTS_TOKEN_VARIABLES) {
+    const token = env[name];
+    if (token !== undefined && token !== '') return name;
+  }
+  return null;
+}
+
 export function hasDocumentsToken(env: Env = process.env): boolean {
-  const token = env[DOCUMENTS_TOKEN_VARIABLE];
-  return token !== undefined && token !== '';
+  return documentsTokenVariable(env) !== null;
 }
 
 export type VercelClientOptions = {
@@ -138,7 +157,10 @@ export type VercelClientOptions = {
 
 /** The private documents store's client (layout v2); a TypeError names the variable when it is unset. */
 export function vercelDocumentsClient(env: Env = process.env): BlobClient {
-  return vercelBlobClient(env, { tokenVariable: DOCUMENTS_TOKEN_VARIABLE, access: 'private' });
+  return vercelBlobClient(env, {
+    tokenVariable: documentsTokenVariable(env) ?? DOCUMENTS_TOKEN_VARIABLE,
+    access: 'private',
+  });
 }
 
 /** The SDK's own switch for its retry loop; the store leaves it off unless the deployment sets it. */

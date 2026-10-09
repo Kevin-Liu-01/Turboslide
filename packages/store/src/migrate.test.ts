@@ -9,12 +9,15 @@ import { describe, expect, it } from 'vitest';
 import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
 
+import { blobAccessStore } from './access-store.ts';
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
-import { legacyAssetKey, newAssetKey } from '@turboslide/schema/access';
+import { legacyAssetKey, newAssetKey, newDeckRecord } from '@turboslide/schema/access';
+import { MIGRATION_STEPS as SCHEMA_MIGRATION_STEPS } from '@turboslide/schema/actions';
 
 import {
   DELETE_BATCH,
+  MIGRATION_STEPS,
   emptyMeta,
   isPublicPath,
   keyedTwinsClient,
@@ -345,5 +348,136 @@ describe('the keyed twins (hardening K1#3)', () => {
     await twins.put('decks/fresh/assets/x.png', png, { overwrite: false });
     expect([...legacy.blobs.keys()]).toEqual([`d/fresh/${key}/assets/x.png`]);
     expect(documents.blobs.has(`d/fresh/${key}/assets/x.png`)).toBe(false);
+  });
+});
+
+// Hardening K1#4 (docs/hardening/HARDENING.md 4.1; DATA-2): `rekey` gives every deck with a record
+// a random key of its own, copies its twins under `d/<id>/<assetKey>/` verified by etag and only
+// then writes the key; `delete` makes a last copy of any twin written at the old place since and
+// removes `decks/<id>/assets/`; a deck without a record keeps its twins; a re-run changes nothing.
+describe('the rekey step (hardening K1#4)', () => {
+  const KEY = 'Rk7Qw2Zp9LmX4cVb8NtY3a';
+
+  async function twoDecks() {
+    const legacy = memoryBlobClient('https://public.local', { now: () => NOW });
+    const documents = memoryBlobClient('https://private.local', {
+      now: () => '2026-09-13T11:00:00.000Z',
+    });
+    const gt = await seedDeck(legacy, 'gt-brand', 2);
+    const q4 = await seedDeck(legacy, 'q4-review', 2);
+    const extra = new Uint8Array([7, 7, 7]);
+    await legacy.put('decks/q4-review/assets/photo.ab12.webp', extra, { overwrite: false });
+    q4.set('decks/q4-review/assets/photo.ab12.webp', extra);
+    // the seed deck holds no record; the other deck's is a real one with the derived key
+    await legacy.del(['decks/gt-brand/access.json']);
+    await blobAccessStore(legacy).write(
+      'q4-review',
+      newDeckRecord('q4-review', 'usr_owner', legacyAssetKey('q4-review'), NOW),
+    );
+    return { legacy, documents, clients: { legacy, documents }, gt, q4 };
+  }
+
+  it('lists rekey between verify and cutover, as the action schema does', () => {
+    expect([...MIGRATION_STEPS]).toEqual([...SCHEMA_MIGRATION_STEPS]);
+    expect(MIGRATION_STEPS.indexOf('rekey')).toBe(MIGRATION_STEPS.indexOf('verify') + 1);
+  });
+
+  it('copies the twins under a new key byte for byte, then writes the key; a re-run is a no-op', async () => {
+    const { legacy, clients, q4 } = await twoDecks();
+    await runMigrationStep(clients, 'plan', { now: () => NOW });
+    // a deck is rekeyed once its documents are copied and verified
+    const early = await runMigrationStep(clients, 'rekey', { now: () => NOW, newKey: () => KEY });
+    expect(early.failed).toEqual([
+      'gt-brand: not verified; run copy and verify first',
+      'q4-review: not verified; run copy and verify first',
+    ]);
+    await runMigrationStep(clients, 'copy', { now: () => NOW });
+    await runMigrationStep(clients, 'verify', { now: () => NOW });
+    const keys: string[] = [];
+    const rekey = await runMigrationStep(clients, 'rekey', {
+      now: () => NOW,
+      newKey: () => {
+        keys.push(KEY);
+        return KEY;
+      },
+    });
+    expect(rekey).toMatchObject({ step: 'rekey', processed: 2, verified: 1, done: true });
+    expect(rekey.failed).toEqual([]);
+    expect(keys).toEqual([KEY]);
+    // the record names the key now
+    const stored = await blobAccessStore(splitBlobClient(clients, { ttlMs: 0 })).read('q4-review');
+    expect(stored?.record.assetKey).toBe(KEY);
+    // every twin under the key, equal bytes and etag; the old copies stay until delete
+    for (const name of ['mark.png', 'photo.ab12.webp']) {
+      const from = `decks/q4-review/assets/${name}`;
+      const to = `d/q4-review/${KEY}/assets/${name}`;
+      expect(legacy.blobs.get(to)?.bytes).toEqual(q4.get(from));
+      expect(legacy.blobs.get(to)?.version).toBe(legacy.blobs.get(from)?.version);
+    }
+    // the seed deck has no record and keeps its twins where they are
+    expect([...legacy.blobs.keys()].some((path) => path.startsWith('d/gt-brand/'))).toBe(false);
+    // a second pass mints nothing and writes nothing
+    const before = new Map([...legacy.blobs].map(([path, blob]) => [path, blob.version]));
+    const again = await runMigrationStep(clients, 'rekey', {
+      now: () => NOW,
+      newKey: () => {
+        throw new Error('a keyed deck takes no new key');
+      },
+    });
+    expect(again.failed).toEqual([]);
+    expect(new Map([...legacy.blobs].map(([path, blob]) => [path, blob.version]))).toEqual(before);
+  });
+
+  it('reads the twins through the keyed client after rekey, and delete moves a late twin then removes the old place', async () => {
+    const { legacy, documents, clients } = await twoDecks();
+    await runMigrationStep(clients, 'plan', { now: () => NOW });
+    await runMigrationStep(clients, 'copy', { now: () => NOW });
+    await runMigrationStep(clients, 'verify', { now: () => NOW });
+    await runMigrationStep(clients, 'rekey', { now: () => NOW, newKey: () => KEY });
+    // an instance that still read the deck as unkeyed wrote a twin at the old place
+    const late = new Uint8Array([5, 4, 3]);
+    await legacy.put('decks/q4-review/assets/late.cd34.png', late, { overwrite: false });
+    const cutover = await runMigrationStep(clients, 'cutover', { now: () => NOW });
+    expect(cutover.done).toBe(true);
+    const deleted = await runMigrationStep(clients, 'delete', { now: () => NOW, batch: 5 });
+    expect(deleted.failed).toEqual([]);
+    const paths = [...legacy.blobs.keys()];
+    expect(paths.filter((path) => path.startsWith('decks/q4-review/'))).toEqual([]);
+    expect(paths.filter((path) => path.startsWith(`d/q4-review/${KEY}/assets/`)).sort()).toEqual([
+      `d/q4-review/${KEY}/assets/late.cd34.png`,
+      `d/q4-review/${KEY}/assets/mark.png`,
+      `d/q4-review/${KEY}/assets/photo.ab12.webp`,
+    ]);
+    // the seed deck keeps its twins at their old place
+    expect(legacy.blobs.has('decks/gt-brand/assets/mark.png')).toBe(true);
+    // the deployment's client reads the deck's twins by their manifest names, under the key
+    const split = splitBlobClient({ legacy, documents }, { ttlMs: 0 });
+    const records = blobAccessStore(split);
+    const client = keyedTwinsClient(
+      split,
+      twinKeyResolver(async (deckId) => (await records.read(deckId))?.record ?? null),
+    );
+    expect((await client.get('decks/q4-review/assets/late.cd34.png'))?.bytes).toEqual(late);
+    expect((await client.head('decks/q4-review/assets/mark.png'))?.url).toBe(
+      `https://public.local/d/q4-review/${KEY}/assets/mark.png`,
+    );
+  });
+
+  it('fails a deck whose keyed copy holds other bytes, and leaves its record unkeyed', async () => {
+    const { legacy, clients } = await twoDecks();
+    await legacy.put(`d/q4-review/${KEY}/assets/mark.png`, new Uint8Array([0]), {
+      overwrite: false,
+    });
+    await runMigrationStep(clients, 'plan', { now: () => NOW });
+    await runMigrationStep(clients, 'copy', { now: () => NOW });
+    await runMigrationStep(clients, 'verify', { now: () => NOW });
+    const rekey = await runMigrationStep(clients, 'rekey', { now: () => NOW, newKey: () => KEY });
+    expect(rekey.failed).toEqual([
+      expect.stringMatching(
+        /^q4-review: d\/q4-review\/Rk7Qw2Zp9LmX4cVb8NtY3a\/assets\/mark\.png has etag/,
+      ),
+    ]);
+    const stored = await blobAccessStore(splitBlobClient(clients, { ttlMs: 0 })).read('q4-review');
+    expect(stored?.record.assetKey).toBe(legacyAssetKey('q4-review'));
   });
 });

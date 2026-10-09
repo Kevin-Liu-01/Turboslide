@@ -15,10 +15,14 @@ import { head } from '@vercel/blob';
 
 import { BlobTimeoutError, boundedBlobClient } from './blob-store.ts';
 import {
+  DOCUMENTS_TOKEN_VARIABLES,
   PUBLIC_DOCUMENT_MAX_AGE_S,
   TWIN_MAX_AGE_S,
+  documentsTokenVariable,
+  hasDocumentsToken,
   publicMaxAge,
   vercelBlobClient,
+  vercelDocumentsClient,
 } from './blob-vercel.ts';
 
 /** A read write token of the SDK's shape; the store id is its fourth segment. */
@@ -214,5 +218,33 @@ describe('the max age of a put on the public store (hardening K1#1)', () => {
     await client.put('decks/y/deck.json', body, { overwrite: true });
     expect(seen.has('decks/y/deck.json')).toBe(true);
     expect(seen.get('decks/y/deck.json')).toBeNull();
+  });
+});
+
+// Hardening K1#4 (docs/hardening/HARDENING.md 4.1): the private store's token is read under the
+// name docs/hosting.md gives it and under the one the Vercel dashboard makes when the store is
+// connected with the prefix TURBOSLIDE_BLOB_PRIVATE, so the stores Kevin connected are read.
+describe('the private store token names (hardening K1#4)', () => {
+  it('reads the documented name first, then the dashboard connection name', () => {
+    expect(DOCUMENTS_TOKEN_VARIABLES).toEqual([
+      'TURBOSLIDE_BLOB_PRIVATE_TOKEN',
+      'TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN',
+    ]);
+    expect(documentsTokenVariable({})).toBeNull();
+    expect(hasDocumentsToken({ TURBOSLIDE_BLOB_PRIVATE_TOKEN: '' })).toBe(false);
+    expect(documentsTokenVariable({ TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN: TOKEN })).toBe(
+      'TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN',
+    );
+    expect(
+      documentsTokenVariable({
+        TURBOSLIDE_BLOB_PRIVATE_TOKEN: TOKEN,
+        TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN: TOKEN,
+      }),
+    ).toBe('TURBOSLIDE_BLOB_PRIVATE_TOKEN');
+    // the dashboard's name alone opens the private client and the split layout
+    expect(() =>
+      vercelDocumentsClient({ TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN: TOKEN }),
+    ).not.toThrow();
+    expect(() => vercelDocumentsClient({})).toThrow(/TURBOSLIDE_BLOB_PRIVATE_TOKEN is not set/);
   });
 });

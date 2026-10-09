@@ -18,7 +18,7 @@ export const ADMIN_USAGE = `usage: turboslide admin <flag|assign-owner|bootstrap
                                     set a deck's owner (admin.assignOwner)
   admin bootstrap --to <url> --email <a@x>
                                     the static bearer gives an email the admin role and mints the first key (admin.bootstrap)
-  admin migrate-storage <plan|copy|verify|cutover|delete|rollback> --to <url> [--batch <n>]
+  admin migrate-storage <plan|copy|verify|rekey|cutover|delete|rollback> --to <url> [--batch <n>]
                                     one step of the storage layout v2 migration (admin.migrateStorage)
   admin mail --to <url> [--since <iso>] [--limit <n>]
                                     the mail captured under TURBOSLIDE_MAIL=capture (admin.mail.list)

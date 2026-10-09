@@ -11,15 +11,27 @@
 // each resumable from the cursor `meta.json` in the private store keeps, every copy verified by
 // etag (Vercel Blob's etag is the md5 of the body, the fake's too), snapshots compared byte for
 // byte, the public documents deleted in batches of 50 after the cutover, and a rollback flag
-// before it. The assetKey copy of the twins to `d/<id>/<assetKey>/` is not part of this module
-// (b2.md records why); the twins stay where the assets route serves them from.
-import { hasOwnAssetKey, keyedTwinPrefix } from '@turboslide/schema/access';
+// before it. Hardening K1#3 and K1#4 (docs/hardening/HARDENING.md 4.1) add the keyed twins: a
+// deck with a key of its own keeps its twins under `d/<id>/<assetKey>/` (`keyedTwinsClient`, which
+// every caller reaches through blob-vercel.ts `layoutBlobClient`), `rekey` gives every deck with a
+// record its key and copies its twins there, and `delete` removes the old `decks/<id>/assets/`.
+import { hasOwnAssetKey, keyedTwinPrefix, newAssetKey } from '@turboslide/schema/access';
 
+import { blobAccessStore } from './access-store.ts';
+import type { AccessStore } from './access-store.ts';
 import type { BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
-import { deckPrefix, isBlobExistsError } from './blob-store.ts';
+import { blobContentType, deckPrefix, isBlobExistsError } from './blob-store.ts';
 
 export const MIGRATION_META = 'meta.json';
-export const MIGRATION_STEPS = ['plan', 'copy', 'verify', 'cutover', 'delete', 'rollback'] as const;
+export const MIGRATION_STEPS = [
+  'plan',
+  'copy',
+  'verify',
+  'rekey',
+  'cutover',
+  'delete',
+  'rollback',
+] as const;
 export type MigrationStep = (typeof MIGRATION_STEPS)[number];
 /** The public documents leave in batches of this many paths (11.5). */
 export const DELETE_BATCH = 50;
@@ -48,6 +60,8 @@ export type MigrationMeta = {
   rollback: boolean;
   /** the public documents removed after the cutover */
   deleted: string[];
+  /** the decks whose twins `rekey` copied under their own key (hardening K1#4) */
+  rekeyed: string[];
   startedAt: string;
   updatedAt: string;
 };
@@ -70,9 +84,11 @@ export type MigrationClients = {
 };
 
 export type MigrationOptions = {
-  /** decks per call of copy, verify and delete; default 5 */
+  /** decks per call of copy, verify, rekey and delete; default 5 */
   batch?: number;
   now?: () => string;
+  /** the key `rekey` gives a deck without one; a random one (`newAssetKey`) by default */
+  newKey?: () => string;
 };
 
 /**
@@ -103,6 +119,7 @@ export function emptyMeta(now: string): MigrationMeta {
     dualRead: false,
     rollback: false,
     deleted: [],
+    rekeyed: [],
     startedAt: now,
     updatedAt: now,
   };
@@ -304,6 +321,103 @@ async function verifyDeck(clients: MigrationClients, deckId: string): Promise<st
   return null;
 }
 
+/** The access records as the deployment reads them, through the split client's layout. */
+function recordsOf(clients: MigrationClients): AccessStore {
+  return blobAccessStore(splitBlobClient(clients, { ttlMs: 0 }));
+}
+
+/**
+ * Copies every twin a deck holds at `decks/<id>/assets/` that its keyed place lacks, each
+ * verified by etag (Vercel Blob's etag is the md5 of the body, the fake's too); null when every
+ * twin is in place, else the deck's failure row.
+ */
+async function copyTwinsUnderKey(
+  legacy: BlobClient,
+  deckId: string,
+  key: string,
+): Promise<{ problem: string | null; old: string[] }> {
+  const prefix = deckPrefix(deckId);
+  const old: string[] = [];
+  for (const entry of await legacy.list(`${prefix}assets/`)) {
+    old.push(entry.pathname);
+    const target = `${keyedTwinPrefix(deckId, key)}${entry.pathname.slice(prefix.length)}`;
+    const stored = await legacy.head(target);
+    if (stored !== null) {
+      if (stored.version === entry.version) continue;
+      return {
+        problem: `${deckId}: ${target} has etag ${stored.version}, its source ${entry.version}`,
+        old,
+      };
+    }
+    const fetched = await legacy.get(entry.pathname);
+    if (fetched === null) continue; // deleted between the list and the read
+    try {
+      const put = await legacy.put(target, fetched.bytes, {
+        overwrite: false,
+        contentType: blobContentType(entry.pathname),
+      });
+      if (put.version !== fetched.entry.version)
+        return {
+          problem: `${deckId}: ${target} stored with etag ${put.version}, expected ${fetched.entry.version}`,
+          old,
+        };
+    } catch (error) {
+      if (!isBlobExistsError(error)) throw error;
+      const raced = await legacy.head(target);
+      if (raced?.version !== fetched.entry.version)
+        return { problem: `${deckId}: ${target} was written with other bytes`, old };
+    }
+  }
+  return { problem: null, old };
+}
+
+/**
+ * `rekey` for one deck (hardening K1#4): a deck with a record gets a random key of its own unless
+ * it holds one, its twins are copied under `d/<id>/<key>/` and verified, and only then is the key
+ * written to the record (with the etag read, so a share write in between makes the deck fail
+ * this pass and the next pass retries it). From that write on, the deployment's keyed client
+ * reads and writes the deck's twins under the key. The manifest's twin paths stay
+ * `assets/<file>`, so no `asset.set` is needed. A deck without a record (the seed deck, a deck
+ * nobody opened since records began) is skipped: 'skipped'.
+ */
+async function rekeyDeck(
+  legacy: BlobClient,
+  records: AccessStore,
+  deckId: string,
+  newKey: () => string = newAssetKey,
+): Promise<string | null | 'skipped'> {
+  const stored = await records.read(deckId);
+  if (stored === null) return 'skipped';
+  const keyed = hasOwnAssetKey(stored.record);
+  const key = keyed ? stored.record.assetKey : newKey();
+  const { problem } = await copyTwinsUnderKey(legacy, deckId, key);
+  if (problem !== null) return problem;
+  if (keyed) return null;
+  try {
+    await records.write(deckId, { ...stored.record, assetKey: key }, { ifMatch: stored.etag });
+  } catch (error) {
+    return `${deckId}: the record changed while its key was written (${error instanceof Error ? error.message : String(error)})`;
+  }
+  return null;
+}
+
+/**
+ * The old twin paths `delete` may remove for a deck: those of a deck with a key of its own once a
+ * last copy put every one under the key; an empty list for a deck without one; the failure row
+ * when the last copy failed.
+ */
+async function oldTwins(
+  legacy: BlobClient,
+  records: AccessStore,
+  deckId: string,
+): Promise<string[] | string> {
+  // a record that does not read keeps the deck's twins where they are: nothing is lost
+  const stored = await records.read(deckId).catch(() => null);
+  if (stored === null || !hasOwnAssetKey(stored.record)) return [];
+  const { problem, old } = await copyTwinsUnderKey(legacy, deckId, stored.record.assetKey);
+  return problem ?? old;
+}
+
 /**
  * One step of the migration from its cursor. Every step writes `meta.json` back so the next call,
  * from any instance, continues where this one stopped. The result is the action's output.
@@ -377,6 +491,38 @@ export async function runMigrationStep(
       await writeMeta(clients.documents, meta);
       return result(decks.length, done);
     }
+    case 'rekey': {
+      if (meta === null) throw new TypeError('run plan first');
+      if (meta.rollback)
+        throw new TypeError('the migration was rolled back; run plan again to restart it');
+      if (meta.step !== step || meta.cursor === meta.decks[meta.decks.length - 1])
+        meta = { ...meta, step, cursor: null };
+      const records = recordsOf(clients);
+      const decks = nextDecks(meta, batch);
+      for (const deckId of decks) {
+        // the record is written where the window writes documents, the private store, with the
+        // etag read there: a deck whose documents are not copied and verified waits for them
+        const problem: string | null = meta.verified.includes(deckId)
+          ? await rekeyDeck(clients.legacy, records, deckId, options.newKey)
+          : `${deckId}: not verified; run copy and verify first`;
+        const failed: string[] = meta.failed.filter((row) => !row.startsWith(`${deckId}:`));
+        if (problem !== null && problem !== 'skipped') failed.push(problem);
+        meta = {
+          ...meta,
+          cursor: deckId,
+          failed,
+          rekeyed:
+            problem === null && !meta.rekeyed.includes(deckId)
+              ? [...meta.rekeyed, deckId]
+              : meta.rekeyed,
+          updatedAt: now(),
+        };
+      }
+      const last = meta.decks[meta.decks.length - 1];
+      const done = meta.decks.length === 0 || meta.cursor === last;
+      await writeMeta(clients.documents, meta);
+      return { ...result(decks.length, done), verified: meta.rekeyed.length };
+    }
     case 'cutover': {
       if (meta === null) throw new TypeError('run plan first');
       if (meta.rollback)
@@ -401,11 +547,19 @@ export async function runMigrationStep(
       if (meta.step !== 'delete' || meta.cursor === meta.decks[meta.decks.length - 1])
         meta = { ...meta, step, cursor: null };
       const decks = nextDecks(meta, batch);
+      const records = recordsOf(clients);
       let removed = 0;
       for (const deckId of decks) {
-        const paths = (await legacyDocuments(clients.legacy, deckId)).map(
-          (entry) => entry.pathname,
-        );
+        // the twins of a keyed deck leave their old place too (hardening K1#4), after a last copy
+        // of any twin written there since `rekey` (an instance that read the deck as unkeyed in
+        // the minute after the switch); a deck without a key of its own keeps them
+        const twins = await oldTwins(clients.legacy, records, deckId);
+        const failed: string[] = meta.failed.filter((row) => !row.startsWith(`${deckId}:`));
+        if (typeof twins === 'string') failed.push(twins);
+        const paths = [
+          ...(await legacyDocuments(clients.legacy, deckId)).map((entry) => entry.pathname),
+          ...(Array.isArray(twins) ? twins : []),
+        ];
         for (let i = 0; i < paths.length; i += DELETE_BATCH) {
           await clients.legacy.del(paths.slice(i, i + DELETE_BATCH));
           removed += Math.min(DELETE_BATCH, paths.length - i);
@@ -413,6 +567,7 @@ export async function runMigrationStep(
         meta = {
           ...meta,
           cursor: deckId,
+          failed,
           deleted: meta.deleted.includes(deckId) ? meta.deleted : [...meta.deleted, deckId],
           updatedAt: now(),
         };

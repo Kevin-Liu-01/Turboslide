@@ -202,6 +202,7 @@ import type {
 } from '@turboslide/realtime/client/room-client';
 import type { PresencePost } from '@turboslide/realtime/protocol';
 import { lintStatic } from '@turboslide/lint/lint-static';
+import { inPage, loadPurifier, purifierNow } from '@turboslide/render/blocks/html-escape';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
@@ -1255,7 +1256,9 @@ export function createEditorController(init: {
       if (html.has(id)) continue;
       const slide = document.slides[id];
       if (!slide) continue;
-      const key = `${slideStamp(slide)}|${deckKey}`;
+      // an html block renders its plate until the page's parser has loaded (HR-W#6), so the
+      // parser's state is part of the key
+      const key = `${slideStamp(slide)}|${deckKey}|${purifierNow() === null ? 'plate' : 'parser'}`;
       const cached = RENDER_MEMO.get(key);
       if (cached !== undefined) {
         // a hit moves to the newest end, so the map's insertion order is the eviction order
@@ -4901,6 +4904,19 @@ export function createEditorController(init: {
       publish({ artifact: { progress: snapshot.artifact.progress, run: null } });
     },
   };
+  /* the html block's parser (docs/hardening/HARDENING.md HR-W#6, CRIT-M9): in the page an html
+     block draws its plate until DOMPurify has loaded, so the load starts when the editor opens,
+     and the slides that hold an html block render again once it resolves */
+  if (inPage() && purifierNow() === null)
+    void loadPurifier()
+      .then(() => {
+        const current = latest().document;
+        const holding = slideOrder(current).filter((id) =>
+          JSON.stringify(current.slides[id] ?? null).includes('"type":"html"'),
+        );
+        if (holding.length > 0) setDocument(current, holding);
+      })
+      .catch(() => undefined);
   return controller;
 }
 

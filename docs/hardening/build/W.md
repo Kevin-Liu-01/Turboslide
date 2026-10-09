@@ -63,6 +63,31 @@ Readings. The scratch tree held the round at `6427b65f` with W#2 and W#6; the se
 
 Not run: the WEB-1 reproduction of the research report. H1 closed WEB-1 at the sanitizer, `web-verify.md` read that an enforced policy refuses its payload, and the security spec's payload test passed on the enforced studio.
 
-## HR-W#6
+## HR-W#6: the html block waits for the parser in a page
 
-Written with its commit.
+The finding as read in the code: in a page `loadPurifier` imported DOMPurify by a variable specifier, which a browser cannot resolve, so the parser never loaded in a page and every inline render of an html block (the editor's slides, the filmstrip, the presenter console, the theme and layout previews) passed the regular expressions alone. On the do tier the object admits `block.set /html` without the write time pass, so a collaborator's markup reached the other editors in that state until a checkpoint rewrote it.
+
+The change: in a page the inline path draws the block's plate (its note on the plate colour, no markup, no CSS) until the parser has loaded; `loadPurifier` imports DOMPurify by a written out specifier in a page, so the client build carries it as a chunk of its own; the editor starts that load when it opens and renders the slides that hold an html block again when it lands (the render memo keys on the parser's state); the presenter does the same for a deck that holds one. The server path, the viewer's sandboxed frame and the exports are unchanged.
+
+Readings:
+
+- Unit tests (`packages/render/src/__tests__/html-escape.test.ts`, four new): `sanitizeHtml` in a page with no parser answers the plate's markup, with the parser the cleaned markup, outside a page the regular expressions as before; the plate escapes the note; `renderHtmlEscape` in a page draws the plate without the block's CSS until the parser binds, then the block. `vitest --project render` 31 files, 539 tests.
+- On a local studio (4856, tmp store, memory tier, load 53 to 189): an html block of plain markup inserted through the window API on a fresh draft rendered its markup 188 ms after the insert, no plate left, the parser bound to the page (`host: browser`) after one request for the DOMPurify chunk. With the parser held back (the page's purifier state seeded with a load that never ends), the block drew its plate with the note "A pricing table" and none of its markup, at 1440 and 390 in both appearances (pictures below).
+- The security spec's "the eight html payloads are inert in the editor, the viewer and the print document" passed on the 4857 run with the parser loading in the page (HR-W#2's readings).
+- The client bundle (node-server build on 4870 and `check-client-bundle.mjs`, load 79 to 94): DOMPurify is its own lazy chunk (`purify.es-*.js`), preloaded by no route; `/edit/gt-brand` preloads 236 B more (1,042,334 against 1,042,098 without W#2 and W#6) and its largest chunk is `EditorRoot` at 519,655 B (ceiling 600,000). The check fails on `/decks` (686,908 B against 600,000) and `/docs` (615,878 B against 450,000) with and without these pushes, byte for byte.
+- `tsc -b` exit 0 (with HR-W#2's).
+
+Not run: the reproduction 4.5 names for this push. The lane did not build an attack payload; the severity therefore stays at 2 as registered, and the push keeps its place after HR-W#2. The fix holds whatever the reproduction would have read: in a page no html block's markup reaches the document before the parser has cleaned it.
+
+Pictures (`docs/hardening/W/`, opened and looked at): `w6-plate-1440-light.jpg`, `w6-plate-1440-dark.jpg`, `w6-plate-390-light.jpg`, `w6-plate-390-dark.jpg`, the plate in the editor on the draft's second slide while the parser is held back. The slides keep the deck's own light appearance in the dark chrome, as every deck does.
+
+## Requests and open points
+
+- To Kevin, through the orchestrator: should a published embed (Publish to the web, Embed) work on any site? Today the frame rule on `/embed` names the Prototemplate hosts and `TURBOSLIDE_EMBED_ANCESTORS`, and it was never enforced, so embeds work everywhere. HR-W#2 keeps it report only by default. If embeds are for those hosts alone, `TURBOSLIDE_CSP=enforce` (or HR-W#4) enforces it and stops the others; if any site, the published embed (`?p=<token>`) needs `frame-ancestors *` or none.
+- To HR-0: enter `security.csp.enforced` against `/deck/<deck>` and `/edit/<deck>`, not `/embed`, which answers its frame rule as a report only header beside the enforced policy.
+- To HR-W#4 (lane W, later): the embed's frame rule is the one directive the site wide flip must decide, as above.
+- To the owner of `docs/hosting.md` (K1#6, O#1a or O#1b, whichever lands next): its variable row for `TURBOSLIDE_CSP` (line 1050) still says report only is the default.
+- To the owner of `apps/studio/src/start.ts` (lane SA): its header comment says the policy goes out report only; since HR-W#2 the document routes enforce.
+- To the orchestrator or lane C: `docs/readme/docs-index.test.mjs` fails because `docs/README.md` does not link `docs/hardening/` (since the HR-spec commit); every lane's `pnpm test` reads it red.
+- To the ship step: none of the lane's pushes needs a variable, a secret or a migration. `TURBOSLIDE_CSP` is not set on the project (the names `vercel env ls` lists, read 2026-10-09), so HR-W#2 enforces on production as written. Production answered `/new` with the report only header on 2026-10-09 (a plain GET).
+- Seen in passing, not this lane's: `check-client-bundle.mjs` fails on `/decks` (686,908 B against 600,000) and `/docs` (615,878 B against 450,000) on the round's tree before any lane W push (lane PC's ceilings); the walk rows `export.pptx.dialog` and `export.print.layout-with-notes` are red on a local file store server without lane W's pushes too.

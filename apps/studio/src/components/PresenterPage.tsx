@@ -8,6 +8,7 @@ import { presenterActionIds, registerStudioAutomation } from '@turboslide/agent/
 import { detectPlatform } from '@turboslide/chrome/menus/platform';
 import { Toast, useToast } from '@turboslide/chrome/Toast';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { loadPurifier, purifierNow } from '@turboslide/render/blocks/html-escape';
 import { slideCounter } from '@turboslide/render/deck';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
@@ -116,7 +117,21 @@ export function PresenterPage({
      presenter drew a light deck on black in dark chrome) */
   const theme: Theme = deckAppearance(document.deck);
   const platform = useMemo(() => detectPlatform(), []);
-  const play = useMemo(() => presenterSlides(document, deckId, theme), [document, deckId, theme]);
+  /* an html block draws its plate in the page until the parser has loaded (docs/hardening/
+     HARDENING.md HR-W#6), so a deck that holds one starts the load and renders again after it */
+  const [parser, setParser] = useState(() => purifierNow() !== null);
+  useMountEffect(() => {
+    if (purifierNow() !== null || !JSON.stringify(document.slides).includes('"type":"html"'))
+      return;
+    void loadPurifier()
+      .then(() => setParser(true))
+      .catch(() => undefined);
+  });
+  const play = useMemo(
+    () => presenterSlides(document, deckId, theme),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the parser's arrival renders again
+    [document, deckId, theme, parser],
+  );
   const [index, setIndex] = useState(0);
   const [connected, setConnected] = useState(false);
   const toast = useToast();

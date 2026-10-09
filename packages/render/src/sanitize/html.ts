@@ -6,7 +6,10 @@
 // deck holds an `html` block (`loadPurifier`), so the studio's function bundle does not carry
 // jsdom on a request that renders none; the render path is synchronous, so it uses the loaded
 // instance when there is one and the regular expression sanitizer of round one otherwise, and a
-// block that already carries `htmlSanitized: true` passed the parser at write time.
+// block that already carries `htmlSanitized: true` passed the parser at write time. In a page the
+// regular expressions are never the only pass (docs/hardening/HARDENING.md HR-W#6, CRIT-M9): a
+// block a collaborator wrote reaches the editor without the write time pass on the do tier, so the
+// inline path draws the block's plate until the parser has loaded (`inPage`, html-escape.ts).
 //
 // The profile: html and svg, `FORBID_TAGS` for the elements a block never needs (script, iframe,
 // object, embed, base, meta, link, style, form, input, button, textarea, select, math), `style`
@@ -118,6 +121,11 @@ export function purifierNow(): Purifier | null {
   return state().instance;
 }
 
+/** True in a page (a window and a document), where the inline path waits for the parser. */
+export function inPage(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
 /** Binds an instance (a test over its own window); `null` forgets the loaded one. */
 export function bindPurifier(purifier: Purifier | null): void {
   const s = state();
@@ -130,9 +138,12 @@ type JsdomModule = { JSDOM: new (html?: string) => { window: unknown } };
 
 /**
  * Loads DOMPurify once per process: bound to the page's `window` in a browser, to a jsdom window
- * on the server. The specifiers are variables so a bundler that follows dynamic imports (Vite's
- * client optimizer) never pulls jsdom into a browser graph; the studio's function bundle carries
- * both packages and loads them on the first deck that holds an `html` block.
+ * on the server. In a page the specifier is written out, so the client build carries DOMPurify as
+ * a chunk of its own that only this call fetches (a variable specifier never resolved in a
+ * browser, so the parser never loaded there before HR-W#6). jsdom's specifier stays a variable so
+ * a bundler that follows dynamic imports (Vite's client optimizer) never pulls jsdom into a
+ * browser graph; the studio's function bundle carries both packages and loads them on the first
+ * deck that holds an `html` block.
  */
 export function loadPurifier(): Promise<Purifier> {
   const s = state();
@@ -141,12 +152,13 @@ export function loadPurifier(): Promise<Purifier> {
   const purifySpecifier = 'dompurify';
   const jsdomSpecifier = 'jsdom';
   s.loading = (async () => {
-    const purify = (await import(/* @vite-ignore */ purifySpecifier)) as DomPurifyModule;
-    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    if (inPage()) {
+      const purify = (await import('dompurify')) as unknown as DomPurifyModule;
       const purifier = createPurifier(purify.default(window), 'browser');
       s.instance = purifier;
       return purifier;
     }
+    const purify = (await import(/* @vite-ignore */ purifySpecifier)) as DomPurifyModule;
     const { JSDOM } = (await import(/* @vite-ignore */ jsdomSpecifier)) as JsdomModule;
     const purifier = createPurifier(purify.default(new JSDOM('').window), 'jsdom');
     s.instance = purifier;

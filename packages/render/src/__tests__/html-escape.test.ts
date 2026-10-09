@@ -3,7 +3,7 @@
 // expression fallback, the CSS tokenizer's cases (@import, url() outside the deck, position:
 // fixed, !important on z-index, @font-face), the style attribute allowlist, the link scheme, the
 // write time stamp, and the frame document with its CSP.
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
@@ -12,7 +12,13 @@ import type { Block, BlockOf } from '@turboslide/schema/blocks';
 import { isAllowedLink } from '@turboslide/schema/text';
 
 import type { BlockContext } from '../blocks/context.ts';
-import { renderHtmlEscape, sanitizeHtml, scopeCss } from '../blocks/html-escape.ts';
+import {
+  HTML_PLATE_CLASS,
+  htmlPlate,
+  renderHtmlEscape,
+  sanitizeHtml,
+  scopeCss,
+} from '../blocks/html-escape.ts';
 import { renderBlock } from '../blocks/render-block.ts';
 import {
   sanitizeCss,
@@ -181,6 +187,60 @@ describe('the regular expression fallback (no parser loaded)', () => {
     expect(purifierNow()).toBe(purifier);
     expect(await loadPurifier()).toBe(purifier);
     bindPurifier(null);
+  });
+});
+
+describe('in a page the inline path waits for the parser (HR-W#6, CRIT-M9)', () => {
+  const parser = () => createPurifier(DOMPurify(new JSDOM('').window), 'jsdom');
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    bindPurifier(null);
+  });
+
+  it('sanitizeHtml answers the plate in a page with no parser, and the cleaned markup with one', () => {
+    const html = '<div class="lay"><h3>Fixed</h3><p onclick="x">a</p></div>';
+    const plate = sanitizeHtml(html, { purifier: null, page: true, note: 'Pricing table' });
+    expect(plate).toBe(htmlPlate('Pricing table'));
+    expect(plate).toContain(`class="${HTML_PLATE_CLASS}"`);
+    expect(plate).toContain('<p>Pricing table</p>');
+    expect(plate).not.toContain('class="lay"');
+    expect(plate).not.toContain('Fixed');
+    expect(sanitizeHtml(html, { purifier: null, page: true })).toContain(
+      '<p>Loading the HTML block</p>',
+    );
+    const cleaned = sanitizeHtml(html, { purifier: parser(), page: true });
+    expect(cleaned).toBe('<div class="lay"><h3>Fixed</h3><p>a</p></div>');
+    // outside a page nothing changes: the regular expressions when no parser has loaded
+    expect(sanitizeHtml(html, { purifier: null, page: false })).toBe(
+      '<div class="lay"><h3>Fixed</h3><p>a</p></div>',
+    );
+  });
+
+  it('escapes the note on the plate', () => {
+    const plate = htmlPlate('<b>x</b> & "y"');
+    expect(plate).toContain('&lt;b&gt;x&lt;/b&gt; &amp; &quot;y&quot;');
+    expect(plate).not.toContain('<b>');
+  });
+
+  it('renders the plate without the block CSS in a page until the parser loads, then the block', () => {
+    vi.stubGlobal('window', {});
+    vi.stubGlobal('document', {});
+    const html = block('<div class="lay"><h3>Fixed</h3></div>', '.lay { color: red }');
+    const before = renderHtmlEscape(html, context());
+    expect(before).toContain(HTML_PLATE_CLASS);
+    expect(before).not.toContain('<h3>Fixed</h3>');
+    expect(before).not.toContain('<style>');
+    bindPurifier(parser());
+    const after = renderHtmlEscape(html, context());
+    expect(after).not.toContain(HTML_PLATE_CLASS);
+    expect(after).toContain('<h3>Fixed</h3>');
+    expect(after).toContain('<style>');
+  });
+
+  it('keeps the server render as it was: no plate outside a page', () => {
+    const rendered = renderHtmlEscape(block('<div><h3>Fixed</h3></div>'), context());
+    expect(rendered).not.toContain(HTML_PLATE_CLASS);
+    expect(rendered).toContain('<h3>Fixed</h3>');
   });
 });
 

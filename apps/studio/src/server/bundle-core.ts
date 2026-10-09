@@ -7,7 +7,12 @@ import { refuse } from '@turboslide/agent/http/errors';
 import { safeEqual } from '@turboslide/identity/safe-equal';
 import { defaultPaths } from '@turboslide/render-worker/paths';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
-import { deckPrefix, isBlobExistsError, pushDeckDir } from '@turboslide/store/blob-store';
+import {
+  ACCESS_FILE,
+  deckPrefix,
+  isBlobExistsError,
+  pushDeckDir,
+} from '@turboslide/store/blob-store';
 import { BUNDLE_MAX_BYTES, listDeckFiles } from '@turboslide/store/bundle';
 import { packDeckDir } from '@turboslide/store/pack';
 import type { PackedBundle } from '@turboslide/store/pack';
@@ -227,7 +232,18 @@ export async function storeBundleCopy(
   return entry.url;
 }
 
-export type ImportBundleOptions = { as?: string; replace?: boolean };
+export type ImportBundleOptions = {
+  as?: string;
+  replace?: boolean;
+  /**
+   * Writes a new deck's access record after the unpack and before the deck reaches the store
+   * (hardening K1#3, the fix of verifier pass 1 F3): the record carries the deck's random asset
+   * key, so the store's keyed client writes the twins under `d/<id>/<assetKey>/` and no twin is
+   * ever at the address made from the deck id. Not called for a replaced deck, which keeps its
+   * record. A failure removes the unpacked deck and nothing reaches the store.
+   */
+  recordNewDeck?: (deckId: string) => Promise<void>;
+};
 
 export type ImportedBundle = UnpackResult & {
   /** the editor path of the deck on this studio */
@@ -247,9 +263,10 @@ function purgeDerived(deckId: string): void {
 
 /**
  * Writes a bundle as a deck of this studio: validated and unpacked into the store's folder (a
- * taken id gets a free sibling unless `replace`), then, on the blob backend, uploaded with
- * deck.json last and the store's stale files of a replaced deck removed, so the next instance
- * lists and opens it. A TypeError names what a refused bundle got wrong (400 in the route).
+ * taken id gets a free sibling unless `replace`), a new deck's record written (`recordNewDeck`),
+ * then, on the blob backend, uploaded with deck.json last and the store's stale files of a
+ * replaced deck removed, so the next instance lists and opens it. A TypeError names what a
+ * refused bundle got wrong (400 in the route).
  */
 export async function importDeckBundle(
   zip: Uint8Array,
@@ -269,6 +286,17 @@ export async function importDeckBundle(
     exists: (deckId) => decks.has(deckId),
   });
   if (result.replaced) purgeDerived(result.deckId);
+  /* records precede decks (H3): the record, and with it the asset key, is in the store before
+     the first twin is written there; a record that is not written leaves no deck behind */
+  const recorded = !result.replaced && options.recordNewDeck !== undefined;
+  if (recorded) {
+    try {
+      await options.recordNewDeck!(result.deckId);
+    } catch (error) {
+      rmSync(result.dir, { recursive: true, force: true });
+      throw error;
+    }
+  }
   let pushed = false;
   const client = await exportBlobClient();
   if (client !== null && decks.kind === 'blob') {
@@ -276,6 +304,10 @@ export async function importDeckBundle(
       await pushDeckDir(client, result.deckId, result.dir, { overwrite: result.replaced });
     } catch (error) {
       rmSync(result.dir, { recursive: true, force: true });
+      // the record this call wrote leaves with the deck; what part of the deck reached the store
+      // has no deck.json (pushed last), so it is no deck, as before the record went first
+      if (recorded)
+        await client.del([`${deckPrefix(result.deckId)}${ACCESS_FILE}`]).catch(() => undefined);
       if (isBlobExistsError(error)) {
         throw new TypeError(
           `decks/${result.deckId} appeared in the store meanwhile; run the upload again`,
@@ -284,8 +316,10 @@ export async function importDeckBundle(
       throw error;
     }
     if (result.replaced) {
-      // files of the old deck the new one does not carry: removed slides, old versions, leases
-      const kept = new Set<string>();
+      // files of the old deck the new one does not carry: removed slides, old versions, leases.
+      // Never the access record, which a bundle never carries (BUNDLE_DROPS): a replaced deck
+      // keeps its record (H3: a deck without one is closed to everyone), and with it its key
+      const kept = new Set<string>([ACCESS_FILE]);
       const files = listDeckFiles(result.dir);
       for (const relative of [...files.documents, ...files.assets]) kept.add(relative);
       const prefix = deckPrefix(result.deckId);

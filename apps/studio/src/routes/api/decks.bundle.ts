@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { refuse } from '@turboslide/agent/http/errors';
-import { legacyAssetKey } from '@turboslide/schema/access';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES } from '@turboslide/store/bundle';
 
@@ -200,17 +199,19 @@ export const Route = createFileRoute('/api/decks/bundle')({
           // the deck a bundle upload makes is the uploader's, as a deck.create or deck.copy is its
           // caller's (return/build/b4.md, the fix round, request 1; VERIFICATION.md R1-F2); a
           // replaced deck keeps its record. A new deck of anyone but the admin takes a fresh
-          // random id that nobody holds until this answer names it, so its record follows the
+          // random id that nobody holds until this answer names it. Its record goes in after the
           // unpack (which never writes into a folder that exists, the record's own on a file
-          // store) and a failed record write takes the deck away again (H3, DATA-V3)
+          // store) and before the deck reaches the store, with a random asset key of its own, so
+          // its twins are written under `d/<id>/<assetKey>/` like every other new deck's
+          // (hardening K1#3; verifier pass 1 F3: the derived key left them readable by name);
+          // a failed record write takes the deck away again (H3, DATA-V3)
           const { creatorOf, recordNewDeck } = await import('../../server/access');
+          const recordIt = async (deckId: string): Promise<void> => {
+            await recordNewDeck(deckId, ctx);
+          };
           let result: Awaited<ReturnType<typeof importDeckBundle>>;
           if (replacing || admin) {
-            result = await importDeckBundle(read.zip, options);
-            // the unpack wrote the twins before the record, under `decks/<id>/assets/`, so the
-            // record keeps the derived key until `migrate-storage rekey` (hardening K1#3)
-            if (!result.replaced)
-              await recordNewDeck(result.deckId, ctx, { assetKey: legacyAssetKey(result.deckId) });
+            result = await importDeckBundle(read.zip, { ...options, recordNewDeck: recordIt });
           } else {
             if (creatorOf(ctx) === null)
               return Response.json(
@@ -220,13 +221,11 @@ export const Route = createFileRoute('/api/decks/bundle')({
             const decks = await ensureDecks();
             let deckId = newDeckId();
             while (await decks.has(deckId)) deckId = newDeckId();
-            result = await importDeckBundle(read.zip, { as: deckId, replace: false });
-            try {
-              await recordNewDeck(result.deckId, ctx, { assetKey: legacyAssetKey(result.deckId) });
-            } catch (error) {
-              await decks.remove(result.deckId).catch(() => undefined);
-              throw error;
-            }
+            result = await importDeckBundle(read.zip, {
+              as: deckId,
+              replace: false,
+              recordNewDeck: recordIt,
+            });
           }
           // no path of this instance in the answer, `dir` the store's `decks/<id>` (H3, DATA-V6)
           return Response.json(publicDeckAnswer(result), {

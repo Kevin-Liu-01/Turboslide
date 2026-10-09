@@ -710,8 +710,8 @@ export async function recordNewDeck(
     store?: Pick<AccessStore, 'write'>;
     /**
      * the deck's asset key: a fresh random one by default (hardening K1#3), so its twins are
-     * written under `d/<id>/<key>/`; a bundle upload whose twins the unpack already wrote under
-     * `decks/<id>/assets/` passes the derived key, and `migrate-storage rekey` moves them later
+     * written under `d/<id>/<key>/`; every caller writes the record before the deck's first twin
+     * (a bundle upload between its unpack and its push, bundle-core.ts `recordNewDeck`)
      */
     assetKey?: string;
   } = {},

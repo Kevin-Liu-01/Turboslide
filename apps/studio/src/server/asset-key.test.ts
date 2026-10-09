@@ -1,8 +1,9 @@
 // Hardening K1#3 (docs/hardening/HARDENING.md 4.1; DATA-2): a new deck's record carries a random
 // asset key of its own, its twins are written under `d/<id>/<assetKey>/` on the public store, and
 // the viewer payload's asset base names that keyed prefix, so the page loads every twin by key and
-// no twin URL can be derived from the deck id and a file name. A bundle upload, whose unpack
-// writes the twins before the record, keeps the derived key until `migrate-storage rekey`.
+// no twin URL can be derived from the deck id and a file name. A record that names the derived
+// key (a deck from before K1#3) keeps the route prefix until `migrate-storage rekey`; a bundle
+// upload's new deck is keyed like the others (bundle-asset-key.test.ts).
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { hasOwnAssetKey, legacyAssetKey } from '@turboslide/schema/access';
@@ -52,7 +53,7 @@ describe("a new deck's asset key (hardening K1#3)", () => {
       expect(hasOwnAssetKey(record)).toBe(true);
     }
     expect(a.record.assetKey).not.toBe(b.record.assetKey);
-    // a bundle upload names the derived key: its twins are already at decks/<id>/assets/
+    // a record that names the derived key has no key of its own (a deck from before K1#3)
     const c = await recordNewDeck('cccccccccccccccccccccc', ctx, {
       now: NOW,
       store,

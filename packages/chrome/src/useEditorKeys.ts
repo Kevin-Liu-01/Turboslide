@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 
+import { outsideOpenModal } from '@turboslide/viewer/Selection';
+
 import { RETIRED_KEYS, RETIRED_KEYS_STORAGE, retiredKeySentence } from './editor-shell';
 import type { MenuItem, Platform } from './menus/model';
 import { findItem, isEnabled, isPresent, MENUS } from './menus/model';
@@ -208,7 +210,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
          and the canvas run handles its own (InlineText) */
       if (isIndentChord(event, s.platform)) {
         event.preventDefault();
-        if (inCanvasText || h.overlayOpen()) return;
+        if (inCanvasText || h.overlayOpen() || outsideOpenModal(event.target)) return;
         const id =
           event.key === ']'
             ? 'format.alignIndent.increaseIndent'
@@ -217,6 +219,11 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         if (item !== undefined && isEnabled(item, s.menuContext)) h.runItem(item);
         return;
       }
+
+      /* a key from outside an open modal dialog (the body, after the dialog's focused control was
+         disabled or left) runs no chord on the deck behind it; the dialog answers it (Selection.tsx
+         outsideOpenModal; the keyboard verifier's pass 1 on the dropdown round, finding 1) */
+      if (outsideOpenModal(event.target)) return;
 
       /* inside a chrome field the browser's editing keys keep their meaning; the menu access
          keys and the Find and replace chord still work */

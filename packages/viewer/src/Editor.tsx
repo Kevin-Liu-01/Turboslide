@@ -270,6 +270,7 @@ import {
   listItemPointer,
   objectContextTarget,
   objectPressPlan,
+  outsideOpenModal,
   resolveObject,
   resolveRun,
   runElement,
@@ -2133,6 +2134,7 @@ export function Editor({
         !editingRef.current &&
         !isEditableTarget(e.target) &&
         !isChromeControlTarget(e.target, root.current) &&
+        !outsideOpenModal(e.target) &&
         selectionRef.current === null
       ) {
         setSpace(true);
@@ -5538,6 +5540,12 @@ export function Editor({
   useOnceLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (editingRef.current || isEditableTarget(e.target)) return;
+      /* no key is the stage's while a modal dialog is open and the key comes from outside it (the
+         body, after the dialog's focused control was disabled or left): the dialog answers it
+         (Selection.tsx outsideOpenModal; the keyboard verifier's pass 1 on the dropdown round:
+         Tab and Shift Tab walked the objects behind the Share dialog, Delete removed the selected
+         table, typing replaced the title's text) */
+      if (outsideOpenModal(e.target)) return;
       /* a focused overlay handle nudges, orders and flips itself with the plain and Cmd arrows,
          Enter and Space (Overlay.tsx); every other chord (Delete, Esc, Option arrows, Cmd letters)
          is the stage's, so a rotate key after a drag from the chip still turns the object */

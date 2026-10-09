@@ -621,11 +621,63 @@ export function chromeDropdowns(): string[] {
     await expect(ctl(share, 'dialog.share')).toBeVisible();
     await share.keyboard.press('Escape');
     await expect(ctl(share, 'dialog.share')).toBeHidden();
+    /* the focus after a choice (the keyboard verifier's pass 1 on the round, finding 1): the
+       trigger keeps it through the write its choice starts, never the disabled attribute that
+       dropped it to the body, and no key a person presses next reaches the table selected behind
+       the dialog; a focus put on the body goes back into the dialog */
+    await pick(share, 'dd-table');
+    const behind = await settled(share);
+    await openShare(share);
+    const general = triggerOf(share, 'dialog.share.mode');
+    await general.focus();
+    await share.keyboard.press('ArrowDown');
+    await share.keyboard.press('ArrowDown');
+    await share.keyboard.press('Enter');
+    const during = await general.evaluate((el) => ({
+      focused: document.activeElement === el,
+      disabled: el.hasAttribute('disabled'),
+    }));
+    await expect(general).toHaveAttribute('value', 'link');
+    await expect(general).not.toHaveAttribute('aria-disabled', 'true');
+    const kept = await general.evaluate((el) => document.activeElement === el);
+    for (const key of ['Delete', 'Backspace']) await share.keyboard.press(key);
+    await share.keyboard.press('z');
+    await share.keyboard.press('Escape');
+    await share.keyboard.press('Tab');
+    const inside = () =>
+      share.evaluate(() => {
+        const card = document.querySelector('[data-control="dialog.share"]');
+        const now = document.activeElement;
+        return now !== null && now !== document.body && card?.contains(now) === true;
+      });
+    const afterTab = await inside();
+    await share.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    await share.waitForTimeout(200);
+    const afterBlur = await inside();
+    for (const key of ['Tab', 'Shift+Tab', 'Delete', 'x']) await share.keyboard.press(key);
+    const stillInside = await inside();
+    await chooseOption(share, 'dialog.share.mode', 'restricted');
+    await closeDialogs(share);
+    const after = await settled(share);
+    const table = await share
+      .locator('.ts-stagewrap.ts-editor .pt-slide [data-block="dd-table"]')
+      .count();
     test.info().annotations.push({
       type: 'keys',
-      description: `${steps.join('; ')}; print Down ${afterDown}, h ${afterH}; Share Escape writes ${writes}`,
+      description: `${steps.join('; ')}; print Down ${afterDown}, h ${afterH}; Share Escape writes ${writes}; Share choice by Enter: focused ${during.focused}, disabled attribute ${during.disabled}, focused after the write ${kept}; after Tab inside ${afterTab}, after a blur inside ${afterBlur}, after Tab, Shift+Tab, Delete, x inside ${stillInside}; behind the dialog: revision ${behind.revision} to ${after.revision}, selected ${behind.blockId} to ${after.blockId}, table ${table}`,
     });
     expect(writes, 'Escape sends no share.setGeneralAccess').toBe(0);
+    expect(during, 'the trigger keeps the focus while its write runs').toEqual({
+      focused: true,
+      disabled: false,
+    });
+    expect(kept, 'and after the write').toBe(true);
+    expect(afterTab, 'Tab moves inside the dialog').toBe(true);
+    expect(afterBlur, 'a focus put on the body goes back into the dialog').toBe(true);
+    expect(stillInside, 'the keys after it stay in the dialog').toBe(true);
+    expect(after.revision, 'nothing written to the deck behind the dialog').toBe(behind.revision);
+    expect(after.blockId, 'the selection behind the dialog unchanged').toBe('dd-table');
+    expect(table, 'the selected table stays').toBe(1);
   });
 
   /* DROPDOWNS.md 3.4, 3.5: the pointer in the Share dialog and inside the Download dialog's label */

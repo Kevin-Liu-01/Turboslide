@@ -317,6 +317,60 @@ describe('the keyboard (3.3)', () => {
     expect(changes).toEqual(['s12']);
   });
 
+  it('keeps the focus where a choice by Tab put it: the field the choice drew takes it and the Tab stops there', () => {
+    function Opener() {
+      const [value, setValue] = useState('viewer');
+      const [expiring, setExpiring] = useState(false);
+      return (
+        <div>
+          <Select
+            label="Role"
+            control="t.role"
+            value={value}
+            options={[
+              { value: 'viewer', label: 'Viewer' },
+              { value: 'editor', label: 'Editor' },
+              { value: 'expiry', label: 'Add expiration' },
+            ]}
+            onChange={(next) => {
+              if (next === 'expiry') setExpiring(true);
+              else setValue(next);
+            }}
+          />
+          {expiring ? (
+            <Select
+              label="Add expiration"
+              control="t.expiry"
+              value=""
+              placeholder="Add expiration"
+              autoFocus
+              options={[{ value: '7', label: '7 days' }]}
+              onChange={() => setExpiring(false)}
+              onBlur={() => setExpiring(false)}
+            />
+          ) : null}
+          <button type="button">Next</button>
+        </div>
+      );
+    }
+    render(<Opener />);
+    const role = screen.getByRole('combobox', { name: 'Role' });
+    act(() => role.focus());
+    fireEvent.keyDown(role, { key: 'ArrowDown' });
+    fireEvent.keyDown(role, { key: 'End' });
+    /* the Tab chooses Add expiration; the expiry field mounts focused and keeps the focus */
+    expect(fireEvent.keyDown(role, { key: 'Tab' })).toBe(false);
+    const expiry = screen.getByRole('combobox', { name: 'Add expiration' });
+    expect(document.activeElement).toBe(expiry);
+    /* a Tab choice that leaves the focus on the trigger lets the key move on */
+    act(() => role.focus());
+    expect(screen.queryByRole('combobox', { name: 'Add expiration' })).toBeNull();
+    fireEvent.keyDown(role, { key: 'ArrowDown' });
+    fireEvent.keyDown(role, { key: 'ArrowDown' });
+    expect(fireEvent.keyDown(role, { key: 'Tab' })).toBe(true);
+    expect(role.getAttribute('value')).toBe('editor');
+  });
+
   it('never calls onChange for the value it already has', () => {
     const onChange = vi.fn();
     render(<Harness initial="next" onChange={onChange} />);
@@ -328,6 +382,84 @@ describe('the keyboard (3.3)', () => {
     fireEvent.click(option('next'));
     expect(onChange).not.toHaveBeenCalled();
     expect(isOpen()).toBe(false);
+  });
+});
+
+describe('the focus through a write (the keyboard verifier, finding 1)', () => {
+  function Writer() {
+    const [value, setValue] = useState('restricted');
+    const [busy, setBusy] = useState(false);
+    return (
+      <>
+        <Select
+          label="General access"
+          control="t.mode"
+          value={value}
+          disabled={busy}
+          options={[
+            { value: 'restricted', label: 'Restricted' },
+            { value: 'link', label: 'Anyone with the link' },
+          ]}
+          onChange={(next) => {
+            setBusy(true);
+            setValue(next);
+          }}
+        />
+        <button type="button" onClick={() => setBusy(false)}>
+          Settle
+        </button>
+      </>
+    );
+  }
+
+  it('keeps the focus on a trigger disabled while it holds it, takes no key or click, and takes the attribute once the focus leaves', () => {
+    render(<Writer />);
+    const mode = screen.getByRole('combobox', { name: 'General access' }) as HTMLButtonElement;
+    act(() => mode.focus());
+    fireEvent.keyDown(mode, { key: 'ArrowDown' });
+    fireEvent.keyDown(mode, { key: 'ArrowDown' });
+    fireEvent.keyDown(mode, { key: 'Enter' });
+    expect(mode.value).toBe('link');
+    /* the write runs: focusable, aria-disabled, never the attribute that drops the focus */
+    expect(document.activeElement).toBe(mode);
+    expect(mode.disabled).toBe(false);
+    expect(mode.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.keyDown(mode, { key: 'ArrowDown' });
+    fireEvent.keyDown(mode, { key: 'r' });
+    fireEvent.click(mode);
+    expect(mode.getAttribute('aria-expanded')).toBe('false');
+    expect(mode.value).toBe('link');
+    /* the focus leaves while the write runs: the attribute */
+    act(() => mode.blur());
+    expect(mode.disabled).toBe(true);
+    /* the write settles: enabled again */
+    fireEvent.click(screen.getByText('Settle'));
+    expect(mode.disabled).toBe(false);
+    expect(mode.hasAttribute('aria-disabled')).toBe(false);
+  });
+
+  it('keeps the focus through a write the pointer started, and draws a trigger disabled from the start with the attribute', () => {
+    render(
+      <>
+        <Writer />
+        <Select
+          label="Locked"
+          value="a"
+          disabled
+          options={[{ value: 'a', label: 'A' }]}
+          onChange={() => {}}
+        />
+      </>,
+    );
+    const mode = screen.getByRole('combobox', { name: 'General access' }) as HTMLButtonElement;
+    fireEvent.click(mode);
+    fireEvent.click(document.querySelector<HTMLElement>('[role="option"][data-value="link"]')!);
+    expect(document.activeElement).toBe(mode);
+    expect(mode.disabled).toBe(false);
+    expect(mode.getAttribute('aria-disabled')).toBe('true');
+    const locked = screen.getByRole('combobox', { name: 'Locked' }) as HTMLButtonElement;
+    expect(locked.disabled).toBe(true);
+    expect(locked.getAttribute('aria-disabled')).toBe('true');
   });
 });
 

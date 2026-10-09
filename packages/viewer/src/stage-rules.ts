@@ -86,7 +86,9 @@ export type TabPress = {
  * the Tab from the Slideshow half while the title was selected, so the focus never reached the
  * chevron and the canvas selection moved to the subtitle. A Tab from the stage, the body or an
  * overlay handle walks the objects as before; with nothing selected, only the stage and the body
- * start the walk.
+ * start the walk. While a modal dialog is open the stage's key handler returns before this rule
+ * for a key from outside the dialog (Selection.tsx outsideOpenModal), so a Tab from the body goes
+ * to the dialog's trap and never walks the objects behind it.
  */
 export function stageOwnsTab(press: TabPress): boolean {
   if (press.fromControl && !press.fromOverlay) return false;

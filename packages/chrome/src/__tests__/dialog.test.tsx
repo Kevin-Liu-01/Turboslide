@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -273,6 +273,67 @@ describe('Dialog, the focus round cycle 2', () => {
     const doneButton = document.querySelector('[data-control="dialog.dl.done"]');
     expect(doneButton).not.toBeNull();
     expect(document.activeElement).toBe(doneButton);
+  });
+});
+
+describe('the focus never rests on the body (the keyboard verifier on the dropdown round, finding 1)', () => {
+  function People() {
+    const [rows, setRows] = useState(['ana', 'ben', 'cy']);
+    return (
+      <Dialog title="People" onClose={() => undefined} control="dialog.people">
+        {rows.map((row) => (
+          <button
+            key={row}
+            type="button"
+            data-control={`row.${row}`}
+            onClick={() => setRows((now) => now.filter((each) => each !== row))}
+          >
+            Remove {row}
+          </button>
+        ))}
+        <button type="button" data-control="people.add">
+          Add people
+        </button>
+      </Dialog>
+    );
+  }
+
+  const row = (name: string) =>
+    document.querySelector<HTMLButtonElement>(`[data-control="${name}"]`);
+
+  it('gives the focus to the control that took the place of the one that left the card', async () => {
+    render(<People />);
+    const ben = row('row.ben')!;
+    act(() => ben.focus());
+    /* the browser blurs a focused control as it leaves the document (Chrome: focusout with no
+       related target, the active element the body); jsdom sends no event, so the test sends it */
+    await act(async () => {
+      ben.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+      fireEvent.click(ben);
+      await Promise.resolve();
+    });
+    expect(row('row.ben')).toBeNull();
+    expect(document.activeElement).toBe(row('row.cy'));
+    /* the last control leaves: the one before it in the order */
+    const add = row('people.add')!;
+    act(() => add.focus());
+    await act(async () => {
+      add.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+      add.remove();
+      await Promise.resolve();
+    });
+    expect(document.activeElement).toBe(row('row.cy'));
+  });
+
+  it('leaves the focus where it is when the window loses it (the active element stays)', async () => {
+    render(<People />);
+    const ana = row('row.ana')!;
+    act(() => ana.focus());
+    await act(async () => {
+      ana.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+      await Promise.resolve();
+    });
+    expect(document.activeElement).toBe(ana);
   });
 });
 

@@ -53,7 +53,8 @@
   outline-offset: -1px;
 }
 
-.ts-dropdown-trigger:disabled {
+.ts-dropdown-trigger:disabled,
+.ts-dropdown-trigger[aria-disabled='true'] {
   color: var(--pt-disabled);
   border-color: var(--pt-hair-soft);
   cursor: default;
@@ -78,7 +79,8 @@
   color: var(--pt-titanium);
 }
 
-.ts-dropdown-trigger:disabled .ts-dropdown-text {
+.ts-dropdown-trigger:disabled .ts-dropdown-text,
+.ts-dropdown-trigger[aria-disabled='true'] .ts-dropdown-text {
   color: var(--pt-disabled);
 }
 
@@ -101,7 +103,8 @@
   right: 5px;
 }
 
-.ts-dropdown-trigger:disabled .ts-dropdown-chevron {
+.ts-dropdown-trigger:disabled .ts-dropdown-chevron,
+.ts-dropdown-trigger[aria-disabled='true'] .ts-dropdown-chevron {
   color: var(--pt-disabled);
 }
 

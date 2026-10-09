@@ -234,6 +234,40 @@ export function Dialog({
     return () => document.removeEventListener('focusin', onFocusIn);
   }, [modal]);
 
+  /* the focus never rests on the page body while a modal card is open: a control that held it
+     and leaves the document (a person's row after Remove access) or takes the disabled attribute
+     (a button while its write runs) drops it to the body with no element to receive a key, and
+     from the body the editor's keys acted on the slide behind the card (the keyboard verifier's
+     pass 1 on the dropdown round, finding 1). After the render that dropped it, the focus goes to
+     the control that now stands at its place in the card's Tab order, else the first control. The
+     window losing focus keeps the active element, so it is no drop */
+  const place = useRef(-1);
+  useEffect(() => {
+    const el = card.current;
+    if (!modal || !el) return undefined;
+    const onIn = (event: FocusEvent) => {
+      if (event.target instanceof HTMLElement)
+        place.current = focusableIn(el).indexOf(event.target);
+    };
+    const onOut = (event: FocusEvent) => {
+      if (event.relatedTarget !== null) return;
+      queueMicrotask(() => {
+        if (!el.isConnected) return;
+        const now = document.activeElement;
+        if (now !== null && now !== document.body) return;
+        const list = focusableIn(el);
+        const at = Math.min(place.current, list.length - 1);
+        (list[at] ?? list[0] ?? el).focus({ preventScroll: true });
+      });
+    };
+    el.addEventListener('focusin', onIn);
+    el.addEventListener('focusout', onOut);
+    return () => {
+      el.removeEventListener('focusin', onIn);
+      el.removeEventListener('focusout', onOut);
+    };
+  }, [modal]);
+
   /* Escape closes a modal card wherever the focus sits (cycle 2, b3 R19 and b4 FR1): the card's
      own handler takes a key pressed inside it and stops its propagation, so this listener sees
      only a key pressed with the focus outside the card, on the body after a focused button left
@@ -278,7 +312,9 @@ export function Dialog({
       return;
     }
     if (event.key === 'Tab') {
-      if (!modal) return;
+      /* a control inside that kept the Tab for itself (a dropdown whose choice put the focus in
+         the field it opened, Select.tsx) is not wrapped around */
+      if (!modal || event.defaultPrevented) return;
       const el = card.current;
       if (!el) return;
       const list = focusableIn(el);

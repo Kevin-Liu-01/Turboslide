@@ -212,6 +212,32 @@ describe('useEditorKeys and the indent chords', () => {
   });
 });
 
+// A modal dialog over the editor (the keyboard verifier's pass 1 on the dropdown round, finding
+// 1): a key from the body, where the focus fell after the dialog's focused control was disabled
+// or left, runs no chord on the deck behind the dialog; Cmd+] and Cmd+[ keep the browser's Back
+// and Forward prevented.
+describe('useEditorKeys behind a modal dialog', () => {
+  it('runs no chord from the body while a modal dialog is open, and prevents Cmd+[ without indenting', () => {
+    const runItem = vi.fn();
+    const undoable: MenuContext = { ...withText, history: { undo: true, redo: false } };
+    render(<Host context={undoable} handlers={handlers(runItem)} />);
+    const card = document.createElement('div');
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    document.body.appendChild(card);
+    try {
+      expect(fireEvent.keyDown(document.body, { key: 'z', metaKey: true })).toBe(true);
+      expect(fireEvent.keyDown(document.body, { key: 'b', metaKey: true })).toBe(true);
+      expect(fireEvent.keyDown(document.body, { key: '[', metaKey: true })).toBe(false);
+      expect(runItem).not.toHaveBeenCalled();
+    } finally {
+      card.remove();
+    }
+    fireEvent.keyDown(document.body, { key: 'z', metaKey: true });
+    expect((runItem.mock.calls[0]?.[0] as MenuItem).id).toBe('edit.undo');
+  });
+});
+
 // The shared dropdown's trigger (docs/DROPDOWNS.md 3.12): a field for the editor's keys, as the
 // select it replaces was, so Backspace on it in Format options never deletes the selected object
 // and the chords stay the field's.

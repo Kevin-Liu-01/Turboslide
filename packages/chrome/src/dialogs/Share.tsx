@@ -4,7 +4,7 @@ import {
   rememberLinkUrl,
   rememberedGeneralUrl,
 } from './share-links';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { labelFor } from '@turboslide/identity/labels';
 import type { GrantWho } from '@turboslide/schema/access';
@@ -1701,8 +1701,10 @@ function GrantRow({
   const status = grantStatus(grant);
   const identity: IdentityView | undefined = grant.principal;
   const key = whoKey(grant);
+  const row = useRef<HTMLLIElement>(null);
   return (
     <li
+      ref={row}
       className={cn('ts-share-row', status !== null && `is-${status}`)}
       data-control={`dialog.share.grant.${key}`}
       data-status={status ?? 'active'}
@@ -1781,6 +1783,15 @@ function GrantRow({
           control={`dialog.share.grant.${key}.expiry`}
           onChange={(id) => {
             const chosen = EXPIRY_DAYS.find((each) => each.id === id);
+            /* the field leaves with its choice: the focus goes back to the person's role field
+               first, while that field still takes it, and the role field keeps it through the
+               write (Select.tsx), so it never falls to the page body, where the editor's keys
+               acted on the slide behind the dialog (the keyboard verifier's pass 1, finding 1) */
+            row.current
+              ?.querySelector<HTMLElement>(
+                `[data-control="dialog.share.grant.${key}.role"][role="combobox"]`,
+              )
+              ?.focus({ preventScroll: true });
             onExpiring(false);
             if (chosen === undefined) return;
             onExpiry(chosen.days === null ? null : expiryDate(chosen.days));

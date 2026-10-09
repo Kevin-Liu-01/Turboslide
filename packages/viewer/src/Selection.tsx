@@ -212,6 +212,30 @@ export function isEditableTarget(target: EventTarget | null): boolean {
   );
 }
 
+/** An open dialog the person answers before the page: the chrome's Dialog, the palette, the help card. */
+const OPEN_MODAL = '[role="dialog"][aria-modal="true"]';
+/** A dialog under one of these is closing or not shown, and holds nothing back. */
+const NOT_SHOWN = '[hidden], [inert], [aria-hidden="true"]';
+
+/**
+ * True when a modal dialog is open and an event's target sits outside every open one: the page
+ * body, after the control that held the focus in the dialog was disabled or left the document.
+ * The stage's keys, its clipboard and the document's key table take nothing then; the dialog's
+ * own listeners answer (Dialog.tsx: Escape closes it, a Tab goes into its trap). The keyboard
+ * verifier's pass 1 on the dropdown round, finding 1: after a choice in the Share dialog the focus
+ * fell to the body, and Tab selected the slide's objects behind the dialog, Delete removed the
+ * selected table and typing replaced the title's text.
+ */
+export function outsideOpenModal(target: EventTarget | null): boolean {
+  if (typeof document === 'undefined') return false;
+  const open = Array.from(document.querySelectorAll(OPEN_MODAL)).filter(
+    (dialog) => dialog.closest(NOT_SHOWN) === null,
+  );
+  if (open.length === 0) return false;
+  if (!(target instanceof Node)) return true;
+  return !open.some((dialog) => dialog.contains(target));
+}
+
 /** The chrome regions that keep their own clipboard: a dialog's or a menu's fields, the Format options panel. */
 const CLIPBOARD_KEEPERS = '[role="dialog"], [role="menu"], .ts-inspector';
 
@@ -229,7 +253,7 @@ export function stageOwnsClipboard(
   stage: Element | null,
   editing: boolean,
 ): boolean {
-  if (editing || isEditableTarget(target)) return false;
+  if (editing || isEditableTarget(target) || outsideOpenModal(target)) return false;
   if (!(target instanceof Element)) return true;
   if (stage !== null && stage.contains(target)) return true;
   return target.closest(CLIPBOARD_KEEPERS) === null;

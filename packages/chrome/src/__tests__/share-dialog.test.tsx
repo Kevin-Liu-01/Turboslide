@@ -34,6 +34,7 @@ import type { EditorAccess, EditorShellInput } from '../editor-shell';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { generalLinkIdOf } from '../dialogs/share-links';
+import { focusableIn } from '../Dialog';
 import { FORBIDDEN_DEFAULT_VIEW_WORDS, forbiddenWordsIn } from '../menus/strings';
 import { hideTooltip } from '../Tooltip';
 
@@ -1265,5 +1266,164 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(readLinkUrls(DECK)).toEqual({ lnk_general: url });
     vi.unstubAllGlobals();
+  });
+});
+
+// The focus after a choice (the keyboard verifier's pass 1 on the dropdown round, findings 1 and
+// 6): a field disabled while its write ran dropped the focus to the page body, where the editor's
+// keys acted on the slide behind the dialog; the expiry field unmounted after its choice with the
+// focus on it; and Add expiration chosen with Tab lost the field the choice drew.
+describe('the focus after a choice in the Share dialog (dropdown round, keyboard verifier)', () => {
+  const lee = {
+    email: 'lee@example.test',
+    role: 'viewer' as const,
+    invitedAt: '2026-09-10T00:00:00Z',
+    expiresAt: null,
+    status: 'pending' as const,
+  };
+  const leeRole = 'dialog.share.grant.lee@example.test.role';
+
+  /** A write that answers when the test says so. */
+  function writes() {
+    const pending: Array<(value: unknown) => void> = [];
+    const dispatch = vi.fn(
+      (_action: string, _input: Record<string, unknown>) =>
+        new Promise<unknown>((resolve) => {
+          pending.push(resolve);
+        }),
+    );
+    const answer = async (value: unknown = {}) => {
+      await act(async () => {
+        pending.shift()?.(value);
+        await Promise.resolve();
+      });
+      await flush();
+    };
+    return { dispatch, answer };
+  }
+
+  function open(access: EditorAccess, dispatch: ReturnType<typeof writes>['dispatch']) {
+    const input: EditorShellInput = {
+      deckId: DECK,
+      document: doc,
+      slideId: SLIDE,
+      revision: 4,
+      origin: 'https://x.test',
+      dispatch: dispatch as unknown as EditorShellInput['dispatch'],
+      access,
+      role: 'owner',
+      capabilities: ['read', 'share', 'settings'],
+    };
+    render(
+      <Host state={host(input).state}>
+        <ShareDialog />
+      </Host>,
+    );
+  }
+
+  const owned = (extra: Partial<AccessRecordJson> = {}): EditorAccess =>
+    accessViewOfRecord(record({ revision: 3, ...extra }), { signedIn: false, via: 'owner' });
+  const trigger = (control: string) =>
+    document.querySelector<HTMLButtonElement>(`[data-control="${control}"][role="combobox"]`);
+  const keys = (element: HTMLElement, ...names: string[]) => {
+    for (const name of names) fireEvent.keyDown(element, { key: name });
+  };
+
+  it('keeps the focus on General access and on the link role through the write each choice starts', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('{"error":"not_found"}', { status: 404 }))),
+    );
+    const { dispatch, answer } = writes();
+    open(owned(), dispatch);
+    await flush();
+    const mode = trigger('dialog.share.mode')!;
+    act(() => mode.focus());
+    keys(mode, 'ArrowDown', 'ArrowDown', 'Enter');
+    expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.setGeneralAccess']);
+    /* the write runs: the field keeps the focus, marked aria-disabled, with no disabled attribute */
+    expect(document.activeElement).toBe(mode);
+    expect(mode.disabled).toBe(false);
+    expect(mode.getAttribute('aria-disabled')).toBe('true');
+    await answer({
+      record: record({ revision: 4, generalAccess: { mode: 'link', role: 'viewer' } }),
+    });
+    expect(document.activeElement).toBe(mode);
+    expect(mode.hasAttribute('aria-disabled')).toBe(false);
+    /* the link role the answer drew: the same through its own write */
+    const linkRole = trigger('dialog.share.linkRole')!;
+    expect(linkRole).not.toBeNull();
+    act(() => linkRole.focus());
+    keys(linkRole, 'ArrowDown', 'End', 'Enter');
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(document.activeElement).toBe(linkRole);
+    expect(linkRole.disabled).toBe(false);
+    await answer();
+    expect(document.activeElement).toBe(linkRole);
+    vi.unstubAllGlobals();
+  });
+
+  it('keeps the expiry field open and focused when Add expiration is chosen with Tab, and gives the focus back to the role field after the expiry', async () => {
+    const { dispatch, answer } = writes();
+    open({ ...owned(), grants: [lee] }, dispatch);
+    await flush();
+    const role = trigger(leeRole)!;
+    act(() => role.focus());
+    /* Viewer, Commenter, Editor, then Add expiration and Remove access */
+    keys(role, 'ArrowDown', 'End', 'ArrowUp');
+    expect(fireEvent.keyDown(role, { key: 'Tab' })).toBe(false);
+    const expiry = trigger('dialog.share.grant.lee@example.test.expiry');
+    expect(expiry).not.toBeNull();
+    expect(document.activeElement).toBe(expiry);
+    expect(dispatch).not.toHaveBeenCalled();
+    /* the expiry by the keyboard: the field leaves, the role field takes the focus and keeps it */
+    keys(expiry!, 'ArrowDown', 'ArrowDown', 'Enter');
+    expect(trigger('dialog.share.grant.lee@example.test.expiry')).toBeNull();
+    expect(dispatch.mock.calls.map(([action, input]) => [action, input.who])).toEqual([
+      ['share.setExpiry', { email: 'lee@example.test' }],
+    ]);
+    expect(document.activeElement).toBe(trigger(leeRole));
+    expect(trigger(leeRole)?.disabled).toBe(false);
+    expect(trigger(leeRole)?.getAttribute('aria-disabled')).toBe('true');
+    await answer();
+    expect(document.activeElement).toBe(trigger(leeRole));
+  });
+
+  it('gives the focus to the control at the row place after Remove access takes the row away', async () => {
+    const { dispatch, answer } = writes();
+    vi.stubGlobal(
+      'confirm',
+      vi.fn(() => true),
+    );
+    /* the browser blurs a focused control as it leaves the document (Chrome: focusout with no
+       related target); jsdom sends nothing, so the removal sends it here */
+    const removeChild = Node.prototype.removeChild;
+    Node.prototype.removeChild = function <T extends Node>(this: Node, child: T): T {
+      const active = document.activeElement;
+      if (active !== null && child.contains(active))
+        active.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+      return removeChild.call(this, child) as T;
+    };
+    try {
+      open({ ...owned(), grants: [lee] }, dispatch);
+      await flush();
+      const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]')!;
+      const role = trigger(leeRole)!;
+      act(() => role.focus());
+      const place = focusableIn(card).indexOf(role);
+      expect(place).toBeGreaterThan(0);
+      keys(role, 'ArrowDown', 'End', 'Enter');
+      expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
+      expect(document.activeElement).toBe(role);
+      await answer({ record: record({ revision: 4 }) });
+      expect(trigger(leeRole)).toBeNull();
+      expect(document.activeElement).not.toBe(document.body);
+      expect(card.contains(document.activeElement)).toBe(true);
+      const list = focusableIn(card);
+      expect(document.activeElement).toBe(list[Math.min(place, list.length - 1)]);
+    } finally {
+      Node.prototype.removeChild = removeChild;
+      vi.unstubAllGlobals();
+    }
   });
 });

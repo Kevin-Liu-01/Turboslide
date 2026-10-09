@@ -183,6 +183,13 @@ export function Select<T extends string>({
   /* a list whose options shrank while open has no active row past its end */
   const active = activeRaw < rows.length ? activeRaw : -1;
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
+  /* the trigger holds the DOM focus. A trigger that becomes disabled while it holds the focus (the
+     write its own choice started: Share's fields and the inspector's fields take `disabled` while
+     the write runs) keeps the focus: the HTML attribute would drop it to the page body, where the
+     editor's keys act on the slide behind the field (the keyboard verifier's pass 1 on the round,
+     finding 1: Tab selected objects, Delete removed a table). It stays focusable with
+     `aria-disabled`, takes no key and no click, and takes the attribute once the focus leaves. */
+  const [focused, setFocused] = useState(false);
   const list = useRef<HTMLDivElement>(null);
   const typed = useRef({ buffer: '', at: 0 });
   /* a press on the label around the trigger closed the list; the label's click on its control
@@ -214,9 +221,11 @@ export function Select<T extends string>({
 
   /**
    * Chooses a row: the list closes first and the trigger keeps the focus, then onChange runs in
-   * the same event when the value is new (3.5). A disabled or absent row chooses nothing.
+   * the same event when the value is new (3.5). A disabled or absent row chooses nothing. With
+   * `settle`, the change's render is committed before choose returns, so the caller reads where
+   * the focus went (the Tab rule of 3.3). Returns true when onChange ran.
    */
-  const choose = (index: number) => {
+  const choose = (index: number, settle = false): boolean => {
     const row = rows[index];
     const wasOpen = open;
     if (wasOpen) {
@@ -224,8 +233,12 @@ export function Select<T extends string>({
       if (trigger !== null && document.activeElement !== trigger)
         trigger.focus({ preventScroll: true });
     }
-    if (row === undefined || row.option.disabled === true) return;
-    if (row.option.value !== value) onChange(row.option.value);
+    if (row === undefined || row.option.disabled === true) return false;
+    if (row.option.value === value) return false;
+    const next = row.option.value;
+    if (settle) flushSync(() => onChange(next));
+    else onChange(next);
+    return true;
   };
 
   /** The latest render's choose and setActive, for the list's own listeners bound once. */
@@ -454,8 +467,14 @@ export function Select<T extends string>({
         setOpen(false);
         return;
       case 'Tab':
-        /* chooses and lets the focus move on: a dialog's Tab trap still sees the key */
-        choose(active);
+        /* chooses and lets the focus move on: a dialog's Tab trap still sees the key. A choice
+           that moved the focus itself keeps it where it went: Share's Add expiration draws the
+           expiry field, which takes the focus as it mounts, and the Tab carried it past the field,
+           whose blur hid it again (the keyboard verifier's pass 1, finding 6) */
+        if (choose(active, true)) {
+          const now = document.activeElement;
+          if (now !== null && now !== trigger && now !== document.body) event.preventDefault();
+        }
         return;
       default:
         break;
@@ -487,8 +506,14 @@ export function Select<T extends string>({
     openAt(startIndex());
   };
 
+  const onTriggerFocus = (event: ReactFocusEvent<HTMLButtonElement>) => {
+    tipAnchor.onFocus(event);
+    setFocused(true);
+  };
+
   const onTriggerBlur = (event: ReactFocusEvent<HTMLButtonElement>) => {
     tipAnchor.onBlur(event);
+    setFocused(false);
     if (open) setOpen(false);
     onBlur?.();
   };
@@ -532,14 +557,15 @@ export function Select<T extends string>({
         aria-label={label}
         data-control={control}
         value={value}
-        disabled={disabled}
+        disabled={disabled && !focused}
+        aria-disabled={disabled ? true : undefined}
         autoFocus={autoFocus}
         data-tip={tipAnchor['data-tip']}
         onMouseEnter={onMouseEnter}
         onMouseMove={onMouseMove}
         onMouseLeave={tipAnchor.onMouseLeave}
         onMouseDown={tipAnchor.onMouseDown}
-        onFocus={tipAnchor.onFocus}
+        onFocus={onTriggerFocus}
         onBlur={onTriggerBlur}
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}

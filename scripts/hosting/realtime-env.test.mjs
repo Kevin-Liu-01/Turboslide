@@ -5,7 +5,7 @@
 // side (the drain, the flag, the migration and the secrets). Nothing here reaches the network, a
 // real project or a real Worker. Runs under the root vitest project `scripts` (vitest.config.ts
 // includes scripts/**/*.test.mjs).
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import {
   chmodSync,
   existsSync,
@@ -36,6 +36,7 @@ import {
   VERCEL_SUBCOMMANDS,
   databaseFor,
   execute,
+  fetchJsonSync,
   isPrivateMode,
   namesFromEnvLs,
   openDecksOf,
@@ -1382,5 +1383,134 @@ describe('run', () => {
       'realtime-env mail --dry-run (project turboslide-gt, scope s, environments production',
     );
     expect(lines[1]).toContain('mail.env is absent: TURBOSLIDE_MAIL stays off');
+  });
+});
+
+describe('db-unlisted (HR-K2#3)', () => {
+  const real = (extra = {}) => options('db-unlisted', { dryRun: false, ...extra });
+  const workerAt = (db, answer) => {
+    const requests = [];
+    const fetch = (url, init) => {
+      requests.push({ url, auth: init.headers?.authorization });
+      if (url.endsWith('/health'))
+        return { status: 200, json: { ok: true, realtime: 'on', db, commit: 'c' } };
+      return answer;
+    };
+    return { requests, fetch };
+  };
+  const ROWS = {
+    status: 200,
+    json: {
+      shapes: 2,
+      rows: [
+        {
+          digest: '0123456789ab',
+          kind: 'select',
+          table: 'session',
+          refused: 3,
+          ran: 0,
+          firstAt: 0,
+          lastAt: Date.UTC(2026, 9, 8),
+        },
+        { digest: 'not a digest; select * from session', kind: 'select', table: null },
+      ],
+    },
+  };
+
+  it('prints the number of statement shapes alone, under the room bearer while the Worker falls back', () => {
+    const files = filesOf();
+    const { requests, fetch } = workerAt('fallback', ROWS);
+    const lines = [];
+    const o = real();
+    expect(
+      execute(
+        planFor('db-unlisted', o, files),
+        o,
+        files,
+        quietIo({ out: (l) => lines.push(l), fetch }),
+      ),
+    ).toBe(0);
+    expect(lines).toEqual(['2']);
+    expect(requests.map((r) => r.url)).toEqual([
+      'https://turboslide-realtime.sub.workers.dev/health',
+      'https://turboslide-realtime.sub.workers.dev/control/db-unlisted',
+    ]);
+    expect(requests[1].auth).toBe(`Bearer ${ROOM_BEARER}`);
+  });
+
+  it('takes the database bearer once the Worker has one, and --digests adds the digests alone', () => {
+    writePrivateFile(
+      FILES.room.name,
+      `TURBOSLIDE_ROOM_SECRET=${ROOM_SECRET}\nTURBOSLIDE_ROOM_BEARER=${ROOM_BEARER}\n${PREVIEW_KEYS}${PRODUCTION_KEYS}`,
+    );
+    const files = filesOf();
+    const { requests, fetch } = workerAt('own', ROWS);
+    const lines = [];
+    const o = real({ digests: true });
+    expect(
+      execute(
+        planFor('db-unlisted', o, files),
+        o,
+        files,
+        quietIo({ out: (l) => lines.push(l), fetch }),
+      ),
+    ).toBe(0);
+    expect(requests[1].auth).toBe(`Bearer ${PRODUCTION_DB}`);
+    expect(lines).toEqual([
+      '2',
+      '0123456789ab select session refused 3 ran 0 last 2026-10-08T00:00:00.000Z',
+    ]);
+    // the preview Worker takes the preview's own database bearer
+    const preview = real({ env: 'preview' });
+    requests.length = 0;
+    execute(planFor('db-unlisted', preview, files), preview, files, quietIo({ fetch }));
+    expect(requests[1].auth).toBe(`Bearer ${PREVIEW_DB}`);
+    expect(requests[1].url).toBe(
+      'https://turboslide-realtime-preview.sub.workers.dev/control/db-unlisted',
+    );
+  });
+
+  it('a Worker before HR-K2#3 or before its migration reads exit 1 with the step to take', () => {
+    const files = filesOf();
+    for (const [answer, words] of [
+      [{ status: 404, json: { error: 'not_found' } }, 'predates HR-K2#3'],
+      [{ status: 503, json: { error: 'unset' } }, 'run worker-migrate first'],
+    ]) {
+      const lines = [];
+      const o = real();
+      const { fetch } = workerAt('fallback', answer);
+      expect(
+        execute(
+          planFor('db-unlisted', o, files),
+          o,
+          files,
+          quietIo({ out: (l) => lines.push(l), fetch }),
+        ),
+      ).toBe(1);
+      expect(lines.at(-1)).toContain(words);
+    }
+  });
+
+  it('a call hands its bearer to the HTTP child through the environment, and the header arrives', async () => {
+    const server = spawn(
+      process.execPath,
+      [
+        '-e',
+        `require('node:http').createServer((req, res) => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ authorization: req.headers.authorization ?? null })); }).listen(0, '127.0.0.1', function () { process.stdout.write(String(this.address().port) + '\\n'); });`,
+      ],
+      { stdio: ['ignore', 'pipe', 'inherit'] },
+    );
+    try {
+      const port = await new Promise((resolve) =>
+        server.stdout.once('data', (chunk) => resolve(String(chunk).trim())),
+      );
+      const answer = fetchJsonSync(`http://127.0.0.1:${port}/x`, {
+        method: 'GET',
+        headers: { authorization: `Bearer ${ROOM_BEARER}` },
+      });
+      expect(answer).toEqual({ status: 200, json: { authorization: `Bearer ${ROOM_BEARER}` } });
+    } finally {
+      server.kill();
+    }
   });
 });

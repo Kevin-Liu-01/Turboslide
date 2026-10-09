@@ -59,6 +59,11 @@
 //   app-partner     13.8 phase 1: TURBOSLIDE_ROOM_BEARER_PREVIOUS on the Vercel environments, the
 //                   coming room bearer the app accepts from the objects before the Worker sends it
 //   app-settle      13.8 phase 3: removes TURBOSLIDE_ROOM_BEARER_PREVIOUS from the environments
+//   db-unlisted     HR-K2#3: reads the Worker's /health, then GET /control/db-unlisted under the
+//                   environment's database bearer (the room bearer while /health answers db
+//                   fallback) and prints the number of statement shapes outside the allowlist the
+//                   Worker counted (a number; `--digests` adds one line per digest with its kind,
+//                   table and counts, never a statement)
 //
 // AUTH-3: each environment holds its own three values (room.env's <NAME>_PRODUCTION and
 // <NAME>_PREVIEW keys). Production falls back to the shared pair of before (the unsuffixed
@@ -76,7 +81,8 @@
 // subcommands use the workspace's wrangler (apps/realtime-worker/node_modules/.bin/wrangler, or
 // `--wrangler`) with CLOUDFLARE_ACCOUNT_ID from cloudflare.env in the child's environment; a remote
 // wrangler command is the integrator's (preview) and the ship step's (production) by the round's
-// rules. Exit 0 when done or nothing to do, 1 when a precondition is absent (a step named in the
+// rules. A bearer reaches the HTTP child through its environment, never its arguments. Exit 0 when
+// done or nothing to do, 1 when a precondition is absent (a step named in the
 // output), 2 on usage or a refusal. Node only; no dependency. Tested by realtime-env.test.mjs
 // against a fake `vercel` on PATH, a fake wrangler and a fake fetch.
 import { spawnSync } from 'node:child_process';
@@ -111,6 +117,7 @@ export const SUBCOMMANDS = Object.freeze([
   'mint',
   'app-partner',
   'app-settle',
+  'db-unlisted',
 ]);
 /** The subcommands that touch the Vercel project and need the linked root. */
 export const VERCEL_SUBCOMMANDS = Object.freeze([
@@ -241,7 +248,7 @@ export const APP_PARTNER_NAME = 'TURBOSLIDE_ROOM_BEARER_PREVIOUS';
 /** The /health `db` answers of a Worker that holds a database bearer (apps/realtime-worker/src/index.ts). */
 export const WORKER_DB_READY = Object.freeze(['own', 'rotating']);
 
-const USAGE = `usage: node scripts/hosting/realtime-env.mjs <${SUBCOMMANDS.join('|')}> [on|off for do-flag] [--dry-run] [--scope <team>] [--project <name>] [--cwd <linked root>] [--environments production,preview] [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview] [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>] [--from-shared]`;
+const USAGE = `usage: node scripts/hosting/realtime-env.mjs <${SUBCOMMANDS.join('|')}> [on|off for do-flag] [--dry-run] [--scope <team>] [--project <name>] [--cwd <linked root>] [--environments production,preview] [--config-dir <dir>] [--admin-emails <a,b>] [--force] [--tier do] [--env preview] [--local] [--host <worker host>] [--wrangler <path>] [--worker-dir <dir>] [--from-shared] [--digests]`;
 
 export class UsageError extends Error {}
 
@@ -264,6 +271,7 @@ export function parseArgs(argv) {
     wrangler: null,
     workerDir: null,
     fromShared: false,
+    digests: false,
     help: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
@@ -277,6 +285,7 @@ export function parseArgs(argv) {
     else if (arg === '--force') out.force = true;
     else if (arg === '--local') out.local = true;
     else if (arg === '--from-shared') out.fromShared = true;
+    else if (arg === '--digests') out.digests = true;
     else if (arg === '--help' || arg === '-h') out.help = true;
     else if (arg === '--scope') out.scope = value();
     else if (arg === '--project') out.project = value();
@@ -543,7 +552,7 @@ const separationStop = (environment, room) => {
  * literal's name, never the value; `when: 'absent'` skips a present variable unless `force`;
  * `plain` omits --sensitive), `rm` (vercel env rm when present), `expect` (the expectation file),
  * `health` (GET /health on a Worker host), `flush` (the drain), `flag` (POST then GET
- * /control/flags), `wrangler` (one wrangler command, a secret's value on stdin when `source`),
+ * /control/flags), `unlisted` (GET /control/db-unlisted, the count alone), `wrangler` (one wrangler command, a secret's value on stdin when `source`),
  * `note` (a sentence), `stop` (end with an exit code).
  */
 export function planFor(sub, options, files) {
@@ -901,6 +910,20 @@ export function planFor(sub, options, files) {
       );
       break;
     }
+    case 'db-unlisted': {
+      if (roomFileMissing(room, options.env)) {
+        steps.push(roomFileStop(room, options.env));
+        break;
+      }
+      steps.push(
+        step('unlisted', {
+          environment: options.env,
+          host: roomHostFor(options.env, options, files),
+          digests: options.digests === true,
+        }),
+      );
+      break;
+    }
     case 'worker-migrate': {
       const database = databaseFor(options.env, files);
       const args = ['d1', 'migrations', 'apply', database, options.local ? '--local' : '--remote'];
@@ -1207,9 +1230,14 @@ export function execute(steps, options, files, io) {
     const source = roomSource('TURBOSLIDE_ROOM_BEARER', environment, files.room);
     return source === null ? undefined : files.room.values.get(source.key);
   };
-  const call = (environment, host, path, init = {}) => {
-    const headers = { authorization: `Bearer ${bearer(environment)}`, ...(init.headers ?? {}) };
+  const call = (environment, host, path, init = {}, key = bearer(environment)) => {
+    const headers = { authorization: `Bearer ${key}`, ...(init.headers ?? {}) };
     return io.fetch(`https://${host}${path}`, { ...init, headers });
+  };
+  /** The environment's database bearer from room.env, or undefined before `mint`. */
+  const dbBearer = (environment) => {
+    const source = roomSource('TURBOSLIDE_DB_BEARER', environment, files.room);
+    return source === null ? undefined : files.room.values.get(source.key);
   };
   /** The `db` answer of each environment's /health this run read (the gate of `do` on production). */
   const workerDb = new Map();
@@ -1443,6 +1471,74 @@ export function execute(steps, options, files, io) {
         if (value !== s.realtime) return 1;
         break;
       }
+      case 'unlisted': {
+        if (dry) {
+          say(
+            `would read https://${s.host}/health, then https://${s.host}/control/db-unlisted under the ${s.environment} database bearer (the room bearer while /health answers db fallback), and print the number of statement shapes`,
+          );
+          break;
+        }
+        let mode;
+        try {
+          const health = io.fetch(`https://${s.host}/health`, { method: 'GET' });
+          mode = health.status === 200 ? (health.json?.db ?? 'fallback') : null;
+        } catch {
+          mode = null;
+        }
+        if (mode === null) {
+          say(`${s.environment}: https://${s.host}/health did not answer 200`);
+          return 1;
+        }
+        const own = WORKER_DB_READY.includes(mode);
+        if (own && dbBearer(s.environment) === undefined) {
+          say(
+            `${s.environment}: the Worker takes its database bearer (db ${mode}) and room.env has none (mint --environments ${s.environment})`,
+          );
+          return 1;
+        }
+        let answer;
+        try {
+          answer = call(
+            s.environment,
+            s.host,
+            '/control/db-unlisted',
+            { method: 'GET' },
+            own ? dbBearer(s.environment) : bearer(s.environment),
+          );
+        } catch (error) {
+          say(
+            `${s.environment}: https://${s.host}/control/db-unlisted unreachable (${error instanceof Error ? error.message : String(error)})`,
+          );
+          return 1;
+        }
+        if (answer.status === 404) {
+          say(
+            `${s.environment}: https://${s.host}/control/db-unlisted answered 404: the Worker predates HR-K2#3`,
+          );
+          return 1;
+        }
+        if (answer.status === 503) {
+          say(
+            `${s.environment}: ts_db_unlisted is not made; run worker-migrate${s.environment === 'preview' ? ' --env preview' : ''} first`,
+          );
+          return 1;
+        }
+        const shapes = answer.json?.shapes;
+        if (answer.status !== 200 || !Number.isInteger(shapes)) {
+          say(
+            `${s.environment}: https://${s.host}/control/db-unlisted answered ${answer.status}${answer.status === 200 ? ' with no count' : ''}`,
+          );
+          return 2;
+        }
+        say(String(shapes));
+        if (s.digests)
+          for (const row of Array.isArray(answer.json.rows) ? answer.json.rows : [])
+            if (typeof row?.digest === 'string' && /^[0-9a-f]{12}$/.test(row.digest))
+              say(
+                `${row.digest} ${String(row.kind).replace(/[^a-z]/g, '')} ${typeof row.table === 'string' ? row.table.replace(/[^A-Za-z0-9_]/g, '') : '-'} refused ${Number(row.refused) || 0} ran ${Number(row.ran) || 0} last ${Number.isFinite(row.lastAt) ? new Date(row.lastAt).toISOString() : '-'}`,
+              );
+        break;
+      }
       case 'wrangler': {
         const shown = `wrangler ${s.args.join(' ')}`;
         if (dry) {
@@ -1512,11 +1608,21 @@ export function spawnWrangler(options, files) {
   };
 }
 
-/** One HTTP call with a 10 s deadline, answered as `{ status, json }` (json null when the body is not JSON). */
+/** The child's variable that carries a call's Authorization header (never its arguments, which `ps` shows). */
+export const FETCH_AUTHORIZATION_VARIABLE = 'REALTIME_ENV_AUTHORIZATION';
+
+/**
+ * One HTTP call with a 10 s deadline, answered as `{ status, json }` (json null when the body is
+ * not JSON). The Authorization header rides the child's environment, so no bearer is ever in a
+ * process's arguments.
+ */
 export function fetchJsonSync(url, init) {
   // spawnSync keeps the script synchronous: one node child per call, the body on stdout as JSON.
+  const { authorization, ...headers } = init?.headers ?? {};
   const script = `
 const [url, init] = [process.argv[1], JSON.parse(process.argv[2])];
+const authorization = process.env.${FETCH_AUTHORIZATION_VARIABLE};
+if (authorization) init.headers = { ...init.headers, authorization };
 fetch(url, { ...init, signal: AbortSignal.timeout(10000) }).then(async (r) => {
   const text = await r.text();
   let json = null;
@@ -1524,8 +1630,12 @@ fetch(url, { ...init, signal: AbortSignal.timeout(10000) }).then(async (r) => {
   process.stdout.write(JSON.stringify({ status: r.status, json }));
 }).catch((e) => { process.stdout.write(JSON.stringify({ error: String(e && e.message || e) })); });
 `;
-  const r = spawnSync(process.execPath, ['-e', script, url, JSON.stringify(init ?? {})], {
+  const env = { ...process.env };
+  delete env[FETCH_AUTHORIZATION_VARIABLE];
+  if (typeof authorization === 'string') env[FETCH_AUTHORIZATION_VARIABLE] = authorization;
+  const r = spawnSync(process.execPath, ['-e', script, url, JSON.stringify({ ...init, headers })], {
     encoding: 'utf8',
+    env,
   });
   if (r.status !== 0 || !r.stdout) throw new Error(`fetch ${url} failed (exit ${r.status})`);
   const answer = JSON.parse(r.stdout);

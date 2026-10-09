@@ -14,7 +14,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { head } from '@vercel/blob';
 
 import { BlobTimeoutError, boundedBlobClient } from './blob-store.ts';
-import { vercelBlobClient } from './blob-vercel.ts';
+import {
+  PUBLIC_DOCUMENT_MAX_AGE_S,
+  TWIN_MAX_AGE_S,
+  publicMaxAge,
+  vercelBlobClient,
+} from './blob-vercel.ts';
 
 /** A read write token of the SDK's shape; the store id is its fourth segment. */
 const TOKEN = 'vercel_blob_rw_teststore_secret';
@@ -126,4 +131,88 @@ describe('the Vercel client under the store deadline', () => {
     },
     TIMING_TEST_MS,
   );
+});
+
+// Hardening K1#1 (docs/hardening/HARDENING.md 4.1; DATA-2): a document put on the public store
+// carries a minute of max age, so a copy cached before the documents move to the private store
+// expires within a minute; a twin keeps a year; a caller's own value wins; a put on the private
+// store carries no default. Read from the header the SDK sends the stand-in API.
+describe('the max age of a put on the public store (hardening K1#1)', () => {
+  let server: Server;
+  const seen = new Map<string, string | null>();
+  const env: Record<string, string | undefined> = {};
+
+  beforeAll(async () => {
+    server = createServer((request, response) => {
+      const url = new URL(request.url ?? '/', 'http://localhost');
+      const pathname = url.searchParams.get('pathname') ?? '';
+      const header = request.headers['x-cache-control-max-age'];
+      seen.set(pathname, typeof header === 'string' ? header : null);
+      request.resume();
+      request.on('end', () => {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(
+          JSON.stringify({
+            url: `https://teststore.public.blob.vercel-storage.com/${pathname}`,
+            downloadUrl: `https://teststore.public.blob.vercel-storage.com/${pathname}?download=1`,
+            pathname,
+            contentType: 'application/octet-stream',
+            contentDisposition: 'inline',
+            etag: '"abc"',
+          }),
+        );
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as AddressInfo;
+    env.VERCEL_BLOB_API_URL = process.env.VERCEL_BLOB_API_URL;
+    process.env.VERCEL_BLOB_API_URL = `http://127.0.0.1:${port}`;
+  });
+
+  afterAll(async () => {
+    if (env.VERCEL_BLOB_API_URL === undefined) delete process.env.VERCEL_BLOB_API_URL;
+    else process.env.VERCEL_BLOB_API_URL = env.VERCEL_BLOB_API_URL;
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+
+  const body = new Uint8Array([123, 125]);
+
+  it('names the rule: a minute for a document, a year for a twin', () => {
+    expect(PUBLIC_DOCUMENT_MAX_AGE_S).toBe(60);
+    expect(TWIN_MAX_AGE_S).toBe(31_536_000);
+    expect(publicMaxAge('decks/x/deck.json')).toBe(60);
+    expect(publicMaxAge('decks/x/access.json')).toBe(60);
+    expect(publicMaxAge('users/acct_1/decks.json')).toBe(60);
+    expect(publicMaxAge('exports/x/job/x.pdf')).toBe(60);
+    expect(publicMaxAge('decks/x/assets/logo.abc123.png')).toBe(31_536_000);
+    expect(publicMaxAge('d/x/AAAAAAAAAAAAAAAAAAAAAA/logo.abc123.png')).toBe(31_536_000);
+    expect(publicMaxAge('u/key/avatar.webp')).toBe(31_536_000);
+    // a deck named `assets` is still a deck: its documents are not twins
+    expect(publicMaxAge('decks/assets/deck.json')).toBe(60);
+  });
+
+  it('sends 60 for a document, a year for a twin and the caller value when one is named', async () => {
+    const client = vercelBlobClient({ BLOB_READ_WRITE_TOKEN: TOKEN });
+    await client.put('decks/x/deck.json', body, { overwrite: true });
+    await client.put('decks/x/slides/title.json', body, { overwrite: true });
+    await client.put('decks/x/assets/logo.abc123.png', body, { overwrite: false });
+    await client.put('decks/x/.thumbs/s1/light@320/title.png', body, {
+      overwrite: true,
+      cacheControlMaxAge: 31_536_000,
+    });
+    expect(seen.get('decks/x/deck.json')).toBe('60');
+    expect(seen.get('decks/x/slides/title.json')).toBe('60');
+    expect(seen.get('decks/x/assets/logo.abc123.png')).toBe('31536000');
+    expect(seen.get('decks/x/.thumbs/s1/light@320/title.png')).toBe('31536000');
+  });
+
+  it('sends no default on the private store', async () => {
+    const client = vercelBlobClient(
+      { TURBOSLIDE_BLOB_PRIVATE_TOKEN: TOKEN },
+      { tokenVariable: 'TURBOSLIDE_BLOB_PRIVATE_TOKEN', access: 'private' },
+    );
+    await client.put('decks/y/deck.json', body, { overwrite: true });
+    expect(seen.has('decks/y/deck.json')).toBe(true);
+    expect(seen.get('decks/y/deck.json')).toBeNull();
+  });
 });

@@ -82,7 +82,10 @@
 // answer mints, which the thumbnail rows send. With the bearer, the smoke makes one scratch deck
 // with `deck.create` (restricted to its creator, as every new deck is), requires `private,
 // no-store` on its thumbnail (`restricted thumbnail private`), and removes it forever at the end
-// of the run (`scratch deck removed`).
+// of the run (`scratch deck removed`). HR-K1#1 (DATA-2): `document cache 60 s` reads the scratch
+// deck's `deck.json` on the public store, whose host the deployment names in its policy's
+// `img-src` (TURBOSLIDE_PUBLIC_STORE_HOST), and requires `max-age=60`, so a copy a browser or the
+// CDN took before the documents move to the private store expires within a minute.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -961,6 +964,55 @@ async function removeScratchDeck(base, scratch, headers) {
   };
 }
 
+/** The public store's host the deployment names in its policy's `img-src`, or null (a tmp store). */
+async function publicStoreHostOf(base, timeoutMs) {
+  const r = await probe(base, '/decks', timeoutMs);
+  return (
+    /img-src[^;]*https:\/\/([a-z0-9.-]+\.public\.blob\.vercel-storage\.com)/.exec(cspOf(r))?.[1] ??
+    null
+  );
+}
+
+/**
+ * `document cache 60 s` (hardening HR-K1#1, DATA-2; retired by HR-K1#6): the scratch deck's
+ * `deck.json`, written by its creation, carries `max-age=60` on the public store, where it was a
+ * month before K1#1. Once the private store holds the documents, the public store has no copy
+ * (403 or 404), which passes too: there is nothing left to cache. A deployment that names no
+ * public store (a tmp or file store) skips the row.
+ */
+async function documentCacheRow(base, scratch, timeoutMs) {
+  const name = 'document cache 60 s';
+  if (scratch.id === null) {
+    return {
+      row: { name, expect: 'a scratch deck', detail: () => scratch.detail },
+      r: { status: '-', ms: 0 },
+      ok: false,
+    };
+  }
+  const host = await publicStoreHostOf(base, timeoutMs);
+  if (host === null) return { skip: `${name}: no public store named in the policy's img-src` };
+  const r = await probe(
+    `https://${host}/`,
+    `decks/${encodeURIComponent(scratch.id)}/deck.json`,
+    timeoutMs,
+  );
+  const cache = r.headers['cache-control'] ?? '';
+  const absent = r.status === 403 || r.status === 404;
+  return {
+    row: {
+      name,
+      expect:
+        "the scratch deck's deck.json on the public store with max-age=60, or no public copy (403 or 404)",
+      detail: () =>
+        absent
+          ? `${r.status}: no public copy (the private store holds the documents)`
+          : `${r.status}; ${cache === '' ? 'no cache-control' : cache}`,
+    },
+    r,
+    ok: r.error === undefined && (absent || (r.status === 200 && /\bmax-age=60\b/.test(cache))),
+  };
+}
+
 /**
  * `restricted thumbnail private` (hardening HR-SD#5, CRIT-M2): the scratch deck is restricted, so
  * its thumbnail, asked with the bearer and no grant in the URL, answers `private, no-store`, and
@@ -1363,6 +1415,9 @@ async function main() {
       // the scratch deck's rows (hardening HR-SD#5), the deck removed before the table prints
       const scratch = await createScratchDeck(base, headers);
       results.push(await restrictedThumbnailRow(base, scratch, headers, args.timeoutMs));
+      const documentCache = await documentCacheRow(base, scratch, args.timeoutMs);
+      if (documentCache.skip !== undefined) console.log(`skip  ${documentCache.skip}`);
+      else results.push(documentCache);
       if (scratch.id !== null) results.push(await removeScratchDeck(base, scratch, headers));
       if (args.templateCopy) {
         const copied = await templateCopyRow(base, headers);

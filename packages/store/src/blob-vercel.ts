@@ -34,6 +34,33 @@ export const BLOB_ACCESS_VARIABLE = 'TURBOSLIDE_BLOB_ACCESS';
 
 type Access = 'public' | 'private';
 
+/**
+ * The max age of a document put on a public store (hardening K1#1, DATA-2): a copy a browser or
+ * the CDN took before the documents move to the private store expires within a minute, instead
+ * of the store's default of a month.
+ */
+export const PUBLIC_DOCUMENT_MAX_AGE_S = 60;
+
+/** A year for a twin: its name carries its digest and is never overwritten (SPEC-3 0.26). */
+export const TWIN_MAX_AGE_S = 31_536_000;
+
+/** True for a twin of a deck (`decks/<id>/assets/`, `d/<id>/<assetKey>/`) or an avatar (`u/`). */
+export function isTwinPath(pathname: string): boolean {
+  return (
+    pathname.startsWith('d/') ||
+    pathname.startsWith('u/') ||
+    /^decks\/[^/]+\/assets\//.test(pathname)
+  );
+}
+
+/**
+ * The max age a put on a public store carries when the caller names none: a year for a twin,
+ * a minute for everything else (documents, records, produced files).
+ */
+export function publicMaxAge(pathname: string): number {
+  return isTwinPath(pathname) ? TWIN_MAX_AGE_S : PUBLIC_DOCUMENT_MAX_AGE_S;
+}
+
 type WithMeta = {
   pathname: string;
   url: string;
@@ -226,6 +253,10 @@ export function vercelBlobClient(
       return [...out].sort();
     },
     async put(pathname, bytes, options) {
+      // the caller's max age, else on a public store the path's (publicMaxAge); a private
+      // store's objects are read with the token alone, so its default stays
+      const maxAge =
+        options.cacheControlMaxAge ?? (access === 'public' ? publicMaxAge(pathname) : undefined);
       try {
         // the SDK's PutBody names Buffer, not Uint8Array; the copy is the bytes' own view
         const result = await put(
@@ -240,10 +271,8 @@ export function vercelBlobClient(
             ...(options.contentType === undefined ? {} : { contentType: options.contentType }),
             ...(options.ifMatch === undefined ? {} : { ifMatch: options.ifMatch }),
             // the object's own max age (gslides-parity SPEC-4 0.31; build-4/b4.md R1): the
-            // thumbnail cache's stamped objects take a year, everything else the store's default
-            ...(options.cacheControlMaxAge === undefined
-              ? {}
-              : { cacheControlMaxAge: options.cacheControlMaxAge }),
+            // thumbnail cache's stamped objects take a year; hardening K1#1 above
+            ...(maxAge === undefined ? {} : { cacheControlMaxAge: maxAge }),
           },
         );
         return entryOf(result);

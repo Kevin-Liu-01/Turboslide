@@ -22,10 +22,10 @@ import {
   REVALIDATE_CACHE_CONTROL,
   isThumbStamp,
   slideStamp,
+  storedThumbIsPublic,
   thumbCacheControl,
   thumbHeaders,
   thumbResponse,
-  thumbStoreAccess,
 } from './thumbs';
 import type { ThumbRequest, ThumbResult } from './thumbs';
 
@@ -118,13 +118,19 @@ describe('the thumbnail headers (SPEC-4 0.31)', () => {
     expect(isThumbStamp('x'.repeat(65))).toBe(false);
   });
 
-  it('reads the store access: private under TURBOSLIDE_BLOB_ACCESS or the layout v2 documents token', () => {
-    expect(thumbStoreAccess({})).toBe('public');
-    expect(thumbStoreAccess({ TURBOSLIDE_BLOB_ACCESS: 'private' })).toBe('private');
-    expect(thumbStoreAccess({ TURBOSLIDE_BLOB_PRIVATE_TOKEN: 'x' })).toBe('private');
+  it('redirects to a stored object a browser can read by URL alone, and streams the rest (hardening K1#2)', () => {
+    const at = 'decks/gt-brand/.thumbs/aaaa0002/dark@320/title.png';
+    expect(storedThumbIsPublic(`https://ab12.public.blob.vercel-storage.com/${at}`, {})).toBe(true);
+    expect(storedThumbIsPublic(`https://ab12.private.blob.vercel-storage.com/${at}`, {})).toBe(
+      false,
+    );
     expect(
-      thumbStoreAccess({ TURBOSLIDE_BLOB_ACCESS: 'public', TURBOSLIDE_BLOB_PRIVATE_TOKEN: '' }),
-    ).toBe('public');
+      storedThumbIsPublic(`https://ab12.public.blob.vercel-storage.com/${at}`, {
+        TURBOSLIDE_BLOB_ACCESS: 'private',
+      }),
+    ).toBe(false);
+    expect(storedThumbIsPublic(`file:///tmp/store/${at}`, {})).toBe(false);
+    expect(storedThumbIsPublic('not a url', {})).toBe(false);
   });
 });
 

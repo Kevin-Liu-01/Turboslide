@@ -318,19 +318,27 @@ export function afterResponse(work: Promise<unknown>, label: string): void {
 }
 
 /**
- * The store's access as the route must read it: `private` when `TURBOSLIDE_BLOB_ACCESS` says so or
- * the documents store of layout v2 is configured (`TURBOSLIDE_BLOB_PRIVATE_TOKEN`; the split client
- * of packages/store/src/migrate.ts routes `.thumbs/` with the documents, so its URLs are not
- * public), `public` otherwise. The names are blob-vercel.ts's; that module stays out of this
- * file's graph because the client transform of warm.ts keeps this file's imports.
+ * Whether a stored thumbnail is answered as a 302 to its URL (hardening K1#2; DATA-2): only an
+ * object a browser can read by its URL, one on a public store. The split client of layout v2
+ * (packages/store migrate.ts) routes `.thumbs/` with the documents to the private store, whose
+ * URLs answer only with its token, so an object there is streamed: per object, because during
+ * the migration's dual read window one slide's thumbnail can be on either store. A deployment
+ * whose one store is private (`TURBOSLIDE_BLOB_ACCESS=private`) streams every object, and so
+ * does a URL that is no web address (a folder store's `file:`).
  */
-export function thumbStoreAccess(
+export function storedThumbIsPublic(
+  url: string,
   env: Record<string, string | undefined> = process.env,
-): 'public' | 'private' {
-  if (env.TURBOSLIDE_BLOB_ACCESS === 'private') return 'private';
-  const documents = env.TURBOSLIDE_BLOB_PRIVATE_TOKEN;
-  if (documents !== undefined && documents !== '') return 'private';
-  return 'public';
+): boolean {
+  if (env.TURBOSLIDE_BLOB_ACCESS === 'private') return false;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+  return !parsed.hostname.endsWith('.private.blob.vercel-storage.com');
 }
 
 /** A year: the stamp names the pixels, so the stored body never changes under its name (SPEC-4 0.31). */
@@ -408,6 +416,7 @@ export async function getThumbnail(
   request: ThumbRequest,
   options: {
     blob?: BlobClient | null;
+    /** forces the answer for every stored object; by default each object's URL decides (K1#2) */
     access?: 'public' | 'private';
     /**
      * On the blob tier, a request that names a stamp (`r`, the home cards) and finds nothing
@@ -433,7 +442,9 @@ export async function getThumbnail(
   const named = isThumbStamp(request.r) ? request.r : null;
   const stamp = named ?? current;
   const blob = options.blob === undefined ? await exportBlobClient() : options.blob;
-  const access = options.access ?? thumbStoreAccess();
+  // a stored object is a 302 when a browser can read its URL, streamed otherwise (K1#2)
+  const redirects = (url: string): boolean =>
+    options.access === undefined ? storedThumbIsPublic(url) : options.access === 'public';
   const { revision } = facts;
 
   // 1. this instance's disk
@@ -487,7 +498,7 @@ export async function getThumbnail(
     );
     const stored = await blob.head(pathname);
     if (stored !== null) {
-      if (access === 'public') {
+      if (redirects(stored.url)) {
         return {
           kind: 'stored',
           url: stored.url,
@@ -532,7 +543,7 @@ export async function getThumbnail(
       );
       const storedCurrent = await blob.head(byContent);
       if (storedCurrent !== null) {
-        if (access === 'public') {
+        if (redirects(storedCurrent.url)) {
           return {
             kind: 'stored',
             url: storedCurrent.url,
@@ -576,7 +587,7 @@ export async function getThumbnail(
           renderThumb(request, current, blob),
           `refresh ${request.deckId}/${request.slideId}@${request.width}`,
         );
-        if (access === 'public') {
+        if (redirects(newest.url)) {
           return {
             kind: 'stored',
             url: newest.url,

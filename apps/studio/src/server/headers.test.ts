@@ -477,6 +477,47 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(enforced).not.toMatch(/script-src[^;]*'unsafe-inline'/);
   });
 
+  it('reads every path rule as the router matches the path, without regard to case (HR-W#2, verifier F1)', () => {
+    // the router renders /Edit/<deck> as /edit/<deck>, so the policy must be the same
+    const headerOf = (path: string) => {
+      const headers = securityHeadersFor(path, base);
+      return headers['content-security-policy'] !== undefined
+        ? 'enforce'
+        : headers['content-security-policy-report-only'] !== undefined
+          ? 'report'
+          : 'none';
+    };
+    for (const path of [
+      '/Edit/gt-brand',
+      '/EDIT/gt-brand',
+      '/Deck/gt-brand',
+      '/Present/gt-brand',
+      '/PRESENT/gt-brand',
+      '/Print/gt-brand',
+      '/EMBED/gt-brand',
+      '/New',
+      '/S/abcdefghijklmnopqrstuv',
+    ]) {
+      expect(isDocumentPath(path), path).toBe(true);
+      expect(headerOf(path), path).toBe('enforce');
+      expect(cspMode({}, path), path).toBe('enforce');
+    }
+    // the embed's exceptions follow it in any case: the frame rule report only, no DENY
+    const embed = securityHeadersFor('/Embed/gt-brand', base);
+    expect(embed['x-frame-options']).toBeUndefined();
+    expect(embed['content-security-policy']).not.toContain('frame-ancestors');
+    expect(securityHeadersFor('/S/abcdefghijklmnopqrstuv', base)['referrer-policy']).toBe(
+      'no-referrer',
+    );
+    // the API routes in any case: no page policy, never cached
+    const api = securityHeadersFor('/API/access/gt-brand', base);
+    expect(api['content-security-policy']).toBeUndefined();
+    expect(api['content-security-policy-report-only']).toBeUndefined();
+    expect(api['cache-control']).toBe('no-store');
+    expect(isDocumentPath('/Decks')).toBe(false);
+    expect(isDocumentPath('/Newer')).toBe(false);
+  });
+
   it('reads the extra embed ancestors from the variable, https names only', () => {
     expect(
       embedAncestors({
@@ -601,6 +642,27 @@ describe('the widened CSRF filter and the JSON rule (SPEC-3 8.7; report 04 F13)'
       '/decks/q4/assets/a.png',
     ])
       expect(csrfFilter(ctx(path)), path).toBe(false);
+  });
+
+  it('filters a route whose path changes case, as the router reaches the same route (verifier F1)', () => {
+    for (const path of [
+      '/API/access/gt-brand',
+      '/Api/Comments/q4',
+      '/api/Share/q4/link',
+      '/API/decks/q4/STREAM',
+      '/API/auth/sign-in',
+    ])
+      expect(csrfFilter(ctx(path, 'GET')), path).toBe(true);
+    expect(csrfFilter(ctx('/S/abc', 'POST'))).toBe(true);
+    expect(csrfFilter(ctx('/S/abc', 'GET'))).toBe(false);
+    expect(csrfFilter(ctx('/Device', 'POST'))).toBe(true);
+    const plain = new Request('http://localhost:4333/API/Actions/slide.remove', {
+      method: 'POST',
+      headers: { 'content-type': 'text/plain' },
+      body: '{}',
+    });
+    expect(requiresJsonBody(plain, '/API/Actions/slide.remove')).toBe(true);
+    expect(contentTypeRefusal(plain, '/API/Actions/slide.remove')?.status).toBe(415);
   });
 
   it('requires application/json for a body on a JSON route and lets an empty body and other routes through', () => {

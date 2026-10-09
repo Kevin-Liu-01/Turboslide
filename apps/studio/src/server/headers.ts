@@ -125,24 +125,39 @@ export function embedAncestors(env: Env = process.env): string[] {
   return [...DEFAULT_EMBED_ANCESTORS, ...extra];
 }
 
+/**
+ * The path as the router matches it. TanStack Router compares the static segments of a route
+ * without regard to case (router.tsx sets no `caseSensitive`; router-core lowercases both sides
+ * with `toLowerCase`), so `/Edit/<deck>` renders the editor and `/API/access/<deck>` reaches the
+ * access route. Every path rule of this module reads this form, so a change of case cannot step
+ * around the enforced policy, the CSRF filter or the JSON rule (hardening HR-W#2, verifier F1).
+ */
+export function routePath(pathname: string): string {
+  return pathname.toLowerCase();
+}
+
 /** Where the CSP is a nonce based policy: the document routes. */
 export function isEmbedPath(pathname: string): boolean {
-  return pathname === '/embed' || pathname.startsWith('/embed/');
+  const path = routePath(pathname);
+  return path === '/embed' || path.startsWith('/embed/');
 }
 
 /** The link exchange route (SPEC-3 6.4): `Referrer-Policy: no-referrer`, unsafe methods only under CSRF. */
 export function isExchangePath(pathname: string): boolean {
-  return pathname === '/s' || pathname.startsWith('/s/');
+  const path = routePath(pathname);
+  return path === '/s' || path.startsWith('/s/');
 }
 
 /** The routes whose answers are never cached and never framed: every API and server function path. */
 export function isApiPath(pathname: string): boolean {
-  return pathname.startsWith('/api/') || pathname.startsWith('/_serverFn/') || pathname === '/mcp';
+  const path = routePath(pathname);
+  return path.startsWith('/api/') || path.startsWith('/_serverfn/') || path === '/mcp';
 }
 
 /** The asset routes: `Cross-Origin-Resource-Policy: same-site`. */
 export function isAssetPath(pathname: string): boolean {
-  return /^\/decks\/[^/]+\/assets\//.test(pathname) || pathname.startsWith('/api/render/');
+  const path = routePath(pathname);
+  return /^\/decks\/[^/]+\/assets\//.test(path) || path.startsWith('/api/render/');
 }
 
 /** A request id: Vercel's, else 16 hex characters minted here (8.8: error bodies carry it, never a stack). */
@@ -234,7 +249,8 @@ export const DOCUMENT_ROUTES: ReadonlyArray<string> = [
 ];
 
 export function isDocumentPath(pathname: string): boolean {
-  return DOCUMENT_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+  const path = routePath(pathname);
+  return DOCUMENT_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
 }
 
 /** The mode of the policy on one path: the variable when it is set, else enforce on a document route. */
@@ -452,7 +468,7 @@ export function csrfFilter(ctx: {
   request: Request;
 }): boolean {
   if (ctx.handlerType === 'serverFn') return true;
-  const path = ctx.pathname;
+  const path = routePath(ctx.pathname);
   if (isExchangePath(path)) return UNSAFE_METHODS.has(ctx.request.method.toUpperCase());
   const method = ctx.request.method.toUpperCase();
   // a bearer or API key agent on the room routes (curl, the CLI's follow, an MCP client) sends no
@@ -535,7 +551,8 @@ export const JSON_ROUTE_PATTERNS: ReadonlyArray<RegExp> = [
  */
 export function requiresJsonBody(request: Request, pathname: string): boolean {
   if (!UNSAFE_METHODS.has(request.method.toUpperCase())) return false;
-  if (!JSON_ROUTE_PATTERNS.some((pattern) => pattern.test(pathname))) return false;
+  const path = routePath(pathname);
+  if (!JSON_ROUTE_PATTERNS.some((pattern) => pattern.test(path))) return false;
   const length = request.headers.get('content-length');
   const type = request.headers.get('content-type');
   // an empty body carries nothing whatever its declared type (a client library stamps text/plain

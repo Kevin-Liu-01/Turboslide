@@ -598,6 +598,18 @@ function securityChecks(base, deck, args) {
     detail: (r) =>
       `${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
   });
+  /* the router matches a route without regard to case, so /Deck/<deck> renders the viewer too:
+     the same enforced policy, or a link with changed letters skips it (HR-W#2, verifier F1) */
+  rows.push({
+    name: `csp enforced /Deck/${deck}`,
+    path: `/Deck/${deck}`,
+    expect: 'the policy of /deck/<deck> on the path with changed case: enforced with a nonce',
+    pass: (r) =>
+      /'nonce-[A-Za-z0-9+/=]+'/.test(r.headers['content-security-policy'] ?? '') &&
+      !('content-security-policy-report-only' in r.headers),
+    detail: (r) =>
+      `${r.status}; ${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
+  });
   rows.push({
     name: 'json asset attachment',
     path: `/decks/${deck}/assets/${args.jsonAsset ?? 'liquid-metal-diamond.recipe.json'}`,

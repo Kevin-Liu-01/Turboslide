@@ -28,7 +28,7 @@ vi.mock('./access', async (importOriginal) => {
 
 const { recordNewDeck } = await import('./access');
 const { contextForIdentity } = await import('./authorize');
-const { viewerAssetBase } = await import('./decks');
+const { viewerAssetBase } = await import('./asset-base');
 
 const NOW = '2026-10-08T22:00:00.000Z';
 const HOST = 'teststore.public.blob.vercel-storage.com';

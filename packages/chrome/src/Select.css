@@ -160,3 +160,25 @@
   color: var(--pt-titanium);
   font-size: 12px;
 }
+
+/* forced colours (Windows High Contrast): the system draws every boundary and outline in one
+   colour, so the 1 px focus outline over the 1 px border read as no focus at all (the keyboard
+   verifier's pass 1 on the round, finding 2). The ring stands 1 px outside the border at 2 px in
+   the system's Highlight; a disabled trigger reads GrayText. The lit row is Menu.css's. */
+@media (forced-colors: active) {
+  .ts-dropdown-trigger:focus-visible,
+  .ts-dropdown-trigger[aria-expanded='true'] {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+
+  .ts-dropdown-trigger:disabled,
+  .ts-dropdown-trigger[aria-disabled='true'],
+  .ts-dropdown-trigger:disabled .ts-dropdown-text,
+  .ts-dropdown-trigger[aria-disabled='true'] .ts-dropdown-text,
+  .ts-dropdown-trigger:disabled .ts-dropdown-chevron,
+  .ts-dropdown-trigger[aria-disabled='true'] .ts-dropdown-chevron {
+    color: GrayText;
+    border-color: GrayText;
+  }
+}

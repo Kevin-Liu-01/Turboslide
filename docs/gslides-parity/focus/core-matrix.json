@@ -12068,12 +12068,12 @@
     {
       "id": "chrome.select.look",
       "feature": "chrome",
-      "interaction": "At 1440 and 390 in both appearances, the Share dialog's General access field: the trigger is 32 px, radius 6 px, a 1 px `--pt-field` border, `--pt-paper` ground, `--pt-ink` text in Inter with tabular figures and the sprite's chevron; the open list computes radius 6 px, a 1 px `--pt-edge` border and `--pt-ring` with no blur or offset; rows are square and 28 px with tabular figures; the lit row draws `--pt-plate`; row text on paper and the lit row's ink on `--pt-plate` hold 4.5:1. In the light appearance at 1440 the compact trigger of the table's Format options is 22 px, and in the Publish size list the figures \"480\" of Small and \"960\" of Medium measure the same width",
+      "interaction": "At 1440 and 390 in both appearances, the Share dialog's General access field: the trigger is 32 px, radius 6 px, a 1 px `--pt-field` border, `--pt-paper` ground, `--pt-ink` text in Inter with tabular figures and the sprite's chevron; the open list computes radius 6 px, a 1 px `--pt-edge` border and `--pt-ring` with no blur or offset; rows are square and 28 px with tabular figures; the lit row draws `--pt-plate`; row text on paper and the lit row's ink on `--pt-plate` hold 4.5:1. In the light appearance at 1440 the compact trigger of the table's Format options is 22 px, and in the Publish size list the figures \"480\" of Small and \"960\" of Medium measure the same width. In forced colours (emulated) the General access list's active option computes the system's Highlight ground and HighlightText ink (4.5:1), the chosen row draws its check at 3:1 on the list's ground, and the focused trigger, open and closed, draws a 2 px solid outline 1 px outside its border",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "DESIGN.md 3.1, 3.2, 4.5, 5.3",
-      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the nine deck themes of 7.2 leave the chrome's tokens as they are (the chrome draws its own appearance), so the row reads the two appearances"
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the nine deck themes of 7.2 leave the chrome's tokens as they are (the chrome draws its own appearance), so the row reads the two appearances; the forced colours step is DD-fix's (the keyboard verifier's pass 1, finding 2: the active option was invisible in every list and a focused trigger looked unfocused)"
     },
     {
       "id": "chrome.select.agent-set",

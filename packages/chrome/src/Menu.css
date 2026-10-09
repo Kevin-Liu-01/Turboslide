@@ -168,6 +168,36 @@
   fill: currentColor;
 }
 
+/* forced colours (Windows High Contrast): the system drops every background, so the lit row (a
+   hovered or focused menu row, the dropdown's active option) takes the system's Highlight pair and
+   keeps it, every part of the row in HighlightText; a disabled row reads GrayText. Without it the
+   active option was invisible in all 40 lists (the keyboard verifier's pass 1 on the dropdown
+   round, finding 2) */
+@media (forced-colors: active) {
+  .ts-menu-item:hover,
+  .ts-menu-item:focus-visible,
+  .ts-menu-item.is-open,
+  .ts-dropdown-option.is-active {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .ts-menu-item:hover *,
+  .ts-menu-item:focus-visible *,
+  .ts-menu-item.is-open *,
+  .ts-dropdown-option.is-active * {
+    color: HighlightText;
+  }
+
+  .ts-menu-item.is-disabled,
+  .ts-menu-item.is-disabled *,
+  .ts-dropdown-option[aria-disabled='true'],
+  .ts-dropdown-option[aria-disabled='true'] * {
+    color: GrayText;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ts-menu,
   .ts-dropdown-list {

@@ -1058,6 +1058,100 @@ export function chromeDropdowns(): string[] {
     expect(widths.small).toBeCloseTo(widths.medium ?? 0, 1);
     await size.press('Escape');
     await closeDialogs(page);
+    /* forced colours (Windows High Contrast, emulated): the active option takes the system's
+       Highlight pair, the chosen row keeps its check, and the focused trigger's ring stands
+       outside its border (the keyboard verifier's pass 1 on the round, finding 2: the active
+       option was invisible and a focused trigger looked unfocused) */
+    await page.emulateMedia({ forcedColors: 'active' });
+    try {
+      await openShare(page);
+      const mode = triggerOf(page, 'dialog.share.mode');
+      await mode.focus();
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('ArrowDown');
+      const forced = await mode.evaluate((el) => {
+        const list = document.getElementById(el.getAttribute('aria-controls') ?? '')!;
+        const system = (name: string) => {
+          const probe = document.createElement('span');
+          probe.style.cssText = `forced-color-adjust: none; color: ${name}`;
+          document.body.append(probe);
+          const value = getComputedStyle(probe).color;
+          probe.remove();
+          return value;
+        };
+        const active = document.getElementById(el.getAttribute('aria-activedescendant') ?? '')!;
+        const chosen = list.querySelector<HTMLElement>('[role="option"][aria-selected="true"]')!;
+        const check = chosen.querySelector<SVGElement>('.ts-menu-check svg');
+        const a = getComputedStyle(active);
+        const t = getComputedStyle(el);
+        return {
+          matches: matchMedia('(forced-colors: active)').matches,
+          highlight: system('Highlight'),
+          highlightText: system('HighlightText'),
+          canvas: getComputedStyle(list).backgroundColor,
+          active: {
+            value: active.dataset.value ?? null,
+            ground: a.backgroundColor,
+            ink: a.color,
+            label: getComputedStyle(active.querySelector('.ts-menu-label')!).color,
+          },
+          chosen: {
+            value: chosen.dataset.value ?? null,
+            check:
+              check === null
+                ? null
+                : {
+                    fill: getComputedStyle(check).fill,
+                    width: check.getBoundingClientRect().width,
+                  },
+          },
+          ring: {
+            style: t.outlineStyle,
+            width: t.outlineWidth,
+            offset: t.outlineOffset,
+            color: t.outlineColor,
+            border: t.borderTopWidth,
+          },
+        };
+      });
+      await page.keyboard.press('Escape');
+      const closedRing = await mode.evaluate((el) => {
+        const t = getComputedStyle(el);
+        return {
+          focused: document.activeElement === el,
+          width: t.outlineWidth,
+          offset: t.outlineOffset,
+        };
+      });
+      readings.push(
+        `forced colours ${JSON.stringify(forced)} closed ${JSON.stringify(closedRing)}`,
+      );
+      expect(forced.matches, 'forced colours emulated').toBe(true);
+      expect(forced.active.value).toBe('link');
+      expect(forced.active.ground, 'the active option: Highlight').toBe(forced.highlight);
+      expect(forced.active.ink, 'its ink: HighlightText').toBe(forced.highlightText);
+      expect(forced.active.label).toBe(forced.highlightText);
+      expect(
+        contrastRatio(forced.active.ink, forced.active.ground),
+        'HighlightText on Highlight',
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(forced.chosen.value).toBe('restricted');
+      expect(forced.chosen.check?.width ?? 0, 'the chosen row draws its check').toBeGreaterThan(0);
+      expect(
+        contrastRatio(forced.chosen.check?.fill ?? forced.canvas, forced.canvas),
+        'the check on the list ground',
+      ).toBeGreaterThanOrEqual(3);
+      expect(forced.ring, 'the ring 1 px outside the border, 2 px wide').toMatchObject({
+        style: 'solid',
+        width: '2px',
+        offset: '1px',
+        color: forced.highlight,
+      });
+      expect(closedRing).toEqual({ focused: true, width: '2px', offset: '1px' });
+    } finally {
+      await page.emulateMedia({ forcedColors: 'none' });
+      await closeDialogs(page);
+    }
     test.info().annotations.push({ type: 'look', description: readings.join('; ') });
   });
 

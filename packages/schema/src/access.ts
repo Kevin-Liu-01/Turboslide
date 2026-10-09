@@ -313,6 +313,40 @@ export function legacyAssetKey(deckId: string): string {
   return `${base}${'0'.repeat(22)}`.slice(0, 22);
 }
 
+const ASSET_KEY_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+/**
+ * A new deck's asset key (hardening K1#3, DATA-2): 22 base64url characters drawn at random, about
+ * 132 bits. The first character is a letter or a digit, so the key is also a plain path segment
+ * (packages/store store.ts `ASSET_SEGMENT`). Web Crypto, so the module stays browser safe.
+ */
+export function newAssetKey(): string {
+  const bytes = new Uint8Array(32);
+  for (;;) {
+    globalThis.crypto.getRandomValues(bytes);
+    // the first character by rejection, so each of the 62 letters and digits is equally likely
+    const first = bytes[0] ?? 255;
+    if (first >= 248) continue;
+    let key = ASSET_KEY_ALPHABET[first % 62] ?? 'A';
+    for (let i = 1; i < 22; i += 1) key += ASSET_KEY_ALPHABET[(bytes[i] ?? 0) & 63] ?? 'A';
+    return key;
+  }
+}
+
+/** True when the record carries a key of its own, not the one derived from the deck id. */
+export function hasOwnAssetKey(record: Pick<AccessRecord, 'deckId' | 'assetKey'>): boolean {
+  return record.assetKey !== legacyAssetKey(record.deckId);
+}
+
+/**
+ * Where a keyed deck's twins live on the public store (hardening K1#3): `d/<id>/<assetKey>/`,
+ * followed by the twin's deck relative path (`assets/<file>`), so a page whose asset base is this
+ * prefix loads every twin by key, and no twin URL can be derived from the deck id and a file name.
+ */
+export function keyedTwinPrefix(deckId: string, assetKey: string): string {
+  return `d/${deckId}/${assetKey}/`;
+}
+
 /** The record of a new deck (SPEC-3 6.1): restricted to its creator. */
 export function newDeckRecord(
   deckId: string,

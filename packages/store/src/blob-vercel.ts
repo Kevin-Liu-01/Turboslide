@@ -25,7 +25,8 @@ import {
 
 /** How often a body read asks the CDN again while its copy lags the version the caller named. */
 const CDN_LAG_STEP_MS = 250;
-import { splitBlobClient } from './migrate.ts';
+import { blobAccessStore } from './access-store.ts';
+import { keyedTwinsClient, splitBlobClient, twinKeyResolver } from './migrate.ts';
 import type { Env } from './select.ts';
 import { BLOB_TOKEN_VARIABLE } from './select.ts';
 
@@ -297,6 +298,20 @@ export function vercelBlobClient(
  */
 export function layoutBlobClient(env: Env = process.env): BlobClient {
   const legacy = vercelBlobClient(env);
-  if (!hasDocumentsToken(env)) return legacy;
-  return splitBlobClient({ legacy, documents: vercelDocumentsClient(env) });
+  const base = hasDocumentsToken(env)
+    ? splitBlobClient({ legacy, documents: vercelDocumentsClient(env) })
+    : legacy;
+  return keyedClient(base);
+}
+
+/**
+ * The client with a keyed deck's twins under `d/<id>/<assetKey>/` (hardening K1#3; migrate.ts
+ * `keyedTwinsClient`): the key is read from the deck's access record through the same client.
+ */
+export function keyedClient(base: BlobClient): BlobClient {
+  const records = blobAccessStore(base);
+  return keyedTwinsClient(
+    base,
+    twinKeyResolver(async (deckId) => (await records.read(deckId))?.record ?? null),
+  );
 }

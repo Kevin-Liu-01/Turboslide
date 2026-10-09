@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import type { WorkerPaths } from '@turboslide/render-worker/paths';
 import type { Appearance } from '@turboslide/schema/deck';
 import type { BlobClient } from '@turboslide/store/blob-store';
-import type { vercelBlobClient } from '@turboslide/store/blob-vercel';
+import type { layoutBlobClient } from '@turboslide/store/blob-vercel';
 import type { BlobClientFactory, HostedDecks, HostingFacts } from '@turboslide/store/hosted';
 import { hostingProviders, openHostedDecks } from '@turboslide/store/hosted';
 import type { SeedSource } from '@turboslide/store/seed';
@@ -95,14 +95,16 @@ function log(line: string): void {
 
 /** The @vercel/blob client for a dev server run with TURBOSLIDE_STORE=blob and a token. */
 /** The shape of @turboslide/store/blob-vercel; a type import, so nothing of it is bundled here. */
-type BlobVercelModule = { vercelBlobClient: typeof vercelBlobClient };
+type BlobVercelModule = { layoutBlobClient: typeof layoutBlobClient };
 
 const devBlobClient: BlobClientFactory = async () => {
   // a specifier the bundlers cannot follow: in the deployment build the Nitro plugin registers
-  // the client, and the browser's dependency scanner must never reach @vercel/blob from here
+  // the client, and the browser's dependency scanner must never reach @vercel/blob from here.
+  // The deployment's client (the private store when its token is set, the keyed twins of
+  // hardening K1#3), so a dev server on the blob tier reads and writes as a deployment does
   const specifier = '@turboslide/store/blob-vercel';
   const mod = (await import(/* @vite-ignore */ specifier)) as BlobVercelModule;
-  return mod.vercelBlobClient(process.env);
+  return mod.layoutBlobClient(process.env);
 };
 
 /**

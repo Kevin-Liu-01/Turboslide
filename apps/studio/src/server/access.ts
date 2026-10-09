@@ -5,6 +5,7 @@ import {
   accessRecordSchema,
   capabilitiesForRole,
   legacyAssetKey,
+  newAssetKey,
   newDeckRecord,
   synthesizeLegacyRecord,
 } from '@turboslide/schema/access';
@@ -695,8 +696,8 @@ export type RecordedDeck = StoredAccess & {
 
 /**
  * Writes the access record of a deck the studio is about to create (the draft's first save,
- * `deck.create`, `deck.copy`): restricted, the creator its owner, the asset key of the pre
- * migration layout, at revision 0 so the first share write bases on 0 (VERIFICATION-3 finding 4).
+ * `deck.create`, `deck.copy`): restricted, the creator its owner, a random asset key of its own
+ * (hardening K1#3), at revision 0 so the first share write bases on 0 (VERIFICATION-3 finding 4).
  * Since H3 (DATA-V3) a caller with no identity is refused (401) instead of leaving the deck
  * unrecorded, and a record another principal holds under the id is `DeckIdTakenError`; the
  * caller's own record (a retried first save) is kept and answered.
@@ -704,7 +705,16 @@ export type RecordedDeck = StoredAccess & {
 export async function recordNewDeck(
   deckId: string,
   ctx: AuthContext,
-  options: { now?: string; store?: Pick<AccessStore, 'write'> } = {},
+  options: {
+    now?: string;
+    store?: Pick<AccessStore, 'write'>;
+    /**
+     * the deck's asset key: a fresh random one by default (hardening K1#3), so its twins are
+     * written under `d/<id>/<key>/`; a bundle upload whose twins the unpack already wrote under
+     * `decks/<id>/assets/` passes the derived key, and `migrate-storage rekey` moves them later
+     */
+    assetKey?: string;
+  } = {},
 ): Promise<RecordedDeck> {
   const owner = creatorOf(ctx);
   if (owner === null)
@@ -721,7 +731,7 @@ export async function recordNewDeck(
   const { record, general } = newHostedDeckRecordWithToken(
     deckId,
     owner,
-    legacyAssetKey(deckId),
+    options.assetKey ?? newAssetKey(),
     now,
     { anonymousPrincipals: ctx.principal?.kind !== 'account' },
   );

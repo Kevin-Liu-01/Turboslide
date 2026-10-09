@@ -11,12 +11,18 @@ import { canonicalJson } from '@turboslide/schema/json';
 
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
+import { legacyAssetKey, newAssetKey } from '@turboslide/schema/access';
+
 import {
   DELETE_BATCH,
+  emptyMeta,
   isPublicPath,
+  keyedTwinsClient,
   readMeta,
   runMigrationStep,
   splitBlobClient,
+  twinKeyResolver,
+  writeMeta,
 } from './migrate.ts';
 
 const encoder = new TextEncoder();
@@ -228,5 +234,116 @@ describe('the storage migration', () => {
     await expect(runMigrationStep(clients, 'copy', { now: () => NOW })).rejects.toThrow(
       /rolled back/,
     );
+  });
+});
+
+// Hardening K1#3 (docs/hardening/HARDENING.md 4.1; DATA-2): a keyed deck's twins live under
+// `d/<id>/<assetKey>/` on the public store while every caller keeps naming them
+// `decks/<id>/assets/<file>`; a deck without a key passes through; the record's key is read once.
+describe('the keyed twins (hardening K1#3)', () => {
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9, 9]);
+
+  function keyed(key: string | null, store = memoryBlobClient('https://store.public.local')) {
+    const keyOf = twinKeyResolver(async (deckId) => {
+      return deckId === 'fresh' && key !== null
+        ? { deckId, assetKey: key }
+        : { deckId, assetKey: legacyAssetKey(deckId) };
+    });
+    return { store, client: keyedTwinsClient(store, keyOf) };
+  }
+
+  it("writes a new deck's twin under its key, and the URL cannot be derived from the id and the name", async () => {
+    const key = newAssetKey();
+    const { store, client } = keyed(key);
+    const put = await client.put('decks/fresh/assets/logo.ab12cd34.png', png, {
+      overwrite: false,
+      contentType: 'image/png',
+    });
+    // the caller's name comes back; the object and its URL are the keyed ones
+    expect(put.pathname).toBe('decks/fresh/assets/logo.ab12cd34.png');
+    expect(put.url).toBe(`https://store.public.local/d/fresh/${key}/assets/logo.ab12cd34.png`);
+    expect(put.url).toContain(key);
+    expect([...store.blobs.keys()]).toEqual([`d/fresh/${key}/assets/logo.ab12cd34.png`]);
+    // nothing answers at the address the id and the file name make
+    expect(await store.head('decks/fresh/assets/logo.ab12cd34.png')).toBeNull();
+    // the caller reads, lists and removes it by its own name
+    expect((await client.head('decks/fresh/assets/logo.ab12cd34.png'))?.url).toBe(put.url);
+    expect((await client.get('decks/fresh/assets/logo.ab12cd34.png'))?.bytes).toEqual(png);
+    expect((await client.list('decks/fresh/assets/')).map((e) => e.pathname)).toEqual([
+      'decks/fresh/assets/logo.ab12cd34.png',
+    ]);
+    expect((await client.list('decks/fresh/')).map((e) => e.pathname)).toEqual([
+      'decks/fresh/assets/logo.ab12cd34.png',
+    ]);
+    await client.del(['decks/fresh/assets/logo.ab12cd34.png']);
+    expect(store.blobs.size).toBe(0);
+  });
+
+  it('passes a deck without a key, documents and other prefixes through unchanged', async () => {
+    const { store, client } = keyed(null);
+    await client.put('decks/old/assets/a.png', png, { overwrite: false });
+    await client.put('decks/fresh/deck.json', png, { overwrite: true });
+    await client.put('exports/fresh/job/x.pdf', png, { overwrite: true });
+    expect([...store.blobs.keys()].sort()).toEqual([
+      'decks/fresh/deck.json',
+      'decks/old/assets/a.png',
+      'exports/fresh/job/x.pdf',
+    ]);
+    expect((await client.head('decks/old/assets/a.png'))?.url).toBe(
+      'https://store.public.local/decks/old/assets/a.png',
+    );
+  });
+
+  it('reads a twin left at the old place until it moves, and the key wins a listing', async () => {
+    const key = newAssetKey();
+    const { store, client } = keyed(key);
+    // written before the key, under the old name
+    await store.put('decks/fresh/assets/left.png', png, { overwrite: false });
+    await store.put('decks/fresh/assets/both.png', png, { overwrite: false });
+    await store.put(`d/fresh/${key}/assets/both.png`, png, { overwrite: false });
+    expect((await client.get('decks/fresh/assets/left.png'))?.entry.url).toBe(
+      'https://store.public.local/decks/fresh/assets/left.png',
+    );
+    const listed = await client.list('decks/fresh/assets/');
+    expect(listed.map((e) => [e.pathname, e.url])).toEqual([
+      ['decks/fresh/assets/both.png', `https://store.public.local/d/fresh/${key}/assets/both.png`],
+      ['decks/fresh/assets/left.png', 'https://store.public.local/decks/fresh/assets/left.png'],
+    ]);
+    // a removal by name takes both places
+    await client.del(['decks/fresh/assets/both.png', 'decks/fresh/assets/left.png']);
+    expect(store.blobs.size).toBe(0);
+  });
+
+  it('reads a key once per deck, and a failed read is asked again', async () => {
+    let fail = true;
+    const reads: string[] = [];
+    const keyOf = twinKeyResolver(async (deckId) => {
+      reads.push(deckId);
+      if (fail) throw new Error('store down');
+      return { deckId, assetKey: 'AbCdEfGhIjKlMnOpQrStUv' };
+    });
+    await expect(keyOf('fresh')).rejects.toThrow('store down');
+    fail = false;
+    expect(await Promise.all([keyOf('fresh'), keyOf('fresh')])).toEqual([
+      'AbCdEfGhIjKlMnOpQrStUv',
+      'AbCdEfGhIjKlMnOpQrStUv',
+    ]);
+    expect(await keyOf('fresh')).toBe('AbCdEfGhIjKlMnOpQrStUv');
+    expect(reads).toEqual(['fresh', 'fresh']);
+  });
+
+  it('keeps the keyed twins public on the split client', async () => {
+    const key = newAssetKey();
+    const legacy = memoryBlobClient('https://public.local');
+    const documents = memoryBlobClient('https://private.local');
+    await writeMeta(documents, { ...emptyMeta(NOW), layout: 'v2' });
+    const split = splitBlobClient({ legacy, documents }, { ttlMs: 0 });
+    const twins = keyedTwinsClient(
+      split,
+      twinKeyResolver(async () => ({ deckId: 'fresh', assetKey: key })),
+    );
+    await twins.put('decks/fresh/assets/x.png', png, { overwrite: false });
+    expect([...legacy.blobs.keys()]).toEqual([`d/fresh/${key}/assets/x.png`]);
+    expect(documents.blobs.has(`d/fresh/${key}/assets/x.png`)).toBe(false);
   });
 });

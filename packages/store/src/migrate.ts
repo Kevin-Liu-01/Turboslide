@@ -13,6 +13,8 @@
 // byte, the public documents deleted in batches of 50 after the cutover, and a rollback flag
 // before it. The assetKey copy of the twins to `d/<id>/<assetKey>/` is not part of this module
 // (b2.md records why); the twins stay where the assets route serves them from.
+import { hasOwnAssetKey, keyedTwinPrefix } from '@turboslide/schema/access';
+
 import type { BlobClient, BlobEntry, BlobPutOptions } from './blob-store.ts';
 import { deckPrefix, isBlobExistsError } from './blob-store.ts';
 
@@ -432,4 +434,148 @@ export async function runMigrationStep(
       return result(0, true);
     }
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// The keyed twins (hardening K1#3, DATA-2; docs/hardening/HARDENING.md 4.1)
+
+/** A deck's own key, or null for a deck whose twins keep `decks/<id>/assets/`. */
+export type TwinKeyOf = (deckId: string) => Promise<string | null>;
+
+/** How long a process trusts a deck's key it read; a deck without a key is asked again sooner. */
+export const TWIN_KEY_TTL_MS = 10 * 60_000;
+export const TWIN_NO_KEY_TTL_MS = 60_000;
+
+/**
+ * The key reader the keyed client asks: a deck's record, read once and kept for a while (a key
+ * is written once, by `deck.create` or by `rekey`, and never changes after). A read that fails is
+ * not kept, and the twin call that asked fails with it, so a twin is never written to the wrong
+ * place on a store that did not answer.
+ */
+export function twinKeyResolver(
+  read: (deckId: string) => Promise<{ deckId: string; assetKey: string } | null>,
+  options: { now?: () => number } = {},
+): TwinKeyOf & { forget: (deckId: string) => void } {
+  const clock = options.now ?? (() => Date.now());
+  const known = new Map<string, { key: string | null; at: number }>();
+  const pending = new Map<string, Promise<string | null>>();
+  const resolve = async (deckId: string): Promise<string | null> => {
+    const hit = known.get(deckId);
+    const at = clock();
+    if (
+      hit !== undefined &&
+      at - hit.at < (hit.key === null ? TWIN_NO_KEY_TTL_MS : TWIN_KEY_TTL_MS)
+    )
+      return hit.key;
+    const inflight = pending.get(deckId);
+    if (inflight !== undefined) return inflight;
+    const next = read(deckId)
+      .then((record) => {
+        const key = record !== null && hasOwnAssetKey(record) ? record.assetKey : null;
+        known.set(deckId, { key, at: clock() });
+        return key;
+      })
+      .finally(() => pending.delete(deckId));
+    pending.set(deckId, next);
+    return next;
+  };
+  return Object.assign(resolve, { forget: (deckId: string) => void known.delete(deckId) });
+}
+
+const DECK_TWIN = /^decks\/([^/]+)\/(assets\/.+)$/;
+const DECK_FOLDER = /^decks\/([^/]+)\/(.*)$/;
+
+/**
+ * One client in which a keyed deck's twins live at `d/<id>/<assetKey>/assets/<file>` while every
+ * caller keeps naming them `decks/<id>/assets/<file>` (hardening K1#3): the store's twin writes
+ * (asset intake, captures, variants, frames, slide imports, copies, templates), its pull, its
+ * removal and the assets route reach the keyed place with no change of their own, and the
+ * manifest's twin paths stay `assets/<file>`. A twin a deck holds at its old place (written before
+ * `rekey` switched it, or in the minute an instance still read the deck as unkeyed) is read there
+ * until `rekey`'s `delete` moves it. Answers carry the caller's pathname and the object's own URL,
+ * the keyed one. Every other path passes through unchanged.
+ */
+export function keyedTwinsClient(inner: BlobClient, keyOf: TwinKeyOf): BlobClient {
+  const keyedPath = async (pathname: string): Promise<string | null> => {
+    const match = DECK_TWIN.exec(pathname);
+    if (match === null) return null;
+    const deckId = match[1] ?? '';
+    const key = await keyOf(deckId);
+    return key === null ? null : `${keyedTwinPrefix(deckId, key)}${match[2] ?? ''}`;
+  };
+  /** The keyed prefix a listing of `prefix` also covers, with the deck's own prefix; null when none. */
+  const keyedListing = async (
+    prefix: string,
+  ): Promise<{ keyed: string; deckId: string; base: string } | null> => {
+    const match = DECK_FOLDER.exec(prefix);
+    if (match === null) return null;
+    const deckId = match[1] ?? '';
+    const rest = match[2] ?? '';
+    // a listing reaches the twins when it names the deck's folder, part of `assets/`, or a
+    // folder under it
+    if (!'assets/'.startsWith(rest) && !rest.startsWith('assets/')) return null;
+    const key = await keyOf(deckId);
+    if (key === null) return null;
+    const base = keyedTwinPrefix(deckId, key);
+    return { keyed: `${base}${rest}`, deckId, base };
+  };
+  const named = (entry: BlobEntry, pathname: string): BlobEntry => ({ ...entry, pathname });
+  return {
+    async head(pathname, options) {
+      const keyed = await keyedPath(pathname);
+      if (keyed === null) return inner.head(pathname, options);
+      const found = await inner.head(keyed, options);
+      return found !== null ? named(found, pathname) : inner.head(pathname, options);
+    },
+    async get(pathname, options) {
+      const keyed = await keyedPath(pathname);
+      if (keyed === null) return inner.get(pathname, options);
+      const found = await inner.get(keyed, options);
+      if (found !== null) return { ...found, entry: named(found.entry, pathname) };
+      return inner.get(pathname, options);
+    },
+    async list(prefix, options) {
+      const listing = await keyedListing(prefix);
+      if (listing === null) return inner.list(prefix, options);
+      const [plain, keyed] = await Promise.all([
+        inner.list(prefix, options),
+        inner.list(listing.keyed, options),
+      ]);
+      const out = new Map<string, BlobEntry>();
+      for (const entry of plain) out.set(entry.pathname, entry);
+      // the keyed copy is the twin; one at the old place under the same name is its leftover
+      for (const entry of keyed) {
+        const pathname = `decks/${listing.deckId}/${entry.pathname.slice(listing.base.length)}`;
+        out.set(pathname, named(entry, pathname));
+      }
+      return [...out.values()].sort((a, b) => a.pathname.localeCompare(b.pathname));
+    },
+    async folders(prefix, options) {
+      const listing = await keyedListing(prefix);
+      if (listing === null) return inner.folders(prefix, options);
+      const [plain, keyed] = await Promise.all([
+        inner.folders(prefix, options),
+        inner.folders(listing.keyed, options),
+      ]);
+      const out = new Set(plain);
+      for (const folder of keyed)
+        out.add(`decks/${listing.deckId}/${folder.slice(listing.base.length)}`);
+      return [...out].sort();
+    },
+    async put(pathname, bytes, options) {
+      const keyed = await keyedPath(pathname);
+      if (keyed === null) return inner.put(pathname, bytes, options);
+      return named(await inner.put(keyed, bytes, options), pathname);
+    },
+    async del(pathnames, options) {
+      const out: string[] = [];
+      for (const pathname of pathnames) {
+        const keyed = await keyedPath(pathname);
+        // both places: a twin removed by name leaves no copy at the other
+        if (keyed !== null) out.push(keyed);
+        out.push(pathname);
+      }
+      await inner.del(out, options);
+    },
+  };
 }

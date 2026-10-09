@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { refuse } from '@turboslide/agent/http/errors';
+import { legacyAssetKey } from '@turboslide/schema/access';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES } from '@turboslide/store/bundle';
 
@@ -206,7 +207,10 @@ export const Route = createFileRoute('/api/decks/bundle')({
           let result: Awaited<ReturnType<typeof importDeckBundle>>;
           if (replacing || admin) {
             result = await importDeckBundle(read.zip, options);
-            if (!result.replaced) await recordNewDeck(result.deckId, ctx);
+            // the unpack wrote the twins before the record, under `decks/<id>/assets/`, so the
+            // record keeps the derived key until `migrate-storage rekey` (hardening K1#3)
+            if (!result.replaced)
+              await recordNewDeck(result.deckId, ctx, { assetKey: legacyAssetKey(result.deckId) });
           } else {
             if (creatorOf(ctx) === null)
               return Response.json(
@@ -218,7 +222,7 @@ export const Route = createFileRoute('/api/decks/bundle')({
             while (await decks.has(deckId)) deckId = newDeckId();
             result = await importDeckBundle(read.zip, { as: deckId, replace: false });
             try {
-              await recordNewDeck(result.deckId, ctx);
+              await recordNewDeck(result.deckId, ctx, { assetKey: legacyAssetKey(result.deckId) });
             } catch (error) {
               await decks.remove(result.deckId).catch(() => undefined);
               throw error;

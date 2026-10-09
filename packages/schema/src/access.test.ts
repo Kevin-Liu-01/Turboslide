@@ -14,9 +14,12 @@ import {
   grantIsLive,
   grantSchema,
   grantWhoSchema,
+  hasOwnAssetKey,
+  keyedTwinPrefix,
   legacyAssetKey,
   linkIsLive,
   maxRole,
+  newAssetKey,
   newDeckRecord,
   scopedCapabilities,
   synthesizeLegacyRecord,
@@ -287,5 +290,40 @@ describe('the kill switches (SPEC-3 8.12)', () => {
     expect(FLAG_DEFAULTS.realtime).toBe(false);
     for (const name of FLAG_NAMES)
       if (name !== 'realtime') expect(FLAG_DEFAULTS[name], name).toBe(true);
+  });
+});
+
+// Hardening K1#3 (docs/hardening/HARDENING.md 4.1; DATA-2): every new record takes a random key
+// that no one derives from the deck id, and a keyed deck's twins live under it.
+describe('the asset key of a new deck (hardening K1#3)', () => {
+  it('is 22 base64url characters, a plain path segment, and the record schema takes it', () => {
+    for (let i = 0; i < 200; i += 1) {
+      const key = newAssetKey();
+      expect(key).toMatch(/^[A-Za-z0-9][A-Za-z0-9_-]{21}$/);
+      expect(accessRecordSchema.safeParse({ ...RECORD, assetKey: key }).success).toBe(true);
+    }
+  });
+
+  it('is drawn at random: 2,000 keys are distinct and use the whole alphabet', () => {
+    const keys = new Set<string>();
+    const seen = new Set<string>();
+    for (let i = 0; i < 2000; i += 1) {
+      const key = newAssetKey();
+      keys.add(key);
+      for (const ch of key.slice(1)) seen.add(ch);
+    }
+    expect(keys.size).toBe(2000);
+    // 64 symbols after the first position; 42,000 draws miss one with odds under 1 in 10^280
+    expect(seen.size).toBe(64);
+  });
+
+  it('tells a key of its own from the derived one, and names the keyed prefix', () => {
+    const key = newAssetKey();
+    expect(hasOwnAssetKey({ deckId: 'q4-review', assetKey: key })).toBe(true);
+    expect(hasOwnAssetKey({ deckId: 'q4-review', assetKey: legacyAssetKey('q4-review') })).toBe(
+      false,
+    );
+    expect(keyedTwinPrefix('q4-review', key)).toBe(`d/q4-review/${key}/`);
+    expect(keyedTwinPrefix('q4-review', key)).not.toContain(legacyAssetKey('q4-review'));
   });
 });

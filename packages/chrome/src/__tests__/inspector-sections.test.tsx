@@ -176,8 +176,8 @@ describe('Inspector sections', () => {
     );
     expect(screen.getByLabelText('t: Size')).toBeTruthy();
     expect(screen.getByLabelText<HTMLInputElement>('t: Weight').value).toBe('600');
-    /* the Seg is the field's group, named with its label (docs/DROPDOWNS.md 4.1) */
-    expect(screen.getByLabelText('t: Align').getAttribute('role')).toBe('group');
+    /* an optional short field is the dropdown with its None row (docs/DROPDOWNS.md 4.1) */
+    expect(screen.getByLabelText('t: Align').getAttribute('role')).toBe('combobox');
     expect(screen.getByLabelText('t: Tracking (em)')).toBeTruthy();
     /* Google's word since SPEC-2 0.20 (the typography label of B1's schema) */
     expect(screen.getByLabelText('t: Line spacing')).toBeTruthy();
@@ -189,6 +189,66 @@ describe('Inspector sections', () => {
       blockId: 't',
       path: '/typography',
       value: { size: 22, weight: 700 },
+      baseRevision: 7,
+    });
+  });
+
+  it('clears the typography Align and Columns through their None row, as set() does', () => {
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    const slide: Slide = {
+      ...freeform,
+      slots: {
+        main: [
+          {
+            id: 't',
+            type: 'text',
+            text: 'Hello',
+            typography: { size: 22, align: 'center', columns: 2 },
+            pos: { x: 137, y: 129, w: 480, h: 64 },
+          },
+        ],
+      },
+    };
+    render(
+      <Inspector deck={WORKED_DECK} slide={slide} blockId="t" revision={7} dispatch={dispatch} />,
+    );
+    const set = (labelText: string, value: string) => {
+      /* the window API's set() on a dropdown (controls.ts setCombobox): a click on the row whose
+         data-value is the value, in the listbox the trigger's aria-controls names */
+      const trigger = screen.getByLabelText(labelText);
+      const list = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+      const row = list?.querySelector<HTMLElement>(`[role="option"][data-value="${value}"]`);
+      expect(row, `${labelText} ${value}`).toBeTruthy();
+      row?.click();
+    };
+    expect(screen.getByLabelText('t: Align').getAttribute('value')).toBe('center');
+    expect(screen.getByLabelText('t: Columns').getAttribute('value')).toBe('2');
+    set('t: Align', '');
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 'free-demo',
+      blockId: 't',
+      path: '/typography',
+      value: { size: 22, columns: 2 },
+      baseRevision: 7,
+    });
+    /* a person's choice of None on Columns writes the same way */
+    chooseOption('block.t.typography.columns', { label: 'None' });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 'free-demo',
+      blockId: 't',
+      path: '/typography',
+      value: { size: 22, align: 'center' },
+      baseRevision: 7,
+    });
+    /* a value still sets: Justify through the same row click */
+    set('t: Align', 'justify');
+    expect(dispatch).toHaveBeenLastCalledWith('block.set', {
+      slideId: 'free-demo',
+      blockId: 't',
+      path: '/typography',
+      value: { size: 22, align: 'justify', columns: 2 },
       baseRevision: 7,
     });
   });

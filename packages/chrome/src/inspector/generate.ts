@@ -498,8 +498,8 @@ export function compositeControls(spec: ControlSpec): ControlSpec[] {
       control: `${spec.control}.${key}`,
       label: `${noun}: ${inspector.label}`,
       path: pointerJoin(spec.path, key),
-      /* a composite draws its fields as a Seg or a stepper (typography.tsx), so an optional field
-         keeps its Seg here */
+      /* typography.tsx draws a short set as the dropdown when the field is optional and as a Seg
+         when it is required, and the rest as a stepper */
       kind: kindFor(inspector, inner, values),
       inspector,
       group: inspector.group ?? spec.group,

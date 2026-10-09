@@ -15,6 +15,7 @@ import type { ControlSpec } from './generate';
 import { LintMark } from './lint-mark';
 import type { ControlProps } from './props';
 import { SegControl } from './seg';
+import { SelectControl } from './select';
 import { StepperControl } from './stepper';
 
 import './typography.css';
@@ -24,7 +25,7 @@ import './typography.css';
  * Kevin, 2026-09-11: "font and typography controls"): a sub-row per field of the object, each
  * with its icon, its label, its tooltip from the field's help and the control the field's own
  * annotation asks for (a stepper through the type ladder for size, a stepper 300 to 700 for
- * weight, a Seg for alignment, steppers through the tracking and leading steps), so the five
+ * weight, the dropdown for alignment, steppers through the tracking and leading steps), so the five
  * controls are generated from the schema like every other one. Every change writes the whole
  * object in one block.set; clearing the last field removes it, so a slide written before the
  * round reads back unchanged. The 500 cap is a lint mark (type/weight-cap) beside the weight and
@@ -138,7 +139,15 @@ export function TypographyControl({ spec, onChange, context, disabled }: Control
               <span>{label}</span>
             </span>
             <span className="ts-ctl-typo-field">
-              {field.kind === 'seg' ? <SegControl {...props} /> : <StepperControl {...props} />}
+              {field.kind !== 'seg' ? (
+                <StepperControl {...props} />
+              ) : field.optional ? (
+                /* an optional field takes the dropdown with its None row, so a person and set()
+                   can clear it (docs/DROPDOWNS.md 4.1, question 4) */
+                <SelectControl {...props} />
+              ) : (
+                <SegControl {...props} />
+              )}
               {unit !== undefined ? (
                 <span className="ts-ctl-typo-unit" aria-hidden="true">
                   {unit}

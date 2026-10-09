@@ -49,10 +49,11 @@
 // under `/brand/` and `/home` are requested twice and the second answer must be a 200 of the right
 // type, at the byte count `apps/studio/public/brand-manifest.json` records when the checkout is
 // beside the script, and `x-vercel-cache: HIT` on an https deployment (the static layer answers
-// before the function); the thumbnail cache: a render without `r` carries
-// `cache-control: public, s-maxage=60, stale-while-revalidate=86400` and `x-turboslide-stamp`, and
-// the same request with `r=<stamp>` twice is a CDN hit, a 302 to a Blob object
-// (`x-turboslide-source: blob`) or a 200 body on a private store. With the bearer, `/api/agent`'s
+// before the function); the thumbnail cache, asked with the smoke's identity cookie on the open
+// deck: a render without `r` carries `x-turboslide-stamp` and, as a body,
+// `cache-control: public, s-maxage=60, stale-while-revalidate=86400`, and the same request with
+// `r=<stamp>` twice is an immutable body (a CDN hit on https) or a 302 to the Blob object, which
+// is `private, no-store` since HR-SD#5. With the bearer, `/api/agent`'s
 // `instance` block is read (`effectsBackend`, `glibcVersionRuntime`) and reported (the row fails
 // only when the block is missing; it asserts `native` once the Linux addon is committed, SPEC-4
 // 0.38), and with `--template-copy` one deck is created from the GT template through
@@ -75,6 +76,13 @@
 // The `/home` row's marks are the remade page's (section 3): the root `class="ts-product"` (the
 // element carries `id="top"` first), the hero lead as React writes it (polish two's two sentences,
 // docs/POLISH-2.md 3.4), and the Speculation Rules script.
+//
+// The hardening round (docs/hardening/HARDENING.md 8.3; HR-SD#5, CRIT-M2): `access answer reads
+// enforce` reads `/api/access/<deck>` (`authorize: 'enforce'`) and keeps the identity cookie the
+// answer mints, which the thumbnail rows send. With the bearer, the smoke makes one scratch deck
+// with `deck.create` (restricted to its creator, as every new deck is), requires `private,
+// no-store` on its thumbnail (`restricted thumbnail private`), and removes it forever at the end
+// of the run (`scratch deck removed`).
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -308,6 +316,12 @@ async function probe(base, path, timeoutMs, init = {}) {
         : Number(response.headers.get('content-length') ?? 0);
     const headers = {};
     for (const [name, value] of response.headers) headers[name] = value;
+    // the identity cookie the answer minted, as a Cookie header value (hardening HR-SD#5)
+    const cookie = response.headers
+      .getSetCookie()
+      .map((line) => line.split(';')[0] ?? '')
+      .filter((pair) => /^(__Host-)?ts_id=/.test(pair))
+      .join('; ');
     return {
       url,
       status: response.status,
@@ -315,6 +329,7 @@ async function probe(base, path, timeoutMs, init = {}) {
       location: response.headers.get('location') ?? '',
       robots: response.headers.get('x-robots-tag') ?? '',
       headers,
+      cookie,
       text,
       bytes,
       ms: Math.round(performance.now() - started),
@@ -327,6 +342,7 @@ async function probe(base, path, timeoutMs, init = {}) {
       location: '',
       robots: '',
       headers: {},
+      cookie: '',
       text: '',
       bytes: 0,
       ms: Math.round(performance.now() - started),
@@ -739,82 +755,244 @@ function firstSlideId(deck) {
 }
 
 /**
- * The thumbnail cache (SPEC-4 0.31; b4.md R11): without `r` the newest stored thumbnail with the
- * stale while revalidate header and the stamp; with `r=<stamp>` twice, the second answer a CDN
- * hit, a 302 to the Blob object, or a 200 body on a private store. In enforce mode (SPEC-3 8.13)
- * the route answers 403 without a grant, and both rows record that instead of failing.
+ * The smoke's own identity and the `access answer reads enforce` row (hardening HR-SD#5): the
+ * first answer of `/api/access/<deck>` names the deployment's authorization mode, always
+ * `enforce` since H3, and mints the anonymous principal cookie the thumbnail rows then send, so
+ * they ask as a person, the way a page's `<img>` does, and not as a caller with no identity,
+ * whom every deployment refuses.
  */
-async function thumbnailRows(base, deck, timeoutMs) {
+async function accessRow(base, deck, timeoutMs) {
+  const path = `/api/access/${encodeURIComponent(deck)}`;
+  // the page's own fetch: the CSRF rule of the access route reads Sec-Fetch-Site and Origin
+  const r = await probe(base, path, timeoutMs, {
+    headers: { 'sec-fetch-site': 'same-origin', origin: new URL(base).origin },
+  });
+  let mode = null;
+  try {
+    mode = JSON.parse(r.text)?.authorize ?? null;
+  } catch {
+    // not JSON: the status says what happened
+  }
+  return {
+    cookie: r.cookie,
+    result: {
+      row: {
+        name: 'access answer reads enforce',
+        expect: `/api/access/${deck} answers 200 with authorize: 'enforce' and an identity cookie`,
+        detail: () =>
+          `${r.status}; authorize ${mode ?? 'absent'}; ${r.cookie === '' ? 'no identity cookie' : 'identity cookie minted'}`,
+      },
+      r,
+      ok: r.error === undefined && r.status === 200 && mode === 'enforce' && r.cookie !== '',
+    },
+  };
+}
+
+/** True for a `cache-control` value no shared cache may keep. */
+const isPrivateNoStore = (value) =>
+  /\bprivate\b/.test(value ?? '') && /\bno-store\b/.test(value ?? '');
+
+/**
+ * The thumbnail cache (SPEC-4 0.31; b4.md R11; hardening HR-SD#5, CRIT-M2), asked with the
+ * smoke's own identity cookie on the open seed deck: who may keep an answer follows the reader's
+ * standing, and a stranger reaches the open deck through its general access (`via: 'open'`), so
+ * the public rules hold. Without `r`, the newest stored thumbnail with the stamp: a 200 body with
+ * `public, s-maxage=60, stale-while-revalidate=86400` (a local server; the CDN rewrites it on
+ * https), or a 302 to the stored object on a public store, which is `private, no-store` for
+ * every reader since HR-SD#5. With `r=<stamp>` twice: the second answer a 200 body immutable for
+ * a year (a CDN hit on https), or the same private 302.
+ */
+async function thumbnailRows(base, deck, timeoutMs, cookie) {
   const https = base.startsWith('https:');
   const slide = firstSlideId(deck);
   const path = `/api/render/${encodeURIComponent(slide)}?deck=${encodeURIComponent(deck)}&theme=dark&w=320`;
-  const plain = await probe(base, path, timeoutMs);
+  const init = cookie === '' ? {} : { headers: { cookie } };
+  const plain = await probe(base, path, timeoutMs, init);
   const stamp = plain.headers['x-turboslide-stamp'] ?? null;
   const rows = [];
-  /* enforce mode refuses the probe's request, which carries no identity and no grant: 403 for an
-     identified caller, 401 for one with no cookie at all (the smoke's fetch) */
-  const enforce = plain.status === 403 || plain.status === 401;
+  const storedRedirect = (r) =>
+    r.status === 302 &&
+    /\.blob\.vercel-storage\.com\//.test(r.location) &&
+    isPrivateNoStore(r.headers['cache-control']);
+  const where = (r) =>
+    `${r.status}${r.status === 302 ? ` -> ${r.location.replace(/\?.*$/, '').slice(0, 60)}` : ''}; ${r.headers['cache-control'] ?? 'no cache-control'}; ${r.headers['x-vercel-cache'] ?? 'no CDN'}${r.headers['set-cookie'] ? '; set-cookie present (the CDN does not cache it)' : ''}`;
   rows.push({
     row: {
       name: 'thumbnail without r',
       expect:
-        'a 200 body or a 302 to the stored object on a public store, with x-turboslide-stamp and, on a local server, cache-control public, s-maxage=60, stale-while-revalidate=86400 (the CDN rewrites it on https; 403 recorded in enforce mode)',
+        'with the identity cookie: a 200 body with x-turboslide-stamp and, on a local server, public, s-maxage=60, stale-while-revalidate=86400, or a 302 to the stored object with private, no-store',
       detail: () =>
-        enforce
-          ? 'enforce mode: refused without the grant'
-          : `${plain.status}${plain.status === 302 ? ` -> ${plain.location.replace(/\?.*$/, '').slice(0, 60)}` : ''}; ${plain.headers['cache-control'] ?? 'no cache-control'}; ${plain.headers['x-vercel-cache'] ?? 'no CDN'}${plain.headers['set-cookie'] ? '; set-cookie present (the CDN does not cache it)' : ''}; stamp ${stamp ?? 'none'}; source ${plain.headers['x-turboslide-source'] ?? '-'}; fresh ${plain.headers['x-turboslide-fresh'] ?? '-'}`,
+        cookie === ''
+          ? `no identity cookie from the access row: ${plain.status}`
+          : `${where(plain)}; stamp ${stamp ?? 'none'}; source ${plain.headers['x-turboslide-source'] ?? '-'}; fresh ${plain.headers['x-turboslide-fresh'] ?? '-'}`,
     },
     r: plain,
     ok:
       plain.error === undefined &&
-      (enforce ||
-        ((plain.status === 200 ||
-          (plain.status === 302 && /\.blob\.vercel-storage\.com\//.test(plain.location))) &&
-          stamp !== null &&
-          // the exact header on a local server; a Vercel deployment's CDN rewrites cache-control on
-          // the way out (s-maxage and stale-while-revalidate are the CDN's, the client sees `public`
-          // or `public, max-age=0, must-revalidate`), so on https the row asserts the stamp and
-          // records the header and x-vercel-cache as the CDN returned them
+      cookie !== '' &&
+      stamp !== null &&
+      (storedRedirect(plain) ||
+        (plain.status === 200 &&
+          // the exact header on a local server; a Vercel deployment's CDN rewrites cache-control
+          // on the way out (s-maxage and stale-while-revalidate are the CDN's, the client sees
+          // `public` or `public, max-age=0, must-revalidate`), so on https the row asserts the
+          // stamp and records the header and x-vercel-cache as the CDN returned them
           (https ||
             /public, s-maxage=60, stale-while-revalidate=86400/.test(
               plain.headers['cache-control'] ?? '',
             )))),
   });
-  if (enforce || stamp === null) {
+  if (stamp === null) {
     rows.push({
       row: {
         name: 'thumbnail with r twice',
         expect: 'a stamp from the row above',
-        detail: () => (enforce ? 'enforce mode: not requested' : 'no stamp to request'),
+        detail: () => 'no stamp to request',
       },
       r: plain,
-      ok: enforce,
+      ok: false,
     });
     return rows;
   }
   const stamped = `${path}&r=${encodeURIComponent(stamp)}`;
-  const first = await probe(base, stamped, timeoutMs);
-  const second = await probe(base, stamped, timeoutMs);
+  const first = await probe(base, stamped, timeoutMs, init);
+  const second = await probe(base, stamped, timeoutMs, init);
   const cache = second.headers['x-vercel-cache'] ?? null;
-  const blobRedirect =
-    second.status === 302 &&
-    second.location !== '' &&
-    (second.headers['x-turboslide-source'] === 'blob' ||
-      /blob\.vercel-storage\.com/.test(second.location));
   const body = second.status === 200 && second.type.startsWith('image/');
   const immutable = /max-age=31536000, immutable/.test(second.headers['cache-control'] ?? '');
   rows.push({
     row: {
       name: 'thumbnail with r twice',
       expect:
-        'the second answer a CDN hit (x-vercel-cache HIT), a 302 to the Blob object (x-turboslide-source blob) or a 200 body, immutable for a year',
+        'with the identity cookie on the open deck: the second answer a 200 body immutable for a year (x-vercel-cache HIT on https), or a 302 to the stored object with private, no-store',
       detail: () =>
-        `first ${first.status} ${first.headers['x-vercel-cache'] ?? '-'} ${first.headers['x-turboslide-source'] ?? ''}; second ${second.status} ${cache ?? '-'} ${second.headers['x-turboslide-source'] ?? ''}${second.location ? ` -> ${second.location.replace(/\?.*$/, '').slice(0, 80)}` : ''}; ${second.headers['cache-control'] ?? 'no cache-control'}`,
+        `first ${first.status} ${first.headers['x-vercel-cache'] ?? '-'} ${first.headers['x-turboslide-source'] ?? ''}; second ${where(second)} ${second.headers['x-turboslide-source'] ?? ''}`,
     },
     r: second,
-    ok: second.error === undefined && (cache === 'HIT' || blobRedirect || body) && immutable,
+    ok:
+      second.error === undefined &&
+      (storedRedirect(second) || (body && immutable && (!https || cache === 'HIT'))),
   });
   return rows;
+}
+
+/**
+ * The smoke's scratch deck (hardening HR-SD#5; the rows of K1 and SD#6 use the same deck): one
+ * blank deck made with the bearer through `deck.create`, restricted to its creator as every new
+ * deck is, and removed forever at the end of the run (`removeScratchDeck`), so the store is as it
+ * was. Its id and first slide come from `deck.info`.
+ */
+async function createScratchDeck(base, headers) {
+  const created = await postJson(
+    base,
+    '/api/actions/deck.create',
+    { name: 'Smoke scratch deck', from: 'blank' },
+    headers,
+    120_000,
+  );
+  const id = created.json?.deckId ?? created.json?.output?.deckId ?? null;
+  if (created.status !== 200 || typeof id !== 'string') {
+    return {
+      id: null,
+      slide: null,
+      detail: `deck.create ${created.status}: ${created.text.slice(0, 160)}`,
+    };
+  }
+  const info = await postJson(
+    base,
+    `/api/actions/deck.info?deck=${encodeURIComponent(id)}`,
+    {},
+    headers,
+    60_000,
+  );
+  const slide = info.json?.sections?.[0]?.slides?.[0]?.id ?? null;
+  return {
+    id,
+    slide: typeof slide === 'string' ? slide : null,
+    detail: `made ${id} in ${created.ms} ms`,
+  };
+}
+
+/** `deck.trash`, then `deck.remove`, each with the revision `deck.info` names; then `deck.info` answers 404. */
+async function removeScratchDeck(base, scratch, headers) {
+  const t = performance.now();
+  const info = (deck) =>
+    postJson(base, `/api/actions/deck.info?deck=${encodeURIComponent(deck)}`, {}, headers, 60_000);
+  const revisionOf = (json) => json?.revision ?? json?.output?.revision ?? null;
+  const before = await info(scratch.id);
+  const trashed = await postJson(
+    base,
+    `/api/actions/deck.trash?deck=${encodeURIComponent(scratch.id)}`,
+    { id: scratch.id, baseRevision: revisionOf(before.json) },
+    headers,
+    60_000,
+  );
+  const after = await info(scratch.id);
+  const removed = await postJson(
+    base,
+    `/api/actions/deck.remove?deck=${encodeURIComponent(scratch.id)}`,
+    {
+      id: scratch.id,
+      confirm: true,
+      baseRevision: revisionOf(after.json) ?? revisionOf(before.json),
+    },
+    headers,
+    60_000,
+  );
+  const gone = await info(scratch.id);
+  return {
+    row: {
+      name: 'scratch deck removed',
+      expect: 'deck.trash and deck.remove 200, then deck.info 404',
+      detail: () =>
+        `${scratch.id}: trash ${trashed.status}, remove ${removed.status}, deck.info after ${gone.status}${gone.status === 404 ? '' : ' (left in place for a hand cleanup)'}`,
+    },
+    r: { status: gone.status, ms: Math.round(performance.now() - t) },
+    ok: trashed.status === 200 && removed.status === 200 && gone.status === 404,
+  };
+}
+
+/**
+ * `restricted thumbnail private` (hardening HR-SD#5, CRIT-M2): the scratch deck is restricted, so
+ * its thumbnail, asked with the bearer and no grant in the URL, answers `private, no-store`, and
+ * no shared cache keeps it for the next requester of the URL. The request names no stamp, so the
+ * route renders the slide now; an answer still rendering (204) is asked again, at most four times.
+ */
+async function restrictedThumbnailRow(base, scratch, headers, timeoutMs) {
+  const name = 'restricted thumbnail private';
+  if (scratch.id === null || scratch.slide === null) {
+    return {
+      row: { name, expect: 'a scratch deck', detail: () => scratch.detail },
+      r: { status: '-', ms: 0 },
+      ok: false,
+    };
+  }
+  const path = `/api/render/${encodeURIComponent(scratch.slide)}?deck=${encodeURIComponent(scratch.id)}&theme=light&w=160`;
+  const answers = [];
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 5_000));
+    const r = await probe(base, path, Math.max(timeoutMs, 90_000), { headers });
+    answers.push(r);
+    if (r.status !== 204) break;
+  }
+  const last = answers[answers.length - 1];
+  const picture = last.status === 200 || last.status === 302;
+  return {
+    row: {
+      name,
+      expect:
+        "the restricted scratch deck's thumbnail, with the bearer and no grant: a 200 body or a 302 with private, no-store, and no answer public",
+      detail: () =>
+        `${answers.map((r) => `${r.status} ${r.headers['cache-control'] ?? 'no cache-control'}`).join('; ')}`,
+    },
+    r: last,
+    ok:
+      last.error === undefined &&
+      picture &&
+      answers.every(
+        (r) => ![200, 204, 302].includes(r.status) || isPrivateNoStore(r.headers['cache-control']),
+      ),
+  };
 }
 
 /**
@@ -1126,9 +1304,12 @@ async function main() {
   for (const skipped of skippedSecurityRows(args)) {
     console.log(`skip  ${skipped.name}: ${skipped.why}`);
   }
-  // the round four rows without a bearer: the static layer twice, the thumbnail cache
+  // the round four rows without a bearer: the static layer twice, the thumbnail cache, asked with
+  // the identity cookie the access row mints (hardening HR-SD#5)
   results.push(...(await cdnRows(base, args.timeoutMs)));
-  results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs)));
+  const access = await accessRow(base, args.deck, args.timeoutMs);
+  results.push(access.result);
+  results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs, access.cookie)));
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
   // the polish round's build rows (docs/archive/rounds/POLISH.md section 0 item 2): the client's Play shaders row
@@ -1144,6 +1325,9 @@ async function main() {
     console.log(
       'skip  template copy: pass --token-env <VAR> and --template-copy (the row writes one deck and removes it)',
     );
+    console.log(
+      'skip  restricted thumbnail private: pass --token-env <VAR> (the row makes a scratch deck and removes it)',
+    );
   }
   if (args.tokenEnv !== null) {
     if (headers.authorization === undefined) {
@@ -1154,6 +1338,10 @@ async function main() {
       });
     } else {
       results.push(await backendRow(base, headers, args.timeoutMs));
+      // the scratch deck's rows (hardening HR-SD#5), the deck removed before the table prints
+      const scratch = await createScratchDeck(base, headers);
+      results.push(await restrictedThumbnailRow(base, scratch, headers, args.timeoutMs));
+      if (scratch.id !== null) results.push(await removeScratchDeck(base, scratch, headers));
       if (args.templateCopy) {
         const copied = await templateCopyRow(base, headers);
         results.push({

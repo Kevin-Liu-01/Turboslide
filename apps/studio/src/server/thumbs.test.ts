@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { VIAS } from '@turboslide/schema/access';
 import type { Slide } from '@turboslide/schema/deck';
 import { CONTENT_RULE } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
@@ -15,6 +16,7 @@ import {
 
 import {
   IMMUTABLE_CACHE_CONTROL,
+  PRIVATE_CACHE_CONTROL,
   REVALIDATE_CACHE_CONTROL,
   isThumbStamp,
   slideStamp,
@@ -53,13 +55,19 @@ function result(over: Partial<ThumbResult> = {}): ThumbResult {
   };
 }
 
+const open = { via: 'open' } as const;
+
 describe('the thumbnail headers (SPEC-4 0.31)', () => {
   it('names a stamp in the URL immutable for a year and a URL without one stale while revalidate', () => {
-    expect(thumbCacheControl({ revisionInUrl: true })).toBe(IMMUTABLE_CACHE_CONTROL);
-    expect(thumbCacheControl({ revisionInUrl: false })).toBe(REVALIDATE_CACHE_CONTROL);
+    expect(thumbCacheControl({ revisionInUrl: true, standing: open })).toBe(
+      IMMUTABLE_CACHE_CONTROL,
+    );
+    expect(thumbCacheControl({ revisionInUrl: false, standing: open })).toBe(
+      REVALIDATE_CACHE_CONTROL,
+    );
     expect(IMMUTABLE_CACHE_CONTROL).toBe('public, max-age=31536000, immutable');
     expect(REVALIDATE_CACHE_CONTROL).toBe('public, s-maxage=60, stale-while-revalidate=86400');
-    const headers = thumbHeaders(result(), request, { revisionInUrl: false });
+    const headers = thumbHeaders(result(), request, { revisionInUrl: false, standing: open });
     expect(headers['cache-control']).toBe(REVALIDATE_CACHE_CONTROL);
     expect(headers['x-turboslide-stamp']).toBe('aaaa0002');
     expect(headers['x-turboslide-fresh']).toBe('1');
@@ -69,7 +77,7 @@ describe('the thumbnail headers (SPEC-4 0.31)', () => {
     expect(headers.etag).toBe('"gt-brand-aaaa0002-title-dark-320"');
   });
 
-  it('answers a stored thumbnail on a public store as a 302 to its URL, and bytes as a PNG body', async () => {
+  it('answers a stored thumbnail on a public store as a private 302 to its URL, and bytes as a PNG body', async () => {
     const stored = thumbResponse(
       result({
         kind: 'stored',
@@ -77,15 +85,17 @@ describe('the thumbnail headers (SPEC-4 0.31)', () => {
         source: 'blob',
       }),
       { ...request, r: 'aaaa0002' },
-      { revisionInUrl: true },
+      { revisionInUrl: true, standing: open },
     );
     expect(stored.status).toBe(302);
     expect(stored.headers.get('location')).toBe(
       'https://fake.blob.local/decks/gt-brand/.thumbs/aaaa0002/dark@320/title.png',
     );
-    expect(stored.headers.get('cache-control')).toBe(IMMUTABLE_CACHE_CONTROL);
+    // the redirect names the stored object: no shared cache keeps it, whoever asked (HR-SD#5)
+    expect(stored.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
     const body = thumbResponse(result({ fresh: false, stamp: 'aaaa0001' }), request, {
       revisionInUrl: false,
+      standing: open,
     });
     expect(body.status).toBe(200);
     expect(body.headers.get('content-type')).toBe('image/png');
@@ -112,6 +122,85 @@ describe('the thumbnail headers (SPEC-4 0.31)', () => {
     expect(
       thumbStoreAccess({ TURBOSLIDE_BLOB_ACCESS: 'public', TURBOSLIDE_BLOB_PRIVATE_TOKEN: '' }),
     ).toBe('public');
+  });
+});
+
+describe('who may keep a thumbnail (hardening HR-SD#5, CRIT-M2)', () => {
+  const NOW = Date.parse('2026-10-08T22:00:00.000Z');
+
+  it('keeps the public rules only for a reader who reached the deck as anyone would', () => {
+    for (const via of VIAS) {
+      const stamped = thumbCacheControl({ revisionInUrl: true, standing: { via } });
+      const unstamped = thumbCacheControl({ revisionInUrl: false, standing: { via } });
+      if (via === 'open' || via === 'publish') {
+        expect(stamped).toBe(IMMUTABLE_CACHE_CONTROL);
+        expect(unstamped).toBe(REVALIDATE_CACHE_CONTROL);
+      } else {
+        expect(stamped).toBe(PRIVATE_CACHE_CONTROL);
+        expect(unstamped).toBe(PRIVATE_CACHE_CONTROL);
+      }
+    }
+    expect(PRIVATE_CACHE_CONTROL).toBe('private, no-store');
+  });
+
+  it('keeps an answer under a grant at the CDN no longer than the grant, never immutable', () => {
+    const grant = (ms: number) => ({ grantExpiresAt: NOW + ms });
+    expect(thumbCacheControl({ revisionInUrl: true, standing: grant(540_000), now: NOW })).toBe(
+      'public, s-maxage=540',
+    );
+    expect(thumbCacheControl({ revisionInUrl: false, standing: grant(540_000), now: NOW })).toBe(
+      'public, s-maxage=60',
+    );
+    expect(thumbCacheControl({ revisionInUrl: true, standing: grant(30_900), now: NOW })).toBe(
+      'public, s-maxage=30',
+    );
+    expect(thumbCacheControl({ revisionInUrl: false, standing: grant(30_900), now: NOW })).toBe(
+      'public, s-maxage=30',
+    );
+    expect(thumbCacheControl({ revisionInUrl: true, standing: grant(999), now: NOW })).toBe(
+      PRIVATE_CACHE_CONTROL,
+    );
+    expect(thumbCacheControl({ revisionInUrl: true, standing: grant(-5_000), now: NOW })).toBe(
+      PRIVATE_CACHE_CONTROL,
+    );
+  });
+
+  it('gives an older copy under a stamped URL the minute, never the grant or the year', () => {
+    const stale = result({ fresh: false, stamp: 'aaaa0001' });
+    const stamped = { ...request, r: 'aaaa0002' };
+    expect(
+      thumbHeaders(stale, stamped, {
+        revisionInUrl: true,
+        standing: { grantExpiresAt: NOW + 540_000 },
+        now: NOW,
+      })['cache-control'],
+    ).toBe('public, s-maxage=60');
+    expect(
+      thumbHeaders(stale, stamped, { revisionInUrl: true, standing: { via: 'open' } })[
+        'cache-control'
+      ],
+    ).toBe(REVALIDATE_CACHE_CONTROL);
+  });
+
+  it('answers the 302 and the pending answer private for every standing', () => {
+    const standings = [...VIAS.map((via) => ({ via })), { grantExpiresAt: NOW + 540_000 }];
+    for (const standing of standings) {
+      const options = { revisionInUrl: true, standing, now: NOW };
+      const stored = thumbResponse(
+        result({ kind: 'stored', url: 'https://fake.blob.local/x.png', source: 'blob' }),
+        { ...request, r: 'aaaa0002' },
+        options,
+      );
+      expect(stored.status).toBe(302);
+      expect(stored.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
+      const pending = thumbResponse(
+        result({ kind: 'pending', source: 'render', cached: false, fresh: false }),
+        { ...request, r: 'aaaa0002' },
+        options,
+      );
+      expect(pending.status).toBe(204);
+      expect(pending.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
+    }
   });
 });
 

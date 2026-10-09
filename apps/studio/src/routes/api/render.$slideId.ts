@@ -14,7 +14,7 @@ import { logSecurityEvent } from '../../server/log';
 import { scrubServerPaths, withoutServerPaths } from '../../server/paths-out';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import { getThumbnail, isThumbStamp, isThumbWidth, thumbResponse } from '../../server/thumbs';
-import type { ThumbRequest } from '../../server/thumbs';
+import type { ThumbRequest, ThumbStanding } from '../../server/thumbs';
 import {
   RENDER_GRANT_QUERY,
   THUMB_GRANT_QUERY,
@@ -28,10 +28,12 @@ import type { RenderGrantTarget } from '../../server/tokens';
 // render worker (SPEC 3.4; MILESTONES M2 item 6). With ?w=160|320|640 the response is the
 // downsampled thumbnail from server/thumbs.ts (M3 item 5): on this instance's disk and, on the
 // blob tier, in the store under `decks/<id>/.thumbs/<stamp>/` shared by every instance
-// (gslides-parity SPEC-4 0.31). A request that names a stamp (?r=) is immutable for the browser
-// and the CDN and answers a 302 to the stored object on a public store; a request without one
-// answers the newest stored thumbnail with `s-maxage=60, stale-while-revalidate=86400` and renders
-// the current one after the response. The worker is reached over HTTP when
+// (gslides-parity SPEC-4 0.31). A request that names a stamp (?r=) answers a 302 to the stored
+// object on a public store; a request without one answers the newest stored thumbnail and renders
+// the current one after the response. Who may keep the answer follows the reader's standing
+// (hardening HR-SD#5, server/thumbs.ts thumbCacheControl): the public rules for a deck open to
+// everyone or the published player, the grant's remaining life for a URL with the grant, and
+// `private, no-store` for everyone else and for every 302. The worker is reached over HTTP when
 // TURBOSLIDE_WORKER_URL is set; otherwise the same job runs in this process through the local queue,
 // which drives the turboslide CLI as a child process where the binary exists, so headless Chromium
 // never runs inside the web app (SPEC 3.3 item 7), and through runCli() in this process inside a
@@ -138,6 +140,9 @@ export const Route = createFileRoute('/api/render/$slideId')({
           const flagged = await requireFlag('renderThumbs', { deckId, action: 'render.thumb' });
           if (flagged !== null) return flagged;
           const grant = verifyThumbGrant(deckId, url.searchParams.get(THUMB_GRANT_QUERY));
+          /* who may keep the answer follows how the reader reached the deck (hardening HR-SD#5,
+             CRIT-M2): the grant's expiry when the URL carries one, else the decision's `via` */
+          let standing: ThumbStanding;
           if (grant === null) {
             const ctx = await requestContext(request);
             const decision = await authorize(ctx, deckId, 'read', {
@@ -163,7 +168,8 @@ export const Route = createFileRoute('/api/render/$slideId')({
               });
               return Response.json({ error: 'forbidden', capability: 'read' }, { status: 403 });
             }
-          }
+            standing = { via: decision.via };
+          } else standing = { grantExpiresAt: grant.exp };
           try {
             const r = url.searchParams.get('r');
             const request_: ThumbRequest = {
@@ -176,7 +182,10 @@ export const Route = createFileRoute('/api/render/$slideId')({
             /* a card's request (a stamp named) whose deck holds no capture on the blob tier
                answers 204 and renders behind the response (docs/archive/rounds/POLISH.md items 90 and 111) */
             const thumb = await getThumbnail(request_, { renderBehind: request_.r !== null });
-            return thumbResponse(thumb, request_, { revisionInUrl: request_.r !== null });
+            return thumbResponse(thumb, request_, {
+              revisionInUrl: request_.r !== null,
+              standing,
+            });
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             /* a thumbnail is a picture the page draws a plate for (docs/archive/rounds/POLISH.md item 111): a

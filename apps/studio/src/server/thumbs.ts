@@ -8,6 +8,7 @@ import { decodeImage, encodePngRgba } from '@turboslide/effects/io';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import type { RenderJobResult } from '@turboslide/render-worker/jobs/render';
+import type { Via } from '@turboslide/schema/access';
 import type { Slide } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { canonicalJson } from '@turboslide/schema/json';
@@ -50,10 +51,10 @@ import {
  *    every instance: one render per stamp across the deployment instead of one per instance. A
  *    request that names a stamp (`r`) and finds the object answers a 302 to its URL on a public
  *    store and streams the body on a private one; a request without `r` answers the newest stored
- *    thumbnail of the slide at once with `s-maxage=60, stale-while-revalidate=86400` and, when
- *    that stamp is not the slide's current one, renders the current one after the response
- *    (`afterResponse`, Vercel's `waitUntil`). Retention keeps the newest THUMB_KEEP stamps per
- *    slide and theme, pruned after each put in the same `waitUntil`.
+ *    thumbnail of the slide at once and, when that stamp is not the slide's current one, renders
+ *    the current one after the response (`afterResponse`, Vercel's `waitUntil`). Retention keeps
+ *    the newest THUMB_KEEP stamps per slide and theme, pruned after each put in the same
+ *    `waitUntil`. Who may keep an answer follows the reader's standing (`thumbCacheControl`).
  *
  * `warmThumbs` renders every missing slide of a theme in one job, so the first grid does not queue
  * 85 single slide Chromium runs; the editor reaches it through the server function in warm.ts for
@@ -80,6 +81,16 @@ const STAMP_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/i;
 export const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 /** The cache rule of an answer without a stamp: fresh for a minute at the CDN, served stale for a day while the current one renders (SPEC-4 0.31). */
 export const REVALIDATE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
+/** The cache rule of an answer that only its own reader may see: no shared cache and no browser copy keep it. */
+export const PRIVATE_CACHE_CONTROL = 'private, no-store';
+
+/**
+ * How the reader reached the deck, which decides who may keep the answer (hardening HR-SD#5,
+ * CRIT-M2): the decision's `via` when the route ran `authorize`, or the expiry of the thumbnail
+ * grant (`s`) when the grant stood for the decision. The URL carries no identity, so a CDN that
+ * keeps an answer serves it to the next requester of the same URL without asking anyone.
+ */
+export type ThumbStanding = { via: Via } | { grantExpiresAt: number };
 
 export function isThumbWidth(value: number): value is ThumbWidth {
   return (THUMB_WIDTHS as readonly number[]).includes(value);
@@ -612,21 +623,48 @@ export async function getThumbnail(
   };
 }
 
-/** The cache rule for a request: immutable when its URL names a stamp, stale while revalidate otherwise (SPEC-4 0.31). */
-export function thumbCacheControl(options: { revisionInUrl: boolean }): string {
-  return options.revisionInUrl ? IMMUTABLE_CACHE_CONTROL : REVALIDATE_CACHE_CONTROL;
+/**
+ * The cache rule for an answer (SPEC-4 0.31; hardening HR-SD#5, CRIT-M2), by the reader's
+ * standing, as `setDeckCacheHeader` (decks.ts) decides for a deck read. A reader who reached the
+ * deck as anyone would (its general access, `via: 'open'`, or the published player's token,
+ * `via: 'publish'`) gets the public rules: immutable for a year when the URL names the stamp of
+ * the current pixels, a minute at the CDN otherwise. A URL that carries the thumbnail grant is
+ * kept at the CDN for no longer than the grant is good for, and never immutable. Every other
+ * reader (the owner, a grant holder, a link holder, an agent, the admin) gets
+ * `private, no-store`, so no shared cache keeps a restricted deck's picture under a URL that
+ * anyone may request.
+ */
+export function thumbCacheControl(options: {
+  revisionInUrl: boolean;
+  standing: ThumbStanding;
+  now?: number;
+}): string {
+  const { standing } = options;
+  if ('grantExpiresAt' in standing) {
+    const seconds = Math.floor((standing.grantExpiresAt - (options.now ?? Date.now())) / 1000);
+    if (seconds <= 0) return PRIVATE_CACHE_CONTROL;
+    // an answer that is not the URL's current pixels keeps the minute of the unstamped rule
+    return `public, s-maxage=${options.revisionInUrl ? seconds : Math.min(seconds, 60)}`;
+  }
+  if (standing.via === 'open' || standing.via === 'publish')
+    return options.revisionInUrl ? IMMUTABLE_CACHE_CONTROL : REVALIDATE_CACHE_CONTROL;
+  return PRIVATE_CACHE_CONTROL;
 }
 
 /** The response headers every thumbnail answer carries, redirect or body. */
 export function thumbHeaders(
   result: ThumbResult,
   request: ThumbRequest,
-  options: { revisionInUrl: boolean },
+  options: { revisionInUrl: boolean; standing: ThumbStanding; now?: number },
 ): Record<string, string> {
   return {
     // an answer that is not the current pixels never takes the immutable year, whatever the URL
     // named: the next request under the same name reads the refreshed copy
-    'cache-control': thumbCacheControl({ revisionInUrl: options.revisionInUrl && result.fresh }),
+    'cache-control': thumbCacheControl({
+      revisionInUrl: options.revisionInUrl && result.fresh,
+      standing: options.standing,
+      ...(options.now !== undefined ? { now: options.now } : {}),
+    }),
     etag: `"${request.deckId}-${result.stamp}-${request.slideId}-${request.theme}-${request.width}"`,
     'x-turboslide-revision': String(result.revision),
     'x-turboslide-stamp': result.stamp,
@@ -640,14 +678,15 @@ export function thumbHeaders(
 
 /**
  * The HTTP response for a thumbnail: a 302 to the store's URL for a stored answer on a public
- * store, the PNG body otherwise. A request that named the stamp (`r`) and got the current pixels
- * gets an immutable year; one that did not, or that got an older stored copy while the current
- * one renders, gets a minute at the CDN and a day of stale service.
+ * store, the PNG body otherwise. The body's cache rule is `thumbCacheControl`'s. The 302 is
+ * `private, no-store` for every reader (HR-SD#5): its location is the stored object's URL, which
+ * no shared cache may hand to another requester, and which the storage migration deletes, so a
+ * redirect kept for a year would point at nothing.
  */
 export function thumbResponse(
   result: ThumbResult,
   request: ThumbRequest,
-  options: { revisionInUrl: boolean },
+  options: { revisionInUrl: boolean; standing: ThumbStanding; now?: number },
 ): Response {
   const headers = thumbHeaders(result, request, options);
   if (result.kind === 'pending') {
@@ -663,7 +702,10 @@ export function thumbResponse(
     });
   }
   if (result.kind === 'stored' && result.url !== undefined) {
-    return new Response(null, { status: 302, headers: { ...headers, location: result.url } });
+    return new Response(null, {
+      status: 302,
+      headers: { ...headers, 'cache-control': PRIVATE_CACHE_CONTROL, location: result.url },
+    });
   }
   const png = result.png ?? new Uint8Array(new ArrayBuffer(0));
   return new Response(png, {

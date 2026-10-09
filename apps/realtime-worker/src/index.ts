@@ -10,7 +10,9 @@
 // counters,access-changed}`, `/control/{open,flags,counters}`) compare the room bearer in
 // constant time and forward. The database routes (`/db/{query,batch}`) take their own bearer,
 // `TURBOSLIDE_DB_BEARER` (AUTH-3), so the room bearer, which the object also sends to the app and
-// the probes carry, reaches no account row; `/db/counters` reads no database and takes either.
+// the probes carry, reaches no account row; `/db/counters` reads no database and takes either;
+// `/control/db-unlisted` (the count of statements outside the allowlist, HR-K2#3) takes the
+// database bearer.
 // Each secret has an optional `_PREVIOUS` value the Worker also accepts while a rotation is in
 // flight (docs/hosting.md 13.8); it is never sent. A Worker without `TURBOSLIDE_DB_BEARER` (a
 // deployment before the rotation) takes the room bearer on `/db` and logs `db.bearer.fallback`
@@ -38,7 +40,7 @@ import {
   writeFlags,
 } from './control.ts';
 import type { CallbacksState } from './control.ts';
-import { dbBatch, dbCountersAnswer, dbQuery, statementMode } from './db.ts';
+import { dbBatch, dbCountersAnswer, dbQuery, dbUnlistedAnswer, statementMode } from './db.ts';
 import type { StatementMode } from './db.ts';
 import {
   ADDRESS_HEADER,
@@ -340,6 +342,12 @@ async function serve(request: Request, env: Env): Promise<Response> {
   }
   if (parts[0] === 'control') {
     workerCounters.controlCalls += 1;
+    // the count of the accounts statements outside the allowlist (HR-K2#3) belongs to the
+    // database: its bearer opens it, the room bearer does not (once the Worker has the former)
+    if (parts[1] === 'db-unlisted' && request.method === 'GET') {
+      if (!(await dbBearerOk(request, env))) return json({ error: 'bearer' }, 401);
+      return dbUnlistedAnswer(env.ACCOUNTS);
+    }
     if (!(await bearerOk(request, env))) return json({ error: 'bearer' }, 401);
     if (parts[1] === 'open' && request.method === 'GET') {
       const decks = await openDecks(env.ACCOUNTS);

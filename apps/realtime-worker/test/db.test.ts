@@ -1,9 +1,10 @@
 import { env } from 'cloudflare:test';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ROOM_PROTOCOL } from '@turboslide/realtime/frames';
 
 import list from '../src/db-statements.json';
+import { UNLISTED_ROWS_MAX, countUnlisted, statementDigest } from '../src/db.ts';
 import worker from '../src/index.ts';
 import { mint } from './lib.ts';
 
@@ -254,5 +255,106 @@ describe('the statement allowlist (AUTH-3)', () => {
       expect(statement, statement).not.toContain(';');
     }
     expect([...list.statements].sort()).toEqual(list.statements);
+  });
+});
+
+describe('the count of the statements outside the list (HR-K2#3)', () => {
+  type Unlisted = {
+    shapes: number;
+    rows: { digest: string; kind: string; table: string | null; refused: number; ran: number }[];
+  };
+
+  const unlistedRows = async (bearer = DB): Promise<Unlisted> => {
+    const response = await call('/control/db-unlisted', { bearer });
+    expect(response.status).toBe(200);
+    return (await response.json()) as Unlisted;
+  };
+
+  it('counts a refused statement per call under its digest, with no text and no parameter anywhere', async () => {
+    const marker = `probe-${crypto.randomUUID()}`;
+    const sql = `select * from "session" where "token" = ? and '${marker}' = '${marker}'`;
+    const secret = `param-${crypto.randomUUID()}`;
+    const lines: string[] = [];
+    const warn = vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
+      lines.push(args.map(String).join(' '));
+    });
+    try {
+      const first = await call('/db/query', { bearer: DB, body: { sql, params: [secret] } });
+      expect(first.status).toBe(403);
+      const { digest } = (await first.json()) as { digest: string };
+      expect(
+        (await call('/db/query', { bearer: DB, body: { sql, params: [secret] } })).status,
+      ).toBe(403);
+      const row = (await unlistedRows()).rows.find((r) => r.digest === digest);
+      expect(row).toMatchObject({ kind: 'select', table: 'session', refused: 2, ran: 0 });
+      const stored = JSON.stringify(
+        (await env.ACCOUNTS.prepare('select * from ts_db_unlisted').all()).results,
+      );
+      expect(stored).not.toContain(marker);
+      expect(stored).not.toContain(secret);
+      expect(lines.join('\n')).toContain(digest);
+      expect(lines.join('\n')).not.toContain(marker);
+      expect(lines.join('\n')).not.toContain(secret);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('the report mode runs an unlisted statement and counts it once as run', async () => {
+    const report = { TURBOSLIDE_DB_STATEMENTS: 'report' };
+    const sql = `select v from rt_flags where k = ? and ${Date.now()} > 0`;
+    const response = await call(
+      '/db/query',
+      { bearer: DB, body: { sql, params: ['realtime'] } },
+      report,
+    );
+    expect(response.status).toBe(200);
+    const digest = await statementDigest(sql);
+    expect((await unlistedRows()).rows.find((r) => r.digest === digest)).toMatchObject({
+      refused: 0,
+      ran: 1,
+    });
+  });
+
+  it('opens to the database bearer alone, and to the room bearer only on a Worker without one', async () => {
+    expect((await call('/control/db-unlisted', { bearer: ROOM })).status).toBe(401);
+    expect((await call('/control/db-unlisted')).status).toBe(401);
+    expect((await call('/control/db-unlisted', { bearer: DB })).status).toBe(200);
+    const before = { TURBOSLIDE_DB_BEARER: '' };
+    expect((await call('/control/db-unlisted', { bearer: ROOM }, before)).status).toBe(200);
+  });
+
+  it('keeps at most UNLISTED_ROWS_MAX rows; a known digest still counts past that', async () => {
+    await env.ACCOUNTS.prepare('delete from ts_db_unlisted').run();
+    await countUnlisted(env.ACCOUNTS, {
+      digest: 'known0000000',
+      kind: 'select',
+      table: null,
+      outcome: 'refused',
+    });
+    const fill = [];
+    for (let i = 1; i < UNLISTED_ROWS_MAX; i += 1)
+      fill.push(
+        env.ACCOUNTS.prepare(
+          'insert into ts_db_unlisted (digest, kind, tbl, refused, ran, first_at, last_at) values (?, ?, null, 1, 0, 0, 0)',
+        ).bind(`fill${String(i).padStart(8, '0')}`, 'select'),
+      );
+    await env.ACCOUNTS.batch(fill);
+    await countUnlisted(env.ACCOUNTS, {
+      digest: 'new000000000',
+      kind: 'select',
+      table: null,
+      outcome: 'refused',
+    });
+    await countUnlisted(env.ACCOUNTS, {
+      digest: 'known0000000',
+      kind: 'select',
+      table: null,
+      outcome: 'refused',
+    });
+    const { shapes, rows } = await unlistedRows();
+    expect(shapes).toBe(UNLISTED_ROWS_MAX);
+    expect(rows.find((r) => r.digest === 'new000000000')).toBeUndefined();
+    expect(rows.find((r) => r.digest === 'known0000000')?.refused).toBe(2);
   });
 });

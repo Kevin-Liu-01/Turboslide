@@ -14,7 +14,10 @@
 // statement and logs it instead: the hand switch for a statement the recording missed, set with
 // no deploy and deleted once the list carries it. The logging rule of 3.3 holds: a statement's
 // kind, its first table name and the first 12 hex characters of its text's SHA-256, never the
-// text or its parameters.
+// text or its parameters. The same three facts are counted per digest in `ts_db_unlisted`
+// (migrations/0004_db_unlisted.sql, HR-K2#3), refused and run apart, so a statement the recording
+// missed is visible after the isolate that saw it is gone: `GET /control/db-unlisted` under the
+// database bearer answers the rows, and `realtime-env.mjs db-unlisted` prints their number.
 import { statementAllowed } from '@turboslide/realtime/d1-statements';
 
 import list from './db-statements.json';
@@ -50,11 +53,100 @@ export async function statementDigest(sql: string): Promise<string> {
   return [...digest.slice(0, 6)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+/** The most rows `ts_db_unlisted` takes; past it a known digest still counts (0004_db_unlisted.sql). */
+export const UNLISTED_ROWS_MAX = 500;
+
+/** One row of `GET /control/db-unlisted`: no text and no parameter, only what the log line carries. */
+export type UnlistedRow = {
+  digest: string;
+  kind: string;
+  table: string | null;
+  refused: number;
+  ran: number;
+  firstAt: number;
+  lastAt: number;
+};
+
+/**
+ * Adds one to the digest's row of `ts_db_unlisted`, refused or run. A failure (a database the
+ * migration has not reached) is a log line and never changes the answer.
+ */
+export async function countUnlisted(
+  db: D1Database,
+  entry: { digest: string; kind: string; table: string | null; outcome: 'refused' | 'ran' },
+  now = Date.now(),
+): Promise<void> {
+  const refused = entry.outcome === 'refused' ? 1 : 0;
+  const ran = 1 - refused;
+  try {
+    const known = await db
+      .prepare(
+        'UPDATE ts_db_unlisted SET refused = refused + ?, ran = ran + ?, last_at = ? WHERE digest = ?',
+      )
+      .bind(refused, ran, now, entry.digest)
+      .run();
+    if ((known.meta.changes ?? 0) > 0) return;
+    await db
+      .prepare(
+        'INSERT INTO ts_db_unlisted (digest, kind, tbl, refused, ran, first_at, last_at) SELECT ?, ?, ?, ?, ?, ?, ? WHERE (SELECT count(*) FROM ts_db_unlisted) < ? ON CONFLICT (digest) DO UPDATE SET refused = refused + excluded.refused, ran = ran + excluded.ran, last_at = excluded.last_at',
+      )
+      .bind(entry.digest, entry.kind, entry.table, refused, ran, now, now, UNLISTED_ROWS_MAX)
+      .run();
+  } catch (error) {
+    console.warn(
+      JSON.stringify({
+        message: 'db.unlisted.count failed',
+        digest: entry.digest,
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
+  }
+}
+
+/** `GET /control/db-unlisted`: every counted digest, the latest first. */
+export async function dbUnlistedAnswer(db: D1Database): Promise<Response> {
+  try {
+    const result = await db
+      .prepare(
+        'SELECT digest, kind, tbl, refused, ran, first_at, last_at FROM ts_db_unlisted ORDER BY last_at DESC',
+      )
+      .all<{
+        digest: string;
+        kind: string;
+        tbl: string | null;
+        refused: number;
+        ran: number;
+        first_at: number;
+        last_at: number;
+      }>();
+    const rows: UnlistedRow[] = result.results.map((row) => ({
+      digest: row.digest,
+      kind: row.kind,
+      table: row.tbl,
+      refused: row.refused,
+      ran: row.ran,
+      firstAt: row.first_at,
+      lastAt: row.last_at,
+    }));
+    return json({ shapes: rows.length, rows });
+  } catch {
+    return json(
+      { error: 'unset', message: 'ts_db_unlisted is not made; run worker-migrate (0004)' },
+      503,
+    );
+  }
+}
+
 /**
  * The refusal of the statements that are not in the list, or null when every one may run. In
- * `report` mode nothing is refused and each unlisted statement is logged.
+ * `report` mode nothing is refused and each unlisted statement is logged. Either way each one is
+ * counted in `ts_db_unlisted`.
  */
-async function unlisted(statements: DbStatement[], mode: StatementMode): Promise<Response | null> {
+async function unlisted(
+  db: D1Database,
+  statements: DbStatement[],
+  mode: StatementMode,
+): Promise<Response | null> {
   for (let index = 0; index < statements.length; index += 1) {
     const sql = statements[index]!.sql;
     if (statementAllowed(sql, ALLOWED_STATEMENTS)) continue;
@@ -70,6 +162,7 @@ async function unlisted(statements: DbStatement[], mode: StatementMode): Promise
           digest,
         }),
       );
+      await countUnlisted(db, { digest, ...shape, outcome: 'ran' });
       continue;
     }
     dbCounters.refused += 1;
@@ -82,6 +175,7 @@ async function unlisted(statements: DbStatement[], mode: StatementMode): Promise
         index,
       }),
     );
+    await countUnlisted(db, { digest, ...shape, outcome: 'refused' });
     return json(
       {
         error: 'statement_not_allowed',
@@ -147,7 +241,7 @@ export async function dbQuery(
 ): Promise<Response> {
   if (!isStatement(body))
     return json({ error: 'invalid', message: 'the body is { sql, params? }' }, 400);
-  const refusal = await unlisted([body], mode);
+  const refusal = await unlisted(db, [body], mode);
   if (refusal !== null) return refusal;
   dbCounters.queries += 1;
   dbCounters.statements += 1;
@@ -195,7 +289,7 @@ export async function dbBatch(
       { error: 'invalid', message: 'the body is { statements: [{ sql, params? }] }, 1 to 100' },
       400,
     );
-  const refusal = await unlisted(statements, mode);
+  const refusal = await unlisted(db, statements, mode);
   if (refusal !== null) return refusal;
   dbCounters.batches += 1;
   dbCounters.statements += statements.length;

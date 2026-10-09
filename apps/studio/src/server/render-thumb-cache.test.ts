@@ -169,7 +169,7 @@ describe('the thumbnail cache rule by standing (HR-SD#5, CRIT-M2)', () => {
     expect(published.headers.get('cache-control')).toBe('public, max-age=31536000, immutable');
   });
 
-  it('answers private, no-store to the owner, a grant holder, a link holder and the admin', async () => {
+  it('answers the owner, a grant holder, a link holder and the admin privately', async () => {
     for (const reader of ['owner', 'guest', 'linked', 'admin']) {
       for (const stamped of [true, false]) {
         const answer = await thumb('kept-deck', { reader, stamped });
@@ -178,12 +178,21 @@ describe('the thumbnail cache rule by standing (HR-SD#5, CRIT-M2)', () => {
           stamped,
           status: 200,
         });
-        expect(answer.headers.get('cache-control')).toBe('private, no-store');
+        // the stamped current pixels stay in the reader's own browser for a year (the cards on
+        // /decks are not asked for again on the next visit); no shared cache keeps either answer
+        expect(answer.headers.get('cache-control')).toBe(
+          stamped ? 'private, max-age=31536000, immutable' : 'private, no-store',
+        );
       }
     }
+    // an older copy under a stamped URL is the reader's alone and never kept
+    next = bytes({ fresh: false, stamp: 'aaaa0001' });
+    const older = await thumb('kept-deck', { reader: 'owner' });
+    expect(older.headers.get('cache-control')).toBe('private, no-store');
+    next = bytes();
     // the admin reaches an open deck as the admin: the answer is the admin's alone as well
     const own = await thumb('open-deck', { reader: 'admin' });
-    expect(own.headers.get('cache-control')).toBe('private, no-store');
+    expect(own.headers.get('cache-control')).toBe('private, max-age=31536000, immutable');
   });
 
   it('keeps an answer under the grant no longer than the grant and never immutable', async () => {
@@ -211,11 +220,15 @@ describe('the thumbnail cache rule by standing (HR-SD#5, CRIT-M2)', () => {
       const answer = await thumb(deck, { reader });
       expect(answer.status).toBe(302);
       expect(answer.headers.get('location')).toBe('https://fake.blob.local/t.png');
-      expect(answer.headers.get('cache-control')).toBe('private, no-store');
+      // stamped: an hour in the reader's browser alone; the migration's delete bounds it
+      expect(answer.headers.get('cache-control')).toBe('private, max-age=3600');
+      const unstamped = await thumb(deck, { reader, stamped: false });
+      expect(unstamped.status).toBe(302);
+      expect(unstamped.headers.get('cache-control')).toBe('private, no-store');
     }
     const granted = await thumb('kept-deck', { grant: signThumbGrant('kept-deck', 'viewer') });
     expect(granted.status).toBe(302);
-    expect(granted.headers.get('cache-control')).toBe('private, no-store');
+    expect(granted.headers.get('cache-control')).toBe('private, max-age=3600');
   });
 
   it('refuses a stranger on a restricted deck with the missing deck answer and no public header', async () => {

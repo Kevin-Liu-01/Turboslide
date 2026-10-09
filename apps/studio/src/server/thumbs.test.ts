@@ -17,6 +17,8 @@ import {
 import {
   IMMUTABLE_CACHE_CONTROL,
   PRIVATE_CACHE_CONTROL,
+  PRIVATE_IMMUTABLE_CACHE_CONTROL,
+  PRIVATE_REDIRECT_CACHE_CONTROL,
   REVALIDATE_CACHE_CONTROL,
   isThumbStamp,
   slideStamp,
@@ -91,8 +93,9 @@ describe('the thumbnail headers (SPEC-4 0.31)', () => {
     expect(stored.headers.get('location')).toBe(
       'https://fake.blob.local/decks/gt-brand/.thumbs/aaaa0002/dark@320/title.png',
     );
-    // the redirect names the stored object: no shared cache keeps it, whoever asked (HR-SD#5)
-    expect(stored.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
+    // the redirect names the stored object: no shared cache keeps it, whoever asked (HR-SD#5);
+    // the reader's browser keeps the stamped current one an hour
+    expect(stored.headers.get('cache-control')).toBe(PRIVATE_REDIRECT_CACHE_CONTROL);
     const body = thumbResponse(result({ fresh: false, stamp: 'aaaa0001' }), request, {
       revisionInUrl: false,
       standing: open,
@@ -136,11 +139,36 @@ describe('who may keep a thumbnail (hardening HR-SD#5, CRIT-M2)', () => {
         expect(stamped).toBe(IMMUTABLE_CACHE_CONTROL);
         expect(unstamped).toBe(REVALIDATE_CACHE_CONTROL);
       } else {
-        expect(stamped).toBe(PRIVATE_CACHE_CONTROL);
+        // the reader's own browser keeps the stamped current pixels; no shared cache keeps either
+        expect(stamped).toBe(PRIVATE_IMMUTABLE_CACHE_CONTROL);
         expect(unstamped).toBe(PRIVATE_CACHE_CONTROL);
       }
     }
     expect(PRIVATE_CACHE_CONTROL).toBe('private, no-store');
+    expect(PRIVATE_IMMUTABLE_CACHE_CONTROL).toBe('private, max-age=31536000, immutable');
+  });
+
+  it("lets a restricted reader's browser keep the stamped current pixels, and nothing else", () => {
+    const stamped = { ...request, r: 'aaaa0002' };
+    for (const via of ['owner', 'grant', 'link', 'agent', 'admin'] as const) {
+      expect(
+        thumbHeaders(result(), stamped, { revisionInUrl: true, standing: { via } })[
+          'cache-control'
+        ],
+      ).toBe('private, max-age=31536000, immutable');
+      // an older copy under the stamped URL is never kept: the next visit reads the new one
+      expect(
+        thumbHeaders(result({ fresh: false }), stamped, {
+          revisionInUrl: true,
+          standing: { via },
+        })['cache-control'],
+      ).toBe(PRIVATE_CACHE_CONTROL);
+      expect(
+        thumbHeaders(result(), request, { revisionInUrl: false, standing: { via } })[
+          'cache-control'
+        ],
+      ).toBe(PRIVATE_CACHE_CONTROL);
+    }
   });
 
   it('keeps an answer under a grant at the CDN no longer than the grant, never immutable', () => {
@@ -192,7 +220,26 @@ describe('who may keep a thumbnail (hardening HR-SD#5, CRIT-M2)', () => {
         options,
       );
       expect(stored.status).toBe(302);
-      expect(stored.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
+      // the stamped current pixels: an hour in the reader's browser alone, never a shared cache
+      expect(stored.headers.get('cache-control')).toBe(PRIVATE_REDIRECT_CACHE_CONTROL);
+      expect(PRIVATE_REDIRECT_CACHE_CONTROL).toBe('private, max-age=3600');
+      const older = thumbResponse(
+        result({
+          kind: 'stored',
+          url: 'https://fake.blob.local/x.png',
+          source: 'blob',
+          fresh: false,
+        }),
+        { ...request, r: 'aaaa0002' },
+        options,
+      );
+      expect(older.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
+      const unstamped = thumbResponse(
+        result({ kind: 'stored', url: 'https://fake.blob.local/x.png', source: 'blob' }),
+        request,
+        { ...options, revisionInUrl: false },
+      );
+      expect(unstamped.headers.get('cache-control')).toBe(PRIVATE_CACHE_CONTROL);
       const pending = thumbResponse(
         result({ kind: 'pending', source: 'render', cached: false, fresh: false }),
         { ...request, r: 'aaaa0002' },

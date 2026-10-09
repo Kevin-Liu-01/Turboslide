@@ -32,8 +32,9 @@ import type { RenderGrantTarget } from '../../server/tokens';
 // object on a public store; a request without one answers the newest stored thumbnail and renders
 // the current one after the response. Who may keep the answer follows the reader's standing
 // (hardening HR-SD#5, server/thumbs.ts thumbCacheControl): the public rules for a deck open to
-// everyone or the published player, the grant's remaining life for a URL with the grant, and
-// `private, no-store` for everyone else and for every 302. The worker is reached over HTTP when
+// everyone or the published player, the grant's remaining life for a URL with the grant, and a
+// private rule for everyone else and for every 302 (the reader's browser alone keeps a stamped
+// answer of the current pixels, a body a year and a 302 an hour). The worker is reached over HTTP when
 // TURBOSLIDE_WORKER_URL is set; otherwise the same job runs in this process through the local queue,
 // which drives the turboslide CLI as a child process where the binary exists, so headless Chromium
 // never runs inside the web app (SPEC 3.3 item 7), and through runCli() in this process inside a

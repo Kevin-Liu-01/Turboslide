@@ -83,6 +83,18 @@ export const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 export const REVALIDATE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=86400';
 /** The cache rule of an answer that only its own reader may see: no shared cache and no browser copy keep it. */
 export const PRIVATE_CACHE_CONTROL = 'private, no-store';
+/**
+ * The cache rule of a stamped answer of the current pixels to a reader who may see them alone (the
+ * owner's own card on /decks): the reader's browser keeps it for a year, since the stamp names the
+ * pixels, and no shared cache keeps it (`private`), so CRIT-M2 stays closed.
+ */
+export const PRIVATE_IMMUTABLE_CACHE_CONTROL = 'private, max-age=31536000, immutable';
+/**
+ * The cache rule of a 302 to the stored object of a stamped answer of the current pixels: an hour
+ * in the reader's browser alone. Not a year: the storage migration's `delete` removes the public
+ * copy of `.thumbs/`, and a redirect kept past it would point at nothing.
+ */
+export const PRIVATE_REDIRECT_CACHE_CONTROL = 'private, max-age=3600';
 
 /**
  * How the reader reached the deck, which decides who may keep the answer (hardening HR-SD#5,
@@ -630,9 +642,10 @@ export async function getThumbnail(
  * `via: 'publish'`) gets the public rules: immutable for a year when the URL names the stamp of
  * the current pixels, a minute at the CDN otherwise. A URL that carries the thumbnail grant is
  * kept at the CDN for no longer than the grant is good for, and never immutable. Every other
- * reader (the owner, a grant holder, a link holder, an agent, the admin) gets
- * `private, no-store`, so no shared cache keeps a restricted deck's picture under a URL that
- * anyone may request.
+ * reader (the owner, a grant holder, a link holder, an agent, the admin) gets a `private` rule,
+ * so no shared cache keeps a restricted deck's picture under a URL that anyone may request: their
+ * own browser keeps a stamped answer of the current pixels for a year (the cards on /decks are
+ * read from it on the next visit), and nothing keeps any other answer.
  */
 export function thumbCacheControl(options: {
   revisionInUrl: boolean;
@@ -648,7 +661,16 @@ export function thumbCacheControl(options: {
   }
   if (standing.via === 'open' || standing.via === 'publish')
     return options.revisionInUrl ? IMMUTABLE_CACHE_CONTROL : REVALIDATE_CACHE_CONTROL;
-  return PRIVATE_CACHE_CONTROL;
+  return options.revisionInUrl ? PRIVATE_IMMUTABLE_CACHE_CONTROL : PRIVATE_CACHE_CONTROL;
+}
+
+/**
+ * The cache rule of a 302 to the stored object: never a shared cache, since its location is the
+ * stored object's URL; an hour in the reader's browser when the URL names the stamp of the
+ * current pixels, so the owner's cards on /decks do not ask the function again on every visit.
+ */
+export function thumbRedirectCacheControl(revisionInUrl: boolean): string {
+  return revisionInUrl ? PRIVATE_REDIRECT_CACHE_CONTROL : PRIVATE_CACHE_CONTROL;
 }
 
 /** The response headers every thumbnail answer carries, redirect or body. */
@@ -679,9 +701,9 @@ export function thumbHeaders(
 /**
  * The HTTP response for a thumbnail: a 302 to the store's URL for a stored answer on a public
  * store, the PNG body otherwise. The body's cache rule is `thumbCacheControl`'s. The 302 is
- * `private, no-store` for every reader (HR-SD#5): its location is the stored object's URL, which
- * no shared cache may hand to another requester, and which the storage migration deletes, so a
- * redirect kept for a year would point at nothing.
+ * `private` for every reader (HR-SD#5): its location is the stored object's URL, which no shared
+ * cache may hand to another requester, and which the storage migration deletes, so a redirect is
+ * kept an hour at most, by the reader's browser alone (`thumbRedirectCacheControl`).
  */
 export function thumbResponse(
   result: ThumbResult,
@@ -704,7 +726,11 @@ export function thumbResponse(
   if (result.kind === 'stored' && result.url !== undefined) {
     return new Response(null, {
       status: 302,
-      headers: { ...headers, 'cache-control': PRIVATE_CACHE_CONTROL, location: result.url },
+      headers: {
+        ...headers,
+        'cache-control': thumbRedirectCacheControl(options.revisionInUrl && result.fresh),
+        location: result.url,
+      },
     });
   }
   const png = result.png ?? new Uint8Array(new ArrayBuffer(0));

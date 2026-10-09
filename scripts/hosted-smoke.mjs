@@ -793,6 +793,14 @@ const isPrivateNoStore = (value) =>
   /\bprivate\b/.test(value ?? '') && /\bno-store\b/.test(value ?? '');
 
 /**
+ * True for a value only the reader's own browser may keep: `private` and no shared cache rule. A
+ * stamped answer of the current pixels is kept that way since the HR-SD#5 fix (a body a year, a
+ * 302 to the stored object an hour).
+ */
+const isPrivateOnly = (value) =>
+  /\bprivate\b/.test(value ?? '') && !/\bpublic\b|s-maxage/.test(value ?? '');
+
+/**
  * The thumbnail cache (SPEC-4 0.31; b4.md R11; hardening HR-SD#5, CRIT-M2), asked with the
  * smoke's own identity cookie on the open seed deck: who may keep an answer follows the reader's
  * standing, and a stranger reaches the open deck through its general access (`via: 'open'`), so
@@ -800,7 +808,8 @@ const isPrivateNoStore = (value) =>
  * `public, s-maxage=60, stale-while-revalidate=86400` (a local server; the CDN rewrites it on
  * https), or a 302 to the stored object on a public store, which is `private, no-store` for
  * every reader since HR-SD#5. With `r=<stamp>` twice: the second answer a 200 body immutable for
- * a year (a CDN hit on https), or the same private 302.
+ * a year (a CDN hit on https), or a private 302 (an hour in the reader's browser since the HR-SD#5
+ * fix).
  */
 async function thumbnailRows(base, deck, timeoutMs, cookie) {
   const https = base.startsWith('https:');
@@ -810,10 +819,10 @@ async function thumbnailRows(base, deck, timeoutMs, cookie) {
   const plain = await probe(base, path, timeoutMs, init);
   const stamp = plain.headers['x-turboslide-stamp'] ?? null;
   const rows = [];
-  const storedRedirect = (r) =>
+  const storedRedirect = (r, rule = isPrivateNoStore) =>
     r.status === 302 &&
     /\.blob\.vercel-storage\.com\//.test(r.location) &&
-    isPrivateNoStore(r.headers['cache-control']);
+    rule(r.headers['cache-control']);
   const where = (r) =>
     `${r.status}${r.status === 302 ? ` -> ${r.location.replace(/\?.*$/, '').slice(0, 60)}` : ''}; ${r.headers['cache-control'] ?? 'no cache-control'}; ${r.headers['x-vercel-cache'] ?? 'no CDN'}${r.headers['set-cookie'] ? '; set-cookie present (the CDN does not cache it)' : ''}`;
   rows.push({
@@ -864,14 +873,14 @@ async function thumbnailRows(base, deck, timeoutMs, cookie) {
     row: {
       name: 'thumbnail with r twice',
       expect:
-        'with the identity cookie on the open deck: the second answer a 200 body immutable for a year (x-vercel-cache HIT on https), or a 302 to the stored object with private, no-store',
+        'with the identity cookie on the open deck: the second answer a 200 body immutable for a year (x-vercel-cache HIT on https), or a 302 to the stored object that is private',
       detail: () =>
         `first ${first.status} ${first.headers['x-vercel-cache'] ?? '-'} ${first.headers['x-turboslide-source'] ?? ''}; second ${where(second)} ${second.headers['x-turboslide-source'] ?? ''}`,
     },
     r: second,
     ok:
       second.error === undefined &&
-      (storedRedirect(second) || (body && immutable && (!https || cache === 'HIT'))),
+      (storedRedirect(second, isPrivateOnly) || (body && immutable && (!https || cache === 'HIT'))),
   });
   return rows;
 }
@@ -957,6 +966,8 @@ async function removeScratchDeck(base, scratch, headers) {
  * its thumbnail, asked with the bearer and no grant in the URL, answers `private, no-store`, and
  * no shared cache keeps it for the next requester of the URL. The request names no stamp, so the
  * route renders the slide now; an answer still rendering (204) is asked again, at most four times.
+ * The same URL with that answer's stamp (`r`, as a card on /decks asks) may be kept by the
+ * reader's browser alone: `private` and no shared cache rule, never `public`.
  */
 async function restrictedThumbnailRow(base, scratch, headers, timeoutMs) {
   const name = 'restricted thumbnail private';
@@ -977,13 +988,20 @@ async function restrictedThumbnailRow(base, scratch, headers, timeoutMs) {
   }
   const last = answers[answers.length - 1];
   const picture = last.status === 200 || last.status === 302;
+  const stamp = last.headers['x-turboslide-stamp'] ?? null;
+  const stamped =
+    picture && stamp !== null
+      ? await probe(base, `${path}&r=${encodeURIComponent(stamp)}`, Math.max(timeoutMs, 90_000), {
+          headers,
+        })
+      : null;
   return {
     row: {
       name,
       expect:
-        "the restricted scratch deck's thumbnail, with the bearer and no grant: a 200 body or a 302 with private, no-store, and no answer public",
+        "the restricted scratch deck's thumbnail, with the bearer and no grant: a 200 body or a 302 with private, no-store, and with its stamp a private answer; no answer public",
       detail: () =>
-        `${answers.map((r) => `${r.status} ${r.headers['cache-control'] ?? 'no cache-control'}`).join('; ')}`,
+        `${answers.map((r) => `${r.status} ${r.headers['cache-control'] ?? 'no cache-control'}`).join('; ')}; with r ${stamped === null ? 'not asked (no stamp)' : `${stamped.status} ${stamped.headers['cache-control'] ?? 'no cache-control'}`}`,
     },
     r: last,
     ok:
@@ -991,7 +1009,11 @@ async function restrictedThumbnailRow(base, scratch, headers, timeoutMs) {
       picture &&
       answers.every(
         (r) => ![200, 204, 302].includes(r.status) || isPrivateNoStore(r.headers['cache-control']),
-      ),
+      ) &&
+      (stamped === null ||
+        (stamped.error === undefined &&
+          (![200, 204, 302].includes(stamped.status) ||
+            isPrivateOnly(stamped.headers['cache-control'])))),
   };
 }
 

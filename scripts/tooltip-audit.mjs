@@ -12,15 +12,15 @@
 // element whose only tooltip is a native `title` is reported apart as title-only (the browser's
 // plain title after its own delay, without the name, sentence and key plate) and fails the audit
 // only under --strict; a Seg option, a menu item, an input, a select, a link and anything with a
-// button or option role is interactive; `<option>` elements, the hidden native mirrors of the
-// composite controls (.ts-native-mirror), the sheet's own content (.ts-sheet, .ts-stage) and
-// elements under [aria-hidden="true"] are not. The audit opens the surfaces a first look does
-// not show: the Insert and Export menus, the palette, a slide row's menu, and, with --edit, the
-// inspector with a block selected. Against a server on this checkout (a localhost base) it also
-// seeds a scratch deck with one freeform slide, decks/tooltip-audit, selects a positioned block
-// there and walks the stage's handles and the arrange bar, then removes the deck; elsewhere pass
-// --freeform-url <edit url of a freeform slide> or the surface is skipped and said so. Exit 0
-// when every page is covered, 1 when an element is missing, 2 when a page could not be walked.
+// button or option role is interactive; `<option>` elements, the sheet's own content (.ts-sheet,
+// .ts-stage) and elements under [aria-hidden="true"] or [hidden] (a closed dropdown's list) are
+// not. The audit opens the surfaces a first look does not show: the Insert and Export menus, the
+// palette, a slide row's menu, and, with --edit, the inspector with a block selected. Against a
+// server on this checkout (a localhost base) it also seeds a scratch deck with one freeform slide,
+// decks/tooltip-audit, selects a positioned block there and walks the stage's handles and the
+// arrange bar, then removes the deck; elsewhere pass --freeform-url <edit url of a freeform slide>
+// or the surface is skipped and said so. Exit 0 when every page is covered, 1 when an element is
+// missing, 2 when a page could not be walked.
 // Since the focus round (docs/FOCUS.md 3.1) the audit runs in two passes: the default view (Tools
 // > Advanced tools off, the parked controls absent) and, with `--advanced`, the switch on (the
 // page's `ts-editor-settings` seeded with `{ "advancedTools": true }` before the load), so every
@@ -87,8 +87,8 @@ const FREEFORM_SLIDE = 'freeform';
 const INTERACTIVE =
   'button, a[href], input, select, textarea, summary, [role="button"], [role="option"], [role="menuitem"], [role="tab"], [role="switch"], [role="checkbox"], [contenteditable="true"], [tabindex]:not([tabindex="-1"])';
 
-/** Where the audit does not look: the rendered sheet and its stage, the hidden mirrors, hidden trees. */
-const EXCLUDED = '.ts-sheet, .ts-stage, .ts-native-mirror, [aria-hidden="true"], [hidden], option';
+/** Where the audit does not look: the rendered sheet and its stage, hidden trees. */
+const EXCLUDED = '.ts-sheet, .ts-stage, [aria-hidden="true"], [hidden], option';
 
 /**
  * Runs inside the page: every interactive element outside the excluded regions that does not

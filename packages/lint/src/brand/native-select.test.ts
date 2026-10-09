@@ -3,14 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, test } from 'vitest';
 
-import {
-  NATIVE_SELECT_ALLOWED,
-  isAllowedNativeSelect,
-  nativeSelects,
-  scanNativeSelects,
-  selectOptionCalls,
-  staleNativeSelectAllowances,
-} from './native-select.ts';
+import { nativeSelects, scanNativeSelects, selectOptionCalls } from './native-select.ts';
 
 // The native select stays out (docs/DROPDOWNS.md 6): both rules on fixtures, then the whole tree.
 
@@ -79,14 +72,7 @@ describe('dropdowns/no-select-option', () => {
 
 describe('the tree', () => {
   /* about 3,000 files listed and the few that name either word parsed; the bound is for a loaded machine */
-  test('carries no native select and no selectOption call outside the allow list', () => {
-    const findings = scanNativeSelects(ROOT);
-    expect(findings.filter((found) => !isAllowedNativeSelect(found))).toEqual([]);
-    /* the allow list only shrinks: every entry names a file of DROPDOWNS.md 2.1 or 2.6 once */
-    const keys = NATIVE_SELECT_ALLOWED.map((allowed) => `${allowed.rule} ${allowed.file}`);
-    expect(new Set(keys).size).toBe(keys.length);
-    expect(NATIVE_SELECT_ALLOWED.length).toBeLessThanOrEqual(38);
-    /* the stale allowances are the integrator's to remove; they are read, never a failure */
-    expect(Array.isArray(staleNativeSelectAllowances(ROOT, findings))).toBe(true);
+  test('carries no native select and no selectOption call', () => {
+    expect(scanNativeSelects(ROOT)).toEqual([]);
   }, 120_000);
 });

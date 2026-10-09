@@ -170,7 +170,9 @@ describe('the DOM and its ARIA (3.2)', () => {
 
   it('renders on the server with no select, no window and stable ids', () => {
     const html = renderToString(<Harness initial="next" name="role" />);
-    expect(html).not.toContain('<select');
+    const parsed = document.createElement('template');
+    parsed.innerHTML = html;
+    expect(parsed.content.querySelector('select')).toBeNull();
     expect(html).toContain('role="combobox"');
     expect(html).toContain('role="listbox"');
     expect(html).toMatch(/<div[^>]*role="listbox"[^>]*hidden=""/);

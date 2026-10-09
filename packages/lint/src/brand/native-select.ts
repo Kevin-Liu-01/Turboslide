@@ -33,57 +33,6 @@ export type NativeSelectFinding = {
   text: string;
 };
 
-/**
- * The files that still held a native select or a selectOption call at DD-C#1 (0e0a5752), which the
- * swap lanes S1 and S2 empty in their pushes (DROPDOWNS.md 2.1 and 2.6). A finding in one of them
- * passes until the integrator empties this list and the lint enforces on the whole tree; a file
- * that holds no finding any more is a stale allowance, listed by `staleNativeSelectAllowances`.
- */
-export const NATIVE_SELECT_ALLOWED: readonly { file: string; rule: NativeSelectRule }[] = [
-  ...[
-    'apps/studio/src/routes/decks.index.tsx',
-    'apps/studio/src/routes/dev.auth.tsx',
-    'apps/studio/src/routes/print.$deckId.tsx',
-    'packages/chrome/src/AssetPicker.tsx',
-    'packages/chrome/src/ThemesPanel.tsx',
-    'packages/chrome/src/YouNeedAccess.tsx',
-    'packages/chrome/src/comments/CommentsPanel.tsx',
-    'packages/chrome/src/dialogs/Download.tsx',
-    'packages/chrome/src/dialogs/Link.tsx',
-    'packages/chrome/src/dialogs/MoreFonts.tsx',
-    'packages/chrome/src/dialogs/Publish.tsx',
-    'packages/chrome/src/dialogs/RequestAccess.tsx',
-    'packages/chrome/src/dialogs/Share.tsx',
-    'packages/chrome/src/dialogs/SpecialCharacters.tsx',
-    'packages/chrome/src/inspector/asset.tsx',
-    'packages/chrome/src/inspector/chart.tsx',
-    'packages/chrome/src/inspector/dither.tsx',
-    'packages/chrome/src/inspector/fields.tsx',
-    'packages/chrome/src/inspector/icon.tsx',
-    'packages/chrome/src/inspector/json.tsx',
-    'packages/chrome/src/inspector/palette.tsx',
-    'packages/chrome/src/inspector/seg.tsx',
-    'packages/chrome/src/inspector/select.tsx',
-    'packages/chrome/src/inspector/shader.tsx',
-    'packages/chrome/src/inspector/table.tsx',
-    'packages/viewer/src/InlineText.tsx',
-  ].map((file) => ({ file, rule: 'dropdowns/no-native-select' as const })),
-  ...[
-    'apps/studio/e2e/accounts.spec.ts',
-    'apps/studio/e2e/charts.spec.ts',
-    'apps/studio/e2e/core/brand.spec.ts',
-    'apps/studio/e2e/core/chrome-surfaces.ts',
-    'apps/studio/e2e/core/export.spec.ts',
-    'apps/studio/e2e/core/present.spec.ts',
-    'apps/studio/e2e/core/share.spec.ts',
-    'apps/studio/e2e/home.spec.ts',
-    'apps/studio/e2e/share.spec.ts',
-    'scripts/layout-shift-audit.mjs',
-    'scripts/probes/core-walk/areas/brand.mjs',
-    'scripts/probes/core-walk/areas/export.mjs',
-  ].map((file) => ({ file, rule: 'dropdowns/no-select-option' as const })),
-];
-
 /** Generated and installed files the scan never reads. */
 const GENERATED: readonly RegExp[] = [
   /(^|\/)node_modules\//,
@@ -156,14 +105,7 @@ export function selectOptionCalls(file: string, text: string): NativeSelectFindi
   return found;
 }
 
-/** True when the allow list takes the finding. */
-export function isAllowedNativeSelect(found: NativeSelectFinding): boolean {
-  return NATIVE_SELECT_ALLOWED.some(
-    (allowed) => allowed.file === found.file && allowed.rule === found.rule,
-  );
-}
-
-/** Every finding of both rules in the tree at `root`, the allowed ones included. */
+/** Every finding of both rules in the tree at `root`; the tree test holds it empty. */
 export function scanNativeSelects(root: string): NativeSelectFinding[] {
   const files = listFiles(root, NATIVE_SELECT_ROOTS).filter(
     (file) => SCRIPT.test(file) && !GENERATED.some((re) => re.test(file)),
@@ -172,15 +114,4 @@ export function scanNativeSelects(root: string): NativeSelectFinding[] {
     const text = readFileSync(join(root, file), 'utf8');
     return [...nativeSelects(file, text), ...selectOptionCalls(file, text)];
   });
-}
-
-/** The allowances that take no finding of the tree at `root`: the integrator removes them. */
-export function staleNativeSelectAllowances(
-  root: string,
-  findings: readonly NativeSelectFinding[] = scanNativeSelects(root),
-): { file: string; rule: NativeSelectRule }[] {
-  return NATIVE_SELECT_ALLOWED.filter(
-    (allowed) =>
-      !findings.some((found) => found.file === allowed.file && found.rule === allowed.rule),
-  );
 }

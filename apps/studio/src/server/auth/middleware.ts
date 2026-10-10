@@ -45,3 +45,29 @@ export function principalMiddleware() {
     return next();
   });
 }
+
+/**
+ * The merge question before the pages that list or open decks (HR-SA#2b; verifier pass 2,
+ * regression finding 1): a document load of such a page by a signed in browser whose decks made
+ * before the sign in wait for an answer goes to /signin with the page as `next` (307), where the
+ * question is asked; the answer returns to the page. A runtime that cannot answer lets the
+ * request through, as an unanswered store does in `linkOrAsk`.
+ */
+export function mergeAskMiddleware() {
+  return createMiddleware({ type: 'request' }).server(async ({ request, next, pathname }) => {
+    let location: string | null = null;
+    try {
+      // the runtime's module loads with the first request, as start.ts loads this one: room.ts and
+      // authorize.ts import this file for the session secret, and identity.ts stays out of their graph
+      const { identityRuntime, mergeAskLocation } = await import('./identity.ts');
+      location = await mergeAskLocation(identityRuntime(), request, pathname);
+    } catch {
+      location = null;
+    }
+    if (location === null) return next();
+    return new Response(null, {
+      status: 307,
+      headers: { location, 'cache-control': 'no-store' },
+    });
+  });
+}

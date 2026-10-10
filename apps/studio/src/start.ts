@@ -21,6 +21,9 @@ import type { AnyRequestMiddleware } from '@tanstack/react-start';
  *    access, `/api/x/*`, avatar, notify, auth, `/device`; `/s/*` on unsafe methods only). The agent
  *    surface (/api/actions, /api/agent, /mcp) stays a bearer surface with the browser `Origin`
  *    refusal of server/headers.ts, because agents send no Origin.
+ * 5. `mergeAskMiddleware()` (server/auth/middleware.ts) sends a document load of a page that lists
+ *    or opens decks to /signin while the browser's merge question is open (HR-SA#2b), so a sign
+ *    in from the editor's own window is asked too.
  *
  * The middlewares are server modules (the cookie reads the state folder, the headers module reads
  * node:crypto) and this file is imported by the client entry as well (hydrateStart reads the
@@ -30,7 +33,7 @@ import type { AnyRequestMiddleware } from '@tanstack/react-start';
  * start.ts > auth/middleware.ts > root.ts when the imports were static).
  */
 async function serverRequestMiddleware(): Promise<AnyRequestMiddleware[]> {
-  const [{ principalMiddleware }, headers] = await Promise.all([
+  const [{ mergeAskMiddleware, principalMiddleware }, headers] = await Promise.all([
     import('./server/auth/middleware'),
     import('./server/headers'),
   ]);
@@ -43,6 +46,7 @@ async function serverRequestMiddleware(): Promise<AnyRequestMiddleware[]> {
       filter: (ctx) => headers.csrfFilter(ctx),
       failureResponse: (ctx) => headers.csrfFailure(ctx),
     }),
+    mergeAskMiddleware(),
   ];
 }
 

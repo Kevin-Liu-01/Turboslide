@@ -44,6 +44,7 @@ import type {
   TokenProfile,
 } from '@turboslide/identity/resolve';
 import { bearerToken, requestRunId } from '@turboslide/agent/http/auth';
+import { signInHref } from '@turboslide/chrome/auth/auth-model';
 
 import { ensureDecks, isHosted, repoRoot, stateDir } from '../root';
 import { dbAliasStore, memoryAliasStore, mergePrincipalRecords } from './alias.ts';
@@ -76,6 +77,7 @@ import { flagOf, markSchemaCurrent, schemaIsCurrent, stampOf } from './schema.ts
 import { sessionSecret } from './secret.ts';
 import { redisSecondaryStorage } from './secondary-storage.ts';
 import type { RedisKvLike } from './secondary-storage.ts';
+import { routePath } from '../headers.ts';
 import { noteTiming } from '../server-timing.ts';
 import { boundPrincipal, ensurePrincipal, parseCookies, readPrincipal } from './session.ts';
 import type { EnsuredPrincipal } from './session.ts';
@@ -843,6 +845,49 @@ export async function mergeQuestion(
   if (found === null) return null;
   const outcome = await linkUnderSession(runtime, request, found, anonymous.id);
   return outcome.kind === 'question' ? outcome.question : null;
+}
+
+/**
+ * The pages a signed in browser with an open merge question opens only after it answers: the
+ * pages that list or open decks. The editor's own sign in window returns to the deck and reloads
+ * it (EditorRoot.tsx, a DROPDOWNS file until DD-C#2), so it never passed /signin, and the
+ * browser's decks stayed outside the account with no question asked (verifier pass 2, regression
+ * finding 1). Every way back to such a page is a document load, so the request middleware sends
+ * it to /signin with the page as `next`, the question is asked there, and the answer returns to
+ * the page.
+ */
+const MERGE_ASK_PAGES = /^\/(?:edit|deck|decks|new|present)(?:\/|$)/;
+
+/** True for a document load of a page that asks the open merge question first. */
+export function asksMergeOn(request: Request, pathname: string): boolean {
+  if (request.method !== 'GET') return false;
+  const destination = request.headers.get('sec-fetch-dest');
+  const document =
+    destination !== null
+      ? destination === 'document'
+      : (request.headers.get('accept') ?? '').includes('text/html');
+  if (!document) return false;
+  const path = routePath(pathname);
+  if (/^\/decks\/[^/]+\/assets\//.test(path)) return false;
+  return MERGE_ASK_PAGES.test(path);
+}
+
+/**
+ * Where a document load goes first while its browser's merge question is open (HR-SA#2b): the
+ * sign in page with the page as `next`, or null when nothing is asked. Only a request with an
+ * account session reads the question, so an anonymous visitor costs no store read.
+ */
+export async function mergeAskLocation(
+  runtime: IdentityRuntime,
+  request: Request,
+  pathname: string,
+): Promise<string | null> {
+  if (runtime.auth === null || !asksMergeOn(request, pathname)) return null;
+  if (sessionCacheKey(request) === null) return null;
+  const question = await mergeQuestion(runtime, request);
+  if (question === null) return null;
+  const url = new URL(request.url);
+  return signInHref(`${url.pathname}${url.search}`);
 }
 
 /**

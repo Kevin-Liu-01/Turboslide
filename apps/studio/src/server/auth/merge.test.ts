@@ -12,8 +12,10 @@ import type { ActionRequestFacts } from './actions.ts';
 import {
   KEEP_SEPARATE_COOKIE,
   answerMerge,
+  asksMergeOn,
   bindIdentityHooks,
   buildIdentityRuntime,
+  mergeAskLocation,
   mergeQuestion,
   requestIdentity,
 } from './identity.ts';
@@ -323,6 +325,122 @@ describe('the sign out keeps a browser whose decks are its own (verifier pass 1)
     expect(after.kind).toBe('anonymous');
     expect(after.principalId).not.toBe(browser.anonymousId);
     expect(await runtime.aliases.accountOf(after.principalId ?? '')).toBeNull();
+  });
+});
+
+/** A document load of a page in the browser, as Chromium sends it. */
+function documentLoad(path: string, cookie: string): Request {
+  return request(path, { cookie, headers: { 'sec-fetch-dest': 'document', accept: 'text/html' } });
+}
+
+describe('the editor sign in is asked on the next page load (verifier pass 2, regression 1)', () => {
+  let person = 40;
+  beforeEach(() => {
+    person += 1;
+    clientAddress = `203.0.113.${person}`;
+  });
+
+  test('a document load of a page that lists or opens decks asks while the question is open', () => {
+    const asks = (path: string, init: RequestInit = {}) =>
+      asksMergeOn(new Request(`${ORIGIN}${path}`, init), path);
+    const page = { headers: { 'sec-fetch-dest': 'document' } };
+    for (const path of ['/edit/deck-0', '/deck/deck-0', '/decks', '/new', '/present/deck-0'])
+      expect(asks(path, page), path).toBe(true);
+    // the router's reading of the path: case and the Kelvin sign
+    expect(asks('/Edit/deck-0', page)).toBe(true);
+    expect(asks('/dec%E2%84%AA/deck-0', page)).toBe(true);
+    // not the sign in page itself, the API, a server function, an asset, the link exchange or the embed
+    for (const path of [
+      '/signin',
+      '/api/access/deck-0',
+      '/_serverFn/abc',
+      '/decks/deck-0/assets/a.png',
+      '/s/abcdefghijklmnopqrstuv',
+      '/embed/deck-0',
+      '/home',
+    ])
+      expect(asks(path, page), path).toBe(false);
+    // only a document load: not a fetch, a picture or a POST
+    expect(asks('/edit/deck-0', { headers: { 'sec-fetch-dest': 'empty' } })).toBe(false);
+    expect(asks('/edit/deck-0', { headers: { 'sec-fetch-dest': 'image' } })).toBe(false);
+    expect(
+      asks('/edit/deck-0', { method: 'POST', headers: { 'sec-fetch-dest': 'document' } }),
+    ).toBe(false);
+    // a client without Sec-Fetch-Dest: the Accept header says a document
+    expect(asks('/edit/deck-0', { headers: { accept: 'text/html,*/*' } })).toBe(true);
+    expect(asks('/edit/deck-0', { headers: { accept: 'application/json' } })).toBe(false);
+  });
+
+  test('the reload after the editor sign in goes to /signin with the deck as next, then back', async () => {
+    const browser = await anonymousBrowser();
+    owned.set(browser.anonymousId, 1);
+    // the editor's window: the mail and the code, then the reload of the deck, never /signin
+    const { cookie, userId } = await signIn('editor-join@example.test', browser.cookie);
+    const reload = documentLoad('/edit/deck-0?edit=1', cookie);
+    expect(await mergeAskLocation(runtime, reload, '/edit/deck-0')).toBe(
+      `/signin?next=${encodeURIComponent('/edit/deck-0?edit=1')}`,
+    );
+    expect(await mergeAskLocation(runtime, documentLoad('/decks', cookie), '/decks')).toBe(
+      '/signin?next=%2Fdecks',
+    );
+    // the sign in page itself asks; it is never sent to itself
+    expect(await mergeAskLocation(runtime, documentLoad('/signin', cookie), '/signin')).toBeNull();
+    // Add It: the deck is the account's, and the deck opens with no detour
+    expect(await answerMerge(runtime, request('/signin', { cookie }), true)).toEqual({
+      linked: true,
+    });
+    expect(await runtime.aliases.accountOf(browser.anonymousId)).toBe(userId);
+    expect(await mergeAskLocation(runtime, reload, '/edit/deck-0')).toBeNull();
+    // the account's other browser reaches the deck
+    const elsewhere = await anonymousBrowser();
+    const second = await signIn('editor-join@example.test', elsewhere.cookie);
+    const there = await requestIdentity(request('/decks', { cookie: second.cookie }), runtime);
+    expect(there.ctx.principal?.aliases ?? []).toContain(browser.anonymousId);
+  });
+
+  test('Keep It Separate ends the detour, on this instance and on another', async () => {
+    const browser = await anonymousBrowser();
+    owned.set(browser.anonymousId, 1);
+    const { cookie } = await signIn('editor-keep@example.test', browser.cookie);
+    expect(
+      await mergeAskLocation(runtime, documentLoad('/edit/deck-0', cookie), '/edit/deck-0'),
+    ).not.toBeNull();
+    const answer = await answerMerge(runtime, request('/signin', { cookie }), false);
+    const kept = cookiesOf([answer?.setCookie ?? ''], cookie);
+    expect(
+      await mergeAskLocation(runtime, documentLoad('/edit/deck-0', kept), '/edit/deck-0'),
+    ).toBeNull();
+    const cold = build(true);
+    await cold.ready;
+    try {
+      expect(
+        await mergeAskLocation(cold, documentLoad('/edit/deck-0', kept), '/edit/deck-0'),
+      ).toBeNull();
+    } finally {
+      await cold.close();
+    }
+  });
+
+  test('no detour for a browser without decks, an anonymous visitor or a fetch', async () => {
+    const empty = await anonymousBrowser();
+    const signedIn = await signIn('editor-empty@example.test', empty.cookie);
+    expect(
+      await mergeAskLocation(
+        runtime,
+        documentLoad('/edit/deck-0', signedIn.cookie),
+        '/edit/deck-0',
+      ),
+    ).toBeNull();
+    const visitor = await anonymousBrowser();
+    owned.set(visitor.anonymousId, 1);
+    expect(
+      await mergeAskLocation(runtime, documentLoad('/edit/deck-0', visitor.cookie), '/edit/deck-0'),
+    ).toBeNull();
+    const browser = await anonymousBrowser();
+    owned.set(browser.anonymousId, 1);
+    const { cookie } = await signIn('editor-fetch@example.test', browser.cookie);
+    const fetchLoad = request('/edit/deck-0', { cookie, headers: { 'sec-fetch-dest': 'empty' } });
+    expect(await mergeAskLocation(runtime, fetchLoad, '/edit/deck-0')).toBeNull();
   });
 });
 

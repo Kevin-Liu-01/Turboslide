@@ -610,6 +610,18 @@ function securityChecks(base, deck, args) {
     detail: (r) =>
       `${r.status}; ${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
   });
+  /* the Kelvin sign U+212A lower cases to k, so /dec<U+212A>/<deck> renders the viewer as well; the
+     middleware receives it percent encoded and decodes it before the case (verifier pass 2, N1) */
+  rows.push({
+    name: `csp enforced /dec%E2%84%AA/${deck}`,
+    path: `/dec%E2%84%AA/${deck}`,
+    expect: 'the policy of /deck/<deck> on the path with the Kelvin sign: enforced with a nonce',
+    pass: (r) =>
+      /'nonce-[A-Za-z0-9+/=]+'/.test(r.headers['content-security-policy'] ?? '') &&
+      !('content-security-policy-report-only' in r.headers),
+    detail: (r) =>
+      `${r.status}; ${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
+  });
   rows.push({
     name: 'json asset attachment',
     path: `/decks/${deck}/assets/${args.jsonAsset ?? 'liquid-metal-diamond.recipe.json'}`,

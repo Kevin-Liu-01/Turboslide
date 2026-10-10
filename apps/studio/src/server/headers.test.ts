@@ -20,6 +20,7 @@ import {
   refuseForeignOrigin,
   refuseSpoofedLocalhost,
   requiresJsonBody,
+  routePath,
   securityHeadersFor,
   trustsProxy,
   withHeaders,
@@ -518,6 +519,36 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(isDocumentPath('/Newer')).toBe(false);
   });
 
+  it('decodes the path before it drops the case, so the Kelvin sign path enforces too (verifier pass 2, N1)', () => {
+    // U+212A lower cases to k, and the middleware receives it percent encoded, as new URL() writes it
+    expect('K'.toLowerCase()).toBe('k');
+    for (const path of [
+      '/dec%E2%84%AA/gt-brand',
+      '/DEC%E2%84%AA/gt-brand',
+      '/dec%e2%84%aa/gt-brand',
+      '/decK/gt-brand',
+      '/de%63k/gt-brand',
+      '/%45dit/gt-brand',
+    ]) {
+      expect(
+        routePath(path).startsWith('/deck/') || routePath(path).startsWith('/edit/'),
+        path,
+      ).toBe(true);
+      expect(isDocumentPath(path), path).toBe(true);
+      expect(cspMode({}, path), path).toBe('enforce');
+      const headers = securityHeadersFor(path, base);
+      expect(headers['content-security-policy'], path).toContain("'nonce-abc123'");
+      expect(headers['content-security-policy-report-only'], path).toBeUndefined();
+    }
+    // the API rule reads the decoded path as well: never cached, CSRF filtered
+    expect(securityHeadersFor('/%61pi/access/gt-brand', base)['cache-control']).toBe('no-store');
+    // a segment that does not decode is read as it came, and the rest of the path still decodes
+    expect(routePath('/dec%E2%84%AA/%ZZ')).toBe('/deck/%zz');
+    expect(routePath('/decks/%E0%A4%A')).toBe('/decks/%e0%a4%a');
+    expect(isDocumentPath('/decks/%E0%A4%A')).toBe(false);
+    expect(isDocumentPath('/dec%E2%84%AAs')).toBe(false);
+  });
+
   it('reads the extra embed ancestors from the variable, https names only', () => {
     expect(
       embedAncestors({
@@ -663,6 +694,19 @@ describe('the widened CSRF filter and the JSON rule (SPEC-3 8.7; report 04 F13)'
     });
     expect(requiresJsonBody(plain, '/API/Actions/slide.remove')).toBe(true);
     expect(contentTypeRefusal(plain, '/API/Actions/slide.remove')?.status).toBe(415);
+  });
+
+  it('filters a room route under the Kelvin sign as the router reaches it (verifier pass 2, N1)', () => {
+    // /api/dec<U+212A>s/<deck>/ops is the ops route to the router; the filter and the JSON rule read it so
+    const ops = '/api/dec%E2%84%AAs/q4/ops';
+    expect(csrfFilter(ctx(ops, 'POST')), ops).toBe(true);
+    expect(csrfFilter(ctx('/api/dec%E2%84%AAs/q4/stream', 'GET'))).toBe(true);
+    const plain = new Request(`http://localhost:4333${ops}`, {
+      method: 'POST',
+      headers: { 'content-type': 'text/plain' },
+      body: '{}',
+    });
+    expect(contentTypeRefusal(plain, ops)?.status).toBe(415);
   });
 
   it('requires application/json for a body on a JSON route and lets an empty body and other routes through', () => {

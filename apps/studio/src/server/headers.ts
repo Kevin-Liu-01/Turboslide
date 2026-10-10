@@ -131,9 +131,24 @@ export function embedAncestors(env: Env = process.env): string[] {
  * with `toLowerCase`), so `/Edit/<deck>` renders the editor and `/API/access/<deck>` reaches the
  * access route. Every path rule of this module reads this form, so a change of case cannot step
  * around the enforced policy, the CSRF filter or the JSON rule (hardening HR-W#2, verifier F1).
+ *
+ * The router also matches the decoded path, while the pathname this module receives still holds
+ * every character outside ASCII percent encoded (`new URL()` encodes it again after TanStack
+ * Start's `getNormalizedURL` decodes it). The Kelvin sign U+212A lower cases to `k`, so
+ * `/dec%E2%84%AA/<deck>` renders the viewer; each segment is decoded before the case is
+ * dropped, and a segment that does not decode is read as it came (verifier pass 2, N1).
  */
 export function routePath(pathname: string): string {
-  return pathname.toLowerCase();
+  return pathname.split('/').map(decodedSegment).join('/').toLowerCase();
+}
+
+function decodedSegment(segment: string): string {
+  if (!segment.includes('%')) return segment;
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
 }
 
 /** Where the CSP is a nonce based policy: the document routes. */

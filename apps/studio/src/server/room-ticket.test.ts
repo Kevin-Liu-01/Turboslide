@@ -2,7 +2,7 @@ import { createHmac } from 'node:crypto';
 
 import { describe, expect, it } from 'vitest';
 
-import { parseTicketClaims, splitTicket } from '@turboslide/realtime/frames';
+import { parseTicketClaims, splitTicket, viewerFactsOfClaims } from '@turboslide/realtime/frames';
 import type { ResolvedIdentity } from '@turboslide/identity/resolve';
 
 import {
@@ -87,6 +87,46 @@ describe('the room ticket', () => {
       .digest();
     expect(Buffer.from(split!.mac)).toEqual(expected);
     expect(minted.ticket).not.toContain(env.TURBOSLIDE_ROOM_SECRET);
+  });
+
+  it('carries whether the reader may share, which the Worker reads back with the deck (HR-SD#1; verifier pass 2, F2)', () => {
+    const facts = {
+      deckId: 'gt-brand',
+      clientId: 'c'.repeat(32),
+      identity: resolved.principalId,
+      kind: 'anonymous' as const,
+      principalId: resolved.principalId,
+      role: 'viewer' as const,
+      resolved,
+      origin: 'https://www.turboslide.com',
+    };
+    const reader = {
+      role: 'viewer' as const,
+      via: 'link',
+      showNames: false,
+      readComments: false,
+      principalId: resolved.principalId,
+      deckId: 'gt-brand',
+    };
+    const viewer = ticketClaimsFor({ ...facts, reader: { ...reader, share: false } }, env);
+    expect(viewer.sh).toBe(false);
+    const minted = mintRoomTicket(viewer, { now: 1_000_000, env });
+    const parsed = parseTicketClaims(splitTicket(minted.ticket)!.claimsText);
+    expect(parsed).not.toBeNull();
+    expect(viewerFactsOfClaims(parsed!)).toMatchObject({
+      share: false,
+      deckId: 'gt-brand',
+      principalId: resolved.principalId,
+    });
+    expect(ticketClaimsFor({ ...facts, reader: { ...reader, share: true } }, env).sh).toBe(true);
+    // a reader whose facts carry no answer mints no claim, and such a ticket still parses
+    const older = ticketClaimsFor({ ...facts, reader }, env);
+    expect('sh' in older).toBe(false);
+    const olderParsed = parseTicketClaims(
+      splitTicket(mintRoomTicket(older, { now: 1_000_000, env }).ticket)!.claimsText,
+    );
+    expect(olderParsed).not.toBeNull();
+    expect('share' in viewerFactsOfClaims(olderParsed!)).toBe(false);
   });
 
   it('carries a verified address and refuses to mint without the secret', () => {

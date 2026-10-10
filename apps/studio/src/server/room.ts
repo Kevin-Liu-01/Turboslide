@@ -56,6 +56,7 @@ import {
   BETWEEN_MAX_ENTRIES,
   betweenEntries,
   editingCount,
+  entryForReader,
   entryRun,
   filterEventForReader as filterEventForReaderCore,
   grantHueSlot,
@@ -64,6 +65,7 @@ import {
   landedOwn,
   landedPast,
   overEditingCeiling,
+  readerStandIns,
   reanchor,
   reanchorAll,
   refusalIssue,
@@ -78,6 +80,7 @@ import {
 } from '@turboslide/realtime/room-core';
 import type { Landed, ReaderDeps, Rejected, ViewerFacts } from '@turboslide/realtime/room-core';
 import type { AccessRecord } from '@turboslide/schema/access';
+import { threadParticipants } from '@turboslide/schema/comments';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
@@ -104,6 +107,7 @@ import { agentAuth } from './auth';
 import {
   authorize,
   bootstrapAgentContext,
+  boundDecide,
   cookieLinkGrants,
   denialBody,
   linkGrantsFor,
@@ -125,8 +129,10 @@ import type { RedisKvLike } from './auth/secondary-storage';
 import { boundPrincipal, ensurePrincipal, readPrincipal } from './auth/session';
 import { applyStreamEntries, createCheckpointer, coveredSeq } from './checkpoint';
 import { roomHost, roomInsecure } from './room-ticket';
-import { commentCapabilityOf, commentsApplierFor, shiftEntriesFor } from './comments';
-import type { CommentActionId, CommentCaller } from './comments';
+import { principalOfStandIn, standInFor, standInsFor } from './stand-ins';
+import type { StandIns } from './stand-ins';
+import { commentCapabilityOf, commentsApplierFor, liveThreads, shiftEntriesFor } from './comments';
+import type { CallerStandIns, CommentActionId, CommentCaller } from './comments';
 import type { Checkpointer } from './checkpoint';
 import { logSecurityEvent } from './log';
 import {
@@ -1675,15 +1681,95 @@ export async function commentCallerFor(
       `${deckId}: ${action} caller took ${total} ms (identity, room and record ${decided - started} ms, the decision ${Date.now() - decided} ms)`,
     );
   }
+  const capabilities = new Set(capabilitiesOf(decision.role, record));
   const caller: CommentCaller = {
     room,
     author: authorOf(identity),
-    capabilities: new Set(capabilitiesOf(decision.role, record)),
+    capabilities,
     principalId: identity.principalId ?? identity.identity,
     origin: new URL(request.url).origin,
     redis: state().redis,
+    // a caller who may not share reads and writes other people as stand-ins (HR-SD#1)
+    ...(capabilities.has('share') ? {} : { standIns: callerStandIns(room, record, identity) }),
   };
   return { ok: true, caller, identity };
+}
+
+/**
+ * The people who acted on an inbox row's deck as the reader may read them (hardening HR-SD#1; the
+ * fix round after verifier pass 2, F2): a reader who may not share that deck reads their stand-ins
+ * on it, as its comments name them; a deck whose record does not answer is read the same way. The
+ * decision is the pure one on the record (no log line per row), made once per deck of a list.
+ */
+export function inboxActorsFor(
+  identity: RequestIdentity,
+): (deckId: string, actors: readonly string[]) => Promise<string[]> {
+  const principal = identity.ctx.principal;
+  const own = [
+    identity.principalId,
+    identity.identity,
+    principal?.id,
+    ...(principal?.aliases ?? []),
+  ];
+  const decks = new Map<string, Promise<StandIns | null>>();
+  return async (deckId, actors) => {
+    let people = decks.get(deckId);
+    if (people === undefined) {
+      people = effectiveAccess(deckId).then(
+        (record) =>
+          boundDecide(record, identity.ctx, 'share').ok ? null : standInsFor(deckId, own),
+        () => standInsFor(deckId, own),
+      );
+      decks.set(deckId, people);
+    }
+    const map = await people;
+    return map === null ? [...actors] : actors.map(map);
+  };
+}
+
+/** The principal ids an access record names: the owner, the maker, the grants, the requests, the links' makers. */
+function recordPrincipals(record: AccessRecord): string[] {
+  return [
+    record.owner,
+    record.createdBy,
+    record.pendingOwner?.principalId,
+    record.publish?.publishedBy,
+    ...record.grants.map((grant) => grant.principalId),
+    ...record.requests.map((request) => request.principalId),
+    ...record.links.map((link) => link.createdBy),
+  ].filter((id): id is string => typeof id === 'string' && id !== '');
+}
+
+/**
+ * The stand-ins of a comment caller who may not share the deck (hardening HR-SD#1; the fix round
+ * after verifier pass 2, F2): its answers name other people by their stand-ins, and a stand-in it
+ * writes names the principal among the people the deck knows (the record's, the threads' and the
+ * room's roster), the people the editor offers to mention.
+ */
+export function callerStandIns(
+  room: Room,
+  record: AccessRecord,
+  identity: RequestIdentity,
+): CallerStandIns {
+  const deckId = room.deckId;
+  const principal = identity.ctx.principal;
+  return {
+    people: standInsFor(deckId, [
+      identity.principalId,
+      identity.identity,
+      principal?.id,
+      ...(principal?.aliases ?? []),
+    ]),
+    principalOf: async (standIn) => {
+      const known = new Set(recordPrincipals(record));
+      const live = await liveThreads(room).catch(() => null);
+      for (const thread of live?.threads.values() ?? [])
+        for (const id of threadParticipants(thread)) known.add(id);
+      const roster = await room.channel.presence.roster(deckId).catch(() => []);
+      for (const row of roster) known.add(row.principalId);
+      return principalOfStandIn(deckId, standIn, known);
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2644,8 +2730,12 @@ export {
 };
 export type { Landed, Rejected, ViewerFacts };
 
-/** The reader projection's host facts on the function: this instance's email memory. */
-const readerDeps: ReaderDeps = { rememberedEmail };
+/**
+ * The reader projection's host facts on the function: this instance's email memory, and the
+ * deployment's stand-ins for a reader who may not share (HR-SD#1; stand-ins.ts, whose key the
+ * Worker's deck room derives from the same room secret).
+ */
+const readerDeps: ReaderDeps = { rememberedEmail, standIn: standInFor };
 
 /** A roster entry as one reader may see it (SPEC-3 4.8), read with this instance's email memory; the rule is room-core's. */
 export function rosterEntryForReader(entry: RosterEntry, reader: ViewerFacts): RosterEntry {
@@ -2657,6 +2747,22 @@ export function filterEventForReader(event: RoomEvent, reader: ViewerFacts): Roo
   return filterEventForReaderCore(event, reader, readerDeps);
 }
 
+/**
+ * The entries of an ops answer's `between` as the writer reads them (hardening HR-SD#1; the fix
+ * round after verifier pass 2, F2): a writer who may not share reads the other writers' authors as
+ * stand-ins, as its stream does. A writer who may share reads them as they are.
+ */
+export async function betweenForWriter(
+  deckId: string,
+  decision: Extract<Decision, { ok: true }>,
+  identity: RequestIdentity,
+  entries: Entry[],
+): Promise<Entry[]> {
+  const reader = await viewerFacts(deckId, decision, identity.ctx, identity.identity);
+  const people = readerStandIns(reader, readerDeps);
+  return people === null ? entries : entries.map((entry) => entryForReader(entry, people));
+}
+
 /** The facts of a reader from the access record and the decision. */
 export async function viewerFacts(
   deckId: string,
@@ -2666,12 +2772,22 @@ export async function viewerFacts(
 ): Promise<ViewerFacts> {
   const record: AccessRecord | null = await readAccess(deckId).catch(() => null);
   const readComments = await authorize(ctx, deckId, 'readComments', { transport: 'route' });
+  /* a reader who may not share reads every other principal's id as its stand-in (hardening
+     HR-SD#1; the fix round after verifier pass 2, F2): the reader's own ids pass, and a record
+     that did not answer shares nothing */
+  const share = record !== null && capabilitiesOf(decision.role, record).includes('share');
+  const own = [ctx.principal?.id, ...(ctx.principal?.aliases ?? [])].filter(
+    (id): id is string => typeof id === 'string' && id !== '' && id !== principalId,
+  );
   return {
     role: decision.role,
     via: decision.via,
     showNames: record?.settings.showNamesToLinkVisitors ?? false,
     readComments: readComments.ok,
     ...(principalId === undefined ? {} : { principalId }),
+    share,
+    deckId,
+    ...(own.length === 0 ? {} : { ownIds: own }),
   };
 }
 

@@ -12,6 +12,8 @@ import { assignHueSlot, preferredHueSlot } from '@turboslide/identity/hues';
 import type { HueSlot } from '@turboslide/identity/hues';
 import { markSpec } from '@turboslide/identity/marks';
 import type { MarkSpec } from '@turboslide/identity/marks';
+import { commentOpWithStandIns, standInsWith } from '@turboslide/identity/stand-in';
+import type { StandIns } from '@turboslide/identity/stand-in';
 import type { ResolvedIdentity } from '@turboslide/identity/resolve';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
@@ -466,6 +468,18 @@ export type ViewerFacts = {
   readComments: boolean;
   /** the reader's principal id, so an `inbox` event reaches its principal's connections only (SPEC-3 3.3) */
   principalId?: string;
+  /**
+   * Whether the reader holds the deck's `share` capability (hardening HR-SD#1, DATA-V2; the fix
+   * round after verifier pass 2, F2). False: every other principal's id in what the reader is
+   * sent (the roster, the entries' authors, the comment ops, a checkpoint's author) is its
+   * stand-in on the deck, as in the studio's answers. Absent, as on a ticket an older app minted:
+   * ids pass as they did.
+   */
+  share?: boolean;
+  /** the deck the reader reads, the stand-ins' deck */
+  deckId?: string;
+  /** the reader's own ids beside `principalId` (the identity, the account's aliases): they pass as they are */
+  ownIds?: readonly string[];
 };
 
 /**
@@ -475,7 +489,47 @@ export type ViewerFacts = {
  * `rememberedEmail`); in the object it is the ticket's `email` claim; a host with neither
  * answers nothing and the entry carries no address.
  */
-export type ReaderDeps = { rememberedEmail: (principalId: string) => string | undefined };
+export type ReaderDeps = {
+  rememberedEmail: (principalId: string) => string | undefined;
+  /**
+   * The stand-in of a principal on a deck under the host's key (@turboslide/identity/stand-in):
+   * the studio's stand-ins.ts on the function, the room secret's key in the object. A host
+   * without one sends ids to every reader.
+   */
+  standIn?: (deckId: string, principalId: string) => string;
+};
+
+/**
+ * The ids one reader reads (HR-SD#1): another principal's id as its stand-in for a reader who may
+ * not share, null when every id passes (a reader who may share, an older ticket, a host with no key).
+ */
+export function readerStandIns(reader: ViewerFacts, deps: ReaderDeps): StandIns | null {
+  const standIn = deps.standIn;
+  const deckId = reader.deckId;
+  if (reader.share !== false || standIn === undefined || deckId === undefined) return null;
+  return standInsWith(
+    (principalId) => standIn(deckId, principalId),
+    [reader.principalId, ...(reader.ownIds ?? [])],
+  );
+}
+
+function authorFor<T extends { principalId?: string }>(author: T, people: StandIns | null): T {
+  return people === null || author.principalId === undefined
+    ? author
+    : { ...author, principalId: people(author.principalId) };
+}
+
+/** An entry as a reader reads it: the author and a comment op's people as stand-ins (HR-SD#1). */
+export function entryForReader(entry: Entry, people: StandIns | null): Entry {
+  if (people === null) return entry;
+  return {
+    ...entry,
+    author: authorFor(entry.author, people),
+    ...(entry.comment === undefined
+      ? {}
+      : { comment: commentOpWithStandIns(entry.comment, people) }),
+  };
+}
 
 /** The host that remembers no address: a test, a reader with no verified people. */
 export const NO_READER_MEMORY: ReaderDeps = { rememberedEmail: () => undefined };
@@ -483,13 +537,18 @@ export const NO_READER_MEMORY: ReaderDeps = { rememberedEmail: () => undefined }
 /**
  * A roster entry as one reader may see it (SPEC-3 4.8): people with a grant see every named
  * person; a person admitted by link sees named people as their role word unless the owner turned
- * the switch on; anonymous labels and agents are shown to everyone as they are.
+ * the switch on; anonymous labels and agents are shown to everyone as they are. A reader who may
+ * not share reads another person's entry under the person's stand-in (HR-SD#1).
  */
 export function rosterEntryForReader(
   entry: RosterEntry,
   reader: ViewerFacts,
   deps: ReaderDeps = NO_READER_MEMORY,
 ): RosterEntry {
+  return authorFor(rosterEntryShown(entry, reader, deps), readerStandIns(reader, deps));
+}
+
+function rosterEntryShown(entry: RosterEntry, reader: ViewerFacts, deps: ReaderDeps): RosterEntry {
   const byLink = reader.via === 'link' || reader.via === 'open';
   /* the address is never the shared entry's (docs/archive/rounds/PEOPLE.md 3.7): whatever a stored entry
      carries is dropped and the reader's own view decides below */
@@ -543,7 +602,8 @@ export function stripNotes(entry: Entry): Entry | null {
  * (docs/archive/rounds/SYNC.md 3.7, invariant 6: before the sync round a viewer received checkpoints alone, so
  * its revision climbed while its document stood still and it read nothing without a reload,
  * audit-ordering item 2); everyone receives checkpoints, presence and the deck level notices;
- * comment entries only a reader with `readComments`.
+ * comment entries only a reader with `readComments`. A reader who may not share reads every other
+ * principal's id as its stand-in (HR-SD#1; `readerStandIns`).
  */
 export function filterEventForReader(
   event: RoomEvent,
@@ -556,10 +616,12 @@ export function filterEventForReader(
     reader.role === 'commenter' ||
     reader.role === 'viewer';
   const fullOps = reader.role === 'owner' || reader.role === 'editor';
+  const people = readerStandIns(reader, deps);
   const filterEntry = (entry: Entry): Entry | null => {
-    if (entry.kind === 'comment') return reader.readComments ? entry : null;
+    if (entry.kind === 'comment') return reader.readComments ? entryForReader(entry, people) : null;
     if (!canSeeOps) return null;
-    return fullOps ? entry : stripNotes(entry);
+    const shown = fullOps ? entry : stripNotes(entry);
+    return shown === null ? null : entryForReader(shown, people);
   };
   switch (event.type) {
     case 'op': {
@@ -574,8 +636,12 @@ export function filterEventForReader(
     }
     case 'presence':
       return { ...event, state: rosterEntryForReader(event.state, reader, deps) };
+    case 'checkpoint':
+      return people === null ? event : { ...event, author: authorFor(event.author, people) };
     case 'reject':
-      return event;
+      return people === null || event.comment === undefined
+        ? event
+        : { ...event, comment: commentOpWithStandIns(event.comment, people) };
     case 'inbox':
       if (event.principalId !== undefined && event.principalId !== reader.principalId) return null;
       return { type: 'inbox', unread: event.unread };

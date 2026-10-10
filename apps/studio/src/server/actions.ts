@@ -115,6 +115,7 @@ import { registerMigrateStorage } from './migrate';
 import {
   commentCallerFor,
   decideFor,
+  inboxActorsFor,
   realtimeChannel,
   realtimeTier,
   redisCommands,
@@ -844,6 +845,8 @@ function registerNotificationHandlers(dispatcher: Dispatcher, request: Request, 
       deckId,
       settingsCapability: owner.ok,
       redis: redisCommands(),
+      // the actors of a deck the caller may not share are its stand-ins (HR-SD#1)
+      actorsOf: inboxActorsFor(identity),
     };
   };
   dispatcher.register('notification.list', async (input) =>

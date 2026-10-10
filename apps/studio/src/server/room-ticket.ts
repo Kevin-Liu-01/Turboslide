@@ -97,6 +97,7 @@ export function ticketClaimsFor(
     via: facts.reader.via,
     names: facts.reader.showNames,
     rc: facts.reader.readComments,
+    ...(facts.reader.share === undefined ? {} : { sh: facts.reader.share }),
     label: facts.resolved.displayName,
     trust: facts.resolved.trust,
     // the hue is the object's grant (3.3); the mark travels without one

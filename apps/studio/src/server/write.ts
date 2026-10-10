@@ -368,21 +368,21 @@ export function versionsWithStandIns(
  * other person's principal id. The access record is the reader's (access.ts recordForReader,
  * which the caller passes as `readerRecord` with the stand-ins applied), the version authors and
  * the lease holders carry stand-ins, and the people map is keyed by them, so the version rows and
- * the Share dialog's owner row still find the name and the mark. A comment author keeps the id
- * key as well while the comments surface names comment authors by id (`keep`). Pure.
+ * the Share dialog's owner row still find the name and the mark. The comment authors are keyed by
+ * their stand-ins as well, the ids `comment.list` and the room's stream name them by for such a
+ * reader (the fix round after verifier pass 2, F2). Pure.
  */
 export function withStandIns(
   payload: EditorDeck,
   identities: Readonly<Record<string, EditorIdentity>>,
   people: StandIns,
-  options: { readerRecord: AccessRecord | undefined; keep: ReadonlySet<string> },
+  options: { readerRecord: AccessRecord | undefined },
 ): { payload: EditorDeck; identities: Record<string, EditorIdentity> } {
   const views: Record<string, EditorIdentity> = {};
   for (const [id, view] of Object.entries(identities)) {
     const standIn = people(id);
     const { accountId: _accountId, ...rest } = view;
     views[standIn] = standIn === id ? view : { ...rest, principalId: standIn };
-    if (standIn !== id && options.keep.has(id)) views[id] = view;
   }
   return {
     payload: {
@@ -656,7 +656,6 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       const people = (await import('./stand-ins')).standInsFor(data.deckId, own);
       answer = withStandIns(shaped, views, people, {
         readerRecord: access.recordForReader(record, own, people),
-        keep: new Set(commentAuthors),
       });
     }
     // the trim after the shaping: a role without history carries an empty log and no count

@@ -16,6 +16,8 @@
 import { randomBytes } from 'node:crypto';
 
 import type { Dispatcher } from '@turboslide/agent/dispatch';
+import { isStandIn, threadWithStandIns } from '@turboslide/identity/stand-in';
+import type { StandIns } from '@turboslide/identity/stand-in';
 import type { Entry, NewEntry } from '@turboslide/realtime/channel';
 import { appendWithRetry } from '@turboslide/realtime/admission';
 import { isDoChannel } from '@turboslide/realtime/do';
@@ -326,6 +328,18 @@ export type CommentCaller = {
   redis: { call: (command: string, ...args: (string | number)[]) => Promise<unknown> } | null;
   now?: () => string;
   id?: () => string;
+  /**
+   * For a caller who may not share the deck (hardening HR-SD#1; the fix round after verifier pass
+   * 2, F2): the stand-ins its answers carry in place of other principals' ids, and the principal a
+   * stand-in it writes (a mention, an assignee, the author filter) names on the deck. Absent for a
+   * caller who may share, whose answers carry the ids.
+   */
+  standIns?: CallerStandIns;
+};
+
+export type CallerStandIns = {
+  people: StandIns;
+  principalOf: (standIn: string) => Promise<string | undefined>;
 };
 
 export type ThreadResult = { thread: Thread; commentsRevision: number };
@@ -817,8 +831,79 @@ export async function commentLink(
   };
 }
 
-/** One entry point for the routes and the dispatcher: the action id and its validated input. */
+/**
+ * One entry point for the routes and the dispatcher: the action id and its validated input. A
+ * caller who may not share writes and reads through its stand-ins (HR-SD#1): the stand-ins it
+ * names become the principals before the action, and every thread of the answer names other
+ * people by their stand-ins.
+ */
 export async function runCommentAction(
+  caller: CommentCaller,
+  action: CommentActionId,
+  input: unknown,
+): Promise<unknown> {
+  const standIns = caller.standIns;
+  if (standIns === undefined) return runComment(caller, action, input);
+  const answer = await runComment(
+    caller,
+    action,
+    await inputWithPrincipals(input, standIns.principalOf),
+  );
+  return answerWithStandIns(answer, standIns.people);
+}
+
+/** A mention that names a stand-in, as the principal it stands for; any other as it is. */
+async function mentionOfStandIn(
+  mention: Mention,
+  principalOf: CallerStandIns['principalOf'],
+): Promise<Mention> {
+  /* the editor writes an id that is no principal id as an invitation mention (its bodyOfInput),
+     and a stand-in is none, so both kinds are read */
+  const id = mention.kind === 'principal' ? mention.principalId : mention.inviteId;
+  if (!isStandIn(id)) return mention;
+  const principalId = await principalOf(id);
+  return principalId === undefined ? mention : { kind: 'principal', principalId };
+}
+
+/** The input of a comment action with the stand-ins it names as principals (HR-SD#1). */
+export async function inputWithPrincipals(
+  input: unknown,
+  principalOf: CallerStandIns['principalOf'],
+): Promise<unknown> {
+  if (typeof input !== 'object' || input === null) return input;
+  const fields = input as {
+    body?: CommentBody;
+    assignee?: Mention | null;
+    author?: string;
+  };
+  const out: Record<string, unknown> = { ...(input as Record<string, unknown>) };
+  if (fields.body !== undefined && Array.isArray(fields.body.mentions)) {
+    const mentions: Mention[] = [];
+    for (const mention of fields.body.mentions)
+      mentions.push(await mentionOfStandIn(mention, principalOf));
+    out.body = { ...fields.body, mentions };
+  }
+  if (fields.assignee !== undefined && fields.assignee !== null)
+    out.assignee = await mentionOfStandIn(fields.assignee, principalOf);
+  if (typeof fields.author === 'string' && isStandIn(fields.author))
+    out.author = (await principalOf(fields.author)) ?? fields.author;
+  return out;
+}
+
+/** An answer with every thread naming other people by their stand-ins (HR-SD#1). Pure. */
+export function answerWithStandIns(answer: unknown, people: StandIns): unknown {
+  if (typeof answer !== 'object' || answer === null) return answer;
+  const fields = answer as { thread?: Thread; threads?: Thread[] };
+  return {
+    ...(answer as Record<string, unknown>),
+    ...(fields.thread === undefined ? {} : { thread: threadWithStandIns(fields.thread, people) }),
+    ...(fields.threads === undefined
+      ? {}
+      : { threads: fields.threads.map((thread) => threadWithStandIns(thread, people)) }),
+  };
+}
+
+async function runComment(
   caller: CommentCaller,
   action: CommentActionId,
   input: unknown,
@@ -877,6 +962,12 @@ export type NotificationCaller = {
   settingsCapability: boolean;
   redis: CommentCaller['redis'];
   now?: () => string;
+  /**
+   * The people who acted on a row's deck as the reader may read them (hardening HR-SD#1; the fix
+   * round after verifier pass 2, F2): their stand-ins on that deck when the reader may not share
+   * it. Absent, the rows carry the ids.
+   */
+  actorsOf?: (deckId: string, actors: readonly string[]) => Promise<string[]>;
 };
 
 export async function notificationList(
@@ -884,7 +975,15 @@ export async function notificationList(
   input: { unread?: boolean; since?: string; limit?: number },
 ): Promise<{ notifications: Notification[]; unread: number }> {
   const result = await inboxFor(caller.redis).list(caller.principalId, input);
-  return { notifications: result.records, unread: result.unread };
+  const actorsOf = caller.actorsOf;
+  if (actorsOf === undefined) return { notifications: result.records, unread: result.unread };
+  const notifications = await Promise.all(
+    result.records.map(async (record) => ({
+      ...record,
+      actors: await actorsOf(record.deckId, record.actors),
+    })),
+  );
+  return { notifications, unread: result.unread };
 }
 
 export async function notificationMarkRead(

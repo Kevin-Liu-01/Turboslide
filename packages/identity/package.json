@@ -21,6 +21,7 @@
     "./principal": "./src/principal.ts",
     "./sha256": "./src/sha256.ts",
     "./safe-equal": "./src/safe-equal.ts",
+    "./stand-in": "./src/stand-in.ts",
     "./index": "./src/index.ts",
     "./package.json": "./package.json"
   },

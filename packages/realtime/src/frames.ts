@@ -76,9 +76,11 @@ const reqSchema = positiveInt;
 /**
  * The claims the function signs (3.3): the protocol version, the deck, the client id it minted,
  * the identity the budgets key on and its kind, the principal, the decision (`role`, `via`), the
- * reader's two facts (`names` is `showNames`, `rc` is `readComments`), the roster entry's identity
- * fields (`label`, `trust`, `mark`, `email` only when `trust` is `verified`), the origin the
- * function served (`org`), the tab token, the build commit (`dpl`) and the two times in ms.
+ * reader's facts (`names` is `showNames`, `rc` is `readComments`, `sh` is whether the reader may
+ * share the deck, hardening HR-SD#1), the roster entry's identity fields (`label`, `trust`,
+ * `mark`, `email` only when `trust` is `verified`), the origin the function served (`org`), the
+ * tab token, the build commit (`dpl`) and the two times in ms. `sh` is optional, so a Worker
+ * deployed first verifies the tickets the app before it mints.
  */
 export const ticketClaimsSchema = z.strictObject({
   v: nonNegativeInt,
@@ -91,6 +93,7 @@ export const ticketClaimsSchema = z.strictObject({
   via: z.string().min(1).max(32),
   names: z.boolean(),
   rc: z.boolean(),
+  sh: z.boolean().optional(),
   label: z.string().min(1).max(80),
   trust: trustSchema,
   mark: z.record(z.string(), z.unknown()),
@@ -114,6 +117,9 @@ export function viewerFactsOfClaims(claims: TicketClaims): {
   showNames: boolean;
   readComments: boolean;
   principalId?: string;
+  share?: boolean;
+  deckId: string;
+  ownIds?: string[];
 } {
   return {
     role: claims.role,
@@ -121,6 +127,9 @@ export function viewerFactsOfClaims(claims: TicketClaims): {
     showNames: claims.names,
     readComments: claims.rc,
     ...(claims.pid === undefined ? {} : { principalId: claims.pid }),
+    ...(claims.sh === undefined ? {} : { share: claims.sh }),
+    deckId: claims.deck,
+    ...(claims.pid !== claims.id ? { ownIds: [claims.id] } : {}),
   };
 }
 

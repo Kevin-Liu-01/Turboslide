@@ -4,9 +4,11 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { standInKey, standInOf } from '@turboslide/identity/stand-in';
+import type { CommentOp } from '@turboslide/schema/comments';
 import type { Mutation } from '@turboslide/schema/mutations';
 
-import type { Entry, RosterEntry } from './channel.ts';
+import type { Entry, RoomEvent, RosterEntry } from './channel.ts';
 import {
   BETWEEN_MAX_ENTRIES,
   betweenEntries,
@@ -115,6 +117,99 @@ describe('room-core', () => {
     expect(presence?.type === 'presence' ? presence.state.email : undefined).toBe(
       'maya@example.com',
     );
+  });
+
+  it('names every other principal by its stand-in to a reader who may not share (HR-SD#1; verifier pass 2, F2)', () => {
+    const OWNER = 'usr_owner01';
+    const READER = 'anon_22222222-2222-4222-8222-222222222222';
+    const key = standInKey('a-room-secret-for-tests-only-0123456789');
+    const deps = {
+      rememberedEmail: () => 'olive@example.test',
+      standIn: (deckId: string, principalId: string) => standInOf(key, deckId, principalId),
+    };
+    const ref = standInOf(key, 'q4-review', OWNER);
+    const viewer: ViewerFacts = {
+      role: 'viewer',
+      via: 'link',
+      showNames: true,
+      readComments: true,
+      principalId: READER,
+      share: false,
+      deckId: 'q4-review',
+    };
+    const sharer: ViewerFacts = { ...viewer, role: 'owner', via: 'owner', share: true };
+    // a ticket an older app minted carries no `share`: ids pass as before
+    const { share: _share, ...older } = viewer;
+    const idsIn = (value: unknown) =>
+      [...JSON.stringify(value).matchAll(/(?:anon_|usr_|agent:)[A-Za-z0-9_-]+/g)]
+        .map((match) => match[0])
+        .filter((id) => id !== READER);
+
+    // a client id is a MAC the room minted and names nobody; the helper's names the principal
+    const row: RosterEntry = { ...roster('owner', OWNER), clientId: 'c'.repeat(32) };
+    expect(rosterEntryForReader(row, viewer, deps).principalId).toBe(ref);
+    expect(rosterEntryForReader(roster('viewer', READER), viewer, deps).principalId).toBe(READER);
+    expect(rosterEntryForReader(row, sharer, deps).principalId).toBe(OWNER);
+    expect(rosterEntryForReader(row, older, deps).principalId).toBe(OWNER);
+
+    const author = { kind: 'human' as const, name: 'Olive', principalId: OWNER };
+    const typed: Mutation = {
+      op: 'text.splice',
+      slideId: 's1',
+      blockId: 'b1',
+      path: '/text',
+      at: 0,
+      remove: 0,
+      insert: 'a',
+    };
+    const edit: Entry = { ...entry(1, [typed]), author };
+    const add: CommentOp = {
+      op: 'add',
+      thread: {
+        id: '01m3shbftjv64ww028yyhs386t',
+        deckId: 'q4-review',
+        anchor: { kind: 'slide', slideId: 'title' },
+        comment: {
+          id: '01m3shbftjv64ww028yyhs386t',
+          author: { principalId: OWNER, label: 'Olive', kind: 'human' },
+          createdAt: '2026-10-10T00:00:00.000Z',
+          body: { text: 'For {@0}', mentions: [{ kind: 'principal', principalId: READER }] },
+        },
+        replies: [],
+        assignee: {
+          to: { kind: 'principal', principalId: READER },
+          by: OWNER,
+          at: '2026-10-10T00:00:00.000Z',
+        },
+        createdAt: '2026-10-10T00:00:00.000Z',
+        updatedAt: '2026-10-10T00:00:00.000Z',
+        revision: 1,
+      },
+    };
+    const comment: Entry = { ...entry(2), kind: 'comment', author, comment: add };
+    const events: RoomEvent[] = [
+      { type: 'presence', clientId: row.clientId, clock: 1, state: row },
+      { type: 'op', entry: edit },
+      { type: 'op', entry: comment },
+      { type: 'ops', entries: [edit, comment] },
+      {
+        type: 'checkpoint',
+        revision: 2,
+        fromSeq: 1,
+        toSeq: 2,
+        author,
+        note: '',
+      },
+      { type: 'reject', opId: 'comment:1', reason: 'invalid', comment: add },
+    ];
+    for (const event of events) {
+      const seen = filterEventForReader(event, viewer, deps);
+      expect(seen, event.type).not.toBeNull();
+      expect(idsIn(seen), event.type).toEqual([]);
+      expect(JSON.stringify(seen), event.type).toContain(ref);
+      expect(idsIn(filterEventForReader(event, sharer, deps)), event.type).toContain(OWNER);
+      expect(idsIn(filterEventForReader(event, older, deps)), event.type).toContain(OWNER);
+    }
   });
 
   it('counts the editing connections and the ceiling', () => {

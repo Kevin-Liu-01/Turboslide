@@ -51,6 +51,7 @@ import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import {
   betweenEntries,
   editingCount,
+  entryForReader,
   entryRun,
   filterEventForReader,
   grantHueSlot,
@@ -59,6 +60,7 @@ import {
   landedOwn,
   landedPast,
   overEditingCeiling,
+  readerStandIns,
   rosterEntryForReader,
   touchedSlides,
   transformEntry,
@@ -66,6 +68,7 @@ import {
 } from '@turboslide/realtime/room-core';
 import type { ReaderDeps, Rejected, ViewerFacts } from '@turboslide/realtime/room-core';
 import { hueFor } from '@turboslide/identity/hues';
+import { standInKey, standInOf } from '@turboslide/identity/stand-in';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -337,6 +340,14 @@ export class DeckRoom extends DurableObject<Env> {
   private deckId: string | null = null;
   /** the deck id is in the object's KV (written once per object, read on a wake without a name) */
   private deckStored = false;
+  /**
+   * Each principal's stand-in on this deck, for the readers who may not share (hardening HR-SD#1;
+   * @turboslide/identity/stand-in), under the key of `TURBOSLIDE_ROOM_SECRET`, the value the app
+   * derives its own stand-ins from, so a person reads the same on the socket as in the app's
+   * answers; made once per principal and secret
+   */
+  private readonly standIns = new Map<string, string>();
+  private standInSecret: { secret: string; key: Uint8Array } | null = null;
   /** app calls of the deployment class (`AppCallError.reach`) that failed in a row */
   private callbackFailures = 0;
   /** when this object last wrote the `callbacks` row as failing; null once a call succeeded after it */
@@ -1062,11 +1073,15 @@ export class DeckRoom extends DurableObject<Env> {
     for (const entry of admitted) this.broadcast({ type: 'op', entry });
     await this.afterAppend(now);
     const entries = [...replayed, ...admitted].sort((a, b) => a.seq - b.seq);
-    const between = betweenEntries(
+    const landedBetween = betweenEntries(
       landed,
       post.base.seq,
       entries[0]?.seq ?? Number.POSITIVE_INFINITY,
     );
+    // the other writers' entries as this writer reads them (HR-SD#1): a writer who may not share
+    // reads their authors as stand-ins, as on the socket's fan out
+    const people = readerStandIns(viewerFactsOfClaims(claims) as ViewerFacts, this.readerDeps());
+    const between = landedBetween?.map((entry) => entryForReader(entry, people));
     return {
       ok: true,
       entries,
@@ -1209,9 +1224,29 @@ export class DeckRoom extends DurableObject<Env> {
     return out;
   }
 
-  /** The reader projection's host facts in the object: each member's own ticket `email` claim (3.3). */
+  /** The stand-in of a principal on this deck under the room secret's key (HR-SD#1). */
+  private deckStandIn(deckId: string, principalId: string): string {
+    const secret = this.env.TURBOSLIDE_ROOM_SECRET;
+    if (this.standInSecret === null || this.standInSecret.secret !== secret) {
+      this.standInSecret = { secret, key: standInKey(secret) };
+      this.standIns.clear();
+    }
+    const memo = `${deckId}\n${principalId}`;
+    let value = this.standIns.get(memo);
+    if (value === undefined) {
+      value = standInOf(this.standInSecret.key, deckId, principalId);
+      this.standIns.set(memo, value);
+    }
+    return value;
+  }
+
+  /**
+   * The reader projection's host facts in the object: each member's own ticket `email` claim
+   * (3.3), and the deck's stand-ins for the readers who may not share (HR-SD#1).
+   */
   private readerDeps(): ReaderDeps {
     return {
+      standIn: (deckId, principalId) => this.deckStandIn(deckId, principalId),
       rememberedEmail: (principalId) => {
         for (const member of this.members.values()) {
           const claims = member.claims;

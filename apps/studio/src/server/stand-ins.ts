@@ -1,6 +1,12 @@
-import { createHmac } from 'node:crypto';
-
-import { isPrincipalId } from '@turboslide/identity/ids';
+import {
+  STAND_IN_PREFIX,
+  isStandIn,
+  standInKey,
+  standInOf,
+  standInsWith,
+} from '@turboslide/identity/stand-in';
+import type { StandIns } from '@turboslide/identity/stand-in';
+import { ROOM_SECRET_VARIABLE } from '@turboslide/realtime/select';
 
 import { downloadSecret } from './tokens';
 
@@ -10,46 +16,51 @@ import { downloadSecret } from './tokens';
  * (`users/<id>/decks.json`), so before this one deck read by a viewer led to its owner's and its
  * collaborators' whole library. A reader without the `share` capability gets, in place of each
  * other person's id, a stand-in: `ref_` and 22 characters of an HMAC over the deck id and the
- * principal id under the deployment's signing secret (`TURBOSLIDE_DOWNLOAD_SECRET`). It is the
- * same for one person on one deck on every instance, so the page's people map, the version rows
- * and the Share dialog's owner row still meet, and it differs between decks, so two decks never
- * show that they name the same person. It is no principal id: no store path, lookup or index
- * takes it. The reader's own ids stay as they are, because the page tells "You" by them.
+ * principal id (@turboslide/identity/stand-in, the one definition). The key comes from
+ * `TURBOSLIDE_ROOM_SECRET` when it is set, the value the realtime Worker verifies the room tickets
+ * with, so the Worker's deck room names a person on a deck as the studio's answers do (the fix
+ * round after verifier pass 2, F2), and from `TURBOSLIDE_DOWNLOAD_SECRET` otherwise. It is the same
+ * for one person on one deck on every instance, so the page's people map, the version rows and the
+ * Share dialog's owner row still meet, and it differs between decks, so two decks never show that
+ * they name the same person. It is no principal id: no store path, lookup or index takes it. The
+ * reader's own ids stay as they are, because the page tells "You" by them.
  */
 
-export const STAND_IN_PREFIX = 'ref_';
+export { STAND_IN_PREFIX, isStandIn };
+export type { StandIns };
+
+let cached: { id: string; key: Uint8Array } | undefined;
+
+/** The deployment's stand-in key, derived once per secret value. */
+function key(env: NodeJS.ProcessEnv = process.env): Uint8Array {
+  const room = env[ROOM_SECRET_VARIABLE];
+  const secret = room !== undefined && room !== '' ? room : downloadSecret(env);
+  const id = typeof secret === 'string' ? `room:${secret}` : `download:${secret.toString('hex')}`;
+  if (cached === undefined || cached.id !== id) cached = { id, key: standInKey(secret) };
+  return cached.key;
+}
 
 /** The stand-in of one principal on one deck. */
 export function standInFor(deckId: string, principalId: string): string {
-  const mac = createHmac('sha256', downloadSecret())
-    .update(`stand-in\n${deckId}\n${principalId}`)
-    .digest('base64url');
-  return `${STAND_IN_PREFIX}${mac.slice(0, 22)}`;
+  return standInOf(key(), deckId, principalId);
 }
 
-/** True for a stand-in this module makes. */
-export function isStandIn(value: string): boolean {
-  return value.startsWith(STAND_IN_PREFIX) && /^[A-Za-z0-9_-]{22}$/.test(value.slice(4));
+export function standInsFor(deckId: string, own: Iterable<string | null | undefined>): StandIns {
+  return standInsWith((principalId) => standInFor(deckId, principalId), own);
 }
 
 /**
- * The mapping one answer applies: another principal's id (a person's or an agent key's) becomes
- * its stand-in; the reader's own ids, and every string that is no principal id (`seed`,
- * `legacy`, a round one author name), pass through.
+ * The principal a stand-in names on a deck among the principals the deck knows, or undefined. A
+ * reader who may not share writes a mention or an assignee with the stand-ins it read, and the
+ * server stores the principal (comments.ts).
  */
-export type StandIns = (id: string) => string;
-
-export function standInsFor(deckId: string, own: Iterable<string | null | undefined>): StandIns {
-  const mine = new Set<string>();
-  for (const id of own) if (typeof id === 'string' && id !== '') mine.add(id);
-  const made = new Map<string, string>();
-  return (id) => {
-    if (mine.has(id) || !isPrincipalId(id)) return id;
-    let standIn = made.get(id);
-    if (standIn === undefined) {
-      standIn = standInFor(deckId, id);
-      made.set(id, standIn);
-    }
-    return standIn;
-  };
+export function principalOfStandIn(
+  deckId: string,
+  standIn: string,
+  known: Iterable<string>,
+): string | undefined {
+  if (!isStandIn(standIn)) return undefined;
+  for (const principalId of known)
+    if (standInFor(deckId, principalId) === standIn) return principalId;
+  return undefined;
 }

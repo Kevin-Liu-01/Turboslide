@@ -174,6 +174,13 @@ describe('frames', () => {
       showNames: false,
       readComments: true,
       principalId: claims.pid,
+      deckId: 'gt-brand',
+    });
+    // whether the reader may share rides `sh` (HR-SD#1), and an identity beside the principal is the reader's own
+    expect(parseTicketClaims(JSON.stringify({ ...claims, sh: false }))?.sh).toBe(false);
+    expect(viewerFactsOfClaims({ ...claims, sh: false, id: 'agent:tok_1' })).toMatchObject({
+      share: false,
+      ownIds: ['agent:tok_1'],
     });
     expect(ticketOfProtocols('turboslide.v1, ticket.abc.def')).toBe('abc.def');
     expect(ticketOfProtocols('turboslide.v1')).toBeNull();

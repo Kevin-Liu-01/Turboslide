@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { isPrincipalId } from '@turboslide/identity/ids';
+import { standInKey, standInOf } from '@turboslide/identity/stand-in';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { newDeckRecord } from '@turboslide/schema/access';
 import type { Version } from '@turboslide/schema/mutations';
@@ -142,6 +143,33 @@ describe('the record a reader without share reads (access.ts)', () => {
   });
 });
 
+describe("the stand-ins' key (verifier pass 2, F2)", () => {
+  it("is the room secret's when it is set, so the Worker's deck room makes the same stand-in", () => {
+    const before = {
+      room: process.env.TURBOSLIDE_ROOM_SECRET,
+      download: process.env.TURBOSLIDE_DOWNLOAD_SECRET,
+    };
+    try {
+      process.env.TURBOSLIDE_DOWNLOAD_SECRET = 'a-download-secret-for-tests-only-0123456789';
+      process.env.TURBOSLIDE_ROOM_SECRET = 'a-room-secret-for-tests-only-0123456789abcdef';
+      // the Worker computes standInOf(standInKey(TURBOSLIDE_ROOM_SECRET), deck, principal)
+      expect(standInFor(DECK, OWNER)).toBe(
+        standInOf(standInKey('a-room-secret-for-tests-only-0123456789abcdef'), DECK, OWNER),
+      );
+      // without a room secret (a deployment with no do tier) the download secret keys them
+      delete process.env.TURBOSLIDE_ROOM_SECRET;
+      expect(standInFor(DECK, OWNER)).toBe(
+        standInOf(standInKey('a-download-secret-for-tests-only-0123456789'), DECK, OWNER),
+      );
+    } finally {
+      if (before.room === undefined) delete process.env.TURBOSLIDE_ROOM_SECRET;
+      else process.env.TURBOSLIDE_ROOM_SECRET = before.room;
+      if (before.download === undefined) delete process.env.TURBOSLIDE_DOWNLOAD_SECRET;
+      else process.env.TURBOSLIDE_DOWNLOAD_SECRET = before.download;
+    }
+  });
+});
+
 describe("the editor loader's people for a reader without share (write.ts)", () => {
   const authored = (principalId: string, n: number): Version => ({
     n,
@@ -182,7 +210,6 @@ describe("the editor loader's people for a reader without share (write.ts)", () 
     };
     const answer = withStandIns(payload, identities, people, {
       readerRecord: recordForReader(record, new Set([VIEWER]), people),
-      keep: new Set(),
     });
     expect(principalIdsIn(answer)).toEqual(expect.arrayContaining([VIEWER]));
     expect(new Set(principalIdsIn(answer))).toEqual(new Set([VIEWER]));
@@ -198,15 +225,16 @@ describe("the editor loader's people for a reader without share (write.ts)", () 
     expect(answer.identities[VIEWER]?.name).toBe('Vi');
   });
 
-  it('keeps a comment author under the id the comments surface names, beside the stand-in', () => {
+  it('keys a comment author by the stand-in alone, as comment.list names it (verifier pass 2, F2)', () => {
     const people = standInsFor(DECK, [VIEWER]);
     const answer = withStandIns(
       { deckId: DECK, versions: [authored(EDITOR, 1)], leases: [] } as unknown as EditorDeck,
       { [EDITOR]: view(EDITOR, 'Ed') },
       people,
-      { readerRecord: undefined, keep: new Set([EDITOR]) },
+      { readerRecord: undefined },
     );
-    expect(Object.keys(answer.identities).sort()).toEqual([EDITOR, people(EDITOR)].sort());
+    expect(Object.keys(answer.identities)).toEqual([people(EDITOR)]);
+    expect(principalIdsIn(answer)).toEqual([]);
   });
 
   it('maps the version list a reader without share reads', () => {

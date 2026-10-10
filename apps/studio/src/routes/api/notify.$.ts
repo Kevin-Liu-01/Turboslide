@@ -11,6 +11,7 @@ import {
 import type { NotificationCaller } from '../../server/comments';
 import {
   decideFor,
+  inboxActorsFor,
   readJsonBody,
   redisCommands,
   refuseCrossSite,
@@ -89,6 +90,8 @@ async function serve(request: Request, splat: string): Promise<Response> {
     ...(deck === null ? {} : { deckId: deck }),
     settingsCapability,
     redis: redisCommands(),
+    // the actors of a deck the caller may not share are its stand-ins (HR-SD#1)
+    actorsOf: inboxActorsFor(identity),
   };
   try {
     switch (action) {

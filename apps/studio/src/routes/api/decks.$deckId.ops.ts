@@ -10,6 +10,7 @@ import {
   OPS_BODY_MAX_BYTES,
   admitOps,
   authorOf,
+  betweenForWriter,
   decideFor,
   readJsonBody,
   realtimeTier,
@@ -152,7 +153,9 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       // no stream delivery under them (VERIFICATION C3S-F8). For a writer with the write right
       // alone: the entries are the stream's unfiltered ones, and a comment only POST from a
       // commenter, whose stream strips the notes, is answered as before
-      ...(result.between !== undefined && hasEdits ? { between: result.between } : {}),
+      ...(result.between !== undefined && hasEdits
+        ? { between: await betweenForWriter(deckId, decision, identity, result.between) }
+        : {}),
     },
     200,
     { 'x-turboslide-revision': String(result.revision ?? result.head ?? '') },

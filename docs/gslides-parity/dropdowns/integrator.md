@@ -12,7 +12,9 @@ Sections 1 to 7 are the first pass, on `931f69d8`. Section 8 is the second pass,
 (`51ca68df` to `8b5988b1`), written on 2026-10-09 from 10:49 to 11:40 PDT. Section 9 is the third
 pass, after fix round 2 (`fb6ddc18`), written on 2026-10-09 from 13:58 to 14:55 PDT. Section 10 is
 the fourth pass, after fix round 3 (`e260e96c`), written on 2026-10-09 from 16:43 to 18:15 PDT; its
-verdict replaces the earlier ones.
+verdict replaces the earlier ones. Section 11 records DD-fix#9 (`5142310c`), written on 2026-10-10
+from 04:40 to 05:15 PDT after the keyboard verifier's final pass 3 found F1 (severity 2); it gives
+no verdict, and the ship waits for the next pass.
 
 ## 1. The state at the start
 
@@ -616,3 +618,175 @@ Image by URL rows, the 42 rows of the help and chrome walk areas and the three r
 (two after one timing miss each, read again twice). The unit tests of the six packages pass with 10
 more than the third pass, and the brand lint, the competitor guard, the native select lint and
 prettier are clean.
+
+## 11. DD-fix#9, after the keyboard verifier's final pass 3
+
+DD-fix#9 wrote this section on 2026-10-10 from 04:40 to 05:15 PDT; the fix and its readings ran
+from 2026-10-09 23:45 to 2026-10-10 05:06 PDT in this checkout on `dropdowns/round`. Nothing was
+pushed or deployed, no Vercel, Cloudflare, GitHub or Google setting changed, production was not
+read, and no token, cookie or secret was printed into this file. Loads are one minute load
+averages, 74 to 520 through the round from other sessions' jobs (never stopped), so no timing below
+is a verdict.
+
+### 11.1 The finding
+
+The keyboard and assistive technology verifier's final pass 3 on `2fdb7a65`
+(`verify-final-3-a11y.md`, untracked in this folder), F1, severity 2, blocked the ship. A Share
+control that disabled itself for its write sent the focus to a control far from it, in Chromium and
+Firefox: a Permissions box toggled with Space wrote `share.settings` once and the focus went to
+`dialog.share.done`, so the next Space pressed Done and closed the dialog; Rotate on a link row by
+Enter landed on Done; Approve on an access request by Enter landed on `dialog.share.gear`, below the
+body's visible edge, with no ring in view; Send by Space landed on `dialog.share.publish`; Publish in
+Publish to the web by Enter landed on the Link tab. Two causes: Share's plain buttons and check boxes
+took the `disabled` attribute while they held the focus (16 controls had `disabled={busy}`), and the
+card's `restore()` (`Dialog.tsx`) focused `focusableIn(el)[Math.min(place, list.length - 1)]`, an
+index read before the write applied to the shorter list the write left, with `preventScroll`.
+
+### 11.2 The change
+
+The product change, its tests and DROPDOWNS.md 3.5 are commit `5142310c` (DD-fix#9), on `2fdb7a65`;
+this section is a second commit that changes this file alone.
+
+| File | What |
+| --- | --- |
+| `packages/chrome/src/FocusHold.tsx` (new) | The one helper: `useFocusHold(disabled)` gives a control the `disabled` attribute only while it does not hold the focus and `aria-disabled="true"` whenever it is disabled; `HoldButton` is a `button` under it whose click (a press, Enter or Space) runs nothing while it is disabled |
+| `Select.tsx` | The trigger's own copy of the rule (`focused` state) is replaced by `useFocusHold`; the behaviour is the same |
+| `Dialog.tsx` | `DialogCheck` takes the hold and ignores a toggle while disabled (the box is controlled, so React puts it back); the action buttons are `HoldButton`s. The restore rule is rewritten: the card keeps the control that holds the focus with every control before and after it in document order (enabled or not), read again at each change while that control is in the card; a dropped focus goes to the same control while it is in the card and takes the focus, else the nearest control after it that does (for a row that left, the next row's first control or the next section's), else the nearest before it, else the card; never Close, never a button of the actions row for a control of the body, never by index; the landing is scrolled into view with `block: 'nearest'`. A drop from a change of the card outside a focus move (a row that left after its write) is restored in the observer's own microtask, so no task sees the focus on the body; inside a move (a focusout that names its related target, until the next focusin) the check keeps its own task (DD-fix#8) |
+| `dialogs/Share.tsx` | Claim, Copy link, a link row's Copy link, Rotate and Revoke, Send, the legacy and unminted rows' Copy link, Switch to a link, Stop sharing, Decline and Approve are `HoldButton`s; the Permissions boxes hold through `DialogCheck`, the three dropdowns through `Select`. The link rows are keyed by their place (`general`, `view`, `present`, `edit`) instead of the link's id, so Rotate, which replaces the link with one of a new id, keeps its button, and a row's first Copy link keeps its button as the row is minted. `copy()` no longer sends the focus to Done (`focusDone`, from VERIFICATION.md pass 1 F8, removed) |
+| `dialogs/Publish.tsx` | Publish and Stop publishing are one `HoldButton` whose words, class, control id and action follow the state, so the focus stays on it through the write and after it |
+| `dialogs/Profile.tsx`, `Tailor.tsx`, `ImportSlides.tsx`, `Background.tsx`, `AvatarBuilder.tsx`, `NamePrompt.tsx` | The same pattern (a button disabled by the run its own press starts): Sign out everywhere else, a session's Sign out, a key's Revoke, Delete account, Tailor's logo find, Import slides' deck rows and file button, Background's Place, the avatar upload and the name plate's Continue are `HoldButton`s. Prettier reflowed one unrelated `img` in `ImportSlides.tsx`, which was not prettier-clean on `main` |
+| `tokens.css` | A solid button held with `aria-disabled` draws the disabled ground, as `:disabled` does |
+| `docs/DROPDOWNS.md` 3.5 | States the hold, the keyed rows, the one Publish button and the landing rule |
+
+Left as they were: the Download dialog's type buttons (`disabled={running}`; the run starts from OK,
+so they never hold the focus when it starts) and every surface outside `dialogs/` with
+`disabled={busy}` (the inspector, panels, the auth plate), which are not modal cards.
+
+### 11.3 The unit tests
+
+- `__tests__/browser-move.ts`: `focusFixup()` makes jsdom drop the focus from a control that takes
+  the `disabled` attribute, as a browser does (jsdom keeps it); `focusDuring(ms)` reads the active
+  element every 25 ms.
+- `dialog.test.tsx`, eight new cases and one changed: a `HoldButton` keeps the focus through its
+  write and ignores a second press, and takes the attribute once the focus leaves; a `DialogCheck`
+  Space twice writes once and keeps the focus; a dropped focus goes back to the same control, not to
+  the old index (which pointed at Done); a row that left gives the focus to the nearest control
+  after it that takes it, past a disabled one; that restore happens in the same task as the render;
+  the last body control leaving gives the focus to the one before it and then to the card, never to
+  Done or Close; the landing is scrolled into view with `{ block: 'nearest', inline: 'nearest' }`;
+  the one body field of a dialog leaving gives the focus to the card, not to Cancel. The DD-fix#8
+  case "a drop from the autoFocus field" now reads the control after it in the body.
+- `share-dialog.test.tsx`, five new cases on the real dialogs with each write held 1.5 s and the
+  focus read every 25 ms (none may read Done, Close or the body): Space twice on each of two
+  Permissions boxes writes once each, the dialog stays open on the box; Enter on Rotate keeps the
+  focus on the same button while its link is replaced; Approve moves the focus to the next request's
+  first control, then to Add people by email, each scrolled into view; Send keeps the focus through
+  the invitation and after its field empties; Publish keeps the focus on its button, which then
+  reads Stop publishing. The two Remove access cases now name their landing, More.
+- On the product files of `2fdb7a65`, 11 of the new cases fail: the Permissions box's readings are
+  `dialog.share.done` 18 times, Rotate's `dialog.share.done`, Send's `dialog.share.gear`, Publish's
+  `dialog.publish.tab.link`, Approve's `dialog.share.notify` during the write. The same-task case
+  fails with the observer of the task-only check.
+
+### 11.4 The gates
+
+| Gate | Reading |
+| --- | --- |
+| `node_modules/.bin/tsc -b` | exit 0 in 556 s on the final files (load 248 to 121); exit 0 in 156 s before the same-task restore (load 148 to 114) |
+| Unit, chrome, `vitest run --testTimeout=120000` | 112 files, 1,097 passed, 2 failed, 2 todo, 79 s (load 76 to 86). The two failures are `editor-shell-render.test.tsx` waits of 1 s for a dialog loaded on first open (Details, Keyboard shortcuts); the file's lazy dialog cases fail the same way on the product files of `2fdb7a65`: read in turn, base 3 failed then 21 of 21, branch 2 failed and 2 failed (load 74 to 250), and earlier base 4 failed twice (load 170 to 520). Measured with a 30 s wait, the Details dialog appeared 4.0 to 6.1 s after the click on base and 3.2 to 4.9 s on the branch |
+| Unit, viewer, the same | 57 files, 554 passed, 111 s (load 449 to 325) |
+| `dialog.test.tsx`, `share-dialog.test.tsx` and `select.test.tsx` alone | 27, 38 and 34 passed (99), on the final files (load 91); `2fdb7a65` had 19 and 33 cases in the first two |
+| Prettier on the changed files | clean |
+
+### 11.5 The hand drive on 4796
+
+A vite dev server (`vite.no-watch.config.ts`) on port 4796 with `TURBOSLIDE_ROOT` the checkout,
+`TURBOSLIDE_STORE=tmp`, `TURBOSLIDE_OVERLAY_DIR=.turboslide/fix9-overlay`,
+`TURBOSLIDE_REALTIME=memory`, `TURBOSLIDE_AUTH_DB=.turboslide/auth-fix9.sqlite`,
+`TURBOSLIDE_MAIL=capture`, `TURBOSLIDE_LOCAL_OPEN=1`, a fake Google pair and session and download
+secrets of 48 characters in a mode 600 file. The drive (`scratchpad/fix9/drive/drive.mjs`, Playwright
+core 1.62.1, Chromium and Firefox at 1440 by 900) makes a deck from `/new`, opens Share and, with the
+keyboard: Space twice within 120 ms on Editors can change permissions and share, then Space once more,
+the same on Viewers and commenters can download, print and copy; Send by Space; General access to
+Anyone with the link, then Rotate on its row by Enter; Publish to the web, Publish by Enter and Enter
+again; then two other browsers ask for access through the link and the owner approves each by
+Enter. The focus is read every 20 ms for 2.5 s after each press (3.5 s with the writes held), and a
+reading of Done, Close or the body fails the step. With `hold`, every Share and publish write is held
+1.5 s by a route.
+
+| Run | Result |
+| --- | --- |
+| Chromium | 17 of 17 (load 174 to 212) |
+| Firefox | 17 of 17 (load 185 to 204) |
+| Chromium, writes held 1.5 s | run 1, signed in: 16 of 17 (load 217 to 279); run 2, anonymous browsers: 17 of 18 (load 99 to 124); run 3, anonymous, the deck revision read at each step: 24 of 24 (load 75 to 93). A fourth run stopped when the editor's reload before Approve did not come up within 600 s (load 300); its steps before that passed. The red step of runs 1 and 2 is the deck revision, below |
+| Firefox, writes held 1.5 s | 18 of 18 (load 120 to 141) |
+
+What each run read:
+
+- Permissions boxes: the box keeps the focus with `aria-disabled="true"` and no `disabled`
+  attribute during its write; the dialog stays open on the box; with the writes held the second
+  Space lands inside the write and writes nothing (one `share.settings`, the box toggled once). On
+  the unheld runs the local write ended inside the 120 ms, so the second Space was a toggle of its
+  own (two writes, the box back where it was), still on the box. The next Space toggles it again with
+  one write.
+- Send: the focus stays on `dialog.share.send` through `share.invite` and after the field empties.
+- Rotate: the focus stays on the row's Rotate, whose control id moves from the old link's id to
+  the new one's (`share.rotateLink`), in view with its ring.
+- Publish: the focus stays on the button, which reads Stop publishing (`deck.publish`); the next
+  Enter unpublishes (`deck.unpublish`) and the focus stays on it, reading Publish.
+- Approve: from the first of two requests the focus lands on the second request's Notify box;
+  from the last, on Add people by email; each in view with its ring, no reading of the body. Before
+  the same-task restore, one Chromium run read the body for one 20 ms sample between the row
+  leaving and the landing.
+- Every run read no Done, Close or body, and no page error. Chromium held runs 1 and 2 read the
+  deck revision 1 after the deck's first write and 2 at the end; run 2 read 2 already at its first
+  reading, after Space on the first box, with every focus reading on the box. Run 3, with a 3 s wait
+  after the deck's first write, read 1 at every step to the end. The unheld and Firefox runs read
+  the revision unchanged.
+
+### 11.6 The rows on 4796
+
+| Run | Reading |
+| --- | --- |
+| The eight dropdown rows (`core/chrome.spec.ts --grep chrome.select.`) | 8 passed, zero retries, 684 s (load 221 to 163) |
+| `apps/studio/e2e/core/share.spec.ts`, whole | 53 tests: 39 passed, 10 failed, 4 not run, 1.6 h (load 160 to 520). The dev server's process ended at about 03:10 under the session's two hour limit on background commands, so the last rows (`realtime.departed-guest.name-stable` onward) read a closed port |
+| The 14 red or unrun rows, narrowed, on a restarted server | 9 passed: `share.dialog.open`, `share.role-change.keeps-link`, `people.chip-tooltip-trust` and the six `accounts.*` rows; 5 red, read below (27.5 min, load 134 to 150) |
+
+The five, each read narrowed on a server with the product files of `2fdb7a65` and on the branch:
+
+| Row | Branch | Base (`2fdb7a65`) |
+| --- | --- | --- |
+| `share.copy-present-link` | red once on the cold server: the copy wrote the Present link in 21 s and the second browser's first open of `/s/<token>?present=1` took 113 s past the 90 s bound; green after the show route was compiled (load 74 to 114) | green |
+| `assist.viewer.disabled` | red three times: on the view link page the title row has no `title.assist`, so no panel and no sentence | red, the same |
+| `share.name-prompt.empty-field` | red twice, green once | red: Ctrl+M opens no name prompt after the deck's own helper closed it, and the row's skip path clicks `dialog.share.close` with no Share dialog open until its 150 s bound |
+| `collab.presence.join-within-2s` | red four times: B's chip in 35.8, 4.4, 3.9 and 17.0 s against 3.5 s (load 95 to 500) | green once (load 105 to 145), then red twice: 4.7 and 16.4 s (load 93 to 305) |
+| `realtime.departed-guest.name-stable` | red four times (once on the closed port): reloads read the names in 4.3 to 14.0 s against 3 s | green once, then red twice: 4.7 to 12.0 s |
+
+
+The two timing rows miss their bounds on both builds at these loads, and their mechanism (the
+presence channel, the editor's reload) does not run the changed files. `assist.viewer.disabled` and
+`share.name-prompt.empty-field` read the same on both builds and do not open a changed dialog
+control. No row's reading differs between the builds in a way the change can produce.
+
+The server was stopped at 05:00 PDT and port 4796 is free; the overlay
+`apps/studio/.turboslide/fix9-overlay` and the Playwright output folders of the runs were removed.
+
+### 11.7 Open after DD-fix#9
+
+1. The keyboard verifier's F2 to F4 of final pass 3 (severity 1, older than the round) stand: the
+   typography Align and Columns names, Cmd+Z on a Format options dropdown, and the cell border
+   fields after a click into a cell.
+2. A checked Permissions box draws its focus ring as a 1 px ink outline on a box filled the same
+   colour (final pass 3, notes), so a checked, focused box still shows no ring; outside this fix.
+3. Outside `dialogs/`, controls with `disabled={busy}` (the inspector's sections, the panels, the
+   auth plate, Format options) still take the attribute while they hold the focus. They are not
+   modal cards, so the card's restore does not reach them; `HoldButton` and `useFocusHold` are the
+   way to give them the same rule.
+4. Held Chromium runs 1 and 2 read the deck revision 1 to 2 with no focus reading of the body, Done
+   or Close, run 2 already at its first reading; run 3, with a 3 s wait after the deck's first
+   write, read 1 at every step. Not explained; the readings point at a late write of the new deck
+   rather than a key reaching it, but no run read which write it was.
+5. `editor-shell-render.test.tsx`'s lazy dialog cases wait 1 s and fail at loads over about 75 on
+   both builds. `assist.viewer.disabled` and `share.name-prompt.empty-field` are red on this dev
+   server on both builds.
+6. The verifiers' notes stay untracked in this folder, as in section 10.5 item 4.

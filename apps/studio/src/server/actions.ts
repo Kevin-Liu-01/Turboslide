@@ -70,7 +70,9 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { placeInsert } from '../editor/place-insert';
-import { hostedAccessHooks } from './access';
+import { hostedAccessHooks, readerOwnIds, readerPeople } from './access';
+import { dispatcherWithStandIns } from './stand-ins';
+import type { StandIns } from './stand-ins';
 import { listingScope } from './deck-scope';
 import type { ListingScope } from './deck-scope';
 import { registerStoreStatusActions } from './agent-actions';
@@ -1537,5 +1539,32 @@ export async function deckDispatcher(
       content: CONTENT,
     }),
   };
-  return { deckId, store, dispatcher, source, session };
+  // the answers that name people as the caller may read them (hardening HR-SD#1; verifier pass
+  // 3, V3-1): one step over every transport this dispatcher serves
+  const people = readerPeopleOf(deckId, request, facts);
+  return {
+    deckId,
+    store,
+    dispatcher: people === undefined ? dispatcher : dispatcherWithStandIns(dispatcher, people),
+    source,
+    session,
+  };
+}
+
+/**
+ * Whose ids the dispatcher's answers keep (stand-ins.ts dispatcherWithStandIns): a caller who
+ * may not share the deck reads every other person by a stand-in, resolved at each call from the
+ * record (access.ts readerPeople), its own ids kept. A dispatcher outside a request (the CLI's
+ * rule, a unit test) and a checkout's holder read the stored ids; a request with no identity
+ * reads stand-ins alone.
+ */
+function readerPeopleOf(
+  deckId: string,
+  request: Request | undefined,
+  facts: CallerFacts,
+): (() => Promise<StandIns | null>) | undefined {
+  if (request === undefined || isCheckoutAgent(request)) return undefined;
+  const ctx: AuthContext = facts.identity?.ctx ?? { principal: null, linkGrants: [] };
+  const own = readerOwnIds(ctx, facts.identity?.principalId, facts.author.principalId);
+  return () => readerPeople(deckId, ctx, own);
 }

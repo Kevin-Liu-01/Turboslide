@@ -17,6 +17,7 @@ import type {
   Stamp,
   Thread,
 } from '@turboslide/schema/comments';
+import type { Author } from '@turboslide/schema/mutations';
 
 import { isPrincipalId } from './ids.ts';
 import { sha256 } from './sha256.ts';
@@ -93,6 +94,31 @@ export function standInsWith(
     }
     return value;
   };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The version log with its authors as stand-ins: the window's version list and its loader, the
+// dispatcher's version answers on every transport and the bundle's `versions/<n>.json` all map
+// through these (the fix of verifier pass 3, V3-1). Pure.
+
+/** An author with another person's principal id as its stand-in. */
+export function authorWithStandIn<A extends Author>(author: A, people: StandIns): A {
+  return author.principalId === undefined
+    ? author
+    : { ...author, principalId: people(author.principalId) };
+}
+
+/** One version entry (a Version, or a stored record with its extra fields) with its author's id as its stand-in. */
+export function versionWithStandIns<V extends { author: Author }>(version: V, people: StandIns): V {
+  return { ...version, author: authorWithStandIn(version.author, people) };
+}
+
+/** The version log with each author's id as its stand-in. */
+export function versionsWithStandIns<V extends { author: Author }>(
+  versions: ReadonlyArray<V>,
+  people: StandIns,
+): V[] {
+  return versions.map((version) => versionWithStandIns(version, people));
 }
 
 // ---------------------------------------------------------------------------------------------

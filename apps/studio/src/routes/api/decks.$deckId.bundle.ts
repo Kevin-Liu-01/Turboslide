@@ -4,6 +4,7 @@ import { refuse } from '@turboslide/agent/http/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MEDIA_TYPE } from '@turboslide/store/bundle';
 
+import { readerOwnIds, readerPeople } from '../../server/access';
 import { authorize, contextForIdentity, denialBody, requestContext } from '../../server/authorize';
 import type { AuthContext } from '../../server/authorize';
 import {
@@ -50,9 +51,12 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
         });
         if (!decision.ok)
           return Response.json(denialBody(decision, 'exportNotes'), { status: decision.status });
+        // the version authors as the caller may read them: by their stand-ins for a caller who
+        // may not share the deck (hardening HR-SD#1; verifier pass 3, V3-1)
+        const people = await readerPeople(params.deckId, ctx, readerOwnIds(ctx));
         let packed;
         try {
-          packed = await exportDeckBundle(params.deckId);
+          packed = await exportDeckBundle(params.deckId, people);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           if (error instanceof RangeError) return refuse(404, 'unknown_deck', message);

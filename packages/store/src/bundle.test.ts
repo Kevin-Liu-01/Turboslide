@@ -217,6 +217,42 @@ describe('the asset scan', () => {
 });
 
 describe('pack and unpack', () => {
+  it("packs each version entry through the caller's mapping and every other file as it is (HR-SD#1)", async () => {
+    const dir = await writeDeck(join(root, 'decks'));
+    // a person's write: versions/2.json names a principal id
+    const outcome = await openFileStore({ dir }).write({
+      baseRevision: WORKED_DECK.revision + 1,
+      author: { kind: 'human', name: 'Olive', principalId: 'usr_owner01' },
+      mutations: [{ op: 'deck.set', path: '/title', value: 'Mapped deck' }],
+    });
+    if (!outcome.ok) throw new Error(outcome.message);
+    const now = () => '2026-09-11T00:00:00.000Z';
+    const textsOf = (zip: Uint8Array) =>
+      new Map(readZip(zip).map((entry) => [entry.name, new TextDecoder().decode(entry.data)]));
+    const plain = textsOf(packDeckDir(dir, { now }).zip);
+    const packed = packDeckDir(dir, {
+      now,
+      version: (record) =>
+        record.author.principalId === undefined
+          ? record
+          : { ...record, author: { ...record.author, principalId: 'ref_standin0000000000000' } },
+    });
+    const mapped = textsOf(packed.zip);
+    const second = `${bundleEntryPrefix('gt-brand')}versions/2.json`;
+    expect(plain.get(second)).toContain('usr_owner01');
+    expect(mapped.get(second)).not.toContain('usr_owner01');
+    expect(mapped.get(second)).toContain('ref_standin0000000000000');
+    for (const [name, text] of plain)
+      if (name !== second && name !== BUNDLE_MANIFEST) expect(mapped.get(name), name).toBe(text);
+    // the manifest digests the bytes the zip carries, so the bundle unpacks
+    expect(packed.manifest.documents['versions/2.json']?.sha256).toBe(
+      sha256Hex(new TextEncoder().encode(mapped.get(second))),
+    );
+    const other = join(root, 'other');
+    mkdirSync(other, { recursive: true });
+    expect((await unpackBundle(packed.zip, { decksDir: other })).counts.versions).toBe(2);
+  });
+
   it('round trips a deck byte for byte, versions and sidecars included, state excluded', async () => {
     const decksDir = join(root, 'decks');
     const dir = await writeDeck(decksDir);

@@ -47,10 +47,10 @@ import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
 import { isPendingEmailGrantFor } from '@turboslide/identity/access';
-import { parsePrincipalId } from '@turboslide/identity/ids';
+import { agentPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import type { LinkGrant, Principal } from '@turboslide/identity/access';
 import type { PrincipalRecord } from '@turboslide/identity/principal';
-import { DeniedError, denialBody, missingRecordMode } from './authorize';
+import { DeniedError, boundDecide, denialBody, missingRecordMode } from './authorize';
 import type { RequestIdentity } from './room';
 import {
   decksDir,
@@ -1183,6 +1183,48 @@ export function shapeRecordFor(
     revision: reader.revision,
     ...(own === undefined ? {} : { grants: [own] }),
   };
+}
+
+/**
+ * The ids a caller's own answers keep (HR-SD#1): its principal and that principal's aliases, an
+ * API key's own principal id and its owner, and the ids the caller passes beside them (the
+ * request's principal and author). The page and an agent tell their own writes by these.
+ */
+export function readerOwnIds(
+  ctx: AuthContext,
+  ...more: ReadonlyArray<string | null | undefined>
+): Set<string> {
+  const own = new Set<string>(ctx.principal?.aliases ?? []);
+  for (const id of [
+    ctx.principal?.id,
+    ctx.agent === undefined ? undefined : agentPrincipalId(ctx.agent.tokenId),
+    ctx.agent?.ownerId,
+    ...more,
+  ])
+    if (typeof id === 'string' && id !== '') own.add(id);
+  return own;
+}
+
+/**
+ * The people mapping of a caller on a deck (hardening HR-SD#1; verifier pass 3, V3-1): null for
+ * a caller who holds `share` there, who reads every id, else the deck's stand-ins with the
+ * caller's own ids kept. The standing is the window's (`listVersions` in write.ts: the role on the
+ * record and the record's settings, `standingOf`), decided on the record without a log line; a
+ * record that does not answer reads as no `share`, so a failed read names nobody.
+ */
+export async function readerPeople(
+  deckId: string,
+  ctx: AuthContext,
+  own: Iterable<string>,
+): Promise<StandIns | null> {
+  let shares = false;
+  try {
+    const record = await effectiveAccess(deckId);
+    shares = standingOf(boundDecide(record, ctx, 'read'), record).capabilities.includes('share');
+  } catch {
+    shares = false;
+  }
+  return shares ? null : standInsFor(deckId, own);
 }
 
 /** `share.get` for a request's identity: `authorize(read)` first, one 404 for a stranger (6.2). */

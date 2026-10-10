@@ -7,8 +7,13 @@ import { newDeckRecord } from '@turboslide/schema/access';
 import type { Version } from '@turboslide/schema/mutations';
 
 import { recordForReader, shapeRecordFor } from './access';
-import { isStandIn, standInFor, standInsFor } from './stand-ins';
-import { versionsWithStandIns, withStandIns } from './write';
+import {
+  isStandIn,
+  standInFor,
+  standInsFor,
+  versionsWithStandIns,
+  withStandIns,
+} from './stand-ins';
 import type { EditorDeck, EditorIdentity } from './write';
 
 // Hardening HR-SD#1 (docs/hardening/HARDENING.md 4.4; DATA-V2): an answer to a reader without

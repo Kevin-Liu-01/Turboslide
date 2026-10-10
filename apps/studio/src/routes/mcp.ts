@@ -47,7 +47,7 @@ function handler(): McpHttpHandler {
       await gateDeckRead(caller, deckId, 'mcp');
       let deck;
       try {
-        deck = await deckDispatcher(deckId, { withView: true });
+        deck = await deckDispatcher(deckId, { withView: true, request });
       } catch (error) {
         if (error instanceof RangeError) throw new RangeError(deckNotFound(deckId));
         throw error;

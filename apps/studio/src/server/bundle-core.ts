@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { bearerToken } from '@turboslide/agent/http/auth';
 import { refuse } from '@turboslide/agent/http/errors';
 import { safeEqual } from '@turboslide/identity/safe-equal';
+import { versionWithStandIns } from '@turboslide/identity/stand-in';
+import type { StandIns } from '@turboslide/identity/stand-in';
 import { defaultPaths } from '@turboslide/render-worker/paths';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import {
@@ -203,13 +205,26 @@ function requireSlug(deckId: string): void {
   if (!SLUG_PATTERN.test(deckId)) throw new TypeError('deckId must be a slug');
 }
 
-/** The deck as a bundle: synced from the store, its twins on disk, packed with its versions. */
-export async function exportDeckBundle(deckId: string): Promise<PackedBundle> {
+/**
+ * The deck as a bundle: synced from the store, its twins on disk, packed with its versions. For
+ * a caller who may not share the deck (`people`, access.ts readerPeople) each version's author is
+ * its stand-in, as the window's version list names it (hardening HR-SD#1; verifier pass 3, V3-1).
+ * The log stays in the bundle: a replace removes every stored file the bundle does not carry
+ * (importDeckBundle), so a bundle without its log would end the deck's history on a pull and a
+ * push back.
+ */
+export async function exportDeckBundle(
+  deckId: string,
+  people: StandIns | null = null,
+): Promise<PackedBundle> {
   requireSlug(deckId);
   // a RangeError when the deck is missing (404 in the route); the sync brings the documents down
   await openDeckStore(deckId);
   await ensureDeckAssets(deckId);
-  return packDeckDir(deckDir(deckId));
+  return packDeckDir(
+    deckDir(deckId),
+    people === null ? {} : { version: (record) => versionWithStandIns(record, people) },
+  );
 }
 
 /**

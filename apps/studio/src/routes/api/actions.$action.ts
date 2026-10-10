@@ -107,7 +107,7 @@ async function serve(request: Request, action: string): Promise<Response> {
   }
   let dispatcher;
   try {
-    dispatcher = (await deckDispatcher(deckId)).dispatcher;
+    dispatcher = (await deckDispatcher(deckId, { request })).dispatcher;
   } catch (error) {
     if (error instanceof RangeError)
       return refuse(404, 'unknown_deck', deckNotFound(deckId), { action });

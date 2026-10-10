@@ -135,6 +135,23 @@ export function versionPath(dir: string, n: number): string {
   return join(dir, VERSIONS_DIR, `${n}.json`);
 }
 
+/** One version record from the text of its file; a text that is not a record is a TypeError naming the file. */
+export function parseVersionRecord(text: string, file: string): VersionRecord {
+  const parsed = versionRecordSchema.safeParse(parseJson(text, file));
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    throw new TypeError(
+      `${file} is not a version record at /${first?.path.map(String).join('/') ?? ''}: ${first?.message ?? 'invalid'}`,
+    );
+  }
+  return asRecord(parsed.data);
+}
+
+/** The text of a version record's file, as the store writes it. */
+export function versionRecordText(record: VersionRecord): string {
+  return canonicalJson(versionRecordSchema.parse(record));
+}
+
 /** Every entry under versions/, sorted by n; a file that is not a record is a TypeError. */
 export function readVersions(dir: string): VersionRecord[] {
   const folder = join(dir, VERSIONS_DIR);
@@ -144,17 +161,11 @@ export function readVersions(dir: string): VersionRecord[] {
     const match = /^(\d+)\.json$/.exec(name);
     if (match === null) continue;
     const file = join(folder, name);
-    const parsed = versionRecordSchema.safeParse(parseJson(readFileSync(file, 'utf8'), file));
-    if (!parsed.success) {
-      const first = parsed.error.issues[0];
-      throw new TypeError(
-        `${file} is not a version record at /${first?.path.map(String).join('/') ?? ''}: ${first?.message ?? 'invalid'}`,
-      );
+    const record = parseVersionRecord(readFileSync(file, 'utf8'), file);
+    if (record.n !== Number(match[1])) {
+      throw new TypeError(`${file} carries n ${record.n}; the file name says ${match[1]}`);
     }
-    if (parsed.data.n !== Number(match[1])) {
-      throw new TypeError(`${file} carries n ${parsed.data.n}; the file name says ${match[1]}`);
-    }
-    records.push(asRecord(parsed.data));
+    records.push(record);
   }
   return records.sort((a, b) => a.n - b.n);
 }
@@ -162,7 +173,7 @@ export function readVersions(dir: string): VersionRecord[] {
 export function writeVersion(dir: string, record: VersionRecord): string {
   const path = versionPath(dir, record.n);
   mkdirSync(join(dir, VERSIONS_DIR), { recursive: true });
-  writeFileSync(path, canonicalJson(versionRecordSchema.parse(record)));
+  writeFileSync(path, versionRecordText(record));
   return path;
 }
 

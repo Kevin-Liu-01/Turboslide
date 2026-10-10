@@ -30,7 +30,6 @@ import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
 import { originsSince } from './origins';
 import type { RecordOrigin } from './origins';
-import type { StandIns } from './stand-ins';
 import {
   createStoredDeck,
   ensureDecks,
@@ -345,59 +344,6 @@ export function shapeByRole(
   };
 }
 
-/** An author with another person's principal id as its stand-in (hardening HR-SD#1). */
-function authorWithStandIn(author: Author, people: StandIns): Author {
-  return author.principalId === undefined
-    ? author
-    : { ...author, principalId: people(author.principalId) };
-}
-
-/** The version log with each author's id as its stand-in (HR-SD#1). Pure. */
-export function versionsWithStandIns(
-  versions: ReadonlyArray<Version>,
-  people: StandIns,
-): Version[] {
-  return versions.map((version) => ({
-    ...version,
-    author: authorWithStandIn(version.author, people),
-  }));
-}
-
-/**
- * The loader's answer for a reader who may not share the deck (hardening HR-SD#1, DATA-V2): no
- * other person's principal id. The access record is the reader's (access.ts recordForReader,
- * which the caller passes as `readerRecord` with the stand-ins applied), the version authors and
- * the lease holders carry stand-ins, and the people map is keyed by them, so the version rows and
- * the Share dialog's owner row still find the name and the mark. The comment authors are keyed by
- * their stand-ins as well, the ids `comment.list` and the room's stream name them by for such a
- * reader (the fix round after verifier pass 2, F2). Pure.
- */
-export function withStandIns(
-  payload: EditorDeck,
-  identities: Readonly<Record<string, EditorIdentity>>,
-  people: StandIns,
-  options: { readerRecord: AccessRecord | undefined },
-): { payload: EditorDeck; identities: Record<string, EditorIdentity> } {
-  const views: Record<string, EditorIdentity> = {};
-  for (const [id, view] of Object.entries(identities)) {
-    const standIn = people(id);
-    const { accountId: _accountId, ...rest } = view;
-    views[standIn] = standIn === id ? view : { ...rest, principalId: standIn };
-  }
-  return {
-    payload: {
-      ...payload,
-      versions: versionsWithStandIns(payload.versions, people),
-      leases: payload.leases.map((lease) => ({
-        ...lease,
-        holder: authorWithStandIn(lease.holder, people),
-      })),
-      ...(options.readerRecord === undefined ? {} : { access: options.readerRecord }),
-    },
-    identities: views,
-  };
-}
-
 /** Sets the identity cookie a server function minted (the Set-Cookie value of session.ts). */
 function sendMintedCookie(setCookieValue: string | undefined): void {
   if (setCookieValue === undefined) return;
@@ -653,7 +599,8 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       identities: views,
     };
     if (!sharer) {
-      const people = (await import('./stand-ins')).standInsFor(data.deckId, own);
+      const { standInsFor, withStandIns } = await import('./stand-ins');
+      const people = standInsFor(data.deckId, own);
       answer = withStandIns(shaped, views, people, {
         readerRecord: access.recordForReader(record, own, people),
       });
@@ -1108,19 +1055,16 @@ const listVersionsFn = createServerFn({ method: 'GET' })
     return { deckId: requireSlug(input.deckId, 'deckId') };
   })
   .handler(async ({ data }): Promise<string> => {
-    const { identity, decision } = await admitDecision(data.deckId, 'history', 'version.list');
+    const { identity } = await admitDecision(data.deckId, 'history', 'version.list');
     const versions = await (await storeFor(data.deckId)).listVersions();
-    // the authors of a reader who may not share the deck are stand-ins (hardening HR-SD#1)
-    const [access, { standInsFor }] = await Promise.all([
+    // the authors of a reader who may not share the deck are stand-ins (hardening HR-SD#1), by
+    // the rule the dispatcher's version answers follow (access.ts readerPeople)
+    const [{ readerPeople }, { versionsWithStandIns }] = await Promise.all([
       import('./access'),
       import('./stand-ins'),
     ]);
-    const record = await access.effectiveAccess(data.deckId);
-    if (access.standingOf(decision, record).capabilities.includes('share'))
-      return JSON.stringify(versions);
-    return JSON.stringify(
-      versionsWithStandIns(versions, standInsFor(data.deckId, ownIdsOf(identity))),
-    );
+    const people = await readerPeople(data.deckId, identity.ctx, ownIdsOf(identity));
+    return JSON.stringify(people === null ? versions : versionsWithStandIns(versions, people));
   });
 
 /** version.list: every log entry, oldest first; the server log the undo spec counts. */

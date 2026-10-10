@@ -19,6 +19,8 @@ import {
   sha256Hex,
 } from './bundle.ts';
 import { loadDeckDir } from './file-store.ts';
+import type { VersionRecord } from './store.ts';
+import { parseVersionRecord, versionRecordText } from './versions.ts';
 import { writeZip } from './zip.ts';
 import type { ZipEntry } from './zip.ts';
 
@@ -27,6 +29,14 @@ export type PackOptions = {
   versions?: boolean;
   /** carry the comments sidecar as the `comments` group (gslides-parity SPEC-3 2.2); default false, a bundle names people only when asked */
   comments?: boolean;
+  /**
+   * Each `versions/<n>.json` entry as the caller may read it (hardening HR-SD#1; verifier pass 3,
+   * V3-1): the studio passes the authors' stand-ins for a caller who may not share the deck, so
+   * the bundle names no other person's principal id. An entry the mapping leaves as it was keeps
+   * its bytes; a changed one is written as the store writes a record. A file under versions/ that
+   * is not a record is a TypeError, so no entry leaves unread.
+   */
+  version?: (record: VersionRecord) => VersionRecord;
   /** the clock for packedAt, for tests */
   now?: () => string;
 };
@@ -56,6 +66,18 @@ function digestOf(bytes: Uint8Array): BundleDigest {
   return { bytes: bytes.byteLength, sha256: sha256Hex(bytes) };
 }
 
+/** One version entry's bytes through the caller's mapping: the same bytes when nothing changed. */
+function versionBytes(
+  bytes: Uint8Array,
+  relative: string,
+  map: (record: VersionRecord) => VersionRecord,
+): Uint8Array {
+  const record = parseVersionRecord(new TextDecoder().decode(bytes), relative);
+  const mapped = map(record);
+  const text = versionRecordText(mapped);
+  return text === versionRecordText(record) ? bytes : new TextEncoder().encode(text);
+}
+
 /**
  * Packs a deck directory. The directory is read through the validator first, so a folder that is
  * not a deck is a TypeError before any bytes are produced; a deck with validation issues still
@@ -74,7 +96,11 @@ export function packDeckDir(dir: string, options: PackOptions = {}): PackedBundl
   const comments: Record<string, BundleDigest> = {};
   const entries: ZipEntry[] = [];
   for (const relative of files.documents) {
-    const bytes = new Uint8Array(readFileSync(join(dir, ...relative.split('/'))));
+    const read = new Uint8Array(readFileSync(join(dir, ...relative.split('/'))));
+    const bytes =
+      options.version !== undefined && relative.startsWith('versions/')
+        ? versionBytes(read, relative, options.version)
+        : read;
     documents[relative] = digestOf(bytes);
     entries.push({ name: `${prefix}${relative}`, data: bytes });
   }

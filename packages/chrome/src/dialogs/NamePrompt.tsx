@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 
 import { Dialog } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import { useLayer } from '../Layer';
 import { ACCOUNT } from '../menus/strings';
 import { tipProps } from '../Tooltip';
@@ -138,7 +139,7 @@ export function NamePromptPlate() {
           setError(null);
         }}
       />
-      <button
+      <HoldButton
         type="submit"
         className="pt-ib is-solid ts-title-name-plate-continue"
         data-control="dialog.namePrompt.continue"
@@ -150,7 +151,7 @@ export function NamePromptPlate() {
         })}
       >
         <span className="pt-lb">{ACCOUNT.namePrompt.continue}</span>
-      </button>
+      </HoldButton>
       {account?.signInAvailable === true && account.signedIn !== true ? (
         <button
           type="button"

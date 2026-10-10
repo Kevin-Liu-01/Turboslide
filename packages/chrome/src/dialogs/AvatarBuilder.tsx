@@ -8,6 +8,7 @@ import type { PictureSize } from '@turboslide/identity/picture';
 import { Dialog, DialogTabs } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
 import type { AvatarChoiceInput, IdentityView } from '../editor-shell';
+import { HoldButton } from '../FocusHold';
 import { cn } from '../lib/cn';
 import { ACCOUNT, REFUSALS } from '../menus/strings';
 import { isParked } from '../parked-controls';
@@ -585,8 +586,7 @@ export function AvatarBuilderDialog() {
               </div>
               <div className="ts-avatar-picture-side">
                 {/* a button, so the keyboard reaches the picker; the input itself stays hidden */}
-                <button
-                  type="button"
+                <HoldButton
                   className="pt-ib ts-avatar-upload"
                   data-control="dialog.avatarBuilder.upload"
                   disabled={busy}
@@ -597,7 +597,7 @@ export function AvatarBuilderDialog() {
                   })}
                 >
                   <span className="pt-lb">{ACCOUNT.avatar.upload}</span>
-                </button>
+                </HoldButton>
                 <input
                   ref={fileRef}
                   type="file"

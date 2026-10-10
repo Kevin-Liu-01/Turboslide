@@ -10,6 +10,7 @@ import { flushSync } from 'react-dom';
 
 import type { SelectSlotProps } from '@turboslide/viewer/select-slot';
 
+import { useFocusHold } from './FocusHold';
 import { Icon } from './icons';
 import type { IconName } from './icons';
 import { cn } from './lib/cn';
@@ -188,8 +189,9 @@ export function Select<T extends string>({
      the write runs) keeps the focus: the HTML attribute would drop it to the page body, where the
      editor's keys act on the slide behind the field (the keyboard verifier's pass 1 on the round,
      finding 1: Tab selected objects, Delete removed a table). It stays focusable with
-     `aria-disabled`, takes no key and no click, and takes the attribute once the focus leaves. */
-  const [focused, setFocused] = useState(false);
+     `aria-disabled`, takes no key and no click, and takes the attribute once the focus leaves: the
+     focus hold every dialog control shares (FocusHold.tsx). */
+  const hold = useFocusHold(disabled);
   const list = useRef<HTMLDivElement>(null);
   const typed = useRef({ buffer: '', at: 0 });
   /* a press on the label around the trigger closed the list; the label's click on its control
@@ -525,12 +527,12 @@ export function Select<T extends string>({
 
   const onTriggerFocus = (event: ReactFocusEvent<HTMLButtonElement>) => {
     tipAnchor.onFocus(event);
-    setFocused(true);
+    hold.onFocus();
   };
 
   const onTriggerBlur = (event: ReactFocusEvent<HTMLButtonElement>) => {
     tipAnchor.onBlur(event);
-    setFocused(false);
+    hold.onBlur();
     if (open) setOpen(false);
     onBlur?.();
   };
@@ -574,8 +576,8 @@ export function Select<T extends string>({
         aria-label={label}
         data-control={control}
         value={value}
-        disabled={disabled && !focused}
-        aria-disabled={disabled ? true : undefined}
+        disabled={hold.disabled}
+        aria-disabled={hold['aria-disabled']}
         autoFocus={autoFocus}
         data-tip={tipAnchor['data-tip']}
         onMouseEnter={onMouseEnter}

@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { Dialog, DialogCheck, DialogField, DialogTabs } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
+import { cn } from '../lib/cn';
 import { DIALOGS, SNACKBARS, stubClause } from '../menus/strings';
 import { Select } from '../Select';
 import { tipProps } from '../Tooltip';
@@ -100,36 +102,31 @@ export function PublishDialog({ tab: initialTab = 'link' }: { tab?: 'link' | 'em
         data-published={published ? '' : undefined}
       >
         <span>{published ? DIALOGS.publish.published : DIALOGS.publish.notPublished}</span>
+        {/* one button that reads Publish, then Stop publishing: the focus stays on it through the
+            write and after it (FocusHold.tsx; the keyboard verifier's final pass 3 on the dropdown
+            round, F1: Publish took the disabled attribute and the focus went to the Link tab) */}
         {!legacy && canPublish ? (
-          published ? (
-            <button
-              type="button"
-              className="pt-ib is-text"
-              disabled={busy}
-              data-control="dialog.publish.stop"
-              onClick={() => write('deck.unpublish')}
-              {...tipProps({
-                name: DIALOGS.publish.stopPublishing,
-                doc: 'The player and the embed stop answering',
-              })}
-            >
-              <span className="pt-lb">{DIALOGS.publish.stopPublishing}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="pt-ib is-solid"
-              disabled={busy}
-              data-control="dialog.publish.publish"
-              onClick={() => write('deck.publish')}
-              {...tipProps({
-                name: DIALOGS.publish.publish,
-                doc: 'Mints the player link and the embed code',
-              })}
-            >
-              <span className="pt-lb">{DIALOGS.publish.publish}</span>
-            </button>
-          )
+          <HoldButton
+            className={cn('pt-ib', published ? 'is-text' : 'is-solid')}
+            disabled={busy}
+            data-control={published ? 'dialog.publish.stop' : 'dialog.publish.publish'}
+            onClick={() => write(published ? 'deck.unpublish' : 'deck.publish')}
+            {...tipProps(
+              published
+                ? {
+                    name: DIALOGS.publish.stopPublishing,
+                    doc: 'The player and the embed stop answering',
+                  }
+                : {
+                    name: DIALOGS.publish.publish,
+                    doc: 'Mints the player link and the embed code',
+                  },
+            )}
+          >
+            <span className="pt-lb">
+              {published ? DIALOGS.publish.stopPublishing : DIALOGS.publish.publish}
+            </span>
+          </HoldButton>
         ) : null}
       </div>
       <DialogTabs

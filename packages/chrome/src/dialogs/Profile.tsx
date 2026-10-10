@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Dialog } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import { ACCOUNT, REFUSALS } from '../menus/strings';
 import { pictureUrlAt } from '@turboslide/identity/picture';
 
@@ -125,8 +126,7 @@ export function ProfileDialog() {
             <div className="ts-profile-section-head">
               <span>{ACCOUNT.profile.sessions}</span>
               {account?.signedIn === true && sessions.length > 1 ? (
-                <button
-                  type="button"
+                <HoldButton
                   className="pt-ib is-text"
                   disabled={busy}
                   data-control="dialog.profile.signOutOthers"
@@ -137,7 +137,7 @@ export function ProfileDialog() {
                   })}
                 >
                   <span className="pt-lb">{ACCOUNT.profile.signOutEverywhereElse}</span>
-                </button>
+                </HoldButton>
               ) : null}
             </div>
             <ul
@@ -169,8 +169,7 @@ export function ProfileDialog() {
                       </span>
                     </span>
                     <span />
-                    <button
-                      type="button"
+                    <HoldButton
                       className="pt-ib is-text"
                       disabled={busy}
                       data-control={`dialog.profile.session.${session.id}.signOut`}
@@ -188,7 +187,7 @@ export function ProfileDialog() {
                       })}
                     >
                       <span className="pt-lb">{ACCOUNT.profile.signOut}</span>
-                    </button>
+                    </HoldButton>
                   </li>
                 ))
               )}
@@ -223,8 +222,7 @@ export function ProfileDialog() {
                         </span>
                       </span>
                       <span />
-                      <button
-                        type="button"
+                      <HoldButton
                         className="pt-ib is-text"
                         disabled={busy || !account.revokeToken}
                         data-control={`dialog.profile.token.${token.id}.revoke`}
@@ -235,7 +233,7 @@ export function ProfileDialog() {
                         })}
                       >
                         <span className="pt-lb">{ACCOUNT.profile.revoke}</span>
-                      </button>
+                      </HoldButton>
                     </li>
                   ))
                 )}
@@ -245,8 +243,7 @@ export function ProfileDialog() {
 
           {account?.signedIn === true ? (
             <div className="ts-profile-danger">
-              <button
-                type="button"
+              <HoldButton
                 className="pt-ib is-text"
                 disabled={busy || !account.deleteAccount}
                 data-control="dialog.profile.deleteAccount"
@@ -260,7 +257,7 @@ export function ProfileDialog() {
                 })}
               >
                 <span className="pt-lb">{ACCOUNT.profile.deleteAccount}</span>
-              </button>
+              </HoldButton>
             </div>
           ) : null}
         </>

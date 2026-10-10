@@ -11,6 +11,7 @@ import type { GrantWho } from '@turboslide/schema/access';
 
 import { Dialog, DialogCheck } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import type {
   AccessGrantView,
   AccessLinkView,
@@ -600,23 +601,16 @@ export function ShareDialog() {
   const personName = (identity: IdentityView): string =>
     me !== undefined && identity.principalId === me.principalId ? 'You' : nameOf(identity);
 
-  /* after the copy the focus goes to Done, so Escape still closes the dialog: the Copy link
-     button re-renders through the busy state and the focus fell to the body, where the card's key
-     handler never saw the Escape (b4.md fix round FR1; VERIFICATION.md pass 1 F8) */
+  /* the copy leaves the focus where it is: a Copy link, Rotate or Send pressed for a write keeps
+     it through the write (FocusHold.tsx), and a focus a leaving row dropped goes to the card's
+     landing (Dialog.tsx). It went to Done after a copy (b4.md fix round FR1; VERIFICATION.md pass 1
+     F8, when the busy state dropped it to the body), where the next Space or Enter closed the
+     dialog (the keyboard verifier's final pass 3 on the dropdown round, F1) */
   const copy = (url: string) => {
     navigator.clipboard
       .writeText(url)
       .then(() => shell.say(SNACKBARS.linkCopied))
-      .catch(() => shell.say(url))
-      .finally(() => focusDone());
-  };
-  const focusDone = () => {
-    if (typeof document === 'undefined') return;
-    const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]');
-    if (card === null) return;
-    if (card.contains(document.activeElement) && document.activeElement !== document.body) return;
-    const done = card.querySelector<HTMLElement>('[data-control="dialog.share.done"]');
-    (done ?? card).focus();
+      .catch(() => shell.say(url));
   };
   const close = () => shell.closeDialog();
 
@@ -925,10 +919,16 @@ export function ShareDialog() {
   };
   const showRows = legacy || canShare;
   const sentence = accessSentence(mode, access.generalAccess.role, authorize);
-  /** One live link of the table: its label, its role, its dates, Copy, Rotate and Revoke. */
-  const linkRow = (link: AccessLinkView, rowId: ShareLinkRowId | 'general') => (
+  /**
+   * One live link of the table: its label, its role, its dates, Copy, Rotate and Revoke. The row
+   * is keyed by its place (`key`), not by the link: Rotate replaces the link with one of a new id,
+   * and a row keyed by the link left the document with the focused button, so the focus went to
+   * the next row (the keyboard verifier's final pass 3 on the dropdown round, F1). Kept, the row's
+   * Rotate holds the focus through the rotation.
+   */
+  const linkRow = (link: AccessLinkView, rowId: ShareLinkRowId | 'general', key: string) => (
     <li
-      key={link.id}
+      key={key}
       className="ts-share-row is-link"
       data-control={rowId === 'general' ? `dialog.share.link.${link.id}` : `dialog.share.${rowId}`}
       data-link={link.id}
@@ -948,8 +948,7 @@ export function ShareDialog() {
       </span>
       {canShare ? (
         <span className="ts-share-row-acts">
-          <button
-            type="button"
+          <HoldButton
             className="pt-ib is-text"
             disabled={busy}
             data-control={
@@ -964,9 +963,8 @@ export function ShareDialog() {
             })}
           >
             <span className="pt-lb">{DIALOGS.share.copyLink}</span>
-          </button>
-          <button
-            type="button"
+          </HoldButton>
+          <HoldButton
             className="pt-ib is-text"
             disabled={busy}
             data-control={`dialog.share.link.${link.id}.rotate`}
@@ -987,9 +985,8 @@ export function ShareDialog() {
             })}
           >
             <span className="pt-lb">{DIALOGS.share.rotate}</span>
-          </button>
-          <button
-            type="button"
+          </HoldButton>
+          <HoldButton
             className="pt-ib is-text"
             disabled={busy}
             data-control={`dialog.share.link.${link.id}.revoke`}
@@ -1004,7 +1001,7 @@ export function ShareDialog() {
             })}
           >
             <span className="pt-lb">{DIALOGS.share.revoke}</span>
-          </button>
+          </HoldButton>
         </span>
       ) : null}
     </li>
@@ -1037,8 +1034,7 @@ export function ShareDialog() {
       {access.claimable === true ? (
         <div className="ts-share-claim" data-control="dialog.share.claim">
           <span>{DIALOGS.share.claim}</span>
-          <button
-            type="button"
+          <HoldButton
             className="pt-ib is-solid"
             disabled={busy || !signedIn}
             data-control="dialog.share.claim.button"
@@ -1053,7 +1049,7 @@ export function ShareDialog() {
             })}
           >
             <span className="pt-lb">{DIALOGS.share.claimButton}</span>
-          </button>
+          </HoldButton>
         </div>
       ) : null}
 
@@ -1133,8 +1129,7 @@ export function ShareDialog() {
               event.currentTarget.select();
             }}
           />
-          <button
-            type="button"
+          <HoldButton
             className="pt-ib is-text"
             disabled={busy || (mode === 'link' && !canShare && address === '')}
             data-control="dialog.share.copy"
@@ -1148,7 +1143,7 @@ export function ShareDialog() {
             })}
           >
             <span className="pt-lb">{DIALOGS.share.copyLink}</span>
-          </button>
+          </HoldButton>
         </div>
         <DialogCheck
           label="Open as a slideshow"
@@ -1320,8 +1315,7 @@ export function ShareDialog() {
                   onChange={setInviteRole}
                   tip={{ name: 'Role', doc: 'Viewer, Commenter or Editor' }}
                 />
-                <button
-                  type="button"
+                <HoldButton
                   className="pt-ib is-solid"
                   disabled={busy || emails.trim() === ''}
                   data-control="dialog.share.send"
@@ -1332,7 +1326,7 @@ export function ShareDialog() {
                   })}
                 >
                   <span className="pt-lb">{DIALOGS.share.send}</span>
-                </button>
+                </HoldButton>
               </div>
               <div className="ts-share-notify">
                 <DialogCheck
@@ -1388,8 +1382,7 @@ export function ShareDialog() {
                           <span className="ts-dialog-hint"> · {found.note}</span>
                         ) : null}
                       </span>
-                      <button
-                        type="button"
+                      <HoldButton
                         className="pt-ib is-text"
                         disabled={busy}
                         data-control={`dialog.share.${row.id}.copy`}
@@ -1397,7 +1390,7 @@ export function ShareDialog() {
                         {...tipProps({ name: DIALOGS.share.copyLink, doc: found?.url ?? '' })}
                       >
                         <span className="pt-lb">{DIALOGS.share.copyLink}</span>
-                      </button>
+                      </HoldButton>
                     </li>
                   );
                 })}
@@ -1417,10 +1410,12 @@ export function ShareDialog() {
               <ul className="ts-share-links pt-scroll" data-control="dialog.share.links">
                 {links
                   .filter((link) => link.label === GENERAL_LINK_LABEL)
-                  .map((link) => linkRow(link, 'general'))}
+                  .map((link, index) =>
+                    linkRow(link, 'general', index === 0 ? 'general' : link.id),
+                  )}
                 {LINK_ROWS.map((row) => {
                   const live = liveLinksFor(access.links, row.label)[0];
-                  if (live !== undefined) return linkRow(live, row.id);
+                  if (live !== undefined) return linkRow(live, row.id, row.id);
                   return (
                     <li
                       key={row.id}
@@ -1433,8 +1428,7 @@ export function ShareDialog() {
                         <span className="ts-share-row-meta">{row.note}</span>
                       </span>
                       <span className="ts-share-row-acts">
-                        <button
-                          type="button"
+                        <HoldButton
                           className="pt-ib is-text"
                           disabled={busy}
                           data-control={`dialog.share.${row.id}.copy`}
@@ -1445,7 +1439,7 @@ export function ShareDialog() {
                           })}
                         >
                           <span className="pt-lb">{DIALOGS.share.copyLink}</span>
-                        </button>
+                        </HoldButton>
                       </span>
                     </li>
                   );
@@ -1456,8 +1450,7 @@ export function ShareDialog() {
 
           {/* Switch to a link for a legacy deck, Stop sharing */}
           {legacy && canShare ? (
-            <button
-              type="button"
+            <HoldButton
               className="pt-ib is-text ts-share-stop"
               disabled={busy}
               data-control="dialog.share.switchToLink"
@@ -1472,11 +1465,10 @@ export function ShareDialog() {
               })}
             >
               <span className="pt-lb">{DIALOGS.share.switchToLink}</span>
-            </button>
+            </HoldButton>
           ) : null}
           {mode !== 'restricted' && !legacy && canShare ? (
-            <button
-              type="button"
+            <HoldButton
               className="pt-ib is-text ts-share-stop"
               disabled={busy}
               data-control="dialog.share.stop"
@@ -1492,7 +1484,7 @@ export function ShareDialog() {
               })}
             >
               <span className="pt-lb">{DIALOGS.share.stopSharing}</span>
-            </button>
+            </HoldButton>
           ) : null}
 
           {/* the gear: owner only (6.5) */}
@@ -1628,8 +1620,7 @@ function RequestRow({
           />
           <span>{DIALOGS.share.notify}</span>
         </label>
-        <button
-          type="button"
+        <HoldButton
           className="pt-ib is-text"
           disabled={busy}
           data-control={`dialog.share.request.${request.id}.decline`}
@@ -1640,9 +1631,8 @@ function RequestRow({
           })}
         >
           <span className="pt-lb">{DIALOGS.share.decline}</span>
-        </button>
-        <button
-          type="button"
+        </HoldButton>
+        <HoldButton
           className="pt-ib is-solid"
           disabled={busy}
           data-control={`dialog.share.request.${request.id}.approve`}
@@ -1653,7 +1643,7 @@ function RequestRow({
           })}
         >
           <span className="pt-lb">{DIALOGS.share.approveAs(roleLabel)}</span>
-        </button>
+        </HoldButton>
       </span>
     </li>
   );

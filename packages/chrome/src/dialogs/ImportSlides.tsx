@@ -9,6 +9,7 @@ import { Dialog, DialogTabs } from '../Dialog';
 import { appearanceOf } from '../editor-shell';
 import type { DeckHeadRow, SourceDeckSlides } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import { cn } from '../lib/cn';
 import { DIALOGS, IMPORT_PPTX } from '../menus/strings';
 import { tipProps } from '../Tooltip';
@@ -244,8 +245,7 @@ export function ImportSlidesDialog() {
                 >
                   {decks.map((deck) => (
                     <li key={deck.id}>
-                      <button
-                        type="button"
+                      <HoldButton
                         role="option"
                         aria-selected={false}
                         className="ts-dialog-row is-button"
@@ -262,7 +262,7 @@ export function ImportSlidesDialog() {
                       >
                         <span className="ts-dialog-row-title">{deck.title}</span>
                         <span className="ts-dialog-row-meta">{rowMeta(deck)}</span>
-                      </button>
+                      </HoldButton>
                     </li>
                   ))}
                 </ul>
@@ -290,8 +290,7 @@ export function ImportSlidesDialog() {
                 tabIndex={-1}
                 onChange={(event) => takeFile(event.target.files?.[0])}
               />
-              <button
-                type="button"
+              <HoldButton
                 className="pt-ib"
                 disabled={busy}
                 data-control="dialog.importSlides.upload.button"
@@ -304,7 +303,7 @@ export function ImportSlidesDialog() {
                 <span className="pt-lb">
                   {busy ? 'Uploading' : 'Select a file from your device'}
                 </span>
-              </button>
+              </HoldButton>
             </div>
           )}
         </>
@@ -550,13 +549,5 @@ function TilePicture({ src, gate, watch }: { src: string; gate: PictureGate; wat
       giveBack();
     };
   }, [src, gate, watch]);
-  return (
-    <img
-      ref={ref}
-      src={shown ?? undefined}
-      alt=""
-      fetchPriority="low"
-      decoding="async"
-    />
-  );
+  return <img ref={ref} src={shown ?? undefined} alt="" fetchPriority="low" decoding="async" />;
 }

@@ -479,7 +479,10 @@ body[data-shell] {
   border-color: transparent;
 }
 
-/* a disabled solid button: the disabled ground under paper text */
+/* a disabled solid button: the disabled ground under paper text; also while it keeps the focus
+   through its own write with `aria-disabled` (FocusHold.tsx) */
+.pt-ib.is-solid[aria-disabled='true'],
+.pt-ib.is-solid[aria-disabled='true']:hover,
 .pt-ib.is-solid:disabled,
 .pt-ib.is-solid:disabled:hover {
   background: var(--pt-disabled);

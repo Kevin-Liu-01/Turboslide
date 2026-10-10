@@ -7,6 +7,7 @@ import { fileToDataUrl } from '@turboslide/viewer/clipboard';
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
 import type { EditorShellInput } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import { useMountEffect } from '../lib/useMountEffect';
 import { findCustomerLogo, logoMatchFor } from '../logo-model';
 import type { LogoRow } from '../logo-model';
@@ -358,8 +359,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
       <p className="ts-dialog-field-label">{TAILOR.logoHead}</p>
       {finder !== null && foundLogo !== null && to.trim() !== '' ? (
         <div className="ts-tailor-find" data-control="dialog.tailor.logo.found">
-          <button
-            type="button"
+          <HoldButton
             className="pt-ib is-text ts-dialog-btn ts-tailor-find-button"
             data-control="dialog.tailor.logo.find"
             data-slug={foundLogo.slug}
@@ -371,7 +371,7 @@ export function TailorDialog({ logoFinder }: { logoFinder?: TailorLogoFinder | n
             <span className="pt-lb">
               {storing ? TAILOR_LOGO.storing : TAILOR_LOGO.find(to.trim())}
             </span>
-          </button>
+          </HoldButton>
           <LogoMarkPair row={foundLogo} grounds={grounds} control="dialog.tailor.logo.find" />
           {storedLogo !== null ? (
             <span className="ts-dialog-hint" data-control="dialog.tailor.logo.stored">

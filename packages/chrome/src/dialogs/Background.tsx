@@ -36,6 +36,7 @@ import {
 import { Dialog, DialogCheck, DialogField } from '../Dialog';
 import { BACKGROUND_PICTURE_POS, insertBlockPlan, factsOf } from '../editor-shell';
 import { useEditorShell } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import { isParked } from '../parked-controls';
 import type { FormatSectionId } from '../inspector/format-sections';
 import { swatchPaint, useDeckTokens } from '../inspector/palette';
@@ -821,8 +822,7 @@ export function BackgroundDialog() {
               onChange={setShaderDither}
               doc={DITHER.help}
             />
-            <button
-              type="button"
+            <HoldButton
               className={cn('ts-dialog-btn', shader !== null && !placing && 'is-solid')}
               data-control="dialog.background.shader.place"
               data-placing={placing ? 'true' : undefined}
@@ -831,7 +831,7 @@ export function BackgroundDialog() {
               {...tipProps({ name: SHADER_GALLERY.place, doc: SHADER_GALLERY.placeDoc })}
             >
               {placing ? SHADER_GALLERY.placing(placingSeconds) : SHADER_GALLERY.place}
-            </button>
+            </HoldButton>
           </div>
           {shaderOpen ? (
             <ShaderGalleryGrid

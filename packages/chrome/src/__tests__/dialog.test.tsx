@@ -15,9 +15,10 @@ import {
 import { ImageByUrlDialog } from '../dialogs/ImageByUrl';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
+import { HoldButton } from '../FocusHold';
 import { Select } from '../Select';
 import { hideTooltip } from '../Tooltip';
-import { browserMove, nextTask } from './browser-move';
+import { browserMove, focusFixup, nextTask } from './browser-move';
 
 // The dialog primitive (gslides-parity SPEC 13.3; R08 B9): role dialog named by its title, the
 // first field focused on open, a focus trap on Tab and Shift+Tab, Esc cancels, Enter runs the
@@ -488,8 +489,26 @@ describe('a control that changes the card as it loses the focus (final pass 2, F
     expect(document.activeElement).toBe(cancel);
   });
 
-  it('gives a drop from the field the card focused as it opened to the control at its place, not to Close', async () => {
-    render(<ByUrl />);
+  it('gives a drop from the field the card focused as it opened to the control after it, not to Close', async () => {
+    render(
+      <Dialog
+        title="Insert image"
+        onClose={() => undefined}
+        control="dialog.byUrl"
+        cancel
+        actions={[
+          { label: 'Insert', primary: true, onClick: () => undefined, control: 'dialog.byUrl.ok' },
+        ]}
+      >
+        <input type="url" autoFocus aria-label="Image address" data-control="dialog.byUrl.url" />
+        <DialogCheck
+          label="Keep the address"
+          checked={false}
+          onChange={() => undefined}
+          control="dialog.byUrl.keep"
+        />
+      </Dialog>,
+    );
     const url = at('dialog.byUrl.url')!;
     expect(document.activeElement).toBe(url);
     /* the field leaves with the focus and no focusout (Firefox; jsdom sends none either) */
@@ -498,7 +517,19 @@ describe('a control that changes the card as it loses the focus (final pass 2, F
       await Promise.resolve();
     });
     await nextTask();
-    expect(document.activeElement).toBe(at('dialog.byUrl.cancel'));
+    expect(document.activeElement).toBe(at('dialog.byUrl.keep'));
+  });
+
+  it('gives a drop from the one field of the body to the card, never to Close, Cancel or the confirming button (final pass 3, F1)', async () => {
+    render(<ByUrl />);
+    const url = at('dialog.byUrl.url')!;
+    expect(document.activeElement).toBe(url);
+    await act(async () => {
+      url.remove();
+      await Promise.resolve();
+    });
+    await nextTask();
+    expect(document.activeElement).toBe(at('dialog.byUrl'));
   });
 
   it('lets Tab from the Image by URL address, typed and not yet previewed, reach Cancel', async () => {
@@ -520,6 +551,238 @@ describe('a control that changes the card as it loses the focus (final pass 2, F
     expect(at('dialog.imageByUrl.preview')).not.toBeNull();
     expect(taken).toEqual([]);
     expect(document.activeElement).toBe(cancel);
+  });
+});
+
+/* The keyboard verifier's final pass 3 on the dropdown round, F1: a control that took the disabled
+   attribute for its own write dropped the focus, and the card gave it to the control at the old
+   index of the list the write had shrunk, which was Done; the next Space closed the dialog. A
+   control that holds the focus now keeps it through its write (FocusHold.tsx), and a focus that
+   is dropped goes back to the same control, else its nearest neighbour after it, never to Done
+   or Close. focusFixup makes jsdom drop the focus from a control that takes the attribute, as a
+   browser does. */
+describe('the focus a write or a leaving control drops (final pass 3, F1)', () => {
+  let stop: () => void = () => undefined;
+  afterEach(() => {
+    stop();
+    inFlight.length = 0;
+  });
+  const at = (name: string) => document.querySelector<HTMLElement>(`[data-control="${name}"]`);
+
+  /* the writes in flight; settle() answers the oldest */
+  const inFlight: Array<() => void> = [];
+  const settle = async () => {
+    await act(async () => {
+      inFlight.shift()?.();
+      await Promise.resolve();
+    });
+    await nextTask();
+  };
+
+  /** A card whose Save button and Notify box start a write that disables every control. */
+  function Writes({ onWrite }: { onWrite: (what: string) => void }) {
+    const [busy, setBusy] = useState(false);
+    const [notify, setNotify] = useState(false);
+    const write = (what: string, after?: () => void) => {
+      if (busy) return;
+      onWrite(what);
+      setBusy(true);
+      inFlight.push(() => {
+        after?.();
+        setBusy(false);
+      });
+    };
+    return (
+      <Dialog
+        title="Writes"
+        onClose={() => undefined}
+        control="dialog.writes"
+        actions={[
+          { label: 'Done', primary: true, onClick: () => undefined, control: 'writes.done' },
+        ]}
+      >
+        <input aria-label="Name" data-control="writes.name" disabled={busy} />
+        <DialogCheck
+          label="Notify"
+          checked={notify}
+          disabled={busy}
+          onChange={(on) => write('notify', () => setNotify(on))}
+          control="writes.notify"
+        />
+        <HoldButton data-control="writes.save" disabled={busy} onClick={() => write('save')}>
+          Save
+        </HoldButton>
+        <HoldButton data-control="writes.copy" disabled={busy}>
+          Copy
+        </HoldButton>
+      </Dialog>
+    );
+  }
+
+  it('keeps the focus on a button through the write its press started, ignores a second press, and gives it the attribute once the focus leaves', async () => {
+    stop = focusFixup();
+    const onWrite = vi.fn();
+    render(<Writes onWrite={onWrite} />);
+    const save = at('writes.save') as HTMLButtonElement;
+    act(() => save.focus());
+    fireEvent.click(save);
+    expect(onWrite.mock.calls).toEqual([['save']]);
+    await nextTask();
+    expect(document.activeElement).toBe(save);
+    expect(save.disabled).toBe(false);
+    expect(save.getAttribute('aria-disabled')).toBe('true');
+    /* the neighbours that do not hold the focus take the attribute */
+    expect((at('writes.copy') as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(save);
+    expect(onWrite).toHaveBeenCalledTimes(1);
+    await settle();
+    expect(document.activeElement).toBe(save);
+    expect(save.hasAttribute('aria-disabled')).toBe(false);
+    /* disabled again, then the focus leaves it: the attribute once it no longer holds it */
+    fireEvent.click(save);
+    expect(save.disabled).toBe(false);
+    act(() => save.blur());
+    expect(save.disabled).toBe(true);
+    expect(save.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('keeps the focus on a check box through the write its Space started: a second Space toggles nothing, one write, and the dialog stays on the box', async () => {
+    stop = focusFixup();
+    const onWrite = vi.fn();
+    render(<Writes onWrite={onWrite} />);
+    const box = at('writes.notify') as HTMLInputElement;
+    act(() => box.focus());
+    /* Space on a check box is its click */
+    fireEvent.click(box);
+    fireEvent.click(box);
+    expect(onWrite.mock.calls).toEqual([['notify']]);
+    await nextTask();
+    expect(document.activeElement).toBe(box);
+    expect(box.disabled).toBe(false);
+    expect(box.getAttribute('aria-disabled')).toBe('true');
+    expect(box.checked).toBe(false);
+    await settle();
+    expect(document.activeElement).toBe(box);
+    expect(box.checked).toBe(true);
+    expect(box.hasAttribute('aria-disabled')).toBe(false);
+    /* the next Space toggles it back with a write of its own */
+    fireEvent.click(box);
+    expect(onWrite.mock.calls).toEqual([['notify'], ['notify']]);
+    expect(document.activeElement).toBe(box);
+  });
+
+  function Rows({ busy = false, rows }: { busy?: boolean; rows: string[] }) {
+    return (
+      <Dialog
+        title="Rows"
+        onClose={() => undefined}
+        control="dialog.rows"
+        cancel
+        actions={[{ label: 'Done', primary: true, onClick: () => undefined, control: 'rows.done' }]}
+      >
+        {rows.map((row) => (
+          <button key={row} type="button" data-control={`rows.${row}`} disabled={busy}>
+            {row}
+          </button>
+        ))}
+        <button type="button" data-control="rows.keep">
+          Keep
+        </button>
+        <input aria-label="Add" data-control="rows.add" />
+      </Dialog>
+    );
+  }
+
+  it('gives a dropped focus back to the same control while it stands in the card, not to the control at its old index', async () => {
+    const view = render(<Rows rows={['a', 'b', 'c']} />);
+    const keep = at('rows.keep')!;
+    act(() => keep.focus());
+    /* the rows before it take the attribute and the focus falls to the body: the old index
+       pointed past the shortened list, at Done */
+    view.rerender(<Rows busy rows={['a', 'b', 'c']} />);
+    await act(async () => {
+      keep.blur();
+      await Promise.resolve();
+    });
+    await nextTask();
+    expect(document.activeElement).toBe(keep);
+  });
+
+  it('gives the focus of a row that left to the nearest control after it that takes the focus, skipping a disabled one', async () => {
+    const view = render(<Rows rows={['a', 'b', 'c']} />);
+    act(() => at('rows.b')!.focus());
+    view.rerender(<Rows busy rows={['a', 'c']} />);
+    await nextTask();
+    expect(at('rows.b')).toBeNull();
+    /* c stands after b but is disabled; Keep is the nearest after it that takes the focus */
+    expect(document.activeElement).toBe(at('rows.keep'));
+  });
+
+  it('restores the focus of a row that left outside a focus move in the same task, so no task finds it on the body', async () => {
+    const view = render(<Rows rows={['a', 'b']} />);
+    act(() => at('rows.b')!.focus());
+    act(() => view.rerender(<Rows rows={['a']} />));
+    /* the card's observer runs in the microtasks after the render, before any other task */
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(at('rows.b')).toBeNull();
+    expect(document.activeElement).toBe(at('rows.keep'));
+  });
+
+  it('never gives the focus to Done or Close: the nearest control before the last one, else the card', async () => {
+    function Last({ shown }: { shown: ReadonlyArray<'first' | 'last'> }) {
+      return (
+        <Dialog
+          title="Last"
+          onClose={() => undefined}
+          control="dialog.last"
+          actions={[
+            { label: 'Done', primary: true, onClick: () => undefined, control: 'last.done' },
+          ]}
+        >
+          {shown.map((each) => (
+            <button key={each} type="button" data-control={`last.${each}`}>
+              {each}
+            </button>
+          ))}
+        </Dialog>
+      );
+    }
+    const view = render(<Last shown={['first', 'last']} />);
+    act(() => at('last.last')!.focus());
+    view.rerender(<Last shown={['first']} />);
+    await nextTask();
+    expect(document.activeElement).toBe(at('last.first'));
+    view.rerender(<Last shown={[]} />);
+    await nextTask();
+    const card = at('dialog.last')!;
+    expect(document.activeElement).toBe(card);
+    expect(document.activeElement).not.toBe(at('last.done'));
+    expect(document.activeElement).not.toBe(at('dialog.last.close'));
+  });
+
+  it('scrolls the control the focus lands on into view, the least scroll that shows it', async () => {
+    const scrolled: Array<{ el: Element; options: unknown }> = [];
+    const scrollIntoView = vi.fn(function (this: Element, options: unknown) {
+      scrolled.push({ el: this, options });
+    });
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: scrollIntoView,
+    });
+    try {
+      const view = render(<Rows rows={['a', 'b']} />);
+      act(() => at('rows.b')!.focus());
+      view.rerender(<Rows rows={['a']} />);
+      await nextTask();
+      expect(document.activeElement).toBe(at('rows.keep'));
+      expect(scrolled).toEqual([
+        { el: at('rows.keep'), options: { block: 'nearest', inline: 'nearest' } },
+      ]);
+    } finally {
+      Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+    }
   });
 });
 

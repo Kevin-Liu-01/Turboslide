@@ -5,6 +5,7 @@ import type {
 } from 'react';
 import { useEffect, useId, useRef } from 'react';
 
+import { HoldButton, useFocusHold } from './FocusHold';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { useLayer } from './Layer';
@@ -151,6 +152,64 @@ function insideClosedDetails(el: HTMLElement, root: HTMLElement): boolean {
   return false;
 }
 
+/* every element of a card that can hold the focus, enabled or not: the neighbours of the focused
+   control are read from it before a write disables them or a row takes them away */
+const HOLDERS =
+  'button, [href], input:not([type="hidden"]), select, textarea, summary, [tabindex]:not([tabindex="-1"])';
+
+/** The control that holds the focus in a card, with the controls after and before it, nearest first. */
+type HeldFocus = {
+  el: HTMLElement;
+  after: HTMLElement[];
+  before: HTMLElement[];
+};
+
+/** Reads the control at `el` and its neighbours in the card's document order. */
+function heldFocusIn(root: HTMLElement, el: HTMLElement): HeldFocus {
+  const after: HTMLElement[] = [];
+  const before: HTMLElement[] = [];
+  for (const each of root.querySelectorAll<HTMLElement>(HOLDERS)) {
+    if (each === el) continue;
+    if (el.compareDocumentPosition(each) & Node.DOCUMENT_POSITION_FOLLOWING) after.push(each);
+    else before.unshift(each);
+  }
+  return { el, after, before };
+}
+
+/** True when the element can take the focus now: in the card, enabled, shown, reachable by Tab. */
+function takesFocus(el: HTMLElement, root: HTMLElement): boolean {
+  return (
+    el.isConnected &&
+    root.contains(el) &&
+    el.matches(FOCUSABLE) &&
+    !el.matches('input[type="hidden"]') &&
+    el.getAttribute('aria-hidden') !== 'true' &&
+    !el.hidden &&
+    !insideClosedDetails(el, root)
+  );
+}
+
+/**
+ * Where a focus the page body took goes back to in a modal card (docs/DROPDOWNS.md 3.5; the
+ * keyboard verifier's final pass 3 on the dropdown round, F1): the same control while it is in the
+ * card and takes the focus; else the nearest control after it in document order that does (for a
+ * row that left, the next row's first control or the next section's), else the nearest before it;
+ * else the card itself. Never Close, and never a button of the actions row (Done, Cancel) for a
+ * control of the body, since the next Space or Enter there closes the dialog; never a control
+ * outside the card. The old way, the control at the lost control's index in the Tab order read
+ * before the write and applied to the shorter list the write left, landed on Done.
+ */
+function focusLandingIn(root: HTMLElement, held: HeldFocus | null): HTMLElement {
+  if (held !== null && takesFocus(held.el, root)) return held.el;
+  const fromActions = held !== null && held.el.closest('.ts-dialog-actions') !== null;
+  const fits = (each: HTMLElement) =>
+    takesFocus(each, root) &&
+    each.closest('.ts-dialog-x') === null &&
+    (fromActions || each.closest('.ts-dialog-actions') === null);
+  if (held === null) return focusableIn(root).find(fits) ?? root;
+  return held.after.find(fits) ?? held.before.find(fits) ?? root;
+}
+
 export function Dialog({
   title,
   lead,
@@ -235,12 +294,18 @@ export function Dialog({
   }, [modal]);
 
   /* the focus never rests on the page body while a modal card is open: a control that held it
-     and leaves the document (a person's row after Remove access) or takes the disabled attribute
-     (a button while its write runs) drops it to the body with no element to receive a key, and
-     from the body the editor's keys acted on the slide behind the card (the keyboard verifier's
-     pass 1 on the dropdown round, finding 1). After the render that dropped it, the focus goes to
-     the control that now stands at its place in the card's Tab order, else the first control. The
-     window losing focus keeps the active element, so it is no drop.
+     and leaves the document (a person's row after Remove access, a request after Approve) or
+     takes the disabled attribute drops it to the body with no element to receive a key, and from
+     the body the editor's keys acted on the slide behind the card (the keyboard verifier's pass 1
+     on the dropdown round, finding 1). A control the person pressed keeps the focus through its
+     own write (FocusHold.tsx), so the drop is a control that left or one a site disabled for
+     another reason. After the render that dropped it, the focus goes where focusLandingIn says:
+     the same control, else its nearest neighbour after it, never Done or Close, scrolled into
+     view (the keyboard verifier's final pass 3, F1: the control at the old index of a list the
+     write had shrunk was Done, and Approve's landing sat below the body's visible part). The card
+     keeps the control that holds the focus with its neighbours, read again at each change while
+     it is in the card, so a row that leaves is followed by what stood after it. The window
+     losing focus keeps the active element, so it is no drop.
      Two signals start the check. Chromium sends a focusout with no related target as the control
      leaves. Firefox sends no focusout and no blur when the focused element leaves the document,
      so the card also watches its own tree and the disabled and hidden attributes in it, and
@@ -255,43 +320,67 @@ export function Dialog({
      and the browser then dropped the person's Tab, Shift+Tab or click (the keyboard verifier's
      final pass 2 on the dropdown round, F1). After the task the move has ended: the focus is on
      the control it reached, or on the body when a control dropped it. */
-  const place = useRef(-1);
+  const held = useRef<HeldFocus | null>(null);
   useEffect(() => {
     const el = card.current;
     if (!modal || !el) return undefined;
-    /* the control the card focused as it opened (the first field, an autoFocus field) took the
-       focus before this effect listened, so its place is read here; with no place a drop from it
-       went to the first control, Close */
-    const opened = document.activeElement;
-    if (opened instanceof HTMLElement && el.contains(opened))
-      place.current = focusableIn(el).indexOf(opened);
-    const onIn = (event: FocusEvent) => {
-      if (event.target instanceof HTMLElement)
-        place.current = focusableIn(el).indexOf(event.target);
+    const hold = (target: EventTarget | null) => {
+      if (target instanceof HTMLElement && target !== el && el.contains(target))
+        held.current = heldFocusIn(el, target);
     };
+    /* the control the card focused as it opened (the first field, an autoFocus field) took the
+       focus before this effect listened, so it is read here; unread, a drop from it went to the
+       first control, Close */
+    hold(document.activeElement);
+    const onIn = (event: FocusEvent) => hold(event.target);
     const restore = () => {
       if (!el.isConnected) return;
       const now = document.activeElement;
       if (now !== null && now !== document.body) return;
-      const list = focusableIn(el);
-      const at = Math.min(place.current, list.length - 1);
+      const target = focusLandingIn(el, held.current);
       /* the ring shows where the focus went: Firefox draws none for a focus a script moves after
          the browser's confirmation closed */
-      (list[at] ?? list[0] ?? el).focus({ preventScroll: true, focusVisible: true });
+      target.focus({ preventScroll: true, focusVisible: true });
+      /* a control below the body's visible part comes into view, the least scroll that shows it */
+      if (
+        target !== el &&
+        document.activeElement === target &&
+        typeof target.scrollIntoView === 'function'
+      )
+        target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     };
     let timer = 0;
     const check = () => {
+      const now = held.current;
+      if (now !== null && now.el.isConnected && el.contains(now.el)) hold(now.el);
       if (timer !== 0) return;
       timer = window.setTimeout(() => {
         timer = 0;
         restore();
       }, 0);
     };
+    /* a focus move in flight: the old control's focusout named the control the focus goes to and
+       that control's focus has not come yet. Outside one, a change of the card that dropped the
+       focus (a row that left after its write) is restored in the observer's own microtask, right
+       after the render that dropped it, so no task runs with the focus on the body (DD-fix#9: the
+       focus sat on the body for a sampled moment after Approve); inside one, the task above waits
+       for the move to end (final pass 2, F1) */
+    let moving = false;
     const onOut = (event: FocusEvent) => {
-      if (event.relatedTarget !== null) return;
+      if (event.relatedTarget !== null) {
+        moving = true;
+        return;
+      }
       check();
     };
-    const changes = new MutationObserver(check);
+    const onAnyIn = () => {
+      moving = false;
+    };
+    const changes = new MutationObserver(() => {
+      check();
+      const now = document.activeElement;
+      if (!moving && (now === null || now === document.body)) restore();
+    });
     changes.observe(el, {
       childList: true,
       subtree: true,
@@ -300,11 +389,13 @@ export function Dialog({
     });
     el.addEventListener('focusin', onIn);
     el.addEventListener('focusout', onOut);
+    document.addEventListener('focusin', onAnyIn, true);
     return () => {
       window.clearTimeout(timer);
       changes.disconnect();
       el.removeEventListener('focusin', onIn);
       el.removeEventListener('focusout', onOut);
+      document.removeEventListener('focusin', onAnyIn, true);
     };
   }, [modal]);
 
@@ -434,9 +525,9 @@ export function Dialog({
         {rows.length > 0 ? (
           <div className="ts-dialog-actions">
             {rows.map((action) => (
-              <button
+              /* a button pressed for a run that disables it keeps the focus (FocusHold.tsx) */
+              <HoldButton
                 key={action.label}
-                type="button"
                 className={cn('pt-ib', action.primary ? 'is-solid' : 'is-text', 'ts-dialog-btn')}
                 disabled={action.disabled}
                 data-control={action.control}
@@ -449,7 +540,7 @@ export function Dialog({
                 })}
               >
                 <span className="pt-lb">{action.label}</span>
-              </button>
+              </HoldButton>
             ))}
           </div>
         ) : null}
@@ -493,14 +584,18 @@ export function DialogField({
   );
 }
 
-/** A check row of a dialog: the box, then the words. */
+/**
+ * A check row of a dialog: the box, then the words. A box disabled while it holds the focus (the
+ * write its own Space started) keeps the focus with `aria-disabled` and takes no toggle until it
+ * is enabled again (FocusHold.tsx; the keyboard verifier's final pass 3, F1).
+ */
 export function DialogCheck({
   label,
   checked,
   onChange,
   control,
   doc,
-  disabled,
+  disabled = false,
 }: {
   label: string;
   checked: boolean;
@@ -509,6 +604,7 @@ export function DialogCheck({
   doc?: string;
   disabled?: boolean;
 }) {
+  const hold = useFocusHold(disabled);
   return (
     <label
       className={cn('ts-dialog-check', disabled && 'is-disabled')}
@@ -517,9 +613,15 @@ export function DialogCheck({
       <input
         type="checkbox"
         checked={checked}
-        disabled={disabled}
+        disabled={hold.disabled}
+        aria-disabled={hold['aria-disabled']}
         data-control={control}
-        onChange={(event) => onChange(event.target.checked)}
+        onFocus={hold.onFocus}
+        onBlur={hold.onBlur}
+        /* an ignored toggle: the box is controlled, so React puts its checked state back */
+        onChange={(event) => {
+          if (!disabled) onChange(event.target.checked);
+        }}
       />
       <span className="ts-dialog-check-box" aria-hidden="true" />
       <span>{label}</span>

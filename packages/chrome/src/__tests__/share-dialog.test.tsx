@@ -6,6 +6,7 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 
 import {
   DRAFT_SENTENCE,
+  GENERAL_LINK_LABEL,
   LEGACY_SENTENCE,
   LINK_ROWS,
   LINK_URLS_KEY,
@@ -28,7 +29,8 @@ import {
   accessSentence,
 } from '../dialogs/Share';
 import type { AccessRecordJson } from '../dialogs/Share';
-import { browserMove, nextTask } from './browser-move';
+import { PublishDialog } from '../dialogs/Publish';
+import { browserMove, focusDuring, focusFixup, nextTask } from './browser-move';
 import { chooseOption } from './choose-option';
 import { buildMenuContext, DEFAULT_SETTINGS } from '../editor-shell';
 import type { EditorAccess, EditorShellInput } from '../editor-shell';
@@ -1422,8 +1424,10 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       expect(trigger(leeRole)).toBeNull();
       expect(document.activeElement).not.toBe(document.body);
       expect(card.contains(document.activeElement)).toBe(true);
-      const list = focusableIn(card);
-      expect(document.activeElement).toBe(list[Math.min(place, list.length - 1)]);
+      /* the control that stood after the row: More (final pass 3, F1: never by the old index) */
+      expect(document.activeElement).toBe(
+        document.querySelector('[data-control="dialog.share.more"]'),
+      );
     } finally {
       Node.prototype.removeChild = removeChild;
       vi.unstubAllGlobals();
@@ -1452,8 +1456,10 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       await nextTask();
       expect(trigger(leeRole)).toBeNull();
       expect(document.activeElement).not.toBe(document.body);
-      const list = focusableIn(card);
-      expect(document.activeElement).toBe(list[Math.min(place, list.length - 1)]);
+      expect(card.contains(document.activeElement)).toBe(true);
+      expect(document.activeElement).toBe(
+        document.querySelector('[data-control="dialog.share.more"]'),
+      );
     } finally {
       vi.unstubAllGlobals();
     }
@@ -1597,5 +1603,310 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
     await answer();
     await nextTask();
     expect(document.activeElement).toBe(back);
+  });
+});
+
+/* The keyboard verifier's final pass 3 on the dropdown round, F1 (Chromium and Firefox): a Share
+   control that took the disabled attribute for its own write dropped the focus, and the card gave
+   it to the control at the old index of the list the write had shrunk. A Permissions box toggled
+   with Space left the focus on Done and the next Space closed the dialog; Rotate landed on Done;
+   Approve on the Permissions button below the body's visible part; Send on Publish to the web;
+   Publish in Publish to the web on the Link tab. focusFixup drops the focus from a control that
+   takes the attribute, as a browser does, and each write is held 1.5 s while the focus is read
+   every 25 ms. */
+describe('the focus through a Share write (final pass 3, F1)', () => {
+  const HOLD_MS = 1500;
+  let stop: () => void = () => undefined;
+  afterEach(() => {
+    stop();
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
+  });
+
+  /** A write that answers when the test says so. */
+  function writes() {
+    const pending: Array<(value: unknown) => void> = [];
+    const dispatch = vi.fn(
+      (_action: string, _input: Record<string, unknown>) =>
+        new Promise<unknown>((resolve) => {
+          pending.push(resolve);
+        }),
+    );
+    const answer = async (value: unknown = {}) => {
+      await act(async () => {
+        pending.shift()?.(value);
+        await Promise.resolve();
+      });
+      await flush();
+      await nextTask();
+    };
+    return { dispatch, answer };
+  }
+
+  function shellOf(access: EditorAccess, dispatch: ReturnType<typeof writes>['dispatch']) {
+    const input: EditorShellInput = {
+      deckId: DECK,
+      document: doc,
+      slideId: SLIDE,
+      revision: 4,
+      origin: 'https://x.test',
+      dispatch: dispatch as unknown as EditorShellInput['dispatch'],
+      access,
+      role: 'owner',
+      capabilities: ['read', 'share', 'settings', 'publish'],
+    };
+    return host(input).state;
+  }
+
+  function open(access: EditorAccess, dispatch: ReturnType<typeof writes>['dispatch']) {
+    const state = shellOf(access, dispatch);
+    render(
+      <Host state={state}>
+        <ShareDialog />
+      </Host>,
+    );
+    return state;
+  }
+
+  const owned = (extra: Partial<AccessRecordJson> = {}): EditorAccess =>
+    accessViewOfRecord(record({ revision: 3, ...extra }), { signedIn: false, via: 'owner' });
+  const at = (control: string) =>
+    document.querySelector<HTMLElement>(`[data-control="${control}"]`);
+  /** The readings that are Done, Close or the page body: the places the focus must never reach. */
+  const lost = (seen: string[], dialog = 'dialog.share') =>
+    seen.filter(
+      (each) => each === `${dialog}.done` || each === `${dialog}.close` || each === 'BODY',
+    );
+  /** Records each element scrollIntoView ran on, with its options. */
+  function scrolls() {
+    const scrolled: Array<{ control: string | null; options: unknown }> = [];
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      writable: true,
+      value: function (this: HTMLElement, options: unknown) {
+        scrolled.push({ control: this.getAttribute('data-control'), options });
+      },
+    });
+    return scrolled;
+  }
+
+  it('keeps the focus on a Permissions box through its write: Space twice writes once and the dialog stays open on the box', async () => {
+    stop = focusFixup();
+    const { dispatch, answer } = writes();
+    const state = open(owned(), dispatch);
+    await flush();
+    openMore();
+    fireEvent.click(at('dialog.share.gear')!);
+    const settings = { ...record().settings! };
+    let revision = 3;
+    for (const key of ['editorsCanShare', 'viewersCanDownload'] as const) {
+      const control = `dialog.share.settings.${key}`;
+      const box = at(control) as HTMLInputElement;
+      expect(box.checked).toBe(true);
+      act(() => box.focus());
+      /* Space on a check box is its click; the second comes while the write runs */
+      fireEvent.click(box);
+      fireEvent.click(box);
+      expect(dispatch.mock.calls.at(-1)?.[0]).toBe('share.settings');
+      expect(dispatch.mock.calls.at(-1)?.[1]).toMatchObject({ [key]: false });
+      const seen = await focusDuring(HOLD_MS);
+      expect(lost(seen)).toEqual([]);
+      expect(new Set(seen)).toEqual(new Set([control]));
+      expect(box.disabled).toBe(false);
+      expect(box.getAttribute('aria-disabled')).toBe('true');
+      settings[key] = false;
+      revision += 1;
+      await answer({ record: record({ revision, settings: { ...settings } }) });
+      expect(document.activeElement).toBe(box);
+      expect(box.checked).toBe(false);
+      expect(box.hasAttribute('aria-disabled')).toBe(false);
+    }
+    expect(dispatch.mock.calls.map(([action]) => action)).toEqual([
+      'share.settings',
+      'share.settings',
+    ]);
+    expect(state.closeDialog).not.toHaveBeenCalled();
+    expect(at('dialog.share')).not.toBeNull();
+  });
+
+  it('keeps the focus on Rotate through the rotation, on the same row though its link is new', async () => {
+    stop = focusFixup();
+    const { texts } = clipboard();
+    const { dispatch, answer } = writes();
+    const general = {
+      id: 'lnk_old',
+      role: 'viewer' as const,
+      label: GENERAL_LINK_LABEL,
+      createdAt: '2026-10-01T00:00:00Z',
+      expiresAt: null,
+      revokedAt: null,
+    };
+    const mode = { mode: 'link' as const, role: 'viewer' as const };
+    open(owned({ generalAccess: mode, links: [general] }), dispatch);
+    await flush();
+    openMore();
+    const rotate = at('dialog.share.link.lnk_old.rotate')!;
+    act(() => rotate.focus());
+    /* Enter on a button is its click */
+    fireEvent.click(rotate);
+    expect(dispatch.mock.calls.map(([action, input]) => [action, input.linkId])).toEqual([
+      ['share.rotateLink', 'lnk_old'],
+    ]);
+    const seen = await focusDuring(HOLD_MS);
+    expect(lost(seen)).toEqual([]);
+    expect(new Set(seen)).toEqual(new Set(['dialog.share.link.lnk_old.rotate']));
+    await answer({
+      record: record({
+        revision: 4,
+        generalAccess: mode,
+        links: [
+          { ...general, revokedAt: '2026-10-09T00:00:00Z' },
+          { ...general, id: 'lnk_new', createdAt: '2026-10-09T00:00:00Z' },
+        ],
+      }),
+      link: { id: 'lnk_new' },
+      url: 'https://x.test/l/fresh',
+    });
+    expect(document.activeElement).toBe(rotate);
+    expect(rotate.getAttribute('data-control')).toBe('dialog.share.link.lnk_new.rotate');
+    expect(texts).toEqual(['https://x.test/l/fresh']);
+  });
+
+  it('moves the focus from Approve to the next request, then to the first control of the section after the requests, in view', async () => {
+    stop = focusFixup();
+    const scrolled = scrolls();
+    const { dispatch, answer } = writes();
+    const ana = {
+      id: 'req_a',
+      principalId: null,
+      email: 'ana@example.test',
+      role: 'editor' as const,
+      askedAt: '2026-10-01T00:00:00Z',
+      respondedAt: null,
+    };
+    const ben = { ...ana, id: 'req_b', email: 'ben@example.test', role: 'commenter' as const };
+    const grant = (email: string, role: 'editor' | 'commenter') => ({
+      principalId: null,
+      email,
+      role,
+      invitedAt: '2026-10-09T00:00:00Z',
+      acceptedAt: null,
+      expiresAt: null,
+    });
+    open(owned({ requests: [ana, ben] }), dispatch);
+    await flush();
+    openMore();
+    fireEvent.click(at('dialog.share.review.toggle')!);
+    const first = at('dialog.share.request.req_a.approve')!;
+    act(() => first.focus());
+    fireEvent.click(first);
+    expect(dispatch.mock.calls.map(([action, input]) => [action, input.requestId])).toEqual([
+      ['share.respond', 'req_a'],
+    ]);
+    const held = await focusDuring(HOLD_MS);
+    expect(lost(held)).toEqual([]);
+    expect(new Set(held)).toEqual(new Set(['dialog.share.request.req_a.approve']));
+    await answer({
+      record: record({
+        revision: 4,
+        requests: [{ ...ana, respondedAt: '2026-10-09T00:00:00Z' }, ben],
+        grants: [grant('ana@example.test', 'editor')],
+      }),
+    });
+    expect(at('dialog.share.request.req_a')).toBeNull();
+    expect(document.activeElement).toBe(at('dialog.share.request.req_b.notify'));
+    expect(scrolled).toEqual([
+      {
+        control: 'dialog.share.request.req_b.notify',
+        options: { block: 'nearest', inline: 'nearest' },
+      },
+    ]);
+    /* the last request: the focus goes to the first control after the requests, Add people */
+    const second = at('dialog.share.request.req_b.approve')!;
+    act(() => second.focus());
+    fireEvent.click(second);
+    const heldAgain = await focusDuring(HOLD_MS);
+    expect(lost(heldAgain)).toEqual([]);
+    await answer({
+      record: record({
+        revision: 5,
+        requests: [
+          { ...ana, respondedAt: '2026-10-09T00:00:00Z' },
+          { ...ben, respondedAt: '2026-10-09T00:00:01Z' },
+        ],
+        grants: [grant('ana@example.test', 'editor'), grant('ben@example.test', 'commenter')],
+      }),
+    });
+    expect(at('dialog.share.requests')).toBeNull();
+    expect(document.activeElement).toBe(at('dialog.share.emails'));
+    expect(scrolled.at(-1)).toEqual({
+      control: 'dialog.share.emails',
+      options: { block: 'nearest', inline: 'nearest' },
+    });
+  });
+
+  it('keeps the focus on Send through the invitation and after the field empties', async () => {
+    stop = focusFixup();
+    const { dispatch, answer } = writes();
+    open(owned(), dispatch);
+    await flush();
+    openMore();
+    fireEvent.change(at('dialog.share.emails')!, { target: { value: 'pat@example.test' } });
+    const send = at('dialog.share.send') as HTMLButtonElement;
+    act(() => send.focus());
+    /* Space on a button is its click */
+    fireEvent.click(send);
+    fireEvent.click(send);
+    expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.invite']);
+    const seen = await focusDuring(HOLD_MS);
+    expect(lost(seen)).toEqual([]);
+    expect(new Set(seen)).toEqual(new Set(['dialog.share.send']));
+    await answer({
+      record: record({
+        revision: 4,
+        grants: [
+          {
+            principalId: null,
+            email: 'pat@example.test',
+            role: 'viewer',
+            invitedAt: '2026-10-09T00:00:00Z',
+            acceptedAt: null,
+            expiresAt: null,
+          },
+        ],
+      }),
+    });
+    expect((at('dialog.share.emails') as HTMLInputElement).value).toBe('');
+    expect(document.activeElement).toBe(send);
+    /* the empty field disables Send; it keeps the focus as an unavailable button */
+    expect(send.disabled).toBe(false);
+    expect(send.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('keeps the focus on Publish in Publish to the web through the write, on the same button reading Stop publishing', async () => {
+    stop = focusFixup();
+    const { dispatch, answer } = writes();
+    const state = shellOf(owned(), dispatch);
+    render(
+      <Host state={state}>
+        <PublishDialog />
+      </Host>,
+    );
+    await flush();
+    const publish = at('dialog.publish.publish') as HTMLButtonElement;
+    act(() => publish.focus());
+    fireEvent.click(publish);
+    fireEvent.click(publish);
+    expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['deck.publish']);
+    const seen = await focusDuring(HOLD_MS);
+    expect(lost(seen, 'dialog.publish')).toEqual([]);
+    expect(new Set(seen)).toEqual(new Set(['dialog.publish.publish']));
+    expect(publish.disabled).toBe(false);
+    expect(publish.getAttribute('aria-disabled')).toBe('true');
+    await answer({ url: `/deck/${DECK}?p=tok&present=1`, embed: `/embed/${DECK}?p=tok` });
+    expect(document.activeElement).toBe(publish);
+    expect(publish.getAttribute('data-control')).toBe('dialog.publish.stop');
+    expect(publish.textContent).toBe('Stop publishing');
+    expect(state.closeDialog).not.toHaveBeenCalled();
   });
 });

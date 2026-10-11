@@ -263,6 +263,9 @@ const QUEUE_ENTRY_BYTES = 96;
 
 /** The longest the first stream open waits for the saved queues to load (HR-RC#5a). */
 export const PENDING_LOAD_WAIT_MS = 1000;
+/** The first wait before the held check is asked again after it failed, doubling to the cap (HR-RC#6). */
+export const HELD_RETRY_MS = 2000;
+export const HELD_RETRY_MAX_MS = 30_000;
 /** The reconnect and resend backoff cap (SPEC-3 3.6). */
 export const BACKOFF_MAX_MS = 8000;
 /**
@@ -2668,7 +2671,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * no position comes back as text on the reject card (RC#5b), as does an op nothing of which
    * survives.
    */
-  const placePersisted = (queue: PersistedQueue): void => {
+  const placePersisted = (queue: PersistedQueue, held: ReadonlySet<string>): void => {
     const ops: PersistedOp[] = queue.entries
       .filter((op) => op.seq === undefined && op.kind === 'edit' && op.mutations !== undefined)
       .map((op) => ({ ...op, mutations: [...(op.mutations ?? [])] }));
@@ -2676,7 +2679,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const landed =
       queue.position === undefined || queue.tier !== tier ? null : landedSince(queue.position);
     if (landed === null) {
-      handBack(ops, PERSISTED_SENTENCE);
+      // the room holds some of them: their text is not handed back to be added a second time
+      handBack(
+        ops.filter((op) => !held.has(op.opId)),
+        PERSISTED_SENTENCE,
+      );
       return;
     }
     const lost: PersistedOp[] = [];
@@ -2700,6 +2707,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       queued = step.kept;
       lost.push(...step.unplaceable);
     }
+    // an op the room holds whose entry was not among those read is never applied again
+    queued = queued.filter((op) => !held.has(op.opId));
     for (const op of queued) {
       try {
         queueLocal(
@@ -2720,36 +2729,51 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (lost.length > 0) handBack(lost, UNPLACEABLE_SENTENCE);
   };
 
+  /**
+   * The op ids the room holds, asked until the check answers (hardening HR-RC#6, RELIABILITY-6):
+   * before this a failed check counted as nothing held, and the plate offered words the room had,
+   * which Apply wrote a second time. The waits double from HELD_RETRY_MS to HELD_RETRY_MAX_MS;
+   * null once the tab stopped.
+   */
+  const askHeld = async (opIds: readonly string[]): Promise<ReadonlySet<string> | null> => {
+    const ask = options.heldOps;
+    if (ask === undefined || opIds.length === 0) return new Set();
+    let wait = HELD_RETRY_MS;
+    for (;;) {
+      if (stopped) return null;
+      try {
+        return await ask(opIds);
+      } catch {
+        await new Promise<void>((resolve) => timers.setTimeout(resolve, wait));
+        wait = Math.min(HELD_RETRY_MAX_MS, wait * 2);
+      }
+    }
+  };
+
   const offerPersisted = async (queues: readonly PersistedQueue[]): Promise<void> => {
     const store = options.pendingStore;
     if (store === undefined || options.onPersisted === undefined) return;
     let others = queues.filter((queue) => queue.clientId !== clientId && unsavedCount(queue) > 0);
     if (others.length === 0) return;
-    // the ops the server's records already hold leave the offer (item 109); a queue with nothing
-    // left is removed as if discarded
-    if (options.heldOps !== undefined) {
-      const unsaved = others.flatMap((queue) =>
-        queue.entries.filter((op) => op.seq === undefined).map((op) => op.opId),
-      );
-      let held: ReadonlySet<string> = new Set();
-      try {
-        held = await options.heldOps(unsaved);
-      } catch {
-        held = new Set();
-      }
-      if (held.size > 0) {
-        const kept: typeof others = [];
-        for (const queue of others) {
-          const entries = queue.entries.filter((op) => op.seq !== undefined || !held.has(op.opId));
-          const trimmed = { ...queue, entries };
-          if (unsavedCount(trimmed) > 0) kept.push(trimmed);
-          else await store.remove(queue.key).catch(() => undefined);
-        }
-        others = kept;
-      }
-      if (others.length === 0) return;
+    // the ops the room already holds (its records and, on the do tier, its log) leave the offer
+    // (item 109; HR-RT#14); a queue with nothing left is removed as if discarded. Nothing is
+    // offered until the check answers (HR-RC#6). The queues keep their held ops, so Apply settles
+    // each one by its entry in order and the ops written after it stay on it (HR-RC#5a)
+    const unsaved = others.flatMap((queue) =>
+      queue.entries.filter((op) => op.seq === undefined).map((op) => op.opId),
+    );
+    const held = await askHeld(unsaved);
+    if (held === null) return;
+    const unheld = (queue: PersistedQueue): number =>
+      queue.entries.filter((op) => op.seq === undefined && !held.has(op.opId)).length;
+    const kept: PersistedQueue[] = [];
+    for (const queue of others) {
+      if (unheld(queue) > 0) kept.push(queue);
+      else await store.remove(queue.key).catch(() => undefined);
     }
-    const count = others.reduce((sum, queue) => sum + unsavedCount(queue), 0);
+    others = kept;
+    if (others.length === 0) return;
+    const count = others.reduce((sum, queue) => sum + unheld(queue), 0);
     options.onPersisted({
       count,
       apply: async () => {
@@ -2757,7 +2781,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         await whenCaughtUp();
         if (stopped) return;
         for (const queue of others) {
-          placePersisted(queue);
+          placePersisted(queue, held);
           await store.remove(queue.key);
         }
         emitChange(local, 'all', 'persisted');

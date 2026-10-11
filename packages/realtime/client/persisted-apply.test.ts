@@ -70,11 +70,8 @@ function splice(at: number, insert: string): Mutation {
 type Notice = Rejected & { mutations?: Mutation[] };
 
 function room() {
-  const server = fakeRoomServer({
-    deckId: 'gt-brand',
-    channel: memoryChannel(),
-    document: normalized(),
-  });
+  const channel = memoryChannel();
+  const server = fakeRoomServer({ deckId: 'gt-brand', channel, document: normalized() });
   const store = memoryPendingStore();
   const tab = (
     identity: FakeIdentity,
@@ -98,7 +95,7 @@ function room() {
     });
     return { client, notices, offer: () => offer, transport };
   };
-  return { server, store, tab };
+  return { server, channel, store, tab };
 }
 
 const settled = async (client: ReturnType<typeof createRoomClient>): Promise<void> => {
@@ -237,5 +234,102 @@ describe('Apply of a saved queue (HR-RC#5a, RC#5b, RC#5d)', () => {
     const [queue] = await h.store.load('gt-brand');
     expect(queue?.entries).toHaveLength(6);
     expect(queue?.entries[0]?.mutations).toEqual([set(1)]);
+  });
+});
+
+describe('the held check of a saved queue (HR-RC#6)', () => {
+  /** The op ids the fake room's log holds, as write.ts heldOf answers them. */
+  const heldIn =
+    (h: ReturnType<typeof room>) =>
+    async (opIds: ReadonlyArray<string>): Promise<ReadonlySet<string>> => {
+      const entries = await h.channel.since('gt-brand', 0, 1000);
+      const ids = new Set(entries.map((entry) => entry.opId));
+      return new Set(opIds.filter((id) => ids.has(id)));
+    };
+
+  it('offers nothing while the check fails and offers once it answers', async () => {
+    const h = room();
+    const a = h.tab(kevin);
+    a.client.start();
+    await until(() => a.client.status().connected);
+    (a.transport as ReturnType<typeof tabTransport>).offline(true);
+    a.client.apply([splice(0, 'Kept ')], 'type', 'now');
+    await a.client.stop();
+    let calls = 0;
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const c = h.tab(kevin, {
+      heldOps: async (ids) => {
+        calls += 1;
+        if (calls === 1) throw new Error('the check failed');
+        if (calls === 2) {
+          await gate;
+          throw new Error('the check failed again');
+        }
+        return heldIn(h)(ids);
+      },
+      // the retry waits run at once here
+      timers: {
+        setTimeout: (run: () => void) => setTimeout(run, 1),
+        clearTimeout: (handle: unknown) => clearTimeout(handle as ReturnType<typeof setTimeout>),
+      },
+    });
+    c.client.start();
+    await until(() => calls === 2);
+    // two checks asked, none answered: nothing is offered (a failure counted as none held before)
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(c.offer()).toBeUndefined();
+    release();
+    await until(() => c.offer() !== undefined);
+    expect(calls).toBe(3);
+    expect(c.offer()?.count).toBe(1);
+    await c.client.stop();
+  });
+
+  it('applies an op the room holds once and keeps the op written after it on it', async () => {
+    const h = room();
+    const start = textOf(h.server.document());
+    // A's " one" reaches the room and its answer is lost; " two" never leaves; the stream is mute
+    const base = tabTransport(h.server, kevin);
+    let posts = 0;
+    const lossy: RoomTransport = {
+      ...base,
+      open: (options) =>
+        base.open({
+          ...options,
+          onEvent: (event) => {
+            if (event.type === 'hello') options.onEvent(event);
+          },
+        }),
+      async postOps(body: OpsPost) {
+        posts += 1;
+        if (posts > 1) throw new Error('offline');
+        await base.postOps(body);
+        throw new Error('the answer was lost');
+      },
+    };
+    const a = h.tab(kevin, {}, lossy);
+    a.client.start();
+    await until(() => a.client.status().connected);
+    a.client.apply([splice(start.length, ' one')], 'type', 'now');
+    await until(() => posts > 0);
+    a.client.apply([splice(start.length + 4, ' two')], 'type', 'now');
+    await a.client.stop();
+    // B writes in front meanwhile
+    const b = h.tab(maya, { pendingStore: undefined, onPersisted: undefined });
+    b.client.start();
+    await until(() => b.client.status().connected);
+    b.client.apply([splice(0, 'Zulu ')], 'type', 'now');
+    await settled(b.client);
+    const c = h.tab(kevin, { heldOps: heldIn(h) });
+    c.client.start();
+    await until(() => c.offer() !== undefined && c.client.status().connected);
+    // " one" is the room's: only " two" is offered
+    expect(c.offer()?.count).toBe(1);
+    await c.offer()?.apply();
+    await settled(c.client);
+    expect(textOf(h.server.document())).toBe(`Zulu ${start} one two`);
+    expect(c.notices).toEqual([]);
+    for (const tab of [b, c]) await tab.client.stop();
   });
 });

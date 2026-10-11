@@ -61,6 +61,7 @@ import {
   landedPast,
   overEditingCeiling,
   readerStandIns,
+  replayFloorFor,
   rosterEntryForReader,
   touchedSlides,
   transformEntry,
@@ -794,11 +795,18 @@ export class DeckRoom extends DurableObject<Env> {
     this.send(member, this.replayFor(since, reader, deps));
   }
 
-  /** The replay a socket open sends first (3.4 item 5; room.ts `replayFor`): `(since, head]` paged, or `resync`. */
+  /**
+   * The replay a socket open sends first (3.4 item 5; room.ts `replayFor`): `(since, head]` paged,
+   * or `resync`. Never below the reader's floor (hardening HR-SD#1e; room-core `replayFloorFor`):
+   * a reader without `history` replays from the position its ticket's `fl` signs, the position of
+   * the document the app handed it, and from the head when the ticket carries none (an app that
+   * predates the claim), so a `since` below it is answered `resync` and never the entries under
+   * the reader's document. The resync frame carries the revision alone, as every resync does.
+   */
   private replayFor(since: number, reader: ViewerFacts, deps: ReaderDeps): RoomEvent {
     const meta = this.meta;
     if (meta === null) return { type: 'resync', revision: 0 };
-    const plan = replayPlan(since, meta.head);
+    const plan = replayPlan(since, meta.head, replayFloorFor(reader, meta.head));
     if (plan.kind === 'resync') return { type: 'resync', revision: meta.revision };
     const entries: Entry[] = [];
     let bytes = 0;
@@ -1079,9 +1087,15 @@ export class DeckRoom extends DurableObject<Env> {
       entries[0]?.seq ?? Number.POSITIVE_INFINITY,
     );
     // the other writers' entries as this writer reads them (HR-SD#1): a writer who may not share
-    // reads their authors as stand-ins, as on the socket's fan out
+    // reads their authors as stand-ins, as on the socket's fan out. Only a post that carries an
+    // edit, from a writer who holds `history`, is answered them (hardening HR-SD#1e), as the
+    // app's ops route answers: a commenter's comment post named a base up to the window below
+    // the head and read the entries above it whole, the notes and the entries under the
+    // document it was handed among them
     const people = readerStandIns(viewerFactsOfClaims(claims) as ViewerFacts, this.readerDeps());
-    const between = landedBetween?.map((entry) => entryForReader(entry, people));
+    const between = hasEdits
+      ? landedBetween?.map((entry) => entryForReader(entry, people))
+      : undefined;
     return {
       ok: true,
       entries,

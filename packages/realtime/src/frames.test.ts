@@ -182,6 +182,12 @@ describe('frames', () => {
       share: false,
       ownIds: ['agent:tok_1'],
     });
+    // the reader's replay floor rides `fl` (HR-SD#1e); a ticket without it leaves the floor to the role
+    expect(parseTicketClaims(JSON.stringify({ ...claims, fl: 42 }))?.fl).toBe(42);
+    expect(parseTicketClaims(JSON.stringify({ ...claims, fl: -1 }))).toBeNull();
+    expect(parseTicketClaims(JSON.stringify({ ...claims, fl: 1.5 }))).toBeNull();
+    expect(viewerFactsOfClaims({ ...claims, role: 'viewer', fl: 42 }).floor).toBe(42);
+    expect('floor' in viewerFactsOfClaims(claims)).toBe(false);
     expect(ticketOfProtocols('turboslide.v1, ticket.abc.def')).toBe('abc.def');
     expect(ticketOfProtocols('turboslide.v1')).toBeNull();
     expect(ticketOfProtocols(null)).toBeNull();

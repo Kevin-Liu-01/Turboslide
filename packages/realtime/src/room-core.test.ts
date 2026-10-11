@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { DEFAULT_ACCESS_SETTINGS, ROLES, roleAllows } from '@turboslide/identity/access';
 import { standInKey, standInOf } from '@turboslide/identity/stand-in';
 import type { CommentOp } from '@turboslide/schema/comments';
 import type { Mutation } from '@turboslide/schema/mutations';
@@ -16,6 +17,7 @@ import {
   filterEventForReader,
   landedOwn,
   overEditingCeiling,
+  replayFloorFor,
   rosterEntryForReader,
   yieldConcurrentConversion,
 } from './room-core.ts';
@@ -210,6 +212,36 @@ describe('room-core', () => {
       expect(idsIn(filterEventForReader(event, sharer, deps)), event.type).toContain(OWNER);
       expect(idsIn(filterEventForReader(event, older, deps)), event.type).toContain(OWNER);
     }
+  });
+
+  it('puts a reader without history on its signed floor, else on the head (HR-SD#1e)', () => {
+    const facts = (role: ViewerFacts['role'], floor?: number | null): ViewerFacts => ({
+      role,
+      via: 'link',
+      showNames: false,
+      readComments: true,
+      ...(floor === undefined ? {} : { floor }),
+    });
+    // the signed position decides whatever the role
+    expect(replayFloorFor(facts('viewer', 12), 40)).toBe(12);
+    expect(replayFloorFor(facts('commenter', 0), 40)).toBe(0);
+    expect(replayFloorFor(facts('viewer', null), 40)).toBeNull();
+    // nothing signed (a ticket an older app minted): a role with history keeps no floor, every
+    // other replays nothing below the head at the open
+    expect(replayFloorFor(facts('owner'), 40)).toBeNull();
+    expect(replayFloorFor(facts('editor'), 40)).toBeNull();
+    expect(replayFloorFor(facts('commenter'), 40)).toBe(40);
+    expect(replayFloorFor(facts('viewer'), 40)).toBe(40);
+    // the role rule is the capability matrix's `history` cell, whatever the settings say: a
+    // change to who holds history that this rule does not follow fails here
+    for (const role of ROLES)
+      for (const settings of [
+        DEFAULT_ACCESS_SETTINGS,
+        { ...DEFAULT_ACCESS_SETTINGS, editorsCanShare: false, viewersCanSeeComments: true },
+      ])
+        expect(replayFloorFor(facts(role), 40) === null, role).toBe(
+          roleAllows(role, 'history', settings),
+        );
   });
 
   it('counts the editing connections and the ceiling', () => {

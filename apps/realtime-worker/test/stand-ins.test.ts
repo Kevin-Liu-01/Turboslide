@@ -95,7 +95,9 @@ describe('the deck room names other people by stand-ins to a reader who may not 
       ref,
     );
 
-    // a reader who joins later: the roster and the replay
+    // a reader who joins later: the roster and the replay (from a floor of 0, the position of the
+    // document the app handed it, HR-SD#1e; a viewer ticket without `fl` replays nothing below
+    // the head, replay-floor.test.ts)
     const late = await join(
       mint({
         deck,
@@ -105,6 +107,7 @@ describe('the deck room names other people by stand-ins to a reader who may not 
         role: 'viewer',
         via: 'link',
         sh: false,
+        fl: 0,
       }),
       '?since=0',
     );

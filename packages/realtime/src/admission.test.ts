@@ -51,6 +51,21 @@ describe('admission', () => {
     expect(replayPlan(4112, 4112)).toEqual({ kind: 'ops', from: 4112 });
   });
 
+  it('resyncs a position below the reader floor and replays from one at or above it (HR-SD#1e)', () => {
+    // a reader loaded at 40: since 0 is below its floor, since 40 and 45 replay as before
+    expect(replayPlan(0, 50, 40)).toEqual({ kind: 'resync' });
+    expect(replayPlan(39, 50, 40)).toEqual({ kind: 'resync' });
+    expect(replayPlan(40, 50, 40)).toEqual({ kind: 'ops', from: 40 });
+    expect(replayPlan(45, 50, 40)).toEqual({ kind: 'ops', from: 45 });
+    // a position that is not a number is below every floor
+    expect(replayPlan(Number.NaN, 50, 40)).toEqual({ kind: 'resync' });
+    // the head's own rules still hold above the floor
+    expect(replayPlan(51, 50, 40)).toEqual({ kind: 'resync' });
+    expect(replayPlan(3000, 5001, 3000)).toEqual({ kind: 'resync' });
+    // no floor (a reader with history): today's rule
+    expect(replayPlan(0, 50, null)).toEqual({ kind: 'ops', from: 0 });
+  });
+
   it('names the budgets per identity kind and the fixed windows', () => {
     expect(budgetsFor('anonymous')).toEqual({
       opsPerMinute: 2400,

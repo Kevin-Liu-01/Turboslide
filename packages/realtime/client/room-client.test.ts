@@ -3259,3 +3259,98 @@ describe("a cover's conversion in the tab's frame (build/r1.md R1-R2k; the realt
     expect(advanceRunEnds(runEnds, [blockRun(13, '2')], true)).toBe(true);
   });
 });
+
+describe('the replay floor of a reader without history (hardening HR-SD#1e)', () => {
+  /** A server whose opens never replay below `floor` for any tab, as the route and the Worker do for a viewer or a commenter. */
+  function floored(): { server: ReturnType<typeof fakeRoomServer>; setFloor: (n: number) => void } {
+    let floor = 0;
+    const server = fakeRoomServer({
+      deckId: 'gt-brand',
+      channel: memoryChannel(),
+      document: normalized(),
+      floorFor: () => floor,
+    });
+    return {
+      server,
+      setFloor: (n) => {
+        floor = n;
+      },
+    };
+  }
+
+  function clientOf(
+    server: ReturnType<typeof fakeRoomServer>,
+    identity: FakeIdentity,
+    document: DeckDocument,
+    seq: number,
+  ) {
+    const changes: DocumentChange[] = [];
+    const transport = tabTransport(server, identity);
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq,
+      transform: testTransform,
+      onChange: (change) => changes.push(change),
+      onResync: async () => server.document(),
+    });
+    return { room, changes, transport };
+  }
+
+  it('replays the entries a reconnect at or above its floor missed, with no resync', async () => {
+    const { server, setFloor } = floored();
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(0, 0, 'Figure 4471 ')]);
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(0, 12, '')]);
+    // the tab is handed the document at seq 2, the position its floor signs
+    setFloor(server.seq());
+    const a = clientOf(server, kevin, server.document(), server.seq());
+    a.room.start();
+    await until(() => a.room.status().connected);
+    server.kill();
+    await until(() => !a.room.status().connected);
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(0, 0, 'A')]);
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(1, 0, 'B')]);
+    await until(() => a.room.status().connected && a.room.status().seq === server.seq(), 5000);
+    expect(a.transport.opens()).toBe(2);
+    expect(a.changes.some((change) => change.reason === 'resync')).toBe(false);
+    expect(textOf(a.room.document())).toBe(textOf(server.document()));
+    expect(textOf(a.room.document()).startsWith('AB')).toBe(true);
+    await a.room.stop();
+  });
+
+  it('answers a position below its floor with a resync, and the edit the tab holds lands once', async () => {
+    const { server, setFloor } = floored();
+    const stale = server.document();
+    const staleSeq = server.seq();
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(0, 0, 'Figure 4471 ')]);
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(0, 12, '')]);
+    await server.appendExternal({ kind: 'human', name: 'Owner' }, [splice(0, 0, 'Z')]);
+    // the floor the server signed is the head; the tab names a position under it
+    setFloor(server.seq());
+    const seen: RoomEvent[] = [];
+    const a = clientOf(server, kevin, stale, staleSeq);
+    const transport = a.transport;
+    const open = transport.open.bind(transport);
+    transport.open = (options) =>
+      open({
+        ...options,
+        onEvent: (event) => {
+          seen.push(event);
+          options.onEvent(event);
+        },
+      });
+    a.room.apply([splice(0, 0, 'k')], 'type', 'now');
+    a.room.start();
+    await until(() => a.changes.some((change) => change.reason === 'resync'), 5000);
+    await until(() => a.room.status().pending === 0 && a.room.status().connected, 5000);
+    // no entry under the floor reached the tab: the open said resync, never ops
+    expect(seen.some((event) => event.type === 'resync')).toBe(true);
+    expect(JSON.stringify(seen)).not.toContain('Figure 4471');
+    // the typed letter landed once and the tab converged on the server
+    const text = textOf(server.document());
+    expect(text.split('k').length - 1).toBe(1);
+    expect(textOf(a.room.document())).toBe(text);
+    await a.room.stop();
+  });
+});

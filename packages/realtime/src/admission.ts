@@ -81,8 +81,18 @@ export type ReplayPlan = { kind: 'ops'; from: number } | { kind: 'resync' };
 /**
  * What a stream open sends first (SPEC-3 3.3 `ops`): the entries since the client's position,
  * or `resync` when the position is older than the head minus 2,000 entries (report 10 F25).
+ *
+ * `floor` is the lowest position the reader may replay from (hardening HR-SD#1e;
+ * room-core.ts `replayFloorFor`): a position below it is answered `resync`, so the reader gets
+ * the current document and never the entries under the document it was given. Null (a reader
+ * with the `history` capability) leaves the rule as it was.
  */
-export function replayPlan(position: number, head: number): ReplayPlan {
+export function replayPlan(
+  position: number,
+  head: number,
+  floor: number | null = null,
+): ReplayPlan {
+  if (floor !== null && !(position >= floor)) return { kind: 'resync' };
   if (position > head) return { kind: 'resync' };
   if (head - position > REPLAY_MAX_ENTRIES) return { kind: 'resync' };
   return { kind: 'ops', from: position };

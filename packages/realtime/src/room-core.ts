@@ -480,7 +480,29 @@ export type ViewerFacts = {
   deckId?: string;
   /** the reader's own ids beside `principalId` (the identity, the account's aliases): they pass as they are */
   ownIds?: readonly string[];
+  /**
+   * The lowest stream position this reader may replay from (hardening HR-SD#1e): the position of
+   * the document the server handed the reader, which that server signed (the loader's floor
+   * token, the room ticket's `fl`). Null: no floor, the reader holds `history`. Absent: the
+   * host signed nothing it can trust (a ticket an older app minted, a floor token that does not
+   * verify), and `replayFloorFor` decides by the role.
+   */
+  floor?: number | null;
 };
+
+/**
+ * The floor of a reader's replay (hardening HR-SD#1e): what the replay of a stream open or a
+ * socket's hello never goes below for this reader. A reader with `history` (an owner, an editor:
+ * `roleAllows` in @turboslide/identity/access) reads the op log in Version history anyway and
+ * keeps the replay it had. A reader without it (a viewer, a commenter) replays from the position
+ * its document was loaded at, signed by the server that loaded it; when the host holds no signed
+ * position for the reader, the floor is the head at the open, so the reader gets no entry it did
+ * not see live and a reconnect after a gap is answered `resync` (the current document).
+ */
+export function replayFloorFor(reader: ViewerFacts, head: number): number | null {
+  if (reader.floor !== undefined) return reader.floor;
+  return reader.role === 'owner' || reader.role === 'editor' ? null : head;
+}
 
 /**
  * What the reader's projection takes from its host (docs/CLOUDFLARE.md 3.3): the address of a

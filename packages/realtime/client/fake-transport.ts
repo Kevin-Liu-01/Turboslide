@@ -52,6 +52,12 @@ export type FakeRoomServerOptions = {
    * (apps/studio room.ts `admitOps` over this channel), so the clients meet the room's own rules
    */
   admit?: (body: OpsPost, identity: FakeIdentity) => Promise<OpsResponse>;
+  /**
+   * The replay floor of an identity's opens (hardening HR-SD#1e; admission.ts `replayPlan`): a
+   * `since` below it is answered `resync`, as the stream route and the Worker answer a reader
+   * without history. None by default.
+   */
+  floorFor?: (identity: FakeIdentity) => number | null;
 };
 
 type Connection = {
@@ -211,7 +217,11 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
               // the seq the last checkpoint covered, as the stream route sends it
               covered,
             });
-            const plan = replayPlan(openOptions.since, liveSeq);
+            const plan = replayPlan(
+              openOptions.since,
+              liveSeq,
+              options.floorFor?.(identity) ?? null,
+            );
             if (plan.kind === 'resync')
               connection.onEvent({ type: 'resync', revision: live.deck.revision });
             else if (plan.from < liveSeq) {

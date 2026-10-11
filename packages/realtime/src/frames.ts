@@ -79,8 +79,11 @@ const reqSchema = positiveInt;
  * reader's facts (`names` is `showNames`, `rc` is `readComments`, `sh` is whether the reader may
  * share the deck, hardening HR-SD#1), the roster entry's identity fields (`label`, `trust`,
  * `mark`, `email` only when `trust` is `verified`), the origin the function served (`org`), the
- * tab token, the build commit (`dpl`) and the two times in ms. `sh` is optional, so a Worker
- * deployed first verifies the tickets the app before it mints.
+ * tab token, the build commit (`dpl`), the reader's replay floor (`fl`, hardening HR-SD#1e: the
+ * stream position of the document the function handed a reader without `history`) and the two
+ * times in ms. `sh` and `fl` are optional, so a Worker deployed first verifies the tickets the
+ * app before it mints. The schema is strict: a Worker that predates a claim refuses every ticket
+ * that carries it, so the Worker that reads a new claim deploys before the app that mints it.
  */
 export const ticketClaimsSchema = z.strictObject({
   v: nonNegativeInt,
@@ -94,6 +97,7 @@ export const ticketClaimsSchema = z.strictObject({
   names: z.boolean(),
   rc: z.boolean(),
   sh: z.boolean().optional(),
+  fl: nonNegativeInt.optional(),
   label: z.string().min(1).max(80),
   trust: trustSchema,
   mark: z.record(z.string(), z.unknown()),
@@ -110,7 +114,10 @@ export const ticketClaimsSchema = z.strictObject({
 
 export type TicketClaims = z.infer<typeof ticketClaimsSchema>;
 
-/** The reader facts of room-core's `ViewerFacts`, read off the claims (3.4 item 6). */
+/**
+ * The reader facts of room-core's `ViewerFacts`, read off the claims (3.4 item 6). A ticket
+ * without `fl` leaves `floor` absent, and room-core's `replayFloorFor` decides it by the role.
+ */
 export function viewerFactsOfClaims(claims: TicketClaims): {
   role: TicketClaims['role'];
   via: string;
@@ -120,6 +127,7 @@ export function viewerFactsOfClaims(claims: TicketClaims): {
   share?: boolean;
   deckId: string;
   ownIds?: string[];
+  floor?: number;
 } {
   return {
     role: claims.role,
@@ -130,6 +138,7 @@ export function viewerFactsOfClaims(claims: TicketClaims): {
     ...(claims.sh === undefined ? {} : { share: claims.sh }),
     deckId: claims.deck,
     ...(claims.pid !== claims.id ? { ownIds: [claims.id] } : {}),
+    ...(claims.fl === undefined ? {} : { floor: claims.fl }),
   };
 }
 

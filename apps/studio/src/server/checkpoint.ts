@@ -182,7 +182,13 @@ export async function commitWrite(
 }
 
 export type CommitRunsResult =
-  | { ok: true; committed: VersionRecord[]; skipped: string[] }
+  | {
+      ok: true;
+      committed: VersionRecord[];
+      skipped: string[];
+      /** the last seq of the runs this call handled, when its budget ended it before the rest */
+      through?: number;
+    }
   | { ok: false; conflict: true; revision: number; committed: VersionRecord[] }
   | { ok: false; aborted: true; committed: VersionRecord[] };
 
@@ -244,22 +250,37 @@ export async function planCheckpoint(
  * the object takes the re-admission path of 3.5 for what remains. A run starts only while
  * `signal` stands (RELIABILITY-1 fix 3): once the object's call is gone (its deadline passed, its
  * connection closed) nothing reads the answer, and its retry is answered from the log by
- * `planCheckpoint`, so the route stops between runs instead of committing on for nobody.
+ * `planCheckpoint`, so the route stops between runs instead of committing on for nobody. With a
+ * `budgetMs` a run starts only while the call is younger than it (RELIABILITY-1 fix 5, hardening
+ * HR-RT#4): two people typing at once for ten seconds make one run per switch of author, each a
+ * four round commit of about 650 ms on production, and 40 of them passed the object's 25 s
+ * deadline, which is how a lost answer began. The first run always starts; `through` names the
+ * last seq handled when the budget ended the call, and the object posts from there next.
  */
 export async function commitRuns(
   store: DeckStore,
   edits: readonly Entry[],
   log: (line: string) => void = () => {},
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; budgetMs?: number; now?: () => number } = {},
 ): Promise<CommitRunsResult> {
   const committed: VersionRecord[] = [];
   const skipped: string[] = [];
+  const now = options.now ?? (() => Date.now());
+  const started = now();
+  let handled = 0;
+  let through: number | undefined;
   for (const write of coalesceEntries(edits)) {
     if (options.signal?.aborted === true) {
       log(`the call was gone after ${committed.length} runs; the rest waits for the retry`);
       return { ok: false, aborted: true, committed };
     }
+    if (options.budgetMs !== undefined && handled > 0 && now() - started >= options.budgetMs) {
+      log(`the call's ${options.budgetMs} ms ended after ${handled} runs, through seq ${through}`);
+      return { ok: true, committed, skipped, ...(through === undefined ? {} : { through }) };
+    }
+    handled += 1;
     const result = await commitWrite(store, write, { origin: true });
+    through = write.toSeq;
     if (result.ok) {
       committed.push(result.record);
       continue;
@@ -288,6 +309,9 @@ export type CheckpointRouteDeps = {
   log: (line: string) => void;
   /** the object's call: gone once its deadline passed or its connection closed */
   signal?: AbortSignal;
+  /** how long the call starts runs for, when the object continues from a partial answer (HR-RT#4) */
+  budgetMs?: number;
+  now?: () => number;
 };
 
 /** The route's answer before it adds the tier: a status, a JSON body, and how many records this call wrote. */
@@ -318,6 +342,8 @@ export async function answerCheckpoint(
   const before = edits.length > 0 ? (await store.read()).document : null;
   const result = await commitRuns(store, edits, log, {
     ...(deps.signal === undefined ? {} : { signal: deps.signal }),
+    ...(deps.budgetMs === undefined ? {} : { budgetMs: deps.budgetMs }),
+    ...(deps.now === undefined ? {} : { now: deps.now }),
   });
   if (!result.ok && 'aborted' in result) {
     // nobody reads this answer; the retry is answered from the log
@@ -334,10 +360,14 @@ export async function answerCheckpoint(
       landed: result.committed.length,
     };
   }
+  // a call its budget ended takes the comments up to the last seq it handled; the rest ride the next
+  const through = result.through;
+  const landedComments =
+    through === undefined ? comments : comments.filter((entry) => entry.seq <= through);
   let commentsResult: { revision: number; threadIds: string[] } | undefined;
-  if (comments.length > 0) {
+  if (landedComments.length > 0) {
     try {
-      commentsResult = await deps.comments.apply(comments);
+      commentsResult = await deps.comments.apply(landedComments);
     } catch (error) {
       log(`comments did not land: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -366,6 +396,8 @@ export async function answerCheckpoint(
       skipped: result.skipped,
       revision: await store.revision(),
       ...(commentsResult === undefined ? {} : { comments: commentsResult }),
+      // the object covers up to here and posts the rest on its next call (HR-RT#4)
+      ...(through === undefined ? {} : { toSeq: through }),
     },
     landed: result.committed.length,
   };

@@ -255,6 +255,13 @@ export type FakeApp = {
   revisionCheck: 'none' | 'conflict' | 'log';
   /** the next checkpoint commits, then its answer is lost this many times (the object reads no answer) */
   loseAnswerTimes: number;
+  /**
+   * The route's budget as a count (HR-RT#4): a call that names the bounded header commits at most
+   * this many edit entries and answers `toSeq`, the last seq it handled; null commits every entry.
+   */
+  budgetEntries: number | null;
+  /** whether each checkpoint call carried the bounded header, in order */
+  bounded: boolean[];
   /** forgets this deck's state; the stub stays for the file so a late call of an earlier test's object meets a benign answer */
   restore: () => void;
 };
@@ -320,6 +327,8 @@ function installFakeFetch(): void {
         closed?: boolean;
       };
       app.checkpoints.push(body);
+      const isBounded = headers.get('x-turboslide-checkpoint-bounded') === '1';
+      app.bounded.push(isBounded);
       if (app.gone) return json({ error: 'not_found', gone: true }, 404);
       if (app.failTimes > 0) {
         app.failTimes -= 1;
@@ -356,6 +365,11 @@ function installFakeFetch(): void {
         edits = edits.filter((entry) => !answered.has(`${entry.clientId} ${entry.opId}`));
         app.covered = Math.max(app.covered, ...above.map((record) => record.ops?.toSeq ?? 0));
       }
+      let through: number | undefined;
+      if (isBounded && app.budgetEntries !== null && edits.length > app.budgetEntries) {
+        edits = edits.slice(0, app.budgetEntries);
+        through = edits[edits.length - 1]?.seq;
+      }
       if (edits.length > 0) {
         app.revision += 1;
         const mutations = edits.flatMap((entry) => entry.mutations ?? []);
@@ -367,19 +381,24 @@ function installFakeFetch(): void {
           revision: app.revision,
           author: edits[edits.length - 1]?.author ?? { kind: 'agent', name: 'room' },
           note: '',
-          ops: { fromSeq: body.fromSeq, toSeq: body.toSeq },
+          ops: { fromSeq: body.fromSeq, toSeq: through ?? body.toSeq },
           mutations,
           origin: { clientId: edits[0]?.clientId ?? 'x', opIds: edits.map((entry) => entry.opId) },
         };
         app.records.push(record);
         committed.push(record);
-        app.covered = body.toSeq;
+        app.covered = through ?? body.toSeq;
       }
       if (app.loseAnswerTimes > 0) {
         app.loseAnswerTimes -= 1;
         throw new TypeError('Network connection lost.');
       }
-      return json({ committed, revision: app.revision, tier: app.tier });
+      return json({
+        committed,
+        revision: app.revision,
+        tier: app.tier,
+        ...(through === undefined ? {} : { toSeq: through }),
+      });
     },
   );
 }
@@ -407,6 +426,8 @@ export function fakeApp(
     gone: false,
     revisionCheck: 'none',
     loseAnswerTimes: 0,
+    budgetEntries: null,
+    bounded: [],
     restore: () => {
       apps.delete(deck);
     },

@@ -1,7 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { jsonResponse } from '@turboslide/agent/http/errors';
-import { checkpointBodySchema } from '@turboslide/realtime/frames';
+import {
+  CHECKPOINT_BOUNDED_HEADER,
+  CHECKPOINT_BUDGET_MS,
+  checkpointBodySchema,
+} from '@turboslide/realtime/frames';
 import type { CheckpointBody } from '@turboslide/realtime/frames';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { DeckStore } from '@turboslide/store/store';
@@ -24,7 +28,9 @@ import { roomBearerMatches } from '../../server/room-bearer';
  * past the foreign records (3.5) instead of the route committing them untransformed, unless the
  * records above that revision are the post's own first attempt, whose entries are answered from
  * the log (checkpoint.ts `planCheckpoint`, hardening HR-RT#1). The route stops between runs once
- * the object's call is gone (`request.signal`). The work itself is `answerCheckpoint`. The route
+ * the object's call is gone (`request.signal`), and when the object asks for the bound
+ * (CHECKPOINT_BOUNDED_HEADER) it starts runs for at most 15 s and answers the seq it reached
+ * (`toSeq`; HR-RT#4). The work itself is `answerCheckpoint`. The route
  * is tier agnostic by construction: it commits whatever the instance's tier and names it in the
  * answer, which 3.8 relies on for the rollback. The body cap is Vercel's 4.5 MB; a run is at most
  * 2,000 entries or 1 MB.
@@ -65,7 +71,12 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   }
   const body = parsed.data;
   try {
-    return await commit(deckId, body, request.signal);
+    return await commit(
+      deckId,
+      body,
+      request.signal,
+      request.headers.get(CHECKPOINT_BOUNDED_HEADER) === '1',
+    );
   } catch (error) {
     // a deck removed while its object still held entries (the store's `No deck.json`): a 404 the
     // object reads as final, so its alarm stops retrying (VERIFICATION.md realtime pass 1 finding
@@ -76,7 +87,12 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   }
 }
 
-async function commit(deckId: string, body: CheckpointBody, signal: AbortSignal): Promise<Response> {
+async function commit(
+  deckId: string,
+  body: CheckpointBody,
+  signal: AbortSignal,
+  bounded: boolean,
+): Promise<Response> {
   const room = await roomFor(deckId);
   const store = room.store;
   const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
@@ -89,6 +105,8 @@ async function commit(deckId: string, body: CheckpointBody, signal: AbortSignal)
       shifts: (edits, before, after) => shiftEntriesFor(room, edits, before, after),
       log: (line) => log(`${deckId}: ${line}`),
       signal,
+      // an object that continues from a partial answer asks for the bound (HR-RT#4)
+      ...(bounded ? { budgetMs: CHECKPOINT_BUDGET_MS } : {}),
     },
     body,
   );

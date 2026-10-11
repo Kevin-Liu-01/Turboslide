@@ -21,6 +21,7 @@ import { CAPS, checkBaseWindow, replayPlan } from '@turboslide/realtime/admissio
 import type { Entry, NewEntry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
 import { originKey, originKeysOf } from '@turboslide/realtime/coalesce';
 import {
+  CHECKPOINT_BOUNDED_HEADER,
   CLOSE_CODES,
   HEARTBEAT_REQUEST,
   HEARTBEAT_RESPONSE,
@@ -106,8 +107,10 @@ export const COLO_HEADER = 'x-turboslide-colo';
 export const REALTIME_HEADER = 'x-turboslide-realtime';
 export const JOIN_HEADER = 'x-turboslide-join';
 
-/** The checkpoint route's deadline (3.6.2: every outbound fetch carries one). */
+/** The checkpoint route's deadline (3.6.2: every outbound fetch carries one), above the route's 15 s budget and its last run (CHECKPOINT_BUDGET_MS). */
 export const CHECKPOINT_TIMEOUT_MS = 25_000;
+/** How many bounded calls a flush or the last close makes for one tail (HR-RT#4): 2,000 entries at 15 s a call. */
+export const CHECKPOINT_CALLS_PER_FLUSH = 8;
 /** The seed route's deadline. */
 export const SEED_TIMEOUT_MS = 25_000;
 /** The entries one checkpoint run posts at most (checkpoint.ts's triggers, read as a page). */
@@ -199,7 +202,13 @@ type Attachment = {
 type Live = { document: DeckDocument; seq: number };
 
 type CheckpointAnswer =
-  | { committed: VersionRecordLike[]; revision: number; tier: string }
+  | {
+      committed: VersionRecordLike[];
+      revision: number;
+      tier: string;
+      /** the last seq the call handled when its 15 s ended it before the rest (HR-RT#4) */
+      toSeq?: number;
+    }
   | { conflict: true; revision: number };
 
 type VersionRecordLike = {
@@ -1396,7 +1405,7 @@ export class DeckRoom extends DurableObject<Env> {
     const meta = this.meta;
     if (meta === null) return;
     try {
-      if (meta.head > meta.covered) await this.checkpoint(true);
+      if (meta.head > meta.covered) await this.checkpointTail(true);
       else if (this.editedSinceOpen)
         await this.postCheckpoint({
           fromSeq: meta.covered + 1,
@@ -1824,6 +1833,22 @@ export class DeckRoom extends DurableObject<Env> {
     return this.checkpointing;
   }
 
+  /**
+   * Checkpoints until the tail is covered or a call moves nothing (a flush, the last close): a
+   * call the route's budget ended answers part of the tail (HR-RT#4), and the caller waits for
+   * the whole of it, at most CHECKPOINT_CALLS_PER_FLUSH calls.
+   */
+  private async checkpointTail(closed: boolean): Promise<void> {
+    for (let call = 0; call < CHECKPOINT_CALLS_PER_FLUSH; call += 1) {
+      const meta = this.meta;
+      if (meta === null) return;
+      const before = meta.covered;
+      await this.checkpoint(closed);
+      const after = this.meta;
+      if (after === null || after.head <= after.covered || after.covered === before) return;
+    }
+  }
+
   private async checkpointOnce(closed: boolean): Promise<void> {
     const meta = this.meta;
     if (meta === null) return;
@@ -1884,10 +1909,17 @@ export class DeckRoom extends DurableObject<Env> {
       await this.readmit(answer.revision);
       return;
     }
+    // a call the route's budget ended answers the last seq it handled; the rest goes on the next
+    // call, armed below (RELIABILITY-1 fix 5, HR-RT#4)
+    const reached =
+      typeof answer.toSeq === 'number' && answer.toSeq >= meta.covered && answer.toSeq < toSeq
+        ? answer.toSeq
+        : toSeq;
     meta.revision = answer.revision;
-    meta.covered = toSeq;
+    meta.covered = reached;
     meta.lastCheckpointAt = Date.now();
-    meta.firstUncommittedAt = toSeq < meta.head ? this.lastEntryAt : null;
+    meta.firstUncommittedAt =
+      reached < meta.head ? (reached < toSeq ? meta.firstUncommittedAt : this.lastEntryAt) : null;
     if (this.live !== null) {
       this.live = {
         document: this.atRevision(this.live.document, answer.revision),
@@ -1908,7 +1940,7 @@ export class DeckRoom extends DurableObject<Env> {
       type: 'checkpoint',
       revision: answer.revision,
       fromSeq,
-      toSeq,
+      toSeq: reached,
       ...(last?.snapshot === undefined ? {} : { snapshot: last.snapshot }),
       author: last?.author ?? lastEntry?.author ?? { kind: 'agent', name: 'room' },
       note: last?.note ?? '',
@@ -1959,7 +1991,8 @@ export class DeckRoom extends DurableObject<Env> {
       `${this.appOrigin()}/api/decks/${encodeURIComponent(deckId)}/checkpoint`,
       {
         method: 'POST',
-        headers: this.appHeaders(true),
+        // the object continues from a partial answer, so the route may bound the call (HR-RT#4)
+        headers: { ...this.appHeaders(true), [CHECKPOINT_BOUNDED_HEADER]: '1' },
         body: JSON.stringify({ ...body, ...(revision === undefined ? {} : { revision }) }),
       },
       CHECKPOINT_TIMEOUT_MS,
@@ -2349,7 +2382,7 @@ export class DeckRoom extends DurableObject<Env> {
   private async httpFlush(): Promise<Response> {
     // an object that never opened holds nothing to commit and seeds nothing for a flush
     if (this.meta === null) return json({ ok: true, revision: 0, covered: 0, head: 0, none: true });
-    await this.checkpoint(false);
+    await this.checkpointTail(false);
     const meta = this.meta;
     return json({ ok: true, revision: meta.revision, covered: meta.covered, head: meta.head });
   }

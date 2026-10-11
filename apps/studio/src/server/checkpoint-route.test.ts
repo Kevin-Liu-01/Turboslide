@@ -2,7 +2,8 @@
 // 3.5, 3.6.1): the store is the tree's BlobStore over the in-memory Blob fake with the worked deck
 // pushed, so every record carries its origin as on production. The hardening round's pins of the
 // route live here (docs/hardening/HARDENING.md 4.6): a post retried after its answer was lost is
-// answered from the log and leaves the store at one revision (HR-RT#1).
+// answered from the log and leaves the store at one revision (HR-RT#1); a call that asks for the
+// bound starts runs for 15 s at most and answers the seq it reached (HR-RT#4).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -18,6 +19,9 @@ import { memoryBlobClient } from '@turboslide/store/blob-fake';
 import type { FakeBlobClient } from '@turboslide/store/blob-fake';
 import { openBlobStore, pushDeckDir } from '@turboslide/store/blob-store';
 import type { BlobStore } from '@turboslide/store/blob-store';
+
+import { CHECKPOINT_BUDGET_MS } from '@turboslide/realtime/frames';
+import type { BlobClient } from '@turboslide/store/blob-store';
 
 import { answerCheckpoint } from './checkpoint';
 import type { CheckpointRouteDeps, CommentsApplier } from './checkpoint';
@@ -210,4 +214,84 @@ describe('the checkpoint route over a Blob store', () => {
     expect(await store.revision()).toBe(revision + 4);
     expect(paragraph((await store.read()).document)).toBe(`${start} a b c d`);
   });
+
+  it('starts runs for 15 s at most when asked, answers the seq it reached, and the next calls commit the rest once (HR-RT#4)', async () => {
+    // every Blob call waits 160 ms, about a second a record, as reliability.md's S3 measured
+    const slow = new Proxy(fake, {
+      get(target, key, receiver) {
+        const value = Reflect.get(target, key, receiver) as unknown;
+        if (typeof value !== 'function') return value;
+        return async (...args: unknown[]) => {
+          await new Promise((resolve) => setTimeout(resolve, 160));
+          return (value as (...rest: unknown[]) => unknown).apply(target, args);
+        };
+      },
+    }) as BlobClient;
+    const slowStore = openBlobStore({
+      client: slow,
+      deckId: DECK,
+      dir: join(root, 'mirror-slow', DECK),
+      syncTtlMs: 0,
+      pollMs: 20,
+      snapshotGraceMs: 0,
+    });
+    let revision = await slowStore.revision();
+    const first = revision;
+    const end = paragraph((await slowStore.read()).document).length;
+    // 40 runs: two authors alternating, one word each
+    const entries: Entry[] = [];
+    let at = end;
+    for (let i = 1; i <= 40; i += 1) {
+      const word = ` w${i}`;
+      entries.push(entry(i, i % 2 === 1 ? A : B, i, splice(at, word)));
+      at += word.length;
+    }
+    // each run's length, to bound the call by the budget plus the run it started last
+    const runs: number[] = [];
+    const timed = new Proxy(slowStore, {
+      get(target, key, receiver) {
+        if (key === 'write')
+          return async (...args: Parameters<BlobStore['write']>) => {
+            const at0 = Date.now();
+            const outcome = await target.write(...args);
+            runs.push(Date.now() - at0);
+            return outcome;
+          };
+        return Reflect.get(target, key, receiver) as unknown;
+      },
+    });
+    const started = Date.now();
+    const reply = await answerCheckpoint(deps({ store: timed, budgetMs: CHECKPOINT_BUDGET_MS }), {
+      revision,
+      entries,
+    });
+    const elapsed = Date.now() - started;
+    expect(reply.status).toBe(200);
+    const reached = reply.body['toSeq'] as number;
+    expect(reached).toBeGreaterThan(0);
+    expect(reached).toBeLessThan(40);
+    expect(reply.landed).toBe(reached);
+    // the call ended at the first run boundary past the budget
+    expect(elapsed).toBeLessThan(CHECKPOINT_BUDGET_MS + Math.max(...runs) + 2000);
+    lines.push(`HR-RT#4 reading: ${reached} of 40 runs in ${elapsed} ms, the longest ${Math.max(...runs)} ms`);
+    // the object covers up to `toSeq` and posts the rest at the revision the answer named
+    let rest = entries.filter((row) => row.seq > reached);
+    revision = reply.body['revision'] as number;
+    for (let call = 0; call < 10 && rest.length > 0; call += 1) {
+      const next = await answerCheckpoint(deps({ store: slowStore, budgetMs: CHECKPOINT_BUDGET_MS }), {
+        revision,
+        entries: rest,
+      });
+      expect(next.status).toBe(200);
+      const through = next.body['toSeq'] as number | undefined;
+      rest = through === undefined ? [] : rest.filter((row) => row.seq > through);
+      revision = next.body['revision'] as number;
+    }
+    expect(rest).toEqual([]);
+    expect(await slowStore.revision()).toBe(first + 40);
+    expect(paragraph((await slowStore.read()).document)).toBe(
+      `${start}${entries.map((row) => (row.mutations?.[0] as { insert: string }).insert).join('')}`,
+    );
+    console.log(lines.filter((line) => line.startsWith('HR-RT#4 reading')).join('\n'));
+  }, 600_000);
 });

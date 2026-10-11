@@ -512,6 +512,17 @@ export const roomAccessChangedSchema = z.strictObject({
   principalIds: z.array(z.string().min(1).max(128)).max(1000).optional(),
 });
 
+/**
+ * The header an object sends on its checkpoint post when it continues from the seq the answer
+ * names (hardening HR-RT#4): a route that reads it commits runs for at most
+ * CHECKPOINT_BUDGET_MS and answers `toSeq`, the highest seq it handled, when it stopped early.
+ * A header and not a body field, so a route and an object one release apart still agree: the
+ * body schema is strict, and a route that does not know the header commits every run as before.
+ */
+export const CHECKPOINT_BOUNDED_HEADER = 'x-turboslide-checkpoint-bounded';
+/** How long one checkpoint call starts runs for (RELIABILITY-1 fix 5); the object's deadline (25 s) leaves room for the last run. */
+export const CHECKPOINT_BUDGET_MS = 15_000;
+
 /** `POST /api/decks/:id/checkpoint` (the object to the function, 3.5): the entries above `covered`, the object's revision when it knows one, `closed` at the last socket. */
 export const checkpointBodySchema = z.strictObject({
   fromSeq: nonNegativeInt,

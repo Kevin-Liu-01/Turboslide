@@ -10,7 +10,6 @@ import type { MarkSpec } from '@turboslide/identity/marks';
 import { PICTURE_MARK_SIZE, pictureUrlOf } from '@turboslide/identity/picture';
 import { toIdentityView } from '@turboslide/identity/resolve';
 import type { ResolvedIdentity } from '@turboslide/identity/resolve';
-import { ConflictError } from '@turboslide/schema/errors';
 import { authorSchema, writeSchema } from '@turboslide/schema/mutations';
 import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
 import type { Issue } from '@turboslide/schema/validate';
@@ -414,31 +413,12 @@ function ownIdsOf(identity: {
 }
 
 /**
- * A refusal as its reader reads it (hardening HR-SD#1d): a 409's lease holder is the holder's
- * stand-in to a caller who may not share the deck, the step the dispatcher's refusals take
- * (stand-ins.ts `errorWithStandIns`). Any other error is returned as it is, with no record read.
- */
-async function refusalForReader(
-  deckId: string,
-  identity: Parameters<typeof ownIdsOf>[0] & { ctx: AuthContext },
-  error: unknown,
-): Promise<unknown> {
-  if (!(error instanceof ConflictError) || error.holder?.principalId === undefined) return error;
-  const [{ readerPeople }, { errorWithStandIns }] = await Promise.all([
-    import('./access'),
-    import('./stand-ins'),
-  ]);
-  const people = await readerPeople(deckId, identity.ctx, ownIdsOf(identity));
-  return people === null ? error : errorWithStandIns(error, people);
-}
-
-/**
  * Version records as their reader reads them (hardening HR-SD#1, HR-SD#1d): to a reader who may
  * not share the deck every other author is the author's stand-in, by the rule the dispatcher's
  * version answers follow (access.ts `readerPeople`, decided on the record at this call). The one
  * step for every answer of this module that carries records: the version list and a write's
- * conflict. The stand-in code loads here and in `refusalForReader`, never at the top, so the
- * client stub of this module pulls none of it.
+ * conflict. The stand-in code loads here, never at the top, so the client stub of this module
+ * pulls none of it.
  */
 async function versionsForReader<V extends { author: Author }>(
   deckId: string,
@@ -1147,7 +1127,7 @@ const leaseSlideFn = createServerFn({ method: 'POST' })
       };
       return JSON.stringify(lease);
     }
-    const identity = await admitRequest(data.deckId, 'write', 'slide.lease');
+    await admitRequest(data.deckId, 'write', 'slide.lease');
     const store = await storeFor(data.deckId);
     if (data.release === true) {
       const released = await store.release(data.slideId, data.author);
@@ -1156,17 +1136,10 @@ const leaseSlideFn = createServerFn({ method: 'POST' })
       }
       return JSON.stringify(released);
     }
-    let lease: Lease;
-    try {
-      lease = await store.lease(data.slideId, data.author, {
-        ...(data.minutes !== undefined ? { minutes: data.minutes } : {}),
-        ...(data.force !== undefined ? { force: data.force } : {}),
-      });
-    } catch (error) {
-      // another author's lease is a 409 naming its holder, which a thrown error carries to the
-      // page whole: the holder is a stand-in to a caller who may not share (hardening HR-SD#1d)
-      throw await refusalForReader(data.deckId, identity, error);
-    }
+    const lease = await store.lease(data.slideId, data.author, {
+      ...(data.minutes !== undefined ? { minutes: data.minutes } : {}),
+      ...(data.force !== undefined ? { force: data.force } : {}),
+    });
     return JSON.stringify(lease);
   });
 

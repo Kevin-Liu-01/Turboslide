@@ -303,7 +303,9 @@ describe('Make a copy with Copy comments (HR-SD#1d)', () => {
     ).catch((error: unknown) => error);
     if (!(made instanceof Error)) {
       // what the copy carried before: the owner's principal id in the copied threads
-      expect(othersIn(commentFiles(made.deckId), people.editor)).toEqual([]);
+      expect(othersIn(commentFiles((made as { deckId: string }).deckId), people.editor)).toEqual(
+        [],
+      );
     }
     expect(made).toBeInstanceOf(Error);
     expect((made as Error).message).toBe(COPY_COMMENTS_REFUSAL);
@@ -322,36 +324,6 @@ describe('Make a copy with Copy comments (HR-SD#1d)', () => {
       copyComments: true,
     })) as { deckId: string };
     expect(commentFiles(owned.deckId)).toContain('For the owner only');
-  });
-});
-
-describe("the window's lease refusal (HR-SD#1d sweep, leaseSlideFn)", () => {
-  it('names the holder by the stand-in to an editor who may not share, and by the id to the owner', async () => {
-    // the owner takes the first slide; the editor asks for it and meets the owner's lease
-    await as(people.owner, () =>
-      write.leaseSlide({ deckId: DECK, slideId, author: authorOf(people.owner), minutes: 30 }),
-    );
-    const refused = (await as(people.editor, () =>
-      write.leaseSlide({ deckId: DECK, slideId, author: authorOf(people.editor) }),
-    ).catch((error: unknown) => error)) as Error & { holder?: Author };
-    expect(refused.name).toBe('ConflictError');
-    // a thrown error reaches the page with its own fields (seroval), the holder among them
-    expect(refused.holder?.principalId).toBe(standInFor(DECK, people.owner.id));
-    expect(
-      othersIn(JSON.stringify({ ...refused, message: refused.message }), people.editor),
-    ).toEqual([]);
-    const viewer = await as(people.viewer, () =>
-      write.leaseSlide({ deckId: DECK, slideId, author: authorOf(people.viewer) }),
-    ).catch((error: unknown) => error);
-    expect((viewer as Error).message).toBe(`No deck ${DECK}`);
-    // the owner's own lease renews, and a second browser of the owner's would read the id
-    const renewed = await as(people.owner, () =>
-      write.leaseSlide({ deckId: DECK, slideId, author: authorOf(people.owner) }),
-    );
-    expect(renewed.holder.principalId).toBe(people.owner.id);
-    await as(people.owner, () =>
-      write.leaseSlide({ deckId: DECK, slideId, author: authorOf(people.owner), release: true }),
-    );
   });
 });
 

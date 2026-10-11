@@ -1672,3 +1672,59 @@ calls, 6 refused (the boot's three before 0003 and the three above), 2 answered 
 Optional on production, a no-op: `worker-migrate` applies `0003_schema_version.sql`, whose row
 production already has; by the round's rules a remote migration on production is the ship
 step's.
+
+## 14. The backup (hardening O#1a)
+
+Vercel Blob keeps no versions, no soft delete and no backup of its own, and a `del` is final
+(RELIABILITY-13, `docs/hardening/HARDENING.md` 4.8). Every night the deployment copies the deck
+documents into a second store, `turboslide-backup` in the General Translation team, private,
+connected to Production as `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN` (`TURBOSLIDE_BACKUP_BLOB_TOKEN`
+is read first when it is set; `server/backup.ts` `BACKUP_TOKEN_VARIABLES`). The client opens it with
+private access, so a public store would refuse every put and the night would fail in the log
+instead of publishing access records. The preview has no backup store and answers 503.
+
+What a night copies, under `backup/<yyyy-mm-dd>/` with the pathnames the documents store uses:
+
+- per deck with a manifest: `deck.json`, `access.json`, `slides/`, `versions/`, `snapshots/` and
+  `comments/`. `deck.json` is copied first and the deck's folder is listed after it: a commit
+  stores its snapshot before it pushes `deck.json` (section 4, Writes), so the backup holds the
+  snapshot its manifest names, and a restore reads that document whole;
+- `users/<principal>/decks.json`, the per principal deck indexes;
+- `links/<hash>.json`, the link hash index, so a restored deck's share links open.
+
+Left out: the twins (`assets/`, `d/`), `.thumbs/`, `leases.json`, every `.turboslide/` sidecar and
+copy, `exports/`, `bundles/`, `builds/`, `index/` and `vitals/`. The twins stay on the public store
+under their digest, and only `deck.remove` deletes them, so a deck restored after a removal comes
+back without its pictures.
+
+How it runs. `apps/studio/vercel.json` calls `GET /api/cron/backup` at `*/10 3-5 * * *`, every ten
+minutes from 03:00 to 05:59 UTC (18 calls a night), with `Authorization: Bearer <CRON_SECRET>`; any
+other caller is answered 401 (`server/cron.ts` holds the one cron credential, which the logo
+refresh uses too). The source is the deployment's own client (`exportBlobClient`), so the copy
+reads the public store before K1's cutover, both stores during its dual read window and the
+private store after it. One call copies for at most 240 s from the cursor
+`backup/<day>/cursor.json` (the phase and the last deck finished), writes the cursor after every
+deck, and writes `backup/<day>/done.json` (decks, objects, bytes, failures, calls) once the day is
+whole; the calls after it read `done.json` and copy nothing. A document the source changed since
+an earlier call of the same night is copied again over its own etag. An object whose copy failed
+is tried once more at once and then named in the day's record. Every store call has a 30 s
+deadline. The copy is `packages/store/src/copy.ts`, the module `scripts/blob-copy.mjs` runs too.
+
+The answers: 200 with the day's counts; 500 when a copy failed (the first failures are in the
+body and in the function's log under `turboslide backup:`); 503 when no backup store or no Blob
+store is connected; 401 without the secret.
+
+Retention: 30 dated folders, the day of the run and the 29 before it. Older days are removed after
+a night completes, the oldest first; the newest complete day stays whatever its age, so a month of
+failed nights never leaves the store empty.
+
+Size and cost, from the listing of 2026-09-20 (`docs/HOSTING-MOVE.md` 1.3): about 7,600 objects
+and 55 MiB a night (72 manifests, 57 access records, 1,172 slides, 3,907 version records, 977
+snapshots, the indexes and the link files). Each object is one put, two heads and one get, so a
+month is about 230,000 advanced and 690,000 simple operations, about $1.15 and $0.30 at Blob's
+prices, and 1.6 GB kept, about $0.04, with about 1.6 GB of reads.
+
+A rehearsal on a checkout: `TURBOSLIDE_BACKUP_DIR=<folder>` opens a folder as the backup store
+(`diskBlobClient`). The route reads the Blob store as its source, so a dev server on the tmp
+store answers 503; `apps/studio/src/server/backup.test.ts` runs a night over two in-memory stores
+cut into calls by a small budget, and `cron-backup.test.ts` drives the route.

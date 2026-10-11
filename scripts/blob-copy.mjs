@@ -36,17 +36,48 @@
 // target copy that still carries the first pass's etag (`ifMatch`), and never over an object the
 // target has rewritten since (a target etag that differs from both the first pass's and the source's
 // is left alone and listed).
-import { createHash } from 'node:crypto';
+//
+// The pass, the skip rules, the verify and the delta live in packages/store/src/copy.ts (hardening
+// O#1a), the one copy module the nightly backup runs too; this file keeps the arguments, the state
+// file, the SDK client and the summary it prints, and re-exports the module's functions for its
+// test. Node loads the module with its type stripping. The SDK is resolved from
+// packages/store/package.json through `createRequire`, because the repository root has no
+// `@vercel/blob` of its own (CLEANUP-10).
 import { readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+import {
+  DEFAULT_CONCURRENCY,
+  copyStore,
+  deltaEntries,
+  listAll,
+  listedDiffering,
+  parseSkip,
+  planCopy,
+  verifyStores,
+} from '../packages/store/src/copy.ts';
+
+export {
+  DEFAULT_CONCURRENCY,
+  DIFFERING_LISTED,
+  copyStore,
+  deltaEntries,
+  listAll,
+  listedDiffering,
+  maxAgeOf,
+  md5,
+  normalizeEtag,
+  parseSkip,
+  planCopy,
+  prefixOf,
+  skipRuleOf,
+  verifyStores,
+} from '../packages/store/src/copy.ts';
+
 export const SOURCE_TOKEN_VARIABLE = 'SOURCE_BLOB_TOKEN';
 export const TARGET_TOKEN_VARIABLE = 'TARGET_BLOB_TOKEN';
-export const DEFAULT_CONCURRENCY = 8;
-export const DIFFERING_LISTED = 20;
-/** The SDK refuses a cache max age under a minute. */
-const MIN_CACHE_MAX_AGE_S = 60;
 const STATE_VERSION = 1;
 
 const USAGE =
@@ -85,297 +116,6 @@ export function parseArgs(argv) {
   return out;
 }
 
-/** `exports-older-than=1d,turboslide-sidecars` as rules; an unknown rule is refused by name. */
-export function parseSkip(text) {
-  const rules = [];
-  for (const part of String(text)
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)) {
-    const m = /^exports-older-than=(\d+)([dh])$/.exec(part);
-    if (m) {
-      const ms = Number(m[1]) * (m[2] === 'd' ? 86_400_000 : 3_600_000);
-      rules.push({ kind: 'exports-older-than', ms, label: part });
-    } else if (part === 'turboslide-sidecars') {
-      rules.push({ kind: 'turboslide-sidecars', label: part });
-    } else {
-      throw new RangeError(
-        `unknown skip rule ${part}; the rules are exports-older-than=<n>d|h and turboslide-sidecars`,
-      );
-    }
-  }
-  return rules;
-}
-
-const SIDECAR = /^decks\/[^/]+\/\.turboslide\//;
-const EXPORT_FILE = /^exports\/(?!\.jobs\/)/;
-
-/** The skip rule an entry falls under, or null when it is copied. */
-export function skipRuleOf(entry, rules, now = Date.now()) {
-  for (const rule of rules) {
-    if (rule.kind === 'turboslide-sidecars' && SIDECAR.test(entry.pathname)) return rule.label;
-    if (rule.kind === 'exports-older-than' && EXPORT_FILE.test(entry.pathname)) {
-      const at = entry.uploadedAt === undefined ? NaN : new Date(entry.uploadedAt).getTime();
-      if (Number.isFinite(at) && now - at > rule.ms) return rule.label;
-    }
-  }
-  return null;
-}
-
-/** Splits a source listing into the copied set and the skipped set, counted per rule. */
-export function planCopy(entries, rules, now = Date.now()) {
-  const copy = [];
-  const skipped = {};
-  for (const entry of entries) {
-    const rule = skipRuleOf(entry, rules, now);
-    if (rule === null) {
-      copy.push(entry);
-    } else {
-      const row = (skipped[rule] ??= { objects: 0, bytes: 0 });
-      row.objects += 1;
-      row.bytes += entry.size ?? 0;
-    }
-  }
-  return { copy, skipped };
-}
-
-/** An etag without its weak marker and quotes, so a `W/"x"` from a body read equals the `"x"` of a head. */
-export function normalizeEtag(etag) {
-  if (typeof etag !== 'string') return '';
-  return etag.replace(/^W\//, '').replace(/^"|"$/g, '');
-}
-
-/** The `max-age` of a cache-control value in seconds, or undefined when it names none. */
-export function maxAgeOf(cacheControl) {
-  const m = /max-age=(\d+)/.exec(String(cacheControl ?? ''));
-  if (!m) return undefined;
-  return Math.max(MIN_CACHE_MAX_AGE_S, Number(m[1]));
-}
-
-/** The first path segment with its slash (`decks/`), the prefix the counts are kept by. */
-export function prefixOf(pathname) {
-  const slash = pathname.indexOf('/');
-  return slash < 0 ? pathname : `${pathname.slice(0, slash + 1)}`;
-}
-
-export function md5(bytes) {
-  return createHash('md5').update(bytes).digest('hex');
-}
-
-/** Every page of a client's listing as one array. */
-export async function listAll(client, prefix = '') {
-  const out = [];
-  for await (const page of client.pages(prefix)) out.push(...page);
-  return out;
-}
-
-/** Runs `work(item)` over the items with at most `limit` in flight, in order of the list. */
-async function pool(items, limit, work) {
-  let next = 0;
-  const workers = [];
-  for (let w = 0; w < Math.min(limit, items.length); w += 1) {
-    workers.push(
-      (async () => {
-        for (;;) {
-          const i = next;
-          next += 1;
-          if (i >= items.length) return;
-          await work(items[i], i);
-        }
-      })(),
-    );
-  }
-  await Promise.all(workers);
-}
-
-function isExistsError(error) {
-  return /already exists|exists in the Blob store/i.test(
-    error instanceof Error ? error.message : String(error),
-  );
-}
-
-/**
- * Copies the entries from the source to the target. `state` (a map pathname to source etag) is
- * filled for every object the target holds with the source's etag at the end of the pass. With
- * `delta`, an entry whose current source etag differs from `state[pathname]` is written over a
- * target copy that still carries the first pass's etag (`ifMatch`); a target copy carrying a third
- * etag is left alone and listed under `rewrittenOnTarget`.
- */
-export async function copyStore({
-  source,
-  target,
-  entries,
-  concurrency = DEFAULT_CONCURRENCY,
-  dryRun = false,
-  delta = false,
-  state = {},
-  log = () => {},
-}) {
-  const started = Date.now();
-  const summary = {
-    objects: entries.length,
-    copied: 0,
-    copiedBytes: 0,
-    already: 0,
-    planned: 0,
-    plannedBytes: 0,
-    vanished: 0,
-    hashChecked: 0,
-    conflicts: [],
-    rewrittenOnTarget: [],
-    differing: [],
-    failed: [],
-  };
-  const noteDiffering = (pathname) => {
-    summary.differing.push(pathname);
-  };
-  let done = 0;
-  await pool(entries, concurrency, async (entry) => {
-    const pathname = entry.pathname;
-    const sourceEtag = normalizeEtag(entry.etag);
-    try {
-      const existing = await target.head(pathname);
-      if (existing !== null && normalizeEtag(existing.etag) === sourceEtag) {
-        summary.already += 1;
-        state[pathname] = sourceEtag;
-        return;
-      }
-      let ifMatch;
-      if (existing !== null) {
-        const firstPass = state[pathname];
-        if (
-          delta &&
-          firstPass !== undefined &&
-          normalizeEtag(existing.etag) === normalizeEtag(firstPass)
-        ) {
-          ifMatch = existing.etag; // the target still carries the first pass's copy: replace it
-        } else if (delta) {
-          summary.rewrittenOnTarget.push(pathname); // rewritten on the target since the first pass
-          return;
-        } else {
-          summary.conflicts.push(pathname); // there with another etag: never overwritten by a plain pass
-          return;
-        }
-      }
-      if (dryRun) {
-        summary.planned += 1;
-        summary.plannedBytes += entry.size ?? 0;
-        return;
-      }
-      const [body, meta] = await Promise.all([source.get(pathname), source.head(pathname)]);
-      if (body === null || meta === null) {
-        summary.vanished += 1; // deleted between the listing and the read
-        return;
-      }
-      const bodyEtag = normalizeEtag(body.etag ?? meta.etag);
-      let put;
-      try {
-        put = await target.put(pathname, body.bytes, {
-          contentType: meta.contentType,
-          cacheControlMaxAge: maxAgeOf(meta.cacheControl),
-          ...(ifMatch === undefined ? {} : { replace: true, ifMatch }),
-        });
-      } catch (error) {
-        if (!isExistsError(error)) throw error;
-        const raced = await target.head(pathname); // another run put it first
-        if (raced !== null && normalizeEtag(raced.etag) === bodyEtag) {
-          summary.already += 1;
-          state[pathname] = bodyEtag;
-          return;
-        }
-        summary.conflicts.push(pathname);
-        return;
-      }
-      summary.copied += 1;
-      summary.copiedBytes += body.bytes.byteLength;
-      if (normalizeEtag(put.etag) !== bodyEtag) {
-        // a multipart upload's etag is not the body's md5: read the copy back and compare the bytes
-        summary.hashChecked += 1;
-        const copy = await target.get(pathname);
-        if (copy === null || md5(copy.bytes) !== md5(body.bytes)) {
-          noteDiffering(pathname);
-          return;
-        }
-      }
-      state[pathname] = bodyEtag;
-    } catch (error) {
-      summary.failed.push({
-        pathname,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      done += 1;
-      if (done % 1000 === 0)
-        log(
-          `${done} of ${entries.length} objects, ${summary.copied} copied, ${summary.already} already there, ${Date.now() - started} ms`,
-        );
-    }
-  });
-  summary.elapsedMs = Date.now() - started;
-  return summary;
-}
-
-/**
- * Verifies the copied set: every source object outside the skip rules is on the target with an equal
- * etag, and the count per prefix agrees. The expected counts come from the source listing of this
- * run; the skipped set is named with its counts.
- */
-export async function verifyStores({ source, target, rules, prefix = '', now = Date.now() }) {
-  const started = Date.now();
-  const [sourceAll, targetAll] = await Promise.all([
-    listAll(source, prefix),
-    listAll(target, prefix),
-  ]);
-  const { copy, skipped } = planCopy(sourceAll, rules, now);
-  const targetByPath = new Map(targetAll.map((entry) => [entry.pathname, entry]));
-  const prefixes = {};
-  const differing = [];
-  for (const entry of copy) {
-    const row = (prefixes[prefixOf(entry.pathname)] ??= {
-      expected: 0,
-      found: 0,
-      expectedBytes: 0,
-      foundBytes: 0,
-    });
-    row.expected += 1;
-    row.expectedBytes += entry.size ?? 0;
-    const stored = targetByPath.get(entry.pathname);
-    if (stored === undefined) {
-      differing.push(`${entry.pathname} (missing on the target)`);
-      continue;
-    }
-    if (normalizeEtag(stored.etag) !== normalizeEtag(entry.etag)) {
-      differing.push(`${entry.pathname} (etag differs)`);
-      continue;
-    }
-    row.found += 1;
-    row.foundBytes += stored.size ?? 0;
-  }
-  const extra = targetAll.filter(
-    (entry) => !copy.some((c) => c.pathname === entry.pathname),
-  ).length;
-  return {
-    ok: differing.length === 0,
-    sourceObjects: sourceAll.length,
-    targetObjects: targetAll.length,
-    copiedSet: copy.length,
-    skipped,
-    skippedRules: rules.map((rule) => rule.label),
-    prefixes,
-    differing,
-    targetObjectsOutsideTheSet: extra,
-    elapsedMs: Date.now() - started,
-  };
-}
-
-/** The entries of the copied set whose source etag moved since the first pass, plus the ones the first pass never saw. */
-export function deltaEntries(entries, state) {
-  return entries.filter((entry) => {
-    const first = state[entry.pathname];
-    return first === undefined || normalizeEtag(first) !== normalizeEtag(entry.etag);
-  });
-}
-
 export function readState(file) {
   try {
     const parsed = JSON.parse(readFileSync(file, 'utf8'));
@@ -395,17 +135,15 @@ export function writeState(file, etags) {
   );
 }
 
-/** The first twenty differing pathnames, the way the summary prints them. */
-export function listedDiffering(list) {
-  return list.slice(0, DIFFERING_LISTED);
-}
+/** Resolves a module as packages/store does, where `@vercel/blob` is a dependency. */
+const storeRequire = createRequire(new URL('../packages/store/package.json', import.meta.url));
 
 /**
  * The store client over the SDK for one token: pages of the listing, a head, a body read from the
  * origin and a put under the same pathname. The token never leaves this closure.
  */
 export async function sdkStoreClient(token, access = 'public') {
-  const sdk = await import('@vercel/blob');
+  const sdk = storeRequire('@vercel/blob');
   const bytesOf = async (stream) => new Uint8Array(await new Response(stream).arrayBuffer());
   return {
     async *pages(prefix = '') {

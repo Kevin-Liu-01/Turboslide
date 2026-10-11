@@ -31,6 +31,7 @@
     "./blob-fake": "./src/blob-fake.ts",
     "./blob-disk": "./src/blob-disk.ts",
     "./blob-vercel": "./src/blob-vercel.ts",
+    "./copy": "./src/copy.ts",
     "./zip": "./src/zip.ts",
     "./bundle": "./src/bundle.ts",
     "./pack": "./src/pack.ts",

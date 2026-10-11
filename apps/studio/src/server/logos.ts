@@ -41,7 +41,6 @@ import { join } from 'node:path';
 import sharp from 'sharp';
 
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
-import { bearerToken } from '@turboslide/agent/http/auth';
 import {
   LOGO_SOURCE,
   LOGO_WORDS,
@@ -68,7 +67,6 @@ import type {
   LogoSearchRow,
   LogoUnavailable,
 } from '@turboslide/chrome/logo-model';
-import { safeEqual } from '@turboslide/identity/safe-equal';
 import type { Asset, AssetTwins, LogoAssetSource } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
 import type { BrandKit, KitAppearance } from '@turboslide/schema/brand';
@@ -91,6 +89,7 @@ import type { DeckStore } from '@turboslide/store/store';
 
 import { bodyRect, freeRectangles, occupiedRects } from '../editor/place-insert';
 import { agentAuth } from './auth';
+import { cronCredential } from './cron';
 import {
   LOGO_DOWN_MESSAGE,
   applyLogoDiscoveries,
@@ -830,22 +829,17 @@ export function resetLogoService(): void {
 // ---------------------------------------------------------------------------------------------
 // The refresh credentials (4.2; judge-design rejection 7)
 
-export const CRON_SECRET_ENV = 'CRON_SECRET';
-
 /**
  * Who may refresh (4.2): the agent bearer as every agent route decides it (the token, or a
- * checkout's localhost), or `Authorization: Bearer <CRON_SECRET>`, all a Vercel cron sends; with
- * neither, or a wrong secret, 401.
+ * checkout's localhost), or `Authorization: Bearer <CRON_SECRET>`, all a Vercel cron sends, as
+ * cron.ts decides it for every cron route (hardening O#1a); with neither, or a wrong secret, 401.
  */
 export function refreshCredential(
   request: Request,
   env: Readonly<Record<string, string | undefined>> = process.env,
   agent: (request: Request) => { ok: boolean } = agentAuth,
 ): 'agent' | 'cron' | null {
-  const given = bearerToken(request);
-  const secret = env[CRON_SECRET_ENV];
-  if (given !== undefined && secret !== undefined && secret !== '' && safeEqual(given, secret))
-    return 'cron';
+  if (cronCredential(request, env)) return 'cron';
   if (agent(request).ok) return 'agent';
   return null;
 }

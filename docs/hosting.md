@@ -619,8 +619,8 @@ Every route below runs on the file, tmp and Blob backends through the same serve
   `untitled-<yyyymmdd>-<4 chars>` that the store has not seen. The first write against revision 0
   creates the deck through `createStoredDeck` (on Blob the upload happens before the write lands)
   and the address becomes `/edit/<id>`; a visit that only looks creates nothing, so the shared
-  store gains no deck per crawler. A lease, a watch poll or a thumbnail warm on an unsaved draft
-  answers as an empty deck would.
+  store gains no deck per crawler. A lease or a thumbnail warm on an unsaved draft answers as an
+  empty deck would.
 - `/decks` lists `deck.list` (the trash left out) with a 320 by 180 thumbnail per card from the
   render route's `?w=320` variant, which stays open when the token is set; the card menu's Rename,
   Make a copy, Move to trash and Download run `deck.rename`, `deck.copy`, `deck.trash` and the

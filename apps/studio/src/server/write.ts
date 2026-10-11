@@ -21,7 +21,6 @@ import {
   readDefaultTemplateId,
 } from '@turboslide/store/templates';
 import type { DefaultKit } from '@turboslide/store/templates';
-import { toVersion } from '@turboslide/store/versions';
 import type { RealtimeTier } from '@turboslide/realtime/channel';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 
@@ -47,9 +46,11 @@ import {
  * CLI and the MCP server use, with the caller's baseRevision and Author. A stale baseRevision comes
  * back as a conflict outcome carrying the current document and the version records written since
  * the caller's base, so the editor can rebase pending mutations that touch other slides and show
- * both versions when they touch the same one. Versions, leases and the watch channel are the
- * store's as well; the watch channel reaches the browser as a long poll, since fs.watch lives in
- * this process. createServerFn appears only under apps/studio/src/server (SPEC 3.3 item 4).
+ * both versions when they touch the same one. Versions and leases are the store's as well. A
+ * revision written elsewhere reaches the editor on the room's stream (room.ts), never through a
+ * function here: the long poll of the version log that read on `read` and named every author
+ * (watchDeckFn) is gone (hardening HR-SD#1d). createServerFn appears only under
+ * apps/studio/src/server (SPEC 3.3 item 4).
  *
  * The boundary is JSON text: TanStack Start's serializability typing refuses `unknown`, which the
  * document types carry on purpose (`ext` on slides, blocks and assets; mutation values), so each
@@ -64,9 +65,9 @@ import {
  * template under an id of root.ts's draft shape that the store has not seen. `readDraftDeck`
  * hands the editor that document; the first write against revision 0 creates the deck through
  * `createStoredDeck` (the Blob backend uploads it before the write lands) and then applies the
- * write, so a visit that only looks creates nothing; a lease, a watch poll or a thumbnail warm
- * on an unsaved draft answers as an empty deck would instead of failing, so the editor shows no
- * error before the first edit.
+ * write, so a visit that only looks creates nothing; a lease or a thumbnail warm on an unsaved
+ * draft answers as an empty deck would instead of failing, so the editor shows no error before
+ * the first edit.
  */
 
 async function storeFor(deckId: string): Promise<DeckStore> {
@@ -379,9 +380,9 @@ function isDenied(error: unknown): boolean {
 
 /**
  * `authorize()` for a server function of this module, over the room's identity (security hotfix
- * H3, DATA-1: `saveVersion`, `listVersions`, `leaseSlide` and `watchDeck` read or wrote any deck
- * with no decision at all). A refusal and a deck the store does not hold answer one sentence,
- * `No deck <id>`, the one `writeDeck` answers.
+ * H3, DATA-1: `saveVersion`, `listVersions`, `leaseSlide` and the long poll removed in HR-SD#1d
+ * read or wrote any deck with no decision at all). A refusal and a deck the store does not hold
+ * answer one sentence, `No deck <id>`, the one `writeDeck` answers.
  */
 async function admitDecision(deckId: string, capability: Capability, action: string) {
   const room = await import('./room');
@@ -1125,115 +1126,4 @@ const leaseSlideFn = createServerFn({ method: 'POST' })
 /** slide.lease: take, renew or release the author's advisory lease on a slide (SPEC 6.7). */
 export async function leaseSlide(input: LeaseSlideInput): Promise<Lease> {
   return JSON.parse(await leaseSlideFn({ data: JSON.stringify(input) })) as Lease;
-}
-
-export type WatchDeckInput = {
-  deckId: string;
-  /** the revision the caller knows; the poll answers when the deck moves past it, or at the timeout */
-  since: number;
-  /** how long to hold the poll; 20 s by default, 25 s at most */
-  timeoutMs?: number;
-};
-
-export type WatchDeckResult = {
-  revision: number;
-  /** the newest version log entry, with its author, for the external revision banner */
-  head: Version | null;
-  leases: Lease[];
-  /** true when the deck moved past `since` */
-  changed: boolean;
-  /**
-   * the version records written after `since`, oldest first, so the editor can apply an external
-   * revision forward on its own document instead of reloading (MILESTONES M4 item 2)
-   */
-  since: VersionRecord[];
-};
-
-const WATCH_DEFAULT_MS = 20_000;
-const WATCH_MAX_MS = 25_000;
-/** how often a poll on an unsaved draft looks for the deck its first write creates */
-const DRAFT_POLL_MS = 1000;
-
-async function snapshot(store: DeckStore, since: number): Promise<WatchDeckResult> {
-  const [revision, records, leases] = await Promise.all([
-    store.revision(),
-    store.records(),
-    store.leases(),
-  ]);
-  const last = records[records.length - 1];
-  return {
-    revision,
-    head: last === undefined ? null : toVersion(last),
-    leases,
-    changed: revision !== since,
-    since: revision === since ? [] : records.filter((record) => record.revision > since),
-  };
-}
-
-/**
- * The store's watch channel as a long poll (SPEC 6.7 "External changes arrive over the store's
- * watch channel as a new revision"; MILESTONES M4 item 2): resolves as soon as deck.json carries a
- * revision other than `since`, or with the current state at the timeout, with the version records
- * written in between so the editor applies them forward within the second. The editor loops on it.
- * Over the Blob mirror the channel is a revision poll against the store every few seconds
- * (@turboslide/store/blob-store watch), so a write from another instance arrives within that.
- */
-const watchDeckFn = createServerFn({ method: 'POST' })
-  .validator((raw: string): WatchDeckInput => {
-    const input = parseJsonInput<Untrusted<WatchDeckInput>>(raw);
-    if (typeof input.since !== 'number' || !Number.isInteger(input.since) || input.since < 0) {
-      throw new TypeError('since must be a non-negative integer revision');
-    }
-    const timeoutMs = typeof input.timeoutMs === 'number' ? input.timeoutMs : WATCH_DEFAULT_MS;
-    return {
-      deckId: requireSlug(input.deckId, 'deckId'),
-      since: input.since,
-      timeoutMs: Math.min(WATCH_MAX_MS, Math.max(0, timeoutMs)),
-    };
-  })
-  .handler(async ({ data }): Promise<string> => {
-    if (await isUnsavedDraft(data.deckId)) {
-      // an unsaved draft (SPEC 6.1) has no store to watch: the poll holds, looking once a second
-      // for the deck the first write creates, and answers as an empty deck at the timeout
-      const deadline = Date.now() + (data.timeoutMs ?? WATCH_DEFAULT_MS);
-      while (Date.now() < deadline) {
-        await new Promise((resolve) => setTimeout(resolve, DRAFT_POLL_MS));
-        if (await hasStoredDeck(data.deckId)) break;
-      }
-      if (!(await hasStoredDeck(data.deckId))) {
-        const empty: WatchDeckResult = {
-          revision: 0,
-          head: null,
-          leases: [],
-          changed: false,
-          since: [],
-        };
-        return JSON.stringify(empty);
-      }
-    }
-    await admitRequest(data.deckId, 'read', 'watchDeck');
-    const store = await storeFor(data.deckId);
-    const now = await snapshot(store, data.since);
-    if (now.changed) return JSON.stringify(now);
-    const result = await new Promise<WatchDeckResult>((resolve, reject) => {
-      let settled = false;
-      const finish = (): void => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        stop();
-        // the deck may have gone away while the poll held (a scratch deck removed by a test):
-        // the rejection becomes the route's error, never an unhandled rejection in the server
-        snapshot(store, data.since).then(resolve, reject);
-      };
-      const stop = store.watch((event) => {
-        if (event.revision !== null && event.revision !== data.since) finish();
-      });
-      const timer = setTimeout(finish, data.timeoutMs ?? WATCH_DEFAULT_MS);
-    });
-    return JSON.stringify(result);
-  });
-
-export async function watchDeck(input: WatchDeckInput): Promise<WatchDeckResult> {
-  return JSON.parse(await watchDeckFn({ data: JSON.stringify(input) })) as WatchDeckResult;
 }

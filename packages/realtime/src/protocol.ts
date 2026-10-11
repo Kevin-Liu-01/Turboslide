@@ -30,6 +30,12 @@ export const OPS_POST_MAX_BYTES = 256 * 1024;
 export const REPLAY_MAX_ENTRIES = 2000;
 /** bytes replayed per stream open */
 export const REPLAY_MAX_BYTES = 1024 * 1024;
+/**
+ * The request header that carries a tab's replay floor token to the stream route and the ticket
+ * route (hardening HR-SD#1e; apps/studio replay-floor.ts): the loader's signed position, never in
+ * a query string
+ */
+export const REPLAY_FLOOR_HEADER = 'x-turboslide-floor';
 /** a `base.seq` further behind the head than this is a 409 `resync` (report 10 F28) */
 export const BASE_SEQ_WINDOW = 500;
 /** one presence state as JSON (report 10 F35) */

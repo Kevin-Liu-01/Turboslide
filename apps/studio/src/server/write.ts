@@ -191,6 +191,12 @@ export type EditorRoom = {
   ticket?: string;
   /** when the ticket expires, ms since the epoch */
   ticketExpiresAt?: number;
+  /**
+   * The replay floor token of a reader without `history` (hardening HR-SD#1e; replay-floor.ts):
+   * `seq` signed for this identity, deck and tier. The transport sends it on every stream open
+   * and every ticket refresh, so the replay never goes below the document this payload carries
+   */
+  floor?: string;
 };
 
 /**
@@ -528,11 +534,13 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     if (selection.tier === 'do') {
       try {
         const ticketing = await import('./room-ticket');
+        // the document's position is the reader's replay floor (HR-SD#1e): the ticket's `fl`
         const reader = await room.viewerFacts(
           data.deckId,
           decision,
           identity.ctx,
           identity.identity,
+          { floor: live.seq },
         );
         const minted = ticketing.mintRoomTicket(
           ticketing.ticketClaimsFor({
@@ -574,7 +582,22 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       /* the deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1): the name Reset reads, the default logo;
          the store's template index is pulled first so a default set on another instance holds */
       defaultKit: await timed('templates', () => defaultKitOfCollection()),
-      room: { seq: live.seq, tier: selection.tier, notice: selection.notice, ...roomExtra },
+      room: {
+        seq: live.seq,
+        tier: selection.tier,
+        notice: selection.notice,
+        ...roomExtra,
+        // a reader without history replays from this document's position and never below it
+        // (HR-SD#1e): the stream route and the ticket route read the token the loader signs here
+        ...(standing.capabilities.includes('history')
+          ? {}
+          : {
+              floor: (await import('./replay-floor')).mintReplayFloor(
+                { deckId: data.deckId, identity: identity.identity, tier: selection.tier },
+                live.seq,
+              ),
+            }),
+      },
       identity: ownIdentityOf(resolved),
       ...(standing.role !== null ? { role: standing.role } : {}),
       ...(standing.via !== null ? { via: standing.via } : {}),

@@ -219,6 +219,7 @@ const facts = (overrides: Partial<ReturnType<typeof roomFactsOf>> = {}) => ({
   url: URL_WS,
   ticket: 'payload.mac',
   ticketExpiresAt: T0 + 600_000,
+  floor: null,
   ...overrides,
 });
 
@@ -236,14 +237,20 @@ describe('the room facts and the pure readers', () => {
   test('roomFactsOf reads the payload structurally and refuses what is not a socket URL or a time', () => {
     expect(
       roomFactsOf({ tier: 'do', seq: 4, url: URL_WS, ticket: 'a.b', ticketExpiresAt: T0 }),
-    ).toEqual({ tier: 'do', seq: 4, url: URL_WS, ticket: 'a.b', ticketExpiresAt: T0 });
+    ).toEqual({ tier: 'do', seq: 4, url: URL_WS, ticket: 'a.b', ticketExpiresAt: T0, floor: null });
     expect(roomFactsOf({ tier: 'blob', seq: 1, notice: 'x' })).toEqual({
       tier: 'blob',
       seq: 1,
       url: null,
       ticket: null,
       ticketExpiresAt: null,
+      floor: null,
     });
+    // the loader's floor token rides the facts as a string, else null (HR-SD#1e)
+    expect(roomFactsOf({ tier: 'memory', seq: 3, floor: `3.${'f'.repeat(32)}` }).floor).toBe(
+      `3.${'f'.repeat(32)}`,
+    );
+    expect(roomFactsOf({ tier: 'memory', seq: 3, floor: 3 }).floor).toBeNull();
     expect(roomFactsOf({ tier: 'do', url: 'https://host/rooms/d', ticket: '' }).url).toBeNull();
     expect(roomFactsOf(undefined).tier).toBeNull();
     expect(expiresAtOf('2026-10-01T00:00:00.000Z')).toBe(Date.parse('2026-10-01T00:00:00.000Z'));
@@ -699,6 +706,36 @@ describe('roomTransport: the choice and the switch (3.8)', () => {
     expect(h.fetch.calls.map((c) => c.url)).toEqual([`/api/decks/${DECK}/ticket`]);
     expect(h.errors[1]).toMatchObject({ retryAfterMs: 0 });
     expect(transport.kind()).toBe('sse');
+  });
+
+  test('the floor token rides every stream open and every ticket refresh as a header, never the URL (HR-SD#1e)', async () => {
+    const FLOOR = `7.${'a'.repeat(32)}`;
+    const h = harness((url) => {
+      if (url.includes('/stream?'))
+        return json({ error: 'tier', tier: 'do' }, 503, { 'retry-after': '30' });
+      if (url.includes('/ticket')) return ticketAnswer('x.y', { url: URL_WS });
+      return json({}, 500);
+    });
+    const transport = roomTransport(
+      DECK,
+      TAB,
+      { tier: 'memory', seq: 7, notice: null, floor: FLOOR },
+      h.deps,
+    );
+    h.open(transport, 7);
+    await h.clock.flush();
+    const stream = h.fetch.calls.find((call) => call.url.includes('/stream?'));
+    const ticket = h.fetch.calls.find((call) => call.url.includes('/ticket'));
+    expect(new Headers(stream?.init?.headers).get('x-turboslide-floor')).toBe(FLOOR);
+    expect(new Headers(ticket?.init?.headers).get('x-turboslide-floor')).toBe(FLOOR);
+    for (const call of h.fetch.calls) expect(call.url).not.toContain(FLOOR);
+    // a payload without one sends no header
+    const bare = harness((url) =>
+      url.includes('/stream?') ? json({ error: 'gone' }, 404) : json({}, 500),
+    );
+    bare.open(roomTransport(DECK, TAB, { tier: 'memory', seq: 0 }, bare.deps));
+    await bare.clock.flush();
+    expect(new Headers(bare.fetch.calls[0]?.init?.headers).has('x-turboslide-floor')).toBe(false);
   });
 
   test('a failure the client reads: StreamFailure shape, with the ladder for a bare close', () => {

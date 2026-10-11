@@ -41,6 +41,7 @@ import {
 } from '@turboslide/realtime/frames';
 import type { AckFrame } from '@turboslide/realtime/frames';
 import {
+  REPLAY_FLOOR_HEADER,
   entrySchema,
   parseSseBlock,
   rejectReasonSchema,
@@ -100,6 +101,12 @@ export type RoomFacts = {
   ticket: string | null;
   /** epoch milliseconds */
   ticketExpiresAt: number | null;
+  /**
+   * The replay floor token the loader signed for a reader without `history` (hardening
+   * HR-SD#1e; write.ts `EditorRoom.floor`): sent as the `x-turboslide-floor` header on every
+   * stream open and every ticket refresh; null for a reader with history or an older payload
+   */
+  floor: string | null;
 };
 
 /** An expiry as a number of epoch milliseconds or an ISO string; null for anything else. */
@@ -121,7 +128,13 @@ export function roomFactsOf(room: unknown): RoomFacts {
     url: typeof row.url === 'string' && /^wss?:\/\/[^/]+\//.test(row.url) ? row.url : null,
     ticket: typeof row.ticket === 'string' && row.ticket !== '' ? row.ticket : null,
     ticketExpiresAt: expiresAtOf(row.ticketExpiresAt ?? row.expiresAt),
+    floor: typeof row.floor === 'string' && row.floor !== '' ? row.floor : null,
   };
+}
+
+/** The request headers that carry a floor token, or none (HR-SD#1e). */
+function floorHeaders(floor: string | null | undefined): Record<string, string> {
+  return floor === null || floor === undefined ? {} : { [REPLAY_FLOOR_HEADER]: floor };
 }
 
 /** The HTTP origin of a socket URL (`wss://` to `https://`, `ws://` to `http://`), for the belt; null for a bad URL. */
@@ -436,7 +449,12 @@ const GLOBAL_TIMERS: TransportTimers = {
  * against an EventSource plus a second fetch to probe the status: one connection per open, no
  * probe that itself takes a slot, and no EventSource reconnect to suppress.
  */
-export function sseTransport(deckId: string, tab: string, deps: TransportDeps = {}): RoomTransport {
+export function sseTransport(
+  deckId: string,
+  tab: string,
+  deps: TransportDeps = {},
+  floor: string | null = null,
+): RoomTransport {
   const base = `/api/decks/${encodeURIComponent(deckId)}`;
   const fetchImpl = fetchOf(deps);
   const listenerWindow = windowOf(deps);
@@ -476,7 +494,8 @@ export function sseTransport(deckId: string, tab: string, deps: TransportDeps = 
         let response: Response;
         try {
           response = await fetchImpl(`${base}/stream?since=${since}${retiring}${tabbed}`, {
-            headers: { accept: 'text/event-stream' },
+            // the loader's floor token (HR-SD#1e): the route replays nothing below it
+            headers: { accept: 'text/event-stream', ...floorHeaders(floor) },
             cache: 'no-store',
             signal: aborter.signal,
           });
@@ -732,7 +751,8 @@ export function wsTransport(
       let response: Response;
       try {
         response = await fetchImpl(`${ticketBase}${query}`, {
-          headers: { accept: 'application/json' },
+          // the loader's floor token (HR-SD#1e): the refreshed ticket keeps the floor in `fl`
+          headers: { accept: 'application/json', ...floorHeaders(room.floor) },
           cache: 'no-store',
         });
       } catch {
@@ -1175,7 +1195,7 @@ export function roomTransport(
   const facts = roomFactsOf(room);
   const now = deps.now ?? (() => Date.now());
   const ws = wsTransport(deckId, tab, facts, deps);
-  const sse = sseTransport(deckId, tab, deps);
+  const sse = sseTransport(deckId, tab, deps, facts.floor);
   let mode: 'ws' | 'sse' = facts.tier === 'do' ? 'ws' : 'sse';
   /** when the socket's opens began failing with no hello between; null while they succeed */
   let failedSince: number | null = null;

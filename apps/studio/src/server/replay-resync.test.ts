@@ -91,6 +91,73 @@ describe('replayFor (docs/REALTIME.md 3.7)', () => {
   });
 });
 
+describe('replayFor never goes below a reader without history (hardening HR-SD#1e)', () => {
+  beforeEach(() => {
+    process.env.TURBOSLIDE_SESSION_SECRET = 'a'.repeat(32);
+  });
+  afterEach(() => {
+    if (SECRET_BEFORE === undefined) delete process.env.TURBOSLIDE_SESSION_SECRET;
+    else process.env.TURBOSLIDE_SESSION_SECRET = SECRET_BEFORE;
+  });
+
+  async function roomWith(count: number): Promise<Room> {
+    const channel = memoryChannel();
+    const result = await channel.append(
+      DECK,
+      0,
+      Array.from({ length: count }, (_, i) => entry(i + 1)),
+    );
+    if (!result.ok) throw new Error('the append missed');
+    return {
+      deckId: DECK,
+      channel,
+      tier: 'memory',
+      live: async () => ({ seq: await channel.head(DECK), document: {} }),
+      revision: () => 7,
+    } as unknown as Room;
+  }
+
+  const link = { via: 'link', showNames: false, readComments: true };
+  const viewer = (floor?: number): ViewerFacts => ({
+    role: 'viewer',
+    ...link,
+    ...(floor === undefined ? {} : { floor }),
+  });
+  const commenter = (floor?: number): ViewerFacts => ({
+    role: 'commenter',
+    ...link,
+    ...(floor === undefined ? {} : { floor }),
+  });
+
+  it('answers since=0 with resync to a viewer and a commenter loaded at 4', async () => {
+    const room = await roomWith(6);
+    expect(await replayFor(room, 0, viewer(4))).toEqual({ type: 'resync', revision: 7 });
+    expect(await replayFor(room, 0, commenter(4))).toEqual({ type: 'resync', revision: 7 });
+    expect(await replayFor(room, 3, commenter(4))).toEqual({ type: 'resync', revision: 7 });
+  });
+
+  it('gives a reconnect at or above the floor every entry it missed', async () => {
+    const room = await roomWith(6);
+    const atFloor = await replayFor(room, 4, viewer(4));
+    expect(atFloor.type === 'ops' && atFloor.entries.map((row) => row.seq)).toEqual([5, 6]);
+    const above = await replayFor(room, 5, commenter(4));
+    expect(above.type === 'ops' && above.entries.map((row) => row.seq)).toEqual([6]);
+  });
+
+  it('puts the floor of a reader with nothing signed at the head, and keeps an editor on today’s replay', async () => {
+    const room = await roomWith(6);
+    expect(await replayFor(room, 0, viewer())).toEqual({ type: 'resync', revision: 7 });
+    expect(await replayFor(room, 6, viewer())).toEqual({ type: 'ops', entries: [] });
+    // `reader` is an owner's editor link: history, no floor
+    const editor = await replayFor(room, 0, { ...reader, floor: null });
+    expect(editor.type === 'ops' && editor.entries.map((row) => row.seq)).toEqual([
+      1, 2, 3, 4, 5, 6,
+    ]);
+    const unsigned = await replayFor(room, 0, reader);
+    expect(unsigned.type === 'ops' && unsigned.entries).toHaveLength(6);
+  });
+});
+
 describe('serverClientId (docs/REALTIME.md 3.3)', () => {
   it('names the agent under its principal id and every other writer as server, within 64 characters', () => {
     expect(

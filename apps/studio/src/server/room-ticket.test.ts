@@ -129,6 +129,38 @@ describe('the room ticket', () => {
     expect('share' in viewerFactsOfClaims(olderParsed!)).toBe(false);
   });
 
+  it('carries the replay floor of a reader without history, which the Worker reads back (HR-SD#1e)', () => {
+    const facts = {
+      deckId: 'gt-brand',
+      clientId: 'd'.repeat(32),
+      identity: resolved.principalId,
+      kind: 'anonymous' as const,
+      principalId: resolved.principalId,
+      role: 'viewer' as const,
+      resolved,
+      origin: 'https://www.turboslide.com',
+    };
+    const reader = {
+      role: 'viewer' as const,
+      via: 'link',
+      showNames: false,
+      readComments: false,
+      principalId: resolved.principalId,
+      deckId: 'gt-brand',
+    };
+    const floored = ticketClaimsFor({ ...facts, reader: { ...reader, floor: 37 } }, env);
+    expect(floored.fl).toBe(37);
+    const parsed = parseTicketClaims(
+      splitTicket(mintRoomTicket(floored, { now: 1_000_000, env }).ticket)!.claimsText,
+    );
+    expect(viewerFactsOfClaims(parsed!).floor).toBe(37);
+    // a reader with history (floor null) and a reader with nothing signed mint no claim
+    expect('fl' in ticketClaimsFor({ ...facts, reader: { ...reader, floor: null } }, env)).toBe(
+      false,
+    );
+    expect('fl' in ticketClaimsFor({ ...facts, reader }, env)).toBe(false);
+  });
+
   it('carries a verified address and refuses to mint without the secret', () => {
     const claims = ticketClaimsFor(
       {

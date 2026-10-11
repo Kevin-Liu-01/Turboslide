@@ -70,6 +70,7 @@ import {
   reanchorAll,
   refusalIssue,
   refusalMessage,
+  replayFloorFor,
   roleMark,
   roleWord,
   rosterEntryForReader as rosterEntryForReaderCore,
@@ -2798,19 +2799,35 @@ export async function betweenForWriter(
   return people === null ? entries : entries.map((entry) => entryForReader(entry, people));
 }
 
-/** The facts of a reader from the access record and the decision. */
+export type ViewerFactsOptions = {
+  /**
+   * The position of the document the server handed this reader, signed by the server that
+   * handed it (hardening HR-SD#1e): the loader's own `live.seq`, or the position a floor token
+   * proves (replay-floor.ts). Absent: nothing the server can trust.
+   */
+  floor?: number;
+};
+
+/**
+ * The facts of a reader from the access record and the decision. The replay floor (hardening
+ * HR-SD#1e; room-core `replayFloorFor`): a reader with `history` has none; a reader without it
+ * replays from `options.floor` when one is given, else from the head at the open.
+ */
 export async function viewerFacts(
   deckId: string,
   decision: Extract<Decision, { ok: true }>,
   ctx: AuthContext,
   principalId?: string,
+  options: ViewerFactsOptions = {},
 ): Promise<ViewerFacts> {
   const record: AccessRecord | null = await readAccess(deckId).catch(() => null);
   const readComments = await authorize(ctx, deckId, 'readComments', { transport: 'route' });
   /* a reader who may not share reads every other principal's id as its stand-in (hardening
      HR-SD#1; the fix round after verifier pass 2, F2): the reader's own ids pass, and a record
-     that did not answer shares nothing */
-  const share = record !== null && capabilitiesOf(decision.role, record).includes('share');
+     that did not answer shares nothing and holds no history */
+  const capabilities = record === null ? [] : capabilitiesOf(decision.role, record);
+  const share = capabilities.includes('share');
+  const floor = capabilities.includes('history') ? { floor: null } : floorOf(options.floor);
   const own = [ctx.principal?.id, ...(ctx.principal?.aliases ?? [])].filter(
     (id): id is string => typeof id === 'string' && id !== '' && id !== principalId,
   );
@@ -2823,7 +2840,12 @@ export async function viewerFacts(
     share,
     deckId,
     ...(own.length === 0 ? {} : { ownIds: own }),
+    ...floor,
   };
+}
+
+function floorOf(floor: number | undefined): Pick<ViewerFacts, 'floor'> {
+  return floor === undefined ? {} : { floor };
 }
 
 /** The presence rate per client: 15 states a second, coalesced (SPEC-3 3.8). */
@@ -2958,14 +2980,19 @@ export async function bindClient(
 
 export { CLIENT_BINDING_TTL_MS, PRESENCE_EXPIRY_MS };
 
-/** The replay a stream open sends first (SPEC-3 3.3 `ops` or `resync`; report 10 F25). */
+/**
+ * The replay a stream open sends first (SPEC-3 3.3 `ops` or `resync`; report 10 F25), never below
+ * the reader's floor (hardening HR-SD#1e; room-core `replayFloorFor`, the rule the Worker's deck
+ * room applies to the socket's `since`): a reader without `history` whose position is under the
+ * document it was handed is answered `resync`, never the entries under that document.
+ */
 export async function replayFor(
   room: Room,
   position: number,
   reader: ViewerFacts,
 ): Promise<RoomEvent> {
   const live = await room.live();
-  const plan = replayPlan(position, live.seq);
+  const plan = replayPlan(position, live.seq, replayFloorFor(reader, live.seq));
   if (plan.kind === 'resync') return { type: 'resync', revision: room.revision() };
   const entries: Entry[] = [];
   let bytes = 0;

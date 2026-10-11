@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { jsonResponse } from '@turboslide/agent/http/errors';
-import { CLIENT_ID_PATTERN } from '@turboslide/realtime/protocol';
+import { CLIENT_ID_PATTERN, REPLAY_FLOOR_HEADER } from '@turboslide/realtime/protocol';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { readStoredAccessFresh } from '../../server/access';
@@ -17,6 +17,7 @@ import {
   resolveRequestIdentity,
   viewerFacts,
 } from '../../server/room';
+import { readReplayFloor } from '../../server/replay-floor';
 import { mintRoomTicket, roomUrlFor, ticketClaimsFor } from '../../server/room-ticket';
 import { hasStoredDeck } from '../../server/root';
 
@@ -29,7 +30,10 @@ import { hasStoredDeck } from '../../server/root';
  * hand off leaves it; on another tier the answer carries `tier` alone, which the transport reads
  * as the word to switch to (3.6.3). Refused with `denialBody` as the stream route refuses. The
  * tier is read after the hand off check and the access record past the cache (the realtime pass 1
- * fix round, findings 7 and 9).
+ * fix round, findings 7 and 9). The ticket of a reader without `history` carries `fl`, the
+ * position the tab's `x-turboslide-floor` token proves on the do tier (hardening HR-SD#1e), so a
+ * refreshed ticket keeps the floor the loader signed; with no token that verifies it carries
+ * none, and the Worker replays nothing below the head to that reader.
  */
 
 export const Route = createFileRoute('/api/decks/$deckId/ticket')({
@@ -81,7 +85,18 @@ async function serve(request: Request, deckId: string): Promise<Response> {
   const client = given ?? mintClientId(deckId, identity.identity);
   const tier = realtimeTier();
   if (tier !== 'do') return jsonResponse({ tier }, 200, cookieHeaders);
-  const reader = await viewerFacts(deckId, decision, identity.ctx, identity.identity);
+  const floor = readReplayFloor(request.headers.get(REPLAY_FLOOR_HEADER), {
+    deckId,
+    identity: identity.identity,
+    tier,
+  });
+  const reader = await viewerFacts(
+    deckId,
+    decision,
+    identity.ctx,
+    identity.identity,
+    floor === undefined ? {} : { floor },
+  );
   const resolved = await resolveRequestIdentity(identity);
   const minted = mintRoomTicket(
     ticketClaimsFor({

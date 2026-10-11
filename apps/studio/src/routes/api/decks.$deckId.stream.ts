@@ -2,7 +2,13 @@ import { createFileRoute } from '@tanstack/react-router';
 import { jsonResponse } from '@turboslide/agent/http/errors';
 import type { RoomEvent } from '@turboslide/realtime/channel';
 import { streamLifetimeMs, streamRetryMs } from '@turboslide/realtime/admission';
-import { STREAM_HEARTBEAT_MS, sseComment, sseFrame, sseRetry } from '@turboslide/realtime/protocol';
+import {
+  REPLAY_FLOOR_HEADER,
+  STREAM_HEARTBEAT_MS,
+  sseComment,
+  sseFrame,
+  sseRetry,
+} from '@turboslide/realtime/protocol';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { accessStore } from '../../server/access';
@@ -31,6 +37,7 @@ import {
   tabTokenOf,
   viewerFacts,
 } from '../../server/room';
+import { readReplayFloor } from '../../server/replay-floor';
 
 /**
  * GET /api/decks/:id/stream (gslides-parity SPEC-3 3.3; MILESTONES-3 B2 day 3): the room's
@@ -40,7 +47,10 @@ import {
  * B1) and their stream slots released before this open's cap is judged (the focus round, cycle 3
  * stream fix round, VERIFICATION.md C3-F1), `hello` with the roster filtered by role (4.8) and the
  * editing count (0.9), the replay since `Last-Event-ID` or `?since=` (or `resync` past 2,000
- * entries, F25), then every event the reader may see, a heartbeat comment every 15 s, and a close
+ * entries, F25, or below the reader's floor, hardening HR-SD#1e: a reader without `history`
+ * replays from the position its `x-turboslide-floor` token proves, the document the loader handed
+ * it, and from the head when it carries none), then every event the reader may see, a heartbeat
+ * comment every 15 s, and a close
  * at a random point between 240 and 290 s with a `retry` between 1 and 4 s so tabs never reconnect
  * together. On the catch all function rule, never `/_serverFn`.
  *
@@ -142,7 +152,20 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       'retry-after': String(STREAM_REFUSAL_RETRY_AFTER_S),
     });
   }
-  const reader = await viewerFacts(deckId, decision, identity.ctx, identity.identity);
+  // the reader's floor (HR-SD#1e): the position the tab's token proves for this identity on this
+  // deck and tier, else none, and a reader without history then replays nothing below the head
+  const floor = readReplayFloor(request.headers.get(REPLAY_FLOOR_HEADER), {
+    deckId,
+    identity: identity.identity,
+    tier: room.tier,
+  });
+  const reader = await viewerFacts(
+    deckId,
+    decision,
+    identity.ctx,
+    identity.identity,
+    floor === undefined ? {} : { floor },
+  );
   await bindClient(room, identity, clientId);
   const lastEventId = request.headers.get('last-event-id');
   const since = url.searchParams.get('since');

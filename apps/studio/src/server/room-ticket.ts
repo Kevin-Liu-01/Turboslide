@@ -3,8 +3,9 @@
 // one into the page's `room` payload and `GET /api/decks/:id/ticket` mints the refresh; the Worker
 // verifies the MAC with `crypto.subtle` before the socket reaches the object (apps/realtime-worker
 // src/ticket.ts). The claims are the decision the function made (`role`, `via`), the reader's two
-// facts, the client id it minted (so the MAC rule of `mintClientId` stays the function's) and the
-// roster entry's identity fields, under `TURBOSLIDE_ROOM_SECRET` with `node:crypto`, as
+// facts (the reader's replay floor among them, `fl`, hardening HR-SD#1e), the client id it minted
+// (so the MAC rule of `mintClientId` stays the function's) and the roster entry's identity
+// fields, under `TURBOSLIDE_ROOM_SECRET` with `node:crypto`, as
 // `clientIdMac` signs client ids. The codec is `@turboslide/realtime/frames`, shared with the
 // Worker byte for byte. Nothing here is logged: a ticket is a credential for ten minutes.
 import { createHmac } from 'node:crypto';
@@ -98,6 +99,9 @@ export function ticketClaimsFor(
     names: facts.reader.showNames,
     rc: facts.reader.readComments,
     ...(facts.reader.share === undefined ? {} : { sh: facts.reader.share }),
+    // the replay floor of a reader without history (hardening HR-SD#1e): the signed position the
+    // Worker replays the socket's `since` from; none for a reader with history or nothing signed
+    ...(typeof facts.reader.floor === 'number' ? { fl: facts.reader.floor } : {}),
     label: facts.resolved.displayName,
     trust: facts.resolved.trust,
     // the hue is the object's grant (3.3); the mark travels without one

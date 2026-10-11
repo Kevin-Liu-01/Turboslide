@@ -27,6 +27,7 @@ import {
   GAP_REOPEN_MS,
   advanceRunEnds,
   createRoomClient,
+  defaultTransform,
   legacyFieldOf,
   presenceRefusalOf,
   presenceStateChanged,
@@ -226,6 +227,51 @@ describe('createRoomClient', () => {
     await settled([a.room, b.room]);
     expect(textOf(a.room.document()).startsWith('BBEvery')).toBe(true);
     expect(textOf(b.room.document())).toBe(textOf(a.room.document()));
+    await a.room.stop();
+    await b.room.stop();
+  });
+
+  it("moves an undo past another person's insert as the tab placed it, so a run's undo keeps the other word (HR-RC#1, RELIABILITY-3)", async () => {
+    const h = harness();
+    // A's flushes wait for the test, so A's burst is pending when B's word lands at its point
+    const due: (() => void)[] = [];
+    const a = h.client(kevin, {
+      transform: defaultTransform,
+      timers: {
+        setTimeout: (run, ms) => {
+          if (ms <= 200) due.push(run);
+          return null;
+        },
+        clearTimeout: () => undefined,
+      },
+    });
+    const b = h.client(maya, { transform: defaultTransform });
+    a.room.start();
+    b.room.start();
+    await until(() => a.room.status().connected && b.room.status().connected);
+    const start = textOf(a.room.document()).length;
+    // A's first word ends at `start + 3`: A's next burst there continues A's own text (the run)
+    a.room.apply([splice(start, 0, ' a1')], 'type');
+    due.splice(0).forEach((run) => run());
+    await settled([a.room]);
+    await until(() => textOf(b.room.document()).endsWith(' a1'));
+    const run = a.room.apply([splice(start + 3, 0, ' t')], 'type');
+    // B's " tb2" lands at the same point while A's " t" waits; the room keeps A's run on the left
+    b.room.apply([splice(start + 3, 0, ' tb2')], 'type', 'now');
+    await settled([b.room]);
+    await until(() => textOf(a.room.document()).endsWith(' t tb2'));
+    due.splice(0).forEach((run) => run());
+    await settled([a.room, b.room]);
+    expect(textOf(h.server.document()).endsWith(' a1 t tb2')).toBe(true);
+    // the undo of A's " t" removes A's two letters; the room's copy of B's insert, at A's offset,
+    // moved it onto B's word before (" a1 tb2" lost "tb" and kept " t")
+    const inverse = a.room.transformSince(run.inverse, run.at);
+    expect(inverse).toEqual([splice(start + 3, 2, '')]);
+    a.room.apply(inverse, 'undo', 'now');
+    due.splice(0).forEach((run) => run());
+    await settled([a.room, b.room]);
+    await until(() => textOf(b.room.document()) === textOf(a.room.document()));
+    expect(textOf(h.server.document()).endsWith(' a1 tb2')).toBe(true);
     await a.room.stop();
     await b.room.stop();
   });

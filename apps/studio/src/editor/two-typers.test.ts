@@ -49,6 +49,8 @@ import {
   retargetFieldRuns,
   slideToConvertFor,
 } from './convert-first';
+import { stepBursts } from './undo-bursts';
+import type { Burst } from './undo-bursts';
 
 const DECK = 'two-typers';
 const START = 'Realtime title';
@@ -163,6 +165,11 @@ type Tab = {
   remote: { opId: string; mutations: readonly Mutation[] } | null;
   /** the writes this tab refused before applying them */
   refused: Mutation[][];
+  /**
+   * The round's writes as one typing group's history entry (controller.tsx `recordBurst`,
+   * undo-bursts.ts): each burst's clock and counts, and the inverses newest first
+   */
+  group: { bursts: Burst[]; inverse: Mutation[] };
 };
 
 /** One delivery to a tab: a stream event, or a POST's answer ordered behind the events before it. */
@@ -251,8 +258,7 @@ function dropStream(tab: Tab): void {
 function quickTimers(retries = false): { timers: Timers; tick: () => Promise<void> } {
   let due = new Set<() => void>();
   const turn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
-  const runs = (ms: number): boolean =>
-    ms <= 200 || (retries && ms <= 8000 && ms !== 5000);
+  const runs = (ms: number): boolean => ms <= 200 || (retries && ms <= 8000 && ms !== 5000);
   return {
     timers: {
       setTimeout: (run, ms) => {
@@ -298,6 +304,7 @@ function makeTab(
     stream: null,
     remote: null,
     refused: [],
+    group: { bursts: [], inverse: [] },
   };
   tab.room = createRoomClient({
     deckId: DECK,
@@ -349,7 +356,11 @@ async function setup(options: {
   const lossy =
     options.loss === undefined
       ? undefined
-      : { lost: options.loss.lost, ordered: options.loss.ordered, roll: options.roll ?? Math.random };
+      : {
+          lost: options.loss.lost,
+          ordered: options.loss.ordered,
+          roll: options.roll ?? Math.random,
+        };
   const base = {
     target: options.target,
     key: runKey(options.target.slideId, options.target.blockId, 'text'),
@@ -442,6 +453,7 @@ function open(world: World, tab: Tab, keys: string, start: Start = 'end'): void 
   tab.absorbed = undefined;
   tab.shrunk = false;
   tab.keys = [...keys];
+  tab.group = { bursts: [], inverse: [] };
 }
 
 function type(tab: Tab, count = 1): void {
@@ -457,7 +469,13 @@ function type(tab: Tab, count = 1): void {
 function write(tab: Tab, mutations: Mutation[]): void {
   if (mutations.length === 0) return;
   try {
-    tab.room.apply(mutations, 'type', 'now');
+    const applied = tab.room.apply(mutations, 'type', 'now');
+    tab.group.bursts.push({
+      at: applied.at,
+      forward: mutations.length,
+      inverse: applied.inverse.length,
+    });
+    tab.group.inverse.unshift(...applied.inverse);
   } catch {
     tab.refused.push(mutations);
   }
@@ -596,6 +614,16 @@ async function texts(world: World): Promise<string[]> {
 
 const count = (text: string, word: string): number => text.split(word).length - 1;
 
+/** The words a person took back are in no copy, every other word once, and every copy the room's text. */
+function judgeUndo(label: string, copies: string[], kept: string[], undone: string[]): string[] {
+  const [room, ...tabs] = copies as [string, ...string[]];
+  const lost = kept.filter((word) => copies.some((text) => count(text, word) !== 1));
+  const left = undone.filter((word) => copies.some((text) => count(text, word) !== 0));
+  return lost.length > 0 || left.length > 0 || tabs.some((text) => text !== room)
+    ? [`${label}: room "${room}", tabs ${JSON.stringify(tabs)}`]
+    : [];
+}
+
 /** Every word once in every copy and every copy the room's text; the failure as a sentence. */
 function judge(label: string, copies: string[], words: string[]): string[] {
   const [room, ...tabs] = copies as [string, ...string[]];
@@ -612,10 +640,12 @@ type Play = {
   rounds: string[][];
   starts?: (round: number, person: number) => Start;
   loss?: Loss;
+  /** the person who takes back their last round with one Cmd+Z once every copy has merged */
+  undo?: number;
 };
 
 /** One seeded order of every person's rounds: keys, bursts, Escapes, measures, posts and deliveries. */
-async function play({ seed, target, rounds, starts, loss }: Play): Promise<string[]> {
+async function play({ seed, target, rounds, starts, loss, undo }: Play): Promise<string[]> {
   const next = random(seed);
   const losses = random(seed * 104_729);
   const world = await setup({
@@ -641,6 +671,18 @@ async function play({ seed, target, rounds, starts, loss }: Play): Promise<strin
       type(tab, tab.keys.length);
       if (tab.open) escape(world, tab);
     }
+    await drain(world);
+  }
+  const undoer = undo === undefined ? undefined : world.tabs[undo];
+  if (undoer !== undefined) {
+    // the controller's undo of a typing group (controller.tsx `stepMutations`): each burst's
+    // inverse moved past what landed since its own clock, newest first, as one write
+    write(
+      undoer,
+      stepBursts(undoer.group.bursts, undoer.group.inverse, 'inverse', (segment, at) =>
+        undoer.room.transformSince(segment, at),
+      ),
+    );
     await drain(world);
   }
   const copies = await texts(world);
@@ -769,6 +811,34 @@ describe('two people typing at one point keep every word whole (realtime.title.t
   }, 3_600_000);
 
   /**
+   * The verifier's undo property (word-fix.md, "Undo of one person's last round after the merge":
+   * 115 of 300 red; hardening HR-RC#1, RELIABILITY-3): two people type a word pair each at one
+   * point of a body text, twice, and once every copy has merged one of them takes back their
+   * second round with one Cmd+Z, as the controller steps a typing group. The other person's words
+   * stay once in every copy and the undone pair is in none. 300 seeded orders from 10,001; the
+   * person who undoes alternates with the seed. `TWO_TYPERS_UNDO_SEEDS` widens a run.
+   */
+  it("an undo after the merge takes back the person's own words and keeps the other person's", async () => {
+    const seeds = Number(process.env['TWO_TYPERS_UNDO_SEEDS'] ?? 300);
+    const rounds = rowRounds(2, 2);
+    const failures: string[] = [];
+    for (let seed = 10_001; seed < 10_001 + seeds; seed += 1) {
+      const undo = seed % 2;
+      const undone: string[] = [...(rounds[1]![undo]!.match(/ \S+/g) ?? [])];
+      const kept = wordsOf(rounds).filter((word) => !undone.includes(word));
+      failures.push(
+        ...judgeUndo(
+          `seed ${seed} (person ${undo} undoes)`,
+          await play({ seed, target: BODY, rounds, undo }),
+          kept,
+          undone,
+        ),
+      );
+    }
+    expect(failures.slice(0, 5), `${failures.length} of ${seeds} seeds`).toEqual([]);
+  }, 3_600_000);
+
+  /**
    * The two typers verifier's lossy properties (docs/gslides-parity/realtime/build/word-fix.md
    * "The verifier's simulation"; hardening HR-RT#2 writes them, HR-RC#9 takes every ceiling to
    * 0): the row's words on the cover, two people, three rounds, 60 seeded orders from 10,001
@@ -782,7 +852,11 @@ describe('two people typing at one point keep every word whole (realtime.title.t
     const failures: string[] = [];
     for (let seed = 10_001; seed < 10_001 + LOSSY_SEEDS; seed += 1)
       failures.push(
-        ...judge(`seed ${seed}`, await play({ seed, target: COVER, rounds, loss }), wordsOf(rounds)),
+        ...judge(
+          `seed ${seed}`,
+          await play({ seed, target: COVER, rounds, loss }),
+          wordsOf(rounds),
+        ),
       );
     return failures;
   };
@@ -796,7 +870,9 @@ describe('two people typing at one point keep every word whole (realtime.title.t
 
   it('a quarter of POST answers lost after admission: at most the reds read at HR-RT#2', async () => {
     const failures = await lossy({ lost: 0.25, ordered: false, drops: 0 });
-    console.log(`lossy lost: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`);
+    console.log(
+      `lossy lost: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`,
+    );
     expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
       ceiling(LOSSY_CEILING.lost),
     );
@@ -804,7 +880,9 @@ describe('two people typing at one point keep every word whole (realtime.title.t
 
   it('the same, the answers ordered behind the stream: at most the reds read at HR-RT#2', async () => {
     const failures = await lossy({ lost: 0.25, ordered: true, drops: 0 });
-    console.log(`lossy ordered: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`);
+    console.log(
+      `lossy ordered: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`,
+    );
     expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
       ceiling(LOSSY_CEILING.ordered),
     );
@@ -812,7 +890,9 @@ describe('two people typing at one point keep every word whole (realtime.title.t
 
   it('stream drops, the answers ordered behind the stream: at most the reds read at HR-RT#2', async () => {
     const failures = await lossy({ lost: 0, ordered: true, drops: 0.15 });
-    console.log(`lossy drops: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`);
+    console.log(
+      `lossy drops: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`,
+    );
     expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
       ceiling(LOSSY_CEILING.drops),
     );

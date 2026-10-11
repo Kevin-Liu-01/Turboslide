@@ -1149,6 +1149,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     recent.push(entry);
     if (recent.length > RECENT_ENTRIES) recent.splice(0, recent.length - RECENT_ENTRIES);
   };
+  /**
+   * Another author's entry as this tab placed it (hardening HR-RC#1, RELIABILITY-3): the entry's
+   * mutations moved past the pending ops it met, with each op's tie (`bridged` in `applyEntry`).
+   * Undo moves an inverse past these, never past the entry as the room wrote it: the room placed
+   * a run of this tab's to the left of another person's insert at the same offset, and the
+   * room's copy of that insert, at the offset, moved the undo of the run onto the other person's
+   * word (the two typers verifier, F3: A's undo removed B's " tb2" and kept A's " ta2"; 115 of
+   * 300 undo orders). Keyed by the entry `recent` holds, so it leaves with it.
+   */
+  const placed = new WeakMap<Entry, readonly Mutation[]>();
 
   /**
    * The op ids of this tab that were acknowledged (from an answer, an echo's `covers`, the
@@ -1554,6 +1564,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       next.push({ ...op, mutations: moved });
     }
     advanceRunEnds(runEnds, bridged, false);
+    placed.set(entry, bridged);
     pending = next;
     try {
       server = applyMutations(server, mutations, { now: entry.at }).document;
@@ -2550,12 +2561,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       // knows). Own means this tab's: an entry under one of its client ids, or a record's echo
       // whose `covers` name an op it minted (docs/archive/rounds/SYNC.md invariant 11). A second tab of the
       // same person carries its own client id, so its entries are remote here and the inverse
-      // is moved past them, which is the right reading.
+      // is moved past them, which is the right reading. Each remote entry is read as this tab
+      // placed it (`placed`, HR-RC#1): in the frame of the document the inverse was recorded
+      // on, where a run of this tab's kept the left of another person's insert at its offset.
       const marker = recentMarkers.get(at);
       const since = marker === undefined ? [] : recent.filter((entry) => entry.seq > marker);
       const landed = since
         .filter((entry) => !ownEntry(entry))
-        .flatMap((entry) => entry.mutations ?? []);
+        .flatMap((entry) => placed.get(entry) ?? entry.mutations ?? []);
       return transformPast(mutations, landed, transform) ?? [];
     },
     flush,

@@ -353,6 +353,8 @@ export class DeckRoom extends DurableObject<Env> {
   private seeding: Promise<void> | null = null;
   private lastEntryAt = 0;
   private editedSinceOpen = false;
+  /** the last socket closed with the tail uncommitted; the checkpoint that covers it lets the deck go (HR-RT#6a) */
+  private closePending = false;
   private readonly awakeSince = Date.now();
   private colo = '';
   /** the deck this object orders; restored on a wake before any handler runs (finding 1) */
@@ -1457,18 +1459,30 @@ export class DeckRoom extends DurableObject<Env> {
     }
     if (this.members.size > 0) return;
     this.editedSinceOpen = false;
-    if ((this.meta?.head ?? 0) <= (this.meta?.covered ?? 0)) {
-      // the doc rows live while the deck has a socket or an uncommitted entry (3.4 item 7)
-      this.db.run('DROP TABLE IF EXISTS doc');
-      this.db.run(DOC_DDL);
-      this.live = null;
-      if (this.meta !== null) {
-        this.meta.seeded = false;
-        this.writeMeta();
-      }
-      await this.ctx.storage.deleteAlarm().catch(() => undefined);
-      this.alarmAt = null;
-    }
+    await this.releaseClosed();
+    // the tail outlived the close: the next checkpoint that covers it lets the deck go
+    this.closePending = (this.meta?.head ?? 0) > (this.meta?.covered ?? 0);
+  }
+
+  /**
+   * A deck with no socket whose tail is committed lets go (3.4 item 7, 3.6.2): the doc rows, the
+   * alarm and the `rt_open` row go. The row stays while an entry is uncommitted (RELIABILITY-8,
+   * hardening HR-RT#6a): the drain lists `rt_open` to find the objects it must flush before a
+   * rollback, and a failed close deleted the row with the tail still in the object, so the drain
+   * never saw it. The alarm that commits such a tail later calls this once the tail is in.
+   */
+  private async releaseClosed(): Promise<void> {
+    const meta = this.meta;
+    if (meta === null || meta.head > meta.covered) return;
+    this.closePending = false;
+    // the doc rows live while the deck has a socket or an uncommitted entry (3.4 item 7)
+    this.db.run('DROP TABLE IF EXISTS doc');
+    this.db.run(DOC_DDL);
+    this.live = null;
+    meta.seeded = false;
+    this.writeMeta();
+    await this.ctx.storage.deleteAlarm().catch(() => undefined);
+    this.alarmAt = null;
     try {
       if (this.deckId !== null) await noteClosed(this.env.ACCOUNTS, this.deckId);
     } catch {
@@ -1993,6 +2007,8 @@ export class DeckRoom extends DurableObject<Env> {
       return;
     }
     if (meta.head > meta.covered) await this.armAlarm(Date.now() + 50);
+    // a tail a failed close left behind is in now (an alarm, a flush): the deck lets go (HR-RT#6a)
+    else if (!closed && this.closePending && this.members.size === 0) await this.releaseClosed();
   }
 
   /**

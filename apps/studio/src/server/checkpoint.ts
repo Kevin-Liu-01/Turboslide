@@ -1,5 +1,5 @@
 import type { Entry, RealtimeChannel, RoomEvent } from '@turboslide/realtime/channel';
-import { coalesceEntries } from '@turboslide/realtime/coalesce';
+import { coalesceEntries, originKey, originKeysOf } from '@turboslide/realtime/coalesce';
 import type { CoalescedWrite } from '@turboslide/realtime/coalesce';
 import { deckKeys } from '@turboslide/realtime/keys';
 import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
@@ -183,23 +183,82 @@ export async function commitWrite(
 
 export type CommitRunsResult =
   | { ok: true; committed: VersionRecord[]; skipped: string[] }
-  | { ok: false; conflict: true; revision: number; committed: VersionRecord[] };
+  | { ok: false; conflict: true; revision: number; committed: VersionRecord[] }
+  | { ok: false; aborted: true; committed: VersionRecord[] };
+
+export type CheckpointPlan =
+  | { kind: 'conflict'; revision: number }
+  | { kind: 'commit'; answered: VersionRecord[]; fresh: Entry[] };
+
+/**
+ * What a checkpoint post asks of the store (RELIABILITY-1, hardening HR-RT#1 fix 1). The object
+ * names the revision it last read. A store still at that revision commits every entry. A store
+ * that moved is read once: when every record above that revision names only entries of this
+ * post in its origin, those records are this post's own first attempt, whose answer the object
+ * never read (its 25 s deadline, a function killed mid run, an answer dropped on the way). The
+ * entries they name are answered from the log and never committed a second time, and the rest
+ * are committed after them, in order. Before this the retry met 409, `readmit` read its own
+ * records as foreign, and every word of the checkpoint was in the store twice. A record above
+ * the object's revision that names anything else, or names nothing, is a write from outside the
+ * object: answered 409, so the object re-admits its tail past it (3.5). Entries are matched by
+ * client and op id, one entry at a time, so a retry whose run grew since the first attempt
+ * commits only the entries the first attempt did not.
+ */
+export async function planCheckpoint(
+  store: DeckStore,
+  body: { revision?: number | undefined; entries: readonly Entry[] },
+): Promise<CheckpointPlan> {
+  const entries = [...body.entries];
+  if (body.revision === undefined) return { kind: 'commit', answered: [], fresh: entries };
+  const current = await store.revision();
+  if (current === body.revision) return { kind: 'commit', answered: [], fresh: entries };
+  const since = body.revision;
+  const above = current > since ? (await store.records()).filter((r) => r.revision > since) : [];
+  if (above.length === 0) return { kind: 'conflict', revision: current };
+  const posted = new Set(
+    entries
+      .filter((entry) => entry.kind === 'edit')
+      .map((entry) => originKey(entry.clientId, entry.opId)),
+  );
+  const named = new Set<string>();
+  for (const record of above) {
+    const keys = originKeysOf(record);
+    if (keys.length === 0 || !keys.every((key) => posted.has(key)))
+      return { kind: 'conflict', revision: current };
+    for (const key of keys) named.add(key);
+  }
+  return {
+    kind: 'commit',
+    answered: above,
+    fresh: entries.filter(
+      (entry) => entry.kind !== 'edit' || !named.has(originKey(entry.clientId, entry.opId)),
+    ),
+  };
+}
 
 /**
  * The body of a checkpoint run as the checkpoint route commits it (docs/CLOUDFLARE.md 3.6.1): one
  * Write per coalesced run of the edit entries, each with its origin, in order; a Write the store
  * refuses for its content is skipped and its op ids named (the run goes on, as the checkpointer
  * does); a conflict stops the run and is answered to the caller with the store's revision, so
- * the object takes the re-admission path of 3.5 for what remains.
+ * the object takes the re-admission path of 3.5 for what remains. A run starts only while
+ * `signal` stands (RELIABILITY-1 fix 3): once the object's call is gone (its deadline passed, its
+ * connection closed) nothing reads the answer, and its retry is answered from the log by
+ * `planCheckpoint`, so the route stops between runs instead of committing on for nobody.
  */
 export async function commitRuns(
   store: DeckStore,
   edits: readonly Entry[],
   log: (line: string) => void = () => {},
+  options: { signal?: AbortSignal } = {},
 ): Promise<CommitRunsResult> {
   const committed: VersionRecord[] = [];
   const skipped: string[] = [];
   for (const write of coalesceEntries(edits)) {
+    if (options.signal?.aborted === true) {
+      log(`the call was gone after ${committed.length} runs; the rest waits for the retry`);
+      return { ok: false, aborted: true, committed };
+    }
     const result = await commitWrite(store, write, { origin: true });
     if (result.ok) {
       committed.push(result.record);
@@ -217,6 +276,99 @@ export async function commitRuns(
     log(`a coalesced write of ${write.opIds.length} ops did not commit: ${result.message}`);
   }
   return { ok: true, committed, skipped };
+}
+
+/** What the checkpoint route hands `answerCheckpoint` from its deck's room. */
+export type CheckpointRouteDeps = {
+  store: DeckStore;
+  /** the sidecar's applier of the post's comment entries */
+  comments: CommentsApplier;
+  /** the `comment.shift` entries the landed edits produce (comments.ts `shiftEntriesFor`) */
+  shifts: (edits: readonly Entry[], before: DeckDocument, after: DeckDocument) => Promise<unknown[]>;
+  log: (line: string) => void;
+  /** the object's call: gone once its deadline passed or its connection closed */
+  signal?: AbortSignal;
+};
+
+/** The route's answer before it adds the tier: a status, a JSON body, and how many records this call wrote. */
+export type CheckpointReply = { status: number; body: Record<string, unknown>; landed: number };
+
+/**
+ * The checkpoint route's work over the deck's store (docs/CLOUDFLARE.md 3.5, 3.6.1), apart from
+ * the request so a test drives it over a Blob store: the plan (`planCheckpoint`: a store that
+ * moved under the object is answered 409 unless the records above the object's revision are this
+ * post's own first attempt, which answer their entries), one Write per coalesced run of the
+ * fresh edits (`commitRuns`), the comment entries to the sidecar, the comment anchors shifted
+ * past the edits this call landed. `committed` lists the records that answered entries from the
+ * log first, then the ones this call wrote, so the object reads one answer either way.
+ */
+export async function answerCheckpoint(
+  deps: CheckpointRouteDeps,
+  body: { revision?: number | undefined; entries: readonly Entry[] },
+): Promise<CheckpointReply> {
+  const { store, log } = deps;
+  const plan = await planCheckpoint(store, body);
+  if (plan.kind === 'conflict') {
+    // a write landed outside the object (a blob instance during the alias switch, a restore):
+    // the object reloads at this revision and re-admits its tail transformed (3.5)
+    return { status: 409, body: { conflict: true, revision: plan.revision }, landed: 0 };
+  }
+  const edits = plan.fresh.filter((entry) => entry.kind === 'edit' && !isStoreEntry(entry));
+  const comments = plan.fresh.filter((entry) => entry.kind === 'comment');
+  const before = edits.length > 0 ? (await store.read()).document : null;
+  const result = await commitRuns(store, edits, log, {
+    ...(deps.signal === undefined ? {} : { signal: deps.signal }),
+  });
+  if (!result.ok && 'aborted' in result) {
+    // nobody reads this answer; the retry is answered from the log
+    return {
+      status: 503,
+      body: { error: 'aborted', committed: result.committed.length },
+      landed: result.committed.length,
+    };
+  }
+  if (!result.ok) {
+    return {
+      status: 409,
+      body: { conflict: true, revision: result.revision, committed: result.committed },
+      landed: result.committed.length,
+    };
+  }
+  let commentsResult: { revision: number; threadIds: string[] } | undefined;
+  if (comments.length > 0) {
+    try {
+      commentsResult = await deps.comments.apply(comments);
+    } catch (error) {
+      log(`comments did not land: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  if (result.committed.length > 0 && before !== null) {
+    // the comment anchors follow their text (SPEC-3 0.52; room.ts appendShifts' sidecar half):
+    // the shifts are applied to the sidecar here, since no stream entry rides the object for them
+    try {
+      const after = (await store.read()).document;
+      const shifts = await deps.shifts(edits, before, after);
+      if (shifts.length > 0) {
+        const shifted = await deps.comments.apply(shifts as Pick<Entry, 'comment'>[]);
+        commentsResult = {
+          revision: shifted.revision,
+          threadIds: [...new Set([...(commentsResult?.threadIds ?? []), ...shifted.threadIds])],
+        };
+      }
+    } catch (error) {
+      log(`comment.shift did not land: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  return {
+    status: 200,
+    body: {
+      committed: [...plan.answered, ...result.committed],
+      skipped: result.skipped,
+      revision: await store.revision(),
+      ...(commentsResult === undefined ? {} : { comments: commentsResult }),
+    },
+    landed: result.committed.length,
+  };
 }
 
 export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {

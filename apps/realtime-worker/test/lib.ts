@@ -246,6 +246,15 @@ export type FakeApp = {
   seedFailStatus: number;
   /** the checkpoint route answers 404 `{ gone: true }`: the deck was removed */
   gone: boolean;
+  /**
+   * The route's check of the object's revision (checkpoint.ts `planCheckpoint`): `none` commits
+   * whatever the body names (the fake's default); `conflict` answers 409 for any other revision,
+   * as the route did before hardening HR-RT#1; `log` answers the entries the records above the
+   * object's revision name from the log and commits the rest, as the route does since.
+   */
+  revisionCheck: 'none' | 'conflict' | 'log';
+  /** the next checkpoint commits, then its answer is lost this many times (the object reads no answer) */
+  loseAnswerTimes: number;
   /** forgets this deck's state; the stub stays for the file so a late call of an earlier test's object meets a benign answer */
   restore: () => void;
 };
@@ -321,9 +330,32 @@ function installFakeFetch(): void {
         return json({ conflict: true, revision: app.revision }, 409);
       }
       const committed: FakeRecord[] = [];
-      const edits = body.entries.filter(
+      let edits = body.entries.filter(
         (entry) => entry.kind === 'edit' && entry.mutations !== undefined,
       );
+      const posted = body as { revision?: number };
+      if (
+        app.revisionCheck !== 'none' &&
+        posted.revision !== undefined &&
+        posted.revision !== app.revision
+      ) {
+        const above = app.records.filter((record) => record.revision > (posted.revision ?? 0));
+        const keys = new Set(edits.map((entry) => `${entry.clientId} ${entry.opId}`));
+        const named = (record: FakeRecord): string[] =>
+          (record.origin?.opIds ?? []).map((opId) => `${record.origin?.clientId} ${opId}`);
+        const own =
+          app.revisionCheck === 'log' &&
+          above.length > 0 &&
+          above.every((record) => {
+            const ids = named(record);
+            return ids.length > 0 && ids.every((key) => keys.has(key));
+          });
+        if (!own) return json({ conflict: true, revision: app.revision }, 409);
+        const answered = new Set(above.flatMap(named));
+        committed.push(...above);
+        edits = edits.filter((entry) => !answered.has(`${entry.clientId} ${entry.opId}`));
+        app.covered = Math.max(app.covered, ...above.map((record) => record.ops?.toSeq ?? 0));
+      }
       if (edits.length > 0) {
         app.revision += 1;
         const mutations = edits.flatMap((entry) => entry.mutations ?? []);
@@ -342,6 +374,10 @@ function installFakeFetch(): void {
         app.records.push(record);
         committed.push(record);
         app.covered = body.toSeq;
+      }
+      if (app.loseAnswerTimes > 0) {
+        app.loseAnswerTimes -= 1;
+        throw new TypeError('Network connection lost.');
       }
       return json({ committed, revision: app.revision, tier: app.tier });
     },
@@ -369,6 +405,8 @@ export function fakeApp(
     seedFailTimes: 0,
     seedFailStatus: 302,
     gone: false,
+    revisionCheck: 'none',
+    loseAnswerTimes: 0,
     restore: () => {
       apps.delete(deck);
     },

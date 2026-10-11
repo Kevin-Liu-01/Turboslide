@@ -27,6 +27,23 @@ export type CoalescedWrite = {
   note?: string;
 };
 
+/**
+ * An entry's place in a record's origin (`VersionRecord.origin`, written from a run's `clientId`
+ * and `opIds`): its client and its op id. The checkpoint route and the object match the entries
+ * of a checkpoint against the records above a revision by it (hardening HR-RT#1).
+ */
+export function originKey(clientId: string, opId: string): string {
+  return `${clientId} ${opId}`;
+}
+
+/** The entries a record's origin names, as `originKey`s; none for a record written without one. */
+export function originKeysOf(record: {
+  origin?: { clientId: string; opIds: readonly string[] } | undefined;
+}): string[] {
+  const origin = record.origin;
+  return origin === undefined ? [] : origin.opIds.map((opId) => originKey(origin.clientId, opId));
+}
+
 /** Two authors are one when kind, name, runId and principalId agree (SPEC-3 2.4). */
 export function sameWriter(a: Author, b: Author): boolean {
   const pa = (a as { principalId?: unknown }).principalId;

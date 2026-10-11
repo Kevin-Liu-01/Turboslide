@@ -19,6 +19,7 @@ import { DurableObject } from 'cloudflare:workers';
 
 import { CAPS, checkBaseWindow, replayPlan } from '@turboslide/realtime/admission';
 import type { Entry, NewEntry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
+import { originKey, originKeysOf } from '@turboslide/realtime/coalesce';
 import {
   CLOSE_CODES,
   HEARTBEAT_REQUEST,
@@ -1969,6 +1970,14 @@ export class DeckRoom extends DurableObject<Env> {
    * mutations past the records' mutations and placed on the seed's document as new entries (the
    * rows are moved to the head by an UPDATE, so the unique index keeps the dedupe), committed at
    * once, and `{ type: 'checkpoint', external: true }` so every tab reloads at the revision.
+   *
+   * A record above the object's revision whose origin names entries of the tail is the object's
+   * own earlier checkpoint, whose answer never came back (RELIABILITY-1 fix 2, hardening HR-RT#1;
+   * a route older than `planCheckpoint`, or a foreign write that landed after it). Those entries
+   * are in the seed's document already: they stay where they are, below the new `covered`, and
+   * are never posted again, and their records are not among what the rest moves past. Before
+   * this every record above the revision was foreign, the tail was moved past itself and posted
+   * again, and every word of the lost checkpoint was in the store twice.
    */
   private async readmit(revision: number): Promise<void> {
     const meta = this.meta;
@@ -1976,16 +1985,32 @@ export class DeckRoom extends DurableObject<Env> {
     const deckId = this.requireDeckId();
     const answer = await this.fetchSeed(deckId, meta.revision);
     const document = await this.seedDocument(answer);
-    const foreign = (answer.records ?? [])
-      .filter((record) => record.revision > meta.revision && record.mutations !== undefined)
-      .sort((a, b) => a.revision - b.revision)
-      .flatMap((record) => record.mutations ?? []);
-    let landed = landedOwn(foreign);
     const stale = this.entriesAbove(meta.covered, meta.head - meta.covered);
+    const tail = new Set(stale.map((entry) => originKey(entry.clientId, entry.opId)));
+    const above = (answer.records ?? [])
+      .filter((record) => record.revision > meta.revision)
+      .sort((a, b) => a.revision - b.revision);
+    const committedOwn = new Set<string>();
+    const foreign: Mutation[] = [];
+    for (const record of above) {
+      const keys = originKeysOf(record);
+      if (keys.some((key) => tail.has(key))) {
+        for (const key of keys) committedOwn.add(key);
+        continue;
+      }
+      foreign.push(...(record.mutations ?? []));
+    }
+    let landed = landedOwn(foreign);
     let running = document;
     const moved: Entry[] = [];
+    let kept = 0;
     this.ctx.storage.transactionSync(() => {
       for (const entry of stale) {
+        if (entry.kind === 'edit' && committedOwn.has(originKey(entry.clientId, entry.opId))) {
+          // committed by the checkpoint whose answer was lost: in the seed's document already
+          kept += 1;
+          continue;
+        }
         if (entry.kind !== 'edit' || entry.mutations === undefined) {
           meta.head += 1;
           moved.push(this.moveEntry(entry, meta.head, entry.mutations ?? null, meta.revision));
@@ -2019,6 +2044,11 @@ export class DeckRoom extends DurableObject<Env> {
       meta.seeded = true;
       this.writeMeta();
     });
+    if (kept > 0)
+      this.log('warn', 'a checkpoint whose answer was lost had committed; its entries stay once', {
+        kept,
+        moved: moved.length,
+      });
     this.writeDocRows(document);
     meta.docSeq = meta.covered;
     this.live = { document: running, seq: meta.head };

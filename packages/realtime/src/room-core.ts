@@ -146,6 +146,8 @@ export type Landed = {
   insertTie: Side;
   /** the POST's own making (the undo of a refused sibling): the run rule does not apply to it */
   own?: true;
+  /** the seq of the entry the row came from (`landedOf`), so `landedPastAnswered` finds its rows */
+  seq?: number;
 };
 
 /** The landed entries' mutations in order, each with the tie the POST's inserts take against it. */
@@ -154,7 +156,7 @@ export function landedOf(entries: ReadonlyArray<Entry>, post: OpsPost): Landed[]
   for (const entry of entries) {
     const insertTie: Side =
       post.insertTie === 'client-id' ? insertTieSide(post.clientId, entry.clientId) : 'right';
-    for (const mutation of entry.mutations ?? []) out.push({ mutation, insertTie });
+    for (const mutation of entry.mutations ?? []) out.push({ mutation, insertTie, seq: entry.seq });
   }
   return out;
 }
@@ -252,6 +254,40 @@ export function landedPast(
     written = written.flatMap((mutation) => movedPast(mutation, against, 'right', tie));
   }
   return out;
+}
+
+/**
+ * What landed, once an entry of the POST is answered from the log (RELIABILITY-2, F1; hardening
+ * HR-RT#2). A retried POST carries the op ids of its first attempt, and an id the log already
+ * holds is answered with its entry and never appended twice. That entry sits in the log above the
+ * POST's base, so its rows are among what landed, and the next entry of the POST, written on top
+ * of it, was moved past its own author's letters: A's " t" answered from the log, A's "a1"
+ * pushed past " t" and refused as outside the text (the two typers verifier, word-fix.md F1).
+ * Here the answered entry's rows leave the set, and the rows that landed before it are moved past
+ * the entry as its client wrote it (`landedPast`), so the next entry meets them in the frame it
+ * was written in. The rows that landed after it were placed past it already and stay. `seq` is
+ * the seq the log answered the entry with; an entry at or under the POST's base (`base`) left no
+ * rows here and changes nothing. One record of the blob tier can answer several entries of one
+ * POST: the first takes the record's rows out, and each one moves the rows before it. The three
+ * admissions call this (apps/studio room.ts `admitOps` and `admitOnBlob`, the object's `admit`).
+ * Pure.
+ */
+export function landedPastAnswered(
+  landed: ReadonlyArray<Landed>,
+  answered: { seq: number; base: number },
+  mutations: readonly Mutation[],
+  run = false,
+  document?: DeckDocument,
+): Landed[] {
+  if (answered.seq <= answered.base) return [...landed];
+  const before: Landed[] = [];
+  const after: Landed[] = [];
+  for (const row of landed) {
+    if (row.seq === answered.seq) continue;
+    if (row.seq !== undefined && row.seq < answered.seq) before.push(row);
+    else after.push(row);
+  }
+  return [...landedPast(before, mutations, run, document), ...after];
 }
 
 /** `after` anchors of inserts and moves re-resolve to the end of the slot or section when the anchor left (SPEC-3 3.5). */

@@ -6,7 +6,10 @@
 // another person's change `absorbedSession` with the splices the room client placed); the Escape
 // writes the cover's shrunk size once its title wrapped, which converts the cover to a canvas in
 // the same write (controller.tsx `commit`, convert-first.ts). Every word typed is in every copy
-// once and whole, and the room and every tab end on one text.
+// once and whole, and the room and every tab end on one text. The lossy properties (hardening
+// HR-RT#2, after the two typers verifier of word-fix.md) lose a quarter of the POST answers after
+// the room admitted them, order the answers behind the stream as the socket does, and drop
+// streams with the answers in flight; the room client resends on its own backoff and reopens.
 import { describe, expect, it } from 'vitest';
 
 import type { Entry, RoomEvent } from '@turboslide/realtime/channel';
@@ -153,11 +156,24 @@ type Tab = {
   /** the Escape's write while the controller measures the cover for its conversion */
   measuring: Mutation[] | null;
   posts: (() => void)[];
-  inbox: (() => void)[];
+  /** the stream's events and, ordered behind them, the answers of the socket (`drop` loses one) */
+  inbox: Delivery[];
+  /** the open stream: closed and reported by a drop */
+  stream: { close: () => void; fail: () => void } | null;
   remote: { opId: string; mutations: readonly Mutation[] } | null;
   /** the writes this tab refused before applying them */
   refused: Mutation[][];
 };
+
+/** One delivery to a tab: a stream event, or a POST's answer ordered behind the events before it. */
+type Delivery = (() => void) & { drop?: () => void };
+
+/**
+ * The failures a property stages (hardening HR-RT#2): `lost`, the share of POST answers lost after
+ * the room admitted the POST; `ordered`, the answers wait behind the stream's events as on the
+ * socket; `drops`, the share of scheduler steps that drop one tab's stream with what it carried.
+ */
+type Loss = { lost: number; ordered: boolean; drops: number };
 
 type World = {
   target: Target;
@@ -168,38 +184,79 @@ type World = {
   tabs: Tab[];
   /** runs the room clients' flush timers and settles what is in flight */
   tick: () => Promise<void>;
+  loss?: Loss;
 };
 type Timers = {
   setTimeout: (run: () => void, ms: number) => unknown;
   clearTimeout: (handle: unknown) => void;
 };
 
-function gated(base: RoomTransport, tab: () => Tab): RoomTransport {
+function gated(
+  base: RoomTransport,
+  tab: () => Tab,
+  loss?: { lost: number; ordered: boolean; roll: () => number },
+): RoomTransport {
   return {
     ...base,
     open(options) {
-      return base.open({
+      const handle = base.open({
         ...options,
         onEvent: (event: RoomEvent) => {
           tab().inbox.push(() => options.onEvent(event));
         },
       });
+      tab().stream = {
+        close: () => handle.close(),
+        fail: () => options.onError(new Error('the stream dropped')),
+      };
+      return handle;
     },
     async postOps(body) {
       await new Promise<void>((resolve) => tab().posts.push(resolve));
-      return base.postOps(body);
+      const answer = await base.postOps(body);
+      if (loss === undefined) return answer;
+      // lost on its way back, after the room admitted it and before the stream brought the entry
+      if (loss.roll() < loss.lost) throw new Error('the answer was lost after the room admitted');
+      if (loss.ordered) {
+        // the socket's one ordered channel: the answer comes after the events queued before it,
+        // and a drop of the stream loses it with them (transport.ts rejectAcks)
+        await new Promise<void>((resolve, reject) => {
+          const delivery: Delivery = () => resolve();
+          delivery.drop = () => reject(new Error('the stream dropped with the answer'));
+          tab().inbox.push(delivery);
+        });
+      }
+      return answer;
     },
   };
 }
 
-/** The room clients' flush timers, run at the next tick; the long ones (heartbeat, reopen) never. */
-function quickTimers(): { timers: Timers; tick: () => Promise<void> } {
+/** A tab's stream drops: what it carried is lost, the room client hears it and reopens on its own wait. */
+function dropStream(tab: Tab): void {
+  const stream = tab.stream;
+  if (stream === null) return;
+  tab.stream = null;
+  stream.close();
+  const lost = tab.inbox.splice(0);
+  for (const delivery of lost) delivery.drop?.();
+  stream.fail();
+}
+
+/**
+ * The room clients' flush timers, run at the next tick; the long ones (heartbeat, reopen) never.
+ * With `retries` the resend backoff, the reopen's wait, the gap watch and the hello hold (up to
+ * BACKOFF_MAX_MS) run at the next tick too, so a lost answer is resent and a dropped stream
+ * reopens; the presence heartbeat (5 s and 10 s) still never runs.
+ */
+function quickTimers(retries = false): { timers: Timers; tick: () => Promise<void> } {
   let due = new Set<() => void>();
   const turn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
+  const runs = (ms: number): boolean =>
+    ms <= 200 || (retries && ms <= 8000 && ms !== 5000);
   return {
     timers: {
       setTimeout: (run, ms) => {
-        if (ms > 200) return null;
+        if (!runs(ms)) return null;
         const handle = (): void => run();
         due.add(handle);
         return handle;
@@ -223,6 +280,7 @@ function makeTab(
   server: FakeRoomServer,
   identity: FakeIdentity,
   timers: Timers,
+  loss?: { lost: number; ordered: boolean; roll: () => number },
 ): Tab {
   const tab: Tab = {
     room: undefined as unknown as RoomClient,
@@ -237,12 +295,13 @@ function makeTab(
     measuring: null,
     posts: [],
     inbox: [],
+    stream: null,
     remote: null,
     refused: [],
   };
   tab.room = createRoomClient({
     deckId: DECK,
-    transport: gated(tabTransport(server, identity), () => tab),
+    transport: gated(tabTransport(server, identity), () => tab, loss),
     document: server.document(),
     seq: server.seq(),
     timers,
@@ -259,7 +318,14 @@ function makeTab(
 }
 
 /** The room on the memory tier with `people` tabs on it, each tab's hello taken. */
-async function setup(options: { target: Target; people: number; wrapAt?: number }): Promise<World> {
+async function setup(options: {
+  target: Target;
+  people: number;
+  wrapAt?: number;
+  loss?: Loss;
+  /** the generator the losses roll on, the play's own */
+  roll?: () => number;
+}): Promise<World> {
   const channel = memoryChannel();
   const start = startDocument();
   const room = memoryRoom(channel, start);
@@ -279,7 +345,11 @@ async function setup(options: { target: Target; people: number; wrapAt?: number 
         now: () => (clock += 61_000),
       }),
   });
-  const { timers, tick } = quickTimers();
+  const { timers, tick } = quickTimers(options.loss !== undefined);
+  const lossy =
+    options.loss === undefined
+      ? undefined
+      : { lost: options.loss.lost, ordered: options.loss.ordered, roll: options.roll ?? Math.random };
   const base = {
     target: options.target,
     key: runKey(options.target.slideId, options.target.blockId, 'text'),
@@ -287,12 +357,12 @@ async function setup(options: { target: Target; people: number; wrapAt?: number 
     room,
   };
   const tabs = Array.from({ length: options.people }, (_, n) =>
-    makeTab(base, server, person(n), timers),
+    makeTab(base, server, person(n), timers, lossy),
   );
   for (const tab of tabs) tab.room.start();
   for (let i = 0; i < 50 && tabs.some((tab) => tab.inbox.length === 0); i += 1) await tick();
   for (const tab of tabs) deliver(tab);
-  return { ...base, tabs, tick };
+  return { ...base, tabs, tick, ...(options.loss === undefined ? {} : { loss: options.loss }) };
 }
 
 /** Puts this tab's session records where textBurstMutation reads them (the module keeps one per run). */
@@ -541,12 +611,18 @@ type Play = {
   /** each person's keys per round */
   rounds: string[][];
   starts?: (round: number, person: number) => Start;
+  loss?: Loss;
 };
 
 /** One seeded order of every person's rounds: keys, bursts, Escapes, measures, posts and deliveries. */
-async function play({ seed, target, rounds, starts }: Play): Promise<string[]> {
-  const world = await setup({ target, people: rounds[0]?.length ?? 0 });
+async function play({ seed, target, rounds, starts, loss }: Play): Promise<string[]> {
   const next = random(seed);
+  const losses = random(seed * 104_729);
+  const world = await setup({
+    target,
+    people: rounds[0]?.length ?? 0,
+    ...(loss === undefined ? {} : { loss, roll: losses }),
+  });
   for (const [round, keys] of rounds.entries()) {
     world.tabs.forEach((tab, n) => open(world, tab, keys[n] ?? '', starts?.(round, n)));
     for (let step = 0; step < 600 && world.tabs.some((tab) => tab.open); step += 1) {
@@ -557,6 +633,7 @@ async function play({ seed, target, rounds, starts }: Play): Promise<string[]> {
       else if (tab.open && tab.keys.length === 0 && roll < 0.68) escape(world, tab);
       else if (roll < 0.76) measured(tab);
       else if (roll < 0.88) tab.posts.shift()?.();
+      else if (loss !== undefined && losses() < loss.drops) dropStream(tab);
       else tab.inbox.shift()?.();
       await world.tick();
     }
@@ -689,5 +766,55 @@ describe('two people typing at one point keep every word whole (realtime.title.t
       );
     }
     expect(failures.slice(0, 5), `${failures.length} of ${seeds} seeds`).toEqual([]);
+  }, 3_600_000);
+
+  /**
+   * The two typers verifier's lossy properties (docs/gslides-parity/realtime/build/word-fix.md
+   * "The verifier's simulation"; hardening HR-RT#2 writes them, HR-RC#9 takes every ceiling to
+   * 0): the row's words on the cover, two people, three rounds, 60 seeded orders from 10,001
+   * each. A ceiling is the red count read at HR-RT#2 with F1 fixed; RC#9's residual R and the
+   * client's own resend paths are what the reds that remain read. `TWO_TYPERS_LOSSY_SEEDS`
+   * widens a run.
+   */
+  const LOSSY_SEEDS = Number(process.env['TWO_TYPERS_LOSSY_SEEDS'] ?? 60);
+  const lossy = async (loss: Loss): Promise<string[]> => {
+    const rounds = rowRounds(2, 3);
+    const failures: string[] = [];
+    for (let seed = 10_001; seed < 10_001 + LOSSY_SEEDS; seed += 1)
+      failures.push(
+        ...judge(`seed ${seed}`, await play({ seed, target: COVER, rounds, loss }), wordsOf(rounds)),
+      );
+    return failures;
+  };
+  /**
+   * The reds of the 60 default orders read at HR-RT#2 (2026-10-11, twice, the same counts; without
+   * F1's fix the same orders read 34, 32 and 28). A widened run reports its count and holds no
+   * ceiling.
+   */
+  const LOSSY_CEILING = { lost: 16, ordered: 10, drops: 11 };
+  const ceiling = (read: number): number => (LOSSY_SEEDS === 60 ? read : LOSSY_SEEDS);
+
+  it('a quarter of POST answers lost after admission: at most the reds read at HR-RT#2', async () => {
+    const failures = await lossy({ lost: 0.25, ordered: false, drops: 0 });
+    console.log(`lossy lost: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`);
+    expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
+      ceiling(LOSSY_CEILING.lost),
+    );
+  }, 3_600_000);
+
+  it('the same, the answers ordered behind the stream: at most the reds read at HR-RT#2', async () => {
+    const failures = await lossy({ lost: 0.25, ordered: true, drops: 0 });
+    console.log(`lossy ordered: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`);
+    expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
+      ceiling(LOSSY_CEILING.ordered),
+    );
+  }, 3_600_000);
+
+  it('stream drops, the answers ordered behind the stream: at most the reds read at HR-RT#2', async () => {
+    const failures = await lossy({ lost: 0, ordered: true, drops: 0.15 });
+    console.log(`lossy drops: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`);
+    expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
+      ceiling(LOSSY_CEILING.drops),
+    );
   }, 3_600_000);
 });

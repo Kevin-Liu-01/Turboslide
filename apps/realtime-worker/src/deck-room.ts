@@ -60,6 +60,7 @@ import {
   landedOf,
   landedOwn,
   landedPast,
+  landedPastAnswered,
   overEditingCeiling,
   readerStandIns,
   replayFloorFor,
@@ -1009,6 +1010,14 @@ export class DeckRoom extends DurableObject<Env> {
       const already = this.findEntry(post.clientId, entry.opId);
       if (already !== undefined) {
         replayed.push(already);
+        // its rows leave what landed, and the rows before it move past it (F1, HR-RT#2)
+        landedMutations = landedPastAnswered(
+          landedMutations,
+          { seq: already.seq, base: post.base.seq },
+          entry.mutations ?? [],
+          entryRun(entry),
+          running,
+        );
         continue;
       }
       if (entry.kind === 'comment') {

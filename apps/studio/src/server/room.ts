@@ -64,6 +64,7 @@ import {
   landedOf,
   landedOwn,
   landedPast,
+  landedPastAnswered,
   overEditingCeiling,
   readerStandIns,
   reanchor,
@@ -2005,6 +2006,14 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
     const already = known.get(entry.opId);
     if (already !== undefined) {
       replayed.push(already);
+      // its rows leave what landed, and the rows before it move past it (F1, HR-RT#2)
+      landedMutations = landedPastAnswered(
+        landedMutations,
+        { seq: already.seq, base: post.base.seq },
+        entry.mutations ?? [],
+        entryRun(entry),
+        running,
+      );
       continue;
     }
     if (entry.kind === 'comment') {
@@ -2354,6 +2363,10 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
    */
   const place = async (landed: ReadonlyArray<Entry>): Promise<Placement> => {
     const { replayed, fresh } = splitReplayed(post.entries, landed);
+    const freshIds = new Set(fresh.map((entry) => entry.opId));
+    /** the seq of the record that answers an op id of this POST (`splitReplayed`'s records) */
+    const answeredAt = new Map<string, number>();
+    for (const row of replayed) answeredAt.set(row.opId, row.seq);
     const rejected: Rejected[] = [];
     const candidates: NewEntry[] = [];
     let running = live.document;
@@ -2411,7 +2424,21 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
       recentLog = await readWindow();
       return naming(recentLog, opId);
     };
-    for (const entry of fresh) {
+    for (const entry of post.entries) {
+      if (!freshIds.has(entry.opId)) {
+        // answered from a record above the base: its rows leave what landed, and the rows
+        // before it move past it as this tab wrote it (F1, HR-RT#2)
+        const seq = answeredAt.get(entry.opId);
+        if (seq !== undefined && entry.kind === 'edit')
+          landedMutations = landedPastAnswered(
+            landedMutations,
+            { seq, base: post.base.seq },
+            entry.mutations ?? [],
+            entryRun(entry),
+            running,
+          );
+        continue;
+      }
       if (entry.kind === 'comment') {
         if (entry.comment !== undefined)
           candidates.push({
@@ -2753,6 +2780,7 @@ export {
   landedOf,
   landedOwn,
   landedPast,
+  landedPastAnswered,
   overEditingCeiling,
   reanchor,
   reanchorAll,

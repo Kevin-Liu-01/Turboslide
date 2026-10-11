@@ -293,8 +293,10 @@ describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F2
       ['c1:3', 9],
     ]);
     expect(appends).toHaveLength(1);
-    // the fresh op was transformed past the record's insert before it was placed (3.3)
-    expect(appends[0]?.mutations).toEqual([[splice(2, 0, 's')]]);
+    // the fresh op was written by the same tab after the ops the record answers: the record's
+    // rows leave what it is moved past (F1, hardening HR-RT#2), so its splice at 0 stays at 0;
+    // before the fix it was moved past the tab's own "qr" to 2
+    expect(appends[0]?.mutations).toEqual([[splice(0, 0, 's')]]);
     // the record the answer names was not in the tab's stream: it rides the answer as `between`
     // only when something sits under the first entry, and here the record is the first entry
     expect(next.between).toBeUndefined();
@@ -856,7 +858,7 @@ describe('the server transforms before it places, on the blob tier too (the sync
       [landed(8, [splice(0, 0, 'pa1')], undefined, 'zz')],
       post('client-id').post,
     );
-    expect(rows).toEqual([{ mutation: splice(0, 0, 'pa1'), insertTie: 'left' }]);
+    expect(rows).toEqual([{ mutation: splice(0, 0, 'pa1'), insertTie: 'left', seq: 8 }]);
     // a row of the POST's own making keeps server order and is marked, so the run rule passes it by
     expect(landedOwn([splice(0, 0, 'x')])).toEqual([
       { mutation: splice(0, 0, 'x'), insertTie: 'right', own: true },

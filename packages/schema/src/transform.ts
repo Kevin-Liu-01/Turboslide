@@ -42,7 +42,8 @@
 // Marks keep server order (`transformMarkAgainstMark`: the later arrival wins the flag), which
 // is what last writer wins means for them.
 import type { MarkMutation, Mutation, SpliceMutation, TextOp } from './mutations.ts';
-import { isFieldTypographyPath, isSlideFieldPath } from './mutations.ts';
+import { slideBlocks } from './deck.ts';
+import { isSlideFieldPath } from './mutations.ts';
 import type { RunFlagKey, RunFlags } from './text.ts';
 import { RUN_FLAG_KEYS } from './text.ts';
 
@@ -334,13 +335,26 @@ export function sameText(a: TextOp, b: TextOp): boolean {
 }
 
 /**
- * True when `against` rewrites or removes the Text `op` names as a whole (SPEC-3 3.5): a
- * `text.replace` of the pointer, a `block.set` of the pointer or a parent of it, a
- * `slide.replace` of the slide, a `slide.set` of one of the three slide fields when the op names
- * that field (docs/archive/rounds/SYNC.md 3.4: `slide.set /heading` rewrites the heading's ops alone, never the
- * lead's or a block's) and of any other slide pointer as before, the removal of the block or the
- * slide, or a restore. The string is last writer wins, so the text op cannot be placed and
- * returns to its author.
+ * True when `against` rewrites or removes the Text `op` names as a whole (SPEC-3 3.5), so the
+ * text op cannot be placed and returns to its author: the string is last writer wins. This is the
+ * one rule (hardening HR-RT#3, RUST-2; question 12's default): the admission in the object and on
+ * the function (@turboslide/realtime room-core) and the browser's rebase read it, so the browser
+ * never drops typing the room would admit and never keeps typing the room would refuse.
+ *
+ * - `text.replace` of the op's pointer.
+ * - `block.set` of the pointer or of a parent of it (the block's value at `''`, an item list
+ *   above an item's text).
+ * - `block.remove` of the block.
+ * - `slide.set` of a slide field (`/heading`, `/lead`, `/big`) when the op names that field: a
+ *   whole value write of the field's text run (docs/archive/rounds/SYNC.md 3.4). Any other slide
+ *   pointer rewrites no Text: the notes, the layout, a field's own face (`/typography/<field>`,
+ *   build/field-fonts.md 2) leave a colleague's typing where it is.
+ * - `slide.replace` when the op's block does not survive in the new slide; a block whose id
+ *   survives (a canvas conversion, the source drawer) keeps its typing and is re-anchored.
+ * - `slide.remove` of the slide, and every `version.restore`.
+ *
+ * The switch names every `Mutation` op and ends in a `never` check, so a new mutation is a type
+ * error here until someone decides whether it rewrites a Text.
  */
 export function rewritesText(against: Mutation, op: TextOp): boolean {
   switch (against.op) {
@@ -357,22 +371,38 @@ export function rewritesText(against: Mutation, op: TextOp): boolean {
     case 'block.remove':
       return against.slideId === op.slideId && against.blockId === op.blockId;
     case 'slide.set':
-      if (against.slideId !== op.slideId) return false;
-      // a whole value write of a slide field is a rewrite of that field's Text alone: the op
-      // names the field as its blockId and the field's pointer as its path (mutations.ts)
-      if (isSlideFieldPath(against.path))
-        return op.path === against.path && op.blockId === against.path.slice(1);
-      // a field's own face (build/field-fonts.md 2: `/typography/<field>`) rewrites no Text: a
-      // colleague's typing in the lead stays while the title's face changes
-      if (isFieldTypographyPath(against.path)) return false;
-      return true;
+      // a whole value write of a slide field rewrites that field's Text alone: the op names the
+      // field as its blockId and the field's pointer as its path (mutations.ts)
+      return (
+        against.slideId === op.slideId &&
+        isSlideFieldPath(against.path) &&
+        op.path === against.path &&
+        op.blockId === against.path.slice(1)
+      );
     case 'slide.replace':
+      return (
+        against.slideId === op.slideId &&
+        !slideBlocks(against.slide).some((row) => row.block.id === op.blockId)
+      );
     case 'slide.remove':
       return against.slideId === op.slideId;
     case 'version.restore':
       return true;
-    default:
+    case 'slide.insert':
+    case 'slide.move':
+    case 'block.insert':
+    case 'block.move':
+    case 'text.splice':
+    case 'text.mark':
+    case 'section.set':
+    case 'asset.set':
+    case 'asset.remove':
+    case 'deck.set':
       return false;
+    default: {
+      const unknown: never = against;
+      throw new TypeError(`rewritesText: no rule for ${(unknown as { op: string }).op}`);
+    }
   }
 }
 

@@ -348,12 +348,30 @@ describe('transformMutation and transformAgainst', () => {
     ).toEqual([]);
     const otherBlock: Mutation = { op: 'block.set', ...address, blockId: 'q', path: '/text' };
     expect(transformMutation(splice(1, 0, 'a'), otherBlock, 'right')).toEqual([splice(1, 0, 'a')]);
-    const slideReplace: Mutation = {
-      op: 'slide.replace',
-      slideId: 'content-rule',
-      slide: base().slides['content-rule']!,
-    };
+    // a slide rewritten without the block returns the op; one whose block survives keeps it
+    // (the one rule of hardening HR-RT#3: the admission's re-anchoring of a canvas conversion)
+    const slide = base().slides['content-rule']!;
+    const dropped =
+      slide.kind === 'content'
+        ? {
+            ...slide,
+            slots: Object.fromEntries(
+              Object.entries(slide.slots).map(([slot, blocks]) => [
+                slot,
+                blocks.filter((row) => row.id !== address.blockId),
+              ]),
+            ),
+          }
+        : slide;
+    const slideReplace: Mutation = { op: 'slide.replace', slideId: 'content-rule', slide: dropped };
     expect(transformMutation(splice(1, 0, 'a'), slideReplace, 'right')).toEqual([]);
+    expect(
+      transformMutation(
+        splice(1, 0, 'a'),
+        { op: 'slide.replace', slideId: 'content-rule', slide },
+        'right',
+      ),
+    ).toEqual([splice(1, 0, 'a')]);
     expect(transformMutation(splice(1, 0, 'a'), { op: 'version.restore', n: 1 }, 'right')).toEqual(
       [],
     );
@@ -403,7 +421,7 @@ describe('transformMutation and transformAgainst', () => {
     expect(sameText(a, lead)).toBe(false);
   });
 
-  it('reads slide.set of a field as a rewrite of that field alone, and of another slide pointer as the whole slide (docs/archive/rounds/SYNC.md 3.4)', () => {
+  it('reads slide.set of a field as a rewrite of that field alone, and of another slide pointer as no rewrite (docs/archive/rounds/SYNC.md 3.4; hardening HR-RT#3)', () => {
     const heading = { slideId: 'title', blockId: 'heading', path: '/heading' } as const;
     const onHeading: SpliceMutation = {
       op: 'text.splice',
@@ -429,10 +447,11 @@ describe('transformMutation and transformAgainst', () => {
     // a block on a content slide whose id happens to be heading, with a block pointer
     const lookalike: SpliceMutation = { ...splice(1, 0, 'a'), blockId: 'heading', path: '/text' };
     expect(rewritesText({ ...setHeading, slideId: 'content-rule' }, lookalike)).toBe(false);
-    // another slide pointer keeps the whole slide rule
+    // another slide pointer rewrites no Text (question 12's default, the admission's rule): the
+    // notes change while a colleague types in the heading and the lead, and both keep their words
     const setNotes: Mutation = { op: 'slide.set', slideId: 'title', path: '/notes', value: 'n' };
-    expect(rewritesText(setNotes, onHeading)).toBe(true);
-    expect(rewritesText(setNotes, onLead)).toBe(true);
+    expect(rewritesText(setNotes, onHeading)).toBe(false);
+    expect(rewritesText(setNotes, onLead)).toBe(false);
     expect(rewritesText({ ...setHeading, slideId: 'other' }, onHeading)).toBe(false);
   });
 

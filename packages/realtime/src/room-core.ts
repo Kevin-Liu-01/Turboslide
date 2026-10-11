@@ -20,9 +20,14 @@ import { slideBlocks } from '@turboslide/schema/deck';
 import { NotImplementedError } from '@turboslide/schema/errors';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Mutation } from '@turboslide/schema/mutations';
-import { isSlideFieldPath } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
-import { insertTieSide, isTextOp, sameText, transformMutation } from '@turboslide/schema/transform';
+import {
+  insertTieSide,
+  isTextOp,
+  rewritesText,
+  sameText,
+  transformMutation,
+} from '@turboslide/schema/transform';
 import type { Side } from '@turboslide/schema/transform';
 import { validateDocument } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
@@ -90,48 +95,6 @@ export type Rejected = { opId: string; reason: RejectReason; message?: string };
 /** A slide document after the write is at most 200 KB (report 04 7.5, 10 F27). */
 function slideBytes(slide: Slide): number {
   return new TextEncoder().encode(canonicalJson(slide)).byteLength;
-}
-
-/**
- * The whole Text rewrites a text op cannot survive (SPEC-3 3.5): a set of its own pointer, its
- * block's removal, its slide's replacement, and a `slide.set` of the slide field the op names
- * (docs/archive/rounds/SYNC.md 3.4: the heading, the lead and the big text are text runs whose whole value
- * write is `slide.set /heading` and the like; it rewrites that field's ops alone).
- */
-function rewritesText(against: Mutation, op: Mutation): boolean {
-  if (!isTextOp(op)) return false;
-  switch (against.op) {
-    case 'block.set':
-      return (
-        against.slideId === op.slideId && against.blockId === op.blockId && against.path === op.path
-      );
-    case 'text.replace':
-      return (
-        against.slideId === op.slideId && against.blockId === op.blockId && against.path === op.path
-      );
-    case 'slide.set':
-      return (
-        against.slideId === op.slideId &&
-        isSlideFieldPath(against.path) &&
-        op.path === against.path &&
-        op.blockId === against.path.slice(1)
-      );
-    case 'block.remove':
-      return against.slideId === op.slideId && against.blockId === op.blockId;
-    case 'slide.replace':
-      // the slide was rewritten (a canvas conversion, the source drawer): a text op on a block
-      // whose id survives is kept and re-anchored, the rest return to their author (SPEC-3 3.5)
-      return (
-        against.slideId === op.slideId &&
-        !slideBlocks(against.slide).some((row) => row.block.id === op.blockId)
-      );
-    case 'slide.remove':
-      return against.slideId === op.slideId;
-    case 'version.restore':
-      return true;
-    default:
-      return false;
-  }
 }
 
 /**
@@ -209,7 +172,8 @@ export function transformEntry(
 
 /** One mutation moved past one that landed before it in the same frame: dropped when that rewrote its Text. */
 function movedPast(mutation: Mutation, against: Mutation, side: Side, insertTie: Side): Mutation[] {
-  if (rewritesText(against, mutation)) return [];
+  // the one rule of a whole Text rewrite (@turboslide/schema/transform, hardening HR-RT#3)
+  if (isTextOp(mutation) && rewritesText(against, mutation)) return [];
   if (!isTextOp(mutation) || !isTextOp(against) || !sameText(mutation, against)) return [mutation];
   try {
     return transformMutation(mutation, against, side, insertTie);

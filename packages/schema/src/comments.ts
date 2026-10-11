@@ -649,9 +649,11 @@ function textOf(
 /**
  * True when the mutation rewrites the whole Text an anchor names (an agent's `text.replace`, a
  * `block.set` of the pointer, a `slide.replace`): the string is last writer wins (SPEC-3 3.5) and
- * the anchor is re-placed by its quoted text.
+ * the anchor is re-placed by its quoted text. An anchor's rule, apart from the transform's one
+ * rule (transform.ts `rewritesText`, hardening HR-RT#3): a re-placement by the quoted text costs
+ * nothing when the text survived, so any write of the slide but a field's face re-places it.
  */
-function rewritesText(
+function anchorRewritten(
   mutation: Mutation,
   anchor: Extract<CommentAnchor, { kind: 'text' }>,
 ): boolean {
@@ -710,7 +712,7 @@ export function shiftAnchors(
         anchor = { ...anchor, range: shiftRange(anchor.range, mutation) };
         continue;
       }
-      if (rewritesText(mutation, anchor)) {
+      if (anchorRewritten(mutation, anchor)) {
         const next = textOf(options.after, anchor);
         if (next === undefined) continue;
         const plain = plainOf(next);

@@ -5,6 +5,7 @@ import { WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import type { Mutation, TextOp } from '@turboslide/schema/mutations';
 import { rewritesText } from '@turboslide/schema/transform';
 
+import { defaultTransform, transformPast } from '../client/room-client.ts';
 import { landedOwn, transformEntry } from './room-core.ts';
 
 // The one rule of a whole Text rewrite (RUST-2; hardening HR-RT#3): every `Mutation` op against a
@@ -49,7 +50,11 @@ function without(slide: Slide, blockId: string): Slide {
 
 type Row = { against: Mutation; lead: boolean; block: boolean; why: string };
 
-/** Every op of `Mutation`, each with the rows that decide it: [the write, rewrites the lead, rewrites the block]. */
+/**
+ * Every op of `Mutation`, each with the rows that decide it: [the write, rewrites the lead,
+ * rewrites the block]. One row per line, so prettier leaves the table as a table.
+ */
+// prettier-ignore
 const TABLE: { [Op in Mutation['op']]: Row[] } = {
   'slide.insert': [
     {
@@ -162,32 +167,34 @@ describe('the one rule of a whole Text rewrite', () => {
         // the admission's transform answers the same: a rewritten op returns to its author
         expect(transformEntry([onLead], landedOwn([row.against])) === null).toBe(row.lead);
         expect(transformEntry([onBlock], landedOwn([row.against])) === null).toBe(row.block);
+        // and the browser's rebase of a pending op (HR-RC#2): the tab drops what the room would
+        // refuse and keeps what the room admits
+        expect(transformPast([onLead], [row.against], defaultTransform) === null).toBe(row.lead);
+        expect(transformPast([onBlock], [row.against], defaultTransform) === null).toBe(row.block);
       });
     }
   }
 
   it('lists every mutation op', () => {
-    expect(Object.keys(TABLE).sort()).toEqual(
-      [
-        'asset.remove',
-        'asset.set',
-        'block.insert',
-        'block.move',
-        'block.remove',
-        'block.set',
-        'deck.set',
-        'section.set',
-        'slide.insert',
-        'slide.move',
-        'slide.remove',
-        'slide.replace',
-        'slide.set',
-        'text.mark',
-        'text.replace',
-        'text.splice',
-        'version.restore',
-      ],
-    );
+    expect(Object.keys(TABLE).sort()).toEqual([
+      'asset.remove',
+      'asset.set',
+      'block.insert',
+      'block.move',
+      'block.remove',
+      'block.set',
+      'deck.set',
+      'section.set',
+      'slide.insert',
+      'slide.move',
+      'slide.remove',
+      'slide.replace',
+      'slide.set',
+      'text.mark',
+      'text.replace',
+      'text.splice',
+      'version.restore',
+    ]);
   });
 
   it('refuses a mutation it has no rule for instead of keeping the typing silently', () => {

@@ -20,12 +20,16 @@
 // pointer, the selection or the slide moved in the last PRESENCE_QUIET_AFTER_MS and at
 // PRESENCE_HEARTBEAT_QUIET_MS otherwise.
 import type { DeckDocument } from '@turboslide/schema/deck';
-import { slideBlocks } from '@turboslide/schema/deck';
 import { NotImplementedError } from '@turboslide/schema/errors';
-import type { Mutation } from '@turboslide/schema/mutations';
-import { isSlideFieldPath } from '@turboslide/schema/mutations';
+import type { Mutation, TextOp } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
-import { isTextOp, sameText, shiftRange, transformMutation } from '@turboslide/schema/transform';
+import {
+  isTextOp,
+  rewritesText,
+  sameText,
+  shiftRange,
+  transformMutation,
+} from '@turboslide/schema/transform';
 import type { Side, Splice } from '@turboslide/schema/transform';
 
 import type {
@@ -509,46 +513,6 @@ export function defaultTransform(
 }
 
 /**
- * The whole Text rewrites a pending text op cannot survive (SPEC-3 3.5). A `slide.set` of a
- * title or statement slide's field (`/heading`, `/lead`, `/big`) rewrites the text run that
- * targets that field alone and no block's run (docs/archive/rounds/SYNC.md 3.4, invariant 5); a `slide.set` of
- * any other slide pointer rewrites every run on the slide, as the schema's own rule reads it
- * (transform.ts `rewritesText`), so the client never keeps an op the admission would refuse.
- */
-export function rewritesText(against: Mutation, op: Mutation): boolean {
-  if (!isTextOp(op)) return false;
-  switch (against.op) {
-    case 'block.set':
-    case 'text.replace':
-      return (
-        against.slideId === op.slideId && against.blockId === op.blockId && against.path === op.path
-      );
-    case 'block.remove':
-      return against.slideId === op.slideId && against.blockId === op.blockId;
-    case 'slide.set':
-      if (against.slideId !== op.slideId) return false;
-      // a whole value write of a slide field rewrites that field's run alone: the run names the
-      // field as its blockId and the field's pointer as its path (schema mutations.ts, B1's half)
-      if (isSlideFieldPath(against.path))
-        return op.path === against.path && op.blockId === against.path.slice(1);
-      return true;
-    case 'slide.replace':
-      // the slide was rewritten (a canvas conversion, the source drawer): a text op on a block
-      // whose id survives is kept and re-anchored, the rest return to their author (SPEC-3 3.5)
-      return (
-        against.slideId === op.slideId &&
-        !slideBlocks(against.slide).some((row) => row.block.id === op.blockId)
-      );
-    case 'slide.remove':
-      return against.slideId === op.slideId;
-    case 'version.restore':
-      return true;
-    default:
-      return false;
-  }
-}
-
-/**
  * The op ids a record's entry folded (channel.ts `Entry.covers`; docs/archive/rounds/SYNC.md 3.2): the blob
  * channel emits them from the record's `origin` for every record written since the round, and
  * a record from before it carries none. Read structurally so an entry from an older server, or
@@ -791,7 +755,7 @@ export function advanceRunEnds(
         runEnds.set(runTextKey(text), { ...text, end: row.end });
       }
     for (const [key, row] of runEnds) {
-      const probe: Mutation = {
+      const probe: TextOp = {
         op: 'text.splice',
         slideId: row.slideId,
         blockId: row.blockId,
@@ -832,7 +796,8 @@ export function transformPast(
   for (const against of landed) {
     const next: Mutation[] = [];
     for (const mutation of out) {
-      if (rewritesText(against, mutation)) continue;
+      // the one rule of a whole Text rewrite, the admission's (hardening HR-RC#2, RUST-2)
+      if (isTextOp(mutation) && rewritesText(against, mutation)) continue;
       next.push(...transform(mutation, against));
     }
     out = next;

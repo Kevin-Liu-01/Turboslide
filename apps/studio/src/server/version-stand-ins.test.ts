@@ -6,7 +6,8 @@
 // editors, an account with its own key (read, write, comment, export) and a browser. Every answer
 // to either editor names the owner by the owner's stand-in on this deck and never by the id; the
 // owner's own key reads the id. A viewer's key (HR-SD#1d) is refused the version log on every
-// action that answers it, `deck.watch` as `version.list`.
+// action that answers it, `deck.watch` as `version.list`, and a viewer's or a commenter's key is
+// refused `diff.run` (`deck_diff` on /mcp), which answers the document at an older revision.
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -54,6 +55,7 @@ const { standInFor } = await import('./stand-ins');
 const { DOWNLOAD_PURPOSE, signTicket } = await import('./bundle-core');
 const { Route: ActionsRoute } = await import('../routes/api/actions.$action');
 const { Route: BundleRoute } = await import('../routes/api/decks.$deckId.bundle');
+const { Route: McpRoute } = await import('../routes/mcp');
 
 setSecurityLogSink(() => undefined);
 
@@ -62,10 +64,12 @@ const actionsPost = (ActionsRoute.options as unknown as { server: { handlers: { 
   .server.handlers.POST;
 const bundleGet = (BundleRoute.options as unknown as { server: { handlers: { GET: Handler } } })
   .server.handlers.GET;
+const mcpPost = (McpRoute.options as unknown as { server: { handlers: { POST: Handler } } }).server
+  .handlers.POST;
 
 let runtime: ReturnType<typeof buildIdentityRuntime>;
-const people = { owner: '', editor: '', browser: '', viewer: '' };
-const keys = { owner: '', editor: '', viewer: '' };
+const people = { owner: '', editor: '', browser: '', viewer: '', commenter: '' };
+const keys = { owner: '', editor: '', viewer: '', commenter: '' };
 let browserCookie = '';
 let slideId = '';
 
@@ -105,6 +109,72 @@ async function action(
   return { status: response.status, text: await response.text() };
 }
 
+let rpcId = 1;
+
+/** One JSON-RPC message to /mcp with a key; the answer's body, from JSON or the last SSE data line. */
+async function mcpCall(
+  secret: string,
+  message: object,
+  sessionId?: string,
+): Promise<{ status: number; session: string | null; body: Record<string, unknown> }> {
+  const headers = new Headers({
+    authorization: `Bearer ${secret}`,
+    'content-type': 'application/json',
+    accept: 'application/json, text/event-stream',
+  });
+  if (sessionId !== undefined) {
+    headers.set('mcp-session-id', sessionId);
+    headers.set('mcp-protocol-version', '2025-03-26');
+  }
+  const request = new Request(`${ORIGIN}/mcp?deck=${DECK}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(message),
+  });
+  const response = await mcpPost({ params: {}, request });
+  const text = await response.text();
+  let body: Record<string, unknown> = {};
+  try {
+    body = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    const data = text.split('\n').filter((line) => line.startsWith('data:'));
+    if (data.length > 0) body = JSON.parse(data[data.length - 1]!.slice(5)) as typeof body;
+  }
+  return { status: response.status, session: response.headers.get('mcp-session-id'), body };
+}
+
+/** One MCP tool call with a key on a fresh session: the tool error's status, or 200, and the text. */
+async function tool(
+  secret: string,
+  name: string,
+  args: object = {},
+): Promise<{ status: number; text: string }> {
+  const init = await mcpCall(secret, {
+    jsonrpc: '2.0',
+    id: rpcId++,
+    method: 'initialize',
+    params: {
+      protocolVersion: '2025-03-26',
+      capabilities: {},
+      clientInfo: { name: 'version-stand-ins', version: '0' },
+    },
+  });
+  if (init.session === null) throw new Error(`initialize answered ${init.status}`);
+  await mcpCall(secret, { jsonrpc: '2.0', method: 'notifications/initialized' }, init.session);
+  const answer = await mcpCall(
+    secret,
+    { jsonrpc: '2.0', id: rpcId++, method: 'tools/call', params: { name, arguments: args } },
+    init.session,
+  );
+  const result = answer.body.result as
+    { isError?: boolean; content?: { text?: string }[] } | undefined;
+  const text = result?.content?.[0]?.text ?? JSON.stringify(answer.body);
+  if (answer.status !== 200) return { status: answer.status, text };
+  if (result?.isError !== true) return { status: 200, text };
+  const status = (JSON.parse(text) as { error?: { status?: number } }).error?.status ?? 0;
+  return { status, text };
+}
+
 /** One call of the editor's window: runDeckAction's dispatcher for the browser's request. */
 async function windowAction(name: string, input: object = {}): Promise<string> {
   const request = new Request(`${ORIGIN}/edit/${DECK}`, { headers: { cookie: browserCookie } });
@@ -125,7 +195,7 @@ beforeAll(async () => {
   });
   await runtime.ready;
   await setIdentityRuntime(runtime);
-  for (const who of ['owner', 'editor', 'viewer'] as const) {
+  for (const who of ['owner', 'editor', 'viewer', 'commenter'] as const) {
     const { id } = await ensureUserByEmail(runtime, `${who}@example.test`);
     people[who] = accountPrincipalId(id);
     const scopes: Scope[] =
@@ -133,7 +203,9 @@ beforeAll(async () => {
         ? ['read', 'write', 'share']
         : who === 'editor'
           ? ['read', 'write', 'comment', 'export']
-          : ['read'];
+          : who === 'commenter'
+            ? ['read', 'comment']
+            : ['read'];
     keys[who] = (await runtime.keys.create({ userId: id, name: who, scopes })).secret;
   }
   const minted = await ensurePrincipal(new Request(`${ORIGIN}/edit/${DECK}`), runtime.secret);
@@ -176,6 +248,7 @@ beforeAll(async () => {
         editorGrant(people.editor, people.owner),
         editorGrant(people.browser, people.owner),
         editorGrant(people.viewer, people.owner, 'viewer'),
+        editorGrant(people.commenter, people.owner, 'commenter'),
       ],
       revision: record.revision + 1,
     },
@@ -262,6 +335,46 @@ describe('deck.watch to a caller without history (HR-SD#1d)', () => {
     expect(watched.status).toBe(200);
     expect(watched.text).toContain('slide.set');
     expect(principalIdsIn(watched.text)).toEqual([]);
+  });
+});
+
+describe('diff.run to a caller without history (HR-SD#1d; the verifier of HR-SD#1d)', () => {
+  // diff.run answers the mutations between two revisions with their old values in prose: the
+  // document at an older revision, what version.list and deck.watch refuse these readers
+  const RANGES = [{ from: 1 }, { from: 1, to: 2 }, { staged: true }, {}];
+
+  it("refuses a viewer's and a commenter's key on /api/actions, as version.list", async () => {
+    for (const who of ['viewer', 'commenter'] as const) {
+      expect((await action('version.list', keys[who])).status, who).toBe(403);
+      for (const input of RANGES) {
+        const diff = await action('diff.run', keys[who], input);
+        const label = `${who} ${JSON.stringify(input)}`;
+        expect(diff.status, label).toBe(403);
+        expect(diff.text, label).toContain('history');
+        expect(diff.text, label).not.toContain('notes');
+        expect(principalIdsIn(diff.text), label).toEqual([]);
+      }
+      // the deck itself stays theirs to read
+      expect((await action('deck.info', keys[who])).status, who).toBe(200);
+    }
+  });
+
+  it("refuses a viewer's and a commenter's key deck_diff on /mcp, as deck_version_list", async () => {
+    for (const who of ['viewer', 'commenter'] as const) {
+      expect((await tool(keys[who], 'deck_version_list')).status, who).toBe(403);
+      const diff = await tool(keys[who], 'deck_diff', { from: 1 });
+      expect(diff.status, who).toBe(403);
+      expect(diff.text, who).not.toContain('notes');
+    }
+  });
+
+  it('answers an editor, who reads history, on both transports', async () => {
+    const diff = await action('diff.run', keys.editor, { from: 1 });
+    expect(diff.status).toBe(200);
+    expect(diff.text).toContain('notes');
+    const viaMcp = await tool(keys.editor, 'deck_diff', { from: 1 });
+    expect(viaMcp.status).toBe(200);
+    expect(viaMcp.text).toContain('notes');
   });
 });
 

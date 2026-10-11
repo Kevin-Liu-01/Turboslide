@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 
 import { synthesizeLegacyRecord } from '@turboslide/identity/access';
+import { ACTIONS } from '@turboslide/schema/actions';
 
 import {
   ACCESS_RECORD_FILE,
@@ -445,6 +446,9 @@ describe('capabilityForAction (SPEC-3 6.2 per route, section 12 per action)', ()
       'activity.list': 'history',
       'version.list': 'history',
       'version.diff': 'history',
+      'version.save': 'history',
+      'version.restore': 'history',
+      'diff.run': 'history',
       'deck.watch': 'history',
       'presence.follow': 'follow',
       'presence.list': 'presence',
@@ -459,5 +463,19 @@ describe('capabilityForAction (SPEC-3 6.2 per route, section 12 per action)', ()
     };
     for (const [id, capability] of Object.entries(expected))
       expect(capabilityForAction(id), id).toBe(capability);
+  });
+
+  it('needs history for every action of the version group (HR-SD#1d)', () => {
+    // each one answers the log or the document at an older revision, which a viewer and a
+    // commenter are refused in version.list
+    const group = Object.values(ACTIONS).filter((spec) => spec.group === 'version');
+    expect(group.map((spec) => spec.id).sort()).toEqual([
+      'diff.run',
+      'version.diff',
+      'version.list',
+      'version.restore',
+      'version.save',
+    ]);
+    for (const spec of group) expect(capabilityForAction(spec.id), spec.id).toBe('history');
   });
 });

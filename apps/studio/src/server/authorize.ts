@@ -515,7 +515,9 @@ export function namedDeckCheck(caller: AuthContext | null, requestBound: boolean
  * deck (accounts, notifications, admin) or that must answer the same to everyone
  * (`share.requestAccess`, SPEC-3 6.5). `deck.watch` reads `history` (hardening HR-SD#1d): its
  * answer is the version log above `since` with each record's mutations, what `version.list`
- * answers, so a viewer or a commenter is refused it as they are refused `version.list`.
+ * answers, so a viewer or a commenter is refused it as they are refused `version.list`. So does
+ * every action of the version group, `diff.run` among them: it answers the mutations between two
+ * revisions with the old values in prose, the document at an older revision.
  */
 export function capabilityForAction(id: string): Capability | null {
   if (id === 'share.requestAccess') return null;
@@ -533,7 +535,13 @@ export function capabilityForAction(id: string): Capability | null {
   if (id.startsWith('share.')) return 'share';
   if (id === 'comment.list' || id === 'comment.get' || id === 'comment.link') return 'readComments';
   if (id.startsWith('comment.')) return 'comment';
-  if (id === 'activity.list' || id === 'deck.watch' || id.startsWith('version.')) return 'history';
+  if (
+    id === 'activity.list' ||
+    id === 'deck.watch' ||
+    id.startsWith('version.') ||
+    (isActionId(id) && ACTIONS[id as ActionId].group === 'version')
+  )
+    return 'history';
   if (id === 'presence.follow') return 'follow';
   if (id.startsWith('presence.')) return 'presence';
   if (id.startsWith('export.') || id === 'build.run') return 'export';

@@ -266,6 +266,8 @@ export type FakeApp = {
   budgetEntries: number | null;
   /** whether each checkpoint call carried the bounded header, in order */
   bounded: boolean[];
+  /** the route answers every comment entry as refused by the sidecar (HR-RT#8) */
+  refuseComments: boolean;
   /** forgets this deck's state; the stub stays for the file so a late call of an earlier test's object meets a benign answer */
   restore: () => void;
 };
@@ -398,11 +400,15 @@ function installFakeFetch(): void {
         app.loseAnswerTimes -= 1;
         throw new TypeError('Network connection lost.');
       }
+      const refusedComments = app.refuseComments
+        ? body.entries.filter((entry) => entry.kind === 'comment').map((entry) => entry.opId)
+        : [];
       return json({
         committed,
         revision: app.revision,
         tier: app.tier,
         ...(through === undefined ? {} : { toSeq: through }),
+        ...(refusedComments.length === 0 ? {} : { refusedComments }),
       });
     },
   );
@@ -435,6 +441,7 @@ export function fakeApp(
     loseAnswerTimes: 0,
     budgetEntries: null,
     bounded: [],
+    refuseComments: false,
     restore: () => {
       apps.delete(deck);
     },

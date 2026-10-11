@@ -234,6 +234,8 @@ type CheckpointAnswer =
       tier: string;
       /** the last seq the call handled when its 15 s ended it before the rest (HR-RT#4) */
       toSeq?: number;
+      /** the comment entries the sidecar's reducer refused (HR-RT#8) */
+      refusedComments?: string[];
     }
   | { conflict: true; revision: number };
 
@@ -2030,6 +2032,15 @@ export class DeckRoom extends DurableObject<Env> {
       typeof answer.toSeq === 'number' && answer.toSeq >= meta.covered && answer.toSeq < toSeq
         ? answer.toSeq
         : toSeq;
+    // a comment the sidecar refused is kept as a dead letter and logged, never dropped (HR-RT#8)
+    if (Array.isArray(answer.refusedComments) && answer.refusedComments.length > 0) {
+      const refused = new Set(answer.refusedComments);
+      const rows = entries.filter((entry) => entry.kind === 'comment' && refused.has(entry.opId));
+      this.deadLetter(rows, 'comment-refused');
+      this.log('error', 'the sidecar refused comments; they moved to dead_letters', {
+        opIds: rows.map((entry) => entry.opId).join(','),
+      });
+    }
     meta.revision = answer.revision;
     meta.covered = reached;
     meta.lastCheckpointAt = Date.now();

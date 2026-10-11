@@ -42,9 +42,12 @@ export const STREAM_RETAIN_ENTRIES = 10_000;
  * `comment` alone, so the blob channel hands it entries before they carry a seq (`NewEntry`).
  */
 export type CommentsApplier = {
-  apply: (
-    entries: ReadonlyArray<Pick<Entry, 'comment'>>,
-  ) => Promise<{ revision: number; threadIds: string[] }>;
+  apply: (entries: ReadonlyArray<Pick<Entry, 'comment'>>) => Promise<{
+    revision: number;
+    threadIds: string[];
+    /** the ops the sidecar's reducer refused (the very objects the entries carry), with its sentence */
+    refused?: ReadonlyArray<{ op: unknown; message: string }>;
+  }>;
 };
 
 export type Timers = {
@@ -370,11 +373,29 @@ export async function answerCheckpoint(
   const landedComments =
     through === undefined ? comments : comments.filter((entry) => entry.seq <= through);
   let commentsResult: { revision: number; threadIds: string[] } | undefined;
+  const refusedComments: string[] = [];
   if (landedComments.length > 0) {
+    // the sidecar takes the comments or the call fails (RELIABILITY-9, hardening HR-RT#8): a
+    // write the store did not take (a 429, a 5xx, a deadline) is a 503, so the object keeps the
+    // entries and tries again, and the edits above are answered from the log on that retry.
+    // Before this the route logged it, answered 200 and the object marked the comments committed
     try {
-      commentsResult = await deps.comments.apply(landedComments);
+      const applied = await deps.comments.apply(landedComments);
+      commentsResult = { revision: applied.revision, threadIds: applied.threadIds };
+      for (const refused of applied.refused ?? []) {
+        const entry = landedComments.find((row) => row.comment === refused.op);
+        if (entry === undefined) continue;
+        refusedComments.push(entry.opId);
+        log(`a comment ${entry.opId} was refused by the sidecar: ${refused.message}`);
+      }
     } catch (error) {
-      log(`comments did not land: ${error instanceof Error ? error.message : String(error)}`);
+      const message = error instanceof Error ? error.message : String(error);
+      log(`comments did not land: ${message}`);
+      return {
+        status: 503,
+        body: { error: 'comments', message: `The comments did not land: ${message}` },
+        landed: result.committed.length,
+      };
     }
   }
   if (result.committed.length > 0 && before !== null) {
@@ -401,6 +422,8 @@ export async function answerCheckpoint(
       skipped: result.skipped,
       revision: await store.revision(),
       ...(commentsResult === undefined ? {} : { comments: commentsResult }),
+      // the comments the sidecar's reducer refused: the object keeps them as dead letters (HR-RT#8)
+      ...(refusedComments.length === 0 ? {} : { refusedComments }),
       // the object covers up to here and posts the rest on its next call (HR-RT#4)
       ...(through === undefined ? {} : { toSeq: through }),
     },

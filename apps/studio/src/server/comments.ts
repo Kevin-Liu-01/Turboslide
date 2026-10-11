@@ -139,6 +139,9 @@ export function commentsApplierFor(
         return {
           revision: change.index.revision,
           threadIds: change.threads.map((thread) => thread.id),
+          // the ops the reducer refused, by reference, so the checkpoint route names their
+          // entries to the object, which keeps them as dead letters (hardening HR-RT#8)
+          refused: change.refused.map(({ op, error }) => ({ op, message: error.message })),
         };
       });
     },

@@ -4,7 +4,8 @@
 // route live here (docs/hardening/HARDENING.md 4.6): a post retried after its answer was lost is
 // answered from the log and leaves the store at one revision (HR-RT#1); a call that asks for the
 // bound starts runs for 15 s at most and answers the seq it reached (HR-RT#4); an error is 404
-// `gone` only for a deck the store does not hold, and 500 otherwise (HR-RT#7).
+// `gone` only for a deck the store does not hold, and 500 otherwise (HR-RT#7); a sidecar write
+// the store did not take answers 503, and a comment the sidecar refused is named (HR-RT#8).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -326,5 +327,67 @@ describe('the checkpoint route over a Blob store', () => {
       throw new Error('the store did not answer');
     });
     expect(unknown.status).toBe(500);
+  });
+
+  it('answers 503 when the sidecar write fails, and the retry lands the comment once and the edit from the log (HR-RT#8)', async () => {
+    const revision = await store.revision();
+    const comment: Entry = {
+      seq: 2,
+      rev: 0,
+      kind: 'comment',
+      author: AUTHOR_A,
+      clientId: A,
+      opId: `${A}:2`,
+      comment: { op: 'resolve', threadId: 't1', at: '2026-10-11T10:00:00.000Z', by: 'anon_a' },
+      at: '2026-10-11T10:00:00.000Z',
+    };
+    const body = { revision, entries: [entry(1, A, 1, splice(start.length, ' z')), comment] };
+    let calls = 0;
+    const landed: unknown[] = [];
+    // the Blob store answers the sidecar's push 503 once, then takes it
+    const flaky: CommentsApplier = {
+      apply: async (entries) => {
+        calls += 1;
+        if (calls === 1) throw new Error('Vercel Blob: 503 Service Unavailable');
+        landed.push(...entries.map((row) => row.comment));
+        return { revision: 7, threadIds: ['t1'] };
+      },
+    };
+    const first = await answerCheckpoint(deps({ comments: flaky }), body);
+    expect(first.status).toBe(503);
+    expect(first.body).toMatchObject({ error: 'comments' });
+    const retry = await answerCheckpoint(deps({ comments: flaky }), body);
+    expect(retry.status).toBe(200);
+    expect(retry.landed).toBe(0);
+    expect(retry.body['comments']).toEqual({ revision: 7, threadIds: ['t1'] });
+    expect(landed).toEqual([comment.comment]);
+    expect(await store.revision()).toBe(revision + 1);
+    expect(paragraph((await store.read()).document)).toBe(`${start} z`);
+  });
+
+  it('names a comment the sidecar refused, so the object keeps it as a dead letter (HR-RT#8)', async () => {
+    const comment: Entry = {
+      seq: 1,
+      rev: 0,
+      kind: 'comment',
+      author: AUTHOR_A,
+      clientId: A,
+      opId: `${A}:1`,
+      comment: { op: 'resolve', threadId: 'missing', at: '2026-10-11T10:00:00.000Z', by: 'anon_a' },
+      at: '2026-10-11T10:00:00.000Z',
+    };
+    const refusing: CommentsApplier = {
+      apply: async (entries) => ({
+        revision: 3,
+        threadIds: [],
+        refused: entries.map((row) => ({ op: row.comment, message: 'no thread missing' })),
+      }),
+    };
+    const reply = await answerCheckpoint(deps({ comments: refusing }), {
+      revision: await store.revision(),
+      entries: [comment],
+    });
+    expect(reply.status).toBe(200);
+    expect(reply.body['refusedComments']).toEqual([`${A}:1`]);
   });
 });

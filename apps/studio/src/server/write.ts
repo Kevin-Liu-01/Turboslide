@@ -3,6 +3,7 @@ import { getRequest, setCookie } from '@tanstack/react-start/server';
 import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import type { AuthContext } from '@turboslide/identity/access';
 import type { AvatarVariant } from '@turboslide/identity/principal';
 import { markSpec } from '@turboslide/identity/marks';
 import type { MarkSpec } from '@turboslide/identity/marks';
@@ -409,6 +410,28 @@ function ownIdsOf(identity: {
     for (const alias of principal.aliases ?? []) own.add(alias);
   }
   return own;
+}
+
+/**
+ * Version records as their reader reads them (hardening HR-SD#1, HR-SD#1d): to a reader who may
+ * not share the deck every other author is the author's stand-in, by the rule the dispatcher's
+ * version answers follow (access.ts `readerPeople`, decided on the record at this call). The one
+ * step for every answer of this module that carries records: the version list and a write's
+ * conflict. The stand-in code loads here, never at the top, so the client stub of this module
+ * pulls none of it.
+ */
+async function versionsForReader<V extends { author: Author }>(
+  deckId: string,
+  identity: Parameters<typeof ownIdsOf>[0] & { ctx: AuthContext },
+  versions: V[],
+): Promise<V[]> {
+  if (versions.length === 0) return versions;
+  const [{ readerPeople }, { versionsWithStandIns }] = await Promise.all([
+    import('./access'),
+    import('./stand-ins'),
+  ]);
+  const people = await readerPeople(deckId, identity.ctx, ownIdsOf(identity));
+  return people === null ? versions : versionsWithStandIns(versions, people);
 }
 
 const readEditorDeckFn = createServerFn({ method: 'GET' })
@@ -983,7 +1006,10 @@ const writeDeckFn = createServerFn({ method: 'POST' })
         message: admitted.message,
         currentRevision: admitted.currentRevision,
         current: admitted.current,
-        since: admitted.since,
+        // the records after the writer's base, with every other author as a stand-in to a writer
+        // who may not share the deck (hardening HR-SD#1d): any stale write from an editor's page
+        // answered the stored authors here, the owner's principal id among them
+        since: await versionsForReader(data.deckId, identity, admitted.since),
       };
     } else {
       result = { ok: false, code: 'invalid', message: admitted.message, issues: [] };
@@ -1058,14 +1084,8 @@ const listVersionsFn = createServerFn({ method: 'GET' })
   .handler(async ({ data }): Promise<string> => {
     const { identity } = await admitDecision(data.deckId, 'history', 'version.list');
     const versions = await (await storeFor(data.deckId)).listVersions();
-    // the authors of a reader who may not share the deck are stand-ins (hardening HR-SD#1), by
-    // the rule the dispatcher's version answers follow (access.ts readerPeople)
-    const [{ readerPeople }, { versionsWithStandIns }] = await Promise.all([
-      import('./access'),
-      import('./stand-ins'),
-    ]);
-    const people = await readerPeople(data.deckId, identity.ctx, ownIdsOf(identity));
-    return JSON.stringify(people === null ? versions : versionsWithStandIns(versions, people));
+    // the authors of a reader who may not share the deck are stand-ins (hardening HR-SD#1)
+    return JSON.stringify(await versionsForReader(data.deckId, identity, versions));
   });
 
 /** version.list: every log entry, oldest first; the server log the undo spec counts. */

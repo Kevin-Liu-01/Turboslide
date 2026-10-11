@@ -223,3 +223,37 @@ describe("the window's long poll of the version log (HR-SD#1d, watchDeckFn)", ()
     expect(listed).toContain(standInFor(DECK, people.owner.id));
   });
 });
+
+describe("the window's write conflict (HR-SD#1d, writeDeckFn)", () => {
+  /** A stale write of the title from a browser: base revision 1, under three newer records. */
+  async function staleWrite(who: Browser): Promise<string> {
+    return JSON.stringify(
+      await as(who, () =>
+        write.writeDeck({
+          deckId: DECK,
+          write: {
+            baseRevision: 1,
+            author: authorOf(who),
+            mutations: [{ op: 'deck.set', path: '/title', value: `${who.name}'s title` }],
+          },
+        }),
+      ),
+    );
+  }
+
+  it('names the other authors by stand-ins to an editor who may not share, and writes nothing', async () => {
+    const store = await openDeckStore(DECK);
+    const before = (await store.read()).document.deck.revision;
+    const answer = await staleWrite(people.editor);
+    expect(answer).toContain('"code":"conflict"');
+    expect(othersIn(answer, people.editor)).toEqual([]);
+    expect(answer).toContain(`"principalId":"${standInFor(DECK, people.owner.id)}"`);
+    expect((await store.read()).document.deck.revision).toBe(before);
+  });
+
+  it('keeps the ids for the owner, who may share', async () => {
+    const answer = await staleWrite(people.owner);
+    expect(answer).toContain('"code":"conflict"');
+    expect(answer).toContain(`"principalId":"${people.owner.id}"`);
+  });
+});

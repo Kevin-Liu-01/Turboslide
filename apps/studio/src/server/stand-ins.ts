@@ -163,8 +163,11 @@ function answerWithStandIns(action: string, output: unknown, people: StandIns): 
     : shape(output, people);
 }
 
-/** A refusal as such a caller reads it: a 409's lease holder (any write, slide.lease) as a stand-in. */
-function errorWithStandIns(error: unknown, people: StandIns): unknown {
+/**
+ * A refusal as such a caller reads it: a 409's lease holder (any write, slide.lease) as a stand-in.
+ * The dispatcher's refusals and the window's lease (write.ts `refusalForReader`) take this step.
+ */
+export function errorWithStandIns(error: unknown, people: StandIns): unknown {
   if (!(error instanceof ConflictError) || error.holder?.principalId === undefined) return error;
   const mapped = new ConflictError(error.message, {
     currentRevision: error.currentRevision,

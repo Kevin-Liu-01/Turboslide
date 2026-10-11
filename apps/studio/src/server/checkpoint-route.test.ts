@@ -5,7 +5,9 @@
 // answered from the log and leaves the store at one revision (HR-RT#1); a call that asks for the
 // bound starts runs for 15 s at most and answers the seq it reached (HR-RT#4); an error is 404
 // `gone` only for a deck the store does not hold, and 500 otherwise (HR-RT#7); a sidecar write
-// the store did not take answers 503, and a comment the sidecar refused is named (HR-RT#8).
+// the store did not take answers 503, and a comment the sidecar refused is named (HR-RT#8); a run
+// the store refuses is answered 409 `refused` with its op ids, and an object of a newer build is
+// answered 503 `upgrade_pending` (HR-RT#9).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -27,7 +29,7 @@ import type { BlobClient } from '@turboslide/store/blob-store';
 
 import { DeckGoneError } from '@turboslide/schema/errors';
 
-import { answerCheckpoint, checkpointErrorReply } from './checkpoint';
+import { answerCheckpoint, checkpointErrorReply, upgradePending } from './checkpoint';
 import type { CheckpointRouteDeps, CommentsApplier } from './checkpoint';
 
 const DECK = 'gt-brand';
@@ -389,5 +391,46 @@ describe('the checkpoint route over a Blob store', () => {
     });
     expect(reply.status).toBe(200);
     expect(reply.body['refusedComments']).toEqual([`${A}:1`]);
+  });
+
+  it('answers a run the store refused 409 with its op ids to an object that returns them, and 200 to an older one (HR-RT#9)', async () => {
+    const revision = await store.revision();
+    const end = start.length;
+    const entries = [
+      entry(1, A, 1, splice(end, ' a')),
+      // outside the text: the store refuses the run
+      entry(2, B, 1, splice(end + 9_999, 'x')),
+      entry(3, A, 2, splice(end + 2, ' c')),
+    ];
+    const reply = await answerCheckpoint(deps({ refusesSkipped: true }), { revision, entries });
+    expect(reply.status).toBe(409);
+    expect(reply.body).toMatchObject({ refused: true, skipped: [`${B}:1`] });
+    expect(reply.body['conflict']).toBeUndefined();
+    expect(await store.revision()).toBe(revision + 2);
+    expect(paragraph((await store.read()).document)).toBe(`${start} a c`);
+    // an object older than the round reads the 200 it read before
+    const older = await answerCheckpoint(deps(), {
+      revision: revision + 2,
+      entries: [entry(4, B, 2, splice(end + 9_999, 'y'))],
+    });
+    expect(older.status).toBe(200);
+    expect(older.body['skipped']).toEqual([`${B}:2`]);
+  });
+
+  it('answers an object of a newer protocol or schema 503 upgrade_pending, and reads its own and older ones (HR-RT#9)', () => {
+    const ours = { protocol: 1, schemaVersion: 3 };
+    const headers = (protocol?: string, schema?: string): Headers =>
+      new Headers({
+        ...(protocol === undefined ? {} : { 'x-turboslide-protocol': protocol }),
+        ...(schema === undefined ? {} : { 'x-turboslide-schema-version': schema }),
+      });
+    expect(upgradePending(headers('2', '3'), ours)).toMatchObject({
+      status: 503,
+      body: { error: 'upgrade_pending' },
+    });
+    expect(upgradePending(headers('1', '4'), ours)?.status).toBe(503);
+    expect(upgradePending(headers('1', '3'), ours)).toBeNull();
+    expect(upgradePending(headers('1', '2'), ours)).toBeNull();
+    expect(upgradePending(headers(), ours)).toBeNull();
   });
 });

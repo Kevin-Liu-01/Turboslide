@@ -22,6 +22,8 @@ import type { Entry, NewEntry, RoomEvent, RosterEntry } from '@turboslide/realti
 import { originKey, originKeysOf } from '@turboslide/realtime/coalesce';
 import {
   CHECKPOINT_BOUNDED_HEADER,
+  CHECKPOINT_PROTOCOL_HEADER,
+  CHECKPOINT_SCHEMA_HEADER,
   CLOSE_CODES,
   HEARTBEAT_REQUEST,
   HEARTBEAT_RESPONSE,
@@ -81,6 +83,7 @@ import type {
 import { hueFor } from '@turboslide/identity/hues';
 import { standInKey, standInOf } from '@turboslide/identity/stand-in';
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { CURRENT_SCHEMA_VERSION } from '@turboslide/schema/migrations';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 
@@ -118,6 +121,8 @@ export const JOIN_HEADER = 'x-turboslide-join';
 export const CHECKPOINT_TIMEOUT_MS = 25_000;
 /** How many bounded calls a flush or the last close makes for one tail (HR-RT#4): 2,000 entries at 15 s a call. */
 export const CHECKPOINT_CALLS_PER_FLUSH = 8;
+/** The sentence a refused run's author reads on the card (HR-RT#9). */
+export const REFUSED_BY_STORE = 'This change was not saved: the store refused it. Make it again.';
 /** How long the checkpoint and seed routes must both say a deck is gone before its tail goes to dead letters (HR-RT#7). */
 export const DECK_GONE_CONFIRM_MS = 60_000;
 /** How long the object keeps a dead letter: 30 days. */
@@ -236,6 +241,8 @@ type CheckpointAnswer =
       toSeq?: number;
       /** the comment entries the sidecar's reducer refused (HR-RT#8) */
       refusedComments?: string[];
+      /** the op ids of the runs the store refused for their content (HR-RT#9) */
+      skipped?: string[];
     }
   | { conflict: true; revision: number };
 
@@ -2041,6 +2048,7 @@ export class DeckRoom extends DurableObject<Env> {
         opIds: rows.map((entry) => entry.opId).join(','),
       });
     }
+    const skipped = Array.isArray(answer.skipped) ? answer.skipped : [];
     meta.revision = answer.revision;
     meta.covered = reached;
     meta.lastCheckpointAt = Date.now();
@@ -2073,6 +2081,12 @@ export class DeckRoom extends DurableObject<Env> {
       ...(answer.comments === undefined ? {} : { comments: answer.comments }),
     };
     this.broadcast(event);
+    if (skipped.length > 0) {
+      this.refuseSkipped(entries, skipped, answer.revision);
+      // a bounded call that also refused runs leaves the rest of the tail for the next (HR-RT#4)
+      if (meta.head > meta.covered) await this.armAlarm(Date.now() + 50);
+      return;
+    }
     this.compact();
     if (answer.tier !== 'do') {
       // the route's instance serves another tier now (3.8 item 2): the tabs reload onto it
@@ -2084,6 +2098,45 @@ export class DeckRoom extends DurableObject<Env> {
     if (meta.head > meta.covered) await this.armAlarm(Date.now() + 50);
     // a tail a failed close left behind is in now (an alarm, a flush): the deck lets go (HR-RT#6a)
     else if (!closed && this.closePending && this.members.size === 0) await this.releaseClosed();
+  }
+
+  /**
+   * Runs the store refused for their content (RELIABILITY-11, hardening HR-RT#9): each entry goes
+   * back to its author as a `reject` (the tab shows its card with the text), leaves the log, and
+   * is kept as a dead letter; the live document is read again from the store and every tab
+   * reloads, so no tab keeps text the store never held. Before this the object covered them
+   * silently and the text lived in the tabs and the object until the last close.
+   */
+  private refuseSkipped(
+    entries: readonly Entry[],
+    skipped: readonly string[],
+    revision: number,
+  ): void {
+    const refused = new Set(skipped);
+    const rows = entries.filter((entry) => entry.kind === 'edit' && refused.has(entry.opId));
+    for (const entry of rows) {
+      const member = this.members.get(entry.clientId);
+      if (member !== undefined)
+        this.send(member, {
+          type: 'reject',
+          opId: entry.opId,
+          reason: 'invalid',
+          ...(entry.mutations === undefined ? {} : { mutations: entry.mutations }),
+          message: REFUSED_BY_STORE,
+        });
+      this.deleteEntry(entry);
+    }
+    this.deadLetter(rows, 'store-refused');
+    this.log('error', 'the store refused runs; their authors were told', {
+      opIds: rows.map((entry) => entry.opId).join(','),
+    });
+    const meta = this.meta;
+    if (meta !== null) {
+      meta.stale = true;
+      this.writeMeta();
+    }
+    this.live = null;
+    this.broadcast({ type: 'resync', revision });
   }
 
   /**
@@ -2195,14 +2248,29 @@ export class DeckRoom extends DurableObject<Env> {
       `${this.appOrigin()}/api/decks/${encodeURIComponent(deckId)}/checkpoint`,
       {
         method: 'POST',
-        // the object continues from a partial answer, so the route may bound the call (HR-RT#4)
-        headers: { ...this.appHeaders(true), [CHECKPOINT_BOUNDED_HEADER]: '1' },
+        // the object continues from a partial answer, so the route may bound the call (HR-RT#4),
+        // and names the protocol and schema it admitted under (HR-RT#9)
+        headers: {
+          ...this.appHeaders(true),
+          [CHECKPOINT_BOUNDED_HEADER]: '1',
+          [CHECKPOINT_PROTOCOL_HEADER]: String(ROOM_PROTOCOL),
+          [CHECKPOINT_SCHEMA_HEADER]: String(CURRENT_SCHEMA_VERSION),
+        },
         body: JSON.stringify({ ...body, ...(revision === undefined ? {} : { revision }) }),
       },
       CHECKPOINT_TIMEOUT_MS,
     );
     if (answer.status === 409) {
-      const conflict = (answer.body ?? {}) as { conflict?: true; revision?: number };
+      const conflict = (answer.body ?? {}) as {
+        conflict?: true;
+        refused?: true;
+        revision?: number;
+      };
+      // runs the store refused, the rest committed: an answer, never a conflict (HR-RT#9)
+      if (conflict.refused === true)
+        return answer.body as CheckpointAnswer & {
+          comments?: { revision: number; threadIds: string[] };
+        };
       return { conflict: true, revision: conflict.revision ?? 0 };
     }
     return answer.body as CheckpointAnswer & {

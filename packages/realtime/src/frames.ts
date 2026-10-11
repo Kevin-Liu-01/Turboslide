@@ -522,6 +522,16 @@ export const roomAccessChangedSchema = z.strictObject({
 export const CHECKPOINT_BOUNDED_HEADER = 'x-turboslide-checkpoint-bounded';
 /** How long one checkpoint call starts runs for (RELIABILITY-1 fix 5); the object's deadline (25 s) leaves room for the last run. */
 export const CHECKPOINT_BUDGET_MS = 15_000;
+/**
+ * The room protocol and the document schema version the object admitted its entries under
+ * (RELIABILITY-11, hardening HR-RT#9), as headers on its checkpoint post for the same reason as
+ * CHECKPOINT_BOUNDED_HEADER. A route of an older build answers 503 `upgrade_pending` to a newer
+ * one, and the object keeps the tail until the app it posts to is as new as itself: the guard
+ * deploys the Worker before the app, so a push that adds a field or a mutation opens a window in
+ * which the new object admits what the old app's validator refuses.
+ */
+export const CHECKPOINT_PROTOCOL_HEADER = 'x-turboslide-protocol';
+export const CHECKPOINT_SCHEMA_HEADER = 'x-turboslide-schema-version';
 
 /** `POST /api/decks/:id/checkpoint` (the object to the function, 3.5): the entries above `covered`, the object's revision when it knows one, `closed` at the last socket. */
 export const checkpointBodySchema = z.strictObject({

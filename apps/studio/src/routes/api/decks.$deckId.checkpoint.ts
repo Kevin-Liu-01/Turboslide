@@ -4,14 +4,17 @@ import { jsonResponse } from '@turboslide/agent/http/errors';
 import {
   CHECKPOINT_BOUNDED_HEADER,
   CHECKPOINT_BUDGET_MS,
+  CHECKPOINT_PROTOCOL_HEADER,
+  ROOM_PROTOCOL,
   checkpointBodySchema,
 } from '@turboslide/realtime/frames';
 import type { CheckpointBody } from '@turboslide/realtime/frames';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import { CURRENT_SCHEMA_VERSION } from '@turboslide/schema/migrations';
 import type { DeckStore } from '@turboslide/store/store';
 
 import { flushCardThumb, scheduleCardThumb } from '../../server/card-thumb';
-import { answerCheckpoint, checkpointErrorReply } from '../../server/checkpoint';
+import { answerCheckpoint, checkpointErrorReply, upgradePending } from '../../server/checkpoint';
 import { commentsApplierFor, shiftEntriesFor } from '../../server/comments';
 import { realtimeTier, roomFor } from '../../server/room';
 import { hasStoredDeck } from '../../server/root';
@@ -52,6 +55,12 @@ function log(line: string): void {
 async function serve(request: Request, deckId: string): Promise<Response> {
   if (!SLUG_PATTERN.test(deckId)) return jsonResponse({ error: 'not_found' }, 404);
   if (!roomBearerMatches(request)) return jsonResponse({ error: 'bearer' }, 401);
+  // an object of a newer build waits for this app to catch up (HR-RT#9)
+  const pending = upgradePending(request.headers, {
+    protocol: ROOM_PROTOCOL,
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+  });
+  if (pending !== null) return jsonResponse(pending.body, pending.status, { 'retry-after': '60' });
   let raw: unknown;
   try {
     raw = await request.json();
@@ -77,6 +86,7 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       body,
       request.signal,
       request.headers.get(CHECKPOINT_BOUNDED_HEADER) === '1',
+      request.headers.has(CHECKPOINT_PROTOCOL_HEADER),
     );
   } catch (error) {
     // a deck removed while its object still held entries is 404 `gone`, the answer the object reads
@@ -92,6 +102,7 @@ async function commit(
   body: CheckpointBody,
   signal: AbortSignal,
   bounded: boolean,
+  refusesSkipped: boolean,
 ): Promise<Response> {
   const room = await roomFor(deckId);
   const store = room.store;
@@ -107,10 +118,12 @@ async function commit(
       signal,
       // an object that continues from a partial answer asks for the bound (HR-RT#4)
       ...(bounded ? { budgetMs: CHECKPOINT_BUDGET_MS } : {}),
+      // an object that names its protocol returns refused runs to their authors (HR-RT#9)
+      refusesSkipped,
     },
     body,
   );
-  if (reply.status === 200) {
+  if (reply.status === 200 || reply.body['refused'] === true) {
     if (reply.landed > 0) scheduleCardThumb(deckId);
     if (body.closed === true) flushCardThumb(deckId);
   }

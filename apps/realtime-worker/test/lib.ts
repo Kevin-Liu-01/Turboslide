@@ -268,6 +268,10 @@ export type FakeApp = {
   bounded: boolean[];
   /** the route answers every comment entry as refused by the sidecar (HR-RT#8) */
   refuseComments: boolean;
+  /** the op ids whose runs the store refuses for their content: answered 409 `refused` (HR-RT#9) */
+  refuseOpIds: string[];
+  /** the protocol header of each checkpoint post, in order */
+  protocols: (string | null)[];
   /** forgets this deck's state; the stub stays for the file so a late call of an earlier test's object meets a benign answer */
   restore: () => void;
 };
@@ -335,6 +339,7 @@ function installFakeFetch(): void {
       app.checkpoints.push(body);
       const isBounded = headers.get('x-turboslide-checkpoint-bounded') === '1';
       app.bounded.push(isBounded);
+      app.protocols.push(headers.get('x-turboslide-protocol'));
       if (app.gone) return json({ error: 'not_found', gone: true }, 404);
       if (app.notFoundPlain) return new Response('Not Found', { status: 404 });
       if (app.failTimes > 0) {
@@ -372,6 +377,10 @@ function installFakeFetch(): void {
         edits = edits.filter((entry) => !answered.has(`${entry.clientId} ${entry.opId}`));
         app.covered = Math.max(app.covered, ...above.map((record) => record.ops?.toSeq ?? 0));
       }
+      const skipped = edits
+        .filter((entry) => app.refuseOpIds.includes(entry.opId))
+        .map((entry) => entry.opId);
+      edits = edits.filter((entry) => !app.refuseOpIds.includes(entry.opId));
       let through: number | undefined;
       if (isBounded && app.budgetEntries !== null && edits.length > app.budgetEntries) {
         edits = edits.slice(0, app.budgetEntries);
@@ -403,13 +412,17 @@ function installFakeFetch(): void {
       const refusedComments = app.refuseComments
         ? body.entries.filter((entry) => entry.kind === 'comment').map((entry) => entry.opId)
         : [];
-      return json({
-        committed,
-        revision: app.revision,
-        tier: app.tier,
-        ...(through === undefined ? {} : { toSeq: through }),
-        ...(refusedComments.length === 0 ? {} : { refusedComments }),
-      });
+      return json(
+        {
+          ...(skipped.length > 0 ? { refused: true, skipped } : {}),
+          committed,
+          revision: app.revision,
+          tier: app.tier,
+          ...(through === undefined ? {} : { toSeq: through }),
+          ...(refusedComments.length === 0 ? {} : { refusedComments }),
+        },
+        skipped.length > 0 ? 409 : 200,
+      );
     },
   );
 }
@@ -442,6 +455,8 @@ export function fakeApp(
     budgetEntries: null,
     bounded: [],
     refuseComments: false,
+    refuseOpIds: [],
+    protocols: [],
     restore: () => {
       apps.delete(deck);
     },

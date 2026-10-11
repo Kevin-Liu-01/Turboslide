@@ -1,5 +1,6 @@
 import type { Entry, RealtimeChannel, RoomEvent } from '@turboslide/realtime/channel';
 import { coalesceEntries, originKey, originKeysOf } from '@turboslide/realtime/coalesce';
+import { CHECKPOINT_PROTOCOL_HEADER, CHECKPOINT_SCHEMA_HEADER } from '@turboslide/realtime/frames';
 import type { CoalescedWrite } from '@turboslide/realtime/coalesce';
 import { deckKeys } from '@turboslide/realtime/keys';
 import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
@@ -319,6 +320,11 @@ export type CheckpointRouteDeps = {
   signal?: AbortSignal;
   /** how long the call starts runs for, when the object continues from a partial answer (HR-RT#4) */
   budgetMs?: number;
+  /**
+   * the object returns refused runs to their authors (HR-RT#9; it names its protocol): a refused
+   * run is answered 409 `refused`; an older object reads 200 with `skipped`, as before
+   */
+  refusesSkipped?: boolean;
   now?: () => number;
 };
 
@@ -415,9 +421,14 @@ export async function answerCheckpoint(
       log(`comment.shift did not land: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
+  // a run the store refused for its content is answered 409 with its op ids (RELIABILITY-11,
+  // hardening HR-RT#9): the object returns them to their authors and reloads the tabs, where
+  // before it read the 200, covered them, and the tabs kept text the store never held
+  const refused = deps.refusesSkipped === true && result.skipped.length > 0;
   return {
-    status: 200,
+    status: refused ? 409 : 200,
     body: {
+      ...(refused ? { refused: true } : {}),
       committed: [...plan.answered, ...result.committed],
       skipped: result.skipped,
       revision: await store.revision(),
@@ -454,6 +465,34 @@ export async function checkpointErrorReply(
   return {
     status: 500,
     body: { error: 'checkpoint', message: error instanceof Error ? error.message : String(error) },
+    landed: 0,
+  };
+}
+
+/**
+ * Whether the object posts from a newer build than this app (HR-RT#9): its room protocol or its
+ * document schema version (the checkpoint's headers) above this build's. Such a post is answered
+ * 503 `upgrade_pending`, and the object keeps its tail until the app it reaches is as new; null
+ * when this build reads the post. A post without the headers is an object older than the round.
+ */
+export function upgradePending(
+  headers: Headers,
+  ours: { protocol: number; schemaVersion: number },
+): CheckpointReply | null {
+  const read = (name: string): number | null => {
+    const raw = headers.get(name);
+    const value = raw === null ? Number.NaN : Number(raw);
+    return Number.isInteger(value) ? value : null;
+  };
+  const protocol = read(CHECKPOINT_PROTOCOL_HEADER);
+  const schemaVersion = read(CHECKPOINT_SCHEMA_HEADER);
+  if ((protocol ?? 0) <= ours.protocol && (schemaVersion ?? 0) <= ours.schemaVersion) return null;
+  return {
+    status: 503,
+    body: {
+      error: 'upgrade_pending',
+      message: `The room posts protocol ${protocol ?? '?'} and schema ${schemaVersion ?? '?'}; this app reads ${ours.protocol} and ${ours.schemaVersion}`,
+    },
     landed: 0,
   };
 }

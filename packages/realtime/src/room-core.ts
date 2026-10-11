@@ -619,13 +619,39 @@ export function stripNotes(entry: Entry): Entry | null {
 }
 
 /**
+ * An entry a reader may not read, as that reader's stream carries it (hardening HR-RC#10): the
+ * seq, the revision, the writer's ids and the time, with no content. A tab moves its position
+ * one seq at a time, so an entry left out of a reader's stream was a gap the tab waited on for
+ * good: a viewer without the comments switch, after anyone's comment, and a viewer or a
+ * commenter, after an editor's speaker notes, applied no later edit until a reload, the reopen
+ * of the gap watch replaying the same gap. The entry is an edit with no mutations that names its
+ * own op id in `covers`, the shape every client's schema reads (protocol.ts `hasPayload`), so a
+ * tab of an older build moves past it as well; the client applies nothing for it.
+ */
+export function hiddenEntry(entry: Entry): Entry {
+  return {
+    seq: entry.seq,
+    rev: entry.rev,
+    kind: 'edit',
+    author: entry.author,
+    clientId: entry.clientId,
+    opId: entry.opId,
+    mutations: [],
+    covers: entry.covers !== undefined && entry.covers.length > 0 ? entry.covers : [entry.opId],
+    at: entry.at,
+  };
+}
+
+/**
  * The events one stream forwards (SPEC-3 3.3, report 10 F25): an owner and an editor receive
  * every operation; a commenter and a viewer receive operations with the notes stripped
  * (docs/archive/rounds/SYNC.md 3.7, invariant 6: before the sync round a viewer received checkpoints alone, so
  * its revision climbed while its document stood still and it read nothing without a reload,
  * audit-ordering item 2); everyone receives checkpoints, presence and the deck level notices;
- * comment entries only a reader with `readComments`. A reader who may not share reads every other
- * principal's id as its stand-in (HR-SD#1; `readerStandIns`).
+ * comment entries only a reader with `readComments`. Every entry keeps its seq: one the reader
+ * may not read (a comment without `readComments`, an edit of the notes alone) arrives as
+ * `hiddenEntry` (HR-RC#10). A reader who may not share reads every other principal's id as its
+ * stand-in (HR-SD#1; `readerStandIns`).
  */
 export function filterEventForReader(
   event: RoomEvent,
@@ -639,23 +665,18 @@ export function filterEventForReader(
     reader.role === 'viewer';
   const fullOps = reader.role === 'owner' || reader.role === 'editor';
   const people = readerStandIns(reader, deps);
-  const filterEntry = (entry: Entry): Entry | null => {
-    if (entry.kind === 'comment') return reader.readComments ? entryForReader(entry, people) : null;
-    if (!canSeeOps) return null;
+  const filterEntry = (entry: Entry): Entry => {
+    if (entry.kind === 'comment')
+      return entryForReader(reader.readComments ? entry : hiddenEntry(entry), people);
+    if (!canSeeOps) return entryForReader(hiddenEntry(entry), people);
     const shown = fullOps ? entry : stripNotes(entry);
-    return shown === null ? null : entryForReader(shown, people);
+    return entryForReader(shown ?? hiddenEntry(entry), people);
   };
   switch (event.type) {
-    case 'op': {
-      const entry = filterEntry(event.entry);
-      return entry === null ? null : { type: 'op', entry };
-    }
-    case 'ops': {
-      const entries = event.entries
-        .map(filterEntry)
-        .filter((entry): entry is Entry => entry !== null);
-      return { type: 'ops', entries };
-    }
+    case 'op':
+      return { type: 'op', entry: filterEntry(event.entry) };
+    case 'ops':
+      return { type: 'ops', entries: event.entries.map(filterEntry) };
     case 'presence':
       return { ...event, state: rosterEntryForReader(event.state, reader, deps) };
     case 'checkpoint':

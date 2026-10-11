@@ -1082,18 +1082,30 @@ describe('the server transforms before it places, on the blob tier too (the sync
     expect(op).toEqual({ type: 'op', entry: { ...entry, mutations: [splice(0, 0, 'g')] } });
     const ops = filterEventForReader({ type: 'ops', entries: [entry] }, reader);
     expect(ops).toEqual({ type: 'ops', entries: [{ ...entry, mutations: [splice(0, 0, 'g')] }] });
-    // an entry that carried notes alone reaches no viewer
+    // an entry that carried notes alone reaches a viewer as its seq with no content, so the tab's
+    // position moves past it (hardening HR-RC#10; before, it reached no viewer and the tab
+    // waited on the gap for good)
     const notesOnly = landed(9, [
       { op: 'slide.set', slideId: 'content-rule', path: '/notes', value: 'p' },
     ]);
-    expect(filterEventForReader({ type: 'op', entry: notesOnly }, reader)).toBeNull();
+    const hiddenNotes = filterEventForReader({ type: 'op', entry: notesOnly }, reader);
+    expect(hiddenNotes).toMatchObject({
+      type: 'op',
+      entry: { seq: 9, kind: 'edit', mutations: [] },
+    });
+    expect(JSON.stringify(hiddenNotes)).not.toContain('/notes');
     // an editor reads the notes as before
     expect(filterEventForReader({ type: 'op', entry }, { ...reader, role: 'editor' })).toEqual({
       type: 'op',
       entry,
     });
-    // a comment entry still needs the comments right
+    // a comment entry still needs the comments right: without it, the seq alone
     const comment: Entry = { ...landed(10, []), kind: 'comment', mutations: undefined } as Entry;
-    expect(filterEventForReader({ type: 'op', entry: comment }, reader)).toBeNull();
+    const hiddenComment = filterEventForReader({ type: 'op', entry: comment }, reader);
+    expect(hiddenComment).toMatchObject({
+      type: 'op',
+      entry: { seq: 10, kind: 'edit', mutations: [] },
+    });
+    expect(hiddenComment?.type === 'op' ? hiddenComment.entry.comment : 'none').toBeUndefined();
   });
 });

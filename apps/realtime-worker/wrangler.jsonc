@@ -66,6 +66,9 @@
       "migrations_dir": "migrations",
     },
   ],
+  // the sweep (hardening HR-RT#6c, index.ts `scheduled`): every five minutes the Worker pokes each
+  // object `rt_open` names, and one whose tail waited more than two minutes checkpoints at once
+  "triggers": { "crons": ["*/5 * * * *"] },
   "vars": {
     // the app the object calls back (the checkpoint and seed routes, 3.2) and the only origin a
     // ticket's `org` claim may name on production; echoed by /health as appOrigin
@@ -95,6 +98,7 @@
     // TURBOSLIDE_APP_ORIGIN is empty here and set per Vercel preview deployment with --var; its
     // D1 is turboslide-accounts-preview; its secrets are its own (worker-secrets --env preview).
     "preview": {
+      "triggers": { "crons": ["*/5 * * * *"] },
       "durable_objects": {
         "bindings": [{ "name": "DECK_ROOM", "class_name": "DeckRoom" }],
       },

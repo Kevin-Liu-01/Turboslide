@@ -36,6 +36,8 @@ import type { AdmissionMode } from '@turboslide/realtime/room-core';
 import {
   admissionDisagreements,
   callbacksState,
+  openStates,
+  sweepOpenDecks,
   dropFlagCache,
   openDecks,
   readFlags,
@@ -43,7 +45,7 @@ import {
   workerCounters,
   writeFlags,
 } from './control.ts';
-import type { CallbacksState } from './control.ts';
+import type { CallbacksState, ObjectCall } from './control.ts';
 import { dbBatch, dbCountersAnswer, dbQuery, dbUnlistedAnswer, statementMode } from './db.ts';
 import type { StatementMode } from './db.ts';
 import {
@@ -367,7 +369,7 @@ async function serve(request: Request, env: Env): Promise<Response> {
       const decks = await openDecks(env.ACCOUNTS);
       return decks === null
         ? json({ error: 'unset', message: 'the control tables are not made' }, 503)
-        : json({ decks });
+        : json({ decks: await openStates(decks, objectsOf(env)) });
     }
     if (parts[1] === 'flags' && request.method === 'GET') {
       const flags = await readFlags(env.ACCOUNTS);
@@ -433,7 +435,36 @@ async function dbBearerOk(request: Request, env: Env): Promise<boolean> {
   ]);
 }
 
+/** One object's own route, called by the router without a request from outside (the sweep, the open list). */
+async function callObject(
+  env: Env,
+  deckId: string,
+  tail: string,
+  method: 'GET' | 'POST',
+): Promise<Record<string, unknown>> {
+  const response = await roomStub(env, deckId).fetch(
+    `https://rooms.internal/rooms/${encodeURIComponent(deckId)}/${tail}`,
+    { method },
+  );
+  return (await response.json()) as Record<string, unknown>;
+}
+
+/** The objects of this Worker as the control module calls them (control.ts `ObjectCall`). */
+function objectsOf(env: Env): ObjectCall {
+  return (deckId, tail, method) => callObject(env, deckId, tail, method);
+}
+
+// Every named export of this module is a Durable Object class or a handler: the runtime refuses a
+// module whose named export is any other value ("Incorrect type for map entry", read on wrangler
+// dev of HR-RT#6c), which the vitest plugin does not check. The sweep lives in control.ts.
 export default {
+  async scheduled(
+    _controller: ScheduledController,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<void> {
+    ctx.waitUntil(sweepOpenDecks(env.ACCOUNTS, objectsOf(env)));
+  },
   async fetch(request: Request, env: Env): Promise<Response> {
     try {
       return await serve(request, env);

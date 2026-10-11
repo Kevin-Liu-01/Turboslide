@@ -184,6 +184,102 @@ export async function openDecks(
   }
 }
 
+/** The tail of one open deck as its object answers it (deck-room.ts `openState`; HR-RT#6c). */
+export type OpenDeck = {
+  deckId: string;
+  openedAt: number;
+  head: number;
+  covered: number;
+  /** how long the oldest uncommitted entry has waited; 0 with nothing uncommitted */
+  ageMs: number;
+  sockets: number;
+};
+
+/** One object's own route as the router calls it (index.ts `objectsOf`): the answer's JSON. */
+export type ObjectCall = (
+  deckId: string,
+  tail: string,
+  method: 'GET' | 'POST',
+) => Promise<Record<string, unknown>>;
+
+/** How many objects one sweep or one `/control/open` reads at once. */
+const OPEN_DECKS_AT_ONCE = 8;
+/** How many open decks one sweep reaches at most (HR-RT#6c). */
+export const SWEEP_DECKS_MAX = 500;
+
+/** Calls `run` over `rows`, OPEN_DECKS_AT_ONCE at a time, in order. */
+async function inChunks<T, R>(rows: readonly T[], run: (row: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = [];
+  for (let at = 0; at < rows.length; at += OPEN_DECKS_AT_ONCE)
+    out.push(...(await Promise.all(rows.slice(at, at + OPEN_DECKS_AT_ONCE).map(run))));
+  return out;
+}
+
+const numberOf = (value: unknown): number => (typeof value === 'number' ? value : 0);
+
+/**
+ * The open list with each deck's tail (HR-RT#6c): `GET /control/open` answers the head, the
+ * covered seq and the age of the oldest uncommitted entry of every object `rt_open` names, so
+ * the drain and an external check read which decks hold uncommitted work and for how long.
+ */
+export async function openStates(
+  decks: readonly { deckId: string; openedAt: number }[],
+  call: ObjectCall,
+): Promise<OpenDeck[]> {
+  return inChunks(decks, async (row) => {
+    try {
+      const state = await call(row.deckId, 'open-state', 'GET');
+      return {
+        ...row,
+        head: numberOf(state['head']),
+        covered: numberOf(state['covered']),
+        ageMs: numberOf(state['ageMs']),
+        sockets: numberOf(state['sockets']),
+      };
+    } catch {
+      return { ...row, head: 0, covered: 0, ageMs: 0, sockets: 0 };
+    }
+  });
+}
+
+/**
+ * The sweep (RELIABILITY-8, hardening HR-RT#6c; `triggers.crons` every five minutes in
+ * wrangler.jsonc, index.ts `scheduled`): every object `rt_open` names is poked, and one whose
+ * oldest uncommitted entry waited more than two minutes checkpoints at once (deck-room.ts
+ * `httpSweep`), so a tail never depends on the object's alarm alone; an object with nothing to
+ * do lets a stale row go.
+ */
+export async function sweepOpenDecks(
+  db: D1Database,
+  call: ObjectCall,
+): Promise<{ swept: number; poked: number; failed: number }> {
+  const decks = (await openDecks(db)) ?? [];
+  let poked = 0;
+  let failed = 0;
+  await inChunks(decks.slice(0, SWEEP_DECKS_MAX), async (row) => {
+    try {
+      const answer = await call(row.deckId, 'sweep', 'POST');
+      if (answer['poked'] === true) poked += 1;
+    } catch (error) {
+      failed += 1;
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          message: 'the sweep did not reach the object',
+          deck: row.deckId,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    }
+  });
+  const swept = Math.min(decks.length, SWEEP_DECKS_MAX);
+  if (poked > 0 || failed > 0 || decks.length > SWEEP_DECKS_MAX)
+    console.log(
+      JSON.stringify({ level: 'info', message: 'sweep', open: decks.length, swept, poked, failed }),
+    );
+  return { swept, poked, failed };
+}
+
 /** The router's request counts by class since this isolate started (`cost.worker.requests`). */
 export const workerCounters = {
   startedAt: Date.now(),

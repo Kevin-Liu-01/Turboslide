@@ -118,6 +118,8 @@ export const JOIN_HEADER = 'x-turboslide-join';
 export const CHECKPOINT_TIMEOUT_MS = 25_000;
 /** How many bounded calls a flush or the last close makes for one tail (HR-RT#4): 2,000 entries at 15 s a call. */
 export const CHECKPOINT_CALLS_PER_FLUSH = 8;
+/** A tail older than this is checkpointed by the Worker's sweep (HR-RT#6c), whatever its alarm did. */
+export const SWEEP_STALE_MS = 120_000;
 /** The first wait after a failed checkpoint (HR-RT#6b); it doubles per failure in a row. */
 export const CHECKPOINT_BACKOFF_BASE_MS = 2000;
 /** The longest wait between two tries of a failed checkpoint: ten minutes. */
@@ -500,6 +502,10 @@ export class DeckRoom extends DurableObject<Env> {
           return this.httpDocument();
         case 'counters':
           return this.httpCounters(url);
+        case 'open-state':
+          return json(this.openState(Date.now()));
+        case 'sweep':
+          return this.httpSweep();
         case 'access-changed':
           return this.httpAccessChanged(request);
         default:
@@ -2464,6 +2470,57 @@ export class DeckRoom extends DurableObject<Env> {
 
   /** The records the last checkpoint run committed, for the write route's answer. */
   private lastRun: VersionRecordLike[] = [];
+
+  /** The tail as the open list reads it (HR-RT#6c): the head, the covered seq, the age of the oldest uncommitted entry. */
+  private openState(now: number): {
+    head: number;
+    covered: number;
+    ageMs: number;
+    sockets: number;
+  } {
+    const meta = this.meta;
+    if (meta === null || meta.head <= meta.covered)
+      return {
+        head: meta?.head ?? 0,
+        covered: meta?.covered ?? 0,
+        ageMs: 0,
+        sockets: this.verifiedSockets(),
+      };
+    const first = meta.firstUncommittedAt ?? (this.lastEntryAt === 0 ? now : this.lastEntryAt);
+    return {
+      head: meta.head,
+      covered: meta.covered,
+      ageMs: Math.max(0, now - first),
+      sockets: this.verifiedSockets(),
+    };
+  }
+
+  /**
+   * The Worker's sweep pokes the object (RELIABILITY-8, hardening HR-RT#6c; index.ts `scheduled`,
+   * every five minutes): a tail whose oldest entry waited more than SWEEP_STALE_MS is
+   * checkpointed now, whatever happened to the alarm (an eviction, a runtime that gave up), and a
+   * deck with no socket and nothing uncommitted lets its `rt_open` row go. Answers the state after.
+   */
+  private async httpSweep(): Promise<Response> {
+    const now = Date.now();
+    const before = this.openState(now);
+    let poked = false;
+    if (before.head > before.covered && before.ageMs > SWEEP_STALE_MS) {
+      poked = true;
+      try {
+        await this.checkpointTail(false);
+        this.checkpointFailures = 0;
+      } catch (error) {
+        await this.retryCheckpointLater('the sweep checkpoint failed', error);
+      }
+    }
+    const meta = this.meta;
+    if (this.members.size === 0 && (meta === null || meta.head <= meta.covered))
+      await this.releaseClosed();
+    if (meta === null && this.members.size === 0 && this.deckId !== null)
+      await noteClosed(this.env.ACCOUNTS, this.deckId).catch(() => undefined);
+    return json({ poked, ...this.openState(Date.now()) });
+  }
 
   private async httpFlush(): Promise<Response> {
     // an object that never opened holds nothing to commit and seeds nothing for a flush

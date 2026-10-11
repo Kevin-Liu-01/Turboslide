@@ -71,8 +71,12 @@ export const REFUSALS = {
   leaveAnyway: 'Changes are still saving. Leave anyway?',
   unsavedChanges: (count: number) =>
     `${count} unsaved change${count === 1 ? '' : 's'} from this browser`,
+  /* a queue older than 24 hours, offered as text (hardening HR-RC#5c): "Unsaved changes from Oct 7" */
+  unsavedChangesFrom: (savedAt: string) =>
+    `Unsaved changes from ${new Date(savedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`,
   apply: 'Apply',
   discard: 'Discard',
+  copyText: 'Copy Text',
   alreadyChanged: (name: string) => `That change was already changed by ${name}`,
   inviteFromShare: 'Invite them from Share',
   tooManyEditors: 'This presentation has too many editors right now',

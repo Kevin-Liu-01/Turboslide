@@ -124,7 +124,7 @@ describe('Apply of a saved queue (HR-RC#5a, RC#5b, RC#5d)', () => {
     c.client.start();
     await until(() => c.offer() !== undefined && c.client.status().connected);
     expect(c.offer()?.count).toBe(1);
-    await c.offer()?.apply();
+    await c.offer()?.apply?.();
     await settled(c.client);
     expect(textOf(h.server.document())).toBe(`Zulu ${start} Xray`);
     expect(textOf(c.client.document())).toBe(`Zulu ${start} Xray`);
@@ -168,7 +168,7 @@ describe('Apply of a saved queue (HR-RC#5a, RC#5b, RC#5d)', () => {
     const c = h.tab(kevin);
     c.client.start();
     await until(() => c.offer() !== undefined && c.client.status().connected);
-    await c.offer()?.apply();
+    await c.offer()?.apply?.();
     await settled(c.client);
     expect(textOf(h.server.document())).toBe(`${start} Charlie`);
     expect(c.notices).toEqual([]);
@@ -193,7 +193,7 @@ describe('Apply of a saved queue (HR-RC#5a, RC#5b, RC#5d)', () => {
     c.client.start();
     await until(() => c.offer() !== undefined && c.client.status().connected);
     expect(c.offer()?.count).toBe(2);
-    await c.offer()?.apply();
+    await c.offer()?.apply?.();
     expect(c.notices).toEqual([
       expect.objectContaining({
         message: PERSISTED_SENTENCE,
@@ -326,10 +326,62 @@ describe('the held check of a saved queue (HR-RC#6)', () => {
     await until(() => c.offer() !== undefined && c.client.status().connected);
     // " one" is the room's: only " two" is offered
     expect(c.offer()?.count).toBe(1);
-    await c.offer()?.apply();
+    await c.offer()?.apply?.();
     await settled(c.client);
     expect(textOf(h.server.document())).toBe(`Zulu ${start} one two`);
     expect(c.notices).toEqual([]);
     for (const tab of [b, c]) await tab.client.stop();
+  });
+});
+
+describe('a saved queue older than 24 hours (HR-RC#5c)', () => {
+  const saved = (clientId: string, savedAt: string, insert: string): PersistedQueue => ({
+    key: pendingKey('gt-brand', clientId),
+    deckId: 'gt-brand',
+    clientId,
+    savedAt,
+    position: 0,
+    tier: 'memory',
+    entries: [{ opId: `${clientId}:1`, kind: 'edit', mutations: [splice(0, insert)] }],
+  });
+  const dayAgo = (hours: number): string => new Date(Date.now() - hours * 3_600_000).toISOString();
+
+  it('is offered as text with its date, Copy Text and Discard, never applied', async () => {
+    const h = room();
+    const start = textOf(h.server.document());
+    await h.store.save(saved('oldtab', dayAgo(30), 'Old words '));
+    const offers: PersistedOffer[] = [];
+    const c = h.tab(kevin, { onPersisted: (offer) => offers.push(offer) });
+    c.client.start();
+    await until(() => offers.length === 1 && c.client.status().connected);
+    expect(offers[0]).toMatchObject({ count: 1, mutations: [splice(0, 'Old words ')] });
+    expect(offers[0]?.apply).toBeUndefined();
+    expect(Date.parse(offers[0]?.savedAt ?? '')).toBeLessThan(Date.now() - 29 * 3_600_000);
+    expect(textOf(c.client.document())).toBe(start);
+    // before this round the store deleted it on read: it is kept until Discard
+    expect(await h.store.load('gt-brand')).toHaveLength(1);
+    await offers[0]?.discard();
+    expect(await h.store.load('gt-brand')).toHaveLength(0);
+    await c.client.stop();
+  });
+
+  it('comes after the fresh queues are applied', async () => {
+    const h = room();
+    const start = textOf(h.server.document());
+    await h.store.save(saved('oldtab', dayAgo(30), 'Old words '));
+    await h.store.save(saved('newtab', dayAgo(1), 'New words '));
+    const offers: PersistedOffer[] = [];
+    const c = h.tab(kevin, { onPersisted: (offer) => offers.push(offer) });
+    c.client.start();
+    await until(() => offers.length === 1 && c.client.status().connected);
+    expect(offers[0]?.count).toBe(1);
+    expect(offers[0]?.savedAt).toBeUndefined();
+    await offers[0]?.apply?.();
+    await settled(c.client);
+    expect(textOf(h.server.document())).toBe(`New words ${start}`);
+    await until(() => offers.length === 2);
+    expect(offers[1]).toMatchObject({ count: 1, mutations: [splice(0, 'Old words ')] });
+    expect(offers[1]?.apply).toBeUndefined();
+    await c.client.stop();
   });
 });

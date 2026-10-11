@@ -6,12 +6,7 @@ import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { layoutEntry } from '@turboslide/schema/layouts';
 import type { ShapeCategory } from '@turboslide/schema/shapes';
-import {
-  applyTheme,
-  applyThemeToTree,
-  readTheme,
-  writeThemeColor,
-} from '@turboslide/viewer/theme';
+import { applyTheme, applyThemeToTree, readTheme, writeThemeColor } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { ActivityPanel } from './activity/ActivityPanel';
@@ -2510,8 +2505,13 @@ export function EditorShell({
               className="ts-queue-plate pt-float ts-chrome"
               role="status"
               data-control="sync.persisted"
+              {...(input.sync.persisted.savedAt === undefined ? {} : { 'data-old': '' })}
             >
-              <span>{REFUSALS.unsavedChanges(input.sync.persisted.count)}</span>
+              <span>
+                {input.sync.persisted.savedAt === undefined
+                  ? REFUSALS.unsavedChanges(input.sync.persisted.count)
+                  : REFUSALS.unsavedChangesFrom(input.sync.persisted.savedAt)}
+              </span>
               <button
                 type="button"
                 className="pt-ib is-text"
@@ -2520,14 +2520,26 @@ export function EditorShell({
               >
                 <span className="pt-lb">{REFUSALS.discard}</span>
               </button>
-              <button
-                type="button"
-                className="pt-ib is-solid"
-                data-control="sync.persisted.apply"
-                onClick={input.sync.persisted.onApply}
-              >
-                <span className="pt-lb">{REFUSALS.apply}</span>
-              </button>
+              {input.sync.persisted.onCopy !== undefined ? (
+                <button
+                  type="button"
+                  className="pt-ib is-solid"
+                  data-control="sync.persisted.copy"
+                  onClick={input.sync.persisted.onCopy}
+                >
+                  <span className="pt-lb">{REFUSALS.copyText}</span>
+                </button>
+              ) : null}
+              {input.sync.persisted.onApply !== undefined ? (
+                <button
+                  type="button"
+                  className="pt-ib is-solid"
+                  data-control="sync.persisted.apply"
+                  onClick={input.sync.persisted.onApply}
+                >
+                  <span className="pt-lb">{REFUSALS.apply}</span>
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>

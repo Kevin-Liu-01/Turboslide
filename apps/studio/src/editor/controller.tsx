@@ -2134,17 +2134,25 @@ export function createEditorController(init: {
         return new Set(answer.held);
       },
       onPersisted: (offer) => {
+        const apply = offer.apply;
         publish({
           persisted: {
             count: offer.count,
-            apply: async () => {
-              publish({ persisted: null });
-              await offer.apply();
-            },
+            ...(apply === undefined
+              ? {}
+              : {
+                  apply: async () => {
+                    publish({ persisted: null });
+                    await apply();
+                  },
+                }),
             discard: async () => {
               publish({ persisted: null });
               await offer.discard();
             },
+            // a queue older than 24 hours: its date and its text, for Copy Text (HR-RC#5c)
+            ...(offer.savedAt === undefined ? {} : { savedAt: offer.savedAt }),
+            ...(offer.mutations === undefined ? {} : { mutations: offer.mutations }),
           },
         });
       },

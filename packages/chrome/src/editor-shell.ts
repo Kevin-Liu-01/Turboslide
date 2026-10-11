@@ -646,8 +646,17 @@ export type EditorSync = {
    * reads Reconnecting while nothing is pending, never Saving for a stream problem.
    */
   streamDown?: boolean;
-  /** "3 unsaved changes from this browser" with Apply and Discard */
-  persisted?: { count: number; onApply: () => void; onDiscard: () => void };
+  /**
+   * "3 unsaved changes from this browser" with Apply and Discard; for a queue older than 24 hours
+   * (`savedAt`, hardening HR-RC#5c) "Unsaved changes from Oct 7" with Copy Text and Discard
+   */
+  persisted?: {
+    count: number;
+    onApply?: () => void;
+    onDiscard: () => void;
+    savedAt?: string;
+    onCopy?: () => void;
+  };
 };
 
 export type EditorClipboardKind = MenuContext['clipboard'];

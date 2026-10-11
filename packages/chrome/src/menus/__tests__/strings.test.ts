@@ -47,6 +47,11 @@ describe('the refusals of SPEC-3 6.8', () => {
     expect(REFUSALS.unsavedChanges(1)).toBe('1 unsaved change from this browser');
     expect(REFUSALS.apply).toBe('Apply');
     expect(REFUSALS.discard).toBe('Discard');
+    /* a queue older than 24 hours, offered as text (hardening HR-RC#5c) */
+    expect(REFUSALS.unsavedChangesFrom('2026-10-07T12:00:00.000Z')).toBe(
+      'Unsaved changes from Oct 7',
+    );
+    expect(REFUSALS.copyText).toBe('Copy Text');
     expect(REFUSALS.alreadyChanged('Maya')).toBe('That change was already changed by Maya');
     expect(REFUSALS.inviteFromShare).toBe('Invite them from Share');
     expect(REFUSALS.tooManyEditors).toBe('This presentation has too many editors right now');
@@ -57,8 +62,8 @@ describe('the refusals of SPEC-3 6.8', () => {
     expect(REFUSALS.signInToUpload).toBe('Sign in to upload a picture');
     /* the third name sentence of identity's NAME_REFUSALS (build-3/b3.md request 5) */
     expect(REFUSALS.nameInvalid).toBe('Use 1 to 40 letters or digits in one script');
-    /* the sixteen sentences of 6.8 (two of them with a variable), plus the persisted queue's Apply and Discard, the View only button's second sentence and the name shape rule */
-    expect(Object.keys(REFUSALS)).toHaveLength(20);
+    /* the sixteen sentences of 6.8 (two of them with a variable), plus the persisted queue's Apply and Discard, the View only button's second sentence and the name shape rule, and the old queue's sentence and Copy Text (HR-RC#5c) */
+    expect(Object.keys(REFUSALS)).toHaveLength(22);
   });
 
   it('name no role the person lacks, no internal noun and no other account or presentation', () => {

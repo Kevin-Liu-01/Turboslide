@@ -145,6 +145,7 @@ import type {
 } from './controller';
 import type { EditSearch } from '../routes/-edit-search';
 import { partitionRoster } from './client-ids';
+import { refusedText } from './refused-write';
 import { SessionBridge, ShellBridge, isPrerendering, whenShown } from './shell-bridge';
 
 /* the route's own CSS travels with the editor since round four day 2 (the banners, the owner
@@ -965,8 +966,21 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       ? {
           persisted: {
             count: snap.persisted.count,
-            onApply: () => void snap.persisted?.apply(),
+            ...(snap.persisted.apply === undefined
+              ? {}
+              : { onApply: () => void snap.persisted?.apply?.() }),
             onDiscard: () => void snap.persisted?.discard(),
+            /* a queue older than 24 hours is offered as text (HR-RC#5c): its date, and Copy Text
+               copies what it holds the way the reject card's Copy text does */
+            ...(snap.persisted.savedAt === undefined
+              ? {}
+              : {
+                  savedAt: snap.persisted.savedAt,
+                  onCopy: () => {
+                    const text = refusedText(snap.persisted?.mutations ?? []);
+                    void navigator.clipboard?.writeText(text).catch(() => undefined);
+                  },
+                }),
           },
         }
       : {}),

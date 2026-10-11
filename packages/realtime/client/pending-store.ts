@@ -1,7 +1,9 @@
 // The pending queue mirror (gslides-parity SPEC-3 0.7; report 10 F36): pending and retained
 // operations are written to IndexedDB under `turboslide:pending:<deckId>:<clientId>`, at most
-// 1 MB and 24 hours, so a tab closed with unsent changes offers them on the next open ("3 unsaved
-// changes from this browser; Apply or Discard"). Behind an interface with a memory implementation
+// 1 MB, so a tab closed with unsent changes offers them on the next open ("3 unsaved changes from
+// this browser; Apply or Discard"). A queue older than 24 hours is kept and offered as text
+// ("Unsaved changes from Oct 7; Copy Text or Discard", hardening HR-RC#5c): nothing is deleted
+// unread. Behind an interface with a memory implementation
 // for the tests and the server side render. Browser safe, no `node:`; the IndexedDB implementation
 // touches `indexedDB` only when called.
 import type { Mutation } from '@turboslide/schema/mutations';
@@ -49,7 +51,7 @@ export type PersistedQueue = {
 };
 
 export type PendingStore = {
-  /** every queue of a deck, this browser's, newest first; stale ones (24 h) are dropped on read */
+  /** every queue of a deck, this browser's, newest first; one older than 24 hours is kept (`isStaleQueue` tells it, HR-RC#5c) */
   load: (deckId: string, now?: number) => Promise<PersistedQueue[]>;
   /** writes a queue; an empty one removes the key; a queue over 1 MB drops its retained entries first and keeps every pending one */
   save: (queue: PersistedQueue) => Promise<void>;
@@ -111,14 +113,8 @@ export function memoryPendingStore(): PendingStore & {
     queues,
     async load(deckId, now = Date.now()) {
       const out: PersistedQueue[] = [];
-      for (const [key, queue] of [...queues]) {
-        if (queue.deckId !== deckId) continue;
-        if (isStaleQueue(queue, now)) {
-          queues.delete(key);
-          continue;
-        }
-        out.push(queue);
-      }
+      void now;
+      for (const queue of queues.values()) if (queue.deckId === deckId) out.push(queue);
       return out.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
     },
     async save(queue) {
@@ -246,23 +242,13 @@ export function indexedDbPendingStore(
 
   return {
     async load(deckId, now = Date.now()) {
+      void now;
       const all = await withStore('readonly', (store) => request(store.getAll()), [] as unknown[]);
       const out: PersistedQueue[] = [];
-      const stale: string[] = [];
       for (const raw of all) {
         const queue = raw as PersistedQueue;
         if (typeof queue?.key !== 'string' || queue.deckId !== deckId) continue;
-        if (isStaleQueue(queue, now)) stale.push(queue.key);
-        else out.push(queue);
-      }
-      if (stale.length > 0) {
-        await withStore(
-          'readwrite',
-          async (store) => {
-            for (const key of stale) await request(store.delete(key));
-          },
-          undefined,
-        );
+        out.push(queue);
       }
       return out.sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
     },

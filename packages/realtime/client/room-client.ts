@@ -66,7 +66,7 @@ import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import { CAPS } from '../src/admission.ts';
 import { slideBytes } from '../src/room-core.ts';
 import type { PendingStore, PersistedOp, PersistedQueue } from './pending-store.ts';
-import { PENDING_MAX_BYTES, pendingKey, unsavedCount } from './pending-store.ts';
+import { PENDING_MAX_BYTES, isStaleQueue, pendingKey, unsavedCount } from './pending-store.ts';
 
 // ---------------------------------------------------------------------------------------------
 // The transport
@@ -413,8 +413,16 @@ export type DocumentChange = {
 
 export type PersistedOffer = {
   count: number;
-  apply: () => Promise<void>;
+  /** absent for queues older than PENDING_MAX_AGE_MS, which are offered as text alone (HR-RC#5c) */
+  apply?: () => Promise<void>;
   discard: () => Promise<void>;
+  /**
+   * The save time of the oldest queue of an offer of queues older than 24 hours (HR-RC#5c): the
+   * plate reads "Unsaved changes from Oct 7" with Copy Text and Discard.
+   */
+  savedAt?: string;
+  /** the unsent changes of such an offer, for its Copy Text */
+  mutations?: Mutation[];
 };
 
 /**
@@ -2773,22 +2781,51 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }
     others = kept;
     if (others.length === 0) return;
-    const count = others.reduce((sum, queue) => sum + unheld(queue), 0);
-    options.onPersisted({
+    // a queue older than 24 hours is offered as text alone, after the fresh ones (HR-RC#5c):
+    // before this it was deleted on read without a word
+    const at = now();
+    const old = others.filter((queue) => isStaleQueue(queue, at));
+    const fresh = others.filter((queue) => !isStaleQueue(queue, at));
+    const onPersisted = options.onPersisted;
+    const offerOld = (): void => {
+      if (old.length === 0 || stopped) return;
+      const ops = old.flatMap((queue) =>
+        queue.entries.filter(
+          (op) => op.seq === undefined && op.kind === 'edit' && !held.has(op.opId),
+        ),
+      );
+      const savedAt = old.map((queue) => queue.savedAt).sort()[0] ?? new Date(at).toISOString();
+      onPersisted({
+        count: ops.length,
+        savedAt,
+        mutations: ops.flatMap((op) => op.mutations ?? []),
+        discard: async () => {
+          for (const queue of old) await store.remove(queue.key);
+        },
+      });
+    };
+    if (fresh.length === 0) {
+      offerOld();
+      return;
+    }
+    const count = fresh.reduce((sum, queue) => sum + unheld(queue), 0);
+    onPersisted({
       count,
       apply: async () => {
         // the stream reaches the head first, so every entry since a queue's position is here
         await whenCaughtUp();
         if (stopped) return;
-        for (const queue of others) {
+        for (const queue of fresh) {
           placePersisted(queue, held);
           await store.remove(queue.key);
         }
         emitChange(local, 'all', 'persisted');
         emitStatus();
+        offerOld();
       },
       discard: async () => {
-        for (const queue of others) await store.remove(queue.key);
+        for (const queue of fresh) await store.remove(queue.key);
+        offerOld();
       },
     });
   };
@@ -2804,6 +2841,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     for (const queue of queues) {
       if (unsavedCount(queue) === 0 || queue.position === undefined || queue.tier !== tier)
         continue;
+      if (isStaleQueue(queue, now())) continue;
       if (queue.position >= seq || seq - queue.position > BASE_SEQ_WINDOW) continue;
       from = from === null ? queue.position : Math.min(from, queue.position);
     }

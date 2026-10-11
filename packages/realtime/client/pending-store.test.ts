@@ -97,7 +97,7 @@ describe('the pending store', () => {
     expect(isStaleQueue(queue([op(1)]), saved + 25 * 60 * 60_000)).toBe(true);
   });
 
-  it('saves, lists per deck newest first, drops stale ones and removes', async () => {
+  it('saves, lists per deck newest first, keeps a queue older than 24 hours (HR-RC#5c) and removes', async () => {
     const store = memoryPendingStore();
     await store.save(queue([op(1)]));
     await store.save({
@@ -113,10 +113,13 @@ describe('the pending store', () => {
     });
     const listed = await store.load('gt-brand', Date.parse('2026-09-13T12:00:00.000Z'));
     expect(listed.map((q) => q.clientId)).toEqual(['b', CLIENT]);
+    // two days later both are still there, and stale by isStaleQueue: the client offers them as text
     const later = await store.load('gt-brand', Date.parse('2026-09-15T12:00:00.000Z'));
-    expect(later).toHaveLength(0);
+    expect(later.map((q) => q.clientId)).toEqual(['b', CLIENT]);
+    expect(later.every((q) => isStaleQueue(q, Date.parse('2026-09-15T12:00:00.000Z')))).toBe(true);
     await store.save(queue([]));
     expect(store.queues.has(pendingKey('gt-brand', CLIENT))).toBe(false);
+    await store.remove('turboslide:pending:gt-brand:b');
     await store.remove('turboslide:pending:other:c');
     expect(store.queues.size).toBe(0);
   });

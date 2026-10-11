@@ -442,12 +442,12 @@ describe('createRoomClient', () => {
     await until(() => cutOff(a.room.status()), 3000);
     await a.room.stop();
     let offer:
-      { count: number; apply: () => Promise<void>; discard: () => Promise<void> } | undefined;
+      { count: number; apply?: () => Promise<void>; discard: () => Promise<void> } | undefined;
     const b = h.client(kevin, { pendingStore: store, onPersisted: (o) => (offer = o) });
     b.room.start();
     await until(() => offer !== undefined);
     expect(offer?.count).toBe(3);
-    await offer?.apply();
+    await offer?.apply?.();
     await until(() => b.room.status().pending === 0 && b.room.status().connected, 5000);
     expect(textOf(h.server.document()).startsWith('QRS')).toBe(true);
     expect(await store.load('gt-brand')).toHaveLength(1);

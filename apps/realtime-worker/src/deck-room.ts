@@ -527,6 +527,8 @@ export class DeckRoom extends DurableObject<Env> {
           return json(this.openState(Date.now()));
         case 'dead-letters':
           return json({ rows: this.deadLetters() });
+        case 'held':
+          return this.httpHeld(request);
         case 'sweep':
           return this.httpSweep();
         case 'access-changed':
@@ -2700,6 +2702,27 @@ export class DeckRoom extends DurableObject<Env> {
     if (meta === null && this.members.size === 0 && this.deckId !== null)
       await noteClosed(this.env.ACCOUNTS, this.deckId).catch(() => undefined);
     return json({ poked, ...this.openState(Date.now()) });
+  }
+
+  /**
+   * Which of the given op ids the log holds (RELIABILITY-6, hardening HR-RT#14): the recovered
+   * writes plate asks before it offers a saved queue, and an entry the room admitted and has not
+   * checkpointed yet is in no record. Each id is looked up by its client and op id through the
+   * month tables' unique index (`findEntry`); an op id is `<clientId>:<n>`. At most 500 ids.
+   */
+  private async httpHeld(request: Request): Promise<Response> {
+    const body = (await request.json().catch(() => null)) as { opIds?: unknown } | null;
+    const opIds = Array.isArray(body?.opIds)
+      ? body.opIds.filter((id): id is string => typeof id === 'string').slice(0, 500)
+      : null;
+    if (opIds === null) return json({ error: 'invalid', message: 'opIds is a list' }, 400);
+    const held: string[] = [];
+    for (const opId of opIds) {
+      const colon = opId.lastIndexOf(':');
+      if (colon <= 0) continue;
+      if (this.findEntry(opId.slice(0, colon), opId) !== undefined) held.push(opId);
+    }
+    return json({ held });
   }
 
   private async httpFlush(): Promise<Response> {

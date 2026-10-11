@@ -103,6 +103,12 @@ export type DoChannel = RealtimeChannel & {
   external: (deckId: string, body: RoomExternalBody) => Promise<void>;
   accessChanged: (deckId: string, principalIds?: readonly string[]) => Promise<void>;
   counters: (deckId: string) => Promise<Record<string, unknown>>;
+  /**
+   * The op ids of the given ones the object's log holds (hardening HR-RT#14): an entry the room
+   * admitted and has not checkpointed yet is held although no record names it. Throws
+   * RoomCallError when the object does not answer, so the caller never reads "none held".
+   */
+  held: (deckId: string, opIds: readonly string[]) => Promise<string[]>;
 };
 
 /** True when the process's channel is the Worker's (the room narrows on it). */
@@ -318,6 +324,15 @@ export function doChannel(options: DoChannelOptions): DoChannel {
         ...(principalIds === undefined ? {} : { principalIds: [...principalIds] }),
       });
       if (!response.ok) throw new RoomCallError('access-changed', response.status);
+    },
+
+    async held(deckId, opIds) {
+      const response = await call('POST', roomRoute(deckId, 'held'), { opIds: [...opIds] });
+      if (!response.ok) throw new RoomCallError('held', response.status);
+      const body = (await response.json()) as { held?: unknown };
+      return Array.isArray(body.held)
+        ? body.held.filter((id): id is string => typeof id === 'string')
+        : [];
     },
 
     async counters(deckId) {

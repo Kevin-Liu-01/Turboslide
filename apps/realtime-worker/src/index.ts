@@ -117,6 +117,8 @@ const BEARER_TAILS = new Set([
   'access-changed',
   // the entries no store took (HR-RT#7), read by hand under the bearer
   'dead-letters',
+  // which op ids the log holds, for the recovered writes plate (HR-RT#14)
+  'held',
 ]);
 const TICKET_TAILS = new Set(['ops', 'presence']);
 
@@ -336,7 +338,11 @@ async function serve(request: Request, env: Env): Promise<Response> {
         await forwarded(
           request,
           {},
-          tail === 'counters' || tail === 'roster' || tail === 'document' || tail === 'dead-letters'
+          tail === 'counters' ||
+            tail === 'roster' ||
+            tail === 'document' ||
+            tail === 'dead-letters' ||
+            tail === 'held'
             ? 'on'
             : flag,
         ),

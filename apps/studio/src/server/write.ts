@@ -16,6 +16,7 @@ import type { Issue } from '@turboslide/schema/validate';
 import { loadDeckDir } from '@turboslide/store/file-store';
 import type { HostingFacts } from '@turboslide/store/hosted';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
+import { isDoChannel } from '@turboslide/realtime/do';
 import {
   DEFAULT_BLANK_TITLE,
   readDefaultKit,
@@ -40,6 +41,7 @@ import {
   openDeckStore,
   templateDir,
 } from './root';
+import type { Room } from './room';
 
 /**
  * The editor's store functions (SPEC 6.7, 7.1; MILESTONES M3 items 3 and 4): every write from the
@@ -683,20 +685,33 @@ const heldOpIdsFn = createServerFn({ method: 'POST' })
     const identity = await room.requestIdentity(getRequest());
     const decision = await room.decideFor(identity, data.deckId, 'read', 'heldOpIds');
     if (!decision.ok) return { held: [] };
-    const deckRoom = await room.roomFor(data.deckId);
-    let records: ReadonlyArray<VersionRecord>;
-    try {
-      records = await deckRoom.store.records();
-    } catch {
-      return { held: [] };
-    }
-    const wanted = new Set(data.opIds);
-    const held: string[] = [];
-    for (const record of records) {
-      for (const opId of record.origin?.opIds ?? []) if (wanted.has(opId)) held.push(opId);
-    }
-    return { held };
+    return { held: await heldOf(await room.roomFor(data.deckId), data.opIds) };
   });
+
+/**
+ * The op ids the deck holds (RELIABILITY-6, hardening HR-RT#14): the ones a record's origin names
+ * and, on the do tier, the ones the object's log holds that no checkpoint has committed yet (2 s
+ * idle, 10 s under typing, longer while checkpoints fail). A read that fails throws: before this
+ * it answered none held, and the plate offered words the room already held, which Apply wrote a
+ * second time. Exported for its test.
+ */
+export async function heldOf(
+  deckRoom: Pick<Room, 'deckId' | 'store' | 'channel'>,
+  opIds: readonly string[],
+): Promise<string[]> {
+  const wanted = new Set(opIds);
+  const held = new Set<string>();
+  const records = await deckRoom.store.records();
+  for (const record of records)
+    for (const opId of record.origin?.opIds ?? []) if (wanted.has(opId)) held.add(opId);
+  const channel = deckRoom.channel;
+  if (isDoChannel(channel)) {
+    const rest = opIds.filter((opId) => !held.has(opId));
+    if (rest.length > 0)
+      for (const opId of await channel.held(deckRoom.deckId, rest)) held.add(opId);
+  }
+  return opIds.filter((opId) => held.has(opId));
+}
 
 export async function heldOpIds(input: {
   deckId: string;

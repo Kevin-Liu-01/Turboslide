@@ -445,6 +445,7 @@ describe('capabilityForAction (SPEC-3 6.2 per route, section 12 per action)', ()
       'activity.list': 'history',
       'version.list': 'history',
       'version.diff': 'history',
+      'deck.watch': 'history',
       'presence.follow': 'follow',
       'presence.list': 'presence',
       'export.run': 'export',

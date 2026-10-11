@@ -513,7 +513,9 @@ export function namedDeckCheck(caller: AuthContext | null, requestBound: boolean
  * delete, trash, restore, copy, rename, export, history, share, publish and comment ids by name,
  * every other mutating action `write`, every other read `read`. `null` for an action that has no
  * deck (accounts, notifications, admin) or that must answer the same to everyone
- * (`share.requestAccess`, SPEC-3 6.5).
+ * (`share.requestAccess`, SPEC-3 6.5). `deck.watch` reads `history` (hardening HR-SD#1d): its
+ * answer is the version log above `since` with each record's mutations, what `version.list`
+ * answers, so a viewer or a commenter is refused it as they are refused `version.list`.
  */
 export function capabilityForAction(id: string): Capability | null {
   if (id === 'share.requestAccess') return null;
@@ -531,7 +533,7 @@ export function capabilityForAction(id: string): Capability | null {
   if (id.startsWith('share.')) return 'share';
   if (id === 'comment.list' || id === 'comment.get' || id === 'comment.link') return 'readComments';
   if (id.startsWith('comment.')) return 'comment';
-  if (id === 'activity.list' || id.startsWith('version.')) return 'history';
+  if (id === 'activity.list' || id === 'deck.watch' || id.startsWith('version.')) return 'history';
   if (id === 'presence.follow') return 'follow';
   if (id.startsWith('presence.')) return 'presence';
   if (id.startsWith('export.') || id === 'build.run') return 'export';

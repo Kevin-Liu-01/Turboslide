@@ -5,7 +5,8 @@
 // (an account) writes three versions, holds a lease, turns Editors Can Share off and invites two
 // editors, an account with its own key (read, write, comment, export) and a browser. Every answer
 // to either editor names the owner by the owner's stand-in on this deck and never by the id; the
-// owner's own key reads the id.
+// owner's own key reads the id. A viewer's key (HR-SD#1d) is refused the version log on every
+// action that answers it, `deck.watch` as `version.list`.
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -63,8 +64,8 @@ const bundleGet = (BundleRoute.options as unknown as { server: { handlers: { GET
   .server.handlers.GET;
 
 let runtime: ReturnType<typeof buildIdentityRuntime>;
-const people = { owner: '', editor: '', browser: '' };
-const keys = { owner: '', editor: '' };
+const people = { owner: '', editor: '', browser: '', viewer: '' };
+const keys = { owner: '', editor: '', viewer: '' };
 let browserCookie = '';
 let slideId = '';
 
@@ -73,11 +74,15 @@ function principalIdsIn(text: string): string[] {
   return [...text.matchAll(/(?:anon_|usr_|agent:)[A-Za-z0-9_-]+/g)].map((match) => match[0]);
 }
 
-function editorGrant(principalId: string, by: string): AccessGrant {
+function editorGrant(
+  principalId: string,
+  by: string,
+  role: AccessGrant['role'] = 'editor',
+): AccessGrant {
   return {
     principalId,
     email: null,
-    role: 'editor',
+    role,
     invitedBy: by,
     invitedAt: AT,
     acceptedAt: AT,
@@ -120,11 +125,15 @@ beforeAll(async () => {
   });
   await runtime.ready;
   await setIdentityRuntime(runtime);
-  for (const who of ['owner', 'editor'] as const) {
+  for (const who of ['owner', 'editor', 'viewer'] as const) {
     const { id } = await ensureUserByEmail(runtime, `${who}@example.test`);
     people[who] = accountPrincipalId(id);
     const scopes: Scope[] =
-      who === 'owner' ? ['read', 'write', 'share'] : ['read', 'write', 'comment', 'export'];
+      who === 'owner'
+        ? ['read', 'write', 'share']
+        : who === 'editor'
+          ? ['read', 'write', 'comment', 'export']
+          : ['read'];
     keys[who] = (await runtime.keys.create({ userId: id, name: who, scopes })).secret;
   }
   const minted = await ensurePrincipal(new Request(`${ORIGIN}/edit/${DECK}`), runtime.secret);
@@ -166,6 +175,7 @@ beforeAll(async () => {
         ...record.grants,
         editorGrant(people.editor, people.owner),
         editorGrant(people.browser, people.owner),
+        editorGrant(people.viewer, people.owner, 'viewer'),
       ],
       revision: record.revision + 1,
     },
@@ -232,6 +242,26 @@ describe('the dispatcher to an editor who may not share (HR-SD#1; verifier pass 
     const diff = await action('version.diff', keys.owner, { from: 0 });
     expect(diff.status).toBe(200);
     expect(principalIdsIn(diff.text)).toContain(people.owner);
+  });
+});
+
+describe('deck.watch to a caller without history (HR-SD#1d)', () => {
+  it("refuses a viewer's key the version log, as version.list does", async () => {
+    const listed = await action('version.list', keys.viewer);
+    expect(listed.status).toBe(403);
+    const watched = await action('deck.watch', keys.viewer, { since: 0, timeoutMs: 0 });
+    expect(watched.status, watched.text).toBe(403);
+    expect(watched.text).not.toContain('slide.set');
+    expect(principalIdsIn(watched.text)).toEqual([]);
+    // the deck itself stays the viewer's to read
+    expect((await action('deck.info', keys.viewer)).status).toBe(200);
+  });
+
+  it('answers an editor who may not share, with the owner as the stand-in', async () => {
+    const watched = await action('deck.watch', keys.editor, { since: 0, timeoutMs: 0 });
+    expect(watched.status).toBe(200);
+    expect(watched.text).toContain('slide.set');
+    expect(principalIdsIn(watched.text)).toEqual([]);
   });
 });
 

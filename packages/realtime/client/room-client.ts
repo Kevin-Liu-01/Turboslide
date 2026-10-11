@@ -305,6 +305,21 @@ export type PendingOp = {
   at: number;
   /** the mutations that undo this op on the document it was applied to, for the rebase of the ops after it when it is refused */
   inverse?: Mutation[];
+  /**
+   * The POST that last carried the op ended without an answer that settled it (hardening
+   * HR-RC#9): the client id it went under and the count of stream opens then. Under that id the
+   * room answers a resend from its log by op id; under a later id (a reconnect's hello) the op
+   * would go under a new id the room cannot tell from a new write, so it waits for the hello of a
+   * stream opened after the failure, whose replay shows whether it landed (`flush`).
+   */
+  unconfirmed?: { clientId: string; opens: number };
+  /**
+   * The seq the room's answer gave the op while the stream has not brought its entry (an answer
+   * above a gap; HR-RC#9). The op is in the room: a reconnect's hello never makes it unsent, it
+   * rides a later POST only under the client id it was admitted with (the room answers it from its
+   * log), and the ops after it wait for the stream rather than go alone below it.
+   */
+  admitted?: number;
   /** resolves when the op is admitted or rejected */
   settle?: (outcome: Settled) => void;
 };
@@ -889,6 +904,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let bound = false;
   /** the reopen ladder of the stream: 500 ms doubling to BACKOFF_MAX_MS, reset by a hello */
   let streamBackoff = 0;
+  /** a flush found ops it had to hold for the stream (HR-RC#9): the next drained entry flushes again */
+  let flushHeld = false;
+  /** the stream opens so far, the open of the stream in use, and the open whose hello came last (HR-RC#9) */
+  let opens = 0;
+  let streamOpen = 0;
+  let helloOpen = 0;
+  /** the position the stream whose hello is being read was opened at (HR-RC#9, the stale hello) */
+  let helloSince = options.seq;
   let reopenTimer: unknown;
   /**
    * The resend's hold after the browser's `online` event (docs/archive/rounds/SYNC.md 3.7; the polish round's
@@ -1061,7 +1084,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         op.settle?.({ rejected });
         continue;
       }
-      next.push({ ...op, mutations: moved });
+      // moved in place: the op stays the one its POST's batch holds (HR-RC#9, `applyEntry`)
+      op.mutations = moved;
+      next.push(op);
     }
     pending = next;
   };
@@ -1526,7 +1551,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       } catch {
         // an op the fold below returns to its author: the next ops read the document without it
       }
-      next.push({ ...op, mutations: moved });
+      // the op is moved in place, never copied (hardening HR-RC#9, RELIABILITY-2's residual R):
+      // the POST in flight holds this object in its batch, and a POST whose answer was lost
+      // marks its batch's ops unsent for the resend. A copy kept `inflight` for good, so the
+      // resend left the op out and the next op went alone on a base below the op's admission,
+      // where the room moved it past the op's own letters (" ua2" refused as outside the text,
+      // the verifier's seeds 10001, 10003 and 10004)
+      op.mutations = moved;
+      next.push(op);
     }
     advanceRunEnds(runEnds, bridged, false);
     placed.set(entry, bridged);
@@ -1626,6 +1658,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }
     // anything below the seq is a duplicate
     for (const key of [...incoming.keys()]) if (key <= seq) incoming.delete(key);
+    // the stream brought what a held flush waited for (HR-RC#9)
+    if (flushHeld) {
+      flushHeld = false;
+      scheduleFlush('now');
+    }
     noteCaughtUp();
     watchGap();
   };
@@ -1759,6 +1796,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     watchGap();
     retained = [];
     posted = [];
+    // an op the room admitted at or below the new position is in the fresh document (HR-RC#9)
+    for (const op of pending.filter((row) => row.admitted !== undefined && row.admitted <= seq)) {
+      pending = pending.filter((row) => row !== op);
+      op.settle?.({ seq: op.admitted ?? seq });
+      noteSettled(op.opId);
+    }
     for (const op of pending) op.inflight = false;
     const folded = fold();
     emitChange(folded.document, 'all', 'resync');
@@ -1825,7 +1868,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         }
         const foreign = helloTier !== null && helloTier !== event.tier;
         helloTier = event.tier;
-        if (foreign || event.seq < seq) {
+        // a hello below the position the stream was opened at is a reset; one below the position
+        // alone is stale (HR-RC#9, the verifier's D): the head it names was read when the stream
+        // opened, and a POST's answer (its `between` and entries, which ride another channel than
+        // the stream on the HTTP tiers) moved the position past it since. Before this the tab read
+        // it as a reset, went back to the hello's head and applied the stream's next entry, its own
+        // already applied write, a second time (" ua33" for " ua3", seeds 10011, 10015, 10022 of
+        // the lost answer property)
+        if (foreign || event.seq < helloSince) {
           // the stream was reset behind this client, or this hello's tier is not the last one's
           // (R1-R2a: the position is the other tier's number); reload at the server's revision
           seq = event.seq;
@@ -1837,7 +1887,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         // replay has shown which of them landed; the ops of a POST still in flight stay in
         // flight, since the client posts while its stream is down and that POST's answer
         // settles them (or hands them back to the resend when it fails)
-        for (const op of pending) if (!(inflightBatch?.includes(op) ?? false)) op.inflight = false;
+        for (const op of pending)
+          if (!(inflightBatch?.includes(op) ?? false) && op.admitted === undefined)
+            op.inflight = false;
         options.onEvent?.(event);
         emitStatus();
         presenceDirty = true;
@@ -1963,8 +2015,39 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // hold the first flush until the replay has caught the stream up (finding 33): the op stays
     // pending and applied locally, and goes once it has been transformed against what landed
     if (!caughtUp) return;
-    const unsent = pending.filter((op) => !op.inflight);
-    if (unsent.length === 0) return;
+    // an unsent op goes with every pending op before it (hardening HR-RC#9, RELIABILITY-2's
+    // residual R): with no POST in flight, a pending op still marked in flight was admitted and
+    // its entry has not reached the position (an answer above a gap, the stream behind it). The
+    // ops after it were written on it, so they never go alone on a base below its admission,
+    // where the room would move them past their own author's letters ("b1 ub" refused as outside
+    // the text, the verifier's lost answer property); the room answers the earlier ones from its
+    // log by op id and places the new ones after them (room-core `landedPastAnswered`)
+    if (!pending.some((op) => !op.inflight)) return;
+    // an op whose last POST ended without an answer under an earlier client id waits, with the
+    // ops written after it, for the hello of a stream opened after that POST (HR-RC#9): the
+    // hello's replay settles it if it landed, and a resend under this id would otherwise land it
+    // twice (the verifier's stream drop property read a doubled " ua2"). A stream opened before
+    // the failure is reopened once, so the wait ends
+    for (const op of pending) {
+      const doubt = op.unconfirmed;
+      if (doubt !== undefined && (doubt.clientId === clientId || helloOpen > doubt.opens))
+        delete op.unconfirmed;
+    }
+    // an op admitted under an earlier client id cannot ride a POST (its id would be minted anew
+    // and land it twice): it and the ops written after it wait for the stream to bring it
+    const held = pending.findIndex(
+      (op) =>
+        op.unconfirmed !== undefined ||
+        (op.admitted !== undefined && !op.opId.startsWith(`${clientId}:`)),
+    );
+    if (held >= 0 && pending[held]?.unconfirmed !== undefined) {
+      const doubt = pending[held]?.unconfirmed;
+      if (doubt !== undefined && stream !== null && streamOpen <= doubt.opens)
+        reopenStream({ message: 'a write of an earlier connection has no answer' });
+    }
+    const unsent = held >= 0 ? pending.slice(0, held) : pending;
+    if (held >= 0) flushHeld = true;
+    if (!unsent.some((op) => !op.inflight)) return;
     const batch: PendingOp[] = [];
     let bytes = 0;
     for (const op of unsent) {
@@ -2015,8 +2098,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       } catch (error) {
         void error;
         // the answer is lost, the write may not be: the record stays for the store echo of its
-        // commit, which settles the ops before they are resent
-        for (const op of batch) op.inflight = false;
+        // commit, which settles the ops before they are resent, and each op remembers the id it
+        // went under (HR-RC#9)
+        for (const op of batch) {
+          op.inflight = false;
+          op.unconfirmed = { clientId: body.clientId, opens };
+        }
         // the browser says whether the network is gone; a POST that failed while it is up is a
         // write the client sends again (item 100)
         offline = browserOffline();
@@ -2031,6 +2118,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       if (response.ok) {
         backoff = 0;
         notFoundRetries = 0;
+        // the room answered for every op of the POST: admitted, refused or not reached
+        for (const op of batch) delete op.unconfirmed;
         // what landed under the admitted entries first, so they drain at once (C3S-F8); an
         // entry the stream delivered meanwhile is a duplicate `take` drops. The POST's record
         // leaves the echo list after the entries were taken, so an echo of this commit that
@@ -2038,6 +2127,11 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         for (const entry of response.between ?? []) take(entry);
         for (const entry of response.entries) take(entry);
         if (record !== null) posted = posted.filter((row) => row !== record);
+        // an op the answer admitted whose entry has not reached the position: the room holds it
+        for (const entry of response.entries) {
+          const op = batch.find((row) => row.opId === entry.opId);
+          if (op !== undefined && pending.includes(op)) op.admitted = entry.seq;
+        }
         let refused = 0;
         for (const rejected of response.rejected) {
           const op = pending.find((row) => row.opId === rejected.opId);
@@ -2078,7 +2172,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         if (pending.some((op) => !op.inflight)) scheduleFlush('now');
         return;
       }
-      for (const op of batch) op.inflight = false;
+      for (const op of batch) {
+        op.inflight = false;
+        // a 5xx or a 429 may follow the room's append: the outcome is unknown (HR-RC#9)
+        if (response.status >= 500 || response.status === 429)
+          op.unconfirmed = { clientId: body.clientId, opens };
+      }
       if (response.code === 'resync') {
         await resync(response.head ?? revision);
         return;
@@ -2188,10 +2287,22 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const retire = retireList();
     let reported = false;
     let self: StreamHandle | null = null;
+    opens += 1;
+    const open = opens;
+    const since = seq;
     const handle = transport.open({
-      since: seq,
+      since,
       ...(retire.length === 0 ? {} : { retire }),
-      onEvent,
+      onEvent: (event) => {
+        // the hello of this open: its replay starts after everything a POST that failed before the
+        // open could have landed (HR-RC#9, `unconfirmed`), and it is read against the position
+        // the open asked from
+        if (event.type === 'hello') {
+          helloOpen = Math.max(helloOpen, open);
+          helloSince = since;
+        }
+        onEvent(event);
+      },
       onError: (error) => {
         // one report per open, and none from a handle the client has already replaced
         if (reported) return;
@@ -2216,6 +2327,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // a transport that refused inside `open` has scheduled the reopen already
     if (reported) return;
     stream = handle;
+    streamOpen = open;
   };
 
   /**

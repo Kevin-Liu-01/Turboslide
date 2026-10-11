@@ -840,17 +840,21 @@ describe('two people typing at one point keep every word whole (realtime.title.t
 
   /**
    * The two typers verifier's lossy properties (docs/gslides-parity/realtime/build/word-fix.md
-   * "The verifier's simulation"; hardening HR-RT#2 writes them, HR-RC#9 takes every ceiling to
-   * 0): the row's words on the cover, two people, three rounds, 60 seeded orders from 10,001
-   * each. A ceiling is the red count read at HR-RT#2 with F1 fixed; RC#9's residual R and the
-   * client's own resend paths are what the reds that remain read. `TWO_TYPERS_LOSSY_SEEDS`
-   * widens a run.
+   * "The verifier's simulation"; hardening HR-RT#2 wrote them, HR-RC#9 took them to 0): the
+   * row's words on the cover, two people, three rounds, 60 seeded orders from 10,001 each. Every
+   * word is in every copy once. At HR-RT#2 they read 16, 10 and 11 of 60 red; HR-RC#9 read the
+   * residual R and the stale hello D in seeds 10004, 10010, 10021 and 10022 (the room client's
+   * pending ops copied away from their POST's batch, a later op posted without an earlier one the
+   * room had admitted, a resend under a reconnect's new id, a hello below the position read as a
+   * reset). `TWO_TYPERS_LOSSY_SEEDS` widens a run and `TWO_TYPERS_LOSSY_FROM` moves its first
+   * seed, so one red seed reads again alone.
    */
   const LOSSY_SEEDS = Number(process.env['TWO_TYPERS_LOSSY_SEEDS'] ?? 60);
+  const LOSSY_FROM = Number(process.env['TWO_TYPERS_LOSSY_FROM'] ?? 10_001);
   const lossy = async (loss: Loss): Promise<string[]> => {
     const rounds = rowRounds(2, 3);
     const failures: string[] = [];
-    for (let seed = 10_001; seed < 10_001 + LOSSY_SEEDS; seed += 1)
+    for (let seed = LOSSY_FROM; seed < LOSSY_FROM + LOSSY_SEEDS; seed += 1)
       failures.push(
         ...judge(
           `seed ${seed}`,
@@ -860,41 +864,19 @@ describe('two people typing at one point keep every word whole (realtime.title.t
       );
     return failures;
   };
-  /**
-   * The reds of the 60 default orders read at HR-RT#2 (2026-10-11, twice, the same counts; without
-   * F1's fix the same orders read 34, 32 and 28). A widened run reports its count and holds no
-   * ceiling.
-   */
-  const LOSSY_CEILING = { lost: 16, ordered: 10, drops: 11 };
-  const ceiling = (read: number): number => (LOSSY_SEEDS === 60 ? read : LOSSY_SEEDS);
 
-  it('a quarter of POST answers lost after admission: at most the reds read at HR-RT#2', async () => {
+  it('a quarter of POST answers lost after admission keeps every word', async () => {
     const failures = await lossy({ lost: 0.25, ordered: false, drops: 0 });
-    console.log(
-      `lossy lost: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`,
-    );
-    expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
-      ceiling(LOSSY_CEILING.lost),
-    );
+    expect(failures.slice(0, 3), `${failures.length} of ${LOSSY_SEEDS} seeds`).toEqual([]);
   }, 3_600_000);
 
-  it('the same, the answers ordered behind the stream: at most the reds read at HR-RT#2', async () => {
+  it('the same, the answers ordered behind the stream, keeps every word', async () => {
     const failures = await lossy({ lost: 0.25, ordered: true, drops: 0 });
-    console.log(
-      `lossy ordered: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`,
-    );
-    expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
-      ceiling(LOSSY_CEILING.ordered),
-    );
+    expect(failures.slice(0, 3), `${failures.length} of ${LOSSY_SEEDS} seeds`).toEqual([]);
   }, 3_600_000);
 
-  it('stream drops, the answers ordered behind the stream: at most the reds read at HR-RT#2', async () => {
+  it('stream drops with the answers ordered behind the stream keep every word', async () => {
     const failures = await lossy({ lost: 0, ordered: true, drops: 0.15 });
-    console.log(
-      `lossy drops: ${failures.length} of ${LOSSY_SEEDS}\n${failures.slice(0, 3).join('\n')}`,
-    );
-    expect(failures.length, failures.slice(0, 3).join('\n')).toBeLessThanOrEqual(
-      ceiling(LOSSY_CEILING.drops),
-    );
+    expect(failures.slice(0, 3), `${failures.length} of ${LOSSY_SEEDS} seeds`).toEqual([]);
   }, 3_600_000);
 });

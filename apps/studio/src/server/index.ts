@@ -12,6 +12,7 @@ import type { DeckIndex } from '@turboslide/store/hosted';
 
 import { effectiveAccess, headCache, indexStore, readAccess } from './access';
 import { hostedDecks, storeSelection } from './root';
+import { standInFor } from './stand-ins';
 
 export type DeckView = 'owned' | 'shared' | 'recent' | 'trash' | 'all';
 
@@ -89,6 +90,18 @@ function row(head: StoredHead, owner: string | null, role: Role): DeckHead {
 }
 
 /**
+ * The owner a row of the caller's index names (hardening HR-SD#1d): the id on a row the caller
+ * owns, else the owner's stand-in on that deck, the one `share.get` names the owner by to a reader
+ * who may not share (stand-ins.ts). A principal id names its holder's deck index on the store, so
+ * before this every deck shared with a person, a viewer link included, named its owner's id here.
+ * The row keeps whether the deck has an owner; no page reads the field, and a share holder reads
+ * the id through `share.get` on the deck.
+ */
+function ownerShown(deckId: string, owner: string | null, role: Role): string | null {
+  return owner === null || role === 'owner' ? owner : standInFor(deckId, owner);
+}
+
+/**
  * `account.decks` (SPEC-3 6.7): the caller's rows per view. On a checkout every deck is the
  * folder holder's (09 1.6). Hosted, a view reads the index; an owned view with an empty index
  * falls back to the records that name the caller as owner, so a deck made before the index
@@ -158,7 +171,7 @@ export async function accountDecks(
     if (head === undefined) continue;
     if (view !== 'trash' && head.trashedAt !== undefined) continue;
     const record = await effectiveAccess(entry.deckId).catch(() => null);
-    out.push(row(head, record?.owner ?? null, entry.role));
+    out.push(row(head, ownerShown(entry.deckId, record?.owner ?? null, entry.role), entry.role));
   }
   return out;
 }

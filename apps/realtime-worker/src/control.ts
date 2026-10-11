@@ -89,6 +89,33 @@ export async function noteCallbacks(
   dropFlagCache();
 }
 
+/** The `rt_flags` row of the admission's disagreements (HR-RT#5a), a count kept as text. */
+export const ADMISSION_DISAGREE_FLAG = 'admission.disagree';
+
+/** Adds `count` to the disagreements of `shadow` (deck-room.ts `noteDisagreements`); one upsert. */
+export async function noteAdmissionDisagreements(db: D1Database, count: number): Promise<void> {
+  await db
+    .prepare(
+      'INSERT INTO rt_flags (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = CAST(CAST(v AS INTEGER) + ? AS TEXT)',
+    )
+    .bind(ADMISSION_DISAGREE_FLAG, String(count), count)
+    .run();
+}
+
+/** The disagreements of `shadow` so far, as `/health` answers them; 0 without the row or the table. */
+export async function admissionDisagreements(db: D1Database): Promise<number> {
+  try {
+    const row = await db
+      .prepare('SELECT v FROM rt_flags WHERE k = ?')
+      .bind(ADMISSION_DISAGREE_FLAG)
+      .first<{ v: string }>();
+    const count = Number(row?.v ?? 0);
+    return Number.isInteger(count) && count >= 0 ? count : 0;
+  } catch {
+    return 0;
+  }
+}
+
 /** Forgets the cached flag (a `POST /control/flags` on this isolate; the tests). */
 export function dropFlagCache(): void {
   flagCache.at = -Infinity;

@@ -79,6 +79,11 @@
     // 10000 and 30000 are the first lever of cost.do.rows-written (2.2, section 8 question 7)
     "TURBOSLIDE_CHECKPOINT_IDLE_MS": "2000",
     "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
+    // how the object places a typed entry (hardening HR-RT#5a, room-core AdmissionMode): `full`
+    // clones and validates the whole document per entry; the preview runs `shadow` (full decides,
+    // incremental beside it, /health counts disagreements) and production takes `incremental`
+    // after seven days of zero there (HR-RT#5b), with `full` the switch back
+    "TURBOSLIDE_ADMISSION": "full",
     // the commit the Worker serves, answered by /health; empty here and passed at every deploy as
     // `--var TURBOSLIDE_BUILD_COMMIT:<sha>` (the way /api/agent reads the Vercel deployment's
     // stamp, apps/studio/src/server/build-commit.ts)
@@ -107,6 +112,7 @@
         "TURBOSLIDE_ROOM_HINT": "",
         "TURBOSLIDE_CHECKPOINT_IDLE_MS": "2000",
         "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
+        "TURBOSLIDE_ADMISSION": "shadow",
         "TURBOSLIDE_BUILD_COMMIT": "",
       },
     },

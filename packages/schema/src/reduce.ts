@@ -644,6 +644,58 @@ export function applyMutations(
   return { document: next, inverse };
 }
 
+/** The ops that write one slide named by `slideId` and nothing of the manifest but its title (`followTitle`). */
+const SLIDE_LEVEL_OPS: ReadonlySet<Mutation['op']> = new Set<Mutation['op']>([
+  'slide.set',
+  'slide.replace',
+  'block.insert',
+  'block.remove',
+  'block.move',
+  'block.set',
+  'text.replace',
+  'text.splice',
+  'text.mark',
+]);
+
+/** The slides a list of slide level mutations writes, in order; null when one of them is not slide level. */
+export function slideLevelTargets(mutations: ReadonlyArray<Mutation>): SlideId[] | null {
+  const ids: SlideId[] = [];
+  for (const mutation of mutations) {
+    if (!SLIDE_LEVEL_OPS.has(mutation.op) || !('slideId' in mutation)) return null;
+    if (!ids.includes(mutation.slideId)) ids.push(mutation.slideId);
+  }
+  return ids;
+}
+
+/**
+ * `applyMutations` for the admission alone (RUST-1, CRIT-M17; hardening HR-RT#5a). When every
+ * mutation writes one slide (`slideLevelTargets`), the manifest object and the slide map are
+ * copied shallowly and only the slides the mutations name are cloned, so an entry costs the
+ * slides it writes and not the deck: the title rule writes `deck.title`, a field of the copy.
+ * Every other list falls back to `applyMutations`'s deep copy. The answer shares every untouched
+ * slide and the manifest's nested values with `document`, so no caller may write through it:
+ * `applyMutations` keeps its deep copy for every other caller, the browser included, and the
+ * parity tests deep freeze the base documents so a write through an alias throws. `touched` names
+ * the cloned slides, null on the fallback.
+ */
+export function applyMutationsTouched(
+  document: DeckDocument,
+  mutations: ReadonlyArray<Mutation>,
+  options: ApplyOptions = {},
+): { document: DeckDocument; inverse: Mutation[]; touched: SlideId[] | null } {
+  const touched = slideLevelTargets(mutations);
+  if (touched === null) return { ...applyMutations(document, mutations, options), touched: null };
+  const slides = { ...document.slides };
+  for (const id of touched) {
+    const slide = document.slides[id];
+    if (slide !== undefined) slides[id] = cloneJson(slide);
+  }
+  const next: DeckDocument = { deck: { ...document.deck }, slides };
+  const inverse: Mutation[] = [];
+  for (const mutation of mutations) inverse.unshift(...applyMutation(next, mutation, options));
+  return { document: next, inverse, touched };
+}
+
 /**
  * The reducer. A stale baseRevision returns the current document (the transport maps it to 409);
  * a mutation that throws or a result that fails validation at severity 3 returns `invalid` and

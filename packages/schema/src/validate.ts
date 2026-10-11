@@ -828,77 +828,173 @@ export function validateDeck(input: unknown): ValidationResult {
           ),
         );
       }
-      const file = slideFile(slide.id);
-      if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
-        /* the empty reference is the theme's ground (docs/DESIGN.md 7.7), not a missing asset */
-        if (
-          slide.picture.asset !== EMPTY_ASSET_REF &&
-          deck.assets[slide.picture.asset] === undefined
-        ) {
-          issues.push(
-            issue(
-              'reference',
-              3,
-              file,
-              '/picture/asset',
-              `Asset "${slide.picture.asset}" is not in deck.json`,
-            ),
-          );
-        }
-      }
-      for (const list of blockLists(slide)) {
-        walkBlocks(list.blocks, list.pointer, (block, pointer) => {
-          for (const ref of blockAssetRefs(block)) {
-            if (ref.assetId !== '' && deck.assets[ref.assetId] === undefined) {
-              issues.push(
-                issue(
-                  'reference',
-                  3,
-                  file,
-                  `${pointer}${ref.path}`,
-                  `Asset "${ref.assetId}" is not in deck.json`,
-                ),
-              );
-            }
-          }
-          // a block dither needs a continuous source: the committed two tone twins cannot be
-          // re-toned (gslides-parity SPEC-3 10.1); asset.add --replace-source attaches one
-          if ((block.type === 'picture' || block.type === 'shot') && block.dither !== undefined) {
-            const asset = deck.assets[block.asset];
-            if (asset !== undefined && !hasContinuousSource(asset)) {
-              issues.push(
-                issue(
-                  'dither',
-                  3,
-                  file,
-                  `${pointer}/dither`,
-                  `Block "${block.id}" dithers asset "${asset.id}": ${DITHER_NO_SOURCE_MESSAGE}`,
-                ),
-              );
-            }
-          }
-        });
-      }
-      // slide links name a slide the deck lists (gslides-parity SPEC 7.2.7, 7.2.8); severity 2,
-      // so a link to a slide that was removed reads as a defect and not as a refused file
-      for (const ref of slideLinkRefs(slide)) {
-        if (!listed.has(ref.slideId)) {
-          issues.push(
-            issue(
-              'link',
-              2,
-              file,
-              ref.pointer,
-              `Slide link to "${ref.slideId}", which is not in the deck; link a listed slide id, or next, previous, first or last`,
-            ),
-          );
-        }
-      }
+      issues.push(...slideReferenceIssues(slide, deck, listed));
     }
   }
 
   issues.sort(compareIssues);
   return { ok: !issues.some((row) => row.severity === 3), deck, slides, issues };
+}
+
+/**
+ * A slide's references into the manifest (validateDeck's per slide pass): the picture of an
+ * opener, a mood or a closing slide and every block's asset name an asset of deck.json, a block
+ * dither has a continuous source, and a slide link names a listed slide (severity 2).
+ */
+function slideReferenceIssues(slide: Slide, deck: Deck, listed: ReadonlySet<string>): Issue[] {
+  const issues: Issue[] = [];
+  const file = slideFile(slide.id);
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    /* the empty reference is the theme's ground (docs/DESIGN.md 7.7), not a missing asset */
+    if (slide.picture.asset !== EMPTY_ASSET_REF && deck.assets[slide.picture.asset] === undefined) {
+      issues.push(
+        issue(
+          'reference',
+          3,
+          file,
+          '/picture/asset',
+          `Asset "${slide.picture.asset}" is not in deck.json`,
+        ),
+      );
+    }
+  }
+  for (const list of blockLists(slide)) {
+    walkBlocks(list.blocks, list.pointer, (block, pointer) => {
+      for (const ref of blockAssetRefs(block)) {
+        if (ref.assetId !== '' && deck.assets[ref.assetId] === undefined) {
+          issues.push(
+            issue(
+              'reference',
+              3,
+              file,
+              `${pointer}${ref.path}`,
+              `Asset "${ref.assetId}" is not in deck.json`,
+            ),
+          );
+        }
+      }
+      // a block dither needs a continuous source: the committed two tone twins cannot be
+      // re-toned (gslides-parity SPEC-3 10.1); asset.add --replace-source attaches one
+      if ((block.type === 'picture' || block.type === 'shot') && block.dither !== undefined) {
+        const asset = deck.assets[block.asset];
+        if (asset !== undefined && !hasContinuousSource(asset)) {
+          issues.push(
+            issue(
+              'dither',
+              3,
+              file,
+              `${pointer}/dither`,
+              `Block "${block.id}" dithers asset "${asset.id}": ${DITHER_NO_SOURCE_MESSAGE}`,
+            ),
+          );
+        }
+      }
+    });
+  }
+  // slide links name a slide the deck lists (gslides-parity SPEC 7.2.7, 7.2.8); severity 2, so a
+  // link to a slide that was removed reads as a defect and not as a refused file
+  for (const ref of slideLinkRefs(slide)) {
+    if (!listed.has(ref.slideId)) {
+      issues.push(
+        issue(
+          'link',
+          2,
+          file,
+          ref.pointer,
+          `Slide link to "${ref.slideId}", which is not in the deck; link a listed slide id, or next, previous, first or last`,
+        ),
+      );
+    }
+  }
+  return issues;
+}
+
+const NO_IDS: ReadonlySet<string> = new Set();
+
+/**
+ * The validation of a write that changed the given slides and, at most, the manifest's title
+ * (hardening HR-RT#5a, RUST-1): each slide through `validateSlide`, its place in its section when
+ * it is an opener, and its references into the manifest (`slideReferenceIssues`); the manifest
+ * through `validateManifest` when `manifestChanged`. The rest of the deck is the document the
+ * admission already validated, so a write of one slide costs that slide and not the deck. The
+ * blocking issues and their order are `validateDocument`'s for such a write on a valid deck; the
+ * parity test (packages/realtime admission-parity.test.ts) holds the two equal. The issues of
+ * untouched slides are not read.
+ */
+export function validateTouched(
+  document: DeckDocument,
+  slideIds: ReadonlyArray<SlideId>,
+  manifestChanged: boolean,
+): { ok: boolean; issues: Issue[] } {
+  const issues: Issue[] = [];
+  const deck = document.deck;
+  if (manifestChanged) issues.push(...validateManifest(deck).issues);
+  let listed: Set<string> | null = null;
+  for (const id of slideIds) {
+    const raw = document.slides[id];
+    if (raw === undefined) continue;
+    const result = validateSlide(raw);
+    issues.push(...result.issues);
+    const slide = result.slide;
+    if (slide === null) {
+      deck.sections.forEach((section, si) => {
+        const ii = section.slideIds.indexOf(id);
+        if (ii >= 0)
+          issues.push(
+            issue(
+              'reference',
+              3,
+              DECK_FILE,
+              `/sections/${si}/slideIds/${ii}`,
+              `No slide file for "${id}" (${slideFile(id)})`,
+            ),
+          );
+      });
+      continue;
+    }
+    if (slide.kind === 'opener') {
+      deck.sections.forEach((section, si) => {
+        const ii = section.slideIds.indexOf(id);
+        if (ii < 0) return;
+        if (ii !== 0)
+          issues.push(
+            issue(
+              'opener',
+              3,
+              DECK_FILE,
+              `/sections/${si}/slideIds/${ii}`,
+              `Opener "${id}" must be first in its section (SPEC 4.4)`,
+            ),
+          );
+        if (slide.sectionId !== section.id)
+          issues.push(
+            issue(
+              'opener',
+              3,
+              slideFile(id),
+              '/sectionId',
+              `Opener sectionId "${slide.sectionId}" must equal its section "${section.id}" (SPEC 4.4)`,
+            ),
+          );
+      });
+    }
+    if (!deck.sections.some((section) => section.slideIds.includes(slide.id)))
+      issues.push(
+        issue(
+          'unlisted',
+          2,
+          slideFile(slide.id),
+          '',
+          `Slide "${slide.id}" is in no section and will not render`,
+        ),
+      );
+    // the listed ids are read for a slide's links alone, so a slide without one costs no set
+    if (slideLinkRefs(slide).length > 0)
+      listed ??= new Set(deck.sections.flatMap((section) => section.slideIds));
+    issues.push(...slideReferenceIssues(slide, deck, listed ?? NO_IDS));
+  }
+  issues.sort(compareIssues);
+  return { ok: !issues.some((row) => row.severity === 3), issues };
 }
 
 /** Validates an in-memory document; the reducer calls this after every write. */

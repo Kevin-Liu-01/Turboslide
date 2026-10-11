@@ -1,6 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { CID_A, call, connect, fakeApp, isAck, isEvent, mint, opsFrame, splice, uniqueDeck } from './lib.ts';
+import {
+  CID_A,
+  call,
+  connect,
+  fakeApp,
+  isAck,
+  isEvent,
+  mint,
+  opsFrame,
+  splice,
+  uniqueDeck,
+} from './lib.ts';
 import type { FakeApp } from './lib.ts';
 
 // The object continues from a partial answer (RELIABILITY-1 fix 5, hardening HR-RT#4): it asks

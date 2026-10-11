@@ -51,6 +51,7 @@ import {
 } from '@turboslide/realtime/protocol';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import {
+  admissionModeOf,
   betweenEntries,
   editingCount,
   entryForReader,
@@ -70,14 +71,20 @@ import {
   transformEntry,
   undoOfSplices,
 } from '@turboslide/realtime/room-core';
-import type { ReaderDeps, Rejected, ViewerFacts } from '@turboslide/realtime/room-core';
+import type {
+  AdmissionDisagreement,
+  LandOptions,
+  ReaderDeps,
+  Rejected,
+  ViewerFacts,
+} from '@turboslide/realtime/room-core';
 import { hueFor } from '@turboslide/identity/hues';
 import { standInKey, standInOf } from '@turboslide/identity/stand-in';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 
-import { noteCallbacks, noteClosed, noteOpen } from './control.ts';
+import { noteAdmissionDisagreements, noteCallbacks, noteClosed, noteOpen } from './control.ts';
 import {
   DOC_DDL,
   ENTRY_COLUMNS,
@@ -1013,6 +1020,13 @@ export class DeckRoom extends DurableObject<Env> {
     const candidates: NewEntry[] = [];
     let running = live.document;
     const author = authorOfClaims(claims);
+    // how a typed entry is placed and judged (HR-RT#5a); a disagreement of `shadow` is counted
+    // once the entries are in
+    const disagreements: AdmissionDisagreement[] = [];
+    const admission: LandOptions = {
+      mode: admissionModeOf(this.env.TURBOSLIDE_ADMISSION),
+      onDisagree: (row) => disagreements.push(row),
+    };
     for (const entry of post.entries) {
       // a retried POST carries the op ids of the first one: an id already in the log is answered
       // with its entry and never appended twice (3.4 item 4, the unique index)
@@ -1066,6 +1080,7 @@ export class DeckRoom extends DurableObject<Env> {
         running,
         { opId: entry.opId, kind: 'edit', mutations: transformed },
         canReadSlide,
+        admission,
       );
       if (!placed.ok) {
         rejected.push(placed.rejected);
@@ -1084,6 +1099,7 @@ export class DeckRoom extends DurableObject<Env> {
         ...(entry.note === undefined ? {} : { note: entry.note }),
       });
     }
+    if (disagreements.length > 0) await this.noteDisagreements(disagreements);
     if (candidates.length === 0) {
       return {
         ok: true,
@@ -1123,6 +1139,27 @@ export class DeckRoom extends DurableObject<Env> {
       revision: meta.revision,
       ...(between === undefined ? {} : { between }),
     };
+  }
+
+  /**
+   * The disagreements `shadow` read in one POST (HR-RT#5a): a line at error each, with the deck,
+   * the op kinds and the field, and one D1 count the preview's `/health` answers, which HR-RT#5b
+   * reads as zero for seven days before production takes `incremental`.
+   */
+  private async noteDisagreements(rows: readonly AdmissionDisagreement[]): Promise<void> {
+    for (const row of rows)
+      this.log('error', 'admission.disagree', {
+        opId: row.opId,
+        ops: row.ops.join(','),
+        field: row.field,
+      });
+    try {
+      await noteAdmissionDisagreements(this.env.ACCOUNTS, rows.length);
+    } catch (error) {
+      this.log('warn', 'the admission count was not written', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   /** The budgets of `admitOps` as in memory fixed windows; the wait in ms when one is over, else null. */

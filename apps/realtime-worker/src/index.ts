@@ -30,8 +30,11 @@ import {
   ticketOfProtocols,
 } from '@turboslide/realtime/frames';
 import type { TicketClaims } from '@turboslide/realtime/frames';
+import { admissionModeOf } from '@turboslide/realtime/room-core';
+import type { AdmissionMode } from '@turboslide/realtime/room-core';
 
 import {
+  admissionDisagreements,
   callbacksState,
   dropFlagCache,
   openDecks,
@@ -74,6 +77,11 @@ export type HealthBody = {
   db: DbBearerMode;
   /** whether `/db` refuses an unlisted statement or runs and logs it (db.ts) */
   statements: StatementMode;
+  /**
+   * How the objects place a typed entry (`TURBOSLIDE_ADMISSION`, HR-RT#5a) and how many entries
+   * `shadow` placed differently from `full` so far (`rt_flags`), the count HR-RT#5b reads
+   */
+  admission: { mode: AdmissionMode; disagree: number };
 };
 
 /**
@@ -169,6 +177,10 @@ async function health(env: Env): Promise<HealthBody> {
     callbacks: await callbacksState(env.ACCOUNTS),
     db: dbBearerMode(env),
     statements: statementMode(env.TURBOSLIDE_DB_STATEMENTS),
+    admission: {
+      mode: admissionModeOf(env.TURBOSLIDE_ADMISSION),
+      disagree: await admissionDisagreements(env.ACCOUNTS),
+    },
   };
 }
 

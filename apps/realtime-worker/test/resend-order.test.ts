@@ -1,6 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ANON_B, CID_A, CID_B, call, connect, fakeApp, isAck, isEvent, mint, splice, uniqueDeck } from './lib.ts';
+import {
+  ANON_B,
+  CID_A,
+  CID_B,
+  call,
+  connect,
+  fakeApp,
+  isAck,
+  isEvent,
+  mint,
+  splice,
+  uniqueDeck,
+} from './lib.ts';
 import type { FakeApp } from './lib.ts';
 
 // A resent ops frame keeps its author's letters in order in the object (RELIABILITY-2, F1;
@@ -20,7 +32,11 @@ function paragraph(document: Doc): string {
   return String(block?.text ?? '');
 }
 
-function frame(req: number, base: number, entries: { n: number; at: number; insert: string; run?: true }[]) {
+function frame(
+  req: number,
+  base: number,
+  entries: { n: number; at: number; insert: string; run?: true }[],
+) {
   return {
     t: 'ops',
     req,

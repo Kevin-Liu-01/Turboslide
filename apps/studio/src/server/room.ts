@@ -54,6 +54,7 @@ import type { RealtimeSelection } from '@turboslide/realtime/select';
 import {
   BETWEEN_MAX_BYTES,
   BETWEEN_MAX_ENTRIES,
+  admissionModeOf,
   betweenEntries,
   editingCount,
   entryForReader,
@@ -80,7 +81,13 @@ import {
   undoOfSplices,
   yieldConcurrentConversion,
 } from '@turboslide/realtime/room-core';
-import type { Landed, ReaderDeps, Rejected, ViewerFacts } from '@turboslide/realtime/room-core';
+import type {
+  LandOptions,
+  Landed,
+  ReaderDeps,
+  Rejected,
+  ViewerFacts,
+} from '@turboslide/realtime/room-core';
 import { scopedCapabilities } from '@turboslide/schema/access';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { threadParticipants } from '@turboslide/schema/comments';
@@ -1889,6 +1896,22 @@ export type AdmitInput = {
 };
 
 /**
+ * How this function's rooms place a typed entry (hardening HR-RT#5a; room-core `AdmissionMode`):
+ * `TURBOSLIDE_ADMISSION` names `full`, `incremental` or `shadow`, `full` when it names nothing
+ * else. A disagreement of `shadow` is a line at error in the function's log with the deck and the
+ * op kinds; the object counts its own in D1 (apps/realtime-worker control.ts).
+ */
+function admissionOptions(deckId: string): LandOptions {
+  return {
+    mode: admissionModeOf(process.env['TURBOSLIDE_ADMISSION']),
+    onDisagree: (row) =>
+      console.error(
+        `turboslide admission.disagree: ${JSON.stringify({ deckId, opId: row.opId, ops: row.ops, field: row.field })}`,
+      ),
+  };
+}
+
+/**
  * The ops route's admission (SPEC-3 3.4): the client binding, the budgets, the base window, then
  * for each entry the transform against what landed since its base, the reducer and the validator
  * on the live document, and the compare and append with the transform hook. An entry that cannot
@@ -1966,6 +1989,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
   }
   const live = await room.live();
   const head = live.seq;
+  const admission = admissionOptions(deckId);
   const windowCheck = checkBaseWindow(post.base.seq, head);
   if (!windowCheck.ok) {
     return {
@@ -2048,6 +2072,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
       running,
       { opId: entry.opId, kind: 'edit', mutations: transformed },
       canReadSlide,
+      admission,
     );
     if (!placed.ok) {
       rejected.push(placed.rejected);
@@ -2104,6 +2129,7 @@ export async function admitOps(room: Room, input: AdmitInput): Promise<Admission
         document,
         { opId: entry.opId, kind: 'edit', mutations: transformed },
         canReadSlide,
+        admission,
       );
       if (!placed.ok) {
         rejected.push(placed.rejected);
@@ -2324,6 +2350,7 @@ export const STALE_AFTER_REFUSAL =
  */
 export async function admitOnBlob(room: Room, input: AdmitInput): Promise<AdmissionResult> {
   const { post, identity } = input;
+  const admission = admissionOptions(room.deckId);
   let live = await liveForBase(room, post.base.seq);
   const stamp = new Date((input.now ?? (() => Date.now()))()).toISOString();
   const resyncAt = (head: number): AdmissionResult => ({
@@ -2483,9 +2510,15 @@ export async function admitOnBlob(room: Room, input: AdmitInput): Promise<Admiss
         running,
         { opId: entry.opId, kind: 'edit', mutations },
         () => true,
+        admission,
       );
       if (!placed.ok && namesUnknownAsset(placed.rejected) && (await freshLive())) {
-        placed = landCandidate(running, { opId: entry.opId, kind: 'edit', mutations }, () => true);
+        placed = landCandidate(
+          running,
+          { opId: entry.opId, kind: 'edit', mutations },
+          () => true,
+          admission,
+        );
       }
       if (!placed.ok) {
         // the entry's own first admission, found by its op id: answered from the record, as a

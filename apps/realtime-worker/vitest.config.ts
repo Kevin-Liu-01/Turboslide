@@ -25,7 +25,15 @@ export default defineConfig(async () => {
     plugins: [
       cloudflareTest({
         wrangler: { configPath: process.env.R1_WRANGLER_CONFIG ?? './wrangler.jsonc' },
-        miniflare: { bindings: { TEST_MIGRATIONS: migrations, ...TEST_SECRETS } },
+        // the suite places every typed entry in `shadow` (hardening HR-RT#5a): the full admission
+        // decides, the incremental one runs beside it, and test/admission.test.ts reads the count
+        miniflare: {
+          bindings: {
+            TEST_MIGRATIONS: migrations,
+            ...TEST_SECRETS,
+            TURBOSLIDE_ADMISSION: 'shadow',
+          },
+        },
       }),
     ],
     test: {

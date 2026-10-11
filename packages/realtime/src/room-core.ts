@@ -20,7 +20,11 @@ import { slideBlocks } from '@turboslide/schema/deck';
 import { NotImplementedError } from '@turboslide/schema/errors';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Mutation } from '@turboslide/schema/mutations';
-import { applyMutations } from '@turboslide/schema/reduce';
+import {
+  applyMutations,
+  applyMutationsTouched,
+  slideLevelTargets,
+} from '@turboslide/schema/reduce';
 import {
   insertTieSide,
   isTextOp,
@@ -29,7 +33,7 @@ import {
   transformMutation,
 } from '@turboslide/schema/transform';
 import type { Side } from '@turboslide/schema/transform';
-import { validateDocument } from '@turboslide/schema/validate';
+import { validateDocument, validateTouched } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
 import { touchedSlides } from '@turboslide/store/store';
 
@@ -92,8 +96,12 @@ export function betweenEntries(
 
 export type Rejected = { opId: string; reason: RejectReason; message?: string };
 
-/** A slide document after the write is at most 200 KB (report 04 7.5, 10 F27). */
-function slideBytes(slide: Slide): number {
+/**
+ * A slide document after the write is at most 200 KB (report 04 7.5, 10 F27). Exported for the
+ * room client, which checks a change against the same measure before it queues it (hardening
+ * HR-RC#4, RELIABILITY-7).
+ */
+export function slideBytes(slide: Slide): number {
   return new TextEncoder().encode(canonicalJson(slide)).byteLength;
 }
 
@@ -296,20 +304,27 @@ export function reanchor(document: DeckDocument, mutation: Mutation): Mutation {
 export function reanchorAll(
   document: DeckDocument,
   mutations: readonly Mutation[],
+  apply: ApplyFn = applyMutations,
 ): { mutations: Mutation[]; document: DeckDocument } {
   if (mutations.length <= 1) {
     const placed = mutations.map((mutation) => reanchor(document, mutation));
-    return { mutations: placed, document: applyMutations(document, placed).document };
+    return { mutations: placed, document: apply(document, placed).document };
   }
   const placed: Mutation[] = [];
   let running = document;
   for (const mutation of mutations) {
     const next = reanchor(running, mutation);
     placed.push(next);
-    running = applyMutations(running, [next]).document;
+    running = apply(running, [next]).document;
   }
   return { mutations: placed, document: running };
 }
+
+/** The reducer `reanchorAll` applies with: `applyMutations`, or the admission's `applyMutationsTouched`. */
+type ApplyFn = (
+  document: DeckDocument,
+  mutations: ReadonlyArray<Mutation>,
+) => { document: DeckDocument };
 
 /** One entry of a POST as the admission judges it: its op id, its kind and its content. */
 export type Candidate = {
@@ -339,18 +354,108 @@ export function undoOfSplices(mutations: readonly Mutation[]): Mutation[] {
   return out;
 }
 
-/** Applies one candidate to the running document and validates; the reject reason when it cannot land. */
+/**
+ * How the admission places and judges an entry (hardening HR-RT#5a, RUST-1; the variable
+ * `TURBOSLIDE_ADMISSION`, `admissionModeOf`). `full`: the whole document is cloned and validated
+ * for every entry, 13.5 to 16.3 ms of CPU on GT and 122 ms on 850 slides. `incremental`: a write
+ * of slides clones and validates the slides it writes (`applyMutationsTouched`,
+ * `validateTouched`), and the whole document only for the writes of the deck (`slide.insert`,
+ * `slide.remove`, `slide.move`, sections, assets, `deck.set`, `version.restore`). `shadow`:
+ * decides with `full`, runs `incremental` beside it on every entry and reports a disagreement.
+ */
+export type AdmissionMode = 'full' | 'incremental' | 'shadow';
+
+/** The mode a variable names; `full` for anything else, the default of every host until HR-RT#5b. */
+export function admissionModeOf(value: string | undefined): AdmissionMode {
+  return value === 'incremental' || value === 'shadow' ? value : 'full';
+}
+
+/** What `shadow` reports when the two placements of an entry differ: the op kinds, and how. */
+export type AdmissionDisagreement = {
+  opId: string;
+  ops: Mutation['op'][];
+  /** `ok`, `reason`, `message`, `document`, or `threw` when the incremental placement threw */
+  field: 'ok' | 'reason' | 'message' | 'document' | 'threw';
+};
+
+export type LandOptions = {
+  mode?: AdmissionMode;
+  onDisagree?: (disagreement: AdmissionDisagreement) => void;
+};
+
+type Landing =
+  { ok: true; document: DeckDocument; mutations: Mutation[] } | { ok: false; rejected: Rejected };
+
+/**
+ * Applies one candidate to the running document and validates; the reject reason when it cannot
+ * land. `options.mode` picks the placement (`AdmissionMode`); the answer is the same in every
+ * mode, which the parity test holds over 2,000 seeded sequences (admission-parity.test.ts).
+ */
 export function landCandidate(
   document: DeckDocument,
   candidate: Candidate,
   canReadSlide: (slideId: string) => boolean,
-): { ok: true; document: DeckDocument; mutations: Mutation[] } | { ok: false; rejected: Rejected } {
+  options: LandOptions = {},
+): Landing {
+  const mode = options.mode ?? 'full';
+  if (mode === 'full') return landWith(document, candidate, canReadSlide, false);
+  if (mode === 'incremental') return landWith(document, candidate, canReadSlide, true);
+  const decided = landWith(document, candidate, canReadSlide, false);
+  let field: AdmissionDisagreement['field'] | null;
+  try {
+    field = landingDiffers(decided, landWith(document, candidate, canReadSlide, true));
+  } catch {
+    field = 'threw';
+  }
+  if (field !== null)
+    options.onDisagree?.({
+      opId: candidate.opId,
+      ops: (candidate.mutations ?? []).map((mutation) => mutation.op),
+      field,
+    });
+  return decided;
+}
+
+/** The first field two landings of one entry differ in; null when they agree. */
+function landingDiffers(a: Landing, b: Landing): AdmissionDisagreement['field'] | null {
+  if (a.ok !== b.ok) return 'ok';
+  if (!a.ok && !b.ok) {
+    if (a.rejected.reason !== b.rejected.reason) return 'reason';
+    if (a.rejected.message !== b.rejected.message) return 'message';
+    return null;
+  }
+  if (a.ok && b.ok) {
+    if (canonicalJson(a.mutations) !== canonicalJson(b.mutations)) return 'document';
+    if (canonicalJson(a.document.deck) !== canonicalJson(b.document.deck)) return 'document';
+    const ids = Object.keys(a.document.slides);
+    if (ids.length !== Object.keys(b.document.slides).length) return 'document';
+    for (const id of ids) {
+      const left = a.document.slides[id];
+      const right = b.document.slides[id];
+      // a slide both placements share by reference is the same slide; the rest are compared
+      if (left === right) continue;
+      if (right === undefined || canonicalJson(left) !== canonicalJson(right)) return 'document';
+    }
+  }
+  return null;
+}
+
+function landWith(
+  document: DeckDocument,
+  candidate: Candidate,
+  canReadSlide: (slideId: string) => boolean,
+  incremental: boolean,
+): Landing {
   if (candidate.kind !== 'edit' || candidate.mutations === undefined) {
     return { ok: true, document, mutations: [] };
   }
   let placed: { mutations: Mutation[]; document: DeckDocument };
   try {
-    placed = reanchorAll(document, candidate.mutations);
+    placed = reanchorAll(
+      document,
+      candidate.mutations,
+      incremental ? applyMutationsTouched : applyMutations,
+    );
   } catch (error) {
     const touched = touchedSlides(candidate.mutations);
     const readable = touched.every(canReadSlide);
@@ -370,7 +475,13 @@ export function landCandidate(
       return { ok: false, rejected: { opId: candidate.opId, reason: 'too-large' } };
     }
   }
-  const validation = validateDocument(next);
+  // a write of slides is judged on those slides and, when the title followed a heading, the
+  // manifest; a write of the deck on the whole document (HR-RT#5a)
+  const slidesOnly = incremental ? slideLevelTargets(mutations) : null;
+  const validation =
+    slidesOnly === null
+      ? validateDocument(next)
+      : validateTouched(next, slidesOnly, manifestMoved(document.deck, next.deck));
   if (!validation.ok) {
     const touched = touchedSlides(mutations);
     const first = refusalIssue(validation.issues, touched);
@@ -386,6 +497,16 @@ export function landCandidate(
     };
   }
   return { ok: true, document: next, mutations };
+}
+
+/** True when a slide level write changed a field of the manifest (the title rule writes `title`). */
+function manifestMoved(before: DeckDocument['deck'], after: DeckDocument['deck']): boolean {
+  if (before === after) return false;
+  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  for (const key of keys)
+    if ((before as Record<string, unknown>)[key] !== (after as Record<string, unknown>)[key])
+      return true;
+  return false;
 }
 
 /**

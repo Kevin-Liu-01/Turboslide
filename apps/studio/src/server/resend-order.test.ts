@@ -75,7 +75,11 @@ function memoryRoom(channel: MemoryChannel, start: DeckDocument): Room {
   } as unknown as Room;
 }
 
-type Post = { clientId: string; base: number; entries: { opId: string; at: number; insert: string; run?: true }[] };
+type Post = {
+  clientId: string;
+  base: number;
+  entries: { opId: string; at: number; insert: string; run?: true }[];
+};
 
 function opsPost(post: Post): OpsPost {
   return {
@@ -110,10 +114,18 @@ describe('a resent POST on the memory tier (admitOps)', () => {
     await channel.presence.bind(DECK, B, 'anon_b', 60_000);
     const start = paragraph((await room.live()).document);
     // B's " tb" lands at 0 as seq 1
-    const b = await admit(room, { clientId: B, base: 0, entries: [{ opId: `${B}:1`, at: 0, insert: ' tb' }] });
+    const b = await admit(room, {
+      clientId: B,
+      base: 0,
+      entries: [{ opId: `${B}:1`, at: 0, insert: ' tb' }],
+    });
     expect(b.ok && b.entries.map((entry) => entry.seq)).toEqual([1]);
     // A's " t" at 0 on base 0 lands after it as seq 2; its answer is lost
-    const first = await admit(room, { clientId: A, base: 0, entries: [{ opId: `${A}:1`, at: 0, insert: ' t' }] });
+    const first = await admit(room, {
+      clientId: A,
+      base: 0,
+      entries: [{ opId: `${A}:1`, at: 0, insert: ' t' }],
+    });
     expect(first.ok && first.entries.map((entry) => entry.seq)).toEqual([2]);
     // the tab resends " t" with "a1", written after its own " t", on the same base
     const resend = await admit(room, {
@@ -141,7 +153,11 @@ describe('a resent POST on the memory tier (admitOps)', () => {
     await channel.presence.bind(DECK, A, 'anon_a', 60_000);
     const start = paragraph((await room.live()).document);
     const end = start.length;
-    await admit(room, { clientId: A, base: 0, entries: [{ opId: `${A}:1`, at: end, insert: ' t' }] });
+    await admit(room, {
+      clientId: A,
+      base: 0,
+      entries: [{ opId: `${A}:1`, at: end, insert: ' t' }],
+    });
     const resend = await admit(room, {
       clientId: A,
       base: 0,
@@ -158,7 +174,12 @@ describe('a resent POST on the memory tier (admitOps)', () => {
 describe('a resent POST on the blob tier (admitOnBlob)', () => {
   type Input = Parameters<typeof admitOnBlob>[1];
 
-  const record = (seq: number, clientId: string, covers: string[] | undefined, mutations: Mutation[]): Entry => ({
+  const record = (
+    seq: number,
+    clientId: string,
+    covers: string[] | undefined,
+    mutations: Mutation[],
+  ): Entry => ({
     seq,
     rev: seq - 1,
     kind: 'edit',

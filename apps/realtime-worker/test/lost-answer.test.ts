@@ -1,7 +1,20 @@
 import { applyMutations } from '@turboslide/schema/reduce';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { BLOCK, CID_A, SLIDE, call, connect, fakeApp, isAck, isEvent, mint, opsFrame, splice, uniqueDeck } from './lib.ts';
+import {
+  BLOCK,
+  CID_A,
+  SLIDE,
+  call,
+  connect,
+  fakeApp,
+  isAck,
+  isEvent,
+  mint,
+  opsFrame,
+  splice,
+  uniqueDeck,
+} from './lib.ts';
 import type { FakeApp } from './lib.ts';
 
 // A checkpoint whose answer is lost after the route committed it (RELIABILITY-1, hardening
@@ -110,7 +123,10 @@ describe('a checkpoint whose answer was lost', () => {
     expect(app.records).toHaveLength(3);
     const last = app.checkpoints.at(-1);
     expect(last?.entries.map((entry) => entry.opId)).toEqual([`${CID_A}:2`]);
-    expect(last?.entries[0]?.mutations?.[0]).toMatchObject({ at: 'cli one '.length, insert: 'two ' });
+    expect(last?.entries[0]?.mutations?.[0]).toMatchObject({
+      at: 'cli one '.length,
+      insert: 'two ',
+    });
     expect(textOf(app)).toBe(`cli one two ${before}`);
     expect(flushed).toMatchObject({ revision: 3, covered: 3 });
     a.close();

@@ -34,6 +34,7 @@ describe('the realtime worker router', () => {
       callbacks: 'ok',
       db: 'own',
       statements: 'enforce',
+      admission: { mode: 'shadow', disagree: 0 },
     });
   });
 

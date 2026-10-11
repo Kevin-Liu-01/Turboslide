@@ -978,10 +978,20 @@ export function absorbedText(
     change.text !== '' &&
     change.end === change.start &&
     local.start === change.start;
+  /* the end of an unflushed delete or replace that sits exactly where another person's change
+     begins stays before that change (hardening HR-RC#3, RELIABILITY-4): the other person typed
+     after the letters this person removed, so their word is not this person's to remove. Before
+     this the end moved past the insertion and a Backspace typed just before another person's
+     word took the word with it: absorbedSession of "Realtime title tqx" with "x" deleted and
+     " tb1" landing at 18 read "Realtime title tq" (the two typers verifier, F2; two of six
+     two-browser attempts lost a word) */
+  const keepsEnd = !keepsBefore && local.end > local.start && local.end === change.start;
+  const shiftEnd = (offset: number): number =>
+    keepsEnd && offset === local.end ? offset : shift(offset);
   const at = keepsBefore ? change.start : shift(local.start);
   const remove = keepsBefore
     ? 0
-    : Math.min(Math.max(at, shift(local.end)) - at, plainLength(remote) - at);
+    : Math.min(Math.max(at, shiftEnd(local.end)) - at, plainLength(remote) - at);
   let text = remote;
   let applied = false;
   if (!untouched) {
@@ -1018,7 +1028,7 @@ export function absorbedText(
     if (offset < local.start + local.text.length) {
       return at + Math.min(offset - local.start, inserted);
     }
-    const shifted = shift(offset - local.text.length + (local.end - local.start));
+    const shifted = shiftEnd(offset - local.text.length + (local.end - local.start));
     return applied ? at + inserted + Math.max(0, shifted - (at + remove)) : shifted;
   };
   const length = plainLength(text);

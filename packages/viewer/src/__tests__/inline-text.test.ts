@@ -674,6 +674,41 @@ describe('absorbedText (a collaborator typed in the run being edited, SPEC-3 3.5
     ).toEqual([18, 18]);
   });
 
+  it("keeps another person's word that landed right after the letters this person removed (HR-RC#3, RELIABILITY-4)", () => {
+    // the two typers verifier, F2: A deleted the "x" it had just typed while B's " tb1" landed
+    // right after it; the absorb moved the delete's end past B's word and the next burst wrote
+    // "Realtime title tq", B's word gone
+    expect(
+      absorbedSession({
+        base: 'Realtime title tqx',
+        raw: 'Realtime title tq',
+        trimmed: 'Realtime title tq',
+        remote: 'Realtime title tqx tb1',
+        selection: [17, 17],
+        splices: [{ at: 18, remove: 0, insert: ' tb1' }],
+      }),
+    ).toEqual({ text: 'Realtime title tq tb1', selection: [17, 17] });
+    // a replace whose end meets the insertion: "x" became "1", A's " ta1" landed after it; the
+    // caret after the "1" stays before A's word
+    expect(
+      absorbedSession({
+        base: 'Realtime title ubx',
+        raw: 'Realtime title ub1',
+        trimmed: 'Realtime title ub1',
+        remote: 'Realtime title ubx ta1',
+        selection: [18, 18],
+        splices: [{ at: 18, remove: 0, insert: ' ta1' }],
+      }),
+    ).toEqual({ text: 'Realtime title ub1 ta1', selection: [18, 18] });
+    // the same without the route's splice: the diff reads the insertion at the same point
+    expect(
+      absorbedText('Realtime title tqx', 'Realtime title tq', 'Realtime title tqx tb1', [17, 17])
+        .text,
+    ).toBe('Realtime title tq tb1');
+    // a delete that ends before the insertion's point keeps the old rule
+    expect(absorbedText('abcde', 'ade', 'abcXde', [1, 1]).text).toBe('aXde');
+  });
+
   it('carries a caret after the unflushed keystrokes past a remote insert that begins between them and the caret (VERIFICATION.md C3S-F12)', () => {
     // four characters typed at 6 of the base while the collaborator's two landed at 8 of it
     const base = 'Every line of copy';

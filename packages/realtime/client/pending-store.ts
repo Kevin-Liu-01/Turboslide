@@ -6,6 +6,8 @@
 // touches `indexedDB` only when called.
 import type { Mutation } from '@turboslide/schema/mutations';
 
+import type { RealtimeTier } from '../src/channel.ts';
+
 export const PENDING_KEY_PREFIX = 'turboslide:pending:';
 /** The mirror's size cap (SPEC-3 0.7). */
 export const PENDING_MAX_BYTES = 1024 * 1024;
@@ -35,6 +37,15 @@ export type PersistedQueue = {
   /** ISO time of the last save */
   savedAt: string;
   entries: PersistedOp[];
+  /**
+   * The stream position the pending entries were written on (hardening HR-RC#5a,
+   * RELIABILITY-5): the tab's seq at the save, the server document the pending ops follow. Apply
+   * moves them past what landed since, as the tab would have before posting. Absent from a queue
+   * an older build saved, which Apply hands back as text (`placePersisted`).
+   */
+  position?: number;
+  /** the tier `position` is a number of (a stream seq, or the store's revision on the blob tier) */
+  tier?: RealtimeTier;
 };
 
 export type PendingStore = {

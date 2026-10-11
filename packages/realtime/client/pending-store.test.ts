@@ -113,6 +113,13 @@ describe('the pending store', () => {
     await store.remove('turboslide:pending:other:c');
     expect(store.queues.size).toBe(0);
   });
+
+  it('keeps the position and the tier the pending entries were written on (HR-RC#5a)', async () => {
+    const store = memoryPendingStore();
+    await store.save({ ...queue([op(1)]), position: 41, tier: 'do' });
+    const [saved] = await store.load('gt-brand', Date.parse('2026-09-13T10:01:00.000Z'));
+    expect(saved).toMatchObject({ position: 41, tier: 'do' });
+  });
 });
 
 describe('clearPendingMirror (SPEC-3 7.4, Forget this browser)', () => {

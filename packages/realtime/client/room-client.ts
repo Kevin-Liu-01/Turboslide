@@ -59,6 +59,7 @@ import {
   PRESENCE_HEARTBEAT_MS,
   PRESENCE_HEARTBEAT_QUIET_MS,
   REPLAY_MAX_ENTRIES,
+  BASE_SEQ_WINDOW,
   caretSeqOf,
 } from '../src/protocol.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
@@ -244,6 +245,8 @@ export const OVERSIZE_SENTENCE = 'This slide would pass 200 kB. Split the text i
 /** The bytes an ops POST keeps for its envelope (the client id, the base, the entry fields). */
 export const POST_ENVELOPE_BYTES = 1024;
 
+/** The longest the first stream open waits for the saved queues to load (HR-RC#5a). */
+export const PENDING_LOAD_WAIT_MS = 1000;
 /** The reconnect and resend backoff cap (SPEC-3 3.6). */
 export const BACKOFF_MAX_MS = 8000;
 /**
@@ -883,6 +886,67 @@ export function flushClassOf(mutations: readonly Mutation[]): FlushClass {
   return mutations.length === 0 ? 'now' : cls;
 }
 
+/** What `bridgePast` moves: a pending op, or an op of a queue an earlier tab saved. */
+type Bridged = { kind: 'edit' | 'comment'; mutations?: Mutation[]; run?: true };
+
+/**
+ * Ops moved past an entry that landed in front of them (the remote path of `applyEntry`): each
+ * op meets the entry in its own frame, the entry as it stands after the ops before it
+ * (`bridged`, moved past each with the side that op leaves it, the inverse of the op's own side
+ * in a tie). An op that declares the run rule keeps the left of an insert at its offset, as the
+ * server places it (room-core.ts transformEntry); every other op lands after it. A cover's field
+ * and the block a conversion made of it are one text on both sides (conversion.ts
+ * fieldRunsOnCanvas; build/r1.md R1-R2k). `document` is the document the first op was written on
+ * (the server's before the entry); each op is moved in place (HR-RC#9). Answers the ops kept, the
+ * ops nothing of which survives, and the entry in the frame after the kept ops. Shared by the
+ * live stream and the Apply of a saved queue (hardening HR-RC#5a), so both place ops by one rule.
+ */
+export function bridgePast<T extends Bridged>(
+  ops: readonly T[],
+  mutations: readonly Mutation[],
+  document: DeckDocument,
+  transform: (mutation: Mutation, against: Mutation, insertTie?: Side) => Mutation[],
+): { kept: T[]; unplaceable: T[]; bridged: Mutation[] } {
+  let bridged: Mutation[] = [...mutations];
+  let running = document;
+  const kept: T[] = [];
+  const unplaceable: T[] = [];
+  for (const op of ops) {
+    if (op.kind !== 'edit' || op.mutations === undefined) {
+      kept.push(op);
+      continue;
+    }
+    const tie = runTieSide(op.run, 'right');
+    const side: Side = tie === 'left' ? 'right' : 'left';
+    const opMutations = op.mutations;
+    const onCanvas = fieldRunsOnCanvas(
+      opMutations,
+      bridged.map((mutation) => ({ mutation })),
+      running,
+    ).read;
+    const moved = transformPast(opMutations, bridged, (mutation, against) =>
+      transform(onCanvas(mutation), onCanvas(against), tie),
+    );
+    if (moved === null) {
+      unplaceable.push(op);
+      continue;
+    }
+    bridged =
+      transformPast(bridged, opMutations, (mutation, against) =>
+        transform(onCanvas(mutation), onCanvas(against), side),
+      ) ?? [];
+    // the next op was written on this one, before the entry: its document carries this op
+    try {
+      running = applyMutations(running, placedOnDocument(opMutations, running)).document;
+    } catch {
+      // an op its caller returns to its author: the next ops read the document without it
+    }
+    op.mutations = moved;
+    kept.push(op);
+  }
+  return { kept, unplaceable, bridged };
+}
+
 export function createRoomClient(options: RoomClientOptions): RoomClient {
   const { deckId, transport } = options;
   const now = options.now ?? (() => Date.now());
@@ -901,6 +965,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
      resync and at a refusal, whose re-fold moves the local frame in ways no splice names */
   const runEnds: RunEnds = new Map();
   const recent: Entry[] = [];
+  /**
+   * The entries between a saved queue's position and the position this page loaded at, by seq
+   * (hardening HR-RC#5a): the first stream open asks from the oldest such position, and Apply
+   * moves the queue's ops past these and the entries the page applied since (`recent`).
+   */
+  const backlog = new Map<number, Entry[]>();
+  let backlogFrom: number | null = null;
+  const loadedAt = options.seq;
   /**
    * The entries buffered ahead of the position, by seq. A list per seq, because the blob tier
    * commits one ops POST as one revision and gives every entry of the batch that revision as its
@@ -1041,8 +1113,19 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     overCeiling,
   });
 
+  /** Apply's waits for the stream to reach the head the last hello named (HR-RC#5a). */
+  const caughtUpWaiters: (() => void)[] = [];
+  const wakeCaughtUp = (): void => {
+    if (caughtUp) for (const wake of caughtUpWaiters.splice(0)) wake();
+  };
+  const whenCaughtUp = (): Promise<void> =>
+    caughtUp && connected
+      ? Promise.resolve()
+      : new Promise<void>((resolve) => caughtUpWaiters.push(resolve));
+
   const emitStatus = (): void => {
     options.onStatus?.(status());
+    wakeCaughtUp();
   };
 
   const emitChange = (
@@ -1082,6 +1165,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       clientId: clientId ?? 'unbound',
       savedAt: new Date(now()).toISOString(),
       entries,
+      // the position the pending entries were written on, so an Apply moves them past what
+      // landed since (HR-RC#5a)
+      position: seq,
+      tier,
     };
     void store.save(queue).catch(() => undefined);
   };
@@ -1533,63 +1620,23 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // another person's word that landed at the earlier op's point (" ua" then "1" read
     // " ua tb1 u1": realtime.title.two-typers; the realtime round's fix round 3). The run ends
     // follow the entry into the local frame.
-    let bridged: Mutation[] = mutations;
-    // the document each pending op was written on (the server's before the entry, then each
-    // earlier pending op), for the cover rules below
-    let running = server;
-    const next: PendingOp[] = [];
-    for (const op of pending) {
-      if (op.kind !== 'edit' || op.mutations === undefined) {
-        next.push(op);
-        continue;
-      }
-      // an op that declares the run rule keeps the left of an insert at its offset, as the
-      // server places it (room-core.ts transformEntry); every other op lands after it
-      const tie = runTieSide(op.run, 'right');
-      const side: Side = tie === 'left' ? 'right' : 'left';
-      // a cover's field and the block a conversion made of it are one text (conversion.ts
-      // fieldRunsOnCanvas; build/r1.md R1-R2k), on both sides: a remote word in the field and
-      // the op's words on the block its own conversion made (" tb2b2 u" for " tb2 ub2", the
-      // memory tier's two typers row in fix round 3), and the op's words in the field and a
-      // remote word on the block another person's conversion made, whose replacement is in this
-      // entry or already in the document (" ua1b2 tb2 u" for " ua1 tb2 ub2": the op kept its
-      // offset in front of the remote word)
-      const opMutations = op.mutations;
-      const onCanvas = fieldRunsOnCanvas(
-        opMutations,
-        bridged.map((mutation) => ({ mutation })),
-        running,
-      ).read;
-      const moved = transformPast(op.mutations, bridged, (mutation, against) =>
-        transform(onCanvas(mutation), onCanvas(against), tie),
-      );
-      if (moved === null) {
-        runEnds.clear();
-        options.onUnplaceable?.(op);
-        const rejected: Rejected = { opId: op.opId, reason: 'stale' };
-        rejects.push({ ...rejected, mutations: op.mutations });
-        op.settle?.({ rejected });
-        continue;
-      }
-      bridged =
-        transformPast(bridged, op.mutations, (mutation, against) =>
-          transform(onCanvas(mutation), onCanvas(against), side),
-        ) ?? [];
-      // the next op was written on this one, before the entry: its document carries this op
-      try {
-        running = applyMutations(running, placedOnDocument(opMutations, running)).document;
-      } catch {
-        // an op the fold below returns to its author: the next ops read the document without it
-      }
-      // the op is moved in place, never copied (hardening HR-RC#9, RELIABILITY-2's residual R):
-      // the POST in flight holds this object in its batch, and a POST whose answer was lost
-      // marks its batch's ops unsent for the resend. A copy kept `inflight` for good, so the
-      // resend left the op out and the next op went alone on a base below the op's admission,
-      // where the room moved it past the op's own letters (" ua2" refused as outside the text,
-      // the verifier's seeds 10001, 10003 and 10004)
-      op.mutations = moved;
-      next.push(op);
+    // the ops are moved in place, never copied (hardening HR-RC#9, RELIABILITY-2's residual R):
+    // the POST in flight holds each in its batch, and a POST whose answer was lost marks its
+    // batch's ops unsent for the resend. A copy kept `inflight` for good, so the resend left the
+    // op out and the next op went alone on a base below the op's admission, where the room moved
+    // it past the op's own letters (" ua2" refused as outside the text, seeds 10001 to 10004)
+    const { kept, unplaceable, bridged } = bridgePast(pending, mutations, server, transform);
+    for (const op of unplaceable) {
+      runEnds.clear();
+      options.onUnplaceable?.(op);
+      const rejected: Rejected = { opId: op.opId, reason: 'stale' };
+      rejects.push({
+        ...rejected,
+        ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+      });
+      op.settle?.({ rejected });
     }
+    const next = kept;
     advanceRunEnds(runEnds, bridged, false);
     placed.set(entry, bridged);
     pending = next;
@@ -1625,6 +1672,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   const noteCaughtUp = (): void => {
     if (caughtUp || seq < helloSeq) return;
     caughtUp = true;
+    wakeCaughtUp();
     if (pending.some((op) => !op.inflight)) scheduleFlush('now');
   };
 
@@ -1729,6 +1777,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * and settles what it still names. Above the position it is buffered by seq.
    */
   const take = (entry: Entry): void => {
+    // an entry under the page's own position, read for a saved queue's Apply (HR-RC#5a)
+    // the page's document holds it already, so it is kept and never applied
+    if (backlogFrom !== null && entry.seq > backlogFrom && entry.seq <= loadedAt) {
+      const rows = backlog.get(entry.seq) ?? [];
+      if (!rows.some((row) => row.opId === entry.opId)) backlog.set(entry.seq, [...rows, entry]);
+      settleBehind(entry);
+      return;
+    }
     if (entry.seq < seq) {
       settleBehind(entry);
       return;
@@ -2363,14 +2419,14 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     return streamBackoff;
   };
 
-  const openStream = (): void => {
+  const openStream = (from?: number): void => {
     if (stopped || stream !== null) return;
     const retire = retireList();
     let reported = false;
     let self: StreamHandle | null = null;
     opens += 1;
     const open = opens;
-    const since = seq;
+    const since = from ?? seq;
     const handle = transport.open({
       since,
       ...(retire.length === 0 ? {} : { retire }),
@@ -2535,10 +2591,87 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   // -------------------------------------------------------------------------------------------
   // The persisted queue of an earlier tab (SPEC-3 0.7)
 
-  const offerPersisted = async (): Promise<void> => {
+  /**
+   * The entries that landed after a saved queue's position, in seq order, or null when this page
+   * does not hold every one of them (hardening HR-RC#5a, RC#5b): the backlog the first open read
+   * up to the page's own position, then the entries applied since.
+   */
+  const landedSince = (from: number): Entry[] | null => {
+    if (from > seq) return null;
+    if (from < loadedAt && (backlogFrom === null || backlogFrom > from)) return null;
+    const rows: Entry[] = [];
+    for (let at = from + 1; at <= seq; at += 1) {
+      const here = at <= loadedAt ? backlog.get(at) : recent.filter((row) => row.seq === at);
+      if (here === undefined || here.length === 0) return null;
+      rows.push(...here);
+    }
+    return rows;
+  };
+
+  /**
+   * Apply of a queue an earlier tab of this browser saved (hardening HR-RC#5a, RELIABILITY-5): its
+   * pending ops were written on the document at `position`, so they are moved past every entry
+   * that landed since, by the rule the live stream moves this tab's own pending ops
+   * (`bridgePast`), then past this tab's unsent ops, and only then applied. An op whose entry is
+   * among those that landed (its POST reached the room before the tab closed) is the room's
+   * already and is not applied again. Before this Apply wrote each op at its old offsets on the
+   * current document: "Zulu Alpha Bravo Ch Xrayarlie" for " Xray" typed after "Charlie". A queue
+   * whose landed entries this page does not hold (from before newer edits, from another tier, or
+   * saved by a build that kept no position) applies as before, at its saved offsets, and an op the
+   * document no longer takes is dropped with the queue, as before.
+   */
+  const placePersisted = (queue: PersistedQueue): void => {
+    const ops: PersistedOp[] = queue.entries
+      .filter((op) => op.seq === undefined && op.kind === 'edit' && op.mutations !== undefined)
+      .map((op) => ({ ...op, mutations: [...(op.mutations ?? [])] }));
+    if (ops.length === 0) return;
+    const landed =
+      queue.position === undefined || queue.tier !== tier ? null : landedSince(queue.position);
+    if (landed === null) {
+      for (const op of ops) {
+        try {
+          queueLocal(op.mutations ?? [], 'persisted', 'now', op.note);
+        } catch {
+          // an op the document no longer takes is dropped with the queue
+        }
+      }
+      return;
+    }
+    let queued = ops.map((op) => ({ ...op, kind: 'edit' as const }));
+    for (const entry of landed) {
+      if (entry.kind !== 'edit') continue;
+      const names = new Set([entry.opId, ...coversOf(entry)]);
+      if (queued.some((op) => names.has(op.opId))) {
+        // the earlier tab's POST of these reached the room: the ops after them were written on them
+        queued = queued.filter((op) => !names.has(op.opId));
+        continue;
+      }
+      // an op nothing of which survives is dropped with the queue, as before
+      queued = bridgePast(queued, entry.mutations ?? [], server, transform).kept;
+    }
+    // this tab's unsent ops are in the local document already: the saved ops land after them
+    for (const op of pending) {
+      if (op.kind !== 'edit' || op.mutations === undefined) continue;
+      queued = bridgePast(queued, op.mutations, server, transform).kept;
+    }
+    for (const op of queued) {
+      try {
+        queueLocal(
+          op.mutations ?? [],
+          'persisted',
+          'now',
+          op.note,
+          op.run === true ? { run: true } : {},
+        );
+      } catch {
+        // an op the document no longer takes is dropped with the queue
+      }
+    }
+  };
+
+  const offerPersisted = async (queues: readonly PersistedQueue[]): Promise<void> => {
     const store = options.pendingStore;
     if (store === undefined || options.onPersisted === undefined) return;
-    const queues = await store.load(deckId, now());
     let others = queues.filter((queue) => queue.clientId !== clientId && unsavedCount(queue) > 0);
     if (others.length === 0) return;
     // the ops the server's records already hold leave the offer (item 109); a queue with nothing
@@ -2569,28 +2702,37 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     options.onPersisted({
       count,
       apply: async () => {
+        // the stream reaches the head first, so every entry since a queue's position is here
+        await whenCaughtUp();
+        if (stopped) return;
         for (const queue of others) {
-          for (const op of queue.entries) {
-            if (op.seq !== undefined || op.kind !== 'edit' || op.mutations === undefined) continue;
-            try {
-              client.apply(
-                op.mutations,
-                'persisted',
-                'now',
-                op.note === undefined ? {} : { note: op.note },
-              );
-            } catch {
-              // an op the document no longer takes is dropped with the queue
-            }
-          }
+          placePersisted(queue);
           await store.remove(queue.key);
         }
         emitChange(local, 'all', 'persisted');
+        emitStatus();
       },
       discard: async () => {
         for (const queue of others) await store.remove(queue.key);
       },
     });
+  };
+
+  /**
+   * The oldest position a saved queue was written on that the first stream open should replay
+   * from (HR-RC#5a): a queue of another tab of this browser, of this tier, saved below this page's
+   * position and within the window an ops POST's base may trail the head by (BASE_SEQ_WINDOW).
+   * Null when no queue needs a replay.
+   */
+  const replayFrom = (queues: readonly PersistedQueue[]): number | null => {
+    let from: number | null = null;
+    for (const queue of queues) {
+      if (unsavedCount(queue) === 0 || queue.position === undefined || queue.tier !== tier)
+        continue;
+      if (queue.position >= seq || seq - queue.position > BASE_SEQ_WINDOW) continue;
+      from = from === null ? queue.position : Math.min(from, queue.position);
+    }
+    return from;
   };
 
   /* the browser's offline and online events (item 100): Offline reads within a second of the
@@ -2620,6 +2762,57 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }
     scheduleFlush('now');
   };
+  /**
+   * The local half of a write (`apply`): the mutations apply to the local document now, the op is
+   * pending and flushes at its cadence. A change the room could never take (HR-RC#4) is refused
+   * with its sentence before anything changes. `run` keeps the declaration an op of a saved queue
+   * was posted with (HR-RC#5a).
+   */
+  const queueLocal = (
+    mutations: Mutation[],
+    label: string,
+    flush: FlushClass | undefined,
+    noteText: string | undefined,
+    saved?: { run?: true },
+  ): ReturnType<RoomClient['apply']> => {
+    const result = applyMutations(local, mutations);
+    // a change the room could never take is refused here with its sentence, so nothing
+    // unsendable enters the queue (HR-RC#4)
+    if (oversizeChange(mutations, result.document))
+      refuseLocal(mutations, 'too-large', OVERSIZE_SENTENCE);
+    clock += 1;
+    // the run rule's declaration, read in the frame the op was written in (R1-R2h)
+    const run = advanceRunEnds(runEnds, mutations, true) || saved?.run === true;
+    const note = noteText?.trim();
+    let settle: ((outcome: Settled) => void) | undefined;
+    const settled = new Promise<Settled>((resolve) => {
+      settle = resolve;
+    });
+    // the op holds its own copy: the controller's typing group grows the array it handed in
+    // with every later burst (controller.tsx commitAs, `group.mutations.push`), and a shared
+    // reference made an offline resend, a lost POST's resend and the persisted queue carry a
+    // later burst's splice twice (realtime.spec.ts:515 `late12323`; s2.md S2-R1)
+    pending.push({
+      opId: '',
+      kind: 'edit',
+      mutations: [...mutations],
+      label,
+      inflight: false,
+      ...(run ? { run: true as const } : {}),
+      at: clock,
+      inverse: result.inverse,
+      ...(note === undefined || note === '' ? {} : { note: note.slice(0, ENTRY_NOTE_MAX) }),
+      ...(settle === undefined ? {} : { settle }),
+    });
+    // the other people's carets on the texts this write spliced move past it now (3.5)
+    shiftRosterCaretsPast(mutations);
+    emitChange(result.document, changedSlides(mutations), 'local');
+    persist();
+    emitStatus();
+    scheduleFlush(flush ?? flushClassOf(mutations));
+    return { document: result.document, inverse: result.inverse, at: clock, settled };
+  };
+
   const client: RoomClient = {
     start() {
       if (stream !== null || stopped) return;
@@ -2628,9 +2821,32 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         window.addEventListener('online', onBrowserOnline);
         offline = browserOffline();
       }
-      openStream();
       heartbeat();
-      void offerPersisted();
+      const store = options.pendingStore;
+      if (store === undefined || options.onPersisted === undefined) {
+        openStream();
+        return;
+      }
+      // the saved queues first, for at most PENDING_LOAD_WAIT_MS: a queue written below this
+      // page's position opens the stream from there, so Apply can place it (HR-RC#5a)
+      let opened = false;
+      const openOnce = (from?: number): void => {
+        if (opened || stopped) return;
+        opened = true;
+        openStream(from);
+      };
+      const wait = timers.setTimeout(() => openOnce(), PENDING_LOAD_WAIT_MS);
+      void store
+        .load(deckId, now())
+        .catch(() => [] as PersistedQueue[])
+        .then((queues) => {
+          timers.clearTimeout(wait);
+          if (!opened) {
+            backlogFrom = replayFrom(queues);
+            openOnce(backlogFrom ?? undefined);
+          }
+          void offerPersisted(queues);
+        });
     },
     async stop() {
       stopped = true;
@@ -2663,42 +2879,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       persist();
     },
     apply(mutations, label, flush, applyOptions) {
-      const result = applyMutations(local, mutations);
-      // a change the room could never take is refused here with its sentence, so nothing
-      // unsendable enters the queue (HR-RC#4)
-      if (oversizeChange(mutations, result.document))
-        refuseLocal(mutations, 'too-large', OVERSIZE_SENTENCE);
-      clock += 1;
-      // the run rule's declaration, read in the frame the op was written in (R1-R2h)
-      const run = advanceRunEnds(runEnds, mutations, true);
-      const note = applyOptions?.note?.trim();
-      let settle: ((outcome: Settled) => void) | undefined;
-      const settled = new Promise<Settled>((resolve) => {
-        settle = resolve;
-      });
-      // the op holds its own copy: the controller's typing group grows the array it handed in
-      // with every later burst (controller.tsx commitAs, `group.mutations.push`), and a shared
-      // reference made an offline resend, a lost POST's resend and the persisted queue carry a
-      // later burst's splice twice (realtime.spec.ts:515 `late12323`; s2.md S2-R1)
-      pending.push({
-        opId: '',
-        kind: 'edit',
-        mutations: [...mutations],
-        label,
-        inflight: false,
-        ...(run ? { run: true as const } : {}),
-        at: clock,
-        inverse: result.inverse,
-        ...(note === undefined || note === '' ? {} : { note: note.slice(0, ENTRY_NOTE_MAX) }),
-        ...(settle === undefined ? {} : { settle }),
-      });
-      // the other people's carets on the texts this write spliced move past it now (3.5)
-      shiftRosterCaretsPast(mutations);
-      emitChange(result.document, changedSlides(mutations), 'local');
-      persist();
-      emitStatus();
-      scheduleFlush(flush ?? flushClassOf(mutations));
-      return { document: result.document, inverse: result.inverse, at: clock, settled };
+      return queueLocal(mutations, label, flush, applyOptions?.note);
     },
     resync(at) {
       return resync(at ?? revision);

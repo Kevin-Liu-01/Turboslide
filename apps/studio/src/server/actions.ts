@@ -118,6 +118,7 @@ import {
   commentCallerFor,
   decideFor,
   inboxActorsFor,
+  keyRoomIdentity,
   realtimeChannel,
   realtimeTier,
   redisCommands,
@@ -789,6 +790,17 @@ async function callerFactsFor(request: Request | undefined): Promise<CallerFacts
   return { identity, caller, author, origin };
 }
 
+/**
+ * The context of the API key a request carries, as the auth runtime resolved it for the agent
+ * gate (`auth/identity.ts` `requestIdentity`, kind `agent`): the key's owner with the key's
+ * scopes. Null for every other caller: a browser, the deployment bearer, the checkout holder.
+ */
+function keyContextOf(facts: CallerFacts): AuthContext | null {
+  return facts.identity?.kind === 'agent' && facts.identity.agent !== null
+    ? facts.identity.ctx
+    : null;
+}
+
 /** The request facts B3's account and admin actions read (auth/actions.ts). */
 function accountFactsFor(request: Request, deckId: string): () => Promise<ActionRequestFacts> {
   return async () => ({
@@ -826,21 +838,37 @@ function deniedError(status: number, body: unknown): Error {
  * HTTP and MCP transports and the /api/comments route are one implementation, the checkpointer
  * writes the sidecar, and the anchors follow the text. They replace the file record handlers
  * registerRecordActions put on the same ids, which the CLI runs over a checkout with no server.
+ * `key` is the context of the API key the request carries (`keyContextOf`): the caller is that
+ * key, never the room's bearer rule (hardening HR-SD#1d).
  */
-function registerRoomCommentHandlers(dispatcher: Dispatcher, request: Request, deckId: string) {
+function registerRoomCommentHandlers(
+  dispatcher: Dispatcher,
+  request: Request,
+  deckId: string,
+  key: AuthContext | null,
+) {
   for (const id of COMMENT_ACTION_IDS) {
     dispatcher.register(id, async (input) => {
-      const result = await commentCallerFor(request, deckId, id);
+      const known = key === null ? undefined : (keyRoomIdentity(key) ?? undefined);
+      const result = await commentCallerFor(request, deckId, id, known);
       if (!result.ok) throw deniedError(result.status, result.body);
       return runCommentAction(result.caller, id, input);
     });
   }
 }
 
-/** The caller's inbox over B2's inbox store (SPEC-3 5.5; b2.md R12), the same as /api/notify. */
-function registerNotificationHandlers(dispatcher: Dispatcher, request: Request, deckId: string) {
+/**
+ * The caller's inbox over B2's inbox store (SPEC-3 5.5; b2.md R12), the same as /api/notify. An
+ * API key's inbox is its own, `agent:<tokenId>`, the principal its comments name (HR-SD#1d).
+ */
+function registerNotificationHandlers(
+  dispatcher: Dispatcher,
+  request: Request,
+  deckId: string,
+  key: AuthContext | null,
+) {
   const caller = async (action: string): Promise<NotificationCaller> => {
-    const identity = await roomIdentity(request);
+    const identity = (key === null ? null : keyRoomIdentity(key)) ?? (await roomIdentity(request));
     const owner = await decideFor(identity, deckId, 'settings', action);
     return {
       principalId: identity.principalId ?? identity.identity,
@@ -1458,8 +1486,9 @@ export async function deckDispatcher(
     objectColo: () => objectColoOf(deckId),
   });
   if (request !== undefined) {
-    registerRoomCommentHandlers(dispatcher, request, deckId);
-    registerNotificationHandlers(dispatcher, request, deckId);
+    const key = keyContextOf(facts);
+    registerRoomCommentHandlers(dispatcher, request, deckId, key);
+    registerNotificationHandlers(dispatcher, request, deckId, key);
     // the picture files go to the public store on the blob tier and to the state folder
     // elsewhere (docs/archive/rounds/PEOPLE.md 4.3; AUDIT.md defect 12), one selection for the writer, the
     // route and the janitor

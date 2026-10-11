@@ -79,6 +79,7 @@ import {
   yieldConcurrentConversion,
 } from '@turboslide/realtime/room-core';
 import type { Landed, ReaderDeps, Rejected, ViewerFacts } from '@turboslide/realtime/room-core';
+import { scopedCapabilities } from '@turboslide/schema/access';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { threadParticipants } from '@turboslide/schema/comments';
 import type { DeckDocument } from '@turboslide/schema/deck';
@@ -658,6 +659,28 @@ export async function requestIdentity(
     kind: principal.kind === 'account' ? 'signedIn' : 'anonymous',
     ...(setCookie !== undefined ? { setCookie } : {}),
     record,
+  };
+}
+
+/**
+ * The room's identity of an API key the agent surface resolved (hardening HR-SD#1d, the verifier
+ * of HR-SD#1d): `ctx` is the key's context from the auth runtime (`auth/identity.ts`
+ * `requestIdentity`), the key's owner with the key's scopes, which `decide()` cuts the owner's
+ * role to; the key writes and reads its inbox as `agent:<tokenId>`. `requestIdentity` above reads
+ * the deployment bearer alone, so before this the deck dispatcher's comment and notification
+ * callers took a user key for a stranger where `TURBOSLIDE_TOKEN` is set (every comment action
+ * answered 403 "not allowed", the owner's key included) and for the checkout holder where it is
+ * not (every id, to any key on localhost).
+ */
+export function keyRoomIdentity(ctx: AuthContext): RequestIdentity | null {
+  const agent = ctx.agent;
+  if (agent === undefined) return null;
+  return {
+    ctx: { ...ctx, linkGrants: [...ctx.linkGrants] },
+    principalId: null,
+    identity: `agent:${agent.tokenId}`,
+    kind: 'agent',
+    record: null,
   };
 }
 
@@ -1643,12 +1666,14 @@ export const COMMENT_CALLER_SLOW_MS = 1000;
 /**
  * The caller of a comment action on a request: the identity, `authorize()` for the capability the
  * action needs (a denial is the body of 6.2), the capabilities of the role on the record, the
- * author the server derives, and the inbox's Redis handle.
+ * author the server derives, and the inbox's Redis handle. `known` is an identity the transport
+ * already resolved, an API key's (`keyRoomIdentity`), in place of the request's.
  */
 export async function commentCallerFor(
   request: Request,
   deckId: string,
   action: CommentActionId,
+  known?: RequestIdentity,
 ): Promise<CommentCallerResult> {
   const started = Date.now();
   const capability = commentCapabilityOf(action);
@@ -1665,7 +1690,7 @@ export async function commentCallerFor(
       (error: unknown) => ({ ok: false as const, error }),
     );
   const [identity, opened, read] = await Promise.all([
-    requestIdentity(request),
+    known ?? requestIdentity(request),
     settle(roomFor(deckId)),
     settle(effectiveAccess(deckId)),
   ]);
@@ -1684,7 +1709,14 @@ export async function commentCallerFor(
       `${deckId}: ${action} caller took ${total} ms (identity, room and record ${decided - started} ms, the decision ${Date.now() - decided} ms)`,
     );
   }
-  const capabilities = new Set(capabilitiesOf(decision.role, record));
+  /* a key holds its owner's role cut to its scopes (09 2.1; `decide()` reads the cell the same
+     way): `share`, which keeps the ids, with the share scope alone, and `remove`, which deletes
+     another author's comment, with the admin scope alone (HR-SD#1d) */
+  const role = capabilitiesOf(decision.role, record);
+  const capabilities =
+    decision.via === 'agent' && identity.ctx.agent !== undefined
+      ? scopedCapabilities(new Set(role), identity.ctx.agent.scopes)
+      : new Set(role);
   const caller: CommentCaller = {
     room,
     author: authorOf(identity),

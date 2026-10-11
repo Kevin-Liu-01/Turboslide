@@ -130,6 +130,16 @@ function authorOf(who: Browser): Author {
   return { kind: 'human', name: who.name, principalId: who.id };
 }
 
+/** One action through the deck's dispatcher for a browser's request, as the editor's window runs it. */
+async function dispatchAs(who: Browser, action: string, input: object): Promise<unknown> {
+  const request = new Request(`${ORIGIN}/edit/${DECK}`, { headers: { cookie: who.cookie } });
+  const { dispatcher } = await deckDispatcher(DECK, { request });
+  return dispatcher.dispatch(action, input, {
+    author: authorOf(who),
+    deckDir: join(root, 'decks', DECK),
+  });
+}
+
 let runtime: ReturnType<typeof buildIdentityRuntime>;
 
 beforeAll(async () => {
@@ -273,30 +283,16 @@ describe('Make a copy with Copy comments (HR-SD#1d)', () => {
 
   /** One deck.copy through the deck's dispatcher, as the editor's Make a copy dialog sends it. */
   async function dispatchCopy(who: Browser, input: object): Promise<unknown> {
-    const request = new Request(`${ORIGIN}/edit/${DECK}`, { headers: { cookie: who.cookie } });
-    const { dispatcher } = await deckDispatcher(DECK, { request });
     const baseRevision = (await (await openDeckStore(DECK)).read()).document.deck.revision;
-    return dispatcher.dispatch(
-      'deck.copy',
-      { id: DECK, baseRevision, ...input },
-      {
-        author: authorOf(who),
-        deckDir: join(root, 'decks', DECK),
-      },
-    );
+    return dispatchAs(who, 'deck.copy', { id: DECK, baseRevision, ...input });
   }
 
   beforeAll(async () => {
     // the owner's thread on the first slide, in the deck's sidecar once the room flushes
-    const request = new Request(`${ORIGIN}/edit/${DECK}`, {
-      headers: { cookie: people.owner.cookie },
+    await dispatchAs(people.owner, 'comment.add', {
+      anchor: { kind: 'slide', slideId },
+      body: { text: 'For the owner only', mentions: [] },
     });
-    const { dispatcher } = await deckDispatcher(DECK, { request });
-    await dispatcher.dispatch(
-      'comment.add',
-      { anchor: { kind: 'slide', slideId }, body: { text: 'For the owner only', mentions: [] } },
-      { author: authorOf(people.owner), deckDir: join(root, 'decks', DECK) },
-    );
     await flushRoom(DECK);
     expect(commentFiles(DECK)).toContain(people.owner.id);
   }, 120_000);
@@ -356,5 +352,49 @@ describe("the window's lease refusal (HR-SD#1d sweep, leaseSlideFn)", () => {
     await as(people.owner, () =>
       write.leaseSlide({ deckId: DECK, slideId, author: authorOf(people.owner), release: true }),
     );
+  });
+});
+
+describe('the record a publish answers (HR-SD#1d sweep, deck.publish and deck.unpublish)', () => {
+  const recordRevision = async (): Promise<number> =>
+    (await readStoredAccess(DECK))?.record.revision ?? 0;
+
+  it('answers an editor who may not share the record share.get gives it, the 409 included', async () => {
+    const base = await recordRevision();
+    const published = JSON.stringify(
+      await dispatchAs(people.editor, 'deck.publish', { id: DECK, baseRevision: base }),
+    );
+    expect(othersIn(published, people.editor)).toEqual([]);
+    expect(published).toContain(`"owner":"${standInFor(DECK, people.owner.id)}"`);
+    expect(published).toContain('"links":[]');
+    // a stale base: the 409 carries the current record, shaped the same way
+    const stale = (await dispatchAs(people.editor, 'deck.unpublish', {
+      id: DECK,
+      baseRevision: base,
+    }).catch((error: unknown) => error)) as Error & { current?: unknown };
+    expect(stale.name).toBe('ConflictError');
+    expect(othersIn(JSON.stringify(stale.current), people.editor)).toEqual([]);
+    const unpublished = JSON.stringify(
+      await dispatchAs(people.editor, 'deck.unpublish', {
+        id: DECK,
+        baseRevision: await recordRevision(),
+      }),
+    );
+    expect(othersIn(unpublished, people.editor)).toEqual([]);
+  });
+
+  it('answers the owner the whole record', async () => {
+    const published = JSON.stringify(
+      await dispatchAs(people.owner, 'deck.publish', {
+        id: DECK,
+        baseRevision: await recordRevision(),
+      }),
+    );
+    expect(published).toContain(people.viewer.id);
+    expect(published).toContain(people.editor.id);
+    await dispatchAs(people.owner, 'deck.unpublish', {
+      id: DECK,
+      baseRevision: await recordRevision(),
+    });
   });
 });

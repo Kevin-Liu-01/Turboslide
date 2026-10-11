@@ -8,6 +8,7 @@
 // show that they name the same person. It is no principal id: no store path, lookup or index
 // takes it. This file is the one definition, with no `node:` import, so the studio, the Worker's
 // deck room and the reader projection of @turboslide/realtime room-core share it byte for byte.
+import type { AccessRecord } from '@turboslide/schema/access';
 import type {
   Comment,
   CommentAuthor,
@@ -119,6 +120,46 @@ export function versionsWithStandIns<V extends { author: Author }>(
   people: StandIns,
 ): V[] {
   return versions.map((version) => versionWithStandIns(version, people));
+}
+
+// ---------------------------------------------------------------------------------------------
+// The access record as a reader who may not share reads it: the editor's loader (the studio's
+// recordForReader), and the record a share write answers such a caller, an editor's deck.publish
+// and deck.unpublish and a stale record write's 409 (the record functions of apps/cli, HR-SD#1d).
+
+/** The fields of an access record that name people or hold a sharer's business. */
+type ReaderRecordFields = Pick<
+  AccessRecord,
+  'owner' | 'pendingOwner' | 'createdBy' | 'links' | 'publish' | 'grants' | 'requests'
+>;
+
+/**
+ * The record with no other principal's id and none of a sharer's business: the owner, the
+ * creator and the publisher as stand-ins, the reader's own grants (each inviter a stand-in) and
+ * the reader's own requests alone, no links and no pending owner. The shape stays a whole record,
+ * because the page and the action schemas read every list. Pure.
+ */
+export function recordWithStandIns<R extends ReaderRecordFields>(
+  record: R,
+  own: ReadonlySet<string>,
+  people: StandIns,
+): R {
+  const mine = (id: string | null): boolean => id !== null && own.has(id);
+  return {
+    ...record,
+    owner: record.owner === null ? null : people(record.owner),
+    pendingOwner: null,
+    createdBy: people(record.createdBy),
+    links: [],
+    publish:
+      record.publish === null
+        ? null
+        : { ...record.publish, publishedBy: people(record.publish.publishedBy) },
+    grants: record.grants
+      .filter((grant) => mine(grant.principalId))
+      .map((grant) => ({ ...grant, invitedBy: people(grant.invitedBy) })),
+    requests: record.requests.filter((request) => mine(request.principalId)),
+  };
 }
 
 // ---------------------------------------------------------------------------------------------

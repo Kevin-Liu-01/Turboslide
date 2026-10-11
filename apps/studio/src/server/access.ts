@@ -47,6 +47,7 @@ import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
 import { isPendingEmailGrantFor } from '@turboslide/identity/access';
+import { recordWithStandIns } from '@turboslide/identity/stand-in';
 import { agentPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import type { LinkGrant, Principal } from '@turboslide/identity/access';
 import type { PrincipalRecord } from '@turboslide/identity/principal';
@@ -1136,29 +1137,15 @@ export function sharesDeck(record: AccessRecord, role: Role | null): boolean {
  * other person's principal id (stand-ins.ts), so the owner is a stand-in the page's people map
  * names, and only the reader's own grants and requests. The links, the pending owner and the
  * publisher's id are a sharer's business. The shape stays a whole record, because the editor's
- * loader hands it to a page that reads every list.
+ * loader hands it to a page that reads every list. One definition with the record functions'
+ * answers to such a caller: `recordWithStandIns` (@turboslide/identity/stand-in, HR-SD#1d).
  */
 export function recordForReader(
   record: AccessRecord,
   own: ReadonlySet<string>,
   people: StandIns = standInsFor(record.deckId, own),
 ): AccessRecord {
-  const mine = (id: string | null): boolean => id !== null && own.has(id);
-  return {
-    ...record,
-    owner: record.owner === null ? null : people(record.owner),
-    pendingOwner: null,
-    createdBy: people(record.createdBy),
-    links: [],
-    publish:
-      record.publish === null
-        ? null
-        : { ...record.publish, publishedBy: people(record.publish.publishedBy) },
-    grants: record.grants
-      .filter((grant) => mine(grant.principalId))
-      .map((grant) => ({ ...grant, invitedBy: people(grant.invitedBy) })),
-    requests: record.requests.filter((request) => mine(request.principalId)),
-  };
+  return recordWithStandIns(record, own, people);
 }
 
 /**

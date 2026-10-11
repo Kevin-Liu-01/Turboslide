@@ -32,6 +32,7 @@ import {
   maxRole,
   newDeckRecord,
 } from '@turboslide/schema/access';
+import { recordWithStandIns } from '@turboslide/identity/stand-in';
 import { ConflictError, ForbiddenError, NotImplementedError } from '@turboslide/schema/errors';
 import { canonicalJson } from '@turboslide/schema/json';
 
@@ -188,6 +189,23 @@ function require(
   return mine;
 }
 
+/**
+ * The record a write answers its caller (hardening HR-SD#1d): whole for a share holder; for any
+ * other caller the record as `share.get` and the editor's loader give it, every other principal
+ * a stand-in where the studio gives one (`deps.standIn`), the caller's own grants and requests
+ * alone, no links and no pending owner (`recordWithStandIns`). Before this an editor who may not
+ * share read the whole record, every invitee's id and address among it, in the answer of
+ * `deck.publish` and `deck.unpublish` and in the 409 of a stale `baseRevision`.
+ */
+function recordForCaller(deps: AccessDeps, record: AccessRecord, now: string): AccessRecord {
+  const mine = standing(record, deps.caller, now);
+  if (mine !== null && capabilitiesOf(record, mine).has('share')) return record;
+  const ids = idsOf(deps.caller);
+  const shown = (id: string): string =>
+    ids.has(id) || deps.standIn === undefined ? id : deps.standIn(id);
+  return recordWithStandIns(record, ids, shown);
+}
+
 /** Writes through the lock with the record's baseRevision rule; the mutator returns what the action answers beside the record. */
 async function write<T>(
   deps: AccessDeps,
@@ -209,7 +227,7 @@ async function write<T>(
     if (record.revision !== baseRevision) {
       throw new ConflictError(
         `the access record is at revision ${record.revision}, not ${baseRevision}; re-read and retry`,
-        { currentRevision: record.revision, current: record },
+        { currentRevision: record.revision, current: recordForCaller(deps, record, now) },
       );
     }
     const next: AccessRecord = structuredClone(record);
@@ -918,7 +936,7 @@ export async function deckPublish(
   );
   const origin = deps.origin.replace(/\/$/, '');
   return {
-    record,
+    record: recordForCaller(deps, record, stamp(deps)),
     url: `${origin}/deck/${deps.deckId}?p=${answer}&present=1`,
     embed: `${origin}/embed/${deps.deckId}?p=${answer}`,
   };
@@ -937,7 +955,7 @@ export async function deckUnpublish(
     },
     () => ({ kind: 'share', summary: 'Publishing stopped' }),
   );
-  return { record };
+  return { record: recordForCaller(deps, record, stamp(deps)) };
 }
 
 /** An admin sets a deck's owner (SPEC-3 12 admin.assignOwner). */

@@ -19,8 +19,9 @@ import { memoryChannel } from '../src/memory.ts';
 import type { OpsPost } from '../src/protocol.ts';
 import { fakeRoomServer, tabTransport } from './fake-transport.ts';
 import type { FakeIdentity } from './fake-transport.ts';
-import { memoryPendingStore } from './pending-store.ts';
-import { createRoomClient, defaultTransform } from './room-client.ts';
+import { memoryPendingStore, pendingKey } from './pending-store.ts';
+import type { PersistedQueue } from './pending-store.ts';
+import { PERSISTED_SENTENCE, createRoomClient, defaultTransform } from './room-client.ts';
 import type { PersistedOffer, Rejected, RoomClientOptions, RoomTransport } from './room-client.ts';
 
 const SLIDE = 'content-rule';
@@ -169,6 +170,41 @@ describe('Apply of a saved queue (HR-RC#5a, RC#5b, RC#5d)', () => {
     await settled(c.client);
     expect(textOf(h.server.document())).toBe(`${start} Charlie`);
     expect(c.notices).toEqual([]);
+    await c.client.stop();
+  });
+
+  it('hands the text back on a card for a queue saved without a position or on another tier (RC#5b)', async () => {
+    const h = room();
+    const start = textOf(h.server.document());
+    const saved = (clientId: string, extra: Partial<PersistedQueue>): PersistedQueue => ({
+      key: pendingKey('gt-brand', clientId),
+      deckId: 'gt-brand',
+      clientId,
+      savedAt: new Date().toISOString(),
+      entries: [{ opId: `${clientId}:1`, kind: 'edit', mutations: [splice(0, 'Kept text ')] }],
+      ...extra,
+    });
+    // an older build saved no position; a queue of the do tier read on the memory tier
+    await h.store.save(saved('oldbuild', {}));
+    await h.store.save(saved('othertier', { position: 0, tier: 'do' }));
+    const c = h.tab(kevin);
+    c.client.start();
+    await until(() => c.offer() !== undefined && c.client.status().connected);
+    expect(c.offer()?.count).toBe(2);
+    await c.offer()?.apply();
+    expect(c.notices).toEqual([
+      expect.objectContaining({
+        message: PERSISTED_SENTENCE,
+        mutations: [splice(0, 'Kept text ')],
+      }),
+      expect.objectContaining({
+        message: PERSISTED_SENTENCE,
+        mutations: [splice(0, 'Kept text ')],
+      }),
+    ]);
+    expect(textOf(c.client.document())).toBe(start);
+    expect(c.client.status().pending).toBe(0);
+    expect(await h.store.load('gt-brand')).toHaveLength(0);
     await c.client.stop();
   });
 });

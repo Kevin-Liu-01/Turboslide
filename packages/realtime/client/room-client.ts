@@ -244,6 +244,14 @@ export const UNPLACEABLE_SENTENCE =
 export const OVERSIZE_SENTENCE = 'This slide would pass 200 kB. Split the text into another slide.';
 /** The bytes an ops POST keeps for its envelope (the client id, the base, the entry fields). */
 export const POST_ENVELOPE_BYTES = 1024;
+/**
+ * The sentence of a saved change Apply cannot place (hardening HR-RC#5b, RELIABILITY-5): the
+ * queue an earlier tab of this browser saved is from before the edits the room still holds
+ * (past the replay window), from another tier, or from a build that saved no position, so its
+ * text comes back on a card to be added again.
+ */
+export const PERSISTED_SENTENCE =
+  'This change was saved in this browser before newer edits. Copy its text to add it again.';
 
 /** The longest the first stream open waits for the saved queues to load (HR-RC#5a). */
 export const PENDING_LOAD_WAIT_MS = 1000;
@@ -2608,6 +2616,20 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     return rows;
   };
 
+  /** Saved ops returned to their author as text on the reject card, with `sentence` (HR-RC#5b). */
+  const handBack = (ops: readonly PersistedOp[], sentence: string): void => {
+    for (const op of ops) {
+      const notice = {
+        opId: op.opId,
+        reason: 'stale' as const,
+        message: sentence,
+        ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+      };
+      rejects.push(notice);
+      options.onReject?.(notice);
+    }
+  };
+
   /**
    * Apply of a queue an earlier tab of this browser saved (hardening HR-RC#5a, RELIABILITY-5): its
    * pending ops were written on the document at `position`, so they are moved past every entry
@@ -2616,9 +2638,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
    * among those that landed (its POST reached the room before the tab closed) is the room's
    * already and is not applied again. Before this Apply wrote each op at its old offsets on the
    * current document: "Zulu Alpha Bravo Ch Xrayarlie" for " Xray" typed after "Charlie". A queue
-   * whose landed entries this page does not hold (from before newer edits, from another tier, or
-   * saved by a build that kept no position) applies as before, at its saved offsets, and an op the
-   * document no longer takes is dropped with the queue, as before.
+   * from before newer edits than the page holds, from another tier, or saved by a build that kept
+   * no position comes back as text on the reject card (RC#5b), as does an op nothing of which
+   * survives.
    */
   const placePersisted = (queue: PersistedQueue): void => {
     const ops: PersistedOp[] = queue.entries
@@ -2628,15 +2650,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     const landed =
       queue.position === undefined || queue.tier !== tier ? null : landedSince(queue.position);
     if (landed === null) {
-      for (const op of ops) {
-        try {
-          queueLocal(op.mutations ?? [], 'persisted', 'now', op.note);
-        } catch {
-          // an op the document no longer takes is dropped with the queue
-        }
-      }
+      handBack(ops, PERSISTED_SENTENCE);
       return;
     }
+    const lost: PersistedOp[] = [];
     let queued = ops.map((op) => ({ ...op, kind: 'edit' as const }));
     for (const entry of landed) {
       if (entry.kind !== 'edit') continue;
@@ -2646,13 +2663,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         queued = queued.filter((op) => !names.has(op.opId));
         continue;
       }
-      // an op nothing of which survives is dropped with the queue, as before
-      queued = bridgePast(queued, entry.mutations ?? [], server, transform).kept;
+      const step = bridgePast(queued, entry.mutations ?? [], server, transform);
+      queued = step.kept;
+      lost.push(...step.unplaceable);
     }
     // this tab's unsent ops are in the local document already: the saved ops land after them
     for (const op of pending) {
       if (op.kind !== 'edit' || op.mutations === undefined) continue;
-      queued = bridgePast(queued, op.mutations, server, transform).kept;
+      const step = bridgePast(queued, op.mutations, server, transform);
+      queued = step.kept;
+      lost.push(...step.unplaceable);
     }
     for (const op of queued) {
       try {
@@ -2663,10 +2683,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           op.note,
           op.run === true ? { run: true } : {},
         );
-      } catch {
-        // an op the document no longer takes is dropped with the queue
+      } catch (error) {
+        // a change refused at the slide cap has its card from `refuseLocal` already
+        const carded = error instanceof Error && error.message === OVERSIZE_SENTENCE;
+        if (!carded) lost.push(op);
       }
     }
+    if (lost.length > 0) handBack(lost, UNPLACEABLE_SENTENCE);
   };
 
   const offerPersisted = async (queues: readonly PersistedQueue[]): Promise<void> => {

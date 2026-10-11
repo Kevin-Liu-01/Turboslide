@@ -21,7 +21,12 @@ import { fakeRoomServer, tabTransport } from './fake-transport.ts';
 import type { FakeIdentity } from './fake-transport.ts';
 import { memoryPendingStore, pendingKey } from './pending-store.ts';
 import type { PersistedQueue } from './pending-store.ts';
-import { PERSISTED_SENTENCE, createRoomClient, defaultTransform } from './room-client.ts';
+import {
+  PERSISTED_SENTENCE,
+  QUEUE_FULL_SENTENCE,
+  createRoomClient,
+  defaultTransform,
+} from './room-client.ts';
 import type { PersistedOffer, Rejected, RoomClientOptions, RoomTransport } from './room-client.ts';
 
 const SLIDE = 'content-rule';
@@ -206,5 +211,31 @@ describe('Apply of a saved queue (HR-RC#5a, RC#5b, RC#5d)', () => {
     expect(c.client.status().pending).toBe(0);
     expect(await h.store.load('gt-brand')).toHaveLength(0);
     await c.client.stop();
+  });
+
+  it('refuses a change past the 1 MB the browser keeps and keeps every queued one (RC#5d)', async () => {
+    const h = room();
+    const a = h.tab(kevin);
+    a.client.start();
+    await until(() => a.client.status().connected);
+    (a.transport as ReturnType<typeof tabTransport>).offline(true);
+    const set = (n: number): Mutation => ({
+      op: 'block.set',
+      slideId: SLIDE,
+      blockId: BLOCK,
+      path: '/text',
+      value: `${n}`.repeat(150_000),
+    });
+    for (let n = 1; n <= 6; n += 1) a.client.apply([set(n)], 'type', 'now');
+    expect(() => a.client.apply([set(7)], 'type', 'now')).toThrow(QUEUE_FULL_SENTENCE);
+    expect(a.client.status().pending).toBe(6);
+    // the author reads the sentence on the card that keeps the refused change's text
+    expect(a.notices).toEqual([
+      expect.objectContaining({ message: QUEUE_FULL_SENTENCE, mutations: [set(7)] }),
+    ]);
+    await a.client.stop();
+    const [queue] = await h.store.load('gt-brand');
+    expect(queue?.entries).toHaveLength(6);
+    expect(queue?.entries[0]?.mutations).toEqual([set(1)]);
   });
 });

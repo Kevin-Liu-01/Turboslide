@@ -60,28 +60,35 @@ describe('the pending store', () => {
     expect(unsavedCount(queue([op(1, 4), op(2), op(3)]))).toBe(2);
   });
 
-  it('drops the oldest entries until the queue fits 1 MB', () => {
-    const big = queue(
-      Array.from({ length: 40 }, (_, i) => ({
-        opId: `${CLIENT}:${i}`,
-        kind: 'edit' as const,
-        mutations: [
-          {
-            op: 'block.set' as const,
-            slideId: 'content-rule',
-            blockId: 'p1',
-            path: '/text',
-            value: 'y'.repeat(50_000),
-          },
-        ],
-      })),
-    );
+  it('fits 1 MB by dropping retained entries, the oldest first, and keeps every pending one (HR-RC#5d)', () => {
+    const entry = (i: number, seq?: number): PersistedQueue['entries'][number] => ({
+      opId: `${CLIENT}:${i}`,
+      kind: 'edit' as const,
+      mutations: [
+        {
+          op: 'block.set' as const,
+          slideId: 'content-rule',
+          blockId: 'p1',
+          path: '/text',
+          value: 'y'.repeat(50_000),
+        },
+      ],
+      ...(seq === undefined ? {} : { seq }),
+    });
+    // 30 retained entries, then 10 pending ones: 2 MB
+    const big = queue([
+      ...Array.from({ length: 30 }, (_, i) => entry(i, i + 1)),
+      ...Array.from({ length: 10 }, (_, i) => entry(30 + i)),
+    ]);
     const trimmed = trimQueue(big);
     expect(new TextEncoder().encode(JSON.stringify(trimmed)).byteLength).toBeLessThanOrEqual(
       PENDING_MAX_BYTES,
     );
-    expect(trimmed.entries.length).toBeLessThan(40);
-    expect(trimmed.entries[trimmed.entries.length - 1]?.opId).toBe(`${CLIENT}:39`);
+    expect(unsavedCount(trimmed)).toBe(10);
+    expect(trimmed.entries.filter((row) => row.seq !== undefined)[0]?.opId).not.toBe(`${CLIENT}:0`);
+    // a queue of pending entries alone over the cap keeps them all (the client refuses the next)
+    const pending = queue(Array.from({ length: 25 }, (_, i) => entry(i)));
+    expect(trimQueue(pending).entries).toHaveLength(25);
   });
 
   it('treats a queue saved more than 24 hours ago as stale', () => {

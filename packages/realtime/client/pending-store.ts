@@ -51,7 +51,7 @@ export type PersistedQueue = {
 export type PendingStore = {
   /** every queue of a deck, this browser's, newest first; stale ones (24 h) are dropped on read */
   load: (deckId: string, now?: number) => Promise<PersistedQueue[]>;
-  /** writes a queue; an empty one removes the key; a queue over 1 MB keeps its newest entries */
+  /** writes a queue; an empty one removes the key; a queue over 1 MB drops its retained entries first and keeps every pending one */
   save: (queue: PersistedQueue) => Promise<void>;
   remove: (key: string) => Promise<void>;
 };
@@ -72,11 +72,19 @@ function bytesOf(value: unknown): number {
   return new TextEncoder().encode(JSON.stringify(value)).byteLength;
 }
 
-/** Drops the oldest entries until the queue fits the cap (SPEC-3 0.7). */
+/**
+ * Fits a queue to the cap (SPEC-3 0.7) by dropping retained entries, the oldest first: they
+ * landed, and the room holds them. A pending entry is never dropped (hardening HR-RC#5d,
+ * RELIABILITY-5): before this the oldest pending entries went without a word and the newer ones
+ * applied without the ones they were typed after. The room client refuses a change that would
+ * pass the cap (room-client.ts QUEUE_FULL_SENTENCE), so the pending entries alone fit.
+ */
 export function trimQueue(queue: PersistedQueue, maxBytes = PENDING_MAX_BYTES): PersistedQueue {
   let out = queue;
-  while (out.entries.length > 0 && bytesOf(out) > maxBytes) {
-    out = { ...out, entries: out.entries.slice(1) };
+  while (bytesOf(out) > maxBytes) {
+    const at = out.entries.findIndex((entry) => entry.seq !== undefined);
+    if (at < 0) break;
+    out = { ...out, entries: out.entries.filter((_, index) => index !== at) };
   }
   return out;
 }

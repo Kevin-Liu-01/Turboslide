@@ -66,7 +66,7 @@ import type { OpsPost, PresencePost } from '../src/protocol.ts';
 import { CAPS } from '../src/admission.ts';
 import { slideBytes } from '../src/room-core.ts';
 import type { PendingStore, PersistedOp, PersistedQueue } from './pending-store.ts';
-import { pendingKey, unsavedCount } from './pending-store.ts';
+import { PENDING_MAX_BYTES, pendingKey, unsavedCount } from './pending-store.ts';
 
 // ---------------------------------------------------------------------------------------------
 // The transport
@@ -252,6 +252,14 @@ export const POST_ENVELOPE_BYTES = 1024;
  */
 export const PERSISTED_SENTENCE =
   'This change was saved in this browser before newer edits. Copy its text to add it again.';
+/**
+ * The sentence of a change refused at the queue's cap (hardening HR-RC#5d, RELIABILITY-5): the
+ * changes not yet saved fill the 1 MB this browser keeps for them, so a new one is refused and
+ * every queued one is kept.
+ */
+export const QUEUE_FULL_SENTENCE = 'Unsaved changes are full. Reconnect to save them.';
+/** The bytes a queued entry adds to the saved queue beside its mutations (its op id, kind, seq). */
+const QUEUE_ENTRY_BYTES = 96;
 
 /** The longest the first stream open waits for the saved queues to load (HR-RC#5a). */
 export const PENDING_LOAD_WAIT_MS = 1000;
@@ -1180,6 +1188,24 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     };
     void store.save(queue).catch(() => undefined);
   };
+
+  /**
+   * The bytes the saved queue holds, by the mutations of every pending and retained op (cached
+   * per mutation list) and a fixed share per entry (HR-RC#5d). The store keeps 1 MB and keeps every
+   * pending op; a change past it is refused (QUEUE_FULL_SENTENCE).
+   */
+  const sizes = new WeakMap<object, number>();
+  const sizeOf = (value: Mutation[] | CommentOp | undefined): number => {
+    if (value === undefined) return QUEUE_ENTRY_BYTES;
+    const known = sizes.get(value);
+    if (known !== undefined) return known;
+    const bytes = bytesOf(value) + QUEUE_ENTRY_BYTES;
+    sizes.set(value, bytes);
+    return bytes;
+  };
+  const queueBytes = (): number =>
+    retained.reduce((sum, op) => sum + sizeOf(op.mutations), 0) +
+    pending.reduce((sum, op) => sum + sizeOf(op.kind === 'edit' ? op.mutations : op.comment), 0);
 
   /**
    * The pending ops after one of them was refused (docs/FOCUS.md rank 13): every op recorded
@@ -2684,8 +2710,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           op.run === true ? { run: true } : {},
         );
       } catch (error) {
-        // a change refused at the slide cap has its card from `refuseLocal` already
-        const carded = error instanceof Error && error.message === OVERSIZE_SENTENCE;
+        // a change refused at a cap has its card from `refuseLocal` already
+        const carded =
+          error instanceof Error &&
+          (error.message === QUEUE_FULL_SENTENCE || error.message === OVERSIZE_SENTENCE);
         if (!carded) lost.push(op);
       }
     }
@@ -2787,9 +2815,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   };
   /**
    * The local half of a write (`apply`): the mutations apply to the local document now, the op is
-   * pending and flushes at its cadence. A change the room could never take (HR-RC#4) is refused
-   * with its sentence before anything changes. `run` keeps the declaration an op of a saved queue
-   * was posted with (HR-RC#5a).
+   * pending and flushes at its cadence. A change the room could never take (HR-RC#4) and a change
+   * past the saved queue's 1 MB (HR-RC#5d) are refused with their sentences before anything
+   * changes. `run` keeps the declaration an op of a saved queue was posted with (HR-RC#5a).
    */
   const queueLocal = (
     mutations: Mutation[],
@@ -2803,6 +2831,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     // unsendable enters the queue (HR-RC#4)
     if (oversizeChange(mutations, result.document))
       refuseLocal(mutations, 'too-large', OVERSIZE_SENTENCE);
+    // the saved queue keeps every pending op: past its cap a new change is refused, never an old
+    // one dropped (HR-RC#5d; before this the store dropped the oldest entries without a word)
+    if (queueBytes() + bytesOf(mutations) + QUEUE_ENTRY_BYTES > PENDING_MAX_BYTES)
+      refuseLocal(mutations, 'too-large', QUEUE_FULL_SENTENCE);
     clock += 1;
     // the run rule's declaration, read in the frame the op was written in (R1-R2h)
     const run = advanceRunEnds(runEnds, mutations, true) || saved?.run === true;

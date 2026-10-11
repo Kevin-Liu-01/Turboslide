@@ -246,25 +246,35 @@ describe('DeckRoom across a wake', () => {
     a.close();
   });
 
-  it('a 404 from a removed deck drops nothing but the tail and stops the retries (finding 10)', async () => {
+  it('a removed deck, gone on the checkpoint route and the seed route a minute apart, moves only its tail to dead letters and stops the retries (finding 10, HR-RT#7)', async () => {
     const stub = stubOf(deck);
     const a = await connect(deck, await mint({ deck, cid: CID_A }));
     await a.next(isEvent('hello'));
     a.send(opsFrame(CID_A, 1, 0, 1, [[splice(0, 0, 'g')]]));
     await a.next(isAck(1));
     app.gone = true;
+    app.seedGone = true;
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(Date.now() + 2500);
-    // the alarm resolves: no throw, so the runtime does not retry it
+    // the alarm resolves: no throw, so the runtime does not retry it; the first reading of gone
+    // keeps the tail and re-arms the alarm
+    expect(await runDurableObjectAlarm(stub)).toBe(true);
+    expect(await counters(deck)).toMatchObject({ head: 1, covered: 0 });
+    // a minute on, both routes still say gone: the tail moves to dead letters
+    vi.setSystemTime(Date.now() + 61_000);
     expect(await runDurableObjectAlarm(stub)).toBe(true);
     vi.useRealTimers();
-    expect(app.checkpoints).toHaveLength(1);
+    expect(app.checkpoints).toHaveLength(2);
     const read = await counters(deck);
     expect(read).toMatchObject({ head: 1, covered: 1 });
     const alarm = await runInDurableObject(stub, (_instance: DeckRoom, state) =>
       state.storage.getAlarm(),
     );
     expect(alarm).toBeNull();
+    const dead = (await (await call(`/rooms/${deck}/dead-letters`)).json()) as {
+      rows: { seq: number; opId: string; reason: string }[];
+    };
+    expect(dead.rows).toMatchObject([{ seq: 1, opId: `${CID_A}:1`, reason: 'gone' }]);
     // no callbacks row: a 404 is the deck's and not the deployment's
     const flag = await env.ACCOUNTS.prepare("SELECT v FROM rt_flags WHERE k = 'callbacks'").first();
     expect(flag).toBeNull();

@@ -74,6 +74,25 @@ export class GoneError extends Error {
   }
 }
 
+/**
+ * A deck the store does not hold (hardening HR-RT#7, RELIABILITY-10): the checkpoint route answers
+ * it 404 with `gone: true`, the one answer the deck's object reads as final, and only after the
+ * seed route answers 404 for the deck as well. Every other error of the route is a 500 the object
+ * retries: a RangeError the reducer, the pointer code or the slug code throws is not a missing
+ * deck, and before this every one of them dropped the object's whole tail.
+ */
+export class DeckGoneError extends Error {
+  readonly status = 404;
+  readonly code = 'gone';
+  readonly deckId: string;
+
+  constructor(deckId: string) {
+    super(`No deck ${deckId} in the store`);
+    this.name = 'DeckGoneError';
+    this.deckId = deckId;
+  }
+}
+
 /** The HTTP status an error class maps to on the agent transport; a numeric `status` the error carries wins (docs/archive/rounds/POLISH.md item 120: the assistant's 503 answered 500). */
 export function errorStatus(error: unknown): number {
   const carried = (error as { status?: unknown } | null)?.status;

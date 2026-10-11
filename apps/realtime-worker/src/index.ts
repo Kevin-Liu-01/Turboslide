@@ -115,6 +115,8 @@ const BEARER_TAILS = new Set([
   'document',
   'counters',
   'access-changed',
+  // the entries no store took (HR-RT#7), read by hand under the bearer
+  'dead-letters',
 ]);
 const TICKET_TAILS = new Set(['ops', 'presence']);
 
@@ -334,7 +336,9 @@ async function serve(request: Request, env: Env): Promise<Response> {
         await forwarded(
           request,
           {},
-          tail === 'counters' || tail === 'roster' || tail === 'document' ? 'on' : flag,
+          tail === 'counters' || tail === 'roster' || tail === 'document' || tail === 'dead-letters'
+            ? 'on'
+            : flag,
         ),
       );
     }

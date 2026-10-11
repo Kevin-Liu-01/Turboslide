@@ -246,6 +246,10 @@ export type FakeApp = {
   seedFailStatus: number;
   /** the checkpoint route answers 404 `{ gone: true }`: the deck was removed */
   gone: boolean;
+  /** the checkpoint route answers 404 without `gone` (a deployment without the route, a deleted preview) */
+  notFoundPlain: boolean;
+  /** the seed route answers 404 for the deck (with `gone`, the deck is gone for good; HR-RT#7) */
+  seedGone: boolean;
   /**
    * The route's check of the object's revision (checkpoint.ts `planCheckpoint`): `none` commits
    * whatever the body names (the fake's default); `conflict` answers 409 for any other revision,
@@ -296,7 +300,7 @@ function installFakeFetch(): void {
       if (match === null) return json({ error: 'not_found' }, 404);
       const app = apps.get(decodeURIComponent(match[1] ?? ''));
       if (match[2] === 'seed') {
-        if (app === undefined) return json({ error: 'not_found' }, 404);
+        if (app === undefined || app.seedGone) return json({ error: 'not_found' }, 404);
         const since = parsed.searchParams.get('since');
         app.seeds.push({ since: since === null ? null : Number(since) });
         if (app.seedFailTimes > 0) {
@@ -330,6 +334,7 @@ function installFakeFetch(): void {
       const isBounded = headers.get('x-turboslide-checkpoint-bounded') === '1';
       app.bounded.push(isBounded);
       if (app.gone) return json({ error: 'not_found', gone: true }, 404);
+      if (app.notFoundPlain) return new Response('Not Found', { status: 404 });
       if (app.failTimes > 0) {
         app.failTimes -= 1;
         return json({ error: 'store_busy' }, app.failStatus);
@@ -424,6 +429,8 @@ export function fakeApp(
     seedFailTimes: 0,
     seedFailStatus: 302,
     gone: false,
+    notFoundPlain: false,
+    seedGone: false,
     revisionCheck: 'none',
     loseAnswerTimes: 0,
     budgetEntries: null,

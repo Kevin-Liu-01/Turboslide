@@ -118,6 +118,13 @@ export const JOIN_HEADER = 'x-turboslide-join';
 export const CHECKPOINT_TIMEOUT_MS = 25_000;
 /** How many bounded calls a flush or the last close makes for one tail (HR-RT#4): 2,000 entries at 15 s a call. */
 export const CHECKPOINT_CALLS_PER_FLUSH = 8;
+/** How long the checkpoint and seed routes must both say a deck is gone before its tail goes to dead letters (HR-RT#7). */
+export const DECK_GONE_CONFIRM_MS = 60_000;
+/** How long the object keeps a dead letter: 30 days. */
+export const DEAD_LETTER_KEEP_MS = 30 * 24 * 60 * 60 * 1000;
+/** The dead letters' table, made on its first write (HR-RT#7). */
+const DEAD_LETTERS_DDL =
+  'CREATE TABLE IF NOT EXISTS dead_letters (seq INTEGER NOT NULL, client_id TEXT NOT NULL, op_id TEXT NOT NULL, entry TEXT NOT NULL, reason TEXT NOT NULL, at INTEGER NOT NULL)';
 /** A tail older than this is checkpointed by the Worker's sweep (HR-RT#6c), whatever its alarm did. */
 export const SWEEP_STALE_MS = 120_000;
 /** The first wait after a failed checkpoint (HR-RT#6b); it doubles per failure in a row. */
@@ -302,11 +309,14 @@ function parseIntVar(value: string | undefined, fallback: number): number {
 export class AppCallError extends Error {
   readonly status: number;
   readonly route: 'seed' | 'checkpoint';
-  constructor(route: 'seed' | 'checkpoint', status: number, message?: string) {
+  /** the route's own word that the deck is gone (`{ gone: true }` on a 404; HR-RT#7) */
+  readonly gone: boolean;
+  constructor(route: 'seed' | 'checkpoint', status: number, message?: string, gone = false) {
     super(message ?? `the ${route} route answered ${status}`);
     this.name = 'AppCallError';
     this.route = route;
     this.status = status;
+    this.gone = gone;
   }
   /**
    * Whether the deployment, not the deck, explains the failure (status 0 is no answer): no answer,
@@ -369,6 +379,8 @@ export class DeckRoom extends DurableObject<Env> {
   private closePending = false;
   /** checkpoints the alarm or the close tried that failed in a row, for the backoff (HR-RT#6b) */
   private checkpointFailures = 0;
+  /** when the checkpoint and seed routes first both said the deck is gone (HR-RT#7) */
+  private goneSince: number | null = null;
   private readonly awakeSince = Date.now();
   private colo = '';
   /** the deck this object orders; restored on a wake before any handler runs (finding 1) */
@@ -504,6 +516,8 @@ export class DeckRoom extends DurableObject<Env> {
           return this.httpCounters(url);
         case 'open-state':
           return json(this.openState(Date.now()));
+        case 'dead-letters':
+          return json({ rows: this.deadLetters() });
         case 'sweep':
           return this.httpSweep();
         case 'access-changed':
@@ -1721,6 +1735,9 @@ export class DeckRoom extends DurableObject<Env> {
         const response = await fetch(url, { ...init, redirect: 'manual', signal });
         if (response.ok || response.status === 409)
           return { status: response.status, body: (await response.json()) as unknown };
+        // a 404's body says whether the route knows the deck is gone (HR-RT#7); others are not read
+        if (response.status === 404)
+          return { status: 404, body: (await response.json().catch(() => null)) as unknown };
         await response.body?.cancel().catch(() => undefined);
         return { status: response.status, body: null };
       });
@@ -1738,7 +1755,9 @@ export class DeckRoom extends DurableObject<Env> {
       return outcome;
     }
     if (outcome.status === 409) return outcome;
-    const failure = new AppCallError(route, outcome.status);
+    const gone =
+      outcome.status === 404 && (outcome.body as { gone?: unknown } | null)?.gone === true;
+    const failure = new AppCallError(route, outcome.status, undefined, gone);
     await this.noteCallback(failure);
     throw failure;
   }
@@ -1988,12 +2007,18 @@ export class DeckRoom extends DurableObject<Env> {
         ...(closed && toSeq >= meta.head ? { closed: true } : {}),
       });
     } catch (error) {
-      if (error instanceof AppCallError && error.status === 404) {
-        this.abandonTail(error);
-        return;
-      }
+      // a 404 lets the tail go only when the route says the deck is gone and the seed route
+      // answers 404 for it too, a minute apart (HR-RT#7); any other answer keeps the tail and
+      // the alarm retries on its backoff
+      if (error instanceof AppCallError && error.status === 404 && error.gone) {
+        if (await this.deckGoneFor(DECK_GONE_CONFIRM_MS)) {
+          this.abandonTail(error);
+          return;
+        }
+      } else this.goneSince = null;
       throw error;
     }
+    this.goneSince = null;
     this.counters.checkpoints += 1;
     if ('conflict' in answer) {
       await this.readmit(answer.revision);
@@ -2051,21 +2076,97 @@ export class DeckRoom extends DurableObject<Env> {
   }
 
   /**
-   * The checkpoint route answered 404: the deck is gone (trashed and deleted while this object
-   * held entries). The tail has no store to land in, so it is dropped as covered and the alarm
-   * is not re-armed for it; a retry would meet the same 404 for ever (finding 10).
+   * Whether the deck is gone for good (HR-RT#7): the checkpoint route said `gone` and the seed
+   * route answers 404 for the deck too, and both have said so for at least `ms`. A deck made
+   * seconds ago can read as missing on an instance whose store has not seen it yet
+   * (RELIABILITY-18), so one reading is never enough. Any other seed answer is the deck's
+   * existence: the tail stays.
+   */
+  private async deckGoneFor(ms: number): Promise<boolean> {
+    try {
+      await this.fetchSeed(this.requireDeckId(), undefined);
+      this.goneSince = null;
+      this.log(
+        'error',
+        'the checkpoint route says the deck is gone and the seed route serves it',
+        {},
+      );
+      return false;
+    } catch (error) {
+      if (!(error instanceof AppCallError) || error.status !== 404) return false;
+    }
+    const now = Date.now();
+    this.goneSince ??= now;
+    return now - this.goneSince >= ms;
+  }
+
+  /**
+   * The deck is gone (trashed and deleted while this object held entries; `deckGoneFor`). The
+   * tail has no store to land in: it moves to the object's `dead_letters` table, kept for
+   * DEAD_LETTER_KEEP_MS, is logged at error, and is covered, so the alarm stops (finding 10).
+   * Before this any 404 from the route dropped the whole tail (RELIABILITY-10).
    */
   private abandonTail(error: AppCallError): void {
     const meta = this.meta;
     if (meta === null) return;
-    this.log('warn', 'the deck is gone; its uncommitted entries are dropped', {
+    const tail = this.entriesAbove(meta.covered, meta.head - meta.covered);
+    this.deadLetter(tail, 'gone');
+    this.log('error', 'the deck is gone; its uncommitted entries moved to dead_letters', {
       covered: meta.covered,
       head: meta.head,
+      entries: tail.length,
       status: error.status,
     });
     meta.covered = meta.head;
     meta.firstUncommittedAt = null;
+    this.goneSince = null;
     this.writeMeta();
+  }
+
+  /**
+   * Keeps entries no store took in the object's `dead_letters` table (HR-RT#7, HR-RT#8): the
+   * entry as JSON with the reason and the time, for DEAD_LETTER_KEEP_MS; older rows go on the
+   * next write. Read by hand (`/rooms/:id/dead-letters`) when someone asks where a word went.
+   */
+  private deadLetter(entries: readonly Entry[], reason: string): void {
+    if (entries.length === 0) return;
+    const now = Date.now();
+    this.db.run(DEAD_LETTERS_DDL);
+    this.ctx.storage.transactionSync(() => {
+      for (const entry of entries)
+        this.db.run(
+          'INSERT INTO dead_letters (seq, client_id, op_id, entry, reason, at) VALUES (?, ?, ?, ?, ?, ?)',
+          entry.seq,
+          entry.clientId,
+          entry.opId,
+          JSON.stringify(entry),
+          reason,
+          now,
+        );
+      this.db.run('DELETE FROM dead_letters WHERE at < ?', now - DEAD_LETTER_KEEP_MS);
+    });
+  }
+
+  /** The dead letters as rows, newest first (`GET /rooms/:id/dead-letters`, under the bearer). */
+  private deadLetters(): {
+    seq: number;
+    opId: string;
+    reason: string;
+    at: number;
+    entry: unknown;
+  }[] {
+    this.db.run(DEAD_LETTERS_DDL);
+    return this.db
+      .exec<{ seq: number; op_id: string; reason: string; at: number; entry: string }>(
+        'SELECT seq, op_id, reason, at, entry FROM dead_letters ORDER BY at DESC, seq DESC LIMIT 500',
+      )
+      .map((row) => ({
+        seq: row.seq,
+        opId: row.op_id,
+        reason: row.reason,
+        at: row.at,
+        entry: JSON.parse(row.entry) as unknown,
+      }));
   }
 
   private async postCheckpoint(body: {

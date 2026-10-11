@@ -3,7 +3,8 @@
 // pushed, so every record carries its origin as on production. The hardening round's pins of the
 // route live here (docs/hardening/HARDENING.md 4.6): a post retried after its answer was lost is
 // answered from the log and leaves the store at one revision (HR-RT#1); a call that asks for the
-// bound starts runs for 15 s at most and answers the seq it reached (HR-RT#4).
+// bound starts runs for 15 s at most and answers the seq it reached (HR-RT#4); an error is 404
+// `gone` only for a deck the store does not hold, and 500 otherwise (HR-RT#7).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -23,7 +24,9 @@ import type { BlobStore } from '@turboslide/store/blob-store';
 import { CHECKPOINT_BUDGET_MS } from '@turboslide/realtime/frames';
 import type { BlobClient } from '@turboslide/store/blob-store';
 
-import { answerCheckpoint } from './checkpoint';
+import { DeckGoneError } from '@turboslide/schema/errors';
+
+import { answerCheckpoint, checkpointErrorReply } from './checkpoint';
 import type { CheckpointRouteDeps, CommentsApplier } from './checkpoint';
 
 const DECK = 'gt-brand';
@@ -36,7 +39,15 @@ const AUTHOR_A: Author = { kind: 'human', name: 'Titanium 471', principalId: 'an
 const AUTHOR_B: Author = { kind: 'human', name: 'Cobalt 118', principalId: 'anon_b' };
 
 function splice(at: number, insert: string): Mutation {
-  return { op: 'text.splice', slideId: SLIDE, blockId: BLOCK, path: '/text', at, remove: 0, insert };
+  return {
+    op: 'text.splice',
+    slideId: SLIDE,
+    blockId: BLOCK,
+    path: '/text',
+    at,
+    remove: 0,
+    insert,
+  };
 }
 
 function entry(seq: number, clientId: string, n: number, mutation: Mutation): Entry {
@@ -273,15 +284,20 @@ describe('the checkpoint route over a Blob store', () => {
     expect(reply.landed).toBe(reached);
     // the call ended at the first run boundary past the budget
     expect(elapsed).toBeLessThan(CHECKPOINT_BUDGET_MS + Math.max(...runs) + 2000);
-    lines.push(`HR-RT#4 reading: ${reached} of 40 runs in ${elapsed} ms, the longest ${Math.max(...runs)} ms`);
+    lines.push(
+      `HR-RT#4 reading: ${reached} of 40 runs in ${elapsed} ms, the longest ${Math.max(...runs)} ms`,
+    );
     // the object covers up to `toSeq` and posts the rest at the revision the answer named
     let rest = entries.filter((row) => row.seq > reached);
     revision = reply.body['revision'] as number;
     for (let call = 0; call < 10 && rest.length > 0; call += 1) {
-      const next = await answerCheckpoint(deps({ store: slowStore, budgetMs: CHECKPOINT_BUDGET_MS }), {
-        revision,
-        entries: rest,
-      });
+      const next = await answerCheckpoint(
+        deps({ store: slowStore, budgetMs: CHECKPOINT_BUDGET_MS }),
+        {
+          revision,
+          entries: rest,
+        },
+      );
       expect(next.status).toBe(200);
       const through = next.body['toSeq'] as number | undefined;
       rest = through === undefined ? [] : rest.filter((row) => row.seq > through);
@@ -294,4 +310,21 @@ describe('the checkpoint route over a Blob store', () => {
     );
     console.log(lines.filter((line) => line.startsWith('HR-RT#4 reading')).join('\n'));
   }, 600_000);
+
+  it('answers a RangeError of the commit 500, and 404 gone only for a deck the store does not hold (HR-RT#7)', async () => {
+    const thrown = new RangeError('text.splice: 99 plus 0 is outside a text of 12 characters');
+    const kept = await checkpointErrorReply(thrown, DECK, async () => true);
+    expect(kept.status).toBe(500);
+    expect(kept.body).toMatchObject({ error: 'checkpoint', message: thrown.message });
+    expect(kept.body['gone']).toBeUndefined();
+    const missing = await checkpointErrorReply(thrown, DECK, async () => false);
+    expect(missing).toMatchObject({ status: 404, body: { error: 'not_found', gone: true } });
+    const typed = await checkpointErrorReply(new DeckGoneError(DECK), DECK, async () => true);
+    expect(typed).toMatchObject({ status: 404, body: { gone: true } });
+    // a store that cannot say keeps the tail: the answer is the retry's 500
+    const unknown = await checkpointErrorReply(thrown, DECK, async () => {
+      throw new Error('the store did not answer');
+    });
+    expect(unknown.status).toBe(500);
+  });
 });

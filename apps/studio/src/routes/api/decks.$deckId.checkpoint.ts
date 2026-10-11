@@ -11,9 +11,10 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { DeckStore } from '@turboslide/store/store';
 
 import { flushCardThumb, scheduleCardThumb } from '../../server/card-thumb';
-import { answerCheckpoint } from '../../server/checkpoint';
+import { answerCheckpoint, checkpointErrorReply } from '../../server/checkpoint';
 import { commentsApplierFor, shiftEntriesFor } from '../../server/comments';
 import { realtimeTier, roomFor } from '../../server/room';
+import { hasStoredDeck } from '../../server/root';
 import { roomBearerMatches } from '../../server/room-bearer';
 
 /**
@@ -78,12 +79,11 @@ async function serve(request: Request, deckId: string): Promise<Response> {
       request.headers.get(CHECKPOINT_BOUNDED_HEADER) === '1',
     );
   } catch (error) {
-    // a deck removed while its object still held entries (the store's `No deck.json`): a 404 the
-    // object reads as final, so its alarm stops retrying (VERIFICATION.md realtime pass 1 finding
-    // 10: the route answered 500 and the alarm retried with backoff, one run per removed deck)
-    if (error instanceof RangeError)
-      return jsonResponse({ error: 'not_found', gone: true, message: error.message }, 404);
-    throw error;
+    // a deck removed while its object still held entries is 404 `gone`, the answer the object reads
+    // as final once the seed route agrees; every other error is a 500 it retries (HR-RT#7)
+    const reply = await checkpointErrorReply(error, deckId, () => hasStoredDeck(deckId));
+    log(`${deckId}: answered ${reply.status}: ${String(reply.body['message'] ?? '')}`);
+    return jsonResponse(reply.body, reply.status);
   }
 }
 

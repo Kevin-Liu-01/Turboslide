@@ -4,6 +4,7 @@ import type { CoalescedWrite } from '@turboslide/realtime/coalesce';
 import { deckKeys } from '@turboslide/realtime/keys';
 import { REPLAY_MAX_ENTRIES } from '@turboslide/realtime/protocol';
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { DeckGoneError } from '@turboslide/schema/errors';
 import type { Author } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
@@ -305,7 +306,11 @@ export type CheckpointRouteDeps = {
   /** the sidecar's applier of the post's comment entries */
   comments: CommentsApplier;
   /** the `comment.shift` entries the landed edits produce (comments.ts `shiftEntriesFor`) */
-  shifts: (edits: readonly Entry[], before: DeckDocument, after: DeckDocument) => Promise<unknown[]>;
+  shifts: (
+    edits: readonly Entry[],
+    before: DeckDocument,
+    after: DeckDocument,
+  ) => Promise<unknown[]>;
   log: (line: string) => void;
   /** the object's call: gone once its deadline passed or its connection closed */
   signal?: AbortSignal;
@@ -400,6 +405,33 @@ export async function answerCheckpoint(
       ...(through === undefined ? {} : { toSeq: through }),
     },
     landed: result.committed.length,
+  };
+}
+
+/**
+ * The checkpoint route's answer to an error its work threw (RELIABILITY-10, hardening HR-RT#7):
+ * 404 `{ gone: true }` for a deck the store does not hold (`DeckGoneError`, or any error once
+ * `deckExists` says the deck is gone), the one answer the object may read as final; 500 for every
+ * other error, which the object retries on its backoff. Before this every RangeError answered
+ * 404 gone, and the reducer, the pointer code and the slug code all throw RangeError.
+ */
+export async function checkpointErrorReply(
+  error: unknown,
+  deckId: string,
+  deckExists: () => Promise<boolean>,
+): Promise<CheckpointReply> {
+  let gone = error instanceof DeckGoneError;
+  if (!gone) gone = !(await deckExists().catch(() => true));
+  if (gone)
+    return {
+      status: 404,
+      body: { error: 'not_found', gone: true, message: `No deck ${deckId} in the store` },
+      landed: 0,
+    };
+  return {
+    status: 500,
+    body: { error: 'checkpoint', message: error instanceof Error ? error.message : String(error) },
+    landed: 0,
   };
 }
 

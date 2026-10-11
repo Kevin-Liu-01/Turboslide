@@ -220,8 +220,10 @@ export async function exportDeckBundle(
   people: StandIns | null = null,
 ): Promise<PackedBundle> {
   requireSlug(deckId);
-  // a RangeError when the deck is missing (404 in the route); the sync brings the documents down
-  await openDeckStore(deckId);
+  // a RangeError when the deck is missing (404 in the route); the sync brings the documents down,
+  // and `records()` the whole version log: a Blob mirror that held no record reads the newest
+  // records alone (hardening PS#1), and the pack reads the folder
+  await (await openDeckStore(deckId)).records();
   await ensureDeckAssets(deckId);
   return packDeckDir(
     deckDir(deckId),

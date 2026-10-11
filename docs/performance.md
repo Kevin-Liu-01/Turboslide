@@ -354,3 +354,15 @@ everything `docs/archive/gslides-parity/SPEC-3.md` section 17 lists.
   day 0 mirror of step 31, the gates of steps 30 and 31); `b3.md` sections 1 and 2 (the split).
 - `scripts/perf-budget.mjs`, `scripts/check-vercel-output.mjs`, `scripts/check.mjs --list` on the
   tree of 2026-09-14; `docs/native.md` "Costs" and "Parity results" (2026-09-10).
+
+## 10. The store's cold read (hardening PS#1)
+
+A Blob mirror that holds no record no longer walks the deck's whole version log before its first
+read. It reads record 1 beside the snapshot the manifest names, takes the newest record's number
+from the two revisions, and reads the 50 newest records in one parallel batch of `get` calls;
+older records come when a caller asks for the whole log (`docs/hardening/build/PS.md`). The pin is
+a call count in `packages/store/src/hosted.test.ts`: after 1,000 commits the first `read()` makes
+56 store calls, against 2,011 before (1,010 `head` and 1,001 `get`), with a ceiling of 60. The
+callers of the whole log (the room's open, which the editor's and the presenter's loader run,
+the checkpoint's covered read, the seed route, the loader's version list) still read it once per
+fresh instance, as one `get` per record in rounds of 50. `TURBOSLIDE_STORE_FULL_WALK=1` brings back the full walk as a repair path.

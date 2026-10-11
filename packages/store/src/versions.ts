@@ -182,6 +182,29 @@ export function nextVersionNumber(records: ReadonlyArray<VersionRecord>): number
   return last === undefined ? 1 : last.n + 1;
 }
 
+/**
+ * How many of the newest records a Blob mirror reads when it holds no record yet (hardening
+ * PS#1, PERF-1; question 14 "a log floor of 50 records"): the editor's loader carries the newest
+ * 50 (`EDITOR_VERSIONS_KEPT`) and retention keeps the newest 50 snapshots
+ * (`SNAPSHOT_KEEP_RECORDS`). Older records are read when a caller asks for the whole log.
+ */
+export const LOG_FLOOR_RECORDS = 50;
+
+/**
+ * The number the newest record of a log carries, read from the document's revision and one
+ * record of the log (hardening PS#1). A write's record moves the revision by one and takes the
+ * next number, so `n - revision` is the same on every write record of a log, and a named version
+ * or a hole adds one to it. From the first record the answer is therefore at or below the newest
+ * number on a deck changed through the store alone (the walk above it reads the named versions
+ * and holes since), and above it on a deck whose revision moved outside the store. Pure.
+ */
+export function newestRecordNumber(
+  revision: number,
+  record: Pick<VersionRecord, 'n' | 'revision'>,
+): number {
+  return revision + record.n - record.revision;
+}
+
 /** The Version projection the action table returns (baseRevision and inverse stay on disk). */
 export function toVersion(record: VersionRecord): Version {
   return {

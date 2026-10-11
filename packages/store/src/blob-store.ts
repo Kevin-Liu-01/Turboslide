@@ -65,8 +65,10 @@ import {
   snapshotPath,
 } from './snapshots.ts';
 import {
+  LOG_FLOOR_RECORDS,
   RECORD_ORIGIN_WRITES,
   documentAtVersion,
+  newestRecordNumber,
   readVersions,
   recordAtRevision,
   recordNamingOps,
@@ -424,6 +426,41 @@ function readManifest(dir: string): Manifest {
 function writeManifestFile(dir: string, manifest: Manifest): void {
   mkdirSync(join(dir, STATE_DIR), { recursive: true });
   writeFileSync(manifestPath(dir), `${JSON.stringify(manifest, null, 2)}\n`);
+}
+
+/**
+ * The log floor of a mirror (hardening PS#1, PERF-1): the lowest record number from which the
+ * mirror holds every record the store holds, up to its newest. A mirror that held no record
+ * reads record 1 and the newest LOG_FLOOR_RECORDS records alone, and the older ones when a caller
+ * asks for the whole log (`extendLog`). The file sits beside the mirror manifest and is its own,
+ * because callers outside the store's queue reset the manifest (the trash stamp's lost race) while
+ * the record files it describes stay on disk. No file means the mirror holds the whole log.
+ */
+function floorPath(dir: string): string {
+  return join(dir, STATE_DIR, 'log-floor.json');
+}
+
+function readFloor(dir: string): number | null {
+  const path = floorPath(dir);
+  if (!existsSync(path)) return null;
+  try {
+    const floor = (JSON.parse(readFileSync(path, 'utf8')) as { floor?: unknown }).floor;
+    if (typeof floor === 'number' && Number.isInteger(floor) && floor > 1) return floor;
+  } catch {
+    // read below
+  }
+  // a floor file that does not read: the mirror vouches for its newest record alone, so a
+  // caller that asks for the whole log reads every record below it
+  const newest = lastRecord(dir);
+  return newest > 1 ? newest : null;
+}
+
+function writeFloor(dir: string, floor: number | null): void {
+  if (floor === null || floor <= 1) {
+    rmSync(floorPath(dir), { force: true });
+    return;
+  }
+  writeAtomic(floorPath(dir), new TextEncoder().encode(`${JSON.stringify({ floor })}\n`));
 }
 
 /** Writes through a sibling name and a rename, so a reader never sees a half-written file. */
@@ -1173,7 +1210,16 @@ export type BlobStoreOptions = {
    * ships as false and N plus 1 as true. The origin check on a write runs whatever this reads.
    */
   writeOrigin?: boolean;
+  /**
+   * The repair path of hardening PS#1: a mirror that holds no record walks the whole log by
+   * number from record 1, as every mirror did before the log floor. `TURBOSLIDE_STORE_FULL_WALK=1`
+   * by default (STORE_FULL_WALK_VARIABLE).
+   */
+  fullWalk?: boolean;
 };
+
+/** `1` makes every Blob mirror that holds no record walk the whole log (BlobStoreOptions.fullWalk). */
+export const STORE_FULL_WALK_VARIABLE = 'TURBOSLIDE_STORE_FULL_WALK';
 
 export type BlobStore = DeckStore & {
   readonly dir: string;
@@ -1198,6 +1244,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const pollMs = options.pollMs ?? 3000;
   const syncTtlMs = options.syncTtlMs ?? 750;
   const snapshotGraceMs = options.snapshotGraceMs ?? SNAPSHOT_GRACE_MS;
+  const fullWalk = options.fullWalk ?? process.env[STORE_FULL_WALK_VARIABLE] === '1';
   const serial = serialQueue();
   const clock = options.now ?? (() => new Date().toISOString());
   // the text anchors of the comments follow the text a write moved, inside the lock (SPEC-3
@@ -1253,6 +1300,96 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const pathOf = (relative: string): string => join(dir, ...relative.split('/'));
 
   /**
+   * One record by number into the mirror, its version row into `files`. Records never change, so
+   * their first body is the body. The store's API (`head`) says whether the record exists before
+   * its public URL is read: a `get` of the path before the record landed seeded the edge's cached
+   * miss for that path, which then hid the record for a while after it landed, so the pull could
+   * not prove the document and the next write on the instance met a stale mirror (b6's cycle 3
+   * reading, R2 b; VERIFICATION C2-F25 and C2-F28, a second browser's slide late). A body the
+   * edge serves that does not hash to the head's etag, or a miss the edge still serves, is read
+   * past the edge (`provenGet`). Answers the record's revision (null when its bytes do not
+   * parse), or null when the store holds no record under the name.
+   */
+  const fetchRecord = async (
+    relative: string,
+    files: Record<string, string>,
+  ): Promise<{ revision: number | null } | null> => {
+    const pathname = `${prefix}${relative}`;
+    const version = (await client.head(pathname))?.version ?? null;
+    if (version === null) return null;
+    let fetched = await client.get(pathname);
+    if (fetched === null || quotedMd5(fetched.bytes) !== version) {
+      // a record has no immutable copy of its own: it is one
+      fetched = await provenGet(client, pathname, { copyOf: false });
+    }
+    if (fetched === null) return null;
+    writeAtomic(pathOf(relative), fetched.bytes);
+    files[relative] = version;
+    return { revision: parseRecordBytes(fetched.bytes)?.revision ?? null };
+  };
+
+  /**
+   * A record whose number is at or below a record the log is known to hold (hardening PS#1): one
+   * `get` and no `head`, since nothing writes such a number again (a writer takes the number after
+   * the newest, and a hole stays one), so the edge holds no miss a later write could hide behind.
+   * The body is accepted when it hashes to the etag it came with and parses as the record of that
+   * number; a miss or any other body is read again the proven way (`fetchRecord`). The `get` reads
+   * the store's URL, not its API, so a window of these is no burst against the API's rate limit.
+   */
+  const fetchKnownRecord = async (
+    n: number,
+    files: Record<string, string>,
+  ): Promise<{ revision: number | null } | null> => {
+    const relative = `versions/${n}.json`;
+    const fetched = await client.get(`${prefix}${relative}`);
+    const record = fetched === null ? null : parseRecordBytes(fetched.bytes);
+    if (fetched === null || record === null || record.n !== n) return fetchRecord(relative, files);
+    if (quotedMd5(fetched.bytes) !== fetched.entry.version) return fetchRecord(relative, files);
+    writeAtomic(pathOf(relative), fetched.bytes);
+    files[relative] = fetched.entry.version;
+    return { revision: record.revision };
+  };
+
+  /**
+   * Reads the records below the mirror's log floor down to `target` (hardening PS#1): the whole
+   * log for `records()`, `listVersions()` and a restore's rebuild, the records from version n for
+   * `documentAt(n)`. LOG_FLOOR_RECORDS numbers at a time, newest first, each by `fetchKnownRecord`
+   * (a number below the floor is below a record the log holds); the floor moves down after each
+   * batch, so a batch that fails leaves the floor where the records the mirror holds start. Runs
+   * in the deck's queue (`serial`), because a pull removes the documents its own pass did not
+   * see. A missing number is a hole and is read once.
+   */
+  const extendLog = async (target: number): Promise<void> => {
+    let floor = readFloor(dir);
+    if (floor === null || floor <= target) return;
+    const held = new Set(
+      localDocuments(dir)
+        .map((relative) => /^versions\/(\d+)\.json$/.exec(relative)?.[1])
+        .filter((n): n is string => n !== undefined)
+        .map(Number),
+    );
+    while (floor > target) {
+      const from = Math.max(target, floor - LOG_FLOOR_RECORDS);
+      const numbers: number[] = [];
+      for (let k = from; k < floor; k += 1) if (!held.has(k)) numbers.push(k);
+      const rows: Record<string, string> = {};
+      await Promise.all(numbers.map((k) => fetchKnownRecord(k, rows)));
+      // the rows join the manifest as it stands now: a stamp outside the queue may have reset it
+      const manifest = readManifest(dir);
+      Object.assign(manifest.files, rows);
+      writeManifestFile(dir, manifest);
+      floor = from;
+      writeFloor(dir, floor);
+    }
+  };
+
+  /** `extendLog` from outside the queue, and no queue slot at all for a mirror holding the whole log. */
+  const wholeLog = async (target = 1): Promise<void> => {
+    const floor = readFloor(dir);
+    if (floor !== null && floor > target) await serial(() => extendLog(target));
+  };
+
+  /**
    * Pulls the store's documents into the mirror. Three facts about Vercel Blob decide the shape
    * of this (measured against the live store on 2026-09-11): `list()` lags `head()` by up to a
    * minute; the public URL a body is fetched from is served by the CDN, which keeps an overwritten
@@ -1287,31 +1424,6 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       const fetched = await client.get(`${prefix}${relative}`);
       return fetched === null ? null : { bytes: fetched.bytes, version: fetched.entry.version };
     };
-    /**
-     * Records never change, so their first body is the body. The store's API (`head`) says
-     * whether the record exists before its public URL is read: a `get` of the path before the
-     * record landed seeded the edge's cached miss for that path, which then hid the record for
-     * a while after it landed, so the pull could not prove the document and the next write on
-     * the instance met a stale mirror (b6's cycle 3 reading, R2 b; VERIFICATION C2-F25 and
-     * C2-F28, a second browser's slide late). A body the edge serves that does not hash to the
-     * head's etag, or a miss the edge still serves, is read past the edge (`provenGet`). Answers
-     * the record's revision (null when its bytes do not parse), or null when the store holds
-     * no record under the name.
-     */
-    const fetchRecord = async (relative: string): Promise<{ revision: number | null } | null> => {
-      const pathname = `${prefix}${relative}`;
-      const version = (await client.head(pathname))?.version ?? null;
-      if (version === null) return null;
-      let fetched = await client.get(pathname);
-      if (fetched === null || quotedMd5(fetched.bytes) !== version) {
-        // a record has no immutable copy of its own: it is one
-        fetched = await provenGet(client, pathname, { copyOf: false });
-      }
-      if (fetched === null) return null;
-      writeAtomic(pathOf(relative), fetched.bytes);
-      next.files[relative] = version;
-      return { revision: parseRecordBytes(fetched.bytes)?.revision ?? null };
-    };
     // 1. the records the mirror holds keep their rows: a record never changes, so the bytes
     // this instance proved once are the store's, and no call is made for them (the listing of
     // the prefix that used to open every pull is gone: docs/archive/rounds/SYNC.md 3.5, invariant 7; the
@@ -1335,12 +1447,56 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     // read and no slide body is fetched. It is read first, so the walk of the records knows the
     // revision the log must reach. A deck written before the round, or a store whose deck.json
     // push failed after its snapshot, has none and takes the replay of step 3.
+    // A mirror that holds no record reads record 1 beside the snapshot (hardening PS#1): the
+    // walk would read it first anyway, and with the snapshot's revision it names the newest
+    // record's number (`newestRecordNumber`)
     const currentKey = etagMd5(deckHead.version);
-    const snapshot = currentKey === null ? null : await readSnapshot(currentKey);
+    const holdsNoRecord = lastRecord(dir, next) === 0;
+    const [snapshot, first] = await Promise.all([
+      currentKey === null ? Promise.resolve(null) : readSnapshot(currentKey),
+      holdsNoRecord ? fetchRecord('versions/1.json', next.files) : Promise.resolve(undefined),
+    ]);
     const provenSnapshot =
       snapshot !== null && quotedMd5(canonicalJson(snapshot.deck)) === deckHead.version
         ? snapshot
         : null;
+    /**
+     * 1b'. The log floor (hardening PS#1, PERF-1). Before it a mirror that held no record walked
+     * the whole log, a head and a get per record ever written: 1,422 calls in 97 rounds at 708
+     * records, past the object's 25 s checkpoint deadline at about 3,700, on every fresh
+     * instance, and every deployment starts with none. Now such a mirror takes the newest
+     * record's number from record 1's revision and the proven snapshot's (`newestRecordNumber`),
+     * reads the LOG_FLOOR_RECORDS numbers up to it in one parallel batch of gets, and walks on
+     * from the number after them; `extendLog` reads the older records when a caller asks for the
+     * whole log. A batch that finds no record while numbers below it are unread is a deck whose
+     * revision moved outside the store, and the walk runs from record 2 as before; so does every
+     * mirror under STORE_FULL_WALK_VARIABLE, and one without a proven snapshot (a deck not
+     * written since the snapshot round).
+     */
+    let floor: number | null = null;
+    let walkStart: { from: number; misses: number } | undefined;
+    if (holdsNoRecord && first !== undefined && first !== null && first.revision !== null) {
+      const top =
+        fullWalk || provenSnapshot === null
+          ? 1
+          : newestRecordNumber(provenSnapshot.deck.revision, { n: 1, revision: first.revision });
+      const low = Math.max(2, top - LOG_FLOOR_RECORDS + 1);
+      if (top >= low) {
+        const numbers: number[] = [];
+        for (let k = low; k <= top; k += 1) numbers.push(k);
+        const found = await Promise.all(numbers.map((k) => fetchKnownRecord(k, next.files)));
+        if (low > 2 && found.every((record) => record === null)) {
+          walkStart = { from: 2, misses: 0 };
+        } else {
+          // the misses at the top of the batch count toward the walk's lookahead, as the walk's
+          // own would have
+          let misses = 0;
+          for (let i = found.length - 1; i >= 0 && found[i] === null; i -= 1) misses += 1;
+          walkStart = { from: top + 1, misses };
+          floor = low > 2 ? low : null;
+        }
+      }
+    }
     /**
      * 1c. The records by number from the mirror's last one (docs/archive/rounds/SYNC.md 3.5, 3.6): each is a
      * head and a get, RECORD_WALK_BATCH at a time once the walk has found records in a row (a
@@ -1353,22 +1509,27 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
      * (versions.ts logHoles). Before this the walk stopped at the first missing number for good,
      * so every later commit reached the other instances as an external checkpoint alone.
      */
-    const walkRecords = async (target: number | null): Promise<void> => {
+    const walkRecords = async (
+      target: number | null,
+      start?: { from: number; misses: number },
+    ): Promise<void> => {
       const last = lastRecord(dir, next);
       const newest = last === 0 ? null : pathOf(`versions/${last}.json`);
       let known =
         newest !== null && existsSync(newest)
           ? (parseRecordBytes(new Uint8Array(readFileSync(newest)))?.revision ?? 0)
           : 0;
-      let n = last + 1;
+      let n = start?.from ?? last + 1;
       let batch = 1;
-      let misses = 0;
+      let misses = start?.misses ?? 0;
       let hits = 0;
-      const limit = last + RECORD_WALK_MAX;
+      const limit = n - 1 + RECORD_WALK_MAX;
       while (n <= limit) {
         const numbers: number[] = [];
         for (let k = n; k < n + batch && k <= limit; k += 1) numbers.push(k);
-        const results = await Promise.all(numbers.map((k) => fetchRecord(`versions/${k}.json`)));
+        const results = await Promise.all(
+          numbers.map((k) => fetchRecord(`versions/${k}.json`, next.files)),
+        );
         let stop = false;
         for (const result of results) {
           if (result !== null) {
@@ -1394,7 +1555,13 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         batch = hits >= 2 ? Math.min(RECORD_WALK_BATCH, batch * 2) : 1;
       }
     };
-    await walkRecords(provenSnapshot?.deck.revision ?? null);
+    // record 1 missing from a mirror that held none ends the walk where it would have started:
+    // a deck with no record at all, or a log whose first number is a hole, which the walk never
+    // read past (the lookahead runs only past a log it knows a record of)
+    if (!(holdsNoRecord && first === null))
+      await walkRecords(provenSnapshot?.deck.revision ?? null, walkStart);
+    // a mirror that held records keeps its floor: the walk reads above them alone
+    if (holdsNoRecord) writeFloor(dir, floor);
     /**
      * 1d. The comments sidecar (SPEC-3 2.2), through its index head (docs/archive/rounds/SYNC.md 3.5): the
      * index is the sidecar's commit point (comments-store.ts), so an index at the version the
@@ -1723,6 +1890,10 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
    * whatever the records say. One `del` call.
    */
   const pruneSnapshots = async (current: string | null): Promise<number> => {
+    // retention names every named version's snapshot, and a mirror that holds the newest records
+    // alone (hardening PS#1) cannot see the named versions below its floor: it removes nothing,
+    // and an instance that read the whole log prunes (the room's open reads it)
+    if (readFloor(dir) !== null) return 0;
     const retained = retainedSnapshots(readVersions(dir));
     const entries = await client.list(`${prefix}${SNAPSHOTS_DIR}/`);
     const doomed = prunableSnapshots(entries, prefix, retained, {
@@ -1747,6 +1918,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
    */
   const discard = (): void => {
     for (const relative of localDocuments(dir)) rmSync(pathOf(relative), { force: true });
+    writeFloor(dir, null);
     invalidate();
   };
 
@@ -1811,6 +1983,22 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           if (current === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
           if (current.version === head.version) throw new StaleMirrorError(deckId);
           return conflictFromStore();
+        }
+        // the log a write reads below the mirror's floor (hardening PS#1): a restore rebuilds its
+        // version from the inverses of every record above it, and the origin check below reads
+        // every record above the write's base, so either reads the older records first when the
+        // floor sits above what it needs (an old version, a queue replayed from long ago)
+        const floor = readFloor(dir);
+        if (floor !== null) {
+          let target = floor;
+          for (const mutation of write.mutations)
+            if (mutation.op === 'version.restore')
+              target = Math.min(target, Math.max(1, mutation.n));
+          if (write.origin !== undefined) {
+            const lowest = readVersions(dir).find((record) => record.n >= floor);
+            if (lowest === undefined || write.baseRevision < lowest.baseRevision) target = 1;
+          }
+          if (target < floor) await extendLog(target);
         }
         // the origin check (docs/archive/rounds/SYNC.md 3.2, invariant 3), here where the mirror is proven: a
         // write whose op ids a record above its base already names is the resend of a POST whose
@@ -2046,13 +2234,18 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       return serial(save);
     },
 
+    // the whole log for every reader of it (hardening PS#1): a mirror that holds the newest
+    // records alone reads the older ones first, so the history panel, a bundle, the recovered
+    // writes check and the agent's `since` answers see every record as before the log floor
     async listVersions(): Promise<Version[]> {
       await requirePresent();
+      await wholeLog();
       return file.listVersions();
     },
 
     async records(): Promise<VersionRecord[]> {
       await requirePresent();
+      await wholeLog();
       // the held origins ride the records this instance committed without the field, so the
       // channel's entries carry `covers` and the resync read's `origins` on this instance
       // (docs/archive/rounds/SYNC.md 3.2) on deployment N as they will everywhere on N plus 1
@@ -2061,6 +2254,8 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
     async documentAt(n: number): Promise<DeckDocument> {
       await requirePresent();
+      // the rebuild applies the inverses of every record above n, and version 0 needs them all
+      await wholeLog(Math.max(1, n));
       return file.documentAt(n);
     },
 
@@ -2069,12 +2264,18 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       const { document } = loadDeckDir(dir);
       if (revision === document.deck.revision) return document;
       // the record's snapshot first (SPEC-2 8.2), the round one replay from the inverses when the
-      // record carries no key or its snapshot is gone
-      const record = recordAtRevision(readVersions(dir), revision);
+      // record carries no key or its snapshot is gone; the newest records the mirror holds answer
+      // most of these, and the older log is read when the record is not among them
+      let record = recordAtRevision(readVersions(dir), revision);
+      if (record === undefined) {
+        await wholeLog();
+        record = recordAtRevision(readVersions(dir), revision);
+      }
       if (record?.snapshot !== undefined) {
         const snapshot = await readSnapshot(record.snapshot);
         if (snapshot !== null) return snapshot;
       }
+      await wholeLog();
       return file.documentAtRevision(revision);
     },
 
@@ -2260,6 +2461,8 @@ export async function pushDeckDir(
   });
   manifest.files['deck.json'] = deck.version;
   writeManifestFile(dir, manifest);
+  // the folder is the deck's whole content in the store now, its log included (hardening PS#1)
+  writeFloor(dir, null);
   options.log?.(
     `blob: pushed ${files.length} files of ${deckId} in ${Math.round(performance.now() - t)} ms`,
   );

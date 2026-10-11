@@ -1,0 +1,55 @@
+--- a/gt-follow.sh
++++ b/gt-follow.sh
+@@ -38,6 +38,11 @@
+ # cannot call a protected preview back; after a green production smoke on a tree that expects do
+ # with no forced row on production, the realtime rows run against production, a red run is rerun
+ # once, and red twice promotes the previous deployment back and redeploys the previous Worker.
++# (9, hardening O#1b, docs/hardening/HARDENING.md 4.8) between passes the loop runs the tree's
++# scripts/hosting/d1-export.mjs: once a week it exports eight tables of the production accounts
++# database (never session, verification, deviceCode, ts_mail, ts_quota or rt_open) into
++# $DIR/backups/accounts-<yyyy-mm-dd>.sql (file 600, folder 700), keeps the newest eight, and
++# never uploads or commits one; every other poll it reads the folder and does nothing.
+ #
+ #   gt-follow.sh                       the loop (started detached, see README.md)
+ #   gt-follow.sh --check <origin>      the check alone against an origin, exit 0 green, 1 red, 2 error
+@@ -659,6 +664,30 @@
+   return 0
+ }
+ 
++# The weekly accounts export (hardening O#1b; docs/hosting.md section 15): the guard checkout's
++# scripts/hosting/d1-export.mjs with the workspace's wrangler and the account id in the child's
++# environment. The script decides whether an export is due (the newest file a week old, no failed
++# attempt in the last six hours), so a poll that finds nothing due costs one directory read and
++# logs nothing. Its one line of output names the file and its size, or wrangler's exit code with
++# every line that names a token dropped; nothing of the database reaches the log. A checkout
++# before the script landed has no such file, and the step is skipped.
++BACKUPS=$DIR/backups
++accounts_export() {
++  local script=$WT/scripts/hosting/d1-export.mjs dir=$WT/$WORKER_DIR out=$GUARD/accounts-export.out
++  [ -f "$script" ] || return 0
++  cf_env
++  local envp=() code
++  [ -n "$CF_ACCOUNT_ID" ] && envp=("CLOUDFLARE_ACCOUNT_ID=$CF_ACCOUNT_ID")
++  (cd "$WT" && env -u VERCEL_OIDC_TOKEN "${envp[@]}" node "$script" --dir "$BACKUPS" --every-days 7 --keep 8 --retry-hours 6 --cwd "$dir" --wrangler "$dir/node_modules/.bin/wrangler") > "$out" 2>&1
++  code=$?
++  if [ $code -ne 0 ]; then
++    log "accounts export failed (exit $code): $(grep -v '^$' "$out" | scrub | tail -1 | cut -c1-240)"
++  elif grep -q '^wrote ' "$out"; then
++    log "accounts export: $(grep '^wrote ' "$out" | scrub | cut -c1-240)"
++  fi
++  return 0
++}
++
+ handle_sha() {
+   local sha=$1
+   log "main moved to $sha (last $(cat "$LAST" 2>/dev/null)); deploying a preview of turboslide-gt"
+@@ -728,5 +757,9 @@
+       rmdir "$LOCK" 2>/dev/null
+     fi
+   fi
++  if mkdir "$LOCK" 2>/dev/null; then
++    accounts_export
++    rmdir "$LOCK" 2>/dev/null
++  fi
+   sleep 120
+ done

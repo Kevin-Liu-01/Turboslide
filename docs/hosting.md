@@ -1728,3 +1728,77 @@ A rehearsal on a checkout: `TURBOSLIDE_BACKUP_DIR=<folder>` opens a folder as th
 (`diskBlobClient`). The route reads the Blob store as its source, so a dev server on the tmp
 store answers 503; `apps/studio/src/server/backup.test.ts` runs a night over two in-memory stores
 cut into calls by a small budget, and `cron-backup.test.ts` drives the route.
+
+## 15. The restore drill and the accounts export (hardening O#1b)
+
+The restore drill. `apps/studio/vercel.json` calls `GET /api/cron/restore-drill` at `0 6 1 * *`,
+06:00 UTC on the first of every month, after the night's backup is due, with the cron secret
+(401 otherwise; `server/cron.ts`). The drill (`server/backup.ts` `runRestoreDrill`):
+
+1. takes the newest night of the backup store with its `done.json`;
+2. chooses a deck by the date: the day count since 1970 modulo the decks of that night, or the
+   next one of the ten after it whose manifest's snapshot the backup holds;
+3. copies that deck's files out of `backup/<day>/decks/<id>/` into `decks/<scratch id>/` of a
+   folder of the function instance (`drill-<yyyymmdd>-<8 hex>`), through `packages/store/src/copy.ts`;
+4. reads the scratch deck through the store as a function instance reads a deck it has not
+   mirrored (`openBlobStore` over the folder: the manifest's etag names the snapshot);
+5. checks five things: the restored `deck.json` has the backup's bytes; the backup holds
+   `snapshots/<md5 of deck.json>.json`; the restored snapshot has the backup's bytes; the document
+   the store reads validates; and that document is the backup's snapshot byte for byte as
+   canonical JSON;
+6. removes the folder and writes `backup/drills/<yyyy-mm>.json` into the backup store (the day,
+   the deck, the scratch id, the object count, the revision, the snapshot key, the five checks,
+   the time).
+
+The live documents store is never written. The route answers 200 when every check held and 500
+with the reason when one did not, which is also a line at error in the function's log under
+`turboslide restore drill:` (HR-O#3's alert reads failures once it lands); 503 without a backup
+store. By hand, with the same code:
+
+    ( set -a; . <env file with TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN>; set +a; node scripts/restore-drill.mjs )
+    TURBOSLIDE_BACKUP_DIR=<folder> node scripts/restore-drill.mjs --deck <id> --keep <folder> --no-record
+
+`--deck` and `--day` choose the deck and the night, `--keep <folder>` restores there and leaves
+the folder (the deck sits under `store/decks/<scratch id>/`), `--no-record` writes nothing into
+the backup store, and the exit code is 0 when every check held, 1 when one did not, 2 without a
+backup store. The backup store is connected to Production alone, so the preview has no drill;
+the first reading of the store itself is the cron's on 2026-11-01, or Kevin's run by hand.
+
+The reading on a checkout (lane O, 2026-10-11 18:32 to 18:34 UTC, load 110 to 147): the
+repository's `decks/gt-brand` pushed into a folder store as the seed push does, two commits through
+the store (revision 27), `users/` and a principal index beside it, then one night of
+`runBackup` into a second folder store: `done` in one call, 1 deck and 99 objects (1,466,708
+bytes) in 1,748 ms. `TURBOSLIDE_BACKUP_DIR=<that folder> node scripts/restore-drill.mjs` restored
+`gt-brand` from 2026-10-11 as `drill-20261011-a7cbdd9d`: 98 objects, revision 27, snapshot
+`9947e59aba475222c851ff4b23ebb531`, every check held, 3,512 ms, exit 0, the record
+`backup/drills/2026-10.json` written. The route on the lane's dev server (port 4861, the same
+folder as `TURBOSLIDE_BACKUP_DIR`): 401 without the secret, 200 with it and the same five checks
+true, 2.3 s. The script answers exit 2 without a backup store and on a malformed `--day`.
+
+Restoring a deck in an incident is a step this round does not build: `--keep` gives the restored
+documents as a folder, and copying them back under the deck's id into the documents store is a
+person's decision taken with the deck's owner.
+
+The weekly accounts export. `scripts/hosting/d1-export.mjs` runs `wrangler d1 export
+turboslide-accounts --remote --skip-confirmation` with `--table` for `user`, `account`, `ts_alias`,
+`ts_api_key`, `ts_principal`, `ts_profile`, `ts_schema` and `rt_flags`: never `session`,
+`verification`, `deviceCode`, `ts_mail`, `ts_quota`, `rt_open` or a table this round adds
+(`ts_db_unlisted` from K2#3, the limiter's and the report counts' to come), because a session
+token or a code on disk is a key to an account. It writes
+`~/.config/turboslide/backups/accounts-<yyyy-mm-dd>.sql` through a `.part` file inside a folder of
+mode 700, sets the file to 600 before the rename, keeps the newest eight, and does nothing until
+the newest export is a week old; a failed run waits six hours before the next try. `account` holds
+Google's tokens until HR-K2#7 stores them encrypted, so every file is a secret: it never leaves the
+machine and never enters a repository, and the disk it sits on is the machine's encrypted disk
+(question 30). The guard runs the script between passes from its checkout under its lock
+(`docs/hardening/build/guard-d1-export.patch`, a patch of `~/.config/turboslide/gt-follow.sh` that
+Kevin or the orchestrator applies after `patch -p1 --dry-run -d ~/.config/turboslide`); a poll
+that finds nothing due logs nothing, a written file logs `accounts export: wrote ...` and a
+failure logs its exit code. D1's Time Travel (7 days on Free, `docs/CLOUDFLARE.md` 3.9) is the
+first way back; an export is the second, read into a database Kevin chooses with
+`wrangler d1 execute <database> --remote --file <export>`. The patch's step, run on 2026-10-11 in
+a sandbox (the patched function over a checkout copy whose wrangler is a fake that records its
+call): the first call wrote `accounts-2026-10-11.sql` with mode 600 in a folder of mode 700 and
+logged one line; the fake saw `d1 export turboslide-accounts --remote`, the eight tables, the
+account id in its environment and `apps/realtime-worker` as its folder; the second call ran no
+wrangler and logged nothing. `scripts/hosting/d1-export.test.mjs` holds the same over a fake.

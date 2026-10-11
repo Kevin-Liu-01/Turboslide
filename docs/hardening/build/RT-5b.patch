@@ -1,0 +1,20 @@
+--- a/apps/realtime-worker/wrangler.jsonc
++++ b/apps/realtime-worker/wrangler.jsonc
+@@ -82,11 +82,12 @@
+     // 10000 and 30000 are the first lever of cost.do.rows-written (2.2, section 8 question 7)
+     "TURBOSLIDE_CHECKPOINT_IDLE_MS": "2000",
+     "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
+-    // how the object places a typed entry (hardening HR-RT#5a, room-core AdmissionMode): `full`
+-    // clones and validates the whole document per entry; the preview runs `shadow` (full decides,
+-    // incremental beside it, /health counts disagreements) and production takes `incremental`
+-    // after seven days of zero there (HR-RT#5b), with `full` the switch back
+-    "TURBOSLIDE_ADMISSION": "full",
++    // how the object places a typed entry (hardening HR-RT#5a and HR-RT#5b, room-core
++    // AdmissionMode): `incremental` clones and validates the slides a write touches, and the whole
++    // document only for a write of the deck; production took it after seven days of zero
++    // disagreements on the preview's `shadow` (/health admission.disagree). `full` is the switch
++    // back, one deploy away
++    "TURBOSLIDE_ADMISSION": "incremental",
+     // the commit the Worker serves, answered by /health; empty here and passed at every deploy as
+     // `--var TURBOSLIDE_BUILD_COMMIT:<sha>` (the way /api/agent reads the Vercel deployment's
+     // stamp, apps/studio/src/server/build-commit.ts)

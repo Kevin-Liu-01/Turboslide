@@ -62,6 +62,8 @@ import {
   caretSeqOf,
 } from '../src/protocol.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
+import { CAPS } from '../src/admission.ts';
+import { slideBytes } from '../src/room-core.ts';
 import type { PendingStore, PersistedOp, PersistedQueue } from './pending-store.ts';
 import { pendingKey, unsavedCount } from './pending-store.ts';
 
@@ -234,6 +236,13 @@ export const FLUSH_MS: Readonly<Record<FlushClass, number>> = { now: 0, pos: 50,
  */
 export const UNPLACEABLE_SENTENCE =
   'This change no longer fits the slide after another change landed; make it again';
+/**
+ * The sentence of a change the room could never take (hardening HR-RC#4, RELIABILITY-7): one
+ * that makes a slide pass the 200 kB slide cap, or that alone passes an ops POST.
+ */
+export const OVERSIZE_SENTENCE = 'This slide would pass 200 kB. Split the text into another slide.';
+/** The bytes an ops POST keeps for its envelope (the client id, the base, the entry fields). */
+export const POST_ENVELOPE_BYTES = 1024;
 
 /** The reconnect and resend backoff cap (SPEC-3 3.6). */
 export const BACKOFF_MAX_MS = 8000;
@@ -506,6 +515,27 @@ export type RoomClient = {
 
 function bytesOf(value: unknown): number {
   return new TextEncoder().encode(JSON.stringify(value)).byteLength;
+}
+
+/**
+ * Whether a change can never be saved (hardening HR-RC#4, RELIABILITY-7): its mutations alone pass
+ * an ops POST, or a slide it touches passes the slide cap in `document`, the document it makes,
+ * by the admission's own measure (room-core.ts `slideBytes`). Before this the batcher stopped at
+ * such an op for good: it was never sent and never refused, every later change of the tab
+ * waited behind it, and the title row read Saving.
+ */
+export function oversizeChange(mutations: readonly Mutation[], document: DeckDocument): boolean {
+  if (bytesOf(mutations) > OPS_POST_MAX_BYTES - POST_ENVELOPE_BYTES) return true;
+  const slideIds = new Set<string>();
+  for (const mutation of mutations) {
+    if ('slideId' in mutation) slideIds.add(mutation.slideId);
+    else if (mutation.op === 'slide.insert') slideIds.add(mutation.slide.id);
+  }
+  for (const slideId of slideIds) {
+    const slide = document.slides[slideId];
+    if (slide !== undefined && slideBytes(slide) > CAPS.slideMaxBytes) return true;
+  }
+  return false;
 }
 
 /**
@@ -2001,6 +2031,46 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     );
   };
 
+  /**
+   * A change refused before it is queued (HR-RC#4): its author reads the sentence on the card that
+   * keeps the change's text (the controller's `onReject`), and the caller is thrown it, so the
+   * local document and the history stay as they were.
+   */
+  let localRefused = 0;
+  const refuseLocal = (
+    mutations: readonly Mutation[],
+    reason: RejectReason,
+    message: string,
+  ): never => {
+    localRefused += 1;
+    const notice = { opId: `local:${localRefused}`, reason, message, mutations: [...mutations] };
+    rejects.push(notice);
+    options.onReject?.(notice);
+    throw new Error(message);
+  };
+
+  /** Ops no POST can carry, returned to their author with OVERSIZE_SENTENCE; the ops after each move past it (HR-RC#4). */
+  const refuseOversize = (ops: readonly PendingOp[]): void => {
+    for (const op of ops) {
+      pending = pending.filter((row) => row !== op);
+      rebasePast(op);
+      const rejected: Rejected = { opId: op.opId, reason: 'too-large', message: OVERSIZE_SENTENCE };
+      op.settle?.({ rejected });
+      const notice = {
+        ...rejected,
+        ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+        ...(op.comment === undefined ? {} : { comment: op.comment }),
+      };
+      rejects.push(notice);
+      options.onReject?.(notice);
+    }
+    runEnds.clear();
+    const folded = fold();
+    emitChange(folded.document, 'all', 'reject');
+    persist();
+    emitStatus();
+  };
+
   const flush = async (): Promise<void> => {
     if (posting !== null) {
       await posting;
@@ -2049,14 +2119,25 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (held >= 0) flushHeld = true;
     if (!unsent.some((op) => !op.inflight)) return;
     const batch: PendingOp[] = [];
+    const tooLarge: PendingOp[] = [];
     let bytes = 0;
     for (const op of unsent) {
       if (op.opId === '' || !op.opId.startsWith(`${clientId}:`)) op.opId = nextOpId();
       const size = bytesOf(op.kind === 'edit' ? op.mutations : op.comment);
-      if (batch.length >= OPS_POST_MAX_ENTRIES || bytes + size > OPS_POST_MAX_BYTES - 1024) break;
+      // an op no POST can carry is refused, never waited on: the ops after it still go (HR-RC#4)
+      if (size > OPS_POST_MAX_BYTES - POST_ENVELOPE_BYTES) {
+        tooLarge.push(op);
+        continue;
+      }
+      if (
+        batch.length >= OPS_POST_MAX_ENTRIES ||
+        bytes + size > OPS_POST_MAX_BYTES - POST_ENVELOPE_BYTES
+      )
+        break;
       batch.push(op);
       bytes += size;
     }
+    if (tooLarge.length > 0) refuseOversize(tooLarge);
     if (batch.length === 0) return;
     for (const op of batch) op.inflight = true;
     const body: OpsPost = {
@@ -2583,6 +2664,10 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     },
     apply(mutations, label, flush, applyOptions) {
       const result = applyMutations(local, mutations);
+      // a change the room could never take is refused here with its sentence, so nothing
+      // unsendable enters the queue (HR-RC#4)
+      if (oversizeChange(mutations, result.document))
+        refuseLocal(mutations, 'too-large', OVERSIZE_SENTENCE);
       clock += 1;
       // the run rule's declaration, read in the frame the op was written in (R1-R2h)
       const run = advanceRunEnds(runEnds, mutations, true);

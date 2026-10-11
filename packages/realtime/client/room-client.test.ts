@@ -25,10 +25,12 @@ import { memoryPendingStore, pendingKey } from './pending-store.ts';
 import {
   BACKOFF_MAX_MS,
   GAP_REOPEN_MS,
+  OVERSIZE_SENTENCE,
   advanceRunEnds,
   createRoomClient,
   defaultTransform,
   legacyFieldOf,
+  oversizeChange,
   presenceRefusalOf,
   presenceStateChanged,
   receivedAtOf,
@@ -274,6 +276,58 @@ describe('createRoomClient', () => {
     expect(textOf(h.server.document()).endsWith(' a1 tb2')).toBe(true);
     await a.room.stop();
     await b.room.stop();
+  });
+
+  it('refuses a change that would pass the slide cap with its sentence, and the next change saves (HR-RC#4, RELIABILITY-7)', async () => {
+    const h = harness();
+    const cards: { reason: string; message?: string; mutations?: Mutation[] }[] = [];
+    const a = h.client(kevin, { onReject: (notice) => cards.push(notice) });
+    a.room.start();
+    await until(() => a.room.status().connected);
+    const before = textOf(a.room.document());
+    // a 297,000 byte paste into one paragraph (reliability.md's reading): the slide passes 200 kB
+    const paste = 'x'.repeat(297_000);
+    expect(() => a.room.apply([splice(0, 0, paste)], 'paste')).toThrow(OVERSIZE_SENTENCE);
+    expect(a.room.status().pending).toBe(0);
+    expect(textOf(a.room.document())).toBe(before);
+    // the author reads the sentence on the card that keeps the pasted text
+    expect(cards).toEqual([
+      expect.objectContaining({
+        reason: 'too-large',
+        message: OVERSIZE_SENTENCE,
+        mutations: [splice(0, 0, paste)],
+      }),
+    ]);
+    // under the cap the measure is the admission's: a slide of 150 kB is taken
+    expect(oversizeChange([splice(0, 0, 'y'.repeat(150_000))], a.room.document())).toBe(false);
+    a.room.apply([splice(0, 0, 'Saved ')], 'type');
+    await settled([a.room]);
+    expect(textOf(h.server.document())).toBe(`Saved ${before}`);
+    await a.room.stop();
+  });
+
+  it('refuses an op no POST can carry and sends the ops after it, never waiting on it (HR-RC#4)', async () => {
+    const h = harness();
+    const refused: { opId: string; reason: string; message?: string }[] = [];
+    const a = h.client(kevin, { onReject: (notice) => refused.push(notice) });
+    a.room.start();
+    await until(() => a.room.status().connected);
+    const before = textOf(a.room.document());
+    // a comment op of 300 kB (sendComment checks nothing) reaches the batcher first
+    a.room.sendComment({
+      op: 'resolve',
+      threadId: '01m4p2nwrver1as67dq1ypaym6',
+      at: 'z'.repeat(300_000),
+      by: kevin.principalId,
+    });
+    a.room.apply([splice(0, 0, 'Next ')], 'type');
+    await settled([a.room]);
+    expect(refused).toEqual([
+      expect.objectContaining({ reason: 'too-large', message: OVERSIZE_SENTENCE }),
+    ]);
+    expect(textOf(h.server.document())).toBe(`Next ${before}`);
+    expect(a.room.status().pending).toBe(0);
+    await a.room.stop();
   });
 
   it('keeps and persists the queue offline, then lands it when the wire returns', async () => {

@@ -118,6 +118,16 @@ export const JOIN_HEADER = 'x-turboslide-join';
 export const CHECKPOINT_TIMEOUT_MS = 25_000;
 /** How many bounded calls a flush or the last close makes for one tail (HR-RT#4): 2,000 entries at 15 s a call. */
 export const CHECKPOINT_CALLS_PER_FLUSH = 8;
+/** The first wait after a failed checkpoint (HR-RT#6b); it doubles per failure in a row. */
+export const CHECKPOINT_BACKOFF_BASE_MS = 2000;
+/** The longest wait between two tries of a failed checkpoint: ten minutes. */
+export const CHECKPOINT_BACKOFF_MAX_MS = 600_000;
+
+/** The wait before the next try after `failures` failed checkpoints in a row. */
+export function checkpointBackoffMs(failures: number): number {
+  const steps = Math.max(0, Math.min(failures - 1, 20));
+  return Math.min(CHECKPOINT_BACKOFF_MAX_MS, CHECKPOINT_BACKOFF_BASE_MS * 2 ** steps);
+}
 /** The seed route's deadline. */
 export const SEED_TIMEOUT_MS = 25_000;
 /** The entries one checkpoint run posts at most (checkpoint.ts's triggers, read as a page). */
@@ -355,6 +365,8 @@ export class DeckRoom extends DurableObject<Env> {
   private editedSinceOpen = false;
   /** the last socket closed with the tail uncommitted; the checkpoint that covers it lets the deck go (HR-RT#6a) */
   private closePending = false;
+  /** checkpoints the alarm or the close tried that failed in a row, for the backoff (HR-RT#6b) */
+  private checkpointFailures = 0;
   private readonly awakeSince = Date.now();
   private colo = '';
   /** the deck this object orders; restored on a wake before any handler runs (finding 1) */
@@ -639,10 +651,32 @@ export class DeckRoom extends DurableObject<Env> {
       if (now + 50 < dueByIdle && now + 50 < dueByMax) {
         await this.armAlarm(Math.min(dueByIdle, dueByMax));
       } else {
-        await this.checkpoint(false);
+        try {
+          await this.checkpoint(false);
+          this.checkpointFailures = 0;
+        } catch (error) {
+          // the alarm never throws for a failed checkpoint (RELIABILITY-8, hardening HR-RT#6b): the
+          // runtime retries a thrown alarm six times from 2 s and then never again, which left the
+          // tail with no committer; the object re-arms on its own backoff, capped at ten minutes
+          await this.retryCheckpointLater('the alarm checkpoint failed', error);
+        }
       }
     }
     await this.armSweeps(now);
+  }
+
+  /** Logs a failed checkpoint at error with the deck and arms the alarm at the backoff (HR-RT#6b). */
+  private async retryCheckpointLater(message: string, error: unknown): Promise<void> {
+    this.checkpointFailures += 1;
+    const wait = checkpointBackoffMs(this.checkpointFailures);
+    this.log('error', message, {
+      error: error instanceof Error ? error.message : String(error),
+      failures: this.checkpointFailures,
+      retryInMs: wait,
+      head: this.meta?.head ?? 0,
+      covered: this.meta?.covered ?? 0,
+    });
+    await this.armAlarm(Date.now() + wait);
   }
 
   /**
@@ -1453,9 +1487,8 @@ export class DeckRoom extends DurableObject<Env> {
           closed: true,
         });
     } catch (error) {
-      this.log('error', 'the close checkpoint failed', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      // the tail waits in the rows; the alarm takes it on the backoff (HR-RT#6b)
+      await this.retryCheckpointLater('the close checkpoint failed', error);
     }
     if (this.members.size > 0) return;
     this.editedSinceOpen = false;

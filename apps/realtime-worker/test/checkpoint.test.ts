@@ -2,7 +2,7 @@ import { env, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DeckRoom } from '../src/deck-room.ts';
-import { RETAIN_ENTRIES } from '../src/deck-room.ts';
+import { RETAIN_ENTRIES, checkpointBackoffMs } from '../src/deck-room.ts';
 import {
   ANON_B,
   CID_A,
@@ -240,18 +240,30 @@ describe('DeckRoom checkpoints', () => {
     a.close();
   });
 
-  it('keeps the entries and the sockets when the route refuses, and commits on the next alarm', async () => {
+  it('keeps the entries and the sockets when the route refuses, re-arms the alarm at the backoff, and commits on the next alarm', async () => {
     const stub = env.DECK_ROOM.get(env.DECK_ROOM.idFromName(deck));
     const a = await connect(deck, await mint({ deck, cid: CID_A }));
     await a.next(isEvent('hello'));
     a.send(opsFrame(CID_A, 1, 0, 1, [[splice(0, 0, 'k')]]));
     await a.next(isAck(1));
-    app.failTimes = 1;
+    app.failTimes = 3;
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(Date.now() + 3000);
-    await expect(runDurableObjectAlarm(stub)).rejects.toThrow(/503/);
+    // a thrown checkpoint leaves the alarm armed at the backoff and never throws out of the
+    // alarm, whose retries the runtime stops after six (RELIABILITY-8, HR-RT#6b)
+    const waits: number[] = [];
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      expect(await runDurableObjectAlarm(stub)).toBe(true);
+      const armed = await runInDurableObject(stub, (_instance: DeckRoom, state) =>
+        state.storage.getAlarm(),
+      );
+      waits.push((armed ?? 0) - Date.now());
+      vi.setSystemTime((armed ?? Date.now()) + 1);
+    }
     vi.useRealTimers();
-    expect(app.checkpoints).toHaveLength(1);
+    expect(waits.map((ms) => Math.round(ms / 1000))).toEqual([2, 4, 8]);
+    expect(checkpointBackoffMs(30)).toBe(600_000);
+    expect(app.checkpoints).toHaveLength(3);
     const counters = (await (await call(`/rooms/${deck}/counters`)).json()) as {
       covered: number;
       head: number;

@@ -5,7 +5,7 @@
 // tier. TanStack Start's compiler is not in the test, so `createServerFn` is a plain builder here
 // (the validator, then the handler) and `getRequest` answers the request of the call. Three
 // browsers: the owner, an invited editor while Editors Can Share is off, and an invited viewer.
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -77,8 +77,11 @@ for (const name of ['TURBOSLIDE_TOKEN', 'TURBOSLIDE_ROOM_SECRET', 'TURBOSLIDE_RO
 const { buildIdentityRuntime, setIdentityRuntime } = await import('./auth/identity');
 const { ensurePrincipal } = await import('./auth/session');
 const { bindAuthorize, boundDecide } = await import('./authorize');
-const { createWithRecord, loadAccessRecord, readStoredAccess, writeAccess } =
+const { COPY_COMMENTS_REFUSAL, createWithRecord, loadAccessRecord, readStoredAccess, writeAccess } =
   await import('./access');
+const { deckDispatcher } = await import('./actions');
+const decks = await import('./decks');
+const { flushRoom } = await import('./room');
 const { setSecurityLogSink } = await import('./log');
 const { createStoredDeck, openDeckStore } = await import('./root');
 const { standInFor } = await import('./stand-ins');
@@ -255,5 +258,73 @@ describe("the window's write conflict (HR-SD#1d, writeDeckFn)", () => {
     const answer = await staleWrite(people.owner);
     expect(answer).toContain('"code":"conflict"');
     expect(answer).toContain(`"principalId":"${people.owner.id}"`);
+  });
+});
+
+describe('Make a copy with Copy comments (HR-SD#1d)', () => {
+  /** Every comment file of a deck folder, as text. */
+  function commentFiles(deckId: string): string {
+    const dir = join(root, 'decks', deckId, 'comments');
+    if (!existsSync(dir)) return '';
+    return readdirSync(dir)
+      .map((name) => readFileSync(join(dir, name), 'utf8'))
+      .join('\n');
+  }
+
+  /** One deck.copy through the deck's dispatcher, as the editor's Make a copy dialog sends it. */
+  async function dispatchCopy(who: Browser, input: object): Promise<unknown> {
+    const request = new Request(`${ORIGIN}/edit/${DECK}`, { headers: { cookie: who.cookie } });
+    const { dispatcher } = await deckDispatcher(DECK, { request });
+    const baseRevision = (await (await openDeckStore(DECK)).read()).document.deck.revision;
+    return dispatcher.dispatch(
+      'deck.copy',
+      { id: DECK, baseRevision, ...input },
+      {
+        author: authorOf(who),
+        deckDir: join(root, 'decks', DECK),
+      },
+    );
+  }
+
+  beforeAll(async () => {
+    // the owner's thread on the first slide, in the deck's sidecar once the room flushes
+    const request = new Request(`${ORIGIN}/edit/${DECK}`, {
+      headers: { cookie: people.owner.cookie },
+    });
+    const { dispatcher } = await deckDispatcher(DECK, { request });
+    await dispatcher.dispatch(
+      'comment.add',
+      { anchor: { kind: 'slide', slideId }, body: { text: 'For the owner only', mentions: [] } },
+      { author: authorOf(people.owner), deckDir: join(root, 'decks', DECK) },
+    );
+    await flushRoom(DECK);
+    expect(commentFiles(DECK)).toContain(people.owner.id);
+  }, 120_000);
+
+  it('refuses Copy comments to an editor who may not share, on /decks and in the editor', async () => {
+    const made = await as(people.editor, () =>
+      decks.copyStoredDeck({ deckId: DECK, name: 'Copy with comments', copyComments: true }),
+    ).catch((error: unknown) => error);
+    if (!(made instanceof Error)) {
+      // what the copy carried before: the owner's principal id in the copied threads
+      expect(othersIn(commentFiles(made.deckId), people.editor)).toEqual([]);
+    }
+    expect(made).toBeInstanceOf(Error);
+    expect((made as Error).message).toBe(COPY_COMMENTS_REFUSAL);
+    await expect(
+      dispatchCopy(people.editor, { name: 'Copy with comments', copyComments: true }),
+    ).rejects.toThrow(COPY_COMMENTS_REFUSAL);
+  });
+
+  it('copies for that editor without the comments, and for the owner with them', async () => {
+    const plain = await as(people.editor, () =>
+      decks.copyStoredDeck({ deckId: DECK, name: 'Copy without comments' }),
+    );
+    expect(commentFiles(plain.deckId)).toBe('');
+    const owned = (await dispatchCopy(people.owner, {
+      name: 'The owner copy',
+      copyComments: true,
+    })) as { deckId: string };
+    expect(commentFiles(owned.deckId)).toContain('For the owner only');
   });
 });

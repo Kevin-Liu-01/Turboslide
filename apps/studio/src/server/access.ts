@@ -10,7 +10,7 @@ import {
   synthesizeLegacyRecord,
 } from '@turboslide/schema/access';
 import type { Capability, Role, Via } from '@turboslide/schema/access';
-import { ConflictError } from '@turboslide/schema/errors';
+import { ConflictError, ForbiddenError } from '@turboslide/schema/errors';
 import { canonicalJson } from '@turboslide/schema/json';
 import { newHostedDeckRecordWithToken } from '@turboslide/store/access-store';
 import type { MintedGeneralLink } from '@turboslide/store/access-store';
@@ -1206,25 +1206,49 @@ export function readerOwnIds(
 }
 
 /**
+ * Whether a caller holds `share` on a deck (hardening HR-SD#1): the window's standing (the role on
+ * the record and the record's settings, `standingOf`), decided on the record without a log line;
+ * a record that does not answer reads as no `share`.
+ */
+export async function callerShares(deckId: string, ctx: AuthContext): Promise<boolean> {
+  try {
+    const record = await effectiveAccess(deckId);
+    return standingOf(boundDecide(record, ctx, 'read'), record).capabilities.includes('share');
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The people mapping of a caller on a deck (hardening HR-SD#1; verifier pass 3, V3-1): null for
- * a caller who holds `share` there, who reads every id, else the deck's stand-ins with the
- * caller's own ids kept. The standing is the window's (`listVersions` in write.ts: the role on the
- * record and the record's settings, `standingOf`), decided on the record without a log line; a
- * record that does not answer reads as no `share`, so a failed read names nobody.
+ * a caller who holds `share` there (`callerShares`), who reads every id, else the deck's
+ * stand-ins with the caller's own ids kept, so a failed read of the record names nobody.
  */
 export async function readerPeople(
   deckId: string,
   ctx: AuthContext,
   own: Iterable<string>,
 ): Promise<StandIns | null> {
-  let shares = false;
-  try {
-    const record = await effectiveAccess(deckId);
-    shares = standingOf(boundDecide(record, ctx, 'read'), record).capabilities.includes('share');
-  } catch {
-    shares = false;
-  }
-  return shares ? null : standInsFor(deckId, own);
+  return (await callerShares(deckId, ctx)) ? null : standInsFor(deckId, own);
+}
+
+/** The sentence Make a copy answers when Copy comments is asked by someone who may not share. */
+export const COPY_COMMENTS_REFUSAL =
+  'Only people who may share this presentation can copy its comments. Make the copy without Copy comments.';
+
+/**
+ * Make a copy with Copy comments (hardening HR-SD#1d): refused to a copier who may not share the
+ * source deck. The copier owns the copy and holds `share` there, so the threads it carries would
+ * name every comment author, mention and assignee by principal id to the copier and to everyone
+ * the copier shares the copy with, and would carry other people's words to people the source's
+ * owner never shared them with. Stand-ins in the copied threads were the other way: they would be
+ * stored as principals in a deck that is not the one they were made for, so a reply on the copy
+ * would notify a stand-in and the copy's people map would show a generated name for every author.
+ * A share holder reads every id on the source and copies the threads as they are. Both copy paths
+ * call this: the window's `copyDeckFn` (decks.ts) and the dispatcher's `deck.copy` (actions.ts).
+ */
+export async function assertMayCopyComments(deckId: string, ctx: AuthContext): Promise<void> {
+  if (!(await callerShares(deckId, ctx))) throw new ForbiddenError(COPY_COMMENTS_REFUSAL, 'share');
 }
 
 /** `share.get` for a request's identity: `authorize(read)` first, one 404 for a stranger (6.2). */

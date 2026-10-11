@@ -1047,6 +1047,10 @@ function registerHostedDeckActions(
   dispatcher.register('deck.copy', async (input) => {
     const { baseRevision, ...rest } = input as DeckCopyInput;
     await allowed(rest.id, 'copy', 'deck.copy');
+    // Copy comments is a share holder's (hardening HR-SD#1d; access.ts assertMayCopyComments); a
+    // dispatcher built outside a request (the CLI's rule, a unit test) copies as the folder's holder
+    if (rest.copyComments === true && creator !== null)
+      await (await import('./access')).assertMayCopyComments(rest.id, creator);
     return made(
       rest.newId,
       () => deckIdFor({ name: rest.name.trim(), from: 'blank' }),

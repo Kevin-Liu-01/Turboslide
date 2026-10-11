@@ -568,6 +568,9 @@ const copyDeckFn = createServerFn({ method: 'POST' })
     const { assertFlag } = await import('./flags');
     const { assertQuota, tierOf } = await import('./ratelimit');
     const { ctx } = await authorizeRequest(data.deckId, 'copy', { action: 'deck.copy' });
+    // Copy comments is a share holder's (hardening HR-SD#1d; access.ts assertMayCopyComments)
+    if (data.copyComments === true)
+      await (await import('./access')).assertMayCopyComments(data.deckId, ctx);
     await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.copy' });
     await assertQuota('deckCreatesPerDay', {
       identity: identityLabel(ctx) ?? 'anonymous',

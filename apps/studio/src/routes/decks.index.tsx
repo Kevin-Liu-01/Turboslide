@@ -16,13 +16,16 @@ import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { Dialog, DialogCheck } from '@turboslide/chrome/Dialog';
 import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
 import { GtMark } from '@turboslide/chrome/GtMark';
-import { Icon } from '@turboslide/chrome/icons';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
 import { Menu } from '@turboslide/chrome/Menu';
 import type { MenuCloseReason } from '@turboslide/chrome/Menu';
 import { Select } from '@turboslide/chrome/Select';
-import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/model';
+import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/context';
 import type { MenuItem } from '@turboslide/chrome/menus/model';
-import { DIALOGS, HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import { DIALOGS, SNACKBARS } from '@turboslide/chrome/menus/strings';
+/* the page title reads the home words without the rest of the strings file (hardening HR-PC#2) */
+import { HOME } from '@turboslide/chrome/menus/page-words';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
@@ -458,8 +461,12 @@ export function foldRecent(
 // ---------------------------------------------------------------------------------------------
 // The card menu (SPEC 6.2): Google's per item menu, in the words of the File menu
 
-/** The rows of a card's menu: Google's Open, Open in new tab, Rename and Remove, plus ours. */
-export const CARD_MENU_ITEMS: ReadonlyArray<MenuItem> = [
+/**
+ * The rows of a card's menu: Google's Open, Open in new tab, Rename and Remove, plus ours. Not
+ * exported, so the router's code splitting moves the rows and the dialog words they read into the
+ * page's own chunk (hardening HR-PC#2).
+ */
+const CARD_MENU_ITEMS: ReadonlyArray<MenuItem> = [
   { id: 'home.card.open', label: 'Open', icon: 'document', status: 'now' },
   { id: 'home.card.openNewTab', label: 'Open in new tab', icon: 'external', status: 'now' },
   { id: 'home.card.present', label: 'Present', icon: 'present', status: 'now', turboslide: true },

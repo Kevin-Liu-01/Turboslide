@@ -329,6 +329,25 @@ for (const file of chunkFiles) {
 }
 notes.push(`webp data URLs in client chunks: ${inlinedStills}`);
 
+// 7. The vendor chunk holds libraries alone (hardening HR-PC#2, PERF-9): the group's test admits
+//    React, the scheduler and the router, and the start runtime's hydration entry, which imports
+//    the app's router, stays out of it, so the chunk caches across deployments and carries no app
+//    module. Every app module the root graph carries writes one of these words; none of the
+//    libraries does. On f7e97039 the chunk held 123,923 B of the app's modules.
+const VENDOR_APP_MARKERS = ['data-control', 'Turboslide'];
+const vendorChunks = chunkFiles.filter((f) => /(?:^|[\\/])vendor-[^\\/]*\.js$/.test(f));
+for (const file of vendorChunks) {
+  const text = readFileSync(file, 'utf8');
+  const found = VENDOR_APP_MARKERS.filter((marker) => text.includes(marker));
+  notes.push(
+    `vendor chunk ${relative(chunkDir, file)} ${statSync(file).size} B; app markers: ${found.length === 0 ? 'none' : found.join(', ')}`,
+  );
+  if (found.length > 0)
+    failures.push(
+      `vendor chunk ${relative(chunkDir, file)} carries app modules (${found.join(', ')}): the vendor group admits libraries alone (hardening HR-PC#2)`,
+    );
+}
+
 for (const n of notes) console.log(`check-client-bundle: ${n}`);
 if (failures.length > 0) {
   for (const f of failures) console.error(`check-client-bundle: FAIL ${f}`);

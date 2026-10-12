@@ -2,7 +2,8 @@ import { useLocation } from '@tanstack/react-router';
 import { Suspense, lazy, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { Icon } from '@turboslide/chrome/icons';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
 import { useLayer } from '@turboslide/chrome/Layer';
 import { ThemeButton } from '@turboslide/chrome/ThemeButton';
 import { tipProps } from '@turboslide/chrome/Tooltip';

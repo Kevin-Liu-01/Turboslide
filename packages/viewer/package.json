@@ -13,6 +13,7 @@
     "./hash": "./src/hash.ts",
     "./keys": "./src/keys.ts",
     "./dither": "./src/dither.ts",
+    "./dither-factory": "./src/dither-factory.ts",
     "./Frame": "./src/Frame.tsx",
     "./Sheet": "./src/Sheet.tsx",
     "./SlideView": "./src/SlideView.tsx",

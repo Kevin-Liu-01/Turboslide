@@ -287,6 +287,13 @@ readings in `docs/hardening/build/PC-wave3b.md`), bytes from the node-server bui
   once the list is in view. With twelve cards and no pointer movement the page makes 12 server
   function calls, each card's own head read, where it made 22 (10 of them the editor's loader);
   `perf-budget.mjs --write` holds the count at one per card.
+- HR-PC#2 (PERF-9): the `vendor` chunk holds the libraries alone (341,275 B, from 518,333 B with
+  123,923 B of the app's modules) and an `app` chunk the app's root graph; the dither pipeline,
+  the 25 KB strings file, the menu model and its key tables, and the icon table outside its 26
+  base glyphs leave the pages outside the editor. `/decks` preloads 564,388 B (from 698,800 B,
+  ceiling 600,000 B), `/docs` 518,607 B (from 618,407 B; still over its 450,000 B ceiling until
+  the docs' own chunks shrink), `/signin` 465,415 B and `/edit/gt-brand` 990,145 B.
+  `check-client-bundle.mjs` fails a vendor chunk that carries an app module.
 
 ## 6. Two definitions that moved in round three
 

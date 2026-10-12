@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
-import { Icon } from '@turboslide/chrome/icons';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
 import type { IconName } from '@turboslide/chrome/icons';
 import { useLayer } from '@turboslide/chrome/Layer';
 import { place } from '@turboslide/chrome/place';

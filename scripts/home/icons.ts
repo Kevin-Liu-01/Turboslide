@@ -12,19 +12,20 @@
 //   one.
 //
 // icons.tsx is a TSX module that Node's type stripping cannot load, so this reads its source text:
-// the `PATHS` table and its two shared arrays, from `/* bars-3-bottom-left` to `export type
-// IconProps`, with the table's two type annotations removed, evaluated with the schema's own
-// `shapePath` (the drawn shape glyphs). `apps/studio/src/components/home/icons.test.ts` pins the
-// result against the module's own `iconPaths` for every name, so a change to the table's shape
-// fails a test and never draws another glyph.
+// the `PATHS` table and its two shared arrays, from `/* bars-3-bottom-left` to the
+// `registerIcons(PATHS)` call, with the table's two type annotations removed, evaluated with the
+// base glyphs it spreads (`BASE_ICON_PATHS`, read the same way from icons-base.tsx, where the
+// glyphs of the pages outside the editor live since hardening HR-PC#2).
+// `apps/studio/src/components/home/icons.test.ts` pins the result against the module's own
+// `iconPaths` for every name, so a change to the table's shape fails a test and never draws
+// another glyph.
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { shapePath } from '../../packages/schema/src/shapes.ts';
-
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const ICONS_SOURCE = 'packages/chrome/src/icons.tsx';
+export const ICONS_BASE_SOURCE = 'packages/chrome/src/icons-base.tsx';
 
 /** One path of a glyph, as icons.tsx's `IconPath` (a filled Heroicon or a drawn stroke). */
 export type IconPath = {
@@ -41,20 +42,30 @@ let table: Readonly<Record<string, readonly IconPath[]>> | null = null;
 /** The editor's icon table, read from icons.tsx's source. */
 export function iconTable(): Readonly<Record<string, readonly IconPath[]>> {
   if (table !== null) return table;
+  const base = readFileSync(resolve(ROOT, ICONS_BASE_SOURCE), 'utf8');
+  const baseHead = 'export const BASE_ICON_PATHS = ';
+  const baseStart = base.indexOf(baseHead);
+  const baseEnd = base.indexOf('} as const satisfies', baseStart);
+  if (baseStart < 0 || baseEnd < baseStart)
+    throw new Error(`${ICONS_BASE_SOURCE}: the BASE_ICON_PATHS table was not found`);
   const source = readFileSync(resolve(ROOT, ICONS_SOURCE), 'utf8');
   const start = source.indexOf('/* bars-3-bottom-left');
-  const end = source.indexOf('export type IconProps');
+  const end = source.indexOf('registerIcons(PATHS)');
   if (start < 0 || end < start) throw new Error(`${ICONS_SOURCE}: the PATHS table was not found`);
   const body = source
     .slice(start, end)
     .replace(/:\s*readonly IconPath\[\]/g, '')
     .replace(/:\s*Record<IconName, readonly IconPath\[\]>/g, '');
-  // the table is data the repository holds (Heroicons paths and shapePath calls), read at build
+  // the tables are data the repository holds (Heroicons paths and drawn glyphs), read at build
   // eslint-disable-next-line @typescript-eslint/no-implied-eval
-  const read = new Function('shapePath', `${body}\nreturn PATHS;`) as (
-    fn: typeof shapePath,
+  const baseTable = new Function(
+    `return (${base.slice(baseStart + baseHead.length, baseEnd + 1)});`,
+  )();
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+  const read = new Function('BASE_ICON_PATHS', `${body}\nreturn PATHS;`) as (
+    paths: unknown,
   ) => Record<string, readonly IconPath[]>;
-  table = read(shapePath);
+  table = read(baseTable);
   return table;
 }
 

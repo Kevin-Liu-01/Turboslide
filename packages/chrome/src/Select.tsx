@@ -11,7 +11,8 @@ import { flushSync } from 'react-dom';
 import type { SelectSlotProps } from '@turboslide/viewer/select-slot';
 
 import { useFocusHold } from './FocusHold';
-import { Icon } from './icons';
+/* the base glyphs alone (hardening HR-PC#2): the editor registers the whole set as it loads */
+import { Icon } from './icons-base';
 import type { IconName } from './icons';
 import { cn } from './lib/cn';
 import { hideTooltip, hideTooltipUntilInput, tipProps } from './Tooltip';

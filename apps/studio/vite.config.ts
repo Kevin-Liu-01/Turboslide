@@ -63,8 +63,15 @@ function externalServerOnly(): Plugin {
 // read the chunks the deployment ships: React, the scheduler and the router in one `vendor`
 // chunk that caches across deployments while the app's chunks change. The client environment
 // alone.
-const VENDOR_TEST =
-  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
+// libraries alone, the hydration entry's path to the app's router left out (vite.deploy.config.ts
+// says why; hardening HR-PC#2)
+const VENDOR_EXCLUDE =
+  /@tanstack[\\/](?:react-start[\\/]dist[\\/](?:plugin[\\/]|esm[\\/]client\.js)|react-start-client[\\/]dist[\\/]esm[\\/](?:index|StartClient|hydrateStart)\.js|start-client-core[\\/]dist[\\/]esm[\\/]client[\\/])/;
+const VENDOR_TEST = new RegExp(
+  `^(?!.*${VENDOR_EXCLUDE.source})` +
+    /.*node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/
+      .source,
+);
 const HOME_SHARED_TEST =
   /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
 // Hidden source maps, opt in with TURBOSLIDE_CLIENT_SOURCEMAP=1 (vite.deploy.config.ts says why).
@@ -82,7 +89,20 @@ const CLIENT_BUILD = {
         codeSplitting: {
           groups: [
             { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
+            /* the landing's own modules alone, not the modules they import (the brand's site
+               facts, which every route's head reads): with their dependencies the chunk joined
+               the root graph once the vendor group stopped holding the app (hardening HR-PC#2) */
+            {
+              name: 'home-shared',
+              test: HOME_SHARED_TEST,
+              priority: 5,
+              includeDependenciesRecursively: false,
+            },
+            /* the app's part of the graph every route loads (the root route, the router, each
+               route file's options and what they import) in one chunk beside `vendor`, where
+               the bundler would otherwise cut it into a chunk per module the lazy routes share
+               (hardening HR-PC#2) */
+            { name: 'app', tags: ['$initial' as const], priority: 1 },
           ],
         },
       },

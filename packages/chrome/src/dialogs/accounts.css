@@ -106,6 +106,10 @@
   margin-top: 12px;
 }
 
+.ts-profile-section-foot {
+  margin: 6px 0 0;
+}
+
 .ts-profile-section-head {
   display: flex;
   align-items: center;

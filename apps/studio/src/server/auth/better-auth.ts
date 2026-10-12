@@ -70,6 +70,12 @@ export const COOKIE_PREFIX = 'ts';
 export const SESSION_IDLE_S = 7 * 24 * 60 * 60;
 export const SESSION_UPDATE_S = 24 * 60 * 60;
 export const SESSION_FRESH_S = 10 * 60;
+/**
+ * The life of a session's copy in its signed cookie (the library's cookie cache) and in an
+ * instance's session facts (identity.ts): a session ended elsewhere, by Sign out everywhere else
+ * or a sign out on another device, is refused within it (HR-SA#7, AUTH-6; it was 300 s).
+ */
+export const SESSION_CACHE_S = 60;
 /** The magic link and the code live 300 s; three attempts per code (SPEC-3 7.3). */
 export const SIGN_IN_EXPIRES_S = 300;
 export const OTP_ATTEMPTS = 3;
@@ -369,7 +375,7 @@ function buildAuth(deps: AuthDeps): Auth {
       expiresIn: SESSION_IDLE_S,
       updateAge: SESSION_UPDATE_S,
       freshAge: SESSION_FRESH_S,
-      cookieCache: { enabled: true, maxAge: 5 * 60 },
+      cookieCache: { enabled: true, maxAge: SESSION_CACHE_S },
     },
     advanced: {
       cookiePrefix: COOKIE_PREFIX,
@@ -486,10 +492,14 @@ export async function migrateBetterAuth(auth: TurboslideAuth): Promise<void> {
   await runMigrations();
 }
 
-/** The session the request's cookie names, or null. */
+/**
+ * The session the request's cookie names, or null. `fresh` reads the session row past the
+ * library's cookie cache, so a caller with a cache of its own (identity.ts) never stacks the two.
+ */
 export async function sessionOf(
   auth: TurboslideAuth,
   request: Request,
+  options: { fresh?: boolean } = {},
 ): Promise<{
   session: {
     id: string;
@@ -503,7 +513,10 @@ export async function sessionOf(
   };
   user: { id: string; email: string; emailVerified: boolean; name: string; image?: string | null };
 } | null> {
-  const result = await auth.api.getSession({ headers: request.headers });
+  const result = await auth.api.getSession({
+    headers: request.headers,
+    ...(options.fresh === true ? { query: { disableCookieCache: true } } : {}),
+  });
   if (result === null) return null;
   return {
     session: result.session,

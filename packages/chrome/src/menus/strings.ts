@@ -274,6 +274,8 @@ export const ACCOUNT = {
     thisBrowser: 'This browser',
     signOut: 'Sign out',
     signOutEverywhereElse: 'Sign out everywhere else',
+    /** beside Sign out everywhere else: how soon another device stops (HR-SA#7, AUTH-6) */
+    signedOutWithinMinute: 'Other devices are signed out within a minute',
     keys: 'API keys',
     keyShownOnce: 'A key is shown once; copy it now',
     revoke: 'Revoke',

@@ -134,10 +134,12 @@ export function ProfileDialog() {
                   className="pt-ib is-text"
                   disabled={busy}
                   data-control="dialog.profile.signOutOthers"
-                  onClick={() => run(account.signOut?.('all'), 'Signed out everywhere else')}
+                  onClick={() =>
+                    run(account.signOut?.('all'), ACCOUNT.profile.signedOutWithinMinute)
+                  }
                   {...tipProps({
                     name: ACCOUNT.profile.signOutEverywhereElse,
-                    doc: 'Every other browser signs out; this one stays',
+                    doc: 'Every other browser signs out within a minute; this one stays',
                   })}
                 >
                   <span className="pt-lb">{ACCOUNT.profile.signOutEverywhereElse}</span>
@@ -180,14 +182,16 @@ export function ProfileDialog() {
                       onClick={() =>
                         run(
                           account?.signOut?.(session.id),
-                          session.current ? undefined : 'Signed out that browser',
+                          session.current
+                            ? undefined
+                            : 'That browser is signed out within a minute',
                         )
                       }
                       {...tipProps({
                         name: ACCOUNT.profile.signOut,
                         doc: session.current
                           ? 'Ends the sign in here; your anonymous identity stays'
-                          : 'Ends the sign in on that browser',
+                          : 'Ends the sign in on that browser within a minute',
                       })}
                     >
                       <span className="pt-lb">{ACCOUNT.profile.signOut}</span>
@@ -196,6 +200,14 @@ export function ProfileDialog() {
                 ))
               )}
             </ul>
+            {account?.signedIn === true && sessions.length > 1 ? (
+              <p
+                className="ts-profile-sentence ts-profile-section-foot"
+                data-control="dialog.profile.signOutWithin"
+              >
+                {ACCOUNT.profile.signedOutWithinMinute}
+              </p>
+            ) : null}
           </section>
 
           {account?.signedIn === true ? (

@@ -417,7 +417,7 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
      resolves the new record at once (b1.md R18), and onto the principal's deck index, the
      carrier every instance reads (R17; PEOPLE.md 3.13): a refused index write leaves the record
      standing. The account's cached session facts leave too (identity.ts `accountSession`, the D1
-     engine's 300 s cache; docs/CLOUDFLARE.md 4.1), so a renamed account reads its new name on the
+     engine's 60 s cache; docs/CLOUDFLARE.md 4.1), so a renamed account reads its new name on the
      next request of this instance */
   const propagate = async (
     principalId: string,
@@ -517,7 +517,8 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const { identity, request } = facts;
     if (rt.auth === null || identity.kind !== 'account' || request === undefined)
       return { signedOut: 0 };
-    /* a revoked session must not answer from the facts cache for the rest of its 300 s */
+    /* a revoked session must not answer from this instance's facts cache for the rest of its 60 s;
+       other instances refuse it within those 60 s (HR-SA#7) */
     if (identity.principalId !== null) forgetAccountFacts(identity.principalId, rt);
     const listed = (await rt.auth.api.listSessions({ headers: request.headers })) as {
       id: string;

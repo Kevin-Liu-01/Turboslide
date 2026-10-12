@@ -881,6 +881,48 @@ describe('the viewer slot (3.13)', () => {
   });
 });
 
+// The dropdown round's last visual pass (verify-final-3-visual.md), F1: the trigger's width followed
+// the chosen label, so the controls beside it moved (on /decks, Title shrank the sort field from
+// 157 to 67 px and the view toggle moved 90 px).
+describe('the trigger width (the last visual pass, F1)', () => {
+  it('stands every option label and the placeholder in hidden cells of the trigger, out of its text and its name', () => {
+    render(
+      <Harness
+        options={[...POSITIONS, { value: 'pic', label: 'Picture', icon: 'text' }]}
+        initial="next"
+        placeholder="Slides in this presentation"
+      />,
+    );
+    const sizers = [...trigger().querySelectorAll<HTMLElement>('.ts-dropdown-sizer')];
+    expect(sizers.map((sizer) => sizer.dataset.label)).toEqual([
+      'Slides in this presentation',
+      'None',
+      'Next slide',
+      'Previous slide',
+      'First slide',
+      'Last slide',
+      'Picture',
+    ]);
+    for (const sizer of sizers) {
+      expect(sizer.getAttribute('aria-hidden')).toBe('true');
+      /* the words are generated content: no text a test, a screen reader or a copy reads */
+      expect(sizer.textContent).toBe('');
+    }
+    /* an option that draws an icon in the trigger keeps the icon's slot in its cell */
+    expect(sizers.map((sizer) => sizer.hasAttribute('data-icon'))).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
+    expect(trigger().textContent).toBe('Next slide');
+    expect(screen.getByRole('combobox', { name: 'Slide' })).toBe(trigger());
+  });
+});
+
 // The dropdown round's last visual pass (verify-final-3-visual.md), F2: a list stayed open after its
 // trigger left the window (a finger drag that started on the open trigger scrolled the panel, a
 // scroll by script), pinned at the window's edge over other fields.

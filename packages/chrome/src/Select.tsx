@@ -215,6 +215,21 @@ export function Select<T extends string>({
     [rows],
   );
   const chosen = rows.find((row) => row.option.value === value);
+  /* every set of words the trigger may show, once each: the placeholder and each option's label,
+     with the icon's slot where the option draws one */
+  const sizes = useMemo(() => {
+    const seen = new Set<string>();
+    const out: { label: string; icon: boolean }[] = [];
+    const add = (words: string, icon: boolean) => {
+      const key = `${icon ? 'i' : 't'}:${words}`;
+      if (words === '' || seen.has(key)) return;
+      seen.add(key);
+      out.push({ label: words, icon });
+    };
+    if (placeholder !== undefined) add(placeholder, false);
+    for (const row of rows) add(row.option.label, row.option.icon !== undefined);
+    return out;
+  }, [rows, placeholder]);
 
   const [open, setOpen] = useState(false);
   const [activeRaw, setActive] = useState(-1);
@@ -638,20 +653,37 @@ export function Select<T extends string>({
         onKeyUp={onKeyUp}
         onClick={onClick}
       >
+        {/* the shown words and, in the same grid cell, every label the trigger may show, so the
+            widest sets the trigger's width and a choice moves nothing beside it, as the select
+            did (the dropdown round's last visual pass, F1: on /decks, Title shrank the sort
+            field from 157 to 67 px and the view toggle moved 90 px). The cells draw their words
+            as generated content and are hidden from the tree: the trigger's text and its name
+            stay the chosen option's */}
         <span className="ts-dropdown-value">
-          {shown?.icon !== undefined ? (
-            <span className="ts-dropdown-icon" aria-hidden="true">
-              <Icon name={shown.icon} size={14} />
+          <span className="ts-dropdown-shown">
+            {shown?.icon !== undefined ? (
+              <span className="ts-dropdown-icon" aria-hidden="true">
+                <Icon name={shown.icon} size={14} />
+              </span>
+            ) : null}
+            {/* a placeholder is no value: a screen reader reads the field's name and an empty
+                value, never "Add expiration" as the chosen one (the verifier's finding 4) */}
+            <span
+              className="ts-dropdown-text"
+              aria-hidden={shown === undefined && words !== '' ? true : undefined}
+            >
+              {words}
             </span>
-          ) : null}
-          {/* a placeholder is no value: a screen reader reads the field's name and an empty
-              value, never "Add expiration" as the chosen one (the verifier's finding 4) */}
-          <span
-            className="ts-dropdown-text"
-            aria-hidden={shown === undefined && words !== '' ? true : undefined}
-          >
-            {words}
           </span>
+          {sizes.map((size) => (
+            <span
+              key={`${size.icon ? 'i' : 't'}:${size.label}`}
+              className="ts-dropdown-sizer"
+              aria-hidden="true"
+              data-label={size.label}
+              data-icon={size.icon ? '' : undefined}
+            />
+          ))}
         </span>
         <span className="ts-dropdown-chevron" aria-hidden="true">
           <Icon name="chevron-down" size={14} />

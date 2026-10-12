@@ -117,11 +117,12 @@
 }
 
 /* the list: as wide as its longest row from its trigger's width (place() writes min-width, which
-   wins over this max-width when the trigger is wider) to 320 px; ten rows tall at most, longer
-   lists scroll in the shared scrollbar (tokens.css, no rule here) */
+   wins over this max-width when the trigger is wider) to 320 px; ten rows tall at most with the
+   plate's padding and its 1 px border (SELECT_MAX_HEIGHT, the list is border-box), longer lists
+   scroll in the shared scrollbar (tokens.css, no rule here) */
 .ts-dropdown-list {
   min-width: 0;
-  max-height: 288px;
+  max-height: 290px;
 }
 
 .ts-dropdown-list[hidden] {

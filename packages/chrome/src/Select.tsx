@@ -88,8 +88,13 @@ export type SelectProps<T extends string = string> = {
 export const SELECT_MAX_ROWS = 10;
 /** A row's height (Menu.css `.ts-menu-item`). */
 export const SELECT_ROW_HEIGHT = 28;
-/** The list's height cap: ten rows and the plate's 4 px of padding above and below. */
-export const SELECT_MAX_HEIGHT = SELECT_MAX_ROWS * SELECT_ROW_HEIGHT + 8;
+/**
+ * The list's height cap: ten rows, the plate's 4 px of padding above and below, and its 1 px
+ * border above and below. The list is `border-box` (Menu.css) with the `.pt-float` border, so a cap
+ * of the rows and the padding alone left 286 px for 288 px of them, and a list of exactly ten rows
+ * scrolled by 2 px and drew the scrollbar (the dropdown round's last visual pass, F8).
+ */
+export const SELECT_MAX_HEIGHT = SELECT_MAX_ROWS * SELECT_ROW_HEIGHT + 8 + 2;
 /** PageUp and PageDown move this many enabled options. */
 export const SELECT_PAGE = 10;
 /** Letters typed within this many ms join the type ahead buffer (the menus', Menu.tsx). */

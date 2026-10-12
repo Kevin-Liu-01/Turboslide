@@ -1,4 +1,8 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import type { ComponentType } from 'react';
@@ -9,7 +13,7 @@ import type { SelectSlotProps } from '@turboslide/viewer/select-slot';
 
 import { openLayers, resetLayersForTests } from '../Layer';
 import type { PlaceOptions } from '../place';
-import { SELECT_MAX_HEIGHT, Select } from '../Select';
+import { SELECT_MAX_HEIGHT, SELECT_MAX_ROWS, SELECT_ROW_HEIGHT, Select } from '../Select';
 import type { SelectGroup, SelectOption, SelectProps } from '../Select';
 import { TIP_DELAY_MS, TIP_ID, hideTooltip, resetTooltipTiming, tipProps } from '../Tooltip';
 import { chooseOption } from './choose-option';
@@ -851,7 +855,7 @@ describe('placement and layer (3.6)', () => {
       matchWidth: true,
       maxHeight: SELECT_MAX_HEIGHT,
     });
-    expect(SELECT_MAX_HEIGHT).toBe(288);
+    expect(SELECT_MAX_HEIGHT).toBe(290);
     expect(list().style.position).toBe('fixed');
   });
 
@@ -874,5 +878,18 @@ describe('the viewer slot (3.13)', () => {
   it('takes the component as its type', () => {
     const slot: ComponentType<SelectSlotProps> = Select;
     expect(slot).toBe(Select);
+  });
+});
+
+// The dropdown round's last visual pass (verify-final-3-visual.md), F8: a list of exactly ten rows
+// scrolled by 2 px and drew the scrollbar, since the cap counted the rows and the padding and not
+// the plate's 1 px border of a border-box list.
+describe('the ten row cap (the last visual pass, F8)', () => {
+  it('holds ten rows, the 4 px of padding above and below and the plate border, so ten rows never scroll', () => {
+    expect(SELECT_MAX_HEIGHT).toBe(SELECT_MAX_ROWS * SELECT_ROW_HEIGHT + 8 + 2);
+    const here = import.meta.dirname ?? join(fileURLToPath(import.meta.url), '..');
+    const css = readFileSync(join(here, '..', 'Select.css'), 'utf8');
+    const rule = /\.ts-dropdown-list \{[^}]*\}/.exec(css)?.[0] ?? '';
+    expect(rule).toContain(`max-height: ${SELECT_MAX_HEIGHT}px`);
   });
 });

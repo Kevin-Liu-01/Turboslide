@@ -33,7 +33,7 @@ import type { MailMode, Mailer } from './mail/mailer.ts';
 import type { RateLimiter } from '../ratelimit.ts';
 import type { QuotaStore } from './quota.ts';
 import type { SecondaryStorage } from './secondary-storage.ts';
-import { notePairCode, signInBinding } from './signin-binding.ts';
+import { PAIR_PATH, notePairCode, signInBinding } from './signin-binding.ts';
 
 export const BETTER_AUTH_SECRET_VARIABLE = 'BETTER_AUTH_SECRET';
 export const GITHUB_ID_VARIABLE = 'GITHUB_CLIENT_ID';
@@ -187,6 +187,21 @@ export function authLimitStorage(
   };
 }
 
+/**
+ * The routes of the mail sign in (HR-SA#4): every path the magic link and code plugins answer,
+ * read from the plugins themselves so a route the library adds is covered, and the second
+ * browser's code (`/sign-in/pair`), which only follows a mail.
+ */
+export function mailPaths(plugins: readonly { endpoints?: Record<string, unknown> }[]): string[] {
+  const paths = new Set<string>([PAIR_PATH]);
+  for (const plugin of plugins)
+    for (const endpoint of Object.values(plugin.endpoints ?? {})) {
+      const path = (endpoint as { path?: unknown }).path;
+      if (typeof path === 'string') paths.add(path);
+    }
+  return [...paths].sort();
+}
+
 export type SessionFacts = { id: string; userId: string; token: string };
 
 export type AuthDeps = {
@@ -273,6 +288,41 @@ function buildAuth(deps: AuthDeps): Auth {
           },
         }
       : {};
+  // the two mail plugins: the link and the code, in one mail (mail/templates.ts)
+  const mailPlugins = [
+    magicLink({
+      expiresIn: SIGN_IN_EXPIRES_S,
+      storeToken: 'hashed',
+      rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
+      sendMagicLink: async ({ email, url, token }, ctx) => {
+        // the code a second browser asks for, answered to the page that asked (HR-SA#2a)
+        notePairCode(ctx, token);
+        let code = '';
+        try {
+          code = (await api.createOtp?.(email, ctx?.headers ?? ctx?.request?.headers)) ?? '';
+        } catch (error) {
+          log(
+            `turboslide auth: code not created: ${error instanceof Error ? error.name : 'error'}`,
+          );
+        }
+        await sendSignIn(email, url, code);
+      },
+    }),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: SIGN_IN_EXPIRES_S,
+      allowedAttempts: OTP_ATTEMPTS,
+      storeOTP: 'hashed',
+      rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
+      sendVerificationOTP: async ({ email, otp }) => {
+        await sendSignIn(email, undefined, otp);
+      },
+    }),
+  ] as const;
+  // with TURBOSLIDE_MAIL=off no mail leaves, so the mail routes answer 404 before the library's
+  // limiter or any row (HR-SA#4, AUTH-8): a request wrote a verification row and a quota row for a
+  // mail that was dropped
+  const mailOff = deps.mailer.mode === 'off';
   const auth = betterAuth({
     appName: 'Turboslide',
     basePath: AUTH_BASE_PATH,
@@ -289,7 +339,7 @@ function buildAuth(deps: AuthDeps): Auth {
     // the stored session tokens are digests (token-at-rest.ts, HR-K2#5); this route compares them
     // with the cookie's token and would end the caller's own session too. Sign out everywhere
     // else is the `account.signOut` action, which ends the other sessions by id (actions.ts)
-    disabledPaths: ['/revoke-other-sessions'],
+    disabledPaths: ['/revoke-other-sessions', ...(mailOff ? mailPaths(mailPlugins) : [])],
     // on the `d1` kind the library takes the binding shaped facade over the proxy and runs its own
     // D1 dialect and index introspector (d1-proxy-dialect.ts: D1 refuses the generic SQLite index
     // read of getMigrations); on the other kinds the Kysely of db.ts with its type
@@ -376,34 +426,7 @@ function buildAuth(deps: AuthDeps): Auth {
     },
     socialProviders: { ...github, ...google },
     plugins: [
-      magicLink({
-        expiresIn: SIGN_IN_EXPIRES_S,
-        storeToken: 'hashed',
-        rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
-        sendMagicLink: async ({ email, url, token }, ctx) => {
-          // the code a second browser asks for, answered to the page that asked (HR-SA#2a)
-          notePairCode(ctx, token);
-          let code = '';
-          try {
-            code = (await api.createOtp?.(email, ctx?.headers ?? ctx?.request?.headers)) ?? '';
-          } catch (error) {
-            log(
-              `turboslide auth: code not created: ${error instanceof Error ? error.name : 'error'}`,
-            );
-          }
-          await sendSignIn(email, url, code);
-        },
-      }),
-      emailOTP({
-        otpLength: 6,
-        expiresIn: SIGN_IN_EXPIRES_S,
-        allowedAttempts: OTP_ATTEMPTS,
-        storeOTP: 'hashed',
-        rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
-        sendVerificationOTP: async ({ email, otp }) => {
-          await sendSignIn(email, undefined, otp);
-        },
-      }),
+      ...mailPlugins,
       deviceAuthorization({
         expiresIn: DEVICE_EXPIRES,
         interval: DEVICE_INTERVAL,

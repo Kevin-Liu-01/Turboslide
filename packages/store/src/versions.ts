@@ -15,6 +15,7 @@ import { mutationSchema, versionSchema } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 import { validateDocument } from '@turboslide/schema/validate';
 
+import { cachedRecords, fileStamp, forgetFile } from './parse-cache.ts';
 import type { VersionRecord, WriteOrigin } from './store.ts';
 
 export const VERSIONS_DIR = 'versions';
@@ -154,6 +155,31 @@ export function versionRecordText(record: VersionRecord): string {
 
 /** Every entry under versions/, sorted by n; a file that is not a record is a TypeError. */
 export function readVersions(dir: string): VersionRecord[] {
+  return readVersionsWith(dir, (file) => parseVersionRecord(readFileSync(file, 'utf8'), file));
+}
+
+/**
+ * `readVersions` through the parse cache (hardening PS#2, PERF-2): a record whose file is
+ * unchanged since it was parsed is not parsed again, so a log read costs a directory listing and
+ * a stat per record, and a commit parses its own record alone. Each call answers its own copies,
+ * so a caller that changes a record changes nothing another caller reads. A Blob mirror reads
+ * its log this way (`openFileStore`'s `cache`).
+ */
+export function readVersionsCached(dir: string): VersionRecord[] {
+  return readVersionsWith(dir, (file) => {
+    const stamp = fileStamp(file);
+    const cached = stamp === null ? undefined : cachedRecords.get(file);
+    if (cached !== undefined && cached.stamp === stamp)
+      return structuredClone(cached.value as VersionRecord);
+    const record = parseVersionRecord(readFileSync(file, 'utf8'), file);
+    // the stamp read before the bytes: a write between the two leaves an older stamp, which the
+    // next read refuses, never newer bytes under an older stamp
+    if (stamp !== null) cachedRecords.set(file, { stamp, value: structuredClone(record) });
+    return record;
+  });
+}
+
+function readVersionsWith(dir: string, read: (file: string) => VersionRecord): VersionRecord[] {
   const folder = join(dir, VERSIONS_DIR);
   if (!existsSync(folder)) return [];
   const records: VersionRecord[] = [];
@@ -161,7 +187,7 @@ export function readVersions(dir: string): VersionRecord[] {
     const match = /^(\d+)\.json$/.exec(name);
     if (match === null) continue;
     const file = join(folder, name);
-    const record = parseVersionRecord(readFileSync(file, 'utf8'), file);
+    const record = read(file);
     if (record.n !== Number(match[1])) {
       throw new TypeError(`${file} carries n ${record.n}; the file name says ${match[1]}`);
     }
@@ -174,6 +200,7 @@ export function writeVersion(dir: string, record: VersionRecord): string {
   const path = versionPath(dir, record.n);
   mkdirSync(join(dir, VERSIONS_DIR), { recursive: true });
   writeFileSync(path, versionRecordText(record));
+  forgetFile(path);
   return path;
 }
 

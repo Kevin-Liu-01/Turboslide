@@ -366,3 +366,16 @@ a call count in `packages/store/src/hosted.test.ts`: after 1,000 commits the fir
 callers of the whole log (the room's open, which the editor's and the presenter's loader run,
 the checkpoint's covered read, the seed route, the loader's version list) still read it once per
 fresh instance, as one `get` per record in rounds of 50. `TURBOSLIDE_STORE_FULL_WALK=1` brings back the full walk as a repair path.
+
+## 11. The commit's parses and validations (hardening PS#2)
+
+A Blob mirror keeps its validated document and its parsed version records in a parse cache
+(`packages/store/src/parse-cache.ts`), each entry checked against the identity of the files it
+was read from (inode, size, modification and change times) before use, and dropped by the
+store's own writes. A write keeps the document the reducer validated as the folder's next read,
+so a read, a revision and the next write on an unchanged mirror validate nothing, and a log read
+parses only the records it has not seen. Every read answers its own copy. The pin is a count in
+`packages/store/src/commit-cost.test.ts`: ten writes on a 1,000 record mirror make 9 record
+parses and 10 validations, against 10,045 parses and 30 validations on `origin/main` `8c9465b6`
+(ceilings 10 and 10); five rounds of `revision()`, `read()` and `records()` on an unchanged
+mirror make none, against 300 parses and 10 validations.

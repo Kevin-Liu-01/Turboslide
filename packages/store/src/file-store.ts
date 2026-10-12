@@ -55,11 +55,13 @@ import {
   documentAtVersion,
   nextVersionNumber,
   readVersions,
+  readVersionsCached,
   recordAtRevision,
   toVersion,
   writeVersion,
 } from './versions.ts';
 import { watchDeck } from './watch.ts';
+import { cachedDocuments, fileStamp, forgetFile } from './parse-cache.ts';
 
 export type FileStoreOptions = {
   /** The deck directory holding deck.json. */
@@ -83,6 +85,13 @@ export type FileStoreOptions = {
    * text anchors the write moved and writes the sidecar under the same lock).
    */
   onWrite?: (before: DeckDocument, after: DeckDocument, mutations: ReadonlyArray<Mutation>) => void;
+  /**
+   * Reads the deck and its version log through the parse cache (hardening PS#2, PERF-2:
+   * `loadDeckDirCached`, `readVersionsCached`), and keeps the document a write validated, so a
+   * read or a write on an unchanged folder validates nothing. A Blob mirror sets it; a checkout
+   * reads its files fresh on every call. Default false.
+   */
+  cache?: boolean;
 };
 
 export type FileStore = DeckStore & { readonly dir: string; readonly leaseFile: string };
@@ -115,12 +124,23 @@ function rawOrder(deck: unknown): string[] {
 
 /** Reads deck.json and the listed slide files, then validates and normalizes them (SPEC 4.4). */
 export function loadDeckDir(dir: string): Loaded {
+  return readDeckDir(dir);
+}
+
+/**
+ * The deck folder's files read and validated; with `stamps`, the stamp of each file is taken
+ * before its bytes are read (`fileStamp`), so a write between the two leaves an older stamp,
+ * which the next lookup refuses.
+ */
+function readDeckDir(dir: string, stamps?: Array<readonly [string, string | null]>): Loaded {
   const manifestPath = join(dir, 'deck.json');
+  if (stamps !== undefined) stamps.push(['deck.json', fileStamp(manifestPath)]);
   if (!existsSync(manifestPath)) throw new RangeError(`No deck.json in ${dir}`);
   const rawDeck = parseJson(readFileSync(manifestPath, 'utf8'), manifestPath);
   const rawSlides: Record<string, unknown> = {};
   for (const id of rawOrder(rawDeck)) {
     const path = slidePath(dir, id);
+    if (stamps !== undefined) stamps.push([`slides/${id}.json`, fileStamp(path)]);
     if (existsSync(path)) rawSlides[id] = parseJson(readFileSync(path, 'utf8'), path);
   }
   const result = validateDeck({ deck: rawDeck, slides: rawSlides });
@@ -136,6 +156,77 @@ export function loadDeckDir(dir: string): Loaded {
     ok: result.ok,
     manifestPath,
   };
+}
+
+/**
+ * The folder's read from the parse cache when every file it was read from is unchanged (hardening
+ * PS#2, PERF-2), else read, validated and kept. The result is the cache's own and is never handed
+ * to a caller: `loadDeckDirCached` copies it.
+ */
+function cachedDeckDir(dir: string): Loaded {
+  const entry = cachedDocuments.get(dir);
+  if (
+    entry !== undefined &&
+    entry.files.every(([relative, stamp]) => fileStamp(join(dir, ...relative.split('/'))) === stamp)
+  )
+    return entry.value as Loaded;
+  const stamps: Array<readonly [string, string | null]> = [];
+  const loaded = readDeckDir(dir, stamps);
+  cachedDocuments.set(dir, { files: stamps, value: loaded });
+  return loaded;
+}
+
+/**
+ * `loadDeckDir` through the parse cache (hardening PS#2): a folder whose files are unchanged since
+ * the last read or write of this process is not read or validated again. Each call answers its own
+ * copy (2 ms of CPU for the GT deck against 13 ms for a validation), so a caller that changes the
+ * document changes nothing another caller reads.
+ */
+export function loadDeckDirCached(dir: string): Loaded {
+  const loaded = cachedDeckDir(dir);
+  return {
+    document: structuredClone(loaded.document),
+    issues: structuredClone(loaded.issues),
+    ok: loaded.ok,
+    manifestPath: loaded.manifestPath,
+  };
+}
+
+/** The folder's revision through the parse cache, with no copy of the document. */
+export function deckDirRevisionCached(dir: string): number {
+  return cachedDeckDir(dir).document.deck.revision;
+}
+
+/**
+ * Keeps a document a write validated as the folder's read, so the next read or write validates
+ * nothing (hardening PS#2). Kept only when a read of the files the write just wrote would answer
+ * the same document and issues: the slides in the order the sections list them and every listed
+ * slide present, and no issue that names a form the files no longer hold (a migrated value) or a
+ * slide the read would not open (an unlisted one). Otherwise the next read validates the files.
+ */
+function rememberDeckDir(dir: string, document: DeckDocument, issues: ReadonlyArray<Issue>): void {
+  const listed = rawOrder(document.deck);
+  const ids = Object.keys(document.slides);
+  if (
+    ids.length !== listed.length ||
+    ids.some((id, i) => listed[i] !== id) ||
+    issues.some(
+      (issue) => issue.code === 'migrated' || issue.code === 'unlisted' || issue.severity === 3,
+    )
+  )
+    return;
+  const files: Array<readonly [string, string | null]> = [
+    ['deck.json', fileStamp(join(dir, 'deck.json'))],
+    ...listed.map((id) => [`slides/${id}.json`, fileStamp(slidePath(dir, id))] as const),
+  ];
+  if (files.some(([, stamp]) => stamp === null)) return;
+  const loaded: Loaded = {
+    document: structuredClone(document),
+    issues: structuredClone([...issues]),
+    ok: true,
+    manifestPath: join(dir, 'deck.json'),
+  };
+  cachedDocuments.set(dir, { files, value: loaded });
 }
 
 function sleep(ms: number): Promise<void> {
@@ -187,11 +278,13 @@ function writeSlideFiles(dir: string, before: DeckDocument, after: DeckDocument)
   for (const [id, slide] of Object.entries(after.slides)) {
     if (jsonEqual(before.slides[id], slide)) continue;
     writeFileSync(slidePath(dir, id), canonicalJson(slide));
+    forgetFile(slidePath(dir, id));
     changed.push(id);
   }
   for (const id of Object.keys(before.slides)) {
     if (after.slides[id] !== undefined) continue;
     rmSync(slidePath(dir, id), { force: true });
+    forgetFile(slidePath(dir, id));
     changed.push(id);
   }
   return changed.sort();
@@ -199,6 +292,7 @@ function writeSlideFiles(dir: string, before: DeckDocument, after: DeckDocument)
 
 export function writeManifest(dir: string, deck: Deck): void {
   writeFileSync(join(dir, 'deck.json'), canonicalJson(deck));
+  forgetFile(join(dir, 'deck.json'));
 }
 
 /**
@@ -271,6 +365,10 @@ export function openFileStore(options: FileStoreOptions): FileStore {
   const lockFile = options.lockFile ?? join(dir, STATE_DIR, 'write.lock');
   const lockTimeoutMs = options.lockTimeoutMs ?? 5000;
   const locked = <T>(run: () => Promise<T>): Promise<T> => withLock(lockFile, lockTimeoutMs, run);
+  // the parse cache of a mirror (hardening PS#2), or the files read fresh on every call
+  const cached = options.cache === true;
+  const load = cached ? loadDeckDirCached : loadDeckDir;
+  const versions = cached ? readVersionsCached : readVersions;
 
   const store: FileStore = {
     id: basename(dir),
@@ -278,17 +376,17 @@ export function openFileStore(options: FileStoreOptions): FileStore {
     leaseFile,
 
     async read(): Promise<ReadResult> {
-      const { document, issues, ok } = loadDeckDir(dir);
+      const { document, issues, ok } = load(dir);
       return { document, issues, ok };
     },
 
     async revision(): Promise<number> {
-      return loadDeckDir(dir).document.deck.revision;
+      return cached ? deckDirRevisionCached(dir) : loadDeckDir(dir).document.deck.revision;
     },
 
     write(write: Write, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
       return locked(async () => {
-        const loaded = loadDeckDir(dir);
+        const loaded = load(dir);
         const current = loaded.document;
         const now = clock();
         const warnings: string[] = [];
@@ -311,7 +409,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
             warnings.push(describeLease(held));
           }
         }
-        const records = readVersions(dir);
+        const records = versions(dir);
         const result = applyWrite(current, write, {
           now,
           resolveVersion: (n) => documentAtVersion(current, records, n),
@@ -331,6 +429,8 @@ export function openFileStore(options: FileStoreOptions): FileStore {
         };
         writeVersion(dir, entry);
         writeManifest(dir, result.document.deck);
+        // the document the reducer just validated is the folder's next read (hardening PS#2)
+        if (cached) rememberDeckDir(dir, result.document, result.issues);
         // the comment anchors follow the text they name (gslides-parity SPEC-3 0.52): the shift
         // entries a checkout's write produces are written to the sidecar under this same lock
         if (options.onWrite !== undefined)
@@ -350,8 +450,8 @@ export function openFileStore(options: FileStoreOptions): FileStore {
     async saveVersion(author: Author, note: string): Promise<Version> {
       if (note.trim() === '') throw new TypeError('A named version needs a note');
       return locked(async () => {
-        const { document } = loadDeckDir(dir);
-        const records = readVersions(dir);
+        const { document } = load(dir);
+        const records = versions(dir);
         const entry: VersionRecord = {
           n: nextVersionNumber(records),
           revision: document.deck.revision,
@@ -368,22 +468,22 @@ export function openFileStore(options: FileStoreOptions): FileStore {
     },
 
     async listVersions(): Promise<Version[]> {
-      return readVersions(dir).map(toVersion);
+      return versions(dir).map(toVersion);
     },
 
     async records(): Promise<VersionRecord[]> {
-      return readVersions(dir);
+      return versions(dir);
     },
 
     async documentAt(n: number): Promise<DeckDocument> {
-      const { document } = loadDeckDir(dir);
-      return documentAtVersion(document, readVersions(dir), n);
+      const { document } = load(dir);
+      return documentAtVersion(document, versions(dir), n);
     },
 
     async documentAtRevision(revision: number): Promise<DeckDocument> {
-      const { document } = loadDeckDir(dir);
+      const { document } = load(dir);
       if (revision === document.deck.revision) return document;
-      const records = readVersions(dir);
+      const records = versions(dir);
       const record = recordAtRevision(records, revision);
       if (record !== undefined) return documentAtVersion(document, records, record.n);
       const first = records[0];
@@ -396,7 +496,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
 
     lease(slideId: string, holder: Author, leaseOptions: LeaseOptions = {}): Promise<Lease> {
       return locked(async () => {
-        const { document } = loadDeckDir(dir);
+        const { document } = load(dir);
         if (document.slides[slideId] === undefined) {
           throw new RangeError(`No slide "${slideId}" in ${store.id}`);
         }

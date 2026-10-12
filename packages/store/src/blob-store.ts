@@ -45,6 +45,7 @@ import type { SidecarChange } from './comments-store.ts';
 import {
   STATE_DIR,
   loadDeckDir,
+  loadDeckDirCached,
   openFileStore,
   putAssetFile,
   removeAssetFile,
@@ -69,7 +70,7 @@ import {
   RECORD_ORIGIN_WRITES,
   documentAtVersion,
   newestRecordNumber,
-  readVersions,
+  readVersionsCached,
   recordAtRevision,
   recordNamingOps,
   versionRecordSchema,
@@ -78,6 +79,7 @@ import {
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { provenGet, putWithCopy } from './access-store.ts';
+import { forgetFile, forgetFolder } from './parse-cache.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import { HOSTED_POLL_MS, isStoreBusy, pulsePath, putPulse } from './pulse.ts';
 import { eachLimit, isAssetKey, isSafeKey } from './seed.ts';
@@ -469,6 +471,7 @@ function writeAtomic(path: string, bytes: Uint8Array): void {
   const partial = `${path}.${process.pid}.part`;
   writeFileSync(partial, bytes);
   renameSync(partial, path);
+  forgetFile(path);
 }
 
 /** The documents the mirror holds, as relative posix paths. */
@@ -1252,6 +1255,9 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const shifted: SidecarChange[] = [];
   const file: FileStore = openFileStore({
     dir,
+    // the mirror's parse cache (hardening PS#2, PERF-2): a read, a revision and the next write on
+    // an unchanged mirror validate nothing, and the log is parsed once per record
+    cache: true,
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.leases === undefined ? {} : { leases: options.leases }),
     onWrite: fileCommentsOnWrite(
@@ -1412,7 +1418,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
    */
   const pull = async (knownHead?: BlobEntry | null): Promise<void> => {
     const manifest = readManifest(dir);
-    const before = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
+    const before = existsSync(pathOf('deck.json')) ? loadDeckDirCached(dir).document : null;
     // the head the caller read a moment ago serves as the pull's, so a moved pulse costs one
     // manifest head and not two (docs/archive/rounds/SYNC.md 4.5); a head that moves between the two calls
     // is caught by the caller's own check or the next tick
@@ -1587,7 +1593,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     await syncSidecar();
     /** the mirror's documents from a proven document, and the manifest rows they get */
     const writeDocuments = (document: DeckDocument): void => {
-      const current = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
+      const current = existsSync(pathOf('deck.json')) ? loadDeckDirCached(dir).document : null;
       mkdirSync(join(dir, 'slides'), { recursive: true });
       for (const [id, slide] of Object.entries(document.slides)) {
         const bytes = new TextEncoder().encode(canonicalJson(slide));
@@ -1660,12 +1666,12 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         const head = await client.head(`${prefix}${relative}`);
         if (head === null || head.version !== quotedMd5(body.bytes)) unproven.add(id);
       });
-      base = loadDeckDir(dir).document;
+      base = loadDeckDirCached(dir).document;
     }
     // 3. the replay: every record above the base, through the writer's own reducer and clock,
     // until the derived manifest is the head's; a record that moves nothing (a named version, a
     // claim a writer neutralized) is skipped, since the reducer would move the revision for it
-    const records = readVersions(dir);
+    const records = readVersionsCached(dir);
     let document = base;
     const rewritten = new Set<string>();
     for (const record of [...records].sort((a, b) => a.n - b.n)) {
@@ -1713,7 +1719,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         if (lagging === 0) {
           writeAtomic(pathOf('deck.json'), deck.bytes);
           for (const [relative, bytes] of bodies) writeAtomic(pathOf(relative), bytes);
-          document = loadDeckDir(dir).document;
+          document = loadDeckDirCached(dir).document;
           proven = true;
         }
       }
@@ -1894,7 +1900,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     // alone (hardening PS#1) cannot see the named versions below its floor: it removes nothing,
     // and an instance that read the whole log prunes (the room's open reads it)
     if (readFloor(dir) !== null) return 0;
-    const retained = retainedSnapshots(readVersions(dir));
+    const retained = retainedSnapshots(readVersionsCached(dir));
     const entries = await client.list(`${prefix}${SNAPSHOTS_DIR}/`);
     const doomed = prunableSnapshots(entries, prefix, retained, {
       now: Date.now(),
@@ -1918,6 +1924,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
    */
   const discard = (): void => {
     for (const relative of localDocuments(dir)) rmSync(pathOf(relative), { force: true });
+    forgetFolder(dir);
     writeFloor(dir, null);
     invalidate();
   };
@@ -1926,7 +1933,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const conflictFromStore = async (): Promise<WriteOutcome> => {
     discard();
     await syncNow(true);
-    const current = loadDeckDir(dir).document;
+    const current = loadDeckDirCached(dir).document;
     return {
       ok: false,
       code: 'conflict',
@@ -1995,7 +2002,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
             if (mutation.op === 'version.restore')
               target = Math.min(target, Math.max(1, mutation.n));
           if (write.origin !== undefined) {
-            const lowest = readVersions(dir).find((record) => record.n >= floor);
+            const lowest = readVersionsCached(dir).find((record) => record.n >= floor);
             if (lowest === undefined || write.baseRevision < lowest.baseRevision) target = 1;
           }
           if (target < floor) await extendLog(target);
@@ -2010,14 +2017,14 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         // the deployment writes none (heldOrigins)
         if (write.origin !== undefined) {
           const replayed = recordNamingOps(
-            withHeldOrigins(readVersions(dir)),
+            withHeldOrigins(readVersionsCached(dir)),
             write.baseRevision,
             write.origin.opIds,
           );
           if (replayed !== undefined) {
             return {
               ok: true,
-              document: loadDeckDir(dir).document,
+              document: loadDeckDirCached(dir).document,
               revision: replayed.revision,
               entry: replayed,
               changed: [],
@@ -2202,11 +2209,11 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         // the current manifest's snapshot key, and the snapshot is stored now when the deck's
         // last write predates the round
         const key = snapshotKey(new Uint8Array(readFileSync(pathOf('deck.json'))));
-        const record = readVersions(dir).find((row) => row.n === version.n);
+        const record = readVersionsCached(dir).find((row) => row.n === version.n);
         if (record !== undefined) writeVersion(dir, { ...record, snapshot: key });
         try {
           if ((await client.head(`${prefix}${snapshotPath(key)}`)) === null)
-            await putSnapshot(key, snapshotBody(loadDeckDir(dir).document));
+            await putSnapshot(key, snapshotBody(loadDeckDirCached(dir).document));
           const entry = await client.put(
             `${prefix}${relative}`,
             new Uint8Array(readFileSync(pathOf(relative))),
@@ -2221,7 +2228,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           if (isBlobExistsError(error)) {
             invalidate();
             await pull();
-            const current = loadDeckDir(dir).document;
+            const current = loadDeckDirCached(dir).document;
             throw new ConflictError(
               `Another instance saved version ${version.n} of ${deckId} first`,
               { currentRevision: current.deck.revision, current },
@@ -2261,15 +2268,15 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
     async documentAtRevision(revision: number): Promise<DeckDocument> {
       await requirePresent();
-      const { document } = loadDeckDir(dir);
+      const { document } = loadDeckDirCached(dir);
       if (revision === document.deck.revision) return document;
       // the record's snapshot first (SPEC-2 8.2), the round one replay from the inverses when the
       // record carries no key or its snapshot is gone; the newest records the mirror holds answer
       // most of these, and the older log is read when the record is not among them
-      let record = recordAtRevision(readVersions(dir), revision);
+      let record = recordAtRevision(readVersionsCached(dir), revision);
       if (record === undefined) {
         await wholeLog();
-        record = recordAtRevision(readVersions(dir), revision);
+        record = recordAtRevision(readVersionsCached(dir), revision);
       }
       if (record?.snapshot !== undefined) {
         const snapshot = await readSnapshot(record.snapshot);

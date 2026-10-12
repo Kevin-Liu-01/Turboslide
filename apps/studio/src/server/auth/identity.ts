@@ -1062,7 +1062,10 @@ export async function requestIdentity(
   options: { mint?: boolean; now?: Date; fresh?: boolean } = {},
 ): Promise<RequestIdentity> {
   const now = options.now ?? new Date();
-  const bearer = resolveBearerSync(bearerToken(request), {
+  // the key read by its hash first when this instance's view of it is missing or stale (HR-SA#6)
+  const given = bearerToken(request);
+  if (given !== undefined && given !== '') await runtime.keys.prime(given);
+  const bearer = resolveBearerSync(given, {
     env: runtime.env,
     keys: runtime.keys,
     checkoutToken: runtime.checkoutToken,

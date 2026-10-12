@@ -30,6 +30,9 @@ export function studioSessionSecret(): string {
 
 export function principalMiddleware() {
   return createMiddleware({ type: 'request' }).server(async ({ request, next }) => {
+    // a request with a bearer: the key is read by its hash before the routes' synchronous checks
+    // when this instance has not read it within KEY_CACHE_MS (HR-SA#6, AUTH-5; auth/tokens.ts)
+    if (request.headers.get('authorization') !== null) await primeBearer(request);
     const ensured = await ensurePrincipal(request, studioSessionSecret());
     if (ensured !== null) bindRequestPrincipal(request, ensured);
     if (ensured?.minted && ensured.setCookie) {
@@ -53,6 +56,24 @@ export function principalMiddleware() {
  * question is asked; the answer returns to the page. A runtime that cannot answer lets the
  * request through, as an unanswered store does in `linkOrAsk`.
  */
+/**
+ * Primes the identity runtime's key store for the request's bearer (HR-SA#6). The runtime loads
+ * here, as mergeAskMiddleware loads it, so identity.ts stays out of this module's graph; a store
+ * that cannot be read leaves the request to the routes, which refuse an unread key.
+ */
+async function primeBearer(request: Request): Promise<void> {
+  try {
+    const [{ identityRuntime }, { bearerToken }] = await Promise.all([
+      import('./identity.ts'),
+      import('@turboslide/agent/http/auth'),
+    ]);
+    const bearer = bearerToken(request);
+    if (bearer !== undefined && bearer !== '') await identityRuntime().keys.prime(bearer);
+  } catch {
+    // the routes answer the request as they would with a cold store
+  }
+}
+
 export function mergeAskMiddleware() {
   return createMiddleware({ type: 'request' }).server(async ({ request, next, pathname }) => {
     let location: string | null = null;

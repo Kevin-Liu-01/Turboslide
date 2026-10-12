@@ -7,6 +7,8 @@
 // becomes the one body shape of errors.ts with the status of the error class. GET describes the
 // action (its schemas, transports and whether a handler is registered) so an agent can read one
 // endpoint before calling it.
+import { createHash } from 'node:crypto';
+
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import type { Author } from '@turboslide/schema/mutations';
@@ -87,6 +89,46 @@ export function refuseSpoofedLocalhost(request: Request, env: Env = process.env)
     'unauthorized',
     `the agent surface is open only on localhost; this instance (host ${socketHost(request) || 'unknown'}) has no ${'TURBOSLIDE_TOKEN'} set, so requests off localhost are refused`,
   );
+}
+
+/**
+ * `Idempotency-Key` (RELIABILITY-21, hardening HR-O#6): a caller that may resend a write after a
+ * timeout sends one key per write, and the same key with the same body on the resend. The studio
+ * makes the key the write's op id in the room and the record's `origin`, so the resend is answered
+ * with the record the first attempt made and is never applied twice. One to 255 visible ASCII
+ * characters; a UUID per write is the expected form.
+ */
+export const IDEMPOTENCY_KEY_HEADER = 'idempotency-key';
+const IDEMPOTENCY_KEY = /^[\x21-\x7e]{1,255}$/;
+
+/** The request's key, undefined when it sends none; a `refuse` body for a malformed one. */
+export function requestIdempotencyKey(
+  request: Request,
+): { ok: true; key: string | undefined } | { ok: false; response: Response } {
+  const value = request.headers.get(IDEMPOTENCY_KEY_HEADER);
+  if (value === null) return { ok: true, key: undefined };
+  const key = value.trim();
+  if (IDEMPOTENCY_KEY.test(key)) return { ok: true, key };
+  return {
+    ok: false,
+    response: refuse(
+      400,
+      'invalid_idempotency_key',
+      'Idempotency-Key takes 1 to 255 visible ASCII characters, one value per write, such as a UUID',
+    ),
+  };
+}
+
+/**
+ * The op id the `n`th store write of a keyed request carries: the caller and the key hashed, so
+ * two callers that pick the same key never answer each other's writes, and the id fits the
+ * room's 64 characters (`idem-`, 32 base64url characters, and `-<n>` from the second write of an
+ * action that writes more than once). A resend makes the same writes in the same order, so each
+ * one meets its first attempt's id.
+ */
+export function idempotentOpId(caller: string, key: string, n = 1): string {
+  const digest = createHash('sha256').update(`${caller}\n${key}`).digest('base64url').slice(0, 32);
+  return n === 1 ? `idem-${digest}` : `idem-${digest}-${n}`;
 }
 
 /** The actions whose bodies may carry an upload and get the larger cap. */
@@ -241,6 +283,8 @@ export async function handleActionRequest(
   } catch (error) {
     return errorResponse(error, actionId);
   }
+  const keyed = requestIdempotencyKey(request);
+  if (!keyed.ok) return keyed.response;
   const body = await readJsonBody(request, bodyLimitFor(spec));
   if (!body.ok) return body.response;
   const force = requestForce(request);

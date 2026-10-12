@@ -483,6 +483,16 @@ export const roomWriteBodySchema = z.strictObject({
 export type RoomWriteBody = z.infer<typeof roomWriteBodySchema>;
 
 /**
+ * The op id of a keyed agent write on `POST /rooms/:id/write` (RELIABILITY-21, hardening HR-O#6):
+ * the object answers the entry it holds under the write's client id and this op id instead of
+ * admitting the write again, and admits a new one under it. A header and not a body field: the
+ * body schema is strict, and an object of the release before reads the body and ignores the
+ * header. 1 to 64 characters of `A-Z a-z 0-9 : _ -`, the room's op id bound.
+ */
+export const ROOM_WRITE_OP_ID_HEADER = 'x-turboslide-op-id';
+export const ROOM_WRITE_OP_ID_PATTERN = /^[A-Za-z0-9:_-]{1,64}$/;
+
+/**
  * `POST /rooms/:id/comment`: a comment op the function checked against the live thread
  * (`comments.ts` `landOp` on the do tier). It enters the object's order as a `comment` entry, fans
  * out as an `op`, and the object checkpoints at once, so the sidecar holds it before the answer

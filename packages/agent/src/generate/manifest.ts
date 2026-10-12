@@ -21,6 +21,7 @@ export type ExecutionRules = {
     deck: string;
     author: string;
     force: string;
+    idempotency: string;
     auth: string;
     limits: { writeBytes: number; assetBytes: number };
     errors: string;
@@ -49,6 +50,8 @@ export const EXECUTION_RULES: ExecutionRules = {
       'x-turboslide-author: agent:<runId> (or ?author=); a request without one writes as agent:http.',
     force:
       '?force=1 (or x-turboslide-force: 1) writes to a slide another author leased; without it the write is 409 with the holder and the current document.',
+    idempotency:
+      'Idempotency-Key: <one value per write, such as a UUID> on a POST of a writing action makes it safe to resend after a timeout: send the same key with the same body, and a write that already landed is answered 200 with its record and the idempotent-replayed: true header instead of being applied again. 1 to 255 visible ASCII characters; anything else is 400 invalid_idempotency_key.',
     auth: 'Authorization: Bearer <TURBOSLIDE_TOKEN> on every deployed instance; open only on localhost when the instance has no token; a request off localhost without a token is 401.',
     limits: { writeBytes: 1024 * 1024, assetBytes: 25 * 1024 * 1024 },
     errors:

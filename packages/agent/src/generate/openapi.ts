@@ -94,6 +94,15 @@ const forceParameter = {
     'Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form',
 };
 
+const idempotencyParameter = {
+  name: 'idempotency-key',
+  in: 'header',
+  required: false,
+  schema: { type: 'string', pattern: '^[\\x21-\\x7e]{1,255}$' },
+  description:
+    'One value per write, such as a UUID: a resend with the same key and body is answered 200 with the record the first attempt made (idempotent-replayed: true) and is not applied again (hardening HR-O#6)',
+};
+
 const actionParameter = {
   name: 'id',
   in: 'path',
@@ -247,7 +256,13 @@ export function generateOpenApi(): JsonSchema {
         'x-mutates': spec.mutates,
         'x-milestone': spec.milestone,
         'x-transports': spec.transports,
-        parameters: [deckParameter, authorParameter, ...(spec.mutates ? [forceParameter] : [])],
+        parameters: [
+          deckParameter,
+          authorParameter,
+          ...(spec.mutates
+            ? [forceParameter, { $ref: '#/components/parameters/IdempotencyKey' }]
+            : []),
+        ],
         requestBody: {
           required: true,
           content: {
@@ -288,6 +303,7 @@ export function generateOpenApi(): JsonSchema {
     paths,
     components: {
       schemas,
+      parameters: { IdempotencyKey: idempotencyParameter },
       securitySchemes: {
         bearer: {
           type: 'http',

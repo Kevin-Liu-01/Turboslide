@@ -57,6 +57,7 @@ function execution(): string[] {
     `- Deck: ${http.deck}`,
     `- Author: ${http.author}`,
     `- Force: ${http.force}`,
+    `- Retries: ${http.idempotency}`,
     `- Auth: ${http.auth}`,
     `- Limits: ${http.limits.writeBytes} bytes per write body, ${http.limits.assetBytes} bytes per asset upload.`,
     `- Errors: ${http.errors}`,

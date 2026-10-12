@@ -14,10 +14,13 @@ import {
   requestHost,
 } from './auth.ts';
 import {
+  IDEMPOTENCY_KEY_HEADER,
   effectiveHost,
   handleActionRequest,
+  idempotentOpId,
   isLocalRequest,
   readJsonBody,
+  requestIdempotencyKey,
   trustsProxy,
 } from './dispatch.ts';
 import { errorBodyOf } from './errors.ts';
@@ -446,5 +449,52 @@ describe('forwarded host trust (gslides-parity SPEC-3 8.8, TURBOSLIDE_TRUST_PROX
       { dispatcher: d, env: { TURBOSLIDE_TOKEN: 'secret' } },
     );
     expect(tokened.status).toBe(200);
+  });
+});
+
+// RELIABILITY-21 (hardening HR-O#6): the key a resend carries, and the op ids made from it.
+describe('Idempotency-Key', () => {
+  it('reads one key of 1 to 255 visible characters and refuses anything else with 400', async () => {
+    expect(requestIdempotencyKey(post('/x', {}))).toEqual({ ok: true, key: undefined });
+    const uuid = '0b7f4f1e-3c1a-4a8e-9d1e-6f0c2b7a9d11';
+    expect(requestIdempotencyKey(post('/x', {}, { [IDEMPOTENCY_KEY_HEADER]: uuid }))).toEqual({
+      ok: true,
+      key: uuid,
+    });
+    for (const bad of ['', 'two words', 'x'.repeat(256), 'caf\u00e9']) {
+      const read = requestIdempotencyKey(post('/x', {}, { [IDEMPOTENCY_KEY_HEADER]: bad }));
+      expect(read.ok, JSON.stringify(bad)).toBe(false);
+      if (read.ok) continue;
+      expect(read.response.status).toBe(400);
+      expect(((await read.response.json()) as { error: { code: string } }).error.code).toBe(
+        'invalid_idempotency_key',
+      );
+    }
+  });
+
+  it('makes one op id per caller, key and write, within the room bound', () => {
+    const first = idempotentOpId('tok_a', 'k1');
+    expect(first).toMatch(/^idem-[A-Za-z0-9_-]{32}$/);
+    expect(idempotentOpId('tok_a', 'k1')).toBe(first);
+    expect(idempotentOpId('tok_b', 'k1')).not.toBe(first);
+    expect(idempotentOpId('tok_a', 'k2')).not.toBe(first);
+    expect(idempotentOpId('tok_a', 'k1', 2)).toBe(`${first}-2`);
+    expect(idempotentOpId('tok_a', 'k1', 999).length).toBeLessThanOrEqual(64);
+  });
+
+  it('refuses a malformed key before the action runs', async () => {
+    const d = createDispatcher();
+    let ran = 0;
+    d.register('deck.info', () => {
+      ran += 1;
+      return {};
+    });
+    const response = await handleActionRequest(
+      post('/api/actions/deck.info', {}, { [IDEMPOTENCY_KEY_HEADER]: 'two words' }),
+      'deck.info',
+      { dispatcher: d, env: {} },
+    );
+    expect(response.status).toBe(400);
+    expect(ran).toBe(0);
   });
 });

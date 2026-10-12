@@ -4,8 +4,10 @@ import {
   handleActionRequest,
   readJsonBody,
   refuseSpoofedLocalhost,
+  requestIdempotencyKey,
 } from '@turboslide/agent/http/dispatch';
 import { errorResponse, jsonResponse, refuse } from '@turboslide/agent/http/errors';
+import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { ForbiddenError } from '@turboslide/schema/errors';
 
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
@@ -21,6 +23,8 @@ import { agentAuth, HTTP_DEFAULT_AUTHOR, requireAgentAuth } from '../../server/a
 import { capabilityForAction } from '../../server/authorize';
 import { FlagOffError } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
+import type { Idempotency } from '../../server/idempotency';
+import { idempotencyCaller, replayedRecord, replayedResponse } from '../../server/idempotency';
 import { RateLimitedError, rateLimitedResponse } from '../../server/ratelimit';
 import { flushRoom } from '../../server/room';
 import { deckDir } from '../../server/root';
@@ -48,6 +52,12 @@ import { deckDir } from '../../server/root';
 // quota. The handler takes the studio's bearer rule, so an API key reaches this route under that
 // gate (before H2 the agent package's token only rule answered every key 401). A deck the caller
 // cannot see and a deck that does not exist answer the same 404.
+//
+// Hardening HR-O#6 (RELIABILITY-21): a POST of a writing action may carry `Idempotency-Key`. The
+// key, scoped to the caller, becomes the op id of each write the action makes (the room's entry
+// and the record's origin, server/idempotency.ts), and a resend whose first attempt is in the log
+// is answered with that record (200, `idempotent-replayed: true`) once the gate admitted it, so a
+// retried write is never applied twice.
 
 export const Route = createFileRoute('/api/actions/$action')({
   server: {
@@ -98,6 +108,8 @@ async function serve(request: Request, action: string): Promise<Response> {
   if (foreign !== null) return foreign;
   const url = new URL(request.url);
   const deckId = url.searchParams.get('deck') || DEFAULT_DECK;
+  const keyed = requestIdempotencyKey(request);
+  if (!keyed.ok) return keyed.response;
   let caller: AgentCaller;
   try {
     caller = await agentCaller(request);
@@ -105,9 +117,20 @@ async function serve(request: Request, action: string): Promise<Response> {
   } catch (error) {
     return gateRefusal(error, action);
   }
+  const idempotency: Idempotency | undefined =
+    keyed.key !== undefined &&
+    request.method === 'POST' &&
+    isActionId(action) &&
+    ACTIONS[action].mutates
+      ? { caller: idempotencyCaller(caller), key: keyed.key }
+      : undefined;
   let dispatcher;
+  let live;
   try {
-    dispatcher = (await deckDispatcher(deckId, { request })).dispatcher;
+    ({ dispatcher, live } = await deckDispatcher(deckId, {
+      request,
+      ...(idempotency === undefined ? {} : { idempotency }),
+    }));
   } catch (error) {
     if (error instanceof RangeError)
       return refuse(404, 'unknown_deck', deckNotFound(deckId), { action });
@@ -125,6 +148,10 @@ async function serve(request: Request, action: string): Promise<Response> {
       await gateAgentAction(caller, { action, deckId, input, transport: 'http' });
     } catch (error) {
       return gateRefusal(error, action);
+    }
+    if (idempotency !== undefined) {
+      const record = await replayedRecord(live, idempotency);
+      if (record !== undefined) return replayedResponse(action, record);
     }
   }
   // what the open editor wrote a moment ago reaches the store before an agent reads it (room.ts

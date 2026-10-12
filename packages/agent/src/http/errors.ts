@@ -18,7 +18,9 @@ export type HttpErrorCode =
   | 'not_on_http'
   | 'method_not_allowed'
   | 'no_session'
-  | 'unknown_deck';
+  | 'unknown_deck'
+  /** an Idempotency-Key that is not 1 to 255 visible ASCII characters (hardening HR-O#6) */
+  | 'invalid_idempotency_key';
 
 export type HttpError = {
   name: string;

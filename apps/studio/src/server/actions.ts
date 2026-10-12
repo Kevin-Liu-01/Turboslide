@@ -125,6 +125,8 @@ import {
   requestIdentity as roomIdentity,
   roomBackedStore,
 } from './room';
+import type { Idempotency } from './idempotency';
+import { keyedStore } from './idempotency';
 import { isDoChannel } from '@turboslide/realtime/do';
 import {
   deckDir,
@@ -1324,6 +1326,8 @@ export type DeckDispatcher = {
   source: DeckSource;
   /** The attached page the view actions run in, when one is attached at creation. */
   session: StudioSession | undefined;
+  /** The store the document actions read and write: the room's on the do tier, keyed when asked. */
+  live: DeckStore;
 };
 
 export type DeckDispatcherOptions = {
@@ -1335,6 +1339,12 @@ export type DeckDispatcherOptions = {
    * and no request in a unit test, where those actions act as an anonymous caller over the files.
    */
   request?: Request;
+  /**
+   * The caller and the `Idempotency-Key` of a keyed agent write (RELIABILITY-21, hardening
+   * HR-O#6): every document write of the request carries an op id made from them
+   * (server/idempotency.ts `keyedStore`).
+   */
+  idempotency?: Idempotency;
 };
 
 /**
@@ -1376,7 +1386,9 @@ export async function deckDispatcher(
   // object was not added. Try again"); through the room the record enters the object's order and
   // reaches every tab as an op. `putAsset`, `snapshots` and the other members ride the spread of
   // `roomBackedStore` unchanged, so a picture's bytes still go to the store.
-  const liveStore = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
+  const roomed = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
+  const liveStore =
+    options.idempotency === undefined ? roomed : keyedStore(roomed, options.idempotency);
   const store = storeFor(deckId);
   const dispatcher = createDispatcher();
   const load = async (): Promise<DeckDocument> => (await liveStore.read()).document;
@@ -1581,6 +1593,7 @@ export async function deckDispatcher(
     dispatcher: people === undefined ? dispatcher : dispatcherWithStandIns(dispatcher, people),
     source,
     session,
+    live: liveStore,
   };
 }
 

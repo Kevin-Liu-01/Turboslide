@@ -93,7 +93,7 @@ import type { AccessRecord } from '@turboslide/schema/access';
 import { threadParticipants } from '@turboslide/schema/comments';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
-import type { Author, Mutation } from '@turboslide/schema/mutations';
+import type { Author, Mutation, WriteOrigin } from '@turboslide/schema/mutations';
 import { boundedBlobClient } from '@turboslide/store/blob-store';
 import type { BlobClient } from '@turboslide/store/blob-store';
 import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
@@ -1572,6 +1572,8 @@ export async function roomBackedStore(deckId: string, store: DeckStore): Promise
         baseRevision: write.baseRevision,
         strict: true,
         ...(write.note === undefined ? {} : { note: write.note }),
+        // a keyed agent write's op id (server/idempotency.ts; hardening HR-O#6)
+        ...(write.origin === undefined ? {} : { origin: write.origin }),
       });
       if (!admitted.ok) {
         if (admitted.code === 'conflict') {
@@ -3540,6 +3542,12 @@ export type ServerWriteInput = {
   /** keep the exact revision check; the default is the per touched slide rule of 3.7 c */
   strict?: boolean;
   note?: string;
+  /**
+   * The op id of a keyed agent write (RELIABILITY-21, hardening HR-O#6): the store answers a
+   * write whose op id a record names with that record, and on the do tier the object answers the
+   * entry it already holds under the op id. Absent, a server write takes a fresh op id.
+   */
+  origin?: WriteOrigin;
 };
 
 export type ServerWriteResult =
@@ -3600,6 +3608,7 @@ export async function admitServerWrite(
           author: input.author,
           mutations: input.mutations,
           ...(input.note === undefined ? {} : { note: input.note }),
+          ...(input.origin === undefined ? {} : { origin: input.origin }),
         },
         { force: true },
       );
@@ -3669,14 +3678,18 @@ export async function admitServerWrite(
     // the do tier (docs/CLOUDFLARE.md 3.2 "An agent HTTP write"): the write enters the object's
     // order under the bearer with `agent:<principalId>` as its client id, fans out as an `op`,
     // and the object checkpoints at once, so the record exists before this answer
-    const answer = await onDo.serverWrite(deckId, {
-      author: input.author,
-      clientId: serverClientId(input.author),
-      mutations: input.mutations,
-      baseRevision: input.baseRevision,
-      ...(input.strict === undefined ? {} : { strict: input.strict }),
-      ...(input.note === undefined ? {} : { note: input.note }),
-    });
+    const answer = await onDo.serverWrite(
+      deckId,
+      {
+        author: input.author,
+        clientId: serverClientId(input.author),
+        mutations: input.mutations,
+        baseRevision: input.baseRevision,
+        ...(input.strict === undefined ? {} : { strict: input.strict }),
+        ...(input.note === undefined ? {} : { note: input.note }),
+      },
+      input.origin?.opIds[0],
+    );
     const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
     if (!answer.ok) {
       if (answer.code === 'conflict') {

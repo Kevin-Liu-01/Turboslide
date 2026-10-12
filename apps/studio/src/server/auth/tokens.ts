@@ -30,6 +30,7 @@ import type { Scope } from '@turboslide/schema/access';
 import { SCOPES } from '@turboslide/schema/access';
 
 import type { AuthDb } from './db.ts';
+import { DEVICE_KEY_LEGACY_EXPIRY, DEVICE_KEY_NAME } from './device-grant.ts';
 import type { ApiKeyTable, AuthDatabase } from './schema.ts';
 
 export const TOKEN_PREFIX = 'ts_';
@@ -73,6 +74,8 @@ export type ApiKeyStore = {
   resolve: (secret: string) => Promise<ApiKeyRecord | null>;
   /** The same, without an await (the route rule); null while a Postgres cache is cold. */
   resolveSync: (secret: string) => ApiKeyRecord | null;
+  /** The record of a secret whether or not it is live, so a refusal can say why (HR-SA#5). */
+  recordSync: (secret: string) => ApiKeyRecord | null;
   /** Stamps `lastUsedAt` at most once a minute per key. */
   touch: (tokenId: string, now?: Date) => Promise<void>;
   /** How many keys were ever minted (revoked ones count: the bootstrap rule is one way). */
@@ -108,10 +111,25 @@ export function newKeyId(random: (n: number) => Uint8Array = (n) => randomBytes(
   return `tok_${base64url(random(KEY_ID_BYTES))}`;
 }
 
+/**
+ * When a key stops working: its own `expiresAt`, or for a device key minted before HR-SA#5 with
+ * none, DEVICE_KEY_LEGACY_EXPIRY (AUTH-7, CRIT-M14; device-grant.ts). Applied at every read, so no
+ * stored row changes. Null for a key that never expires (one made with no expiry in Profile).
+ */
+export function keyExpiry(record: Pick<ApiKeyRecord, 'name' | 'expiresAt'>): string | null {
+  if (record.expiresAt !== null) return record.expiresAt;
+  return record.name === DEVICE_KEY_NAME ? DEVICE_KEY_LEGACY_EXPIRY : null;
+}
+
+/** Whether a key is past its expiry (keyExpiry); a revoked key is refused for that first. */
+export function isKeyExpired(record: ApiKeyRecord, now: Date = new Date()): boolean {
+  const expiry = keyExpiry(record);
+  return expiry !== null && Date.parse(expiry) <= now.getTime();
+}
+
 export function isKeyLive(record: ApiKeyRecord, now: Date = new Date()): boolean {
   if (!record.enabled || record.revokedAt !== null) return false;
-  if (record.expiresAt !== null && Date.parse(record.expiresAt) <= now.getTime()) return false;
-  return true;
+  return !isKeyExpired(record, now);
 }
 
 export function parseScopes(value: string): Scope[] {
@@ -284,6 +302,10 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
       const record = syncRow(hashSecret(secret));
       return record !== null && isKeyLive(record, now()) ? record : null;
     },
+    recordSync(secret) {
+      if (!isKeySecret(secret)) return null;
+      return syncRow(hashSecret(secret));
+    },
     async touch(tokenId, at = now()) {
       const last = lastTouch.get(tokenId) ?? 0;
       if (at.getTime() - last < LAST_USED_MIN_GAP_MS) return;
@@ -358,13 +380,13 @@ export function memoryApiKeyStore(now: () => Date = () => new Date()): ApiKeySto
     },
     resolve: (secret) => Promise.resolve(store.resolveSync(secret)),
     resolveSync(secret) {
+      const rec = store.recordSync(secret);
+      return rec !== null && isKeyLive(rec, now()) ? rec : null;
+    },
+    recordSync(secret) {
       if (!isKeySecret(secret)) return null;
       const hash = hashSecret(secret);
-      for (const row of rows.values())
-        if (row.hash === hash) {
-          const rec = record(row);
-          return isKeyLive(rec, now()) ? rec : null;
-        }
+      for (const row of rows.values()) if (row.hash === hash) return record(row);
       return null;
     },
     touch(tokenId, at = now()) {
@@ -388,6 +410,7 @@ export function noApiKeyStore(): ApiKeyStore {
     revoke: () => Promise.resolve(null),
     resolve: () => Promise.resolve(null),
     resolveSync: () => null,
+    recordSync: () => null,
     touch: () => Promise.resolve(),
     countSync: () => 0,
   };
@@ -407,13 +430,14 @@ export type BearerResolution =
   | { kind: 'bootstrap'; bootstrapOnly: boolean }
   | { kind: 'checkout' }
   | { kind: 'none' }
-  | { kind: 'refused'; reason: 'unknown_key' | 'not_a_key' };
+  | { kind: 'refused'; reason: 'unknown_key' | 'not_a_key' | 'key_expired' };
 
 export type BearerDeps = {
   env?: Readonly<Record<string, string | undefined>>;
   keys?: ApiKeyStore | null;
   /** The per checkout token, when the process runs on a checkout. */
   checkoutToken?: string | null;
+  now?: Date;
 };
 
 /**
@@ -428,10 +452,14 @@ export function resolveBearerSync(
   if (bearer === undefined || bearer === '') return { kind: 'none' };
   const keys = deps.keys ?? null;
   if (isKeySecret(bearer)) {
-    const record = keys?.resolveSync(bearer) ?? null;
-    return record === null
-      ? { kind: 'refused', reason: 'unknown_key' }
-      : { kind: 'api-key', record };
+    // a revoked key and an unknown one read the same; an expired key says so, so the CLI can ask
+    // for a new sign in (HR-SA#5)
+    const record = keys?.recordSync(bearer) ?? null;
+    if (record === null || !record.enabled || record.revokedAt !== null)
+      return { kind: 'refused', reason: 'unknown_key' };
+    if (isKeyExpired(record, deps.now ?? new Date()))
+      return { kind: 'refused', reason: 'key_expired' };
+    return { kind: 'api-key', record };
   }
   const staticToken = env[STATIC_TOKEN_ENV];
   if (staticToken !== undefined && staticToken !== '' && safeEqual(bearer, staticToken))

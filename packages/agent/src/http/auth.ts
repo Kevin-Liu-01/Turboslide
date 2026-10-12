@@ -60,7 +60,7 @@ export function bearerToken(request: Request): string | undefined {
 
 export type AuthResult =
   | { ok: true; mode: 'localhost' | 'token' }
-  | { ok: false; status: 401; code: 'unauthorized'; message: string };
+  | { ok: false; status: 401; code: 'unauthorized' | 'key_expired'; message: string };
 
 /**
  * The rule: with TURBOSLIDE_TOKEN set, every request carries `Authorization: Bearer <token>`;

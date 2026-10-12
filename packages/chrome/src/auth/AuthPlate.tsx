@@ -177,6 +177,11 @@ export type AuthPlateProps = {
   /** the device page's code from `user_code`, and the signed in address it acts as */
   deviceCode?: string;
   deviceEmail?: string;
+  /**
+   * What the code in the address asks for, read on the server for the signed in person (HR-SA#5):
+   * its scopes and when it was made, as `HH:MM UTC`; absent for a code typed by hand
+   */
+  deviceRequest?: DeviceRequestFacts | null;
   /** when the last mail left, so a sent state opened from elsewhere (the gallery) counts down */
   sentAt?: number;
   /** the clock, for the gallery and the tests */
@@ -184,6 +189,17 @@ export type AuthPlateProps = {
 };
 
 const DEVICE_ATTEMPTS = 5;
+
+/** The device code's request as /device shows it (HR-SA#5). */
+export type DeviceRequestFacts = { scopes: readonly string[]; madeAt: string };
+
+/** The sentence of a request's scopes, in the order the words list them. */
+export function deviceAsks(scopes: readonly string[]): string {
+  const words = Object.entries(AUTH_WORDS.device.scopes)
+    .filter(([scope]) => scopes.includes(scope))
+    .map(([, word]) => word);
+  return AUTH_WORDS.device.asks(words);
+}
 
 export function AuthPlate({
   host,
@@ -197,6 +213,7 @@ export function AuthPlate({
   onTryAgain,
   deviceCode = '',
   deviceEmail = '',
+  deviceRequest = null,
   sentAt,
   now = Date.now,
 }: AuthPlateProps) {
@@ -673,6 +690,11 @@ export function AuthPlate({
     body = (
       <>
         <p className="ts-auth-lede">{AUTH_WORDS.device.lede}</p>
+        {deviceRequest !== null && cleanDeviceCode(deviceCode) === device ? (
+          <p className="ts-auth-lede" data-control={id('request')}>
+            {deviceAsks(deviceRequest.scopes)} {AUTH_WORDS.device.made(deviceRequest.madeAt)}
+          </p>
+        ) : null}
         <form
           className="ts-auth-form"
           noValidate
@@ -740,7 +762,9 @@ export function AuthPlate({
             </button>
           </div>
         </form>
-        <p className="ts-auth-foot-line">{AUTH_WORDS.device.foot}</p>
+        <p className="ts-auth-foot-line">
+          {AUTH_WORDS.device.foot} {AUTH_WORDS.device.lifetime}
+        </p>
       </>
     );
   } else if (state.step === 'approved') {

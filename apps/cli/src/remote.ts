@@ -12,7 +12,9 @@ import {
 } from '@turboslide/schema/errors';
 
 import { flagString } from './args.ts';
+import { KEY_EXPIRED_CODE, SignInExpiredError } from './commands/login.ts';
 import type { CommandContext } from './context.ts';
+import type { GateError } from './exit.ts';
 import { UsageError } from './exit.ts';
 import { hostsPath, normalizeHost, resolveToken, saveHostToken } from './hosts.ts';
 
@@ -71,8 +73,15 @@ export async function readError(
   return { message, body };
 }
 
-export function refused(url: string, response: Response, message: string): UsageError {
+export function refused(
+  url: string,
+  response: Response,
+  message: string,
+  code?: string,
+): UsageError | GateError {
   const origin = normalizeHost(url);
+  // a device key past its 90 days (HR-SA#5): the sentence, then the command, exit 1
+  if (response.status === 401 && code === KEY_EXPIRED_CODE) return new SignInExpiredError(origin);
   if (response.status === 401) {
     return new UsageError(
       `${origin} refused the request: ${message}. Run \`turboslide login --to ${origin}\` for an API key, or pass --token <TURBOSLIDE_TOKEN of the deployment> once; the CLI keeps it in ${hostsPath()}`,
@@ -144,6 +153,6 @@ export async function remoteAction<T = unknown>(
     case 404:
       throw new RangeError(message);
     default:
-      throw refused(to, response, message);
+      throw refused(to, response, message, body?.code);
   }
 }

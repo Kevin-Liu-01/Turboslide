@@ -7,9 +7,12 @@
 // `logout` revokes that key through `account.tokens.revoke` and forgets the record. The server
 // mints that key from the library's grant (apps/studio/src/server/auth/device-grant.ts); the flow
 // here is tested against a fake.
+//
+// The key lives 90 days (HR-SA#5, AUTH-7); a key past its expiry is refused with the code
+// `key_expired`, and every hosted command then prints SIGN_IN_EXPIRED and exits 1 (remote.ts).
 import type { CommandContext } from '../context.ts';
 import { flagNumber, flagString } from '../args.ts';
-import { UsageError } from '../exit.ts';
+import { GateError, UsageError } from '../exit.ts';
 import { forgetHost, hostsPath, normalizeHost, saveHostToken, savedHost } from '../hosts.ts';
 import { remoteAction } from '../remote.ts';
 import { runAction } from '../write.ts';
@@ -22,6 +25,18 @@ export const DEVICE_CODE_PATH = '/api/auth/device/code';
 export const DEVICE_TOKEN_PATH = '/api/auth/device/token';
 export const DEVICE_GRANT = 'urn:ietf:params:oauth:grant-type:device_code';
 export const DEFAULT_CLIENT_ID = 'turboslide-cli';
+/** The code of a refused key past its expiry (HR-SA#5). */
+export const KEY_EXPIRED_CODE = 'key_expired';
+/** What the CLI prints for it. */
+export const SIGN_IN_EXPIRED = 'Your sign in expired. Run turboslide login.';
+
+/** A hosted command refused for an expired key: the sentence, the command to run, exit 1. */
+export class SignInExpiredError extends GateError {
+  constructor(origin: string) {
+    super(`${SIGN_IN_EXPIRED}\n  turboslide login --to ${origin}`);
+    this.name = 'SignInExpiredError';
+  }
+}
 
 export type DeviceCodeAnswer = {
   device_code: string;
@@ -39,6 +54,7 @@ export type DeviceTokenAnswer =
       scope?: string;
       token_id?: string;
       principal_id?: string;
+      expires_at?: string | null;
     }
   | {
       error: 'authorization_pending' | 'slow_down' | 'access_denied' | 'expired_token' | string;
@@ -62,7 +78,7 @@ function sleepMs(ms: number): Promise<void> {
 export async function deviceFlow(
   origin: string,
   options: DeviceFlowOptions,
-): Promise<{ token: string; tokenId?: string; principalId?: string }> {
+): Promise<{ token: string; tokenId?: string; principalId?: string; expiresAt?: string }> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const sleep = options.sleep ?? sleepMs;
   const clientId = options.clientId ?? DEFAULT_CLIENT_ID;
@@ -103,6 +119,7 @@ export async function deviceFlow(
         token: answer.access_token,
         ...(answer.token_id !== undefined ? { tokenId: answer.token_id } : {}),
         ...(answer.principal_id !== undefined ? { principalId: answer.principal_id } : {}),
+        ...(typeof answer.expires_at === 'string' ? { expiresAt: answer.expires_at } : {}),
       };
     }
     switch (answer.error) {
@@ -146,9 +163,12 @@ export async function login(ctx: CommandContext, fetchImpl?: typeof fetch): Prom
     kind: 'api-key',
     ...(result.tokenId !== undefined ? { tokenId: result.tokenId } : {}),
     ...(result.principalId !== undefined ? { principalId: result.principalId } : {}),
+    ...(result.expiresAt !== undefined ? { expiresAt: result.expiresAt } : {}),
     path,
   });
-  ctx.out.human(`signed in to ${origin}; the key is kept in ${path}`);
+  ctx.out.human(
+    `signed in to ${origin}; the key is kept in ${path}${result.expiresAt !== undefined ? ` and works until ${result.expiresAt.slice(0, 10)}` : ''}`,
+  );
   return 0;
 }
 
@@ -163,10 +183,15 @@ export async function logout(ctx: CommandContext): Promise<number> {
   }
   let revoked = false;
   if (saved.kind === 'api-key' && saved.tokenId !== undefined) {
-    await runAction(ctx, async () => {
-      await remoteAction(ctx, origin, 'account.tokens.revoke', { tokenId: saved.tokenId });
-      revoked = true;
-    });
+    try {
+      await runAction(ctx, async () => {
+        await remoteAction(ctx, origin, 'account.tokens.revoke', { tokenId: saved.tokenId });
+        revoked = true;
+      });
+    } catch (error) {
+      // a key past its expiry works nowhere already; the host is forgotten all the same
+      if (!(error instanceof SignInExpiredError)) throw error;
+    }
   }
   forgetHost(origin, ctx.env);
   ctx.out.result({ origin, revoked, forgotten: true });

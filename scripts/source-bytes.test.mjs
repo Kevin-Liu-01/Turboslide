@@ -50,7 +50,8 @@ describe('tracked source files', () => {
     expect(files.length).toBeGreaterThan(1_000);
   });
 
-  it('hold no NUL byte', () => {
+  // about 5,000 reads: seconds on an idle machine, so the bound leaves room for a loaded one
+  it('hold no NUL byte', { timeout: 120_000 }, () => {
     const holding = files.filter((file) => readFileSync(join(ROOT, file)).includes(0));
     expect(holding).toEqual([]);
   });

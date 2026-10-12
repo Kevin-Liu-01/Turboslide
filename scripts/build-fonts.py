@@ -26,7 +26,7 @@ PowerPoint writer takes it back as character spacing (packages/export/src/pptx/f
 
 The parity round two adds an italic twin of every face (SPEC-2 7.1) cut from
 InterVariable-Italic.woff2 of the same release (the rsms/inter tag v4.1; the features round
-replaced the 4.0 italic file with the 4.1 one, docs/FEATURES.md 3.1 item 1): the same family, style Italic, the
+replaced the 4.0 italic file with the 4.1 one, docs/archive/rounds/FEATURES.md 3.1 item 1): the same family, style Italic, the
 OS/2 and head italic bits set, post.italicAngle from the source, so PowerPoint and LibreOffice
 find the Italic style under the family name a run travels under.
 

@@ -46,7 +46,7 @@ The tree's expectation of production's realtime tier: `{ "realtime": "blob" | "r
 
 ## The guard patch
 
-`docs/gslides-parity/cloudflare/build/guard.patch` is a unified diff against `~/.config/turboslide/gt-follow.sh` as it read on 2026-10-01 10:49 PDT (23,938 bytes, the version with the docs-only rule; `sha256` prefix `a3b6f5d305773fe7`). It replaces the first realtime round's patch (`docs/gslides-parity/realtime/build/guard.patch`, removed in this phase and never applied), is written against the same guard, and is applied by the ship step, never by a lane, after R5's push is deployed (the three row ids exist in the matrix from then on) and before R1's push (the first one that carries the Worker):
+`docs/gslides-parity/cloudflare/build/guard.patch` is a unified diff against `~/.config/turboslide/gt-follow.sh` as it read on 2026-10-01 10:49 PDT (23,938 bytes, the version with the docs-only rule; `sha256` prefix `a3b6f5d305773fe7`). It replaces the first realtime round's patch (removed in this phase by `6276ec07` and never applied; `6276ec07^` holds its last version), is written against the same guard, and is applied by the ship step, never by a lane, after R5's push is deployed (the three row ids exist in the matrix from then on) and before R1's push (the first one that carries the Worker):
 
 ```sh
 cd ~/.config/turboslide

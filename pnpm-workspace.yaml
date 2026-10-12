@@ -72,6 +72,10 @@ catalog:
   ioredis: 6.0.0
   jsdom: 30.0.1
   jszip: 3.10.2
+  # The hardening round (docs/hardening/HARDENING.md HR-C#3a, CLEANUP-9): unused files, exports,
+  # dependencies and duplicate exports, read with the committed knip.json by `node scripts/check.mjs
+  # --knip` against scripts/knip-allow.json; the version the cleanup research measured
+  knip: 6.40.0
   kysely: 0.29.5
   nitro: 3.0.260903-beta
   parse5: 8.0.1

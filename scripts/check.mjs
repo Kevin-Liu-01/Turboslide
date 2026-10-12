@@ -48,6 +48,10 @@
 // Its mode is BRAND_LINT_MODE in packages/lint/src/brand/config.ts: report prints and passes,
 // enforce fails on a finding config.ts does not accept. The same constant decides whether step
 // 18's one rail check (packages/lint/src/chrome.ts) fails the chrome lint. `--list` prints 33.
+//
+// The hardening round (docs/hardening/HARDENING.md HR-C#3a, CLEANUP-9): step 34 is the knip step,
+// `node scripts/check.mjs --knip`: knip with the committed knip.json, every finding compared with
+// scripts/knip-allow.json. No server. `--list` prints 34.
 // Step 29 is the generated files check: `node scripts/build-brand.ts --check` (the icon set, the
 // twins by bytes, the card, the two build records and facts.json against the tree; it launches
 // Chrome for Testing once for the card compare when chromium-1217 is present and prints why it
@@ -460,6 +464,8 @@ const steps = [
   // Round 1 of the next program (docs/NEXT.md 4.1.3 item 25): the brand lint over the chrome
   // sources, the stylesheets and the mood pictures' credits, in the mode config.ts names
   { cmd: 'node packages/lint/src/brand/main.ts --json .turboslide/brand-lint.json' },
+  // the hardening round (HR-C#3a): unused files, exports, dependencies and duplicate exports
+  { cmd: 'node scripts/check.mjs --knip' },
 ];
 
 const argv = process.argv.slice(2);
@@ -484,6 +490,11 @@ if (flag('greps')) {
 // `--audit`: step 28, `pnpm audit --prod --audit-level=high` filtered by scripts/audit-allow.json.
 if (flag('audit')) {
   process.exit(await runAudit());
+}
+
+// `--knip`: step 34, knip against scripts/knip-allow.json; `--knip --prune` drops stale entries.
+if (flag('knip')) {
+  process.exit(runKnip(flag('prune')));
 }
 
 const from = Number(value('from') ?? 1);
@@ -608,6 +619,73 @@ async function runAudit() {
   for (const entry of expired)
     console.error(`check audit: FAIL acceptance of ${entry.id} expired on ${entry.expires}`);
   return open.length === 0 && expired.length === 0 ? 0 : 1;
+}
+
+/**
+ * Step 34 (docs/hardening/HARDENING.md HR-C#3a, CLEANUP-9): knip (the catalog's version) with the
+ * committed knip.json reports unused files, exports, types and dependencies, unlisted
+ * dependencies, duplicate exports and unused catalog entries. Each finding is one line,
+ * `<type> <file> <name>`, compared with scripts/knip-allow.json, which held the findings of the
+ * day the step joined the chain. A finding the list does not hold fails the step. An entry knip no
+ * longer reports fails it too, because the list only shrinks: the change that removes a dead file,
+ * export or dependency removes its entry in the same commit. `prune` rewrites the list without
+ * those entries; nothing ever adds one.
+ */
+function runKnip(prune) {
+  const { readFileSync, writeFileSync } = require('node:fs');
+  const allowPath = resolve(ROOT, 'scripts/knip-allow.json');
+  const bin = resolve(ROOT, 'node_modules/.bin/knip');
+  if (!existsSync(bin)) {
+    console.error('check knip: FAIL node_modules/.bin/knip is missing; run pnpm install');
+    return 1;
+  }
+  const run = spawnSync(
+    bin,
+    ['--config', 'knip.json', '--reporter', 'json', '--no-progress', '--no-exit-code'],
+    { cwd: ROOT, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 },
+  );
+  let report;
+  try {
+    report = JSON.parse(run.stdout);
+  } catch {
+    console.error(
+      `check knip: FAIL knip answered no JSON (exit ${run.status}): ${run.stderr.slice(0, 400)}`,
+    );
+    return 1;
+  }
+  const found = new Set();
+  for (const row of report.issues ?? [])
+    for (const [type, items] of Object.entries(row)) {
+      if (!Array.isArray(items) || type === 'owners') continue;
+      for (const item of items) {
+        if (type === 'files') found.add(`files ${row.file}`);
+        else if (Array.isArray(item))
+          found.add(`${type} ${row.file} ${item.map((alias) => alias.name).join('|')}`);
+        else
+          found.add(
+            `${type} ${row.file} ${item.namespace ? `${item.namespace}.` : ''}${item.name}`,
+          );
+      }
+    }
+  const allow = JSON.parse(readFileSync(allowPath, 'utf8'));
+  const allowed = new Set(allow.findings);
+  const added = [...found].filter((finding) => !allowed.has(finding)).sort();
+  const gone = allow.findings.filter((finding) => !found.has(finding));
+  console.log(
+    `check knip: ${found.size} finding(s), ${allowed.size} in scripts/knip-allow.json, ${added.length} new, ${gone.length} no longer reported`,
+  );
+  for (const finding of added) console.error(`check knip: FAIL new finding: ${finding}`);
+  if (prune && gone.length > 0) {
+    allow.findings = allow.findings.filter((finding) => found.has(finding));
+    writeFileSync(allowPath, `${JSON.stringify(allow, null, 2)}\n`);
+    console.log(`check knip: removed ${gone.length} entry(ies) from scripts/knip-allow.json`);
+    return added.length === 0 ? 0 : 1;
+  }
+  for (const finding of gone)
+    console.error(
+      `check knip: FAIL no longer reported, remove it from scripts/knip-allow.json (--knip --prune): ${finding}`,
+    );
+  return added.length === 0 && gone.length === 0 ? 0 : 1;
 }
 
 async function isUp(url) {

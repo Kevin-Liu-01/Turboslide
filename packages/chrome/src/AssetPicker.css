@@ -13,16 +13,20 @@
   color: var(--pt-ink);
 }
 
+/* the head wraps, the filter on its own line, so the role controls keep their words: in one row
+   that did not wrap the role Seg shrank until All, Openers and Moods drew over each other (the
+   dropdown round's last visual pass, F4) */
 .ts-asset-picker-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
   padding: 6px 8px;
   border-bottom: 1px solid var(--pt-hair);
 }
 
 .ts-asset-picker-filter {
-  flex: 1 1 auto;
+  flex: 1 1 100%;
   min-width: 0;
   height: 22px;
   padding: 0 8px;
@@ -41,6 +45,16 @@
 .ts-asset-picker-roles {
   flex: 0 0 auto;
   min-width: 0;
+}
+
+/* the role Seg draws words, where the small variant draws 28 px icon squares (Seg.css) */
+.ts-asset-picker-head .pt-seg {
+  flex: 0 0 auto;
+}
+
+.ts-asset-picker-head .pt-seg.is-small .pt-ib {
+  width: auto;
+  padding: 0 8px;
 }
 
 .ts-asset-picker-list {

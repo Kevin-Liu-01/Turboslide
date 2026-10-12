@@ -1,10 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
+import type { Dispatcher } from '@turboslide/agent/dispatch';
 import {
   WRITE_BODY_LIMIT,
+  bodyLimitFor,
   handleActionRequest,
+  idempotencyFingerprint,
   readJsonBody,
   refuseSpoofedLocalhost,
   requestIdempotencyKey,
+  takesIdempotencyKey,
 } from '@turboslide/agent/http/dispatch';
 import { errorResponse, jsonResponse, refuse } from '@turboslide/agent/http/errors';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
@@ -23,8 +27,13 @@ import { agentAuth, HTTP_DEFAULT_AUTHOR, requireAgentAuth } from '../../server/a
 import { capabilityForAction } from '../../server/authorize';
 import { FlagOffError } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
-import type { Idempotency } from '../../server/idempotency';
-import { idempotencyCaller, replayedRecord, replayedResponse } from '../../server/idempotency';
+import type { EarlierAttempt, Idempotency } from '../../server/idempotency';
+import {
+  idempotencyCaller,
+  replayedRecord,
+  replayedResponse,
+  withReplayedHeader,
+} from '../../server/idempotency';
 import { RateLimitedError, rateLimitedResponse } from '../../server/ratelimit';
 import { flushRoom } from '../../server/room';
 import { deckDir } from '../../server/root';
@@ -53,11 +62,15 @@ import { deckDir } from '../../server/root';
 // gate (before H2 the agent package's token only rule answered every key 401). A deck the caller
 // cannot see and a deck that does not exist answer the same 404.
 //
-// Hardening HR-O#6 (RELIABILITY-21): a POST of a writing action may carry `Idempotency-Key`. The
-// key, scoped to the caller, becomes the op id of each write the action makes (the room's entry
-// and the record's origin, server/idempotency.ts), and a resend whose first attempt is in the log
-// is answered with that record (200, `idempotent-replayed: true`) once the gate admitted it, so a
-// retried write is never applied twice.
+// Hardening HR-O#6 (RELIABILITY-21): a POST of a writing action that takes it
+// (`takesIdempotencyKey`; a key on any other writing action is 400 `idempotency_not_supported`)
+// may carry `Idempotency-Key`. The key, scoped to the caller and fingerprinted with the action and
+// the body, becomes the op id of each write the action makes (the room's entry and the record's
+// origin, server/idempotency.ts). Once the gate admitted the call, a resend whose first attempt is
+// in the log runs the action over the records that attempt made and answers what the action
+// answers, with `idempotent-replayed: true`, so a retried write is never applied twice; the same
+// key with another action or body is 422 `idempotency_key_reused` (the wave 3b verify's findings
+// 3 to 5).
 
 export const Route = createFileRoute('/api/actions/$action')({
   server: {
@@ -117,20 +130,56 @@ async function serve(request: Request, action: string): Promise<Response> {
   } catch (error) {
     return gateRefusal(error, action);
   }
-  const idempotency: Idempotency | undefined =
+  let idempotency: Idempotency | undefined;
+  if (
     keyed.key !== undefined &&
     request.method === 'POST' &&
     isActionId(action) &&
     ACTIONS[action].mutates
-      ? { caller: idempotencyCaller(caller), key: keyed.key }
-      : undefined;
+  ) {
+    const spec = ACTIONS[action];
+    if (!takesIdempotencyKey(spec))
+      return refuse(
+        400,
+        'idempotency_not_supported',
+        `${action} does not take Idempotency-Key: its effects are outside the version log a key is found in. Send it without the key`,
+        { action },
+      );
+    // the fingerprint reads a copy of the body; a body that does not parse is the handler's 400
+    // below, before anything is written
+    const body = await readJsonBody(request.clone(), bodyLimitFor(spec));
+    if (body.ok)
+      idempotency = {
+        caller: idempotencyCaller(caller),
+        key: keyed.key,
+        fingerprint: idempotencyFingerprint(action, body.value),
+      };
+  }
+  const open = async (replay?: EarlierAttempt) =>
+    deckDispatcher(deckId, {
+      request,
+      ...(idempotency === undefined ? {} : { idempotency }),
+      ...(replay === undefined ? {} : { replay }),
+    });
+  const run = (over: Dispatcher): Promise<Response> =>
+    handleActionRequest(request, action, {
+      dispatcher: over,
+      defaultDeck: deckId,
+      deckDir: (id) => deckDir(id),
+      defaultAuthor: HTTP_DEFAULT_AUTHOR,
+      authorize: (req) => agentAuth(req),
+      onDispatch: (event) => {
+        if (process.env.TURBOSLIDE_AGENT_LOG === '1') {
+          console.error(
+            `agent http: ${event.action} ${event.status} ${event.ms} ms deck=${event.deckId ?? '-'} author=${event.author.kind === 'agent' ? `agent:${event.author.runId ?? ''}` : event.author.name}${event.force ? ' force' : ''}`,
+          );
+        }
+      },
+    });
   let dispatcher;
   let live;
   try {
-    ({ dispatcher, live } = await deckDispatcher(deckId, {
-      request,
-      ...(idempotency === undefined ? {} : { idempotency }),
-    }));
+    ({ dispatcher, live } = await open());
   } catch (error) {
     if (error instanceof RangeError)
       return refuse(404, 'unknown_deck', deckNotFound(deckId), { action });
@@ -150,8 +199,26 @@ async function serve(request: Request, action: string): Promise<Response> {
       return gateRefusal(error, action);
     }
     if (idempotency !== undefined) {
-      const record = await replayedRecord(live, idempotency);
-      if (record !== undefined) return replayedResponse(action, record);
+      const earlier = await replayedRecord(live, idempotency);
+      if (earlier !== undefined && !earlier.sameRequest)
+        return refuse(
+          422,
+          'idempotency_key_reused',
+          'This Idempotency-Key came with another action or body; send a new key for a new write',
+          { action },
+        );
+      if (earlier !== undefined) {
+        // the action once more over the first attempt's records: its own answer, nothing written
+        let replayed: Response;
+        try {
+          replayed = await run((await open(earlier)).dispatcher);
+        } catch {
+          return replayedResponse(action, earlier.record);
+        }
+        return replayed.ok
+          ? withReplayedHeader(replayed)
+          : replayedResponse(action, earlier.record);
+      }
     }
   }
   // what the open editor wrote a moment ago reaches the store before an agent reads it (room.ts
@@ -168,18 +235,5 @@ async function serve(request: Request, action: string): Promise<Response> {
     (reads === 'read' || reads === 'readComments' || reads === 'history')
   )
     await flushRoom(deckId);
-  return handleActionRequest(request, action, {
-    dispatcher,
-    defaultDeck: deckId,
-    deckDir: (id) => deckDir(id),
-    defaultAuthor: HTTP_DEFAULT_AUTHOR,
-    authorize: (req) => agentAuth(req),
-    onDispatch: (event) => {
-      if (process.env.TURBOSLIDE_AGENT_LOG === '1') {
-        console.error(
-          `agent http: ${event.action} ${event.status} ${event.ms} ms deck=${event.deckId ?? '-'} author=${event.author.kind === 'agent' ? `agent:${event.author.runId ?? ''}` : event.author.name}${event.force ? ' force' : ''}`,
-        );
-      }
-    },
-  });
+  return run(dispatcher);
 }

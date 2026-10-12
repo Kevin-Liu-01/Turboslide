@@ -1,10 +1,12 @@
 // The HTTP transport end to end without a server (MILESTONES M4 item 1): the bearer rule, the
 // request facts, the one error body, the size cap, the dispatch of a registered action, and the
 // GET contract of an action.
+import { ACTIONS } from '@turboslide/schema/actions';
 import { ConflictError } from '@turboslide/schema/errors';
 import { describe, expect, it } from 'vitest';
 
 import { createDispatcher } from '../dispatch.ts';
+import { generateOpenApi } from '../generate/openapi.ts';
 import {
   authorize,
   isLocalHost,
@@ -17,10 +19,13 @@ import {
   IDEMPOTENCY_KEY_HEADER,
   effectiveHost,
   handleActionRequest,
+  idempotencyFingerprint,
+  idempotencyKeyPrefix,
   idempotentOpId,
   isLocalRequest,
   readJsonBody,
   requestIdempotencyKey,
+  takesIdempotencyKey,
   trustsProxy,
 } from './dispatch.ts';
 import { errorBodyOf } from './errors.ts';
@@ -472,14 +477,83 @@ describe('Idempotency-Key', () => {
     }
   });
 
-  it('makes one op id per caller, key and write, within the room bound', () => {
-    const first = idempotentOpId('tok_a', 'k1');
+  it('makes one op id per caller, key, request and write, within the room bound', () => {
+    const fingerprint = idempotencyFingerprint('slide.new', { layout: 'blank', baseRevision: 0 });
+    const scope = { caller: 'tok_a', key: 'k1', fingerprint };
+    const first = idempotentOpId(scope);
     expect(first).toMatch(/^idem-[A-Za-z0-9_-]{32}$/);
-    expect(idempotentOpId('tok_a', 'k1')).toBe(first);
-    expect(idempotentOpId('tok_b', 'k1')).not.toBe(first);
-    expect(idempotentOpId('tok_a', 'k2')).not.toBe(first);
-    expect(idempotentOpId('tok_a', 'k1', 2)).toBe(`${first}-2`);
-    expect(idempotentOpId('tok_a', 'k1', 999).length).toBeLessThanOrEqual(64);
+    expect(first.startsWith(idempotencyKeyPrefix(scope))).toBe(true);
+    expect(idempotentOpId(scope)).toBe(first);
+    expect(idempotentOpId({ ...scope, caller: 'tok_b' })).not.toBe(first);
+    expect(idempotentOpId({ ...scope, key: 'k2' })).not.toBe(first);
+    expect(idempotentOpId(scope, 2)).toBe(`${first}-2`);
+    expect(idempotentOpId(scope, 999).length).toBeLessThanOrEqual(64);
+  });
+
+  // the wave 3b verify's finding 4: one key sent with another body is another request
+  it('fingerprints the action and the body, whatever the order of the keys', () => {
+    const body = { layout: 'blank', baseRevision: 0, after: 'title' };
+    const fingerprint = idempotencyFingerprint('slide.new', body);
+    expect(fingerprint).toMatch(/^[A-Za-z0-9_-]{10}$/);
+    expect(
+      idempotencyFingerprint('slide.new', { after: 'title', baseRevision: 0, layout: 'blank' }),
+    ).toBe(fingerprint);
+    expect(idempotencyFingerprint('slide.new', { ...body, layout: 'closing' })).not.toBe(
+      fingerprint,
+    );
+    expect(idempotencyFingerprint('slide.duplicate', body)).not.toBe(fingerprint);
+    const scope = { caller: 'tok_a', key: 'k1' };
+    expect(idempotentOpId({ ...scope, fingerprint }).startsWith(idempotencyKeyPrefix(scope))).toBe(
+      true,
+    );
+    expect(
+      idempotentOpId({ ...scope, fingerprint: idempotencyFingerprint('slide.new', {}) }),
+    ).not.toBe(idempotentOpId({ ...scope, fingerprint }));
+  });
+
+  // the wave 3b verify's finding 5: the header is named on the writes that keep it, and only there
+  it('is taken by the document writes and by no write that acts outside the version log', () => {
+    for (const id of [
+      'slide.new',
+      'block.set',
+      'text.insert',
+      'section.set',
+      'deck.set',
+      'asset.add',
+      'version.restore',
+    ] as const)
+      expect(takesIdempotencyKey(ACTIONS[id]), id).toBe(true);
+    for (const id of [
+      'deck.create',
+      'deck.copy',
+      'deck.trash',
+      'version.save',
+      'slide.lease',
+      'comment.add',
+      'share.invite',
+      'share.emailCollaborators',
+      'account.tokens.create',
+      'admin.flag',
+      'template.create',
+    ] as const)
+      expect(takesIdempotencyKey(ACTIONS[id]), id).toBe(false);
+    for (const spec of Object.values(ACTIONS))
+      if (!spec.mutates) expect(takesIdempotencyKey(spec), spec.id).toBe(false);
+    const paths = (
+      generateOpenApi() as { paths: Record<string, { post?: { parameters?: unknown[] } }> }
+    ).paths;
+    let named = 0;
+    for (const [path, item] of Object.entries(paths)) {
+      const id = /^\/api\/actions\/([A-Za-z.]+)$/.exec(path)?.[1];
+      if (id === undefined || item.post === undefined) continue;
+      const names = (item.post.parameters ?? []).some(
+        (parameter) =>
+          (parameter as { $ref?: string }).$ref === '#/components/parameters/IdempotencyKey',
+      );
+      expect(names, id).toBe(takesIdempotencyKey(ACTIONS[id as keyof typeof ACTIONS]));
+      if (names) named += 1;
+    }
+    expect(named).toBeGreaterThan(60);
   });
 
   it('refuses a malformed key before the action runs', async () => {

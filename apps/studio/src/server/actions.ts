@@ -125,8 +125,8 @@ import {
   requestIdentity as roomIdentity,
   roomBackedStore,
 } from './room';
-import type { Idempotency } from './idempotency';
-import { keyedStore } from './idempotency';
+import type { EarlierAttempt, Idempotency } from './idempotency';
+import { keyedStore, replayStore } from './idempotency';
 import { isDoChannel } from '@turboslide/realtime/do';
 import {
   deckDir,
@@ -1345,6 +1345,12 @@ export type DeckDispatcherOptions = {
    * (server/idempotency.ts `keyedStore`).
    */
   idempotency?: Idempotency;
+  /**
+   * The earlier attempt of a keyed request this one resends: the document actions read the deck
+   * as that attempt did and its writes are answered by its records (server/idempotency.ts
+   * `replayStore`), so the action answers as it did then and writes nothing.
+   */
+  replay?: EarlierAttempt;
 };
 
 /**
@@ -1388,7 +1394,11 @@ export async function deckDispatcher(
   // `roomBackedStore` unchanged, so a picture's bytes still go to the store.
   const roomed = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
   const liveStore =
-    options.idempotency === undefined ? roomed : keyedStore(roomed, options.idempotency);
+    options.idempotency === undefined
+      ? roomed
+      : options.replay === undefined
+        ? keyedStore(roomed, options.idempotency)
+        : replayStore(roomed, options.idempotency, options.replay);
   const store = storeFor(deckId);
   const dispatcher = createDispatcher();
   const load = async (): Promise<DeckDocument> => (await liveStore.read()).document;

@@ -1053,6 +1053,11 @@ async function createRoom(deckId: string): Promise<Room> {
   const read = await store.read();
   const records = await store.records();
   const coveredAtOpen = coveredSeq(records);
+  // a memory stream starts empty in a new process while the records keep the seqs the process
+  // before covered: its head is raised to them, so the entries this process appends number above
+  // what the records cover and are applied and checkpointed (the wave 3b verify's finding 6: after
+  // a restart a fresh tab's typing took seqs 1 to 3 under a covered 3 and was never committed)
+  if (onDo === null && selection.tier !== 'blob') await channel.floor?.(deckId, coveredAtOpen);
   const live: Live = {
     seq: coveredAtOpen,
     document: read.document,

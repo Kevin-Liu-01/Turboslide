@@ -56,6 +56,13 @@ export type SelectOption<T extends string = string> = {
 export type SelectGroup<T extends string = string> = {
   heading?: string;
   options: readonly SelectOption<T>[];
+  /**
+   * Rows that act and are never the field's value (Share's Transfer ownership, Add expiration and
+   * Remove access beside a person's role): the trigger's width is not sized over their words, so
+   * the field is as wide as the values it shows (the wave 3b verify's finding 7: the role field
+   * took 136 px for "Viewer" and left the person's name 40 px at 390)
+   */
+  actions?: boolean;
 };
 
 export type SelectProps<T extends string = string> = {
@@ -104,7 +111,7 @@ const LIST_GAP = 2;
 /** A label press closes an open list; the click the label then sends its control within this window is not an open. */
 const LABEL_CLICK_MS = 1000;
 
-type Row<T extends string> = { option: SelectOption<T>; index: number };
+type Row<T extends string> = { option: SelectOption<T>; index: number; action?: true };
 type Section<T extends string> = { heading?: string; rows: Row<T>[] };
 
 function isGroup<T extends string>(
@@ -123,8 +130,10 @@ function sectionsOf<T extends string>(
   const sections: Section<T>[] = [];
   const rows: Row<T>[] = [];
   let loose: Section<T> | null = null;
-  const add = (section: Section<T>, option: SelectOption<T>) => {
-    const row = { option, index: rows.length };
+  const add = (section: Section<T>, option: SelectOption<T>, action = false) => {
+    const row: Row<T> = action
+      ? { option, index: rows.length, action: true }
+      : { option, index: rows.length };
     rows.push(row);
     section.rows.push(row);
   };
@@ -133,7 +142,7 @@ function sectionsOf<T extends string>(
       loose = null;
       const section: Section<T> =
         entry.heading === undefined ? { rows: [] } : { heading: entry.heading, rows: [] };
-      for (const option of entry.options) add(section, option);
+      for (const option of entry.options) add(section, option, entry.actions === true);
       if (section.rows.length > 0) sections.push(section);
       continue;
     }
@@ -216,7 +225,7 @@ export function Select<T extends string>({
   );
   const chosen = rows.find((row) => row.option.value === value);
   /* every set of words the trigger may show, once each: the placeholder and each option's label,
-     with the icon's slot where the option draws one */
+     with the icon's slot where the option draws one; a group of actions is never shown */
   const sizes = useMemo(() => {
     const seen = new Set<string>();
     const out: { label: string; icon: boolean }[] = [];
@@ -227,7 +236,8 @@ export function Select<T extends string>({
       out.push({ label: words, icon });
     };
     if (placeholder !== undefined) add(placeholder, false);
-    for (const row of rows) add(row.option.label, row.option.icon !== undefined);
+    for (const row of rows)
+      if (row.action !== true) add(row.option.label, row.option.icon !== undefined);
     return out;
   }, [rows, placeholder]);
 

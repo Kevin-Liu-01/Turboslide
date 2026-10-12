@@ -921,6 +921,32 @@ describe('the trigger width (the last visual pass, F1)', () => {
     expect(trigger().textContent).toBe('Next slide');
     expect(screen.getByRole('combobox', { name: 'Slide' })).toBe(trigger());
   });
+
+  // the wave 3b verify's finding 7: Share's role field took 136 px for "Viewer", sized over the
+  // row's actions it never shows, and left a person's name 40 px at 390
+  it('stands no cell for a group of actions, which the trigger never shows', () => {
+    render(
+      <Harness
+        options={[
+          { options: POSITIONS.slice(1, 3) },
+          {
+            actions: true,
+            options: [
+              { value: 'expiry', label: 'Add expiration' },
+              { value: 'remove', label: 'Remove access' },
+            ],
+          },
+        ]}
+        initial="next"
+      />,
+    );
+    const sizers = [...trigger().querySelectorAll<HTMLElement>('.ts-dropdown-sizer')];
+    expect(sizers.map((sizer) => sizer.dataset.label)).toEqual(['Next slide', 'Previous slide']);
+    /* the actions are rows of the list as before */
+    expect(
+      [...list().querySelectorAll<HTMLElement>('[role="option"]')].map((row) => row.dataset.value),
+    ).toEqual(['next', 'previous', 'expiry', 'remove']);
+  });
 });
 
 // The dropdown round's last visual pass (verify-final-3-visual.md), F2: a list stayed open after its

@@ -310,14 +310,14 @@ The list is in the top layer at `popover` (50) while open: over every dialog and
 
 The trigger (`Select.css`):
 
-| Part          | `field`                                                               | `compact`                                  |
-| ------------- | --------------------------------------------------------------------- | ------------------------------------------ |
-| Height        | 32 px                                                                 | 22 px                                      |
-| Text          | 13 px Inter, `--pt-ink`                                               | 12 px Inter, `--pt-ink`                    |
-| Padding       | 0 28 px 0 10 px                                                       | 0 24 px 0 8 px                             |
-| Minimum width | none (the site's layout)                                              | 96 px; maximum 220 px (`select.css` today) |
-| Width         | its widest option or placeholder, unless the site sets one            | the same, between 96 and 220 px            |
-| Chevron       | the sprite's `chevron-down`, 14 px, `--pt-ink-2`, 8 px from the right | 14 px, 5 px from the right                 |
+| Part          | `field`                                                                                                   | `compact`                                  |
+| ------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Height        | 32 px                                                                                                     | 22 px                                      |
+| Text          | 13 px Inter, `--pt-ink`                                                                                   | 12 px Inter, `--pt-ink`                    |
+| Padding       | 0 28 px 0 10 px                                                                                           | 0 24 px 0 8 px                             |
+| Minimum width | none (the site's layout)                                                                                  | 96 px; maximum 220 px (`select.css` today) |
+| Width         | its widest option or placeholder, unless the site sets one; a group of actions (`actions`) is not counted | the same, between 96 and 220 px            |
+| Chevron       | the sprite's `chevron-down`, 14 px, `--pt-ink-2`, 8 px from the right                                     | 14 px, 5 px from the right                 |
 
 Both: `box-sizing: border-box`, `appearance: none`, a 1 px `--pt-field` border, `border-radius: var(--pt-radius)` (6 px), `--pt-paper` ground, `font-variant-numeric: var(--pt-numerals)`, the value in one line with an ellipsis. Focus visible and open: a 1 px `--pt-ink` outline at -1 px (the rule `tokens.css` 524 to 528 draws today). Hover: the border in `--pt-ink-2`. Disabled: text in `--pt-disabled`, border in `--pt-hair-soft`, `cursor: default`. In a dialog field the trigger fills the row (`Dialog.css`, `.ts-dialog .ts-dropdown-trigger { width: 100% }`).
 

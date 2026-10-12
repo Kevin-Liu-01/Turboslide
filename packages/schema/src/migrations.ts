@@ -129,11 +129,12 @@ function at(value: unknown, path: Path): unknown {
 
 /**
  * The minor that governs the object at `path`: the `schemaMinor` of the nearest object on the
- * way down from the root that carries one (a slide inside a record's mutation answers for itself).
+ * way down from the root that carries one (a slide inside a record's mutation answers for itself),
+ * and `floor` above the root when no object carries one.
  */
-function minorAt(root: unknown, path: Path): number {
+function minorAt(root: unknown, path: Path, floor: number): number {
   let node = root;
-  let minor = isRecord(node) ? readMinor(node) : 0;
+  let minor = isRecord(node) && 'schemaMinor' in node ? readMinor(node) : floor;
   for (const segment of path) {
     node = childOf(node, segment);
     if (isRecord(node) && 'schemaMinor' in node) minor = readMinor(node);
@@ -145,7 +146,7 @@ function minorAt(root: unknown, path: Path): number {
  * The unknown keys of a failed parse when every issue is one and each lies in an object of a
  * minor above this release's, else null (the failure stands as it is).
  */
-function newerFields(root: unknown, error: z.ZodError): Unknown[] | null {
+function newerFields(root: unknown, error: z.ZodError, floor: number): Unknown[] | null {
   const out: Unknown[] = [];
   for (const issue of error.issues) {
     if (issue.code !== 'unrecognized_keys') return null;
@@ -155,7 +156,7 @@ function newerFields(root: unknown, error: z.ZodError): Unknown[] | null {
       path.push(segment);
     }
     if (!isRecord(at(root, path))) return null;
-    const minor = minorAt(root, path);
+    const minor = minorAt(root, path, floor);
     if (minor <= CURRENT_SCHEMA_MINOR) return null;
     out.push({ path, keys: [...issue.keys], minor });
   }
@@ -167,11 +168,18 @@ function newerFields(root: unknown, error: z.ZodError): Unknown[] | null {
  * release does not know is parsed without them, and the fields are put back on the parsed
  * value in the places and the key order they had, so a canonical file written by the newer
  * release serializes to the same bytes (RELIABILITY-19). Anything else fails as `safeParse` does.
+ * `minor` is the minor of a value that carries no `schemaMinor` of its own, 0 when not given: an
+ * action's answer, built from documents whose stamps it does not carry (the wave 3b verify's
+ * finding 2), passes the minor that holds for it.
  */
-export function parseTolerant<T>(schema: z.ZodType<T>, value: unknown): TolerantParse<T> {
+export function parseTolerant<T>(
+  schema: z.ZodType<T>,
+  value: unknown,
+  options: { minor?: number } = {},
+): TolerantParse<T> {
   const first = schema.safeParse(value);
   if (first.success) return { success: true, data: first.data, kept: [] };
-  const fields = newerFields(value, first.error);
+  const fields = newerFields(value, first.error, options.minor ?? 0);
   if (fields === null || fields.length === 0) return { success: false, error: first.error };
   const stripped = structuredClone(value);
   for (const field of fields) {

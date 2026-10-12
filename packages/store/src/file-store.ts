@@ -56,7 +56,9 @@ import {
   nextVersionNumber,
   readVersions,
   recordAtRevision,
+  recordMinor,
   toVersion,
+  versionRecordText,
   writeVersion,
 } from './versions.ts';
 import { watchDeck } from './watch.ts';
@@ -317,7 +319,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
           resolveVersion: (n) => documentAtVersion(current, records, n),
         });
         if (!result.ok) return result;
-        const changed = writeSlideFiles(dir, current, result.document);
+        const minor = recordMinor(current, result.document);
         const entry: VersionRecord = {
           n: nextVersionNumber(records),
           revision: result.document.deck.revision,
@@ -328,8 +330,14 @@ export function openFileStore(options: FileStoreOptions): FileStore {
           mutations: result.entry.mutations,
           inverse: result.inverse,
           ...(writeOptions.ops !== undefined ? { ops: writeOptions.ops } : {}),
+          ...(minor !== undefined ? { schemaMinor: minor } : {}),
         };
-        writeVersion(dir, entry);
+        // the record's text before any file changes: a record that cannot be written refuses the
+        // write whole, so the slide files never move without the record and the manifest (the
+        // wave 3b verify's finding 1: a refused record left a slide file one write ahead)
+        const recordText = versionRecordText(entry);
+        const changed = writeSlideFiles(dir, current, result.document);
+        writeVersion(dir, entry, recordText);
         writeManifest(dir, result.document.deck);
         // the comment anchors follow the text they name (gslides-parity SPEC-3 0.52): the shift
         // entries a checkout's write produces are written to the sidecar under this same lock

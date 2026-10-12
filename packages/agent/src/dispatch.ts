@@ -4,9 +4,10 @@
 // registered yet (MILESTONES M1 item 3), and validates the handler's output. Handlers are
 // registered by the packages that implement them; the file store, the renderer and the linter
 // register theirs in the CLI (M1) and the studio (M2 onward).
-import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
+import type { ActionGroup, ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { NotImplementedError } from '@turboslide/schema/errors';
+import { CURRENT_SCHEMA_MINOR, parseTolerant } from '@turboslide/schema/migrations';
 import type { Author } from '@turboslide/schema/mutations';
 import type { z } from 'zod';
 
@@ -61,6 +62,32 @@ export type Dispatcher = {
   spec: (id: string) => ActionSpec;
 };
 
+/**
+ * The groups whose answers hold no part of a deck's documents: people, access, comments and the
+ * operator's tools. Their answers stay strict, so a field a handler should not return is refused.
+ */
+const STRICT_ANSWER_GROUPS: ReadonlySet<ActionGroup> = new Set<ActionGroup>([
+  'account',
+  'admin',
+  'comment',
+  'presence',
+  'share',
+]);
+
+/**
+ * An action's answer checked against its output schema. The answer of an action over a deck
+ * carries slides, blocks, sections and assets as the store read them, with the fields a newer
+ * minor wrote kept (RELIABILITY-19), so a field this release does not know is kept there in its
+ * place (`parseTolerant`), while every other fault stands. Before this, the check refused such an
+ * answer after the store had committed the write, and the 500 led an agent to send the write
+ * again (the wave 3b verify's finding 2).
+ */
+function checkOutput(action: ActionSpec, output: unknown) {
+  return STRICT_ANSWER_GROUPS.has(action.group)
+    ? action.output.safeParse(output)
+    : parseTolerant(action.output, output, { minor: CURRENT_SCHEMA_MINOR + 1 });
+}
+
 export function createDispatcher(): Dispatcher {
   const handlers = new Map<ActionId, ActionHandler>();
   const spec = (id: string): ActionSpec => {
@@ -85,7 +112,7 @@ export function createDispatcher(): Dispatcher {
       const handler = handlers.get(action.id);
       if (handler === undefined) throw new NotImplementedError(action.id, action.milestone);
       const output = await handler(parsed.data, context);
-      const checked = action.output.safeParse(output);
+      const checked = checkOutput(action, output);
       if (!checked.success) {
         const first = checked.error.issues[0];
         throw new Error(

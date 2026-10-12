@@ -75,6 +75,9 @@ import { dbQuotaStore, memoryQuotaStore } from './quota.ts';
 import type { QuotaStore } from './quota.ts';
 import { flagOf, markSchemaCurrent, schemaIsCurrent, stampOf } from './schema.ts';
 import { sessionSecret } from './secret.ts';
+import { dbLimiter } from '../ratelimit.ts';
+import type { RateLimiter } from '../ratelimit.ts';
+import { dbLimitStore } from './limits.ts';
 import { redisSecondaryStorage } from './secondary-storage.ts';
 import type { RedisKvLike } from './secondary-storage.ts';
 import { routePath } from '../headers.ts';
@@ -144,6 +147,13 @@ export type IdentityRuntime = {
   aliases: AliasStore;
   profiles: ProfileStore;
   quotas: QuotaStore;
+  /**
+   * The one limiter over the accounts database (HR-SA#3): on the D1 and Postgres engines, which
+   * many instances share; null on SQLite (a checkout, one process) and with no database. start.ts
+   * binds it as the application's limiter and the download tokens' spent set, and better-auth's
+   * sign in limits count in it.
+   */
+  limits: RateLimiter | null;
   mailer: Mailer;
   principals: PrincipalStore;
   checkoutToken: string | null;
@@ -352,6 +362,11 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
   /* the mail mode gates the email method (REALTIME.md 4.1, default 7.7): with TURBOSLIDE_MAIL=off
      the dialog hides the field, so a database with no sender never offers a mail that is dropped */
   const mailMode = selectMail(input.env).mode;
+  /* the engines several instances share hold the one limiter's counters (HR-SA#3) */
+  const limits =
+    db !== null && (db.kind === 'd1' || db.kind === 'postgres')
+      ? dbLimiter(dbLimitStore(db.db))
+      : null;
   const runtime: IdentityRuntime = {
     env: input.env,
     hosted: input.hosted,
@@ -366,6 +381,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     aliases: db !== null ? dbAliasStore(db.db) : memoryAliasStore(),
     profiles: db !== null ? dbProfileStore(db.db) : memoryProfileStore(),
     quotas: db !== null ? dbQuotaStore(db.db) : memoryQuotaStore(),
+    limits,
     mailer,
     principals,
     checkoutToken: input.hosted ? null : checkoutToken(input.stateDir, input.announce ?? log),
@@ -386,6 +402,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
       sessionSecret: secret,
       mailer,
       quotas: runtime.quotas,
+      ...(limits !== null ? { limits } : {}),
       hosted: input.hosted,
       ...(input.redis !== undefined
         ? { secondaryStorage: redisSecondaryStorage(input.redis) }

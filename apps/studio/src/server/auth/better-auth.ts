@@ -30,6 +30,7 @@ import { sha256Hex } from '@turboslide/identity/sha256';
 import type { AuthDb } from './db.ts';
 import { signInMail } from './mail/templates.ts';
 import type { MailMode, Mailer } from './mail/mailer.ts';
+import type { RateLimiter } from '../ratelimit.ts';
 import type { QuotaStore } from './quota.ts';
 import type { SecondaryStorage } from './secondary-storage.ts';
 import { notePairCode, signInBinding } from './signin-binding.ts';
@@ -164,6 +165,28 @@ export function betterAuthSecret(env: Env, sessionSecret: string): string {
   return sha256Hex(`turboslide better-auth secret:${sessionSecret}`);
 }
 
+/**
+ * The library's rate limit storage over the one limiter (HR-SA#3): the library hands a key of the
+ * client's address and the path, and a rule in seconds; the key is counted as its digest under
+ * the library's secret, so `ts_limits` holds no address. The library's own memory store answers
+ * the same two fields.
+ */
+export function authLimitStorage(
+  limits: Pick<RateLimiter, 'limit'>,
+  secret: string,
+  now: () => number = () => Date.now(),
+): NonNullable<NonNullable<BetterAuthOptions['rateLimit']>['customStorage']> {
+  return {
+    async consume(key, rule) {
+      const counted = `auth:${sha256Hex(`${secret}:${key}`)}`;
+      const taken = await limits.limit(counted, rule.max, rule.window * 1000);
+      return taken.ok
+        ? { allowed: true, retryAfter: null }
+        : { allowed: false, retryAfter: Math.max(1, Math.ceil((taken.resetAt - now()) / 1000)) };
+    },
+  };
+}
+
 export type SessionFacts = { id: string; userId: string; token: string };
 
 export type AuthDeps = {
@@ -174,6 +197,12 @@ export type AuthDeps = {
   mailer: Mailer;
   /** The per address mail quota (F42); memory when the runtime has no database. */
   quotas: QuotaStore;
+  /**
+   * The one limiter over the accounts database (HR-SA#3, AUTH-8), when the engine is shared by
+   * many instances: the library's sign in limits count in it (`authLimitStorage`), so an address
+   * spread over instances meets one count. Without it the library counts in this process.
+   */
+  limits?: RateLimiter;
   /** Redis when the deployment has one; sessions and counters move there. */
   secondaryStorage?: SecondaryStorage;
   hosted: boolean;
@@ -300,6 +329,15 @@ function buildAuth(deps: AuthDeps): Auth {
       window: 60,
       max: 100,
       storage: deps.secondaryStorage !== undefined ? 'secondary-storage' : 'memory',
+      // the shared limiter wins over both (HR-SA#3): every instance reads one count per address
+      ...(deps.limits !== undefined
+        ? {
+            customStorage: authLimitStorage(
+              deps.limits,
+              betterAuthSecret(deps.env, deps.sessionSecret),
+            ),
+          }
+        : {}),
       customRules: {
         '/sign-in/magic-link': { window: 3600, max: MAILS_PER_IP_PER_HOUR },
         '/email-otp/send-verification-otp': { window: 3600, max: MAILS_PER_IP_PER_HOUR },

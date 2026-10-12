@@ -10,6 +10,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { selectStore } from '@turboslide/store/select';
 
 import { logSecurityEvent } from './log';
+import type { RateLimiter } from './ratelimit';
 
 /**
  * Signed one-time download tokens (SPEC 11: a deployed studio exposes no path a caller chooses).
@@ -27,7 +28,9 @@ import { logSecurityEvent } from './log';
  * secret is required on a hosted store (a token minted on one instance must verify on another);
  * the spent set moves behind `SpentSet` with a memory default and `kvSpentSet` over the key value
  * client of the redis tier (`dl:spent:<nonce>`, B2's channel binds it through `bindSpentSet`), so
- * a token spent on one instance is spent on every instance; the export cancel token (an HMAC over
+ * a token spent on one instance is spent on every instance (since HR-SA#3 a hosted deployment
+ * binds `limiterSpentSet` over the one limiter in the accounts database, whose spend is one
+ * statement, so two instances never both serve a token); the export cancel token (an HMAC over
  * the job id, `cancelTokenFor`) replaces the bare job id as the cancel capability; and the
  * thumbnail grant (`signThumbGrant`, an HMAC over deck id, role and an expiry of 10 minutes,
  * handed to the page by the `thumbGrant` server function) gates the `?w=` variant of the render
@@ -127,9 +130,9 @@ export const TOKEN_TTL_MS = 15 * 60 * 1000;
 // The spent set (SPEC-3 8.10): per instance in memory, or the key value client of the redis tier
 
 export type SpentSet = {
-  kind: 'memory' | 'kv';
-  has: (nonce: string) => Promise<boolean>;
-  add: (nonce: string, expiresAt: number) => Promise<void>;
+  kind: 'memory' | 'kv' | 'limiter';
+  /** Spends the nonce until `expiresAt`: true for the first spend, false when it was spent before. */
+  spend: (nonce: string, expiresAt: number) => Promise<boolean>;
 };
 
 export type SpentKv = {
@@ -141,13 +144,12 @@ export function memorySpentSet(now: () => number = () => Date.now()): SpentSet {
   const used = new Map<string, number>();
   return {
     kind: 'memory',
-    async has(nonce) {
+    async spend(nonce, expiresAt) {
       const t = now();
       for (const [key, exp] of used) if (exp < t) used.delete(key);
-      return used.has(nonce);
-    },
-    async add(nonce, expiresAt) {
+      if (used.has(nonce)) return false;
       used.set(nonce, expiresAt);
+      return true;
     },
   };
 }
@@ -156,11 +158,32 @@ export function memorySpentSet(now: () => number = () => Date.now()): SpentSet {
 export function kvSpentSet(kv: SpentKv, now: () => number = () => Date.now()): SpentSet {
   return {
     kind: 'kv',
-    async has(nonce) {
-      return (await kv.get(downloadSpentKey(nonce))) !== null;
-    },
-    async add(nonce, expiresAt) {
+    async spend(nonce, expiresAt) {
+      if ((await kv.get(downloadSpentKey(nonce))) !== null) return false;
       await kv.set(downloadSpentKey(nonce), '1', Math.max(1000, expiresAt - now()));
+      return true;
+    },
+  };
+}
+
+/**
+ * The spent set over the one limiter (HR-SA#3): a nonce is a key with a limit of one for the
+ * token's remaining life, so the first spend is admitted and every later one, on any instance
+ * that shares the limiter, is refused by the same statement.
+ */
+export function limiterSpentSet(
+  limiter: Pick<RateLimiter, 'limit'>,
+  now: () => number = () => Date.now(),
+): SpentSet {
+  return {
+    kind: 'limiter',
+    async spend(nonce, expiresAt) {
+      const taken = await limiter.limit(
+        downloadSpentKey(nonce),
+        1,
+        Math.max(1000, expiresAt - now()),
+      );
+      return taken.ok;
     },
   };
 }
@@ -305,8 +328,6 @@ export async function resolveDownload(
 ): Promise<ResolvedDownload | null> {
   const payload = verifyDownloadToken(token, now);
   if (!payload) return null;
-  const { spent } = state();
-  if (await spent.has(payload.nonce)) return null;
   let path: string | null = null;
   if (payload.k === 'job') {
     const job = await (await worker()).job(payload.j);
@@ -327,7 +348,8 @@ export async function resolveDownload(
     path = candidate;
   }
   if (!existsSync(path) || !statSync(path).isFile()) return null;
-  await spent.add(payload.nonce, payload.exp);
+  // one spend, after the file is known: a second request, on this instance or another, is refused
+  if (!(await state().spent.spend(payload.nonce, payload.exp))) return null;
   // the file is opened by the name the report lists; it is saved as the name the token carries
   const name = payload.k === 'job' && payload.f !== undefined ? payload.f : payload.n;
   return { path, name, bytes: statSync(path).size, type: contentType(payload.n) };

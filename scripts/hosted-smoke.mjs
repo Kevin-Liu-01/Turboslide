@@ -92,7 +92,10 @@
 // file name with no identity, and the picture by its asset key (a deployment alone: a local tmp
 // store keeps names). HR-K1#5a (CRIT-M4, DATA-3): `export URL signed` exports the scratch deck as
 // a one theme PDF through the sync export's JSON variant and requires every file's link to name
-// `/api/download/` and no store host.
+// `/api/download/` and no store host. HR-W#3a (SPEC-1, WEB-4): `static headers /home`, `/home/`
+// and `/docs` read the answers the CDN gives before the function runs, whose headers come from the
+// route rules of apps/studio/vite.deploy.config.ts: nosniff, `x-frame-options: DENY`, COOP, the
+// referrer and permissions policies, and on https the long HSTS value.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -548,6 +551,26 @@ function missingHeaders(r, names) {
   return names.filter((name) => !(name in r.headers));
 }
 
+/**
+ * The security headers a static answer lacks (hardening HR-W#3a): the values of
+ * apps/studio/src/server/headers.ts STATIC_HEADERS, HSTS on https only.
+ */
+function missingStaticHeaders(r, https) {
+  const expected = {
+    'x-content-type-options': /^nosniff$/,
+    'x-frame-options': /^DENY$/,
+    'cross-origin-opener-policy': /^same-origin$/,
+    'referrer-policy': /^strict-origin-when-cross-origin$/,
+    'permissions-policy': /geolocation=\(\)/,
+    ...(https
+      ? { 'strict-transport-security': /max-age=63072000; includeSubDomains; preload/ }
+      : {}),
+  };
+  return Object.entries(expected)
+    .filter(([name, value]) => !value.test(r.headers[name] ?? ''))
+    .map(([name]) => name);
+}
+
 function cspOf(r) {
   return (
     r.headers['content-security-policy-report-only'] ?? r.headers['content-security-policy'] ?? ''
@@ -624,6 +647,26 @@ function securityChecks(base, deck, args) {
     detail: (r) =>
       `${r.status}; ${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
   });
+  /* HR-W#3a (SPEC-1, WEB-4): the CDN answers the prerendered pages before the function runs, so
+     their headers are the route rules'; /home/ is the same file under the screenshots' folder on
+     Vercel, and a node server answers it with the app's redirect to /home, which carries them too */
+  for (const path of ['/home', '/home/', '/docs']) {
+    const answered = (r) =>
+      r.status === 200 ||
+      (path.endsWith('/') &&
+        [301, 302, 307, 308].includes(r.status) &&
+        r.headers.location === path.slice(0, -1));
+    rows.push({
+      name: `static headers ${path}`,
+      path,
+      expect: `a 200 page${path.endsWith('/') ? ' (or a redirect to the path without the slash)' : ''} with nosniff, X-Frame-Options DENY, COOP, the referrer and permissions policies${https ? ' and the long HSTS' : ''}`,
+      pass: (r) => answered(r) && missingStaticHeaders(r, https).length === 0,
+      detail: (r) => {
+        const missing = missingStaticHeaders(r, https);
+        return `${r.status}; ${missing.length === 0 ? 'every header' : `missing ${missing.join(', ')}`}; x-frame-options ${r.headers['x-frame-options'] ?? 'none'}; ${r.headers['x-vercel-cache'] ? `x-vercel-cache ${r.headers['x-vercel-cache']}` : 'no cache header'}`;
+      },
+    });
+  }
   rows.push({
     name: 'json asset attachment',
     path: `/decks/${deck}/assets/${args.jsonAsset ?? 'liquid-metal-diamond.recipe.json'}`,

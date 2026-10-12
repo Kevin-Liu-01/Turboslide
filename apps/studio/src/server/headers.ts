@@ -109,6 +109,23 @@ export const HSTS = 'max-age=63072000; includeSubDomains; preload';
 export const PERMISSIONS_POLICY =
   'geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()';
 
+/**
+ * The headers of an answer the CDN serves before the function runs (hardening HR-W#3a, SPEC-1,
+ * WEB-4): the prerendered /home and docs pages, the docs' markdown twins, the root redirect, the
+ * icon and robots.txt. The middleware never sees those requests, so vite.deploy.config.ts writes
+ * these into the route rules, which Vercel applies in front of the static file and Nitro applies
+ * on the node server. The values are the ones `securityHeadersFor` sets on an https page that is
+ * not the embed (headers.test.ts holds the two equal).
+ */
+export const STATIC_HEADERS: Readonly<Record<string, string>> = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'cross-origin-opener-policy': 'same-origin',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': PERMISSIONS_POLICY,
+  'strict-transport-security': HSTS,
+};
+
 /** The customer domains the embed is sold for, beside Prototemplate; a comma list in the variable. */
 export const EMBED_ANCESTORS_ENV = 'TURBOSLIDE_EMBED_ANCESTORS';
 

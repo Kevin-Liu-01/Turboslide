@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CSP_REPORT_PATH,
+  STATIC_HEADERS,
   assetResponseHeaders,
   buildCsp,
   clientAddress,
@@ -372,6 +373,24 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(api['content-security-policy-report-only']).toBeUndefined();
     expect(securityHeadersFor('/decks/q4/assets/a.png', base)['cross-origin-resource-policy']).toBe(
       'same-site',
+    );
+  });
+
+  it('gives the answers the CDN serves the headers the middleware sets on an https page (HR-W#3a)', () => {
+    // the route rules of vite.deploy.config.ts carry STATIC_HEADERS on /, /home, the docs, the icon
+    // and robots.txt, which the middleware never sees; each value is the one it sets itself
+    const page = securityHeadersFor('/home', base);
+    expect(Object.keys(STATIC_HEADERS).sort()).toEqual([
+      'cross-origin-opener-policy',
+      'permissions-policy',
+      'referrer-policy',
+      'strict-transport-security',
+      'x-content-type-options',
+      'x-frame-options',
+    ]);
+    for (const [name, value] of Object.entries(STATIC_HEADERS)) expect(page[name]).toBe(value);
+    expect(STATIC_HEADERS['strict-transport-security']).toBe(
+      'max-age=63072000; includeSubDomains; preload',
     );
   });
 

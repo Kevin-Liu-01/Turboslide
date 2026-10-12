@@ -10,6 +10,8 @@ import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
+import { STATIC_HEADERS } from './src/server/headers.ts';
+
 // Deployment build: `pnpm --filter @turboslide/studio build:deploy`. Nitro picks the target from
 // NITRO_PRESET: node-server (default), vercel (apps/studio/vercel.json; docs/hosting.md), bun
 // (bundle only) (SPEC 3.2, 11; tanstack report section 6.2). Same routes and server functions as
@@ -220,7 +222,11 @@ const DOCS_PRERENDER = [
   { path: '/sitemap.xml' },
 ];
 
-/** The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two). */
+/**
+ * The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two), with the
+ * static headers, because Vercel applies the first header rule a path matches and a twin's own rule
+ * comes before `/docs/**` (HR-W#3a).
+ */
 const DOCS_TWIN_RULES = Object.fromEntries(
   DOCS.map(({ page, twin }) => [
     twin,
@@ -228,6 +234,7 @@ const DOCS_TWIN_RULES = Object.fromEntries(
       headers: {
         'content-type': 'text/markdown; charset=utf-8',
         link: `<${DOCS_ORIGIN}${page}>; rel="canonical"`,
+        ...STATIC_HEADERS,
       },
     },
   ]),
@@ -244,20 +251,32 @@ const DOCS_TWIN_RULES = Object.fromEntries(
 // (site.ts TWIN_PATHS: hero-dark.png and the rest), so they take the icon set's day and week
 // rather than 1.6's immutable year until their names carry a hash. On the node-server build the
 // same rules run in h3, so the local check sees the redirect and the headers too.
+// The answers the CDN gives before the function runs carry the app's security headers
+// (`STATIC_HEADERS`, hardening HR-W#3a, SPEC-1): the root redirect, the prerendered pages, the docs'
+// twins, the icon and robots.txt. Nitro compiles a header rule into a route without `continue`, and
+// Vercel applies the first such route a path matches, so each rule of those paths carries the whole
+// set: `/docs` and `/home/` get rules of their own (`/docs/**` does not match `/docs` there, and the
+// static layer answers `/home/` with the page under the screenshots' `/home/**` year).
 const DAY = 'public, max-age=86400, stale-while-revalidate=604800';
 const WEEK = 'public, max-age=604800, stale-while-revalidate=2592000';
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 /** A prerendered page: the CDN's copy, revalidated by the browser on every visit. */
 const PAGE = 'public, max-age=0, must-revalidate';
 const ROUTE_RULES = {
-  '/': { redirect: { to: '/new', status: 307 as const }, headers: { 'x-robots-tag': 'noindex' } },
+  '/': {
+    redirect: { to: '/new', status: 307 as const },
+    headers: { 'x-robots-tag': 'noindex', ...STATIC_HEADERS },
+  },
   /* the prerendered pages (docs/POLISH-2.md 5.2): the header Vercel gives /home's static file, so the
      CDN serves a page and a browser asks again before using its copy; written for /home too, which
      the node server otherwise answered with the /home/** rule's year (h3 matches the page itself) */
-  '/home': { headers: { 'cache-control': PAGE } },
-  '/docs/**': { headers: { 'cache-control': PAGE } },
+  '/home': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/home/': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/docs': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/docs/**': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   ...DOCS_TWIN_RULES,
-  '/favicon.ico': { headers: { 'cache-control': DAY } },
+  '/favicon.ico': { headers: { 'cache-control': DAY, ...STATIC_HEADERS } },
+  '/robots.txt': { headers: { ...STATIC_HEADERS } },
   '/icon.svg': { headers: { 'cache-control': DAY } },
   '/apple-touch-icon.png': { headers: { 'cache-control': DAY } },
   '/og/turboslide.png': { headers: { 'cache-control': DAY } },

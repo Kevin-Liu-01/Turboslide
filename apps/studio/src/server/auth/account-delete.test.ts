@@ -544,7 +544,7 @@ describe('an account deleted through /api/auth/delete-user', () => {
     expect(w.index.indexes.has(accountPrincipalId(maya.userId))).toBe(false);
     expect(w.index.indexes.has(maya.anonymousId)).toBe(false);
     expect(existsSync(join(w.picturesDir, 'u', MAYA_KEY))).toBe(false);
-    expect((await runtime.profiles.get(maya.userId))?.deletedAt).not.toBeNull();
+    expect(typeof (await runtime.profiles.get(maya.userId))?.deletedAt).toBe('string');
     // one line with the counts, naming the principal and never the address
     const line = lines.find((one) => one.event === 'delete' && one.action === 'account.delete');
     expect(line).toMatchObject({

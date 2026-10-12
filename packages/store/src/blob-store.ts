@@ -72,7 +72,7 @@ import {
   readVersions,
   recordAtRevision,
   recordNamingOps,
-  versionRecordSchema,
+  safeParseRecord,
   writeVersion,
 } from './versions.ts';
 import type { FileStore } from './file-store.ts';
@@ -554,7 +554,7 @@ export const CLAIM_GRACE_MS = 60_000;
 /** A stored record's bytes as a record, or null when they do not parse. */
 function parseRecordBytes(bytes: Uint8Array): VersionRecord | null {
   try {
-    const parsed = versionRecordSchema.safeParse(JSON.parse(new TextDecoder().decode(bytes)));
+    const parsed = safeParseRecord(JSON.parse(new TextDecoder().decode(bytes)));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;

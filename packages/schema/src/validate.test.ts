@@ -154,7 +154,7 @@ describe('normalization', () => {
     const slide = { ...clone(CONTENT_RULE), schemaVersion: 9 };
     const result = validateSlide(slide);
     expect(result.ok).toBe(false);
-    expect(result.issues[0]?.code).toBe('ahead');
+    expect(result.issues[0]?.code).toBe('upgrade_pending');
   });
 });
 

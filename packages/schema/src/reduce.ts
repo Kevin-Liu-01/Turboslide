@@ -4,11 +4,12 @@
 // the inverse mutations (SPEC 6.7), so the server log stays linear.
 import type { Block } from './blocks.ts';
 import type { DeckDocument, Slide } from './deck.ts';
-import { slideSchema, slotsForLayout } from './deck.ts';
+import { slotsForLayout } from './deck.ts';
 import { diffDecks } from './diff.ts';
 import type { BlockId, SlideId } from './ids.ts';
 import type { Author, BlockSlot, Mutation, SlideFieldId, Write } from './mutations.ts';
 import { slideFieldOf, slideFieldPath } from './mutations.ts';
+import { parseMutationSlide } from './migrations.ts';
 import { cloneJson, getAt, hasAt, setAt } from './pointer.ts';
 import {
   canonicalText,
@@ -280,7 +281,7 @@ export function applyMutation(
 ): Mutation[] {
   switch (mutation.op) {
     case 'slide.insert': {
-      const parsed = slideSchema.safeParse(mutation.slide);
+      const parsed = parseMutationSlide(mutation.slide);
       if (!parsed.success)
         throw new TypeError(`slide.insert: ${parsed.error.issues[0]?.message ?? 'invalid slide'}`);
       const slide = parsed.data;
@@ -347,7 +348,7 @@ export function applyMutation(
     }
     case 'slide.replace': {
       const old = requireSlide(document, mutation.slideId);
-      const parsed = slideSchema.safeParse(mutation.slide);
+      const parsed = parseMutationSlide(mutation.slide);
       if (!parsed.success)
         throw new TypeError(`slide.replace: ${parsed.error.issues[0]?.message ?? 'invalid slide'}`);
       if (parsed.data.id !== mutation.slideId) {

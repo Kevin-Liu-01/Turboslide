@@ -32,6 +32,16 @@ import { typographyObjectSchema } from './typography.ts';
 
 export const SCHEMA_VERSION = 1;
 
+/**
+ * The minor this release writes (RELIABILITY-19, hardening HR-O#5). A release that adds a field
+ * raises it and stamps `schemaMinor` on the files it writes; a release reads a file of a higher
+ * minor by keeping the fields it does not know and writing them back unchanged
+ * (migrations.ts `parseTolerant`), so a rollback past an additive release still opens and saves
+ * every deck. A field that is renamed or removed raises SCHEMA_VERSION instead, with a migration.
+ * Minor 0 is never written: a file without the field is minor 0.
+ */
+export const SCHEMA_MINOR = 0;
+
 /** The appearance a new deck opens in when the deployment's kit is silent (docs/archive/rounds/PRODUCT.md section 1, question 1): one line to flip. */
 export { DEFAULT_APPEARANCE } from './brand.ts';
 
@@ -94,6 +104,8 @@ export type Section = { id: SectionId; name: string; slideIds: SlideId[] };
 
 export type Deck = {
   schemaVersion: 1;
+  /** the minor of the release that wrote the file, when above 0 (SCHEMA_MINOR) */
+  schemaMinor?: number;
   /** slug, stable: 'gt-brand' */
   id: string;
   title: string;
@@ -139,6 +151,8 @@ export type Deck = {
 export type SlideBase = {
   /** on every slide file so one slide can be read, validated and migrated alone */
   schemaVersion: 1;
+  /** the minor of the release that wrote the file, when above 0 (SCHEMA_MINOR) */
+  schemaMinor?: number;
   id: SlideId;
   /** overrides the derived title (first heading, big or plate title) */
   title?: string;
@@ -478,8 +492,12 @@ export const grammarRecordSchema = z.strictObject({
     .optional(),
 }) satisfies z.ZodType<GrammarRecord>;
 
+/** `schemaMinor` as a file stores it: an integer above 0, absent on minor 0 (SCHEMA_MINOR). */
+export const schemaMinorSchema = z.number().int().positive().optional();
+
 const slideBase = {
   schemaVersion: z.literal(SCHEMA_VERSION),
+  schemaMinor: schemaMinorSchema,
   id: annotate(slugSchema, { label: 'Id', control: 'readonly', group: 'Slide' }),
   title: annotate(z.string().optional(), {
     label: 'Title override',
@@ -636,6 +654,7 @@ export const isoDateSchema = z
 
 export const deckSchema = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
+  schemaMinor: schemaMinorSchema,
   id: slugSchema,
   title: annotate(z.string().min(1), { label: 'Title', control: 'text', group: 'Slide' }),
   theme: annotate(z.enum(THEMES), {

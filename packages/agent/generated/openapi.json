@@ -23712,6 +23712,11 @@
             "type": "number",
             "const": 1
           },
+          "schemaMinor": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
           "id": {
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -24279,6 +24284,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -24778,6 +24788,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -25270,6 +25285,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -25750,6 +25770,11 @@
               "schemaVersion": {
                 "type": "number",
                 "const": 1
+              },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
               },
               "id": {
                 "type": "string",
@@ -26261,6 +26286,11 @@
               "schemaVersion": {
                 "type": "number",
                 "const": 1
+              },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
               },
               "id": {
                 "type": "string",
@@ -27403,6 +27433,11 @@
               "schemaVersion": {
                 "type": "number",
                 "const": 1
+              },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
               },
               "id": {
                 "type": "string",

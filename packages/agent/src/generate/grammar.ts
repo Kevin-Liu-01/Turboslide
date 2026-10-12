@@ -109,7 +109,10 @@ export function generateGrammar(): string {
   for (const kind of SLIDE_KINDS) {
     parts.push(`### \`${kind}\``, '');
     parts.push(
-      propertyTable(SLIDE_KIND_CATALOG[kind].schema, new Set(['schemaVersion', 'kind', 'ext'])),
+      propertyTable(
+        SLIDE_KIND_CATALOG[kind].schema,
+        new Set(['schemaVersion', 'schemaMinor', 'kind', 'ext']),
+      ),
       '',
     );
   }

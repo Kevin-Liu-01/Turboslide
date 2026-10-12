@@ -2,7 +2,8 @@
 // (layout defaults filled, slot names checked against the layout, block ids unique per slide,
 // asset references resolved, section slide ids unique across the deck, an opener's sectionId
 // equals its section and it is first, Text parsed and re-serialized so escapes are canonical),
-// keeps `ext` on the three levels, rejects unknown fields elsewhere with `unknown_field`, and
+// keeps `ext` on the three levels, rejects unknown fields elsewhere with `unknown_field` (a file
+// of a newer minor keeps them, migrations.ts parseTolerant), and
 // returns issues with JSON pointers. The input is the manifest plus the slide files, since a deck
 // on disk is deck.json plus slides/<id>.json (SPEC 4.1).
 import type { z } from 'zod';
@@ -23,7 +24,14 @@ import {
 } from './deck.ts';
 import type { Severity } from './findings.ts';
 import type { SlideId } from './ids.ts';
-import { isRecord, migrate } from './migrations.ts';
+import type { KeptField } from './migrations.ts';
+import {
+  CURRENT_SCHEMA_MINOR,
+  CURRENT_SCHEMA_VERSION,
+  isRecord,
+  migrate,
+  parseTolerant,
+} from './migrations.ts';
 import { getAt, joinPointer, setAt } from './pointer.ts';
 import { DITHER_NO_SOURCE_MESSAGE } from './blocks/dither.ts';
 import { hasContinuousSource } from './assets.ts';
@@ -36,7 +44,10 @@ export type IssueCode =
   | 'unknown_field'
   | 'ext'
   | 'migrated'
-  | 'ahead'
+  /** a file of a newer major: this release cannot read it (RELIABILITY-19, hardening HR-O#5) */
+  | 'upgrade_pending'
+  /** a field of a newer minor this release does not know, kept and written back as it was (HR-O#5) */
+  | 'kept'
   | 'duplicate_id'
   | 'slot'
   | 'reference'
@@ -129,6 +140,30 @@ function compareIssues(a: Issue, b: Issue): number {
   if (a.file !== b.file) return a.file < b.file ? -1 : 1;
   if (a.pointer !== b.pointer) return a.pointer < b.pointer ? -1 : 1;
   return a.code < b.code ? -1 : a.code > b.code ? 1 : 0;
+}
+
+/** The refusal of a file of a newer major (RELIABILITY-19): this release reads it once it is the newer one. */
+function upgradePending(file: string, ahead: number): Issue {
+  return issue(
+    'upgrade_pending',
+    3,
+    file,
+    '/schemaVersion',
+    `Written by a newer release (schemaVersion ${ahead}; this release reads ${CURRENT_SCHEMA_VERSION}); it opens again once that release is back`,
+  );
+}
+
+/** One severity 1 line per field of a newer minor the tolerant parse kept (RELIABILITY-19). */
+function keptIssues(file: string, kept: ReadonlyArray<KeptField>): Issue[] {
+  return kept.map((field) =>
+    issue(
+      'kept',
+      1,
+      file,
+      field.pointer,
+      `Kept a field of a newer release (schemaMinor ${field.minor}; this release writes ${CURRENT_SCHEMA_MINOR}); it is written back unchanged`,
+    ),
+  );
 }
 
 /** Walks a block and its composite children; the callback gets the block and its pointer. */
@@ -513,15 +548,7 @@ export function validateSlide(input: unknown, fileLabel?: string): SlideValidati
   const file = fileLabel ?? (typeof input.id === 'string' ? slideFile(input.id) : 'slide');
   const migrated = migrate(input, 'slide');
   if (migrated.ahead !== undefined) {
-    issues.push(
-      issue(
-        'ahead',
-        3,
-        file,
-        '/schemaVersion',
-        `schemaVersion ${migrated.ahead} is newer than this build knows`,
-      ),
-    );
+    issues.push(upgradePending(file, migrated.ahead));
     return { ok: false, slide: null, issues };
   }
   if (migrated.applied.length > 0) {
@@ -535,11 +562,12 @@ export function validateSlide(input: unknown, fileLabel?: string): SlideValidati
       ),
     );
   }
-  const parsed = slideSchema.safeParse(migrated.value);
+  const parsed = parseTolerant(slideSchema, migrated.value);
   if (!parsed.success) {
     issues.push(...zodIssues(parsed.error, file));
     return { ok: false, slide: null, issues: issues.sort(compareIssues) };
   }
+  issues.push(...keptIssues(file, parsed.kept));
   const slide = parsed.data;
   normalizeSlide(slide, file, issues);
   const ext = extPointers(slide);
@@ -568,15 +596,7 @@ export function validateManifest(input: unknown): {
   }
   const migrated = migrate(input, 'deck');
   if (migrated.ahead !== undefined) {
-    issues.push(
-      issue(
-        'ahead',
-        3,
-        DECK_FILE,
-        '/schemaVersion',
-        `schemaVersion ${migrated.ahead} is newer than this build knows`,
-      ),
-    );
+    issues.push(upgradePending(DECK_FILE, migrated.ahead));
     return { ok: false, deck: null, issues };
   }
   if (migrated.applied.length > 0) {
@@ -590,11 +610,12 @@ export function validateManifest(input: unknown): {
       ),
     );
   }
-  const parsed = deckSchema.safeParse(migrated.value);
+  const parsed = parseTolerant(deckSchema, migrated.value);
   if (!parsed.success) {
     issues.push(...zodIssues(parsed.error, DECK_FILE));
     return { ok: false, deck: null, issues: issues.sort(compareIssues) };
   }
+  issues.push(...keptIssues(DECK_FILE, parsed.kept));
   const deck = parsed.data;
   // the design round's theme migration (docs/DESIGN.md 7.9): the legacy id is mapped once and the
   // deck carries the new id from its next save

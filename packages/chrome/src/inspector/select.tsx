@@ -9,7 +9,7 @@ import { optionLabel, optionValue } from './props';
  * the section of an opener. The trigger is the control itself, so the label and data-control sit
  * on it. An optional field offers the None row, which removes the field.
  */
-export function SelectControl({ spec, onChange, disabled }: ControlProps) {
+export function SelectControl({ spec, onChange, disabled, labelledBy }: ControlProps) {
   const options = spec.options ?? [];
   const current = spec.value === undefined ? '' : String(spec.value);
   const known = options.some((option) => String(option) === current);
@@ -30,6 +30,7 @@ export function SelectControl({ spec, onChange, disabled }: ControlProps) {
       value={current}
       options={rows}
       label={spec.label}
+      {...(labelledBy === undefined ? {} : { labelledBy })}
       control={spec.control}
       disabled={disabled}
       tip={{

@@ -73,6 +73,13 @@ export type SelectProps<T extends string = string> = {
   onChange: (value: T) => void;
   /** the accessible name, as the site's aria-label is today */
   label: string;
+  /**
+   * the id of the visible words that name the field to a person, where `label` carries more for
+   * the window API (the inspector's generated fields: `t: Align` for `set()`, read as "Align"):
+   * the trigger and its list are named by them through aria-labelledby, which wins over aria-label
+   * in the accessible name, and the window API keeps reading aria-label
+   */
+  labelledBy?: string;
   /** the trigger's data-control; each option takes `<control>.<value>` */
   control?: string;
   /** 32 px for dialogs, panels and pages; 22 px for the inspector's rows */
@@ -202,6 +209,7 @@ export function Select<T extends string>({
   options,
   onChange,
   label,
+  labelledBy,
   control,
   size = 'field',
   tip,
@@ -647,6 +655,7 @@ export function Select<T extends string>({
         aria-controls={listId}
         aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
         aria-label={label}
+        aria-labelledby={labelledBy}
         data-control={control}
         value={value}
         disabled={hold.disabled}
@@ -707,6 +716,7 @@ export function Select<T extends string>({
         id={listId}
         role="listbox"
         aria-label={label}
+        aria-labelledby={labelledBy}
         className="ts-dropdown-list pt-float"
         hidden={!open}
         style={open && placed === null ? { visibility: 'hidden' } : undefined}

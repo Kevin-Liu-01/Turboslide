@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 import { DEFAULT_FONT_ID, isFontId } from '@turboslide/schema/fonts';
 import {
   NUMERALS_SENTENCE,
@@ -72,6 +74,10 @@ export function TypographyControl({ spec, onChange, context, disabled }: Control
       ? (spec.value as Record<string, unknown>)
       : {};
   const fields = compositeControls(spec);
+  /* each row's words name its dropdown to a person: the field's label alone ("Align"), where the
+     control's own label carries the block's id for the window API ("t: Align", read as "dd-text:
+     Align" by a screen reader; the dropdown round's last keyboard pass, F2) */
+  const rowIds = useId();
 
   const write = (key: string, value: unknown) => {
     const next: Record<string, unknown> = { ...current };
@@ -129,6 +135,7 @@ export function TypographyControl({ spec, onChange, context, disabled }: Control
           <span key={field.path} className="ts-ctl-typo-row" data-field={key}>
             <span
               className="ts-ctl-typo-label"
+              id={`${rowIds}${key}`}
               {...tipProps({
                 name: label,
                 doc:
@@ -144,7 +151,7 @@ export function TypographyControl({ spec, onChange, context, disabled }: Control
               ) : field.optional ? (
                 /* an optional field takes the dropdown with its None row, so a person and set()
                    can clear it (docs/DROPDOWNS.md 4.1, question 4) */
-                <SelectControl {...props} />
+                <SelectControl {...props} labelledBy={`${rowIds}${key}`} />
               ) : (
                 <SegControl {...props} />
               )}

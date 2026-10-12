@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { emptyTable } from '@turboslide/schema/blocks/table';
 
+import { blurVerdictOf, isParkingField } from '@turboslide/viewer/InlineText';
+
 import { TableSection, tableFormatSlot } from '../inspector/table';
 import { forbiddenWordsIn } from '../menus/strings';
 import { chooseOption } from './choose-option';
@@ -381,6 +383,29 @@ describe('TableSection', () => {
     cleanup();
     mount({ cell: { row: 1, column: 1 } });
     expect(document.querySelector('[data-for="formatOptions.table.unmerge"]')).toBeNull();
+  });
+
+  /* the dropdown round's last keyboard pass, F4: after a click into a cell's text, a press on the
+     Cell group's Border weight ended the cell's text session, the cell was no longer chosen, and
+     the field took the disabled attribute under the press. The group parks the session instead
+     (InlineText's SESSION_PARK_ATTRIBUTE, the toolbar size field's rule), for its fields and for
+     the rows of their lists, which stand inside it in the document */
+  it('parks the cell’s text session for every field of the Cell group and the rows of its lists', () => {
+    mount({ cell: { row: 1, column: 1 } });
+    const weight = control('cell.border.weight');
+    const list = document.getElementById(weight.getAttribute('aria-controls') ?? '')!;
+    for (const target of [
+      weight,
+      control('cell.border.dash'),
+      control('cell.fill.plate'),
+      control('cell.border.color.ink'),
+      list.querySelector('[role="option"]')!,
+    ]) {
+      expect(isParkingField(target), target.getAttribute('data-control') ?? '').toBe(true);
+      expect(blurVerdictOf(target)).toBe('park');
+    }
+    /* the table's own Border fields act on the whole table and leave the session's rule alone */
+    expect(isParkingField(control('border.weight'))).toBe(false);
   });
 
   it('asks for a cell first when none is selected', () => {

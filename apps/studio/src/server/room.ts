@@ -1620,6 +1620,26 @@ export async function closeRoom(deckId: string): Promise<void> {
   await (await pending).close().catch(() => undefined);
 }
 
+/**
+ * Commits the tail of every room this instance holds on the memory and redis tiers, then closes
+ * every room (hardening HR-O#8, PERF-18): the node-server build's SIGTERM path, so the entries the
+ * memory channel holds in this process reach the store before it exits. The do tier's object
+ * keeps its own tail (its checkpoint would post back to this process's closed listener), and the
+ * blob tier has none. A room whose flush fails is logged by `flushRoom` and the others go on.
+ */
+export async function flushRooms(): Promise<void> {
+  const s = shared.__turboslideRoom;
+  if (s === undefined) return;
+  for (const [deckId, pending] of [...s.rooms]) {
+    const tier = await pending.then(
+      (room) => room.tier,
+      () => null,
+    );
+    if (tier === 'memory' || tier === 'redis') await flushRoom(deckId);
+  }
+  await closeRooms();
+}
+
 /** Forgets every room on this instance (a test, a deck removal). */
 export async function closeRooms(): Promise<void> {
   const s = shared.__turboslideRoom;

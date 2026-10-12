@@ -383,7 +383,15 @@ export default defineConfig({
           fallthrough: true,
         },
       ],
-      plugins: [`${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`],
+      plugins: [
+        `${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`,
+        // the node-server build commits its rooms and exits on SIGTERM (hardening HR-O#8,
+        // PERF-18); a Vercel function's life is the platform's
+        ...((process.env.NITRO_PRESET ?? 'node-server') === 'node-server' &&
+        process.env.VERCEL === undefined
+          ? [fileURLToPath(new URL('./src/server/plugins/shutdown.ts', import.meta.url))]
+          : []),
+      ],
       vercel: {
         functions: { maxDuration: 300 },
         // the seed deck's twins are static files the CDN answers before the asset route runs,

@@ -165,7 +165,7 @@
   width: 120px;
   height: 26px;
   padding: 0 6px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);

@@ -95,7 +95,10 @@
 // `/api/download/` and no store host. HR-W#3a (SPEC-1, WEB-4): `static headers /home`, `/home/`
 // and `/docs` read the answers the CDN gives before the function runs, whose headers come from the
 // route rules of apps/studio/vite.deploy.config.ts: nosniff, `x-frame-options: DENY`, COOP, the
-// referrer and permissions policies, and on https the long HSTS value.
+// referrer and permissions policies, and on https the long HSTS value. HR-W#3b (SPEC-1, CRIT-W5):
+// `static csp /home` and `static csp /docs` require an enforced policy with `frame-ancestors
+// 'none'` whose nonce is the one value of every nonce attribute on the page (on Vercel the build's
+// one nonce, which the route header names; on a node server the request's).
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -571,6 +574,25 @@ function missingStaticHeaders(r, https) {
     .map(([name]) => name);
 }
 
+/**
+ * Why a prerendered page's policy does not hold (hardening HR-W#3b), or null: an enforced policy
+ * with `frame-ancestors 'none'` and no report only twin, whose nonce is the page's one value.
+ */
+function staticCspProblem(r) {
+  const csp = r.headers['content-security-policy'];
+  if (typeof csp !== 'string') return 'no enforced policy';
+  if ('content-security-policy-report-only' in r.headers) return 'a report only policy beside it';
+  if (!/(?:^|;)\s*frame-ancestors 'none'(?:;|$)/.test(csp)) return "no frame-ancestors 'none'";
+  const nonce = /'nonce-([A-Za-z0-9+/=]+)'/.exec(csp)?.[1];
+  if (nonce === undefined) return 'no nonce in the policy';
+  const values = new Set([...r.text.matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]));
+  if (values.size === 0) return 'no nonce on the page';
+  if (values.size > 1 || !values.has(nonce)) {
+    return `the page's ${values.size} nonce value(s) are not the policy's`;
+  }
+  return null;
+}
+
 function cspOf(r) {
   return (
     r.headers['content-security-policy-report-only'] ?? r.headers['content-security-policy'] ?? ''
@@ -664,6 +686,21 @@ function securityChecks(base, deck, args) {
       detail: (r) => {
         const missing = missingStaticHeaders(r, https);
         return `${r.status}; ${missing.length === 0 ? 'every header' : `missing ${missing.join(', ')}`}; x-frame-options ${r.headers['x-frame-options'] ?? 'none'}; ${r.headers['x-vercel-cache'] ? `x-vercel-cache ${r.headers['x-vercel-cache']}` : 'no cache header'}`;
+      },
+    });
+  }
+  /* HR-W#3b (SPEC-1, CRIT-W5): the prerendered pages enforce the policy, framed by no site, and
+     every tag the page trusts carries the nonce the policy names */
+  for (const path of ['/home', '/docs']) {
+    rows.push({
+      name: `static csp ${path}`,
+      path,
+      expect:
+        "a 200 page with an enforced policy, frame-ancestors 'none', and the policy's nonce on every nonced tag",
+      pass: (r) => r.status === 200 && staticCspProblem(r) === null,
+      detail: (r) => {
+        const nonces = new Set([...r.text.matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]));
+        return `${r.status}; ${staticCspProblem(r) ?? "enforced, the page's nonce"}; ${nonces.size} nonce value(s) on the page`;
       },
     });
   }

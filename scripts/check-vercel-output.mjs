@@ -22,7 +22,9 @@
 // of each route a path matches up to the first one without `continue: true` (Nitro writes its rules
 // without it), so the check collects the headers a path gets that way: the root redirect, /home and
 // /home/, /docs and /docs/, every prerendered docs page with and without the trailing slash, every
-// docs twin, the icon and robots.txt.
+// docs twin, the icon and robots.txt. HR-W#3b (CRIT-W5): every prerendered page's nonce
+// attributes hold one value, the build's, and the header Vercel gives the page enforces a policy
+// that names it with `frame-ancestors 'none'`; no address the function answers gets that header.
 import {
   existsSync,
   lstatSync,
@@ -305,6 +307,75 @@ for (const path of STATIC_SECURITY_PATHS) {
           : `${bad.length} of ${paths.length} lack them: ${bad.slice(0, 3).join(', ')} (${missingSecurity(bad[0]).join(', ')})`,
     );
   }
+}
+
+// HR-W#3b (SPEC-1, CRIT-W5): every prerendered page carries the build's one nonce, and the header
+// Vercel gives the page, with and without its trailing slash, enforces a policy that names that
+// nonce with frame-ancestors 'none'. An address the function answers (a docs address with no
+// page, the app's routes) gets no such header, so its own nonce is the one its policy names.
+{
+  const home = PRERENDERED.flatMap(({ route, files }) =>
+    files
+      .filter((file) => existsSync(join(staticDir, file)))
+      .map((file) => ({ path: route, file })),
+  ).slice(0, 1);
+  const docs = staticDocs().pages.map((path) => ({
+    path,
+    file: `${path.slice(1)}/index.html`,
+  }));
+  const pages = [...home, ...docs].map(({ path, file }) => {
+    const html = readFileSync(join(staticDir, file), 'utf8');
+    return { path, values: [...html.matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]) };
+  });
+  const values = new Set(pages.flatMap((page) => page.values));
+  const bare = pages.filter((page) => page.values.length === 0);
+  const nonce = values.size === 1 ? [...values][0] : null;
+  row(
+    'csp',
+    'static csp: one nonce on every prerendered page',
+    pages.length > 0 && bare.length === 0 && nonce !== null,
+    `${pages.length} page(s), ${pages.reduce((n, page) => n + page.values.length, 0)} nonce attribute(s), ${values.size} value(s)${bare.length > 0 ? `; no nonce on ${bare[0].path}` : ''}`,
+  );
+  /** Why the header of a path does not enforce the page's nonce, or null when it does. */
+  const cspProblem = (path) => {
+    const csp = collectedHeaders(path)['content-security-policy'];
+    if (typeof csp !== 'string') return 'no content-security-policy';
+    if (nonce === null || !csp.includes(`'nonce-${nonce}'`)) return 'another nonce';
+    if (!/(?:^|;)\s*frame-ancestors 'none'(?:;|$)/.test(csp)) return "no frame-ancestors 'none'";
+    if (/script-src[^;]*'unsafe-inline'/.test(csp)) return "script-src 'unsafe-inline'";
+    return null;
+  };
+  const groups = [
+    ['/home', home.map(({ path }) => [path, `${path}/`]).flat()],
+    ['the docs pages', docs.map(({ path }) => path)],
+    ['the docs pages with a trailing slash', docs.map(({ path }) => `${path}/`)],
+  ];
+  for (const [name, paths] of groups) {
+    const bad = paths.filter((path) => cspProblem(path) !== null);
+    row(
+      'csp',
+      `static csp ${name}`,
+      paths.length > 0 && bad.length === 0,
+      paths.length === 0
+        ? 'no prerendered page'
+        : bad.length === 0
+          ? `${paths.length} of ${paths.length} enforce the page's nonce`
+          : `${bad.length} of ${paths.length} do not: ${bad[0]} (${cspProblem(bad[0])})`,
+    );
+  }
+  const answered = ['/docs/no-such-page', '/new', '/decks', '/deck/gt-brand', '/docs/index.md'];
+  const stray = answered.filter((path) => {
+    const headers = collectedHeaders(path);
+    return 'content-security-policy' in headers || 'content-security-policy-report-only' in headers;
+  });
+  row(
+    'csp',
+    'static csp on the prerendered pages alone',
+    stray.length === 0,
+    stray.length === 0
+      ? `no policy header on ${answered.join(', ')}`
+      : `a policy header on ${stray.join(', ')}`,
+  );
 }
 for (const file of STATIC_FILES) {
   const path = join(staticDir, file);

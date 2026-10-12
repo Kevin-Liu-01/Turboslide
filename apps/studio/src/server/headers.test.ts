@@ -16,13 +16,17 @@ import {
   embedAncestors,
   isDocumentPath,
   isLocalRequest,
+  isStaticPagePath,
+  prerenderNonce,
   publicStoreHost,
   publicStoreOrigin,
   refuseForeignOrigin,
   refuseSpoofedLocalhost,
+  requestNonce,
   requiresJsonBody,
   routePath,
   securityHeadersFor,
+  staticPageCsp,
   trustsProxy,
   withHeaders,
 } from './headers';
@@ -470,16 +474,10 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
       expect(headerOf(path, { TURBOSLIDE_CSP: 'report' }), path).toBe('report');
       expect(headerOf(path, { TURBOSLIDE_CSP: 'off' }), path).toBe('none');
     }
-    for (const path of [
-      '/decks',
-      '/decks/trash',
-      '/home',
-      '/docs/start',
-      '/signin',
-      '/newer',
-      '/',
-    ]) {
+    // /home and the docs enforce since HR-W#3b (the next test)
+    for (const path of ['/decks', '/decks/trash', '/homes', '/docsy', '/signin', '/newer', '/']) {
       expect(isDocumentPath(path), path).toBe(false);
+      expect(isStaticPagePath(path), path).toBe(false);
       expect(headerOf(path), path).toBe('report');
       expect(headerOf(path, { TURBOSLIDE_CSP: 'enforce' }), path).toBe('enforce');
     }
@@ -495,6 +493,57 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     expect(enforced).toContain("'nonce-abc123'");
     expect(enforced).toContain('report-uri /api/x/csp/report');
     expect(enforced).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+  });
+
+  it('gives the prerendered pages one nonce per build and the enforced policy that names it (HR-W#3b)', () => {
+    // the middleware enforces the policy on /home and the docs wherever the function answers them
+    for (const path of ['/home', '/home/', '/docs', '/docs/editor/slides', '/Docs/Reference']) {
+      expect(isStaticPagePath(path), path).toBe(true);
+      const headers = securityHeadersFor(path, base);
+      expect(headers['content-security-policy'], path).toContain("frame-ancestors 'none'");
+      expect(headers['content-security-policy-report-only'], path).toBeUndefined();
+      const report = securityHeadersFor(path, { ...base, env: { TURBOSLIDE_CSP: 'report' } });
+      expect(report['content-security-policy'], path).toBeUndefined();
+      expect(report['content-security-policy-report-only'], path).toBeDefined();
+    }
+
+    // the build mints its nonce once and keeps it in the environment for the prerender's server
+    const env: Record<string, string | undefined> = {};
+    const nonce = prerenderNonce(env);
+    expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/);
+    expect(env.TURBOSLIDE_PRERENDER_NONCE).toBe(nonce);
+    expect(prerenderNonce(env)).toBe(nonce);
+    // a value of another shape is replaced, so the header and the pages never disagree
+    const odd: Record<string, string | undefined> = { TURBOSLIDE_PRERENDER_NONCE: 'abc' };
+    expect(prerenderNonce(odd)).not.toBe('abc');
+    expect(prerenderNonce(odd)).toBe(odd.TURBOSLIDE_PRERENDER_NONCE);
+
+    // the request takes the build's nonce only while TanStack Start prerenders
+    const prerendering = { TSS_PRERENDERING: 'true', TURBOSLIDE_PRERENDER_NONCE: nonce };
+    expect(requestNonce(prerendering)).toBe(nonce);
+    expect(requestNonce({ TURBOSLIDE_PRERENDER_NONCE: nonce })).not.toBe(nonce);
+    expect(requestNonce({ TSS_PRERENDERING: 'true', TURBOSLIDE_PRERENDER_NONCE: 'abc' })).toMatch(
+      /^[A-Za-z0-9+/]{22}==$/,
+    );
+    expect(requestNonce({})).not.toBe(requestNonce({}));
+
+    // the route header: the builder's policy with that nonce and no frame
+    const csp = staticPageCsp(nonce, {});
+    expect(Object.keys(csp)).toEqual(['content-security-policy']);
+    expect(csp['content-security-policy']).toBe(
+      buildCsp({ nonce, pathname: '/home', reportUri: CSP_REPORT_PATH, env: {} }),
+    );
+    expect(csp['content-security-policy']).toContain(`'nonce-${nonce}' 'strict-dynamic'`);
+    expect(csp['content-security-policy']).toContain("frame-ancestors 'none'");
+    expect(csp['content-security-policy']).not.toContain('upgrade-insecure-requests');
+    expect(staticPageCsp(nonce, { VERCEL: '1' })['content-security-policy']).toContain(
+      'upgrade-insecure-requests',
+    );
+    // the switches as the build reads them
+    expect(Object.keys(staticPageCsp(nonce, { TURBOSLIDE_CSP: 'report' }))).toEqual([
+      'content-security-policy-report-only',
+    ]);
+    expect(staticPageCsp(nonce, { TURBOSLIDE_CSP: 'off' })).toEqual({});
   });
 
   it('reads every path rule as the router matches the path, without regard to case (HR-W#2, verifier F1)', () => {

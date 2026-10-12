@@ -324,9 +324,16 @@ const HOME_SHARED_TEST =
 // default: a deployment ships no map.
 const CLIENT_SOURCEMAP: boolean | 'hidden' =
   process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
+// The shader gallery's stills stay files (hardening HR-PC#3, PERF-8): `shaderPreviewUrl`'s glob
+// of packages/materials/previews/*.webp put every still under the 4 KB inline limit into the
+// chunk the viewer and the editor load as a data URL, about 120 KB of base64 in a 138,850 B chunk.
+// As files, a still is fetched when the gallery or a card shows it and cached with the build.
+const MATERIAL_PREVIEW = /[\\/]materials[\\/]previews[\\/][^\\/]+\.webp$/;
 const CLIENT_BUILD = {
   build: {
     sourcemap: CLIENT_SOURCEMAP,
+    assetsInlineLimit: (file: string): boolean | undefined =>
+      MATERIAL_PREVIEW.test(file) ? false : undefined,
     rolldownOptions: {
       output: {
         codeSplitting: {

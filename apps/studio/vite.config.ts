@@ -70,9 +70,13 @@ const HOME_SHARED_TEST =
 // Hidden source maps, opt in with TURBOSLIDE_CLIENT_SOURCEMAP=1 (vite.deploy.config.ts says why).
 const CLIENT_SOURCEMAP: boolean | 'hidden' =
   process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
+// the shader gallery's stills stay files (vite.deploy.config.ts says why; hardening HR-PC#3)
+const MATERIAL_PREVIEW = /[\\/]materials[\\/]previews[\\/][^\\/]+\.webp$/;
 const CLIENT_BUILD = {
   build: {
     sourcemap: CLIENT_SOURCEMAP,
+    assetsInlineLimit: (file: string): boolean | undefined =>
+      MATERIAL_PREVIEW.test(file) ? false : undefined,
     rolldownOptions: {
       output: {
         codeSplitting: {

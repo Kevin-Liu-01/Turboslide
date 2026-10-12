@@ -282,11 +282,15 @@ if (base !== null) {
       const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(60_000) });
       html = response.status === 200 ? await response.text() : null;
       if (html === null) {
-        failures.push(`${route} answered ${response.status} on ${base}; no head to read (POLISH-2 5.2)`);
+        failures.push(
+          `${route} answered ${response.status} on ${base}; no head to read (POLISH-2 5.2)`,
+        );
         continue;
       }
     } catch (error) {
-      failures.push(`${route} on ${base}: ${error instanceof Error ? error.message : String(error)}`);
+      failures.push(
+        `${route} on ${base}: ${error instanceof Error ? error.message : String(error)}`,
+      );
       continue;
     }
     const named = new Set();
@@ -308,6 +312,22 @@ if (base !== null) {
       );
   }
 }
+
+// 6. The shader gallery's stills are files (hardening HR-PC#3, PERF-8): no client chunk carries a
+//    webp as a data URL. On f7e97039 the chunk the viewer and the editor load held 119 of them,
+//    about 120 KB of base64 (the glob of packages/materials/previews/*.webp under Vite's 4 KB
+//    inline limit); vite.config.ts and vite.deploy.config.ts keep them out of the inlining.
+const WEBP_DATA_URL = 'data:image/webp;base64';
+let inlinedStills = 0;
+for (const file of chunkFiles) {
+  const count = readFileSync(file, 'utf8').split(WEBP_DATA_URL).length - 1;
+  if (count === 0) continue;
+  inlinedStills += count;
+  failures.push(
+    `client chunk ${relative(chunkDir, file)} inlines ${count} webp data URL(s): the shader stills are files (hardening HR-PC#3)`,
+  );
+}
+notes.push(`webp data URLs in client chunks: ${inlinedStills}`);
 
 for (const n of notes) console.log(`check-client-bundle: ${n}`);
 if (failures.length > 0) {

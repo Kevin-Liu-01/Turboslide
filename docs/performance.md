@@ -278,6 +278,11 @@ readings in `docs/hardening/build/PC-wave3b.md`), bytes from the node-server bui
   872,364 B, and `/docs/reference/block` 863,145 B, from 1,097,400 B; the `shapes-*.js` chunk
   (234,190 B) is gone from the output. `scripts/entry-graph.test.mjs` holds the icon set's graph
   free of the schema.
+- HR-PC#3 (PERF-8, one item): the shader gallery's 122 stills are files, not data URLs, so the
+  `MaterialMount` chunk falls from 138,944 B to 15,628 B and `/deck/gt-brand` loads 2,160,211 B of
+  JavaScript after it settles (from 2,283,527 B). The viewer's 977 KB and the presenter's
+  1,172 KB budgets stay unmet: the viewer draws the editor's shell, and both load the action
+  table through the window automation.
 
 ## 6. Two definitions that moved in round three
 

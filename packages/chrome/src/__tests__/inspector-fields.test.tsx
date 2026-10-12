@@ -2,7 +2,10 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { z } from 'zod';
+
 import { NumberField, SliderField } from '../inspector/fields';
+import { SelectControl } from '../inspector/select';
 import { StepperControl } from '../inspector/stepper';
 import type { ControlSpec } from '../inspector/generate';
 import { hideTooltip } from '../Tooltip';
@@ -145,5 +148,35 @@ describe('a typed number commits once (RETURN.md 2.14 item 3)', () => {
     input.dispatchEvent(new Event('change', { bubbles: true }));
     expect(onChange).toHaveBeenCalledTimes(2);
     expect(onChange).toHaveBeenLastCalledWith(300);
+  });
+});
+
+// The generated dropdown's None row (DROPDOWNS.md 3.9, question 5): the row that removes an
+// optional field read "None" beside a schema tag that reads "none" itself, so the chart's Legend
+// offered "None" and "none" (the dropdown round's last visual pass, F5). The removing row reads
+// "Default" there, and "None" everywhere else.
+describe('SelectControl', () => {
+  const legend = (options: ReadonlyArray<string>): ControlSpec => ({
+    control: 'block.c.legend',
+    label: 'c: Legend',
+    path: '/legend',
+    kind: 'select',
+    inspector: { control: 'select', label: 'Legend' } as ControlSpec['inspector'],
+    group: 'Block',
+    options,
+    value: undefined,
+    optional: true,
+    text: false,
+    schema: z.enum(options as [string, ...string[]]),
+  });
+  const rows = () =>
+    [...document.querySelectorAll('[role="option"] .ts-menu-label')].map((row) => row.textContent);
+
+  it('reads the removing row "Default" beside a tag that reads "none", and "None" elsewhere', () => {
+    render(<SelectControl spec={legend(['none', 'right', 'bottom'])} onChange={vi.fn()} />);
+    expect(rows()).toEqual(['Default', 'none', 'right', 'bottom']);
+    cleanup();
+    render(<SelectControl spec={legend(['right', 'bottom'])} onChange={vi.fn()} />);
+    expect(rows()).toEqual(['None', 'right', 'bottom']);
   });
 });

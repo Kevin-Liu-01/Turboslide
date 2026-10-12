@@ -13,8 +13,14 @@ export function SelectControl({ spec, onChange, disabled }: ControlProps) {
   const options = spec.options ?? [];
   const current = spec.value === undefined ? '' : String(spec.value);
   const known = options.some((option) => String(option) === current);
+  /* the row that removes the field reads "None", or "Default" where one of the schema's own tags
+     reads "none" (the chart's Legend: "none" hides the legend, and removing the field draws the
+     default one), so no two rows read alike (the dropdown round's last visual pass, F5) */
+  const clears = options.some((option) => optionLabel(option).toLowerCase() === 'none')
+    ? 'Default'
+    : 'None';
   const rows: SelectOption[] = [
-    ...(spec.optional || current === '' ? [{ value: '', label: 'None' }] : []),
+    ...(spec.optional || current === '' ? [{ value: '', label: clears }] : []),
     ...(!known && current !== '' ? [{ value: current, label: optionLabel(current) }] : []),
     ...options.map((option) => ({ value: String(option), label: optionLabel(option) })),
   ];

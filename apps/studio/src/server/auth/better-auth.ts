@@ -16,7 +16,8 @@
 // alias.ts) and where the caller's other stores hear about a sign in or a deletion; they are
 // injected so this module knows the library and nothing of the studio's stores. Nothing here
 // prints a secret: the secret is `BETTER_AUTH_SECRET`, else a value derived from the identity
-// cookie's secret, so a checkout needs no variable.
+// cookie's secret, so a checkout needs no variable. Google's access and refresh tokens are stored
+// encrypted under that secret, and a Google ID token is never a sign in (HR-K2#7).
 import { betterAuth } from 'better-auth';
 import type { Auth, BetterAuthOptions } from 'better-auth';
 import { getMigrations } from 'better-auth/db/migration';
@@ -285,6 +286,12 @@ function buildAuth(deps: AuthDeps): Auth {
             // `accessType: 'offline'` and no `consent`, since nothing calls a Google API later
             // (docs/REALTIME.md 4.1; design-google-login.md 2.4)
             prompt: 'select_account' as const,
+            // the library stores Google's ID token as Google sent it (encryptOAuthTokens below
+            // covers the access and refresh tokens alone), and inside its hour that token is a
+            // sign in on `/sign-in/social`. Nothing here signs in with an ID token, so the provider
+            // refuses them there and on `/link-social`, and a reader of the account table holds
+            // no sign in (HR-K2#7, SPEC-2)
+            disableIdTokenSignIn: true,
           },
         }
       : {};
@@ -401,6 +408,11 @@ function buildAuth(deps: AuthDeps): Auth {
         '/callback/google': { window: 60, max: SOCIAL_PER_MINUTE },
       },
     },
+    // Google's access and refresh tokens are stored encrypted under the library's secret, which
+    // the Worker and its database bearer never hold (HR-K2#7, SPEC-2). A row stored before this
+    // reads as it is (better-auth `oauth2/utils.mjs`) and is rewritten at the person's next
+    // Google sign in
+    account: { encryptOAuthTokens: true },
     user: {
       deleteUser: {
         enabled: true,

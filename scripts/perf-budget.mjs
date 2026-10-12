@@ -67,11 +67,11 @@
 // production build of apps/studio served on this machine with TURBOSLIDE_STORE=tmp, deployment is
 // a Vercel preview or production reached from the check machine); --deck <id> (gt-brand);
 // --runs <n> (3; cold and warm samples per route, medians compared); --only <checks> (routes,
-// transitions, filmstrip, idle, twins, cdn, vitals, write); --routes <paths> (the routes check's
-// paths, comma separated, `/decks` alone for a read of the listing on a deployment one does not
-// write to; all eight by default); --idle-seconds <n> (60); --write (the write path
+// transitions, filmstrip, idle, twins, cdn, vitals, write, preload); --routes <paths> (the routes
+// check's paths, comma separated, `/decks` alone for a read of the listing on a deployment one
+// does not write to; all eight by default); --idle-seconds <n> (60); --write (the write path
 // on /new: a scratch deck is created and left in place, so pass it only against a tmp store or a
-// preview you own; the deck id is printed); --json <file> (the raw numbers); --report (print the
+// preview you own; the deck id is printed; with it the preload check makes twelve more); --json <file> (the raw numbers); --report (print the
 // table and exit 0 whatever the result, for a baseline run); --chrome <path> (else
 // TURBOSLIDE_CHROME, else the chromium-1217 build AGENTS.md names, else playwright-core's default).
 //
@@ -504,6 +504,7 @@ const results = {
   cdn: null,
   vitals: null,
   write: null,
+  preload: null,
 };
 const rows = [];
 let failures = 0;
@@ -1573,6 +1574,73 @@ async function writePath() {
 }
 
 // ---------------------------------------------------------------------------------------------
+// The list's preloads (hardening HR-PC#4, PERF-5), with --write: one visitor makes twelve decks
+// through /new (the window API's first write), then loads /decks with the pointer outside the
+// page and counts the server function calls until the page settles. Each card reads its own head
+// at most once (an unlisted deck of this browser); the editor's loader runs on intent alone, so a
+// card in view adds nothing. With the first twelve cards on `preload="viewport"` every card ran
+// the loader's two calls as well (24 calls on twelve cards; perf.md PERF-5). The scratch decks are
+// left in place, as the write path's.
+
+const PRELOAD_CARDS = 12;
+
+async function decksPreload() {
+  const context = await newContext();
+  const page = await context.newPage();
+  for (let i = 0; i < PRELOAD_CARDS; i += 1) {
+    await page.goto(`${args.base}/new`, { waitUntil: 'commit' });
+    await page.waitForFunction(() => window.turboslide?.studio?.invoke !== undefined, null, {
+      timeout: 120_000,
+    });
+    await page.evaluate(async () => {
+      const studio = window.turboslide.studio;
+      const info = await studio.invoke('deck.info', {});
+      await studio.invoke('slide.new', { layout: 'title', baseRevision: info.revision ?? 0 });
+    });
+    await page.waitForURL(/\/edit\//, { timeout: 60_000 });
+  }
+  // the last deck's own writes finish on a blank page first, so every call counted is the list's
+  await page.goto('about:blank');
+  await sleep(3_000);
+  const calls = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/_serverFn/')) calls.push(request.url().split('?')[0]);
+  });
+  await page.mouse.move(0, 0);
+  await page.goto(`${args.base}/decks`, { waitUntil: 'commit' });
+  await waitLandmark(page, '/decks');
+  // settled: no new resource entry for three seconds, at most a minute
+  let last = -1;
+  let still = 0;
+  for (let i = 0; i < 120 && still < 6; i += 1) {
+    await sleep(500);
+    const count = await page.evaluate(() => performance.getEntriesByType('resource').length);
+    still = count === last ? still + 1 : 0;
+    last = count;
+  }
+  const cards = await page.locator('[data-control^="home.open."]').count();
+  results.preload = { made: PRELOAD_CARDS, cards, serverFnCalls: calls.length, calls };
+  assert(
+    'preload',
+    `/decks cards drawn (of ${PRELOAD_CARDS} made)`,
+    cards,
+    PRELOAD_CARDS,
+    'count',
+    {
+      floor: true,
+    },
+  );
+  assert(
+    'preload',
+    '/decks server function calls with no pointer movement (one per card at most)',
+    calls.length,
+    cards,
+    'count',
+  );
+  await context.close();
+}
+
+// ---------------------------------------------------------------------------------------------
 
 /**
  * Runs one check; a check that throws (a selector that never resolved, a page that closed) is
@@ -1599,6 +1667,7 @@ try {
   await runCheck('cdn', cdnHits);
   await runCheck('vitals', () => vitals());
   if (args.write) await runCheck('write', writePath);
+  if (args.write) await runCheck('preload', decksPreload);
 } finally {
   await browser.close();
 }

@@ -175,9 +175,6 @@ type HomeSettings = { sort: HomeSort; view: HomeView };
    lists are ruled rows); the cards stay one click away under Grid view */
 const DEFAULT_SETTINGS: HomeSettings = { sort: 'opened', view: 'list' };
 
-/** the cards that preload the editor's loader on viewport entry (SPEC-4 0.39) */
-export const VIEWPORT_PRELOAD_CARDS = 12;
-
 /**
  * The saved view and sort as a cookie the loader reads (gslides-parity SPEC-3 9.2 L1; research-3
  * 05 3.4 L1): `ts-home=view:list;sort:title`, same origin, one year, so the server renders the
@@ -1110,11 +1107,10 @@ function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
       >
         <RowsHead />
         <tbody>
-          {recentCards.map((card, index) => (
+          {recentCards.map((card) => (
             <DeckRowView
               key={card.id}
               card={card}
-              index={index}
               mounted={props.mounted}
               now={props.now}
               openedAt={props.opened[card.id]}
@@ -1151,11 +1147,10 @@ function GridFrame({ view, ...props }: ListProps & { view: HomeView }) {
       aria-busy="true"
       aria-label={`${HOME.recent}, loading`}
     >
-      {recentCards.map((card, index) => (
+      {recentCards.map((card) => (
         <DeckCardView
           key={card.id}
           card={card}
-          index={index}
           mounted={props.mounted}
           now={props.now}
           openedAt={props.opened[card.id]}
@@ -1402,6 +1397,7 @@ function DeckList({
   };
 
   const shown = list.filter((card) => !hidden.has(card.id));
+  const editorCodeInView = useEditorCodeInView();
 
   return (
     <>
@@ -1434,12 +1430,11 @@ function DeckList({
           )}
         </div>
       ) : settings.view === 'grid' ? (
-        <ul className="ts-cards" data-control="home.cards">
-          {visible.map((card, index) => (
+        <ul className="ts-cards" data-control="home.cards" ref={editorCodeInView}>
+          {visible.map((card) => (
             <DeckCardView
               key={card.id}
               card={card}
-              index={index}
               mounted={mounted}
               now={now}
               openedAt={opened[card.id]}
@@ -1455,14 +1450,13 @@ function DeckList({
           ))}
         </ul>
       ) : (
-        <table className="ts-rows" data-control="home.rows">
+        <table className="ts-rows" data-control="home.rows" ref={editorCodeInView}>
           <RowsHead />
           <tbody>
-            {visible.map((card, index) => (
+            {visible.map((card) => (
               <DeckRowView
                 key={card.id}
                 card={card}
-                index={index}
                 mounted={mounted}
                 now={now}
                 openedAt={opened[card.id]}
@@ -1515,8 +1509,6 @@ function DeckList({
 
 type CardViewProps = {
   card: DeckCard;
-  /** the card's place in the list: the first screen's cards preload on viewport entry (SPEC-4 0.39) */
-  index: number;
   /** this browser's values (opened, the local date form) are drawn only after hydration */
   mounted: boolean;
   now: Date;
@@ -1544,9 +1536,37 @@ function whenLine(card: DeckCard, mounted: boolean, now: Date, openedAt?: string
   return editedLine(card.updatedAt, now, (card as CardWithAuthor).updatedBy);
 }
 
-/** The first screen's cards run the editor's loader as they scroll into view; the rest on intent. */
-function preloadOf(index: number): 'viewport' | 'intent' {
-  return index < VIEWPORT_PRELOAD_CARDS ? 'viewport' : 'intent';
+/**
+ * The edit route's code, fetched once the list is in view (hardening HR-PC#4, PERF-5). Every card
+ * preloads on intent, so the editor's loader runs when a person points at, focuses or touches a
+ * card, and the 30 s `defaultPreloadStaleTime` (router.tsx) keeps its answer for the click. Until
+ * that, the list asks the server nothing for the editor. The first twelve cards used to preload on
+ * viewport (SPEC-4 0.39), which ran the loader's chain of reads for every card in view: 10 server
+ * function calls beside the cards' own 12 on a list of twelve at 1440 by 900. The ref goes on the
+ * cards or the rows; the code is loaded once per page, and a failed fetch is tried again by the
+ * click.
+ */
+function useEditorCodeInView(): (element: HTMLElement | null) => (() => void) | undefined {
+  const router = useRouter();
+  const loaded = useRef(false);
+  return useCallback(
+    (element: HTMLElement | null) => {
+      if (element === null || loaded.current || typeof IntersectionObserver === 'undefined') {
+        return undefined;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting) || loaded.current) return;
+        loaded.current = true;
+        observer.disconnect();
+        void Promise.resolve(router.loadRouteChunk(router.routesById['/edit/$deckId'])).catch(
+          () => undefined,
+        );
+      });
+      observer.observe(element);
+      return () => observer.disconnect();
+    },
+    [router],
+  );
 }
 
 function MoreButton({
@@ -1751,7 +1771,6 @@ function GtBrandCover() {
 
 function DeckCardView({
   card,
-  index,
   mounted,
   now,
   openedAt,
@@ -1774,7 +1793,7 @@ function DeckCardView({
       <Link
         to="/edit/$deckId"
         params={{ deckId: card.id }}
-        preload={preloadOf(index)}
+        preload="intent"
         className="ts-hm-card-open"
         data-control={`home.open.${card.id}`}
         onClick={(event) => {
@@ -1791,7 +1810,7 @@ function DeckCardView({
           <Link
             to="/edit/$deckId"
             params={{ deckId: card.id }}
-            preload={preloadOf(index)}
+            preload="intent"
             className="ts-hm-card-title"
             data-control={`home.title.${card.id}`}
             onClick={(event) => {
@@ -1841,7 +1860,6 @@ function RowsHead() {
  */
 function DeckRowView({
   card,
-  index,
   mounted,
   now,
   openedAt,
@@ -1873,7 +1891,7 @@ function DeckRowView({
           <Link
             to="/edit/$deckId"
             params={{ deckId: card.id }}
-            preload={preloadOf(index)}
+            preload="intent"
             className="ts-hm-card-open ts-row-open"
             data-control={`home.open.${card.id}`}
             tabIndex={-1}
@@ -1894,7 +1912,7 @@ function DeckRowView({
               <Link
                 to="/edit/$deckId"
                 params={{ deckId: card.id }}
-                preload={preloadOf(index)}
+                preload="intent"
                 className="ts-hm-card-title"
                 data-control={`home.title.${card.id}`}
                 onClick={(event) => {

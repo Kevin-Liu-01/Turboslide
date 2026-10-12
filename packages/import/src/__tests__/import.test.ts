@@ -209,8 +209,9 @@ describe('mapSlide', () => {
     expect(row.rulesLeftOver).toEqual([]);
   });
 
-  it('maps an opener and drops its known style block', () => {
-    const html = readFileSync(join(hasDeck ? DECK : '', 'slides/01-opener-brand.html'), 'utf8');
+  // the opener is the Prototemplate deck's file, so without that checkout (CI) the case skips
+  it.skipIf(!hasDeck)('maps an opener and drops its known style block', () => {
+    const html = readFileSync(join(DECK, 'slides/01-opener-brand.html'), 'utf8');
     const { slide, row } = mapSlide({
       file: '01-opener-brand.html',
       n: 1,

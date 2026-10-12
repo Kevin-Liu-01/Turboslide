@@ -151,6 +151,32 @@ function folded(text: string): string {
   return text.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
 }
 
+/**
+ * True when nothing of the trigger shows: its box stands wholly outside the window, or outside the
+ * box of an element that holds it and clips its overflow (a panel, a dialog's card). An element
+ * with no box clips nothing (`display: contents`, a document that lays nothing out), and a trigger
+ * with no box is never clipped.
+ */
+function clippedWhole(element: Element, box: DOMRect): boolean {
+  if (box.width === 0 && box.height === 0) return false;
+  const outside = (clip: { top: number; left: number; bottom: number; right: number }) =>
+    box.bottom <= clip.top ||
+    box.top >= clip.bottom ||
+    box.right <= clip.left ||
+    box.left >= clip.right;
+  if (outside({ top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth }))
+    return true;
+  for (let node = element.parentElement; node !== null; node = node.parentElement) {
+    const style = getComputedStyle(node);
+    if (!/auto|scroll|hidden|clip/.test(`${style.overflowX} ${style.overflowY} ${style.overflow}`))
+      continue;
+    const clip = node.getBoundingClientRect();
+    if (clip.width === 0 && clip.height === 0) continue;
+    if (outside(clip)) return true;
+  }
+  return false;
+}
+
 /** A key that types a character: one character and no modifier but Shift. */
 function isPrintable(event: ReactKeyboardEvent): boolean {
   return event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey;
@@ -290,27 +316,38 @@ export function Select<T extends string>({
      rule, question 6); a scroll the person makes of anything that holds the trigger closes it, as
      the system popup does (question 7; the list's own scroll does not count); the window losing
      focus closes it. While the list is open the trigger takes the scrolling keys and a press
-     outside closes it first, so the wheel is the person's one road to a scroll: after a wheel
-     outside the list, a scroll that moves the trigger closes it. A scroll the page makes itself
-     leaves the list on its trigger (place()'s autoUpdate follows it), and the trigger's new place
-     is where the next one is measured from: the focus scroll that brings a clipped trigger into
-     view on the press that opens it, a panel's first layout and its scroll anchoring, a smooth
-     scroll from PageDown still running (the keyboard verifier's pass 1, finding 5: a list opened
-     within about 100 ms of Format options laying out, or during such a scroll, closed by itself
-     about 14 ms later). The place is read at the scroll events, never at the wheel: a browser
-     scrolls on its compositor and hands the page a wheel with only passive listeners after the
-     scroll has moved the trigger (read in Format options at 1440 by 600, the wheel's target was
-     the section the trigger had left) */
+     outside closes it first, so the wheel and a finger drag that starts on the trigger are the
+     person's roads to a scroll: after either, a scroll that moves the trigger closes it. A scroll
+     the page makes itself leaves the list on its trigger (place()'s autoUpdate follows it), and
+     the trigger's new place is where the next one is measured from: the focus scroll that brings a
+     clipped trigger into view on the press that opens it, a panel's first layout and its scroll
+     anchoring, a smooth scroll from PageDown still running (the keyboard verifier's pass 1,
+     finding 5: a list opened within about 100 ms of Format options laying out, or during such a
+     scroll, closed by itself about 14 ms later). The place is read at the scroll events, never at
+     the wheel: a browser scrolls on its compositor and hands the page a wheel with only passive
+     listeners after the scroll has moved the trigger (read in Format options at 1440 by 600, the
+     wheel's target was the section the trigger had left). Any scroll that leaves nothing of the
+     trigger in the window or in the box that holds it closes the list: a touch scroll fires no
+     wheel, and a list that followed its trigger out of view stood pinned at the window's edge over
+     other fields, where a tap changed a field the person could not see (the dropdown round's last
+     visual pass, F2: at 390 a finger drag from the open Line type trigger left the list over Drop
+     shadow with its trigger below the window; in the Share card at 390 by 560 the list stood over
+     the dialog's title with its trigger 95 px above the window) */
   useEffect(() => {
     if (!open || trigger === null) return undefined;
     const opened = trigger.getBoundingClientRect();
     let at = { top: opened.top, left: opened.left };
-    /* the person turned the wheel outside the list since it opened */
+    /* the person turned the wheel outside the list, or put a finger on the trigger, since it opened */
     let wheeled = false;
     const onDown = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
-      if (list.current?.contains(target) || trigger?.contains(target)) return;
+      if (list.current?.contains(target)) return;
+      if (trigger?.contains(target)) {
+        /* a finger down on the open trigger that moves scrolls what holds it */
+        if ((event as PointerEvent).pointerType === 'touch') wheeled = true;
+        return;
+      }
       const element = target instanceof Element ? target : target.parentElement;
       const wrapping = element?.closest('label');
       if (wrapping != null && trigger !== null && wrapping.contains(trigger))
@@ -328,7 +365,7 @@ export function Select<T extends string>({
       if (target !== document && !target.contains(trigger)) return;
       const now = trigger.getBoundingClientRect();
       const moved = Math.abs(now.top - at.top) > 0.5 || Math.abs(now.left - at.left) > 0.5;
-      if (wheeled && moved) setOpen(false);
+      if ((wheeled && moved) || clippedWhole(trigger, now)) setOpen(false);
       else at = { top: now.top, left: now.left };
     };
     const onWindowBlur = () => setOpen(false);

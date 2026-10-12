@@ -881,6 +881,86 @@ describe('the viewer slot (3.13)', () => {
   });
 });
 
+// The dropdown round's last visual pass (verify-final-3-visual.md), F2: a list stayed open after its
+// trigger left the window (a finger drag that started on the open trigger scrolled the panel, a
+// scroll by script), pinned at the window's edge over other fields.
+describe('a trigger scrolled out of view (the last visual pass, F2)', () => {
+  it('closes its list with no change once its trigger is scrolled out of the window or of the box that holds it', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    const panel = screen.getByTestId('panel');
+    panel.getBoundingClientRect = () =>
+      ({
+        x: 0,
+        y: 100,
+        left: 0,
+        top: 100,
+        right: 320,
+        bottom: 700,
+        width: 320,
+        height: 600,
+      }) as DOMRect;
+    let top = 300;
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: top,
+        left: 40,
+        top,
+        right: 240,
+        bottom: top + 32,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
+    fireEvent.click(trigger());
+    /* the page's own scroll that leaves the trigger in the panel's box keeps the list on it */
+    top = 120;
+    fireEvent.scroll(panel);
+    expect(isOpen()).toBe(true);
+    /* past the panel's top edge (a finger drag, a scroll by script): closed, nothing chosen */
+    top = 40;
+    fireEvent.scroll(panel);
+    expect(isOpen()).toBe(false);
+    expect(trigger().value).toBe('next');
+    /* the window's edge clips it the same way: below the 768 px window of jsdom */
+    top = 300;
+    fireEvent.click(trigger());
+    expect(isOpen()).toBe(true);
+    top = 800;
+    fireEvent.scroll(document);
+    expect(isOpen()).toBe(false);
+  });
+
+  it('counts a touch drag that starts on the open trigger as the person scrolling', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    let top = 300;
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: top,
+        left: 40,
+        top,
+        right: 240,
+        bottom: top + 32,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
+    fireEvent.click(trigger());
+    fireEvent.pointerDown(trigger(), { pointerType: 'touch' });
+    top = 260;
+    fireEvent.scroll(screen.getByTestId('panel'));
+    expect(isOpen()).toBe(false);
+    expect(trigger().value).toBe('next');
+  });
+});
+
 // The dropdown round's last visual pass (verify-final-3-visual.md), F8: a list of exactly ten rows
 // scrolled by 2 px and drew the scrollbar, since the cap counted the rows and the padding and not
 // the plate's 1 px border of a border-box list.

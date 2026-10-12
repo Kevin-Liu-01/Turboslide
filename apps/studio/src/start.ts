@@ -79,6 +79,9 @@ async function bindServerSeams(): Promise<void> {
     // miss falls back to the scan of every stored deck's record
     findShareLink: (hash, options) => access.findShareLink(hash, options),
     deckIndex: (principalId, view) => index.accountDecks({ principalId, admin: false }, view),
+    // before an account's rows go, its decks move to the trash and its grants on other decks, its
+    // deck index and its picture files go (HR-SD#2); one function, so it is bound once
+    beforeDelete: (await import('./server/auth/account-delete')).beforeAccountDelete,
   });
   const redis = room.redisCommands();
   if (redis !== null) {

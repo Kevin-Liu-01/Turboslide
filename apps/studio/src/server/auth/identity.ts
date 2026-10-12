@@ -111,9 +111,13 @@ export type DeckIndexView = 'owned' | 'shared' | 'recent' | 'trash' | 'all';
 export type IdentityHooks = {
   /** After an anonymous id links to an account: the index and the inbox merge (B2). */
   onLinked: ((anonymousId: string, userId: string) => Promise<void>)[];
-  /** Before an account is deleted; throw to refuse (owned decks other people hold grants on). */
+  /**
+   * Before an account is deleted, while its rows are still there; a throw refuses the deletion.
+   * start.ts binds account-delete.ts (HR-SD#2): the account's decks to the trash, its grants on
+   * other decks, its deck index and its picture files.
+   */
   beforeDelete: ((userId: string) => Promise<void>)[];
-  /** After an account is deleted: the files, the aliases and the profile are this module's; the rest is the hook's. */
+  /** After an account is deleted: the aliases, the principal record, the keys and the profile are this module's; the rest is the hook's. */
   onDeleted: ((userId: string) => Promise<void>)[];
   /** Binds pending invitations (grants by email) to a principal on the first verified session (6.5). */
   bindInvitations: ((userId: string, email: string) => Promise<void>) | null;
@@ -509,7 +513,10 @@ export async function setIdentityRuntime(runtime: IdentityRuntime | undefined): 
   if (previous !== undefined && previous !== runtime) await previous.close();
 }
 
-/** Binds the seams other builders provide; each call adds or replaces. */
+/**
+ * Binds the seams other builders provide; each call adds or replaces. A list hook is added once
+ * per function: start.ts binds its seams on every request (HR-SD#2).
+ */
 export function bindIdentityHooks(
   partial: Partial<Omit<IdentityHooks, 'onLinked' | 'beforeDelete' | 'onDeleted'>> & {
     onLinked?: IdentityHooks['onLinked'][number];
@@ -519,9 +526,12 @@ export function bindIdentityHooks(
   runtime: IdentityRuntime = identityRuntime(),
 ): void {
   const { onLinked, beforeDelete, onDeleted, ...rest } = partial;
-  if (onLinked !== undefined) runtime.hooks.onLinked.push(onLinked);
-  if (beforeDelete !== undefined) runtime.hooks.beforeDelete.push(beforeDelete);
-  if (onDeleted !== undefined) runtime.hooks.onDeleted.push(onDeleted);
+  const add = <T>(list: T[], hook: T | undefined): void => {
+    if (hook !== undefined && !list.includes(hook)) list.push(hook);
+  };
+  add(runtime.hooks.onLinked, onLinked);
+  add(runtime.hooks.beforeDelete, beforeDelete);
+  add(runtime.hooks.onDeleted, onDeleted);
   Object.assign(runtime.hooks, rest);
 }
 

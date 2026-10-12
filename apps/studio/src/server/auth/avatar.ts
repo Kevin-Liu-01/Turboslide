@@ -440,9 +440,12 @@ export function pictureUrl(
   return `${picture.base}/${picture.digest}-${size}.webp`;
 }
 
-/** Removes a person's picture files on account deletion (7.4). */
+/**
+ * Removes a person's picture files on account deletion (7.4), before `onUserDeleted` clears the
+ * profile's key (account-delete.ts, HR-SD#2).
+ */
 export async function removePictureFiles(
-  deps: Pick<SetPictureDeps, 'store' | 'profiles'>,
+  deps: { store: Pick<AvatarStore, 'removeKey'>; profiles: Pick<ProfileStore, 'get'> },
   userId: string,
 ): Promise<number> {
   const profile = await deps.profiles.get(userId);

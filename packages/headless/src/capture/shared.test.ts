@@ -221,7 +221,7 @@ describe('the sniff and the sharp guard (SPEC-3 8.5, 0.28; report 04 F17)', () =
       .webp()
       .toBuffer();
     expect(sniffImage(new Uint8Array(webp))).toBe('webp');
-    expect(sniffImage(new Uint8Array(Buffer.from('GIF89a  ')))).toBe('gif');
+    expect(sniffImage(new Uint8Array(Buffer.from('GIF89a\u0002\u0000\u0002\u0000')))).toBe('gif');
     expect(
       sniffImage(new Uint8Array(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'))),
     ).toBe('svg');

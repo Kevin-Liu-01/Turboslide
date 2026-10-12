@@ -270,6 +270,15 @@ promises): `/home` and `/decks` under 600 KB, `/deck` under 1,000 KB, `/present`
 `/edit` and `/new` under 2,000 KB, the largest chunk under 600,000 bytes; measured on the day 0
 tree 2,974 to 3,187 KB and 1,202,643 bytes.
 
+The hardening round's client bundle pushes (lane PC, `docs/hardening/HARDENING.md` 4.10;
+readings in `docs/hardening/build/PC-wave3b.md`), bytes from the node-server build:
+
+- HR-PC#1 (PERF-10): the icon set draws its three shape glyphs from constants, so it no longer
+  imports the 221 KB shape table. `/docs` loads 638,109 B of JavaScript after it settles, from
+  872,364 B, and `/docs/reference/block` 863,145 B, from 1,097,400 B; the `shapes-*.js` chunk
+  (234,190 B) is gone from the output. `scripts/entry-graph.test.mjs` holds the icon set's graph
+  free of the schema.
+
 ## 6. Two definitions that moved in round three
 
 Recorded by the verifier (BASELINE.md section 5) and open on the check at merge 1

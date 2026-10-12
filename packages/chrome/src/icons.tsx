@@ -22,7 +22,8 @@
  * rows that name a visual thing: three more Heroicons (arrow-long-right, chat-bubble-left,
  * chart-pie, copied from heroicons 2.2.0 optimized/20/solid on 2026-09-24) and, where Heroicons
  * has no symbol, a glyph drawn from the thing itself in the same weight: the three named shapes
- * from the schema's own `shapePath` at 16 by 12 (filled, the outline the shape picker strokes),
+ * as the schema's own `shapePath` at 16 by 12 (filled, the outline the shape picker strokes),
+ * written out as constants so this module never imports the shape table (hardening HR-PC#1),
  * the eight line kinds from their own paths, the chart kinds, Word art, the border rows, Mask
  * image and Drop shadow. A drawn entry with `stroke` renders `fill="none" stroke="currentColor"`
  * at width 1.5 (the picker's weight, pickers/ShapePicker.tsx) with round caps and joins. The
@@ -30,8 +31,6 @@
  * `<svg viewBox="0 0 20 20">` at 16 px, never an inline path elsewhere and never an `<img>`;
  * __tests__/icons.test.ts pins the table against the theme sprite.
  */
-import { shapePath } from '@turboslide/schema/shapes';
-
 export type IconName =
   | 'sidebar'
   | 'prev'
@@ -203,8 +202,8 @@ export type IconName =
  * One path of a glyph. A Heroicon entry is filled by the svg's `fill="currentColor"`; a drawn
  * entry with `stroke` draws `fill="none" stroke="currentColor"` at `width` (1.5 when absent, the
  * shape picker's weight) with round caps and joins and `dash` as its `stroke-dasharray`;
- * `translate` moves the path on the 20 grid (the shape glyphs are `shapePath(id, 16, 12)` at
- * (2, 4), docs/archive/rounds/VECTOR.md 3.1).
+ * `translate` moves the path on the 20 grid (the shape glyphs are `shapePath(id, 16, 12)`'s
+ * output at (2, 4), docs/archive/rounds/VECTOR.md 3.1).
  */
 export type IconPath = {
   d: string;
@@ -1017,13 +1016,26 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   ],
   /* the vector round (docs/archive/rounds/VECTOR.md 3.1): the glyphs drawn from the thing itself. The three
      shapes are the schema's own `shapePath` at 16 by 12, filled, moved to (2, 4): the outline the
-     shape picker strokes at 48 by 36, so the row and the plate draw one geometry. The line kinds
+     shape picker strokes at 48 by 36, so the row and the plate draw one geometry. The three paths
+     are `shapePath`'s output written out (hardening HR-PC#1, PERF-10): importing the function
+     put the 221 KB shape table in every page that draws an icon, and __tests__/icons.test.ts
+     holds each constant equal to `shapePath(kind, 16, 12)`. The line kinds
      are their own paths, stroked at the picker's weight; the arrow heads are
      `lineEndPath('fillArrow', 5)` (`M0,0 L-5,-2.5 L-5,2.5 Z`, the tip at the origin pointing along
      +x) rotated to the line's angle and placed at its end, written out on the grid. */
-  'shape-rect': [{ d: shapePath('rect', 16, 12), translate: [2, 4] }],
-  'shape-round-rect': [{ d: shapePath('roundRect', 16, 12), translate: [2, 4] }],
-  'shape-ellipse': [{ d: shapePath('ellipse', 16, 12), translate: [2, 4] }],
+  'shape-rect': [{ d: 'M0,0 H16 V12 H0 Z', translate: [2, 4] }],
+  'shape-round-rect': [
+    {
+      d: 'M0,2 A2,2 0 0 1 2,0 H14 A2,2 0 0 1 16,2 V10 A2,2 0 0 1 14,12 H2 A2,2 0 0 1 0,10 Z',
+      translate: [2, 4],
+    },
+  ],
+  'shape-ellipse': [
+    {
+      d: 'M0,6 A8,6 0 0 1 8,0 A8,6 0 0 1 16,6 A8,6 0 0 1 8,12 A8,6 0 0 1 0,6 Z',
+      translate: [2, 4],
+    },
+  ],
   'line-line': [{ d: 'M3,16 L17,4', stroke: true }],
   /* the line's angle is atan2(-12, 14); the head's three points at (17, 4), and the stroke stops
      at the head's base (5 back along the line) so its round cap stays under the head */

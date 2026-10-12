@@ -11,8 +11,8 @@
 // zod moved into a chunk /home, /present and /deck load. The values now live in modules without
 // zod and the loaders' module no longer carries the editor's function; these assertions keep it
 // so, since the bundle numbers of step 31 are minutes of build away from a source edit.
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
@@ -26,6 +26,100 @@ function runtimeImports(source) {
     if (m[1] === undefined) out.push(m[2]);
   }
   return out;
+}
+
+/*
+ * The static runtime graph of a module, within the workspace (hardening HR-PC#1 to HR-PC#3): every
+ * file a static import, a side effect import or an `export ... from` reaches, as paths from the
+ * repository root. `@turboslide/<package>/<sub>` resolves through the package's `exports`, a
+ * relative specifier through the file, `.ts`, `.tsx` and `index.ts`; a library, a stylesheet and
+ * a `?url` asset end the walk. A dynamic `import()` is a chunk of its own and is not followed, so
+ * the graph is what the bundler puts in the chunk of the module and the chunks it imports.
+ */
+const PACKAGE_DIRS = new Map();
+for (const dir of ['packages', 'apps']) {
+  for (const name of [
+    'agent',
+    'chrome',
+    'effects',
+    'export',
+    'fonts',
+    'headless',
+    'identity',
+    'import',
+    'lint',
+    'materials',
+    'mcp',
+    'native',
+    'realtime',
+    'render',
+    'schema',
+    'store',
+    'theme',
+    'viewer',
+    'cli',
+    'render-worker',
+  ]) {
+    const json = resolve(ROOT, dir, name, 'package.json');
+    if (!existsSync(json)) continue;
+    const manifest = JSON.parse(readFileSync(json, 'utf8'));
+    PACKAGE_DIRS.set(manifest.name, {
+      dir: resolve(ROOT, dir, name),
+      exports: manifest.exports ?? {},
+    });
+  }
+}
+function resolveSpecifier(specifier, from) {
+  if (/\.(?:css|woff2?|png|jpe?g|svg|json)(?:\?.*)?$/.test(specifier) || specifier.includes('?'))
+    return null;
+  if (specifier.startsWith('.')) {
+    const base = resolve(dirname(from), specifier);
+    for (const candidate of [base, `${base}.ts`, `${base}.tsx`, resolve(base, 'index.ts')]) {
+      if (existsSync(candidate) && !candidate.endsWith('/')) {
+        try {
+          if (readFileSync(candidate)) return candidate;
+        } catch {
+          /* a directory */
+        }
+      }
+    }
+    throw new Error(`${relative(ROOT, from)}: cannot resolve ${specifier}`);
+  }
+  const match = /^(@turboslide\/[^/]+)(\/.*)?$/.exec(specifier);
+  if (match === null) return null;
+  const pkg = PACKAGE_DIRS.get(match[1]);
+  if (pkg === undefined) throw new Error(`${relative(ROOT, from)}: unknown package ${match[1]}`);
+  const target = pkg.exports[`.${match[2] ?? ''}`];
+  if (typeof target !== 'string')
+    throw new Error(`${relative(ROOT, from)}: ${specifier} is not exported`);
+  return resolve(pkg.dir, target);
+}
+function staticSpecifiers(source) {
+  const out = [];
+  const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  for (const m of code.matchAll(/^\s*import\s+(type\s+)?(?:[\s\S]*?\sfrom\s+)?'([^']+)';/gm)) {
+    if (m[1] === undefined) out.push(m[2]);
+  }
+  for (const m of code.matchAll(
+    /^\s*export\s+(type\s+)?(?:\*|\{[^}]*\})(?:\s+as\s+\w+)?\s+from\s+'([^']+)';/gm,
+  )) {
+    if (m[1] === undefined) out.push(m[2]);
+  }
+  return out;
+}
+function runtimeGraph(entry) {
+  const seen = new Set();
+  const stack = [resolve(ROOT, entry)];
+  while (stack.length > 0) {
+    const file = stack.pop();
+    if (seen.has(file)) continue;
+    seen.add(file);
+    for (const specifier of staticSpecifiers(readFileSync(file, 'utf8'))) {
+      const next = resolveSpecifier(specifier, file);
+      if (next !== null && !seen.has(next)) stack.push(next);
+    }
+  }
+  return new Set([...seen].map((file) => relative(ROOT, file)));
 }
 
 describe('the entry chunk graph stays without zod', () => {
@@ -127,5 +221,27 @@ describe('the entry chunk graph stays without zod', () => {
     const imports = runtimeImports(read('apps/studio/src/components/EditorSkeleton.tsx'));
     expect(imports).toEqual(['@turboslide/chrome/menus/default-titles']);
     expect(runtimeImports(read('packages/chrome/src/menus/default-titles.ts'))).toEqual([]);
+  });
+});
+
+/* hardening HR-PC#1 (PERF-10): the icon set drew its three shape glyphs with the schema's
+   `shapePath`, so every page that drew an icon fetched the 221 KB shape table (`shapes-*.js`,
+   234,190 B on the node-server build of f7e97039) after load: /docs, /decks, the viewer and the
+   presenter. The glyphs are constants now, and __tests__/icons.test.ts holds them equal to
+   `shapePath(kind, 16, 12)`. */
+describe('the shape table stays out of the pages that draw icons', () => {
+  it('the icon set reaches no shape definitions and no schema module', () => {
+    const graph = runtimeGraph('packages/chrome/src/icons.tsx');
+    expect(graph.has('packages/schema/src/shapes/definitions.ts')).toBe(false);
+    expect(graph.has('packages/schema/src/shapes.ts')).toBe(false);
+    expect([...graph].filter((path) => path.startsWith('packages/schema/'))).toEqual([]);
+  });
+
+  it('the walk follows the import that would bring it back', () => {
+    expect(
+      runtimeGraph('packages/schema/src/shapes.ts').has(
+        'packages/schema/src/shapes/definitions.ts',
+      ),
+    ).toBe(true);
   });
 });

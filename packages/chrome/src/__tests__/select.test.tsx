@@ -959,6 +959,54 @@ describe('a trigger scrolled out of view (the last visual pass, F2)', () => {
     expect(isOpen()).toBe(false);
     expect(trigger().value).toBe('next');
   });
+
+  /* The integrator's fix of HR-DD#2 (docs/hardening/build/integrator-wave3b.md): the editor's
+     body is `overflow: hidden` with a box 0 px tall, and read as a clip it closed the list on
+     every scroll, the page's own 40 px panel scroll of chrome.select.placement included. The
+     root's and the body's overflow belong to the viewport, which the window's rect reads. */
+  it('reads no clip from the body or the root, whose overflow is the window', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    const zeroTall = () =>
+      ({ x: 0, y: 0, left: 0, top: 0, right: 1024, bottom: 0, width: 1024, height: 0 }) as DOMRect;
+    const bodyRect = document.body.getBoundingClientRect;
+    const rootRect = document.documentElement.getBoundingClientRect;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.getBoundingClientRect = zeroTall;
+    document.documentElement.getBoundingClientRect = zeroTall;
+    try {
+      let top = 470;
+      trigger().getBoundingClientRect = () =>
+        ({
+          x: 40,
+          y: top,
+          left: 40,
+          top,
+          right: 240,
+          bottom: top + 30,
+          width: 200,
+          height: 30,
+        }) as DOMRect;
+      fireEvent.click(trigger());
+      top = 430;
+      fireEvent.scroll(screen.getByTestId('panel'));
+      expect(isOpen()).toBe(true);
+      /* the window's edge still closes it */
+      top = 800;
+      fireEvent.scroll(document);
+      expect(isOpen()).toBe(false);
+      expect(trigger().value).toBe('next');
+    } finally {
+      document.body.getBoundingClientRect = bodyRect;
+      document.documentElement.getBoundingClientRect = rootRect;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  });
 });
 
 // The dropdown round's last visual pass (verify-final-3-visual.md), F8: a list of exactly ten rows

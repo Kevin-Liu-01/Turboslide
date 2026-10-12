@@ -155,7 +155,9 @@ function folded(text: string): string {
  * True when nothing of the trigger shows: its box stands wholly outside the window, or outside the
  * box of an element that holds it and clips its overflow (a panel, a dialog's card). An element
  * with no box clips nothing (`display: contents`, a document that lays nothing out), and a trigger
- * with no box is never clipped.
+ * with no box is never clipped. The body and the root are not read: their overflow is the
+ * window's, which the first check reads (the editor's body is `overflow: hidden` with a box 0 px
+ * tall, and read as a clip it closed the list on every scroll).
  */
 function clippedWhole(element: Element, box: DOMRect): boolean {
   if (box.width === 0 && box.height === 0) return false;
@@ -166,7 +168,11 @@ function clippedWhole(element: Element, box: DOMRect): boolean {
     box.left >= clip.right;
   if (outside({ top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth }))
     return true;
-  for (let node = element.parentElement; node !== null; node = node.parentElement) {
+  for (
+    let node = element.parentElement;
+    node !== null && node !== document.body && node !== document.documentElement;
+    node = node.parentElement
+  ) {
     const style = getComputedStyle(node);
     if (!/auto|scroll|hidden|clip/.test(`${style.overflowX} ${style.overflowY} ${style.overflow}`))
       continue;

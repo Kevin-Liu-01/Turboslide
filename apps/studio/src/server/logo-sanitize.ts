@@ -321,7 +321,7 @@ const NAME_CHAR = /[A-Za-z0-9_:.-]/;
 const MAX_DEPTH = 256;
 
 /** A character XML 1.0 forbids in a document (production 2); a browser refuses a file holding one. */
-const NOT_XML_CHAR = /[^\t\n\r -퟿-�\u{10000}-\u{10FFFF}]/u;
+const NOT_XML_CHAR = /[^\t\n\r\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/u;
 
 /** True for a code point XML 1.0 allows, so a decoded reference never makes a file a browser refuses. */
 function isXmlCodePoint(code: number): boolean {
@@ -578,7 +578,7 @@ function cssUnescaped(value: string): string {
       if (hex === undefined) return character === '\n' ? '' : (character ?? '');
       const code = Number.parseInt(hex, 16);
       return code === 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)
-        ? '�'
+        ? '\uFFFD'
         : String.fromCodePoint(code);
     },
   );

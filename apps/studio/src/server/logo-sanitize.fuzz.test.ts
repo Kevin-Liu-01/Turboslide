@@ -263,12 +263,12 @@ const PROLOGS = [
   '<!DOCTYPE svg [<!ENTITY a "b">]>',
   '<!DOCTYPE svg [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>',
   '<!ELEMENT svg ANY>',
-  '﻿',
+  '\uFEFF',
   '   ',
 ];
 
 const ELEMENT_PREFIXES = ['svg:', 'html:', 'x:', 'SVG:'];
-const NOISE = ['<', '>', '"', "'", '&', '/', '=', '!', '-', '[', ']', '?', ' ', '\u0000', '￾'];
+const NOISE = ['<', '>', '"', "'", '&', '/', '=', '!', '-', '[', ']', '?', ' ', '\u0000', '\uFFFE'];
 const DEPTHS = [1, 3, 20, 255, 256, 257, 400, 2_000, 20_000];
 
 /** The offsets just after a `>`: places where an element or text can go between tags. */
@@ -420,7 +420,7 @@ function cssUnescaped(value: string): string {
       if (hex === undefined) return ch === '\n' ? '' : ch;
       const code = Number.parseInt(hex, 16);
       return code === 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)
-        ? '�'
+        ? '\uFFFD'
         : String.fromCodePoint(code);
     })
     .toLowerCase();

@@ -355,6 +355,27 @@ describe('useEditorKeys and the dropdown trigger', () => {
     fireEvent.keyDown(document.body, { key: 'b', metaKey: true });
     expect(runItem).toHaveBeenCalledTimes(1);
   });
+
+  /* the dropdown round's last keyboard pass, F3: Cmd+Z on a Format options dropdown right after a
+     choice undid nothing, since the trigger counted as a field and the browser has no history on
+     a button. Undo and Redo reach the deck from a closed trigger; an open list keeps every key */
+  it('runs Undo and Redo from a closed dropdown, and nothing from an open one', () => {
+    const runItem = vi.fn();
+    const undoable: MenuContext = { ...withText, history: { undo: true, redo: true } };
+    const view = render(<Host context={undoable} handlers={handlers(runItem)} />);
+    const dropdown = view.getByTestId('dropdown');
+    dropdown.setAttribute('aria-expanded', 'false');
+    dropdown.focus();
+    fireEvent.keyDown(dropdown, { key: 'z', metaKey: true });
+    fireEvent.keyDown(dropdown, { key: 'z', metaKey: true, shiftKey: true });
+    expect(runItem.mock.calls.map(([item]) => (item as MenuItem).id)).toEqual([
+      'edit.undo',
+      'edit.redo',
+    ]);
+    dropdown.setAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(dropdown, { key: 'z', metaKey: true });
+    expect(runItem).toHaveBeenCalledTimes(2);
+  });
 });
 
 // The caret keys inside the canvas run (build-4/hotfix-4.md, key ownership): Home, End, PageUp,

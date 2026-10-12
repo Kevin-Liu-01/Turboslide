@@ -1,11 +1,11 @@
-// Which op ids the deck holds (RELIABILITY-6, hardening HR-RT#14; write.ts `heldOf`, the server half
+// Which op ids the deck holds (RELIABILITY-6, hardening HR-RT#14; held.ts `heldOf`, the server half
 // of the recovered writes plate): the ones a record's origin names and, on the do tier, the ones the
 // object's log holds that no checkpoint committed yet; a read that fails throws, never "none held".
 import { describe, expect, it } from 'vitest';
 
 import type { VersionRecord } from '@turboslide/store/store';
 
-import { heldOf } from './write';
+import { heldOf } from './held';
 
 type DeckRoom = Parameters<typeof heldOf>[0];
 

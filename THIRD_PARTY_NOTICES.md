@@ -640,6 +640,13 @@ on 2026-09-22 (Figma, Vercel, GitHub, Stripe and Anthropic under CC0-1.0, OpenAI
 EC2 under CC-BY-ND-2.0 from AWS's own package) and three drawings of Turboslide's own for the
 tests (Acme, Gradientco, Northwind), so the tests and the preview run without the network.
 
+`packages/chrome/src/presence/agent-marks.tsx` carries the path data of four marks as thesvg.org
+served them on 2026-10-14, each recorded there under MIT: Claude Code (`claude-code/color`), Codex
+(`codex-openai/color`), OpenClaw (`openclaw-moltbot-clawdbot/color`) and Hermes of Nous Research
+(`nousresearch-hermes/mono`). The landing's title and the editor draw them beside the agents'
+names. They are shown to identify the tool, never to imply endorsement, and each mark belongs to
+its owner.
+
 ## Everything else
 
 The remaining dependencies are listed with their licenses by `pnpm licenses list` from the repo

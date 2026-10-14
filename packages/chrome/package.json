@@ -40,6 +40,7 @@
     "./Toast": "./src/Toast.tsx",
     "./Progress": "./src/Progress.tsx",
     "./ThemeButton": "./src/ThemeButton.tsx",
+    "./presence/agent-marks": "./src/presence/agent-marks.tsx",
     "./useShellKeys": "./src/useShellKeys.ts",
     "./ViewerShell": "./src/ViewerShell.tsx",
     "./Overlay": "./src/Overlay.tsx",

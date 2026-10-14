@@ -146,7 +146,9 @@ Apache POI and python-pptx projects for the same purpose.
 
 What: the 63 Heroicons 20 solid symbols in `packages/theme/assets/sprite.svg` and
 `packages/theme/src/sprite.ts`, copied from the GT deck's `parts/head.html`, which took them from
-`optimized/20/solid` of https://github.com/tailwindlabs/heroicons.
+`optimized/20/solid` of https://github.com/tailwindlabs/heroicons; and the Heroicons 20 solid
+paths of the chrome's icon table, `packages/chrome/src/icons.tsx`, which the editor, `/home` and
+`/docs` draw, copied from heroicons 2.2.0 `optimized/20/solid`.
 
     MIT License
 

@@ -5,7 +5,21 @@ import { describe, expect, it } from 'vitest';
 
 import { shapePath } from '@turboslide/schema/shapes';
 
-import { ICON_NAMES, Icon, iconPaths } from '../icons';
+import {
+  ARROW_LEFT,
+  BOOK_OPEN,
+  CHAT_BUBBLE_LEFT_RIGHT,
+  DOCUMENT_TEXT,
+  EXCLAMATION_TRIANGLE,
+  GLOBE_ALT,
+  Glyph,
+  ICON_NAMES,
+  Icon,
+  PENCIL_SQUARE,
+  PLUS,
+  WINDOW,
+  iconPaths,
+} from '../icons';
 import type { IconName } from '../icons';
 
 // The icon table of the vector round (docs/archive/rounds/VECTOR.md 3.1, 3.4; the three assertions of 6.3):
@@ -153,5 +167,33 @@ describe('the icon table', () => {
     expect(pause).not.toContain('stroke=');
     expect(pause).not.toContain('fill-rule');
     expect(iconPaths('pause')[0]?.d).not.toBe(iconPaths('play')[0]?.d);
+  });
+
+  it('names the site pages’ glyphs by their Heroicon names and exports each one (docs/SITE.md D11)', () => {
+    const exported = {
+      'book-open': BOOK_OPEN,
+      'pencil-square': PENCIL_SQUARE,
+      'document-text': DOCUMENT_TEXT,
+      'chat-bubble-left-right': CHAT_BUBBLE_LEFT_RIGHT,
+      'arrow-left': ARROW_LEFT,
+      'globe-alt': GLOBE_ALT,
+      window: WINDOW,
+      'exclamation-triangle': EXCLAMATION_TRIANGLE,
+      plus: PLUS,
+    } as const;
+    for (const [name, paths] of Object.entries(exported)) {
+      expect(ICON_NAMES, name).toContain(name);
+      expect(iconPaths(name as keyof typeof exported), name).toBe(paths);
+    }
+    /* the shorter names the table carried draw the same glyph */
+    expect(iconPaths('book')).toBe(BOOK_OPEN);
+    expect(iconPaths('pencil')).toBe(PENCIL_SQUARE);
+    expect(iconPaths('document')).toBe(DOCUMENT_TEXT);
+    expect(iconPaths('chat')).toBe(CHAT_BUBBLE_LEFT_RIGHT);
+    /* Glyph draws what Icon draws */
+    for (const name of ['globe-alt', 'window', 'exclamation-triangle', 'arrow-left'] as const)
+      expect(renderToStaticMarkup(createElement(Glyph, { paths: iconPaths(name) })), name).toBe(
+        markup(name),
+      );
   });
 });

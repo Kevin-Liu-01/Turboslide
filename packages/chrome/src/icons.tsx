@@ -22,7 +22,8 @@
  * rows that name a visual thing: three more Heroicons (arrow-long-right, chat-bubble-left,
  * chart-pie, copied from heroicons 2.2.0 optimized/20/solid on 2026-09-24) and, where Heroicons
  * has no symbol, a glyph drawn from the thing itself in the same weight: the three named shapes
- * from the schema's own `shapePath` at 16 by 12 (filled, the outline the shape picker strokes),
+ * from the schema's own `shapePath` at 16 by 12 (filled, the outline the shape picker strokes;
+ * written out as path data and recomputed by the test since the site pages),
  * the eight line kinds from their own paths, the chart kinds, Word art, the border rows, Mask
  * image and Drop shadow. A drawn entry with `stroke` renders `fill="none" stroke="currentColor"`
  * at width 1.5 (the picker's weight, pickers/ShapePicker.tsx) with round caps and joins. The
@@ -30,7 +31,6 @@
  * `<svg viewBox="0 0 20 20">` at 16 px, never an inline path elsewhere and never an `<img>`;
  * __tests__/icons.test.ts pins the table against the theme sprite.
  */
-import { shapePath } from '@turboslide/schema/shapes';
 
 export type IconName =
   | 'sidebar'
@@ -197,7 +197,17 @@ export type IconName =
   | 'user-circle'
   | 'arrow-up-right'
   | 'arrow-down-right'
-  | 'cursor-arrow';
+  | 'cursor-arrow'
+  /* the site pages (docs/SITE.md D11): the Heroicon names of four glyphs the table carried under
+     shorter names, and four new ones */
+  | 'book-open'
+  | 'pencil-square'
+  | 'document-text'
+  | 'chat-bubble-left-right'
+  | 'arrow-left'
+  | 'globe-alt'
+  | 'window'
+  | 'exclamation-triangle';
 
 /**
  * One path of a glyph. A Heroicon entry is filled by the svg's `fill="currentColor"`; a drawn
@@ -227,6 +237,181 @@ const BARS_3_BOTTOM_LEFT: readonly IconPath[] = [
 const ARROWS_POINTING_OUT: readonly IconPath[] = [
   {
     d: 'm13.28 7.78 3.22-3.22v2.69a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.69l-3.22 3.22a.75.75 0 0 0 1.06 1.06ZM2 17.25v-4.5a.75.75 0 0 1 1.5 0v2.69l3.22-3.22a.75.75 0 0 1 1.06 1.06L4.56 16.5h2.69a.75.75 0 0 1 0 1.5h-4.5a.747.747 0 0 1-.75-.75ZM12.22 13.28l3.22 3.22h-2.69a.75.75 0 0 0 0 1.5h4.5a.747.747 0 0 0 .75-.75v-4.5a.75.75 0 0 0-1.5 0v2.69l-3.22-3.22a.75.75 0 1 0-1.06 1.06ZM3.5 4.56l3.22 3.22a.75.75 0 0 0 1.06-1.06L4.56 3.5h2.69a.75.75 0 0 0 0-1.5h-4.5a.75.75 0 0 0-.75.75v4.5a.75.75 0 0 0 1.5 0V4.56Z',
+  },
+];
+
+/*
+ * The glyphs the site pages draw (/home and /docs; docs/SITE.md D11), one exported constant each, so
+ * a page that imports a few of them carries those paths alone: the table below names the same
+ * constants, and nothing of the table reaches a page that never renders `Icon` (a probe bundle of
+ * two glyphs and `Glyph` read 1,934 B minified on 2026-10-14). Heroicons 20 solid; the four the
+ * table lacked (arrow-left, globe-alt, window, exclamation-triangle) were copied from heroicons
+ * 2.2.0 optimized/20/solid on 2026-10-14.
+ */
+/* plus */
+export const PLUS: readonly IconPath[] = [
+  {
+    d: 'M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z',
+  },
+];
+
+/* presentation-chart-line */
+export const PRESENTATION_CHART_LINE: readonly IconPath[] = [
+  {
+    d: 'M1 2.75A.75.75 0 0 1 1.75 2h16.5a.75.75 0 0 1 0 1.5H18v8.75A2.75 2.75 0 0 1 15.25 15h-1.072l.798 3.06a.75.75 0 0 1-1.452.38L13.41 18H6.59l-.114.44a.75.75 0 0 1-1.452-.38L5.823 15H4.75A2.75 2.75 0 0 1 2 12.25V3.5h-.25A.75.75 0 0 1 1 2.75ZM7.373 15l-.391 1.5h6.037l-.392-1.5H7.373Zm7.49-8.931a.75.75 0 0 1-.175 1.046 19.326 19.326 0 0 0-3.398 3.098.75.75 0 0 1-1.097.04L8.5 8.561l-2.22 2.22A.75.75 0 1 1 5.22 9.72l2.75-2.75a.75.75 0 0 1 1.06 0l1.664 1.663a20.786 20.786 0 0 1 3.122-2.74.75.75 0 0 1 1.046.176Z',
+    evenodd: true,
+  },
+];
+
+/* pencil */
+export const PENCIL_SQUARE: readonly IconPath[] = [
+  {
+    d: 'm5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z',
+  },
+  {
+    d: 'M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z',
+  },
+];
+
+/* command-line */
+export const COMMAND_LINE: readonly IconPath[] = [
+  {
+    d: 'M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z',
+    evenodd: true,
+  },
+];
+
+/* play */
+export const PLAY: readonly IconPath[] = [
+  {
+    d: 'M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z',
+  },
+];
+
+/* puzzle-piece */
+export const PUZZLE_PIECE: readonly IconPath[] = [
+  {
+    d: 'M12 4.467c0-.405.262-.75.559-1.027.276-.257.441-.584.441-.94 0-.828-.895-1.5-2-1.5s-2 .672-2 1.5c0 .362.171.694.456.953.29.265.544.6.544.994a.968.968 0 0 1-1.024.974 39.655 39.655 0 0 1-3.014-.306.75.75 0 0 0-.847.847c.14.993.242 1.999.306 3.014A.968.968 0 0 1 4.447 10c-.393 0-.729-.253-.994-.544C3.194 9.17 2.862 9 2.5 9 1.672 9 1 9.895 1 11s.672 2 1.5 2c.356 0 .683-.165.94-.441.276-.297.622-.559 1.027-.559a.997.997 0 0 1 1.004 1.03 39.747 39.747 0 0 1-.319 3.734.75.75 0 0 0 .64.842c1.05.146 2.111.252 3.184.318A.97.97 0 0 0 10 16.948c0-.394-.254-.73-.545-.995C9.171 15.693 9 15.362 9 15c0-.828.895-1.5 2-1.5s2 .672 2 1.5c0 .356-.165.683-.441.94-.297.276-.559.622-.559 1.027a.998.998 0 0 0 1.03 1.005c1.337-.05 2.659-.162 3.961-.337a.75.75 0 0 0 .644-.644c.175-1.302.288-2.624.337-3.961A.998.998 0 0 0 16.967 12c-.405 0-.75.262-1.027.559-.257.276-.584.441-.94.441-.828 0-1.5-.895-1.5-2s.672-2 1.5-2c.362 0 .694.17.953.455.265.291.601.545.995.545a.97.97 0 0 0 .976-1.024 41.159 41.159 0 0 0-.318-3.184.75.75 0 0 0-.842-.64c-1.228.164-2.473.271-3.734.319A.997.997 0 0 1 12 4.467Z',
+  },
+];
+
+/* deck */
+export const PRESENTATION_CHART_BAR: readonly IconPath[] = [
+  {
+    d: 'M1 2.75A.75.75 0 0 1 1.75 2h16.5a.75.75 0 0 1 0 1.5H18v8.75A2.75 2.75 0 0 1 15.25 15h-1.072l.798 3.06a.75.75 0 0 1-1.452.38L13.41 18H6.59l-.114.44a.75.75 0 0 1-1.452-.38L5.823 15H4.75A2.75 2.75 0 0 1 2 12.25V3.5h-.25A.75.75 0 0 1 1 2.75ZM7.373 15l-.391 1.5h6.037l-.392-1.5H7.373ZM13.25 5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0v-5.5a.75.75 0 0 1 .75-.75Zm-6.5 4a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 6.75 9Zm4-1.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5Z',
+    evenodd: true,
+  },
+];
+
+/* book */
+export const BOOK_OPEN: readonly IconPath[] = [
+  {
+    d: 'M10.75 16.82A7.462 7.462 0 0 1 15 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0 0 18 15.06v-11a.75.75 0 0 0-.546-.721A9.006 9.006 0 0 0 15 3a8.963 8.963 0 0 0-4.25 1.065V16.82ZM9.25 4.065A8.963 8.963 0 0 0 5 3c-.85 0-1.673.118-2.454.339A.75.75 0 0 0 2 4.06v11a.75.75 0 0 0 .954.721A7.506 7.506 0 0 1 5 15.5c1.579 0 3.042.487 4.25 1.32V4.065Z',
+  },
+];
+
+/* code */
+export const CODE_BRACKET: readonly IconPath[] = [
+  {
+    d: 'M6.28 5.22a.75.75 0 0 1 0 1.06L2.56 10l3.72 3.72a.75.75 0 0 1-1.06 1.06L.97 10.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Zm7.44 0a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L17.44 10l-3.72-3.72a.75.75 0 0 1 0-1.06ZM11.377 2.011a.75.75 0 0 1 .612.867l-2.5 14.5a.75.75 0 0 1-1.478-.255l2.5-14.5a.75.75 0 0 1 .866-.612Z',
+    evenodd: true,
+  },
+];
+
+/* queue-list */
+export const QUEUE_LIST: readonly IconPath[] = [
+  {
+    d: 'M2 4.5A2.5 2.5 0 0 1 4.5 2h11a2.5 2.5 0 0 1 0 5h-11A2.5 2.5 0 0 1 2 4.5ZM2.75 9.083a.75.75 0 0 0 0 1.5h14.5a.75.75 0 0 0 0-1.5H2.75ZM2.75 12.663a.75.75 0 0 0 0 1.5h14.5a.75.75 0 0 0 0-1.5H2.75ZM2.75 16.25a.75.75 0 0 0 0 1.5h14.5a.75.75 0 1 0 0-1.5H2.75Z',
+  },
+];
+
+/* information-circle */
+export const INFORMATION_CIRCLE: readonly IconPath[] = [
+  {
+    d: 'M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z',
+    evenodd: true,
+  },
+];
+
+/* light-bulb */
+export const LIGHT_BULB: readonly IconPath[] = [
+  {
+    d: 'M10 1a6 6 0 0 0-3.815 10.631C7.237 12.5 8 13.443 8 14.456v.644a.75.75 0 0 0 .572.729 6.016 6.016 0 0 0 2.856 0A.75.75 0 0 0 12 15.1v-.644c0-1.013.762-1.957 1.815-2.825A6 6 0 0 0 10 1ZM8.863 17.414a.75.75 0 0 0-.226 1.483 9.066 9.066 0 0 0 2.726 0 .75.75 0 0 0-.226-1.483 7.553 7.553 0 0 1-2.274 0Z',
+  },
+];
+
+/* photo */
+export const PHOTO: readonly IconPath[] = [
+  {
+    d: 'M1 5.25A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25v9.5A2.25 2.25 0 0 1 16.75 17H3.25A2.25 2.25 0 0 1 1 14.75v-9.5Zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 0 0 .75-.75v-2.69l-2.22-2.219a.75.75 0 0 0-1.06 0l-1.91 1.909.47.47a.75.75 0 1 1-1.06 1.06L6.53 8.091a.75.75 0 0 0-1.06 0l-2.97 2.97ZM12 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z',
+    evenodd: true,
+  },
+];
+
+/* clipboard-document */
+export const CLIPBOARD_DOCUMENT: readonly IconPath[] = [
+  {
+    d: 'M15.988 3.012A2.25 2.25 0 0 1 18 5.25v6.5A2.25 2.25 0 0 1 15.75 14H13.5v-3.379a3 3 0 0 0-.879-2.121l-3.12-3.121a3 3 0 0 0-1.402-.791 2.252 2.252 0 0 1 1.913-1.576A2.25 2.25 0 0 1 12.25 1h1.5a2.25 2.25 0 0 1 2.238 2.012ZM11.5 3.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v.25h-3v-.25Z',
+  },
+  {
+    d: 'M3.5 6A1.5 1.5 0 0 0 2 7.5v9A1.5 1.5 0 0 0 3.5 18h7a1.5 1.5 0 0 0 1.5-1.5v-5.879a1.5 1.5 0 0 0-.44-1.06L8.44 6.439A1.5 1.5 0 0 0 7.378 6H3.5Z',
+  },
+];
+
+/* document */
+export const DOCUMENT_TEXT: readonly IconPath[] = [
+  {
+    d: 'M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm2.25 8.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z',
+    evenodd: true,
+  },
+];
+
+/* chat */
+export const CHAT_BUBBLE_LEFT_RIGHT: readonly IconPath[] = [
+  {
+    d: 'M3.505 2.365A41.369 41.369 0 0 1 9 2c1.863 0 3.697.124 5.495.365 1.247.167 2.18 1.108 2.435 2.268a4.45 4.45 0 0 0-.577-.069 43.141 43.141 0 0 0-4.706 0C9.229 4.696 7.5 6.727 7.5 8.998v2.24c0 1.413.67 2.735 1.76 3.562l-2.98 2.98A.75.75 0 0 1 5 17.25v-3.443c-.501-.048-1-.106-1.495-.172C2.033 13.438 1 12.162 1 10.72V5.28c0-1.441 1.033-2.717 2.505-2.914Z',
+  },
+  {
+    d: 'M14 6c-.762 0-1.52.02-2.271.062C10.157 6.148 9 7.472 9 8.998v2.24c0 1.519 1.147 2.839 2.71 2.935.214.013.428.024.642.034.2.009.385.09.518.224l2.35 2.35a.75.75 0 0 0 1.28-.531v-2.07c1.453-.195 2.5-1.463 2.5-2.915V8.998c0-1.526-1.157-2.85-2.729-2.936A41.645 41.645 0 0 0 14 6Z',
+  },
+];
+
+/* arrow-right */
+export const ARROW_RIGHT: readonly IconPath[] = [
+  {
+    d: 'M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z',
+    evenodd: true,
+  },
+];
+
+/* arrow-left */
+export const ARROW_LEFT: readonly IconPath[] = [
+  {
+    d: 'M17 10a.75.75 0 0 1-.75.75H5.612l4.158 3.96a.75.75 0 1 1-1.04 1.08l-5.5-5.25a.75.75 0 0 1 0-1.08l5.5-5.25a.75.75 0 1 1 1.04 1.08L5.612 9.25H16.25A.75.75 0 0 1 17 10Z',
+    evenodd: true,
+  },
+];
+
+/* globe-alt */
+export const GLOBE_ALT: readonly IconPath[] = [
+  {
+    d: 'M16.555 5.412a8.028 8.028 0 0 0-3.503-2.81 14.899 14.899 0 0 1 1.663 4.472 8.547 8.547 0 0 0 1.84-1.662ZM13.326 7.825a13.43 13.43 0 0 0-2.413-5.773 8.087 8.087 0 0 0-1.826 0 13.43 13.43 0 0 0-2.413 5.773A8.473 8.473 0 0 0 10 8.5c1.18 0 2.304-.24 3.326-.675ZM6.514 9.376A9.98 9.98 0 0 0 10 10c1.226 0 2.4-.22 3.486-.624a13.54 13.54 0 0 1-.351 3.759A13.54 13.54 0 0 1 10 13.5c-1.079 0-2.128-.127-3.134-.366a13.538 13.538 0 0 1-.352-3.758ZM5.285 7.074a14.9 14.9 0 0 1 1.663-4.471 8.028 8.028 0 0 0-3.503 2.81c.529.638 1.149 1.199 1.84 1.66ZM17.334 6.798a7.973 7.973 0 0 1 .614 4.115 13.47 13.47 0 0 1-3.178 1.72 15.093 15.093 0 0 0 .174-3.939 10.043 10.043 0 0 0 2.39-1.896ZM2.666 6.798a10.042 10.042 0 0 0 2.39 1.896 15.196 15.196 0 0 0 .174 3.94 13.472 13.472 0 0 1-3.178-1.72 7.973 7.973 0 0 1 .615-4.115ZM10 15c.898 0 1.778-.079 2.633-.23a13.473 13.473 0 0 1-1.72 3.178 8.099 8.099 0 0 1-1.826 0 13.47 13.47 0 0 1-1.72-3.178c.855.151 1.735.23 2.633.23ZM14.357 14.357a14.912 14.912 0 0 1-1.305 3.04 8.027 8.027 0 0 0 4.345-4.345c-.953.542-1.971.981-3.04 1.305ZM6.948 17.397a8.027 8.027 0 0 1-4.345-4.345c.953.542 1.971.981 3.04 1.305a14.912 14.912 0 0 0 1.305 3.04Z',
+  },
+];
+
+/* window */
+export const WINDOW: readonly IconPath[] = [
+  {
+    d: 'M4.25 2A2.25 2.25 0 0 0 2 4.25v11.5A2.25 2.25 0 0 0 4.25 18h11.5A2.25 2.25 0 0 0 18 15.75V4.25A2.25 2.25 0 0 0 15.75 2H4.25ZM3.5 8v7.75c0 .414.336.75.75.75h11.5a.75.75 0 0 0 .75-.75V8h-13ZM5 4.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V5a.75.75 0 0 0-.75-.75H5ZM7.25 5A.75.75 0 0 1 8 4.25h.01a.75.75 0 0 1 .75.75v.01a.75.75 0 0 1-.75.75H8a.75.75 0 0 1-.75-.75V5ZM11 4.25a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V5a.75.75 0 0 0-.75-.75H11Z',
+    evenodd: true,
+  },
+];
+
+/* exclamation-triangle */
+export const EXCLAMATION_TRIANGLE: readonly IconPath[] = [
+  {
+    d: 'M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+    evenodd: true,
   },
 ];
 
@@ -262,11 +447,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* book-open */
-  book: [
-    {
-      d: 'M10.75 16.82A7.462 7.462 0 0 1 15 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0 0 18 15.06v-11a.75.75 0 0 0-.546-.721A9.006 9.006 0 0 0 15 3a8.963 8.963 0 0 0-4.25 1.065V16.82ZM9.25 4.065A8.963 8.963 0 0 0 5 3c-.85 0-1.673.118-2.454.339A.75.75 0 0 0 2 4.06v11a.75.75 0 0 0 .954.721A7.506 7.506 0 0 1 5 15.5c1.579 0 3.042.487 4.25 1.32V4.065Z',
-    },
-  ],
+  book: BOOK_OPEN,
   /* list-bullet */
   index: [
     {
@@ -329,12 +510,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* document-text */
-  document: [
-    {
-      d: 'M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm2.25 8.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z',
-      evenodd: true,
-    },
-  ],
+  document: DOCUMENT_TEXT,
   /* chevron-down */
   'chevron-down': [
     {
@@ -343,18 +519,9 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* photo */
-  photo: [
-    {
-      d: 'M1 5.25A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25v9.5A2.25 2.25 0 0 1 16.75 17H3.25A2.25 2.25 0 0 1 1 14.75v-9.5Zm1.5 5.81v3.69c0 .414.336.75.75.75h13.5a.75.75 0 0 0 .75-.75v-2.69l-2.22-2.219a.75.75 0 0 0-1.06 0l-1.91 1.909.47.47a.75.75 0 1 1-1.06 1.06L6.53 8.091a.75.75 0 0 0-1.06 0l-2.97 2.97ZM12 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z',
-      evenodd: true,
-    },
-  ],
+  photo: PHOTO,
   /* queue-list */
-  'queue-list': [
-    {
-      d: 'M2 4.5A2.5 2.5 0 0 1 4.5 2h11a2.5 2.5 0 0 1 0 5h-11A2.5 2.5 0 0 1 2 4.5ZM2.75 9.083a.75.75 0 0 0 0 1.5h14.5a.75.75 0 0 0 0-1.5H2.75ZM2.75 12.663a.75.75 0 0 0 0 1.5h14.5a.75.75 0 0 0 0-1.5H2.75ZM2.75 16.25a.75.75 0 0 0 0 1.5h14.5a.75.75 0 1 0 0-1.5H2.75Z',
-    },
-  ],
+  'queue-list': QUEUE_LIST,
   /* sparkles */
   sparkles: [
     {
@@ -362,12 +529,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* presentation-chart-bar */
-  deck: [
-    {
-      d: 'M1 2.75A.75.75 0 0 1 1.75 2h16.5a.75.75 0 0 1 0 1.5H18v8.75A2.75 2.75 0 0 1 15.25 15h-1.072l.798 3.06a.75.75 0 0 1-1.452.38L13.41 18H6.59l-.114.44a.75.75 0 0 1-1.452-.38L5.823 15H4.75A2.75 2.75 0 0 1 2 12.25V3.5h-.25A.75.75 0 0 1 1 2.75ZM7.373 15l-.391 1.5h6.037l-.392-1.5H7.373ZM13.25 5a.75.75 0 0 1 .75.75v5.5a.75.75 0 0 1-1.5 0v-5.5a.75.75 0 0 1 .75-.75Zm-6.5 4a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 6.75 9Zm4-1.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5Z',
-      evenodd: true,
-    },
-  ],
+  deck: PRESENTATION_CHART_BAR,
   /* check-badge */
   'check-badge': [
     {
@@ -389,18 +551,9 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* plus */
-  plus: [
-    {
-      d: 'M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z',
-    },
-  ],
+  plus: PLUS,
   /* arrow-right */
-  'arrow-right': [
-    {
-      d: 'M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z',
-      evenodd: true,
-    },
-  ],
+  'arrow-right': ARROW_RIGHT,
   /* cube */
   cube: [
     {
@@ -473,14 +626,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* pencil-square */
-  pencil: [
-    {
-      d: 'm5.433 13.917 1.262-3.155A4 4 0 0 1 7.58 9.42l6.92-6.918a2.121 2.121 0 0 1 3 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 0 1-.65-.65Z',
-    },
-    {
-      d: 'M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0 0 10 3H4.75A2.75 2.75 0 0 0 2 5.75v9.5A2.75 2.75 0 0 0 4.75 18h9.5A2.75 2.75 0 0 0 17 15.25V10a.75.75 0 0 0-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5Z',
-    },
-  ],
+  pencil: PENCIL_SQUARE,
   /* paint-brush */
   brush: [
     {
@@ -502,21 +648,9 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* code-bracket */
-  code: [
-    {
-      d: 'M6.28 5.22a.75.75 0 0 1 0 1.06L2.56 10l3.72 3.72a.75.75 0 0 1-1.06 1.06L.97 10.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Zm7.44 0a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L17.44 10l-3.72-3.72a.75.75 0 0 1 0-1.06ZM11.377 2.011a.75.75 0 0 1 .612.867l-2.5 14.5a.75.75 0 0 1-1.478-.255l2.5-14.5a.75.75 0 0 1 .866-.612Z',
-      evenodd: true,
-    },
-  ],
+  code: CODE_BRACKET,
   /* chat-bubble-left-right */
-  chat: [
-    {
-      d: 'M3.505 2.365A41.369 41.369 0 0 1 9 2c1.863 0 3.697.124 5.495.365 1.247.167 2.18 1.108 2.435 2.268a4.45 4.45 0 0 0-.577-.069 43.141 43.141 0 0 0-4.706 0C9.229 4.696 7.5 6.727 7.5 8.998v2.24c0 1.413.67 2.735 1.76 3.562l-2.98 2.98A.75.75 0 0 1 5 17.25v-3.443c-.501-.048-1-.106-1.495-.172C2.033 13.438 1 12.162 1 10.72V5.28c0-1.441 1.033-2.717 2.505-2.914Z',
-    },
-    {
-      d: 'M14 6c-.762 0-1.52.02-2.271.062C10.157 6.148 9 7.472 9 8.998v2.24c0 1.519 1.147 2.839 2.71 2.935.214.013.428.024.642.034.2.009.385.09.518.224l2.35 2.35a.75.75 0 0 0 1.28-.531v-2.07c1.453-.195 2.5-1.463 2.5-2.915V8.998c0-1.526-1.157-2.85-2.729-2.936A41.645 41.645 0 0 0 14 6Z',
-    },
-  ],
+  chat: CHAT_BUBBLE_LEFT_RIGHT,
   /* x-circle */
   'x-circle': [
     {
@@ -757,12 +891,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       evenodd: true,
     },
   ],
-  'presentation-chart-line': [
-    {
-      d: 'M1 2.75A.75.75 0 0 1 1.75 2h16.5a.75.75 0 0 1 0 1.5H18v8.75A2.75 2.75 0 0 1 15.25 15h-1.072l.798 3.06a.75.75 0 0 1-1.452.38L13.41 18H6.59l-.114.44a.75.75 0 0 1-1.452-.38L5.823 15H4.75A2.75 2.75 0 0 1 2 12.25V3.5h-.25A.75.75 0 0 1 1 2.75ZM7.373 15l-.391 1.5h6.037l-.392-1.5H7.373Zm7.49-8.931a.75.75 0 0 1-.175 1.046 19.326 19.326 0 0 0-3.398 3.098.75.75 0 0 1-1.097.04L8.5 8.561l-2.22 2.22A.75.75 0 1 1 5.22 9.72l2.75-2.75a.75.75 0 0 1 1.06 0l1.664 1.663a20.786 20.786 0 0 1 3.122-2.74.75.75 0 0 1 1.046.176Z',
-      evenodd: true,
-    },
-  ],
+  'presentation-chart-line': PRESENTATION_CHART_LINE,
   'chart-bar': [
     {
       d: 'M15.5 2A1.5 1.5 0 0 0 14 3.5v13a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 16.5 2h-1ZM9.5 6A1.5 1.5 0 0 0 8 7.5v9A1.5 1.5 0 0 0 9.5 18h1a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 10.5 6h-1ZM3.5 10A1.5 1.5 0 0 0 2 11.5v5A1.5 1.5 0 0 0 3.5 18h1A1.5 1.5 0 0 0 6 16.5v-5A1.5 1.5 0 0 0 4.5 10h-1Z',
@@ -804,12 +933,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M13 4.5a2.5 2.5 0 1 1 .702 1.737L6.97 9.604a2.518 2.518 0 0 1 0 .792l6.733 3.367a2.5 2.5 0 1 1-.671 1.341l-6.733-3.367a2.5 2.5 0 1 1 0-3.475l6.733-3.366A2.52 2.52 0 0 1 13 4.5Z',
     },
   ],
-  'information-circle': [
-    {
-      d: 'M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z',
-      evenodd: true,
-    },
-  ],
+  'information-circle': INFORMATION_CIRCLE,
   'academic-cap': [
     {
       d: 'M9.664 1.319a.75.75 0 0 1 .672 0 41.059 41.059 0 0 1 8.198 5.424.75.75 0 0 1-.254 1.285 31.372 31.372 0 0 0-7.86 3.83.75.75 0 0 1-.84 0 31.508 31.508 0 0 0-2.08-1.287V9.394c0-.244.116-.463.302-.592a35.504 35.504 0 0 1 3.305-2.033.75.75 0 0 0-.714-1.319 37 37 0 0 0-3.446 2.12A2.216 2.216 0 0 0 6 9.393v.38a31.293 31.293 0 0 0-4.28-1.746.75.75 0 0 1-.254-1.285 41.059 41.059 0 0 1 8.198-5.424ZM6 11.459a29.848 29.848 0 0 0-2.455-1.158 41.029 41.029 0 0 0-.39 3.114.75.75 0 0 0 .419.74c.528.256 1.046.53 1.554.82-.21.324-.455.63-.739.914a.75.75 0 1 0 1.06 1.06c.37-.369.69-.77.96-1.193a26.61 26.61 0 0 1 3.095 2.348.75.75 0 0 0 .992 0 26.547 26.547 0 0 1 5.93-3.95.75.75 0 0 0 .42-.739 41.053 41.053 0 0 0-.39-3.114 29.925 29.925 0 0 0-5.199 2.801 2.25 2.25 0 0 1-2.514 0c-.41-.275-.826-.541-1.25-.797a6.985 6.985 0 0 1-1.084 3.45 26.503 26.503 0 0 0-1.281-.78A5.487 5.487 0 0 0 6 12v-.54Z',
@@ -843,11 +967,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M10 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM10 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM11.5 15.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z',
     },
   ],
-  play: [
-    {
-      d: 'M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z',
-    },
-  ],
+  play: PLAY,
   /* pause, copied from heroicons 2.2.0 optimized/20/solid on 2026-10-05 (the design round,
      docs/DESIGN.md 8.1: the landing's motion toggle draws pause and play) */
   pause: [
@@ -922,22 +1042,9 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       evenodd: true,
     },
   ],
-  'light-bulb': [
-    {
-      d: 'M10 1a6 6 0 0 0-3.815 10.631C7.237 12.5 8 13.443 8 14.456v.644a.75.75 0 0 0 .572.729 6.016 6.016 0 0 0 2.856 0A.75.75 0 0 0 12 15.1v-.644c0-1.013.762-1.957 1.815-2.825A6 6 0 0 0 10 1ZM8.863 17.414a.75.75 0 0 0-.226 1.483 9.066 9.066 0 0 0 2.726 0 .75.75 0 0 0-.226-1.483 7.553 7.553 0 0 1-2.274 0Z',
-    },
-  ],
-  'command-line': [
-    {
-      d: 'M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z',
-      evenodd: true,
-    },
-  ],
-  'puzzle-piece': [
-    {
-      d: 'M12 4.467c0-.405.262-.75.559-1.027.276-.257.441-.584.441-.94 0-.828-.895-1.5-2-1.5s-2 .672-2 1.5c0 .362.171.694.456.953.29.265.544.6.544.994a.968.968 0 0 1-1.024.974 39.655 39.655 0 0 1-3.014-.306.75.75 0 0 0-.847.847c.14.993.242 1.999.306 3.014A.968.968 0 0 1 4.447 10c-.393 0-.729-.253-.994-.544C3.194 9.17 2.862 9 2.5 9 1.672 9 1 9.895 1 11s.672 2 1.5 2c.356 0 .683-.165.94-.441.276-.297.622-.559 1.027-.559a.997.997 0 0 1 1.004 1.03 39.747 39.747 0 0 1-.319 3.734.75.75 0 0 0 .64.842c1.05.146 2.111.252 3.184.318A.97.97 0 0 0 10 16.948c0-.394-.254-.73-.545-.995C9.171 15.693 9 15.362 9 15c0-.828.895-1.5 2-1.5s2 .672 2 1.5c0 .356-.165.683-.441.94-.297.276-.559.622-.559 1.027a.998.998 0 0 0 1.03 1.005c1.337-.05 2.659-.162 3.961-.337a.75.75 0 0 0 .644-.644c.175-1.302.288-2.624.337-3.961A.998.998 0 0 0 16.967 12c-.405 0-.75.262-1.027.559-.257.276-.584.441-.94.441-.828 0-1.5-.895-1.5-2s.672-2 1.5-2c.362 0 .694.17.953.455.265.291.601.545.995.545a.97.97 0 0 0 .976-1.024 41.159 41.159 0 0 0-.318-3.184.75.75 0 0 0-.842-.64c-1.228.164-2.473.271-3.734.319A.997.997 0 0 1 12 4.467Z',
-    },
-  ],
+  'light-bulb': LIGHT_BULB,
+  'command-line': COMMAND_LINE,
+  'puzzle-piece': PUZZLE_PIECE,
   'user-group': [
     {
       d: 'M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.326a.78.78 0 0 1-.358-.442 3 3 0 0 1 4.308-3.516 6.484 6.484 0 0 0-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 0 1-2.07-.655ZM16.44 15.98a4.97 4.97 0 0 0 2.07-.654.78.78 0 0 0 .357-.442 3 3 0 0 0-4.308-3.517 6.484 6.484 0 0 1 1.907 3.96 2.32 2.32 0 0 1-.026.654ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.304 16.19a.844.844 0 0 1-.277-.71 5 5 0 0 1 9.947 0 .843.843 0 0 1-.277.71A6.975 6.975 0 0 1 10 18a6.974 6.974 0 0 1-4.696-1.81Z',
@@ -1017,13 +1124,26 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   ],
   /* the vector round (docs/archive/rounds/VECTOR.md 3.1): the glyphs drawn from the thing itself. The three
      shapes are the schema's own `shapePath` at 16 by 12, filled, moved to (2, 4): the outline the
-     shape picker strokes at 48 by 36, so the row and the plate draw one geometry. The line kinds
+     shape picker strokes at 48 by 36, so the row and the plate draw one geometry. Since the site
+     pages (docs/SITE.md D11) the three are written out as path data and icons.test.ts recomputes
+     them with `shapePath`, so this module imports nothing of the schema and a page that draws a
+     few exported glyphs carries no shape definition. The line kinds
      are their own paths, stroked at the picker's weight; the arrow heads are
      `lineEndPath('fillArrow', 5)` (`M0,0 L-5,-2.5 L-5,2.5 Z`, the tip at the origin pointing along
      +x) rotated to the line's angle and placed at its end, written out on the grid. */
-  'shape-rect': [{ d: shapePath('rect', 16, 12), translate: [2, 4] }],
-  'shape-round-rect': [{ d: shapePath('roundRect', 16, 12), translate: [2, 4] }],
-  'shape-ellipse': [{ d: shapePath('ellipse', 16, 12), translate: [2, 4] }],
+  'shape-rect': [{ d: 'M0,0 H16 V12 H0 Z', translate: [2, 4] }],
+  'shape-round-rect': [
+    {
+      d: 'M0,2 A2,2 0 0 1 2,0 H14 A2,2 0 0 1 16,2 V10 A2,2 0 0 1 14,12 H2 A2,2 0 0 1 0,10 Z',
+      translate: [2, 4],
+    },
+  ],
+  'shape-ellipse': [
+    {
+      d: 'M0,6 A8,6 0 0 1 8,0 A8,6 0 0 1 16,6 A8,6 0 0 1 8,12 A8,6 0 0 1 0,6 Z',
+      translate: [2, 4],
+    },
+  ],
   'line-line': [{ d: 'M3,16 L17,4', stroke: true }],
   /* the line's angle is atan2(-12, 14); the head's three points at (17, 4), and the stroke stops
      at the head's base (5 back along the line) so its round cap stays under the head */
@@ -1078,14 +1198,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'm19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z',
     },
   ],
-  'clipboard-document': [
-    {
-      d: 'M15.988 3.012A2.25 2.25 0 0 1 18 5.25v6.5A2.25 2.25 0 0 1 15.75 14H13.5v-3.379a3 3 0 0 0-.879-2.121l-3.12-3.121a3 3 0 0 0-1.402-.791 2.252 2.252 0 0 1 1.913-1.576A2.25 2.25 0 0 1 12.25 1h1.5a2.25 2.25 0 0 1 2.238 2.012ZM11.5 3.25a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v.25h-3v-.25Z',
-    },
-    {
-      d: 'M3.5 6A1.5 1.5 0 0 0 2 7.5v9A1.5 1.5 0 0 0 3.5 18h7a1.5 1.5 0 0 0 1.5-1.5v-5.879a1.5 1.5 0 0 0-.44-1.06L8.44 6.439A1.5 1.5 0 0 0 7.378 6H3.5Z',
-    },
-  ],
+  'clipboard-document': CLIPBOARD_DOCUMENT,
   sun: [
     {
       d: 'M10 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 2ZM10 15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 15ZM10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM15.657 5.404a.75.75 0 1 0-1.06-1.06l-1.061 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM6.464 14.596a.75.75 0 1 0-1.06-1.06l-1.06 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM18 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 18 10ZM5 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 5 10ZM14.596 15.657a.75.75 0 0 0 1.06-1.06l-1.06-1.061a.75.75 0 1 0-1.06 1.06l1.06 1.06ZM5.404 6.464a.75.75 0 0 0 1.06-1.06l-1.06-1.06a.75.75 0 1 0-1.061 1.06l1.06 1.06Z',
@@ -1116,6 +1229,16 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M6.28 5.22a.75.75 0 0 0-1.06 1.06l7.22 7.22H6.75a.75.75 0 0 0 0 1.5h7.5a.747.747 0 0 0 .75-.75v-7.5a.75.75 0 0 0-1.5 0v5.69L6.28 5.22Z',
     },
   ],
+  /* the Heroicon names of the glyphs the table carried under shorter ones, and the four the site
+     pages added (docs/SITE.md D11) */
+  'book-open': BOOK_OPEN,
+  'pencil-square': PENCIL_SQUARE,
+  'document-text': DOCUMENT_TEXT,
+  'chat-bubble-left-right': CHAT_BUBBLE_LEFT_RIGHT,
+  'arrow-left': ARROW_LEFT,
+  'globe-alt': GLOBE_ALT,
+  window: WINDOW,
+  'exclamation-triangle': EXCLAMATION_TRIANGLE,
   /* the Select tool's plain arrow (docs/archive/rounds/POLISH.md 2.6 item 72): the pointer's own shape, drawn
      filled at the weight of the Heroicons glyphs, so it differs from Show my pointer's rays */
   'cursor-arrow': [{ d: 'M5 2.5 L5 15.5 L8.4 12.6 L10.8 17.6 L13.1 16.5 L10.7 11.6 L15.2 11.3 Z' }],
@@ -1133,7 +1256,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
 export type IconProps = { name: IconName; size?: number };
 
 /** The names of the table, for the tests that walk every glyph. */
-export const ICON_NAMES: ReadonlyArray<IconName> = Object.keys(PATHS) as IconName[];
+export const ICON_NAMES: ReadonlyArray<IconName> = /* @__PURE__ */ Object.keys(PATHS) as IconName[];
 
 /** The paths of one name, for the tests and the contact sheet; the renderer is `Icon`. */
 export function iconPaths(name: IconName): readonly IconPath[] {
@@ -1146,9 +1269,17 @@ export function iconPaths(name: IconName): readonly IconPath[] {
  * glyphs of docs/archive/rounds/VECTOR.md 3.1) draws its outline in the same colour at its width.
  */
 export function Icon({ name, size = 16 }: IconProps) {
+  return <Glyph paths={PATHS[name]} size={size} />;
+}
+
+/**
+ * The renderer of one glyph's paths, for a page that imports the exported constants alone (the
+ * site pages, docs/SITE.md D11): the same svg `Icon` draws.
+ */
+export function Glyph({ paths, size = 16 }: { paths: readonly IconPath[]; size?: number }) {
   return (
     <svg viewBox="0 0 20 20" width={size} height={size} fill="currentColor" aria-hidden="true">
-      {PATHS[name].map((path) => {
+      {paths.map((path) => {
         const transform =
           path.translate === undefined
             ? undefined

@@ -720,8 +720,13 @@ describe("a preview's window on the shared public store", () => {
     expect(text(await preview.get('links/preview.json'))).toBe('preview link');
     w.t.now = Date.parse(frozen.settlesAt ?? '');
     await w.run('plan');
+    // production goes on writing the public store during the preview's window: the copy takes a
+    // version written after the plan (the read of the planned etag gives up), and production
+    // writes that document again after the copy
+    await w.legacy.put('decks/index.json', body('production before the copy'), { overwrite: true });
     await w.run('copy');
-    // production goes on writing the public store during the preview's window
+    await w.legacy.put('decks/index.json', body('production after the copy'), { overwrite: true });
+    expect(text(await w.documents.get('decks/index.json'))).toBe('production before the copy');
     await w.legacy.put('links/abc.json', body('production edit'), { overwrite: true });
     await w.legacy.del(['vitals/v.json']);
     await w.legacy.put('links/later.json', body('production new'), { overwrite: true });
@@ -729,7 +734,7 @@ describe("a preview's window on the shared public store", () => {
     const verify = await w.run('verify');
     expect(verify).toMatchObject({ clean: true, done: true });
     expect(verify.note).toMatch(
-      /^2 planned documents the other environment changed or removed since the plan; 1 more public documents; 15 private documents$/,
+      /^3 planned documents the other environment changed or removed since the plan; 1 more public documents; 15 private documents$/,
     );
     const switched = await w.run('switch');
     opens(w, switched);
@@ -738,16 +743,13 @@ describe("a preview's window on the shared public store", () => {
     expect(text(await preview.get('links/later.json'))).toBeNull();
     await preview.put('links/x.json', body('x'), { overwrite: true });
     expect(w.documents.blobs.has('links/x.json')).toBe(true);
-    expect(
-      w
-        .publicWrites()
-        .filter(
-          (c) =>
-            c.pathname !== 'links/abc.json' &&
-            c.pathname !== 'vitals/v.json' &&
-            c.pathname !== 'links/later.json',
-        ),
-    ).toEqual([]);
+    const production = new Set([
+      'decks/index.json',
+      'links/abc.json',
+      'vitals/v.json',
+      'links/later.json',
+    ]);
+    expect(w.publicWrites().filter((c) => !production.has(c.pathname))).toEqual([]);
   });
 });
 

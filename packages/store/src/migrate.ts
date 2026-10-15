@@ -865,11 +865,14 @@ async function planStep(call: Call): Promise<MigrationResult> {
       takenAt: iso(call.clock()),
       entries: listed.map((entry) => [entry.pathname, entry.version, entry.size]),
     };
-    await call.documents.put(MIGRATION_PLAN, encoder.encode(JSON.stringify(plan)), {
-      overwrite: true,
-      contentType: 'application/json',
-      signal: AbortSignal.timeout(RECORD_WRITE_MS * 3),
-    });
+    const bytes = encoder.encode(JSON.stringify(plan));
+    await tried(call, MIGRATION_PLAN, () =>
+      call.documents.put(MIGRATION_PLAN, bytes, {
+        overwrite: true,
+        contentType: 'application/json',
+        signal: AbortSignal.timeout(RECORD_WRITE_MS * 3),
+      }),
+    );
     call.progress = { ...call.progress, copied: 0, failed: [] };
     delete call.progress.copiedAt;
     delete call.progress.verifiedAt;
@@ -1009,12 +1012,11 @@ async function verifyStep(call: Call): Promise<MigrationResult> {
     const mine = ofPrivate.get(path);
     const now = ofPublic.get(path);
     // the public copy changed or left since the plan: on a shared store, the other environment
+    // wrote it, and the copy holds one of its versions or none, which the snapshot takes
     const moved = now?.version !== etag;
     if (call.shared && moved) other += 1;
-    if (mine?.version === etag) {
-      if (!call.shared && moved) row(call, `public ${differs(path, etag, now)}`);
-    } else if (!(call.shared && moved && (now === undefined || mine?.version === now.version)))
-      row(call, `private ${differs(path, etag, mine)}`);
+    else if (mine?.version !== etag) row(call, `private ${differs(path, etag, mine)}`);
+    else if (moved) row(call, `public ${differs(path, etag, now)}`);
   }
   if (!call.shared) {
     for (const path of ofPublic.keys())

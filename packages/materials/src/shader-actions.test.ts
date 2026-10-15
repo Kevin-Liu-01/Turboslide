@@ -17,6 +17,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { reencodeContinuous } from '@turboslide/headless/capture/intake';
 
+import { ACTIONS } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
 import type { MaterialBlock } from '@turboslide/schema/blocks/material';
 import type { DeckDocument } from '@turboslide/schema/deck';
@@ -35,7 +36,7 @@ import {
   shaderSet,
 } from './actions.ts';
 import type { AssetActionDeps, AssetWriteContext } from './actions.ts';
-import { GALLERY_MATERIAL_IDS } from './catalog.ts';
+import { GALLERY_MATERIAL_IDS, MATERIAL_IDS } from './catalog.ts';
 import { frameAssetId, frameKeyOf } from './recipe-key.ts';
 
 const REPO = resolve(import.meta.dirname, '../../..');
@@ -144,6 +145,14 @@ describe('shader.list', () => {
       'Graphic',
     ]);
     expect(shaderList({ materialId: 'paper:gem-smoke' }).shaders).toHaveLength(1);
+    /* the action's doc, which the agent docs carry, names what the gallery leaves out and where
+       material.list lists it (the review of wave 1: it said "every entry" after wave 1.3) */
+    const doc = ACTIONS['shader.list'].doc;
+    const hidden = MATERIAL_IDS.filter((id) => !GALLERY_MATERIAL_IDS.includes(id));
+    expect(hidden).toHaveLength(3);
+    for (const id of hidden) expect(doc).toContain(id);
+    expect(doc).not.toMatch(/every entry with its category/);
+    expect(doc).toMatch(/material\.list lists all/);
     expect(SHADER_ACTION_ID_STRINGS).toEqual([
       'shader.list',
       'shader.insert',

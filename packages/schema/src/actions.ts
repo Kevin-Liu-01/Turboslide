@@ -4312,7 +4312,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.list': action({
     id: 'shader.list',
     label: 'List shaders',
-    doc: 'The shader library in the gallery’s order: every entry with its category, its featured preset, its stills (the file names under packages/materials/previews), its uniform schema and its palette presets computed from this deck’s brand kit, plus the eleven common controls with their ranges and sentences and the five category chips; material.list is the alias without the gallery fields.',
+    doc: 'The shader library in the gallery’s order: each gallery entry with its category, featured preset, stills (the file names under packages/materials/previews), uniform schema and palette presets from this deck’s brand kit, plus the eleven common controls with their ranges and sentences and the five category chips. The gallery leaves out paper:perlin-noise, paper:simplex-noise and paper:waves; a named materialId answers any entry, and material.list lists all.',
     group: 'asset',
     mutates: false,
     transports: A,

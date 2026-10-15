@@ -121,7 +121,7 @@ import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
 import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
-import { stampPreferences } from './chrome-preferences';
+import { settingsChanged, stampPreferences } from './chrome-preferences';
 import { hideTooltip } from './Tooltip';
 import type { Version } from '@turboslide/schema/mutations';
 
@@ -502,6 +502,21 @@ export function EditorShell({
     }
     const theme: Theme = chosen === 'match' ? appearanceOf(inputRef.current.document.deck) : chosen;
     if (readTheme() !== theme) applyTheme(theme);
+  });
+
+  /* a toggle in another tab (a storage event; it never fires in the tab that wrote): the menu's
+     rows read the stored settings again and the root's stamps follow, so this tab neither shows a
+     stale check nor writes the old value back on its next toggle (the GF-fix of wave 1; the root's
+     boot script restamps the root on the routes without an editor) */
+  useMountEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (!settingsChanged(event)) return;
+      const stored = { ...DEFAULT_SETTINGS, ...readStoredSettings(load(SETTINGS_STORAGE)) };
+      setSettings(stored);
+      applyChromePreferences(stored);
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   });
 
   /* Tools > Advanced > Show slide and block ids and Show sections as a tree: the root carries the

@@ -33,8 +33,19 @@ export function tooltipsHidden(): boolean {
   return document.documentElement.hasAttribute(HIDE_TOOLTIPS_ATTRIBUTE);
 }
 
+/** The key the editor stores its settings under (editor-shell.ts `SETTINGS_STORAGE`). */
+const SETTINGS_KEY = 'ts-editor-settings';
+
 /**
  * The same stamps as one statement of the studio root's boot script, read from the stored
- * settings under `ts-editor-settings` (editor-shell.ts `SETTINGS_STORAGE`) before first paint.
+ * settings under `ts-editor-settings` (editor-shell.ts `SETTINGS_STORAGE`) before first paint, and
+ * read again on every `storage` event for that key, so a tab that is already open (the deck list,
+ * the trash, the presenter console, another editor) follows a toggle made in another tab without
+ * a reload. A cleared storage (the event's null key) clears both.
  */
-export const PREFERENCES_BOOT_STATEMENT = `try{var p=JSON.parse(localStorage.getItem('ts-editor-settings')||'null'),r=document.documentElement;if(p&&p.reduceMotion===true)r.setAttribute('${REDUCE_MOTION_ATTRIBUTE}','');if(p&&p.showTooltips===false)r.setAttribute('${HIDE_TOOLTIPS_ATTRIBUTE}','')}catch(e){}`;
+export const PREFERENCES_BOOT_STATEMENT = `try{var tsPrefs=function(){var p=null;try{p=JSON.parse(localStorage.getItem('${SETTINGS_KEY}')||'null')}catch(e){}var r=document.documentElement;r.toggleAttribute('${REDUCE_MOTION_ATTRIBUTE}',!!p&&p.reduceMotion===true);r.toggleAttribute('${HIDE_TOOLTIPS_ATTRIBUTE}',!!p&&p.showTooltips===false)};tsPrefs();addEventListener('storage',function(e){if(e.key===null||e.key==='${SETTINGS_KEY}')tsPrefs()})}catch(e){}`;
+
+/** True when a `storage` event may have changed the stored settings (another tab wrote or cleared them). */
+export function settingsChanged(event: StorageEvent): boolean {
+  return event.key === null || event.key === SETTINGS_KEY;
+}

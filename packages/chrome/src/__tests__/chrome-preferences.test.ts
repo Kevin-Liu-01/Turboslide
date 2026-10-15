@@ -6,6 +6,7 @@ import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
 import {
   HIDE_TOOLTIPS_ATTRIBUTE,
   PREFERENCES_BOOT_STATEMENT,
+  settingsChanged,
   stampPreferences,
   tooltipsHidden,
 } from '../chrome-preferences';
@@ -48,6 +49,40 @@ describe('the preference stamps', () => {
     localStorage.setItem(SETTINGS_STORAGE, '{');
     expect(boot).not.toThrow();
     expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('a tab already open follows another tab’s write and a cleared storage, without a reload', () => {
+    boot();
+    expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(false);
+    /* another tab turns Reduce motion on and Show tooltips off */
+    localStorage.setItem(
+      SETTINGS_STORAGE,
+      JSON.stringify({ reduceMotion: true, showTooltips: false }),
+    );
+    window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+    expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(true);
+    expect(tooltipsHidden()).toBe(true);
+    /* a write under another key changes nothing */
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({}));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'gt-theme' }));
+    expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(true);
+    /* then turns them back, and a cleared storage clears both */
+    window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+    expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(false);
+    expect(tooltipsHidden()).toBe(false);
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
+    window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+    expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(true);
+    localStorage.clear();
+    window.dispatchEvent(new StorageEvent('storage', { key: null }));
+    expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('reads the key the editor stores its settings under', () => {
+    expect(PREFERENCES_BOOT_STATEMENT).toContain(`'${SETTINGS_STORAGE}'`);
+    expect(settingsChanged(new StorageEvent('storage', { key: SETTINGS_STORAGE }))).toBe(true);
+    expect(settingsChanged(new StorageEvent('storage', { key: null }))).toBe(true);
+    expect(settingsChanged(new StorageEvent('storage', { key: 'gt-theme' }))).toBe(false);
   });
 
   it("stamps and clears both from the settings, leaving the landing's Pause Motion", () => {

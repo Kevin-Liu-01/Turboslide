@@ -301,6 +301,37 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
       ).toBe('true');
     },
   );
+
+  it(
+    'another tab’s toggle reaches an open editor: the stamps and the menu’s checks follow, and the next toggle keeps it',
+    { timeout: 15_000 },
+    () => {
+      const { container } = render(<Harness input={input()} shell={shellState()} />);
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
+      /* the other tab writes the record and the browser tells this tab with a storage event */
+      localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
+      act(() => {
+        window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+      });
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
+      fireEvent.click(container.querySelector('[data-control="menubar.tools"]') as HTMLElement);
+      fireEvent.click(
+        document.querySelector('[data-menu-item="tools.preferences"]') as HTMLElement,
+      );
+      expect(
+        document
+          .querySelector('[data-menu-item="tools.preferences.reduceMotion"]')
+          ?.getAttribute('aria-checked'),
+      ).toBe('true');
+      fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+      /* this tab's own toggle of another row writes the record with the other tab's choice kept */
+      clickMenuPath(container, 'tools', 'tools.preferences', 'tools.preferences.showTooltips');
+      const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}');
+      expect(stored.reduceMotion).toBe(true);
+      expect(stored.showTooltips).toBe(false);
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
+    },
+  );
 });
 
 describe('the editor shell in its default state', () => {

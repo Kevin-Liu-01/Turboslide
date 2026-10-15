@@ -1,8 +1,10 @@
+import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import type { RenderRecord } from '@turboslide/schema/render';
@@ -16,7 +18,7 @@ import { cacheDir, defaultPaths, deckDirOf, readDeckHead } from './paths.ts';
 import type { WorkerPaths } from './paths.ts';
 import { EXPORT_AHEAD_OF, createQueue, queuePosition } from './queue.ts';
 import type { JobContext } from './queue.ts';
-import { createWorkerServer } from './server.ts';
+import { LOCAL_FLAG, WORKER_TOKEN_MIN_LENGTH, createWorkerServer, workerStart } from './server.ts';
 import type { Runners } from './server.ts';
 
 const tmp = mkdtempSync(join(tmpdir(), 'turboslide-worker-'));
@@ -337,12 +339,21 @@ describe('server and clients', () => {
     const { port } = server.address() as AddressInfo;
     const base = `http://127.0.0.1:${port}`;
     try {
-      const health = (await (await fetch(`${base}/healthz`)).json()) as {
-        ok: boolean;
-        queue: { total: number };
-      };
-      expect(health.ok).toBe(true);
+      // /healthz answers ok alone, with no bearer and no version (HR-PS#11a, CRIT-M8); the
+      // versions, the paths and the queue are /status, behind the bearer
+      const healthz = await fetch(`${base}/healthz`);
+      expect(healthz.status).toBe(200);
+      expect(await healthz.json()).toEqual({ ok: true });
+      expect((await fetch(`${base}/status`)).status).toBe(401);
+      const status = (await (
+        await fetch(`${base}/status`, { headers: { authorization: 'Bearer secret' } })
+      ).json()) as { ok: boolean; node: string; tools: unknown; queue: { total: number } };
+      expect(status.ok).toBe(true);
+      expect(status.node).toBe(process.version);
+      expect(status.queue.total).toBe(0);
       expect((await fetch(`${base}/jobs`)).status).toBe(401);
+      for (const path of ['/cache/demo/7/light@1x/x.png', '/render/demo/x', '/jobs/zzz'])
+        expect((await fetch(`${base}${path}`)).status).toBe(401);
       // wrong bearers of the right length in characters and in bytes (HR-SA#1)
       for (const wrong of ['Bearer secreT', 'Bearer s\u00e9cret', 'Bearer s\u00e9cre'])
         expect((await fetch(`${base}/jobs`, { headers: { authorization: wrong } })).status).toBe(
@@ -393,6 +404,7 @@ describe('server and clients', () => {
         env: { TURBOSLIDE_WORKER_URL: base, TURBOSLIDE_WORKER_TOKEN: 'secret' },
       });
       expect(client.mode).toBe('http');
+      expect(((await client.health()) as { node?: string }).node).toBe(process.version);
       const rendered = await client.renderSlide({
         deckId: 'demo',
         slideId: 'thesis',
@@ -429,5 +441,95 @@ describe('server and clients', () => {
     expect(Buffer.from(rendered.png).equals(PNG)).toBe(true);
     const health = (await client.health()) as { mode: string };
     expect(health.mode).toBe('local');
+  });
+});
+
+describe('hardening HR-PS#11a: the worker starts with its token or on 127.0.0.1 alone (CRIT-M8)', () => {
+  const token = 'w'.repeat(WORKER_TOKEN_MIN_LENGTH);
+
+  it('refuses to start without the token unless --local, which binds 127.0.0.1', () => {
+    // origin/main 8c9465b6: a worker with no TURBOSLIDE_WORKER_TOKEN served every route to
+    // whoever reached its port, on the host the variable named (the image sets 0.0.0.0)
+    expect(() => workerStart([], { TURBOSLIDE_WORKER_HOST: '0.0.0.0' })).toThrow(
+      /needs TURBOSLIDE_WORKER_TOKEN/,
+    );
+    expect(() => workerStart([], { TURBOSLIDE_WORKER_TOKEN: 'short' })).toThrow(
+      /at least 32 characters/,
+    );
+    expect(workerStart([LOCAL_FLAG], { TURBOSLIDE_WORKER_HOST: '0.0.0.0' })).toEqual({
+      host: '127.0.0.1',
+      port: 4322,
+      token: undefined,
+      local: true,
+    });
+    expect(
+      workerStart([], {
+        TURBOSLIDE_WORKER_TOKEN: token,
+        TURBOSLIDE_WORKER_HOST: '0.0.0.0',
+        TURBOSLIDE_WORKER_PORT: '4400',
+      }),
+    ).toEqual({ host: '0.0.0.0', port: 4400, token, local: false });
+    expect(() =>
+      workerStart([], { TURBOSLIDE_WORKER_TOKEN: token, TURBOSLIDE_WORKER_PORT: 'x' }),
+    ).toThrow(/must be a port number/);
+    const paths = fakePaths(join(tmp, 'no-token'));
+    const queue = createQueue({ dir: paths.workerDir });
+    try {
+      expect(() => createWorkerServer({ queue, paths })).toThrow(/needs a bearer token/);
+      expect(() => createWorkerServer({ queue, paths, local: true }).close()).not.toThrow();
+    } finally {
+      queue.close();
+    }
+  });
+
+  it('the process exits 1 without the token, naming the variable and not the value', () => {
+    const main = join(dirname(fileURLToPath(import.meta.url)), 'main.ts');
+    const env: Record<string, string> = {};
+    for (const [key, value] of Object.entries(process.env))
+      if (value !== undefined && !key.startsWith('TURBOSLIDE_')) env[key] = value;
+    const refused = spawnSync(process.execPath, [main], {
+      env: { ...env, TURBOSLIDE_WORKER_DIR: join(tmp, 'refused') },
+      encoding: 'utf8',
+      timeout: 60_000,
+    });
+    expect(refused.status).toBe(1);
+    expect(refused.stderr).toMatch(
+      /refuses to start: The render worker needs TURBOSLIDE_WORKER_TOKEN/,
+    );
+  });
+
+  it('a wrong bearer as long as the token is 401 on every route but /healthz', async () => {
+    const paths = fakePaths(join(tmp, 'bearer'));
+    const queue = createQueue({ dir: paths.workerDir });
+    const server = createWorkerServer({ queue, paths, token, runners: fakeRunners(paths) });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', () => resolve()));
+    const { port } = server.address() as AddressInfo;
+    const base = `http://127.0.0.1:${port}`;
+    const wrong = { authorization: `Bearer ${'x'.repeat(WORKER_TOKEN_MIN_LENGTH)}` };
+    try {
+      for (const path of [
+        '/status',
+        '/jobs',
+        '/jobs/zzz/files/a.png',
+        '/cache/a.png',
+        '/render/demo/x',
+      ])
+        expect((await fetch(`${base}${path}`, { headers: wrong })).status).toBe(401);
+      const posted = await fetch(`${base}/jobs`, {
+        method: 'POST',
+        headers: { ...wrong, 'content-type': 'application/json' },
+        body: JSON.stringify({ kind: 'export', deckId: 'demo' }),
+      });
+      expect(posted.status).toBe(401);
+      expect(queue.list()).toHaveLength(0);
+      const health = await fetch(`${base}/healthz`, { headers: wrong });
+      const text = await health.text();
+      expect(health.status).toBe(200);
+      expect(JSON.parse(text)).toEqual({ ok: true });
+      expect(text).not.toMatch(/version|node|tools|soffice|pdftoppm|chrome|queue|decks/i);
+    } finally {
+      queue.close();
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 });

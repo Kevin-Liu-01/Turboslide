@@ -1,7 +1,8 @@
 // The worker's HTTP surface (SPEC 3.3 item 7, 11 Security): the studio facade enqueues jobs and
 // polls them here; nothing else reaches the worker. Routes:
 //
-//   GET  /healthz                         versions, tools, queue stats
+//   GET  /healthz                         { ok: true } and nothing else (no bearer)
+//   GET  /status                          versions, tools, paths, queue stats
 //   POST /jobs                            { kind, ...input } -> 202 with the job record
 //                                         (kinds: render, sheet, export, verify, measure)
 //   GET  /jobs[?kind=]                    recent records
@@ -12,8 +13,11 @@
 //                                         one slide: the PNG (or a JPEG at quality 92) with
 //                                         X-Turboslide-Record, or JSON
 //
-// TURBOSLIDE_WORKER_TOKEN, when set, is required as a bearer token on every route but /healthz,
-// compared in constant time (@turboslide/identity/safe-equal, HR-SA#1).
+// TURBOSLIDE_WORKER_TOKEN is required as a bearer token on every route but /healthz, compared in
+// constant time (@turboslide/identity/safe-equal, HR-SA#1). The worker refuses to start without
+// it unless it is started with `--local`, which serves 127.0.0.1 alone (`workerStart`, hardening
+// HR-PS#11a, CRIT-M8); /healthz names no version, so a scan learns nothing of the tools. The
+// route inventory is docs/security.md section 19.
 // Bodies are capped at 1 MB. The container has no credentials and reads only the decks directory
 // and its own work directory (SPEC 11).
 import { createReadStream, existsSync, statSync } from 'node:fs';
@@ -67,11 +71,59 @@ export function defaultRunners(paths: WorkerPaths): Runners {
 export type WorkerServerOptions = {
   queue: Queue;
   paths: WorkerPaths;
+  /** the bearer every route but /healthz requires; absent only with `local` */
   token?: string;
+  /** a checkout's worker on 127.0.0.1 (`--local`): no bearer when no token is given */
+  local?: boolean;
   runners?: Partial<Runners>;
   version?: string;
   log?: (line: string) => void;
 };
+
+/** The shortest TURBOSLIDE_WORKER_TOKEN the process starts with, as the studio's own secrets. */
+export const WORKER_TOKEN_MIN_LENGTH = 32;
+/** The flag that starts a checkout's worker on 127.0.0.1 without a token. */
+export const LOCAL_FLAG = '--local';
+const LOOPBACK = '127.0.0.1';
+
+export type WorkerStart = {
+  host: string;
+  port: number;
+  /** undefined only for a `--local` worker started without one */
+  token: string | undefined;
+  local: boolean;
+};
+
+/**
+ * How the worker process starts (hardening HR-PS#11a, CRIT-M8). With TURBOSLIDE_WORKER_TOKEN (at
+ * least WORKER_TOKEN_MIN_LENGTH characters) it serves TURBOSLIDE_WORKER_HOST (127.0.0.1 by
+ * default; the image sets 0.0.0.0) on TURBOSLIDE_WORKER_PORT (4322). With `--local` it serves
+ * 127.0.0.1 whatever the host variable says, with the token when one is set and without a bearer
+ * otherwise. Anything else is a TypeError naming the variable: before this a worker started
+ * without the token served every job, file and render route to whoever reached its port.
+ */
+export function workerStart(
+  argv: readonly string[],
+  env: Readonly<Record<string, string | undefined>>,
+): WorkerStart {
+  const local = argv.includes(LOCAL_FLAG);
+  const port = Number(env.TURBOSLIDE_WORKER_PORT ?? 4322);
+  if (!Number.isInteger(port) || port < 0 || port > 65_535)
+    throw new TypeError(
+      `TURBOSLIDE_WORKER_PORT must be a port number, got ${JSON.stringify(env.TURBOSLIDE_WORKER_PORT)}`,
+    );
+  const token = env.TURBOSLIDE_WORKER_TOKEN ?? '';
+  if (token !== '' && token.length < WORKER_TOKEN_MIN_LENGTH)
+    throw new TypeError(
+      `TURBOSLIDE_WORKER_TOKEN must be at least ${WORKER_TOKEN_MIN_LENGTH} characters`,
+    );
+  if (local) return { host: LOOPBACK, port, token: token === '' ? undefined : token, local };
+  if (token === '')
+    throw new TypeError(
+      `The render worker needs TURBOSLIDE_WORKER_TOKEN; start it with ${LOCAL_FLAG} to serve ${LOOPBACK} without one`,
+    );
+  return { host: env.TURBOSLIDE_WORKER_HOST ?? LOOPBACK, port, token, local };
+}
 
 class HttpError extends Error {
   readonly status: number;
@@ -141,6 +193,10 @@ export function publicJob(record: JobRecord): Omit<JobRecord, 'dir'> & { files: 
 }
 
 export function createWorkerServer(options: WorkerServerOptions): Server {
+  if (!options.token && options.local !== true)
+    throw new TypeError(
+      `The render worker needs a bearer token unless it serves ${LOOPBACK} alone (${LOCAL_FLAG})`,
+    );
   const runners: Runners = { ...defaultRunners(options.paths), ...options.runners };
   const log = options.log ?? (() => {});
   const versions = toolVersions().catch(() => ({ soffice: null, pdftoppm: null }));
@@ -163,6 +219,11 @@ export function createWorkerServer(options: WorkerServerOptions): Server {
     const parts = url.pathname.split('/').filter(Boolean);
     const method = req.method ?? 'GET';
     if (parts[0] === 'healthz' && method === 'GET') {
+      json(res, 200, { ok: true });
+      return;
+    }
+    authorize(req);
+    if (parts[0] === 'status' && method === 'GET') {
       json(res, 200, {
         ok: true,
         name: '@turboslide/render-worker',
@@ -176,7 +237,6 @@ export function createWorkerServer(options: WorkerServerOptions): Server {
       });
       return;
     }
-    authorize(req);
     if (parts[0] === 'jobs') {
       if (parts.length === 1 && method === 'POST') {
         const body = await readBody(req);

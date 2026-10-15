@@ -215,7 +215,7 @@ overrides:
   solid-js@<1.9.16: 1.9.16
 
 patchedDependencies:
-  '@paper-design/shaders@0.0.78': e7ee33647978c734f7dea2e858edfa55f20579b0e4cbfd1fb387c516dd8cc07f
+  '@paper-design/shaders@0.0.78': f4dfa144d1895da79862b9bb14364452bf92145db497d657ac3b801b95e68e8b
 
 importers:
 
@@ -391,7 +391,7 @@ importers:
     dependencies:
       '@paper-design/shaders':
         specifier: 'catalog:'
-        version: 0.0.78(patch_hash=e7ee33647978c734f7dea2e858edfa55f20579b0e4cbfd1fb387c516dd8cc07f)
+        version: 0.0.78(patch_hash=f4dfa144d1895da79862b9bb14364452bf92145db497d657ac3b801b95e68e8b)
       '@simplewebauthn/browser':
         specifier: 'catalog:'
         version: 14.0.0
@@ -853,7 +853,7 @@ importers:
     dependencies:
       '@paper-design/shaders':
         specifier: 'catalog:'
-        version: 0.0.78(patch_hash=e7ee33647978c734f7dea2e858edfa55f20579b0e4cbfd1fb387c516dd8cc07f)
+        version: 0.0.78(patch_hash=f4dfa144d1895da79862b9bb14364452bf92145db497d657ac3b801b95e68e8b)
       '@turboslide/effects':
         specifier: workspace:*
         version: link:../effects
@@ -7068,7 +7068,7 @@ snapshots:
 
   '@oxc-project/types@0.149.0': {}
 
-  '@paper-design/shaders@0.0.78(patch_hash=e7ee33647978c734f7dea2e858edfa55f20579b0e4cbfd1fb387c516dd8cc07f)': {}
+  '@paper-design/shaders@0.0.78(patch_hash=f4dfa144d1895da79862b9bb14364452bf92145db497d657ac3b801b95e68e8b)': {}
 
   '@peculiar/asn1-android@2.9.4':
     dependencies:

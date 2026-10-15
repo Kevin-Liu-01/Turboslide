@@ -2,7 +2,8 @@
 // taken from Glyphfield, MIT, Kevin Liu): a disposed ShaderMount hands its canvas, its WebGL2
 // context and its compiled program to a pool of two keyed by the context attributes, so the next
 // mount skips the context (about 70 ms) and the compile (about 45 ms); a lost context is dropped;
-// a third key evicts the oldest entry and releases its context; dispose never waits on the GPU
+// a third key evicts the oldest entry and releases its context unless the browser already lost
+// it; dispose never waits on the GPU
 // through `getError`. Turboslide's change to the patch: a pooled canvas holds no drawing buffer
 // (size zero), so the next mount never shows the last frame and a mount at speed 0 still draws on
 // its first resize. Node, with a fake document, canvas and context.
@@ -216,6 +217,28 @@ describe('the Paper context and program pool (the pnpm patch)', () => {
     /* the capture's attributes find the capture's context, never the stage's */
     const again = mount(doc, { preserveDrawingBuffer: true, antialias: false });
     expect(again.gl).toBe(capture.gl);
+    again.dispose();
+  });
+
+  it('evicts a context the browser already lost without releasing it again', () => {
+    /* WebKit counts a released context toward its limit of 16 until it is collected and then drops
+       the least recently used idle one by itself, so a pooled context can be lost before eviction;
+       a second release logs "loseContext: context already lost" (the review of wave 1) */
+    const calls: Calls = {};
+    const doc = fakeDocument(calls);
+    const stage = mount(doc);
+    const capture = mount(doc, { preserveDrawingBuffer: true, antialias: false });
+    const other = mount(doc, { alpha: false });
+    stage.dispose();
+    capture.dispose();
+    stage.gl.lose();
+    other.dispose();
+    expect(stage.gl.loseContext).not.toHaveBeenCalled();
+    expect(stage.canvasElement.dataset.paperShaderPooled).toBeUndefined();
+    /* the live context the eviction keeps is untouched, and a lost one is never handed out */
+    expect(capture.gl.loseContext).not.toHaveBeenCalled();
+    const again = mount(doc);
+    expect(again.gl).not.toBe(stage.gl);
     again.dispose();
   });
 

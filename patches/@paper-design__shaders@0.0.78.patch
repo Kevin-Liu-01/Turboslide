@@ -1,8 +1,8 @@
 diff --git a/dist/shader-mount.js b/dist/shader-mount.js
-index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8d37f7d6e 100644
+index 5cf3dfe98acca473afa58329e5828e4a79d0f478..137f3ab7fd45730020ed22cfd8e117d43c5aff4a 100644
 --- a/dist/shader-mount.js
 +++ b/dist/shader-mount.js
-@@ -3,8 +3,70 @@
+@@ -3,8 +3,72 @@
   *       https://github.com/paper-design/shaders       *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * */
  
@@ -47,7 +47,9 @@ index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8
 +  while (canvasPool.length > POOLED_CANVAS_LIMIT) {
 +    const evicted = canvasPool.shift();
 +    delete evicted.canvas.dataset.paperShaderPooled;
-+    releaseContext(evicted.gl);
++    // Turboslide: WebKit drops an idle context by itself once it holds 16, and a second release
++    // of a context it already lost logs "loseContext: context already lost".
++    if (!evicted.gl.isContextLost()) releaseContext(evicted.gl);
 +  }
 +}
 +function cachedProgram(gl, fragmentShaderSource) {
@@ -73,7 +75,7 @@ index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8
  class ShaderMount {
    parentElement;
    canvasElement;
-@@ -52,7 +114,9 @@ class ShaderMount {
+@@ -52,7 +116,9 @@ class ShaderMount {
        styleElement.setAttribute("data-paper-shader", "");
        this.ownerDocument.head.prepend(styleElement);
      }
@@ -84,7 +86,7 @@ index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8
      this.canvasElement = canvasElement;
      this.parentElement.prepend(canvasElement);
      this.fragmentShader = fragmentShader;
-@@ -61,7 +125,7 @@ class ShaderMount {
+@@ -61,7 +127,7 @@ class ShaderMount {
      this.currentFrame = frame;
      this.minPixelRatio = minPixelRatio;
      this.maxPixelCount = maxPixelCount;
@@ -93,7 +95,7 @@ index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8
      if (!gl) {
        throw new Error("Paper Shaders: WebGL is not supported in this browser");
      }
-@@ -79,13 +143,14 @@ class ShaderMount {
+@@ -79,13 +145,14 @@ class ShaderMount {
      this.ownerDocument.addEventListener("visibilitychange", this.handleDocumentVisibilityChange);
    }
    initProgram = () => {
@@ -109,7 +111,7 @@ index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8
      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
      const positions = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
      this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
-@@ -394,13 +459,16 @@ class ShaderMount {
+@@ -394,13 +461,16 @@ class ShaderMount {
          this.gl.deleteTexture(texture);
        });
        this.textures.clear();
@@ -128,7 +130,7 @@ index 5cf3dfe98acca473afa58329e5828e4a79d0f478..c4be7e9b914ceb18855c85a6b8bd3ab8
      }
      if (this.resizeObserver) {
        this.resizeObserver.disconnect();
-@@ -414,6 +482,7 @@ class ShaderMount {
+@@ -414,6 +484,7 @@ class ShaderMount {
      this.ownerDocument.removeEventListener("visibilitychange", this.handleDocumentVisibilityChange);
      this.uniformLocations = {};
      this.canvasElement.remove();

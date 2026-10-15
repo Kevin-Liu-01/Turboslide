@@ -453,6 +453,24 @@
   background: var(--pt-paper);
 }
 
+/* the live editor's frame (HeroBox.tsx): over the poster in the same box, shown once it says it
+   is ready, so the swap moves nothing */
+.ts-site .site-hero-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity 150ms var(--pt-ease-out);
+}
+
+.ts-site .site-hero-box[data-state='live'] .site-hero-frame,
+.ts-site .site-hero-box[data-state='done'] .site-hero-frame {
+  opacity: 1;
+}
+
 /* ---- the screens after the hero: a ruled title block, one sentence, one large figure ---- */
 
 .ts-site .site-screen {
@@ -997,7 +1015,8 @@
 @media (prefers-reduced-motion: reduce) {
   .ts-site .site-btn,
   .ts-site .site-bar-link,
-  .ts-site .site-foot a {
+  .ts-site .site-foot a,
+  .ts-site .site-hero-frame {
     transition: none;
   }
 }

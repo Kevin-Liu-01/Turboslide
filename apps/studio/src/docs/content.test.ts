@@ -1,8 +1,10 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
+
+import { FIGURE_SIZES } from './figures';
 
 // The docs' content (docs/POLISH-2.md 5.6, C29): every MDX file under apps/studio/content/docs has
 // a title and a description, uses no em dash and no en dash as a dash, and every link to a docs
@@ -10,6 +12,7 @@ import { describe, expect, it } from 'vitest';
 // other addresses name one of the addresses the studio serves.
 
 const DIR = fileURLToPath(new URL('../../content/docs', import.meta.url));
+const FIGURE_DIR = fileURLToPath(new URL('../../public/docs/figures', import.meta.url));
 
 /** The site's addresses outside the docs pages that a docs page may link to. */
 const SITE_PATHS = new Set([
@@ -117,6 +120,29 @@ describe('the docs content', () => {
           else if (hash !== undefined && hash !== '' && !found.anchors.has(hash)) broken.push(href);
         }
         expect(broken, `${url} links`).toEqual([]);
+      });
+
+      it('names figures whose pictures exist in both appearances, each with alt text and a caption', () => {
+        const faults: string[] = [];
+        for (const match of page.text.matchAll(/<Figure\b([\s\S]*?)\/>/g)) {
+          const props = match[1] ?? '';
+          const name = /\bname="([^"]+)"/.exec(props)?.[1] ?? '';
+          const alt = /\balt="([^"]+)"/.exec(props)?.[1] ?? '';
+          const caption = /\bcaption="([^"]+)"/.exec(props)?.[1] ?? '';
+          const size = FIGURE_SIZES[name];
+          if (size === undefined) faults.push(`${name}: not in figures.ts`);
+          const files = ['light', 'dark'].flatMap((appearance) => [
+            `${name}-${appearance}.webp`,
+            ...(size?.phone === undefined ? [] : [`${name}-390-${appearance}.webp`]),
+          ]);
+          for (const file of files)
+            if (!existsSync(join(FIGURE_DIR, file))) faults.push(`${name}: no ${file}`);
+          if (!alt.endsWith('.'))
+            faults.push(`${name}: alt text "${alt}" ends without a full stop`);
+          if (!caption.endsWith('.'))
+            faults.push(`${name}: caption "${caption}" ends without a full stop`);
+        }
+        expect(faults, url).toEqual([]);
       });
     });
   }

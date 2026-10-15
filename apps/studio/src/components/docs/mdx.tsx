@@ -1,10 +1,12 @@
 import { Link } from '@tanstack/react-router';
 import { Children, isValidElement, useId, useRef, useState } from 'react';
-import type { ComponentProps, ComponentType, ReactElement, ReactNode } from 'react';
+import type { CSSProperties, ComponentProps, ComponentType, ReactElement, ReactNode } from 'react';
 
-import { calloutLabel, countsText } from '../../docs/markdown';
+import { FIGURE_SIZES } from '../../docs/figures';
+import { calloutLabel, countsText, figureSource } from '../../docs/markdown';
 import type { CountsProps } from '../../docs/markdown';
 import type { DocsPage } from '../../docs/source';
+import { Frame } from '../site/Frame';
 import { SiteIcon } from '../site/SiteIcon';
 import type { SiteIconName } from '../site/SiteIcon';
 
@@ -200,6 +202,67 @@ export function Card({
 
 export function Cards({ children }: { children?: ReactNode }) {
   return <ul className="ts-docs-index">{children}</ul>;
+}
+
+/**
+ * A figure cut from a capture of the product (plan E.5): `<Figure name alt caption />` draws
+ * /docs/figures/<name>-light.webp or -dark.webp after the page's appearance (one `<picture>` per
+ * appearance, the other never fetched), the -390- cut at 720 px and under where one exists, at
+ * its native size at most, in the square frame with corner crosses; a leader under it where the
+ * capture names one; and "Figure N" (a CSS counter) before the caption. Its markdown form is the
+ * light picture and the caption (src/docs/markdown.ts).
+ */
+export function Figure({ name, alt, caption }: { name: string; alt: string; caption: string }) {
+  const size = FIGURE_SIZES[name];
+  if (size === undefined) return null;
+  const vars = {
+    '--fig-w': `${size.width}px`,
+    ...(size.phone === undefined ? {} : { '--fig-phone-w': `${size.phone.width}px` }),
+    ...(size.leader === undefined
+      ? {}
+      : {
+          '--fig-at': `${size.leader.at}%`,
+          '--fig-phone-at': `${size.leader.phoneAt ?? size.leader.at}%`,
+        }),
+  } as CSSProperties;
+  return (
+    <figure className="ts-docs-fig" data-figure={name} style={vars}>
+      <Frame className="ts-docs-fig-frame">
+        {(['light', 'dark'] as const).map((appearance) => (
+          <picture key={appearance} className={`site-pic is-${appearance}`}>
+            {size.phone === undefined ? null : (
+              <source
+                media="(max-width: 720px)"
+                srcSet={figureSource(name, appearance, true)}
+                width={size.phone.width}
+                height={size.phone.height}
+              />
+            )}
+            <img
+              src={figureSource(name, appearance, false)}
+              width={size.width}
+              height={size.height}
+              alt={alt}
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+        ))}
+      </Frame>
+      {size.leader === undefined ? null : (
+        <div className="ts-docs-leader" aria-hidden="true">
+          <i />
+          <span className="t-label">{size.leader.label}</span>
+        </div>
+      )}
+      <figcaption className="t-small">
+        <span className="t-label">
+          Figure <span className="ts-docs-fig-n" />
+        </span>
+        {caption}
+      </figcaption>
+    </figure>
+  );
 }
 
 /** The action reference's counts per transport, read from the contracts at generation (5.4). */
@@ -424,4 +487,5 @@ export const DOCS_COMPONENTS: MdxComponents = {
   Card,
   Kbd,
   ActionCounts,
+  Figure,
 };

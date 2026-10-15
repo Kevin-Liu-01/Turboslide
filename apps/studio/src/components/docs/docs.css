@@ -234,7 +234,7 @@
 /* ---- the article's text: 17/28, reading text held at 32em ---- */
 
 .ts-docs .ts-docs-body-text {
-  counter-reset: sec;
+  counter-reset: sec fig;
 }
 
 .ts-docs .ts-docs-body-text > p,
@@ -429,6 +429,64 @@
 .ts-docs .ts-docs-code .ts-docs-ln[data-prompt]::before {
   content: '$ ';
   color: var(--pt-panel-text-2);
+}
+
+/* ---- figures: a capture at its native size at most, in the square frame with corner crosses,
+   a leader to one control where the capture names one, then "Figure N" and the caption ---- */
+
+.ts-docs .ts-docs-fig {
+  margin: 32px 0;
+  counter-increment: fig;
+}
+
+.ts-docs .ts-docs-fig-frame,
+.ts-docs .ts-docs-leader {
+  width: min(var(--fig-w), 100%);
+}
+
+.ts-docs .ts-docs-fig-frame {
+  border-color: var(--pt-hair);
+}
+
+.ts-docs .ts-docs-leader {
+  position: relative;
+  height: 32px;
+}
+
+.ts-docs .ts-docs-leader i {
+  position: absolute;
+  top: 0;
+  left: var(--fig-at);
+  width: 1px;
+  height: 12px;
+  background: var(--pt-ink);
+}
+
+.ts-docs .ts-docs-leader span {
+  position: absolute;
+  top: 16px;
+  left: var(--fig-at);
+  transform: translateX(-50%);
+  color: var(--pt-ink);
+}
+
+.ts-docs .ts-docs-fig figcaption {
+  margin-top: 12px;
+  max-width: 44em;
+  color: var(--pt-titanium);
+}
+
+.ts-docs .ts-docs-leader + figcaption {
+  margin-top: 4px;
+}
+
+.ts-docs .ts-docs-fig figcaption .t-label {
+  margin-right: 8px;
+  color: var(--pt-ink);
+}
+
+.ts-docs .ts-docs-fig-n::before {
+  content: counter(fig);
 }
 
 /* ---- tables: capital heads over an edge rule, rows on hairlines ---- */
@@ -1171,6 +1229,17 @@
     text-indent: -2ch;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  /* a figure with a phone cut takes its width and its leader's place */
+  .ts-docs .ts-docs-fig-frame,
+  .ts-docs .ts-docs-leader {
+    width: min(var(--fig-phone-w, var(--fig-w)), 100%);
+  }
+
+  .ts-docs .ts-docs-leader i,
+  .ts-docs .ts-docs-leader span {
+    left: var(--fig-phone-at, var(--fig-at));
   }
 
   .ts-docs .ts-docs-pager {

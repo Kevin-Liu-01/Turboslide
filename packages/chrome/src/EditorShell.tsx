@@ -121,7 +121,8 @@ import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
 import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
-import { setTooltipsShown } from './Tooltip';
+import { stampPreferences } from './chrome-preferences';
+import { hideTooltip } from './Tooltip';
 import type { Version } from '@turboslide/schema/mutations';
 
 import './EditorShell.css';
@@ -305,13 +306,13 @@ function forget(key: string): void {
 
 /**
  * Tools > Preferences > Reduce motion and Show tooltips on the page (the Glyphfield port, PLAN.md
- * wave 1 item 7): the root's `data-motion="reduced"` zeroes the chrome's durations (tokens.css;
- * the root's boot script stamps it before first paint), and the tooltip manager shows no plate.
+ * wave 1 item 7): the root's attributes (chrome-preferences.ts; the root's boot script stamps them
+ * before first paint) zero the chrome's durations and keep the tooltip manager from showing a
+ * plate; the one up hides when the tooltips go off.
  */
 function applyChromePreferences(settings: ShellSettings): void {
-  if (settings.reduceMotion === true) document.documentElement.dataset.motion = 'reduced';
-  else delete document.documentElement.dataset.motion;
-  setTooltipsShown(settings.showTooltips !== false);
+  stampPreferences(settings);
+  if (settings.showTooltips === false) hideTooltip();
 }
 
 /**

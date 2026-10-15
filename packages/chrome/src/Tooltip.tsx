@@ -1,6 +1,7 @@
 import type { FocusEvent, KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import { cloneElement, isValidElement } from 'react';
 
+import { tooltipsHidden } from './chrome-preferences';
 import { closeLayer, openLayer } from './Layer';
 import { place } from './place';
 
@@ -362,20 +363,15 @@ function cancelPending(): void {
 
 /*
  * Tools > Preferences > Show tooltips (the Glyphfield port, PLAN.md wave 1 item 7): while it is
- * off the manager shows no plate. `data-tip`, the accessible names and the tooltip audit stay.
+ * off the root carries `data-hide-tooltips` (chrome-preferences.ts; the studio root's boot script
+ * stamps it on every route, the editor on its toggle) and the manager shows no plate. `data-tip`,
+ * the accessible names and the tooltip audit stay.
  */
-let tipsShown = true;
-
-/** Turns the plates on or off for the page; off hides the one up. */
-export function setTooltipsShown(on: boolean): void {
-  tipsShown = on;
-  if (!on) hideTooltip();
-}
 
 /** Shows the tooltip for an anchor now, replacing whatever is up. */
 export function showTooltip(anchor: HTMLElement, content: TipContent): void {
   cancelPending();
-  if (!tipsShown || !anchor.isConnected) return;
+  if (tooltipsHidden() || !anchor.isConnected) return;
   const el = ensureLayer();
   if (shown !== null && shown.anchor !== anchor) shown.anchor.removeAttribute('aria-describedby');
   shown = { anchor, content };
@@ -423,7 +419,7 @@ export function hideTooltipUntilInput(): void {
  * the reader is walking a toolbar and the second plate should not make them wait again).
  */
 export function scheduleTooltip(anchor: HTMLElement, content: TipContent): void {
-  if (!tipsShown) return;
+  if (tooltipsHidden()) return;
   if (shown !== null && shown.anchor === anchor) return;
   if (shown !== null) {
     showTooltip(anchor, content);

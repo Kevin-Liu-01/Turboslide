@@ -3467,7 +3467,8 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6): View > Play shaders, per browser */
   'playShaders',
   /* the Glyphfield port (PLAN.md wave 1 item 7): Tools > Preferences > Reduce motion and Show
-     tooltips; the root's boot script reads reduceMotion from this record before first paint */
+     tooltips; the root's boot script reads both from this record before first paint
+     (chrome-preferences.ts) */
   'reduceMotion',
   'showTooltips',
 ];

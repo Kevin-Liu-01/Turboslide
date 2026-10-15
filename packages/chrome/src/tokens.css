@@ -617,9 +617,9 @@ body[data-shell] {
 }
 
 /* Tools > Preferences > Reduce motion (the Glyphfield port, PLAN.md wave 1 item 7) stamps
-   data-motion="reduced" on the root (the editor, and the root's boot script before first paint),
-   and the same durations go to zero whatever the system setting says. */
-:root[data-motion='reduced'] {
+   data-reduce-motion on the root (chrome-preferences.ts: the editor, and the root's boot script
+   before first paint), and the same durations go to zero whatever the system setting says. */
+:root[data-reduce-motion] {
   --pt-dur-fast: 0ms;
   --pt-dur-leave: 0ms;
   --pt-dur-toast: 0ms;
@@ -628,6 +628,6 @@ body[data-shell] {
   --pt-dur-sb: 0ms;
 }
 
-:root[data-motion='reduced'] .pt-ib {
+:root[data-reduce-motion] .pt-ib {
   transition: none;
 }

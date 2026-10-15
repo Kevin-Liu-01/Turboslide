@@ -12,6 +12,7 @@ import type { Block } from '@turboslide/schema/blocks';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
+import { stampPreferences } from '../chrome-preferences';
 import { RETIRED_KEYS_STORAGE, SETTINGS_STORAGE } from '../editor-shell';
 import type { EditorShellInput } from '../editor-shell';
 import { EditorShell } from '../EditorShell';
@@ -21,7 +22,7 @@ import { FORBIDDEN_DEFAULT_VIEW_WORDS, SNACKBARS, forbiddenWordsIn } from '../me
 import { ShellContext } from '../shell-context';
 import type { ShellState } from '../shell-context';
 import { useSnackbar } from '../Snackbar';
-import { TIP_ID, hideTooltip, resetTooltipTiming, setTooltipsShown } from '../Tooltip';
+import { TIP_ID, hideTooltip, resetTooltipTiming } from '../Tooltip';
 
 // The editor shell rendered in its default state (gslides-parity SPEC 11.1, 12, 13, 14.2): the
 // title row, the menu bar with the ten menus, the toolbar in the order of 3.1, the side panel toggle;
@@ -168,26 +169,30 @@ afterEach(async () => {
 
 describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips (the Glyphfield port, PLAN.md wave 1 item 7)', () => {
   afterEach(() => {
+    stampPreferences({});
     delete document.documentElement.dataset.motion;
     delete document.documentElement.dataset.theme;
-    setTooltipsShown(true);
     resetTooltipTiming();
   });
 
   /* each row renders the whole shell, twice in the first; 15 s for a loaded machine */
   it(
-    'Reduce motion stamps data-motion="reduced" on the root and keeps it per browser; a stored one is stamped on mount',
+    "Reduce motion stamps data-reduce-motion on the root and keeps it per browser, leaving the landing's data-motion; a stored one is stamped on mount",
     { timeout: 15_000 },
     () => {
+      /* the landing's Pause Motion, carried by a move inside the app, is the landing's own */
+      document.documentElement.dataset.motion = 'paused';
       const first = render(<Harness input={input()} shell={shellState()} />);
-      expect(document.documentElement.dataset.motion).toBeUndefined();
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
+      expect(document.documentElement.dataset.motion).toBe('paused');
       clickMenuPath(
         first.container,
         'tools',
         'tools.preferences',
         'tools.preferences.reduceMotion',
       );
-      expect(document.documentElement.dataset.motion).toBe('reduced');
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
+      expect(document.documentElement.dataset.motion).toBe('paused');
       expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').reduceMotion).toBe(true);
       clickMenuPath(
         first.container,
@@ -195,12 +200,13 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
         'tools.preferences',
         'tools.preferences.reduceMotion',
       );
-      expect(document.documentElement.dataset.motion).toBeUndefined();
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
+      expect(document.documentElement.dataset.motion).toBe('paused');
       expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').reduceMotion).toBe(false);
       cleanup();
       localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
       const { container } = render(<Harness input={input()} shell={shellState()} />);
-      expect(document.documentElement.dataset.motion).toBe('reduced');
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
       fireEvent.click(container.querySelector('[data-control="menubar.tools"]') as HTMLElement);
       fireEvent.click(
         document.querySelector('[data-menu-item="tools.preferences"]') as HTMLElement,
@@ -236,6 +242,7 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'tools', 'tools.preferences', 'tools.preferences.showTooltips');
     expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').showTooltips).toBe(false);
+    expect(document.documentElement.hasAttribute('data-hide-tooltips')).toBe(true);
     const share = container.querySelector<HTMLElement>('[data-tip]')!;
     expect(share.getAttribute('data-tip')).not.toBe('');
     const hover = (x: number) => {

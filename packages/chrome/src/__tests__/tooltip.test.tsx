@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { stampPreferences } from '../chrome-preferences';
 import { ToolButton } from '../ToolButton';
 import {
   TIP_DELAY_MS,
@@ -330,6 +331,29 @@ describe('Tooltip', () => {
     expect(onKeyDown).toHaveBeenCalledTimes(1);
     const wrapper = document.querySelector('.pt-tip-anchor');
     expect(wrapper?.getAttribute('data-tip')).toBe('Wrapped');
+  });
+
+  it('shows no plate while the root carries Show tooltips off, as the boot script leaves a page the editor never mounted', () => {
+    stampPreferences({ showTooltips: false });
+    try {
+      render(<ToolButton title="Keyboard shortcuts (?)" onClick={() => undefined} />);
+      const button = screen.getByRole('button', { name: 'Keyboard shortcuts' });
+      moveTo(10, 10);
+      fireEvent.mouseEnter(button);
+      act(() => {
+        vi.advanceTimersByTime(TIP_DELAY_MS * 2);
+      });
+      expect(layer()?.hidden ?? true).toBe(true);
+      tabTo(button);
+      expect(layer()?.hidden ?? true).toBe(true);
+      expect(button.getAttribute('data-tip')).toBe('Keyboard shortcuts');
+      fireEvent.blur(button);
+      stampPreferences({});
+      tabTo(button);
+      expect(layer()?.hidden).toBe(false);
+    } finally {
+      stampPreferences({});
+    }
   });
 
   it('spreads onto any element through tipProps', () => {

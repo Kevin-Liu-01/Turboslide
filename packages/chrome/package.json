@@ -27,6 +27,7 @@
     "./Filmstrip": "./src/Filmstrip.tsx",
     "./ToolButton": "./src/ToolButton.tsx",
     "./Tooltip": "./src/Tooltip.tsx",
+    "./chrome-preferences": "./src/chrome-preferences.ts",
     "./Seg": "./src/Seg.tsx",
     "./Select": "./src/Select.tsx",
     "./Toolbar": "./src/Toolbar.tsx",

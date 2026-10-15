@@ -10515,6 +10515,42 @@
       "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
     },
     {
+      "id": "help.docs.sections",
+      "feature": "help",
+      "interaction": "On /docs, /docs/sharing and /docs/agents/http at 1440 and 390 every h2 sits in a numbered section whose anchor links to the heading's id and is named \"Link to <title>\"; the number is drawn in the gutter 16 px left of the article from 1024 px and inline before the title under it; the heading's text is its title alone; at 1440 the on this page column numbers the same h2s; a click on a number puts the heading's id in the address",
+      "driver": "core/docs.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 6; plan E.4 and G.4 item 13; the brief's docs problem D3",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the docs step, 2026-10-14: the Workbench reference of /docs, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "help.docs.figures",
+      "feature": "help",
+      "interaction": "On /docs, /docs/sharing, /docs/themes and /docs/export at 1440 and 390 in both appearances every figure loads the capture of the page's appearance alone (the other appearance's file is never fetched), drawn at its native size at most in a square frame, with alt text that ends in a full stop and \"Figure\" before its caption; at 390 the editor-top and title-row-share figures draw their phone cuts",
+      "driver": "core/docs.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 6; plan E.5 and G.4 item 13; the brief's docs problem D1 (no pictures of the product)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the docs step, 2026-10-14: the Workbench reference of /docs, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "help.docs.footer",
+      "feature": "help",
+      "interaction": "At 1440 and 390 /docs and /docs/reference/deck end with the compact footer under the page: the T in a box linking to /home, \"Turboslide is made by General Translation.\" and GitHub, Report an issue and MIT License, each opening in a new tab",
+      "driver": "core/docs.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 6; plan E.4; the brief's docs problem D6 (no footer)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the docs step, 2026-10-14: the Workbench reference of /docs, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "help.docs.nav-weight",
+      "feature": "help",
+      "interaction": "At 1440 in both appearances the current page in the navigation of /docs, /docs/sharing and /docs/reference has the computed weight 500 and its words are drawn as wide as the same words at 500 on the page, not as wide as at 700",
+      "driver": "core/docs.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 6; plan E.3 and G.4 item 13; the judge's reading of the Workbench prototype's current item at 700",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the docs step, 2026-10-14: the Workbench reference of /docs, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
       "id": "chrome.colors.pairs-at-floor",
       "feature": "chrome",
       "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row and every key chip of the tooltip (on Undo), the search card and the toolbar search pill read from the drawn elements over their composited grounds included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",
@@ -11132,11 +11168,11 @@
     {
       "id": "help.docs.page",
       "feature": "help",
-      "interaction": "/docs and every docs page answer 200 at 1440 and 390 in both appearances and draw the page frame's 58 px bar (the lockup, Documentation, the search pill, the theme button, New Presentation) and rails, the sidebar's three groups with the current page marked, the title in sentence case, the description, Copy Page, the article at most 640 px wide, the table of contents from 1180 px, previous and next; at 390 a Menu button opens the sidebar and search is an icon button; corners on the ladder (buttons, fields, tabs and menus 6 px; code, callouts, cards and the search window 8 px; key chips and step numbers 4 px; rows square); no box-shadow with a blur or an offset; the shared scrollbar; a miss under /docs draws the docs layout with the three closest pages",
+      "interaction": "/docs and every docs page answer 200 at 1440 and 390 in both appearances and draw the site's 56 px bar (the T in a box and the word, Documentation, the search field, the theme button, New Presentation over 720 px), the navigation's three groups with the current page marked from 1024 px and the Contents disclosure in its place under 1024 px, the title in sentence case, the description, Copy Page in the page tools (beside the article from 1280 px, under it below), the article at most 720 px wide, the on this page column from 1280 px, previous and next and the compact footer; the search is a 288 px field from 1024 px and a 32 px button under it; corners on the ladder (buttons and the search 6 px, key chips and the code panel's Copy 4 px, code panels, callouts, index rows, figures, the pager and rows square); no box-shadow with a blur or an offset; the shared scrollbar; no page wider than the window at 320, 390, 768, 1024 and 1440; a miss under /docs draws the docs layout with the three closest pages",
       "driver": "core/docs.spec.ts",
       "today": "broken",
       "severity": 2,
-      "evidence": "research-docs 3.1 (/docs answers the Not found page on production, ts-docs-404-1440.jpg), 6 P8",
+      "evidence": "research-docs 3.1 (/docs answers the Not found page on production, ts-docs-404-1440.jpg), 6 P8; restated for the Workbench reference by the site build's docs step (docs/SITE.md section 6)",
       "note": "Polish two (docs/POLISH-2.md 6), P2-D#1"
     },
     {

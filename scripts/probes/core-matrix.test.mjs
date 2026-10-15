@@ -566,7 +566,10 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         POLISH2_RETIRED.filter((id) => !isCoreId(id)).length +
         /* the dropdown round (docs/DROPDOWNS.md 7.1): DD-C#2 enters its eight rows; none retires */
         CORE_MATRIX.filter(isDropdownsRow).length -
-        DROPDOWNS_RETIRED.filter((id) => !isCoreId(id)).length,
+        DROPDOWNS_RETIRED.filter((id) => !isCoreId(id)).length +
+        /* the site build's docs step (docs/SITE.md section 6): four help.docs rows of the
+           Workbench reference; help.docs.page is restated in place */
+        SITE_DOCS.length,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
@@ -1662,6 +1665,13 @@ const SITE_HERO = [
   'home.hero.phone',
   'home.hero.server-features-sentence',
 ];
+/* the docs step's rows of the Workbench reference, after the hero step's (docs/SITE.md section 6) */
+const SITE_DOCS = [
+  'help.docs.sections',
+  'help.docs.figures',
+  'help.docs.footer',
+  'help.docs.nav-weight',
+];
 const SITE_NOTE = /^The site build \(docs\/SITE\.md;/;
 
 describe('the site build', () => {
@@ -1696,6 +1706,21 @@ describe('the site build', () => {
       expect(coreRow(id).today, id).toBe('not driven');
       expect(coreRow(id).severity, id).toBeUndefined();
     }
+    /* the docs step's rows follow the hero step's, on the docs' driver, not driven until a run
+       on a deployment reads them */
+    const ids = CORE_MATRIX.map((row) => row.id);
+    const after = ids.indexOf(SITE_HERO[SITE_HERO.length - 1]);
+    expect(ids.slice(after + 1, after + 1 + SITE_DOCS.length)).toEqual(SITE_DOCS);
+    for (const id of SITE_DOCS) {
+      const row = coreRow(id);
+      expect(row.feature, id).toBe('help');
+      expect(row.driver, id).toBe('core/docs.spec.ts');
+      expect(row.today, id).toBe('not driven');
+      expect(row.note, id).toMatch(SITE_NOTE);
+      expect(row.note, id).toMatch(/the docs step/);
+    }
+    /* help.docs.page is restated in place for the Workbench reference */
+    expect(coreRow('help.docs.page').interaction).toMatch(/56 px bar/);
     /* the old landing's rows are gone with their modules */
     for (const id of [
       'home.page.order',

@@ -246,7 +246,7 @@ export const MINI_DOCS: readonly string[] = [
   '',
   '',
   '',
-  'Menus, panels and dialogs open and close without animation.',
+  'Menus, panels and dialogs open and close without animation, and animated patterns hold their frame.',
   'A control you point at shows its name, a sentence and its key.',
   'Your screen reader says who joined, who left and who is on which slide.',
   'Replaces the customer name everywhere, swaps the pictures named after the old one and skips slides, as one change.',

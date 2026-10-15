@@ -3389,3 +3389,11 @@ describe('the words of Round 1 (docs/NEXT.md 4.1.3 items 21 and 22; audit-clutte
     }
   });
 });
+
+describe('Tools > Preferences > Reduce motion (review 3 C)', () => {
+  it('names the animated patterns it holds as well as the chrome it stills (MaterialMount reads motionReduced())', () => {
+    const doc = findItem('tools.preferences.reduceMotion')?.doc ?? '';
+    expect(doc).toMatch(/^Menus, panels and dialogs open and close without animation/);
+    expect(doc).toContain('animated patterns hold their frame');
+  });
+});

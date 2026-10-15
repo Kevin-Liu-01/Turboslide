@@ -2537,10 +2537,11 @@ const TOOLS: Menu = {
       ),
       /* the Glyphfield port (PLAN.md wave 1 item 7): chrome motion off for people who want less
          of it whatever their system setting says, and the hover plates off for people who know
-         the editor */
+         the editor. Reduce motion also holds the stage's animated patterns whatever Play
+         animated patterns says (MaterialMount reads motionReduced()), so its sentence names them */
       now('tools.preferences.reduceMotion', 'Reduce motion', toggle('reduceMotion'), {
         turboslide: true,
-        doc: 'Menus, panels and dialogs open and close without animation',
+        doc: 'Menus, panels and dialogs open and close without animation, and animated patterns hold their frame',
       }),
       now('tools.preferences.showTooltips', 'Show tooltips', toggle('showTooltips'), {
         turboslide: true,

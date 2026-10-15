@@ -1,7 +1,7 @@
 // The catalog, the presets, recipe resolution and the recipe key (SPEC 5.4; MILESTONES M5 item 3).
 // The key test reproduces the two digests deck.json records for the imported material openers
 // (opener-prototemplate, opener-blog), so a key computed here is the importer's key.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
@@ -17,8 +17,16 @@ import {
   listMaterials,
   requireMaterial,
 } from './catalog.ts';
-import { fragmentShaderFor, toShaderUniforms, toVec4, toVec4List } from './paper.ts';
+import {
+  fragmentShaderFor,
+  mipmapsFor,
+  textureSources,
+  toShaderUniforms,
+  toVec4,
+  toVec4List,
+} from './paper.ts';
 import { GT_PALETTE } from './presets.ts';
+import { shaderPreviewFile } from './previews.ts';
 import { PROTO_MATERIALS } from './proto.ts';
 import { checkUniform, materialSlug, resolveRecipe, validateUniforms } from './recipe.ts';
 import { recipeKey } from './recipe-key.ts';
@@ -84,6 +92,96 @@ describe('the catalog', () => {
       u_colors: '#fe5b16,#f7ff61,#ffffff',
       u_colorBack: '#000000',
     });
+  });
+});
+
+describe('six more Paper materials (the Glyphfield port, wave 2.2)', () => {
+  /* Glyphfield's names (`PAPER_SHADER_FAMILIES` labels) in the catalog's sentence case */
+  const SIX: Readonly<Record<string, string>> = {
+    'paper:warp': 'Warp',
+    'paper:water': 'Water',
+    'paper:voronoi': 'Voronoi',
+    'paper:color-panels': 'Color panels',
+    'paper:pulsing-border': 'Pulsing border',
+    'paper:dot-orbit': 'Dot orbit',
+  };
+
+  test('are in the catalog and the gallery under Glyphfield’s names, each with its own shader', () => {
+    for (const [id, label] of Object.entries(SIX)) {
+      const entry = requireMaterial(id);
+      expect(entry.label).toBe(label);
+      expect(entry.available).toBe(true);
+      expect(entry.still).toBe(false);
+      expect(entry.credit).toBe(`Material: ${label.toLowerCase()}, Paper Shaders`);
+      expect(fragmentShaderFor(entry)).toMatch(/^#version 300 es/);
+      expect(GALLERY_MATERIAL_IDS).toContain(id);
+    }
+    expect(new Set(Object.keys(SIX).map((id) => fragmentShaderFor(requireMaterial(id)))).size).toBe(
+      6,
+    );
+    expect(MATERIAL_IDS).toHaveLength(23);
+  });
+
+  test('every uniform of every entry is one the shader or Paper’s sizing reads', () => {
+    const SIZING = new Set(['u_fit', 'u_scale', 'u_rotation', 'u_offsetX', 'u_offsetY']);
+    for (const entry of Object.values(MATERIALS)) {
+      const glsl = fragmentShaderFor(entry);
+      for (const spec of entry.uniforms) {
+        if (SIZING.has(spec.name) || /^u_(origin|world)/.test(spec.name)) continue;
+        expect(glsl, `${entry.id} ${spec.name}`).toMatch(
+          new RegExp(`uniform [^;]*\\b${spec.name}\\b`),
+        );
+      }
+    }
+  });
+
+  test('the noise texture for warp, voronoi, dot orbit and pulsing border; water filters an empty picture', () => {
+    const textured = Object.keys(SIX).filter((id) => requireMaterial(id).noiseTexture);
+    expect(textured.sort()).toEqual([
+      'paper:dot-orbit',
+      'paper:pulsing-border',
+      'paper:voronoi',
+      'paper:warp',
+    ]);
+    const water = requireMaterial('paper:water');
+    expect(Object.keys(textureSources(water, 'data:noise'))).toEqual(['u_image']);
+    expect(mipmapsFor(water)).toEqual(['u_image']);
+    /* water has no u_isImage: sending it made Paper warn on every frame */
+    const uniforms = toShaderUniforms(
+      water,
+      resolveRecipe(water, { preset: 'ink-paper' }).uniforms,
+    );
+    expect(uniforms).not.toHaveProperty('u_isImage');
+    expect(fragmentShaderFor(water)).not.toContain('u_isImage');
+    const metal = requireMaterial('paper:liquid-metal');
+    expect(toShaderUniforms(metal, resolveRecipe(metal, {}).uniforms).u_isImage).toBe(false);
+    expect(Object.keys(textureSources(requireMaterial('paper:warp'), 'data:noise'))).toEqual([
+      'u_noiseTexture',
+    ]);
+  });
+
+  test('warp’s colours run from the kit’s ground to its figures', () => {
+    const warp = requireMaterial('paper:warp');
+    const ink = resolveRecipe(warp, { preset: 'ink-paper' }).uniforms.u_colors;
+    expect(ink).toBe(`${GT_PALETTE.ink},${GT_PALETTE.titanium},${GT_PALETTE.paperInk}`);
+    const paper = resolveRecipe(warp, { preset: 'paper-ink' }).uniforms.u_colors;
+    expect(paper).toBe(`${GT_PALETTE.paper},${GT_PALETTE.ink2},${GT_PALETTE.ink}`);
+  });
+
+  test('every entry has its gallery card and a tile per preset under previews/, in the index', () => {
+    const dir = join(REPO, 'packages/materials/previews');
+    const index = JSON.parse(readFileSync(join(dir, 'index.json'), 'utf8')) as {
+      entries: { file: string }[];
+    };
+    const indexed = new Set(index.entries.map((row) => row.file));
+    for (const entry of Object.values(MATERIALS))
+      for (const file of [
+        shaderPreviewFile(entry.id),
+        ...entry.presets.map((preset) => shaderPreviewFile(entry.id, preset.name)),
+      ]) {
+        expect(existsSync(join(dir, file)), file).toBe(true);
+        expect(indexed.has(file), file).toBe(true);
+      }
   });
 });
 

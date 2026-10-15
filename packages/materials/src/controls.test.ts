@@ -58,6 +58,17 @@ describe('the eleven controls', () => {
     expect(SHADER_CONTROL_BY_NAME.speed.sentence).toBe('how fast it plays in the show');
   });
 
+  test('a control scales numbers alone: color panels’ Edges switch is no amount (wave 2.2)', () => {
+    const panels = requireMaterial('paper:color-panels');
+    const map = controlMapOf(panels);
+    for (const name of MATERIAL_CONTROL_NAMES) expect(map[name], name).not.toContain('u_edges');
+    expect(map.density).toEqual(['u_density']);
+    const base = resolveRecipe(panels, { uniforms: { u_edges: 1 } }).uniforms;
+    expect(applyControls(panels, base, { detail: 8 })).not.toHaveProperty('u_edges');
+    /* water's u_edges is a number, and Detail moves it as Glyphfield's mapping does */
+    expect(controlMapOf(requireMaterial('paper:water')).detail).toEqual(['u_layering', 'u_edges']);
+  });
+
   test('every catalog entry maps the controls onto uniforms inside their ranges', () => {
     for (const entry of Object.values(MATERIALS)) {
       const map = controlMapOf(entry);

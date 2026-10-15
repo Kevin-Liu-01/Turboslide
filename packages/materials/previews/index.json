@@ -1,10 +1,51 @@
 {
-  "generatedAt": "2026-09-24T15:50:30.749Z",
+  "generatedAt": "2026-10-15T15:51:12.253Z",
   "anchor": 5500,
   "size": [320, 200],
   "tileSize": [96, 60],
   "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
   "entries": [
+    {
+      "materialId": "paper:color-panels",
+      "preset": "accent",
+      "file": "color-panels--accent.webp",
+      "bytes": 346
+    },
+    {
+      "materialId": "paper:color-panels",
+      "preset": "brand-blue",
+      "file": "color-panels--brand-blue.webp",
+      "bytes": 408
+    },
+    {
+      "materialId": "paper:color-panels",
+      "preset": "caption",
+      "file": "color-panels--caption.webp",
+      "bytes": 312
+    },
+    {
+      "materialId": "paper:color-panels",
+      "preset": "hint",
+      "file": "color-panels--hint.webp",
+      "bytes": 330
+    },
+    {
+      "materialId": "paper:color-panels",
+      "preset": "ink-paper",
+      "file": "color-panels--ink-paper.webp",
+      "bytes": 368
+    },
+    {
+      "materialId": "paper:color-panels",
+      "preset": "paper-ink",
+      "file": "color-panels--paper-ink.webp",
+      "bytes": 390
+    },
+    {
+      "materialId": "paper:color-panels",
+      "file": "color-panels.webp",
+      "bytes": 1658
+    },
     {
       "materialId": "paper:dithering",
       "preset": "accent",
@@ -86,6 +127,47 @@
       "materialId": "paper:dot-grid",
       "file": "dot-grid.webp",
       "bytes": 1814
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "preset": "accent",
+      "file": "dot-orbit--accent.webp",
+      "bytes": 598
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "preset": "brand-blue",
+      "file": "dot-orbit--brand-blue.webp",
+      "bytes": 1050
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "preset": "caption",
+      "file": "dot-orbit--caption.webp",
+      "bytes": 818
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "preset": "hint",
+      "file": "dot-orbit--hint.webp",
+      "bytes": 576
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "preset": "ink-paper",
+      "file": "dot-orbit--ink-paper.webp",
+      "bytes": 940
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "preset": "paper-ink",
+      "file": "dot-orbit--paper-ink.webp",
+      "bytes": 1010
+    },
+    {
+      "materialId": "paper:dot-orbit",
+      "file": "dot-orbit.webp",
+      "bytes": 2888
     },
     {
       "materialId": "paper:gem-smoke",
@@ -452,6 +534,47 @@
       "bytes": 4518
     },
     {
+      "materialId": "paper:pulsing-border",
+      "preset": "accent",
+      "file": "pulsing-border--accent.webp",
+      "bytes": 246
+    },
+    {
+      "materialId": "paper:pulsing-border",
+      "preset": "brand-blue",
+      "file": "pulsing-border--brand-blue.webp",
+      "bytes": 320
+    },
+    {
+      "materialId": "paper:pulsing-border",
+      "preset": "caption",
+      "file": "pulsing-border--caption.webp",
+      "bytes": 228
+    },
+    {
+      "materialId": "paper:pulsing-border",
+      "preset": "hint",
+      "file": "pulsing-border--hint.webp",
+      "bytes": 196
+    },
+    {
+      "materialId": "paper:pulsing-border",
+      "preset": "ink-paper",
+      "file": "pulsing-border--ink-paper.webp",
+      "bytes": 252
+    },
+    {
+      "materialId": "paper:pulsing-border",
+      "preset": "paper-ink",
+      "file": "pulsing-border--paper-ink.webp",
+      "bytes": 248
+    },
+    {
+      "materialId": "paper:pulsing-border",
+      "file": "pulsing-border.webp",
+      "bytes": 742
+    },
+    {
       "materialId": "paper:simplex-noise",
       "preset": "accent",
       "file": "simplex-noise--accent.webp",
@@ -696,6 +819,129 @@
       "materialId": "paper:swirl",
       "file": "swirl.webp",
       "bytes": 5150
+    },
+    {
+      "materialId": "paper:voronoi",
+      "preset": "accent",
+      "file": "voronoi--accent.webp",
+      "bytes": 1268
+    },
+    {
+      "materialId": "paper:voronoi",
+      "preset": "brand-blue",
+      "file": "voronoi--brand-blue.webp",
+      "bytes": 2154
+    },
+    {
+      "materialId": "paper:voronoi",
+      "preset": "caption",
+      "file": "voronoi--caption.webp",
+      "bytes": 1790
+    },
+    {
+      "materialId": "paper:voronoi",
+      "preset": "hint",
+      "file": "voronoi--hint.webp",
+      "bytes": 1198
+    },
+    {
+      "materialId": "paper:voronoi",
+      "preset": "ink-paper",
+      "file": "voronoi--ink-paper.webp",
+      "bytes": 2066
+    },
+    {
+      "materialId": "paper:voronoi",
+      "preset": "paper-ink",
+      "file": "voronoi--paper-ink.webp",
+      "bytes": 2188
+    },
+    {
+      "materialId": "paper:voronoi",
+      "file": "voronoi.webp",
+      "bytes": 9170
+    },
+    {
+      "materialId": "paper:warp",
+      "preset": "accent",
+      "file": "warp--accent.webp",
+      "bytes": 348
+    },
+    {
+      "materialId": "paper:warp",
+      "preset": "brand-blue",
+      "file": "warp--brand-blue.webp",
+      "bytes": 334
+    },
+    {
+      "materialId": "paper:warp",
+      "preset": "caption",
+      "file": "warp--caption.webp",
+      "bytes": 278
+    },
+    {
+      "materialId": "paper:warp",
+      "preset": "hint",
+      "file": "warp--hint.webp",
+      "bytes": 364
+    },
+    {
+      "materialId": "paper:warp",
+      "preset": "ink-paper",
+      "file": "warp--ink-paper.webp",
+      "bytes": 340
+    },
+    {
+      "materialId": "paper:warp",
+      "preset": "paper-ink",
+      "file": "warp--paper-ink.webp",
+      "bytes": 376
+    },
+    {
+      "materialId": "paper:warp",
+      "file": "warp.webp",
+      "bytes": 1668
+    },
+    {
+      "materialId": "paper:water",
+      "preset": "accent",
+      "file": "water--accent.webp",
+      "bytes": 730
+    },
+    {
+      "materialId": "paper:water",
+      "preset": "brand-blue",
+      "file": "water--brand-blue.webp",
+      "bytes": 1006
+    },
+    {
+      "materialId": "paper:water",
+      "preset": "caption",
+      "file": "water--caption.webp",
+      "bytes": 842
+    },
+    {
+      "materialId": "paper:water",
+      "preset": "hint",
+      "file": "water--hint.webp",
+      "bytes": 512
+    },
+    {
+      "materialId": "paper:water",
+      "preset": "ink-paper",
+      "file": "water--ink-paper.webp",
+      "bytes": 982
+    },
+    {
+      "materialId": "paper:water",
+      "preset": "paper-ink",
+      "file": "water--paper-ink.webp",
+      "bytes": 854
+    },
+    {
+      "materialId": "paper:water",
+      "file": "water.webp",
+      "bytes": 3988
     },
     {
       "materialId": "paper:waves",

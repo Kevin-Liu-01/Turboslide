@@ -34,12 +34,17 @@ export const GT_PALETTE = {
   transparent: '#00000000',
 } as const;
 
-/** Which uniforms of an entry play the ground, the figure, the color list and the inner fill. */
+/**
+ * Which uniforms of an entry play the ground, the figure, the color list and the inner fill.
+ * `ramp` is a color list with no ground uniform of its own (warp): it takes the ground first, then
+ * the second and the first figure colours, so the bands run from the ground to the figure.
+ */
 export type PaletteRoles = {
   back?: string;
   front?: string;
   colors?: string;
   inner?: string;
+  ramp?: string;
 };
 
 /**
@@ -99,6 +104,10 @@ function palette(
   if (roles.front !== undefined) out[roles.front] = values.front;
   if (roles.colors !== undefined) out[roles.colors] = values.colors;
   if (roles.inner !== undefined) out[roles.inner] = values.inner;
+  if (roles.ramp !== undefined) {
+    const [first, second] = values.colors.split(',');
+    out[roles.ramp] = [values.back, second ?? first, first].filter(Boolean).join(',');
+  }
   return out;
 }
 

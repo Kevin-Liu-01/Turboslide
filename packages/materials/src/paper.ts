@@ -8,8 +8,10 @@
 // by the capture page, since they are HTMLImageElements. Browser safe; importable in Node too
 // (the package touches no DOM at import time), which is how the capture job converts uniforms.
 import {
+  colorPanelsFragmentShader,
   ditheringFragmentShader,
   dotGridFragmentShader,
+  dotOrbitFragmentShader,
   emptyPixel,
   gemSmokeFragmentShader,
   getShaderColorFromString,
@@ -20,12 +22,16 @@ import {
   metaballsFragmentShader,
   neuroNoiseFragmentShader,
   perlinNoiseFragmentShader,
+  pulsingBorderFragmentShader,
   simplexNoiseFragmentShader,
   smokeRingFragmentShader,
   spiralFragmentShader,
   staticMeshGradientFragmentShader,
   staticRadialGradientFragmentShader,
   swirlFragmentShader,
+  voronoiFragmentShader,
+  warpFragmentShader,
+  waterFragmentShader,
   wavesFragmentShader,
 } from '@paper-design/shaders';
 import type { ShaderMountUniforms } from '@paper-design/shaders';
@@ -56,6 +62,12 @@ const SHADERS: Readonly<Record<PaperShaderName, string>> = {
   dotGrid: dotGridFragmentShader,
   perlinNoise: perlinNoiseFragmentShader,
   staticMeshGradient: staticMeshGradientFragmentShader,
+  warp: warpFragmentShader,
+  water: waterFragmentShader,
+  voronoi: voronoiFragmentShader,
+  colorPanels: colorPanelsFragmentShader,
+  pulsingBorder: pulsingBorderFragmentShader,
+  dotOrbit: dotOrbitFragmentShader,
 };
 
 /** The GLSL of an entry, from the package. */
@@ -142,15 +154,18 @@ export function toShaderUniforms(
   return out;
 }
 
-/** The uniform names that take an HTMLImageElement, with the data URI each loads from. */
+/**
+ * The uniform names that take an HTMLImageElement, with the data URI each loads from: the empty
+ * pixel for an image mask and for an image source (water draws its ground and its light over it).
+ */
 export function textureSources(entry: MaterialEntry, noiseSrc: string): Record<string, string> {
   const out: Record<string, string> = {};
-  if (entry.imageMask) out.u_image = EMPTY_PIXEL_SRC;
+  if (entry.imageMask || entry.imageSource) out.u_image = EMPTY_PIXEL_SRC;
   if (entry.noiseTexture) out.u_noiseTexture = noiseSrc;
   return out;
 }
 
-/** The uniform names that get mipmaps (the image mask, as the React wrapper asks). */
+/** The uniform names that get mipmaps (the image mask or source, as the React wrapper asks). */
 export function mipmapsFor(entry: MaterialEntry): string[] {
-  return entry.imageMask ? ['u_image'] : [];
+  return entry.imageMask || entry.imageSource ? ['u_image'] : [];
 }

@@ -2535,8 +2535,9 @@ const TOOLS: Menu = {
           doc: 'Light or dark chrome. Match follows the presentation’s or the system’s appearance',
         },
       ),
-      /* the Glyphfield port (PLAN.md wave 1 item 7): chrome motion off for people whose system
-         setting is on, and the hover plates off for people who know the editor */
+      /* the Glyphfield port (PLAN.md wave 1 item 7): chrome motion off for people who want less
+         of it whatever their system setting says, and the hover plates off for people who know
+         the editor */
       now('tools.preferences.reduceMotion', 'Reduce motion', toggle('reduceMotion'), {
         turboslide: true,
         doc: 'Menus, panels and dialogs open and close without animation',
@@ -2937,9 +2938,9 @@ const ROW_ICONS: Readonly<Record<string, IconName>> = {
   'tools.preferences.playShaders': 'play',
   'tools.preferences.appearance.light': 'sun',
   'tools.preferences.appearance.dark': 'moon',
-  'tools.preferences.appearance.match': 'presentation-chart-line',
+  'tools.preferences.appearance.match': 'slide',
   'tools.preferences.appearance.system': 'computer-desktop',
-  'tools.preferences.reduceMotion': 'pause',
+  'tools.preferences.reduceMotion': 'arrows-pointing-in',
   'tools.preferences.showTooltips': 'chat-bubble-left',
   'tools.preferences.collaboratorAnnouncements': 'eye',
   'tools.accessibilitySettings': 'eye',

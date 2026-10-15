@@ -39,6 +39,7 @@ import {
   stepLadder,
   stepPlainSize,
   tailKindOf,
+  withStoredSettings,
   writeStoredSettings,
 } from '../editor-shell';
 import type { ActionFacts, EditorSelection, EditorShellInput, InsertIntent } from '../editor-shell';
@@ -1514,6 +1515,41 @@ describe('the retired letters, the ladder and the stored settings', () => {
     /* the root's boot script reads this key and this field before first paint */
     expect(JSON.parse(written).reduceMotion).toBe(true);
     expect(readStoredSettings(written)).toMatchObject({ reduceMotion: true, showTooltips: false });
+  });
+  it('another tab’s write changes the stored keys alone: the per session settings keep this tab’s values (review 3 A)', () => {
+    const session = {
+      ...DEFAULT_SETTINGS,
+      announce: true,
+      zoom: '200',
+      showChanges: true,
+      sectionsTree: true,
+      pointerOthers: false,
+      comments: 'open',
+      speakerNotes: false,
+      reduceMotion: true,
+    };
+    const next = withStoredSettings(session, JSON.stringify({ showTooltips: false }));
+    expect(next).toMatchObject({
+      announce: true,
+      zoom: '200',
+      showChanges: true,
+      sectionsTree: true,
+      pointerOthers: false,
+      comments: 'open',
+      showTooltips: false,
+    });
+    /* a stored key the record no longer holds returns to its default */
+    expect(next.speakerNotes).toBe(true);
+    expect(next.reduceMotion).toBe(false);
+    /* a cleared storage: every stored key at its default, the session's kept */
+    const cleared = withStoredSettings(session, null);
+    expect(cleared).toMatchObject({ announce: true, zoom: '200', reduceMotion: false });
+    for (const key of STORED_SETTINGS) expect(cleared[key]).toBe(DEFAULT_SETTINGS[key]);
+    /* over the defaults it is the mount's read */
+    expect(withStoredSettings(DEFAULT_SETTINGS, JSON.stringify({ snapGrid: true }))).toEqual({
+      ...DEFAULT_SETTINGS,
+      snapGrid: true,
+    });
   });
   it('keeps View > Play shaders at In the show only by default and remembers it per browser (docs/archive/rounds/FEATURES.md 5.6, question 5)', () => {
     expect(DEFAULT_SETTINGS.playShaders).toBe('show');

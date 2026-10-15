@@ -332,6 +332,56 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
       expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
     },
   );
+
+  it(
+    'another tab’s write leaves this tab’s per session settings: the announcements and the zoom stay (review 3 A)',
+    { timeout: 15_000 },
+    async () => {
+      const { container } = render(<Harness input={input()} shell={shellState()} />);
+      /* the check of a row, read with its menu open, then the menu closed */
+      const checkOf = (menu: string, ...ids: string[]): string | null => {
+        clickMenuPath(container, menu, ...ids.slice(0, -1));
+        const row = document.querySelector(`[data-menu-item="${ids[ids.length - 1]}"]`);
+        const checked = row?.getAttribute('aria-checked') ?? null;
+        fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+        return checked;
+      };
+      clickMenuPath(
+        container,
+        'tools',
+        'tools.preferences',
+        'tools.preferences.collaboratorAnnouncements',
+      );
+      clickMenuPath(container, 'view', 'view.zoom', 'view.zoom.200');
+      await flush();
+      expect(
+        checkOf('tools', 'tools.preferences', 'tools.preferences.collaboratorAnnouncements'),
+      ).toBe('true');
+      expect(checkOf('view', 'view.zoom', 'view.zoom.200')).toBe('true');
+      /* another editor turns Reduce motion on (or the show picks Play shaders) */
+      localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
+      act(() => {
+        window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+      });
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
+      expect(checkOf('tools', 'tools.preferences', 'tools.preferences.reduceMotion')).toBe('true');
+      expect(
+        checkOf('tools', 'tools.preferences', 'tools.preferences.collaboratorAnnouncements'),
+      ).toBe('true');
+      expect(checkOf('view', 'view.zoom', 'view.zoom.200')).toBe('true');
+      expect(checkOf('view', 'view.zoom', 'view.zoom.fit')).toBe('false');
+      /* a cleared storage returns the stored keys to their defaults and keeps the session's */
+      localStorage.clear();
+      act(() => {
+        window.dispatchEvent(new StorageEvent('storage', { key: null }));
+      });
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
+      expect(
+        checkOf('tools', 'tools.preferences', 'tools.preferences.collaboratorAnnouncements'),
+      ).toBe('true');
+      expect(checkOf('view', 'view.zoom', 'view.zoom.200')).toBe('true');
+    },
+  );
 });
 
 describe('the editor shell in its default state', () => {

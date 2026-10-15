@@ -3537,6 +3537,21 @@ export function readStoredSettings(saved: string | null): ShellSettings {
   }
 }
 
+/**
+ * This tab's settings after another tab wrote the stored record (`saved`, a `storage` event): each
+ * stored key takes the record's value, or its default when the record no longer holds it (a
+ * cleared storage); the per session keys (the zoom, the announcements, Show changes, the sections
+ * tree, the pointers and the comments) keep this tab's values.
+ */
+export function withStoredSettings(settings: ShellSettings, saved: string | null): ShellSettings {
+  const next: Partial<Record<MenuSetting, boolean | string>> = { ...settings };
+  for (const key of STORED_SETTINGS) {
+    const value = DEFAULT_SETTINGS[key];
+    if (value !== undefined) next[key] = value;
+  }
+  return { ...next, ...readStoredSettings(saved) };
+}
+
 /** The stored subset of the settings as JSON. */
 export function writeStoredSettings(settings: ShellSettings): string {
   const out: Partial<Record<MenuSetting, boolean | string>> = {};

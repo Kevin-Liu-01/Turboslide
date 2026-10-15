@@ -53,6 +53,7 @@ import {
   shapeDrawTool,
   modeOf,
   shapePickPlan,
+  withStoredSettings,
   wordArtBlock,
   writeStoredSettings,
   zoomStepFrom,
@@ -507,13 +508,14 @@ export function EditorShell({
   /* a toggle in another tab (a storage event; it never fires in the tab that wrote): the menu's
      rows read the stored settings again and the root's stamps follow, so this tab neither shows a
      stale check nor writes the old value back on its next toggle (the GF-fix of wave 1; the root's
-     boot script restamps the root on the routes without an editor) */
+     boot script restamps the root on the routes without an editor). Only the stored keys change:
+     this tab's zoom, announcements and other per session settings stay (withStoredSettings). */
   useMountEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (!settingsChanged(event)) return;
-      const stored = { ...DEFAULT_SETTINGS, ...readStoredSettings(load(SETTINGS_STORAGE)) };
-      setSettings(stored);
-      applyChromePreferences(stored);
+      const saved = load(SETTINGS_STORAGE);
+      setSettings((current) => withStoredSettings(current, saved));
+      applyChromePreferences(withStoredSettings(DEFAULT_SETTINGS, saved));
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);

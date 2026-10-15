@@ -1,5 +1,6 @@
 // The cost of a commit as call counts, which no machine load moves (hardening 8.4): the parses
-// and validations a write makes on a long log (PS#2, PERF-2).
+// and validations a write makes on a long log (PS#2, PERF-2) and the puts of a commit (PS#3,
+// PERF-3 item 1).
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -19,6 +20,7 @@ import { openBlobStore, pushDeckDir } from './blob-store.ts';
 import type { BlobStore } from './blob-store.ts';
 import { loadDeckDir, loadDeckDirCached, openFileStore } from './file-store.ts';
 import { LruMap, clearParseCache } from './parse-cache.ts';
+import { pulseWanted, putPulse, setPulseRule } from './pulse.ts';
 import { snapshotBody, snapshotKey, snapshotPath } from './snapshots.ts';
 import type { VersionRecord } from './store.ts';
 import { readVersions, versionRecordSchema, versionRecordText } from './versions.ts';
@@ -257,5 +259,83 @@ describe('hardening PS#2: the mirror parses and validates once per commit (PERF-
     expect(lru.size).toBe(3);
     expect(lru.get('b')).toBeUndefined();
     expect(lru.get('a')).toBe(97);
+  });
+});
+
+describe('hardening PS#3: no pulse put where no poll reads it (PERF-3 item 1)', () => {
+  afterEach(() => setPulseRule(null));
+  /** The puts of the calls since the last reset, as stored paths with the numbers and keys named. */
+  const putsOf = (fake: FakeBlobClient): string[] =>
+    fake.calls
+      .filter((call) => call.op === 'put')
+      .map((call) =>
+        call.pathname
+          .replace('decks/gt-brand/', '')
+          .replace(/^versions\/\d+\.json$/, 'versions/<n>.json')
+          .replace(/^snapshots\/[0-9a-f]{32}\.json$/, 'snapshots/<md5>.json'),
+      )
+      .sort();
+  async function writer(): Promise<{ fake: FakeBlobClient; store: BlobStore }> {
+    const fake = memoryBlobClient(undefined, { now });
+    await pushDeckDir(fake, 'gt-brand', seed, { overwrite: false });
+    const store = openBlobStore({
+      client: fake,
+      deckId: 'gt-brand',
+      dir: join(root, 'writer', 'gt-brand'),
+      now,
+      syncTtlMs: 0,
+    });
+    await store.read();
+    return { fake, store };
+  }
+  async function commit(store: BlobStore, size: number): Promise<void> {
+    clock = new Date(Date.parse(clock) + 1000).toISOString();
+    const outcome = await store.write({
+      baseRevision: await store.revision(),
+      author: agent,
+      mutations: [setSize(size)],
+    });
+    if (!outcome.ok) throw new Error(outcome.message);
+  }
+
+  it('a commit on the do tier makes 4 puts and no pulse put, and 5 on the blob tier', async () => {
+    const { fake, store } = await writer();
+    // the do tier: room.ts sets the rule from the tier the instance serves
+    setPulseRule(() => false);
+    for (let i = 0; i < 5; i += 1) {
+      fake.calls.length = 0;
+      await commit(store, SIZES[i % 3] ?? 20);
+      // origin/main 8c9465b6: these four and `.turboslide/pulse.json`
+      expect(putsOf(fake)).toEqual([
+        'deck.json',
+        'slides/content-rule.json',
+        'snapshots/<md5>.json',
+        'versions/<n>.json',
+      ]);
+    }
+    // handed off to the blob tier: the next commit writes the pulse again
+    setPulseRule(() => true);
+    fake.calls.length = 0;
+    await commit(store, 24);
+    expect(putsOf(fake)).toEqual([
+      '.turboslide/pulse.json',
+      'deck.json',
+      'slides/content-rule.json',
+      'snapshots/<md5>.json',
+      'versions/<n>.json',
+    ]);
+  }, 120_000);
+
+  it('a process with no rule, or a rule that throws, writes the pulse', async () => {
+    expect(pulseWanted()).toBe(true);
+    setPulseRule(() => {
+      throw new Error('no tier');
+    });
+    expect(pulseWanted()).toBe(true);
+    const fake = memoryBlobClient(undefined, { now });
+    expect(await putPulse(fake, 'gt-brand', 'deck', { now })).not.toBeNull();
+    setPulseRule(() => false);
+    expect(await putPulse(fake, 'gt-brand', 'deck', { now })).toBeNull();
+    expect(fake.calls.filter((call) => call.op === 'put')).toHaveLength(1);
   });
 });

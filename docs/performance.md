@@ -379,3 +379,16 @@ parses only the records it has not seen. Every read answers its own copy. The pi
 parses and 10 validations, against 10,045 parses and 30 validations on `origin/main` `8c9465b6`
 (ceilings 10 and 10); five rounds of `revision()`, `read()` and `records()` on an unchanged
 mirror make none, against 300 parses and 10 validations.
+
+## 12. The commit's puts on the do tier (hardening PS#3)
+
+A commit on `origin/main` `8c9465b6` made five puts on every tier: the snapshot, the version
+record, the changed slide, `deck.json` and `.turboslide/pulse.json`. Only the blob tier's channel
+reads the pulse (one head per tick per open deck); on the do tier the realtime Worker carries
+every change and no instance polls. The store now asks a process wide rule before it writes the
+pulse (`setPulseRule` and `pulseWanted` in `packages/store/src/pulse.ts`), and the studio's room
+module sets the rule from the tier the instance serves (`pulseWantedOnTier`): no pulse on `do`,
+the pulse again from the next commit once the realtime flag hands the instance to the blob tier.
+A process that sets no rule (the CLI, the tests) and a rule that throws write the pulse. The pin
+is `packages/store/src/commit-cost.test.ts`: five commits with the rule off make the four puts
+each, and the next commit with the rule on makes five.

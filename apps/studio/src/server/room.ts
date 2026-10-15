@@ -99,7 +99,7 @@ import type { BlobClient } from '@turboslide/store/blob-store';
 import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
 import { sharedPresence } from '@turboslide/store/presence-store';
 import type { SharedPresence } from '@turboslide/store/presence-store';
-import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pulse';
+import { headPulse, isStoreBusy, setPulseRule, storeRetryAfterMs } from '@turboslide/store/pulse';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import {
@@ -193,6 +193,19 @@ type Shared = typeof globalThis & {
 };
 
 const shared = globalThis as Shared;
+
+/**
+ * The deck pulse is written only where a poll reads it (hardening PS#3, PERF-3 item 1): the blob
+ * tier's channel heads it once a tick, and on the do tier the object carries every change and no
+ * instance polls, so the put was one advanced operation of five per commit that nothing read. The
+ * rule reads the tier this instance serves now, so a hand off to the blob tier (the realtime flag
+ * off) writes the pulse again from its next commit; before the room state exists it reads the
+ * environment.
+ */
+export function pulseWantedOnTier(): boolean {
+  return (shared.__turboslideRoom?.selection ?? selectRealtime(process.env)).tier !== 'do';
+}
+setPulseRule(pulseWantedOnTier);
 
 function log(line: string): void {
   console.error(`turboslide room: ${line}`);

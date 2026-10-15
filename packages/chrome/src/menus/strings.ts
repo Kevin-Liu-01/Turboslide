@@ -407,6 +407,8 @@ export const SNACKBARS = {
 
 /** The dialog titles and their control words (SPEC 12 "Dialogs"). */
 export const DIALOGS = {
+  /** the dismissive button a dialog adds (Dialog.tsx `cancel`) and every confirm's (ConfirmDialog.tsx) */
+  cancel: { label: 'Cancel', doc: 'Closes the dialog without a change' },
   makeCopy: {
     title: 'Make a copy',
     name: 'Name',
@@ -526,7 +528,6 @@ export const DIALOGS = {
   deleteForever: {
     title: (name: string) => `Delete ${name} forever? This cannot be undone`,
     ok: 'Delete Forever',
-    cancel: 'Cancel',
   },
   findReplace: {
     title: 'Find and replace',

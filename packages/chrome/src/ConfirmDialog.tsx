@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 
 import { Dialog } from './Dialog';
+import { DIALOGS } from './menus/strings';
 
 /**
  * The confirm of a destructive act (the Glyphfield port, PLAN.md wave 1 item 6, from Glyphfield's
@@ -95,11 +96,11 @@ export function ConfirmDialog({
       control={control}
       actions={[
         {
-          label: 'Cancel',
+          label: DIALOGS.cancel.label,
           onClick: close,
           autoFocus: true,
           control: `${control}.cancel`,
-          doc: 'Closes the dialog without a change',
+          doc: DIALOGS.cancel.doc,
         },
         {
           label: confirmLabel,

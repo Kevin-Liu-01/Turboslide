@@ -71,6 +71,14 @@
   color: var(--pt-ink);
 }
 
+/* an address in the title (Dialog.tsx titleWords) moves to the next line whole; one longer than
+   the line wraps inside its box */
+.ts-dialog-address {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
 .ts-dialog-x {
   appearance: none;
   background: none;

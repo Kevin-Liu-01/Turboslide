@@ -11,11 +11,13 @@ import {
   focusableIn,
   noteMenuRowActivated,
   recentMenuRow,
+  titleWords,
 } from '../Dialog';
 import { ImageByUrlDialog } from '../dialogs/ImageByUrl';
 import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { HoldButton } from '../FocusHold';
+import { DIALOGS } from '../menus/strings';
 import { Select } from '../Select';
 import { TIP_DELAY_MS, TIP_ID, hideTooltip, resetTooltipTiming } from '../Tooltip';
 import { browserMove, focusFixup, nextTask } from './browser-move';
@@ -206,6 +208,32 @@ describe('Dialog role="alertdialog" (the confirm of a destructive act; the Glyph
       resetTooltipTiming();
       vi.useRealTimers();
     }
+  });
+
+  it('keeps an address in its title in one box, the title and its accessible name unchanged', () => {
+    const title = 'Remove access for review-guest@example.test?';
+    render(
+      <Dialog
+        role="alertdialog"
+        title={title}
+        onClose={() => undefined}
+        control="dialog.address"
+      />,
+    );
+    const card = screen.getByRole('alertdialog', { name: title });
+    const heading = card.querySelector('h2')!;
+    expect(heading.textContent).toBe(title);
+    expect(
+      [...heading.querySelectorAll('.ts-dialog-address')].map((box) => box.textContent),
+    ).toEqual(['review-guest@example.test?']);
+    expect(titleWords('Delete Q3 review forever?')).toBe('Delete Q3 review forever?');
+  });
+
+  it('reads the word on Cancel from the strings module', () => {
+    render(<Harness onClose={() => undefined} onOk={() => undefined} />);
+    expect(document.querySelector('[data-control="dialog.test.cancel"]')?.textContent).toBe(
+      DIALOGS.cancel.label,
+    );
   });
 });
 

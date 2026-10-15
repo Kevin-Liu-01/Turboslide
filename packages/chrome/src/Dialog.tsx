@@ -10,6 +10,7 @@ import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
+import { DIALOGS } from './menus/strings';
 import { hideTooltipUntilInput, tipProps } from './Tooltip';
 
 import './Dialog.css';
@@ -90,6 +91,26 @@ export type DialogProps = {
    */
   footnote?: string;
 };
+
+/**
+ * The title with each address in a box of its own (`.ts-dialog-address`), so a confirm that names
+ * a person ("Remove access for review-guest@example.test?") moves the address to the next line
+ * whole instead of breaking it at its hyphen; an address longer than the line wraps inside its
+ * box. The text, and so the accessible name, is unchanged.
+ */
+export function titleWords(title: string): ReactNode {
+  const parts = title.split(/(\S+@\S+)/);
+  if (parts.length === 1) return title;
+  return parts.map((part, index) =>
+    index % 2 === 1 ? (
+      <span key={index} className="ts-dialog-address">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
 
 /* a `summary` is focusable by the browser without a tabindex, so the trap counts it too
    (docs/archive/rounds/POLISH.md 2.6 item 65; audit-chrome item 16: four Tabs left the Logo dialog through its
@@ -225,7 +246,7 @@ export function Dialog({
   onClose,
   actions = [],
   cancel = false,
-  cancelLabel = 'Cancel',
+  cancelLabel = DIALOGS.cancel.label,
   width = 480,
   control,
   className,
@@ -259,7 +280,7 @@ export function Dialog({
         {
           label: cancelLabel,
           onClick: onClose,
-          doc: 'Closes the dialog without a change',
+          doc: DIALOGS.cancel.doc,
           /* a dialog with a control id names its Cancel `<control>.cancel`, so a driver can read it */
           ...(control === undefined ? {} : { control: `${control}.cancel` }),
         },
@@ -529,7 +550,7 @@ export function Dialog({
       >
         <div className="ts-dialog-head">
           <h2 id={titleId} className="ts-dialog-title">
-            {title}
+            {titleWords(title)}
           </h2>
           <button
             type="button"

@@ -94,8 +94,8 @@ export const REFUSALS = {
 export const TAB_ONLY = {
   words: 'In this tab only',
   doc: 'Changes stay in this browser tab and are gone when it closes',
-  sentence:
-    'This presentation lives only in this tab. Start a presentation of your own to download it, share it and add your own pictures.',
+  /* one line of the snackbar (its 560 px, ellipsis past it), the button beside it says the rest */
+  sentence: 'This presentation lives only in this tab.',
   action: 'New Presentation',
 } as const;
 

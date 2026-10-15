@@ -83,6 +83,8 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
   const { win } = options;
   const deckId = `try-${randomHex(6)}`;
   const principalId = `anon_${globalThis.crypto.randomUUID()}`;
+  /* the visitor's controller, once EditorRoot made it (attachVisitor) */
+  let visitorController: EditorController | null = null;
   const visitor: TabPerson = {
     author: { kind: 'human', name: labelFor(principalId), principalId },
     role: 'owner',
@@ -98,7 +100,13 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
       dialogs: TAB_ONLY_DIALOGS,
       action: { label: TAB_ONLY.action, run: () => topWindow(win).location.assign('/new') },
     },
+    /* a page of this presentation (Print, the viewer, the presenter) reads it from the server,
+       so it answers the sentence; any other page loads around the frame */
     openPage: (path, newTab) => {
+      if (path.includes(`/${deckId}`)) {
+        visitorController?.say(TAB_ONLY.sentence);
+        return;
+      }
       if (newTab) win.open(path, '_blank', 'noopener');
       else topWindow(win).location.assign(path);
     },
@@ -142,8 +150,6 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
     visitor: view,
     reducedMotion: () => win.matchMedia('(prefers-reduced-motion: reduce)').matches,
   });
-  let visitorController: EditorController | null = null;
-
   /** the agents' first pose on the title slide: the poster's still, and the first live frame */
   const pose = (): void => {
     controllers.get('claude')?.reportPresence({

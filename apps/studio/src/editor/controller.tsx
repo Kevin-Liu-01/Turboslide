@@ -2460,9 +2460,11 @@ export function createEditorController(init: {
         forward: mutations.length,
         inverse: applied.inverse.length,
       });
+      /* a presentation that lives in the tab alone stores no name (docs/SITE.md D10): no prompt */
       if (
         identity !== undefined &&
         identity.trust === 'label' &&
+        backend.tabOnly === undefined &&
         !latest().namePrompt &&
         !promptedName
       ) {

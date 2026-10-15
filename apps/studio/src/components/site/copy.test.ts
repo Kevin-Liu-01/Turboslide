@@ -9,7 +9,16 @@ import {
   wordsOutsideSentenceCase,
 } from '@turboslide/theme/copy';
 
-import { AGENTS_SCREEN, AVATAR_DOCS, FOOTER, HERO, NAV, PRESENT_SCREEN, TITLE_TEXT } from './copy';
+import {
+  AGENTS_SCREEN,
+  AVATAR_DOCS,
+  DOCS_FOOTER,
+  FOOTER,
+  HERO,
+  NAV,
+  PRESENT_SCREEN,
+  TITLE_TEXT,
+} from './copy';
 import { HOME_META } from './meta';
 
 // The landing's words (docs/SITE.md A.1; plain technical English): no em dash, en dash or
@@ -72,6 +81,7 @@ const sentences: ReadonlyArray<[string, string]> = [
   ]),
   ['footer.made', FOOTER.made],
   ['footer.licence', FOOTER.licence],
+  ...DOCS_FOOTER.links.map((link): [string, string] => ['docs.footer.link', link.label]),
 ];
 
 const buttons: ReadonlyArray<string> = [

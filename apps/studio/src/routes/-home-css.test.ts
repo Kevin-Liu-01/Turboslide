@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SITE = join(here, '..', 'components', 'site');
+const DOCS = join(here, '..', 'components', 'docs');
 
 const cssImports = (source: string): string[] =>
   [...source.matchAll(/^import\s+(?:\w+\s+from\s+)?'([^']+\.css(?:\?[^']*)?)';$/gm)].map(
@@ -42,5 +43,29 @@ describe("the landing's stylesheet", () => {
     const all = selectors(readFileSync(join(SITE, 'site.css'), 'utf8'));
     expect(all.length).toBeGreaterThan(100);
     expect(all.filter((selector) => !/(?:^|\s)\.ts-site(?=$|[\s.:[])/.test(selector))).toEqual([]);
+  });
+});
+
+// The docs (docs/SITE.md section 6) draw on the same root: /docs links the site's stylesheet and
+// then its own from the layout route's head, no docs file imports a stylesheet as a module, and
+// every selector of docs.css names the docs' root `.ts-docs`, which the site root carries on the
+// docs alone.
+describe("the docs' stylesheets", () => {
+  it('are linked from the head of /docs, the site first, and imported as a module by no docs file', () => {
+    const route = readFileSync(join(here, 'docs.tsx'), 'utf8');
+    expect(cssImports(route).sort()).toEqual([
+      '../components/docs/docs.css?url',
+      '../components/site/site.css?url',
+    ]);
+    expect(route.indexOf('href: siteCss }')).toBeGreaterThan(0);
+    expect(route.indexOf('href: siteCss }')).toBeLessThan(route.indexOf('href: docsCss }'));
+    for (const name of readdirSync(DOCS).filter((file) => /\.tsx?$/.test(file)))
+      expect(cssImports(readFileSync(join(DOCS, name), 'utf8')), name).toEqual([]);
+  });
+
+  it("names the docs' root in every selector", () => {
+    const all = selectors(readFileSync(join(DOCS, 'docs.css'), 'utf8'));
+    expect(all.length).toBeGreaterThan(100);
+    expect(all.filter((selector) => !/(?:^|\s)\.ts-docs(?=$|[\s.:[])/.test(selector))).toEqual([]);
   });
 });

@@ -21,14 +21,15 @@ export type SiteLinkProps = {
 type Routed =
   | { to: '/home' }
   | { to: '/decks' }
-  | { to: '/docs' }
   | { to: '/docs/$'; params: { _splat: string } }
   | { to: '/deck/$deckId'; params: { deckId: string } };
 
 function routed(href: string): Routed | null {
   if (href === '/home') return { to: '/home' };
   if (href === '/decks') return { to: '/decks' };
-  if (href === '/docs') return { to: '/docs' };
+  /* /docs is the docs' front page, which the splat route draws (routes/docs.$.tsx); naming the
+     layout route instead made the router warn on every render */
+  if (href === '/docs') return { to: '/docs/$', params: { _splat: '' } };
   const doc = /^\/docs\/([\w/-]+)$/.exec(href);
   if (doc?.[1] !== undefined) return { to: '/docs/$', params: { _splat: doc[1] } };
   const deck = /^\/deck\/([^/?#]+)$/.exec(href);

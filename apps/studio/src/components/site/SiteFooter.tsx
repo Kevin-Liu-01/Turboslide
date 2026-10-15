@@ -1,5 +1,5 @@
 import { BoxedMark } from './BoxedMark';
-import { FOOTER } from './copy';
+import { DOCS_FOOTER, FOOTER } from './copy';
 import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 
@@ -45,6 +45,40 @@ export function SiteFooter() {
           <p>{FOOTER.made}</p>
           <p>{FOOTER.licence}</p>
         </div>
+      </div>
+    </footer>
+  );
+}
+
+/**
+ * The docs' footer (docs/SITE.md section 6): one compact row under every docs page, the T in a
+ * box linking to /home, the sentence that names the maker, and the repository's three links.
+ */
+export function DocsFooter() {
+  return (
+    <footer className="site-foot is-compact">
+      <div className="site-wrap site-foot-row t-small">
+        <SiteLink
+          href="/home"
+          control="docs.foot.lockup"
+          className="site-lockup"
+          aria-label={DOCS_FOOTER.name}
+        >
+          <BoxedMark size={24} />
+        </SiteLink>
+        <p>{DOCS_FOOTER.made}</p>
+        <nav aria-label={DOCS_FOOTER.nav}>
+          {DOCS_FOOTER.links.map((link) => (
+            <SiteLink
+              key={link.href}
+              href={link.href}
+              external
+              control={`docs.foot.${link.label.toLowerCase().replace(/\W+/g, '-')}`}
+            >
+              {link.label}
+            </SiteLink>
+          ))}
+        </nav>
       </div>
     </footer>
   );

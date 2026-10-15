@@ -818,6 +818,32 @@
   margin: 0;
 }
 
+/* the docs' footer (SiteFooter.tsx DocsFooter): one compact row, the T in a box, the maker's
+   sentence and the repository's three links */
+.ts-site .site-foot.is-compact {
+  margin-top: 96px;
+  padding: 24px 0 32px;
+}
+
+.ts-site .site-foot-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-foot-row p {
+  margin: 0;
+}
+
+.ts-site .site-foot-row nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-left: auto;
+}
+
 /* ---- the layout breakpoint (BRAND_LAYOUT_MAX_PX, 1023 px): one column ---- */
 
 @media (max-width: 1023px) {
@@ -1009,6 +1035,14 @@
     flex-direction: column;
     gap: 4px;
     margin-top: 48px;
+  }
+
+  .ts-site .site-foot.is-compact {
+    margin-top: 80px;
+  }
+
+  .ts-site .site-foot-row nav {
+    margin-left: 0;
   }
 }
 

@@ -159,3 +159,15 @@ export const FOOTER = {
   made: 'Turboslide is made by General Translation.',
   licence: 'Turboslide is open source under the MIT License.',
 } as const;
+
+/** The docs' footer (docs/SITE.md section 6): the compact row under every docs page. */
+export const DOCS_FOOTER = {
+  name: 'Turboslide home',
+  nav: 'Footer',
+  made: FOOTER.made,
+  links: [
+    { label: 'GitHub', href: REPOSITORY },
+    { label: 'Report an issue', href: `${REPOSITORY}/issues` },
+    { label: 'MIT License', href: `${GITHUB_FILE}/LICENSE` },
+  ],
+} as const;

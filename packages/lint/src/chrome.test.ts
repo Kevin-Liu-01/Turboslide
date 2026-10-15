@@ -122,11 +122,11 @@ describe('chrome audit configuration', () => {
   });
 
   test('the one rail check runs on /home, /decks and Not found and fails once the brand lint enforces (NEXT.md 4.1.3 item 25)', () => {
-    expect(TURBOSLIDE_CHROME.rails).toBe('.ts-product, .ts-home-page, .ts-notfound');
+    expect(TURBOSLIDE_CHROME.rails).toBe('.ts-site, .ts-home-page, .ts-notfound');
     const one: AuditResult = {
       ...empty,
       rails: {
-        page: 'ts-product',
+        page: 'ts-site',
         min: 1200,
         left: [168],
         right: [1272],
@@ -137,7 +137,7 @@ describe('chrome audit configuration', () => {
     const two: AuditResult = {
       ...empty,
       rails: {
-        page: 'ts-product',
+        page: 'ts-site',
         min: 1200,
         left: [158, 168],
         right: [1272],
@@ -149,7 +149,7 @@ describe('chrome audit configuration', () => {
     expect(failingAudit(two, 'report')).toBe(false);
     expect(failingAudit(two, 'enforce')).toBe(true);
     expect(formatAudit(two)).toEqual([
-      '  rails on ts-product: left [158, 168] right [1272], two rails on one side (ts-rail-outer | ts-rail | ts-rail)',
+      '  rails on ts-site: left [158, 168] right [1272], two rails on one side (ts-rail-outer | ts-rail | ts-rail)',
     ]);
   });
 });

@@ -211,10 +211,11 @@ export const SHELL_CHROME: ChromeScope = {
  */
 export const TURBOSLIDE_CHROME: ChromeScope = {
   ...SHELL_CHROME,
-  /* round four (gslides-parity SPEC-4 6.2; build-4/b2.md R1): the /home product page's root
-     `.ts-product` and the Not found page's root `.ts-notfound` join, so step 18 audits both */
+  /* round four (gslides-parity SPEC-4 6.2; build-4/b2.md R1): the /home page's root and the Not
+     found page's root `.ts-notfound` join, so step 18 audits both; since the site build
+     (docs/SITE.md D7) the /home root is `.ts-site`, the root /docs shares */
   roots:
-    '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate, .ts-product, .ts-notfound',
+    '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate, .ts-site, .ts-notfound',
   content: '.ts-stage, .ts-sheet, .stage, .sheet-flow .sheet > *, .pt-page-body, .pt-root, iframe',
   /* .ts-title-slideshow is the one solid call to action of the title row: its wrapper owns the
      ink outline of the two halves inside it (docs/archive/rounds/RETURN.md 4.1; return/build/b1.md R10) */
@@ -225,7 +226,7 @@ export const TURBOSLIDE_CHROME: ChromeScope = {
     '.ts-select, .ts-select-chip, .ts-hover, .ts-handle, .ts-marquee, .ts-group, .ts-crop-frame, .ts-turn',
   guides: '.ts-guide',
   /* the one rail check (NEXT.md 4.1.3 item 25): /home, /decks and its sub pages, Not found */
-  rails: '.ts-product, .ts-home-page, .ts-notfound',
+  rails: '.ts-site, .ts-home-page, .ts-notfound',
   collab:
     '.ts-flag, .ts-remote-outline, .ts-remote-caret, .ts-remote-pointer, .ts-following-plate, .ts-chip-stripe, .is-following, .has-halo',
   collabColors: COLLAB_COLORS,

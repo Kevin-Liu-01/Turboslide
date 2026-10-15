@@ -147,3 +147,67 @@ describe('the docs content', () => {
     });
   }
 });
+
+/** The rows of a markdown table after its head, each cell trimmed, the link text of a linked cell kept with its address. */
+function tableRows(text: string, head: string): string[][] {
+  const at = text.indexOf(head);
+  if (at < 0) return [];
+  const lines = text.slice(at).split('\n');
+  const rows: string[][] = [];
+  for (const line of lines.slice(2)) {
+    if (!line.startsWith('|')) break;
+    rows.push(
+      line
+        .split('|')
+        .slice(1, -1)
+        .map((cell) => cell.trim()),
+    );
+  }
+  return rows;
+}
+
+// The front page (docs/SITE.md section 6; plan E.6) lists the pages of each group and the action
+// reference's counts per group. Its index rows carry each page's own title and description, and
+// its table carries the generated reference's rows and totals, so a page or a count that moves
+// fails here instead of going stale on the front page.
+describe('the front page', () => {
+  const front = pages.get('/docs');
+
+  it('lists each page under its own title with its own description', () => {
+    const faults: string[] = [];
+    const cards = [
+      ...(front?.text ?? '').matchAll(
+        /<Card title="([^"]+)" href="([^"]+)"(?: sub)?>\s*([\s\S]*?)\s*<\/Card>/g,
+      ),
+    ];
+    expect(cards.length).toBeGreaterThan(10);
+    for (const [, title = '', href = '', body = ''] of cards) {
+      const target = pages.get(href);
+      if (target === undefined) {
+        faults.push(`${href}: no page`);
+        continue;
+      }
+      const meta = frontmatter(target.text);
+      if (meta['title'] !== title)
+        faults.push(`${href}: title "${title}", the page's "${meta['title']}"`);
+      const text = body.replace(/\s+/g, ' ');
+      if (meta['description'] !== text)
+        faults.push(`${href}: "${text}", the page's "${meta['description']}"`);
+    }
+    expect(faults).toEqual([]);
+  });
+
+  it("carries the generated reference's counts per group and in all", () => {
+    const reference = pages.get('/docs/reference');
+    const head = '| Group';
+    const want = tableRows(reference?.text ?? '', head);
+    const got = tableRows(front?.text ?? '', head);
+    expect(want.length).toBe(16);
+    expect(got.slice(0, -1)).toEqual(want);
+    const counts =
+      /<ActionCounts total="(\d+)" cli="(\d+)" mcp="(\d+)" http="(\d+)" window="(\d+)"/.exec(
+        reference?.text ?? '',
+      );
+    expect(got[got.length - 1]).toEqual(['Every group', ...(counts?.slice(1) ?? [])]);
+  });
+});

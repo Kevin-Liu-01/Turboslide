@@ -24,7 +24,7 @@ import { UsageError } from '../exit.ts';
 import type { PictureDitherResult, SlideSetBackgroundPictureResult } from '../store-actions.ts';
 import { baseRevision, openStore, printSlideResult, requireAddress } from '../write.ts';
 
-export const DITHER_USAGE = `usage: turboslide block dither <slideId>#<blockId> [--pattern bayer8|bayer4|blue64|random] [--tone two|three|original] [--steps <2-7>]
+export const DITHER_USAGE = `usage: turboslide block dither <slideId>#<blockId> [--pattern bayer8|bayer4|blue64|random|halftone] [--tone two|three|original] [--steps <2-7>]
          [--cell 1|2|3|4] [--strength <0-1>] [--black <0-255>] [--white <0-255>] [--gamma <0.5-2>] [--invert]
          [--polarity auto|dark-ground|light-ground|same] [--blur <0-8>] [--min-filter <0-9>] [--channel gray|r|g|b] [--seed <n>]
          [--photograph] [--off]

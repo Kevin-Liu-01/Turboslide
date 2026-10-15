@@ -2624,7 +2624,8 @@
             "bayer8",
             "bayer4",
             "blue64",
-            "random"
+            "random",
+            "halftone"
           ]
         },
         "cell": {
@@ -8353,7 +8354,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "title": "Pattern",
                   "x-inspector": {
@@ -8363,7 +8365,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "group": "Block",
                     "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -19068,7 +19071,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "title": "Pattern",
                   "x-inspector": {
@@ -19078,7 +19082,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "group": "Block",
                     "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -33169,7 +33174,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "title": "Pattern",
                   "x-inspector": {
@@ -33179,7 +33185,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "group": "Block",
                     "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -44906,7 +44913,8 @@
                 "bayer8",
                 "bayer4",
                 "blue64",
-                "random"
+                "random",
+                "halftone"
               ],
               "title": "Pattern",
               "x-inspector": {
@@ -44916,7 +44924,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "group": "Block",
                 "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -45294,7 +45303,8 @@
                 "bayer8",
                 "bayer4",
                 "blue64",
-                "random"
+                "random",
+                "halftone"
               ],
               "title": "Pattern",
               "x-inspector": {
@@ -45304,7 +45314,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "group": "Block",
                 "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -58593,7 +58604,8 @@
               "bayer8",
               "bayer4",
               "blue64",
-              "random"
+              "random",
+              "halftone"
             ]
           },
           "cell": {
@@ -88814,7 +88826,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -88824,7 +88837,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -89441,7 +89455,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "title": "Pattern",
                 "x-inspector": {
@@ -89451,7 +89466,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "group": "Block",
                   "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -89812,7 +89828,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "title": "Pattern",
                 "x-inspector": {
@@ -89822,7 +89839,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "group": "Block",
                   "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."

@@ -8,7 +8,7 @@
 // nothing; ./dither.ts builds `pictureDitherSchema` over these lists and re-exports them, so a
 // reader that needs the schema keeps one import.
 
-export const DITHER_PATTERNS = ['bayer8', 'bayer4', 'blue64', 'random'] as const;
+export const DITHER_PATTERNS = ['bayer8', 'bayer4', 'blue64', 'random', 'halftone'] as const;
 export type DitherPattern = (typeof DITHER_PATTERNS)[number];
 
 export const DITHER_TONES = ['two', 'three', 'original'] as const;
@@ -25,7 +25,7 @@ export type DitherChannel = (typeof DITHER_CHANNELS)[number];
 
 /** A non destructive dither over a picture's continuous source (SPEC-3 10.1). */
 export type PictureDither = {
-  /** The threshold texture; bayer8 is the deck's screen. */
+  /** The threshold texture; bayer8 is the deck's screen, halftone a 45 degree screen of round dots. */
   pattern: DitherPattern;
   /** Ink and paper, three tones with titanium in the middle, or the picture's own colours posterised. */
   tone?: DitherTone;

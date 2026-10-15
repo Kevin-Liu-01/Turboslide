@@ -409,6 +409,13 @@ describe('the Format options Dither section', () => {
       'block.set',
       expect.objectContaining({ value: { ...PHOTOGRAPH, pattern: 'blue64' } }),
     );
+    /* the clustered-dot screen (the Glyphfield port, wave 2.4) */
+    expect(control('formatOptions.dither.pattern.halftone').textContent).toBe('Halftone');
+    fireEvent.click(control('formatOptions.dither.pattern.halftone'));
+    expect(dispatch).toHaveBeenLastCalledWith(
+      'block.set',
+      expect.objectContaining({ value: { ...PHOTOGRAPH, pattern: 'halftone' } }),
+    );
     fireEvent.click(control('formatOptions.dither.polarity.same'));
     expect(dispatch).toHaveBeenLastCalledWith(
       'block.set',

@@ -152,6 +152,8 @@ describe('readDither and variantFor', () => {
     expect(readDither({ dither: null })).toBeUndefined();
     expect(readDither({ dither: 'bayer8' })).toBeUndefined();
     expect(readDither({ dither: { pattern: 'floyd' } })).toBeUndefined();
+    /* the schema's list, halftone with it (the Glyphfield port, wave 2.4) */
+    expect(readDither({ dither: { pattern: 'halftone' } })).toEqual({ pattern: 'halftone' });
     expect(readDither({ dither: { cell: 2 } })).toBeUndefined();
   });
 

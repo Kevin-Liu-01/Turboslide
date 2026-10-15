@@ -11,7 +11,8 @@
 //      black, white and gamma, with the adjustments' brightness and contrast folded in as the CSS
 //      filter formulas on the 0 to 1 value
 //   3. the threshold against the pattern: bayer8 (the deck's table), bayer4 ((m + 0.5) / 16),
-//      blue64 (the pinned texture) or random (a 32 bit hash of x, y and seed); the two tone rule is
+//      blue64 (the pinned texture), random (a 32 bit hash of x, y and seed) or halftone (the
+//      clustered-dot table of halftone.ts, round dots on a 45 degree screen); the two tone rule is
 //      the deck's (lit when the tone exceeds the threshold), three tones and the posterised colours
 //      quantise with the same threshold so the two tone case stays byte identical
 //   4. polarity: auto is dark ground when the positive's lit fraction is under 0.5
@@ -32,6 +33,7 @@ import { resolveDither } from '@turboslide/schema/blocks/dither-values';
 
 import { BAYER8_THRESHOLDS } from './bayer.ts';
 import { blue64Thresholds } from './blue64.ts';
+import { HALFTONE8_THRESHOLDS } from './halftone.ts';
 import { gaussianBlur, minFilter, unsharpBand } from './filters.ts';
 import type { UnsharpBand } from './filters.ts';
 import type { BitImage, Box, Box4, GrayImage, RgbaImage } from './image.ts';
@@ -114,6 +116,8 @@ export function thresholdAt(pattern: DitherPattern, x: number, y: number, seed =
       return blue64Thresholds()[(((y % 64) + 64) % 64) * 64 + (((x % 64) + 64) % 64)] ?? 0;
     case 'random':
       return hash32(x, y, seed) >>> 24;
+    case 'halftone':
+      return HALFTONE8_THRESHOLDS[(((y % 8) + 8) % 8) * 8 + (((x % 8) + 8) % 8)] ?? 0;
   }
 }
 

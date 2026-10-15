@@ -168,6 +168,27 @@ describe('picture.materialize', () => {
     expect(bytes.byteLength).toBeLessThan(120_000);
   }, 60_000);
 
+  it('materializes a halftone dither as its own 1-bit variant (the Glyphfield port, wave 2.4)', async () => {
+    await addDitherSlide('bg-halftone', { ...photograph, pattern: 'halftone' });
+    const target = ditheredPictures(await document())[0];
+    expect(target?.dither.pattern).toBe('halftone');
+    const written = await pictureMaterialize(deps, ctx, {
+      baseRevision: await revision(),
+      scale: 1,
+    });
+    expect(written.written).toHaveLength(1);
+    const files = written.written[0]?.files ?? [];
+    expect(files).toHaveLength(2);
+    const asset = (await document()).deck.assets['fixture-photo'] as Asset;
+    const variant = asset.variants?.[target?.key ?? ''];
+    expect(variant?.metrics?.litFraction).toBeGreaterThan(0);
+    /* a 1-bit palette PNG, like every variant: no new export path */
+    const bytes = readFileSync(join(dir, files[0] as string));
+    expect(bytes.subarray(1, 4).toString('latin1')).toBe('PNG');
+    expect(bytes[24]).toBe(1);
+    expect(bytes[25]).toBe(3);
+  }, 60_000);
+
   it('prunes a variant no picture references after the dither changes, removing its files', async () => {
     await addDitherSlide('bg-dither', photograph);
     const first = await pictureMaterialize(deps, ctx, { baseRevision: await revision(), scale: 1 });

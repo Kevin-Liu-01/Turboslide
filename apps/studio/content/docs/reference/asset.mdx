@@ -41,20 +41,20 @@ description: The actions of the asset group, with their input fields and their n
 
 **Dither asset.** Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance; with fromRecorded it reads the committed twins back and verifies them cell for cell.
 
-| Field          | Type                                          | Required | Description                                                                         |
-| -------------- | --------------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| `assetId`      | string                                        | no       | Required unless allTwoTone                                                          |
-| `treatment`    | object \| object                              | no       | The full treatment to run; the recorded one with the params merged when omitted     |
-| `params`       | object                                        | no       | Parameters merged over the recorded treatment (--gamma, --black on the CLI)         |
-| `plate`        | "lower-left" \| "lower-right" \| "upper-left" | no       | The plate rectangle the metrics are screened against                                |
-| `source`       | string                                        | no       | The continuous source when the asset records none                                   |
-| `allTwoTone`   | boolean                                       | no       | Every asset with a two-tone treatment                                               |
-| `fromRecorded` | boolean                                       | no       | Read the committed twins back instead of regenerating; metrics are recomputed       |
-| `verifyCells`  | boolean                                       | no       | Regenerate from the source where one exists and count the cells that differ         |
-| `pattern`      | "bayer8" \| "bayer4" \| "blue64" \| "random"  | no       | The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5) |
-| `cell`         | 1 \| 2 \| 3 \| 4                              | no       | Sheet pixels per cell; 2 unless set                                                 |
-| `tone`         | "two" \| "three" \| "original"                | no       | two, three or original; two unless set                                              |
-| `baseRevision` | integer                                       | yes      | The revision the caller read; a stale value is rejected with 409                    |
+| Field          | Type                                                       | Required | Description                                                                         |
+| -------------- | ---------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `assetId`      | string                                                     | no       | Required unless allTwoTone                                                          |
+| `treatment`    | object \| object                                           | no       | The full treatment to run; the recorded one with the params merged when omitted     |
+| `params`       | object                                                     | no       | Parameters merged over the recorded treatment (--gamma, --black on the CLI)         |
+| `plate`        | "lower-left" \| "lower-right" \| "upper-left"              | no       | The plate rectangle the metrics are screened against                                |
+| `source`       | string                                                     | no       | The continuous source when the asset records none                                   |
+| `allTwoTone`   | boolean                                                    | no       | Every asset with a two-tone treatment                                               |
+| `fromRecorded` | boolean                                                    | no       | Read the committed twins back instead of regenerating; metrics are recomputed       |
+| `verifyCells`  | boolean                                                    | no       | Regenerate from the source where one exists and count the cells that differ         |
+| `pattern`      | "bayer8" \| "bayer4" \| "blue64" \| "random" \| "halftone" | no       | The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5) |
+| `cell`         | 1 \| 2 \| 3 \| 4                                           | no       | Sheet pixels per cell; 2 unless set                                                 |
+| `tone`         | "two" \| "three" \| "original"                             | no       | two, three or original; two unless set                                              |
+| `baseRevision` | integer                                                    | yes      | The revision the caller read; a stale value is rejected with 409                    |
 
 - Command line: `turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --pattern <pattern> --cell <cell> --tone <tone> --all-two-tone --from-recorded --verify-cells`
 - MCP tool: `deck_asset_dither`

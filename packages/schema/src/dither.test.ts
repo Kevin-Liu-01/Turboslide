@@ -30,6 +30,7 @@ import { validateDocument } from './validate.ts';
 describe('pictureDitherSchema', () => {
   it('takes the pattern alone and every field inside its range (SPEC-3 10.1)', () => {
     expect(pictureDitherSchema.safeParse({ pattern: 'bayer8' }).success).toBe(true);
+    expect(pictureDitherSchema.safeParse({ pattern: 'halftone' }).success).toBe(true);
     expect(
       pictureDitherSchema.safeParse({
         pattern: 'blue64',

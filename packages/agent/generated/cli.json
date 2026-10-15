@@ -3282,14 +3282,15 @@
         {
           "key": "pattern",
           "flag": "--pattern",
-          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\"",
+          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\" | \"halftone\"",
           "required": false,
           "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
           "enum": [
             "bayer8",
             "bayer4",
             "blue64",
-            "random"
+            "random",
+            "halftone"
           ]
         },
         {

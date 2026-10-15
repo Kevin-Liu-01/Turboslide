@@ -7537,7 +7537,7 @@
     {
       "id": "shaders.agent.list-insert-set-render",
       "feature": "shaders",
-      "interaction": "shader.list, shader.insert, shader.set and shader.render answer on the HTTP transport with the bearer; shader.render returns a PNG of 3200 by 1800 within 20 s; material.list still answers as an alias",
+      "interaction": "shader.list, shader.insert, shader.set and shader.render answer on the HTTP transport with the bearer; shader.render returns a PNG of 3200 by 1800 within 20 s; material.list still answers as an alias; the six Paper materials of the Glyphfield port (warp, water, voronoi, color panels, pulsing border, dot orbit) are listed, each placed on one slide gets its still from the editor and a 3200 by 1800 PNG from shader.render, and the PDF, the Editable PowerPoint and the PNG of that slide place each still",
       "driver": "core/shaders.spec.ts",
       "today": "not driven",
       "evidence": "audit-shaders 18 (material-list.json)",

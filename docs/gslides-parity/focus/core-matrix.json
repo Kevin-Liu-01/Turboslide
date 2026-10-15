@@ -10434,6 +10434,87 @@
       "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
     },
     {
+      "id": "home.hero.swap-no-shift",
+      "feature": "decks",
+      "interaction": "The poster paints first; after the page's load the editor's frame loads over it and, once it says it is ready, fades in and the poster leaves; the box keeps its size and the cumulative layout shift of /home from load to 10 s after the swap is 0, at 1440 and 390 in both appearances",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 5 (the frame protocol); plan A.3, G.4 item 4",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.agents-work",
+      "feature": "decks",
+      "interaction": "Within 20 s of the swap the frame's tab room holds writes by agent:claude-code and agent:codex; the frame's title row draws both agents' chips with their brand marks; an agent's caret, pointer or drag box is drawn on the stage",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md D4, D5; Kevin's request of 2026-10-14 (Claude Code and Codex going around making changes in the editor)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.visitor-types",
+      "feature": "decks",
+      "interaction": "A visitor opens slide 1 in the frame and types into its lead one key every 120 ms while the agents work; the lead holds exactly the typed text, no agent write lands on that slide meanwhile, and Undo in the frame takes back the visitor's text alone",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 5 (the runner's rules); plan G.4 item 6",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.no-writes",
+      "feature": "decks",
+      "interaction": "For 90 s of /home with a visitor typing, the frame makes only GET and HEAD requests and none to /api/, /_serverFn, /mcp, /rooms/ or /decks/",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md D3 (nothing is written to the server); plan G.4 item 7",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.fresh-on-reload",
+      "feature": "decks",
+      "interaction": "A reload of /home starts the frame on the shipped deck: five slides in order, revision 0, an empty room",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md D3; plan G.4 item 8",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.paused",
+      "feature": "decks",
+      "interaction": "With the hero scrolled out of view, and with the frame's document hidden, the room takes no entry for 10 s; back in view and visible, writes resume",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 5; plan G.4 item 9",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.reduced-motion",
+      "feature": "decks",
+      "interaction": "Under reduced motion the agents keep writing, their pointers jump in one post and no drag box is drawn",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md section 5; plan G.4 item 10",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.phone",
+      "feature": "decks",
+      "interaction": "At 390 by 844 the frame draws the phone editor (Menus, the filmstrip row) while the agents write, and a wheel outside the frame scrolls the page",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "plan C.12, G.4 item 11",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
+      "id": "home.hero.server-features-sentence",
+      "feature": "decks",
+      "interaction": "In the frame, Share, File > Download > PowerPoint and Print open nothing and say \"This presentation lives only in this tab.\" with New Presentation",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md D10; plan G.4 item 12",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the hero step, 2026-10-14: the live editor of the hero, read on the dev server at 4870 in the step's notes; not yet read on production"
+    },
+    {
       "id": "chrome.colors.pairs-at-floor",
       "feature": "chrome",
       "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row and every key chip of the tooltip (on Undo), the search card and the toolbar search pill read from the drawn elements over their composited grounds included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",

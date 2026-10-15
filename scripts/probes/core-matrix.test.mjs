@@ -1650,6 +1650,18 @@ const SITE_LANDING = [
   'home.hero.poster-first',
   'home.budget.first-script',
 ];
+/* the hero step's rows of the live editor, after the landing step's (docs/SITE.md section 5) */
+const SITE_HERO = [
+  'home.hero.swap-no-shift',
+  'home.hero.agents-work',
+  'home.hero.visitor-types',
+  'home.hero.no-writes',
+  'home.hero.fresh-on-reload',
+  'home.hero.paused',
+  'home.hero.reduced-motion',
+  'home.hero.phone',
+  'home.hero.server-features-sentence',
+];
 const SITE_NOTE = /^The site build \(docs\/SITE\.md;/;
 
 describe('the site build', () => {
@@ -1665,6 +1677,14 @@ describe('the site build', () => {
   it("enters the landing step's home rows first, each on the driver with the site note", () => {
     const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home').map((row) => row.id);
     expect(home.slice(0, SITE_LANDING.length)).toEqual(SITE_LANDING);
+    /* the hero step's rows follow, not driven until a run on a deployment reads them */
+    expect(home.slice(SITE_LANDING.length, SITE_LANDING.length + SITE_HERO.length)).toEqual(
+      SITE_HERO,
+    );
+    for (const id of SITE_HERO) {
+      expect(coreRow(id).today, id).toBe('not driven');
+      expect(coreRow(id).note, id).toMatch(/the hero step/);
+    }
     expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(home);
     for (const row of CORE_MATRIX.filter((candidate) => areaOf(candidate.id) === 'home')) {
       expect(row.feature, row.id).toBe('decks');

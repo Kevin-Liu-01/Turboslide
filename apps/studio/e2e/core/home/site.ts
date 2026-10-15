@@ -7,7 +7,7 @@ import { extraHTTPHeaders, title } from '../lib';
 // The landing's rows of the site build (docs/SITE.md; the landing step, plan A, B and D): the
 // Workbench layout in both appearances at 1440 and 390, the one line title with its two stacks,
 // the hero's poster in a box whose size never changes, and the page's own script without an
-// editor module. The hero step adds the rows of the live editor (`home.hero.*` beside the poster's).
+// editor module. The hero step's rows of the live editor are hero.ts's.
 // Every observation is through the page and the network; /home writes no store.
 
 export const ROWS: readonly string[] = [
@@ -289,7 +289,8 @@ export function rows(): void {
     const page = await context.newPage();
     const scripts: { url: string; bytes: number }[] = [];
     page.on('requestfinished', async (request) => {
-      if (request.resourceType() !== 'script') return;
+      /* the page's own scripts: the hero's frame is a document of its own (docs/SITE.md D1) */
+      if (request.resourceType() !== 'script' || request.frame() !== page.mainFrame()) return;
       const sizes = await request.sizes().catch(() => null);
       scripts.push({ url: request.url(), bytes: sizes?.responseBodySize ?? 0 });
     });

@@ -1,6 +1,7 @@
 import { test } from '@playwright/test';
 
 import { coverage } from './lib';
+import * as hero from './home/hero';
 import * as site from './home/site';
 
 // The driver of the landing's `home.*` rows (docs/SITE.md, the site build of 2026-10-14; the
@@ -8,10 +9,10 @@ import * as site from './home/site';
 // core-matrix.json in the same commit). Each module under home/ exports `ROWS`, the ids it
 // drives, and `rows()`, which declares one test per row with `test(title(id), ...)`; `coverage`
 // registers a failing test for every row of this driver no module drives, so a forgotten row
-// reads "no test" and is never counted as passed (docs/FOCUS.md 6.1). The hero step's module of
-// the live editor joins MODULES in the push that enters its rows.
+// reads "no test" and is never counted as passed (docs/FOCUS.md 6.1).
 //
 //   site.ts   the landing step: the layout, the title and its stacks, the poster, the script
+//   hero.ts   the hero step: the live editor in its frame, the agents, the visitor, the tab
 //
 // The rules of a core spec hold: no fixture, no disk, no environment variable but
 // PLAYWRIGHT_BASE_URL and VERCEL_OIDC_TOKEN, every observation through the page and the network,
@@ -19,7 +20,7 @@ import * as site from './home/site';
 //
 //   PLAYWRIGHT_BASE_URL=<origin> node_modules/.bin/playwright test apps/studio/e2e/core/home.spec.ts
 
-const MODULES = [site] as const;
+const MODULES = [site, hero] as const;
 
 test.use({
   trace: { mode: 'retain-on-failure', screenshots: false, snapshots: false, sources: true },

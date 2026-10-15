@@ -130,7 +130,8 @@
 // Workbench page: its landing step retired the 84 `home.*` rows (the landing round's, the design
 // round's and polish two's) and five `decks.home.*` rows with their modules, restated five more
 // `decks.home.*` rows for the new page, and entered the site's `home.*` rows on the same driver,
-// `core/home.spec.ts`, each not driven until a run reads it and noted "The site build".
+// `core/home.spec.ts`, each not driven until a run reads it and noted "The site build". The hero
+// step appended the nine `home.hero.*` rows of the live editor after them on the same driver.
 //
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line

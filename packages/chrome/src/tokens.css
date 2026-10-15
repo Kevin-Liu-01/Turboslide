@@ -615,3 +615,19 @@ body[data-shell] {
     transition: none;
   }
 }
+
+/* Tools > Preferences > Reduce motion (the Glyphfield port, PLAN.md wave 1 item 7) stamps
+   data-motion="reduced" on the root (the editor, and the root's boot script before first paint),
+   and the same durations go to zero whatever the system setting says. */
+:root[data-motion='reduced'] {
+  --pt-dur-fast: 0ms;
+  --pt-dur-leave: 0ms;
+  --pt-dur-toast: 0ms;
+  --pt-dur-slide: 0ms;
+  --pt-dur-enter: 0ms;
+  --pt-dur-sb: 0ms;
+}
+
+:root[data-motion='reduced'] .pt-ib {
+  transition: none;
+}

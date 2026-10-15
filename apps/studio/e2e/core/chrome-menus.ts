@@ -142,6 +142,9 @@ export function chromeMenus(person: () => { page: Page; deck: string }): string[
       'Link detection',
       'Play animated patterns',
       'Appearance',
+      /* the Glyphfield port (PLAN.md wave 1 item 7) */
+      'Reduce motion',
+      'Show tooltips',
       'Turn on collaborator announcements',
     ]);
   });

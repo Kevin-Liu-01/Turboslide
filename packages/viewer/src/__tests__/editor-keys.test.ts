@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { isChromeControlTarget } from '../Editor';
 import {
+  bracketOf,
   editorKeyAction,
   isBareCharacterKey,
   NUDGE_PX,
@@ -357,6 +358,24 @@ describe('editorKeyAction', () => {
     });
     expect(editorKeyAction({ key: 'i', metaKey: true }, nothing)).toBeNull();
     expect(editorKeyAction({ key: ']', metaKey: true }, nothing)).toBeNull();
+  });
+
+  it('reads the bracket keys by their place on a French and a German Mac, never over a chord key (the Glyphfield port, PLAN.md wave 1 item 7)', () => {
+    expect(editorKeyAction({ key: '$', code: 'BracketRight', metaKey: true }, selected)).toEqual({
+      type: 'indent',
+      by: 1,
+    });
+    expect(editorKeyAction({ key: 'ü', code: 'BracketLeft', metaKey: true }, selected)).toEqual({
+      type: 'indent',
+      by: -1,
+    });
+    expect(bracketOf({ key: 'Dead', code: 'BracketLeft' })).toBe('[');
+    /* the German + is zoom in, Dvorak's / is Keyboard shortcuts, Shift keeps the braces */
+    expect(bracketOf({ key: '+', code: 'BracketRight' })).toBeNull();
+    expect(bracketOf({ key: '/', code: 'BracketLeft' })).toBeNull();
+    expect(bracketOf({ key: '{', code: 'BracketLeft', shiftKey: true })).toBeNull();
+    expect(bracketOf({ key: 'x', code: 'BracketLeft' })).toBeNull();
+    expect(editorKeyAction({ key: '+', code: 'BracketRight', metaKey: true }, selected)).toBeNull();
   });
 
   it('Cmd D duplicates, Cmd A selects all, Cmd X, C, V are the clipboard and Shift V pastes plain', () => {

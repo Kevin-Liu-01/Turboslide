@@ -21,7 +21,7 @@ import { FORBIDDEN_DEFAULT_VIEW_WORDS, SNACKBARS, forbiddenWordsIn } from '../me
 import { ShellContext } from '../shell-context';
 import type { ShellState } from '../shell-context';
 import { useSnackbar } from '../Snackbar';
-import { hideTooltip } from '../Tooltip';
+import { TIP_ID, hideTooltip, resetTooltipTiming, setTooltipsShown } from '../Tooltip';
 
 // The editor shell rendered in its default state (gslides-parity SPEC 11.1, 12, 13, 14.2): the
 // title row, the menu bar with the ten menus, the toolbar in the order of 3.1, the side panel toggle;
@@ -164,6 +164,136 @@ afterEach(async () => {
      would otherwise still see the next test's first key */
   vi.useRealTimers();
   await new Promise((resolve) => setTimeout(resolve, 0));
+});
+
+describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips (the Glyphfield port, PLAN.md wave 1 item 7)', () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.motion;
+    delete document.documentElement.dataset.theme;
+    setTooltipsShown(true);
+    resetTooltipTiming();
+  });
+
+  /* each row renders the whole shell, twice in the first; 15 s for a loaded machine */
+  it(
+    'Reduce motion stamps data-motion="reduced" on the root and keeps it per browser; a stored one is stamped on mount',
+    { timeout: 15_000 },
+    () => {
+      const first = render(<Harness input={input()} shell={shellState()} />);
+      expect(document.documentElement.dataset.motion).toBeUndefined();
+      clickMenuPath(
+        first.container,
+        'tools',
+        'tools.preferences',
+        'tools.preferences.reduceMotion',
+      );
+      expect(document.documentElement.dataset.motion).toBe('reduced');
+      expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').reduceMotion).toBe(true);
+      clickMenuPath(
+        first.container,
+        'tools',
+        'tools.preferences',
+        'tools.preferences.reduceMotion',
+      );
+      expect(document.documentElement.dataset.motion).toBeUndefined();
+      expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').reduceMotion).toBe(false);
+      cleanup();
+      localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
+      const { container } = render(<Harness input={input()} shell={shellState()} />);
+      expect(document.documentElement.dataset.motion).toBe('reduced');
+      fireEvent.click(container.querySelector('[data-control="menubar.tools"]') as HTMLElement);
+      fireEvent.click(
+        document.querySelector('[data-menu-item="tools.preferences"]') as HTMLElement,
+      );
+      expect(
+        document
+          .querySelector('[data-menu-item="tools.preferences.reduceMotion"]')
+          ?.getAttribute('aria-checked'),
+      ).toBe('true');
+    },
+  );
+
+  it(
+    'Show tooltips off shows no plate on a hover and keeps every data-tip; on again shows it',
+    { timeout: 15_000 },
+    () => {
+      vi.useFakeTimers();
+      try {
+        showTooltipsRow();
+      } finally {
+        /* the shell leaves under the fake clock: its deferred cleanup (useMountEffect) runs before
+         the real clock returns, or its keydown listener would see the next rows' keys */
+        cleanup();
+        act(() => {
+          vi.runOnlyPendingTimers();
+        });
+        vi.useRealTimers();
+      }
+    },
+  );
+
+  function showTooltipsRow(): void {
+    const { container } = render(<Harness input={input()} shell={shellState()} />);
+    clickMenuPath(container, 'tools', 'tools.preferences', 'tools.preferences.showTooltips');
+    expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').showTooltips).toBe(false);
+    const share = container.querySelector<HTMLElement>('[data-tip]')!;
+    expect(share.getAttribute('data-tip')).not.toBe('');
+    const hover = (x: number) => {
+      fireEvent.mouseMove(document.body, { clientX: x, clientY: x });
+      fireEvent.mouseEnter(share);
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      const tip = document.getElementById(TIP_ID);
+      const up = tip !== null && !tip.hidden;
+      fireEvent.mouseLeave(share);
+      return up;
+    };
+    expect(hover(10)).toBe(false);
+    clickMenuPath(container, 'tools', 'tools.preferences', 'tools.preferences.showTooltips');
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(hover(20)).toBe(true);
+  }
+
+  it(
+    'Match the system forgets the stored appearance and the theme’s dual key and draws the system’s appearance',
+    { timeout: 15_000 },
+    () => {
+      localStorage.setItem('ts-chrome-appearance', 'dark');
+      localStorage.setItem('gt-theme', 'dark');
+      localStorage.setItem('gt-deck-theme', 'dark');
+      /* the root's boot script stamps the stored theme before the shell mounts */
+      document.documentElement.dataset.theme = 'dark';
+      const { container } = render(<Harness input={input()} shell={shellState()} />);
+      expect(document.documentElement.dataset.theme).toBe('dark');
+      clickMenuPath(
+        container,
+        'tools',
+        'tools.preferences',
+        'tools.preferences.appearance',
+        'tools.preferences.appearance.system',
+      );
+      /* the stubbed system answers light (beforeEach) */
+      expect(document.documentElement.dataset.theme).toBe('light');
+      expect(localStorage.getItem('ts-chrome-appearance')).toBeNull();
+      expect(localStorage.getItem('gt-theme')).toBeNull();
+      expect(localStorage.getItem('gt-deck-theme')).toBeNull();
+      fireEvent.click(container.querySelector('[data-control="menubar.tools"]') as HTMLElement);
+      fireEvent.click(
+        document.querySelector('[data-menu-item="tools.preferences"]') as HTMLElement,
+      );
+      fireEvent.click(
+        document.querySelector('[data-menu-item="tools.preferences.appearance"]') as HTMLElement,
+      );
+      expect(
+        document
+          .querySelector('[data-menu-item="tools.preferences.appearance.system"]')
+          ?.getAttribute('aria-checked'),
+      ).toBe('true');
+    },
+  );
 });
 
 describe('the editor shell in its default state', () => {

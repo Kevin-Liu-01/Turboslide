@@ -3466,6 +3466,10 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   'linkDetection',
   /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6): View > Play shaders, per browser */
   'playShaders',
+  /* the Glyphfield port (PLAN.md wave 1 item 7): Tools > Preferences > Reduce motion and Show
+     tooltips; the root's boot script reads reduceMotion from this record before first paint */
+  'reduceMotion',
+  'showTooltips',
 ];
 
 /**
@@ -3505,6 +3509,8 @@ export const DEFAULT_SETTINGS: ShellSettings = {
   linkDetection: true,
   /* docs/archive/rounds/FEATURES.md 5.6, question 5's default: shaders hold their frame while editing and move in the show */
   playShaders: 'show',
+  reduceMotion: false,
+  showTooltips: true,
 };
 
 /** The mode the shell is in: the route's word, else the round one Viewing flag, else Editing (SPEC-3 5.3). */

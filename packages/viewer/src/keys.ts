@@ -130,7 +130,26 @@ export type EditorKeyContext = {
   advanced?: boolean;
 };
 
-export type EditorKeyLike = KeyLike & { shiftKey?: boolean };
+export type EditorKeyLike = KeyLike & { shiftKey?: boolean; code?: string };
+
+/**
+ * The bracket a key event names for Cmd+] and Cmd+[ (Increase and Decrease indent): the typed `]`
+ * or `[`, else the bracket key by its place (`BracketRight`, `BracketLeft`) when the key typed
+ * there is no chord key of its own (the Glyphfield port, PLAN.md wave 1 item 7, from Glyphfield's
+ * layerOrderShortcut.ts). A French Mac types $ and a dead ^ on those keys and a German one ü, so
+ * the place names them. A letter, a digit and the punctuation of US chords keep their own meaning:
+ * Dvorak types / on BracketLeft (Cmd+/ is Keyboard shortcuts), and the German + on BracketRight
+ * stays Cmd+Plus (zoom in). With Shift the key is the character it types (the braces of a US
+ * keyboard). The one rule for the chrome's chord table (menus/keys.ts `eventKeyName`), its indent
+ * chord (useEditorKeys.ts), the text session (InlineText.tsx) and the stage keys below.
+ */
+export function bracketOf(e: { key: string; code?: string; shiftKey?: boolean }): ']' | '[' | null {
+  if (e.key === ']' || e.key === '[') return e.key;
+  if (e.shiftKey === true) return null;
+  const place = e.code === 'BracketRight' ? ']' : e.code === 'BracketLeft' ? '[' : null;
+  if (place === null || /^[a-z0-9/.,<>\\;'`=+_-]$/i.test(e.key)) return null;
+  return place;
+}
 
 /** One resolved stage key. `inert` is a key the stage consumes and does nothing with (the arrows on a grammar slide). */
 export type EditorKeyAction =
@@ -219,9 +238,11 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
       if (low === 'x' && shift) return { type: 'mark', mark: 's' };
       if (key === '.' && !shift) return { type: 'mark', mark: 'sup' };
       if (key === ',' && !shift) return { type: 'mark', mark: 'sub' };
-      /* Increase and Decrease indent, Chrome's Forward and Back on macOS (0.55) */
-      if (key === ']') return { type: 'indent', by: 1 };
-      if (key === '[') return { type: 'indent', by: -1 };
+      /* Increase and Decrease indent, Chrome's Forward and Back on macOS (0.55); the bracket
+         keys by their place on other layouts (bracketOf) */
+      const bracket = bracketOf(e);
+      if (bracket === ']') return { type: 'indent', by: 1 };
+      if (bracket === '[') return { type: 'indent', by: -1 };
     }
     switch (low) {
       case 'd':

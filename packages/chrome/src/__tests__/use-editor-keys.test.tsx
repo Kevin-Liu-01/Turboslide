@@ -107,6 +107,15 @@ describe('isIndentChord', () => {
       ),
     ).toBe(false);
   });
+
+  it('matches the bracket keys by their place on a French and a German Mac, and leaves the German + and Dvorak’s / alone (the Glyphfield port, PLAN.md wave 1 item 7)', () => {
+    const cmd = { metaKey: true, ctrlKey: false, altKey: false, shiftKey: false };
+    expect(isIndentChord({ key: '$', code: 'BracketRight', ...cmd }, 'mac')).toBe(true);
+    expect(isIndentChord({ key: 'Dead', code: 'BracketLeft', ...cmd }, 'mac')).toBe(true);
+    expect(isIndentChord({ key: 'ü', code: 'BracketLeft', ...cmd }, 'mac')).toBe(true);
+    expect(isIndentChord({ key: '+', code: 'BracketRight', ...cmd }, 'mac')).toBe(false);
+    expect(isIndentChord({ key: '/', code: 'BracketLeft', ...cmd }, 'mac')).toBe(false);
+  });
 });
 
 describe('useEditorKeys and the indent chords', () => {
@@ -139,6 +148,23 @@ describe('useEditorKeys and the indent chords', () => {
       target.dispatchEvent(back);
       expect(back.defaultPrevented).toBe(true);
       expect((runItem.mock.calls[1]?.[0] as MenuItem).id).toBe('format.alignIndent.decreaseIndent');
+      /* a French Mac's $ and a German one's ü, by the bracket keys' place */
+      for (const [key, code, id] of [
+        ['$', 'BracketRight', 'format.alignIndent.increaseIndent'],
+        ['ü', 'BracketLeft', 'format.alignIndent.decreaseIndent'],
+      ] as const) {
+        const placed = new KeyboardEvent('keydown', {
+          key,
+          code,
+          metaKey: true,
+          bubbles: true,
+          cancelable: true,
+        });
+        target.dispatchEvent(placed);
+        expect(placed.defaultPrevented).toBe(true);
+        expect((runItem.mock.calls.at(-1)?.[0] as MenuItem).id).toBe(id);
+      }
+      expect(runItem).toHaveBeenCalledTimes(4);
       await settle();
       /* nothing selected: the default is still prevented and nothing runs */
       const idle = vi.fn();

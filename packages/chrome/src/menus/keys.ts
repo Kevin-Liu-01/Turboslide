@@ -1,3 +1,5 @@
+import { bracketOf } from '@turboslide/viewer/keys';
+
 import type { MenuItem, MenuPredicate, Platform, Shortcut } from './model.ts';
 import { MENUS, TITLE_ROW_ITEMS, TOOLBAR_HEAD, TOOLBAR_TAIL_DEFAULT, walkItems } from './model.ts';
 
@@ -323,6 +325,10 @@ const EVENT_KEYS: Readonly<Record<string, string>> = {
 export function eventKeyName(event: KeyLike): string {
   const mapped = EVENT_KEYS[event.key];
   if (mapped !== undefined) return mapped;
+  /* after EVENT_KEYS, so the German + on BracketRight stays Plus: the bracket keys by their place
+     where a layout types another character there (bracketOf, @turboslide/viewer/keys) */
+  const bracket = bracketOf(event);
+  if (bracket !== null) return bracket;
   if (event.code !== undefined) {
     const letter = /^Key([A-Z])$/.exec(event.code);
     if (

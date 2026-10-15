@@ -1501,6 +1501,20 @@ describe('the retired letters, the ladder and the stored settings', () => {
     expect(readStoredSettings(written).advancedTools).toBe(true);
     expect(readStoredSettings(writeStoredSettings(DEFAULT_SETTINGS)).advancedTools).toBe(false);
   });
+  it('keeps Reduce motion off and Show tooltips on by default and remembers both per browser (the Glyphfield port, PLAN.md wave 1 item 7)', () => {
+    expect(DEFAULT_SETTINGS.reduceMotion).toBe(false);
+    expect(DEFAULT_SETTINGS.showTooltips).toBe(true);
+    expect(STORED_SETTINGS).toContain('reduceMotion');
+    expect(STORED_SETTINGS).toContain('showTooltips');
+    const written = writeStoredSettings({
+      ...DEFAULT_SETTINGS,
+      reduceMotion: true,
+      showTooltips: false,
+    });
+    /* the root's boot script reads this key and this field before first paint */
+    expect(JSON.parse(written).reduceMotion).toBe(true);
+    expect(readStoredSettings(written)).toMatchObject({ reduceMotion: true, showTooltips: false });
+  });
   it('keeps View > Play shaders at In the show only by default and remembers it per browser (docs/archive/rounds/FEATURES.md 5.6, question 5)', () => {
     expect(DEFAULT_SETTINGS.playShaders).toBe('show');
     expect(STORED_SETTINGS).toContain('playShaders');

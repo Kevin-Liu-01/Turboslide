@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import type { KeyBinding } from '../keys.ts';
+import type { KeyBinding, KeyLike } from '../keys.ts';
 import {
   GESTURES,
   OMITTED_SHORTCUTS,
@@ -15,6 +15,7 @@ import {
   buildKeyTable,
   chordText,
   chordsOf,
+  eventKeyName,
   formatChord,
   isBareKey,
   matchesShortcut,
@@ -177,6 +178,72 @@ describe('the chord grammar', () => {
       'mac',
     );
     expect(hits.map((binding) => binding.id)).toEqual(['edit.undo', 'toolbar.undo']);
+  });
+});
+
+// The bracket keys by their place (the Glyphfield port, PLAN.md wave 1 item 7; Glyphfield's
+// layerOrderShortcut.ts): Cmd+] and Cmd+[ indent from a French Mac ($ and a dead ^ on the bracket
+// keys) and a German one (ü on BracketLeft). The German + on BracketRight stays zoom in, Dvorak's /
+// on BracketLeft stays Keyboard shortcuts, and Shift keeps the braces a US keyboard types: each
+// layout's event reaches exactly the bindings of the US event for the same chord, so no chord
+// gains a second meaning.
+describe('the bracket keys by their place', () => {
+  const cmd = { metaKey: true, ctrlKey: false, altKey: false, shiftKey: false };
+  const ctrl = { metaKey: false, ctrlKey: true, altKey: false, shiftKey: false };
+  const ids = (event: KeyLike, platform: Platform) =>
+    bindingsFor(event, platform).map((binding) => binding.id);
+  const US = {
+    increase: { key: ']', code: 'BracketRight' },
+    decrease: { key: '[', code: 'BracketLeft' },
+    zoomIn: { key: '=', code: 'Equal' },
+    shortcuts: { key: '/', code: 'Slash' },
+  };
+
+  it('names ] and [ from a French Mac and a German one', () => {
+    expect(eventKeyName({ key: '$', code: 'BracketRight', ...cmd })).toBe(']');
+    expect(eventKeyName({ key: 'Dead', code: 'BracketLeft', ...cmd })).toBe('[');
+    expect(eventKeyName({ key: '^', code: 'BracketLeft', ...cmd })).toBe('[');
+    expect(eventKeyName({ key: 'ü', code: 'BracketLeft', ...cmd })).toBe('[');
+    /* a US keyboard reads as before */
+    expect(eventKeyName({ ...US.increase, ...cmd })).toBe(']');
+    expect(eventKeyName({ ...US.decrease, ...cmd })).toBe('[');
+  });
+
+  it('runs Increase and Decrease indent from those keys on both platforms, and nothing else', () => {
+    const french = {
+      increase: { key: '$', code: 'BracketRight' },
+      decrease: { key: 'Dead', code: 'BracketLeft' },
+    };
+    const german = { decrease: { key: 'ü', code: 'BracketLeft' } };
+    for (const [platform, mods] of [
+      ['mac', cmd],
+      ['win', ctrl],
+    ] as const) {
+      const increase = ids({ ...US.increase, ...mods }, platform);
+      const decrease = ids({ ...US.decrease, ...mods }, platform);
+      expect(increase).toContain('format.alignIndent.increaseIndent');
+      expect(decrease).toContain('format.alignIndent.decreaseIndent');
+      expect(ids({ ...french.increase, ...mods }, platform)).toEqual(increase);
+      expect(ids({ ...french.decrease, ...mods }, platform)).toEqual(decrease);
+      expect(ids({ ...german.decrease, ...mods }, platform)).toEqual(decrease);
+    }
+  });
+
+  it('keeps the German + on BracketRight as zoom in, Dvorak’s / on BracketLeft as Keyboard shortcuts, and the braces as typed', () => {
+    const zoomIn = ids({ ...US.zoomIn, ...cmd }, 'mac');
+    expect(zoomIn).toContain('view.zoom.in');
+    expect(eventKeyName({ key: '+', code: 'BracketRight', ...cmd })).toBe('Plus');
+    expect(ids({ key: '+', code: 'BracketRight', ...cmd }, 'mac')).toEqual(zoomIn);
+    const shortcuts = ids({ ...US.shortcuts, ...cmd }, 'mac');
+    expect(shortcuts.length).toBeGreaterThan(0);
+    expect(eventKeyName({ key: '/', code: 'BracketLeft', ...cmd })).toBe('/');
+    expect(ids({ key: '/', code: 'BracketLeft', ...cmd }, 'mac')).toEqual(shortcuts);
+    /* Shift on a US keyboard types the braces; they stay braces and run no indent */
+    expect(eventKeyName({ key: '{', code: 'BracketLeft', ...cmd, shiftKey: true })).toBe('{');
+    expect(eventKeyName({ key: '}', code: 'BracketRight', ...cmd, shiftKey: true })).toBe('}');
+    expect(ids({ key: '}', code: 'BracketRight', ...cmd, shiftKey: true }, 'mac')).not.toContain(
+      'format.alignIndent.increaseIndent',
+    );
   });
 });
 

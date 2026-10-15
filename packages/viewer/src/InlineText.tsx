@@ -40,6 +40,7 @@ import {
 } from '@turboslide/schema/text';
 import type { Run, RunMarks, SlideLinkKeyword, Text as Markup } from '@turboslide/schema/text';
 
+import { bracketOf } from './keys';
 import {
   addressRangeAt,
   colorFromCss,
@@ -2437,11 +2438,12 @@ export function InlineText({
            position, and a Tab after "Two" that ended the session left the next words after "One" */
         if (callbacks.current.onListLevel?.(e.shiftKey ? -1 : 1) === true) return;
         finish(e.shiftKey ? 'shift-tab' : 'tab');
-      } else if (meta && !e.altKey && (e.key === ']' || e.key === '[')) {
-        /* Increase and Decrease indent, Chrome's Forward and Back on macOS: always prevented (0.55) */
+      } else if (meta && !e.altKey && bracketOf(e) !== null) {
+        /* Increase and Decrease indent, Chrome's Forward and Back on macOS: always prevented (0.55);
+           the bracket keys by their place on other layouts (keys.ts bracketOf) */
         e.preventDefault();
         e.stopPropagation();
-        const by: 1 | -1 = e.key === ']' ? 1 : -1;
+        const by: 1 | -1 = bracketOf(e) === ']' ? 1 : -1;
         if (callbacks.current.onListLevel?.(by) === true) return;
         callbacks.current.onIndent?.(by);
       } else if (meta && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'i') {

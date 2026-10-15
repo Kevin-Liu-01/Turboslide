@@ -286,7 +286,11 @@ export type MenuSetting =
   | 'linkDetection'
   /* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6): Play shaders, On, In the show only or
      Off, per browser; under Tools > Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20) */
-  | 'playShaders';
+  | 'playShaders'
+  /* the Glyphfield port (PLAN.md wave 1 item 7): Tools > Preferences > Reduce motion and Show
+     tooltips, per browser */
+  | 'reduceMotion'
+  | 'showTooltips';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -2516,14 +2520,31 @@ const TOOLS: Menu = {
             'Match the presentation',
             toggle('appearance', 'match'),
           ),
+          /* the Glyphfield port (PLAN.md wave 1 item 7): the way back to the system's appearance
+             once Light or Dark was picked; it forgets the stored theme */
+          now(
+            'tools.preferences.appearance.system',
+            'Match the system',
+            toggle('appearance', 'system'),
+          ),
         ],
         {
           turboslide: true,
           icon: 'swatch',
           /* docs/archive/rounds/POLISH.md 2.9 item 120 (audit-assist item 31): one sentence for the two words */
-          doc: 'Light or dark chrome. Match follows the presentation’s own appearance',
+          doc: 'Light or dark chrome. Match follows the presentation’s or the system’s appearance',
         },
       ),
+      /* the Glyphfield port (PLAN.md wave 1 item 7): chrome motion off for people whose system
+         setting is on, and the hover plates off for people who know the editor */
+      now('tools.preferences.reduceMotion', 'Reduce motion', toggle('reduceMotion'), {
+        turboslide: true,
+        doc: 'Menus, panels and dialogs open and close without animation',
+      }),
+      now('tools.preferences.showTooltips', 'Show tooltips', toggle('showTooltips'), {
+        turboslide: true,
+        doc: 'A control you point at shows its name, a sentence and its key',
+      }),
       /* SPEC-3 0.42, 4.9, 13.1: the one row of Google's Accessibility settings Turboslide can
          honour; Google draws it under Accessibility settings, hence `turboslide` here */
       now(
@@ -2916,7 +2937,10 @@ const ROW_ICONS: Readonly<Record<string, IconName>> = {
   'tools.preferences.playShaders': 'play',
   'tools.preferences.appearance.light': 'sun',
   'tools.preferences.appearance.dark': 'moon',
-  'tools.preferences.appearance.match': 'computer-desktop',
+  'tools.preferences.appearance.match': 'presentation-chart-line',
+  'tools.preferences.appearance.system': 'computer-desktop',
+  'tools.preferences.reduceMotion': 'pause',
+  'tools.preferences.showTooltips': 'chat-bubble-left',
   'tools.preferences.collaboratorAnnouncements': 'eye',
   'tools.accessibilitySettings': 'eye',
   'tools.accessibilitySettings.collaboratorAnnouncements': 'eye',

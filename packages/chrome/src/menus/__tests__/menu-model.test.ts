@@ -534,7 +534,11 @@ const SPEC_ROWS: Row[] = [
     'tools.preferences.appearance.light',
     'tools.preferences.appearance.dark',
     'tools.preferences.appearance.match',
+    /* the Glyphfield port (PLAN.md wave 1 item 7): the way back to the system's appearance */
+    'tools.preferences.appearance.system',
   ]),
+  /* the Glyphfield port (PLAN.md wave 1 item 7): two Turboslide preferences */
+  row('tools', 'now', ['tools.preferences.reduceMotion', 'tools.preferences.showTooltips']),
   /* SPEC-3 0.42, 13.1: the one row of Accessibility settings Turboslide can honour, under Tools >
      Preferences since Round 1 (docs/NEXT.md 4.1.3 item 20); Google's submenu and its row stay in
      Google's position as omitted rows */
@@ -672,8 +676,9 @@ const COUNTS: Record<string, Counts> = {
   slide: [8, 1, 1],
   arrange: [7, 0, 0],
   /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/archive/rounds/PRODUCT.md section 2 rank 9, 5, 6);
-     Round 1 (docs/NEXT.md 4.1.3 item 20): Assist left and Appearance joined Preferences */
-  tools: [18, 2, 4],
+     Round 1 (docs/NEXT.md 4.1.3 item 20): Assist left and Appearance joined Preferences; 19 with
+     Reduce motion and Show tooltips (the Glyphfield port, PLAN.md wave 1 item 7) */
+  tools: [19, 2, 4],
   extensions: [2, 0, 2],
   help: [4, 0, 2],
 };
@@ -819,12 +824,13 @@ describe('the SPEC rows', () => {
     /* 147 with the Shapes gallery row, All shapes (docs/FOCUS.md section 4, cycle 2); 160 with the
        features round's Logo and Tabular figures rows (docs/archive/rounds/FEATURES.md 4.3, 3.1 item 4) */
     /* Round 1 (docs/NEXT.md 4.1.3 item 20): Tools > Assist left (one Now row fewer) and Edit
-       theme is omitted (one Now row to Omit) */
-    expect(total).toEqual([159, 15, 25]);
+       theme is omitted (one Now row to Omit); 160 with the Glyphfield port's Preferences row
+       (PLAN.md wave 1 item 7: Reduce motion and Show tooltips) */
+    expect(total).toEqual([160, 15, 25]);
     /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
        round's nine rows (docs/archive/rounds/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two;
-       198 after Round 1's cuts; 199 with Sign In as text */
-    expect(total[0] + total[1] + total[2]).toBe(199);
+       198 after Round 1's cuts; 199 with Sign In as text; 200 with the Glyphfield port's row */
+    expect(total[0] + total[1] + total[2]).toBe(200);
   });
 
   it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {

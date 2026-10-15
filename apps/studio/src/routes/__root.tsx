@@ -64,10 +64,13 @@ const ITALIC_PRELOAD_ROUTES: ReadonlySet<string> = new Set(['/edit/$deckId']);
  * Slides, Keynote and Pitch open. The stored choice wins on every visit after the first (View >
  * Appearance and the Light and Dark buttons of /home write the key). The viewer package's
  * `THEME_BOOT_SCRIPT`, which defaulted to dark, stays for the deck document (deck/parts/head.html
- * carries its own copy); the studio's document uses this one.
+ * carries its own copy); the studio's document uses this one. Its second statement stamps
+ * `data-motion="reduced"` when Tools > Preferences > Reduce motion is on in the editor's stored
+ * settings (`ts-editor-settings`; the Glyphfield port, PLAN.md wave 1 item 7), so tokens.css
+ * zeroes the chrome's durations before first paint on every route.
  */
 export const APPEARANCE_BOOT_SCRIPT =
-  "try{var t=localStorage.getItem('gt-theme');if(t!=='light'&&t!=='dark')t=localStorage.getItem('gt-deck-theme');if(t!=='light'&&t!=='dark')t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}";
+  "try{var t=localStorage.getItem('gt-theme');if(t!=='light'&&t!=='dark')t=localStorage.getItem('gt-deck-theme');if(t!=='light'&&t!=='dark')t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}try{var s=JSON.parse(localStorage.getItem('ts-editor-settings')||'null');if(s&&s.reduceMotion===true)document.documentElement.setAttribute('data-motion','reduced')}catch(e){}";
 
 /**
  * The `theme-color` statement (SPEC-4 1.6; R02 2.4): the meta carries the dark paper in the

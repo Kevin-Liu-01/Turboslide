@@ -6,7 +6,14 @@ import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { layoutEntry } from '@turboslide/schema/layouts';
 import type { ShapeCategory } from '@turboslide/schema/shapes';
-import { applyTheme, applyThemeToTree, readTheme, writeThemeColor } from '@turboslide/viewer/theme';
+import {
+  applyTheme,
+  applyThemeToTree,
+  DECK_THEME_KEY,
+  readTheme,
+  THEME_KEY,
+  writeThemeColor,
+} from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { ActivityPanel } from './activity/ActivityPanel';
@@ -114,6 +121,7 @@ import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
 import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
+import { setTooltipsShown } from './Tooltip';
 import type { Version } from '@turboslide/schema/mutations';
 
 import './EditorShell.css';
@@ -285,6 +293,25 @@ function store(key: string, value: string): void {
   } catch {
     // private mode: the choice holds for the session only
   }
+}
+
+function forget(key: string): void {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // private mode: nothing was stored
+  }
+}
+
+/**
+ * Tools > Preferences > Reduce motion and Show tooltips on the page (the Glyphfield port, PLAN.md
+ * wave 1 item 7): the root's `data-motion="reduced"` zeroes the chrome's durations (tokens.css;
+ * the root's boot script stamps it before first paint), and the tooltip manager shows no plate.
+ */
+function applyChromePreferences(settings: ShellSettings): void {
+  if (settings.reduceMotion === true) document.documentElement.dataset.motion = 'reduced';
+  else delete document.documentElement.dataset.motion;
+  setTooltipsShown(settings.showTooltips !== false);
 }
 
 /**
@@ -462,7 +489,9 @@ export function EditorShell({
   /* the platform, the stored settings, the last layout and the chrome appearance, read after mount */
   useMountEffect(() => {
     setPlatform(detectPlatform());
-    setSettings({ ...DEFAULT_SETTINGS, ...readStoredSettings(load(SETTINGS_STORAGE)) });
+    const stored = { ...DEFAULT_SETTINGS, ...readStoredSettings(load(SETTINGS_STORAGE)) };
+    setSettings(stored);
+    applyChromePreferences(stored);
     setLastLayout(readLastLayout(load(LAST_LAYOUT_STORAGE)));
     const chosen = readAppearance();
     setAppearanceState(chosen);
@@ -657,8 +686,18 @@ export function EditorShell({
     else window.location.assign(target);
   }, []);
 
-  const setAppearance = useCallback((value: 'light' | 'dark' | 'match') => {
+  const setAppearance = useCallback((value: 'light' | 'dark' | 'match' | 'system') => {
     setAppearanceState(value);
+    if (value === 'system') {
+      /* Match the system (the Glyphfield port, PLAN.md wave 1 item 7) forgets the stored choice,
+         the chrome's own and the theme's dual key, so the system branch above and the root's boot
+         script follow the operating system again */
+      forget(APPEARANCE_STORAGE);
+      forget(THEME_KEY);
+      forget(DECK_THEME_KEY);
+      showTheme(systemTheme());
+      return;
+    }
     store(APPEARANCE_STORAGE, value);
     const theme: Theme = value === 'match' ? appearanceOf(inputRef.current.document.deck) : value;
     applyTheme(theme);
@@ -1237,8 +1276,16 @@ export function EditorShell({
           current.toggles?.onSuggestionMarks?.(!(current.toggles.suggestionMarks ?? false));
           return;
         case 'appearance':
-          if (value === 'light' || value === 'dark' || value === 'match') setAppearance(value);
+          if (value === 'light' || value === 'dark' || value === 'match' || value === 'system')
+            setAppearance(value);
           return;
+        case 'reduceMotion':
+        case 'showTooltips': {
+          const on = !(effectiveSettings[setting] === true);
+          setSetting(setting, on);
+          applyChromePreferences({ ...effectiveSettings, [setting]: on });
+          return;
+        }
         default: {
           const now = effectiveSettings[setting];
           setSetting(setting, typeof value === 'string' ? value : !(now === true));

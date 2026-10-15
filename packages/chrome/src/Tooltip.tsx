@@ -360,10 +360,22 @@ function cancelPending(): void {
   pending = null;
 }
 
+/*
+ * Tools > Preferences > Show tooltips (the Glyphfield port, PLAN.md wave 1 item 7): while it is
+ * off the manager shows no plate. `data-tip`, the accessible names and the tooltip audit stay.
+ */
+let tipsShown = true;
+
+/** Turns the plates on or off for the page; off hides the one up. */
+export function setTooltipsShown(on: boolean): void {
+  tipsShown = on;
+  if (!on) hideTooltip();
+}
+
 /** Shows the tooltip for an anchor now, replacing whatever is up. */
 export function showTooltip(anchor: HTMLElement, content: TipContent): void {
   cancelPending();
-  if (!anchor.isConnected) return;
+  if (!tipsShown || !anchor.isConnected) return;
   const el = ensureLayer();
   if (shown !== null && shown.anchor !== anchor) shown.anchor.removeAttribute('aria-describedby');
   shown = { anchor, content };
@@ -411,6 +423,7 @@ export function hideTooltipUntilInput(): void {
  * the reader is walking a toolbar and the second plate should not make them wait again).
  */
 export function scheduleTooltip(anchor: HTMLElement, content: TipContent): void {
+  if (!tipsShown) return;
   if (shown !== null && shown.anchor === anchor) return;
   if (shown !== null) {
     showTooltip(anchor, content);

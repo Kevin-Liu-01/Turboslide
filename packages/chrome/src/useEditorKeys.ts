@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 
+import { bracketOf } from '@turboslide/viewer/keys';
 import { modalDialogOpen } from '@turboslide/viewer/Selection';
 
 import { RETIRED_KEYS, RETIRED_KEYS_STORAGE, retiredKeySentence } from './editor-shell';
@@ -156,12 +157,17 @@ export function isCaretKeyInCanvasText(event: Pick<KeyboardEvent, 'key' | 'targe
   return CARET_KEYS.has(event.key) && isCanvasText(event.target);
 }
 
-/** Cmd+] or Cmd+[ on a Mac, Ctrl+] or Ctrl+[ elsewhere, with no other modifier (SPEC-2 0.55). */
+/**
+ * Cmd+] or Cmd+[ on a Mac, Ctrl+] or Ctrl+[ elsewhere, with no other modifier (SPEC-2 0.55); the
+ * bracket keys by their place on layouts that type another character there (bracketOf).
+ */
 export function isIndentChord(
-  event: Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'altKey' | 'shiftKey'>,
+  event: Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'altKey' | 'shiftKey'> & {
+    code?: string;
+  },
   platform: Platform,
 ): boolean {
-  if (event.key !== ']' && event.key !== '[') return false;
+  if (bracketOf(event) === null) return false;
   if (event.altKey || event.shiftKey) return false;
   return platform === 'mac' ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
 }
@@ -214,7 +220,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         event.preventDefault();
         if (inCanvasText || h.overlayOpen() || modalDialogOpen()) return;
         const id =
-          event.key === ']'
+          bracketOf(event) === ']'
             ? 'format.alignIndent.increaseIndent'
             : 'format.alignIndent.decreaseIndent';
         const item = findItem(id);

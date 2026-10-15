@@ -1002,9 +1002,9 @@ export function createEditorController(init: {
     const first = slideOrder(latest().document)[0];
     if (first === undefined) return;
     homeCardWarmed = true;
-    backend.warmThumbnails({ data: { deckId, theme: readTheme(), slideIds: [first] } }).catch(
-      () => undefined,
-    );
+    backend
+      .warmThumbnails({ data: { deckId, theme: readTheme(), slideIds: [first] } })
+      .catch(() => undefined);
   };
   const listeners = new Set<() => void>();
   let alive = false;
@@ -1364,7 +1364,8 @@ export function createEditorController(init: {
     if (versionsTimer !== undefined) clearTimeout(versionsTimer);
     versionsTimer = setTimeout(() => {
       versionsTimer = undefined;
-      backend.listVersions({ deckId })
+      backend
+        .listVersions({ deckId })
         .then((versions) => publish({ versions }))
         .catch(() => undefined);
     }, 500);
@@ -3314,7 +3315,12 @@ export function createEditorController(init: {
       if (draft) draftInFlight = true;
       let answer: RunDeckActionAnswer;
       try {
-        answer = await backend.runDeckActionDetailed({ deckId, action: id, input: request, author });
+        answer = await backend.runDeckActionDetailed({
+          deckId,
+          action: id,
+          input: request,
+          author,
+        });
       } catch (error) {
         if (draft) {
           // the action may have created the deck before it failed (a picture sharp refused):

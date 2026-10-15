@@ -73,7 +73,10 @@ export function tabComments(document: () => DeckDocument): TabComments {
   let lastOp: CommentOp | null = null;
   const stamp = (): string => new Date().toISOString();
 
-  const land = (thread: Thread | undefined, op: CommentOp): { thread: Thread; commentsRevision: number } => {
+  const land = (
+    thread: Thread | undefined,
+    op: CommentOp,
+  ): { thread: Thread; commentsRevision: number } => {
     revision += 1;
     lastOp = op;
     const next = applyCommentOp(thread, op, stamp(), revision);
@@ -156,8 +159,18 @@ export function tabComments(document: () => DeckDocument): TabComments {
       case 'comment.reopen':
       case 'comment.done': {
         const input = raw as ThreadInput;
-        const op = action === 'comment.resolve' ? 'resolve' : action === 'comment.reopen' ? 'reopen' : 'done';
-        return land(existing(input.threadId), { op, threadId: input.threadId, at, by: me.principalId });
+        const op =
+          action === 'comment.resolve'
+            ? 'resolve'
+            : action === 'comment.reopen'
+              ? 'reopen'
+              : 'done';
+        return land(existing(input.threadId), {
+          op,
+          threadId: input.threadId,
+          at,
+          by: me.principalId,
+        });
       }
       case 'comment.assign': {
         const input = raw as ThreadInput & { assignee: Mention | null };

@@ -316,7 +316,10 @@ describe('agents with a brand mark (docs/SITE.md D5)', () => {
   });
 
   it('keeps the hue and names the brand of an agent row whose mark names one', () => {
-    const view = participantOf(agentRow({ variant: 'agent', brand: 'claude-code' }), '2026-10-14T00:00:00.000Z');
+    const view = participantOf(
+      agentRow({ variant: 'agent', brand: 'claude-code' }),
+      '2026-10-14T00:00:00.000Z',
+    );
     expect(view.brand).toBe('claude-code');
     expect(view.hue).toBe(6);
     expect(view.kind).toBe('agent');

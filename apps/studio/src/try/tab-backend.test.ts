@@ -15,7 +15,11 @@ import type { TabPerson } from './tab-backend';
 // `fetch` throws for the whole file, so any call that would leave the tab fails the test.
 
 const visitor: TabPerson = {
-  author: { kind: 'human', name: 'Cobalt 118', principalId: 'anon_0f1e2d3c-4b5a-4978-8a9b-0c1d2e3f4a5b' },
+  author: {
+    kind: 'human',
+    name: 'Cobalt 118',
+    principalId: 'anon_0f1e2d3c-4b5a-4978-8a9b-0c1d2e3f4a5b',
+  },
   role: 'owner',
   trust: 'label',
   hue: 1,
@@ -58,20 +62,38 @@ describe('the tab backend', () => {
       deckId,
       document: heroDocument(deckId),
       people: [visitor, claude],
-      tabOnly: { sentence: TAB_ONLY.sentence, dialogs: ['share'], action: { label: 'New Presentation', run: () => undefined } },
+      tabOnly: {
+        sentence: TAB_ONLY.sentence,
+        dialogs: ['share'],
+        action: { label: 'New Presentation', run: () => undefined },
+      },
       openPage: () => undefined,
       checkpointIdleMs: 50,
     });
-    const mine = createEditorController({ deckId, author: visitor.author, payload: payloadFor(visitor), backend });
-    const agent = createEditorController({ deckId, author: claude.author, payload: payloadFor(claude), backend });
+    const mine = createEditorController({
+      deckId,
+      author: visitor.author,
+      payload: payloadFor(visitor),
+      backend,
+    });
+    const agent = createEditorController({
+      deckId,
+      author: claude.author,
+      payload: payloadFor(claude),
+      backend,
+    });
     mine.start();
     agent.start();
     agent.reportPresence({ slideId: 'title', pointer: { x: 400, y: 300 }, pointerOn: true });
     mine.reportPresence({ slideId: 'agenda', pointerOn: true });
 
     /* the agent's chip reaches the visitor's roster with its brand and its hue */
-    await until(() => mine.getSnapshot().roster.some((row) => row.principalId === 'agent:claude-code'));
-    const row = mine.getSnapshot().roster.find((entry) => entry.principalId === 'agent:claude-code');
+    await until(() =>
+      mine.getSnapshot().roster.some((row) => row.principalId === 'agent:claude-code'),
+    );
+    const row = mine
+      .getSnapshot()
+      .roster.find((entry) => entry.principalId === 'agent:claude-code');
     expect(row?.kind).toBe('agent');
     expect(row?.hueSlot).toBe(5);
     expect((row?.mark as { brand?: string }).brand).toBe('claude-code');
@@ -99,7 +121,10 @@ describe('the tab backend', () => {
       body: { text: 'Shorter title?', mentions: [] },
     })) as { thread: { id: string } };
     await until(() => mine.getSnapshot().comments.threads.length === 1);
-    await mine.invoke('comment.reply', { threadId: added.thread.id, body: { text: 'Done.', mentions: [] } });
+    await mine.invoke('comment.reply', {
+      threadId: added.thread.id,
+      body: { text: 'Done.', mentions: [] },
+    });
     await mine.invoke('comment.resolve', { threadId: added.thread.id });
     await until(() => mine.getSnapshot().comments.threads[0]?.resolved !== undefined);
     expect(mine.getSnapshot().comments.threads[0]?.replies).toHaveLength(1);
@@ -111,8 +136,12 @@ describe('the tab backend', () => {
     await until(() => revisionOf(mine) >= 1);
 
     /* what needs the server answers the sentence */
-    await expect(backend.runDeckAction({ deckId, action: 'share.get', input: {}, author: visitor.author })).rejects.toThrow(TabOnlyError);
-    await expect(backend.startExport({ deckId, input: { format: 'pptx' } } as never)).rejects.toThrow(TAB_ONLY.sentence);
+    await expect(
+      backend.runDeckAction({ deckId, action: 'share.get', input: {}, author: visitor.author }),
+    ).rejects.toThrow(TabOnlyError);
+    await expect(
+      backend.startExport({ deckId, input: { format: 'pptx' } } as never),
+    ).rejects.toThrow(TAB_ONLY.sentence);
 
     mine.stop();
     agent.stop();

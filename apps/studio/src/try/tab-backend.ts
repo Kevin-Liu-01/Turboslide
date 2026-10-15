@@ -243,8 +243,7 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
     input: unknown;
     author: Author;
   }): Promise<unknown> => {
-    if (!input.action.startsWith('comment.') && !input.action.startsWith('notification.'))
-      refuse();
+    if (!input.action.startsWith('comment.') && !input.action.startsWith('notification.')) refuse();
     const answer = comments.run(input.action, input.input, input.author);
     const op = comments.takeOp();
     if (op !== null) {

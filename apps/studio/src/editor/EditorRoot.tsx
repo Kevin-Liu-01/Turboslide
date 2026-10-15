@@ -1032,16 +1032,18 @@ export function EditorRoot({
      before the hand off rejects, and the sign in window says it under the provider's row
      (docs/POLISH-2.md 4.3) */
   const socialSignIn = (provider: 'github' | 'google'): Promise<void> =>
-    backend.authPost('sign-in/social', {
-      provider,
-      callbackURL: signInReturnAddress(),
-      errorCallbackURL: signInErrorAddress(),
-    }).then((answer) => {
-      const url = (answer as { url?: string } | null)?.url;
-      /* the window says a refusal under the provider's row (the plate's request-failed line) */
-      if (typeof url !== 'string') throw new Error('Sign in did not complete.');
-      window.location.assign(url);
-    });
+    backend
+      .authPost('sign-in/social', {
+        provider,
+        callbackURL: signInReturnAddress(),
+        errorCallbackURL: signInErrorAddress(),
+      })
+      .then((answer) => {
+        const url = (answer as { url?: string } | null)?.url;
+        /* the window says a refusal under the provider's row (the plate's request-failed line) */
+        if (typeof url !== 'string') throw new Error('Sign in did not complete.');
+        window.location.assign(url);
+      });
   const account: EditorAccount = {
     principal,
     signedIn: payload.identity?.kind === 'account',

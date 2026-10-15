@@ -647,17 +647,20 @@ export function EditorShell({
   }, []);
   const reopenPanel = useCallback(() => setPanel(lastPanel.current), []);
 
-  const openDialog = useCallback((request: DialogId | DialogRequest) => {
-    const id = typeof request === 'string' ? request : request.id;
-    const tab = inputRef.current.tabOnly;
-    setMenuOpen(null);
-    /* a dialog that needs the server answers the tab's sentence instead (docs/SITE.md D10) */
-    if (tab !== undefined && tab.dialogs.includes(id)) {
-      snackbar.show(tab.sentence, tab.action);
-      return;
-    }
-    setDialog(typeof request === 'string' ? { id: request } : request);
-  }, [snackbar]);
+  const openDialog = useCallback(
+    (request: DialogId | DialogRequest) => {
+      const id = typeof request === 'string' ? request : request.id;
+      const tab = inputRef.current.tabOnly;
+      setMenuOpen(null);
+      /* a dialog that needs the server answers the tab's sentence instead (docs/SITE.md D10) */
+      if (tab !== undefined && tab.dialogs.includes(id)) {
+        snackbar.show(tab.sentence, tab.action);
+        return;
+      }
+      setDialog(typeof request === 'string' ? { id: request } : request);
+    },
+    [snackbar],
+  );
   const closeDialog = useCallback(() => setDialog(null), []);
 
   const openLayoutGrid = useCallback((request: LayoutGridRequest) => setLayoutGrid(request), []);

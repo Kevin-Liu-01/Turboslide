@@ -114,6 +114,45 @@ function useElapsed(): {
   return { elapsedMs, running, toggle, reset };
 }
 
+/**
+ * The timer readout with Pause and Reset. It owns `useElapsed`, so its 250 ms tick re-renders
+ * this leaf only, never the console with its three live clones, the notes and the slide list
+ * (Glyphfield 83f752d moved its typing meter's clock out of the tool the same way).
+ */
+function PresenterTimer({ tip }: { tip: PresentTip }) {
+  const timer = useElapsed();
+  return (
+    <div className="ts-presenter-timer" data-control="presenter.timer">
+      <span className="ts-presenter-label">{PRESENT_TEXT.timer}</span>
+      <output className="ts-presenter-elapsed" data-control="presenter.elapsed" aria-live="off">
+        {formatElapsed(timer.elapsedMs)}
+      </output>
+      <button
+        type="button"
+        className="ts-presenter-text-btn"
+        data-control="presenter.pause"
+        aria-pressed={!timer.running}
+        onClick={timer.toggle}
+        {...tip({
+          name: timer.running ? PRESENT_TEXT.pause : PRESENT_TEXT.resume,
+          doc: 'Holds the timer where it is; the show keeps going',
+        })}
+      >
+        {timer.running ? PRESENT_TEXT.pause : PRESENT_TEXT.resume}
+      </button>
+      <button
+        type="button"
+        className="ts-presenter-text-btn"
+        data-control="presenter.reset"
+        onClick={timer.reset}
+        {...tip({ name: PRESENT_TEXT.reset, doc: 'Starts the timer again from zero' })}
+      >
+        {PRESENT_TEXT.reset}
+      </button>
+    </div>
+  );
+}
+
 function useClock(): string {
   const read = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const [time, setTime] = useState(read);
@@ -166,7 +205,6 @@ export function PresenterConsole({
   const current = slides[at];
   const previous = at > 0 ? slides[at - 1] : undefined;
   const next = at < total - 1 ? slides[at + 1] : undefined;
-  const timer = useElapsed();
   const clock = useClock();
   const [notesSize, setNotesSize] = useState<number>(NOTES_FONT.initial);
   const [listOpen, setListOpen] = useState(false);
@@ -263,34 +301,7 @@ export function PresenterConsole({
   return (
     <div className="ts-presenter" data-control="presenter" data-index={at} data-total={total}>
       <header className="ts-presenter-head">
-        <div className="ts-presenter-timer" data-control="presenter.timer">
-          <span className="ts-presenter-label">{PRESENT_TEXT.timer}</span>
-          <output className="ts-presenter-elapsed" data-control="presenter.elapsed" aria-live="off">
-            {formatElapsed(timer.elapsedMs)}
-          </output>
-          <button
-            type="button"
-            className="ts-presenter-text-btn"
-            data-control="presenter.pause"
-            aria-pressed={!timer.running}
-            onClick={timer.toggle}
-            {...tip({
-              name: timer.running ? PRESENT_TEXT.pause : PRESENT_TEXT.resume,
-              doc: 'Holds the timer where it is; the show keeps going',
-            })}
-          >
-            {timer.running ? PRESENT_TEXT.pause : PRESENT_TEXT.resume}
-          </button>
-          <button
-            type="button"
-            className="ts-presenter-text-btn"
-            data-control="presenter.reset"
-            onClick={timer.reset}
-            {...tip({ name: PRESENT_TEXT.reset, doc: 'Starts the timer again from zero' })}
-          >
-            {PRESENT_TEXT.reset}
-          </button>
-        </div>
+        <PresenterTimer tip={tip} />
         <h1 className="ts-presenter-title">{title}</h1>
         <div className="ts-presenter-facts">
           <span

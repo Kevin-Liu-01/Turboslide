@@ -157,6 +157,15 @@ export function isEmbedPath(pathname: string): boolean {
   return path === '/embed' || path.startsWith('/embed/');
 }
 
+/**
+ * The landing's live editor (docs/SITE.md D1, C.5): /home frames it from the same origin, so it
+ * answers `X-Frame-Options: SAMEORIGIN` and `frame-ancestors 'self'` where every other page but
+ * the embed answers DENY and 'none'.
+ */
+export function isSameOriginFramePath(pathname: string): boolean {
+  return routePath(pathname) === '/try';
+}
+
 /** The link exchange route (SPEC-3 6.4): `Referrer-Policy: no-referrer`, unsafe methods only under CSRF. */
 export function isExchangePath(pathname: string): boolean {
   const path = routePath(pathname);
@@ -261,6 +270,7 @@ export const DOCUMENT_ROUTES: ReadonlyArray<string> = [
   '/s',
   '/edit',
   '/new',
+  '/try',
 ];
 
 export function isDocumentPath(pathname: string): boolean {
@@ -329,7 +339,12 @@ export function buildCsp(options: CspOptions): string {
     "base-uri 'none'",
     "form-action 'self'",
   ];
-  if (options.frameAncestors !== false) directives.push(frameAncestorsOf(embed, env));
+  if (options.frameAncestors !== false)
+    directives.push(
+      options.pathname !== undefined && isSameOriginFramePath(options.pathname)
+        ? "frame-ancestors 'self'"
+        : frameAncestorsOf(embed, env),
+    );
   if (env.VERCEL !== undefined && env.VERCEL !== '' && options.reportOnly !== true)
     directives.push('upgrade-insecure-requests');
   if (options.reportUri !== undefined) directives.push(`report-uri ${options.reportUri}`);
@@ -367,7 +382,7 @@ export function securityHeadersFor(
   };
   if (options.secure) headers['strict-transport-security'] = HSTS;
   if (!embed) {
-    headers['x-frame-options'] = 'DENY';
+    headers['x-frame-options'] = isSameOriginFramePath(pathname) ? 'SAMEORIGIN' : 'DENY';
     headers['cross-origin-opener-policy'] = 'same-origin';
   }
   if (isAssetPath(pathname)) headers['cross-origin-resource-policy'] = 'same-site';

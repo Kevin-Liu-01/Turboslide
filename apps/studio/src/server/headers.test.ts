@@ -361,6 +361,13 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
       'frame-ancestors https://prototemplate.com https://*.prototemplate.com',
     );
     expect(embedEnforced['content-security-policy-report-only']).toBeUndefined();
+    // the landing's live editor (docs/SITE.md D1): framed by /home from the same origin alone
+    const live = securityHeadersFor('/try', base);
+    expect(live['x-frame-options']).toBe('SAMEORIGIN');
+    expect(live['content-security-policy']).toContain("frame-ancestors 'self'");
+    expect(live['content-security-policy']).not.toContain("frame-ancestors 'none'");
+    expect(securityHeadersFor('/home', base)['x-frame-options']).toBe('DENY');
+    expect(securityHeadersFor('/tryout', base)['x-frame-options']).toBe('DENY');
     const exchange = securityHeadersFor('/s/abcdefghijklmnopqrstuv', base);
     expect(exchange['referrer-policy']).toBe('no-referrer');
     // plain http never pins itself; API answers are never cached and carry no page policy
@@ -444,6 +451,7 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
       '/s/abcdefghijklmnopqrstuv',
       '/edit/q4',
       '/new',
+      '/try',
     ]) {
       expect(isDocumentPath(path), path).toBe(true);
       expect(headerOf(path), path).toBe('enforce');

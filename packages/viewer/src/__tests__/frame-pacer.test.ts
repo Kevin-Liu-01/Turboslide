@@ -3,7 +3,8 @@
 // period, the loop draws 30 frames a second, plus or minus 1, where the strict rule it replaces
 // (`throttleMount`) drew 20 to 24. The loop drives Paper through `setFrame` alone, keeps a frame a
 // scrubber set, sleeps between frames, and stops while the document is hidden, at speed 0 and
-// after `stop`. Node, with a fake clock that fires animation frames on the display's vsync.
+// after `stop`. Node, with a fake clock that fires animation frames on the display's vsync, and a
+// second that runs an ask made between two vsyncs at once with the earlier stamp, as Chromium does.
 import { describe, expect, it, vi } from 'vitest';
 
 import type { MaterialHandle } from '@turboslide/materials/mount';
@@ -74,6 +75,77 @@ function fakeClock(times: number[]) {
     }
   };
   return { clock, run, requested: () => requested, pending: () => frames.size + timers.size };
+}
+
+/**
+ * Chromium's clock (the review of wave 1, raf-phase.mjs: 57 of 59 animation frames asked from a
+ * timer ran a median 0.3 ms after the ask): an ask made inside a vsync interval whose frame has not
+ * run yet runs at once, stamped with the vsync that began the interval; an ask made once that frame
+ * ran waits for the next vsync. Timers fire 1 ms late, as in `fakeClock`.
+ */
+function chromiumClock(times: number[]) {
+  let now = 0;
+  let nextId = 1;
+  const frames = new Map<number, { callback: (time: number) => void; at: number; stamp: number }>();
+  const timers = new Map<number, { at: number; run: () => void }>();
+  const ran = new Set<number>();
+  let requested = 0;
+  /** The index of the vsync that began the interval holding `time`, or -1 before the first. */
+  const intervalOf = (time: number) => {
+    let index = -1;
+    for (let k = 0; k < times.length && (times[k] ?? Infinity) <= time; k += 1) index = k;
+    return index;
+  };
+  const clock: FrameClock = {
+    now: () => now,
+    frame: (callback) => {
+      requested += 1;
+      const id = nextId++;
+      const k = intervalOf(now);
+      if (k >= 0 && !ran.has(k) && now > (times[k] ?? Infinity)) {
+        ran.add(k);
+        frames.set(id, { callback, at: now + 0.3, stamp: times[k] ?? now });
+      } else {
+        const next = times[k + 1] ?? Infinity;
+        frames.set(id, { callback, at: next, stamp: next });
+      }
+      return id;
+    },
+    cancelFrame: (id) => void frames.delete(id),
+    after: (run, ms) => {
+      const id = nextId++;
+      timers.set(id, { at: now + ms + 1, run });
+      return id;
+    },
+    cancelAfter: (id) => void timers.delete(id),
+  };
+  /** Runs every timer and animation frame up to `until`, in time order. */
+  const run = (until: number) => {
+    for (;;) {
+      const timer = [...timers.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+      const frame = [...frames.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+      const timerAt = timer?.[1].at ?? Infinity;
+      const frameAt = frame?.[1].at ?? Infinity;
+      if (Math.min(timerAt, frameAt) > until) {
+        now = until;
+        return;
+      }
+      if (timer !== undefined && timerAt <= frameAt) {
+        timers.delete(timer[0]);
+        now = timerAt;
+        timer[1].run();
+        continue;
+      }
+      /* every frame due at this moment runs in one batch, as one vsync's callbacks do */
+      now = frameAt;
+      const batch = [...frames.entries()].filter(([, entry]) => entry.at === frameAt);
+      for (const [id] of batch) frames.delete(id);
+      const k = intervalOf(now);
+      if (k >= 0 && times[k] === now) ran.add(k);
+      for (const [, entry] of batch) entry.callback(entry.stamp);
+    }
+  };
+  return { clock, run, requested: () => requested };
 }
 
 type FakeDocument = {
@@ -167,13 +239,50 @@ describe('paceFrames', () => {
       expect(count).toBeGreaterThanOrEqual(29);
       expect(count).toBeLessThanOrEqual(31);
     }
-    /* the loop sleeps between frames: about one animation frame asked per drawn frame, not one per vsync */
+    /* the loop sleeps between frames: where an ask waits for the next vsync (Firefox, WebKit), about
+       one animation frame asked per drawn frame, not one per vsync */
     expect(requested()).toBeLessThan(stamps.length * 1.5);
     /* the shader's time moves with the clock at speed 1: from the first tick, a period before the first frame */
     const advanced = (set.at(-1) ?? 5500) - 5500;
     expect(Math.abs(advanced - (stamps.at(-1)! - stamps[0]!) - 1000 / 30)).toBeLessThan(2);
     loop.stop();
   });
+
+  it.each([
+    [60, 0.4, 2],
+    [120, 0.3, 2],
+  ])(
+    'on Chromium’s clock at %i Hz (jitter %f ms) draws 30 frames a second and asks at most %i animation frames per draw',
+    (hz, amplitude, asksPerDraw) => {
+      /* Chromium runs the timer's ask at once with the earlier vsync's stamp, which is early, so
+         the loop asks again and draws on the next vsync: two asks per draw, where a loop asking on
+         every vsync makes two at 60 Hz and four at 120 Hz (the review of wave 1, finding 1) */
+      const times = vsyncs(hz, 10, amplitude);
+      const { clock, run, requested } = chromiumClock(times);
+      const { target } = fakeTarget();
+      const stamps: number[] = [];
+      const loop = paceFrames(
+        {
+          ...target,
+          setFrame: (ms) => {
+            stamps.push(clock.now());
+            target.setFrame(ms);
+          },
+        },
+        { fps: 30, speed: 1 },
+        clock,
+      );
+      run(11_000);
+      for (const count of perSecond(stamps, 2000, 8)) {
+        expect(count).toBeGreaterThanOrEqual(29);
+        expect(count).toBeLessThanOrEqual(31);
+      }
+      /* plus the first ask and the one pending when the clock stops: 299 draws, 601 asks */
+      expect(requested()).toBeLessThanOrEqual(stamps.length * asksPerDraw + 4);
+      expect(requested()).toBeGreaterThan(stamps.length * 1.5);
+      loop.stop();
+    },
+  );
 
   it('keeps a frame a scrubber set and advances from it', () => {
     const { clock, run } = fakeClock(vsyncs(60, 2, 0.2));

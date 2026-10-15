@@ -4,9 +4,17 @@
 // no private field of Paper is replaced. A frame is due 5 percent early (at most 0.75 ms), since
 // animation frame timestamps jitter around the display's period and a strict comparison drops
 // every frame that lands just under 33.33 ms, which held the editor at 20 to 24 fps. A late frame
-// carries the remainder instead of starting a new phase, and between two frames the loop sleeps
-// on a timer and asks for no animation frame. A hidden document and a canvas out of the viewport
-// stop the loop, as Paper's own observers stop its loop.
+// carries the remainder instead of starting a new phase. Between two drawn frames the loop sleeps
+// on a timer that ends 8 ms before the next due frame, then asks for one animation frame. Firefox
+// and WebKit run that ask on the next vsync, the due one, so they ask about one animation frame
+// per drawn frame. Chromium runs an ask made between two vsyncs at once, stamped with the vsync
+// that began the interval; that stamp is early, so the loop asks once more and draws on the next
+// vsync: about two asks per drawn frame, where a loop asking on every vsync makes two at 60 Hz and
+// four at 120 Hz (the reviews of wave 1 read 60 asks and 30 draws a second at 60 Hz, and 1.7 asks
+// per draw at 120 Hz). Judging the ask by the clock instead of its stamp would not save it, since
+// the clock still reads 8 ms early; only a timer ending after the due vsync would, and that costs
+// Firefox and WebKit a whole vsync. A hidden document and a canvas out of the viewport stop the
+// loop, as Paper's own observers stop its loop.
 import type { MaterialHandle } from '@turboslide/materials/mount';
 
 /** The due rule: one frame per period, a frame slightly early counts, a stall skips the missed ones. */
@@ -74,7 +82,10 @@ export type PacedFrames = {
   stop: () => void;
 };
 
-/** How long before a due frame the loop's timer ends, so the animation frame it asks for is the due one. */
+/**
+ * How long before a due frame the loop's timer ends, so the animation frame it asks for is the due
+ * one where an ask waits for the next vsync (Firefox, WebKit; Chromium's is the header's extra ask).
+ */
 const WAKE_EARLY_MS = 8;
 
 /**

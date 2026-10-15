@@ -416,14 +416,18 @@ export function Dialog({
   }, [modal]);
 
   /* Escape closes a modal card wherever the focus sits (cycle 2, b3 R19 and b4 FR1): the card's
-     own handler takes a key pressed inside it and stops its propagation, so this listener sees
-     only a key pressed with the focus outside the card, on the body after a focused button left
-     the document. The floating form leaves the focus in the page on purpose and keeps Escape to
-     the card, so the person typing can still end a text session with it. */
+     own handler takes a key pressed inside it, so this listener acts only on a key pressed with
+     the focus outside the card, on the body after a focused button left the document. A key some
+     card already handled (`defaultPrevented`) is left alone: the app hydrates `document`, so
+     React's stopPropagation cannot stop this listener on the same node, and a confirm nested in
+     this card (Share's Remove access, Profile's Delete account) has already left the document
+     when it runs, its target outside this card. The floating form leaves the focus in the page
+     on purpose and keeps Escape to the card, so the person typing can still end a text session
+     with it. */
   useEffect(() => {
     if (!modal) return undefined;
     const onDocumentEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
       const el = card.current;
       if (el && event.target instanceof Node && el.contains(event.target)) return;
       event.preventDefault();

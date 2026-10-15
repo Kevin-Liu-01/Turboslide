@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
-
-import { Dialog } from '../Dialog';
+import { ConfirmDialog } from '../ConfirmDialog';
 import { DIALOGS } from '../menus/strings';
 
 /**
- * Delete forever (gslides-parity SPEC 6.4, 12 "Dialogs"; docs/archive/rounds/PRODUCT.md 3.3): the chrome's one
- * Dialog with the 18 px title "Delete <title> forever?" and the lead "This cannot be undone.",
- * one sentence naming what goes, Cancel and the solid Delete forever, which takes the focus on
- * open so Enter deletes and Esc keeps (docs/FOCUS.md rank 29). Presentational: the trash page runs
- * `deck.remove` in `onConfirm` for one deck or for every deck in the trash (`count`); the editor
- * never reaches it. Exported for /decks/trash.
+ * Delete forever (gslides-parity SPEC 6.4, 12 "Dialogs"; docs/archive/rounds/PRODUCT.md 3.3): the
+ * chrome's ConfirmDialog with the 18 px title "Delete <title> forever?" and the lead "This cannot
+ * be undone.", one sentence naming what goes, Cancel and the solid Delete Forever. Cancel holds the
+ * focus on open, so Enter and Esc keep the deck and the Delete Forever tooltip names no key
+ * (docs/FOCUS.md rank 29; the Glyphfield port, PLAN.md wave 1 item 6, Kevin's answer to its
+ * question 5: Cancel, as Glyphfield). Presentational: the trash page runs `deck.remove` in
+ * `onConfirm` for one deck or for every deck in the trash (`count`); the editor never reaches it.
+ * Exported for /decks/trash.
  */
 export type DeleteForeverDialogProps = {
   /** the presentation's title; with `count` the number of presentations the confirm covers */
@@ -48,41 +48,19 @@ export function DeleteForeverDialog({
   onClose,
   busy = false,
 }: DeleteForeverDialogProps) {
-  /* the primary button holds the focus once the frame has settled (docs/archive/rounds/POLISH.md item 97;
-     audit-pages item 32): the opener's own focus return (a card menu closing after the dialog
-     mounted) moved it to Cancel, and Enter cancelled while the tooltip said Enter deletes */
-  useEffect(() => {
-    if (typeof document === 'undefined') return undefined;
-    const frame = requestAnimationFrame(() => {
-      const ok = document.querySelector<HTMLElement>('[data-control="trash.confirm.ok"]');
-      if (ok !== null && document.activeElement !== ok) ok.focus();
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
   return (
-    <Dialog
+    <ConfirmDialog
       title={deleteForeverTitle(title, count)}
       lead={DELETE_FOREVER_LEAD}
-      onClose={onClose}
-      width={480}
+      sentence={deleteForeverSentence(title, count, slides)}
+      confirmLabel={DIALOGS.deleteForever.ok}
+      confirmDoc="Deletes the files; nothing brings them back"
       /* the trash page's ids since round one (`trash.confirm`, `.ok`, `.cancel`): the drivers of
          the trash rows and the fresh presentation write probe read them */
       control="trash.confirm"
-      cancel
-      cancelLabel={DIALOGS.deleteForever.cancel}
-      actions={[
-        {
-          label: DIALOGS.deleteForever.ok,
-          primary: true,
-          disabled: busy,
-          autoFocus: true,
-          onClick: onConfirm,
-          control: 'trash.confirm.ok',
-          doc: 'Deletes the files; nothing brings them back',
-        },
-      ]}
-    >
-      <p>{deleteForeverSentence(title, count, slides)}</p>
-    </Dialog>
+      busy={busy}
+      onConfirm={onConfirm}
+      onClose={onClose}
+    />
   );
 }

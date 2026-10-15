@@ -17,7 +17,7 @@ import { EditorShellContext } from '../editor-shell-context';
 import type { EditorShellState } from '../editor-shell-context';
 import { HoldButton } from '../FocusHold';
 import { Select } from '../Select';
-import { hideTooltip } from '../Tooltip';
+import { TIP_DELAY_MS, TIP_ID, hideTooltip, resetTooltipTiming } from '../Tooltip';
 import { browserMove, focusFixup, nextTask } from './browser-move';
 
 // The dialog primitive (gslides-parity SPEC 13.3; R08 B9): role dialog named by its title, the
@@ -127,6 +127,85 @@ describe('Dialog', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     fireEvent.click(dialog.querySelector('.ts-dialog-x') as HTMLElement);
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('Dialog role="alertdialog" (the confirm of a destructive act; the Glyphfield port, PLAN.md wave 1 item 6)', () => {
+  function Confirm({ onOk, onOuterKey }: { onOk: () => void; onOuterKey: () => void }) {
+    return (
+      /* an outer card's own key handler, as Share's and Profile's cards hold one */
+      <div onKeyDown={onOuterKey}>
+        <Dialog
+          role="alertdialog"
+          title="Remove access for lee@example.test?"
+          lead="This cannot be undone."
+          onClose={() => undefined}
+          control="dialog.alert"
+          actions={[
+            { label: 'Cancel', onClick: () => undefined, control: 'dialog.alert.cancel' },
+            { label: 'Remove Access', primary: true, onClick: onOk, control: 'dialog.alert.ok' },
+          ]}
+        >
+          <p>Anyone who could open the presentation may already hold a copy.</p>
+        </Dialog>
+      </div>
+    );
+  }
+
+  it('is described by its lead and its body, and Enter runs no default button nor reaches an outer card', () => {
+    const onOk = vi.fn();
+    const onOuterKey = vi.fn();
+    render(<Confirm onOk={onOk} onOuterKey={onOuterKey} />);
+    const card = screen.getByRole('alertdialog', { name: 'Remove access for lee@example.test?' });
+    const described = (card.getAttribute('aria-describedby') ?? '')
+      .split(' ')
+      .map((id) => document.getElementById(id)?.textContent ?? '');
+    expect(described).toEqual([
+      'This cannot be undone.',
+      'Anyone who could open the presentation may already hold a copy.',
+    ]);
+    act(() => card.focus());
+    fireEvent.keyDown(card, { key: 'Enter' });
+    expect(onOk).not.toHaveBeenCalled();
+    expect(onOuterKey).not.toHaveBeenCalled();
+    /* the other keys still reach the outer handler as before */
+    fireEvent.keyDown(card, { key: 'a' });
+    expect(onOuterKey).toHaveBeenCalledTimes(1);
+  });
+
+  it("names no key on the solid button's tooltip, where a dialog's names Enter", () => {
+    vi.useFakeTimers();
+    try {
+      /* each reading's pointer moves to a new point: a dialog's mount waits for the next one */
+      let at = 0;
+      const tipKeyOf = (control: string): string | null => {
+        const button = document.querySelector<HTMLElement>(`[data-control="${control}"]`)!;
+        at += 10;
+        fireEvent.mouseMove(document.body, { clientX: at, clientY: at });
+        fireEvent.mouseEnter(button);
+        act(() => {
+          vi.advanceTimersByTime(TIP_DELAY_MS);
+        });
+        const tip = document.getElementById(TIP_ID);
+        expect(tip?.hidden).toBe(false);
+        const key = tip?.querySelector('kbd')?.textContent ?? null;
+        fireEvent.mouseLeave(button);
+        return key;
+      };
+      const { unmount } = render(<Confirm onOk={() => undefined} onOuterKey={() => undefined} />);
+      expect(tipKeyOf('dialog.alert.ok')).toBeNull();
+      unmount();
+      /* the close's deferred cleanup (useMountEffect) hides the tips until the next input */
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+      render(<Harness onClose={() => undefined} onOk={() => undefined} />);
+      expect(tipKeyOf('dialog.test.ok')).toBe('Enter');
+    } finally {
+      hideTooltip();
+      resetTooltipTiming();
+      vi.useRealTimers();
+    }
   });
 });
 

@@ -74,7 +74,8 @@ export const TIP_ID = 'pt-tip';
 const REST_MS = 500;
 
 /** Inside these surfaces a tooltip shows on hover alone, never on keyboard focus (3.1.1). */
-export const QUIET_FOCUS_SURFACES = '.ts-menu, .ts-context-menu, [role="dialog"]';
+export const QUIET_FOCUS_SURFACES =
+  '.ts-menu, .ts-context-menu, [role="dialog"], [role="alertdialog"]';
 
 /** True when a focus on the anchor must not show its tooltip: the anchor sits in a menu or a dialog. */
 export function quietOnFocus(anchor: HTMLElement): boolean {

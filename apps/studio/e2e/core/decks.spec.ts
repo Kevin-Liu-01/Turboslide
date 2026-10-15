@@ -1066,7 +1066,7 @@ test(title('decks.trash.delete-forever-cancel'), async () => {
   await trashFromEditor(deck);
   await gotoTrash();
   await ctl(page, `trash.delete.${deck}`).click();
-  await expect(page.locator('[data-control="trash.confirm"][role="dialog"]')).toBeVisible();
+  await expect(page.locator('[data-control="trash.confirm"][role="alertdialog"]')).toBeVisible();
   await ctl(page, 'trash.confirm.cancel').click();
   await expect(ctl(page, `trash.card.${deck}`)).toBeVisible();
   expect(await statusOf(page, `/edit/${deck}`)).toBe(200);
@@ -1074,25 +1074,31 @@ test(title('decks.trash.delete-forever-cancel'), async () => {
 
 test(title('decks.trash.delete-forever-enter'), async () => {
   test.setTimeout(120_000);
-  const other = await newDeck(page, scratch, 'Enter deletes me');
+  /* a deck of its own, left to teardownAll: the shared deck sits in the trash since delete-forever-cancel */
+  const other = await newDeck(page, scratch, 'Enter keeps me');
   await trashFromEditor(other);
   await gotoTrash();
   await ctl(page, `trash.delete.${other}`).click();
-  await expect(page.locator('[data-control="trash.confirm"][role="dialog"]')).toBeVisible();
-  const tip =
-    (await ctl(page, 'trash.confirm.ok').getAttribute('data-tip')) ??
-    (await ctl(page, 'trash.confirm.ok').getAttribute('title')) ??
-    (await ctl(page, 'trash.confirm.ok').getAttribute('aria-keyshortcuts')) ??
-    '';
-  await page.keyboard.press('Enter');
-  await expect(
-    ctl(page, `trash.card.${other}`),
-    `Enter deletes (the button's tooltip: "${tip}")`,
-  ).toHaveCount(0, { timeout: 20_000 });
+  await expect(page.locator('[data-control="trash.confirm"][role="alertdialog"]')).toBeVisible();
+  /* ConfirmDialog (the Glyphfield port, PLAN.md wave 1 item 6): Cancel holds the focus on open,
+     so the Delete Forever tooltip names no key (docs/FOCUS.md rank 29) and Enter keeps the deck */
   await expect
-    .poll(() => statusOf(page, `/edit/${other}`), { timeout: 20_000, intervals: [2000] })
-    .toBe(404);
-  scratch.ids.delete(other);
+    .poll(() => page.evaluate(() => document.activeElement?.getAttribute('data-control') ?? ''))
+    .toBe('trash.confirm.cancel');
+  await ctl(page, 'trash.confirm.ok').hover();
+  const tip = page.locator('#pt-tip:not([hidden])');
+  await tip.waitFor({ timeout: 5000 });
+  const tipText = (await tip.textContent()) ?? '';
+  const tipKeys = await tip.locator('kbd').count();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-control="trash.confirm"]')).toHaveCount(0, { timeout: 5000 });
+  test.info().annotations.push({
+    type: 'confirm',
+    description: `the Delete Forever tooltip "${tipText}" with ${tipKeys} key chip(s); Enter on open closed the confirm`,
+  });
+  expect(tipKeys, 'the Delete Forever tooltip names no key').toBe(0);
+  await expect(ctl(page, `trash.card.${other}`), 'Enter on open keeps the deck').toBeVisible();
+  expect(await statusOf(page, `/edit/${other}`)).toBe(200);
 });
 
 test(title('decks.nav.back-forward'), async () => {
@@ -1542,7 +1548,7 @@ test(title('decks.trash.confirm-dialog-chrome'), async () => {
   await trashFromEditor(deck);
   await gotoTrash();
   await ctl(page, `trash.delete.${deck}`).click();
-  const dialog = page.locator('.ts-dialog-scrim [role="dialog"]').first();
+  const dialog = page.locator('.ts-dialog-scrim [role="alertdialog"]').first();
   await dialog.waitFor({ timeout: 8000 });
   const facts = await dialog.evaluate((el) => {
     const titleEl = el.querySelector('h2, .ts-dialog-title, [id$="-title"]');
@@ -3382,13 +3388,18 @@ test(title('decks.trash.enter-confirms'), async () => {
   await trashFromEditor(other);
   await gotoTrash();
   await ctl(page, `trash.delete.${other}`).click();
-  await expect(page.locator('[data-control="trash.confirm"][role="dialog"]')).toBeVisible();
-  const focused = await page.evaluate(
-    () =>
-      document.activeElement?.getAttribute('data-control') ??
-      document.activeElement?.tagName.toLowerCase() ??
-      'none',
-  );
+  await expect(page.locator('[data-control="trash.confirm"][role="alertdialog"]')).toBeVisible();
+  const focusedControl = () =>
+    page.evaluate(
+      () =>
+        document.activeElement?.getAttribute('data-control') ??
+        document.activeElement?.tagName.toLowerCase() ??
+        'none',
+    );
+  /* Cancel holds the focus on open (ConfirmDialog); Tab reaches Delete Forever, and Enter there deletes */
+  await expect.poll(focusedControl).toBe('trash.confirm.cancel');
+  await page.keyboard.press('Tab');
+  const focused = await focusedControl();
   await page.keyboard.press('Enter');
   const gone = await expect(ctl(page, `trash.card.${other}`))
     .toHaveCount(0, { timeout: 20_000 })
@@ -3396,10 +3407,10 @@ test(title('decks.trash.enter-confirms'), async () => {
     .catch(() => false);
   test.info().annotations.push({
     type: 'confirm',
-    description: `the focus on open ${focused}; Enter deleted ${gone}`,
+    description: `the focus after Tab ${focused}; Enter deleted ${gone}`,
   });
-  expect(focused, 'the primary button holds the focus').toBe('trash.confirm.ok');
-  expect(gone, 'Enter deletes').toBe(true);
+  expect(focused, 'Tab from Cancel reaches Delete Forever').toBe('trash.confirm.ok');
+  expect(gone, 'Enter on Delete Forever deletes').toBe(true);
   await expect
     .poll(() => statusOf(page, `/edit/${other}`), { timeout: 20_000, intervals: [2000] })
     .toBe(404);

@@ -279,6 +279,13 @@ export const ACCOUNT = {
     revoke: 'Revoke',
     deleteAccount: 'Delete account',
     deleteRefused: 'Other people hold access to presentations you own. Transfer them first',
+    /* the confirm of Delete account (ConfirmDialog, the Glyphfield port, PLAN.md wave 1 item 6) */
+    deleteAccountConfirm: {
+      title: 'Delete your account?',
+      sentence: (who: string) =>
+        `Your sessions, avatar and notifications as ${who} are deleted. Your edits stay in the presentations.`,
+      ok: 'Delete Account',
+    },
   },
   avatar: {
     title: 'Change avatar',
@@ -456,6 +463,11 @@ export const DIALOGS = {
     addExpiration: 'Add expiration',
     removeAccess: 'Remove access',
     removeNote: 'Anyone who could open the presentation may already hold a copy',
+    /* the confirm of Remove access (ConfirmDialog, the Glyphfield port, PLAN.md wave 1 item 6) */
+    removeConfirm: {
+      title: (who: string) => `Remove access for ${who}?`,
+      ok: 'Remove Access',
+    },
     pending: 'Pending',
     expired: 'Expired',
     pendingOwnership: 'Pending ownership',

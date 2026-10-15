@@ -1392,12 +1392,54 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
     expect(document.activeElement).toBe(trigger(leeRole));
   });
 
+  const leeRemove = 'dialog.share.grant.lee@example.test.remove';
+
+  /**
+   * Remove access from the role field by the keyboard: the confirm opens with the focus on Cancel
+   * and writes nothing (the Glyphfield port, PLAN.md wave 1 item 6: ConfirmDialog replaced
+   * window.confirm); its Remove Access closes it, gives the focus back to the role field and then
+   * starts the write.
+   */
+  function removeLee(role: HTMLElement, dispatch: ReturnType<typeof writes>['dispatch']): void {
+    keys(role, 'ArrowDown', 'End', 'Enter');
+    const confirm = document.querySelector<HTMLElement>(`[data-control="${leeRemove}"]`);
+    expect(confirm?.getAttribute('role')).toBe('alertdialog');
+    expect(confirm?.querySelector('h2')?.textContent).toBe('Remove access for lee@example.test?');
+    expect(document.activeElement).toBe(
+      document.querySelector(`[data-control="${leeRemove}.cancel"]`),
+    );
+    expect(dispatch).not.toHaveBeenCalled();
+    fireEvent.click(document.querySelector<HTMLElement>(`[data-control="${leeRemove}.ok"]`)!);
+    expect(document.querySelector(`[data-control="${leeRemove}"]`)).toBeNull();
+  }
+
+  it('asks before Remove access: Cancel and Escape keep the person and give the focus back to the role field', async () => {
+    const { dispatch } = writes();
+    open({ ...owned(), grants: [lee] }, dispatch);
+    await flush();
+    const role = trigger(leeRole)!;
+    act(() => role.focus());
+    keys(role, 'ArrowDown', 'End', 'Enter');
+    const cancel = document.querySelector<HTMLElement>(`[data-control="${leeRemove}.cancel"]`)!;
+    expect(document.activeElement).toBe(cancel);
+    /* Enter on the focused Cancel is the browser's click on it */
+    fireEvent.keyDown(cancel, { key: 'Enter' });
+    fireEvent.click(cancel);
+    expect(document.querySelector(`[data-control="${leeRemove}"]`)).toBeNull();
+    expect(document.activeElement).toBe(trigger(leeRole));
+    keys(trigger(leeRole)!, 'ArrowDown', 'End', 'Enter');
+    fireEvent.keyDown(document.querySelector(`[data-control="${leeRemove}"]`)!, {
+      key: 'Escape',
+    });
+    expect(document.querySelector(`[data-control="${leeRemove}"]`)).toBeNull();
+    /* the Share card stays open behind it */
+    expect(document.querySelector('[data-control="dialog.share"]')).not.toBeNull();
+    expect(document.activeElement).toBe(trigger(leeRole));
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
   it('gives the focus to the control at the row place after Remove access takes the row away', async () => {
     const { dispatch, answer } = writes();
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => true),
-    );
     /* the browser blurs a focused control as it leaves the document (Chrome: focusout with no
        related target); jsdom sends nothing, so the removal sends it here */
     const removeChild = Node.prototype.removeChild;
@@ -1415,7 +1457,7 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       act(() => role.focus());
       const place = focusableIn(card).indexOf(role);
       expect(place).toBeGreaterThan(0);
-      keys(role, 'ArrowDown', 'End', 'Enter');
+      removeLee(role, dispatch);
       expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
       expect(document.activeElement).toBe(role);
       await answer({ record: record({ revision: 4 }) });
@@ -1430,7 +1472,6 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
       );
     } finally {
       Node.prototype.removeChild = removeChild;
-      vi.unstubAllGlobals();
     }
   });
 
@@ -1438,31 +1479,23 @@ describe('the focus after a choice in the Share dialog (dropdown round, keyboard
      on the body; jsdom sends none either, so the removal here is Firefox's */
   it('gives the focus to the control at the row place after Remove access when the browser sends no focusout (Firefox)', async () => {
     const { dispatch, answer } = writes();
-    vi.stubGlobal(
-      'confirm',
-      vi.fn(() => true),
+    open({ ...owned(), grants: [lee] }, dispatch);
+    await flush();
+    const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]')!;
+    const role = trigger(leeRole)!;
+    act(() => role.focus());
+    const place = focusableIn(card).indexOf(role);
+    expect(place).toBeGreaterThan(0);
+    removeLee(role, dispatch);
+    expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
+    await answer({ record: record({ revision: 4 }) });
+    await nextTask();
+    expect(trigger(leeRole)).toBeNull();
+    expect(document.activeElement).not.toBe(document.body);
+    expect(card.contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).toBe(
+      document.querySelector('[data-control="dialog.share.more"]'),
     );
-    try {
-      open({ ...owned(), grants: [lee] }, dispatch);
-      await flush();
-      const card = document.querySelector<HTMLElement>('[data-control="dialog.share"]')!;
-      const role = trigger(leeRole)!;
-      act(() => role.focus());
-      const place = focusableIn(card).indexOf(role);
-      expect(place).toBeGreaterThan(0);
-      keys(role, 'ArrowDown', 'End', 'Enter');
-      expect(dispatch.mock.calls.map(([action]) => action)).toEqual(['share.remove']);
-      await answer({ record: record({ revision: 4 }) });
-      await nextTask();
-      expect(trigger(leeRole)).toBeNull();
-      expect(document.activeElement).not.toBe(document.body);
-      expect(card.contains(document.activeElement)).toBe(true);
-      expect(document.activeElement).toBe(
-        document.querySelector('[data-control="dialog.share.more"]'),
-      );
-    } finally {
-      vi.unstubAllGlobals();
-    }
   });
 
   /* the final pass 1, finding 4: the role field read "Add expiration" as its value while the

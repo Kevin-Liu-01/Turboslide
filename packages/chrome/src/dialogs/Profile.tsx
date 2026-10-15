@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { ConfirmDialog } from '../ConfirmDialog';
 import { Dialog } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
 import { HoldButton } from '../FocusHold';
@@ -26,6 +27,9 @@ export function ProfileDialog() {
   const account = shell.input.account;
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /* Delete account asks first (ConfirmDialog, the Glyphfield port, PLAN.md wave 1 item 6); the
+     confirm is drawn inside the profile card, so the card's focus trap counts it */
+  const [deleting, setDeleting] = useState(false);
   const run = (promise: Promise<unknown> | undefined, done?: string) => {
     if (!promise || busy) return;
     setBusy(true);
@@ -247,10 +251,7 @@ export function ProfileDialog() {
                 className="pt-ib is-text"
                 disabled={busy || !account.deleteAccount}
                 data-control="dialog.profile.deleteAccount"
-                onClick={() => {
-                  if (window.confirm(`${ACCOUNT.profile.deleteAccount}?`))
-                    run(account.deleteAccount?.());
-                }}
+                onClick={() => setDeleting(true)}
                 {...tipProps({
                   name: ACCOUNT.profile.deleteAccount,
                   doc: 'Removes your sessions, avatar and notifications; edits keep their words',
@@ -258,6 +259,20 @@ export function ProfileDialog() {
               >
                 <span className="pt-lb">{ACCOUNT.profile.deleteAccount}</span>
               </HoldButton>
+              {deleting ? (
+                <ConfirmDialog
+                  title={ACCOUNT.profile.deleteAccountConfirm.title}
+                  sentence={ACCOUNT.profile.deleteAccountConfirm.sentence(
+                    identity.email ?? nameOf(identity),
+                  )}
+                  confirmLabel={ACCOUNT.profile.deleteAccountConfirm.ok}
+                  confirmDoc="Deletes your account; your edits stay"
+                  control="dialog.profile.deleteAccount.confirm"
+                  busy={busy}
+                  onConfirm={() => run(account.deleteAccount?.())}
+                  onClose={() => setDeleting(false)}
+                />
+              ) : null}
             </div>
           ) : null}
         </>

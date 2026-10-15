@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { labelFor } from '@turboslide/identity/labels';
 import type { GrantWho } from '@turboslide/schema/access';
 
+import { ConfirmDialog } from '../ConfirmDialog';
 import { Dialog, DialogCheck } from '../Dialog';
 import { useEditorShell } from '../editor-shell-context';
 import { HoldButton } from '../FocusHold';
@@ -1692,6 +1693,9 @@ function GrantRow({
   const identity: IdentityView | undefined = grant.principal;
   const key = whoKey(grant);
   const row = useRef<HTMLLIElement>(null);
+  /* Remove access asks first (ConfirmDialog, the Glyphfield port, PLAN.md wave 1 item 6); the
+     confirm is drawn in the row, inside the Share card, so the card's focus trap counts it */
+  const [removing, setRemoving] = useState(false);
   return (
     <li
       ref={row}
@@ -1750,10 +1754,8 @@ function GrantRow({
           onChange={(value) => {
             if (value === 'transfer') onTransfer();
             else if (value === 'expiry') onExpiring(true);
-            else if (value === 'remove') {
-              if (window.confirm(`${DIALOGS.share.removeAccess}? ${DIALOGS.share.removeNote}`))
-                onRemove();
-            } else onRole(value);
+            else if (value === 'remove') setRemoving(true);
+            else onRole(value);
           }}
           tip={{
             name: 'Role',
@@ -1791,6 +1793,18 @@ function GrantRow({
           }}
           tip={{ name: DIALOGS.share.addExpiration, doc: 'Up to one year' }}
           onBlur={() => onExpiring(false)}
+        />
+      ) : null}
+      {removing ? (
+        <ConfirmDialog
+          title={DIALOGS.share.removeConfirm.title(who(grant))}
+          sentence={`${DIALOGS.share.removeNote}.`}
+          confirmLabel={DIALOGS.share.removeConfirm.ok}
+          confirmDoc="Takes this person's access to the presentation away"
+          control={`dialog.share.grant.${key}.remove`}
+          busy={busy}
+          onConfirm={onRemove}
+          onClose={() => setRemoving(false)}
         />
       ) : null}
     </li>

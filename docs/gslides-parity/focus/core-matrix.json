@@ -307,7 +307,7 @@
     {
       "id": "decks.trash.delete-forever-enter",
       "feature": "decks",
-      "interaction": "Delete forever, then Enter in the dialog; the key the button's tooltip names deletes",
+      "interaction": "Delete forever, then Enter in the dialog: the focus starts on Cancel, so Enter keeps the deck, and the Delete Forever tooltip names no key",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
@@ -9730,7 +9730,7 @@
     {
       "id": "decks.trash.enter-confirms",
       "feature": "decks",
-      "interaction": "Delete forever, Enter: the deck is deleted",
+      "interaction": "Delete forever, then Tab to Delete Forever and Enter: the deck is deleted",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 2,

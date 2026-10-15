@@ -750,10 +750,11 @@ export function chromeDropdowns(): string[] {
     await share.waitForTimeout(300);
     const clicked = { focus: await focusedControl(), value: await emails.inputValue() };
     await emails.fill('');
-    /* the guest leaves again: Remove access, with the browser's confirmation accepted */
-    share.once('dialog', (dialog) => void dialog.accept());
+    /* the guest leaves again: Remove access, then the confirm's Remove Access (ConfirmDialog, the
+       Glyphfield port, PLAN.md wave 1 item 6; it was the browser's confirmation box) */
     await guestRole.focus();
     for (const key of ['ArrowDown', 'End', 'Enter']) await share.keyboard.press(key);
+    await ctl(share, `dialog.share.grant.${guest}.remove.ok`).click();
     await expect(share.locator(`li[data-control="dialog.share.grant.${guest}"]`)).toHaveCount(0, {
       timeout: 15_000,
     });

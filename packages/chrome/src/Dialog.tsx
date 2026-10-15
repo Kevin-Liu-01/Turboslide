@@ -33,6 +33,12 @@ import './Dialog.css';
  * field under the caret did not handle the key itself (`defaultPrevented`): the Change background
  * dialog's hex field applies its colour on Enter and the same key must not also run Done from a
  * render that has not seen the colour yet (F-hex-field, `images.background.hex-field`).
+ *
+ * `role="alertdialog"` is the confirm of a destructive act (ConfirmDialog.tsx, the Glyphfield port,
+ * PLAN.md wave 1 item 6): it has no default button, so Enter acts on the focused button alone and
+ * never reaches an outer card's default, the solid button's tooltip names no key (docs/FOCUS.md
+ * rank 29), a confirming button does not take a focus that left the card, and the card is
+ * described by its lead and its body.
  */
 export type DialogAction = {
   label: string;
@@ -52,6 +58,8 @@ export type DialogAction = {
 
 export type DialogProps = {
   title: string;
+  /** `alertdialog` for the confirm of a destructive act: no default button (see above) */
+  role?: 'dialog' | 'alertdialog';
   /** a second line under the title */
   lead?: string;
   onClose: () => void;
@@ -212,6 +220,7 @@ function focusLandingIn(root: HTMLElement, held: HeldFocus | null): HTMLElement 
 
 export function Dialog({
   title,
+  role = 'dialog',
   lead,
   onClose,
   actions = [],
@@ -237,6 +246,13 @@ export function Dialog({
   const openerRow = useRef<string | null>(null);
   const titleId = useId();
   const leadId = useId();
+  const bodyId = useId();
+  const alert = role === 'alertdialog';
+  /* a confirm is described by its lead and by the sentence of its body, which names what goes */
+  const describedBy =
+    [lead === undefined ? null : leadId, alert ? bodyId : null]
+      .filter((id) => id !== null)
+      .join(' ') || undefined;
   const primary = actions.find((action) => action.primary);
   const rows: DialogAction[] = cancel
     ? [
@@ -431,9 +447,9 @@ export function Dialog({
     const active = document.activeElement;
     if (active instanceof HTMLElement && active !== el && el.contains(active)) return;
     const list = focusableIn(el);
-    const confirming = list.find((each) => each.classList.contains('is-solid'));
+    const confirming = alert ? undefined : list.find((each) => each.classList.contains('is-solid'));
     (confirming ?? list.find((each) => !each.closest('.ts-dialog-x')) ?? el).focus();
-  }, [modal, actionsKey]);
+  }, [modal, actionsKey, alert]);
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
@@ -465,6 +481,12 @@ export function Dialog({
       }
       return;
     }
+    if (event.key === 'Enter' && alert) {
+      /* a confirm has no default button: the browser clicks the focused button, and an outer
+         card (Share, Profile) never reads the key as its own default */
+      event.stopPropagation();
+      return;
+    }
     if (event.key === 'Enter' && primary !== undefined && !primary.disabled) {
       /* a field that handled Enter itself (the hex field applies its colour) is not also the
          default button's trigger; the default button reads the state of the next render */
@@ -492,10 +514,10 @@ export function Dialog({
       <div
         ref={card}
         className={cn('ts-dialog pt-window', !modal && 'is-float', className)}
-        role="dialog"
+        role={role}
         aria-modal={modal ? 'true' : undefined}
         aria-labelledby={titleId}
-        aria-describedby={lead === undefined ? undefined : leadId}
+        aria-describedby={describedBy}
         tabIndex={-1}
         style={{ width: `min(${width}px, calc(100vw - 32px))` }}
         data-control={control}
@@ -521,7 +543,9 @@ export function Dialog({
             {lead}
           </p>
         ) : null}
-        <div className="ts-dialog-body">{children}</div>
+        <div id={alert ? bodyId : undefined} className="ts-dialog-body">
+          {children}
+        </div>
         {rows.length > 0 ? (
           <div className="ts-dialog-actions">
             {rows.map((action) => (
@@ -536,7 +560,7 @@ export function Dialog({
                 {...tipProps({
                   name: action.label,
                   ...(action.doc === undefined ? {} : { doc: action.doc }),
-                  ...(action.primary ? { key: 'Enter' } : {}),
+                  ...(action.primary && !alert ? { key: 'Enter' } : {}),
                 })}
               >
                 <span className="pt-lb">{action.label}</span>

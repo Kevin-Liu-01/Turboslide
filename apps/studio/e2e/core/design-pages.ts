@@ -656,8 +656,9 @@ export function designDecks(): string[] {
         const forever = page.locator('.ts-trash .ts-trash-delete:not(:disabled)').first();
         if ((await forever.count()) > 0) {
           await forever.click();
-          await page.locator('[role="dialog"]').first().waitFor({ timeout: 10_000 });
-          want(await cornersOf(page, 'dialog', '[role="dialog"]'), '8px', `${where} trash`);
+          /* Delete forever's confirm is an alertdialog (ConfirmDialog) */
+          await page.locator('[role="alertdialog"]').first().waitFor({ timeout: 10_000 });
+          want(await cornersOf(page, 'dialog', '[role="alertdialog"]'), '8px', `${where} trash`);
           await page.keyboard.press('Escape');
         }
         /* the templates gallery: its cards, covers, buttons and the default mark */

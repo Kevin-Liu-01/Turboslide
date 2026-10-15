@@ -320,7 +320,7 @@ test('Move to trash hides the deck, Undo brings it back, the trash page restores
   await expect(async () => expect(manifestOf(COPY).trashedAt).toBeDefined()).toPass();
   await openTrash(page);
   await page.locator(`[data-control="trash.delete.${COPY}"]`).click();
-  const dialog = page.locator('[data-control="trash.confirm"][role="dialog"]');
+  const dialog = page.locator('[data-control="trash.confirm"][role="alertdialog"]');
   await expect(dialog).toBeVisible();
   await expect(dialog.getByRole('heading')).toHaveText(
     'Delete Copy of Home beta forever? This cannot be undone',

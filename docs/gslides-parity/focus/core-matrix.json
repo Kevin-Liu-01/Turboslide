@@ -4,11 +4,11 @@
     {
       "id": "decks.home.new-presentation",
       "feature": "decks",
-      "interaction": "On /home click the hero New Presentation button; the address is /new with a draft; the close band's New Presentation reaches /new the same way",
+      "interaction": "On /home click the hero New Presentation button; the address is /new with a draft; the bar's New Presentation reaches /new the same way",
       "driver": "core/decks.spec.ts",
-      "today": "works",
+      "today": "not driven",
       "evidence": "audit-decks row 2",
-      "note": "Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1)"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1)"
     },
     {
       "id": "decks.home.your-presentations",
@@ -4948,12 +4948,11 @@
     {
       "id": "decks.home.seller-lead",
       "feature": "decks",
-      "interaction": "The h1 reads \"Presentations for people and agents\" (page text in two locked lines); a fresh context's lead begins \"Turboslide is a slides editor in the browser.\"; the second hero button reads Open the Example Deck and opens /deck/gt-brand",
+      "interaction": "The h1 reads \"Presentations for people and agents\" as page text; a fresh context's lead begins \"Turboslide is a slides editor in the browser.\"; the second hero button reads Open the Example Deck and opens /deck/gt-brand",
       "driver": "core/decks.spec.ts",
-      "today": "broken",
+      "today": "not driven",
       "evidence": "audit-home section 1 and items 1, 2, 12 (the h1 today ends \", in one place\" and the buttons are Start from a template and Open the GT Deck)",
-      "severity": 2,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7; restated in the design round, DR-D4#2 (the h1 of docs/DESIGN.md 8.2 in two lines; the integrator, build/d4.md request to D5)"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production. Before: docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.2 item 1 and 3.7 (the h1, the lead and the second button change with the redesign); B7; restated in the design round, DR-D4#2 (the h1 of docs/DESIGN.md 8.2 in two lines; the integrator, build/d4.md request to D5)"
     },
     {
       "id": "decks.card.thumbnail-slide-1",
@@ -9955,34 +9954,13 @@
       "note": "Polish round; docs/archive/rounds/POLISH.md 2.9 item 120; B5 with the integrator's `model.ts` rows. The polish fix round 3 (B6): the palette's group is `.pt-search-group[data-group]` with an h4 label (Palette.tsx); the ship's run of record read no head through the older selectors twice"
     },
     {
-      "id": "decks.home.pictures-three-widths",
-      "feature": "decks",
-      "interaction": "At 1440, 1280, 390 and 320 in both appearances nothing is wider than the viewport, the slides sit at the widths of docs/LANDING.md section 2 as docs/DESIGN.md 8.2, 8.5 and 8.6 redrew them, and the page is under 14,000 px at 1440 and 15,000 at 390 (question 11)",
-      "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 3,
-      "evidence": "audit-home items 1, 2, 11, 13, 22",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The bands take 80 px of padding where section 2.0 wrote 96, so the page meets the 7,500 px ceiling with the panel and the export band painted at rest (l1.md). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the hero's top padding is 72 px over the 1023 px breakpoint and 48 px under it, the bands keep 3.4's 112 and 72; restated in the design round, DR-D4#4"
-    },
-    {
       "id": "decks.home.copy-rules",
       "feature": "decks",
-      "interaction": "`copy.test.ts` passes with the rules of docs/LANDING.md 2.17; the page's own copy outside the slides, the two panels, the generated lines and the product's strings holds under 750 words at rest, with no semicolon, no comma in a heading, no report word and no file path",
+      "interaction": "The site's `copy.test.ts` passes (docs/SITE.md A.1); the page's own copy outside the recorded run, the code, the key chips and the editor's poster holds under 750 words at rest, with no semicolon, no comma in a heading, no report word and no file path",
       "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 3,
+      "today": "not driven",
       "evidence": "audit-home items 4, 5, 14, 16, 19",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
-    },
-    {
-      "id": "decks.home.product-pictures",
-      "feature": "decks",
-      "interaction": "Every slide on /home is the `renderSlide` output of the page deck built from apps/studio/home-deck, every picture a file part, a capture or a still in `assets.json`, and `build-home-assets.ts --check` exits 0",
-      "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 3,
-      "evidence": "audit-home items 3, 20, 24",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The test no longer runs `shots.test.ts`. Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7. Round 1 (docs/NEXT.md 4.1.3 item 9, B2a): the canvas crop left the page for a diagram and the pictures take the 1104 px column's widths"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production. Before: docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.links-and-card",
@@ -9995,45 +9973,13 @@
       "note": "Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
-      "id": "decks.home.load-budget",
-      "feature": "decks",
-      "interaction": "Measure: the first byte, the LCP on the h1, the pictures before the first scroll (0) and after a full scroll (line 200 KB), the document against 60 KB until audit item 13 (gated at 100 KB by home.budget.bytes-first) and the JavaScript, with docs/LANDING.md 4.1's numbers beside their lines",
-      "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "audit-home items 30, 31",
-      "measure": true,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
-    },
-    {
       "id": "decks.home.layout-shift",
       "feature": "decks",
-      "interaction": "CLS 0 at 1440, 1280 and 390 in both appearances over the load, every band's insert, a full scroll, every loop and every interaction's end state",
+      "interaction": "CLS 0 at 1440, 1280 and 390 in both appearances over the load and a full scroll",
       "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 1,
+      "today": "not driven",
       "evidence": "audit-collab item 20",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Each later push holds its own motions and interactions to this row. Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
-    },
-    {
-      "id": "decks.home.grammar",
-      "feature": "decks",
-      "interaction": "At 1440 in both appearances: one rail element with the column's two rails, the seams' 9 px crosses, the 58 px bar, no icon before a heading, the two #101010 panels (the hero's terminal and the agents band's console) the only monospace, and no sheet wider than a thumbnail drawing a frame",
-      "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "audit-brand-surfaces 34 to 38",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Before: docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the rails drawn once by `.ts-rails`, a `.ts-seam` under every band with its two crosses, the diagrams end their flows in 11 unit square markers"
-    },
-    {
-      "id": "decks.home.capture-plain",
-      "feature": "decks",
-      "interaction": "No selection ring, chip, handle, caret or guide is drawn at rest, and no blue is drawn by an automatic motion (the page read itself after a full scroll at 1440 and 390 in both appearances); the kits band's Colors row shows the kit's six colours, so its six swatches, each painted in the value its row reads (General Translation's Primary and Accent are #2f5ce0), are left out of the scan",
-      "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "audit-brand-surfaces 38 (rank 13)",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). The captures and Shot.tsx leave; the row keeps the rule it protected and reads the page (Kevin's answer 3). Before: docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the canvas section draws a diagram in place of the selected picture's capture; the driver reads every shown capture's pixels for the selection blues; restated in the design round, DR-D4#5 (finishing round 3, pass 4 finding 1: DESIGN.md 8.0 \"Colour\" and 8.7, question 34)"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production. Before: docs/LANDING.md 6.7 (second pass), V1#8. Before: Landing round push 1 (docs/LANDING.md 6.7 \"Rows restated in push 1\"; build/integrator.md, Landing, day 0, 5.2; L1). Each later push holds its own motions and interactions to this row. Before: Polish round; docs/archive/rounds/POLISH.md 3.7 (section 3, the home page remade); B7"
     },
     {
       "id": "decks.home.copy",
@@ -10048,12 +9994,11 @@
     {
       "id": "decks.home.phone",
       "feature": "decks",
-      "interaction": "`/home` at 390 keeps a 16 px gutter at the navigation; nothing crosses the viewport",
+      "interaction": "`/home` at 390 keeps a 16 px gutter at the bar; nothing crosses the viewport",
       "driver": "core/decks.spec.ts",
-      "today": "broken",
-      "severity": 1,
+      "today": "not driven",
       "evidence": "audit-brand-surfaces 39",
-      "note": "docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the 1023 px layout block keeps the column's gutter on the navigation (the bug was home.css 398)"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production. Before: docs/NEXT.md 4.1.3 item 9 and 4.1.5 (B2a): the 1023 px layout block keeps the column's gutter on the navigation (the bug was home.css 398)"
     },
     {
       "id": "decks.list.ruled-rows",
@@ -10444,554 +10389,49 @@
       "note": "Cloudflare phase; docs/CLOUDFLARE.md 2.3; R5 (the ledger field); the verifier reads"
     },
     {
-      "id": "home.page.order",
+      "id": "home.page.layout",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the sections the tree renders follow section 2's order (the nav, the hero, the numbers row, then menus, canvas, tailor, kits, agents, people, present, export, patterns, features, close), each band with one h2, then the footer; one h1; from V4#18 an interlude between every two sections from the numbers row on",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#5 and DR-D4#6"
-    },
-    {
-      "id": "home.page.markup-final",
-      "feature": "decks",
-      "interaction": "With script blocked, the first screen at 1440 by 900 and 390 by 844 paints as the scripted page at rest within 0.5 percent of pixels (the Blue Marble's still included); every band's h2, lead, labels, captions and table rows are in the document; each reserved box has its final size",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "judge-1 a-mid.png; critic 4",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
-    },
-    {
-      "id": "home.hero.type",
-      "feature": "decks",
-      "interaction": "The h1 is page text above the stage, weight 500, -0.042 em, two lines \"Presentations for\" \"people and agents\": 76 px (within 1) from 1,136 px, 61.6 px (within 0.5) at 1024, 64 px from 720 to 1023, min(44 px, the column / 8.4) under 720; every h2 54 px at 1440 and 30 px at 390; page text in weights 400 and 500 only; no full width sheet draws a frame",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-1440-light-first.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#2; restated in polish two, P2-N#3"
-    },
-    {
-      "id": "home.budget.bytes-first",
-      "feature": "decks",
-      "interaction": "Cold at 1440 ×1, ×2 and 390: no picture and no chunk but the route's before `load`; the document at most 100 KB decoded (80 KB from Round 2's entry chunk split and Inter subset; docs/LANDING.md 7 question 21) and 20 KB brotli (52 KB decoded once audit item 13 lands); the page CSS at most 20 KB brotli (docs/DESIGN.md question 32, the first screen's glyph masks); the route chunk at most 70 KB decoded and 22 KB brotli with no `data-home-slides`; the page's own bytes at most 70 KB over the wire",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "docs/LANDING.md 4.1",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; the document line raised from 80 KB to 100 KB decoded on 2026-10-04 for Kevin's picks, every element of A, B and C and much more interaction (docs/LANDING.md 4.1, 7 question 21), the first lines kept as Round 2's goals; restated in the design round, DR-D4#2"
-    },
-    {
-      "id": "home.budget.bytes-page",
-      "feature": "decks",
-      "interaction": "After a full native scroll with motion playing: the pictures of 4.1 at most 200 KB at ×1 and ×2, the page's own script at most 360 KB decoded and 120 KB gzip (300 KB and 90 KB from Round 2's entry chunk split and Inter subset; docs/LANDING.md 7 question 22), the page's own bytes at most 400 KB over the wire; nothing under `/home/` requested twice; no PDF, browser raster or slide 7 still requested",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "docs/LANDING.md 4.1; field.ts's CORS hunk",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; the own script lines raised from 300 KB and 90 KB gzip to 360 KB and 120 KB gzip on 2026-10-04 for Kevin's picks, every element of A, B and C and much more interaction (docs/LANDING.md 4.1, 7 question 22), the first lines kept as Round 2's goals"
-    },
-    {
-      "id": "home.budget.shared",
-      "feature": "decks",
-      "interaction": "Report the shared entry chunk against 600 KB decoded, and the font against 120 KB with exactly one font request on `/home` (answer 7)",
+      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the T in a box, one h1, the editor's figure, screen 02 (the recorded run and the transports table), screen 03 (the viewer and six key chips) and the footer's three columns; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "research-current 6.2",
-      "measure": true,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "evidence": "docs/SITE.md A; the brief's problems L1 to L13 of the landing before it",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
     },
     {
-      "id": "home.budget.lcp",
+      "id": "home.title.one-line",
       "feature": "decks",
-      "interaction": "The LCP element is the page text h1 and the hero's field is never the LCP element; LCP at most 400 ms cold at 1440 ×1, ×2 and 390 on the preview, at most 200 ms warm; read at a load under 20",
+      "interaction": "The h1 reads \"Presentations for people and agents\"; at 1440 in both appearances it is one line inside the 1280 px column with both stacks; at 390 it is two or three lines",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "research-current 6.2",
-      "measure": true,
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
+      "evidence": "docs/SITE.md B, D8 (72 px so the line and its two stacks fit the 1280 px column)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
     },
     {
-      "id": "home.a11y.skip-and-contrast",
+      "id": "home.title.stacks",
       "feature": "decks",
-      "interaction": "The skip link is the first Tab stop and moves focus to the hero; no text at rest falls under 4.5:1 (3:1 at 24 px and over) in either appearance",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "judge-3 2, 6",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1"
-    },
-    {
-      "id": "home.hero.select",
-      "feature": "decks",
-      "interaction": "A click or Tab on the hero frame's slide 1 title draws the 1 px ring in #2f5ce0, eight square handles, the stem, the knob and the chip \"Title\" within 50 ms, and any slide the frame's filmstrip shows takes the same selection; no blue is drawn before it",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-a hero-edit.png",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.hero.edit",
-      "feature": "decks",
-      "interaction": "Dragging the frame's title 100 px follows the pointer within one frame and snaps within 6 px of a centre line with a 1 px guide; a second click or Enter types; Escape ends; the hero's Undo puts the words back and then returns the title on the move curve within 700 ms by transform; the change adds its Version history row; on touch the first tap only selects; a press stops the loop for good",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-a hero-edit.png",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.canvas.gestures",
-      "feature": "decks",
-      "interaction": "On slide 6, the Louisbourg lighthouse (lighthouse#h, #p1, #credit, #plate): resize by the east handle with the opposite edge fixed at any rotation; Shift turns in 15 degree steps with the angle in the chip; a drag off the plate turns the Layout row to Canvas and the moved text keeps its paper ground; Undo three times returns every object and the row reads Mood",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-a canvas-edit.png; direction-b b-strip-canvas-gestures.png",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.canvas.log",
-      "feature": "decks",
-      "interaction": "Each gesture's end prints, within 450 ms, one line in the Command section of the band's Format options panel (a code element: the resting sentence in Inter, a printed line in the code face on the panel's code surface; no #101010 panel in the band) in a form of cli.json: turboslide slide to-canvas lighthouse before the first, then turboslide block set lighthouse#<block> /pos '<json>' or turboslide block rotate lighthouse#<block> --to <degrees> with <block> from canvasBlock and the gesture's values in whole slide units; no line breaks inside a token at 390; the live region reads it",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-a canvas-edit.png; direction-b b-strip-canvas-gestures.png",
-      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
-    },
-    {
-      "id": "home.objects.keyboard",
-      "feature": "decks",
-      "interaction": "Tab reaches each object of the hero frame's shown slide, the miniature's stage and the lighthouse in reading order; arrows nudge 1 unit and Shift 10 (packages/viewer/src/keys.ts 164, 165), nudges within 700 ms are one undo step; Option or Alt with Left or Right turns 15 degrees and with Shift 1 degree; Enter edits; Escape returns focus to the object; [, ] and S do nothing",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "judge-3 3 (ka.mjs); critic 2 (Google's keys)",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.menus.bar",
-      "feature": "decks",
-      "interaction": "The miniature's menu bar holds visibleMenus(DEFAULT_MENU_CONTEXT) in order with each menu's rows, rules, submenus and shortcuts equal to menus.generated.ts in the platform's form (a Mac and a Linux context); a menubar with a roving tabindex: Left and Right move between menus, Down, Enter or Space opens one, Up and Down move between rows, Right opens a submenu, Escape closes and returns focus to the title, and a pointer over another title opens it while one is open; at 390 one Menus key lists the nine menus and drills into one with a row back, rows 44 px; every row 2.5's table does not list is a working row in ink 2 that sets \"This row runs in the editor.\" with its doc, and only a row the editor disables with nothing selected is grey (docs/DESIGN.md 8.4)",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-c strip-menus.jpg; strip-phone.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
-    },
-    {
-      "id": "home.menus.rows",
-      "feature": "decks",
-      "interaction": "Each row of 2.5's table, by pointer and by its shortcut with focus in the band, changes the page deck within 300 ms as the table says and the change shows in the hero frame, the filmstrips, the kits grid and the show; each adds its Version history row; Edit > Undo takes it back; an inserted text box or shape is the renderer's markup; a new slide is the blank layout; Delete slide renumbers every counter; Skip slide leaves the show; Download > PDF Document downloads the page's PDF",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "judge-3 c-menus-tailor.png; judge-2 7 (rows that only describe)",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.budget.live-module",
-      "feature": "decks",
-      "interaction": "The live core and the chunks it imports at once: one request after `load` and one idle callback, never before, at most 64 KB decoded and 20 KB gzip; each band chunk at most 56 KB decoded and 16 KB gzip; no slide markup in the core",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "docs/LANDING.md 4.1",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
-    },
-    {
-      "id": "home.tailor.apply",
-      "feature": "decks",
-      "interaction": "Typing Globex and pressing Apply or Enter replaces every Northwind in the nine slide deck's text and notes within 1 s; the count reads TAILOR.count and equals the CLI's recorded answer for the deck the page holds (with and without slide 5); the snackbar reads TAILOR.result with Undo and leaves by a cut; Undo restores every name; an empty field answers \"Type a customer name first.\"; the field takes at most 24 characters",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-a tailor-apply.png",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.tailor.filmstrip",
-      "feature": "decks",
-      "interaction": "Dragging slide 2 to place 4 in the filmstrip of slides 1 to 5, across the top of the Tailor band, lifts it with a 2 px outline, the others make room in 200 ms and it settles in 240 ms; every counter on the page renumbers; Cmd or Ctrl with Up or Down and the Move Up and Move Down glyph buttons a thumbnail shows on its hover and focus move the slide; Undo returns it; on touch a 350 ms press lifts it",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "direction-a filmstrip-move.png",
-      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
-    },
-    {
-      "id": "home.kits.restyle",
-      "feature": "decks",
-      "interaction": "Kestrel sets the six variables on every slide root on the page within 500 ms (the hero frame, the miniature, the grid, every band, the show); sampled every 40 ms no text falls under 4.5:1; Globex sets #0a1b38, #f4f1ea, #c9cbd3 and #8d97ab and the selection ring holds 3:1 on it; GT restores; Undo takes the kit back; at rest the one colour outside paper and ink is the Globex swatch's ground, besides the status glyphs' hue (docs/DESIGN.md 8.0 \"Colour\": the hero's done glyph), and no #2f5ce0 is drawn outside the Colors row's swatches of the kit's Primary and Accent (docs/DESIGN.md 8.0 \"Colour\" and 8.7)",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-c strip-hero-kit.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass); restated in the design round, DR-D4#4"
-    },
-    {
-      "id": "home.kits.color",
-      "feature": "decks",
-      "interaction": "Typing #e6e0d2 shows it on every slide at the seventh key; Enter commits one change with its row; Escape puts the kit's back; the text takes ink or paper by contrast and every text reads 4.5:1 or more; #777777-like colours whose best text is under 4.5:1 are refused with the sentence and change nothing; an invalid value answers its sentence",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-c strip-hero-kit.jpg (the typed #3d2b1f)",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.agents.rest",
-      "severity": 2,
-      "interaction": "At the agents band's first paint: slide 5 as the run wrote it above the console; the console's resting screen is `turboslide version list` with the recorded answer (the save before the run and the run's three writes) in its slots at both widths (14 of 64 columns at 720 px and over, 22 of 44 under), no line cut or wider than the panel; Version history shows Today with its sentence and no row, and \"Recorded from the CLI\" with the run's three Agent rows as v4, v3 and v2 over v1, v4 on the plate; every counter reads n / 9",
-      "evidence": "a-mid.png (avoided)",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3); restated in the design round, DR-D4#6"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.agents.typed",
-      "severity": 2,
-      "interaction": "`help` lists the six commands the page runs; anything else prints \"This page runs 6 of the CLI's 180 commands.\" with 180 from `cli.json`; the chips' commands typed run as the chips do, `tailor --replace=<current name>=<name>` with any name up to 24 characters; `version list` prints the recorded table and one line per version made on the page; `version restore <n>` for a listed n restores that version as Agent, an unlisted n prints the CLI's recorded refusal; an unclosed quote and a name over 24 characters print their sentences; Up recalls the last line",
-      "evidence": "judge-2 6",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.agents.transports",
-      "severity": 1,
-      "interaction": "The CLI, MCP and HTTP tabs (tabs with tab panels, a roving tabindex, the arrow keys) show each command the page ran as `turboslide ...`, as `tools/call` with the tool name of `mcp-tools.json`, the current name in its JSON values and `baseRevision`, and as `POST /api/actions/<id>` of `openapi.json`; the MCP and HTTP panels print no answer and end with \"Request only. The CLI tab shows the recorded answer.\"",
-      "evidence": "judge-2 6",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.agents.history",
-      "severity": 1,
-      "interaction": "Every change on the page adds one Version history row within 200 ms naming You or Agent with its Heroicon, the change in words and the time in \"6:45 PM\" form, newest first under Today in Version history's scroll region of fixed height (360 px, 312 px under 720 px) of 48 px rows that moves nothing outside the list; an Undo takes its row away",
-      "evidence": "judge-2 6",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3). The 200 ms bound is an interaction bound, read at a one minute load under 24; restated in the design round, DR-D4#6"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.agents.recorded",
-      "severity": 2,
-      "interaction": "Every printed command and answer equals `chips.generated.ts`, recorded from the CLI on the fixture whose sha256 it names, with the chips recorded on the page deck at rest and after each other chip (the twelve ordered pairs) differing only in the revision and the finding count of a slide arranged by hand; every MCP and HTTP body validates against the tool's `inputSchema` and the operation's request body schema; `node scripts/home/run.ts --check` exits 0",
-      "evidence": "judge-2 7 (no hand written JSON)",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.agents.chips",
-      "severity": 2,
-      "interaction": "Each of the four chips (Tailor for Initech, Turn the Title, Rewrite a Row, Skip This Slide) plays its step within 5 s from the press to the flag leaving, with the fixture's name and with a 24 character name: the command at 24 ms a character, a quoted value whole, the answer, the ink ring by transform within 700 ms to the changed block (the whole slide for a skip), the change landing; the change shows on slide 5 above and wherever the page draws it (the name everywhere, the turned title, the row, the skip in the show and the Present list); one Version history row; the chip keeps focus with `aria-disabled`; a second press toggles; the printed command and answer equal `chips.generated.ts` with only the name and the revision substituted",
-      "evidence": "strip-agents.jpg; agents-run.png",
-      "note": "docs/LANDING.md 6.7 (second pass); push 13 (V3); replaces home.agents.run. The 5 s, 24 ms and 700 ms bounds are interaction bounds, read at a one minute load under 24"
-    },
-    {
-      "id": "home.versions.scrub",
-      "feature": "decks",
-      "interaction": "The scrubber's ticks equal the versions (the deck before the run, the run's three, each change on the page); a drag, a click and the keys move the chosen version; the slide above shows that version's changed slide as it stood, by a cut within one frame; the caption names the version; nothing else on the page changes",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-c strip-versions.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "id": "home.versions.restore",
-      "feature": "decks",
-      "interaction": "Restore This Version on version k commits one change by You; every band then equals version k (the counters, the names, the kit, slide 5's state); a new newest row enters; Restore is aria-disabled on the newest; a typed version restore <n> does the same by Agent",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-c strip-versions.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.present.show",
-      "severity": 2,
-      "interaction": "Present, or Cmd+Enter (Ctrl+F5 off macOS) with the band half in view and no text field focused, opens the show on the slide chosen in the list within 800 ms with focus on the stage; keys page with a cut through the deck's nine slides, a skipped slide left out and marked \"Skipped\" in the list; the counter, notes and timer show; the slides carry the visitor's changes; slide 8 draws its pattern moving while motion is allowed and the pattern chunk has loaded, its still frame otherwise; Escape returns within 400 ms with focus on Present; `openShow` opens the same show in a container; S opens nothing",
-      "evidence": "present-show.png",
-      "note": "docs/LANDING.md 6.7 (second pass); push 16 (V3). The 800 ms and 400 ms bounds are interaction bounds, read at a one minute load under 24"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.present.focus",
-      "severity": 2,
-      "interaction": "On open focus is on the show's stage; Tab cycles among Previous, Next and Exit and never reaches the page behind; Exit gives focus back to the control that opened the show",
-      "evidence": "judge-3 a-show.png (avoided)",
-      "note": "docs/LANDING.md 6.7 (second pass); push 16 (V3)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.present.print",
-      "severity": 1,
-      "interaction": "Print This Deck and Cmd or Ctrl+P print the page deck as the visitor left it, one 16 by 9 page per slide, skipped slides left out (nine pages, eight with one skipped); with the live module absent, the hero alone",
-      "evidence": "print-deck.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass); push 16 (V3)"
-    },
-    {
-      "id": "home.export.seam",
-      "feature": "decks",
-      "interaction": "Dragging the seam follows the pointer 1:1 with no inertia; a click sets it; the left side decodes to the pixels of slide 7's picture part in the Perfect file (the opener field's slide, answer 1; `assets.json`) and its label's size equals that picture's; the right side's text boxes sit at the Editable text file's `a:off` and `a:ext` within 1 px at the sheet's scale, hold its `a:t` runs and are selectable; the labels read Perfect and Editable text; the handle is a slider with arrows 2, Shift 10, Home and End",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "strip-export-seam.jpg; judge-3 6 graft 8; critic 2",
-      "note": "docs/LANDING.md 6.7; bound fixed in docs/gslides-parity/landing/build/integrator.md, Landing, day 0, 5.1; push 6 (L3)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.export.figure",
-      "severity": 1,
-      "interaction": "The Perfect row's figure equals `facts.json` `export` and its sentence compares the picture with its screenshot; the link goes to `docs/pptx.md`; Download the PDF downloads a PDF of nine pages whose sha256 is in `assets.json`, requested only on the click; no text on the page reads \"pixel for pixel\"",
-      "evidence": "judge-1 4; judge-2 2",
-      "note": "docs/LANDING.md 6.7 (second pass); push 17 (V3)"
-    },
-    {
-      "feature": "decks",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "id": "home.export.loupe",
-      "severity": 2,
-      "interaction": "A pointer held 350 ms on slide 7 shows the loupe with both windows at ten times at the pointer's place; its count equals the driver's count of differing pixels in the same window of the two decoded files at pixelmatch's threshold 0.1; with focus on `[data-loupe]` the arrows move it by 14 px and Escape hides it; the two rasters are requested only on the first use and hash to `assets.json`; no text reads \"pixel for pixel\"",
-      "evidence": "b-strip-export-compare.png; judge-1 (the loupe on two real rasters)",
-      "note": "docs/LANDING.md 6.7 (second pass); push 17 (V3)"
-    },
-    {
-      "id": "home.motion.in-view",
-      "feature": "decks",
-      "interaction": "C1 (the lighthouse, 2,400 ms), E1 (600 ms) and K1 (930 ms) play once at 35 percent in view, never again; a band above the viewport at first observation renders final; with Pause Motion each lands at its end state",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "mood-develop-light.png; close-mark.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
-    },
-    {
-      "id": "home.motion.rest",
-      "feature": "decks",
-      "interaction": "With Pause Motion pressed after every band played: 0 frame callbacks in 2 s, `document.getAnimations()` empty and at most 2 ms of task a second at the top, middle and bottom; no element animates `left`, `top`, `width` or `height` at any time",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "judge-1 6",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
-    },
-    {
-      "id": "home.motion.reduced",
-      "feature": "decks",
-      "interaction": "Under reduce: no `ts-intro`; `document.getAnimations()` empty after the load, a full scroll and each interaction; no loop starts and no shader chunk is requested; every field at its final tone, the people band's still, the pattern's still frame on both sides; every motion toggle hidden, the terminal's and the footer's; every interaction works",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-1440-light-reduced-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9; restated in polish two, P2-N#1"
-    },
-    {
-      "id": "home.motion.hidden-tab",
-      "feature": "decks",
-      "interaction": "A hidden tab finishes a running one shot motion at its end state, and a visible tab leaves it there; its loop clauses (a hidden tab pauses every loop, a visible tab resumes the loops in view) are `home.motion.loops`'s from V4#18",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "4.1",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
-    },
-    {
-      "id": "home.budget.frame",
-      "feature": "decks",
-      "interaction": "4.1's lines: a field frame at most 2 ms at 1x and 8 ms at 4x, a band chunk's insert at most 10 ms at 1x and 35 ms at 4x, the hero's loop at most 12 ms of task a second, the shader at most 4 ms of main thread a frame; read at a load under 20",
+      "interaction": "Each stack sits within 12 px after its word, never above its line and in the upper three quarters of it, over no other line's text; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are images found by role and name, and the tooltip names an agent on hover and on focus",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "4.1",
-      "measure": true,
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
+      "evidence": "docs/SITE.md B; Kevin's request of 2026-10-14 (avatars at the top right of people, the four agents beside agents)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
     },
     {
-      "id": "home.budget.main-thread",
+      "id": "home.hero.poster-first",
       "feature": "decks",
-      "interaction": "4.1's lines: the boot script at most 1 KB and 5 ms; script task time before LCP at most 120 ms at 1x; the live core's boot at most 20 ms at 1x and 60 ms at 4x; no task from page code over 50 ms; read at a load under 20",
+      "interaction": "The editor's box is 16:10 above 720 px and at most 560 px tall at 390; the poster of the page's appearance and width is drawn in it and is the one poster fetched; the box keeps its size",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "4.1",
-      "measure": true,
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
+      "evidence": "docs/SITE.md A.3; the judge's reading of the prototype (the caption under the fold at 1440)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
     },
     {
-      "id": "home.a11y.keyboard-walk",
+      "id": "home.budget.first-script",
       "feature": "decks",
-      "interaction": "A Tab walk of every control the tree renders, in reading order, each with a visible focus indicator, never entering a hidden control; Pause Motion reachable from the nav; no key without a modifier acts unless focus is on what it changes; Cmd or Ctrl+Z outside an editing band changes nothing",
+      "interaction": "Loading /home requests no module of the editor (src/editor, src/try, the editor shell, the viewer's editor) or of the old landing; on a build the page's own scripts are under 120,000 B on the wire",
       "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "5",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
-    },
-    {
-      "id": "home.page.bands-after-load",
-      "feature": "decks",
-      "interaction": "Cold at 1440 and 390: no band chunk, band picture or shader chunk is requested before `load` and one idle callback; after the core starts, a native scroll of 600 px every 300 ms from the top brings no unfilled reserved box into the viewport; CLS 0 over every insert",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "docs/LANDING.md 4.2",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
-    },
-    {
-      "id": "home.hero.stage",
-      "feature": "decks",
-      "interaction": "At 1440 the frame (644 px) and the terminal (364 px) side by side, 16 px apart, both 480 px tall; at 390 stacked at 358 px; slide 1 of the frame lies inside the first viewport at 1440 by 900 and 390 by 844; the terminal's resting lines equal `HOME_RUN.screens.transcript` at 44 columns, none cut or wider than the terminal, whole in its slots at 1440; the notes row's counter reads \"1 / 9\"; no `#2f5ce0` at rest",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-1440-light-first.png; judge-3 b-typed.png (tokens broken, avoided)",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#2"
-    },
-    {
-      "id": "home.lead.visit",
-      "feature": "decks",
-      "interaction": "A fresh context reads \"Turboslide is a slides editor in the browser.\" as the lead's first sentence; three visits in one context read the three sentences in order, each set before its first paint; storage that throws reads the first; no sentence over 50 characters",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "the first pass's home.motion.hero",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8"
-    },
-    {
-      "id": "home.numbers.row",
-      "feature": "decks",
-      "interaction": "Four cells whose figures equal `facts.json` `actions`, `layouts`, `materials` and `shapePresets`, each the menu model's glyph in a well, the figure at 44 px in tabular figures with its noun and its menu path as crumbs (Slide > Apply layout, Insert > Animated pattern, Insert > Shape); the actions cell's chips read the CLI's, the MCP server's and the HTTP API's counts; nothing in the band animates",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#3"
-    },
-    {
-      "id": "home.features.table",
-      "feature": "decks",
-      "interaction": "Ten rows in 2.14's order in two columns of five at 1440, each the menu model's glyph in a well, the name, the model's path as crumbs and the shortcut as 4 px key chips in `keys.ts`'s form for the platform (read in a Mac and a Linux context); no figure in the rows",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "b-1440-light-full.jpg",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#8; restated in the design round, DR-D4#3"
-    },
-    {
-      "id": "home.motion.pause",
-      "feature": "decks",
-      "interaction": "The motion toggles (the hero terminal's 28 px icon button and the footer's Pause Motion text button; none in the navigation) carry `aria-pressed` and the name \"Pause motion\"; pressing either, a running one shot motion lands at its end state within one frame and 0 frame callbacks run in the next 2 s without input at the top, middle and bottom; both then draw the play glyph, the terminal's tooltip reads \"Play motion\" and the footer's label Play Motion; the choice is in `localStorage` `ts-home-motion` and a reload paints both pressed, H5's still from the first paint and no automatic motion starting; with storage throwing the page plays and the toggles work for the visit; hidden under reduced motion; a drag on the lighthouse and the show still move while paused. Its loop clauses are `home.motion.loops`'s",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-1440-light-first.png (the control); judge-1 (121 to 0 frame callbacks a second in B)",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9; restated in the design round, DR-D4#1; restated in polish two, P2-N#1"
-    },
-    {
-      "id": "home.motion.develop",
-      "feature": "decks",
-      "interaction": "The Blue Marble develops in the frame's slide 1 over 1,500 ms after `load` and one idle callback, started no later than the first paint plus 3.0 s or its still shown then; never under reduced motion or with Pause Motion stored (the still from the first paint); no CSS animation on the h1 or an element holding it",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "b-strip-hero-field.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#9"
-    },
-    {
-      "id": "home.hero.run",
-      "feature": "decks",
-      "interaction": "With the stage half in view after H5 the loop starts within 500 ms and plays Restore and the three steps, each step's printed lines equal to the recordings at 44 columns, the frame cutting to slide 5 and its filmstrip and counters following, the playing tab carrying `aria-current=\"step\"` with its rule filling; a cycle's length equals the caption's figure within 1 s; after three cycles the store's history is unchanged; a step tab plays its step and stops the loop; a press in the frame stops it at rest; a chip on slide 5 stops it; under half in view it pauses within one frame",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-strip-hero-agent.png; b-strip-hero-step.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V1#15"
-    },
-    {
-      "id": "home.interludes.glyphs",
-      "feature": "decks",
-      "interaction": "Eleven interludes, one between every two sections from the numbers row to the close, `aria-hidden`, 128 px tall at 1440 and 80 px at 390, printed at 2 px cells; each one's gathered still equals its glyph's cells; a cycle gathers over 1,500 ms, holds to 7 s, thins over 1,500 ms and rests to 12 s; at most two draw at once; the still under reduce and with Pause Motion stored, at 1440 and 390, read at the core's ready with the glyph chunk answering a second late",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "b-strip-field-gather.png; b-strip-field-glyphs.png (drawn finer); verify-landing.md finding 5 (production 2026-10-05: with Pause Motion stored at 390 the ten canvases 300 by 150 and blank at main[data-live=\"ready\"], their stills drawn within 3 s)",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#18; Round 1 follow-up, lane E item 5: the core reports ready once the first screen's starts have drawn (apps/studio/src/components/home/live/index.ts), and startInterludes (live/field.ts) settles once every interlude has drawn its first pose from the glyph chunk"
-    },
-    {
-      "id": "home.motion.loops",
-      "feature": "decks",
-      "interaction": "Read over every loop `tsHomeMotion.registered()` lists on the tree (L-H from V1#15 and I1 from V4#18; V4#19 and V4#20 add P-T and P-L to the reading in their own pushes): each loop starts within 500 ms of its band reaching its threshold (a demonstration half in view, an interlude any part in view and among the two most in view) and pauses within one frame of leaving it; at most one demonstration and two interludes draw at once (`tsHomeMotion.running()`); Pause Motion holds every running loop's frame within one frame and Play resumes each from that frame; a hidden tab pauses every loop and a visible tab resumes the loops in view",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "direction-b landing.js 155 to 215",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#18"
-    },
-    {
-      "id": "home.motion.offscreen",
-      "feature": "decks",
-      "interaction": "Over every loop `tsHomeMotion.registered()` lists, as `home.motion.loops`: scrolled so no loop's band is in view, and anywhere with Pause Motion pressed, 0 frame callbacks in 2 s, no timer firing, at most 2 ms of task a second",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "4.1",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#18"
-    },
-    {
-      "id": "home.patterns.pair",
-      "feature": "decks",
-      "interaction": "The right slide's picture hashes to the exporter's captured frame in `assets.json`; the left draws the shader in the slide's ink and paper only; the shader chunk is requested only once the band is within one viewport height, at most 8 KB gzip, and never under reduce or with Pause Motion stored; off screen no frame is drawn; a kit recolours the left side; `home-page.spec.ts`'s shader test reads the same chunk rule",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-strip-pattern.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#19"
-    },
-    {
-      "id": "home.people.loop",
-      "feature": "decks",
-      "interaction": "Half in view, the staged loop plays B's sequence with the person's uneven key gaps, Follow and Stop, its length within 1 s of the caption's figure; the marks are ink; nothing reaches the page deck or Version history",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-strip-people.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#20"
-    },
-    {
-      "id": "home.people.type",
-      "feature": "decks",
-      "interaction": "Typing in a text box of either screen shows the words on the other within 200 ms with the person's flag and caret; the first press stops the loop for good; Escape ends; Tab and Enter reach each text box",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "b-strip-people-typing.png",
-      "note": "docs/LANDING.md 6.7 (second pass), V4#20"
+      "today": "not driven",
+      "evidence": "docs/SITE.md D1, D12 (the editor in a frame of its own document; byte lines read on a build)",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
     },
     {
       "id": "chrome.colors.pairs-at-floor",
@@ -11021,56 +10461,6 @@
       "today": "not driven",
       "evidence": "research-type 1.2",
       "note": "Design round (docs/DESIGN.md 11), DR-D1#3; DESIGN.md 4.4 keeps the italic prefetch on /edit, so the italic clause reads the face's status in document.fonts and the files requested"
-    },
-    {
-      "id": "home.nav.icons",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the nav is one 58 px row: the lockup, Documentation from 720 px (the footer holds it under 720 px), the shared theme button as a 32 px icon button with the shared tooltip, one hairline, Sign In and New Presentation; no boxed text button but New Presentation; no motion toggle",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F1: six text controls, four kinds of button, two rows at 390",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts; restated in polish two, P2-N#1"
-    },
-    {
-      "id": "home.type.default-glyphs",
-      "feature": "decks",
-      "interaction": "No element of /home outside a slide computes `cv11` or `ss01`; every number of docs/DESIGN.md 8.0 the page draws (the numbers row, the counters, the filmstrip numbers, the times and versions, the key chips) computes tabular-nums; at 1440 and 390 in both appearances no element with its own words that clips its overflow cuts its line box (the descenders of the titles in the miniature, the people screens and the status row)",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F14: the h1, every h2 and the lockup compute \"cv11\", \"ss01\"",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.radius.ladder",
-      "feature": "decks",
-      "interaction": "On /home at 1440 and 390 in both appearances: buttons, fields, menus and tooltips 6 px; figure frames and dialogs 8 px; key chips 4 px; slides, thumbnails, rails and seams 0",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F15: no element on production /home draws a radius",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.scroll.regions",
-      "feature": "decks",
-      "interaction": "Chromium with scrollbars shown: the document, the hero terminal, the miniature filmstrip, the hero filmstrip and the patterns row at 390 draw the shared bar (8 px, the terminals the ink thumb); the miniature's notes field draws no bar at rest",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F16; research-scroll scroll/landing-notes.png",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.pictures.all-load",
-      "feature": "decks",
-      "interaction": "After a full scroll at 1440 and 390 in both appearances every `img` and `picture` source on /home has a natural width over 0 and answered 200; every file the page references is in `assets.json`; the hidden appearance's twins are not requested",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "Kevin's screenshot 4: a picture on /home that failed to load",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#1; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "present.presenter.surfaces",
@@ -11201,36 +10591,6 @@
       "note": "Design round (docs/DESIGN.md 11), DR-D2#2; replaces versions.field.square; the walk probe's share area"
     },
     {
-      "id": "home.hero.frame-chrome",
-      "feature": "decks",
-      "interaction": "The hero frame draws the editor's title row (the mark, the title, the saved phrase with its cloud, the agent's chip, the comments glyph, Slideshow with its play glyph, Share with its lock), the menu row, the toolbar row with the editor's glyphs for its 16 controls in the menu model's order, the filmstrip, the slide and the notes row with the shown slide's notes and `n / 9` in tabular figures, at the window's 8 px corner; at 1440 and 390 in both appearances every cell of the title row that clips its overflow holds its whole line, so the title keeps its descenders",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F2: the frame drew the title row and the menu names alone",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#2; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.hero.terminal-never-empty",
-      "feature": "decks",
-      "interaction": "Sampled every 250 ms for 24 s with the loop playing at 1440: the terminal shows at least 12 lines in every sample; a Restore appends its lines after the transcript and the screen scrolls to its end",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F2: 22 percent of samples at five lines or fewer, the Restore clearing the screen",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#2; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.hero.steps",
-      "feature": "decks",
-      "interaction": "The four steps are rows in the terminal's foot with the done glyph in the status green, the playing row's 2 px countdown rule and each length in tabular seconds; no CLI fragment under a step; the panel's head reads \"Recorded from the CLI, 19 s\" with a pause button",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F2: four tabs under the stage with CLI fragments and a caption sentence",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#2; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
       "id": "decks.pages.access-plates",
       "feature": "decks",
       "interaction": "You need access, the refused page and Not found draw their buttons at 6 px with Title Case labels and their messages in Inter's defaults",
@@ -11289,125 +10649,6 @@
       "severity": 2,
       "evidence": "research-surfaces 7: the editor stored gt-theme=light about 3.5 s after the load on a dark system",
       "note": "Design round (docs/DESIGN.md 11), DR-D2#3; the driver is core/chrome-surfaces.ts; a /new draft, which writes nothing"
-    },
-    {
-      "id": "home.menus.icons",
-      "feature": "decks",
-      "interaction": "At 1440 in both appearances every row of the miniature's nine menus draws the menu model's glyph from the landing's sprite (a `<use>` of the content hashed `/home/glyphs-<hash>.svg`, which answers 200 and holds each symbol), a checked row the check and a submenu the next glyph, the rows of View > Live pointers excepted (their glyph stays off the page); a row the page does not run is a working row, not `aria-disabled`, whose press sets \"This row runs in the editor.\" with its sentence, and only the rows the editor disables with nothing selected are grey (Insert > Link and Comment); the h2 reads \"Menus and keyboard shortcuts\"; at 390 the Menus key's plate sits in the flow under the key, inside the frame, which grows",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F4: an empty glyph column in every row; 9 of 13 Insert rows drawn disabled",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.canvas.panel",
-      "feature": "decks",
-      "interaction": "Beside the lighthouse at 1440 (under it at 390), in both appearances, the product's Format options panel in an 8 px window: the title and the band's Undo, Size & rotation (Width, Height, Rotate), Position (X, Y), Layout and Command, each section head with the panel's glyph; at rest the fields read the plate's box in slide units in tabular figures; a drag of the heading writes its X, Y, Width and Height within one unit of the printed line, Layout reads Canvas, the line is in the code face, Option or Alt with Right reads 15 in Rotate, and Undo returns the heading's box and Mood; no row of text under the slide",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F5: two rows of text under the picture, the second a placeholder sentence",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.tailor.dialog",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the Tailor dialog as the editor draws it in an 8 px window: the title, Replace and With with their fields, the count, Cancel (the form's reset, which empties With and leaves the count) and Apply; beside it at 1440 the filmstrip of slides 1 to 5 in one row above the stage; Move Up and Move Down glyph buttons on each thumbnail shown on its hover and focus and hidden at rest; Apply shows the product's snackbar under the stage, ink at the 6 px corner, with TAILOR.result and Undo",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F6: the rows float without the dialog; Move Up and Move Down as bare text under thumbnail 2",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#4; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.diagrams.flows",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the Present band draws the editor to presenter view (the S key) and to a phone's show (the present link) under its buttons, the export band a slide to pitch.pdf and pitch.pptx at the head of the column beside the Download dialog, over the reading, and the agents band the CLI, the MCP server and the HTTP API into one action and the deck with Version history under the Version history panel: each an svg named by one sentence (role img) whose one use of the landing's sprite (answering 200) draws the symbol: 1 px strokes and fills in the tokens alone, the window boxes at the 8 px corner, 11 unit square markers at each flow's end and no arrowhead, the labels in Inter; Present carries the play glyph and View > Slideshow's key chips, Print This Deck the printer glyph",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F9 and F10: the Present band is half empty; the export band ends in three rows of text",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7, the agents flow in DR-D4#6; driven by apps/studio/e2e/core/home/design.ts. Restated in the finishing round 2 of DR-D4 (pass 3 finding 1): the export and agents diagrams moved from under the lead into the empty columns beside the Download dialog and the console"
-    },
-    {
-      "id": "home.present.figure",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the Present band shows the product's presenter view of the page deck as scripts/home/capture.ts captured it from /present on the node-server build (assets.json `presenter`, 1024 by 640 at x1 and 2048 by 1280 at x2, at most 25,000 B and 60,000 B): in a .pt-window figure frame at the 8 px corner that shows the capture's top 544 of its 640 rows (a 1024 by 544 frame, the empty foot under the previous and next slides cropped), the shown appearance's file by its srcset with width and height on the img, decoded with a natural width over 0 in an 8 by 5 box, answering 200, named by its alt and captioned in one sentence; nothing of it is requested at the top of the page and the hidden appearance's twin is never requested; the editor to presenter view to show diagram stays under the buttons",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F9: the Present band shows no presenter view; VERIFICATION.md design round pass 1 finding 3 (the one product picture Kevin asked for)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts. Restated in the finishing round 2 of DR-D4 (pass 3 finding 1): the frame crops the capture's empty foot"
-    },
-    {
-      "id": "home.export.dialog",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances, under the export band's seam where three ruled rows stood: the editor's Download dialog as scripts/home/capture.ts captured it on the page deck (File > Download > More formats > Download options; assets.json `download-dialog`, at most 20,000 B at x1 and 40,000 B at x2), the shown appearance's file by its srcset with width and height on the img, decoded and answering 200, named by its alt, nothing of it requested at the top and the hidden twin never requested; beside it the Perfect file's reading with the done glyph in --pt-status-done, Download the PDF and Read the record; the seam's labels carry the editor's photo and document glyphs; no ruled row is left",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F10: the export band ends in three rows of text; VERIFICATION.md design round pass 1 finding 3",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.patterns.stills",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances, under the patterns band's pair, Insert > Animated pattern's path as crumbs and the 17 stills the editor's gallery draws (assets.json `pattern-card`, packages/materials/previews byte for byte) in the gallery's order, each with its name: each img carries width 320 and height 200, decodes with a natural width over 0 and answers 200, none is requested at the top of the page; nine to a row at 1440 and one sideways scrolling row at 390; no layout shift while they load",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F11: the patterns band shows one pattern of 17",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#7; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.kits.themes",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the kits band, now Themes and brand kits, shows the library's nine themes as tiles in one group in its order, General Translation pressed at rest, each its name and a swatch of its paper and ink in the shown appearance; a press on Swiss swaps in the renderer's stylesheet of that theme for the page deck (style[data-home-theme]) and within 500 ms every slide on the page computes Swiss's paper and ink of the shown appearance and draws no frame cross, Swiss is pressed and the status line names the theme; the Globex kit pressed after it sets its colours over Swiss; the GT kit and General Translation bring back the sheet's colours on every slide",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-landing F7: the kits band shows three kits and no theme; VERIFICATION.md design round pass 1 finding 3",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#5; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.agents.history-panel",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the agents band's Version history is the editor's panel in an 8 px window: the head with the clock glyph, the scrubber, Restore This Version with its glyph at the 6 px corner (aria-disabled at rest); a Today group (its sentence while it has no row) and a \"Recorded from the CLI\" group with the run's three Agent rows and the deck's first version as v4 to v1 in tabular figures, each with its author's square chip and glyph, v4 on the plate; the four chips carry command-line, arrow-path, pencil and eye-slash; after Turn the Title one Today row with its time in tabular figures is on the plate and the sentence leaves",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-landing F8: three \"Recorded\" cells and no group; VERIFICATION.md design round pass 2 finding 3",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.people.share-dialog",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the people band, \"Share a link and edit together\", opens with the editor's Share dialog in an 8 px window beside the two screens (above them under 720 px), each screen an 8 px window: Share Onboarding plan, General access, Anyone with the link with \"Anyone with this link can edit\" and Editor, the link of this page with Copy Link, You as Owner and Maya and Sam as Editors each with the slide their screen shows, and Done; the glyphs draw; Copy Link writes the page's link to the clipboard and reads \"Link copied\"; Done says it closes the dialog in the editor",
-      "driver": "core/home.spec.ts",
-      "today": "not driven",
-      "evidence": "research-landing P9; integrator.md finishing step, blocker 2 (the screens' square corners)",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#6; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.hero.font-swap",
-      "feature": "decks",
-      "interaction": "At 1440, 390 and 320 px, for each of the three visit sentences, /home painted with Inter blocked (in 'Inter Fallback') and with Inter draws the same hero: the h1's two lines with the same words on each and the same box, the lead's lines with the same words on each and the same box, the side, the two buttons and the stage's top at the same places, within 0.1 px; the lead is one run of text (the visit's sentence, then the rest); with Inter answered 2.5 s after the request, no layout shift is reported at 1440 or 390",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "VERIFICATION.md design round pass 3 finding 3: at 390 the h1 is three lines in the fallback and two in Inter and the stage moves 44 px (CLS 0.0369 with the font after 3 s); at 1440 the lead is four lines and three (0.0028); home.page.bands-after-load red in runs 1 and 4",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#2, entered in its finishing round 2 for pass 3 finding 3; driven by apps/studio/e2e/core/home/design.ts"
-    },
-    {
-      "id": "home.kits.colors",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances the kits band at rest lists the kit's six colours in a Colors row under the kits, as the Brand kit panel names them (Text, Background, Captions, Hints, Primary, Accent), as many to a line as the list's width holds at 168 px a cell (two at 1440, 1280 and 390, one at 320): each a swatch painted in its hex value, the value the token the grid's slides draw, in tabular figures with the slashed zero; under them \"Text on background reads N to 1\", N the contrast of the text on the background floored to a tenth; at 1440 Kestrel, a typed background and the Swiss theme each change the six values and the readout to what the slides then draw; at 1440, 1280, 390 and 320 in both appearances, at rest and on each of the nine themes, each value's text ends inside its cell and the window, after its label, and the list draws the height it holds before the chunk writes it",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "VERIFICATION.md design round pass 3 finding 6: the kits band draws no contrast readout and no six colours with hex values at rest, which DESIGN.md 8.7 lists; pass 4 finding 2: in dark at 1440 and 1280 \"Background #070707\" ran under the next cell's swatch, and at 320 past the window",
-      "note": "Design round (docs/DESIGN.md 11), DR-D4#5, entered in its finishing round 2 for pass 3 finding 6; driven by apps/studio/e2e/core/home/design.ts"
     },
     {
       "id": "decks.pages.radius",
@@ -11693,96 +10934,6 @@
       "severity": 1,
       "evidence": "verify-r1.md finding 11; Round 1 pass 2 P2-2 (production 2026-10-05: trash-trash-listed-*.jpg, a framed card with framed Restore and Delete forever)",
       "note": "Round 1 follow-up, lane C item 5: apps/studio/src/routes/decks.trash.tsx TrashRow on the page grammar (.ts-decks-page), decks.css; the data-control ids stay (trash.card.<id> is the row)"
-    },
-    {
-      "id": "home.menus.readout",
-      "feature": "decks",
-      "interaction": "At 1440 with slide 2 at rest (a layout slide, no pose), a click on the heading reads the status row's readout \"Heading · x <x> · y <y> · 0°\" with x and y the heading's drawn place in units, never x 0 and y 0, and the read frees nothing; Insert > Shape > Rectangle on the layout slide reads the inserted box's place; after an arrow nudge the readout reads the store's pose",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "verify-landing.md finding 1 (production 2026-10-05: \"Heading · x 0 · y 0 · 0°\" for slide 2's heading at rest, \"Shape · x 0 · y 0 · 0°\" for a rectangle at left 680, top 370; probe-readout.mjs)",
-      "note": "Round 1 follow-up, lane E item 1: a layout slide holds no rest until its first freeing, so sheetLayout's pose (apps/studio/src/components/home/live/paint.ts) reads the place the layout draws the object in (boxIn), where it read a zero box; live/pose.test.ts pins it"
-    },
-    {
-      "id": "home.present.no-prompts",
-      "feature": "decks",
-      "interaction": "After Restore This Version on recorded version 2 and on version 3, the agents band's slide 5 keeps the layout's prompts, while the Present band's chosen slide 5, the show on slide 5 and the print of the nine slides draw no prompt (no `[data-prompt]`, no \"Click to add\"), as the product's Slideshow and print render with prompts off",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "verify-landing.md finding 2 (production 2026-10-05: ps-show-version3-slide5.png and b-1440-light-12-print-sheet.png, seven \"Click to add text\" hints on slide 5 in the show and the print after a restore of version 3)",
-      "note": "Round 1 follow-up, lane E item 2: versions.ts paintStep draws slide 5's recorded render of the run's first or second step, prompts included, on every slide root, and the show's and the print's copies (show.ts showSlide and cloneSlide) now drop `[data-prompt]` (dropPrompts); live/show-prompts.test.ts pins it"
-    },
-    {
-      "id": "home.hero.thumb-frames",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances, every hero filmstrip thumbnail keeps its frame (its ::after edge has a box in the layout) at rest, after the Set the Title step tab plays (the steps before it landed at once, the frame on slide 5) and after Restore and a click on slide 1",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "verify-landing.md finding 3 (production 2026-10-05: S-pt3.png against S-pt2.png, slide 1's thumbnail with no edge after Set the Title, its ::after still computing 2 px solid ink)",
-      "note": "Round 1 follow-up, lane E item 3: nothing painted over the frame; Chromium's moveBefore left slide 1's thumbnail without its ::after box when a step reordered the strip several times in one task, so the strip reorders by insertBefore (apps/studio/src/components/home/live/hero-stage.ts reorder) and gives the focus back; live/hero-stage.test.ts pins the moves"
-    },
-    {
-      "id": "home.export.pdf-appearance",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in each appearance, Download the PDF's href names the shown appearance's file (assets.json `pdf`) once the export band has started, before any click, and follows the navigation's theme button both ways; naming the file requests nothing",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "verify-landing.md finding 4 (production 2026-10-05: in the dark appearance the link carried /home/pdf-light-6f207f1381.pdf until a click rewrote it, probe-pdf.mjs)",
-      "note": "Round 1 follow-up, lane E item 4: apps/studio/src/components/home/live/seam.ts names the file from the band's start, on every change of html[data-theme] and of the system appearance, and on the click; HomeExport.tsx's markup keeps the light file for a page without script; restated in the design round, DR-D4#1b"
-    },
-    {
-      "id": "home.export.one-mark",
-      "feature": "decks",
-      "interaction": "The export band draws one mark: the Perfect picture's footer logo corner (assets.json `export-perfect`, light) matches the Turboslide mark and not the GT monogram, and with the seam at 0 the Editable text side draws its footer logo picture over the paper plate the file puts behind it",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "verify-landing.md finding 6 (production 2026-10-05: the Perfect side drew the GT monogram and \"07 / 09\" beside the page's Turboslide mark); build/ship.md 6 named it for Kevin",
-      "note": "Round 1 follow-up, lane E item 6: the exporter draws the theme's default logo, the GT monogram, for a deck whose kit names no footer logo, so the export's page deck takes the Turboslide mark as its footer logo (scripts/home/export.ts writeExportMark); the Perfect file lays that logo over its sheet picture a second time at 3x, and the build serves the sheet picture (scripts/build-home-assets.ts). The counter stays the exporter's \"07 / 09\" (the n / N format pads)"
-    },
-    {
-      "id": "home.nav.no-pause",
-      "feature": "decks",
-      "interaction": "At 1440, 1024, 768, 390 and 320 in both appearances the navigation's header holds no [data-motion-toggle]; the hero terminal's head holds one (a 28 px icon button) and the footer's closing line one, a text button reading Pause Motion or Play Motion with its glyph and the same width in both; pressing either flips html[data-motion] and both buttons' aria-pressed within one frame; a reload with the pause stored paints both pressed before the live core loads; under reduced motion neither shows",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "Kevin, 2026-10-07: \"remove the pause unpause button in top bar\"; research-header 1.2 findings 1 and 2, 3.2 findings 1 and 2",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-N#1"
-    },
-    {
-      "id": "home.nav.fits-320",
-      "feature": "decks",
-      "interaction": "At 320 and 359 px in both appearances the navigation is one 58 px row whose controls' boxes do not overlap, and nothing draws inside Sign In's box; from 360 px the bar reads the lockup, Documentation from 720 px, the theme button, one hairline, Sign In and New Presentation",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 1,
-      "evidence": "research-header 1.2 finding 3 (the pause glyph and a hairline inside Sign In at 320), nav-320-light-today.jpg",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-N#1"
-    },
-    {
-      "id": "home.nav.theme-first-paint",
-      "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances, with the page's module scripts aborted (the root's inline boot script runs and nothing hydrates): the navigation's theme button draws one glyph, ◐ in light and ◑ in dark, matching html[data-theme], and its accessible name is \"Dark or light\"; with JavaScript off it draws ◐ on the light page; after hydration and after each press the glyph follows html[data-theme]",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "research-header 1.2 finding 4 (an empty square until hydration at every width in both appearances, 0.8 s warm and 5.8 s cold at a load over 100), nav-1440-dark-before-hydration.jpg, nav-1440-dark-no-script.jpg",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-N#2"
-    },
-    {
-      "id": "home.hero.side-fits-headline",
-      "feature": "decks",
-      "interaction": "At 1440, 1280 and 1024 in both appearances, in Inter and in 'Inter Fallback', for each of the three visit sentences: the hero side's box is no taller than the h1's (within 0.5 px), the lead is two lines whose first cap line is within 1 px of the h1's first cap line, and the buttons' bottom edge is within 1.5 px of the h1's last baseline; the h1 is 76 px from 1,136 px, 61.6 px (within 0.5) at 1024 and 64 px from 720 to 1023; at 768, 390 and 320 the lead is two lines (three on the third visit at 320) with the same breaks in both faces",
-      "driver": "core/home.spec.ts",
-      "today": "broken",
-      "severity": 2,
-      "evidence": "Kevin, 2026-10-07: \"the right side paragraph + the buttons is too tall\"; research-header 2.1 (the side 34, 51 and 78 px taller than the h1 at 1440, 1280 and 1024), 2.3, measure.json",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-N#3"
     },
     {
       "id": "accounts.plate.signin-page",

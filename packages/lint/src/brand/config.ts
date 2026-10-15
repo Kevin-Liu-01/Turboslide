@@ -252,12 +252,6 @@ export type CodeSurface = { file: string; selector: string; reason: string };
 
 export const CODE_SURFACES: readonly CodeSurface[] = [
   {
-    file: 'apps/studio/src/routes/home.css',
-    selector: '.ts-home-panel',
-    reason:
-      "The /home terminals: the hero's agent terminal and the agents band's console, the page's only code surfaces (LANDING.md 2.0 \"The two panels\"; DECK-GRAMMAR.md:31, Kevin's pick of the hero's terminal, question 18).",
-  },
-  {
     file: 'packages/chrome/src/EditHtmlPanel.css',
     selector: '.ts-edit-html-field textarea',
     reason: "The HTML block's source field: code.",
@@ -353,7 +347,7 @@ export const CODE_SURFACES: readonly CodeSurface[] = [
 /**
  * The classes of a rail wrapper in TSX (gt-ui single-rail `.tc-rail`): a wrapper inside a wrapper
  * draws the column's pair twice. `ts-rails` is the element that draws the 1104 px column's pair
- * on /home, /decks and Not found (`apps/studio/src/components/home/grammar.css`, B2a#15).
+ * on /decks and Not found (`apps/studio/src/components/home/grammar.css`, B2a#15).
  */
 export const RAIL_WRAPPER_CLASSES: readonly string[] = ['tc-rail', 'ts-rail', 'ts-rails'];
 
@@ -550,22 +544,6 @@ export const ACCEPTED: readonly Acceptance[] = [
     match: 'smooth',
     reason:
       'The book view of the exported web page scrolls a page into view smoothly; B3b#10 removed the same in the studio. From before Round 1, outside every item; build/b5.md request 6.',
-    owner: 'the integrator',
-  },
-  {
-    rule: 'css/z-index',
-    file: 'apps/studio/src/components/home/live/paint.ts',
-    match: 'el.style.zIndex = z',
-    reason:
-      "A block of the landing's live slide brought to front (20) or sent to back (0) over the renderer's order + 1: local order inside the slide sheet's own stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
-    owner: 'the integrator',
-  },
-  {
-    rule: 'css/z-index',
-    file: 'apps/studio/src/components/home/live/theme.ts',
-    match: "zIndex: '10'",
-    reason:
-      "The printed field's canvas over the slide's own blocks (10): local order inside the slide sheet's stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
     owner: 'the integrator',
   },
   {

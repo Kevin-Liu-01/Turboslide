@@ -311,12 +311,6 @@ const PRERENDER = existsSync(HOME_ROUTE)
 // every route preloads is named `vendor` and holds the app's shared modules with the libraries.
 const VENDOR_TEST =
   /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
-// The landing's shared modules (polish two, request P2-N-2): the copy, the facts, the generated
-// assets and timings that /home's route and its live bands both import, in one chunk, so /home's
-// document names one preload for them where it named one per module (seven links, about 0.8 KB of
-// its 100,000 B line). Only the landing imports them (components/home and its live/ folder).
-const HOME_SHARED_TEST =
-  /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
 // Hidden source maps for the client chunks, opt in (the focus round, cycle 3 stream fix round's
 // fix round; VERIFICATION C2-F18): `TURBOSLIDE_CLIENT_SOURCEMAP=1` writes a `.map` beside every
 // chunk with no `sourceMappingURL` comment, so the served bytes are the same and
@@ -330,10 +324,7 @@ const CLIENT_BUILD = {
     rolldownOptions: {
       output: {
         codeSplitting: {
-          groups: [
-            { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
-          ],
+          groups: [{ name: 'vendor', test: VENDOR_TEST, priority: 10 }],
         },
       },
     },

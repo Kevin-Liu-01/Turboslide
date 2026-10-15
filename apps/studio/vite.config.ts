@@ -57,16 +57,14 @@ function externalServerOnly(): Plugin {
   };
 }
 
-// The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`)
-// and the landing's shared group, the same groups as vite.deploy.config.ts (which says why each
-// test reads as it does) so `pnpm build` and scripts/check-client-bundle.mjs
-// read the chunks the deployment ships: React, the scheduler and the router in one `vendor`
+// The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`),
+// the same group as vite.deploy.config.ts (which says why its test reads as it does; the
+// landing's shared group left with the old landing, docs/SITE.md), so `pnpm build` and
+// scripts/check-client-bundle.mjs read the chunks the deployment ships: React, the scheduler and the router in one `vendor`
 // chunk that caches across deployments while the app's chunks change. The client environment
 // alone.
 const VENDOR_TEST =
   /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
-const HOME_SHARED_TEST =
-  /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
 // Hidden source maps, opt in with TURBOSLIDE_CLIENT_SOURCEMAP=1 (vite.deploy.config.ts says why).
 const CLIENT_SOURCEMAP: boolean | 'hidden' =
   process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
@@ -76,10 +74,7 @@ const CLIENT_BUILD = {
     rolldownOptions: {
       output: {
         codeSplitting: {
-          groups: [
-            { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
-          ],
+          groups: [{ name: 'vendor', test: VENDOR_TEST, priority: 10 }],
         },
       },
     },

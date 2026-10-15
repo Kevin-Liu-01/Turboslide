@@ -54,8 +54,7 @@
 // skips the compare otherwise, build-4/b1.md R13; Round 1's B1#2 retired the outline step), then
 // `node scripts/build-colors.ts --check` (the colour block of tokens.css and colors.generated.ts
 // against a fresh colorjs.io run over palette.ts, docs/DESIGN.md 5.4), then
-// `node scripts/build-home-assets.ts --check` (the /home screenshots and facts-data.ts against
-// facts.json, b2.md R2), `node packages/schema/scripts/build-definitions.mjs --check` (the shape
+// `node packages/schema/scripts/build-definitions.mjs --check` (the shape
 // table as one compact string and ids.ts, b4.md R3) and `node packages/native/scripts/check-record.mjs`
 // (the wasm module rebuilt when the toolchain is present and compared with BUILD-RECORD.json, the
 // Linux addon by hash; b4.md R6, SPEC-4 0.38). Step 30 is the Vercel output check after a
@@ -70,8 +69,9 @@
 // route preload ceilings of SPEC-4 3.12 read from the served heads (check-client-bundle.mjs
 // --base); in CI the perf command carries --report until two runs agree (0.46). The step's
 // TURBOSLIDE_CHECK_PERF opt in of days 0 to 5 was removed at merge 2 (build-4/integrator.md).
-// Step 18's URL list gains /home and the Not found page (/no-such-page) and step 26's list gains
-// home-page.spec.ts (6.1).
+// Step 18's URL list gains /home and the Not found page (/no-such-page) (6.1). The site build
+// (docs/SITE.md) retired the landing's generated assets (scripts/build-home-assets.ts and its
+// step 29 check) and home-page.spec.ts with the page they read; /home's rows are core/home.spec.ts's.
 import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -129,7 +129,7 @@ const EXPORT_BATCH = '3';
 // Step 26 (SPEC-3 16.1): the round three specs against the runner's own dev server, each with
 // two browser contexts on the memory channel; a spec whose builder has not landed the file is
 // skipped by name with a line, never a silent pass (the list is the specification's). Round four
-// (SPEC-4 6.1) adds B2's home-page.spec.ts (the /home page) so its green is its own.
+// (SPEC-4 6.1) added B2's home-page.spec.ts, retired with the old landing by the site build.
 const ROUND_THREE_SPECS = [
   'apps/studio/e2e/realtime.spec.ts',
   'apps/studio/e2e/presence.spec.ts',
@@ -139,7 +139,6 @@ const ROUND_THREE_SPECS = [
   'apps/studio/e2e/accounts.spec.ts',
   'apps/studio/e2e/dither.spec.ts',
   'apps/studio/e2e/security.spec.ts',
-  'apps/studio/e2e/home-page.spec.ts',
 ];
 // Step 27 (SPEC-3 9.4, 16.5): the layout shift audit against `vite preview` of the production
 // build on its own port (AGENTS.md port table: 4344 is B5's preview); the script is B5's.
@@ -149,7 +148,6 @@ const PREVIEW_PORT = '4344';
 // behind it, the Vercel output check gated on the project link and the icon set, the perf budget
 // against the node-server build on 4321.
 const BUILD_BRAND = 'scripts/build-brand.ts';
-const BUILD_HOME_ASSETS = 'scripts/build-home-assets.ts';
 const BUILD_DEFINITIONS = 'packages/schema/scripts/build-definitions.mjs';
 /* the design round (docs/DESIGN.md 5.4, DR-D1#2): the chrome's colour block and colors.generated.ts */
 const BUILD_COLORS = 'scripts/build-colors.ts';
@@ -224,38 +222,6 @@ const INNER_HTML_ALLOW = [
   'packages/viewer/standalone/runtime.ts',
   'packages/identity/src/names.ts',
   'apps/studio/src/server/decks.ts',
-  // the landing (docs/LANDING.md 2.0, 6.1): HomeSheet writes the renderer's output, rendered at
-  // build from the page deck (slides.generated.ts), into the server's markup only; the client
-  // renders the same element empty and React leaves it as hydration found it
-  'apps/studio/src/components/home/HomeSheet.tsx',
-  // the selection replica (L2#2): its overlay's fixed markup, and a text box's own markup read
-  // before an edit and written back by Escape on an empty box or by Undo, never typed text
-  'apps/studio/src/components/home/live/objects.ts',
-  // the agents band (L3#4): slide 5's states, the renderer's output rendered at build
-  // (live-slides.generated.ts), parsed in a template element
-  'apps/studio/src/components/home/live/agents.ts',
-  // the show and the print (L3#5): slide 7, the renderer's output rendered at build
-  // (live-slides.generated.ts), parsed in a template element
-  'apps/studio/src/components/home/live/show.ts',
-  // the live core's band loader (V1#8, V2's hunk): each band's markup, the renderer's output
-  // rendered at build (bands/<band>.generated.ts, bands/deck.generated.ts), written into the band's
-  // empty placeholders or parsed in a template element; never typed text
-  'apps/studio/src/components/home/live/index.ts',
-  // the deck drawn on every slide (V1#8, V2's hunk): an inserted block's markup rendered at build
-  // (menus.generated.ts), parsed in a template element, and a text box's own markup read before
-  // an edit and written back by an Undo; never typed text
-  'apps/studio/src/components/home/live/paint.ts',
-  // the miniature editor (V2#11): the renderer's markup of a slide, a text box and two shapes,
-  // rendered at build (bands/deck.generated.ts, menus.generated.ts), parsed in a template element
-  'apps/studio/src/components/home/live/menus.ts',
-  // the scrubber's view (V2#14): slide 5's earlier states, the renderer's output rendered at build
-  // (bands/live.generated.ts), parsed in a template element; since the fix round (V2#14 fix) also
-  // those states' runs, the same build output, written into every slide 5 drawn at version 2 or 3;
-  // never typed text
-  'apps/studio/src/components/home/live/versions.ts',
-  // the hero's stage (V1#15): slide 5's recorded states, the renderer's output rendered at build
-  // (bands/live.generated.ts), parsed in a template element
-  'apps/studio/src/components/home/live/hero-stage.ts',
 ];
 const OVERWRITE_ALLOW = [
   'apps/studio/src/server/export-batch.ts',
@@ -429,10 +395,10 @@ const steps = [
       },
   { cmd: 'node scripts/check.mjs --audit' },
   // gslides-parity SPEC-4 6.1, steps 29 to 31 (0.46): the generated files checks (the brand
-  // build, the /home assets, the shape table, the native record), the Vercel output check after
+  // build, the colours, the shape table, the native record), the Vercel output check after
   // a Vercel build, the perf budget against the node-server build
   {
-    cmd: `node ${BUILD_BRAND} --check && node ${BUILD_COLORS} --check && node ${BUILD_HOME_ASSETS} --check && node ${BUILD_DEFINITIONS} --check && node ${NATIVE_RECORD_CHECK}`,
+    cmd: `node ${BUILD_BRAND} --check && node ${BUILD_COLORS} --check && node ${BUILD_DEFINITIONS} --check && node ${NATIVE_RECORD_CHECK}`,
     needs: 'brand',
   },
   {

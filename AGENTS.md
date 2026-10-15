@@ -564,8 +564,7 @@ Round four's lines (`docs/archive/gslides-parity/SPEC-4.md` 6.1 and 0.46; `docs/
 --check` (the icon set, the twins and the card against `apps/studio/public/brand-manifest.json`
 by bytes, rebuilt and compared, plus the facts of SPEC-4 6.4; it launches Chrome for Testing once
 for the card compare when chromium-1217 is present and the fonts venv's python once for the
-outlines, and prints why it skips either), then `node scripts/build-home-assets.ts --check` (the
-`/home` screenshots and `facts-data.ts` against `facts.json`), `node
+outlines, and prints why it skips either), then `node
 packages/schema/scripts/build-definitions.mjs --check` (the shape table as one compact string and
 `ids.ts`; the generator moved from `src/shapes/` at merge 2) and `node
 packages/native/scripts/check-record.mjs` (the wasm module rebuilt when cargo, the wasm32 target
@@ -573,7 +572,7 @@ and wasm-bindgen are present and compared with `packages/native/BUILD-RECORD.jso
 addon by hash, a pending addon reported and not failed). Step 30 is `NITRO_PRESET=vercel pnpm
 --filter @turboslide/studio build:deploy && node scripts/check-vercel-output.mjs` (the header rules
 of SPEC-4 1.6 and the `/` redirect in `.vercel/output/config.json`, the static files of 0.13, every
-picture under `apps/studio/public/brand/` and `/home/`, the prerendered `/home`, every `*.func`
+picture under `apps/studio/public/brand/`, the prerendered `/home`, every `*.func`
 directory against 250 MB); it runs on a machine linked to the Vercel project
 (`.vercel/project.json`) once `brand-manifest.json` exists, or with `TURBOSLIDE_CHECK_VERCEL=1`,
 and is skipped in CI. Step 31 is `node scripts/perf-budget.mjs --base http://localhost:4321
@@ -587,8 +586,9 @@ SPEC-4 3.12 read from the served heads of `/decks`, `/deck/gt-brand` and `/edit/
 largest chunk ceiling of 600,000 bytes is asserted in step 6 too). The `TURBOSLIDE_CHECK_PERF`
 opt in of days 0 to 5 is gone since merge 2. Step 18's `lint --chrome` list carries `/home` and
 the Not found page (`/no-such-page`, a 404 the shell driver accepts when the document carries
-`main[data-control="notfound"]`), both with `--states ''`; step 26's list carries
-`home-page.spec.ts`. Every merge runs `node scripts/probes/new-write-probe.mjs --base
+`main[data-control="notfound"]`), both with `--states ''`. The site build (`docs/SITE.md`)
+retired `home-page.spec.ts` and `scripts/build-home-assets.ts` with the landing they read; `/home`'s
+rows are `e2e/core/home.spec.ts`'s. Every merge runs `node scripts/probes/new-write-probe.mjs --base
 http://localhost:4321` (17 rows: the draft on `/new`, six writes saved, the address moved to
 `/edit/<id>`, the room attached, the reopened page's first write, Move to trash and Delete
 forever) against a dev server the integrator starts with `playwright.config.ts`'s environment on

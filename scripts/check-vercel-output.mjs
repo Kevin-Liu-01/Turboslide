@@ -63,10 +63,11 @@ const STATIC_FILES = [
 /**
  * The generated pictures beside the icon set (round four merge 2; build-4/b1.md R12, b2.md): every
  * file under these public folders must be under static/ too. The twins keep fixed names
- * (`/brand/*.png`, SITE.twins) and the /home screenshots carry a content hash, so the list is read
- * from the tree rather than written here.
+ * (`/brand/*.png`, SITE.twins), so the list is read from the tree rather than written here. The
+ * site build (docs/SITE.md) retired public/home: the landing's pictures are imported with `?url`
+ * and named by content under /assets.
  */
-const STATIC_FOLDERS = ['brand', 'home'];
+const STATIC_FOLDERS = ['brand'];
 /** SPEC-4 0.43: /home is prerendered; the start plugin writes either shape. */
 const PRERENDERED = [{ route: '/home', files: ['home/index.html', 'home.html'] }];
 /** Vercel's per function size cap (docs/hosting.md section 6); the 200 MB gate waits for round five (SPEC-4 0.35). */
@@ -222,7 +223,7 @@ for (const file of STATIC_FILES) {
   const present = existsSync(path);
   row('static', file, present, present ? `${lstatSync(path).size} B` : 'missing');
 }
-// the twins and the /home screenshots (the public folders, read from the tree)
+// the twins (the public folders, read from the tree)
 const publicDir = join(ROOT, 'apps/studio/public');
 for (const folder of STATIC_FOLDERS) {
   const source = join(publicDir, folder);

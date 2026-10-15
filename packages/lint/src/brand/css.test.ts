@@ -76,16 +76,15 @@ describe('the CSS checks', () => {
     expect(rulesOf('.ts-x code, .ts-y { font-family: monospace }')).toEqual([
       'css/mono-outside-code',
     ]);
-    /* /home's code surfaces are its two #101010 panels, the hero's terminal and the agents band's
-       console, both `.ts-home-panel` since the landing's second pass (config.ts) */
+    /* a named surface passes in its own file alone: the lint panel's rule ids (config.ts) */
     expect(
-      rulesOf('.ts-home-panel { font-family: var(--pt-mono) }', 'apps/studio/src/routes/home.css'),
+      rulesOf('.ts-lint-rule { font-family: var(--pt-mono) }', 'packages/chrome/src/LintPanel.css'),
     ).toEqual([]);
-    expect(rulesOf('.ts-home-panel { font-family: var(--pt-mono) }')).toEqual([
+    expect(rulesOf('.ts-lint-rule { font-family: var(--pt-mono) }')).toEqual([
       'css/mono-outside-code',
     ]);
     expect(
-      rulesOf('.ts-product-cmd { font-family: var(--pt-mono) }', 'apps/studio/src/routes/home.css'),
+      rulesOf('.ts-lint-head { font-family: var(--pt-mono) }', 'packages/chrome/src/LintPanel.css'),
     ).toEqual(['css/mono-outside-code']);
     expect(rulesOf(':root { --pt-mono: ui-monospace, Menlo, monospace }')).toEqual([]);
   });

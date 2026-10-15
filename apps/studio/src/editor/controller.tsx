@@ -175,6 +175,7 @@ import type { ShellState } from '@turboslide/chrome/shell-context';
 import type { ShellMode } from '@turboslide/chrome/shell-data';
 import { planPlayList } from '@turboslide/export/batch/plan';
 import {
+  brandOfRow,
   identityIndex,
   identityOfPrincipal,
   identityView,
@@ -1470,11 +1471,18 @@ export function createEditorController(init: {
        agent writes with `author.kind: 'agent'`, the token's label and the run id, under the room's
        `agent:<principalId>` client id (the blob tier's record keeps `store`), so a write through
        POST /api/actions reaches this banner the way the assist's and the checkout agent's did */
+    /* an agent whose roster row names a brand works beside the person with its own pointer,
+       caret and chip (docs/SITE.md D5): its writes are a collaborator's, never an outside write */
+    const branded = new Set(
+      latest()
+        .roster.filter((row) => brandOfRow(row) !== null)
+        .map((row) => row.clientId),
+    );
     const mine = agentEntriesOf(entries, {
       clientId: client.clientId(),
       earlierIds: latest().ownClientIds,
       assistNotes: ownAssistNotes,
-    });
+    }).filter((entry) => !branded.has(entry.clientId));
     if (mine.length === 0) return;
     const mutations: Mutation[] = mine.flatMap((entry) => entry.mutations ?? []);
     const before = beforeRemote;

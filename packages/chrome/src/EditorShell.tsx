@@ -62,6 +62,7 @@ import type {
   VersionDiffView,
 } from './editor-shell';
 import { EditorShellContext } from './editor-shell-context';
+import { tabSnack } from './tab-only';
 import type {
   CommentCardRequest,
   DialogRequest,
@@ -609,8 +610,13 @@ export function EditorShell({
     [input, effectiveSettings, platform, regroup],
   );
 
+  /* an editor whose presentation lives in the tab alone (docs/SITE.md D10): a snackbar that
+     carries the tab's sentence carries its button too, whichever path said it */
   const say = useCallback(
-    (text: string, action?: SnackbarAction) => snackbar.show(text, action),
+    (text: string, action?: SnackbarAction) => {
+      const snack = tabSnack(inputRef.current.tabOnly, text, action);
+      snackbar.show(snack.text, snack.action);
+    },
     [snackbar],
   );
 
@@ -642,9 +648,16 @@ export function EditorShell({
   const reopenPanel = useCallback(() => setPanel(lastPanel.current), []);
 
   const openDialog = useCallback((request: DialogId | DialogRequest) => {
-    setDialog(typeof request === 'string' ? { id: request } : request);
+    const id = typeof request === 'string' ? request : request.id;
+    const tab = inputRef.current.tabOnly;
     setMenuOpen(null);
-  }, []);
+    /* a dialog that needs the server answers the tab's sentence instead (docs/SITE.md D10) */
+    if (tab !== undefined && tab.dialogs.includes(id)) {
+      snackbar.show(tab.sentence, tab.action);
+      return;
+    }
+    setDialog(typeof request === 'string' ? { id: request } : request);
+  }, [snackbar]);
   const closeDialog = useCallback(() => setDialog(null), []);
 
   const openLayoutGrid = useCallback((request: LayoutGridRequest) => setLayoutGrid(request), []);

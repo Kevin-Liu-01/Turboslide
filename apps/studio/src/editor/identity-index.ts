@@ -5,6 +5,8 @@
 // "(2)" suffix in order of first appearance. Pure functions over the controller's state; the
 // controller re-exports the two the editor root reads.
 import type { IdentityView, PresenceParticipant } from '@turboslide/chrome/editor-shell';
+import { isAgentBrand } from '@turboslide/chrome/presence/agent-marks';
+import type { AgentBrand } from '@turboslide/chrome/presence/agent-marks';
 import { disambiguateLabels, labelFor } from '@turboslide/identity/labels';
 import type { RosterEntry } from '@turboslide/realtime/channel';
 import { receivedAtOf } from '@turboslide/realtime/client/room-client';
@@ -30,7 +32,14 @@ export function identityView(identity: EditorIdentity | undefined, author: Autho
     ...(identity.mark !== undefined ? { mark: identity.mark } : {}),
     ...(identity.runId !== undefined ? { runId: identity.runId } : {}),
     ...(identity.deleted === true ? { deleted: true } : {}),
+    ...brandPart(identity.kind === 'agent' ? 'agent' : 'human', identity.mark),
   };
+}
+
+/** `{ brand }` for an agent whose mark names one (docs/SITE.md D5), else nothing. */
+function brandPart(kind: 'human' | 'agent', mark: unknown): { brand?: AgentBrand } {
+  const brand = brandOfRow({ kind, mark: (mark ?? {}) as Record<string, unknown> });
+  return brand === null ? {} : { brand };
 }
 
 /**
@@ -40,6 +49,16 @@ export function identityView(identity: EditorIdentity | undefined, author: Autho
  * wherever a participant is expected; `RemoteCursors` reads the box through `dragOf`.
  */
 export type ParticipantView = PresenceParticipant & { drag?: PresenceDrag };
+
+/**
+ * The brand a roster row's mark names (docs/SITE.md D5): an agent row whose mark carries `brand`
+ * with one of the four agent marks (only the landing's tab room writes one), else null.
+ */
+export function brandOfRow(entry: Pick<RosterEntry, 'kind' | 'mark'>): AgentBrand | null {
+  if (entry.kind !== 'agent') return null;
+  const brand = (entry.mark as { brand?: unknown }).brand;
+  return isAgentBrand(brand) ? brand : null;
+}
 
 /**
  * A roster entry as the presence surfaces read it (SPEC-3 4.11 Participant; the chrome's
@@ -53,6 +72,8 @@ export type ParticipantView = PresenceParticipant & { drag?: PresenceDrag };
 export function participantOf(entry: RosterEntry, now: string): ParticipantView {
   const named = entry.trust === 'guest' || entry.trust === 'verified';
   const drag = dragOf(entry);
+  /* an agent with a brand mark keeps the hue the room granted, as a person does (docs/SITE.md D5) */
+  const brand = brandOfRow(entry);
   return {
     principalId: entry.principalId,
     label: entry.label,
@@ -68,7 +89,8 @@ export function participantOf(entry: RosterEntry, now: string): ParticipantView 
     mark: entry.mark as PresenceParticipant['mark'],
     clientId: entry.clientId,
     role: entry.role,
-    ...(entry.kind === 'agent' ? {} : { hue: entry.hueSlot + 1 }),
+    ...(entry.kind === 'agent' && brand === null ? {} : { hue: entry.hueSlot + 1 }),
+    ...(brand === null ? {} : { brand }),
     ...(entry.slideId !== undefined ? { slideId: entry.slideId } : {}),
     ...(entry.selection !== undefined
       ? {

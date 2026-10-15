@@ -14,7 +14,7 @@ import { Menu } from './Menu';
 import { tooltipKey } from './menus/keys';
 import { findItem, isPresent, itemById } from './menus/model';
 import type { MenuItem } from './menus/model';
-import { TITLE_ROW } from './menus/strings';
+import { TAB_ONLY, TITLE_ROW } from './menus/strings';
 import { NamePromptPlate } from './dialogs/NamePrompt';
 import { AccountMenu } from './presence/AccountMenu';
 import { nameOf } from './presence/IdentityChip';
@@ -236,6 +236,7 @@ const LONGEST_SAVE_WORDS = [
   TITLE_ROW.offline,
   TITLE_ROW.notSaved,
   TITLE_ROW.reconnecting,
+  TAB_ONLY.words,
 ].reduce((a, b) => (b.length > a.length ? b : a));
 
 function SaveState() {
@@ -261,7 +262,11 @@ function SaveState() {
     return () => window.clearTimeout(timer);
   }, [streamDown]);
   const reconnecting = !offline && streamDown && downForAWhile;
-  const words = saveWords(save.state, save.draft === true, offline, reconnecting);
+  /* a presentation that lives in the tab alone (docs/SITE.md C.7) never reads "All changes
+     saved": the cell says where the changes are, and Saving while a write is in flight */
+  const tabOnly = shell.input.tabOnly !== undefined;
+  const settled = saveWords(save.state, save.draft === true, offline, reconnecting);
+  const words = tabOnly && settled === TITLE_ROW.saved ? TAB_ONLY.words : settled;
   const item = itemById('title.saveState');
   /* Google shows a viewer and a commenter no save words: the cell is absent below `write`
      (SPEC-3 13.4; VERIFICATION-3 finding 10) */
@@ -289,7 +294,7 @@ function SaveState() {
       aria-hidden={untouched ? true : undefined}
       tabIndex={untouched ? -1 : undefined}
       onClick={() => shell.runItem(item)}
-      {...tipProps({ name: words, doc: item.doc })}
+      {...tipProps({ name: words, doc: tabOnly ? TAB_ONLY.doc : item.doc })}
     >
       <Icon name={icon} />
       <span className="ts-title-save-words" data-longest={LONGEST_SAVE_WORDS}>

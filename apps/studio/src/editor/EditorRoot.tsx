@@ -474,6 +474,8 @@ type EditorRootProps = {
   author: Author;
   onSearch: (patch: Partial<EditSearch>) => void;
   onDeckCreated: (deckId: string) => void;
+  /** the controller once made, for a route that drives the editor beside the person (/try's runner) */
+  onController?: (controller: EditorController) => void;
 };
 
 /**
@@ -502,7 +504,14 @@ function openFactsOf(document: EditorDeck['document']): DeckOpenFacts {
 /** The Slideshow arrow of the title row (TitleRow.tsx): a pointer over it preloads the presenter route. */
 const PRESENT_ARROW = '[data-control="present.arrow"]';
 
-export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: EditorRootProps) {
+export function EditorRoot({
+  payload,
+  search,
+  author,
+  onSearch,
+  onDeckCreated,
+  onController,
+}: EditorRootProps) {
   const router = useRouter();
   /* the document's backend (backend.ts): the server's on /new and /edit, the tab's on /try */
   const backend = editorBackend();
@@ -515,6 +524,10 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       ...(search.comment !== undefined ? { initialThread: search.comment } : {}),
     }),
   );
+  /* the controller React kept (a development render makes the initializer's work twice) */
+  useLayoutEffect(() => {
+    onController?.(controller);
+  }, [controller, onController]);
   const [capabilities, setCapabilities] = useState<ExportCapabilities | null>(null);
   /* View > Mode for an editor (SPEC-3 5.3): Editing or Commenting; Viewing is the `?edit=0` flag */
   const [chosenMode, setChosenMode] = useState<'editing' | 'commenting'>('editing');
@@ -1355,14 +1368,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
 
   const scopeAttr = { [SCOPE_ATTRIBUTE]: `editor:${deckId}` };
 
-  /* navigation for the menu's route effects and the dialogs: a new tab, or a full load of another route */
-  const go = (path: string, newTab?: boolean): void => {
-    if (newTab) {
-      window.open(path, '_blank', 'noopener');
-      return;
-    }
-    window.location.assign(path);
-  };
+  /* navigation for the menu's route effects and the dialogs: a new tab, or a full load of another
+     route, in the window the backend names (the page around /try's frame) */
+  const go = (path: string, newTab?: boolean): void => backend.openPage(path, newTab);
 
   /* the Slideshow button's host (SPEC 9.1): the play list's first slide, goto and present as actions */
   const presentHost: PresentHost = {
@@ -1909,9 +1917,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     present: {
       start: (fromBeginning) =>
         startSlideshow(presentHost, { from: fromBeginning ? 'beginning' : 'current' }),
-      presenterView: () => presenterView(presentHost),
+      /* Presenter view reads the presentation from the server in a second window (D10) */
+      presenterView: () =>
+        backend.tabOnly === undefined
+          ? presenterView(presentHost)
+          : controller.say(backend.tabOnly.sentence),
     },
     navigate: go,
+    ...(backend.tabOnly === undefined ? {} : { tabOnly: backend.tabOnly }),
     onTrashed: () => {
       void controller.reload();
     },

@@ -174,4 +174,8 @@ export const serverBackend: EditorBackend = {
   authPost,
   attachesSession: true,
   recordsRecent: true,
+  openPage: (path, newTab) => {
+    if (newTab) window.open(path, '_blank', 'noopener');
+    else window.location.assign(path);
+  },
 };

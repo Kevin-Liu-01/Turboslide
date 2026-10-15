@@ -99,6 +99,8 @@ export type EditorBackend = {
   attachesSession: boolean;
   /** whether opened decks enter this browser's Recent mirror (routes/-recent.ts) */
   recordsRecent: boolean;
+  /** a full load of another page, or a new tab: this window on the server backend */
+  openPage: (path: string, newTab?: boolean) => void;
   /**
    * What a backend without the server answers in place of a server feature (docs/SITE.md D10):
    * the sentence, the dialogs it stands for and the snackbar's action. Absent on the server.

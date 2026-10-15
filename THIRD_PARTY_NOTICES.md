@@ -190,7 +190,10 @@ and requires the LICENSE and NOTICE text below to travel with the distribution (
 materials carry the credit "Material: <name>, Paper Shaders, rendered in Turboslide" (the M5
 capture) or "Shader: <name>, Paper Shaders, rendered in Turboslide" (a frame of the shader library,
 docs/archive/rounds/FEATURES.md 5.5). The gallery's stills under `packages/materials/previews/` are renders of the
-same shaders at anchor 5500 (`scripts/build-shader-previews.mjs`).
+same shaders at anchor 5500 (`scripts/build-shader-previews.mjs`). The form presets in
+`packages/materials/src/form-presets.ts` copy the shape values of Paper's authored presets from
+`@paper-design/shaders-react` 0.0.78 (Apache 2.0, the same NOTICE, not a dependency) as data, with
+every colour replaced by the brand kit's.
 
 NOTICE:
 

@@ -108,6 +108,9 @@ describe('the Shader section', () => {
       'Sphere',
       'Chrome',
       'Noir',
+      /* Paper's authored forms in the kit's colours (the Glyphfield port, wave 2.3) */
+      'Stripes',
+      'Backdrop',
     ]);
     expect(
       tiles
@@ -192,6 +195,22 @@ describe('the Shader section', () => {
     ).mutations;
     expect(colour[0]).toMatchObject({ path: '/preset', value: 'brand-blue' });
     expect(previewed).toHaveBeenCalledTimes(1);
+
+    // a form preset tile writes its name and pushes Paper's shape in the kit's colours
+    const stripes = container.querySelector<HTMLButtonElement>(
+      '[data-control="formatOptions.shader.preset.stripes"]',
+    );
+    if (stripes === null) throw new Error('no form tile');
+    previewed.mockClear();
+    fireEvent.click(stripes);
+    const form = (dispatch.mock.calls[3]?.[1] as { mutations: { path: string; value?: unknown }[] })
+      .mutations;
+    expect(form).toEqual([expect.objectContaining({ path: '/preset', value: 'stripes' })]);
+    expect(previewed.mock.calls[0]?.[1]).toMatchObject({
+      u_repetition: 6,
+      u_shape: 'circle',
+      u_colorBack: '#070707',
+    });
   });
 
   it('hides a parked control while the switch is off and draws it with the switch on', () => {

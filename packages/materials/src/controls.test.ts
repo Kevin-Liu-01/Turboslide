@@ -189,9 +189,10 @@ describe('the kit palette', () => {
           material.presets.some((preset) => preset.name === row.name),
           material.id,
         ).toBe(true);
-    // the words are the seller's: sentence case, no id
+    // the words are the seller's: sentence case (a numeral may lead, Paper's 1960s), no id
     for (const material of Object.values(MATERIALS))
-      for (const preset of material.presets) expect(preset.label).toMatch(/^[A-Z][^_]*$/);
+      for (const preset of material.presets)
+        expect(preset.label, `${material.id} ${preset.name}`).toMatch(/^[A-Z0-9][^_A-Z]*$/);
   });
 
   test('the frame key follows the kit, the anchor, the recipe and the aspect, and names the asset', () => {

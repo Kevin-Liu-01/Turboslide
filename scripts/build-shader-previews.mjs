@@ -27,7 +27,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'packages/materials/previews');
 const INDEX = join(OUT, 'index.json');
 
-const { MATERIALS, GALLERY_MATERIAL_IDS } = await import('../packages/materials/src/catalog.ts');
+const { MATERIALS, MATERIAL_IDS } = await import('../packages/materials/src/catalog.ts');
 const {
   SHADER_PREVIEW_ANCHOR,
   SHADER_PREVIEW_SIZE,
@@ -47,10 +47,13 @@ const check = args.includes('--check');
 const onlyAt = args.indexOf('--only');
 const only = onlyAt === -1 ? null : new Set((args[onlyAt + 1] ?? '').split(',').filter(Boolean));
 
-/** Every still the catalog asks for: the material's card and one tile per preset. */
+/**
+ * Every still the catalog asks for: the material's card and one tile per preset, for every entry,
+ * the three the gallery leaves out too, since a saved deck's Shader section draws its entry's still.
+ */
 function wanted() {
   const rows = [];
-  for (const id of GALLERY_MATERIAL_IDS) {
+  for (const id of MATERIAL_IDS) {
     const entry = MATERIALS[id];
     if (entry === undefined) continue;
     rows.push({

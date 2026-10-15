@@ -129,10 +129,10 @@ describe('shader.list', () => {
         .filter((entry) => entry.still)
         .map((entry) => entry.id)
         .sort(),
-    ).toEqual([
-      'paper:dot-grid',
-      'paper:static-mesh-gradient',
-      'paper:static-radial-gradient',
+    ).toEqual(['paper:dot-grid', 'paper:static-mesh-gradient', 'paper:static-radial-gradient']);
+    /* the gallery leaves Paper's three placeholders out (the Glyphfield port, wave 1.3); named, one still answers */
+    expect(listed.shaders.map((entry) => entry.id)).not.toContain('paper:waves');
+    expect(shaderList({ materialId: 'paper:waves' }).shaders.map((entry) => entry.id)).toEqual([
       'paper:waves',
     ]);
     expect(listed.controls).toHaveLength(11);

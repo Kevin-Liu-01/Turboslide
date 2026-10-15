@@ -9,9 +9,9 @@
 //   appearance, the dialog alone on a transparent ground (capture.ts --only download), served as
 //   WebP with its alpha at 1x (at most 20,000 B) and 2x (at most 40,000 B, so the page's pictures
 //   after a full scroll stay under 200 KB at 2x).
-// - The patterns band's cards: the 17 stills the editor's Insert > Animated pattern gallery shows
+// - The patterns band's cards: the stills of the catalog's 17 entries
 //   (packages/materials/previews/<material>.webp, 320 by 200, the files the gallery's cards
-//   draw), served byte for byte under /home/, with the gallery's names and order in
+//   draw), served byte for byte under /home/, with the catalog's names in
 //   pattern-cards.generated.ts.
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
@@ -20,7 +20,11 @@ import { fileURLToPath } from 'node:url';
 
 import sharp from 'sharp';
 
-import { GALLERY_MATERIAL_IDS, MATERIALS } from '../../packages/materials/src/catalog.ts';
+import {
+  FEATURED_MATERIAL_IDS,
+  MATERIALS,
+  MATERIAL_IDS,
+} from '../../packages/materials/src/catalog.ts';
 import { shaderPreviewFile } from '../../packages/materials/src/previews.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
@@ -104,7 +108,10 @@ export async function derivePresenterFiles(): Promise<FigureFile[]> {
         );
         if (made.length <= budget) bytes = made;
       }
-      if (bytes === null) fail(`the ${entry.appearance} presenter view at ${variant} is over ${budget} B at quality 50`);
+      if (bytes === null)
+        fail(
+          `the ${entry.appearance} presenter view at ${variant} is over ${budget} B at quality 50`,
+        );
       out.push({ role: 'presenter', appearance: entry.appearance, variant, bytes, material: null });
     }
   }
@@ -115,7 +122,9 @@ export async function derivePresenterFiles(): Promise<FigureFile[]> {
 export async function deriveDownloadFiles(): Promise<FigureFile[]> {
   const index = resolve(ROOT, DOWNLOAD_DIR, 'download.json');
   if (!existsSync(index))
-    fail(`${DOWNLOAD_DIR}/download.json is missing; run node scripts/home/capture.ts --record --only download`);
+    fail(
+      `${DOWNLOAD_DIR}/download.json is missing; run node scripts/home/capture.ts --record --only download`,
+    );
   const recording = JSON.parse(readFileSync(index, 'utf8')) as DownloadRecording;
   const { width, height } = recording.size;
   const out: FigureFile[] = [];
@@ -134,16 +143,35 @@ export async function deriveDownloadFiles(): Promise<FigureFile[]> {
         );
         if (made.length <= budget) bytes = made;
       }
-      if (bytes === null) fail(`the ${entry.appearance} Download dialog at ${variant} is over ${budget} B at quality 50`);
-      out.push({ role: 'download-dialog', appearance: entry.appearance, variant, bytes, material: null });
+      if (bytes === null)
+        fail(
+          `the ${entry.appearance} Download dialog at ${variant} is over ${budget} B at quality 50`,
+        );
+      out.push({
+        role: 'download-dialog',
+        appearance: entry.appearance,
+        variant,
+        bytes,
+        material: null,
+      });
     }
   }
   return out;
 }
 
-/** The gallery's 17 stills in its order, each with its name. */
+/**
+ * The landing's 17 cards, each with its name: the catalog with the featured six first, the
+ * gallery's order before the Glyphfield port (wave 1.3) left three entries out of the gallery, so
+ * the landing keeps its cards and its count until its own rewrite.
+ */
+const PATTERN_CARD_IDS: readonly string[] = [
+  ...FEATURED_MATERIAL_IDS,
+  ...MATERIAL_IDS.filter((id) => !FEATURED_MATERIAL_IDS.includes(id)),
+];
+
+/** The landing's 17 stills in their order, each with its name. */
 export function derivePatternCardFiles(): FigureFile[] {
-  return GALLERY_MATERIAL_IDS.map((material) => {
+  return PATTERN_CARD_IDS.map((material) => {
     const file = resolve(ROOT, PREVIEWS_DIR, shaderPreviewFile(material));
     if (!existsSync(file)) fail(`${PREVIEWS_DIR}/${shaderPreviewFile(material)} is missing`);
     return {

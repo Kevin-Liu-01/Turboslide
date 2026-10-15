@@ -582,10 +582,34 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
 
 export const MATERIAL_IDS: ReadonlyArray<string> = Object.keys(MATERIALS);
 
-/** The catalog ids in the gallery's order: the featured six first, then the rest in catalog order (5.4). */
+/**
+ * Paper's placeholder patterns, left out of the gallery and `shader.list` the way Glyphfield's
+ * library retires them (`RETIRED_PAPER_FAMILIES`); `material.list`, the actions and saved decks
+ * keep them.
+ */
+const GALLERY_HIDDEN_IDS: ReadonlyArray<string> = [
+  'paper:perlin-noise',
+  'paper:simplex-noise',
+  'paper:waves',
+];
+
+/** The simple patterns the gallery lists after the richer entries (Glyphfield's `SIMPLE_PAPER_FAMILIES`). */
+const GALLERY_LAST_IDS: ReadonlyArray<string> = ['paper:spiral', 'paper:dot-grid'];
+
+/**
+ * The catalog ids in the gallery's order (5.4): the featured six first, then the richer entries in
+ * catalog order, then spiral and dot grid, without the three placeholders (the Glyphfield port,
+ * wave 1.3).
+ */
 export const GALLERY_MATERIAL_IDS: ReadonlyArray<string> = [
   ...FEATURED_MATERIAL_IDS.filter((id) => id in MATERIALS),
-  ...MATERIAL_IDS.filter((id) => !FEATURED_MATERIAL_IDS.includes(id)),
+  ...MATERIAL_IDS.filter(
+    (id) =>
+      !FEATURED_MATERIAL_IDS.includes(id) &&
+      !GALLERY_HIDDEN_IDS.includes(id) &&
+      !GALLERY_LAST_IDS.includes(id),
+  ),
+  ...GALLERY_LAST_IDS.filter((id) => id in MATERIALS),
 ];
 
 export function materialEntry(id: string): MaterialEntry | undefined {

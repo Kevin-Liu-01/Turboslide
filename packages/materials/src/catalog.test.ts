@@ -9,7 +9,14 @@ import { describe, expect, test } from 'vitest';
 import { materialCatalogEntrySchema } from '@turboslide/schema/blocks/material';
 import type { Asset } from '@turboslide/schema/assets';
 
-import { MATERIALS, MATERIAL_IDS, listMaterials, requireMaterial } from './catalog.ts';
+import {
+  FEATURED_MATERIAL_IDS,
+  GALLERY_MATERIAL_IDS,
+  MATERIALS,
+  MATERIAL_IDS,
+  listMaterials,
+  requireMaterial,
+} from './catalog.ts';
 import { fragmentShaderFor, toShaderUniforms, toVec4, toVec4List } from './paper.ts';
 import { GT_PALETTE } from './presets.ts';
 import { PROTO_MATERIALS } from './proto.ts';
@@ -77,6 +84,28 @@ describe('the catalog', () => {
       u_colors: '#fe5b16,#f7ff61,#ffffff',
       u_colorBack: '#000000',
     });
+  });
+});
+
+describe('the gallery order (the Glyphfield port, wave 1.3)', () => {
+  const HIDDEN = ['paper:perlin-noise', 'paper:simplex-noise', 'paper:waves'];
+
+  test('leaves out Paper’s three placeholder patterns, which the catalog and saved decks keep', () => {
+    for (const id of HIDDEN) {
+      expect(GALLERY_MATERIAL_IDS).not.toContain(id);
+      expect(MATERIAL_IDS).toContain(id);
+      expect(listMaterials(id).map((entry) => entry.id)).toEqual([id]);
+      expect(requireMaterial(id).id).toBe(id);
+    }
+    expect([...GALLERY_MATERIAL_IDS].sort()).toEqual(
+      MATERIAL_IDS.filter((id) => !HIDDEN.includes(id)).sort(),
+    );
+  });
+
+  test('lists the featured six first and the simple patterns, spiral and dot grid, last', () => {
+    expect(GALLERY_MATERIAL_IDS.slice(0, 6)).toEqual([...FEATURED_MATERIAL_IDS]);
+    expect(GALLERY_MATERIAL_IDS.slice(-2)).toEqual(['paper:spiral', 'paper:dot-grid']);
+    expect(new Set(GALLERY_MATERIAL_IDS).size).toBe(GALLERY_MATERIAL_IDS.length);
   });
 });
 

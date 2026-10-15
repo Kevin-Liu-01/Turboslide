@@ -77,6 +77,7 @@ import type { DeckStore } from '@turboslide/store/store';
 
 import {
   GALLERY_MATERIAL_IDS,
+  MATERIAL_IDS,
   SHADER_CATEGORIES,
   entryWithPalette,
   featuredPresetOf,
@@ -932,13 +933,17 @@ export type ShaderListOutput = {
   categories: typeof SHADER_CATEGORIES;
 };
 
-/** `shader.list`: the catalog in the gallery's order, with the categories, the previews and the control ranges. */
+/**
+ * `shader.list`: the gallery's entries in its order, with the categories, the previews and the
+ * control ranges; a named `materialId` answers any catalog entry, so a saved deck's shader that the
+ * gallery leaves out is still read by its id.
+ */
 export function shaderList(input: ShaderListInput = {}, deck?: Deck): ShaderListOutput {
   const palette = deck === undefined ? undefined : shaderPaletteOfDeck(deck);
   const ids =
     input.materialId === undefined
       ? GALLERY_MATERIAL_IDS
-      : GALLERY_MATERIAL_IDS.filter((id) => id === input.materialId);
+      : MATERIAL_IDS.filter((id) => id === input.materialId);
   const entries: ShaderListEntry[] = ids.flatMap((id) => {
     const base = materialEntry(id);
     if (base === undefined) return [];

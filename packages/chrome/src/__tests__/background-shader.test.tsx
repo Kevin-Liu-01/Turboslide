@@ -8,7 +8,9 @@ import type { Block, PictureBlock } from '@turboslide/schema/blocks';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
+import { GALLERY_MATERIAL_IDS } from '@turboslide/materials/catalog';
 import { FRAME_UPLOAD_ABOVE_BYTES } from '@turboslide/viewer/shader-frame';
+import type * as MaterialMountModule from '@turboslide/viewer/MaterialMount';
 
 import { BackgroundDialog, backgroundCapture } from '../dialogs/Background';
 import { SHADER_GALLERY } from '../dialogs/ShaderGallery';
@@ -30,6 +32,22 @@ const SETTINGS: ShellSettings = { ...DEFAULT_SETTINGS, advancedTools: true };
 // Format options at the Shader section. The ground itself and the 30 s bound are the server's
 // (B7) and the walk's; this file drives the dialog in jsdom.
 
+/* the shader library's chunk (viewer MaterialMount.tsx `loadMaterialMount`): each load is counted
+   and never answers, so jsdom loads no Paper code; the capture seams below stand in for the frame */
+const chunkLoads = vi.fn();
+vi.mock('@turboslide/viewer/MaterialMount', async () => {
+  const actual = await vi.importActual<typeof MaterialMountModule>(
+    '@turboslide/viewer/MaterialMount',
+  );
+  return {
+    ...actual,
+    loadMaterialMount: () => {
+      chunkLoads();
+      return new Promise(() => undefined);
+    },
+  };
+});
+
 afterEach(() => {
   hideTooltip();
   cleanup();
@@ -38,6 +56,7 @@ afterEach(() => {
 
 beforeEach(() => {
   vi.useRealTimers();
+  chunkLoads.mockClear();
 });
 
 function Host({
@@ -150,10 +169,13 @@ describe('the Background dialog’s Shader row', () => {
     expect(choose.getAttribute('aria-expanded')).toBe('false');
     expect(place.disabled).toBe(true);
     expect(control('dialog.shader.grid')).toBeNull();
+    /* the shader library's chunk starts with the grid, not with the dialog (the Glyphfield port, wave 1.3) */
+    expect(chunkLoads).not.toHaveBeenCalled();
     fireEvent.click(choose);
+    expect(chunkLoads).toHaveBeenCalledTimes(1);
     expect(choose.getAttribute('aria-expanded')).toBe('true');
     const grid = control('dialog.shader.grid') as HTMLElement;
-    expect(grid.dataset.count).toBe('17');
+    expect(grid.dataset.count).toBe(String(GALLERY_MATERIAL_IDS.length));
     expect(document.querySelector('.ts-shader.is-compact')).not.toBeNull();
     /* no canvas mounts in the dialog */
     expect(document.querySelectorAll('canvas')).toHaveLength(0);

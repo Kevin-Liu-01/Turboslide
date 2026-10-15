@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   GALLERY_MATERIAL_IDS,
   SHADER_CATEGORIES,
+  categoryLabel,
   featuredPresetOf as featuredPresetNameOf,
   materialEntry,
 } from '@turboslide/materials/catalog';
@@ -33,11 +34,15 @@ import './ShaderGallery.css';
 /**
  * The Shader gallery (docs/archive/rounds/FEATURES.md 5.4; audit-shaders 3 and 14): one picker for Insert >
  * Shader and Change background > Shader > Choose. A grid of 320 by 200 stills, one card per
- * catalog entry with its presets as a row of small tiles under the name; a search field over the
- * name, the description and the engine; five category chips (Fluid, Light, Metal, Gradient,
- * Graphic, the catalog's `category`); the featured order first (`GALLERY_MATERIAL_IDS`: liquid
- * metal, gem smoke, god rays, mesh gradient, smoke ring, grain gradient), then the catalog's
- * order. The stills are B5's build time webp files in ink and paper (`packages/materials/previews/`,
+ * gallery entry with its presets as a row of small tiles under the name; a search field where
+ * every word must match the name, the description, the category or the engine; five category
+ * chips (Fluid, Light, Metal, Gradient, Graphic, the catalog's `category`); the featured order
+ * first (`GALLERY_MATERIAL_IDS`: liquid metal, gem smoke, god rays, mesh gradient, smoke ring,
+ * grain gradient), then the richer entries, then spiral and dot grid; Paper's perlin noise,
+ * simplex noise and waves stay in the catalog and out of the grid (the Glyphfield port, wave
+ * 1.3). Opening the grid starts the shader library's chunk (`loadMaterialMount`), which the
+ * insert's live mount and the hover mount need next. The stills are B5's build time webp files in
+ * ink and paper (`packages/materials/previews/`,
  * named by `@turboslide/materials/previews`), and the dialog says so in one sentence under its
  * title (judge-seller addition 12); a still whose file is not on the build draws a plate with no
  * text (5.5). No canvas mounts in the dialog (5.6): the one exception is the P1 hover live mount
@@ -101,11 +106,16 @@ export function shaderPreviewUrl(entry: MaterialEntry, preset?: MaterialPreset):
   return previewUrlOf(entry.id, preset?.name);
 }
 
-/** True when the search matches the name, the description or the engine (5.4). */
+/**
+ * True when every word of the search is found in the name, the description, the category or the
+ * engine (5.4; Glyphfield's library search), so "smoke ring" and "ring smoke" find the same card.
+ */
 export function matchesShaderQuery(entry: MaterialEntry, query: string): boolean {
-  const q = query.trim().toLocaleLowerCase();
-  if (q === '') return true;
-  return `${entry.label} ${entry.doc} ${engineOf(entry.id).label}`.toLocaleLowerCase().includes(q);
+  const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const text =
+    `${entry.label} ${entry.doc} ${categoryLabel(entry.category)} ${engineOf(entry.id).label}`.toLocaleLowerCase();
+  return words.every((word) => text.includes(word));
 }
 
 /** The cards for a query, a category chip and an engine family, in the gallery's order. */
@@ -360,6 +370,11 @@ export function ShaderGalleryGrid({
     setHovered(null);
   };
   useEffect(() => disposeHover, []);
+  /* the shader library's chunk starts loading when the grid opens (the Glyphfield port, wave 1.3),
+     not on the first hover or after the insert; a failed load is retried by the next mount */
+  useEffect(() => {
+    loadMaterialMount().catch(() => undefined);
+  }, []);
   useEffect(() => {
     if (hovered !== null && !cards.some((entry) => entry.id === hovered)) disposeHover();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- the card list alone decides

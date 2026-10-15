@@ -13,6 +13,7 @@ import type { MaterialEntry } from '@turboslide/materials/catalog';
 import { shaderPreviewFile } from '@turboslide/materials/previews';
 import { materialBlockSchema } from '@turboslide/schema/blocks/material';
 import { workedDocument } from '@turboslide/schema/fixtures';
+import type * as MaterialMountModule from '@turboslide/viewer/MaterialMount';
 
 import {
   SHADER_GALLERY,
@@ -45,6 +46,22 @@ import { hideTooltip } from '../Tooltip';
 // selecting the block and closing; the block maker's alt, preset and the `motion` default written
 // only once the schema knows the field. The rows themselves are driven by B4's walk against a
 // server; this file drives the dialog in jsdom over the real catalog.
+
+/* the shader library's chunk (viewer MaterialMount.tsx `loadMaterialMount`): each load is counted
+   and never answers, so jsdom loads no Paper code */
+const chunkLoads = vi.fn();
+vi.mock('@turboslide/viewer/MaterialMount', async () => {
+  const actual = await vi.importActual<typeof MaterialMountModule>(
+    '@turboslide/viewer/MaterialMount',
+  );
+  return {
+    ...actual,
+    loadMaterialMount: () => {
+      chunkLoads();
+      return new Promise(() => undefined);
+    },
+  };
+});
 
 afterEach(() => {
   hideTooltip();
@@ -141,15 +158,21 @@ describe('the catalog as the gallery reads it', () => {
       'paper:smoke-ring',
       'paper:grain-gradient',
     ]);
-    expect(ordered).toHaveLength(MATERIAL_IDS.length);
+    expect(ordered).toHaveLength(GALLERY_MATERIAL_IDS.length);
     expect(shaderGalleryEntries('').map((entry) => entry.id)).toEqual(ordered);
+    /* Paper's three placeholders stay in the catalog and out of the grid (the Glyphfield port, wave 1.3) */
+    for (const id of ['paper:perlin-noise', 'paper:simplex-noise', 'paper:waves']) {
+      expect(MATERIAL_IDS).toContain(id);
+      expect(ordered).not.toContain(id);
+    }
+    expect(ordered.slice(-2)).toEqual(['paper:spiral', 'paper:dot-grid']);
   });
 
   it('files every entry under its catalog category; the union of the five chips is the whole grid', () => {
     const ids = new Set<string>(SHADER_CATEGORIES.map((each) => each.id));
     for (const entry of insertableMaterials()) expect(ids.has(entry.category)).toBe(true);
     const byChip = SHADER_CATEGORIES.flatMap((each) => shaderGalleryEntries('', each.id));
-    expect(byChip.map((entry) => entry.id).sort()).toEqual([...MATERIAL_IDS].sort());
+    expect(byChip.map((entry) => entry.id).sort()).toEqual([...GALLERY_MATERIAL_IDS].sort());
     expect(shaderGalleryEntries('', 'metal').map((entry) => entry.id)).toEqual(
       insertableMaterials()
         .filter((entry) => entry.category === 'metal')
@@ -160,16 +183,30 @@ describe('the catalog as the gallery reads it', () => {
     );
   });
 
-  it('searches the name, the description and the engine; "metal" narrows to one card', () => {
+  it('searches every word in the name, the description, the category and the engine; "metal" narrows to one card', () => {
     expect(shaderGalleryEntries('metal').map((entry) => entry.id)).toEqual(['paper:liquid-metal']);
     expect(shaderGalleryEntries('meta').map((entry) => entry.id)).toEqual([
       'paper:liquid-metal',
       'paper:metaballs',
     ]);
-    expect(shaderGalleryEntries('Paper Shaders')).toHaveLength(MATERIAL_IDS.length);
+    expect(shaderGalleryEntries('Paper Shaders')).toHaveLength(GALLERY_MATERIAL_IDS.length);
     expect(shaderGalleryEntries('smoky ring').map((entry) => entry.id)).toEqual([
       'paper:smoke-ring',
     ]);
+    /* every word must match somewhere, in any order and across the fields (Glyphfield's search) */
+    expect(shaderGalleryEntries('ring smoky').map((entry) => entry.id)).toEqual([
+      'paper:smoke-ring',
+    ]);
+    expect(shaderGalleryEntries('  metal   liquid ').map((entry) => entry.id)).toEqual([
+      'paper:liquid-metal',
+    ]);
+    /* the category is searched too: every card under the Fluid chip answers "fluid paper" */
+    const fluid = shaderGalleryEntries('', 'fluid').map((entry) => entry.id);
+    expect(fluid.length).toBeGreaterThan(1);
+    expect(shaderGalleryEntries('fluid paper').map((entry) => entry.id)).toEqual(
+      expect.arrayContaining(fluid),
+    );
+    expect(shaderGalleryEntries('liquid zzqx')).toEqual([]);
     expect(shaderGalleryEntries('zzqx')).toEqual([]);
     /* a chip and the query both apply */
     expect(shaderGalleryEntries('liquid', 'graphic')).toEqual([]);
@@ -268,10 +305,10 @@ describe('the Shader gallery dialog', () => {
       expect(control(`dialog.shader.category.${each}`), each).not.toBeNull();
     expect(control('dialog.shader.category.all')?.getAttribute('aria-checked')).toBe('true');
     const grid = control('dialog.shader.grid') as HTMLElement;
-    expect(grid.dataset.count).toBe(String(MATERIAL_IDS.length));
+    expect(grid.dataset.count).toBe(String(GALLERY_MATERIAL_IDS.length));
     expect(grid.dataset.query).toBe('');
     const list = cards();
-    expect(list).toHaveLength(MATERIAL_IDS.length);
+    expect(list).toHaveLength(GALLERY_MATERIAL_IDS.length);
     expect(list[0]?.dataset.material).toBe('paper:liquid-metal');
     expect(list[0]?.dataset.preset).toBe('diamond');
     expect(list[0]?.getAttribute('role')).toBe('option');
@@ -425,7 +462,7 @@ describe('the Shader gallery dialog', () => {
       </Host>,
     );
     expect(document.querySelector('.ts-shader[data-hover-live="true"]')).not.toBeNull();
-    expect(document.querySelectorAll('.ts-shader-hover')).toHaveLength(MATERIAL_IDS.length);
+    expect(document.querySelectorAll('.ts-shader-hover')).toHaveLength(GALLERY_MATERIAL_IDS.length);
     /* nothing is live before a hover: no host carries the control id and no canvas exists */
     expect(controls('dialog.shader.hover')).toHaveLength(0);
     expect(document.querySelectorAll('canvas')).toHaveLength(0);
@@ -445,6 +482,23 @@ describe('the Shader gallery dialog', () => {
     );
     expect(document.querySelector('.ts-shader[data-hover-live]')).toBeNull();
     expect(document.querySelectorAll('.ts-shader-hover')).toHaveLength(0);
+  });
+});
+
+describe('the shader library chunk', () => {
+  it('starts loading once when the dialog opens, before any hover or insert (the Glyphfield port, wave 1.3)', () => {
+    chunkLoads.mockClear();
+    render(
+      <Host state={host(vi.fn(() => Promise.resolve({})))}>
+        <ShaderGalleryDialog />
+      </Host>,
+    );
+    expect(chunkLoads).toHaveBeenCalledTimes(1);
+    fireEvent.change(control('dialog.shader.search') as HTMLInputElement, {
+      target: { value: 'smoke' },
+    });
+    expect(chunkLoads).toHaveBeenCalledTimes(1);
+    expect(document.querySelectorAll('canvas')).toHaveLength(0);
   });
 });
 

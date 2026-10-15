@@ -70,7 +70,7 @@ export const HERO = {
     label: 'The editor',
     caption:
       'Claude Code and Codex are editing this presentation with you. It lives only in this tab.',
-    alt: 'The Turboslide editor on a presentation titled Northwind quarterly review. It shows the title row with Share, the menus File to Help, the toolbar, the filmstrip of five slides and the title slide on the stage, with the pointers of Claude Code and Codex on it.',
+    alt: 'The Turboslide editor on a presentation titled Northwind quarterly review. It shows the title row with Share, the menus File to Help, the toolbar, the filmstrip of five slides and the title slide on the stage. The pointers of Claude Code and Codex are on the slide.',
     frameTitle: 'The Turboslide editor with Claude Code and Codex',
   },
 } as const;

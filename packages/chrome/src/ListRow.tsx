@@ -2,6 +2,7 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 
 import { cn } from './lib/cn';
 import type { ShellItem } from './shell-data';
+import { Tooltip } from './Tooltip';
 
 import './ListRow.css';
 
@@ -44,26 +45,28 @@ export type ListRowProps = {
 /**
  * A frameless sidebar row: the 22px number column and a 12.5px title over
  * a soft rule. Presentational on purpose: the caller supplies active and
- * onSelect. The title attribute carries the full text, since the sidebar
- * clamps the row and the preview card has no caption for a heading.
+ * onSelect. The tooltip carries the full text, since the sidebar clamps the
+ * row and the preview card has no caption for a heading; it is the chrome's
+ * tooltip, never a native title, so Show tooltips off hides it.
  */
 export function ListRow({ item, active, onSelect }: ListRowProps) {
   const select = () => onSelect(item.id);
   return (
-    <div
-      className={cn('pt-row', active && 'is-active')}
-      role="button"
-      tabIndex={0}
-      data-id={item.id}
-      data-preview={item.id}
-      aria-current={active || undefined}
-      onMouseDown={pressWithoutFocus}
-      onClick={select}
-      onKeyDown={(event) => activateOnKey(event, select)}
-      title={item.title}
-    >
-      <span className="n">{item.n ?? ''}</span>
-      <span className="pt-row-title">{item.title}</span>
-    </div>
+    <Tooltip content={{ name: item.title }}>
+      <div
+        className={cn('pt-row', active && 'is-active')}
+        role="button"
+        tabIndex={0}
+        data-id={item.id}
+        data-preview={item.id}
+        aria-current={active || undefined}
+        onMouseDown={pressWithoutFocus}
+        onClick={select}
+        onKeyDown={(event) => activateOnKey(event, select)}
+      >
+        <span className="n">{item.n ?? ''}</span>
+        <span className="pt-row-title">{item.title}</span>
+      </div>
+    </Tooltip>
   );
 }

@@ -6,6 +6,7 @@ import { createLiveAdapter } from '@turboslide/agent/window/adapter';
 import type { StudioAdapter } from '@turboslide/agent/window/adapter';
 import { registerStudioAutomation, viewerActionIds } from '@turboslide/agent/window/registry';
 import type { ShellItem, ShellMode, ShellSection } from '@turboslide/chrome/shell-data';
+import { tipProps } from '@turboslide/chrome/Tooltip';
 import type { ShellState } from '@turboslide/chrome/shell-context';
 import { usePtShell, usePtStage } from '@turboslide/chrome/shell-context';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
@@ -209,7 +210,10 @@ export function DeckViewer({
             {deck.fallback ? (
               <span
                 className="ts-word-chip"
-                title={`decks/${deck.fallback} stands in for decks/${deck.id}`}
+                {...tipProps({
+                  name: 'Fixture',
+                  doc: `decks/${deck.fallback} stands in for decks/${deck.id}`,
+                })}
               >
                 fixture
               </span>

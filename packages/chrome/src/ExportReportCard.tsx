@@ -4,6 +4,7 @@ import type { ExportReport } from '@turboslide/schema/export';
 
 import type { ExportMenuInput } from './ExportMenu';
 import { useLayer } from './Layer';
+import { tipProps } from './Tooltip';
 
 import './ExportReportCard.css';
 
@@ -190,7 +191,8 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
                 <button
                   type="button"
                   className="pt-ib is-text"
-                  title={`Download ${file.name}`}
+                  aria-label={`Download ${file.name}`}
+                  {...tipProps({ name: 'Download', doc: `Saves ${file.name} to this computer` })}
                   data-control={`export.download.${file.name}`}
                   onClick={() => onDownload(run, file)}
                 >
@@ -229,7 +231,8 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
         <button
           type="button"
           className="pt-ib is-text"
-          title="Close the report"
+          aria-label="Close the report"
+          {...tipProps({ name: 'Close', doc: 'Closes the report' })}
           data-control="export.report.close"
           onClick={onClose}
         >

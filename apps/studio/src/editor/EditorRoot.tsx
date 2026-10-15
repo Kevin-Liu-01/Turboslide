@@ -2618,7 +2618,11 @@ function RejectCard({
               <button
                 type="button"
                 className="pt-ib is-text is-solid"
-                title="Copy the text of this change"
+                aria-label="Copy text of this change"
+                {...tipProps({
+                  name: 'Copy text',
+                  doc: 'Puts the text of this change on the clipboard',
+                })}
                 data-control="conflict.copy"
                 onClick={() => {
                   void navigator.clipboard?.writeText(notice.text).catch(() => undefined);
@@ -2630,7 +2634,8 @@ function RejectCard({
             <button
               type="button"
               className="pt-ib is-text"
-              title="Dismiss this notice"
+              aria-label="Dismiss this notice"
+              {...tipProps({ name: 'Dismiss', doc: 'Closes this notice' })}
               data-control="conflict.discard"
               onClick={() => controller.dismissReject(notice.opId)}
             >
@@ -2675,7 +2680,10 @@ function ExternalRevisionBanner({
       <button
         type="button"
         className="pt-ib is-text"
-        title="Reload the document from the server; unsaved local edits are dropped"
+        {...tipProps({
+          name: 'Reload',
+          doc: 'Loads the presentation from the server again; edits not yet saved are dropped',
+        })}
         data-control="external.reload"
         onClick={() => {
           void controller.reload();

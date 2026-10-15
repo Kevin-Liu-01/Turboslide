@@ -2919,7 +2919,9 @@ export function InlineText({
         style={style}
         onMouseDown={(e) => e.preventDefault()}
       >
-        <span className="ts-link-chip-href" data-control="chip.link.href" title={chipHref}>
+        {/* the whole address is one click away (Change); no native title, which Tools >
+            Preferences > Show tooltips could not turn off */}
+        <span className="ts-link-chip-href" data-control="chip.link.href">
           {shownHref}
         </span>
         <button

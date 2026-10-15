@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { tipProps } from './Tooltip';
+
 import './ConnectCard.css';
 
 /**
@@ -76,8 +78,8 @@ export function ConnectCard({ url, tokenRequired, deckId, className }: ConnectCa
           <button
             type="button"
             className="pt-ib is-text"
-            title="Copy the push command to the clipboard"
             aria-label="Copy the push command"
+            {...tipProps({ name: 'Copy', doc: 'Puts the push command on the clipboard' })}
             data-control="connect.copy.push"
             onClick={() => void copy('push')}
           >
@@ -92,8 +94,8 @@ export function ConnectCard({ url, tokenRequired, deckId, className }: ConnectCa
           <button
             type="button"
             className="pt-ib is-text"
-            title="Copy the pull command to the clipboard"
             aria-label="Copy the pull command"
+            {...tipProps({ name: 'Copy', doc: 'Puts the pull command on the clipboard' })}
             data-control="connect.copy.pull"
             onClick={() => void copy('pull')}
           >

@@ -2,8 +2,11 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import type { ExportReport } from '@turboslide/schema/export';
+
 import { ConnectCard, connectCommands } from '../ConnectCard';
 import { ExportMenu } from '../ExportMenu';
+import { ExportReportCard } from '../ExportReportCard';
 
 // The Connect card (docs/deck-transfer.md): the two commands carry the deployment URL and the deck
 // id, the token flag appears only when the deployment requires a bearer, Copy writes the command
@@ -43,12 +46,74 @@ describe('ConnectCard', () => {
       <ConnectCard url="https://turboslide.vercel.app" tokenRequired={false} deckId="q4" />,
     );
     const copy = container.querySelector<HTMLButtonElement>('[data-control="connect.copy.pull"]');
-    expect(copy?.getAttribute('title')).toMatch(/Copy the pull command/);
+    /* the chrome's tooltip, which Show tooltips off hides, and the agent's name in aria-label */
+    expect(copy?.hasAttribute('title')).toBe(false);
+    expect(copy?.getAttribute('aria-label')).toBe('Copy the pull command');
+    expect(copy?.getAttribute('data-tip')).toBe('Copy');
     fireEvent.click(copy!);
     await waitFor(() => expect(copy?.textContent).toBe('Copied'));
     expect(writeText).toHaveBeenCalledWith(
       'turboslide deck pull q4 --from https://turboslide.vercel.app',
     );
+  });
+});
+
+describe('no native tooltips (Tools > Preferences > Show tooltips)', () => {
+  it('the Connect card and the export report card set no title; their buttons carry the chrome’s tip and a name', () => {
+    const connect = render(
+      <ConnectCard url="https://turboslide.vercel.app" tokenRequired={false} deckId="q4" />,
+    );
+    expect(connect.container.querySelectorAll('[title]')).toHaveLength(0);
+    expect(
+      connect.container
+        .querySelector('[data-control="connect.copy.push"]')
+        ?.getAttribute('aria-label'),
+    ).toBe('Copy the push command');
+    cleanup();
+    const report = {
+      deckId: 'q4',
+      revision: 1,
+      format: 'pdf',
+      mode: 'flatten',
+      theme: 'light',
+      fontSet: 'exact',
+      files: [],
+      fonts: { embedded: [], requiredOnViewer: [], substitutedIn: [] },
+      slides: [],
+      perfect: true,
+      passed: true,
+      geometryInBounds: true,
+      residual: [],
+    } as unknown as ExportReport;
+    render(
+      <ExportReportCard
+        run={{
+          kind: 'export',
+          /* the export menu's input names pptx; the report's format names the PDF */
+          input: {
+            format: 'pptx',
+            mode: 'flatten',
+            theme: ['light'],
+            fonts: 'exact',
+            verify: false,
+          },
+          report,
+          downloads: [{ name: 'Pipeline review.pdf', bytes: 59_997 }],
+          jobId: 'job',
+          ms: 4300,
+        }}
+        downloads
+        onDownload={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    expect(document.querySelectorAll('[title]')).toHaveLength(0);
+    const download = document.querySelector('[data-control="export.download.Pipeline review.pdf"]');
+    expect(download?.getAttribute('aria-label')).toBe('Download Pipeline review.pdf');
+    expect(download?.getAttribute('data-tip')).toBe('Download');
+    const close = document.querySelector('[data-control="export.report.close"]');
+    expect(close?.getAttribute('aria-label')).toBe('Close the report');
+    expect(close?.getAttribute('data-tip')).toBe('Close');
   });
 });
 

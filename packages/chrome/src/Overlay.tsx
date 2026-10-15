@@ -715,7 +715,7 @@ export function Overlay({ view }: OverlayProps) {
           <span
             className="ts-link-chip-href"
             data-control="chip.link.href"
-            title={view.linkChip.href}
+            {...tipProps({ name: 'Link address', doc: view.linkChip.href })}
           >
             {view.linkChip.href.length > 56
               ? `${view.linkChip.href.slice(0, 55)}\u2026`

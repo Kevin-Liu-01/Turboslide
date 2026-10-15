@@ -492,14 +492,6 @@ export const ACCEPTED: readonly Acceptance[] = [
   },
   {
     rule: 'gt-ui/cta-title-case',
-    file: 'packages/chrome/src/dialogs/ImportSlides.tsx',
-    match: 'Select a file from your device',
-    reason:
-      'A sentence case button label in the Import slides dialog, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
-    owner: 'the integrator',
-  },
-  {
-    rule: 'gt-ui/cta-title-case',
     file: 'packages/chrome/src/dialogs/Open.tsx',
     match: 'Select a file from your device',
     reason:

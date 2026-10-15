@@ -442,6 +442,14 @@ export function formPresetsFor(
 }
 
 /**
+ * True when the preset is one of the material's form presets: the Shader section lists them, the
+ * gallery's cards keep to the kit looks and the recorded ones.
+ */
+export function isFormPreset(materialId: string, name: string): boolean {
+  return (FORM_PRESETS[materialId] ?? []).some((form) => form.name === name);
+}
+
+/**
  * The palette presets, then the entry's own, then its form presets; an own preset replaces a
  * palette preset of the same name and keeps its place at the front so the tiles read the same.
  * `values` is the deck's shader palette (5.7); the legacy palette without one.

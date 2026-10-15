@@ -10,7 +10,7 @@ import {
 } from '@turboslide/materials/catalog';
 import type { MaterialEntry, ShaderCategory } from '@turboslide/materials/catalog';
 import type { MaterialHandle } from '@turboslide/materials/mount';
-import { shaderPaletteOf } from '@turboslide/materials/presets';
+import { isFormPreset, shaderPaletteOf } from '@turboslide/materials/presets';
 import type { ShaderPalette } from '@turboslide/materials/presets';
 import { shaderPreviewUrl as previewUrlOf } from '@turboslide/materials/previews';
 import type { MaterialBlock, MaterialPreset } from '@turboslide/schema/blocks/material';
@@ -35,7 +35,8 @@ import './ShaderGallery.css';
 /**
  * The Shader gallery (docs/archive/rounds/FEATURES.md 5.4; audit-shaders 3 and 14): one picker for Insert >
  * Shader and Change background > Shader > Choose. A grid of 320 by 200 stills, one card per
- * gallery entry with its presets as a row of small tiles under the name; a search field where
+ * gallery entry with its kit and recorded presets as a row of small tiles under the name (Paper's
+ * form presets, wave 2.3, are listed in the Shader section once placed); a search field where
  * every word must match the name, the description, the category or the engine; five category
  * chips (Fluid, Light, Metal, Gradient, Graphic, the catalog's `category`); the featured order
  * first (`GALLERY_MATERIAL_IDS`: liquid metal, gem smoke, god rays, mesh gradient, smoke ring,
@@ -559,6 +560,8 @@ export function ShaderGalleryGrid({
           const cardControl = `dialog.shader.tile.${entry.id}`;
           if (parked(cardControl)) return null;
           const featured = featuredPresetOf(entry);
+          /* the kit looks and the recorded ones; Paper's forms (wave 2.3) are the Shader section's */
+          const tiles = entry.presets.filter((preset) => !isFormPreset(entry.id, preset.name));
           const isActive = active === entry.id;
           const live = hovered === entry.id;
           const { onMouseEnter, onMouseLeave, ...tip } = tipProps({
@@ -602,13 +605,13 @@ export function ShaderGalleryGrid({
                 ) : null}
               </span>
               <span className="ts-shader-name">{entry.label}</span>
-              {entry.presets.length > 1 ? (
+              {tiles.length > 1 ? (
                 <div
                   className="ts-shader-presets"
                   role="group"
                   aria-label={`${entry.label} presets`}
                 >
-                  {entry.presets.map((preset) => {
+                  {tiles.map((preset) => {
                     const presetControl = `${cardControl}.preset.${preset.name}`;
                     if (parked(presetControl)) return null;
                     return (

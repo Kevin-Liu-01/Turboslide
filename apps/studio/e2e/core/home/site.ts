@@ -93,8 +93,13 @@ export function rows(): void {
             const cs = getComputedStyle(el);
             if (cs.display === 'none') continue;
             radii.add(cs.borderTopLeftRadius);
-            if (cs.boxShadow !== 'none' && /\d+px \d+px [1-9]/.test(cs.boxShadow))
-              shadows.push(cs.boxShadow);
+            /* a shadow with an offset or a blur: the first three lengths of any layer non zero
+               (a spread alone, the paper cut of the avatars, is allowed) */
+            if (cs.boxShadow !== 'none')
+              for (const layer of cs.boxShadow.split(/,(?![^(]*\))/)) {
+                const lengths = [...layer.matchAll(/(-?[\d.]+)px/g)].map((m) => Number(m[1]));
+                if (lengths.slice(0, 3).some((n) => n !== 0)) shadows.push(cs.boxShadow);
+              }
           }
           return {
             bar: Math.round(
@@ -293,8 +298,10 @@ export function rows(): void {
       await page.locator('.ts-site[data-hydrated]').waitFor({ timeout: 30_000 });
       await page.waitForLoadState('networkidle');
       const paths = scripts.map((s) => new URL(s.url).pathname);
+      /* the router's entry carries editor/refusal.ts (the refused page's sentence table, a module
+         with no import) on every route; nothing else of src/editor may load */
       const editor = paths.filter((p) =>
-        /\/src\/editor\/|\/src\/try\/|EditorShell|\/viewer\/src\/Editor\.tsx|\/components\/home\/(?!sign-in)/.test(
+        /\/src\/editor\/(?!refusal\.ts)|\/src\/try\/|EditorShell|\/viewer\/src\/Editor\.tsx/.test(
           p,
         ),
       );

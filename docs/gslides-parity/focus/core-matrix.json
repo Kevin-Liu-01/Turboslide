@@ -10427,7 +10427,7 @@
     {
       "id": "home.budget.first-script",
       "feature": "decks",
-      "interaction": "Loading /home requests no module of the editor (src/editor, src/try, the editor shell, the viewer's editor) or of the old landing; on a build the page's own scripts are under 120,000 B on the wire",
+      "interaction": "Loading /home requests no module of the editor (src/editor but the router entry's refusal table, src/try, the editor shell, the viewer's editor); on a build the page's own scripts are under 120,000 B on the wire",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md D1, D12 (the editor in a frame of its own document; byte lines read on a build)",

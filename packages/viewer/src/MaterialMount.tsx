@@ -6,6 +6,7 @@ import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks/material';
 
 import { MATERIAL_PLAY_EVENT } from './dither';
+import { paceHandle } from './frame-pacer';
 
 /**
  * The live material preview in the stage (SPEC 5.3: "materials mount on
@@ -32,10 +33,12 @@ import { MATERIAL_PLAY_EVENT } from './dither';
  * mounts at speed 0 so its plate is not empty (the label is gone, 5.5), and every other frameless
  * block draws its plate until its frame lands 2 to 3 s after the insert, so the stage never holds
  * two canvases while frames are pending (`planMounts`; the fix round of ship two, verification
- * F.5 item 4, `shaders.perf.one-context`). The editor caps the mount at 30 frames per second
- * (`throttle`) and at 1x device pixels below zoom 100 (`scale`); `prefers-reduced-motion: reduce`
- * sets speed 0 (the anchor's still is the frame); `document.hidden` and an off screen stage pause
- * through Paper's own observers. The deck's shader palette (`palette`, 5.7) reaches the presets.
+ * F.5 item 4, `shaders.perf.one-context`). The editor caps a playing mount at 30 frames per second
+ * (`fps`, paced by frame-pacer.ts: Paper at speed 0 and its public `setFrame` on each due frame)
+ * and at 1x device pixels below zoom 100 (`scale`); `prefers-reduced-motion: reduce` sets speed 0
+ * (the anchor's still is the frame); `document.hidden` and an off screen stage pause the pacer's
+ * loop, and Paper's own observers a mount it does not pace. The deck's shader palette (`palette`,
+ * 5.7) reaches the presets.
  * Every live handle is registered by block id so the Shader section previews a slider through
  * `previewShaderUniforms` while it is held and writes on the release alone (5.3). Without
  * `selected` the mount behaves as before the round: every root mounts.
@@ -218,33 +221,6 @@ export function prefersReducedMotion(): boolean {
 /** The frames per second the editor's mount is capped at (5.6). */
 export const EDITOR_SHADER_FPS = 30;
 
-/**
- * Caps a mount's animation loop at `fps` (5.6): Paper's `render` is an own arrow property the
- * loop schedules by name, so a wrapper that skips a frame while the loop runs, scheduling the
- * next one itself, holds the rate without touching Paper. A render while the loop is paused (a
- * `setFrame`, a `setUniforms` during a held slider, a resize) always draws, since nothing else
- * would.
- */
-export function throttleMount(handle: MaterialHandle, fps: number): void {
-  if (fps <= 0) return;
-  const mount = handle.mount as unknown as {
-    render: (time: number) => void;
-    rafId: number | null;
-    currentSpeed: number;
-  };
-  const original = mount.render;
-  const interval = 1000 / fps;
-  let last = -Infinity;
-  mount.render = (time: number) => {
-    if (mount.currentSpeed !== 0 && time - last < interval) {
-      mount.rafId = requestAnimationFrame(mount.render);
-      return;
-    }
-    last = time;
-    original(time);
-  };
-}
-
 // ---------------------------------------------------------------------------------------------
 // The registry of live mounts, by block id (the Shader section's live preview, 5.3)
 
@@ -376,22 +352,25 @@ export function MaterialMount({
           for (const { recipe, host, plan, id } of targets) {
             const own = recipe.speed ?? 1;
             const playSpeed = reduced || plan === 'still' ? 0 : speed * own;
+            /* a playing mount is paced at `fps` (5.6): Paper mounts at speed 0 and the pacer moves
+               its frame, so a Speed preview that starts it later is capped too */
+            const paced = plan === 'play' && fps > 0;
             const { speed: _speed, ...clean } = recipe;
             void _speed;
             mountMaterial(host, clean, {
-              speed: playSpeed,
+              speed: paced ? 0 : playSpeed,
               frame: recipe.anchor ?? 0,
               ...(palette !== undefined ? { palette } : {}),
               ...(lowRes ? { minPixelRatio: 1 } : {}),
             })
-              .then((handle) => {
+              .then((mounted) => {
                 if (!alive) {
-                  handle.dispose();
+                  mounted.dispose();
                   return;
                 }
                 // the canvas above the frame it covers (the header's second paragraph)
-                raiseCanvas(handle);
-                if (plan === 'play' && fps > 0) throttleMount(handle, fps);
+                raiseCanvas(mounted);
+                const handle = paced ? paceHandle(mounted, { fps, speed: playSpeed }) : mounted;
                 handles.push({ id, handle });
                 if (id !== null) LIVE.set(id, handle);
               })

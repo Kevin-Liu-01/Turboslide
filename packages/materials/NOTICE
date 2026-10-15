@@ -8,6 +8,12 @@ This package binds @paper-design/shaders 0.0.78 (Apache License 2.0), whose NOTI
     Powered by Paper Shaders:
     https://shaders.paper.design
 
+Change notice (Apache License 2.0, section 4(b)): Turboslide modifies one file of the package,
+dist/shader-mount.js, through the pnpm patch patches/@paper-design__shaders@0.0.78.patch at the
+repository root (taken from Glyphfield, MIT, Kevin Liu). Disposed mounts pool their canvas, WebGL2
+context and compiled programs, and dispose no longer calls getError. Every other file of the
+package is used unmodified.
+
 The full license text and the notices of every other third-party work Turboslide ships are in
 THIRD_PARTY_NOTICES.md at the repository root; the CLI and studio distributions carry that file
 (SPEC 11, Licensing). Frames rendered from these materials may be shipped, modified and sold.

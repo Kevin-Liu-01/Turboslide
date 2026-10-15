@@ -174,9 +174,16 @@ What: the 63 Heroicons 20 solid symbols in `packages/theme/assets/sprite.svg` an
 
 What: `@paper-design/shaders` 0.0.78, the shader materials behind the `paper:*` entries of the
 material catalog in `packages/materials` (SPEC 5.4, M5): the package's fragment shaders and
-`ShaderMount` are imported as is by `packages/materials/src/paper.ts` and `mount.ts`, served to
-the headless capture page from the package's own `dist` by `capture.ts`, and the GT palette presets
-in `presets.ts` are Turboslide's uniform values, not a modification of the package. Source:
+`ShaderMount` are imported by `packages/materials/src/paper.ts` and `mount.ts`, served to the
+headless capture page from the package's own `dist` by `capture.ts`, and the GT palette presets in
+`presets.ts` are Turboslide's uniform values, not a modification of the package. Change notice
+(Apache 2.0 section 4(b)): Turboslide modifies one file of the package, `dist/shader-mount.js`,
+through the pnpm patch `patches/@paper-design__shaders@0.0.78.patch` (taken from Glyphfield, MIT,
+Kevin Liu, in October 2026). A disposed `ShaderMount` returns its canvas, its WebGL2 context and its
+compiled programs to a pool of two keyed by the context attributes, a lost context is dropped, an
+evicted context is released with `WEBGL_lose_context`, a pooled canvas is set to size zero, and
+`dispose` no longer calls `getError`. The patched file says so in a comment under its banner. Every
+other file of the package is used unmodified. Source:
 https://github.com/paper-design/shaders. Apache 2.0 permits shipping, modifying and selling renders
 and requires the LICENSE and NOTICE text below to travel with the distribution (pptx report section
 4.11); `packages/materials/NOTICE` repeats the NOTICE beside the code. Frames rendered from the

@@ -177,14 +177,11 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
 
   /* each row renders the whole shell, twice in the first; 15 s for a loaded machine */
   it(
-    "Reduce motion stamps data-reduce-motion on the root and keeps it per browser, leaving the landing's data-motion; a stored one is stamped on mount",
+    'Reduce motion stamps data-reduce-motion on the root and keeps it per browser; a stored one is stamped on mount',
     { timeout: 15_000 },
     () => {
-      /* the landing's Pause Motion, carried by a move inside the app, is the landing's own */
-      document.documentElement.dataset.motion = 'paused';
       const first = render(<Harness input={input()} shell={shellState()} />);
       expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
-      expect(document.documentElement.dataset.motion).toBe('paused');
       clickMenuPath(
         first.container,
         'tools',
@@ -192,7 +189,6 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
         'tools.preferences.reduceMotion',
       );
       expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
-      expect(document.documentElement.dataset.motion).toBe('paused');
       expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').reduceMotion).toBe(true);
       clickMenuPath(
         first.container,
@@ -201,7 +197,6 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
         'tools.preferences.reduceMotion',
       );
       expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
-      expect(document.documentElement.dataset.motion).toBe('paused');
       expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').reduceMotion).toBe(false);
       cleanup();
       localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
@@ -216,6 +211,37 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
           .querySelector('[data-menu-item="tools.preferences.reduceMotion"]')
           ?.getAttribute('aria-checked'),
       ).toBe('true');
+    },
+  );
+
+  it(
+    "an editor reached from /home by a move inside the app removes the landing's Pause Motion on mount, so its menus open and its motion follows Reduce motion alone",
+    { timeout: 15_000 },
+    () => {
+      /* Pause Motion pressed on /home, then a link inside the app: the document keeps the
+         landing's attribute, and the landing's guard (home/motion.css) pauses every animation */
+      const guard = document.createElement('style');
+      guard.setAttribute('data-test-css', 'landing-guard');
+      guard.textContent =
+        "html[data-motion='paused'] * { animation-play-state: paused !important; }";
+      document.head.appendChild(guard);
+      document.documentElement.dataset.motion = 'paused';
+      const first = render(<Harness input={input()} shell={shellState()} />);
+      expect(document.documentElement.hasAttribute('data-motion')).toBe(false);
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(false);
+      fireEvent.click(
+        first.container.querySelector('[data-control="menubar.file"]') as HTMLElement,
+      );
+      const menu = document.querySelector<HTMLElement>('[role="menu"]');
+      expect(menu).not.toBeNull();
+      expect(getComputedStyle(menu as HTMLElement).animationPlayState).not.toBe('paused');
+      cleanup();
+      /* with Reduce motion stored, the editor's motion is the preference's alone */
+      document.documentElement.dataset.motion = 'paused';
+      localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ reduceMotion: true }));
+      render(<Harness input={input()} shell={shellState()} />);
+      expect(document.documentElement.hasAttribute('data-motion')).toBe(false);
+      expect(document.documentElement.hasAttribute('data-reduce-motion')).toBe(true);
     },
   );
 

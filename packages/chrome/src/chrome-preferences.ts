@@ -8,7 +8,8 @@
  * choice too. Reduce motion has an attribute of its own because the
  * landing's Pause Motion owns `data-motion` (home/boot.ts, motion.css). Its name lives in the
  * viewer's reduce-motion.ts, whose `motionReduced()` is the one check in script for both the
- * system setting and this attribute.
+ * system setting and this attribute. The editor removes the landing's `data-motion` on mount
+ * (`leaveLandingMotion`), so its motion follows Reduce motion alone.
  */
 import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
 
@@ -26,6 +27,17 @@ export function stampPreferences(settings: ChromePreferences): void {
   const root = document.documentElement;
   root.toggleAttribute(REDUCE_MOTION_ATTRIBUTE, settings.reduceMotion === true);
   root.toggleAttribute(HIDE_TOOLTIPS_ATTRIBUTE, settings.showTooltips === false);
+}
+
+/**
+ * Removes the landing's Pause Motion (`data-motion="paused"`, home/boot.ts) from the root. A move
+ * inside the app from /home carries it along, and the landing's guard (home/motion.css,
+ * `animation-play-state: paused` on every element) then holds each menu, panel and dialog of the
+ * editor at its first keyframe, at opacity 0. The editor calls it on mount; the landing reads its
+ * stored choice again on its next load.
+ */
+export function leaveLandingMotion(): void {
+  document.documentElement.removeAttribute('data-motion');
 }
 
 /** Whether Show tooltips is off for this page. */

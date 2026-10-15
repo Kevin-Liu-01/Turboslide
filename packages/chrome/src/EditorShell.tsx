@@ -122,7 +122,7 @@ import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
 import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
-import { settingsChanged, stampPreferences } from './chrome-preferences';
+import { leaveLandingMotion, settingsChanged, stampPreferences } from './chrome-preferences';
 import { hideTooltip } from './Tooltip';
 import type { Version } from '@turboslide/schema/mutations';
 
@@ -494,6 +494,7 @@ export function EditorShell({
     const stored = { ...DEFAULT_SETTINGS, ...readStoredSettings(load(SETTINGS_STORAGE)) };
     setSettings(stored);
     applyChromePreferences(stored);
+    leaveLandingMotion();
     setLastLayout(readLastLayout(load(LAST_LAYOUT_STORAGE)));
     const chosen = readAppearance();
     setAppearanceState(chosen);

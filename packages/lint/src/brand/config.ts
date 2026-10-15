@@ -569,6 +569,14 @@ export const ACCEPTED: readonly Acceptance[] = [
     owner: 'the integrator',
   },
   {
+    rule: 'css/no-eyebrow',
+    file: 'apps/studio/src/components/site/site.css',
+    match: '.ts-site .t-label',
+    reason:
+      "The Workbench labels of /home and /docs (docs/SITE.md D9; Kevin's pick of the Workbench direction, 2026-10-14): 12 px capitals at +0.06em that name a figure, a table, a navigation group or a screen number, never set above a page's heading at 1024 px and over; on a phone a screen's number and label sit above its one sentence, the accepted case.",
+    owner: 'the integrator',
+  },
+  {
     rule: 'css/z-index',
     file: 'packages/viewer/src/MaterialMount.tsx',
     match: 'host.style.zIndex = style.zIndex',

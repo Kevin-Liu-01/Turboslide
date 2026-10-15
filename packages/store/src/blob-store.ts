@@ -165,6 +165,11 @@ export type BlobClient = {
   list: (prefix: string, options?: BlobCallOptions) => Promise<BlobEntry[]>;
   /** the folders directly under a prefix, each with its trailing slash */
   folders: (prefix: string, options?: BlobCallOptions) => Promise<string[]>;
+  /**
+   * the blobs directly under a prefix, none in a folder below it (the folded listing's files);
+   * optional: the storage migration lists the whole prefix of a client without it (migrate.ts)
+   */
+  files?: (prefix: string, options?: BlobCallOptions) => Promise<BlobEntry[]>;
   put: (pathname: string, bytes: Uint8Array, options: BlobPutOptions) => Promise<BlobEntry>;
   /** removes what exists; a missing pathname is not an error */
   del: (pathnames: ReadonlyArray<string>, options?: BlobCallOptions) => Promise<void>;
@@ -1089,7 +1094,7 @@ export function boundedBlobClient(client: BlobClient, deadlines: BlobDeadlines =
     run: (signal: AbortSignal) => Promise<T>,
   ) =>
     new Promise<T>((resolve, reject) => {
-      noteStoreCall(op === 'folders' ? 'list' : op, pathname);
+      noteStoreCall(op === 'folders' || op === 'files' ? 'list' : op, pathname);
       const controller = new AbortController();
       let settled = false;
       let grace: ReturnType<typeof setTimeout> | undefined;

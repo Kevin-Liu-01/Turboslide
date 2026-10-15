@@ -148,7 +148,7 @@ export async function listAll(client: CopyClient, prefix = ''): Promise<CopyEntr
  * Runs `work(item)` over the items with at most `limit` in flight, in order of the list; once
  * `stop()` answers true no further item starts, and the items left are counted.
  */
-async function pool<T>(
+export async function pool<T>(
   items: ReadonlyArray<T>,
   limit: number,
   work: (item: T) => Promise<void>,

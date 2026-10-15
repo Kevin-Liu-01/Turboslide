@@ -28,7 +28,7 @@ const CDN_LAG_STEP_MS = 250;
 import { blobAccessStore } from './access-store.ts';
 import { keyedTwinsClient, splitBlobClient, twinKeyResolver } from './migrate.ts';
 import type { Env } from './select.ts';
-import { BLOB_TOKEN_VARIABLE } from './select.ts';
+import { BLOB_TOKEN_VARIABLE, sharesPublicStore } from './select.ts';
 
 /** The store's access level; `public` is what the twins need. TURBOSLIDE_BLOB_ACCESS overrides. */
 export const BLOB_ACCESS_VARIABLE = 'TURBOSLIDE_BLOB_ACCESS';
@@ -264,7 +264,8 @@ export function vercelBlobClient(
       do {
         const page = await list({
           token,
-          prefix,
+          // the store's top level is the listing without a prefix
+          ...(prefix === '' ? {} : { prefix }),
           limit: 1000,
           mode: 'folded',
           abortSignal: options?.signal,
@@ -274,6 +275,23 @@ export function vercelBlobClient(
         cursor = page.hasMore ? page.cursor : undefined;
       } while (cursor !== undefined);
       return [...out].sort();
+    },
+    async files(prefix, options) {
+      const out: BlobEntry[] = [];
+      let cursor: string | undefined;
+      do {
+        const page = await list({
+          token,
+          ...(prefix === '' ? {} : { prefix }),
+          limit: 1000,
+          mode: 'folded',
+          abortSignal: options?.signal,
+          ...(cursor === undefined ? {} : { cursor }),
+        });
+        for (const blob of page.blobs) out.push(entryOf(blob));
+        cursor = page.hasMore ? page.cursor : undefined;
+      } while (cursor !== undefined);
+      return out;
     },
     async put(pathname, bytes, options) {
       // the caller's max age, else on a public store the path's (publicMaxAge); a private
@@ -314,26 +332,41 @@ export function vercelBlobClient(
 
 /**
  * The client a deployment opens (gslides-parity SPEC-3 2.2, 11.5): with the private store's token
- * set, one client over both stores that routes documents private and twins public and honours the
- * migration's dual read window (`splitBlobClient`); without it, the public store alone (layout
- * v1). The studio's hosting plugin registers the result as `HostingProviders.blob`.
+ * set, one client over both stores that routes documents by the layout record (`splitBlobClient`);
+ * without it, the public store alone (layout v1). The studio's hosting plugin registers the result
+ * as `HostingProviders.blob`.
  */
 export function layoutBlobClient(env: Env = process.env): BlobClient {
   const legacy = vercelBlobClient(env);
-  const base = hasDocumentsToken(env)
-    ? splitBlobClient({ legacy, documents: vercelDocumentsClient(env) })
-    : legacy;
-  return keyedClient(base);
+  if (!hasDocumentsToken(env)) return keyedClient(legacy);
+  const shared = sharesPublicStore(env);
+  const documents = vercelDocumentsClient(env);
+  const base = splitBlobClient({ legacy, documents }, { sharedPublicStore: shared });
+  return keyedClient(base, shared ? legacy : null);
 }
 
 /**
  * The client with a keyed deck's twins under `d/<id>/<assetKey>/` (hardening K1#3; migrate.ts
- * `keyedTwinsClient`): the key is read from the deck's access record through the same client.
+ * `keyedTwinsClient`): the key is read from the deck's access record through the same client, and
+ * again at each removal. With `sharedPublic`, the public store another environment reads, a twin
+ * removal leaves only from under a key the deck's public record does not hold (HR-K1#4b).
  */
-export function keyedClient(base: BlobClient): BlobClient {
+export function keyedClient(base: BlobClient, sharedPublic: BlobClient | null = null): BlobClient {
+  const fresh = (
+    read: (deckId: string) => Promise<{ deckId: string; assetKey: string } | null>,
+  ) => {
+    const keyOf = twinKeyResolver(read);
+    return Object.assign(keyOf, {
+      fresh: (deckId: string) => {
+        keyOf.forget(deckId);
+        return keyOf(deckId);
+      },
+    });
+  };
   const records = blobAccessStore(base);
-  return keyedTwinsClient(
-    base,
-    twinKeyResolver(async (deckId) => (await records.read(deckId))?.record ?? null),
-  );
+  const keyOf = fresh(async (deckId) => (await records.read(deckId))?.record ?? null);
+  if (sharedPublic === null) return keyedTwinsClient(base, keyOf, { freshKeyOf: keyOf.fresh });
+  const published = blobAccessStore(sharedPublic);
+  const sharedKeyOf = fresh(async (deckId) => (await published.read(deckId))?.record ?? null);
+  return keyedTwinsClient(base, keyOf, { freshKeyOf: keyOf.fresh, sharedKeyOf: sharedKeyOf.fresh });
 }

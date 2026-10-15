@@ -26,6 +26,12 @@ import { isSafeKey } from './seed.ts';
 export type DiskBlobOptions = {
   /** the URL an entry reports; default `file://` of the path */
   urlFor?: (pathname: string) => string;
+  /**
+   * list the files and folders whose names start with a dot too (`.thumbs/`, `.turboslide/`):
+   * the folder that stands in for a Blob store in the storage migration (HR-K1#4b), whose
+   * listings must hold every document
+   */
+  hidden?: boolean;
 };
 
 function quotedMd5(bytes: Uint8Array): string {
@@ -33,12 +39,12 @@ function quotedMd5(bytes: Uint8Array): string {
 }
 
 /** Every file under a folder as posix pathnames relative to `root`. */
-function walk(root: string, folder: string, out: string[]): void {
+function walk(root: string, folder: string, out: string[], hidden = false): void {
   if (!existsSync(folder)) return;
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
-    if (entry.name.startsWith('.')) continue;
+    if (!hidden && entry.name.startsWith('.')) continue;
     const full = join(folder, entry.name);
-    if (entry.isDirectory()) walk(root, full, out);
+    if (entry.isDirectory()) walk(root, full, out, hidden);
     else if (entry.isFile()) out.push(relative(root, full).split(sep).join(posix.sep));
   }
 }
@@ -72,7 +78,7 @@ export function diskBlobClient(root: string, options: DiskBlobOptions = {}): Blo
     const start = folder === '' ? base : join(base, ...folder.split('/').filter(Boolean));
     if (!start.startsWith(base)) return [];
     const names: string[] = [];
-    walk(base, start, names);
+    walk(base, start, names, options.hidden === true);
     return names.filter((name) => name.startsWith(prefix)).sort();
   };
   return {
@@ -99,6 +105,12 @@ export function diskBlobClient(root: string, options: DiskBlobOptions = {}): Blo
         if (slash > 0) out.add(`${prefix}${rest.slice(0, slash)}/`);
       }
       return [...out].sort();
+    },
+    async files(prefix) {
+      return under(prefix)
+        .filter((name) => !name.slice(prefix.length).includes('/'))
+        .map((name) => entryOf(name))
+        .filter((entry): entry is BlobEntry => entry !== null);
     },
     async put(pathname, bytes, putOptions) {
       const file = fileOf(pathname);

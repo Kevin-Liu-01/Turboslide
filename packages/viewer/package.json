@@ -32,6 +32,7 @@
     "./gesture-frame": "./src/gesture-frame.ts",
     "./clipboard": "./src/clipboard.ts",
     "./MaterialMount": "./src/MaterialMount.tsx",
+    "./reduce-motion": "./src/reduce-motion.ts",
     "./shader-frame": "./src/shader-frame.ts",
     "./canvas-measure": "./src/canvas-measure.ts",
     "./rotate": "./src/rotate.ts",

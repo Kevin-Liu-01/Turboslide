@@ -483,6 +483,22 @@ describe('the Shader gallery dialog', () => {
     expect(document.querySelector('.ts-shader[data-hover-live]')).toBeNull();
     expect(document.querySelectorAll('.ts-shader-hover')).toHaveLength(0);
   });
+
+  it('carries no hover surface under Tools > Preferences > Reduce motion with no system setting', () => {
+    document.documentElement.setAttribute('data-reduce-motion', '');
+    try {
+      render(
+        <Host state={host(vi.fn(() => Promise.resolve({})))}>
+          <ShaderGalleryDialog />
+        </Host>,
+      );
+      expect(window.matchMedia).toBeUndefined();
+      expect(document.querySelector('.ts-shader[data-hover-live]')).toBeNull();
+      expect(document.querySelectorAll('.ts-shader-hover')).toHaveLength(0);
+    } finally {
+      document.documentElement.removeAttribute('data-reduce-motion');
+    }
+  });
 });
 
 describe('the shader library chunk', () => {

@@ -89,6 +89,8 @@ describe('the collaborator layer', () => {
     expect(css).toMatch(
       /prefers-reduced-motion: reduce\)\s*\{\s*\.ts-remote-pointer\s*\{\s*transition: none;/,
     );
+    /* Tools > Preferences > Reduce motion stops the pointer's glide too (the GF-fix of wave 1) */
+    expect(css).toMatch(/:root\[data-reduce-motion\] \.ts-remote-pointer\s*\{\s*transition: none;/);
   });
 
   it('draws the pointer polygon inside its box', () => {

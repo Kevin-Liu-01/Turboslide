@@ -173,10 +173,10 @@
   bottom: -7px;
 }
 
-/* a refused position (the opener rule, SPEC 4.1): the card shakes for 200ms */
+/* a refused position (the opener rule, SPEC 4.1): the card shakes for 200 ms (--pt-dur-enter) */
 .ts-card.is-refused,
 .ts-film-section.is-refused {
-  animation: ts-shake 200ms var(--pt-ease-out) both;
+  animation: ts-shake var(--pt-dur-enter) var(--pt-ease-out) both;
 }
 
 @keyframes ts-shake {

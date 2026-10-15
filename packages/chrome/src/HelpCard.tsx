@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
+import { motionReduced } from '@turboslide/viewer/reduce-motion';
+
 import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
 import { usePtShell } from './shell-context';
@@ -61,7 +63,7 @@ export function HelpCard({ rows, note }: HelpCardProps) {
     }
     if (!wasOpen.current) return;
     wasOpen.current = false;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (motionReduced()) return;
     setClosing(true);
     timer.current = window.setTimeout(() => setClosing(false), OUT_MS);
   }, [helpOpen]);

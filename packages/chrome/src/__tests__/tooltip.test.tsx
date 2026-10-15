@@ -313,6 +313,17 @@ describe('Tooltip', () => {
     }
   });
 
+  it('respects Tools > Preferences > Reduce motion, the root attribute, with no system setting', () => {
+    stampPreferences({ reduceMotion: true });
+    try {
+      render(<ToolButton title="Theme (D)" onClick={() => undefined} />);
+      tabTo(screen.getByRole('button', { name: 'Theme' }));
+      expect(layer()?.dataset.motion).toBe('none');
+    } finally {
+      stampPreferences({});
+    }
+  });
+
   it('wraps a DOM child with merged handlers and a component child with a display contents span', () => {
     const onKeyDown = vi.fn();
     render(

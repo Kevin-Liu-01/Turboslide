@@ -1,6 +1,8 @@
 import type { FocusEvent, KeyboardEvent, MouseEvent, ReactElement, ReactNode } from 'react';
 import { cloneElement, isValidElement } from 'react';
 
+import { motionReduced } from '@turboslide/viewer/reduce-motion';
+
 import { tooltipsHidden } from './chrome-preferences';
 import { closeLayer, openLayer } from './Layer';
 import { place } from './place';
@@ -255,14 +257,6 @@ function keyboardFocus(): boolean {
   return lastPressSeq <= lastNavKeySeq && lastReturnSeq <= lastNavKeySeq;
 }
 
-function reducedMotion(): boolean {
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch {
-    return false;
-  }
-}
-
 function ensureLayer(): HTMLDivElement {
   if (layer !== null && layer.isConnected) return layer;
   const el = document.createElement('div');
@@ -376,7 +370,7 @@ export function showTooltip(anchor: HTMLElement, content: TipContent): void {
   if (shown !== null && shown.anchor !== anchor) shown.anchor.removeAttribute('aria-describedby');
   shown = { anchor, content };
   renderContent(el, content);
-  el.dataset.motion = reducedMotion() ? 'none' : 'fade';
+  el.dataset.motion = motionReduced() ? 'none' : 'fade';
   el.hidden = false;
   /* the tooltip layer of the stacking scale, in the top layer over every other surface but the
      hover preview (docs/DESIGN.md 2.2, 2.3) */

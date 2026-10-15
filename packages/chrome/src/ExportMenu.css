@@ -192,7 +192,7 @@
   height: 6px;
   flex: 0 0 auto;
   background: var(--pt-ink);
-  animation: ts-export-pulse 1.2s var(--pt-ease-out) infinite alternate;
+  animation: ts-export-pulse var(--pt-dur-loop) var(--pt-ease-out) infinite alternate;
 }
 
 @keyframes ts-export-pulse {

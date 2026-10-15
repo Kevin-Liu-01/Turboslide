@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
+
 import {
   HIDE_TOOLTIPS_ATTRIBUTE,
   PREFERENCES_BOOT_STATEMENT,
-  REDUCE_MOTION_ATTRIBUTE,
   stampPreferences,
   tooltipsHidden,
 } from '../chrome-preferences';

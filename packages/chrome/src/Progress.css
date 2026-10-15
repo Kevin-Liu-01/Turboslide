@@ -28,7 +28,7 @@
   width: 100%;
   background: var(--pt-ink);
   transform: translateX(-100%);
-  transition: transform 160ms ease-out;
+  transition: transform var(--pt-dur-toast) ease-out;
   mask-size:
     calc(100% - 16 * var(--ts-cell, 2px)) 100%,
     calc(16 * var(--ts-cell, 2px)) 100%;

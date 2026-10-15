@@ -29,8 +29,8 @@
   background: var(--pt-paper);
   color: var(--pt-titanium);
   transition:
-    border-color 120ms ease-out,
-    color 120ms ease-out;
+    border-color var(--pt-dur-fast) ease-out,
+    color var(--pt-dur-fast) ease-out;
 }
 
 .pt-filter:focus-within {
@@ -98,7 +98,7 @@
   justify-content: center;
   color: var(--pt-titanium);
   cursor: pointer;
-  transition: color 120ms ease-out;
+  transition: color var(--pt-dur-fast) ease-out;
 }
 
 .pt-filter-clear svg {

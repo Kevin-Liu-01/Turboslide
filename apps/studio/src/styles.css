@@ -230,6 +230,10 @@ body {
     transition: none;
   }
 }
+/* Tools > Preferences > Reduce motion (packages/viewer/src/reduce-motion.ts): the same jump */
+:root[data-reduce-motion] .ts-remote-pointer {
+  transition: none;
+}
 
 /* The pending skeletons of the ssr: false routes (gslides-parity SPEC-3 9.2 E1, P1): the same
    grid as the shell they stand in for (EditorShell.css, PresenterConsole.css lay out the rows and

@@ -4,6 +4,7 @@ import { flushSync } from 'react-dom';
 
 import { resolveSlideHash, writeSlideHash } from '@turboslide/viewer/hash';
 import type { SlideHashForm } from '@turboslide/viewer/hash';
+import { motionReduced } from '@turboslide/viewer/reduce-motion';
 import { toggleTheme } from '@turboslide/viewer/theme';
 
 import { EditorShell } from './EditorShell';
@@ -186,11 +187,6 @@ function isDensity(value: string | null): value is ShellDensity {
   return value === 'outline' || value === 'thumbs';
 }
 
-/** The reader has asked for no motion: every transition commits at once. */
-function reducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 export function ViewerShell({
   id,
   title,
@@ -336,7 +332,8 @@ export function ViewerShell({
      list stays in the DOM through a close (sidebarShown) */
   const moveSidebar = (kind: SidebarMotion) => {
     window.clearTimeout(sbTimer.current);
-    if (reducedMotion()) {
+    /* the reader asked for no motion (the system or Reduce motion): the move commits at once */
+    if (motionReduced()) {
       setSbMotion(null);
       return;
     }
@@ -381,7 +378,7 @@ export function ViewerShell({
     const done = () => {
       if (transitionStamp.current === stamp) setTransition(null);
     };
-    if (!settled.current || reducedMotion()) {
+    if (!settled.current || motionReduced()) {
       commitMode(to);
       setTransition(null);
       return;

@@ -19,6 +19,7 @@ import { CATALOG } from '@turboslide/schema/catalog';
 import { deckAppearance } from '@turboslide/schema/deck';
 import type { BlockId } from '@turboslide/schema/ids';
 import { loadMaterialMount } from '@turboslide/viewer/MaterialMount';
+import { motionReduced } from '@turboslide/viewer/reduce-motion';
 
 import { Dialog } from '../Dialog';
 import { factsOf, insertBlockPlan } from '../editor-shell';
@@ -206,18 +207,6 @@ export function shaderFailureSentence(error: unknown): string {
 
 export const HOVER_LIVE_DELAY_MS = 400;
 
-function reducedMotion(): boolean {
-  try {
-    return (
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    );
-  } catch {
-    return false;
-  }
-}
-
 /** The View > Play shaders setting (5.6): Off stops the hover mount too; absent reads as the default. */
 function playShadersOff(settings: ShellSettings): boolean {
   return (settings as Readonly<Record<string, unknown>>).playShaders === 'off';
@@ -356,7 +345,7 @@ export function ShaderGalleryGrid({
   } | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const hoverAllowed =
-    hoverLive && !parked('dialog.shader.hover') && !reducedMotion() && !playShadersOff(settings);
+    hoverLive && !parked('dialog.shader.hover') && !motionReduced() && !playShadersOff(settings);
   const disposeHover = () => {
     window.clearTimeout(hoverTimer.current);
     hoverTimer.current = 0;

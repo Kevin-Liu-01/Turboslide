@@ -28,7 +28,7 @@
 }
 
 .pt-ib.ts-status[data-state='saving'] .ts-status-dot {
-  animation: ts-status-pulse 1.2s var(--pt-ease-out) infinite alternate;
+  animation: ts-status-pulse var(--pt-dur-loop) var(--pt-ease-out) infinite alternate;
 }
 
 @keyframes ts-status-pulse {

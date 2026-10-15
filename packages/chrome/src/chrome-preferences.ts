@@ -1,16 +1,16 @@
 /**
  * Tools > Preferences > Reduce motion and Show tooltips as attributes of the page's root (the
- * Glyphfield port, PLAN.md wave 1 item 7): the one module that names the two attributes and
- * stamps them. The studio root's boot script runs `PREFERENCES_BOOT_STATEMENT` before first
- * paint on every route (the deck list, the trash, the editor, the presenter console and the
- * slideshow), and the editor stamps them again on mount and on each toggle. tokens.css reads the
- * first and the tooltip manager (Tooltip.tsx) the second, so a page where the editor never
- * mounted follows the stored choice too. Reduce motion has an attribute of its own because the
- * landing's Pause Motion owns `data-motion` (home/boot.ts, motion.css).
+ * Glyphfield port, PLAN.md wave 1 item 7): the one module that stamps the two attributes. The
+ * studio root's boot script runs `PREFERENCES_BOOT_STATEMENT` before first paint on every route
+ * (the deck list, the trash, the editor, the presenter console and the slideshow), and the editor
+ * stamps them again on mount and on each toggle. tokens.css reads the first and the tooltip
+ * manager (Tooltip.tsx) the second, so a page where the editor never mounted follows the stored
+ * choice too. Reduce motion has an attribute of its own because the
+ * landing's Pause Motion owns `data-motion` (home/boot.ts, motion.css). Its name lives in the
+ * viewer's reduce-motion.ts, whose `motionReduced()` is the one check in script for both the
+ * system setting and this attribute.
  */
-
-/** Present while Reduce motion is on: tokens.css zeroes the chrome's durations. */
-export const REDUCE_MOTION_ATTRIBUTE = 'data-reduce-motion';
+import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
 
 /** Present while Show tooltips is off: the tooltip manager shows no plate. */
 export const HIDE_TOOLTIPS_ATTRIBUTE = 'data-hide-tooltips';

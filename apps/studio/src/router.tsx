@@ -3,6 +3,7 @@ import type { ParsedLocation } from '@tanstack/react-router';
 import { getGlobalStartContext } from '@tanstack/react-start';
 
 import { setDitherWorkerFactory } from '@turboslide/viewer/dither';
+import { motionReduced } from '@turboslide/viewer/reduce-motion';
 
 import { routeTree } from './routeTree.gen';
 import { PageRefused } from './routes/-refused-page';
@@ -66,9 +67,8 @@ function routeTransitionTypes({
 }): string[] | false {
   if (fromLocation === undefined) return false;
   if (!pathChanged) return false;
-  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  }
+  /* the system's reduced motion or Tools > Preferences > Reduce motion: the route changes at once */
+  if (motionReduced()) return false;
   return ['route'];
 }
 

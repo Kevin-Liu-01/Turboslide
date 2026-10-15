@@ -116,7 +116,7 @@
 .ts-shader-chev {
   display: inline-flex;
   transform: rotate(-90deg);
-  transition: transform 120ms ease-out;
+  transition: transform var(--pt-dur-fast) ease-out;
 }
 
 .ts-shader-chev.is-open {

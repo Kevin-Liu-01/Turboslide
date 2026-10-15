@@ -7,6 +7,7 @@ import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks
 
 import { MATERIAL_PLAY_EVENT } from './dither';
 import { paceHandle } from './frame-pacer';
+import { motionReduced, onMotionReducedChange } from './reduce-motion';
 
 /**
  * The live material preview in the stage (SPEC 5.3: "materials mount on
@@ -35,10 +36,10 @@ import { paceHandle } from './frame-pacer';
  * two canvases while frames are pending (`planMounts`; the fix round of ship two, verification
  * F.5 item 4, `shaders.perf.one-context`). The editor caps a playing mount at 30 frames per second
  * (`fps`, paced by frame-pacer.ts: Paper at speed 0 and its public `setFrame` on each due frame)
- * and at 1x device pixels below zoom 100 (`scale`); `prefers-reduced-motion: reduce` sets speed 0
- * (the anchor's still is the frame); `document.hidden` and an off screen stage pause the pacer's
- * loop, and Paper's own observers a mount it does not pace. The deck's shader palette (`palette`,
- * 5.7) reaches the presets.
+ * and at 1x device pixels below zoom 100 (`scale`); reduced motion, the system's setting or Tools >
+ * Preferences > Reduce motion (reduce-motion.ts), sets speed 0 (the anchor's still is the frame);
+ * `document.hidden` and an off screen stage pause the pacer's loop, and Paper's own observers a
+ * mount it does not pace. The deck's shader palette (`palette`, 5.7) reaches the presets.
  * Every live handle is registered by block id so the Shader section previews a slider through
  * `previewShaderUniforms` while it is held and writes on the release alone (5.3). Without
  * `selected` the mount behaves as before the round: every root mounts.
@@ -208,16 +209,6 @@ export function raiseCanvas(handle: MaterialHandle): void {
   }
 }
 
-/** The `prefers-reduced-motion: reduce` read, false where matchMedia is missing (a test's jsdom). */
-export function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch {
-    return false;
-  }
-}
-
 /** The frames per second the editor's mount is capped at (5.6). */
 export const EDITOR_SHADER_FPS = 30;
 
@@ -264,7 +255,7 @@ export function previewShaderFrame(blockId: string, ms: number): boolean {
 export function previewShaderSpeed(blockId: string, speed: number): boolean {
   const handle = LIVE.get(blockId);
   if (handle === undefined) return false;
-  handle.setSpeed(prefersReducedMotion() ? 0 : speed);
+  handle.setSpeed(motionReduced() ? 0 : speed);
   return true;
 }
 
@@ -293,20 +284,10 @@ export function MaterialMount({
     setPlaying(null);
   }, [html]);
 
-  /* reduced motion (5.6): speed 0 on every mount, followed live when the setting flips */
-  const [reduced, setReduced] = useState<boolean>(() => prefersReducedMotion());
-  useEffect(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-    let media: MediaQueryList;
-    try {
-      media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    } catch {
-      return;
-    }
-    const onChange = () => setReduced(media.matches);
-    media.addEventListener?.('change', onChange);
-    return () => media.removeEventListener?.('change', onChange);
-  }, []);
+  /* reduced motion (5.6): speed 0 on every mount, followed live when the system setting or Tools >
+     Preferences > Reduce motion flips */
+  const [reduced, setReduced] = useState<boolean>(() => motionReduced());
+  useEffect(() => onMotionReducedChange(() => setReduced(motionReduced())), []);
 
   const selectedKey = selected === undefined ? 'all' : (selected ?? []).join(' ');
   const lowRes = scale !== undefined && scale < 1;

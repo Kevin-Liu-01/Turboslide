@@ -150,13 +150,17 @@
   overflow: hidden;
 }
 
+/* the sweep reads --pt-dur-loop, which tokens.css zeroes under reduced motion (the system's or
+   Tools > Preferences > Reduce motion); the segment then stands still at the centre, never at the
+   left edge where it would read as 40 percent done */
 .ts-upload-progress > span {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: 30%;
   width: 40%;
   background: var(--pt-ink);
-  animation: ts-upload-sweep 1.1s linear infinite;
+  animation: ts-upload-sweep var(--pt-dur-loop) linear infinite;
 }
 
 @keyframes ts-upload-sweep {

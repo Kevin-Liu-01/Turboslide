@@ -451,7 +451,12 @@ export async function readLayout(
 /**
  * A process's reads of the layout, kept LAYOUT_TTL_MS from the time the read began and shared by
  * concurrent callers. A read that fails or answers after LAYOUT_READ_MS (an instance suspended
- * while it waited) rejects with StorageLayoutError and is not kept.
+ * while it waited) rejects with StorageLayoutError and is not kept. The deadline is a timer of its
+ * own, as in boundedBlobClient: at LAYOUT_READ_MS the call underneath is cancelled through its
+ * signal and the shared read rejects whether or not that call ever answers. Every document call of
+ * the split client waits on this read, so one store call that never settled held all of them on
+ * the instance until it was recycled (the 96b4fb72 preview, 2026-10-16: every head and list of a
+ * document met the 10 s deadline, and the requests that wait without one met the 300 s limit).
  */
 export function layoutReader(
   documents: BlobClient,
@@ -465,7 +470,30 @@ export function layoutReader(
   let seen = false;
   const read = async (): Promise<LayoutRecord> => {
     const began = clock();
-    const { record, etag } = await readLayout(documents, AbortSignal.timeout(LAYOUT_READ_MS), seen);
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        // no reason of its own: the SDK meets the plain AbortError (boundedBlobClient)
+        controller.abort();
+        reject(
+          new StorageLayoutError(
+            `the read of ${MIGRATION_META} did not answer within ${LAYOUT_READ_MS / 1000} s`,
+          ),
+        );
+      }, LAYOUT_READ_MS);
+      timer.unref?.();
+    });
+    const reading = readLayout(documents, controller.signal, seen);
+    // the read that lost to the deadline settles unobserved
+    reading.catch(() => undefined);
+    let answer: { record: LayoutRecord; etag: string | null };
+    try {
+      answer = await Promise.race([reading, deadline]);
+    } finally {
+      clearTimeout(timer);
+    }
+    const { record, etag } = answer;
     if (clock() - began > LAYOUT_READ_MS)
       throw new StorageLayoutError(`the read of ${MIGRATION_META} answered after its deadline`);
     seen ||= etag !== null;

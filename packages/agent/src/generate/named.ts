@@ -64,8 +64,21 @@ export type NamedSchemas = {
   outputId: (id: ActionId) => string;
 };
 
-/** Generates every named schema with `uri(id)` as the reference form. */
-export function generateNamedSchemas(uri: (id: string) => string): NamedSchemas {
+/* One registry conversion per reference form: openapi.json and mcp-tools.json each ask for it, and
+   a generateAll run spent a third of its time here. The callers read the schemas and never write. */
+const generatedByBase = new Map<string, NamedSchemas>();
+
+/** Every named schema with `<refBase><id>` as the reference form (`#/$defs/`, `#/components/schemas/`). */
+export function generateNamedSchemas(refBase: string): NamedSchemas {
+  let named = generatedByBase.get(refBase);
+  if (named === undefined) {
+    named = convertNamedSchemas((id) => `${refBase}${id}`);
+    generatedByBase.set(refBase, named);
+  }
+  return named;
+}
+
+function convertNamedSchemas(uri: (id: string) => string): NamedSchemas {
   const registry = z.registry<{ id: string }>();
   const byInstance = new Map<z.ZodType, string>();
   for (const [id, schema] of Object.entries(NAMED_SCHEMAS)) {

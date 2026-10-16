@@ -5,8 +5,18 @@ import { z } from 'zod';
 
 export type JsonSchema = Record<string, unknown>;
 
-export function toJsonSchema(schema: z.ZodType): JsonSchema {
-  return z.toJSONSchema(schema, { target: 'draft-2020-12', io: 'input', unrepresentable: 'any' });
+/* One conversion per schema: the CLI, llms-full, the skill and docs references each read every
+   action's input, and z.toJSONSchema was three quarters of a generateAll run. */
+const converted = new WeakMap<z.ZodType, Readonly<JsonSchema>>();
+
+/** The JSON Schema of a Zod schema, converted once and shared; callers read it and never write. */
+export function toJsonSchema(schema: z.ZodType): Readonly<JsonSchema> {
+  let json = converted.get(schema);
+  if (json === undefined) {
+    json = z.toJSONSchema(schema, { target: 'draft-2020-12', io: 'input', unrepresentable: 'any' });
+    converted.set(schema, json);
+  }
+  return json;
 }
 
 export type PropertySummary = {

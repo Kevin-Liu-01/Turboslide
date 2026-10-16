@@ -157,7 +157,7 @@ export type McpContract = {
 };
 
 export function generateMcpTools(): McpContract {
-  const named = generateNamedSchemas((id) => `#/$defs/${id}`);
+  const named = generateNamedSchemas('#/$defs/');
   const byName = new Map<string, McpTool>();
   const used = new Set<string>();
   const collectRefs = (schema: JsonSchema): void => {

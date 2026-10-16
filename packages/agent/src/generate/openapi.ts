@@ -117,7 +117,7 @@ const errorContent = {
 };
 
 export function generateOpenApi(): JsonSchema {
-  const named = generateNamedSchemas((id) => `#/components/schemas/${id}`);
+  const named = generateNamedSchemas('#/components/schemas/');
   const httpActions = actionsOn('http');
   const schemas: Record<string, JsonSchema> = { ...named.schemas, Error: errorSchema };
 

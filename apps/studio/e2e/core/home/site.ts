@@ -132,7 +132,7 @@ export function rows(): void {
         ]);
         expect(facts.figures, `${label}: the editor, the run and the viewer`).toBe(3);
         expect(facts.keys, `${label}: six slideshow keys`).toBe(6);
-        expect(facts.footer, `${label}: three footer columns`).toBe(3);
+        expect(facts.footer, `${label}: four footer columns`).toBe(4);
         expect(facts.wide, `${label}: nothing wider than the viewport`).toBeLessThanOrEqual(0);
         expect(
           facts.radii.filter((r) => !['0px', '4px', '6px', '8px', '50%'].includes(r)),

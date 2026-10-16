@@ -227,7 +227,7 @@ async function viewOf(page: Page): Promise<View> {
         previous: shown(q('[data-control="docs.previous"]')),
         next: shown(q('[data-control="docs.next"]')),
       },
-      footer: shown(q('[data-control="docs.foot.lockup"]')),
+      footer: shown(q('[data-control="site.foot.lockup"]')),
       radii,
       shadows,
       scrollbar: window.innerWidth - document.documentElement.clientWidth,
@@ -534,9 +534,10 @@ row('help.docs.figures', async () => {
 });
 
 /**
- * The docs' footer (docs/SITE.md section 6): one compact row under every page, the T in a box
- * linking to /home, the sentence that names the maker and the repository's three links, each in a
- * new tab.
+ * The site's footer under every docs page (docs/SITE.md, the footer): the lockup with the
+ * animated T in a box linking to /home, the four columns of links under their labels (Product,
+ * Agents, Docs, Project), the maker's link and the appearance switch, under the page; an external
+ * link opens in a new tab.
  */
 row('help.docs.footer', async () => {
   const faults: string[] = [];
@@ -546,14 +547,18 @@ row('help.docs.footer', async () => {
       await page.goto(url);
       await hydrated(page);
       const facts = await page.evaluate(() => {
-        const foot = document.querySelector('.ts-docs .site-foot.is-compact');
+        const foot = document.querySelector('.ts-docs .site-foot');
         return {
-          lockup: foot?.querySelector('[data-control="docs.foot.lockup"]')?.getAttribute('href'),
-          made: foot?.querySelector('p')?.textContent?.trim() ?? '',
-          links: [...(foot?.querySelectorAll('nav a') ?? [])].map((a) => ({
-            label: a.textContent?.trim() ?? '',
-            target: a.getAttribute('target'),
-          })),
+          lockup: foot?.querySelector('[data-control="site.foot.lockup"]')?.getAttribute('href'),
+          live: foot?.querySelectorAll('svg.site-mark-live .site-mark-run').length ?? 0,
+          columns: [...(foot?.querySelectorAll('.site-foot-cols h2') ?? [])].map(
+            (h) => h.textContent?.trim() ?? '',
+          ),
+          maker: foot?.querySelector('[data-control="site.foot.maker"]')?.textContent?.trim(),
+          switch: foot?.querySelectorAll('.site-appear button').length ?? 0,
+          external: [...(foot?.querySelectorAll('a[href^="http"]') ?? [])].map((a) =>
+            a.getAttribute('target'),
+          ),
           below:
             (foot?.getBoundingClientRect().top ?? 0) >=
             (document.querySelector('.ts-docs-body')?.getBoundingClientRect().bottom ?? 0),
@@ -561,13 +566,16 @@ row('help.docs.footer', async () => {
       });
       if (facts.lockup !== '/home')
         faults.push(`${url} at ${width}: the mark links ${facts.lockup}`);
-      if (facts.made !== 'Turboslide is made by General Translation.')
-        faults.push(`${url} at ${width}: "${facts.made}"`);
-      const labels = facts.links.map((link) => link.label);
-      if (JSON.stringify(labels) !== JSON.stringify(['GitHub', 'Report an issue', 'MIT License']))
-        faults.push(`${url} at ${width}: links ${labels.join(', ')}`);
-      if (facts.links.some((link) => link.target !== '_blank'))
-        faults.push(`${url} at ${width}: a link opens in the same tab`);
+      if (facts.live === 0) faults.push(`${url} at ${width}: no animated mark`);
+      if (
+        JSON.stringify(facts.columns) !== JSON.stringify(['Product', 'Agents', 'Docs', 'Project'])
+      )
+        faults.push(`${url} at ${width}: columns ${facts.columns.join(', ')}`);
+      if (facts.maker !== 'General Translation')
+        faults.push(`${url} at ${width}: the maker "${facts.maker}"`);
+      if (facts.switch !== 2) faults.push(`${url} at ${width}: ${facts.switch} appearance buttons`);
+      if (facts.external.some((target) => target !== '_blank'))
+        faults.push(`${url} at ${width}: an external link opens in the same tab`);
       if (!facts.below) faults.push(`${url} at ${width}: the footer is not under the page`);
     }
   }
@@ -1013,7 +1021,7 @@ row('help.docs.links', async () => {
     (navFacts.glyph !== 'none' && navFacts.glyph !== 'normal')
   )
     faults.push(`the navigation's Documentation ${JSON.stringify(navFacts)}`);
-  const foot = page.locator('[data-control="site.foot.documentation.getting-started"]');
+  const foot = page.locator('[data-control="site.foot.docs.getting-started"]');
   const footFacts = await foot.evaluate((element) => ({
     href: element.getAttribute('href'),
     target: element.getAttribute('target'),

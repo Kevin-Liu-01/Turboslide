@@ -10544,7 +10544,7 @@
     {
       "id": "help.docs.footer",
       "feature": "help",
-      "interaction": "At 1440 and 390 /docs and /docs/reference/deck end with the compact footer under the page: the T in a box linking to /home, \"Turboslide is made by General Translation.\" and GitHub, Report an issue and MIT License, each opening in a new tab",
+      "interaction": "At 1440 and 390 /docs and /docs/reference/deck end with the site's footer under the page: the animated T in a box linking to /home, the columns Product, Agents, Docs and Project, General Translation linked as the maker and the Light and Dark switch; every external link opens in a new tab",
       "driver": "core/docs.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md section 6; plan E.4; the brief's docs problem D6 (no footer)",

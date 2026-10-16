@@ -281,7 +281,10 @@ let packagesReady: Promise<void> | undefined;
  * Writes the bundled package files (the theme CSS and sprite, Inter, the export faces,
  * calibration.json) under <root>/packages once per process and names the folder in
  * TURBOSLIDE_PACKAGES_DIR, so a render or export in this process finds them where the workspace
- * would have been. A no-op in a checkout or when the bundle carries no such group.
+ * would have been. A no-op in a checkout or when the bundle carries no such group. Runs on the
+ * render, export, capture and measure paths alone, through `ensureDeckAssets`, which each of them
+ * awaits before its job (hardening PS#7, PERF-6): before, every deck read, listing and store open
+ * on a fresh instance wrote 290 files and 29.9 MB first, about 2.0 s of CPU.
  */
 function ensurePackages(): Promise<void> {
   packagesReady ??= (async () => {
@@ -304,16 +307,15 @@ function ensurePackages(): Promise<void> {
 }
 
 /**
- * The collection with its seed materialized (and uploaded once, for blob), and the package
- * files. Hosted, the derived files are swept first when a sweep is due or the volume is low, and
- * a materialization that meets ENOSPC is retried once after a sweep.
+ * The collection with its seed materialized (and uploaded once, for blob). Hosted, the derived
+ * files are swept first when a sweep is due or the volume is low, and a materialization that
+ * meets ENOSPC is retried once after a sweep. The package files are the render paths' alone
+ * (`ensureDeckAssets`, hardening PS#7), so a read never waits on them and never fails on them.
  */
 export async function ensureDecks(): Promise<HostedDecks> {
   const decks = hostedDecks();
   await sweepDerivedIfDue();
-  await withDiskRoom('materializing the seed', () =>
-    Promise.all([decks.ready(), ensurePackages()]),
-  );
+  await withDiskRoom('materializing the seed', () => decks.ready());
   return decks;
 }
 
@@ -447,14 +449,16 @@ export async function isUnsavedDraft(deckId: string): Promise<boolean> {
 }
 
 /**
- * A deck's twins on disk (the seed's from the bundle, the store's beyond them) before a job
- * that renders or exports the deck runs; the browser would otherwise wait on images that are
- * not there (measured on the first preview: a render hung to the 300 s job timeout, 502).
+ * A deck's twins on disk (the seed's from the bundle, the store's beyond them) and the package
+ * files (`ensurePackages`) before a job that renders, exports, captures or measures the deck
+ * runs; the browser would otherwise wait on images that are not there (measured on the first
+ * preview: a render hung to the 300 s job timeout, 502).
  */
 export async function ensureDeckAssets(deckId: string): Promise<void> {
-  await withDiskRoom(`writing the twins of ${deckId}`, async () =>
-    (await ensureDecks()).ensureAssets(deckId),
-  );
+  await withDiskRoom(`writing the twins of ${deckId}`, async () => {
+    const decks = await ensureDecks();
+    await Promise.all([decks.ensureAssets(deckId), ensurePackages()]);
+  });
 }
 
 /** The local file of an asset twin, or null. */

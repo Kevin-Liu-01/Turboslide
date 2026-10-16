@@ -117,6 +117,21 @@ describe('doChannel', () => {
     ).rejects.toThrow('the realtime Worker answered 503 on comment');
   });
 
+  it('posts a purge under the bearer and throws when the object does not answer (HR-RT#13)', async () => {
+    let status = 200;
+    const { fetchFn, calls } = fakeFetch(() => json({ ok: true, purged: true }, status));
+    const channel = doChannel({ host: 'rooms.test', bearer: 'the-bearer', fetch: fetchFn });
+    await channel.purge('gt-brand');
+    expect(`${calls[0]?.method} ${new URL(calls[0]?.url ?? '').pathname}`).toBe(
+      'POST /rooms/gt-brand/purge',
+    );
+    expect(calls[0]?.headers.authorization).toBe('Bearer the-bearer');
+    status = 502;
+    await expect(channel.purge('gt-brand')).rejects.toThrow(
+      'the realtime Worker answered 502 on purge',
+    );
+  });
+
   it('reads the realtime flag off /health, caches it 60 s and reads off after three failures', async () => {
     let realtime: 'on' | 'off' = 'on';
     let fail = false;

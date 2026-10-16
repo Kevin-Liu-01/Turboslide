@@ -54,7 +54,7 @@ builder key of `MILESTONES-4.md`.
 | Perfect PPTX is a pixel identical raster per page from Chromium                        | today               | `packages/export/src/pptx`, `docs/pptx.md`: 170 pages, worst decoded mismatch 0.003 percent, about 15.5 MiB per theme                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | Long exports run as per slide batches, merged without a browser                        | today               | `apps/studio/src/server/export-batch.ts`, `packages/export/src/batch/plan.ts`: two batches of 60 and 25 for the GT deck                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Fluid compute: instances are reused, work continues after the answer                   | after               | Vercel's instance reuse today; `waitUntil` from `@vercel/functions` (in the catalog since day 0) for the thumbnail refresh and the home card render after SPEC-4 3.2 (B4)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Immutable documents by content hash                                                    | today               | `packages/store/src/snapshots.ts`: every committed write stores the document under the md5 of its manifest bytes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Immutable documents by content hash                                                    | today               | `packages/store/src/snapshots.ts`: a committed write stores the document under the md5 of its manifest bytes on every tenth record, and the deck's last close stores the current one (hardening PS#4, section 13)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Preloading: a hover starts the next route's data                                       | today               | `defaultPreload: 'intent'`, the title row's mark as a `Link`, every card on `preload="intent"` with the edit route's code fetched once the list is in view (hardening HR-PC#4) and `defaultPreloadStaleTime` at 30 s (`apps/studio/src/router.tsx`, SPEC-4 0.39, B3 at merge 2): `decks->edit` 168 ms in page and `edit->decks` 16 ms in page on production, where day 0 read 598 ms and a 1,114 ms document load (VERIFICATION-4 section 5.2, 2026-09-14)                                                                                                                                                                                                                                                                                                                |
 | Fast saves                                                                             | after               | The local commit is under 25 ms today; the Blob write in four rounds after SPEC-4 0.33 (B4). On round three the reported revision moves at the server's acknowledgement, 512 to 707 ms after the last keyup on production (section 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | A fast home page                                                                       | after               | SPEC-4 3.1: the `blob` tier's list from manifests (B4) and the shell streamed before the list with the Recent row from `localStorage` (B3) landed at merge 2; production's `/decks` first byte fell from 5.3 to 6.3 s to 409 ms cold and 235 ms warm at the median, with a worst cold sample of 3,782 ms (VERIFICATION-4 section 5.1), so the slow mode is rarer and shorter, not gone; the row flips when the cold first byte meets its 400 ms ceiling on every sample                                                                                                                                                                                                                                                                                                   |
@@ -391,3 +391,63 @@ a call count in `packages/store/src/hosted.test.ts`: after 1,000 commits the fir
 callers of the whole log (the room's open, which the editor's and the presenter's loader run,
 the checkpoint's covered read, the seed route, the loader's version list) still read it once per
 fresh instance, as one `get` per record in rounds of 50. `TURBOSLIDE_STORE_FULL_WALK=1` brings back the full walk as a repair path.
+
+## 11. The commit's parses and validations (hardening PS#2)
+
+A Blob mirror keeps its validated document and its parsed version records in a parse cache
+(`packages/store/src/parse-cache.ts`), each entry checked against the identity of the files it
+was read from (inode, size, modification and change times) before use, and dropped by the
+store's own writes. A write keeps the document the reducer validated as the folder's next read,
+so a read, a revision and the next write on an unchanged mirror validate nothing, and a log read
+parses only the records it has not seen. Every read answers its own copy. The pin is a count in
+`packages/store/src/commit-cost.test.ts`: ten writes on a 1,000 record mirror make 9 record
+parses and 10 validations, against 10,045 parses and 30 validations on `origin/main` `8c9465b6`
+(ceilings 10 and 10); five rounds of `revision()`, `read()` and `records()` on an unchanged
+mirror make none, against 300 parses and 10 validations.
+
+## 12. The commit's puts on the do tier (hardening PS#3)
+
+A commit on `origin/main` `8c9465b6` made five puts on every tier: the snapshot, the version
+record, the changed slide, `deck.json` and `.turboslide/pulse.json`. Only the blob tier's channel
+reads the pulse (one head per tick per open deck); on the do tier the realtime Worker carries
+every change and no instance polls. The store now asks a process wide rule before it writes the
+pulse (`setPulseRule` and `pulseWanted` in `packages/store/src/pulse.ts`), and the studio's room
+module sets the rule from the tier the instance serves (`pulseWantedOnTier`): no pulse on `do`,
+the pulse again from the next commit once the realtime flag hands the instance to the blob tier.
+A process that sets no rule (the CLI, the tests) and a rule that throws write the pulse. The pin
+is `packages/store/src/commit-cost.test.ts`: five commits with the rule off make the four puts
+each, and the next commit with the rule on makes five.
+
+## 13. The snapshot every tenth commit (hardening PS#4)
+
+A commit on `origin/main` `8c9465b6` stored the whole document under the md5 of its manifest
+(`snapshots/<md5>.json`, 330 KB on the GT deck) on every write, and every instance that learned a
+commit read that snapshot. Now a commit stores it on record 1, on every tenth record
+(`SNAPSHOT_EVERY_RECORDS`), for a version restore and for a document over 3 MB (the seed route
+points the realtime object at the snapshot above 4 MB), and its record names it then alone. The
+deck's last close stores the current one: the checkpoint route when the object posts `closed`
+(the do tier) and the channel's prune at the last stream's close (the blob tier), through
+`snapshotCurrent`. A reader proves the head by replaying the records above its own mirror when at
+most ten sit there, else from the newest stored snapshot a record names (the newest two are
+tried) and at most nine records, else from the head's own snapshot (the trash stamp writes the
+manifest around the log), and an empty mirror reads the head's snapshot first as before.
+`documentAtRevision` of a revision whose record names no snapshot replays the inverses above it
+from the mirror, without reading the log below its floor.
+
+Readings, in process on the GT deck of the repository (one character spliced into a paragraph per
+commit, the pulse off as on the do tier), counts and bytes, which no load moves:
+
+| Reading                                  | Before (PS#3's tree)         | After               |
+| ---------------------------------------- | ---------------------------- | ------------------- |
+| Puts over 20 commits                     | 80                           | 62                  |
+| Bytes put over 20 commits                | 8,643,592 (432,180 a commit) | 2,694,752 (134,738) |
+| Snapshot bytes over 20 commits           | 6,608,830 (20 snapshots)     | 660,890 (2)         |
+| A warm reader learning one commit, gets  | the snapshot and the record  | the record          |
+| A warm reader learning one commit, bytes | 331,070                      | 568                 |
+
+The pins are `packages/store/src/commit-cost.test.ts` (2 snapshot puts over 20 commits; a fresh,
+a warm and a far behind mirror read the same document as the writer; a fresh mirror of 1,005
+records whose head stores no snapshot reads in at most 60 calls, and `documentAtRevision` there
+reads no record) and `apps/studio/src/server/close-snapshot.test.ts` (the last close stores the
+current snapshot). `deck.json` is the larger part left: 96,275 B a commit, which PS#12a and
+PS#12b take on.

@@ -143,10 +143,42 @@ export function pulseBytes(source: PulseSource, at: string, nonce: string): Uint
   return new TextEncoder().encode(JSON.stringify({ v: 1, source, at, nonce }));
 }
 
+const PULSE_RULE = Symbol.for('turboslide.pulseRule');
+type PulseRuleHolder = typeof globalThis & { [PULSE_RULE]?: () => boolean };
+
+/**
+ * Sets whether this process writes the deck pulse (hardening PS#3, PERF-3 item 1). Only the blob
+ * tier's poll reads the pulse; on the do tier the realtime Worker carries every change and no
+ * instance polls, so the put was one advanced operation per commit that nothing read. The
+ * studio's room module sets the rule from the tier the instance serves, so an instance handed
+ * off to the blob tier (the realtime flag off) writes the pulse again at its next commit. An
+ * instance that still serves the do tier for up to a minute after the flag moved writes none, and
+ * the blob poll's manifest head every PULSE_SAFETY_TICKS ticks reads its commits. A process that
+ * sets no rule (the CLI, the tests) writes the pulse; `null` removes the rule. Kept on
+ * `globalThis`, so a second copy of this module in one process reads the same rule.
+ */
+export function setPulseRule(rule: (() => boolean) | null): void {
+  const holder = globalThis as PulseRuleHolder;
+  if (rule === null) delete holder[PULSE_RULE];
+  else holder[PULSE_RULE] = rule;
+}
+
+/** Whether this process writes the deck pulse now (`setPulseRule`); a rule that throws counts as yes. */
+export function pulseWanted(): boolean {
+  const rule = (globalThis as PulseRuleHolder)[PULSE_RULE];
+  if (rule === undefined) return true;
+  try {
+    return rule();
+  } catch {
+    return true;
+  }
+}
+
 /**
  * Overwrites the deck's pulse after a write landed. Best effort: a put that fails answers null and
  * the caller never fails its own write on it (the safety tick and the next write cover the gap);
- * the caller passes a bounded client, so the put ends at its deadline.
+ * the caller passes a bounded client, so the put ends at its deadline. Answers null with no call
+ * while the process writes no pulse (`pulseWanted`).
  */
 export async function putPulse(
   client: BlobClient,
@@ -154,6 +186,7 @@ export async function putPulse(
   source: PulseSource,
   options: PulseWriteOptions = {},
 ): Promise<BlobEntry | null> {
+  if (!pulseWanted()) return null;
   const at = (options.now ?? (() => new Date().toISOString()))();
   const nonce = (options.nonce ?? (() => crypto.randomUUID()))();
   try {

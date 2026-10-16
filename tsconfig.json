@@ -42,6 +42,9 @@
       "path": "packages/realtime"
     },
     {
+      "path": "packages/report"
+    },
+    {
       "path": "packages/identity"
     },
     {

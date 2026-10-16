@@ -1054,3 +1054,75 @@ function decodeEntities(text: string): string {
     return NAMED_ENTITIES[body.toLowerCase()] ?? whole;
   });
 }
+
+// ---------------------------------------------------------------------------------------------
+// The stored manifest's two shapes (hardening PS#12a, PERF-3 item 3, CRIT-M13)
+//
+// `deck.json` holds the asset catalog inline (`assets`), 96,275 B of the GT deck's manifest, and
+// a commit rewrites all of it for a one paragraph edit. A later release (PS#12b) keeps the catalog
+// in `assets.json` beside `deck.json`, rewritten only by a commit that changes an asset, and the
+// manifest names the catalog's md5 (`assetCatalog`, the store's etag for its bytes) in the place
+// the catalog held. This release reads both shapes and writes the inline one alone, so a rollback
+// from PS#12b lands on a release that reads every manifest PS#12b stored (1.3 item 4). The pair is
+// read as one document: the manifest's key order with `assetCatalog` swapped for `assets` in
+// place, so the inline form's canonical bytes are the ones a writer of that form would store.
+
+/** The catalog file beside `deck.json` in the external shape. */
+export const ASSET_CATALOG_FILE = 'assets.json';
+
+/** The md5 of a catalog's bytes, lower case hex: what `assetCatalog` holds. */
+export const assetCatalogDigestSchema = z.string().regex(/^[0-9a-f]{32}$/);
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The catalog digest a raw manifest names when it is in the external shape (no `assets`, an
+ * `assetCatalog` of 32 hex characters), else null. A manifest that carries both is the inline
+ * shape with a stray field, which validation reports.
+ */
+export function assetCatalogOf(raw: unknown): string | null {
+  if (!isPlainRecord(raw) || 'assets' in raw) return null;
+  const parsed = assetCatalogDigestSchema.safeParse(raw['assetCatalog']);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Copies `raw` with the key `from` replaced by `to` (holding `value`) at the same place. */
+function swapKey(
+  raw: Record<string, unknown>,
+  from: string,
+  to: string,
+  value: unknown,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(raw)) {
+    if (key === from) out[to] = value;
+    else if (key !== to) out[key] = field;
+  }
+  return out;
+}
+
+/**
+ * The inline manifest of an external one: `assetCatalog` replaced by the catalog `assets.json`
+ * holds, in its place. A manifest already inline comes back as it is. The digest is not checked
+ * here; the store compares the catalog's md5 with `assetCatalogOf` before it calls this.
+ */
+export function inlineAssetCatalog(raw: unknown, catalog: unknown): unknown {
+  if (assetCatalogOf(raw) === null) return raw;
+  return swapKey(raw as Record<string, unknown>, 'assetCatalog', 'assets', catalog);
+}
+
+/**
+ * The external shape of a manifest: `assets` replaced in place by `assetCatalog`, the md5 of the
+ * catalog's canonical bytes, which the caller computes (this package has no hash). The store
+ * hashes it to prove a head written in that shape (blob-store.ts `manifestKeys`).
+ */
+export function externalManifestOf(deck: Deck, catalogDigest: string): Record<string, unknown> {
+  return swapKey(
+    deck as unknown as Record<string, unknown>,
+    'assets',
+    'assetCatalog',
+    catalogDigest,
+  );
+}

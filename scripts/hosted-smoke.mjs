@@ -769,6 +769,17 @@ function securityChecks(base, deck, args) {
     pass: (r) => r.status === 204,
     detail: (r) => `${r.status}`,
   });
+  /* hardening PS#9 (PERF-14): the contracts are static files and a request that is not a document
+     load or a server function mints no identity cookie, so the CDN keeps the answer */
+  for (const path of ['/llms.txt', '/llms-full.txt', '/openapi.json']) {
+    rows.push({
+      name: `no cookie on contracts ${path}`,
+      path,
+      expect: '200 with no identity cookie',
+      pass: (r) => r.status === 200 && r.cookie === '',
+      detail: (r) => `${r.status}${r.cookie === '' ? '' : ', a cookie minted'}`,
+    });
+  }
   if (args.restricted) {
     for (const path of [
       `/deck/${args.restricted}`,

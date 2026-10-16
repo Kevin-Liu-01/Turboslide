@@ -11,9 +11,12 @@
 //
 // Twins, thumbnails, leases, exports and the `.turboslide/` sidecars are left out: the twins are
 // named by their digest on the public store, the rest regenerates. Per deck, `deck.json` is
-// copied first and the folder listed after it: a commit stores its snapshot before it pushes
-// `deck.json` (docs/hosting.md 4, Writes), so the listing holds the snapshot the copied manifest
-// names, and a restore reads that document whole (`documentAtRevision`'s snapshot path).
+// copied first and the folder listed after it: a commit that stores a snapshot stores it before
+// it pushes `deck.json` (docs/hosting.md 4, Writes), so the listing holds every snapshot the
+// copied records name. Since hardening PS#4 a commit stores one on every tenth record and the
+// deck's last close stores the current one, so a deck copied in the middle of a session may hold
+// none for its manifest; a restore then reads the newest named snapshot and replays the records
+// above it, which the listing holds too.
 //
 // A call copies for at most 240 s (BACKUP_BUDGET_MS, inside the function's 300 s) from the
 // cursor `backup/<day>/cursor.json`, which names the last deck finished and the phase, and writes

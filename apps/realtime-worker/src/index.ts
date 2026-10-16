@@ -7,8 +7,8 @@
 // is forwarded as a join (the fallback carrier of 3.3) and the object waits 5 s for the frame.
 // `POST /rooms/:id/ops` and `/presence` carry `Authorization: Ticket` and are verified the same
 // way. The bearer routes (`/rooms/:id/{write,comment,flush,external,publish,roster,document,
-// counters,access-changed}`, `/control/{open,flags,counters}`) compare the room bearer in
-// constant time and forward. The database routes (`/db/{query,batch}`) take their own bearer,
+// counters,access-changed,dead-letters,held,purge}`, `/control/{open,flags,counters}`) compare
+// the room bearer in constant time and forward. The database routes (`/db/{query,batch}`) take their own bearer,
 // `TURBOSLIDE_DB_BEARER` (AUTH-3), so the room bearer, which the object also sends to the app and
 // the probes carry, reaches no account row; `/db/counters` reads no database and takes either;
 // `/control/db-unlisted` (the count of statements outside the allowlist, HR-K2#3) takes the
@@ -17,10 +17,10 @@
 // flight (docs/hosting.md 13.8); it is never sent. A Worker without `TURBOSLIDE_DB_BEARER`
 // refuses every `/db` call and `/control/db-unlisted` and logs `db.bearer.missing` once per
 // isolate (HR-K2#4: the room bearer's fallback ended with the rotation). `GET /health` answers
-// `{ ok, protocol, commit, realtime, appOrigin, callbacks, db, statements }`, the last two
-// naming the bearer mode and the allowlist mode, never a value. `OPTIONS` answers CORS for the
-// ticket POSTs. A refused upgrade is accepted and closed with its code so the browser reads it
-// (3.6.3). The Worker's own work per request stays
+// `{ ok, protocol, commit, bundle, realtime, appOrigin, callbacks, db, statements, admission,
+// alerts }`, `db` and `statements` naming the bearer mode and the allowlist mode, never a value.
+// `OPTIONS` answers CORS for the ticket POSTs. A refused upgrade is accepted and closed with its
+// code so the browser reads it (3.6.3). The Worker's own work per request stays
 // under the Free plan's 10 ms: one HMAC verify and one JSON parse per upgrade, one digest compare
 // per bearer value. Request counts by class ride `GET /control/counters`.
 import {
@@ -58,6 +58,8 @@ import {
   REALTIME_HEADER,
 } from './deck-room.ts';
 import { authorizationToken, secretsMatchAny, verifyTicketRotating } from './ticket.ts';
+import { alertsHealth, watchOnce } from './watch.ts';
+import type { WatchKind } from './watch.ts';
 
 export { DeckRoom };
 
@@ -71,6 +73,13 @@ export type HealthBody = {
   ok: true;
   protocol: number;
   commit: string;
+  /**
+   * The SHA-256 of the bundle this deploy uploaded (`TURBOSLIDE_BUNDLE_HASH`, which the deploy
+   * passes as `--var` from scripts/hosting/worker-hash.mjs; RELIABILITY-16, hardening HR-RT#18);
+   * the guard deploys the production Worker only when the push's hash differs. Empty when the
+   * deploy passed none
+   */
+  bundle: string;
   realtime: 'on' | 'off' | 'unset';
   appOrigin: string;
   /** whether the deck objects reach `appOrigin` (control.ts `CallbacksState`; 3.8) */
@@ -84,6 +93,11 @@ export type HealthBody = {
    * `shadow` placed differently from `full` so far (`rt_flags`), the count HR-RT#5b reads
    */
   admission: { mode: AdmissionMode; disagree: number };
+  /**
+   * The alert channel of the scheduled check (hardening HR-O#3): `set` when the Worker holds
+   * the alert key and address, and the kinds of incident open now (watch.ts); never a value
+   */
+  alerts: { channel: 'set' | 'unset'; open: WatchKind[] };
 };
 
 /**
@@ -119,6 +133,8 @@ const BEARER_TAILS = new Set([
   'dead-letters',
   // which op ids the log holds, for the recovered writes plate (HR-RT#14)
   'held',
+  // a removed deck's object deletes its storage (RELIABILITY-20, HR-RT#13)
+  'purge',
 ]);
 const TICKET_TAILS = new Set(['ops', 'presence']);
 
@@ -178,6 +194,7 @@ async function health(env: Env): Promise<HealthBody> {
     ok: true,
     protocol: protocolOf(env),
     commit: env.TURBOSLIDE_BUILD_COMMIT ?? '',
+    bundle: env.TURBOSLIDE_BUNDLE_HASH ?? '',
     realtime: await realtimeFlag(env.ACCOUNTS),
     appOrigin: env.TURBOSLIDE_APP_ORIGIN ?? '',
     callbacks: await callbacksState(env.ACCOUNTS),
@@ -187,6 +204,7 @@ async function health(env: Env): Promise<HealthBody> {
       mode: admissionModeOf(env.TURBOSLIDE_ADMISSION),
       disagree: await admissionDisagreements(env.ACCOUNTS),
     },
+    alerts: await alertsHealth(env),
   };
 }
 
@@ -342,7 +360,10 @@ async function serve(request: Request, env: Env): Promise<Response> {
             tail === 'roster' ||
             tail === 'document' ||
             tail === 'dead-letters' ||
-            tail === 'held'
+            tail === 'held' ||
+            // a purge runs with the realtime flag off too: an object handing off would flush
+            // the tail of a deck the store no longer holds instead of deleting it
+            tail === 'purge'
             ? 'on'
             : flag,
         ),
@@ -474,6 +495,8 @@ export default {
     ctx: ExecutionContext,
   ): Promise<void> {
     ctx.waitUntil(sweepOpenDecks(env.ACCOUNTS, objectsOf(env)));
+    // the health check and the alert mail (hardening HR-O#3, watch.ts), on the sweep's cron
+    ctx.waitUntil(watchOnce(env));
   },
   async fetch(request: Request, env: Env): Promise<Response> {
     try {

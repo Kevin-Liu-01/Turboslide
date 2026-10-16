@@ -99,7 +99,7 @@ import type { BlobClient } from '@turboslide/store/blob-store';
 import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
 import { sharedPresence } from '@turboslide/store/presence-store';
 import type { SharedPresence } from '@turboslide/store/presence-store';
-import { headPulse, isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pulse';
+import { headPulse, isStoreBusy, setPulseRule, storeRetryAfterMs } from '@turboslide/store/pulse';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import {
@@ -193,6 +193,19 @@ type Shared = typeof globalThis & {
 };
 
 const shared = globalThis as Shared;
+
+/**
+ * The deck pulse is written only where a poll reads it (hardening PS#3, PERF-3 item 1): the blob
+ * tier's channel heads it once a tick, and on the do tier the object carries every change and no
+ * instance polls, so the put was one advanced operation of five per commit that nothing read. The
+ * rule reads the tier this instance serves now, so a hand off to the blob tier (the realtime flag
+ * off) writes the pulse again from its next commit; before the room state exists it reads the
+ * environment.
+ */
+export function pulseWantedOnTier(): boolean {
+  return (shared.__turboslideRoom?.selection ?? selectRealtime(process.env)).tier !== 'do';
+}
+setPulseRule(pulseWantedOnTier);
 
 function log(line: string): void {
   console.error(`turboslide room: ${line}`);
@@ -629,9 +642,6 @@ export async function requestIdentity(
       record: null,
     };
   }
-  const touched = await principalStore()
-    .touch(principal.id, new Date(), true)
-    .catch(() => null);
   /* the display name typed on another instance (b1.md R17) and the avatar choice chosen there
      (docs/archive/rounds/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
      instance, so what `account.setName` and `account.setAvatar` wrote elsewhere rides the
@@ -640,15 +650,22 @@ export async function requestIdentity(
      (`freshIndex`, the editor boot; docs/archive/rounds/PEOPLE.md 6.4), and applied by access.ts
      recordWithIndexFacts: a record that carries a name keeps it; the index's non picture choice
      replaces the record's unless the record's choice is a picture, which the index never carries
-     and a stale glyph must not outlive */
-  const facts =
-    touched === null
-      ? null
-      : await (
-          options.freshIndex === true
-            ? refreshIndexFacts(principal.id)
-            : indexFactsFor(principal.id)
-        ).catch(() => null);
+     and a stale glyph must not outlive.
+     The touch, the index facts, the index's link grants and the link grant cookie's are read
+     together (hardening PS#5, PERF-4): none needs another's answer, since the facts change the
+     name and the avatar alone and the record's own grants join the index's after the round.
+     Before, the four ran one after another inside every caller's first read */
+  const [touched, facts, indexGrants, cookieGrants] = await Promise.all([
+    principalStore()
+      .touch(principal.id, new Date(), true)
+      .catch(() => null),
+    (options.freshIndex === true
+      ? refreshIndexFacts(principal.id)
+      : indexFactsFor(principal.id)
+    ).catch(() => null),
+    linkGrantsFor(principal.id, null),
+    cookieLinkGrants(request, principal.id),
+  ]);
   const record =
     touched !== null && facts !== null ? recordWithIndexFacts(touched, facts) : touched;
   return {
@@ -659,8 +676,8 @@ export async function requestIdentity(
     ctx: {
       principal,
       linkGrants: unionLinkGrants(
-        await linkGrantsFor(principal.id, record),
-        await cookieLinkGrants(request, principal.id),
+        unionLinkGrants(touched?.linkGrants ?? [], indexGrants),
+        cookieGrants,
       ),
     },
     principalId: principal.id,
@@ -1643,6 +1660,28 @@ export async function flushRooms(): Promise<void> {
     if (tier === 'memory' || tier === 'redis') await flushRoom(deckId);
   }
   await closeRooms();
+}
+
+/**
+ * A removed deck's Durable Object deletes its storage (RELIABILITY-20; hardening HR-RT#13): on an
+ * instance built for the do tier, `POST /rooms/:id/purge` under the bearer, also while the
+ * instance serves the blob tier after a hand off, since the object keeps what it held. Before
+ * this no path let an object's entries go, so a deleted deck's text stayed in the Worker's
+ * storage for good. `deck.remove` calls it once the store removed the deck (decks.ts), after
+ * `closeRoom`. A purge that fails is logged and the removal stands: the object then keeps its
+ * rows until a later removal of the same id. Nothing on the other tiers, whose stream is the
+ * instance's own.
+ */
+export async function purgeRoom(deckId: string): Promise<void> {
+  const onDo = state().doChannel;
+  if (onDo === null) return;
+  try {
+    await onDo.purge(deckId);
+  } catch (error) {
+    log(
+      `${deckId}: the object was not purged after the removal: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 /** Forgets every room on this instance (a test, a deck removal). */

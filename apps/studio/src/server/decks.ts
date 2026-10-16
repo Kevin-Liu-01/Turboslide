@@ -667,9 +667,15 @@ const removeDeckFn = createServerFn({ method: 'POST' })
     // the deck's room on this instance goes first (room.ts closeRoom says why): a checkpoint run
     // pending or in flight would write the folder back after the removal (the focus round,
     // cycle 2; VERIFICATION C2-F19, `/deck/<id>` 200 after Delete forever on the check's server)
-    const { closeRoom } = await import('./room');
+    const { closeRoom, purgeRoom } = await import('./room');
     await closeRoom(data.deckId);
-    return mapStale(async () => (await ensureDecks()).remove(data.deckId, data.baseRevision));
+    const removed = await mapStale(async () =>
+      (await ensureDecks()).remove(data.deckId, data.baseRevision),
+    );
+    // the deck's Durable Object deletes its entries and rows once the store let the deck go
+    // (RELIABILITY-20, hardening HR-RT#13); a removal the store refused keeps them
+    await purgeRoom(data.deckId);
+    return removed;
   });
 
 export async function removeStoredDeck(

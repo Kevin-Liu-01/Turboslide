@@ -276,15 +276,18 @@ export const BACKOFF_MAX_MS = 8000;
  */
 export const RECONNECT_HOLD_MAX_MS = BACKOFF_MAX_MS;
 /**
- * How many times an ops POST answered 404 is sent again before the ops return to their author.
- * On the blob tier the store's head of a deck made seconds ago answers null on another instance
- * for a while (the class `apps/studio/src/editor/access-refresh.ts` names for the read side; the
- * polish round's sync fix round 3 read a resend answered 404 on the enforce preview 23 s after
- * the deck's first write), so the route's 404 is a moment's, not the deck's; a deck deleted
- * forever answers 404 on every retry and the ops return once these are spent (the ladder's
- * 500 ms doubling to BACKOFF_MAX_MS: about 15 s).
+ * How long ops POSTs answered 404 in a row are sent again before the client asks whether the
+ * deck is gone (hardening HR-RC#8, RELIABILITY-18). On the blob tier the store's head of a deck
+ * made seconds ago answers null on another instance for a while (the class
+ * `apps/studio/src/editor/access-refresh.ts` names for the read side; the polish round's sync
+ * fix round 3 read a resend answered 404 on the enforce preview 23 s after the deck's first
+ * write), so the route's 404 is a moment's, not the deck's. Every room client runs on a deck its
+ * tab loaded or created (the controller attaches it once the deck is in the store), so a 404 is
+ * sent again on the backoff ladder for this long. Past it the client asks `hasStoredDeck`: the
+ * ops return to their author only when the store says the deck is gone. Before this the ops
+ * returned after five retries, about 15 s, and the 23 s 404 took the words out of the slide.
  */
-export const NOT_FOUND_RETRY_MAX = 5;
+export const NOT_FOUND_RETRY_MS = 60_000;
 /** The longest wait a server's `retry-after` or `retry:` is honoured for before the next open. */
 export const REOPEN_WAIT_MAX_MS = 60_000;
 /** At most this many earlier ids ride an open's `retire` (server/room.ts RETIRE_MAX reads no more). */
@@ -443,6 +446,16 @@ export type ResyncAnswer = {
   document: DeckDocument;
   origins?: readonly ResyncOrigin[];
   bounded?: boolean;
+  /**
+   * The stream position of `document` on the tier the read ran on: the last entry it includes
+   * (the editor loader's `room.seq` and `room.tier`; hardening HR-RC#7). On a tier whose seq is
+   * not the revision (do, memory) the tab's position becomes it when the tab is on that tier.
+   * Without it a reload left the position behind the document: every POST went at the old base
+   * and was answered `resync` again, and the stream's replay from the old position applied the
+   * entries the document held a second time. A position of another tier is another numbering
+   * and is left alone; the hello of that tier resyncs the tab.
+   */
+  position?: { seq: number; tier: RealtimeTier };
 };
 
 export type RoomClientOptions = {
@@ -494,6 +507,13 @@ export type RoomClientOptions = {
    * every unsaved op is offered.
    */
   heldOps?: (opIds: ReadonlyArray<string>) => Promise<ReadonlySet<string>>;
+  /**
+   * Whether the store holds the deck, asked by a read that heads the store and no instance's
+   * copy (hardening HR-RC#8): once ops POSTs have answered 404 for NOT_FOUND_RETRY_MS, the ops
+   * return to their author when this answers false, and stay pending and go again when it
+   * answers true or fails. Absent, the ops return once the window is spent.
+   */
+  hasStoredDeck?: () => Promise<boolean>;
   /** a pending op that no longer applies after a remote change was returned to its author */
   onUnplaceable?: (op: PendingOp) => void;
 };
@@ -545,6 +565,17 @@ export type RoomClient = {
 
 function bytesOf(value: unknown): number {
   return new TextEncoder().encode(JSON.stringify(value)).byteLength;
+}
+
+/**
+ * Whether a change carries typed text: an op at plain text offsets of a Text (hardening HR-RC#7).
+ * Its offsets name the document it was typed on, so past the bound of a reload it returns to its
+ * author as a card rather than re-folding at the old offsets.
+ */
+function carriesText(mutations: readonly Mutation[] | undefined): boolean {
+  return (
+    mutations?.some((mutation) => isTextOp(mutation) || mutation.op === 'text.replace') ?? false
+  );
 }
 
 /**
@@ -1086,8 +1117,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let flushAt = Number.POSITIVE_INFINITY;
   let posting: Promise<void> | null = null;
   let backoff = 0;
-  /** the ops POSTs answered 404 in a row (NOT_FOUND_RETRY_MAX), reset by an answer that is not one */
-  let notFoundRetries = 0;
+  /**
+   * When the first of the ops POSTs answered 404 in a row was answered (NOT_FOUND_RETRY_MS),
+   * null after an answer that is not one; a `hasStoredDeck` that answers the deck is there
+   * starts the window again
+   */
+  let notFoundSince: number | null = null;
   let stopped = false;
   /**
    * The POSTs of this client on the blob tier whose commit may reach this tab as a store echo
@@ -1865,13 +1900,20 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /**
    * The pending ops the resync read acknowledged (docs/archive/rounds/SYNC.md 3.2, invariant 10): every op an
    * origin above the old position names is settled at that record's seq and leaves the queue,
-   * never re-sent. When the records did not reach the old position (`bounded`, or on the blob
-   * tier a head more than REPLAY_MAX_ENTRIES above it, where the seq is the revision), an op
-   * posted before the resync cannot be told from a lost first attempt and is dropped with the
-   * queue and returned to its author with the reject card's sentence, the way an op the document
-   * no longer takes is (invariant 3's bound); an op never posted (no id yet) stays and re-folds.
+   * never re-sent. Past the bound the pending ops cannot be placed on the document read: the
+   * records did not reach the old position (`bounded`, or on the blob tier a head more than
+   * REPLAY_MAX_ENTRIES above it, where the seq is the revision), or on a tier whose seq is not
+   * the revision the document is at another position than the tab's (`elsewhere`, hardening
+   * HR-RC#7), so it holds entries the ops were never moved past, or lacks ones they were. There
+   * an op posted before the resync cannot be told from a lost first attempt, and an op with typed
+   * text, posted or not, names offsets of the tab's document and not of this one (RELIABILITY-17:
+   * on the do tier the text landed at the old offsets): each is dropped with the queue and
+   * returned to its author with the reject card's sentence, the way an op the document no longer
+   * takes is (invariant 3's bound). An op the room admitted is in its log and stays for the
+   * document or the replay to settle (HR-RC#9); one never posted without text (a move, a slide
+   * added) names blocks by id and stays and re-folds.
    */
-  const settleFromResync = (answer: ResyncAnswer, since: number): void => {
+  const settleFromResync = (answer: ResyncAnswer, since: number, elsewhere: boolean): void => {
     for (const origin of answer.origins ?? []) {
       const own = pending.filter((op) => origin.opIds.includes(op.opId));
       if (own.length === 0) continue;
@@ -1884,11 +1926,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }
     const bounded =
       answer.bounded === true ||
-      (tier === 'blob' && answer.document.deck.revision - since > REPLAY_MAX_ENTRIES);
+      (tier === 'blob' && answer.document.deck.revision - since > REPLAY_MAX_ENTRIES) ||
+      elsewhere;
     if (!bounded) return;
     const kept: PendingOp[] = [];
     for (const op of pending) {
-      if (op.opId === '' || op.kind !== 'edit') {
+      if (
+        op.kind !== 'edit' ||
+        op.admitted !== undefined ||
+        (op.opId === '' && !carriesText(op.mutations))
+      ) {
         kept.push(op);
         continue;
       }
@@ -1911,20 +1958,34 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (answered === null || stopped) return;
     const answer: ResyncAnswer = 'slides' in answered ? { document: answered } : answered;
     const fresh = answer.document;
+    // the document's stream position on a tier whose seq is not the revision (hardening HR-RC#7):
+    // the loader names it, and the tab's own document is at `seq` now, with every pending op
+    // moved past the entries up to it (the stream may have moved it during the read)
+    const readAt = tier !== 'blob' && answer.position?.tier === tier ? answer.position.seq : null;
+    // entries the reload put aside: the tab had applied entries past the document, held some
+    // above its position, or the last hello named a head above it
+    const replay = readAt !== null && (readAt < seq || readAt < helloSeq || incoming.size > 0);
     server = fresh;
     revision = Math.max(revision, fresh.deck.revision);
     runEnds.clear();
-    settleFromResync(answer, since);
+    settleFromResync(answer, since, readAt !== null && readAt !== seq);
     // the reload brought the document to the head. On the blob tier the seq of an entry is the
     // revision its record made (blob.ts), so the fresh document's revision is the stream
     // position; a position left at the last hello buffered every later entry for good and the
     // document stopped moving while the revision climbed (hotfix 2 cause A3, "revision 2 vs 12").
-    seq = Math.max(seq, helloSeq, tier === 'blob' ? fresh.deck.revision : 0);
+    // On the do tier the position is the document's (HR-RC#7). Kept where it was, a 409 `resync`
+    // while the stream was down came before any hello named the head: every resend went at the
+    // old base and was answered `resync` again, a reload each time, and the stream's replay
+    // from the old position applied the entries the document held a second time
+    seq = readAt ?? Math.max(seq, helloSeq, tier === 'blob' ? fresh.deck.revision : 0);
     appliedAtSeq.clear();
     // the pending ops (re-folded on the fresh document) may flush
     caughtUp = true;
     incoming.clear();
     watchGap();
+    // the entries above the document come again from its position (HR-RC#7); a stream that is
+    // down opens from it on its own ladder
+    if (replay && stream !== null) reopenStream({ message: 'the stream replays from the reload' });
     retained = [];
     posted = [];
     // an op the room admitted at or below the new position is in the fresh document (HR-RC#9)
@@ -2172,6 +2233,23 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     emitStatus();
   };
 
+  /**
+   * Whether ops answered 404 go again (hardening HR-RC#8, RELIABILITY-18): yes within
+   * NOT_FOUND_RETRY_MS of the first 404 in a row. Past it the store is asked: only its answer
+   * that the deck is gone returns the ops; its answer that the deck is there, or a failed ask,
+   * keeps them and starts the window again. With no way to ask, the ops return.
+   */
+  const sendAgainAfterNotFound = async (): Promise<boolean> => {
+    const at = now();
+    notFoundSince ??= at;
+    if (at - notFoundSince < NOT_FOUND_RETRY_MS) return true;
+    if (options.hasStoredDeck === undefined) return false;
+    const stored = await options.hasStoredDeck().catch(() => true);
+    if (!stored) return false;
+    notFoundSince = now();
+    return true;
+  };
+
   const flush = async (): Promise<void> => {
     if (posting !== null) {
       await posting;
@@ -2299,7 +2377,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       resending = false;
       if (response.ok) {
         backoff = 0;
-        notFoundRetries = 0;
+        notFoundSince = null;
         // the room answered for every op of the POST: admitted, refused or not reached
         for (const op of batch) delete op.unconfirmed;
         // what landed under the admitted entries first, so they drain at once (C3S-F8); an
@@ -2361,6 +2439,30 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           op.unconfirmed = { clientId: body.clientId, opens };
       }
       if (response.code === 'resync') {
+        // on a tier whose seq is not the revision (hardening HR-RC#7, RELIABILITY-17) the base is
+        // more than BASE_SEQ_WINDOW behind and a replay from the position can bring what landed:
+        // the replay moves the pending ops past it, where a reload re-folded the typed text at
+        // its old offsets. A stream whose replay is still coming (its hello named a head above the
+        // position) is waited for: the resend goes once the replay drains (noteCaughtUp).
+        // Otherwise the resend waits for the hello of a stream opened from the position (or
+        // RECONNECT_HOLD_MAX_MS), and only a stream that said hello is opened again: a stream
+        // that is down opens on its own ladder, and an open in flight is left to answer. Closing
+        // that open too, every resend's 409 (one each RECONNECT_HOLD_MAX_MS) closed the open
+        // before its hello and the stream never came back (the lane's browser reading on the
+        // memory tier: a 409 every 8 s for two minutes). A gap past the replay is a reload
+        if (
+          tier !== 'blob' &&
+          response.head !== undefined &&
+          response.head - seq <= REPLAY_MAX_ENTRIES
+        ) {
+          if (connected && seq < helloSeq) caughtUp = false;
+          else {
+            if (connected) reopenStream({ message: 'a write was answered resync' });
+            holdForHello();
+          }
+          emitStatus();
+          return;
+        }
         await resync(response.head ?? revision);
         return;
       }
@@ -2393,13 +2495,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         reopenStream({ message: 'the client binding lapsed' });
         return;
       }
-      if (response.status === 404 && notFoundRetries < NOT_FOUND_RETRY_MAX) {
+      if (response.status === 404 && (await sendAgainAfterNotFound())) {
         // the deck is unknown to the instance that answered (the blob tier's head of a fresh
-        // deck, NOT_FOUND_RETRY_MAX): the ops stay pending and go again after a backoff, to
+        // deck, NOT_FOUND_RETRY_MS): the ops stay pending and go again after a backoff, to
         // another instance or a later moment, the way a 5xx is resent; the record stays for the
         // echo. Before this the ops returned to the author at once and the word went to the card
         resending = true;
-        notFoundRetries += 1;
         emitStatus();
         backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
         timers.setTimeout(() => void flush(), backoff);
@@ -2407,7 +2508,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       // a refusal that will not change on a retry (a forbidden write, a deck gone for good): the
       // ops return to the author
-      notFoundRetries = 0;
+      notFoundSince = null;
       runEnds.clear();
       if (record !== null) posted = posted.filter((row) => row !== record);
       for (const op of batch) {

@@ -2344,7 +2344,7 @@ describe('the sync and costs round: acknowledgement by id, undo past remote entr
     await h.room.stop();
   });
 
-  it('returns a posted op to its author when the resync read is bounded (the records did not reach the old position), and keeps one never posted', async () => {
+  it('returns a posted op and typed text never posted to their author when the resync read is bounded (the records did not reach the old position), and keeps a change never posted without text (HR-RC#7)', async () => {
     const document = normalized();
     const r0 = document.deck.revision;
     const rejects: string[] = [];
@@ -2361,15 +2361,34 @@ describe('the sync and costs round: acknowledgement by id, undo past remote entr
     h.hold(true);
     const posted = h.room.apply([splice(0, 0, 'k')], 'type');
     await until(() => h.posts.length === 1);
-    // typed after the POST left: no op id yet, never on the wire
-    const fresh = h.room.apply([splice(1, 0, 'q')], 'type');
+    // typed after the POST left: no op id yet, never on the wire. Its offset names the tab's
+    // document, which the read's document is 5,000 revisions past (RELIABILITY-17)
+    const typed = h.room.apply([splice(1, 0, 'q')], 'type');
+    // a change without text, never posted: it names the block by id
+    const measure: Mutation = {
+      op: 'block.set',
+      slideId: SLIDE,
+      blockId: BLOCK,
+      path: '/measure',
+      value: 60,
+    };
+    const fresh = h.room.apply([measure], 'measure');
     h.fire({ type: 'resync', revision: r0 + 5000 });
-    const outcome = await posted.settled;
-    expect('rejected' in outcome && outcome.rejected.reason).toBe('stale');
-    if ('rejected' in outcome) rejects.push(outcome.rejected.message ?? '');
-    expect(rejects[0]).toContain('no longer fits');
-    expect(h.room.rejects()).toHaveLength(1);
-    // the never posted op stays pending and goes on the new base
+    for (const settled of [posted.settled, typed.settled]) {
+      const outcome = await settled;
+      expect('rejected' in outcome && outcome.rejected.reason).toBe('stale');
+      if ('rejected' in outcome) rejects.push(outcome.rejected.message ?? '');
+    }
+    expect(rejects).toHaveLength(2);
+    for (const message of rejects) expect(message).toContain('no longer fits');
+    expect(h.room.rejects()).toHaveLength(2);
+    expect(h.room.rejects().map((row) => row.mutations)).toEqual([
+      [splice(0, 0, 'k')],
+      [splice(1, 0, 'q')],
+    ]);
+    // the text is the read's, with neither letter; the change without text stays pending and
+    // goes on the new base
+    expect(textOf(h.room.document())).toBe(textOf(document));
     expect(h.room.status().pending).toBe(1);
     h.hold(false);
     await h.room.flush();

@@ -5,7 +5,8 @@ import { InlineCode } from './InlineCode';
 import { JsonLd } from './JsonLd';
 import { FEATURES_META } from './meta';
 import { PageHead } from './PageHead';
-import { FEATURES_HEAD, FEATURE_COUNTS, FEATURE_GROUPS, PAGES } from './pages-copy';
+import { PageShots } from './PageShots';
+import { FEATURES_HEAD, FEATURES_SHOTS, FEATURE_COUNTS, FEATURE_GROUPS, PAGES } from './pages-copy';
 import { ProductCrop } from './ProductCrop';
 import { SiteBlock } from './SiteBlock';
 import { SiteIcon } from './SiteIcon';
@@ -13,10 +14,13 @@ import { SiteLink } from './SiteLink';
 import { softwareData, webPageData } from './structured-data';
 
 /**
- * /features (the pages step): the page's name and lead with the counts read from facts.ts, then
- * one numbered ruled block per group (make, present, share and work together, export, agents, run
- * it yourself), each with a crop of the product or a code panel and one sentence per feature
- * linked to its chapter of the documentation.
+ * /features (the pages step): the head as /home draws its first screen (the h1 with "people" and
+ * "agents" in the accent, the lead beside New Presentation and Read the Documentation), then the
+ * first screen's figure, the Theme panel and File > Download a person uses beside the commands an
+ * agent runs, each shot linked to its group, then the counts read from facts.ts. Then one
+ * numbered ruled block per group (make, present, share and work together, export, agents, run it
+ * yourself), each with a crop of the product or a code panel and one sentence per feature linked
+ * to its chapter of the documentation.
  */
 export function FeaturesPage() {
   const origin = SITE.origin();
@@ -31,6 +35,7 @@ export function FeaturesPage() {
         })}
       />
       <PageHead copy={FEATURES_HEAD}>
+        <PageShots shots={FEATURES_SHOTS} name={PAGES.shotsName} control="site.features.shot" />
         <dl className="site-counts" aria-label={PAGES.countsName}>
           {FEATURE_COUNTS.map((count) => (
             <div key={count.id}>
@@ -52,6 +57,7 @@ export function FeaturesPage() {
           label={group.label}
           icon={group.icon}
           sentence={group.sentence}
+          keys={group.keys}
         >
           {group.figure.kind === 'crop' ? (
             <ProductCrop

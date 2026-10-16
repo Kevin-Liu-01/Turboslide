@@ -666,21 +666,152 @@
 }
 
 /* ---- the site pages: /features, /faq and /about (FeaturesPage.tsx, FaqPage.tsx, AboutPage.tsx) ----
-   The page's name in the display size with its lead, then numbered ruled blocks: the landing's
+   Each page's first screen is drawn as /home draws its own (PageHead.tsx): the h1 at the display
+   step with its key words in the accent, the lead beside the two buttons on the hero's row, then
+   framed shots of the real product (PageShots.tsx). Then numbered ruled blocks: the landing's
    screen head (label in the first three columns, the sentence in the other nine) with the block's
-   body on the same nine columns. The bar's About, FAQ and GitHub leave under 1024 px. */
+   body on the same nine columns, 128 px apart as the landing's screens are. The bar's About, FAQ
+   and GitHub leave under 1024 px. */
 
-.ts-site .site-page-head {
-  padding-top: 96px;
+/* a key word of a heading (Keyed.tsx): the site accent, a text colour alone */
+.ts-site .site-key {
+  color: var(--pt-accent);
 }
 
-.ts-site .site-page-head .t-lead {
-  max-width: 36em;
-  margin: 24px 0 0;
+/* the hero's top padding and rhythm: 64 px over the h1, 20 px to the lead's row, 24 px to the
+   figure, so a page's first screen sits where /home's does */
+.ts-site .site-page-head {
+  padding-top: 64px;
+}
+
+.ts-site .site-page-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  align-items: start;
+  margin-top: 20px;
+}
+
+.ts-site .site-page-row .t-lead {
+  grid-column: 1 / span 7;
+  margin: 0;
+  max-width: 37em;
+}
+
+.ts-site .site-page-row .site-btns {
+  grid-column: 8 / span 5;
+  justify-self: end;
+  padding-top: 4px;
+}
+
+.ts-site .site-page-head > .site-shots {
+  margin-top: 48px;
+}
+
+/* `side` (/faq): the head in its page's column, the lead over the buttons */
+.ts-site .site-page-head[data-layout='side'] .site-page-row {
+  display: block;
+}
+
+.ts-site .site-page-head[data-layout='side'] .site-page-row .site-btns {
+  justify-self: start;
+  margin-top: 32px;
+  padding-top: 0;
 }
 
 .ts-site .site-page-head + .site-screen {
-  padding-top: 96px;
+  padding-top: 128px;
+}
+
+/* the shots of a first screen: one row whose columns follow each capture's ratio (--shot-cols),
+   so every frame has one height; the head, the frame and the sentence of each shot share three
+   rows across the figure (subgrid), so the heads and the sentences line up */
+.ts-site .site-shots {
+  display: grid;
+  grid-template-columns: var(--shot-cols, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  column-gap: var(--site-gap);
+}
+
+.ts-site .site-shot {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  min-width: 0;
+  margin: 0;
+}
+
+.ts-site .site-shot-head {
+  display: flex;
+  align-items: baseline;
+  padding-bottom: 12px;
+}
+
+.ts-site .site-shot-head .site-label {
+  white-space: nowrap;
+}
+
+.ts-site .site-shot-link {
+  text-decoration: none;
+  transition: color 120ms ease-out;
+}
+
+.ts-site .site-shot-link:hover,
+.ts-site .site-shot-link:hover .site-num {
+  color: var(--pt-accent);
+}
+
+.ts-site .site-shot-frame .site-pic img {
+  height: auto;
+}
+
+.ts-site .site-shot-term {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* the prompt that waits after the last command, with a block cursor in the panel's text */
+.ts-site .site-shot-term .site-cursor {
+  display: inline-block;
+  width: 1ch;
+  height: 16px;
+  vertical-align: -3px;
+  background: var(--pt-panel-text-2);
+}
+
+.ts-site .site-shot-note {
+  margin: 12px 0 0;
+  color: var(--pt-ink-2);
+}
+
+/* /about: the editor on eight columns, the phone's viewer on four, cut to the editor's height */
+.ts-site .site-about-shots {
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+}
+
+.ts-site .site-about-editor {
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+}
+
+.ts-site .site-about-shots .site-shot-frame {
+  height: 100%;
+}
+
+.ts-site .site-about-phone {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ts-site .site-about-phone .site-pic {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-site .site-about-phone .site-pic img {
+  object-position: center top;
 }
 
 /* the counts of /features, read from facts.ts: four figures over a hairline */
@@ -716,8 +847,10 @@
   margin-left: calc((100% + var(--site-gap)) / 4);
 }
 
-.ts-site .site-block-body code,
-.ts-site .site-faq-a code {
+/* inline code in a sentence; a code panel's lines keep the panel's own text colour (the ink here
+   drew them black on the #101010 panel) */
+.ts-site .site-block-body :not(pre) > code,
+.ts-site .site-faq-a :not(pre) > code {
   font-size: 0.875em;
   color: var(--pt-ink);
 }
@@ -823,22 +956,34 @@
   margin: 32px 0 0;
 }
 
-/* /faq: the label in the first three columns, the disclosure list in the other nine */
-.ts-site .site-faq-grid {
+/* /faq: the head and the disclosure list on seven columns; on the other five, held in view while
+   the list scrolls, the shot of the answer opened last (FaqPage.tsx) */
+.ts-site .site-faq-page {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--site-gap);
+  align-items: start;
+}
+
+.ts-site .site-faq-main {
+  grid-column: 1 / span 7;
+  min-width: 0;
+}
+
+.ts-site .site-faq-aside {
+  grid-column: 8 / span 5;
+  position: sticky;
+  top: calc(var(--site-bar-h) + 32px);
+  margin-top: 72px;
+}
+
+.ts-site .site-faq-list {
+  margin-top: 96px;
   border-top: 1px solid var(--pt-hair);
 }
 
 .ts-site .site-faq-label {
-  grid-column: 1 / span 3;
-  align-self: start;
-  padding-top: 24px;
-}
-
-.ts-site .site-faq {
-  grid-column: 4 / span 9;
+  padding: 16px 0 4px;
 }
 
 .ts-site .site-faq-item {
@@ -911,31 +1056,107 @@
     display: none;
   }
 
+  /* the head's row and the shots stack; each shot at its capture's width at most, the phone's
+     viewer at a phone's */
+  .ts-site .site-page-row .t-lead {
+    grid-column: 1 / -1;
+  }
+
+  .ts-site .site-page-row .site-btns {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 24px;
+    padding-top: 0;
+  }
+
+  .ts-site .site-shots,
+  .ts-site .site-about-shots {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 40px;
+  }
+
+  .ts-site .site-shot {
+    grid-row: auto;
+    grid-template-rows: none;
+    max-width: var(--crop-w, none);
+  }
+
+  .ts-site .site-shot[data-shot='viewer'] {
+    max-width: 390px;
+  }
+
+  .ts-site .site-about-shots .site-shot-frame {
+    height: auto;
+  }
+
+  .ts-site .site-about-phone {
+    height: auto;
+    aspect-ratio: 780 / 1120;
+  }
+
   .ts-site .site-block-body {
     margin-left: 0;
   }
 
-  .ts-site .site-faq-label,
-  .ts-site .site-faq {
-    grid-column: 1 / -1;
+  /* the head, then the shot, then the list */
+  .ts-site .site-faq-page {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .ts-site .site-faq-label {
-    padding: 16px 0 8px;
+  .ts-site .site-faq-main {
+    display: contents;
+  }
+
+  .ts-site .site-faq-aside {
+    order: 1;
+    position: static;
+    margin-top: 48px;
+  }
+
+  .ts-site .site-faq-list {
+    order: 2;
   }
 }
 
 @media (max-width: 720px) {
   .ts-site .site-page-head {
-    padding-top: 40px;
+    padding-top: 24px;
   }
 
-  .ts-site .site-page-head .t-lead {
-    margin-top: 16px;
+  .ts-site .site-page-row {
+    margin-top: 12px;
+  }
+
+  .ts-site .site-page-row .site-btns,
+  .ts-site .site-page-head[data-layout='side'] .site-page-row .site-btns {
+    margin-top: 20px;
+  }
+
+  .ts-site .site-page-head > .site-shots,
+  .ts-site .site-faq-aside {
+    margin-top: 28px;
+  }
+
+  .ts-site .site-faq-list {
+    margin-top: 64px;
   }
 
   .ts-site .site-page-head + .site-screen {
-    padding-top: 72px;
+    padding-top: 96px;
+  }
+
+  /* the phone's captures, each cut from its top to most of a phone's screen */
+  .ts-site .site-about-editor {
+    aspect-ratio: auto;
+    height: min(440px, 60svh);
+  }
+
+  .ts-site .site-about-phone {
+    aspect-ratio: auto;
+    height: min(440px, 60svh);
   }
 
   .ts-site .site-counts {

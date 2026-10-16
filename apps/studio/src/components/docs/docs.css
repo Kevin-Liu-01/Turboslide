@@ -131,17 +131,18 @@
 }
 
 .ts-docs .ts-docs-nav-link:hover {
-  color: var(--pt-ink);
+  color: var(--pt-accent);
 }
 
 .ts-docs .ts-docs-nav-link:focus-visible {
   outline-offset: -2px;
 }
 
-/* the current page: ink at 500 (never synthesized: the root sets font-synthesis none) and a
-   2 px ink rule over the rail */
+/* the current page: the site accent at 500 (never synthesized: the root sets font-synthesis
+   none) and a 2 px rule over the rail filled in the accent; a link under the pointer takes the
+   accent too (the site's rule for the current item and the hovered link) */
 .ts-docs .ts-docs-nav-link[aria-current='page'] {
-  color: var(--pt-ink);
+  color: var(--pt-accent);
   font-weight: 500;
 }
 
@@ -152,7 +153,7 @@
   top: 6px;
   bottom: 6px;
   width: 2px;
-  background: var(--pt-ink);
+  background: var(--pt-accent);
 }
 
 /* a folder's pages: indented under their parent, a step lighter */
@@ -163,7 +164,7 @@
 
 .ts-docs .ts-docs-nav-list .is-sub .ts-docs-nav-link:hover,
 .ts-docs .ts-docs-nav-list .is-sub .ts-docs-nav-link[aria-current='page'] {
-  color: var(--pt-ink);
+  color: var(--pt-accent);
 }
 
 .ts-docs .ts-docs-nav-count {
@@ -317,7 +318,7 @@
 
 .ts-docs .ts-docs-body-text a.ts-docs-anchor:hover,
 .ts-docs .ts-docs-sec:has(> h2:target) a.ts-docs-anchor {
-  color: var(--pt-ink);
+  color: var(--pt-accent);
 }
 
 .ts-docs .ts-docs-body-text h3,
@@ -686,6 +687,7 @@
 }
 
 .ts-docs .ts-docs-index-row:hover .ts-docs-index-title {
+  color: var(--pt-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
@@ -756,9 +758,16 @@
   padding-left: 24px;
 }
 
-.ts-docs .ts-docs-toc a:hover,
+.ts-docs .ts-docs-toc a:hover {
+  color: var(--pt-accent);
+}
+
 .ts-docs .ts-docs-toc a[aria-current='true'] {
   color: var(--pt-ink);
+}
+
+.ts-docs .ts-docs-toc a[aria-current='true']::before {
+  color: var(--pt-accent);
 }
 
 .ts-docs .ts-docs-toc a:focus-visible {
@@ -879,6 +888,7 @@
 }
 
 .ts-docs .ts-docs-pager-link:hover .ts-docs-pager-title {
+  color: var(--pt-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;

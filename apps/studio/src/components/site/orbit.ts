@@ -174,6 +174,20 @@ export function fanBox(orbit: Orbit, n: number, s: number): Box {
   return box;
 }
 
+/** The lift of the avatar under the pointer or the focus (site.css `--up` and `scale`). */
+export const LIFT = 0.12;
+export const LIFT_SCALE = 1.1;
+/** The focus ring outside an avatar: a 2 px outline 3 px off it (site.css `.site-av:focus-visible`). */
+export const FOCUS_RING = 5;
+
+/**
+ * The room a lifted avatar and its focus ring take past its place on the orbit, in px: kept free
+ * under the bar, so the crest of an open fan never reaches the sticky bar's rule.
+ */
+export function liftRoom(s: number): number {
+  return s * (LIFT + (LIFT_SCALE - 1) / 2) + FOCUS_RING;
+}
+
 /**
  * The angle each stack's fan centres on when site.css names none (its `--prefer`, in degrees):
  * over the right shoulder of its letter.
@@ -264,7 +278,7 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
       letter: letter.box,
       glyphs: glyphs.filter((g) => g !== letter).map((g) => g.box),
       discs,
-      bounds,
+      bounds: { ...bounds, y0: bounds.y0 + liftRoom(s) },
       n,
       s,
       prefer: Number.isFinite(prefer) ? prefer : PREFER[kind],

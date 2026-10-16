@@ -1,5 +1,6 @@
 // The site's pictures (docs/SITE.md A.6): the hero's poster and the viewer's capture of /home,
-// cut from a running studio and written as lossy WebP next to the components that import them
+// cut from a running studio and written as WebP (the hero's lossless, so the dithered Earth on
+// its first slide keeps every cell; the rest lossy) next to the components that import them
 // (apps/studio/src/components/site/pictures/, imported with `?url` so the build names them by
 // content), and the docs' figures (docs/SITE.md section 6), written to
 // apps/studio/public/docs/figures/ with their sizes in apps/studio/src/docs/figures.ts. Not a
@@ -45,11 +46,23 @@ const APPEARANCES = ['light', 'dark'];
 
 mkdirSync(OUT, { recursive: true });
 
-/** Lossy WebP at the highest quality, from 86 down, that keeps the file under MAX_BYTES. */
-async function writeWebp(png, file, crop) {
+/**
+ * Lossy WebP at the highest quality, from 86 down, that keeps the file under MAX_BYTES; with
+ * `lossless`, lossless WebP when it fits under the line (a flat capture of the product's UI is
+ * smaller lossless, and lossy smears a dithered picture's cells).
+ */
+async function writeWebp(png, file, crop, lossless = false) {
   let image = sharp(png);
   if (crop !== undefined) image = image.extract(crop);
   const raw = await image.png().toBuffer();
+  const exact = lossless ? await sharp(raw).webp({ lossless: true, effort: 6 }).toBuffer() : null;
+  if (exact !== null && exact.length <= MAX_BYTES) {
+    writeFileSync(file, exact);
+    console.log(
+      `${file.startsWith(ROOT) ? file.slice(ROOT.length + 1) : file}: ${exact.length} B lossless`,
+    );
+    return;
+  }
   for (let quality = 86; quality >= 50; quality -= 4) {
     const webp = await sharp(raw).webp({ quality, effort: 6, smartSubsample: true }).toBuffer();
     if (webp.length <= MAX_BYTES || quality <= 50) {
@@ -111,7 +124,7 @@ async function hero(browser) {
       await hideDevNotice(tab);
       await tab.mouse.move(size.width - 2, size.height - 2);
       const png = await tab.screenshot({ type: 'png' });
-      await writeWebp(png, join(OUT, `hero-${size.name}-${appearance}.webp`));
+      await writeWebp(png, join(OUT, `hero-${size.name}-${appearance}.webp`), undefined, true);
       await context.close();
     }
 }

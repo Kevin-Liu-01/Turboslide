@@ -147,6 +147,8 @@ export const FOOTER = {
       icon: 'presentation-chart-bar',
       links: [
         { label: 'New presentation', href: '/new', external: false },
+        /* the row decks.home.your-presentations opens /decks from here */
+        { label: 'Your presentations', href: '/decks', external: false },
         { label: 'Features', href: '/features', external: false },
         { label: 'The example deck', href: '/deck/gt-brand', external: false },
       ],

@@ -1,14 +1,8 @@
 {
   "generatedAt": "2026-10-15T15:51:12.253Z",
   "anchor": 5500,
-  "size": [
-    320,
-    200
-  ],
-  "tileSize": [
-    96,
-    60
-  ],
+  "size": [320, 200],
+  "tileSize": [96, 60],
   "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
   "entries": [
     {

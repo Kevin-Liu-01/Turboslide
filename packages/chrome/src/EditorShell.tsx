@@ -242,6 +242,11 @@ const SaveAsTemplateDialog = lazyDialog(() =>
 const TailorDialog = lazyDialog(() => import('./dialogs/Tailor').then((m) => m.TailorDialog));
 /* the features round (docs/archive/rounds/FEATURES.md 4.3): the Logo picker over thesvg.org */
 const LogoDialog = lazyDialog(() => import('./dialogs/Logo').then((m) => m.LogoDialog));
+/* the slide clock (HTML-SLIDES-DESIGN 2.5): Slide > Transition and the Animate panel */
+const TransitionDialog = lazyDialog(() =>
+  import('./dialogs/Transition').then((m) => m.TransitionDialog),
+);
+const AnimatePanel = lazyDialog(() => import('./panels/AnimatePanel').then((m) => m.AnimatePanel));
 
 const LAZY_DIALOGS = [
   AgentAccessDialog,
@@ -276,6 +281,8 @@ const LAZY_DIALOGS = [
   SaveAsTemplateDialog,
   TailorDialog,
   LogoDialog,
+  TransitionDialog,
+  AnimatePanel,
 ] as const;
 
 /** A colour or weight plate anchored to a menu row (SPEC-2 0.27). */
@@ -1209,11 +1216,36 @@ export function EditorShell({
         case 'accountMenu':
           document.querySelector<HTMLButtonElement>('[data-control="title.account"]')?.click();
           return;
+        /* the slide clock (HTML-SLIDES-DESIGN 2.5): an object with no effect gets a Fade on click,
+           one write and one history entry, and the Animate panel opens on its effects */
+        case 'animate': {
+          const slideNow = current.document.slides[current.slideId];
+          const block = slideNow ? selectedBlock(slideNow, current.selection) : undefined;
+          if (slideNow === undefined || block === undefined) {
+            say('Select an object on the slide first');
+            return;
+          }
+          openPanel('animate');
+          if (slideNow.effects?.some((effect) => effect.block === block.id) === true) return;
+          current
+            .dispatch('motion.add', {
+              slideId: slideNow.id,
+              baseRevision: current.revision,
+              effect: {
+                block: block.id,
+                role: 'enter',
+                motion: { preset: 'fade' },
+                start: 'click',
+              },
+            })
+            .catch((error: unknown) => say(errorText(error)));
+          return;
+        }
         default:
           say(`${item.label} is not available for the current selection`);
       }
     },
-    [closePanel, openDialog, panel, reopenPanel, runPlan, say, zoomStep],
+    [closePanel, openDialog, openPanel, panel, reopenPanel, runPlan, say, zoomStep],
   );
 
   const runToggle = useCallback(
@@ -2277,6 +2309,19 @@ export function EditorShell({
             onClose={closePanel}
           />
         );
+      /* the Animate panel (HTML-SLIDES-DESIGN 2.5, its first part): the selected object's effects */
+      case 'animate':
+        return (
+          <AnimatePanel.Component
+            slideId={input.slideId}
+            slide={slide}
+            block={selectedBlock(slide, input.selection)}
+            revision={input.revision}
+            dispatch={input.dispatch}
+            onNotice={say}
+            onClose={closePanel}
+          />
+        );
       /* the product round (docs/archive/rounds/PRODUCT.md 6.1): the assistant's panel; Accept commits through the
          editor's own dispatch, one undo step */
       case 'assist':
@@ -2380,6 +2425,8 @@ export function EditorShell({
         return <RequestAccessDialog.Component role={dialog.role ?? 'editor'} />;
       case 'forgetBrowser':
         return <ForgetBrowserDialog.Component />;
+      case 'transition':
+        return <TransitionDialog.Component />;
     }
   })();
 

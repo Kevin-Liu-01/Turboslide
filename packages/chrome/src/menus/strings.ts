@@ -613,6 +613,70 @@ export const DIALOGS = {
     inserted: (name: string) => `Inserted ${name}`,
     empty: 'No character matches that name',
   },
+  /* Slide > Transition (HTML-SLIDES-DESIGN 2.5): built like Slide numbers and Playback */
+  transition: {
+    title: 'Transition',
+    transition: 'Transition',
+    duration: 'Duration in seconds',
+    from: 'From',
+    apply: 'Apply to all',
+    applyToSelected: 'Apply to selected',
+    durationRange: 'Duration is a number of seconds from 0 to 3',
+  },
+} as const;
+
+/**
+ * The words of the slide clock's names (HTML-SLIDES-DESIGN 2.2): the presets, the starts, the
+ * roles, the directions and the transitions as a person reads them. The Animate panel and the
+ * Transition dialog read them; the names themselves are the schema's (`motion-core.ts`).
+ */
+export const MOTION = {
+  roles: { enter: 'Entrance', emphasis: 'Emphasis', exit: 'Exit' },
+  starts: {
+    click: { label: 'On click', doc: 'Waits for the next click or key in the show' },
+    with: { label: 'With previous', doc: 'Starts with the effect before it' },
+    after: { label: 'After previous', doc: 'Starts when the effect before it ends' },
+  },
+  presets: {
+    fade: 'Fade',
+    'rise-in': 'Rise in',
+    'slide-in': 'Slide in',
+    'pop-in': 'Pop in',
+    wipe: 'Wipe',
+    draw: 'Draw',
+    'push-in': 'Push in',
+    float: 'Float',
+    pulse: 'Pulse',
+    'type-on': 'Type on',
+    'word-rise': 'Word rise',
+    'line-reveal': 'Line reveal',
+    'glyph-stagger': 'Letter stagger',
+    'tracking-in': 'Tracking in',
+  },
+  /* an effect an agent wrote with keyframes or a path has no preset to pick */
+  keyframes: 'Keyframes',
+  path: 'Motion path',
+  directions: { left: 'Left', right: 'Right', top: 'Top', bottom: 'Bottom' },
+  transitions: {
+    none: { label: 'None', doc: 'Cuts to the slide' },
+    crossfade: { label: 'Crossfade', doc: 'The slide fades in' },
+    'slide-fade': {
+      label: 'Slide and fade',
+      doc: 'The slide slides in from a side as it fades in',
+    },
+    'rise-fade': { label: 'Rise and fade', doc: 'The slide rises as it fades in' },
+    'scale-fade': { label: 'Scale and fade', doc: 'The slide grows to full size as it fades in' },
+    'zoom-through': { label: 'Zoom through', doc: 'The slide shrinks to full size as it fades in' },
+    'blur-swipe': { label: 'Blur swipe', doc: 'The slide comes in from a side out of a blur' },
+    'flip-fade': { label: 'Flip and fade', doc: 'The slide turns to face you as it fades in' },
+    'spring-pop': { label: 'Spring pop', doc: 'The slide pops to full size as it fades in' },
+    'rotate-fade': { label: 'Rotate and fade', doc: 'The slide turns upright as it fades in' },
+    'drift-fade': { label: 'Drift and fade', doc: 'The slide drifts into place as it fades in' },
+  },
+  /* absent: the show's quick fade and rise */
+  standard: { label: 'Standard', doc: 'The show’s quick fade and rise' },
+  /** The step an effect plays in, as the panel heads it. */
+  step: (step: number) => (step === 0 ? 'When the slide opens' : `Click ${step}`),
 } as const;
 
 /** The in-menu pickers (SPEC-2 4.1, 6): the Insert > Table hover grid and the preset grids. */
@@ -992,6 +1056,19 @@ export const PANELS = {
     remove: 'Remove',
     series: (n: number) => `Series ${n}`,
     category: (n: number) => `Category ${n}`,
+  },
+  /* the Animate panel (HTML-SLIDES-DESIGN 2.5, its first part): the selected object's effects */
+  animate: {
+    title: 'Animate',
+    empty: 'Select an object on the slide to animate it',
+    none: 'No animation yet',
+    add: 'Add animation',
+    effect: 'Effect',
+    start: 'Start',
+    delay: 'Delay in seconds',
+    duration: 'Duration in seconds',
+    remove: 'Remove',
+    timeRange: 'Use a number of seconds from 0 to 60',
   },
 } as const;
 

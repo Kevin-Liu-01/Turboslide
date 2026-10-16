@@ -958,6 +958,8 @@ export const PANEL_IDS = [
   'editHtml',
   /* the product round (docs/archive/rounds/PRODUCT.md 6.1): the Assist panel */
   'assist',
+  /* the Animate panel (HTML-SLIDES-DESIGN 2.5, its first part) */
+  'animate',
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
@@ -971,6 +973,8 @@ export function panelIdOfTitle(title: string): PanelId | null {
       return 'themes';
     case 'Assist':
       return 'assist';
+    case 'Animate':
+      return 'animate';
     case 'Format options':
       return 'formatOptions';
     case 'Version history':
@@ -1043,6 +1047,8 @@ export const DIALOG_IDS = [
   'tailor',
   /* the features round (docs/archive/rounds/FEATURES.md 4.3): the Logo picker */
   'logo',
+  /* Slide > Transition (HTML-SLIDES-DESIGN 2.5) */
+  'transition',
 ] as const;
 export type DialogId = (typeof DIALOG_IDS)[number];
 
@@ -1071,6 +1077,8 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
     /* the features round (docs/archive/rounds/FEATURES.md 4.3) */
     case 'Logo':
       return 'logo';
+    case 'Transition':
+      return 'transition';
     case 'Slide numbers':
       return 'slideNumbers';
     case 'Details':

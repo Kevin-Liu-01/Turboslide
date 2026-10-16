@@ -330,7 +330,9 @@ export type MenuClientHandler =
   | 'toggleSidePanel'
   | 'addCaption'
   | 'useOnEverySlide'
-  | 'fontPicker';
+  | 'fontPicker'
+  /* the slide clock (HTML-SLIDES-DESIGN 2.5): Insert > Animation and the object menus' row */
+  | 'animate';
 
 /**
  * The plates a dynamic submenu draws instead of a list of rows: the layout grid, a shape
@@ -646,7 +648,6 @@ const CHAT_LATER = 'Leave a comment on the slide instead';
 const EMAIL_COLLABORATORS_LATER = 'The invitation carries your message';
 const DELETE_VERSIONS_LATER = 'Named versions are kept; older records thin out after 30 days';
 const VIEWERS_TAB_LATER = 'Turboslide keeps no record of who viewed a presentation';
-const STILL_SLIDES = 'The GT theme presents still slides';
 const NUMBERING_STARTS = 'Numbering starts at 1';
 const NO_MEDIA = 'Link to a recording instead';
 const START_FROM_GT = 'Start from the GT brand deck on the home page';
@@ -1629,7 +1630,15 @@ const INSERT: Menu = {
       advanced: true,
       doc: 'Arrows, punctuation, currency, math, symbols and emoji, by name',
     }),
-    omit('insert.animation', 'Animation', 'Section 0.5'),
+    /* the slide clock (HTML-SLIDES-DESIGN 2.5): Insert > Animation and the object menus' row
+       give the selected object a Fade on click when it has no effect yet and open the Animate
+       panel, where its effects are set */
+    now('insert.animation', 'Animation', client('animate'), {
+      enabled: 'objectSelected',
+      disabledReason: SELECT_OBJECT,
+      doc: 'Entrance, emphasis and exit effects for the selected object in the show',
+      terms: ['animate', 'animation', 'effect', 'fade', 'appear', 'build', 'motion', 'on click'],
+    }),
     now('insert.link', 'Link', client('link'), {
       key: shortcut('Cmd+K'),
       icon: 'link',
@@ -2236,7 +2245,12 @@ const SLIDE: Menu = {
         doc: 'Keeps your content and moves it into the new layout',
       },
     ),
-    later('slide.transition', 'Transition', STILL_SLIDES),
+    /* HTML-SLIDES-DESIGN 2.5: the Later stub is a dialog built like Slide numbers */
+    now('slide.transition', 'Transition', dialog('Transition'), {
+      enabled: 'hasSlide',
+      doc: 'How the slide comes in during the show, for the selected slides or all of them',
+      terms: ['transition', 'animation', 'fade', 'slide in', 'motion'],
+    }),
     /* the product round (docs/archive/rounds/PRODUCT.md 4.1) drew Edit theme and Change theme as two rows that open
        one panel. Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 50, 99) keeps Change theme;
        Google's Edit theme stays in its position as an omitted row, so the parity record holds it */
@@ -3200,13 +3214,18 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     item: 'slide.changeTheme',
     when: 'canEdit',
   },
+  /* HTML-SLIDES-DESIGN 2.5: Transition opens Slide > Transition; the button stays behind Tools >
+     Advanced tools, as docs/FOCUS.md 3.3 parked it, and the menu row is in the default view */
   {
     control: 'toolbar.transition',
     label: 'Transition',
     text: true,
-    status: 'later',
-    stubReason: STILL_SLIDES,
+    status: 'now',
     item: 'slide.transition',
+    enabled: 'hasSlide',
+    when: 'canEdit',
+    advanced: true,
+    doc: 'How the slide comes in during the show',
   },
   {
     control: 'toolbar.hideMenus',
@@ -3329,6 +3348,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     { id: 'format.editHtml', when: 'htmlBlockSelected' },
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
   ],
   /* the polish round (docs/archive/rounds/POLISH.md 2.6 item 74; audit-chrome item 50): Google's seventeen rows
@@ -3354,6 +3374,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.formatOptions',
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
     /* SPEC-2 0.100: a picture object covering the sheet at the bottom of the stack leaves no
        empty sheet to right-click, so Change background and Guides stay one click away */
@@ -3373,6 +3394,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.changeShape',
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
   ],
   line: [
@@ -3387,6 +3409,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.bordersLines.lineEnd',
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
   ],
   group: [
@@ -3405,6 +3428,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.formatOptions',
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
   ],
   chart: [
@@ -3422,6 +3446,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.formatOptions',
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
   ],
   table: [
@@ -3434,6 +3459,7 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.formatOptions',
     'format.altText',
     DIVIDER,
+    'insert.animation',
     'insert.comment',
   ],
   tableCell: [

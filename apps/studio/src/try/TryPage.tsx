@@ -5,7 +5,7 @@ import { useBlocker } from '@tanstack/react-router';
 import { useMountEffect } from '../components/useMountEffect';
 import { EditorRoot } from '../editor/EditorRoot';
 import type { EditSearch } from '../routes/-edit-search';
-import { framingWindow, topWindow } from './frame';
+import { tryBlocker } from './frame';
 import { trySession } from './session';
 import type { TrySession } from './session';
 
@@ -33,7 +33,8 @@ declare global {
  * deck, on the tab backend, with Claude Code and Codex at work. The session is made at the first
  * render, before the editor reads its backend. A navigation away from /try leaves for the window
  * around the frame, so the lockup, File > Open and New Presentation never load a page inside the
- * hero. `still` holds the agents at their first pose (the poster's capture).
+ * hero, and a leave never asks for the browser's leave prompt (frame.ts `tryBlocker`). `still`
+ * holds the agents at their first pose (the poster's capture).
  */
 export function TryPage({
   search,
@@ -45,15 +46,7 @@ export function TryPage({
   onSearch: (patch: Partial<EditSearch>) => void;
 }) {
   const [session] = useState(() => trySession({ win: window, still }));
-  useBlocker({
-    shouldBlockFn: ({ next }) => {
-      if (next.pathname === '/try') return false;
-      if (framingWindow(window) === null) return false;
-      const query = new URLSearchParams(next.search as Record<string, string>).toString();
-      topWindow(window).location.assign(`${next.pathname}${query === '' ? '' : `?${query}`}`);
-      return true;
-    },
-  });
+  useBlocker(tryBlocker(window));
   useMountEffect(() => {
     const stop = session.start();
     window.turboslideTry = {

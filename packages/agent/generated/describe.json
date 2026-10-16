@@ -668,7 +668,7 @@
     },
     "block.align": {
       "label": "Align blocks",
-      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
+      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
       "mutates": true,
       "milestone": "M6",
       "group": "block"
@@ -1235,7 +1235,7 @@
     },
     "presence.follow": {
       "label": "Follow",
-      "doc": "The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.",
+      "doc": "The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.",
       "mutates": true,
       "milestone": "GS3",
       "group": "presence"
@@ -1515,7 +1515,7 @@
     },
     "share.emailCollaborators": {
       "label": "Email collaborators",
-      "doc": "Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.",
+      "doc": "Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.",
       "mutates": true,
       "milestone": "GS3",
       "group": "share"
@@ -1571,7 +1571,7 @@
     },
     "account.setName": {
       "label": "Change name",
-      "doc": "Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
+      "doc": "Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
       "mutates": true,
       "milestone": "GS3",
       "group": "account"
@@ -1613,7 +1613,7 @@
     },
     "admin.flag": {
       "label": "Kill switch",
-      "doc": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.",
+      "doc": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.",
       "mutates": true,
       "milestone": "GS3",
       "group": "admin"

@@ -2130,7 +2130,7 @@
           "type": "string"
         },
         "replaceSource": {
-          "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)",
+          "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins",
           "type": "string",
           "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         },
@@ -2267,7 +2267,7 @@
           ]
         },
         "allowHosts": {
-          "description": "Hosts beyond the built-in allowlist (SPEC 11 captureHosts)",
+          "description": "Hosts beyond the built-in allowlist",
           "type": "array",
           "items": {
             "type": "string"
@@ -2618,7 +2618,7 @@
           "type": "boolean"
         },
         "pattern": {
-          "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
+          "description": "The threshold texture to regenerate the twins with; bayer8 unless set",
           "type": "string",
           "enum": [
             "bayer8",
@@ -22219,7 +22219,7 @@
           ]
         },
         "baseRevision": {
-          "description": "The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)",
+          "description": "The comments revision the caller read; a stale value never refuses",
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
@@ -29922,7 +29922,7 @@
           ]
         },
         "mode": {
-          "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
+          "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent",
           "type": "string",
           "enum": [
             "native",
@@ -29942,7 +29942,7 @@
           }
         },
         "fonts": {
-          "description": "The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
+          "description": "The export font set: standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
           "type": "string",
           "enum": [
             "exact",
@@ -29954,12 +29954,12 @@
           "type": "boolean"
         },
         "headings": {
-          "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
+          "description": "Write every heading as a PNG instead of a text box",
           "type": "string",
           "const": "raster"
         },
         "rasterScale": {
-          "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)",
+          "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3",
           "anyOf": [
             {
               "type": "string",
@@ -29976,7 +29976,7 @@
           ]
         },
         "pictureScale": {
-          "description": "The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)",
+          "description": "The scale two-tone pictures are regenerated at from the one-bit image",
           "type": "number",
           "enum": [
             2,
@@ -29984,7 +29984,7 @@
           ]
         },
         "excludeShareAlike": {
-          "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
+          "description": "Replace share-alike pictures with the paper plate and its credit",
           "type": "boolean"
         },
         "svgVector": {
@@ -30000,7 +30000,7 @@
           ]
         },
         "verify": {
-          "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)",
+          "description": "Render the files back through LibreOffice and diff every page against the web render",
           "type": "boolean"
         },
         "slideIds": {
@@ -30063,7 +30063,7 @@
           "additionalProperties": false
         },
         "merge": {
-          "description": "Hosted only: build the file from the stored batches of the job (SPEC-2 8.1)",
+          "description": "Hosted only: build the file from the stored batches of the job",
           "type": "object",
           "properties": {
             "jobId": {
@@ -30112,7 +30112,7 @@
           "type": "boolean"
         },
         "includeComments": {
-          "description": "Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)",
+          "description": "Append each slide’s comment threads, for readers with readComments",
           "type": "boolean"
         }
       },
@@ -33084,7 +33084,7 @@
         },
         "activityForCommenters": {
           "type": "boolean",
-          "description": "The owner lets commenters read the Activity panel (SPEC-3 5.7)"
+          "description": "The owner lets commenters read the Activity panel"
         }
       },
       "required": [
@@ -52765,7 +52765,7 @@
     {
       "name": "deck_align_blocks",
       "action": "block.align",
-      "description": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
+      "description": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
       "inputSchema": {
         "$id": "#/$defs/BlockAlignInput",
         "type": "object",
@@ -57265,7 +57265,7 @@
             "type": "string"
           },
           "replaceSource": {
-            "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)",
+            "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
@@ -58587,7 +58587,7 @@
             "type": "boolean"
           },
           "pattern": {
-            "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
+            "description": "The threshold texture to regenerate the twins with; bayer8 unless set",
             "type": "string",
             "enum": [
               "bayer8",
@@ -59033,7 +59033,7 @@
             ]
           },
           "allowHosts": {
-            "description": "Hosts beyond the built-in allowlist (SPEC 11 captureHosts)",
+            "description": "Hosts beyond the built-in allowlist",
             "type": "array",
             "items": {
               "type": "string"
@@ -61519,7 +61519,7 @@
             ]
           },
           "mode": {
-            "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
+            "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent",
             "type": "string",
             "enum": [
               "native",
@@ -61539,7 +61539,7 @@
             }
           },
           "fonts": {
-            "description": "The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
+            "description": "The export font set: standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
             "type": "string",
             "enum": [
               "exact",
@@ -61551,12 +61551,12 @@
             "type": "boolean"
           },
           "headings": {
-            "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
+            "description": "Write every heading as a PNG instead of a text box",
             "type": "string",
             "const": "raster"
           },
           "rasterScale": {
-            "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)",
+            "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3",
             "anyOf": [
               {
                 "type": "string",
@@ -61573,7 +61573,7 @@
             ]
           },
           "pictureScale": {
-            "description": "The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)",
+            "description": "The scale two-tone pictures are regenerated at from the one-bit image",
             "type": "number",
             "enum": [
               2,
@@ -61581,7 +61581,7 @@
             ]
           },
           "excludeShareAlike": {
-            "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
+            "description": "Replace share-alike pictures with the paper plate and its credit",
             "type": "boolean"
           },
           "svgVector": {
@@ -61597,7 +61597,7 @@
             ]
           },
           "verify": {
-            "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)",
+            "description": "Render the files back through LibreOffice and diff every page against the web render",
             "type": "boolean"
           },
           "slideIds": {
@@ -61660,7 +61660,7 @@
             "additionalProperties": false
           },
           "merge": {
-            "description": "Hosted only: build the file from the stored batches of the job (SPEC-2 8.1)",
+            "description": "Hosted only: build the file from the stored batches of the job",
             "type": "object",
             "properties": {
               "jobId": {
@@ -62051,7 +62051,7 @@
             "type": "boolean"
           },
           "includeComments": {
-            "description": "Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)",
+            "description": "Append each slide’s comment threads, for readers with readComments",
             "type": "boolean"
           }
         },
@@ -66802,7 +66802,7 @@
     {
       "name": "deck_follow_client",
       "action": "presence.follow",
-      "description": "The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.",
+      "description": "The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.",
       "inputSchema": {
         "$id": "#/$defs/PresenceFollowInput",
         "type": "object",
@@ -69193,7 +69193,7 @@
             ]
           },
           "baseRevision": {
-            "description": "The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)",
+            "description": "The comments revision the caller read; a stale value never refuses",
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
@@ -78344,7 +78344,7 @@
           },
           "activityForCommenters": {
             "type": "boolean",
-            "description": "The owner lets commenters read the Activity panel (SPEC-3 5.7)"
+            "description": "The owner lets commenters read the Activity panel"
           }
         },
         "required": [
@@ -86371,7 +86371,7 @@
     {
       "name": "deck_email_collaborators",
       "action": "share.emailCollaborators",
-      "description": "Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.",
+      "description": "Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.",
       "inputSchema": {
         "$id": "#/$defs/ShareEmailCollaboratorsInput",
         "type": "object",
@@ -87755,7 +87755,7 @@
     {
       "name": "deck_set_my_name",
       "action": "account.setName",
-      "description": "Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
+      "description": "Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
       "inputSchema": {
         "$id": "#/$defs/AccountSetNameInput",
         "type": "object",
@@ -88699,7 +88699,7 @@
     {
       "name": "deck_admin_flag",
       "action": "admin.flag",
-      "description": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.",
+      "description": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.",
       "inputSchema": {
         "$id": "#/$defs/AdminFlagInput",
         "type": "object",

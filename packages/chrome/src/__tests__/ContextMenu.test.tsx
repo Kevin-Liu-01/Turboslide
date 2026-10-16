@@ -11,7 +11,7 @@ import { hideTooltip } from '../Tooltip';
 
 // The right-click menus of gslides-parity SPEC 4.2 and 4.3 over the menu primitive: the card
 // menu's order, its dividers, the keys on the right, the disabled stubs, Unskip slide on a skipped
-// card, the Apply layout submenu with the 21 layouts and the current one checked, and focus
+// card, the Apply layout submenu with the 22 layouts and the current one checked, and focus
 // returning to the right-clicked element on Esc.
 
 const CTX: MenuContext = {
@@ -208,7 +208,7 @@ describe('ContextMenu', () => {
     expect(document.activeElement).toBe(document.getElementById('card'));
   });
 
-  it('opens Apply layout as the 21 layouts with the current one checked and picks one', () => {
+  it('opens Apply layout as the 22 layouts with the current one checked and picks one', () => {
     const onLayout = vi.fn();
     render(<Harness onLayout={onLayout} layout="big-number" />);
     const apply = document.querySelector<HTMLElement>('[data-menu-item="slide.applyLayout"]');

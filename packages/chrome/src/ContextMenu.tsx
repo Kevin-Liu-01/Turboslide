@@ -24,7 +24,7 @@ import './ContextMenu.css';
  * the element that was right-clicked, and a row's activation reaches the caller through
  * `onSelect` with the model's item; the caller runs its effect (an action, a dialog, a panel).
  * Apply layout is the model's first dynamic submenu: `renderLayouts` draws the layout grid when
- * the chrome has one, and the default here is the plain list of the 21 layouts with the current
+ * the chrome has one, and the default here is the plain list of the 22 layouts with the current
  * one checked, Google's eleven first and the GT layouts after the rule (SPEC 5.2), each row a
  * `menuitemradio` the arrows walk. The other dynamic submenus of round two (Change shape ▸ and
  * Mask image ▸ with a shape grid, the bullet and numbering preset grids, the line ends and
@@ -128,7 +128,7 @@ type LayoutListProps = {
 };
 
 /**
- * The default Apply layout submenu: the 21 layouts as radio rows, Google's eleven, the "GT
+ * The default Apply layout submenu: the 22 layouts as radio rows, Google's eleven, the "More
  * layouts" rule, then the rest (gslides-parity SPEC 5.2), the current layout checked. The arrows
  * walk the rows, Enter picks; the parent Menu handles Esc and Left.
  */

@@ -7,7 +7,7 @@
 // from the current view, or names the input it still needs. The Insert group (Kevin, 2026-09-11:
 // "reuse primitives and icons like boxes and shapes") leads with the primitives palette: Box,
 // Shape in its five kinds, Rule, Text, Icon (through the sprite picker), Image and Material,
-// then the grammar's other blocks and the 21 layouts of @turboslide/schema/layouts as New slide
+// then the grammar's other blocks and the 22 layouts of @turboslide/schema/layouts as New slide
 // entries (gslides-parity SPEC 5.1: one list in one order everywhere; each runs slide.new); the same
 // entries feed the toolbar's Insert menu (InsertMenu.tsx). The `menus` and `layouts` groups are the
 // ToolFinder's (Search the menus, SPEC 2.10) and stay empty in the full palette. On a freeform slide every inserted block carries a position box

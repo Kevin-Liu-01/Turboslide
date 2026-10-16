@@ -1,5 +1,5 @@
 // Apply layout (gslides-parity SPEC 5.5, 14.2 apply-layout.test.ts): every source layout to every
-// target layout of the 21 produces a valid slide; the mapping rows of the table (title, body,
+// target layout of the 22 produces a valid slide; the mapping rows of the table (title, body,
 // appended paragraphs, lists, tables, pictures, the credit, the kept fields); the drop count on
 // Title slide and Main point; the same layout resets the overrides; freeform to Blank keeps the
 // boxes, a grammar source to Blank gets boxes, freeform to a grammar layout refiles by geometry.
@@ -103,7 +103,7 @@ const CONTENT_RULE: ContentSlide = {
 };
 
 describe('applyLayout', () => {
-  it('produces a valid slide for every source layout to every target layout of the 21', () => {
+  it('produces a valid slide for every source layout to every target layout of the 22', () => {
     for (const source of LAYOUT_IDS) {
       const sourceSlide = filled(source);
       for (const target of LAYOUT_IDS) {

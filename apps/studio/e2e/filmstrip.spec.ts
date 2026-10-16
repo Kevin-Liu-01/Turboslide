@@ -312,7 +312,7 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
       .toEqual(['title', 'content-rule', 'third', 'second']);
   });
 
-  test('Apply layout lists the 21 layouts with the current one checked, and a pick is one slide.applyLayout', async ({
+  test('Apply layout lists the 22 layouts with the current one checked, and a pick is one slide.applyLayout', async ({
     page,
   }) => {
     test.setTimeout(180_000);
@@ -322,7 +322,7 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     const apply = menu(page).locator('[data-menu-item="slide.applyLayout"]');
     await apply.hover();
     const radios = page.locator('[role="menuitemradio"][data-layout]');
-    await expect(radios).toHaveCount(21);
+    await expect(radios).toHaveCount(22);
     await expect(radios.first()).toHaveAttribute('data-layout', 'title');
     await expect(page.locator('.ts-layout-rule')).toHaveText('More layouts');
     await expect(page.locator('[role="menuitemradio"][aria-checked="true"]')).toHaveCount(1);

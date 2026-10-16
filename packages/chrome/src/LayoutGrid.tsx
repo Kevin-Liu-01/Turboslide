@@ -14,9 +14,9 @@ import { cn } from './lib/cn';
 import './LayoutGrid.css';
 
 /**
- * The layout grid (gslides-parity SPEC 5.2, 5.3, 5.5; R03 finding 2): the 21 layouts as 128 by
+ * The layout grid (gslides-parity SPEC 5.2, 5.3, 5.5; R03 finding 2): the 22 layouts as 128 by
  * 72 tiles in three columns with the name under each, Google's eleven first, a labelled rule
- * reading "GT layouts", the ten GT layouts after it. Each tile is the slide the entry's `make`
+ * reading "More layouts", the eleven GT layouts after it. Each tile is the slide the entry's `make`
  * produces for this deck, rendered through the one renderer with the live prompts, in the deck's
  * appearance, cached per appearance and deck. The current layout is ringed in ink. A picture
  * layout the deck cannot make (no starter picture) reads "Add a picture first" and asks for one.

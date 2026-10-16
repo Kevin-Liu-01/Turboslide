@@ -6,7 +6,7 @@ import type { AccessRecord } from '@turboslide/schema/access';
 import { newDeckRecord } from '@turboslide/schema/access';
 import type { Version } from '@turboslide/schema/mutations';
 
-import { recordForReader, shapeRecordFor } from './access';
+import { capabilitiesOf, recordForReader, shapeRecordFor, sharesDeck, standingOf } from './access';
 import {
   isStandIn,
   standInFor,
@@ -121,7 +121,7 @@ describe('the stand-ins (stand-ins.ts)', () => {
 describe('the record a reader without share reads (access.ts)', () => {
   it('names no other principal and keeps only the own grant, for the route and the loader', () => {
     const record = sharedRecord();
-    const routed = shapeRecordFor(record, 'viewer', VIEWER);
+    const routed = shapeRecordFor(record, 'viewer', VIEWER, 'grant');
     expect(routed.owner).toBe(standInFor(DECK, OWNER));
     expect(routed.grants).toEqual([{ ...record.grants[1], invitedBy: standInFor(DECK, OWNER) }]);
     expect(principalIdsIn(routed)).toEqual([VIEWER]);
@@ -139,12 +139,36 @@ describe('the record a reader without share reads (access.ts)', () => {
 
   it('answers the whole record to the owner and to an editor while editors may share', () => {
     const record = sharedRecord();
-    expect(shapeRecordFor(record, 'owner', OWNER)).toBe(record);
-    expect(shapeRecordFor(record, 'editor', EDITOR)).toBe(record);
+    expect(shapeRecordFor(record, 'owner', OWNER, 'owner')).toBe(record);
+    expect(shapeRecordFor(record, 'editor', EDITOR, 'grant')).toBe(record);
     const closed = { ...record, settings: { ...record.settings, editorsCanShare: false } };
-    const shaped = shapeRecordFor(closed, 'editor', EDITOR);
+    const shaped = shapeRecordFor(closed, 'editor', EDITOR, 'grant');
     expect(shaped.owner).toBe(standInFor(DECK, OWNER));
     expect(principalIdsIn(shaped)).toEqual([EDITOR]);
+  });
+
+  it("answers an edit link's holder the reader's record and no share capability (post-deploy review)", () => {
+    /* an anonymous holder of the edit link read every link, the pending invitee's address and the
+       owner's id from /api/access/<id>, and was listed share, trash, restore and publish */
+    const record = sharedRecord();
+    const holder = 'anon_3ad72548-0000-4000-8000-000000000000';
+    const shaped = shapeRecordFor(record, 'editor', holder, 'link');
+    expect(shaped).not.toBe(record);
+    expect(shaped.owner).toBe(standInFor(DECK, OWNER));
+    expect(shaped.links).toBeUndefined();
+    expect(shaped.grants).toBeUndefined();
+    expect(principalIdsIn(shaped)).toEqual([]);
+    expect(sharesDeck(record, 'editor', 'link')).toBe(false);
+    expect(sharesDeck(record, 'editor', 'open')).toBe(false);
+    expect(sharesDeck(record, 'editor', 'grant')).toBe(true);
+    const listed = capabilitiesOf('editor', record, 'link');
+    for (const capability of ['share', 'trash', 'restore', 'publish', 'settings'] as const)
+      expect(listed).not.toContain(capability);
+    expect(listed).toEqual(expect.arrayContaining(['read', 'write', 'follow']));
+    expect(standingOf({ ok: true, role: 'editor', via: 'link' }, record).capabilities).toEqual(
+      listed,
+    );
+    expect(capabilitiesOf('editor', record, 'grant')).toContain('share');
   });
 });
 

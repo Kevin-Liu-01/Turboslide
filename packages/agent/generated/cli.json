@@ -201,7 +201,7 @@
           "flag": "--token",
           "type": "string",
           "required": false,
-          "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use"
+          "description": "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use"
         },
         {
           "key": "as",
@@ -252,7 +252,7 @@
           "flag": "--token",
           "type": "string",
           "required": false,
-          "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use"
+          "description": "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use"
         },
         {
           "key": "as",

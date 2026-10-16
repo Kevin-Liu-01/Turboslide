@@ -27,6 +27,7 @@ import {
   accessRecordSchema,
   capabilitiesForRole,
   grantIsLive,
+  isRequestPending,
   legacyAssetKey,
   linkIsLive,
   maxRole,
@@ -668,7 +669,7 @@ export async function shareRequestAccess(
       if (standing(record, deps.caller, now) !== null) return;
       const mine = record.requests.filter(
         (row) =>
-          row.respondedAt === null &&
+          isRequestPending(row, Date.parse(now)) &&
           ((row.principalId !== null && ids.has(row.principalId)) ||
             (input.email !== undefined && row.email === input.email)),
       );
@@ -716,7 +717,7 @@ export async function shareListRequests(
   const now = stamp(deps);
   const { record } = await loadRecord(deps);
   require(record, deps.caller, now, 'share', 'share.listRequests');
-  return { requests: record.requests.filter((row) => row.respondedAt === null) };
+  return { requests: record.requests.filter((row) => isRequestPending(row, Date.parse(now))) };
 }
 
 export async function shareRespond(
@@ -730,6 +731,9 @@ export async function shareRespond(
       require(next, deps.caller, now, 'share', 'share.respond');
       const request = next.requests.find((row) => row.id === input.requestId);
       if (request === undefined) throw new RangeError(`no request ${input.requestId}`);
+      /* an unanswered request expires after 30 days (docs/sharing; isRequestPending) */
+      if (request.respondedAt === null && !isRequestPending(request, Date.parse(now)))
+        throw new RangeError(`request ${input.requestId} expired after 30 days without an answer`);
       request.respondedAt = now;
       if (input.grant !== null) {
         next.grants.push({

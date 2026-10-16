@@ -16,13 +16,14 @@ import type { AuthContext } from '../../server/authorize';
 import {
   ANY_SUBJECT,
   UPLOAD_PURPOSE,
-  bundleRouteAdmission,
+  bundleRouteAdmissionWithKey,
   fetchBundleFromUrl,
   importDeckBundle,
 } from '../../server/bundle-core';
 import { assertFlag } from '../../server/flags';
 import { publicDeckAnswer } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
+import { bearerKeyContext } from '../../server/route-caller';
 import { ensureDecks, newDeckId } from '../../server/root';
 
 // POST /api/decks/bundle (docs/deck-transfer.md): uploads a deck bundle and creates the deck it
@@ -137,7 +138,12 @@ export const Route = createFileRoute('/api/decks/bundle')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const admission = bundleRouteAdmission(request, UPLOAD_PURPOSE, ANY_SUBJECT);
+        const admission = await bundleRouteAdmissionWithKey(
+          request,
+          UPLOAD_PURPOSE,
+          ANY_SUBJECT,
+          bearerKeyContext,
+        );
         if (admission instanceof Response) return admission;
         // the identity behind the request (gslides-parity SPEC-3 8.2: a ticket carries the identity
         // it was minted for and is checked against `write` on the target): the ticket's, the
@@ -145,7 +151,9 @@ export const Route = createFileRoute('/api/decks/bundle')({
         const ctx: AuthContext =
           admission.kind === 'ticket'
             ? contextForIdentity(admission.identity)
-            : await requestContext(request);
+            : admission.kind === 'key'
+              ? admission.ctx
+              : await requestContext(request);
         const identity = identityLabel(ctx) ?? 'anonymous';
         try {
           await assertFlag('readOnly', { identity, action: 'deck.unpack' });
@@ -242,7 +250,12 @@ export const Route = createFileRoute('/api/decks/bundle')({
         }
       },
       GET: async ({ request }) => {
-        const admission = bundleRouteAdmission(request, UPLOAD_PURPOSE, ANY_SUBJECT);
+        const admission = await bundleRouteAdmissionWithKey(
+          request,
+          UPLOAD_PURPOSE,
+          ANY_SUBJECT,
+          bearerKeyContext,
+        );
         if (admission instanceof Response) return admission;
         return refuse(
           405,

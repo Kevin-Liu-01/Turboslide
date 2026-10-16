@@ -1404,7 +1404,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .optional()
         .describe(
-          'The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use',
+          "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use",
         ),
       as: slugSchema
         .optional()
@@ -1442,7 +1442,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .optional()
         .describe(
-          'The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use',
+          "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use",
         ),
       as: slugSchema
         .optional()
@@ -4558,7 +4558,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.insert': action({
     id: 'shader.insert',
     label: 'Insert a shader',
-    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
+    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first. The still (the frame downloads, renders and thumbnails draw) is written by an open editor that can write the deck, or by shader.capture: the answer’s stillPending is true until one has, and without an open editor an agent runs shader.capture before a download, else a PDF or PPTX draws a grey plate or the older moment.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4580,6 +4580,9 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       slideId: slugSchema,
       blockId: blockIdSchema,
       block: materialBlockSchema,
+      stillPending: z
+        .boolean()
+        .describe('True while the block has no still for its recipe and moment; see the doc'),
     }),
     cli: {
       usage:
@@ -4597,7 +4600,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.set': action({
     id: 'shader.set',
     label: 'Set a shader field',
-    doc: 'One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.',
+    doc: 'One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry. The still (the frame downloads, renders and thumbnails draw) is written by an open editor that can write the deck, or by shader.capture: the answer’s stillPending is true until one has, and without an open editor an agent runs shader.capture before a download, else a PDF or PPTX draws a grey plate or the older moment.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4614,7 +4617,13 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       value: z.unknown().optional().describe('Absent removes the field'),
       baseRevision,
     }),
-    output: z.strictObject({ revision, block: materialBlockSchema }),
+    output: z.strictObject({
+      revision,
+      block: materialBlockSchema,
+      stillPending: z
+        .boolean()
+        .describe('True while the block has no still for its recipe and moment; see the doc'),
+    }),
     cli: { usage: 'turboslide shader set <slideId> <blockId> <path> <value>' },
     mcp: 'deck_shader_set',
     example: {

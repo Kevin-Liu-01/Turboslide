@@ -14,6 +14,7 @@ import {
   DEFAULT_ACCESS_SETTINGS,
   SCOPES,
   SCOPES_FOR,
+  capabilitiesForStanding,
   decide,
   roleAllows,
   synthesizeLegacyRecord,
@@ -180,6 +181,55 @@ describe('the matrix, one assertion per cell', () => {
         else expect(d.status).toBe(403);
       }
     }
+  });
+
+  test('capabilitiesForStanding lists the cells decide() grants, by link and by grant alike', () => {
+    /* post-deploy review: the loaders listed an edit link holder's capabilities by role alone, so
+       it read the whole sharing record (share) that decide() refuses it */
+    const rec = record({
+      generalAccess: { mode: 'link', role: 'viewer' },
+      grants: [grant('usr_ed', 'editor'), grant('usr_co', 'commenter'), grant('usr_vi', 'viewer')],
+      links: [link('lnk_e', 'editor'), link('lnk_c', 'commenter'), link('lnk_v', 'viewer')],
+    });
+    const anon = principal('anon_9f1c2a3e-4b5d-4e6f-8a9b-0c1d2e3f4a5b', 'anonymous');
+    const standings: Array<[Role, 'owner' | 'grant' | 'link', AuthContext]> = [
+      ['owner', 'owner', ctx(OWNER_PRINCIPAL)],
+      ['editor', 'grant', ctx(principal('usr_ed'))],
+      ['commenter', 'grant', ctx(principal('usr_co'))],
+      ['viewer', 'grant', ctx(principal('usr_vi'))],
+      [
+        'editor',
+        'link',
+        ctx(anon, { linkGrants: [{ linkId: 'lnk_e', deckId: 'q4-review', role: 'editor' }] }),
+      ],
+      [
+        'commenter',
+        'link',
+        ctx(anon, { linkGrants: [{ linkId: 'lnk_c', deckId: 'q4-review', role: 'commenter' }] }),
+      ],
+      [
+        'viewer',
+        'link',
+        ctx(anon, { linkGrants: [{ linkId: 'lnk_v', deckId: 'q4-review', role: 'viewer' }] }),
+      ],
+    ];
+    for (const [role, via, c] of standings) {
+      const listed = capabilitiesForStanding(role, via, rec.settings);
+      const granted = CAPABILITIES.filter(
+        (capability) => decide(rec, c, capability, { now: NOW }).ok,
+      );
+      expect([...listed].sort(), `${via} ${role}`).toEqual([...granted].sort());
+    }
+    expect(capabilitiesForStanding('editor', 'link', rec.settings).has('share')).toBe(false);
+    expect(capabilitiesForStanding('editor', 'open', rec.settings).has('share')).toBe(false);
+    expect(capabilitiesForStanding('editor', 'grant', rec.settings).has('share')).toBe(true);
+    /* the Share dialog's footer (menus/strings.ts DIALOGS.share.footer): notes reach no link,
+       skipped slides reach a comment link and no view link */
+    expect(capabilitiesForStanding('commenter', 'link', rec.settings).has('readNotes')).toBe(false);
+    expect(capabilitiesForStanding('commenter', 'link', rec.settings).has('readSkipped')).toBe(
+      true,
+    );
+    expect(capabilitiesForStanding('viewer', 'link', rec.settings).has('readSkipped')).toBe(false);
   });
 
   test('the legacy open deck at each role, and nothing by address when restricted or link', () => {

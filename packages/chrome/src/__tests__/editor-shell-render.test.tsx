@@ -11,6 +11,7 @@ import { ACTION_IDS } from '@turboslide/schema/actions';
 import type { Block } from '@turboslide/schema/blocks';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
 import { workedDocument } from '@turboslide/schema/fixtures';
+import { pagePreference } from '@turboslide/viewer/live-plan';
 
 import { stampPreferences } from '../chrome-preferences';
 import { RETIRED_KEYS_STORAGE, SETTINGS_STORAGE } from '../editor-shell';
@@ -211,6 +212,38 @@ describe('Tools > Preferences: Match the system, Reduce motion and Show tooltips
           .querySelector('[data-menu-item="tools.preferences.reduceMotion"]')
           ?.getAttribute('aria-checked'),
       ).toBe('true');
+    },
+  );
+
+  it(
+    'Play animated patterns stamps the root at once, so the editor and the show hold or move without a reload',
+    { timeout: 15_000 },
+    () => {
+      /* post-deploy review: Off was stored but the root carried no data-hold-live until a reload,
+         and In the show only after Off kept holding until a Reduce motion toggle */
+      const { container } = render(<Harness input={input()} shell={shellState()} />);
+      const pick = (word: 'on' | 'show' | 'off') =>
+        clickMenuPath(
+          container,
+          'tools',
+          'tools.preferences',
+          'tools.preferences.playShaders',
+          `tools.preferences.playShaders.${word}`,
+        );
+      const root = document.documentElement;
+      pick('off');
+      expect(JSON.parse(localStorage.getItem(SETTINGS_STORAGE) ?? '{}').playShaders).toBe('off');
+      expect(root.hasAttribute('data-hold-live')).toBe(true);
+      expect(pagePreference()).toBe('off');
+      pick('show');
+      expect(root.hasAttribute('data-hold-live')).toBe(false);
+      expect(pagePreference()).toBe('show');
+      pick('on');
+      expect(root.hasAttribute('data-play-live')).toBe(true);
+      expect(pagePreference()).toBe('on');
+      pick('show');
+      expect(root.hasAttribute('data-play-live')).toBe(false);
+      expect(pagePreference()).toBe('show');
     },
   );
 

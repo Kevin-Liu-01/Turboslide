@@ -14,9 +14,11 @@
  *    editor's one live mount carried into the show.
  *
  * The person's settings can only hold. The preference is stamped on the root as
- * `data-hold-live` while it is Off (packages/chrome/src/chrome-preferences.ts and the show's
- * Options menu), so every surface reads it without the editor's settings, as Reduce motion's
- * `data-reduce-motion` is read. The presenter console's previews are LiveClone copies and never
+ * `data-hold-live` while it is Off and `data-play-live` while it is On
+ * (packages/chrome/src/chrome-preferences.ts and the show's Options menu), so every surface reads
+ * it without the editor's settings, as Reduce motion's `data-reduce-motion` is read. The editor's
+ * mount reads On alone as leave to move the selected pattern while editing (`editorPlays`): In
+ * the show only and Off hold it on its still there. The presenter console's previews are LiveClone copies and never
  * mount, so a talk runs one live canvas, in the audience window.
  */
 import type { PlayMode } from '@turboslide/schema/deck';
@@ -63,6 +65,9 @@ export function planLive(roots: ReadonlyArray<LiveRootFacts>, settings: LiveSett
 /** Present on the root while the person's Play animated patterns preference is Off. */
 export const HOLD_LIVE_ATTRIBUTE = 'data-hold-live';
 
+/** Present on the root while the person's Play animated patterns preference is On. */
+export const PLAY_LIVE_ATTRIBUTE = 'data-play-live';
+
 /** The stored preference as one of its three words; In the show only when absent or unknown. */
 export function livePreferenceOf(value: unknown): LivePreference {
   return value === 'on' || value === 'off' ? value : 'show';
@@ -71,13 +76,26 @@ export function livePreferenceOf(value: unknown): LivePreference {
 /** Stamps the preference on the root, so every surface of the page holds under Off. */
 export function stampLivePreference(value: unknown): void {
   if (typeof document === 'undefined') return;
-  document.documentElement.toggleAttribute(HOLD_LIVE_ATTRIBUTE, livePreferenceOf(value) === 'off');
+  const preference = livePreferenceOf(value);
+  document.documentElement.toggleAttribute(HOLD_LIVE_ATTRIBUTE, preference === 'off');
+  document.documentElement.toggleAttribute(PLAY_LIVE_ATTRIBUTE, preference === 'on');
 }
 
-/** The preference as the page's root carries it: Off while the attribute is present. */
+/** The preference as the page's root carries it: Off, On, else In the show only. */
 export function pagePreference(): LivePreference {
   if (typeof document === 'undefined') return 'show';
-  return document.documentElement.hasAttribute(HOLD_LIVE_ATTRIBUTE) ? 'off' : 'show';
+  const root = document.documentElement;
+  if (root.hasAttribute(HOLD_LIVE_ATTRIBUTE)) return 'off';
+  return root.hasAttribute(PLAY_LIVE_ATTRIBUTE) ? 'on' : 'show';
+}
+
+/**
+ * Whether the editor's selected pattern moves while editing (docs editor/objects, Tools >
+ * Preferences > Play animated patterns): under On alone. In the show only and Off mount it on its
+ * still, where a slider and the Still group's Play preview on it.
+ */
+export function editorPlays(preference: LivePreference): boolean {
+  return preference === 'on';
 }
 
 /**
@@ -91,7 +109,7 @@ export function onLiveSettingsChange(listener: () => void): () => void {
     const observer = new MutationObserver(listener);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: [HOLD_LIVE_ATTRIBUTE],
+      attributeFilter: [HOLD_LIVE_ATTRIBUTE, PLAY_LIVE_ATTRIBUTE],
     });
     stops.push(() => observer.disconnect());
   }

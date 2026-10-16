@@ -1207,14 +1207,14 @@
     },
     "shader.insert": {
       "label": "Insert a shader",
-      "doc": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+      "doc": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first. The still (the frame downloads, renders and thumbnails draw) is written by an open editor that can write the deck, or by shader.capture: the answer’s stillPending is true until one has, and without an open editor an agent runs shader.capture before a download, else a PDF or PPTX draws a grey plate or the older moment.",
       "mutates": true,
       "milestone": "P1",
       "group": "block"
     },
     "shader.set": {
       "label": "Set a shader field",
-      "doc": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+      "doc": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry. The still (the frame downloads, renders and thumbnails draw) is written by an open editor that can write the deck, or by shader.capture: the answer’s stillPending is true until one has, and without an open editor an agent runs shader.capture before a download, else a PDF or PPTX draws a grey plate or the older moment.",
       "mutates": true,
       "milestone": "P1",
       "group": "block"

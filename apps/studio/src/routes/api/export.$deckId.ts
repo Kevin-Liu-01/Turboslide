@@ -33,6 +33,11 @@ import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
 import { withoutServerPaths } from '../../server/paths-out';
 import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
+import {
+  ROUTE_BEARER_REQUIRED,
+  bearerKeyContext,
+  routeCallerContext,
+} from '../../server/route-caller';
 import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/root';
 import { storedFileLink } from '../../server/stored-files';
 import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
@@ -87,7 +92,8 @@ import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
 // `keepalive`, where it cannot carry a header (SPEC-2 0.45).
 //
 // Authentication (SPEC 11): TURBOSLIDE_TOKEN, when set, is required as `Authorization: Bearer
-// <token>` on every request here; unset (a checkout), the route is open. The editor never fetches
+// <token>`, or a live API key in its place (server/route-caller.ts: the key acts as its owner with
+// its scopes), on every request here; unset (a checkout), the route is open. The editor never fetches
 // this route: its export runs through the syncExport server function of server/download.ts (the
 // same runSyncExport and the same JSON answer, reached same origin under the CSRF middleware), so
 // the page holds no token. The token is set on the production and preview environments of the
@@ -183,16 +189,13 @@ async function jobOfDeck(jobId: string, deckId: string): Promise<boolean> {
   return (job?.input as { deckId?: string } | undefined)?.deckId === deckId;
 }
 
-function unauthorized(request: Request): Response | null {
+async function unauthorized(request: Request): Promise<Response | null> {
   const token = process.env.TURBOSLIDE_TOKEN;
   if (token === undefined || token === '') return null;
   const given = bearerToken(request);
   if (given !== undefined && safeEqual(given, token)) return null;
-  return refuse(
-    401,
-    'unauthorized',
-    'bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>',
-  );
+  if ((await bearerKeyContext(request)) !== null) return null;
+  return refuse(401, 'unauthorized', ROUTE_BEARER_REQUIRED);
 }
 
 function badRequest(message: string): Response {
@@ -317,7 +320,7 @@ async function syncExport(
   let result;
   try {
     // a stored copy's link names this route's caller (hardening K1#5a)
-    const ctx = await requestContext(request);
+    const ctx = await routeCallerContext(request);
     result = await runSyncExport(deckId, input, {
       link: (target) => storedFileLink(target, ctx),
     });
@@ -391,12 +394,12 @@ export const Route = createFileRoute('/api/export/$deckId')({
             return pathlessJson({ error: 'forbidden', capability: 'export' }, { status: 403 });
           }
         }
-        const denied = cancelling ? null : unauthorized(request);
+        const denied = cancelling ? null : await unauthorized(request);
         if (denied) return denied;
         if (!SLUG_PATTERN.test(params.deckId)) return badRequest('deckId must be a slug');
         let ctx: Awaited<ReturnType<typeof requestContext>> | null = null;
         if (!cancelling) {
-          ctx = await requestContext(request);
+          ctx = await routeCallerContext(request);
           const refused = await refusedBy(ctx, params.deckId, 'export', 'export.run');
           if (refused !== null) return refused;
           const flagged = await requireFlag('exports', {
@@ -466,7 +469,7 @@ export const Route = createFileRoute('/api/export/$deckId')({
         }
         const input = parsed.data as ExportInput;
         // the notes and the skipped slides need their own cells (SPEC-3 6.2, 8.2; report 04 F21)
-        const caller = await requestContext(request);
+        const caller = ctx ?? (await routeCallerContext(request));
         if (input.includeNotes === true) {
           const refused = await refusedBy(caller, params.deckId, 'exportNotes', 'export.run');
           if (refused !== null) return refused;
@@ -492,11 +495,11 @@ export const Route = createFileRoute('/api/export/$deckId')({
         }
       },
       GET: async ({ params, request }) => {
-        const denied = unauthorized(request);
+        const denied = await unauthorized(request);
         if (denied) return denied;
         if (!SLUG_PATTERN.test(params.deckId)) return badRequest('deckId must be a slug');
         const refused = await refusedBy(
-          await requestContext(request),
+          await routeCallerContext(request),
           params.deckId,
           'export',
           'export.list',

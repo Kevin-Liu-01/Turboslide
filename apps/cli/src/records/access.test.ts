@@ -5,9 +5,21 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import type { AccessRecord } from '@turboslide/schema/access';
-import { legacyAssetKey, linkIsLive, newDeckRecord } from '@turboslide/schema/access';
+import {
+  isRequestPending,
+  legacyAssetKey,
+  linkIsLive,
+  newDeckRecord,
+} from '@turboslide/schema/access';
 
-import { shareClaim, shareGet, shareSetGeneralAccess, standing } from './access.ts';
+import {
+  shareClaim,
+  shareGet,
+  shareListRequests,
+  shareRespond,
+  shareSetGeneralAccess,
+  standing,
+} from './access.ts';
 import type { AccessDeps, Caller } from './access.ts';
 
 // The general access writes (docs/archive/rounds/POLISH.md items 79 and 96; the rows share.role-change.keeps-link
@@ -197,5 +209,46 @@ describe('share.claim (security hotfix H3, DATA-V3)', () => {
     expect(record.owner).toBe('usr_admin');
     expect(record.createdBy).toBe('usr_admin');
     expect(record.generalAccess).toEqual({ mode: 'open', role: 'viewer' });
+  });
+});
+
+// docs/sharing: "A request nobody answers expires after 30 days" (post-deploy review: no mechanism
+// read askedAt). isRequestPending is the rule; the list, the answer and the dialog read it.
+describe('an unanswered access request after 30 days', () => {
+  const asked = (id: string, askedAt: string) => ({
+    id,
+    principalId: 'usr_asker',
+    email: null,
+    role: 'viewer' as const,
+    askedAt,
+    respondedAt: null,
+  });
+
+  it('is pending under 30 days, expired at 30, and never once answered', () => {
+    const now = Date.parse(NOW);
+    expect(isRequestPending(asked('a', '2026-08-30T12:00:01.000Z'), now)).toBe(true);
+    expect(isRequestPending(asked('b', '2026-08-29T12:00:00.000Z'), now)).toBe(false);
+    expect(isRequestPending({ ...asked('c', NOW), respondedAt: NOW }, now)).toBe(false);
+    expect(isRequestPending(asked('d', 'not a time'), now)).toBe(false);
+  });
+
+  it('leaves the list and cannot be answered', async () => {
+    const record: AccessRecord = {
+      ...newDeckRecord('q4-review', 'anon_owner', legacyAssetKey('q4-review'), NOW),
+      requests: [
+        asked('req_old', '2026-08-01T00:00:00.000Z'),
+        asked('req_new', '2026-09-27T00:00:00.000Z'),
+      ],
+    };
+    const stored = { record };
+    const dir = mkdtempSync(join(tmpdir(), 'ts-access-'));
+    const deps = depsFor(dir, stored);
+    const listed = await shareListRequests(deps);
+    expect(listed.requests.map((row) => row.id)).toEqual(['req_new']);
+    await expect(
+      shareRespond(deps, { requestId: 'req_old', grant: 'viewer', baseRevision: record.revision }),
+    ).rejects.toThrow(/expired after 30 days/);
+    expect(stored.record.grants).toEqual([]);
+    rmSync(dir, { recursive: true, force: true });
   });
 });

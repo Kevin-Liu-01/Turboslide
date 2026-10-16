@@ -4,7 +4,7 @@
  * the HTTP paths of the OpenAPI file), and the layouts, themes and animated patterns /features
  * names. The pages do not import the tables, whose schemas their scripts would carry;
  * facts.test.ts recomputes every number from `packages/schema/src/actions.ts`, the layout and
- * theme ids, the material catalog and the generated contracts, and fails with the new number when
+ * theme ids, the material gallery and the generated contracts, and fails with the new number when
  * a table moves, so a page never states a count the tree does not have.
  */
 export type SiteFacts = {
@@ -22,7 +22,10 @@ export type SiteFacts = {
   layouts: number;
   /** the themes of the Theme panel (`THEME_IDS`) */
   themes: number;
-  /** the animated patterns of the material catalog (`MATERIAL_IDS`) */
+  /**
+   * the animated patterns Insert > Animated pattern lists (`GALLERY_MATERIAL_IDS`): the catalog's
+   * 41 less Paper's three placeholders, which `material.list` and saved decks keep
+   */
   materials: number;
 };
 
@@ -34,5 +37,5 @@ export const SITE_FACTS: SiteFacts = {
   page: 185,
   layouts: 22,
   themes: 9,
-  materials: 41,
+  materials: 38,
 };

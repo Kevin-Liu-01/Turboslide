@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 
 import { labelFor } from '@turboslide/identity/labels';
+import { isRequestPending } from '@turboslide/schema/access';
 import type { GrantWho } from '@turboslide/schema/access';
 
 import { ConfirmDialog } from '../ConfirmDialog';
@@ -219,6 +220,7 @@ export function accessSentence(
   mode: 'restricted' | 'link' | 'open',
   role: EditorRole,
   _authorize: AuthorizeMode | undefined,
+  alone = false,
 ): string {
   if (mode === 'open') return LEGACY_SENTENCE;
   if (mode === 'link') {
@@ -227,11 +229,29 @@ export function accessSentence(
     if (role === 'commenter') return 'Anyone with the link can open it and leave comments';
     return 'Anyone with the link can open it and cannot change it';
   }
-  return RESTRICTED_SENTENCE;
+  return alone ? RESTRICTED_SENTENCE : RESTRICTED_SHARED_SENTENCE;
 }
 
-/** The sentence under Restricted (docs/archive/rounds/POLISH.md item 96): no link opens the presentation. */
+/**
+ * The sentence under Restricted for the owner of a deck no person and no live link opens
+ * (docs/archive/rounds/POLISH.md item 96).
+ */
 export const RESTRICTED_SENTENCE = 'Only you can open this presentation';
+
+/**
+ * The sentence under Restricted for anyone else, and for the owner once a person or a live link
+ * opens the deck: "Only you" was shown to an edit link's holder on a deck with three links and an
+ * invite (post-deploy review).
+ */
+export const RESTRICTED_SHARED_SENTENCE = 'Only people with access can open this presentation';
+
+/** True for the owner of a deck that no grant and no live link opens: the one reader of "Only you". */
+export function opensAlone(owner: boolean, access: EditorAccess | undefined): boolean {
+  if (!owner || access === undefined) return false;
+  return (
+    (access.grants ?? []).length === 0 && !(access.links ?? []).some((link) => linkIsLive(link))
+  );
+}
 
 /** `Sep 28, 2026`: the product's date form for a link's Created and Expires (item 96). */
 export function shareDate(iso: string): string {
@@ -363,7 +383,7 @@ export function accessViewOfRecord(
         ...(link.useCount !== undefined ? { useCount: link.useCount } : {}),
       })),
     requests: (record.requests ?? [])
-      .filter((request) => request.respondedAt === null)
+      .filter((request) => isRequestPending(request, now))
       .map((request) => ({
         id: request.id,
         ...(request.principalId !== null
@@ -919,7 +939,12 @@ export function ShareDialog() {
     });
   };
   const showRows = legacy || canShare;
-  const sentence = accessSentence(mode, access.generalAccess.role, authorize);
+  const sentence = accessSentence(
+    mode,
+    access.generalAccess.role,
+    authorize,
+    opensAlone(owner, access),
+  );
   /**
    * One live link of the table: its label, its role, its dates, Copy, Rotate and Revoke. The row
    * is keyed by its place (`key`), not by the link: Rotate replaces the link with one of a new id,
@@ -1087,7 +1112,7 @@ export function ShareDialog() {
                 name: DIALOGS.share.generalAccess,
                 doc:
                   mode === 'restricted'
-                    ? 'Only you, until you pick Anyone with the link'
+                    ? 'Only people with access, until you pick Anyone with the link'
                     : 'No sign in needed; the link can be revoked',
               }}
             />

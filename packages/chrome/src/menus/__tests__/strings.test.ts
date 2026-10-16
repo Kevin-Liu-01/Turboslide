@@ -93,7 +93,7 @@ describe('the default view strings of SPEC-3 15', () => {
     );
     expect(DIALOGS.share.noPendingRequests).toBe('No pending requests');
     expect(DIALOGS.share.footer).toBe(
-      'Speaker notes and skipped slides never travel with a view or comment link',
+      'Speaker notes never travel with a view or comment link, and skipped slides never travel with a view link',
     );
     expect(DIALOGS.share.legacy).toBe('Anyone with the address can view (legacy)');
     expect(DIALOGS.share.switchToLink).toBe('Switch to a link');

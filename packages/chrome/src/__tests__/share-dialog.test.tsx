@@ -27,6 +27,7 @@ import {
   rowAddress,
   shareLinks,
   accessSentence,
+  opensAlone,
 } from '../dialogs/Share';
 import type { AccessRecordJson } from '../dialogs/Share';
 import { PublishDialog } from '../dialogs/Publish';
@@ -1077,13 +1078,69 @@ describe('the two stages of the Share dialog (product round)', () => {
     expect(accessSentence('link', 'viewer', 'shadow')).toBe(
       'Anyone with the link can open it and cannot change it',
     );
-    expect(accessSentence('restricted', 'viewer', 'shadow')).toBe(
+    expect(accessSentence('restricted', 'viewer', 'shadow', true)).toBe(
+      'Only you can open this presentation',
+    );
+    expect(accessSentence('restricted', 'viewer', 'enforce', true)).toBe(
       'Only you can open this presentation',
     );
     expect(accessSentence('restricted', 'viewer', 'enforce')).toBe(
-      'Only you can open this presentation',
+      'Only people with access can open this presentation',
     );
     expect(accessSentence('open', 'editor', undefined)).toBe(LEGACY_SENTENCE);
+  });
+
+  it('says "Only you" under Restricted to the owner of a deck no person and no live link opens, and to nobody else', () => {
+    /* post-deploy review: an edit link's holder read "Only you can open this presentation" on a
+       deck with three live links and a pending invite */
+    const bare: EditorAccess = {
+      revision: 1,
+      generalAccess: { mode: 'restricted', role: 'viewer' },
+      grants: [],
+      links: [],
+    };
+    expect(opensAlone(true, bare)).toBe(true);
+    expect(opensAlone(false, bare)).toBe(false);
+    expect(opensAlone(true, undefined)).toBe(false);
+    const linked: EditorAccess = {
+      ...bare,
+      links: [
+        {
+          id: 'l1',
+          role: 'editor',
+          createdAt: '2026-10-01T00:00:00.000Z',
+          expiresAt: null,
+          revokedAt: null,
+        },
+      ],
+    };
+    expect(opensAlone(true, linked)).toBe(false);
+    const revoked: EditorAccess = {
+      ...bare,
+      links: [
+        {
+          id: 'l1',
+          role: 'editor',
+          createdAt: '2026-10-01T00:00:00.000Z',
+          expiresAt: null,
+          revokedAt: '2026-10-02T00:00:00.000Z',
+        },
+      ],
+    };
+    expect(opensAlone(true, revoked)).toBe(true);
+    const invited: EditorAccess = {
+      ...bare,
+      grants: [
+        {
+          email: 'someone@example.com',
+          role: 'viewer',
+          invitedAt: '2026-10-01T00:00:00.000Z',
+          expiresAt: null,
+          status: 'pending',
+        },
+      ],
+    };
+    expect(opensAlone(true, invited)).toBe(false);
   });
 
   it('shows the address for the selected access, copies the field, swaps it for the present link and keeps the rest behind More', async () => {

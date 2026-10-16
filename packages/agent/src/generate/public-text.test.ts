@@ -25,3 +25,19 @@ describe('the generated contracts', () => {
     }
   });
 });
+
+// llms.txt is served at /llms.txt: its Discovery list names site addresses, and each docs twin
+// it names is a docs page (post-deploy review: skills/... and docs/grammar.md answered 404).
+describe("llms.txt's Discovery list", () => {
+  it('names site addresses alone, and every /docs twin is a page', () => {
+    const text = readFileSync(join(REPO_ROOT, 'packages/agent/generated/llms.txt'), 'utf8');
+    const section = /## Discovery\n\n([\s\S]*?)\n\n/.exec(text)?.[1] ?? '';
+    const addresses = section.split('\n').map((line) => /^- (\S+):/.exec(line)?.[1] ?? line);
+    expect(addresses.length).toBeGreaterThan(4);
+    expect(addresses.filter((address) => !address.startsWith('/'))).toEqual([]);
+    for (const address of addresses.filter((each) => /^\/docs\/.+\.md$/.test(each))) {
+      const page = join(REPO_ROOT, 'apps/studio/content', `${address.slice(1, -'.md'.length)}.mdx`);
+      expect(() => readFileSync(page, 'utf8'), address).not.toThrow();
+    }
+  });
+});

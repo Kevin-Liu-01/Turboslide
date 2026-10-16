@@ -44,6 +44,23 @@ describe("the landing's stylesheet", () => {
     expect(all.length).toBeGreaterThan(100);
     expect(all.filter((selector) => !/(?:^|\s)\.ts-site(?=$|[\s.:[])/.test(selector))).toEqual([]);
   });
+
+  // post-deploy review: `.site-block-body code` (inline code, ink at 0.875em) also matched the
+  // `pre code` of CodePanel inside a block body, so /features drew #070707 commands on the #101010
+  // panel in light at 11.4 px. A rule that colours or sizes `code` under a body names inline code
+  // alone, and the panel's own rule sets its size and colour.
+  it("keeps the inline code rule off a code panel's pre", () => {
+    const all = selectors(readFileSync(join(SITE, 'site.css'), 'utf8'));
+    const inline = all.filter((selector) =>
+      /\.site-(?:block-body|faq-a)\b.*\bcode$/.test(selector),
+    );
+    expect(inline.length).toBeGreaterThan(0);
+    expect(inline.filter((selector) => !/:not\(pre\) > code$/.test(selector))).toEqual([]);
+    const panel = /\.ts-site \.site-term pre \{([^}]*)\}/.exec(
+      readFileSync(join(SITE, 'site.css'), 'utf8'),
+    )?.[1];
+    expect(panel).toContain('font-size: 13px');
+  });
 });
 
 // The docs (docs/SITE.md section 6) draw on the same root: /docs links the site's stylesheet and

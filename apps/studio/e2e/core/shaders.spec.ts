@@ -518,6 +518,9 @@ test(title('shaders.perf.hidden-pauses'), async () => {
   await clickCard(page, slideId);
   expect(shader).not.toBeNull();
   const id = shader!.id;
+  /* the selected pattern moves while editing under On alone (docs editor/objects; live-plan.ts
+     editorPlays): In the show only, the default, mounts it on its still */
+  await setPlayShaders(page, /^On$/);
   await installRafCounter(page);
   await selectBlock(page, id);
   await page.waitForTimeout(500);
@@ -611,6 +614,7 @@ test(title('shaders.perf.hidden-pauses'), async () => {
     type: 'hidden',
     description: `visible: ${c1 - c0} frames in 1 s; ${mechanism}: ${hiddenDelta} frames in 2 s; resumed: ${resumedDelta} frames in 1.5 s; reduced motion: ${reducedCanvas} canvas, two clips 900 ms apart ${clips ? (clips.equal ? 'identical' : `differ (${clips.distances.join(', ')})`) : 'unread'}`,
   });
+  await setPlayShaders(page, /^In the show only$/);
   expect(
     hiddenDelta,
     'the rAF loop stops while hidden (at most two stray frames)',

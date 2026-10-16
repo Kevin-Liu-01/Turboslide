@@ -4,6 +4,8 @@
 // admits under the realtime round's author shape (a bearer's write with `kind: 'agent'`, the
 // token's label and the run id, under the room's `agent:<principalId>` client id or the blob
 // tier's `store`).
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import type { Entry } from '@turboslide/realtime/channel';
@@ -11,6 +13,7 @@ import type { Entry } from '@turboslide/realtime/channel';
 import {
   FOLLOW_ENDING_COMMENT_ACTIONS,
   agentEntriesOf,
+  agentWroteOutside,
   endsFollowOnAction,
   endsFollowOnPanel,
   endsFollowOnSlide,
@@ -166,5 +169,52 @@ describe('the agent banner’s gate', () => {
     expect(
       agentEntriesOf([accepted], { clientId: OWN, earlierIds: [], assistNotes: notes }),
     ).toEqual([accepted]);
+  });
+});
+
+// Post-deploy review of caa20174: an agent's shader.insert or shader.set over HTTP left no still
+// (PDF and PPTX drew grey boxes, or the 5.5 s moment after a moved anchor) while an editor sat
+// open, because only a tab's own commit scheduled a capture. The open editor captures the stills
+// an outside agent write left stale; the gate is agentWroteOutside, and the controller wires it.
+describe('the stills an outside agent write leaves', () => {
+  const bearer = () =>
+    entry({
+      clientId: 'agent:agent:key_12',
+      author: { kind: 'agent', name: 'cli', principalId: 'agent:key_12' },
+    });
+
+  it('are captured for an agent write no tab of the room made, and for nothing else', () => {
+    const own = { clientId: OWN, earlierIds: [EARLIER], assistNotes: new Set<string>() };
+    expect(agentWroteOutside([bearer()], own)).toBe(true);
+    const human = entry({ clientId: 'store', author: { kind: 'human', name: 'Titanium 7' } });
+    const mine = entry({ clientId: OWN, author: { kind: 'agent', name: 'Assistant' } });
+    expect(agentWroteOutside([human, mine], own)).toBe(false);
+  });
+
+  it('leave the banner its assist note', () => {
+    const accepted = entry({
+      clientId: 'agent:agent:assist',
+      author: { kind: 'agent', name: 'Assistant', runId: 'assist-9' },
+      note: 'Assist: shorter',
+    });
+    const notes = new Set(['Assist: shorter']);
+    expect(
+      agentWroteOutside([accepted], { clientId: OWN, earlierIds: [], assistNotes: notes }),
+    ).toBe(false);
+    expect(notes.size).toBe(1);
+  });
+
+  it('are scheduled by the editor on every stream event that brings entries', () => {
+    const source = readFileSync(new URL('./controller.tsx', import.meta.url), 'utf8');
+    expect(source).toMatch(
+      /announceAgentWrite\(\[event\.entry\]\);\s*captureAgentStills\(\[event\.entry\]\);/,
+    );
+    expect(source).toMatch(
+      /announceAgentWrite\(event\.entries\);\s*captureAgentStills\(event\.entries\);/,
+    );
+    const body = /const captureAgentStills = [\s\S]*?\n {2}};/.exec(source)?.[0] ?? '';
+    expect(body).toContain('agentWroteOutside(');
+    expect(body).toContain("hasCapability('write')");
+    expect(body).toContain('shaderFrames.scheduleStale()');
   });
 });

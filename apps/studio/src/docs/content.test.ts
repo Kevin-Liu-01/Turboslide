@@ -4,6 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { MOTION } from '@turboslide/chrome/menus/strings';
+import { GALLERY_MATERIAL_IDS, materialEntry } from '@turboslide/materials/catalog';
+
 import { FIGURE_SIZES } from './figures';
 
 // The docs' content (docs/POLISH-2.md 5.6, C29): every MDX file under apps/studio/content/docs has
@@ -209,5 +212,65 @@ describe('the front page', () => {
         reference?.text ?? '',
       );
     expect(got[got.length - 1]).toEqual(['Every group', ...(counts?.slice(1) ?? [])]);
+  });
+});
+
+// The animated patterns of editor/objects (post-deploy review: the page said 20 patterns while the
+// gallery listed 38): the count it states is the gallery's, and each card's name sits in the row
+// of its group.
+describe('the animated patterns page', () => {
+  const objects = pages.get('/docs/editor/objects')?.text ?? '';
+  const cards = GALLERY_MATERIAL_IDS.flatMap((id) => {
+    const entry = materialEntry(id);
+    return entry?.available === true ? [entry] : [];
+  });
+
+  it("states the gallery's count", () => {
+    const stated = /opens a gallery of (\d+) patterns in five groups/.exec(objects)?.[1];
+    expect(Number(stated)).toBe(cards.length);
+  });
+
+  it('names every card in the row of its group', () => {
+    const rows = new Map(
+      [...objects.matchAll(/^\| (Fluid|Light|Metal|Gradient|Graphic)\s*\| ([^|]+)\|$/gm)].map(
+        (m) => [(m[1] ?? '').toLowerCase(), (m[2] ?? '').split(',').map((name) => name.trim())],
+      ),
+    );
+    expect([...rows.keys()].sort()).toEqual(['fluid', 'gradient', 'graphic', 'light', 'metal']);
+    const missing = cards.filter(
+      (entry) => !(rows.get(entry.category) ?? []).includes(entry.label),
+    );
+    expect(missing.map((entry) => entry.id)).toEqual([]);
+  });
+});
+
+// HTML slides wave A (post-deploy review): the editor's menu table, the slides, objects and
+// presenting pages describe the slide clock the editor ships: Insert > Animation and the Animate
+// panel, Slide > Playback and Slide > Transition, click steps in the show and the timed advance.
+// The words are the chrome's own (menus/strings.ts MOTION), so a renamed effect fails here.
+describe('the slide clock in the docs', () => {
+  const text = (url: string) => pages.get(url)?.text ?? '';
+  const row = (url: string, menu: string) =>
+    new RegExp(`^\\| ${menu}\\s*\\| (.+)\\|$`, 'm').exec(text(url))?.[1] ?? '';
+
+  it("names Animation, Playback and Transition in the editor's menu table", () => {
+    expect(row('/docs/editor', 'Insert')).toContain('an animation');
+    expect(row('/docs/editor', 'Slide')).toContain('Playback');
+    expect(row('/docs/editor', 'Slide')).toContain('Transition');
+  });
+
+  it('lists every transition, every start and every effect by the words the editor shows', () => {
+    const slides = text('/docs/editor/slides');
+    for (const { label } of Object.values(MOTION.transitions))
+      expect(slides).toContain(`| ${label}`);
+    const objects = text('/docs/editor/objects');
+    for (const { label } of Object.values(MOTION.starts)) expect(objects).toContain(label);
+    for (const label of Object.values(MOTION.presets)) expect(objects).toContain(label);
+  });
+
+  it('says a click in the show plays the next step before the next slide', () => {
+    const presenting = text('/docs/presenting');
+    expect(presenting).toContain('Next animation step, else next slide.');
+    expect(presenting).not.toMatch(/\| Next slide\.\s+\|/);
   });
 });

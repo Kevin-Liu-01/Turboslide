@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { Block } from '@turboslide/schema/blocks';
 import type { ContentSlide, DeckDocument, Slide } from '@turboslide/schema/deck';
+import type { Finding } from '@turboslide/schema/findings';
 import { workedDocument } from '@turboslide/schema/fixtures';
 
 import { FormatOptions } from '../FormatOptions';
@@ -453,5 +454,27 @@ describe('the chart and the table sections (docs/archive/rounds/FEATURES.md 2.2 
     cleanup();
     chartPanel('tbl', { advancedTools: true });
     expect(document.querySelectorAll(`${body} [data-control]`).length).toBeGreaterThan(0);
+  });
+});
+
+// post-deploy review: with nothing selected on a freeform slide, the Layout row drew one
+// layout/freeform mark per freeform slide of the deck, because the panel read every slide-level
+// finding of the deck's list. It reads this slide's alone.
+describe("the slide's own findings", () => {
+  it('marks the Layout row with the findings of this slide and no other', () => {
+    const finding = (slideId: string): Finding => ({
+      id: `f-${slideId}`,
+      rule: 'layout/freeform',
+      severity: 1,
+      kind: 'polish',
+      slideId,
+      path: '/layout',
+      evidence: {},
+      proposal: 'A freeform slide',
+      source: 'lint',
+    });
+    panel(undefined, { findings: [finding('cv'), finding('other-1'), finding('other-2')] });
+    const marks = document.querySelectorAll('[data-rule="layout/freeform"]');
+    expect(marks).toHaveLength(1);
   });
 });

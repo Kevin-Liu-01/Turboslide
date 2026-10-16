@@ -286,7 +286,7 @@ test('share.dialog.open, share.copy-view-link, share.copy-present-link, share.co
     'restricted',
   );
   await expect(dialog.locator('[data-control="dialog.share.footer"]')).toHaveText(
-    'Speaker notes and skipped slides never travel with a view or comment link',
+    'Speaker notes never travel with a view or comment link, and skipped slides never travel with a view link',
   );
   /* the mode sentence, from the same route the spec read */
   const sentence = dialog.locator('[data-control="dialog.share.authorize"]');

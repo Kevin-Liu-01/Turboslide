@@ -162,6 +162,8 @@ export type BundleRouteAdmission =
   | { kind: 'ticket'; identity: string }
   /** the deployment's bearer: the bootstrap admin */
   | { kind: 'bearer' }
+  /** a live API key: its owner with its scopes (route-caller.ts; `deck push` and `deck pull` send it) */
+  | { kind: 'key'; ctx: AuthContext }
   /** a checkout without a token: the localhost holder */
   | { kind: 'open' };
 
@@ -189,8 +191,25 @@ export function bundleRouteAdmission(
   return refuse(
     401,
     'unauthorized',
-    'bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>, or ask the studio page for a ticket',
+    'bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN> or an API key, or ask the studio page for a ticket',
   );
+}
+
+/**
+ * `bundleRouteAdmission` with a live API key admitted in the bearer's place (the post-deploy
+ * review: `turboslide deck push` and `deck pull` send the key `turboslide login` saved, and the
+ * routes answered 401 to it). The key's context is what the route decides the deck for.
+ */
+export async function bundleRouteAdmissionWithKey(
+  request: Request,
+  purpose: string,
+  subject: string,
+  keyContext: (request: Request) => Promise<AuthContext | null>,
+): Promise<Response | BundleRouteAdmission> {
+  const admission = bundleRouteAdmission(request, purpose, subject);
+  if (!(admission instanceof Response)) return admission;
+  const ctx = await keyContext(request);
+  return ctx === null ? admission : { kind: 'key', ctx };
 }
 
 /** The round two shape of the rule: the 401 Response, or null when the request may proceed. */

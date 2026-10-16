@@ -137,6 +137,24 @@ export type AccessRequest = {
   respondedAt: string | null;
 };
 
+/** How long an unanswered access request stays pending (docs/sharing "A request nobody answers expires after 30 days"). */
+export const REQUEST_PENDING_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * True while a request waits for an answer: not answered, and asked under 30 days ago. An older
+ * one has expired: the dialog no longer lists it, `share.listRequests` leaves it out,
+ * `share.respond` refuses it, and it no longer counts against the asker's three open requests,
+ * so the person can ask again. `askedAt` that does not parse reads as expired.
+ */
+export function isRequestPending(
+  request: Pick<AccessRequest, 'askedAt' | 'respondedAt'>,
+  now: number = Date.now(),
+): boolean {
+  if (request.respondedAt !== null) return false;
+  const asked = Date.parse(request.askedAt);
+  return Number.isFinite(asked) && now - asked < REQUEST_PENDING_MS;
+}
+
 export type PendingOwner = {
   principalId: string | null;
   email: string | null;

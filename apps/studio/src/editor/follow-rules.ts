@@ -77,6 +77,24 @@ export function endsFollowOnView(
  * after a reload), and mutations on the entry. An entry whose note this tab's own assist accept
  * wrote is skipped once and its note consumed, so the seller's own accept raises no banner.
  */
+/**
+ * True when a stream event carries an agent's write that no tab of this room made (an HTTP, MCP
+ * or CLI call): the entries `agentEntriesOf` keeps, read without consuming this tab's assist
+ * notes, which the banner's own read consumes. The editor then captures the shader stills the
+ * write left stale (controller.tsx `captureAgentStills`; post-deploy review: no tab's commit
+ * scheduled them, so agent inserts exported as grey boxes).
+ */
+export function agentWroteOutside(
+  entries: ReadonlyArray<Entry>,
+  own: {
+    clientId: string | null;
+    earlierIds: ReadonlyArray<string>;
+    assistNotes: ReadonlySet<string>;
+  },
+): boolean {
+  return agentEntriesOf(entries, { ...own, assistNotes: new Set(own.assistNotes) }).length > 0;
+}
+
 export function agentEntriesOf(
   entries: ReadonlyArray<Entry>,
   own: { clientId: string | null; earlierIds: ReadonlyArray<string>; assistNotes: Set<string> },

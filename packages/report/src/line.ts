@@ -6,7 +6,7 @@
 //
 // Browser and Worker safe: no Node import.
 
-import { MESSAGE_MAX, STACK_FRAMES_MAX, scrubRoute, scrubStack, scrubText } from './scrub.ts';
+import { MESSAGE_MAX, STACK_FRAMES_MAX, scrubMessage, scrubRoute, scrubStack } from './scrub.ts';
 
 /**
  * What raised the line: an uncaught `error` event, an `unhandledrejection` event, or a route's
@@ -82,7 +82,7 @@ export function reportLine(input: { kind: ReportKind; route: string; error: unkn
   return {
     kind: input.kind,
     route: scrubRoute(input.route),
-    message: scrubText(messageOf(input.error), MESSAGE_MAX),
+    message: scrubMessage(messageOf(input.error), MESSAGE_MAX),
     stack: scrubStack(stackOf(input.error)),
   };
 }
@@ -109,7 +109,7 @@ export function readReportLine(text: string): ReportLine | null {
   return {
     kind: body['kind'],
     route: scrubRoute(body['route']),
-    message: scrubText(body['message'], MESSAGE_MAX),
+    message: scrubMessage(body['message'], MESSAGE_MAX),
     stack: scrubStack((stack as string[]).slice(0, STACK_FRAMES_MAX).join('\n')),
   };
 }

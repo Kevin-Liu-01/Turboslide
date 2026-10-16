@@ -29,7 +29,8 @@ import { BOOTSTRAP_ACTION, localTokenRequired, resolveBearerSync } from './auth/
  *   per checkout token of `.turboslide/token` (7.7; opt in this round, b3.md deviations).
  *
  * `/api/render` and `/api/export` keep their M2 check because the editor's own thumbnails fetch
- * them from the page without a header.
+ * them from the page without a header; since the post-deploy review they and the two bundle
+ * routes take a live API key in the bearer's place too (route-caller.ts).
  */
 
 /** The author of a request that names none: the hosted surface is an agent transport (SPEC 7.2). */

@@ -14920,7 +14920,7 @@
       "post": {
         "operationId": "shader.insert",
         "summary": "Insert a shader",
-        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first. The still (the frame downloads, renders and thumbnails draw) is written by an open editor that can write the deck, or by shader.capture: the answer’s stillPending is true until one has, and without an open editor an agent runs shader.capture before a download, else a PDF or PPTX draws a grey plate or the older moment.",
         "externalDocs": {
           "url": "/docs/reference/block"
         },
@@ -15066,7 +15066,7 @@
       "post": {
         "operationId": "shader.set",
         "summary": "Set a shader field",
-        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry. The still (the frame downloads, renders and thumbnails draw) is written by an open editor that can write the deck, or by shader.capture: the answer’s stillPending is true until one has, and without an open editor an agent runs shader.capture before a download, else a PDF or PPTX draws a grey plate or the older moment.",
         "externalDocs": {
           "url": "/docs/reference/block"
         },
@@ -52768,7 +52768,7 @@
             "description": "The studio, such as https://turboslide.vercel.app"
           },
           "token": {
-            "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use",
+            "description": "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use",
             "type": "string"
           },
           "as": {
@@ -52889,7 +52889,7 @@
             "description": "The studio, such as https://turboslide.vercel.app"
           },
           "token": {
-            "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use",
+            "description": "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use",
             "type": "string"
           },
           "as": {
@@ -65120,13 +65120,18 @@
               "alt"
             ],
             "additionalProperties": false
+          },
+          "stillPending": {
+            "type": "boolean",
+            "description": "True while the block has no still for its recipe and moment; see the doc"
           }
         },
         "required": [
           "revision",
           "slideId",
           "blockId",
-          "block"
+          "block",
+          "stillPending"
         ],
         "additionalProperties": false
       },
@@ -65650,11 +65655,16 @@
               "alt"
             ],
             "additionalProperties": false
+          },
+          "stillPending": {
+            "type": "boolean",
+            "description": "True while the block has no still for its recipe and moment; see the doc"
           }
         },
         "required": [
           "revision",
-          "block"
+          "block",
+          "stillPending"
         ],
         "additionalProperties": false
       },
@@ -80300,7 +80310,7 @@
       "bearer": {
         "type": "http",
         "scheme": "bearer",
-        "description": "TURBOSLIDE_TOKEN of the deployment (SPEC 11). Required on every host but localhost; an instance without a token serves localhost only."
+        "description": "An API key from turboslide login, acting for its owner with its scopes; the deployment's TURBOSLIDE_TOKEN is the bootstrap bearer until a key exists. Required on every host but localhost; an instance without a token serves localhost only."
       }
     }
   }

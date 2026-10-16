@@ -41,6 +41,7 @@ import {
   DEFAULT_ACCESS_SETTINGS,
   ROLES,
   SCOPES,
+  capabilitiesForRole,
   synthesizeLegacyRecord as synthesizeSchemaLegacyRecord,
 } from '@turboslide/schema/access';
 
@@ -176,6 +177,24 @@ const NOT_BY_LINK: ReadonlySet<Capability> = new Set<Capability>([
   'publish',
   'transfer',
 ]);
+
+/**
+ * The capabilities a standing holds, as `decide()` answers them cell by cell: the role's cells
+ * (`capabilitiesForRole`) without the ones a link visitor and the legacy open mode never get
+ * (`NOT_BY_LINK`). The lists the loaders, `share.get` and the comment caller read come from here,
+ * so an edit link's holder is never counted as a sharer for reads while `decide()` refuses it the
+ * writes (post-deploy review: the whole sharing record reached an edit link's anonymous holder).
+ */
+export function capabilitiesForStanding(
+  role: Role,
+  via: Via,
+  settings: AccessSettings,
+): Set<Capability> {
+  const out = capabilitiesForRole(role, settings);
+  if (via === 'link' || via === 'open')
+    for (const capability of NOT_BY_LINK) out.delete(capability);
+  return out;
+}
 
 /** The matrix of research 09 2.1 for a role holding a grant (or the owner). */
 export function roleAllows(role: Role, capability: Capability, settings: AccessSettings): boolean {

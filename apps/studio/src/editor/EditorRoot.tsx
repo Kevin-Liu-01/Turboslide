@@ -61,6 +61,7 @@ import { labelFor } from '@turboslide/identity/labels';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
 import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
+import { isRequestPending } from '@turboslide/schema/access';
 import { PRINCIPAL_ID_PATTERN } from '@turboslide/schema/comments';
 import type { CommentAnchor, CommentBody } from '@turboslide/schema/comments';
 import { SHAPE_KINDS } from '@turboslide/schema/blocks';
@@ -1236,7 +1237,7 @@ export function EditorRoot({
               ...(link.useCount !== undefined ? { useCount: link.useCount } : {}),
             })),
           requests: record.requests
-            .filter((request) => request.respondedAt === null)
+            .filter((request) => isRequestPending(request))
             .map((request) => ({
               id: request.id,
               ...(request.principalId !== null

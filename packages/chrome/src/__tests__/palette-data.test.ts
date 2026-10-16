@@ -217,7 +217,7 @@ describe('presentPaletteEntries', () => {
     /* the default view's Insert group: the entries whose menu row is core (docs/FOCUS.md 2.3,
        2.4), the five shape and line entries, the table, the chart and the diagram that returned
        with their rows in the return round (docs/archive/rounds/RETURN.md 2.2 to 2.6) and the Shader of the
-       features round's ship two (docs/archive/rounds/FEATURES.md 5.4), then the 21 New slide rows; the Box, Rule
+       features round's ship two (docs/archive/rounds/FEATURES.md 5.4), then the 22 New slide rows; the Box, Rule
        and Icon entries and the grammar blocks stand behind the switch */
     const insert = off.filter((entry) => entry.group === 'insert');
     expect(insert.filter((entry) => entry.insert === 'primitive').map((entry) => entry.id)).toEqual(

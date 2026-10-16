@@ -635,6 +635,8 @@ async function ogTemplateHtml(): Promise<string> {
     resolve(ROOT, BRAND_DIR),
     resolve(ROOT, `${PUBLIC_DIR}${CARD_MOOD.dark}`),
   );
+  /* the picture decodes in sync: decoded async, Chromium drew the JPEG one of two ways from one
+     run to the next (16,421 pixels one level apart), so `--check` read an unchanged card as changed */
   const html = `<!doctype html>
 <html lang="en" data-theme="dark">
 <head>
@@ -668,7 +670,7 @@ body { width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; backg
 </head>
 <body>
 <div class="card">
-  <img src="${picture}" alt="">
+  <img src="${picture}" alt="" decoding="sync">
   <div class="plate">
     <div class="lock">${lockupSvg({ title: false })}</div>
     <p>${cardSentence()}</p>

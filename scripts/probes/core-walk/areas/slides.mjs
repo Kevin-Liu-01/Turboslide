@@ -1,6 +1,6 @@
 // Slides and the filmstrip, the probe's rows (docs/FOCUS.md 2.2, 6.4 `slides.*` with the driver
 // `probe --core`): every route to New slide, Duplicate, Delete and Skip, the selection, the
-// reorders, the 21 layouts from the picker, the layout carry rows, the notes pane, the counter
+// reorders, the 22 layouts from the picker, the layout carry rows, the notes pane, the counter
 // and the hash. The two tab paste is core/slides.spec.ts. Every slide this area adds is added
 // through the product; the one fresh slide the layout rows need is a setup write.
 

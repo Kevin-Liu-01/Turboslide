@@ -152,8 +152,8 @@
       "kind": "built"
     },
     "packages/theme/brand/og-template.html": {
-      "bytes": 3787,
-      "sha256": "f6d81cc63af132014dec06f56cb4a3df04660dff88ce18ec33ffaf13776c9dbf",
+      "bytes": 3803,
+      "sha256": "ad05aa0ba52e5eb2cbe38461043c66f6ad414dbf6b5563a8822da28c693235f1",
       "kind": "built"
     },
     "packages/theme/brand/wordmark.svg": {

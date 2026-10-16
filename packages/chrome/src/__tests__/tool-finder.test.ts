@@ -84,7 +84,7 @@ describe('finderRows', () => {
 });
 
 describe('toolFinderEntries', () => {
-  it('has the menus, the slides and the 21 layouts as groups, and runs a menu row through the shell', () => {
+  it('has the menus, the slides and the 22 layouts as groups, and runs a menu row through the shell', () => {
     let ran: string | null = null;
     let picked: string | null = null;
     /* the run is asserted with the switch on; the default list is asserted without a parked row

@@ -1,5 +1,5 @@
 // The slide templates, kept as a thin view over the layout list (gslides-parity SPEC 5.1: the
-// fifteen templates became the 21 entries of packages/schema/src/layouts.ts, with their placeholder
+// fifteen templates became the entries of packages/schema/src/layouts.ts, with their placeholder
 // copy replaced by empty Texts and live prompts). Sidebar.tsx still reads SLIDE_TEMPLATES and
 // templateTitle for its row menu; once its rewrite (B4) reads the layouts directly this file is
 // deleted, so nothing new imports it. Pure: no React, no DOM.
@@ -41,7 +41,7 @@ function fromLayout(entry: LayoutEntry): SlideTemplate {
   };
 }
 
-/** The 21 layouts in the one order (SPEC 5.2), as templates. */
+/** The 22 layouts in the one order (SPEC 5.2), as templates. */
 export const SLIDE_TEMPLATES: ReadonlyArray<SlideTemplate> = LAYOUTS.map(fromLayout);
 
 /** The row label of a template: the layout's name. */

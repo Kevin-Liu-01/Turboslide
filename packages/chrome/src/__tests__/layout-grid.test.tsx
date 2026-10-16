@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe('LayoutGrid', () => {
-  it('draws the 21 layouts with Google’s eleven before the GT rule and picks one on click', () => {
+  it('draws the 22 layouts with Google’s eleven before the GT rule and picks one on click', () => {
     const onPick = vi.fn();
     const { container } = render(
       <LayoutGrid

@@ -910,12 +910,13 @@ type StoreBusyAnswer = {
  * Runs `writeDeck`'s body; a store refusal that carries its own 503 and wait answers 503 with the
  * refusal's name, sentence and wait in the body (`StoreBusyAnswer`), which `readWriteDeckAnswer`
  * throws on the page as an error that carries them. The framework drops the headers a function
- * sets on an answer that is not 2xx, so the wait travels in the body alone. `status` sets the
- * request's own status by default.
+ * sets on an answer that is not 2xx, so the wait travels in the body alone. writeDeckFn's handler
+ * passes setResponseStatus as `status`: this module is in the page's graph (routes/new.tsx), so a
+ * server-only call stays inside a server function's handler, which the build strips from the page.
  */
 export async function answeringRefusals(
   run: () => Promise<string>,
-  status: (code: number) => void = (code) => setResponseStatus(code),
+  status: (code: number) => void,
 ): Promise<string> {
   try {
     return await run();
@@ -1138,7 +1139,12 @@ const writeDeckFn = createServerFn({ method: 'POST' })
       ...(input.returnDocument === true ? { returnDocument: true } : {}),
     };
   })
-  .handler(({ data }): Promise<string> => answeringRefusals(() => writeDeckAnswer(data)));
+  .handler(({ data }): Promise<string> =>
+    answeringRefusals(
+      () => writeDeckAnswer(data),
+      (code) => setResponseStatus(code),
+    ),
+  );
 
 /**
  * The event the page raises when a write created the deck (the first save of a draft, SPEC

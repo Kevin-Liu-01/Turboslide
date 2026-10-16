@@ -893,17 +893,27 @@ function firstSlideId(deck) {
 }
 
 /**
- * The smoke's own identity and the `access answer reads enforce` row (hardening HR-SD#5): the
- * first answer of `/api/access/<deck>` names the deployment's authorization mode, always
- * `enforce` since H3, and mints the anonymous principal cookie the thumbnail rows then send, so
- * they ask as a person, the way a page's `<img>` does, and not as a caller with no identity,
- * whom every deployment refuses.
+ * The smoke's own identity and the `access answer reads enforce` row (hardening HR-SD#5, PS#9):
+ * the deck's page, loaded as a browser loads a document, mints the anonymous principal cookie the
+ * thumbnail rows then send, so they ask as a person, the way a page's `<img>` does, and not as a
+ * caller with no identity, whom every deployment refuses. Since PS#9 only a document load or a
+ * server function mints that cookie (server/auth/middleware.ts `mintsIdentityCookie`), so the
+ * access route answers with no cookie, and its answer names the deployment's authorization mode,
+ * always `enforce` since H3.
  */
 async function accessRow(base, deck, timeoutMs) {
   const path = `/api/access/${encodeURIComponent(deck)}`;
+  // the document load a browser visit starts with: the one request that mints the identity cookie
+  const page = await probe(base, `/deck/${encodeURIComponent(deck)}`, timeoutMs, {
+    headers: { 'sec-fetch-dest': 'document', 'sec-fetch-mode': 'navigate', accept: 'text/html' },
+  });
   // the page's own fetch: the CSRF rule of the access route reads Sec-Fetch-Site and Origin
   const r = await probe(base, path, timeoutMs, {
-    headers: { 'sec-fetch-site': 'same-origin', origin: new URL(base).origin },
+    headers: {
+      'sec-fetch-site': 'same-origin',
+      origin: new URL(base).origin,
+      ...(page.cookie === '' ? {} : { cookie: page.cookie }),
+    },
   });
   let mode = null;
   try {
@@ -912,16 +922,21 @@ async function accessRow(base, deck, timeoutMs) {
     // not JSON: the status says what happened
   }
   return {
-    cookie: r.cookie,
+    cookie: page.cookie,
     result: {
       row: {
         name: 'access answer reads enforce',
-        expect: `/api/access/${deck} answers 200 with authorize: 'enforce' and an identity cookie`,
+        expect: `/deck/${deck} as a document mints an identity cookie, and /api/access/${deck} answers 200 with authorize: 'enforce' and no cookie`,
         detail: () =>
-          `${r.status}; authorize ${mode ?? 'absent'}; ${r.cookie === '' ? 'no identity cookie' : 'identity cookie minted'}`,
+          `page ${page.status}, ${page.cookie === '' ? 'no identity cookie' : 'identity cookie minted'}; access ${r.status}; authorize ${mode ?? 'absent'}; ${r.cookie === '' ? 'no cookie' : 'a cookie minted'}`,
       },
       r,
-      ok: r.error === undefined && r.status === 200 && mode === 'enforce' && r.cookie !== '',
+      ok:
+        r.error === undefined &&
+        r.status === 200 &&
+        mode === 'enforce' &&
+        page.cookie !== '' &&
+        r.cookie === '',
     },
   };
 }
@@ -970,7 +985,7 @@ async function thumbnailRows(base, deck, timeoutMs, cookie) {
         'with the identity cookie: a 200 body with x-turboslide-stamp and, on a local server, public, s-maxage=60, stale-while-revalidate=86400, or a 302 to the stored object with private, no-store',
       detail: () =>
         cookie === ''
-          ? `no identity cookie from the access row: ${plain.status}`
+          ? `no identity cookie from the deck page: ${plain.status}`
           : `${where(plain)}; stamp ${stamp ?? 'none'}; source ${plain.headers['x-turboslide-source'] ?? '-'}; fresh ${plain.headers['x-turboslide-fresh'] ?? '-'}`,
     },
     r: plain,
@@ -1679,7 +1694,7 @@ async function main() {
     console.log(`skip  ${skipped.name}: ${skipped.why}`);
   }
   // the round four rows without a bearer: the static layer twice, the thumbnail cache, asked with
-  // the identity cookie the access row mints (hardening HR-SD#5)
+  // the identity cookie the deck page mints (hardening HR-SD#5, PS#9)
   results.push(...(await cdnRows(base, args.timeoutMs)));
   const access = await accessRow(base, args.deck, args.timeoutMs);
   results.push(access.result);

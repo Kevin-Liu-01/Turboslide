@@ -26,7 +26,8 @@ import { roomBearerMatches } from '../../server/room-bearer';
  * the existing commit path against the store: one Write per coalesced run (`commitRuns`, with
  * `origin: { clientId, opIds }` on every record), the comment entries to the comments applier,
  * the comment anchors shifted past the landed edits (`appendShifts`' sidecar half), the card
- * thumbnail scheduled after an edit and flushed when the object says `closed`. The body names the
+ * thumbnail scheduled after an edit and flushed when the object says `closed`, when the store
+ * also stores the current snapshot (hardening PS#4). The body names the
  * object's `revision` when it knows one; a store at another revision is answered 409
  * `{ conflict: true, revision }` before anything is written, so the object re-admits its entries
  * past the foreign records (3.5) instead of the route committing them untransformed, unless the
@@ -125,7 +126,21 @@ async function commit(
   );
   if (reply.status === 200 || reply.body['refused'] === true) {
     if (reply.landed > 0) scheduleCardThumb(deckId);
-    if (body.closed === true) flushCardThumb(deckId);
+    if (body.closed === true) {
+      flushCardThumb(deckId);
+      // the deck's last close stores the current manifest's snapshot (hardening PS#4): a commit
+      // stores one on every tenth record alone, so the next fresh reader of a deck at rest
+      // proves it in one read. Best effort and awaited, since the object's last call is the one
+      // with no person waiting on it; a failure leaves the replay path to the reader
+      const closing = store as DeckStore & { snapshotCurrent?: () => Promise<boolean> };
+      if (typeof closing.snapshotCurrent === 'function')
+        await closing.snapshotCurrent().catch((error: unknown) => {
+          log(
+            `${deckId}: the snapshot at the last close: ${error instanceof Error ? error.message : String(error)}`,
+          );
+          return false;
+        });
+    }
   }
   return jsonResponse({ ...reply.body, tier }, reply.status);
 }

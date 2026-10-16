@@ -69,9 +69,16 @@ afterEach(() => {
 /**
  * `count` commits of the worked deck stored the way `write()` stores them (each record under its
  * number with its snapshot key, the newest snapshot, the manifest and the changed slide), built
- * with the store's own reducer and record text rather than a store per commit.
+ * with the store's own reducer and record text rather than a store per commit. With
+ * `snapshotEvery`, a record names its key and the store holds its snapshot on every that many
+ * records alone, as a commit stores them since PS#4 (the newest 50 records' snapshots stored).
  */
-async function commitLog(fake: FakeBlobClient, count: number): Promise<DeckDocument> {
+async function commitLog(
+  fake: FakeBlobClient,
+  count: number,
+  snapshotEvery?: number,
+): Promise<DeckDocument> {
+  const stored = new Map<string, Uint8Array>();
   let document = loadDeckDir(seed).document;
   const text = new TextEncoder();
   for (let n = 1; n <= count; n += 1) {
@@ -86,6 +93,10 @@ async function commitLog(fake: FakeBlobClient, count: number): Promise<DeckDocum
       { now: createdAt },
     );
     if (!result.ok) throw new Error(result.message);
+    const key = snapshotKey(canonicalJson(result.document.deck));
+    const named = snapshotEvery === undefined || n % snapshotEvery === 0;
+    if (named && snapshotEvery !== undefined && n > count - 50)
+      stored.set(key, snapshotBody(result.document));
     const record: VersionRecord = {
       n,
       revision: result.document.deck.revision,
@@ -95,17 +106,17 @@ async function commitLog(fake: FakeBlobClient, count: number): Promise<DeckDocum
       createdAt,
       mutations: result.entry.mutations,
       inverse: result.inverse,
-      snapshot: snapshotKey(canonicalJson(result.document.deck)),
+      ...(named ? { snapshot: key } : {}),
     };
     await fake.put(`decks/gt-brand/versions/${n}.json`, text.encode(versionRecordText(record)), {
       overwrite: false,
     });
     document = result.document;
   }
-  const key = snapshotKey(canonicalJson(document.deck));
-  await fake.put(`decks/gt-brand/${snapshotPath(key)}`, snapshotBody(document), {
-    overwrite: false,
-  });
+  if (snapshotEvery === undefined)
+    stored.set(snapshotKey(canonicalJson(document.deck)), snapshotBody(document));
+  for (const [key, body] of stored)
+    await fake.put(`decks/gt-brand/${snapshotPath(key)}`, body, { overwrite: false });
   await fake.put(
     'decks/gt-brand/slides/content-rule.json',
     text.encode(canonicalJson(document.slides['content-rule'])),
@@ -118,10 +129,13 @@ async function commitLog(fake: FakeBlobClient, count: number): Promise<DeckDocum
   return document;
 }
 
-async function mirrorOf(count: number): Promise<{ fake: FakeBlobClient; store: BlobStore }> {
+async function mirrorOf(
+  count: number,
+  snapshotEvery?: number,
+): Promise<{ fake: FakeBlobClient; store: BlobStore }> {
   const fake = memoryBlobClient(undefined, { now });
   await pushDeckDir(fake, 'gt-brand', seed, { overwrite: false });
-  await commitLog(fake, count);
+  await commitLog(fake, count, snapshotEvery);
   const store = openBlobStore({
     client: fake,
     deckId: 'gt-brand',
@@ -298,18 +312,19 @@ describe('hardening PS#3: no pulse put where no poll reads it (PERF-3 item 1)', 
     if (!outcome.ok) throw new Error(outcome.message);
   }
 
-  it('a commit on the do tier makes 4 puts and no pulse put, and 5 on the blob tier', async () => {
+  it('a commit on the do tier makes at most 4 puts and no pulse put', async () => {
     const { fake, store } = await writer();
     // the do tier: room.ts sets the rule from the tier the instance serves
     setPulseRule(() => false);
     for (let i = 0; i < 5; i += 1) {
       fake.calls.length = 0;
       await commit(store, SIZES[i % 3] ?? 20);
-      // origin/main 8c9465b6: these four and `.turboslide/pulse.json`
+      // origin/main 8c9465b6: these four and `.turboslide/pulse.json` on every commit. Since
+      // PS#4 the snapshot is stored by record 1 and every tenth record alone
       expect(putsOf(fake)).toEqual([
         'deck.json',
         'slides/content-rule.json',
-        'snapshots/<md5>.json',
+        ...(i === 0 ? ['snapshots/<md5>.json'] : []),
         'versions/<n>.json',
       ]);
     }
@@ -321,7 +336,6 @@ describe('hardening PS#3: no pulse put where no poll reads it (PERF-3 item 1)', 
       '.turboslide/pulse.json',
       'deck.json',
       'slides/content-rule.json',
-      'snapshots/<md5>.json',
       'versions/<n>.json',
     ]);
   }, 120_000);
@@ -338,4 +352,119 @@ describe('hardening PS#3: no pulse put where no poll reads it (PERF-3 item 1)', 
     expect(await putPulse(fake, 'gt-brand', 'deck', { now })).toBeNull();
     expect(fake.calls.filter((call) => call.op === 'put')).toHaveLength(1);
   });
+});
+
+describe('hardening PS#4: the snapshot every tenth commit and at the last close (PERF-3 item 2)', () => {
+  const snapshotGets = (fake: FakeBlobClient): number =>
+    fake.calls.filter((call) => call.op === 'get' && call.pathname.includes('/snapshots/')).length;
+  const snapshotPuts = (fake: FakeBlobClient): number =>
+    fake.calls.filter((call) => call.op === 'put' && call.pathname.includes('/snapshots/')).length;
+  const mirrorAt = (fake: FakeBlobClient, name: string): BlobStore =>
+    openBlobStore({
+      client: fake,
+      deckId: 'gt-brand',
+      dir: join(root, name, 'gt-brand'),
+      now,
+      syncTtlMs: 0,
+    });
+  /** `count` writes through the store, each a second after the last. */
+  async function writes(store: BlobStore, count: number): Promise<void> {
+    for (let i = 0; i < count; i += 1) {
+      clock = new Date(Date.parse(clock) + 1000).toISOString();
+      const outcome = await store.write({
+        baseRevision: await store.revision(),
+        author: agent,
+        mutations: [setSize(SIZES[i % 3] ?? 20)],
+      });
+      if (!outcome.ok) throw new Error(outcome.message);
+    }
+  }
+  const canonical = async (store: BlobStore): Promise<string> =>
+    canonicalJson((await store.read()).document);
+
+  it('20 commits store 2 snapshots, and the records of the others name none', async () => {
+    const fake = memoryBlobClient(undefined, { now });
+    await pushDeckDir(fake, 'gt-brand', seed, { overwrite: false });
+    const writer = mirrorAt(fake, 'writer');
+    // record 1 stores one whatever the count: the deck's first base a fresh mirror can prove
+    await writes(writer, 1);
+    fake.calls.length = 0;
+    await writes(writer, 20);
+    // origin/main 8c9465b6: 20, one per commit
+    expect(snapshotPuts(fake)).toBe(2);
+    const named = (await writer.records()).filter((record) => record.snapshot !== undefined);
+    expect(named.map((record) => record.n)).toEqual([1, 10, 20]);
+  }, 240_000);
+
+  it('the replay equals the snapshot path for a fresh, a warm and a far behind mirror', async () => {
+    const fake = memoryBlobClient(undefined, { now });
+    await pushDeckDir(fake, 'gt-brand', seed, { overwrite: false });
+    const writer = mirrorAt(fake, 'writer');
+    await writes(writer, 1);
+    const warm = mirrorAt(fake, 'warm');
+    const farBehind = mirrorAt(fake, 'far');
+    await warm.read();
+    await farBehind.read();
+    await writes(writer, 22);
+    const head = await canonical(writer);
+
+    // a mirror 22 commits behind (records 2 to 23, past SNAPSHOT_EVERY_RECORDS) proves the head
+    // from the newest stored snapshot (record 20's) and three records
+    fake.calls.length = 0;
+    expect(await canonical(farBehind)).toBe(head);
+    expect(snapshotGets(fake)).toBe(1);
+
+    // a warm mirror learning one commit replays the record and reads no snapshot
+    expect(await canonical(warm)).toBe(head);
+    await writes(writer, 1);
+    const next = await canonical(writer);
+    fake.calls.length = 0;
+    expect(await canonical(warm)).toBe(next);
+    expect(snapshotGets(fake)).toBe(0);
+
+    // a fresh mirror of a head with no snapshot (record 24) replays from record 20's
+    fake.calls.length = 0;
+    const fresh = mirrorAt(fake, 'fresh');
+    expect(await canonical(fresh)).toBe(next);
+    const read = fake.calls.filter(
+      (call) => call.op === 'get' && call.pathname.includes('/snapshots/'),
+    );
+    // the head's key (a miss) and record 20's
+    expect(read).toHaveLength(2);
+    expect(
+      fake.calls.some((call) => call.op === 'get' && call.pathname.endsWith('/slides/title.json')),
+    ).toBe(false);
+
+    // the last close stores the head's snapshot, and the next fresh mirror reads it alone
+    expect(await writer.snapshotCurrent()).toBe(true);
+    expect(await writer.snapshotCurrent()).toBe(false);
+    const rested = mirrorAt(fake, 'rested');
+    fake.calls.length = 0;
+    expect(await canonical(rested)).toBe(next);
+    expect(snapshotGets(fake)).toBe(1);
+
+    // and a write on each mirror commits on the head the others proved
+    await writes(fresh, 1);
+    await writes(warm, 1);
+    expect(await canonical(rested)).toBe(await canonical(writer));
+  }, 240_000);
+
+  it('a fresh mirror of 1,000 records whose head stores no snapshot reads in at most 60 calls', async () => {
+    const { fake, store } = await mirrorOf(1005, 10);
+    const { document } = await store.read();
+    expect(document.deck.revision).toBe(412 + 1005);
+    // PS#1's ceiling: the manifest head, the head's snapshot (a miss), the manifest body, record
+    // 1, the newest 50 records, the walk's miss, the comments index and record 1000's snapshot
+    expect(fake.calls.length).toBeLessThanOrEqual(60);
+    expect(snapshotGets(fake)).toBe(2);
+    // a revision whose record names no snapshot is rebuilt from the inverses above it, which the
+    // mirror holds: no record below the log floor is read (the whole log was 1,005 gets)
+    fake.calls.length = 0;
+    const at = await store.documentAtRevision(412 + 1003);
+    expect(at.deck.revision).toBe(412 + 1003);
+    const recordGets = fake.calls.filter(
+      (call) => call.op === 'get' && call.pathname.includes('/versions/'),
+    );
+    expect(recordGets).toHaveLength(0);
+  }, 240_000);
 });

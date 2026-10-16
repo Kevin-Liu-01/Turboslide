@@ -64,7 +64,11 @@ function deckFolder(): string {
   return dir;
 }
 
-/** Commits one write through the store, as a function instance does (a record and a snapshot). */
+/**
+ * Commits one write through the store, as a function instance does (a record and a snapshot). The
+ * store stores the snapshot on every commit here (`snapshotEvery: 1`), so each manifest names one:
+ * since hardening PS#4 a commit stores it on every tenth record and at the deck's last close.
+ */
 async function commit(source: FakeBlobClient, deckId: string, size: number): Promise<void> {
   const store = openBlobStore({
     client: source,
@@ -72,6 +76,7 @@ async function commit(source: FakeBlobClient, deckId: string, size: number): Pro
     dir: join(root, 'mirror', `${deckId}-${size}`),
     syncTtlMs: 0,
     snapshotGraceMs: 0,
+    snapshotEvery: 1,
   });
   const { document } = await store.read();
   const outcome = await store.write({

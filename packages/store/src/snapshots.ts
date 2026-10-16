@@ -1,5 +1,6 @@
 // Immutable per revision documents on the Blob backend (gslides-parity SPEC-2 8.2, 0.32, 0.40).
-// Every committed write stores the whole DeckDocument as canonical JSON under
+// A committed write stores the whole DeckDocument as canonical JSON (every tenth record since
+// hardening PS#4, SNAPSHOT_EVERY_RECORDS) under
 // `snapshots/<md5>.json`, where the md5 is the hash of the `deck.json` bytes the writer is about
 // to push: Vercel Blob's etag for a body is that md5 in quotes (blob-store.ts quotedMd5, measured
 // 2026-09-11), so `head('deck.json')` names the current snapshot with no body read, two writers
@@ -43,6 +44,34 @@ export const SNAPSHOT_PRUNE_EVERY = 20;
 /** True when the record numbered `n` is one the prune runs after (SNAPSHOT_PRUNE_EVERY). */
 export function pruneDue(n: number): boolean {
   return Number.isInteger(n) && n > 0 && n % SNAPSHOT_PRUNE_EVERY === 0;
+}
+
+/**
+ * A commit stores the snapshot of the document it leaves on every this many records, and its
+ * record names it (hardening PS#4, PERF-3 item 2). Before, every commit stored one: 330 KB and one
+ * advanced operation of a 432 KB commit on the GT deck. A reader proves the current document by the
+ * replay of the records above its own mirror or above the newest stored snapshot a record names
+ * (blob-store.ts `pull`), which this count bounds to nine records. Record 1 stores one too: the
+ * snapshot the deck was created with is named by no record, and without a named one a fresh
+ * mirror would build its base from the slide bodies, which the loser of a commit race may have
+ * overwritten. A named version, the deck's last close (`snapshotCurrent`) and a deck over
+ * SNAPSHOT_EVERY_COMMIT_BYTES store one whatever the count.
+ */
+export const SNAPSHOT_EVERY_RECORDS = 10;
+
+/**
+ * The snapshot size from which every commit stores its snapshot: the seed route answers the
+ * realtime object with the snapshot's URL instead of the document above 4 MB of JSON text (the
+ * function's answer cap is 4.5 MB), and it needs the snapshot of the current revision for that.
+ * The bound sits 1 MB below the route's, so a document whose text and bytes differ (the route
+ * counts UTF-16 units of `JSON.stringify`, this the UTF-8 bytes of the canonical body) is on the
+ * every commit side whenever the route may point at its snapshot.
+ */
+export const SNAPSHOT_EVERY_COMMIT_BYTES = 3 * 1024 * 1024;
+
+/** True when the commit of record `n` stores its snapshot by the count: record 1 and every `every` (SNAPSHOT_EVERY_RECORDS). */
+export function snapshotDue(n: number, every: number = SNAPSHOT_EVERY_RECORDS): boolean {
+  return Number.isInteger(n) && n > 0 && (n === 1 || n % every === 0);
 }
 
 const MD5_HEX = /^[0-9a-f]{32}$/;

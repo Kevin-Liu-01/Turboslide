@@ -278,10 +278,14 @@ describe('hosted stores', () => {
   });
 
   /** Two BlobStores over one fake, each with its own mirror, the seed pushed once. */
-  async function blobPair(hooks?: {
-    beforeCommit?: () => Promise<void>;
-    afterHead?: () => Promise<void>;
-  }): Promise<{ fake: FakeBlobClient; a: BlobStore; b: BlobStore }> {
+  async function blobPair(
+    hooks?: {
+      beforeCommit?: () => Promise<void>;
+      afterHead?: () => Promise<void>;
+    },
+    // 1 stores a snapshot on every commit, for the tests of the snapshot path itself (PS#4)
+    extra: { snapshotEvery?: number } = {},
+  ): Promise<{ fake: FakeBlobClient; a: BlobStore; b: BlobStore }> {
     // the fake stamps uploads with the test clock; the pair prunes with no grace so a test sees
     // the retention rule act (the store's default leaves an unreferenced snapshot alone for 5 min)
     const fake = memoryBlobClient(undefined, { now });
@@ -294,6 +298,7 @@ describe('hosted stores', () => {
       syncTtlMs: 0,
       pollMs: 20,
       snapshotGraceMs: 0,
+      ...extra,
     });
     const b = openBlobStore({
       client: fake,
@@ -304,6 +309,7 @@ describe('hosted stores', () => {
       pollMs: 20,
       snapshotGraceMs: 0,
       ...(hooks === undefined ? {} : { hooks }),
+      ...extra,
     });
     return { fake, a, b };
   }
@@ -582,7 +588,22 @@ describe('hosted stores', () => {
       const gets = fake.calls.filter((c) => c.op === 'get').map((c) => c.pathname);
       expect(gets.some((p) => p.startsWith('decks/gt-brand/slides/'))).toBe(false);
       expect(gets.some((p) => p === 'decks/gt-brand/deck.json')).toBe(false);
-      expect(gets.filter((p) => p.startsWith('decks/gt-brand/snapshots/'))).toHaveLength(1);
+      // since PS#4 a mirror that holds the document before replays the record and reads no
+      // snapshot; an empty mirror reads the one the head names
+      expect(gets.filter((p) => p.startsWith('decks/gt-brand/snapshots/'))).toHaveLength(0);
+      expect(gets).toContain('decks/gt-brand/versions/1.json');
+      const cold = openBlobStore({
+        client: fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'mirror-cold', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      fake.calls.length = 0;
+      expect((await cold.read()).document.deck.revision).toBe(413);
+      const coldGets = fake.calls.filter((c) => c.op === 'get').map((c) => c.pathname);
+      expect(coldGets.some((p) => p.startsWith('decks/gt-brand/slides/'))).toBe(false);
+      expect(coldGets.filter((p) => p.startsWith('decks/gt-brand/snapshots/'))).toHaveLength(1);
       fake.releaseGet();
     });
 
@@ -690,7 +711,7 @@ describe('hosted stores', () => {
     });
 
     it('retention keeps the newest records’ snapshots and every named version’s', async () => {
-      const { fake, a } = await blobPair();
+      const { fake, a } = await blobPair(undefined, { snapshotEvery: 1 });
       let base = 412;
       const keys: string[] = [];
       for (const [i, size] of [20, 22, 24].entries()) {
@@ -752,7 +773,7 @@ describe('hosted stores', () => {
         mutations: [setSize(22)],
       });
       expect(early.ok).toBe(true);
-      const { fake, a, b } = await blobPair();
+      const { fake, a, b } = await blobPair(undefined, { snapshotEvery: 1 });
       const records = await a.records();
       expect(records).toHaveLength(1);
       expect(records[0]?.snapshot).toBeUndefined();
@@ -2526,7 +2547,7 @@ describe('hosted stores', () => {
       ]);
     });
 
-    it('a remote commit costs the reader no list: the records by number, the snapshot the etag names, the comments index head (3.5, invariant 7)', async () => {
+    it('a remote commit costs the reader no list: the records by number and the comments index head (3.5, invariant 7)', async () => {
       const { fake, a, b } = await blobPair();
       await b.sync();
       const written = await a.write({
@@ -2540,9 +2561,10 @@ describe('hosted stores', () => {
       expect(seen.document.deck.revision).toBe(413);
       const ops = opsOf(fake);
       expect(lists(fake)).toEqual([]);
-      // one record read (a head and a get), one miss past it, one snapshot get, one index head
+      // one record read (a head and a get), one miss past it, one index head; the record is
+      // replayed onto the mirror's document, so no snapshot is read (hardening PS#4; before it
+      // the reader fetched the whole document, 330 KB on the GT deck, for every commit it learned)
       expect(ops.filter((op) => op.startsWith('get '))).toEqual([
-        `get decks/gt-brand/${snapshotPath(written.ok ? written.entry.snapshot! : '')}`,
         'get decks/gt-brand/versions/1.json',
       ]);
       expect(ops.filter((op) => op.startsWith('head '))).toEqual([
@@ -2551,8 +2573,8 @@ describe('hosted stores', () => {
         'head decks/gt-brand/versions/2.json',
         'head decks/gt-brand/comments/index.json',
       ]);
-      // four heads and two gets, no listing: the reader's row of docs/archive/rounds/SYNC.md 4.5
-      expect(ops).toHaveLength(6);
+      // four heads and one get, no listing: the reader's row of docs/archive/rounds/SYNC.md 4.5
+      expect(ops).toHaveLength(5);
       // a second read inside the same head is one head and nothing else
       fake.calls.length = 0;
       await b.read();
@@ -2586,9 +2608,12 @@ describe('hosted stores', () => {
         expect(lists(fake)).toHaveLength(i === SNAPSHOT_PRUNE_EVERY ? 1 : 0);
       }
       expect(lists(fake)).toEqual(['list decks/gt-brand/snapshots/']);
-      expect(opsOf(fake).filter((op) => op.startsWith('put '))).toHaveLength(
-        5 * SNAPSHOT_PRUNE_EVERY,
+      const puts = opsOf(fake).filter((op) => op.startsWith('put '));
+      // four puts a commit, and the snapshot on records 1, 10 and 20 alone (PS#4)
+      expect(puts.filter((op) => !op.includes('/snapshots/'))).toHaveLength(
+        4 * SNAPSHOT_PRUNE_EVERY,
       );
+      expect(puts.filter((op) => op.includes('/snapshots/'))).toHaveLength(3);
       // the twentieth record is the one the prune follows
       expect(SNAPSHOT_PRUNE_EVERY).toBe(20);
     });

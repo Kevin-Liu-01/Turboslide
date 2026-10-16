@@ -129,22 +129,23 @@ temp tree (`apps/studio/src/server/root.test.ts`); the Docker worker's own folde
 
 ### Layout
 
-One Vercel Blob store, public access, holds each deck under `decks/<id>/` in the layout of SPEC
-4.1: `deck.json`, `slides/<slideId>.json`, `versions/<n>.json`, `leases.json`, the sidecars
+One Vercel Blob store, public access, holds each deck under `decks/<id>/` in the layout of SPEC 4.1:
+`deck.json`, `slides/<slideId>.json`, `versions/<n>.json`, `leases.json`, the sidecars
 (`import-ids.json`, `import-report.json`, `known-findings.json`) and `assets/<file>`, the twins,
-whose public URLs the browser can read directly. Since the Google Slides parity round two the
-prefix also holds `snapshots/<md5>.json`, one immutable copy of the whole document per committed
-write (the subsection "Immutable per revision documents" below). Templates are not uploaded; they
-ship in the bundle. Produced exports live beside the decks under `exports/<deckId>/<jobId>/` (the
-files of a synchronous export; the plan, the parts and the files of a batched one, section 7).
-The editor's queued export keeps its record at `exports/.jobs/<jobId>.json`, a folder no deck id
-can name (the stream fix round two, `build/t1.md` C3S-F7): written `queued` when the export
-starts, rewritten `done` or `failed` by the instance that ran the job under `waitUntil` after its
-response, with the produced files stored under `exports/<deckId>/<jobId>/` and their `?download=1`
-addresses, so a poll on any instance answers from the record and a job no record names is refused
-in the product's words, never a 500. Records older than a day are pruned at the next export start;
-`deck.remove` deletes the stored files with the deck prefix and the small record outlives it until
-that prune.
+whose public URLs the browser can read directly. Since the Google Slides parity round two the prefix
+also holds `snapshots/<md5>.json`, immutable copies of the whole document: one per committed write
+until hardening PS#4, and since then one on every tenth record, for a restore, for a document over 3
+MB and at the deck's last close (the subsection "Immutable per revision documents" below). Templates
+are not uploaded; they ship in the bundle. Produced exports live beside the decks under
+`exports/<deckId>/<jobId>/` (the files of a synchronous export; the plan, the parts and the files of
+a batched one, section 7). The editor's queued export keeps its record at
+`exports/.jobs/<jobId>.json`, a folder no deck id can name (the stream fix round two, `build/t1.md`
+C3S-F7): written `queued` when the export starts, rewritten `done` or `failed` by the instance that
+ran the job under `waitUntil` after its response, with the produced files stored under
+`exports/<deckId>/<jobId>/` and their `?download=1` addresses, so a poll on any instance answers
+from the record and a job no record names is refused in the product's words, never a 500. Records
+older than a day are pruned at the next export start; `deck.remove` deletes the stored files with
+the deck prefix and the small record outlives it until that prune.
 
 ### Reads
 
@@ -221,18 +222,20 @@ per tick until the last stream closed.
 
 A write pulls first, then applies through `FileStore.write` on the mirror (the same `applyWrite`,
 lease check and version record as on disk), then pushes in this order. The focus round
-(docs/FOCUS.md section 5 ranks 3, 7, 20 and 21; `docs/gslides-parity/focus/build/b7.md`) changed
-the order that follows: the version record travels in the second round, before the commit, as a
-claim on its number (`overwrite` refused; a number another instance holds is `RecordTakenError`
-and the write runs once more from the store's current document; a claim older than 60 s is a
-stopped writer's and is taken over), so a record is never invisible to the other instances until
-the next commit; the fourth round is the removed bodies alone; every push of `deck.json` (the
-seed, `create`, `copy`, `trash`, `restore`) stores its snapshot first; `pull()` fetches the bodies
-the manifest names and proves each against its own head, and a lagging body leaves the document
-unproven (`StaleMirrorError`, a lost race for the room); and `list()` reads one head per deck (the
-mirror when its manifest row names the head's etag, else the origin body when its md5 is the etag,
-else the snapshot the etag names), so the listing shows a rename, a trash stamp or a restore within
-its own refresh. The steps as they were, for the record of round two:
+(docs/FOCUS.md section 5 ranks 3, 7, 20 and 21; `docs/gslides-parity/focus/build/b7.md`) changed the
+order that follows: the version record travels in the second round, before the commit, as a claim on
+its number (`overwrite` refused; a number another instance holds is `RecordTakenError` and the write
+runs once more from the store's current document; a claim older than 60 s is a stopped writer's and
+is taken over), so a record is never invisible to the other instances until the next commit; the
+fourth round is the removed bodies alone; every push of `deck.json` (the seed, `create`, `copy`,
+`trash`, `restore`) stores its snapshot first, and since hardening PS#4 a write stores it on every
+tenth record, for a version restore and above 3 MB alone, while a reader replays the records above
+its mirror or above the newest stored snapshot a record names; `pull()` fetches the bodies the
+manifest names and proves each against its own head, and a lagging body leaves the document unproven
+(`StaleMirrorError`, a lost race for the room); and `list()` reads one head per deck (the mirror
+when its manifest row names the head's etag, else the origin body when its md5 is the etag, else the
+snapshot the etag names), so the listing shows a rename, a trash stamp or a restore within its own
+refresh. The steps as they were, for the record of round two:
 
 1. `snapshots/<md5>.json`, the whole document as canonical JSON under the md5 of the `deck.json`
    bytes about to be pushed, with overwrite refused (the subsection below; gslides-parity SPEC-2
@@ -1687,8 +1690,10 @@ What a night copies, under `backup/<yyyy-mm-dd>/` with the pathnames the documen
 
 - per deck with a manifest: `deck.json`, `access.json`, `slides/`, `versions/`, `snapshots/` and
   `comments/`. `deck.json` is copied first and the deck's folder is listed after it: a commit
-  stores its snapshot before it pushes `deck.json` (section 4, Writes), so the backup holds the
-  snapshot its manifest names, and a restore reads that document whole;
+  that stores a snapshot stores it before it pushes `deck.json` (section 4, Writes), so the backup
+  holds every snapshot its records name. Since hardening PS#4 a deck copied in the middle of a
+  session may hold no snapshot of its manifest; a restore then reads the newest named snapshot and
+  replays the records above it, which the backup holds too;
 - `users/<principal>/decks.json`, the per principal deck indexes;
 - `links/<hash>.json`, the link hash index, so a restored deck's share links open.
 

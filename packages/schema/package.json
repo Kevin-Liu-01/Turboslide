@@ -44,6 +44,7 @@
     "./ext": "./src/ext.ts",
     "./style-text": "./src/style-text.ts",
     "./motion": "./src/motion.ts",
+    "./motion-core": "./src/motion-core.ts",
     "./export": "./src/export.ts",
     "./errors": "./src/errors.ts",
     "./jitless": "./src/jitless.ts",

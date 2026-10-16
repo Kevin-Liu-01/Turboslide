@@ -2387,12 +2387,13 @@ export function createEditorController(init: {
         answer = await sendThroughFreeze(
           () => backend.writeDeck({ deckId, write, returnDocument: true }),
           {
-          waiting: (refusal) => {
-            refusals.count += 1;
-            publish({ error: refusal.message });
-            sayRefusal(refusal);
+            waiting: (refusal) => {
+              refusals.count += 1;
+              publish({ error: refusal.message });
+              sayRefusal(refusal);
+            },
           },
-        });
+        );
       } catch (error) {
         draftInFlight = false;
         const failure = error instanceof Error ? error : new TypeError(String(error));

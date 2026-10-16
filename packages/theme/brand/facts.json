@@ -1,6 +1,6 @@
 {
   "generator": "scripts/build-brand.ts --facts",
-  "writtenAt": "2026-10-12",
+  "writtenAt": "2026-10-16",
   "actions": {
     "count": 194,
     "source": "packages/schema/src/actions.ts ACTION_IDS; packages/agent/generated/manifest.json actionCount"
@@ -22,7 +22,7 @@
     "source": "packages/schema/src/shapes.ts SHAPE_PRESETS"
   },
   "materials": {
-    "count": 17,
+    "count": 23,
     "source": "packages/materials/src/catalog.ts MATERIAL_IDS"
   },
   "checkSteps": {

@@ -91,7 +91,7 @@ async function copyAt(concurrency: number) {
 
 describe('the copy of 40,000 documents at 200 ms a put, with 429s and 5xxs', () => {
   it('fits the freeze at the default concurrency, and the table of concurrencies', async () => {
-    const readings = [];
+    const readings: Awaited<ReturnType<typeof copyAt>>[] = [];
     for (const concurrency of [8, 16, 32, 64]) readings.push(await copyAt(concurrency));
     // COPY_READINGS names a file the table goes to (docs/hosting.md 10 quotes it)
     const table = readings

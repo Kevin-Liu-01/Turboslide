@@ -1197,7 +1197,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ts-site .site-faq-item summary svg {
+  .ts-site .site-faq-item summary svg,
+  .ts-site .site-shot-link {
     transition: none;
   }
 }

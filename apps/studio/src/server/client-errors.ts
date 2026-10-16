@@ -10,13 +10,17 @@
 // the rate on the line, so a burst from many browsers stays readable and bounded. The address is
 // the limiter's key alone and never enters the line. The CSRF filter of headers.ts covers the
 // route (`/api/x/` except the CSP reports), so another site cannot post into it from a browser.
-import { REPORT_LINE_MAX_BYTES, readReportLine } from '@turboslide/report/line';
+// Every accepted line, sampled out of the log or not, adds one to its daily count by kind, route
+// and key (hardening HR-O#2c, reports.ts), so the counts stay exact while the log is sampled.
+import { REPORT_LINE_MAX_BYTES, readReportLine, reportKey } from '@turboslide/report/line';
 import type { ReportLine } from '@turboslide/report/line';
 
 import { buildCommit } from './build-commit';
 import { clientAddress } from './headers';
 import { memoryLimiter } from './ratelimit';
 import type { RateLimiter } from './ratelimit';
+import { countReport } from './reports';
+import type { ReportCount } from './reports';
 
 /** Lines one address may send in a minute. */
 export const ERRORS_PER_ADDRESS = 30;
@@ -42,6 +46,8 @@ export type ClientErrorDeps = {
   log: (line: string) => void;
   now: () => number;
   build: () => string | null;
+  /** adds one to the line's daily count (reports.ts `countReport`, which never throws) */
+  count: (entry: ReportCount) => Promise<unknown>;
 };
 
 /** This instance's minute of logged lines (the sampling past LOGGED_PER_MINUTE). */
@@ -53,6 +59,7 @@ function defaultDeps(): ClientErrorDeps {
     log: (line) => console.error(line),
     now: () => Date.now(),
     build: () => buildCommit(),
+    count: (entry) => countReport(entry),
   };
 }
 
@@ -107,6 +114,7 @@ export async function acceptClientError(
     return { response: empty(413), line: null };
   const line = readReportLine(text);
   if (line === null) return { response: empty(400), line: null };
+  await deps.count({ kind: line.kind, route: line.route, key: reportKey(line) });
   const now = deps.now();
   const decision = sample(now);
   if (decision.log) {

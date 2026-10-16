@@ -11,9 +11,11 @@ import {
 } from './client-errors';
 import type { ClientErrorDeps } from './client-errors';
 import { memoryLimiter } from './ratelimit';
+import type { ReportCount } from './reports';
 
 // POST /api/x/errors (hardening HR-O#2a, RELIABILITY-14): the cap, the rate limit, the sampling
-// and the scrubbed line. Every value below is a test value.
+// and the scrubbed line, and the daily count of every accepted line (HR-O#2c). Every value below
+// is a test value.
 
 const ORIGIN = 'http://localhost:4868';
 
@@ -30,17 +32,22 @@ function post(body: string, address = '198.51.100.20', headers: Record<string, s
 }
 
 let lines: string[];
+let counted: ReportCount[];
 let deps: ClientErrorDeps;
 
 beforeEach(() => {
   vi.stubEnv('VERCEL', '1');
   resetClientErrorWindow();
   lines = [];
+  counted = [];
   deps = {
     limiter: memoryLimiter(),
     log: (line) => lines.push(line),
     now: () => Date.parse('2026-10-12T21:00:00.000Z'),
     build: () => '8c9465b6823c3b9ed1bcc4174dc7e8c0f59f169e',
+    count: async (entry) => {
+      counted.push(entry);
+    },
   };
 });
 
@@ -80,6 +87,8 @@ describe('POST /api/x/errors', () => {
     });
     expect(lines[0]).not.toContain('198.51.100.20');
     expect(lines[0]).not.toContain('Acme');
+    // the daily count (HR-O#2c): the scrubbed route and message, never the address
+    expect(counted).toEqual([{ kind: 'route', route: '/deck/$', key: 'Error: "…" for <address>' }]);
   });
 
   test('a body over 4 KB answers 413, by its declared length and by its bytes', async () => {
@@ -94,6 +103,7 @@ describe('POST /api/x/errors', () => {
     ).toBe(413);
     expect((await acceptClientError(post(big), deps)).response.status).toBe(413);
     expect(lines).toHaveLength(0);
+    expect(counted).toHaveLength(0);
   });
 
   test('a body that is not a line answers 400 and logs nothing', async () => {
@@ -103,6 +113,7 @@ describe('POST /api/x/errors', () => {
         .response.status,
     ).toBe(400);
     expect(lines).toHaveLength(0);
+    expect(counted).toHaveLength(0);
   });
 
   test('one address sends 30 lines a minute; the 31st answers 429; another address goes on', async () => {
@@ -115,6 +126,8 @@ describe('POST /api/x/errors', () => {
       204,
     );
     expect(lines).toHaveLength(ERRORS_PER_ADDRESS + 1);
+    // the refused 31st is not counted
+    expect(counted).toHaveLength(ERRORS_PER_ADDRESS + 1);
   });
 
   test('past 300 lines in a minute an instance logs one in ten, marked as a sample', async () => {
@@ -130,6 +143,8 @@ describe('POST /api/x/errors', () => {
       .slice(LOGGED_PER_MINUTE)
       .map((line) => (JSON.parse(line) as { sampled?: number }).sampled);
     expect(samples).toEqual(Array.from({ length: 5 }, () => SAMPLE_PAST_BUDGET));
+    // every line counts, sampled out of the log or not (HR-O#2c)
+    expect(counted).toHaveLength(LOGGED_PER_MINUTE + extra);
     // a new minute logs every line again
     open.now = () => Date.parse('2026-10-12T21:01:00.000Z');
     await acceptClientError(post(good()), open);

@@ -46,6 +46,7 @@ import { keyForDeviceGrant } from './device-grant.ts';
 import { buildIdentityRuntime, forgetAllAccountFacts, requestIdentity } from './identity.ts';
 import type { IdentityRuntime } from './identity.ts';
 import { AUTH_SCHEMA_KEY, AUTH_SCHEMA_VERSION } from './schema.ts';
+import { reportCounter } from '../reports.ts';
 
 const WRITE = process.env.TURBOSLIDE_RECORD_STATEMENTS === 'write';
 const LIST = fileURLToPath(
@@ -536,6 +537,19 @@ describe('the accounts statements, recorded over a database in production’s st
     await runtime.quotas.peek('record:probe');
     await runtime.quotas.reset('record:probe');
     await actAs(admin, 'account.forget');
+  });
+
+  test('the report counts (HR-O#2c): a new row, the same row again, the prune', async () => {
+    const counter = reportCounter(runtime.db!);
+    const now = Date.parse('2026-10-12T21:00:00.000Z');
+    await counter.count({ kind: 'error', route: '/decks', key: 'TypeError: x is undefined' }, now);
+    await counter.count({ kind: 'error', route: '/decks', key: 'TypeError: x is undefined' }, now);
+    await counter.prune('2026-09-12');
+    expect(
+      fake.sqlite
+        .prepare('select count from ts_reports where day = ? and kind = ?')
+        .get('2026-10-12', 'error'),
+    ).toEqual({ count: 2 });
   });
 
   test('the account’s deletion: the library’s rows, then the profile, the aliases, the record and the keys', async () => {

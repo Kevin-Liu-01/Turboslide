@@ -61,6 +61,16 @@ export function brandOfRow(entry: Pick<RosterEntry, 'kind' | 'mark'>): AgentBran
 }
 
 /**
+ * The step a roster row's agent names (docs/SITE.md D5): the `doing` words of a branded agent's
+ * mark (only the landing's tab room writes them, tab-backend.ts `say`), else null.
+ */
+export function doingOfRow(entry: Pick<RosterEntry, 'kind' | 'mark'>): string | null {
+  if (brandOfRow(entry) === null) return null;
+  const doing = (entry.mark as { doing?: unknown }).doing;
+  return typeof doing === 'string' && doing.trim() !== '' ? doing.trim() : null;
+}
+
+/**
  * A roster entry as the presence surfaces read it (SPEC-3 4.11 Participant; the chrome's
  * PresenceParticipant). The wire's hue slot is 0 to 5 and the chrome's `HueSlot` is 1 to 6
  * (docs/archive/rounds/PEOPLE.md 3.15), so the slot moves up by one here and the caret, the outline, the flag
@@ -74,6 +84,7 @@ export function participantOf(entry: RosterEntry, now: string): ParticipantView 
   const drag = dragOf(entry);
   /* an agent with a brand mark keeps the hue the room granted, as a person does (docs/SITE.md D5) */
   const brand = brandOfRow(entry);
+  const doing = doingOfRow(entry);
   return {
     principalId: entry.principalId,
     label: entry.label,
@@ -91,6 +102,7 @@ export function participantOf(entry: RosterEntry, now: string): ParticipantView 
     role: entry.role,
     ...(entry.kind === 'agent' && brand === null ? {} : { hue: entry.hueSlot + 1 }),
     ...(brand === null ? {} : { brand }),
+    ...(doing === null ? {} : { doing }),
     ...(entry.slideId !== undefined ? { slideId: entry.slideId } : {}),
     ...(entry.selection !== undefined
       ? {

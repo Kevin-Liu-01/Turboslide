@@ -287,6 +287,43 @@ export function flagText(name: string, trust: IdentityView['trust']): string {
   return first.length + suffix.length <= FLAG_CAPACITY ? `${first}${suffix}` : first;
 }
 
+/** The longest step words a flag draws (docs/SITE.md D5); longer words are cut at a word. */
+export const DOING_CAPACITY = 32;
+
+/**
+ * The step an agent with a brand mark names (docs/SITE.md D5), or null: the participant's
+ * `doing` words, trimmed and cut at a word to DOING_CAPACITY. A person or a plain agent names none.
+ */
+export function doingOf(participant: Pick<PresenceParticipant, 'brand' | 'doing'>): string | null {
+  if (participant.brand === undefined || typeof participant.doing !== 'string') return null;
+  const words = participant.doing.trim().replace(/\s+/gu, ' ');
+  if (words === '') return null;
+  if (words.length <= DOING_CAPACITY) return words;
+  const cut = words.slice(0, DOING_CAPACITY + 1);
+  const space = cut.lastIndexOf(' ');
+  return space > 0 ? cut.slice(0, space) : words.slice(0, DOING_CAPACITY);
+}
+
+/** "Codex: adding a chart", the name and the step as one flag reads them (docs/SITE.md D5). */
+export function doingText(name: string, doing: string): string {
+  return `${name}: ${doing}`;
+}
+
+/** The step words alone with a capital, for a flag on a stage too narrow for the name too. */
+export function doingShort(doing: string): string {
+  return doing.charAt(0).toUpperCase() + doing.slice(1);
+}
+
+/**
+ * The width a step flag of `text` reserves in CSS px, for its placement beside a pointer or a
+ * block: the flag itself is as wide as its words (presence.css `.has-step`), and 13 px Inter at
+ * weight 500 runs about 6 to 7 px a character, so 7 px a character with the 14 px chip, its 6 px
+ * gap, 12 px of padding and the 2 px border is never short; a name's flag keeps its fixed 120 px.
+ */
+export function flagWidthOf(text: string): number {
+  return Math.max(120, Math.ceil(34 + text.length * 7));
+}
+
 /** The participants with a live entry on a slide, in roster order (4.3). */
 export function participantsOnSlide(
   others: readonly PresenceParticipant[],

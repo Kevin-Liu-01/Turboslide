@@ -14,7 +14,8 @@ import { TRY_READY, framingWindow, isTryPress, isTryVisible, topWindow } from '.
 import type { TryPressed } from './frame';
 import { createGuests } from './guests';
 import type { GuestHandle, Guests } from './guests';
-import { heroDocument } from './hero-deck';
+import { HERO_ASSET_BASE, heroDocument } from './hero-deck';
+import { REVIEW } from './script';
 import type { AgentKey } from './script';
 import { createTabBackend } from './tab-backend';
 import type { TabPerson, TabRoom } from './tab-backend';
@@ -130,9 +131,10 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
     trust: 'label',
     hue: 1,
   };
-  const { backend, room, payloadFor, join } = createTabBackend({
+  const { backend, room, payloadFor, join, say } = createTabBackend({
     deckId,
     document: heroDocument(deckId),
+    assetBase: HERO_ASSET_BASE,
     people: [visitor, TRY_AGENTS.claude, TRY_AGENTS.codex],
     tabOnly: {
       sentence: TAB_ONLY.sentence,
@@ -184,6 +186,7 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
     return {
       invoke,
       present,
+      say: (words) => say(TRY_AGENTS[key].author.principalId, words),
       document: () => controller.getSnapshot().document,
       revision: () => {
         const snap = controller.getSnapshot();
@@ -194,6 +197,7 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
   const view = tryVisitor({ room, principalId, win });
   const runner = createRunner({
     agents: { claude: handleOf('claude'), codex: handleOf('codex') },
+    review: REVIEW,
     visitor: view,
     reducedMotion: () => win.matchMedia('(prefers-reduced-motion: reduce)').matches,
   });
@@ -212,7 +216,16 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
       join(person);
       const { controller, invoke, present } = controllerFor(person);
       controller.start();
-      return { invoke, present, leave: () => controller.stop() };
+      const principal = person.author.principalId;
+      return {
+        invoke,
+        present,
+        say: (words) => say(principal, words),
+        leave: () => {
+          say(principal, null);
+          controller.stop();
+        },
+      };
     },
     visitor: view,
     document: () => room.server.document(),
@@ -284,6 +297,8 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
 
   /** the agents' first pose on the title slide: the poster's still, and the first live frame */
   const pose = (): void => {
+    say(TRY_AGENTS.claude.author.principalId, 'writing the lead');
+    say(TRY_AGENTS.codex.author.principalId, 'checking the title');
     controllers.get('claude')?.reportPresence({
       slideId: 'title',
       pointer: { x: 820, y: 600 },

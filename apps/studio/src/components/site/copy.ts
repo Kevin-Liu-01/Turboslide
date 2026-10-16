@@ -143,7 +143,9 @@ export const FOOTER = {
   top: 'Turboslide, back to the top',
   home: 'Turboslide home',
   sentence:
-    'Turboslide is a slides editor in the browser. Every command in its menus is also an action that an agent can run.',
+    'Turboslide is a slides editor in the browser for people and agents. Every command in its menus is also an action an agent can run.',
+  /** the words of the sentence drawn in the site accent, as the title draws them */
+  keys: ['people', 'agents'],
   nav: 'Footer',
   columns: [
     {

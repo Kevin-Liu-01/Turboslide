@@ -17,8 +17,42 @@ const REPOSITORY = SITE.repository;
 const GITHUB_FILE = `${REPOSITORY}/blob/main`;
 const F = SITE_FACTS;
 
-/** A site page's head: the h1 is the page's name and the lead says what the page holds. */
-export type PageHeadCopy = { title: string; lead: string };
+/** A button of a page's head: Title Case words, a solid icon, and its `data-control` id. */
+export type PageAction = {
+  id: string;
+  label: string;
+  href: string;
+  icon: SiteIconName;
+  external?: boolean;
+};
+
+/**
+ * A site page's head: the h1 with its key words in the accent (Keyed.tsx), the lead that says what
+ * the page holds, and the page's two buttons, New Presentation first, as /home draws its own.
+ */
+export type PageHeadCopy = {
+  title: string;
+  keys: readonly string[];
+  lead: string;
+  actions: readonly PageAction[];
+};
+
+/** New Presentation, the first button of every page's head. */
+const NEW_PRESENTATION = { label: 'New Presentation', href: '/new', icon: 'plus' } as const;
+
+/**
+ * One framed shot of a page's first screen: a docs figure (public/docs/figures) or a code panel,
+ * under a head that names it and, where it has one, the block or question it belongs to.
+ */
+export type Shot = {
+  id: string;
+  label: string;
+  icon: SiteIconName;
+  /** the block or answer of the page the shot belongs to, and its number */
+  href?: string;
+  number?: string;
+  caption: string;
+} & ({ kind: 'crop'; name: string; alt: string } | { kind: 'code'; lines: readonly string[] });
 
 /** One feature: its name, one sentence, and its chapter of the documentation. */
 export type Feature = { name: string; sentence: string; href: string };
@@ -34,15 +68,68 @@ export type FeatureGroup = {
   label: string;
   icon: SiteIconName;
   sentence: string;
+  /** the words of the sentence drawn in the accent */
+  keys: readonly string[];
   docs: { label: string; href: string };
   figure: GroupFigure;
   features: readonly Feature[];
 };
 
 export const FEATURES_HEAD: PageHeadCopy = {
-  title: 'Features',
+  title: 'Features for people and agents',
+  keys: ['people', 'agents'],
   lead: 'What Turboslide does today, in six groups. Each feature links to its chapter of the documentation.',
+  actions: [
+    { id: 'site.features.new', ...NEW_PRESENTATION },
+    { id: 'site.features.docs', label: 'Read the Docs', href: '/docs', icon: 'book-open' },
+  ],
 };
+
+/**
+ * The first screen of /features: the Theme panel and File > Download that a person uses, and the
+ * commands an agent runs for the same work, each a shot that links to its group below.
+ */
+export const FEATURES_SHOTS: readonly Shot[] = [
+  {
+    id: 'make',
+    kind: 'crop',
+    name: 'themes-panel',
+    label: 'Theme panel',
+    icon: 'pencil-square',
+    number: '01',
+    href: '#make',
+    alt: 'The Theme panel: the Light and Dark appearance, the Swiss theme and brand kit of this presentation, and the first theme tile, Simple.',
+    caption: `${F.themes} themes, each with a light and a dark appearance.`,
+  },
+  {
+    id: 'export',
+    kind: 'crop',
+    name: 'file-download',
+    label: 'File > Download',
+    icon: 'arrow-down-tray',
+    number: '04',
+    href: '#export',
+    alt: 'The File menu open at Download, with Microsoft PowerPoint, PDF Document, JPEG image, PNG image and More formats.',
+    caption: 'PowerPoint, PDF, JPEG and PNG from the File menu.',
+  },
+  {
+    id: 'agents',
+    kind: 'code',
+    label: 'Command line',
+    icon: 'command-line',
+    number: '05',
+    href: '#agents',
+    lines: [
+      'turboslide info --json',
+      'turboslide slides --json',
+      'turboslide slide new --layout split --after title',
+      'turboslide render all --theme light,dark --out renders --json',
+      'turboslide lint all --json',
+      'turboslide export pptx --mode flatten --theme both --out exports',
+    ],
+    caption: 'The same work as actions an agent runs.',
+  },
+];
 
 /** The counts under the lead, read from facts.ts. */
 export const FEATURE_COUNTS = [
@@ -59,6 +146,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
     label: 'Make',
     icon: 'pencil-square',
     sentence: 'Make a presentation in the browser, with no account.',
+    keys: ['no account'],
     docs: { label: 'The editor', href: '/docs/editor' },
     figure: {
       kind: 'crop',
@@ -119,6 +207,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
     label: 'Present',
     icon: 'play',
     sentence: 'Present full screen, with your notes in a second window.',
+    keys: ['full screen'],
     docs: { label: 'Presenting', href: '/docs/presenting' },
     figure: {
       kind: 'crop',
@@ -163,6 +252,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
     label: 'Share and work together',
     icon: 'user-group',
     sentence: 'Share by link or by name, and edit together.',
+    keys: ['edit together'],
     docs: { label: 'Sharing and people', href: '/docs/sharing' },
     figure: {
       kind: 'crop',
@@ -214,6 +304,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
     label: 'Export',
     icon: 'arrow-down-tray',
     sentence: 'Download what you see on the slide.',
+    keys: ['what you see'],
     docs: { label: 'Download and export', href: '/docs/export' },
     figure: {
       kind: 'crop',
@@ -257,6 +348,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
     label: 'Agents',
     icon: 'command-line',
     sentence: 'Every menu command is an action an agent can run.',
+    keys: ['agent'],
     docs: { label: 'Agents', href: '/docs/agents' },
     figure: {
       kind: 'code',
@@ -314,6 +406,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
     label: 'Run it yourself',
     icon: 'code-bracket',
     sentence: 'Run the studio from its repository on your own computer or server.',
+    keys: ['your own'],
     docs: { label: 'Run Turboslide yourself', href: '/docs/self-hosting' },
     figure: {
       kind: 'code',
@@ -376,7 +469,83 @@ export type Question = {
 
 export const FAQ_HEAD: PageHeadCopy = {
   title: 'Questions and answers',
+  keys: ['answers'],
   lead: 'What people ask before they make a presentation with Turboslide. Each answer links to the documentation that says more.',
+  actions: [
+    { id: 'site.faq.new', ...NEW_PRESENTATION },
+    { id: 'site.faq.docs', label: 'Read the Docs', href: '/docs', icon: 'book-open' },
+  ],
+};
+
+/**
+ * The shots of /faq: the part of the product an answer talks about, in a column beside the list
+ * that holds the shot of the answer opened last (FaqPage.tsx). `href` is the answer the shot
+ * belongs to; its number is that question's place in the list.
+ */
+export const FAQ_SHOTS = {
+  share: {
+    id: 'share',
+    kind: 'crop',
+    name: 'share-dialog',
+    label: 'Share',
+    icon: 'user-group',
+    href: '#privacy',
+    alt: "The sharing dialog: General access set to Anyone with the link with the role Viewer, Copy Link, the Open as a slideshow box, the owner's row and More.",
+    caption: 'Share sets who can open a presentation and what each person can do.',
+  },
+  download: {
+    id: 'download',
+    kind: 'crop',
+    name: 'file-download',
+    label: 'File > Download',
+    icon: 'arrow-down-tray',
+    href: '#export',
+    alt: 'The File menu open at Download, with Microsoft PowerPoint, PDF Document, JPEG image, PNG image and More formats.',
+    caption: 'PowerPoint, PDF, JPEG and PNG, and the Turboslide file under More formats.',
+  },
+  agents: {
+    id: 'agents',
+    kind: 'code',
+    label: 'Command line',
+    icon: 'command-line',
+    href: '#connect',
+    lines: [
+      'turboslide login --to https://www.turboslide.com',
+      'turboslide mcp --deck <folder>',
+      'turboslide slide new --layout split --after title',
+    ],
+    caption: 'An agent signs in once, then runs the same actions as the menus.',
+  },
+  source: {
+    id: 'source',
+    kind: 'code',
+    label: 'Your computer',
+    icon: 'code-bracket',
+    href: '#self-host',
+    lines: [
+      'git clone https://github.com/Kevin-Liu-01/Turboslide.git',
+      'cd Turboslide',
+      'corepack enable',
+      'pnpm install',
+      'pnpm dev',
+    ],
+    caption: 'The studio then answers at localhost:4321.',
+  },
+} as const satisfies Record<string, Shot>;
+
+export type FaqShotId = keyof typeof FAQ_SHOTS;
+
+/** The shot each answer opens beside the list; an answer not named here leaves the shot as it is. */
+export const FAQ_SHOT_FOR: Readonly<Record<string, FaqShotId>> = {
+  privacy: 'share',
+  collaborate: 'share',
+  'present-link': 'share',
+  export: 'download',
+  backups: 'download',
+  agents: 'agents',
+  connect: 'agents',
+  'self-host': 'source',
+  license: 'source',
 };
 
 export const QUESTIONS: readonly Question[] = [
@@ -550,6 +719,8 @@ export type AboutBlock = {
   label: string;
   icon: SiteIconName;
   sentence: string;
+  /** the words of the sentence drawn in the accent */
+  keys: readonly string[];
   body: readonly string[];
   points?: readonly { name: string; sentence: string }[];
   links?: readonly { label: string; href: string; external: boolean }[];
@@ -557,8 +728,38 @@ export type AboutBlock = {
 
 export const ABOUT_HEAD: PageHeadCopy = {
   title: 'About Turboslide',
+  keys: ['Turboslide'],
   lead: 'Turboslide is a slides editor in the browser for people and agents. It is open source under the MIT License and made by General Translation.',
+  actions: [
+    { id: 'site.about.new', ...NEW_PRESENTATION },
+    {
+      id: 'site.about.source',
+      label: 'Read the Source',
+      href: REPOSITORY,
+      icon: 'code-bracket',
+      external: true,
+    },
+  ],
 };
+
+/**
+ * The first screen of /about: the editor with both agents at work (the poster of /home's live
+ * editor) beside the viewer on a phone, both captures of the real product (scripts/site/capture.mjs).
+ */
+export const ABOUT_FIGURE = {
+  editor: {
+    label: 'The editor',
+    icon: 'pencil-square',
+    caption: 'Claude Code and Codex at work on a presentation.',
+    alt: 'The Turboslide editor on a presentation titled Northwind quarterly review, with the menus, the toolbar, the filmstrip and the title slide. The pointers of Claude Code and Codex are on the slide.',
+  },
+  viewer: {
+    label: 'The viewer',
+    icon: 'play',
+    caption: 'Anyone with the link presents it.',
+    alt: 'The Turboslide viewer on a phone in the Book view of the example deck, with the slide counter, the Slide, Grid and Book views, Theme and Help in its bar.',
+  },
+} as const;
 
 export const GENERAL_TRANSLATION = 'https://generaltranslation.com';
 
@@ -569,6 +770,7 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
     label: 'What it is',
     icon: 'presentation-chart-bar',
     sentence: 'A slides editor in the browser.',
+    keys: ['browser'],
     body: [
       'You start a presentation at turboslide.com/new, present it full screen and send the link. It is saved as you type.',
       'A slide is a layout with typed blocks in named slots on a sheet of 1600 by 900 pixels, so a program can read and write it as data.',
@@ -584,6 +786,7 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
     label: 'Agent native',
     icon: 'command-line',
     sentence: 'Every menu command is an action.',
+    keys: ['action'],
     body: [
       `Turboslide keeps every operation in one table of ${F.actions} actions. The menus, the command line, MCP, HTTP and the page API are made from that table, so an agent can do what a person can.`,
       'Each action checks its input the same way on every transport. A write names the revision it read, and it is refused if the presentation changed since.',
@@ -596,6 +799,7 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
     label: 'Principles',
     icon: 'check-badge',
     sentence: 'Your presentations stay yours.',
+    keys: ['yours'],
     body: [],
     points: [
       {
@@ -620,6 +824,7 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
     label: 'Open source',
     icon: 'code-bracket',
     sentence: 'Open source under the MIT License.',
+    keys: ['Open source'],
     body: [
       'The repository holds the studio, the command line and every package they use. Anyone can read the code and run the studio on their own computer or server.',
     ],
@@ -635,6 +840,7 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
     label: 'Who makes it',
     icon: 'globe-alt',
     sentence: 'Made by General Translation.',
+    keys: ['General Translation'],
     body: [],
     links: [{ label: 'generaltranslation.com', href: GENERAL_TRANSLATION, external: true }],
   },
@@ -644,6 +850,7 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
     label: 'Contact',
     icon: 'chat-bubble-left-right',
     sentence: 'Report a problem or ask for a feature on GitHub.',
+    keys: ['GitHub'],
     body: [
       'Open an issue in the repository. Say what you did, what you expected and what happened, with the address of the page.',
     ],
@@ -657,5 +864,10 @@ export const PAGES = {
   docsLink: 'Read the chapter',
   figure: 'Figure',
   countsName: 'Turboslide in numbers',
+  shotsName: 'Turboslide for people and agents',
+  shotName: 'The product this answer is about',
+  aboutShotsName: 'The editor and the viewer',
+  codeSource: 'From the docs',
+  commands: (n: number): string => `${n} commands`,
   questionsName: 'Questions',
 } as const;

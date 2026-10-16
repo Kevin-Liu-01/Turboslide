@@ -3,11 +3,36 @@ import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 /**
  * The presentation in the landing's live editor (docs/SITE.md C.8): "Northwind quarterly review",
  * five slides in the Swiss theme, made for the page and owned by nobody. Northwind is a made up
- * company; the deck carries no picture, no General Translation mark and no product name but its
- * own. The tab room starts from this document on every load, so a reload of /home starts the
- * hero again (hero-deck.test.ts validates it and runs the lint over it).
+ * company; the deck carries no General Translation picture or mark and no product name but its
+ * own. Its one asset is a drawing made for it, a warehouse rack of parcels, which no slide shows
+ * until Claude Code places it (script.ts). The tab room starts from this document on every load,
+ * so a reload of /home starts the hero again (hero-deck.test.ts validates it and runs the lint
+ * over it).
  */
 export const HERO_DECK_TITLE = 'Northwind quarterly review';
+
+/**
+ * Where the hero deck's asset paths resolve: no store holds a tab's deck, so its picture is a
+ * static file of the site (apps/studio/public/hero/), and the tab backend serves every asset path
+ * from here (session.ts).
+ */
+export const HERO_ASSET_BASE = '/hero/';
+
+/** The id of the deck's one picture, the warehouse drawing. */
+export const HERO_PICTURE = 'warehouse';
+
+const ASSETS: DeckDocument['deck']['assets'] = {
+  [HERO_PICTURE]: {
+    id: HERO_PICTURE,
+    role: 'other',
+    alt: 'A drawing of a warehouse rack of parcels, a pallet of parcels and two parcels on the floor',
+    twins: { light: 'northwind-warehouse-light.jpg', dark: 'northwind-warehouse-dark.jpg' },
+    size: [1600, 1200],
+    scale: 1,
+    source: { kind: 'file' },
+    inline: 'native',
+  },
+};
 
 /** The slide ids the agents' script names (script.ts). */
 export const HERO_SLIDES = {
@@ -125,7 +150,7 @@ export function heroDocument(deckId: string, now: Date = new Date()): DeckDocume
       theme: 'swiss',
       defaults: { appearance: 'light' },
       sections: [{ id: 'deck', name: 'Deck', slideIds: SLIDES.map((slide) => slide.id) }],
-      assets: {},
+      assets: structuredClone(ASSETS),
       revision: 0,
       createdAt: stamp,
       updatedAt: stamp,

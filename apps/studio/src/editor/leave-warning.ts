@@ -4,6 +4,18 @@
 import { REFUSALS } from '@turboslide/chrome/menus/strings';
 
 import type { EditorBackend } from './backend';
+import type { EditorSnapshot } from './controller';
+
+/**
+ * The writes of this tab the server has not acknowledged: the room client's pending operations
+ * (the controller's own count before the room attaches) and the deck writes that run on the
+ * server, such as a picture upload, which the room counts only once they come back.
+ */
+export function unsavedWrites(
+  snapshot: Pick<EditorSnapshot, 'sync' | 'pending' | 'serverWrites'>,
+): number {
+  return (snapshot.sync?.pending ?? snapshot.pending) + snapshot.serverWrites;
+}
 
 /**
  * The `beforeunload` listener that asks for the browser's leave prompt while operations of this

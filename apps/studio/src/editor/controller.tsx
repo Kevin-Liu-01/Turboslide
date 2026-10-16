@@ -520,6 +520,12 @@ export type EditorSnapshot = {
   serverRevision: number;
   /** operations pending or retained (SPEC-3 3.6: "Saving…" while pending + retained > 0) */
   pending: number;
+  /**
+   * The deck writes of this tab that run on the server (asset.add, asset.dither,
+   * material.capture) from the call to the answer: the room counts such a write only once it
+   * comes back over the stream, and a picture upload runs for seconds before that.
+   */
+  serverWrites: number;
   /** the room client's status, null before the stream opened */
   sync: SyncStatus | null;
   /** the room's roster as the stream told it */
@@ -1143,6 +1149,7 @@ export function createEditorController(init: {
     html: new Map(),
     serverRevision: init.payload.document.deck.revision,
     pending: 0,
+    serverWrites: 0,
     sync: null,
     roster: [],
     ownClientIds: readClientIds(idStorage(), deckId),
@@ -3381,9 +3388,9 @@ export function createEditorController(init: {
      capture browser, the catalog); the write they end in comes back over the watch channel, and
      the handler waits for that revision before it answers */
   const serverSide = (id: ServerSideWindowAction, options: { announce?: boolean } = {}): void => {
-    dispatcher.register(id, async (input, ctx) => {
+    const writesDeck = options.announce === true;
+    const run = async (input: unknown, ctx: ActionContext): Promise<unknown> => {
       const before = latest().document.deck.revision;
-      const writesDeck = options.announce === true;
       let request = input;
       if (writesDeck) {
         // the write behind an asset action bases on the revision the room acknowledged, once
@@ -3492,6 +3499,20 @@ export function createEditorController(init: {
         shaderFrames.scheduleStale();
       }
       return output;
+    };
+    if (!writesDeck) {
+      dispatcher.register(id, run);
+      return;
+    }
+    /* a deck write counts in `serverWrites` until it answers, so the save words and the leave
+       warning (leave-warning.ts) see an upload the room does not hold yet */
+    dispatcher.register(id, async (input, ctx) => {
+      publish({ serverWrites: latest().serverWrites + 1 });
+      try {
+        return await run(input, ctx);
+      } finally {
+        publish({ serverWrites: Math.max(0, latest().serverWrites - 1) });
+      }
     });
   };
   /** The sentence a failed server side write shows, by what the person was doing. */

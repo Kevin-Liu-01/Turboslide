@@ -145,7 +145,7 @@ import type {
 } from './controller';
 import type { EditSearch } from '../routes/-edit-search';
 import { partitionRoster } from './client-ids';
-import { leaveWarning } from './leave-warning';
+import { leaveWarning, unsavedWrites } from './leave-warning';
 import { refusedText } from './refused-write';
 import { SessionBridge, ShellBridge, isPrerendering, whenShown } from './shell-bridge';
 
@@ -749,16 +749,17 @@ export function EditorRoot({
   }, [refusedByControl, controller]);
 
   /* the save words answer the save queue alone (docs/archive/rounds/POLISH.md item 100; SPEC-3 3.6): Saving…
-     while anything is pending or retained, the retry word while the client is sending a write
-     again after a failed POST or a 5xx, Offline from the browser's own word; a reject notice is
-     the card's or the snackbar's and never touches the save state (audit-collab item 3: the row
-     read "Couldn't save, retrying" for minutes while nothing retried) */
+     while anything is pending or retained or a server side write (an upload) runs, the retry
+     word while the client is sending a write again after a failed POST or a 5xx, Offline from
+     the browser's own word; a reject notice is the card's or the snackbar's and never touches the
+     save state (audit-collab item 3: the row read "Couldn't save, retrying" for minutes while
+     nothing retried) */
   const status: SaveState =
     snap.sync?.resending === true
       ? 'conflict'
       : snap.sync?.offline === true
         ? 'unsaved'
-        : snap.pending > 0
+        : snap.pending + snap.serverWrites > 0
           ? 'unsaved'
           : 'saved';
   /* the caller's standing, from the loader and again on every access event of the stream */
@@ -795,10 +796,7 @@ export function EditorRoot({
      stops there and the room client posts the leave with keepalive; a page the browser restores
      from its cache afterwards reloads, since its stream and its client id are gone */
   useEffect(() => {
-    const onBeforeUnload = leaveWarning(backend, () => {
-      const current = controller.getSnapshot();
-      return current.sync?.pending ?? current.pending;
-    });
+    const onBeforeUnload = leaveWarning(backend, () => unsavedWrites(controller.getSnapshot()));
     const onPageHide = () => controller.stop();
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) window.location.reload();

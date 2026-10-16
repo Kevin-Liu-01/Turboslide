@@ -14,6 +14,7 @@ import {
   shaderSet,
 } from '@turboslide/materials/actions';
 import type { ShaderInsertInput } from '@turboslide/materials/actions';
+import { parseAnchor } from '@turboslide/materials/shader-writes';
 
 import { flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
@@ -23,13 +24,30 @@ import { assetDeps, oneOf } from './asset.ts';
 
 const USAGE = `usage: turboslide shader <list|insert|set|frame|capture|render> ...
   shader list [--material <id>]                          the catalog: the shaders, their presets and controls
-  shader insert <slideId> <materialId> [--preset <p>] [--controls <json>] [--at <x,y,w,h>] [--alt <text>]
+  shader insert <slideId> <materialId> [--preset <p>] [--controls <json>] [--anchor <ms>] [--at <x,y,w,h>] [--alt <text>]
   shader set <slideId> <blockId> <path> <value>          one field under the block (/preset, /controls/strength, /anchor)
   shader frame <slideId> <blockId> --frame-key <key> --file <frame.png>
   shader capture <slideId> <blockId> [--backend angle-metal|swiftshader]
   shader render <materialId> [--preset <p>] [--time <ms>] --out <file>`;
 
 type Position = NonNullable<ShaderInsertInput['at']>;
+
+/**
+ * A still's moment from a flag (`--anchor` on insert, `--time` on render): a whole number of ms
+ * from 0 to 60000, through the one anchor schema (the shader design 2.3); anything else is a
+ * usage error that names the flag.
+ */
+export function anchorFlag(ctx: CommandContext, flag: string): number | undefined {
+  const raw = flagString(ctx.args, flag);
+  if (raw === undefined) return undefined;
+  try {
+    return parseAnchor(raw.trim() === '' ? Number.NaN : Number(raw), `--${flag}`);
+  } catch {
+    throw new UsageError(
+      `--${flag} wants a whole number of ms from 0 to 60000, got "${raw}"\n${USAGE}`,
+    );
+  }
+}
 
 /** `x,y,w,h` in sheet px into a position; a malformed value is a usage error. */
 export function parsePosition(raw: string): Position {
@@ -76,6 +94,7 @@ async function insert(ctx: CommandContext): Promise<number> {
   const materialId = requirePositional(ctx, 1, USAGE);
   const preset = flagString(ctx.args, 'preset');
   const controlsRaw = flagString(ctx.args, 'controls');
+  const anchor = anchorFlag(ctx, 'anchor');
   const at = flagString(ctx.args, 'at');
   const alt = flagString(ctx.args, 'alt');
   const deps = assetDeps(ctx);
@@ -87,6 +106,7 @@ async function insert(ctx: CommandContext): Promise<number> {
       ...(controlsRaw !== undefined
         ? { controls: parseValue(controlsRaw) as Record<string, number> }
         : {}),
+      ...(anchor !== undefined ? { anchor } : {}),
       ...(at !== undefined ? { at: parsePosition(at) } : {}),
       ...(alt !== undefined ? { alt } : {}),
       baseRevision: await baseRevision(ctx, deps.store),
@@ -169,7 +189,7 @@ async function render(ctx: CommandContext): Promise<number> {
   const out = flagString(ctx.args, 'out');
   if (out === undefined) throw new UsageError(`shader render needs --out <file>\n${USAGE}`);
   const preset = flagString(ctx.args, 'preset');
-  const time = flagString(ctx.args, 'time');
+  const time = anchorFlag(ctx, 'time');
   const backend = oneOf(ctx, 'backend', ['angle-metal', 'swiftshader'] as const);
   const deps = assetDeps(ctx);
   const deck = (await deps.store.read()).document.deck;
@@ -179,7 +199,7 @@ async function render(ctx: CommandContext): Promise<number> {
       {
         materialId,
         ...(preset !== undefined ? { preset } : {}),
-        ...(time !== undefined ? { timeMs: Number(time) } : {}),
+        ...(time !== undefined ? { timeMs: time } : {}),
         ...(backend !== undefined ? { backend } : {}),
       },
       deck,

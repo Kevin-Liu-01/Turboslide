@@ -60,15 +60,15 @@ It takes no input.
 
 **Render a shader.** PNG bytes of a recipe for an agent or the CLI, no deck write and no browser of the caller’s: the material, a preset, uniforms or the common controls, the frame time and the pixels (3200 by 1800 unless a size with the long side 3200 is named); the deck’s brand kit colours the presets when the call names a deck.
 
-| Field        | Type                           | Required | Description |
-| ------------ | ------------------------------ | -------- | ----------- |
-| `materialId` | string                         | yes      |             |
-| `preset`     | string                         | no       |             |
-| `uniforms`   | record                         | no       |             |
-| `controls`   | object                         | no       |             |
-| `size`       | [integer, integer]             | no       |             |
-| `timeMs`     | number                         | no       |             |
-| `backend`    | "angle-metal" \| "swiftshader" | no       |             |
+| Field        | Type                           | Required | Description                                                                              |
+| ------------ | ------------------------------ | -------- | ---------------------------------------------------------------------------------------- |
+| `materialId` | string                         | yes      |                                                                                          |
+| `preset`     | string                         | no       |                                                                                          |
+| `uniforms`   | record                         | no       |                                                                                          |
+| `controls`   | object                         | no       |                                                                                          |
+| `size`       | [integer, integer]             | no       |                                                                                          |
+| `timeMs`     | integer                        | no       | The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent |
+| `backend`    | "angle-metal" \| "swiftshader" | no       |                                                                                          |
 
 - Command line: `turboslide shader render <materialId> --preset <preset> --time <timeMs> --out <file>`
 - MCP tool: `deck_shader_render`

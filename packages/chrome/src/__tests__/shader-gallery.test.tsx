@@ -22,7 +22,6 @@ import {
   engineOf,
   featuredPresetOf,
   insertableMaterials,
-  schemaHasMotion,
   shaderBlockOf,
   shaderEngines,
   shaderFailureSentence,
@@ -240,18 +239,15 @@ describe('the catalog as the gallery reads it', () => {
     expect(shaderPreviewUrl(LIQUID, diamond)).toMatch(/\/previews\/liquid-metal--diamond\.webp$/);
   });
 
-  it('makes the block with the entry, the preset, the alt and the motion default once the schema knows it', () => {
+  it('makes the block with the entry, the preset and the alt, and no motion', () => {
     const block = shaderBlockOf('m-1', LIQUID);
     expect(block.type).toBe('material');
     expect(block.materialId).toBe('paper:liquid-metal');
     expect(block.preset).toBe('diamond');
     expect(block.alt).toBe('The liquid metal shader');
     expect(block.uniforms).toBeUndefined();
-    const hasMotion = 'motion' in materialBlockSchema.shape;
-    expect(schemaHasMotion()).toBe(hasMotion);
-    expect((block as { motion?: unknown }).motion).toEqual(
-      hasMotion ? { play: 'show' } : undefined,
-    );
+    /* Playback is the slide's and the deck's (the shader design 3.1) */
+    expect((block as { motion?: unknown }).motion).toBeUndefined();
     /* a preset tile's pick */
     const sphere = LIQUID.presets.find((each) => each.name === 'sphere');
     expect(shaderBlockOf('m-2', LIQUID, sphere).preset).toBe('sphere');
@@ -330,9 +326,21 @@ describe('the Shader gallery dialog', () => {
     expect(plate.textContent).toBe('');
     /* the preset tiles inside the card, labelled by the preset's label, never counted as cards */
     const presets = controls('dialog.shader.tile.paper:liquid-metal.preset.');
-    expect(presets.map((tile) => tile.dataset.preset)).toEqual(
-      LIQUID.presets.map((preset) => preset.name),
-    );
+    /* the kit looks and the recorded ones; Paper's forms (wave 2.3) wait for the Shader section */
+    expect(presets.map((tile) => tile.dataset.preset)).toEqual([
+      'ink-paper',
+      'paper-ink',
+      'brand-blue',
+      'accent',
+      'caption',
+      'hint',
+      'diamond',
+      'sphere',
+      'chrome',
+      'noir',
+    ]);
+    expect(LIQUID.presets.map((preset) => preset.name)).toContain('stripes');
+    expect(controls('dialog.shader.tile.paper:warp.preset.')).toHaveLength(6);
     expect(presets[0]?.getAttribute('aria-label')).toBe(LIQUID.presets[0]?.label);
     expect(presets.every((tile) => list[0]?.contains(tile))).toBe(true);
     /* every control carries a tooltip */

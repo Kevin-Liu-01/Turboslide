@@ -35,9 +35,19 @@ import type {
   MaterialUniformValue,
   MaterialUniforms,
 } from '@turboslide/schema/blocks/material';
-import { MATERIAL_ANCHORS, MATERIAL_PLATE_SIDES } from '@turboslide/schema/blocks/material';
+import {
+  MATERIAL_ANCHORS,
+  MATERIAL_ANCHOR_MAX_MS,
+  MATERIAL_PLATE_SIDES,
+} from '@turboslide/schema/blocks/material';
 import type { Mutation } from '@turboslide/schema/mutations';
-import { previewShaderSpeed, previewShaderUniforms } from '@turboslide/viewer/MaterialMount';
+import {
+  liveShaderFrame,
+  onLiveShaderChange,
+  previewShaderFrame,
+  previewShaderSpeed,
+  previewShaderUniforms,
+} from '@turboslide/viewer/MaterialMount';
 
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
@@ -60,9 +70,10 @@ import './shader.css';
  * a change writes `/preset` and clears the control overrides); Colors (the kit's six swatches
  * with the role's sentence in the tooltip, one pressed as the ground the preset takes, then
  * Custom); Form (Strength, Detail, Frequency, Amplitude, Density); Light and texture (Brightness,
- * Grain); Orientation (Rotation, Center X, Center Y); Motion (Speed); Dither (Two-tone and Plate
- * in the Dither section's words); Advanced, collapsed, the raw uniforms with Reset per row and the
- * anchor. Every slider previews through the stage's live mount while it is held and commits on
+ * Grain); Orientation (Rotation, Center X, Center Y); Motion (Speed); Still (Play and Pause, the
+ * time scrubber and the time in seconds, the shader design 2.2; hidden for a still pattern); Dither
+ * (Two-tone and Plate in the Dither section's words); Advanced, collapsed, the raw uniforms with
+ * Reset per row. Every slider previews through the stage's live mount while it is held and commits on
  * release as one `slide.update` (the controls and the resolved uniforms in one write), one undo
  * entry; nothing captures while a slider is held (the capture waits 800 ms after the last commit,
  * packages/viewer shader-frame.ts). Every slider carries one sentence in the seller's words
@@ -78,7 +89,7 @@ import './shader.css';
  * lands (5.1), a picture block whose asset is a material frame. The Background dialog's Shader
  * options link selects it and opens this section, which reads the recipe off the asset (the
  * material, the preset the capture recorded under `ext.preset`, the uniforms, the anchor) and
- * draws the head, the Preset tiles, the Colors swatches and Advanced; every write is one
+ * draws the head, the Preset tiles, the Colors swatches, Still and Advanced; every write is one
  * `slide.setBackgroundMaterial`, the same write Place makes, which renders the ground again
  * through the hosted job and points the picture at the new frame. The slider groups and the
  * Dither group are not drawn for a ground: the ground record carries no controls, and the
@@ -118,8 +129,16 @@ export const SHADER_WORDS = {
   dither: 'Dither',
   advanced: 'Advanced',
   advancedDoc: 'Every value of the pattern by its own name, for a fine adjustment',
-  anchor: 'Frame time',
-  anchorDoc: 'The moment of the loop the still freezes, in milliseconds',
+  still: 'Still',
+  play: 'Play',
+  playDoc: 'Plays the pattern from its still so you can find a moment',
+  pause: 'Pause',
+  pauseDoc: 'Holds this moment as the still',
+  time: 'Time',
+  timeDoc:
+    'The moment of the pattern the still holds in downloads, thumbnails and wherever it is not playing',
+  timeValue: 'Time value',
+  timeValueDoc: 'The still’s moment in seconds; Enter applies',
   reset: 'Reset',
   stillFresh: 'Still: up to date',
   stillPending: 'Still: updating after the last change',
@@ -453,24 +472,20 @@ function ColorSwatches({
   );
 }
 
-/** The Advanced group, collapsed: the anchor and the raw uniforms with Reset per row. */
+/** The Advanced group, collapsed: the raw uniforms with Reset per row. */
 function AdvancedGroup({
   entry,
-  anchor,
   uniforms,
   base,
   disabled,
-  onAnchor,
   onUniform,
 }: {
   entry: MaterialEntry;
-  anchor: number;
   /** The overrides over the preset (a block's `uniforms`; a ground's values that differ from the preset's). */
   uniforms: MaterialUniforms | undefined;
   /** The preset's resolved uniforms, what a row shows under no override. */
   base: MaterialUniforms;
   disabled: boolean;
-  onAnchor: (value: number) => void;
   onUniform: (name: string, value: MaterialUniformValue | undefined) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -493,17 +508,6 @@ function AdvancedGroup({
       </button>
       {open ? (
         <div>
-          <NumberField
-            label={SHADER_WORDS.anchor}
-            value={anchor}
-            onCommit={onAnchor}
-            control={`${ID}.anchor`}
-            disabled={disabled}
-            doc={SHADER_WORDS.anchorDoc}
-            step={100}
-            min={0}
-            unit="ms"
-          />
           {entry.uniforms.map((spec) => {
             const value = shownUniform(spec);
             const overridden = uniforms?.[spec.name] !== undefined;
@@ -590,6 +594,229 @@ function AdvancedGroup({
         </div>
       ) : null}
     </div>
+  );
+}
+
+/** The still's moment as a whole ms the schema takes: 0 to 60,000 (the shader design 2.3). */
+export function anchorOfSeconds(seconds: number): number {
+  return Math.min(MATERIAL_ANCHOR_MAX_MS, Math.max(0, Math.round(seconds * 1000)));
+}
+
+/** One step of the time scrubber: a frame at 60 frames per second, in seconds. */
+const STILL_STEP_S = 1 / 60;
+
+/**
+ * The Still group (the shader design 2.2): Play and Pause, a time scrubber from 0 to 60 s in steps
+ * of 1/60 s, and the time in seconds. While the group is shown the block's live mount holds the
+ * still (each new mount, after a selection or a write, is set to the anchor at speed 0) until
+ * Play, which runs it from the anchor at the block's speed and writes nothing; Pause stops it and
+ * writes the moment it shows as `/anchor`, one history entry. A held scrubber moves the live mount
+ * and writes nothing; the release writes. While the pattern plays, the thumb and the seconds follow
+ * its clock from an animation frame loop that writes the two inputs directly, so the panel does
+ * not render on every frame (Glyphfield's ShaderTimeExplorer does the same). Under reduced motion
+ * Play holds, as every live mount does.
+ */
+function StillGroup({
+  blockId,
+  anchor,
+  speed,
+  disabled,
+  onAnchor,
+}: {
+  /** The block whose live mount the group drives (a shader block, or a ground's picture). */
+  blockId: string;
+  /** The stored moment in ms. */
+  anchor: number;
+  /** The block's playback speed (its Speed control). */
+  speed: number;
+  disabled: boolean;
+  onAnchor: (ms: number) => void;
+}) {
+  const [playing, setPlaying] = useState(false);
+  /* the moment shown while the scrubber is held, or after a write until the anchor lands */
+  const [draft, setDraft] = useState<number | null>(null);
+  const [typed, setTyped] = useState<string | null>(null);
+  /* the typed text as the handlers read it: Enter commits and blurs in one event, so the blur's
+     handler must see the commit (NumberField's rule, fields.tsx) */
+  const typedRef = useRef<string | null>(null);
+  const type = (next: string | null) => {
+    typedRef.current = next;
+    setTyped(next);
+  };
+  const range = useRef<HTMLInputElement>(null);
+  const field = useRef<HTMLInputElement>(null);
+  const playingRef = useRef(false);
+  playingRef.current = playing;
+  const draftRef = useRef<number | null>(null);
+  draftRef.current = draft;
+  const shown = draft ?? anchor;
+
+  /* a new anchor (this write landing, an undo, a collaborator) ends the draft */
+  useEffect(() => setDraft(null), [anchor]);
+
+  /* hold every live mount of the block on the shown moment while it is not playing */
+  useEffect(() => {
+    const hold = () => {
+      if (playingRef.current) return;
+      if (previewShaderFrame(blockId, draftRef.current ?? anchor)) previewShaderSpeed(blockId, 0);
+    };
+    hold();
+    return onLiveShaderChange(hold);
+  }, [blockId, anchor]);
+
+  /* while playing, the thumb and the seconds follow the live clock; past 60 s it starts again at 0 */
+  useEffect(() => {
+    if (!playing) return;
+    let frame = 0;
+    const follow = () => {
+      let ms = liveShaderFrame(blockId);
+      if (ms === null) {
+        setPlaying(false);
+        return;
+      }
+      if (ms > MATERIAL_ANCHOR_MAX_MS) {
+        ms %= MATERIAL_ANCHOR_MAX_MS;
+        previewShaderFrame(blockId, ms);
+      }
+      if (range.current !== null) range.current.value = String(ms / 1000);
+      if (field.current !== null && document.activeElement !== field.current)
+        field.current.value = (ms / 1000).toFixed(2);
+      frame = requestAnimationFrame(follow);
+    };
+    frame = requestAnimationFrame(follow);
+    return () => cancelAnimationFrame(frame);
+  }, [playing, blockId]);
+
+  /* the group leaves (another block, the panel closed): the mount stops where it is */
+  useEffect(
+    () => () => {
+      if (playingRef.current) previewShaderSpeed(blockId, 0);
+    },
+    [blockId],
+  );
+
+  const write = (ms: number) => {
+    setDraft(ms);
+    if (ms !== anchor) onAnchor(ms);
+  };
+  const play = () => {
+    if (!previewShaderFrame(blockId, shown)) return;
+    previewShaderSpeed(blockId, speed);
+    setPlaying(true);
+  };
+  const pause = () => {
+    setPlaying(false);
+    previewShaderSpeed(blockId, 0);
+    const live = liveShaderFrame(blockId);
+    write(anchorOfSeconds((live ?? shown) / 1000));
+  };
+  const preview = (seconds: number) => {
+    const ms = anchorOfSeconds(seconds);
+    if (playingRef.current) {
+      setPlaying(false);
+      previewShaderSpeed(blockId, 0);
+    }
+    draftRef.current = ms;
+    setDraft(ms);
+    previewShaderFrame(blockId, ms);
+  };
+  /* the release writes the moment the scrubber holds */
+  const release = () => {
+    const ms = draftRef.current;
+    if (ms !== null && ms !== anchor) onAnchor(ms);
+  };
+  const timeTip = tipProps({ name: SHADER_WORDS.time, doc: SHADER_WORDS.timeDoc });
+  const onRangeKey = (event: KeyboardEvent<HTMLInputElement>) => {
+    timeTip.onKeyDown(event);
+    if (disabled || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;
+    event.preventDefault();
+    const step = event.shiftKey ? 1 : STILL_STEP_S;
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+    preview((draftRef.current ?? anchor) / 1000 + direction * step);
+  };
+  const commitTyped = () => {
+    const text = typedRef.current?.trim() ?? null;
+    if (text === null) return;
+    type(null);
+    const seconds = Number(text);
+    if (text === '' || !Number.isFinite(seconds)) return;
+    const ms = anchorOfSeconds(seconds);
+    previewShaderFrame(blockId, ms);
+    write(ms);
+  };
+
+  return (
+    <Group title={SHADER_WORDS.still} doc={SHADER_WORDS.timeDoc}>
+      <div className="ts-shader-still">
+        <PanelButton
+          label={playing ? SHADER_WORDS.pause : SHADER_WORDS.play}
+          icon={playing ? 'pause' : 'play'}
+          pressed={playing}
+          control={`${ID}.still.play`}
+          disabled={disabled}
+          doc={playing ? SHADER_WORDS.pauseDoc : SHADER_WORDS.playDoc}
+          onClick={() => (playing ? pause() : play())}
+        />
+        <input
+          ref={range}
+          type="range"
+          className="ts-shader-still-range"
+          min={0}
+          max={MATERIAL_ANCHOR_MAX_MS / 1000}
+          step={STILL_STEP_S}
+          value={shown / 1000}
+          aria-label={SHADER_WORDS.time}
+          aria-valuetext={`${(shown / 1000).toFixed(2)} s`}
+          data-control={`${ID}.still.scrubber`}
+          disabled={disabled}
+          {...timeTip}
+          onKeyDown={onRangeKey}
+          onKeyUp={(event) => {
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') release();
+          }}
+          onChange={(event) => preview(Number(event.target.value))}
+          onPointerDown={() => document.addEventListener('pointerup', release, { once: true })}
+          onBlur={timeTip.onBlur}
+        />
+        <label className={cn('ts-fo-field ts-shader-still-time', disabled && 'is-disabled')}>
+          <span className="ts-fo-field-box">
+            <input
+              ref={field}
+              type="text"
+              inputMode="decimal"
+              value={typed ?? (shown / 1000).toFixed(2)}
+              aria-label={SHADER_WORDS.timeValue}
+              data-control={`${ID}.still.time`}
+              disabled={disabled}
+              autoComplete="off"
+              spellCheck={false}
+              {...tipProps({
+                name: SHADER_WORDS.timeValue,
+                doc: SHADER_WORDS.timeValueDoc,
+                key: 'Enter',
+              })}
+              onChange={(event) => type(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  commitTyped();
+                  event.currentTarget.blur();
+                } else if (event.key === 'Escape') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  type(null);
+                  event.currentTarget.blur();
+                }
+              }}
+              onBlur={commitTyped}
+            />
+            <span className="ts-fo-field-unit" aria-hidden="true">
+              s
+            </span>
+          </span>
+        </label>
+      </div>
+    </Group>
   );
 }
 
@@ -810,6 +1037,16 @@ function BlockSection({
       <Group title={SHADER_WORDS.orientation}>{groups('Orientation')}</Group>
       <Group title={SHADER_WORDS.motion}>{groups('Motion')}</Group>
 
+      {entry.still || parked(`${ID}.still`) ? null : (
+        <StillGroup
+          blockId={block.id}
+          anchor={block.anchor ?? MATERIAL_ANCHORS[1]}
+          speed={controls.speed}
+          disabled={busy}
+          onAnchor={(ms) => set('/anchor', ms)}
+        />
+      )}
+
       <Group title={SHADER_WORDS.dither} doc={DITHER.help}>
         {parked(`${ID}.twoTone`) ? null : (
           <CheckField
@@ -840,11 +1077,9 @@ function BlockSection({
       {parked(`${ID}.advanced`) ? null : (
         <AdvancedGroup
           entry={entry}
-          anchor={block.anchor ?? MATERIAL_ANCHORS[1]}
           uniforms={block.uniforms}
           base={previewBase}
           disabled={busy}
-          onAnchor={(value) => set('/anchor', value)}
           onUniform={setUniform}
         />
       )}
@@ -948,14 +1183,22 @@ function GroundSection({
         />
       )}
 
+      {entry.still || parked(`${ID}.still`) ? null : (
+        <StillGroup
+          blockId={picture.id}
+          anchor={source.timeMs}
+          speed={1}
+          disabled={busy}
+          onAnchor={(ms) => place({ preset, uniforms: overrides, anchor: ms })}
+        />
+      )}
+
       {parked(`${ID}.advanced`) ? null : (
         <AdvancedGroup
           entry={entry}
-          anchor={source.timeMs}
           uniforms={overrides}
           base={presetUniforms}
           disabled={busy}
-          onAnchor={(value) => place({ preset, uniforms: overrides, anchor: value })}
           onUniform={setUniform}
         />
       )}

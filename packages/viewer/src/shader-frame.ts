@@ -35,6 +35,7 @@ import { slideBlocks } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 
+import { paperEngineRuns } from './live-plan';
 import { loadMaterialMount } from './MaterialMount';
 
 /** The rest after the last change before a capture (5.5). */
@@ -73,26 +74,14 @@ export type CaptureOptions = {
  */
 export const FRAME_WEBP_QUALITIES: ReadonlyArray<number> = [0.92, 0.8];
 
-let canCaptureAnswer: boolean | null = null;
-
 /**
  * True when this browser can draw a frame itself; false sends the block to the hosted
- * `shader.capture`. Read once per page and the probe's context released: Chromium keeps at most
- * sixteen live WebGL contexts and loses the oldest past that, so a probe per capture would in time
- * take down the stage's own mount (the integrator's note of ship two).
+ * `shader.capture`. The one WebGL2 probe of the page (live-plan.ts `paperEngineRuns`), which the
+ * show's playback rule reads too: read once and its context released, since Chromium keeps at most
+ * sixteen live WebGL contexts and loses the oldest past that (the integrator's note of ship two).
  */
 export function clientCanCapture(): boolean {
-  if (typeof document === 'undefined') return false;
-  if (canCaptureAnswer !== null) return canCaptureAnswer;
-  try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl2');
-    canCaptureAnswer = gl !== null;
-    (gl?.getExtension('WEBGL_lose_context') as { loseContext: () => void } | null)?.loseContext();
-  } catch {
-    canCaptureAnswer = false;
-  }
-  return canCaptureAnswer;
+  return paperEngineRuns();
 }
 
 /** The GPU's renderer string as WebGL reports it, or 'webgl2' when the extension is hidden. */

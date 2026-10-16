@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 
+import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { FrameBand } from '@turboslide/render/stage';
 import { bandForSlide } from '@turboslide/render/stage';
 
 import { Frame } from './Frame';
 import { isPictureKind } from './model';
 import type { ViewerSlide } from './model';
+import { ShaderLayer } from './present/ShaderLayer';
 import { Sheet } from './Sheet';
 import { SlideView } from './SlideView';
 import type { Theme } from './theme';
@@ -29,6 +31,8 @@ export type StageProps = {
   onStep?: (delta: number) => void;
   /** the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format */
   band?: FrameBand;
+  /** the deck's shader palette (ViewerDeck.palette), for the live shader the ShaderLayer plays */
+  palette?: ShaderPalette | undefined;
 };
 
 /**
@@ -37,7 +41,9 @@ export type StageProps = {
  * for full-picture slides (head:249-254), the fitted .sheet with the frame
  * (rails, crosses, wordmark, counter) and the rendered slide. The grid and
  * the book are siblings the shell renders over the stage while their mode is
- * up; the sheet hides then, so the fixed stage keeps its fit.
+ * up; the sheet hides then, so the fixed stage keeps its fit. In slide mode the ShaderLayer
+ * plays the slide's largest shader under its Playback and the viewer's settings (the shader
+ * design 3.3).
  */
 export function Stage({
   slide,
@@ -51,6 +57,7 @@ export function Stage({
   dir,
   onStep,
   band,
+  palette,
 }: StageProps) {
   const picture = slide && isPictureKind(slide.kind) ? slide.picture : undefined;
   const isPicture = Boolean(picture) && mode === 'slide';
@@ -83,7 +90,25 @@ export function Stage({
           counter={slide?.counter ?? true}
           {...(band === undefined ? {} : { band: bandForSlide(band, slide) })}
         />
-        {slide ? <SlideView slideId={slide.id} html={slide.html} theme={theme} /> : null}
+        {slide ? (
+          <SlideView
+            slideId={slide.id}
+            html={slide.html}
+            theme={theme}
+            {...(mode === 'slide'
+              ? {
+                  layer: (body) => (
+                    <ShaderLayer
+                      body={body}
+                      html={slide.html}
+                      play={slide.play}
+                      palette={palette}
+                    />
+                  ),
+                }
+              : {})}
+          />
+        ) : null}
       </Sheet>
     </div>
   );

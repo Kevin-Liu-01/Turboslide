@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Browser, BrowserContext, Page } from '@playwright/test';
+import type { APIResponse, Browser, BrowserContext, Page } from '@playwright/test';
 
 import {
   Scratch,
@@ -45,6 +45,7 @@ import {
   title,
   waitFrame,
   waitFrameDrawn,
+  zipEntriesRaw,
   openShaderGallery,
   headingRun,
   typeInto,
@@ -88,6 +89,53 @@ const STRENGTH_LANE =
   'not on this build: formatOptions.shader.amplitude (docs/archive/rounds/FEATURES.md 5.3, B5)';
 /* the frame key as the schema spells it, `sha256:` then 64 hex (packages/schema/src/actions.ts shader.frame) */
 const KEY = /^(sha256:)?[0-9a-f]{64}$/;
+/** The six Paper materials of the Glyphfield port (wave 2.2) and the boxes the agent row places them in. */
+const SIX_MATERIALS = [
+  'paper:warp',
+  'paper:water',
+  'paper:voronoi',
+  'paper:color-panels',
+  'paper:pulsing-border',
+  'paper:dot-orbit',
+] as const;
+type SixBox = { x: number; y: number; w: number; h: number };
+const SIX_BOXES: readonly SixBox[] = [0, 1, 2, 3, 4, 5].map((i) => ({
+  x: 80 + (i % 3) * 490,
+  y: 140 + Math.floor(i / 3) * 360,
+  w: 460,
+  h: 260,
+}));
+/* a 0.8 percent patch of the slide PNG, and the same area of the still */
+const SIX_PATCH = 0.004;
+/** The PNG a shader.render answer carries: the body itself, or base64 in a JSON body. */
+async function pngOfRender(render: APIResponse): Promise<Buffer | null> {
+  if (/image\/png/.test(render.headers()['content-type'] ?? ''))
+    return Buffer.from(await render.body());
+  const body = (await render.json().catch(() => null)) as Record<string, unknown> | null;
+  const raw =
+    (body?.['png'] as string | undefined) ??
+    (body?.['bytes'] as string | undefined) ??
+    (body?.['dataUrl'] as string | undefined) ??
+    (body?.['data'] as string | undefined) ??
+    null;
+  return typeof raw === 'string' ? Buffer.from(raw.replace(/^data:[^,]*,/, ''), 'base64') : null;
+}
+/** Closes the Download dialog after a run (Done, the close control, else Escape). */
+async function closeDownloadDialog(p: Page): Promise<void> {
+  for (let i = 0; i < 3; i += 1) {
+    if ((await p.locator('.ts-dialog-scrim [role="dialog"]').count()) === 0) return;
+    const done = p.locator(
+      '[data-control="dialog.download.done"], [data-control="dialog.download.close"], [data-control="dialog.download.cancel"]',
+    );
+    if ((await done.count()) > 0)
+      await done
+        .first()
+        .click({ timeout: 3000 })
+        .catch(() => undefined);
+    else await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+  }
+}
 /** Four sample points across a picture, away from its edges. */
 const POINTS: readonly (readonly [number, number])[] = [
   [0.25, 0.5],
@@ -631,7 +679,7 @@ test(title('shaders.perf.editor-frame'), async () => {
 });
 
 test(title('shaders.agent.list-insert-set-render'), async () => {
-  test.setTimeout(180_000);
+  test.setTimeout(600_000);
   await openEditor(page, deck);
   await clickCard(page, slideId);
   const maybe = agentHeaders(base());
@@ -711,18 +759,7 @@ test(title('shaders.agent.list-insert-set-render'), async () => {
   );
   const ms = Date.now() - t0;
   const type = render.headers()['content-type'] ?? '';
-  let png: Buffer | null = null;
-  if (/image\/png/.test(type)) png = Buffer.from(await render.body());
-  else {
-    const body = (await render.json().catch(() => null)) as Record<string, unknown> | null;
-    const raw =
-      (body?.['png'] as string | undefined) ??
-      (body?.['bytes'] as string | undefined) ??
-      (body?.['dataUrl'] as string | undefined) ??
-      (body?.['data'] as string | undefined) ??
-      null;
-    if (typeof raw === 'string') png = Buffer.from(raw.replace(/^data:[^,]*,/, ''), 'base64');
-  }
+  const png = await pngOfRender(render);
   const size = png ? pngSize(png) : null;
   test.info().annotations.push({
     type: 'render',
@@ -735,6 +772,149 @@ test(title('shaders.agent.list-insert-set-render'), async () => {
   /* the alias */
   const alias = await post('material.list', {});
   expect(alias.status(), 'material.list still answers').toBe(200);
+
+  /* the six Paper materials of the Glyphfield port, wave 2.2: listed, placed on a slide of their
+     own through the window transport (a write of this tab, so the editor's capturer draws each
+     still: the client path), rendered by shader.render (the hosted path), and the PDF, the
+     Editable PowerPoint and the PNG of their slide place each still */
+  const ids = arr.map((entry) => (entry as { id?: string }).id);
+  for (const id of SIX_MATERIALS) expect(ids, `shader.list names ${id}`).toContain(id);
+  const sixSlide = await addSlide(page);
+  await clickCard(page, sixSlide);
+  const placed: { materialId: string; blockId: string; asset: string; box: SixBox }[] = [];
+  const facts: string[] = [];
+  for (const [i, materialId] of SIX_MATERIALS.entries()) {
+    const box = SIX_BOXES[i]!;
+    const before6 = (await shaderBlocks(page, sixSlide)).map((o) => o.id);
+    const s = await settled(page);
+    await invoke(
+      page,
+      'shader.insert',
+      { slideId: sixSlide, materialId, at: { ...box, z: 1 }, baseRevision: s.revision },
+      60_000,
+    );
+    let blockId = '';
+    await expect
+      .poll(
+        async () => {
+          const fresh = (await shaderBlocks(page, sixSlide)).filter((o) => !before6.includes(o.id));
+          blockId = fresh[0]?.id ?? '';
+          return blockId;
+        },
+        { timeout: 20_000 },
+      )
+      .not.toBe('');
+    const frame = await waitFrame(page, sixSlide, blockId, { timeout: 30_000 });
+    facts.push(`${materialId} still ${frame.asset ?? 'none'} after ${frame.ms} ms`);
+    expect(frame.asset, `${materialId}: the editor draws its still`).not.toBeNull();
+    placed.push({ materialId, blockId, asset: frame.asset!, box });
+  }
+  for (const { materialId } of placed) {
+    const t1 = Date.now();
+    const hosted = await post(
+      'shader.render',
+      { materialId, size: [3200, 1800], timeMs: 5500 },
+      90_000,
+    );
+    const bytes = hosted.status() === 200 ? await pngOfRender(hosted) : null;
+    const hostedSize = bytes ? pngSize(bytes) : null;
+    facts.push(
+      `${materialId} hosted ${hosted.status()} ${hostedSize ? `${hostedSize.width} by ${hostedSize.height}` : 'no PNG'} in ${Date.now() - t1} ms`,
+    );
+    expect(hosted.status(), `${materialId}: shader.render answers`).toBe(200);
+    expect(hostedSize && [hostedSize.width, hostedSize.height], materialId).toEqual([3200, 1800]);
+  }
+  /* the frame files the sheet draws, read once for the export samples below */
+  const stills = new Map<string, Buffer>();
+  for (const { blockId } of placed) {
+    const src = await page.evaluate((id) => {
+      const root = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`);
+      const img = root?.querySelector('img');
+      return img ? img.currentSrc || img.getAttribute('src') : null;
+    }, blockId);
+    const got = src ? await fetchPageFile(page, src) : null;
+    if (got) stills.set(blockId, got.bytes);
+  }
+  /* the PDF: one image object per still at least */
+  const pdf = await download(
+    page,
+    async () => {
+      await menuPath(page, 'file', 'file.download', 'file.download.pdf');
+      const ok = ctl(page, 'dialog.download.ok');
+      if (await ok.isVisible({ timeout: 2000 }).catch(() => false)) await ok.click();
+    },
+    120_000,
+  );
+  await closeDownloadDialog(page);
+  facts.push(`PDF ${pdf.bytes.length} bytes, ${pdfImages(pdf.bytes)} image objects`);
+  expect(pdfImages(pdf.bytes), 'the PDF carries the six stills').toBeGreaterThanOrEqual(6);
+  /* the Editable PowerPoint: each block is a picture named ts:<slide>#<block> whose descr names
+     its material and whose media is the 3200 px still */
+  await menuPath(page, 'file', 'file.download', 'file.download.more', 'file.download.options');
+  await ctl(page, 'dialog.download.pptx').waitFor({ timeout: 8000 });
+  await ctl(page, 'dialog.download.mode.native').click({ force: true });
+  const pptx = await download(page, () => ctl(page, 'dialog.download.ok').click(), 120_000);
+  await closeDownloadDialog(page);
+  let parts = zipEntriesRaw(pptx.bytes);
+  const inner =
+    [...parts.keys()].find((n) => /\(light, editable\)\.pptx$/.test(n)) ??
+    [...parts.keys()].find((n) => n.endsWith('.pptx'));
+  if (inner !== undefined) parts = zipEntriesRaw(parts.get(inner)!());
+  const slideParts = [...parts.keys()].filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n));
+  for (const { materialId, blockId } of placed) {
+    const name = `ts:${sixSlide}#${blockId}`;
+    const part = slideParts.find((n) =>
+      parts.get(n)!().toString('utf8').includes(`name="${name}"`),
+    );
+    const xml = part ? parts.get(part)!().toString('utf8') : '';
+    const pic =
+      new RegExp(
+        `<p:pic>(?:(?!</p:pic>).)*?name="${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"(?:(?!</p:pic>).)*?</p:pic>`,
+        's',
+      ).exec(xml)?.[0] ?? '';
+    const descr = /descr="([^"]*)"/.exec(pic)?.[1] ?? '';
+    const embed = /r:embed="([^"]+)"/.exec(pic)?.[1] ?? null;
+    const rels = part
+      ? (parts
+          .get(part.replace('slides/', 'slides/_rels/') + '.rels')?.()
+          ?.toString('utf8') ?? '')
+      : '';
+    const target = embed
+      ? (new RegExp(`Id="${embed}"[^>]*Target="([^"]+)"`).exec(rels)?.[1] ?? null)
+      : null;
+    const media = target ? (parts.get(`ppt/${target.replace(/^\.\.\//, '')}`)?.() ?? null) : null;
+    const size = media ? pngSize(media) : null;
+    facts.push(`PPTX ${name} ${size ? `${size.width} by ${size.height}` : 'no picture'}`);
+    expect(pic, `${materialId}: the PowerPoint places the still`).not.toBe('');
+    expect(descr, `${materialId}: the recipe in descr`).toContain(materialId);
+    expect(size?.width, `${materialId}: the 3200 px still`).toBe(3200);
+  }
+  /* the PNG of the slide: inside each box, the still's pixels */
+  const slidePng = await download(
+    page,
+    () => menuPath(page, 'file', 'file.download', 'file.download.png'),
+    120_000,
+  );
+  const slideSize = pngSize(slidePng.bytes);
+  facts.push(`PNG ${slideSize ? `${slideSize.width} by ${slideSize.height}` : 'not a PNG'}`);
+  expect(slideSize, 'the slide as a PNG').not.toBeNull();
+  for (const { materialId, blockId, box } of placed) {
+    const still = stills.get(blockId);
+    expect(still, `${materialId}: the frame file`).toBeDefined();
+    const inSlide = POINTS.map(
+      ([fx, fy]) => [(box.x + fx * box.w) / 1600, (box.y + fy * box.h) / 900] as const,
+    );
+    const drawn = await samplePicture(page, slidePng.bytes, inSlide, SIX_PATCH);
+    const frame = await samplePicture(page, still!, POINTS, (SIX_PATCH * 1600) / box.w);
+    const distances =
+      drawn && frame ? POINTS.map((_, i) => rgbDistance(drawn.rgb[i]!, frame.rgb[i]!)) : [];
+    facts.push(`PNG ${materialId} ${distances.join(', ')}`);
+    expect(
+      distances.filter((d) => d <= 48).length,
+      `${materialId}: three of four samples within 48 per channel`,
+    ).toBeGreaterThanOrEqual(3);
+  }
+  test.info().annotations.push({ type: 'six', description: facts.join('; ') });
 });
 
 test(title('shaders.library.glyph-engines-render'), async () => {
@@ -862,18 +1042,30 @@ async function showCanvases(
     await p.waitForTimeout(250);
   }
 }
-/* the P1 item the two show rows measure (docs/archive/rounds/FEATURES.md 5.2 item 4, 5.6): the show's
-   ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx) and the Shader section's Play in the
-   show control land as one commit, and the section draws Play in the show only when the item is
-   on the build (7.1 `shaders.panel.section-groups`), so the control's presence is the item's; a
-   build without it draws the frame in the show and the rows read not driven with the reason,
-   never a red row on a layer no lane built (the fix round of ship two, finding 5) */
+/* the item the two show rows measure (docs/archive/rounds/FEATURES.md 5.2 item 4, 5.6; the shader
+   design 3.6): the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx) and Slide >
+   Playback land as one commit, so the Slide menu's row is the item's presence; a build without it
+   draws the frame in the show and the rows read not driven with the reason, never a red row on a
+   layer no lane built (the fix round of ship two, finding 5). The per block
+   formatOptions.shader.play is not built: the slide's and the deck's Playback replace it. */
 const SHOW_LANE =
-  "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/archive/rounds/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land";
-/** True when the Shader section draws Play in the show, the P1 item's own control. */
-async function showLayerBuilt(p: Page, id: string): Promise<boolean> {
-  if (!(await openShaderSection(p, id))) return false;
-  return (await ctl(p, 'formatOptions.shader.play').count()) > 0;
+  "not on this build: Slide > Playback (menu.slide.playback) and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; the shader design 3.6); the show draws the frame until they land";
+/** True when the Slide menu draws Playback, the item's own row. */
+async function showLayerBuilt(p: Page, _id: string): Promise<boolean> {
+  await ctl(p, 'menubar.slide').click();
+  await p.locator('#ts-menu-slide').waitFor({ timeout: 8000 });
+  const built = (await ctl(p, 'menu.slide.playback').count()) > 0;
+  await p.keyboard.press('Escape');
+  return built;
+}
+/** Sets the whole presentation's Playback through Slide > Playback > Apply (the shader design 3.1). */
+async function setDeckPlayback(p: Page, play: 'play' | 'hold'): Promise<void> {
+  await menuPath(p, 'slide', 'slide.playback');
+  await expect(ctl(p, 'dialog.playback')).toBeVisible({ timeout: 8000 });
+  /* the radio's input sits under its drawn dot, so the check is forced */
+  await ctl(p, `dialog.playback.${play}`).check({ force: true });
+  await ctl(p, 'dialog.playback.apply').click();
+  await expect(ctl(p, 'dialog.playback')).toHaveCount(0, { timeout: 8000 });
 }
 async function leaveShow(p: Page): Promise<void> {
   if ((await ctl(p, 'present.show').count()) > 0) {
@@ -896,22 +1088,9 @@ test(title('shaders.show.plays-when-on'), async () => {
     );
   if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await setPlayShaders(page, /^on$/i);
-  /* the block's Play in the show through the section's control */
-  let playHow = 'formatOptions.shader.play';
-  {
-    await openShaderSection(page, id);
-    const on = ctl(page, 'formatOptions.shader.play');
-    const pressed =
-      (await on.getAttribute('aria-pressed')) ?? (await on.getAttribute('aria-checked'));
-    if (pressed === 'false') {
-      await on.click();
-      playHow = 'formatOptions.shader.play clicked on';
-    } else {
-      const b = await block();
-      const motion = (b?.block['motion'] ?? null) as { play?: string } | null;
-      playHow = `formatOptions.shader.play already on (motion.play ${motion?.play ?? 'unset'})`;
-    }
-  }
+  /* the deck on play through Slide > Playback > Apply (the shader design 3.6) */
+  await setDeckPlayback(page, 'play');
+  const playHow = 'Slide > Playback > Play in the show, Apply';
   await waitFrame(page, slideId, id, { timeout: 15_000 });
   await page.keyboard.press('Escape');
   await clickCard(page, slideId);

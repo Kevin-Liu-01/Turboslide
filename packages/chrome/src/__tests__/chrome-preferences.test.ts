@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { HOLD_LIVE_ATTRIBUTE, pagePreference } from '@turboslide/viewer/live-plan';
 import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
 
 import {
@@ -28,6 +29,7 @@ afterEach(() => {
   localStorage.clear();
   root().removeAttribute(REDUCE_MOTION_ATTRIBUTE);
   root().removeAttribute(HIDE_TOOLTIPS_ATTRIBUTE);
+  root().removeAttribute(HOLD_LIVE_ATTRIBUTE);
   delete root().dataset.motion;
 });
 
@@ -97,5 +99,20 @@ describe('the preference stamps', () => {
     expect(root().hasAttribute(REDUCE_MOTION_ATTRIBUTE)).toBe(true);
     expect(tooltipsHidden()).toBe(false);
     expect(root().dataset.motion).toBe('paused');
+  });
+
+  /* Play animated patterns Off holds every live block in the show and the viewer (the shader
+     design 3.1): the boot statement and the editor stamp it, and live-plan.ts reads it */
+  it('stamps Play animated patterns Off as the hold attribute, from the record and the settings', () => {
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ playShaders: 'off' }));
+    boot();
+    expect(pagePreference()).toBe('off');
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ playShaders: 'on' }));
+    window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+    expect(pagePreference()).toBe('show');
+    stampPreferences({ playShaders: 'off' });
+    expect(root().hasAttribute(HOLD_LIVE_ATTRIBUTE)).toBe(true);
+    stampPreferences({ playShaders: 'show' });
+    expect(root().hasAttribute(HOLD_LIVE_ATTRIBUTE)).toBe(false);
   });
 });

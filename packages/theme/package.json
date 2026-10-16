@@ -16,6 +16,7 @@
     "./palette": "./src/palette.ts",
     "./colors": "./src/colors.generated.ts",
     "./contrast": "./src/contrast.ts",
+    "./color-space": "./src/color-space.ts",
     "./sprite": "./src/sprite.ts",
     "./copy": "./src/copy.ts",
     "./brand": "./src/brand.ts",

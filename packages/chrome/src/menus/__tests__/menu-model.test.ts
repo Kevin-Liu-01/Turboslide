@@ -468,6 +468,8 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-2 0.74: one Background dialog on every slide kind; the picture sources left the row */
   row('slide', 'now', ['slide.changeBackground']),
   row('slide', 'now', ['slide.applyLayout']),
+  /* the shader design 3.1: Playback, play or hold for the deck and the selected slides */
+  row('slide', 'now', ['slide.playback']),
   row('slide', 'later', ['slide.transition']),
   /* the product round (docs/archive/rounds/PRODUCT.md 4.1) drew Edit theme as a second way into the Brand kit
      panel; Round 1 (docs/NEXT.md 4.1.3 item 20) omits it in Google's position */

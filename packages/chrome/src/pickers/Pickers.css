@@ -218,6 +218,130 @@
   outline-offset: -1px;
 }
 
+/* the free colour field under the swatches (ColorField.tsx; the Glyphfield port, wave 2 item 6):
+   the area and the hue strip are structure at radius 0, the fields and buttons are controls at the
+   control radius, the thumbs are round; a white ring with a dark hairline reads on every colour */
+.ts-color-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  width: 152px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-color-plate > .ts-color-field:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ts-color-area,
+.ts-color-hue {
+  position: relative;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.ts-color-area {
+  height: 96px;
+  background-color: hsl(var(--ts-color-hue, 0) 100% 50%);
+  background-image:
+    linear-gradient(to top, black, transparent), linear-gradient(to right, white, transparent);
+}
+
+.ts-color-hue {
+  height: 12px;
+  background: linear-gradient(
+    to right,
+    hsl(0 100% 50%),
+    hsl(60 100% 50%),
+    hsl(120 100% 50%),
+    hsl(180 100% 50%),
+    hsl(240 100% 50%),
+    hsl(300 100% 50%),
+    hsl(360 100% 50%)
+  );
+}
+
+.ts-color-area:focus-visible,
+.ts-color-hue:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-color-area-thumb,
+.ts-color-hue-thumb {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid white;
+  outline: 1px solid rgb(0 0 0 / 0.55);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.ts-color-area-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.ts-color-hue-thumb {
+  top: 50%;
+  width: 6px;
+  height: 14px;
+}
+
+.ts-color-field .ts-color-hex {
+  gap: 6px;
+  margin-top: 0;
+}
+
+/* the fields take the room the row leaves, never their own intrinsic width */
+.ts-color-field .ts-color-hex input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 0;
+  font-size: 11px;
+}
+
+.ts-color-draft {
+  flex: none;
+  box-sizing: border-box;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-color-action {
+  flex: none;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-color-action:hover {
+  background: var(--pt-plate);
+}
+
+.ts-color-action.is-on {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-color-action:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
 /* the brand kit's row at the top of the colour plate (docs/archive/rounds/PRODUCT.md 4.1): six swatches over a hairline */
 .ts-color-kit {
   grid-template-columns: repeat(6, 22px);

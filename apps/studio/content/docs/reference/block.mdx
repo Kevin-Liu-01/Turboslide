@@ -721,19 +721,20 @@ description: The actions of the block group, with their input fields and their n
 
 ## shader.insert [#shader.insert]
 
-**Insert a shader.** Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.
+**Insert a shader.** Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.
 
-| Field          | Type    | Required | Description                                                      |
-| -------------- | ------- | -------- | ---------------------------------------------------------------- |
-| `slideId`      | string  | yes      |                                                                  |
-| `materialId`   | string  | yes      | A catalog id from shader.list (paper:liquid-metal)               |
-| `preset`       | string  | no       | A preset of the entry; its featured one when absent              |
-| `controls`     | object  | no       |                                                                  |
-| `at`           | object  | no       | The box in sheet px; the free rectangle when absent              |
-| `alt`          | string  | no       |                                                                  |
-| `baseRevision` | integer | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type    | Required | Description                                                                              |
+| -------------- | ------- | -------- | ---------------------------------------------------------------------------------------- |
+| `slideId`      | string  | yes      |                                                                                          |
+| `materialId`   | string  | yes      | A catalog id from shader.list (paper:liquid-metal)                                       |
+| `preset`       | string  | no       | A preset of the entry; its featured one when absent                                      |
+| `controls`     | object  | no       |                                                                                          |
+| `anchor`       | integer | no       | The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent |
+| `at`           | object  | no       | The box in sheet px; the free rectangle when absent                                      |
+| `alt`          | string  | no       |                                                                                          |
+| `baseRevision` | integer | yes      | The revision the caller read; a stale value is rejected with 409                         |
 
-- Command line: `turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --at <at>`
+- Command line: `turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --anchor <anchor> --at <at>`
 - MCP tool: `deck_shader_insert`
 - HTTP: `POST /api/actions/shader.insert`
 - Runs on: command line, MCP, HTTP, page.
@@ -741,7 +742,7 @@ description: The actions of the block group, with their input fields and their n
 
 ## shader.set [#shader.set]
 
-**Set a shader field.** One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/\<name\> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.
+**Set a shader field.** One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/\<name\> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.
 
 | Field          | Type    | Required | Description                                                      |
 | -------------- | ------- | -------- | ---------------------------------------------------------------- |

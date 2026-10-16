@@ -3282,14 +3282,15 @@
         {
           "key": "pattern",
           "flag": "--pattern",
-          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\"",
+          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\" | \"halftone\"",
           "required": false,
           "description": "The threshold texture to regenerate the twins with; bayer8 unless set",
           "enum": [
             "bayer8",
             "bayer4",
             "blue64",
-            "random"
+            "random",
+            "halftone"
           ]
         },
         {
@@ -3488,9 +3489,9 @@
         {
           "key": "anchors",
           "flag": "--anchor",
-          "type": "number[]",
+          "type": "integer[]",
           "required": true,
-          "description": "Frame times in ms"
+          "description": "Frame times in ms, 0 to 60000"
         },
         {
           "key": "id",
@@ -4715,7 +4716,7 @@
     },
     {
       "action": "shader.insert",
-      "usage": "turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --at <at>",
+      "usage": "turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --anchor <anchor> --at <at>",
       "command": [
         "shader",
         "insert"
@@ -4737,6 +4738,13 @@
           "flag": "--controls",
           "type": "object",
           "required": false
+        },
+        {
+          "key": "anchor",
+          "flag": "--anchor",
+          "type": "integer",
+          "required": false,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         {
           "key": "at",
@@ -4912,8 +4920,9 @@
         {
           "key": "timeMs",
           "flag": "--time",
-          "type": "number",
-          "required": false
+          "type": "integer",
+          "required": false,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         {
           "key": "backend",
@@ -6949,9 +6958,9 @@
         {
           "key": "anchor",
           "flag": "--anchor",
-          "type": "number",
+          "type": "integer",
           "required": false,
-          "description": "The frame time in ms; the catalog default unless set"
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         {
           "key": "dither",

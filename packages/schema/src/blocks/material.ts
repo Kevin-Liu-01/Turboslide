@@ -39,6 +39,24 @@ export type MaterialPlateSide = (typeof MATERIAL_PLATE_SIDES)[number];
 /** Frame anchors the deck's openers were sampled at (OPENERS.md: about 4, 5.5 and 7 seconds). */
 export const MATERIAL_ANCHORS = [4000, 5500, 7000] as const;
 
+/** The latest moment a still can hold, in ms of the pattern's own clock (the shader design 2.3). */
+export const MATERIAL_ANCHOR_MAX_MS = 60_000;
+
+/**
+ * The chosen still's moment, the one schema every action that takes it parses through
+ * (`shader.insert`, `shader.set /anchor`, `shader.render`, `material.capture`,
+ * `slide.setBackgroundMaterial`): a whole number of ms from 0 to 60,000. The stored block keeps
+ * `nonnegative` until the stored decks are scanned for anchors outside the range.
+ */
+export const materialAnchorSchema = z
+  .number()
+  .int()
+  .min(0)
+  .max(MATERIAL_ANCHOR_MAX_MS)
+  .describe(
+    "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent",
+  );
+
 /** The two values of `motion.play` (docs/archive/rounds/FEATURES.md 5.1, 5.6): the show plays the shader, or never. */
 export const MATERIAL_MOTION_PLAYS = ['off', 'show'] as const;
 export type MaterialMotionPlay = (typeof MATERIAL_MOTION_PLAYS)[number];
@@ -108,7 +126,11 @@ export type MaterialBlock = {
   plate?: MaterialPlateSide;
   /** The frozen frame asset the block shows; absent until the recipe is captured. */
   asset?: AssetId;
-  /** The show's motion (docs/archive/rounds/FEATURES.md 5.6); absent is off, so every still surface draws the frame. */
+  /**
+   * The show's motion of the features round (docs/archive/rounds/FEATURES.md 5.6), superseded by
+   * the slide's and the deck's Playback (`slidePlay`, the shader design 3.1): read by nothing and
+   * written by nothing, kept so the decks that hold it stay valid.
+   */
   motion?: MaterialMotion;
   /** The Shader section's common controls (5.2, 5.3); absent means the preset's authored uniforms. */
   controls?: MaterialControls;
@@ -182,7 +204,7 @@ export const materialBlockSchema = z.strictObject({
     control: 'number',
     snap: MATERIAL_ANCHORS,
     group: 'Block',
-    help: 'The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.',
+    help: "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
   }),
   twoTone: annotate(z.boolean().optional(), {
     label: 'Two-tone',
@@ -202,7 +224,7 @@ export const materialBlockSchema = z.strictObject({
     label: 'Motion',
     control: 'json',
     group: 'Block',
-    help: 'Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.',
+    help: 'Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.',
   }),
   controls: annotate(materialControlsSchema.optional(), {
     label: 'Controls',

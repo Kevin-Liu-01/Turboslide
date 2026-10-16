@@ -215,8 +215,10 @@ import {
   isCanvasSlide,
   isTrashed,
   slideBlocks,
+  slidePlay,
   slideTitle,
 } from '@turboslide/schema/deck';
+import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
 import type { Asset } from '@turboslide/schema/assets';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
 import type { Block } from '@turboslide/schema/blocks';
@@ -4963,6 +4965,8 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
         // the show's frame follows Insert > Slide numbers as the editor stage does (render/deck.ts
         // slideCounter; docs/archive/rounds/RETURN.md section 5 slides.numbers.apply, "in the show too")
         counter: slideCounter(deck, slide, 1, 1) !== '',
+        // the slide's Playback for the read only show's ShaderLayer (the shader design 3.1)
+        ...(slidePlay(deck, slide) === 'hold' ? { play: 'hold' as const } : {}),
       });
     }
   }
@@ -4982,5 +4986,7 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
       readTheme(),
       bandAssetResolver(deck, (_id, _theme, path) => assetBase + path),
     ),
+    /* the deck's shader palette, so a shader the show plays draws the colours of its still */
+    palette: shaderPaletteOfDeck(deck),
   };
 }

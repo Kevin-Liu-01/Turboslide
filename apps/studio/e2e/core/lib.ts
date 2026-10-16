@@ -278,7 +278,8 @@ export async function rightClickBlock(page: Page, blockId: string): Promise<void
     .locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${blockId}"]`)
     .first()
     .click({ button: 'right' });
-  await page.locator('.ts-context-menu').first().waitFor({ timeout: 6000 });
+  /* the open menu, never a closed one's fading exit copy (data-exiting, packages/chrome/src/Layer.ts) */
+  await page.locator('.ts-context-menu:not([data-exiting])').first().waitFor({ timeout: 6000 });
 }
 
 /** Opens a menubar menu, hovers the parents and clicks the last row. */

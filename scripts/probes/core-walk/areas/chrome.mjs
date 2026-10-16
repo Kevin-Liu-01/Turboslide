@@ -1654,7 +1654,8 @@ async function productRound(t) {
     const b = await t.boxOf(blockId);
     if (!b) return out;
     await t.rightClickAt(b.free.x + b.free.w / 2, b.free.y + b.free.h / 2);
-    const root = '.ts-context-menu';
+    /* the open menu, never a closed one's fading exit copy (packages/chrome/src/Layer.ts) */
+    const root = '.ts-context-menu:not([data-exiting])';
     const top = await iconsUnder(root);
     for (const r of top) out.set(r.id, r);
     for (const parent of top.filter((r) => r.submenu)) {

@@ -33,8 +33,15 @@ vi.mock('@turboslide/viewer/MaterialMount', async () => {
     ...actual,
     previewShaderUniforms: (blockId: string, uniforms: Record<string, unknown>) =>
       previewed(blockId, uniforms),
+    previewShaderFrame: (blockId: string, ms: number) => framed(blockId, ms),
+    previewShaderSpeed: (blockId: string, speed: number) => sped(blockId, speed),
+    liveShaderFrame: () => liveMs,
   };
 });
+/* the Still group's seams (the shader design 2.2): the frame and speed of the live mount, its clock */
+const framed = vi.fn<(blockId: string, ms: number) => boolean>(() => true);
+const sped = vi.fn<(blockId: string, speed: number) => boolean>(() => true);
+let liveMs: number | null = 7251.4;
 
 vi.mock('../parked-controls', async () => {
   const actual = await vi.importActual<typeof import('../parked-controls')>('../parked-controls');
@@ -82,6 +89,7 @@ describe('the Shader section', () => {
       SHADER_WORDS.light,
       SHADER_WORDS.orientation,
       SHADER_WORDS.motion,
+      SHADER_WORDS.still,
       SHADER_WORDS.dither,
       SHADER_WORDS.advanced,
     ]);
@@ -108,6 +116,9 @@ describe('the Shader section', () => {
       'Sphere',
       'Chrome',
       'Noir',
+      /* Paper's authored forms in the kit's colours (the Glyphfield port, wave 2.3) */
+      'Stripes',
+      'Backdrop',
     ]);
     expect(
       tiles
@@ -192,6 +203,22 @@ describe('the Shader section', () => {
     ).mutations;
     expect(colour[0]).toMatchObject({ path: '/preset', value: 'brand-blue' });
     expect(previewed).toHaveBeenCalledTimes(1);
+
+    // a form preset tile writes its name and pushes Paper's shape in the kit's colours
+    const stripes = container.querySelector<HTMLButtonElement>(
+      '[data-control="formatOptions.shader.preset.stripes"]',
+    );
+    if (stripes === null) throw new Error('no form tile');
+    previewed.mockClear();
+    fireEvent.click(stripes);
+    const form = (dispatch.mock.calls[3]?.[1] as { mutations: { path: string; value?: unknown }[] })
+      .mutations;
+    expect(form).toEqual([expect.objectContaining({ path: '/preset', value: 'stripes' })]);
+    expect(previewed.mock.calls[0]?.[1]).toMatchObject({
+      u_repetition: 6,
+      u_shape: 'circle',
+      u_colorBack: '#070707',
+    });
   });
 
   it('hides a parked control while the switch is off and draws it with the switch on', () => {
@@ -308,8 +335,13 @@ describe('the Shader section', () => {
     const titles = [...container.querySelectorAll('.ts-shader-group-title')].map((el) =>
       el.textContent?.trim(),
     );
-    expect(titles).toEqual([SHADER_WORDS.preset, SHADER_WORDS.colors, SHADER_WORDS.advanced]);
-    expect(container.querySelector('input[type="range"]')).toBeNull();
+    expect(titles).toEqual([
+      SHADER_WORDS.preset,
+      SHADER_WORDS.colors,
+      SHADER_WORDS.still,
+      SHADER_WORDS.advanced,
+    ]);
+    expect(container.querySelector('input[data-control$=".slider"]')).toBeNull();
     expect(
       container
         .querySelector('[data-control="formatOptions.shader.preset.diamond"]')
@@ -337,5 +369,73 @@ describe('the Shader section', () => {
     fireEvent.click(primary);
     expect(dispatch.mock.calls[1]?.[1]).toMatchObject({ preset: 'brand-blue', anchor: 5500 });
     expect(container.textContent).not.toMatch(/paper:|not captured|sha256/);
+  });
+  it('draws the Still group for a moving pattern only; a held scrubber previews, the release and Pause write one whole ms', () => {
+    const still = render(
+      <ShaderSection
+        block={{ ...block, materialId: 'paper:static-radial-gradient', preset: undefined }}
+        deck={deck}
+        write={writeOf(vi.fn<EditorDispatch>(async () => ({})))}
+        settings={{}}
+      />,
+    );
+    expect(
+      still.container.querySelector('[data-control="formatOptions.shader.still.play"]'),
+    ).toBeNull();
+    cleanup();
+
+    framed.mockClear();
+    sped.mockClear();
+    const dispatch = vi.fn<EditorDispatch>(async () => ({}));
+    const { container } = render(
+      <ShaderSection block={block} deck={deck} write={writeOf(dispatch)} settings={{}} />,
+    );
+    // the live mount holds the still on show: the anchor (5500 when absent) at speed 0
+    expect(framed).toHaveBeenCalledWith('shader', 5500);
+    expect(sped).toHaveBeenCalledWith('shader', 0);
+    const time = container.querySelector<HTMLInputElement>(
+      '[data-control="formatOptions.shader.still.time"]',
+    );
+    expect(time?.value).toBe('5.50');
+    const range = container.querySelector<HTMLInputElement>(
+      '[data-control="formatOptions.shader.still.scrubber"]',
+    );
+    if (range === null) throw new Error('no scrubber');
+    expect(range.max).toBe('60');
+    // held: the live mount moves and nothing is written
+    fireEvent.pointerDown(range);
+    fireEvent.change(range, { target: { value: '7.25' } });
+    expect(framed).toHaveBeenLastCalledWith('shader', 7250);
+    expect(dispatch).not.toHaveBeenCalled();
+    // the release writes /anchor once, in whole ms
+    fireEvent.pointerUp(document);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch.mock.calls[0]?.[0]).toBe('slide.update');
+    expect(dispatch.mock.calls[0]?.[1]).toMatchObject({
+      mutations: [{ op: 'block.set', blockId: 'shader', path: '/anchor', value: 7250 }],
+    });
+    // Play runs the mount from the still at the block's speed; Pause writes the moment it shows
+    const play = container.querySelector<HTMLButtonElement>(
+      '[data-control="formatOptions.shader.still.play"]',
+    );
+    if (play === null) throw new Error('no play');
+    fireEvent.click(play);
+    expect(sped).toHaveBeenLastCalledWith('shader', 1);
+    expect(play.getAttribute('aria-pressed')).toBe('true');
+    liveMs = 9000.6;
+    fireEvent.click(play);
+    expect(sped).toHaveBeenLastCalledWith('shader', 0);
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch.mock.calls[1]?.[1]).toMatchObject({
+      mutations: [{ op: 'block.set', path: '/anchor', value: 9001 }],
+    });
+    // a typed time in seconds writes on Enter
+    if (time === null) throw new Error('no time');
+    fireEvent.change(time, { target: { value: '61' } });
+    fireEvent.keyDown(time, { key: 'Enter' });
+    expect(dispatch.mock.calls[2]?.[1]).toMatchObject({
+      mutations: [{ op: 'block.set', path: '/anchor', value: 60000 }],
+    });
+    liveMs = 7251.4;
   });
 });

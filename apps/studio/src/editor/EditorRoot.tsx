@@ -2290,6 +2290,7 @@ function EditorStage({
           theme={deckAppearance(snap.document.deck)}
           dir={shell.dir ?? 'next'}
           onStep={onStep}
+          palette={viewerDeck.palette}
           band={frameBandOf(
             snap.document.deck,
             /* the band's logo twin follows the slide's appearance, as the stage does (docs/NEXT.md

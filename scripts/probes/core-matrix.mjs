@@ -583,6 +583,8 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'formatOptions.shader.play',
   'formatOptions.shader.frame.scrubber',
   'formatOptions.shader.frame.capture',
+  /* the Still group of the Glyphfield port (its shader design, 2.2): templated in inspector/shader.tsx */
+  'formatOptions.shader.still',
   /* the vector round (docs/archive/rounds/VECTOR.md 4.8): the six ids the svg rows' `parks` name, each read where
      it acts through `isParked` of parked-controls.ts (the chooser's accept list and the client
      sniff, the paste and drop handlers, the URL path, the copy handler, the Download dialog); the

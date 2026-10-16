@@ -174,6 +174,12 @@ export type AuthorizeOptions = {
    * H3 every call is enforced and `enforce` is the one value; the field stays for the callers.
    */
   mode?: AuthorizeMode;
+  /**
+   * A question the server asks for itself, not a caller's request: the deck card asks whether a
+   * stranger holding only the address may read the deck (deck-card.ts, GF-2.1). Its denial is the
+   * answer and refuses nobody, so it writes no `authorize.deny` line.
+   */
+  probe?: true;
 };
 
 /** The identity field of a log line: a principal id or the agent's token id, never an address. */
@@ -215,7 +221,7 @@ export async function authorize(
     return { ok: false, status: 404, code: 'not_found' };
   }
   const decision = d.decide(record, ctx, capability);
-  if (decision.ok) return decision;
+  if (decision.ok || options.probe === true) return decision;
   logSecurityEvent({
     ...base,
     event: 'authorize.deny',

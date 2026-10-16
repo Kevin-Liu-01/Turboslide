@@ -6,14 +6,24 @@ import { safeEqual } from '@turboslide/identity/safe-equal';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import type { Theme } from '@turboslide/schema/render';
 
 import { boundPrincipal } from '../../server/auth/session';
 import { authorize, denialBody, requestContext } from '../../server/authorize';
+import type { Decision } from '../../server/authorize';
+import { cardSlideOf, cardStanding } from '../../server/deck-card';
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
 import { scrubServerPaths, withoutServerPaths } from '../../server/paths-out';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
-import { getThumbnail, isThumbStamp, isThumbWidth, thumbResponse } from '../../server/thumbs';
+import {
+  CARD_THUMB_WIDTH,
+  PRIVATE_CACHE_CONTROL,
+  getThumbnail,
+  isThumbStamp,
+  isThumbWidth,
+  thumbResponse,
+} from '../../server/thumbs';
 import type { ThumbRequest, ThumbStanding } from '../../server/thumbs';
 import {
   RENDER_GRANT_QUERY,
@@ -62,6 +72,15 @@ import type { RenderGrantTarget } from '../../server/tokens';
 // picture is an attachment named `<deck id>-<slide id>.<png|jpg>`, so File > Download > JPEG
 // image and PNG image download the current slide instead of opening a 401 tab. A grant never
 // opens the JSON variant or a thumbnail: the target it signs is the full size picture alone.
+//
+// The deck card (GF-2.1; routes/-deck-card.ts, server/deck-card.ts): `?w=1200` is the first slide
+// a shared link unfurls with, 1200 by 675, named in `og:image` only when a stranger holding the
+// link may read the deck. Its request is decided as that stranger, whoever sends it: the deck's
+// general access is open, or the `p` the URL carries is the deck's live publish token. No cookie,
+// bearer or thumbnail grant opens it, and nothing else does: the slide must be the deck's first
+// shown slide, so the width opens one picture per deck and no skipped slide. The picture is the
+// slide's current content (the URL's `r`, the deck's revision, names it for the CDN and never
+// starts a render of its own), kept by the public rules of `thumbCacheControl` for that standing.
 
 let client: WorkerClient | undefined;
 
@@ -104,6 +123,51 @@ function grantTargetOf(url: URL, slideId: string): RenderGrantTarget | null {
   };
 }
 
+/** A refusal of the card's picture: the decision's status and body, kept by no cache. */
+function cardRefused(decision: Extract<Decision, { ok: false }>): Response {
+  return Response.json(denialBody(decision, 'read'), {
+    status: decision.status,
+    headers: { 'cache-control': PRIVATE_CACHE_CONTROL },
+  });
+}
+
+/**
+ * The deck card's picture (GF-2.1; the module comment): decided as the stranger the link reaches,
+ * then the first shown slide at 1200 by 675 through the thumbnail cache at its current stamp.
+ */
+async function deckCardResponse(
+  url: URL,
+  deckId: string,
+  slideId: string,
+  theme: Theme,
+): Promise<Response> {
+  const token = url.searchParams.get('p') ?? undefined;
+  const { standing, decision } = await cardStanding(deckId, token, { transport: 'route' });
+  if (standing === null)
+    return cardRefused(decision.ok ? { ok: false, status: 404, code: 'not_found' } : decision);
+  // one picture per deck: the slide the viewer opens on, never a skipped or a later slide
+  if ((await cardSlideOf(deckId)) !== slideId)
+    return cardRefused({ ok: false, status: 404, code: 'not_found' });
+  const request_: ThumbRequest = { deckId, slideId, theme, width: CARD_THUMB_WIDTH, r: null };
+  try {
+    const thumb = await getThumbnail(request_);
+    const r = url.searchParams.get('r');
+    return thumbResponse(thumb, request_, {
+      revisionInUrl: r !== null && r === String(thumb.revision),
+      standing: { via: standing },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (error instanceof RangeError || /no deck|no slide|ENOENT/.test(message))
+      return cardRefused({ ok: false, status: 404, code: 'not_found' });
+    console.warn(`turboslide deck card: ${deckId}/${slideId} not rendered yet: ${message}`);
+    return new Response(null, {
+      status: 204,
+      headers: { 'cache-control': PRIVATE_CACHE_CONTROL, 'x-turboslide-thumb': 'pending' },
+    });
+  }
+}
+
 export const Route = createFileRoute('/api/render/$slideId')({
   server: {
     handlers: {
@@ -129,9 +193,10 @@ export const Route = createFileRoute('/api/render/$slideId')({
         const w = url.searchParams.get('w');
         if (w !== null) {
           const width = Number(w);
-          if (!isThumbWidth(width))
+          const card = width === CARD_THUMB_WIDTH;
+          if (!card && !isThumbWidth(width))
             return Response.json(
-              { error: { message: 'w must be 160, 320 or 640', status: 400 } },
+              { error: { message: 'w must be 160, 320, 640 or 1200', status: 400 } },
               { status: 400 },
             );
           // the thumbnail grant (gslides-parity SPEC-3 8.13; report 04 F6): the page's `<img>`
@@ -140,6 +205,7 @@ export const Route = createFileRoute('/api/render/$slideId')({
           // answers 503 with plates in the filmstrip
           const flagged = await requireFlag('renderThumbs', { deckId, action: 'render.thumb' });
           if (flagged !== null) return flagged;
+          if (card) return deckCardResponse(url, deckId, slideId, theme);
           const grant = verifyThumbGrant(deckId, url.searchParams.get(THUMB_GRANT_QUERY));
           /* who may keep the answer follows how the reader reached the deck (hardening HR-SD#5,
              CRIT-M2): the grant's expiry when the URL carries one, else the decision's `via` */

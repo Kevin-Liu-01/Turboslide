@@ -1,6 +1,14 @@
 import type { ReactNode, RefObject } from 'react';
 import { SHOT_FRAME_WEIGHTS } from '@turboslide/schema/blocks';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Suspense,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
@@ -121,7 +129,7 @@ import { useEditorKeys } from './useEditorKeys';
 import { usePlate, useStart } from './usePlate';
 import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
-import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
+import { lazyDialog, preloadDialogs, preloadWhenIdle } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
 import { leaveLandingMotion, settingsChanged, stampPreferences } from './chrome-preferences';
 import { hideTooltip } from './Tooltip';
@@ -228,6 +236,8 @@ const SignInDialog = lazyDialog(() => import('./dialogs/SignIn').then((m) => m.S
 const SlideNumbersDialog = lazyDialog(() =>
   import('./dialogs/SlideNumbers').then((m) => m.SlideNumbersDialog),
 );
+/* Slide > Playback (the shader design 3.1) */
+const PlaybackDialog = lazyDialog(() => import('./dialogs/Playback').then((m) => m.PlaybackDialog));
 const SpecialCharactersDialog = lazyDialog(() =>
   import('./dialogs/SpecialCharacters').then((m) => m.SpecialCharactersDialog),
 );
@@ -270,6 +280,7 @@ const LAZY_DIALOGS = [
   ShareDialog,
   SignInDialog,
   SlideNumbersDialog,
+  PlaybackDialog,
   SpecialCharactersDialog,
   DiagramPanel,
   EditHtmlPanel,
@@ -278,6 +289,21 @@ const LAZY_DIALOGS = [
   TailorDialog,
   LogoDialog,
 ] as const;
+
+/**
+ * The panels whose module loads on first open. Opening one is a transition, so the panel shown
+ * stays until the new one is ready instead of an empty column for a frame (the Glyphfield port,
+ * PLAN.md wave 2 item 7, from Glyphfield's tool switch), and both load in idle time once the
+ * editor has painted, unless the browser asks to save data (lib/lazyDialog.ts `preloadWhenIdle`).
+ */
+const LAZY_PANELS = [DiagramPanel, EditHtmlPanel] as const;
+const LAZY_PANEL_IDS: ReadonlySet<PanelId> = new Set<PanelId>(['diagram', 'editHtml']);
+
+/** Runs a panel change now, or as a transition when it shows a lazy panel. */
+function switchPanel(id: PanelId, change: () => void): void {
+  if (LAZY_PANEL_IDS.has(id)) startTransition(change);
+  else change();
+}
 
 /** A colour or weight plate anchored to a menu row (SPEC-2 0.27). */
 type AnchoredPicker = { kind: 'color' | 'weight'; anchor: HTMLElement };
@@ -458,6 +484,9 @@ export function EditorShell({
     dialogsPreloaded.current = true;
     preloadDialogs(LAZY_DIALOGS);
   }, [menuOpen]);
+  /* the lazy panels edit the deck: a person who can write gets them in idle time (LAZY_PANELS) */
+  const canWrite = input.capabilities === undefined || input.capabilities.includes('write');
+  useEffect(() => (canWrite ? preloadWhenIdle(LAZY_PANELS) : undefined), [canWrite]);
   const [compact, setCompactState] = useState(false);
   const [toolFinderOpen, setToolFinderOpen] = useState(false);
   /* the phrase Search the menus hands the Assist panel ("Ask the assistant: <phrase>", docs/archive/rounds/PRODUCT.md 6.1) */
@@ -686,14 +715,19 @@ export function EditorShell({
 
   const openPanel = useCallback((id: PanelId, options?: { section?: FormatSectionId }) => {
     lastPanel.current = id;
-    setPanel(id);
-    setPanelSection(options?.section ?? null);
+    switchPanel(id, () => {
+      setPanel(id);
+      setPanelSection(options?.section ?? null);
+    });
   }, []);
   const closePanel = useCallback(() => {
     setPanel(null);
     setPanelSection(null);
   }, []);
-  const reopenPanel = useCallback(() => setPanel(lastPanel.current), []);
+  const reopenPanel = useCallback(() => {
+    const id = lastPanel.current;
+    switchPanel(id, () => setPanel(id));
+  }, []);
 
   const openDialog = useCallback(
     (request: DialogId | DialogRequest) => {
@@ -2345,6 +2379,8 @@ export function EditorShell({
         return <LogoDialog.Component target={dialog.target} />;
       case 'slideNumbers':
         return <SlideNumbersDialog.Component />;
+      case 'playback':
+        return <PlaybackDialog.Component />;
       case 'details':
         return <DetailsDialog.Component />;
       case 'findReplace':

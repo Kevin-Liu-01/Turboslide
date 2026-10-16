@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 
 import { bracketOf } from '@turboslide/viewer/keys';
+import { NOT_EXIT_COPY } from '@turboslide/viewer/reduce-motion';
 import { modalDialogOpen } from '@turboslide/viewer/Selection';
 
 import { RETIRED_KEYS, RETIRED_KEYS_STORAGE, retiredKeySentence } from './editor-shell';
@@ -230,7 +231,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         /* a modal dialog takes the key alone (its document listener closes it, Dialog.tsx); the
            shell's ladder would otherwise close an open panel with it, where Google closes the
            dialog and leaves the panel (b1 R30) */
-        if (document.querySelector('.ts-dialog-scrim') !== null) return;
+        if (document.querySelector(`.ts-dialog-scrim${NOT_EXIT_COPY}`) !== null) return;
         if (h.escape()) event.preventDefault();
         return;
       }

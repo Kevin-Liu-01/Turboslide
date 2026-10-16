@@ -58,7 +58,13 @@ export type PaperShaderName =
   | 'waves'
   | 'dotGrid'
   | 'perlinNoise'
-  | 'staticMeshGradient';
+  | 'staticMeshGradient'
+  | 'warp'
+  | 'water'
+  | 'voronoi'
+  | 'colorPanels'
+  | 'pulsingBorder'
+  | 'dotOrbit';
 
 export type MaterialEntry = MaterialCatalogEntry & {
   shader: PaperShaderName;
@@ -68,6 +74,11 @@ export type MaterialEntry = MaterialCatalogEntry & {
   noiseTexture: boolean;
   /** The shader masks by an uploaded image (u_image, u_isImage); a frame uses its shape instead. */
   imageMask: boolean;
+  /**
+   * The shader filters an optional source picture (u_image without u_isImage, Paper's water); a
+   * frame draws it over the transparent pixel, so the ground and the shader's own light show.
+   */
+  imageSource: boolean;
   palette: PaletteRoles;
   /** The gallery chip the entry sits under (5.4). */
   category: ShaderCategory;
@@ -118,6 +129,11 @@ function colors(name: string, label: string, def: string, maxCount: number): Mat
   };
 }
 
+/** A switch the shader reads as a bool: 0 off, 1 on (recipe.ts `checkUniform`). */
+function bool(name: string, label: string, def: 0 | 1, help?: string): MaterialUniformSpec {
+  return { name, label, kind: 'bool', default: def, ...(help ? { help } : {}) };
+}
+
 function en(
   name: string,
   label: string,
@@ -161,13 +177,14 @@ function sizing(family: 'object' | 'pattern', scale = 1): MaterialUniformSpec[] 
 
 type Base = Omit<
   MaterialEntry,
-  'family' | 'available' | 'credit' | 'license' | 'presets' | 'still'
-> & { still?: boolean };
+  'family' | 'available' | 'credit' | 'license' | 'presets' | 'still' | 'imageSource'
+> & { still?: boolean; imageSource?: boolean };
 
 function paper(base: Base): MaterialEntry {
   return {
     ...base,
     still: base.still ?? false,
+    imageSource: base.imageSource ?? false,
     family: 'paper',
     available: true,
     credit: PAPER_CREDIT.replace('{label}', base.label.toLowerCase()),
@@ -576,6 +593,168 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
       f('u_grainMixer', 'Grain mixer', 0, 0, 1),
       f('u_grainOverlay', 'Grain overlay', 0, 0, 1),
       ...sizing('object', 1),
+    ],
+  }),
+  /* the Glyphfield port, wave 2.2: six more Paper materials under the names Glyphfield shows
+     (`PAPER_SHADER_FAMILIES` in its src/lib/liveMaterials.ts), in sentence case, with the ranges
+     of each shader's uniform docs (dist/shaders/<name>.d.ts) and Paper's Default preset as the
+     defaults (shaders-react 0.0.78), widened only where an authored preset goes past the docs
+     (warp's softness, 1.5 in Cauldron Pot). Water's one change: Paper's Default draws its light at
+     0.07 over a source picture; a block has no picture, so the light is all water draws and its
+     default takes Slow-mo's 0.4 */
+  'paper:warp': paper({
+    id: 'paper:warp',
+    label: 'Warp',
+    doc: 'Colour bands warped by noise and swirls over checks, stripes or an edge.',
+    shader: 'warp',
+    sizing: 'pattern',
+    noiseTexture: true,
+    imageMask: false,
+    palette: { ramp: 'u_colors' },
+    category: 'fluid',
+    uniforms: [
+      colors('u_colors', 'Colors', '#121212,#9470ff,#121212,#8838ff', 10),
+      f(
+        'u_proportion',
+        'Proportion',
+        0.45,
+        0,
+        1,
+        0.01,
+        'Where the colors meet; 0.5 shares the box.',
+      ),
+      f('u_softness', 'Softness', 1, 0, 2, 0.01, '0 a hard edge, 1 a smooth blend.'),
+      en('u_shape', 'Shape', 'checks', { checks: 0, stripes: 1, edge: 2 }),
+      f('u_shapeScale', 'Shape scale', 0.1, 0, 1),
+      f('u_distortion', 'Distortion', 0.25, 0, 1, 0.01, 'Noise over the bands.'),
+      f('u_swirl', 'Swirl', 0.8, 0, 1),
+      int('u_swirlIterations', 'Swirl passes', 10, 0, 20, 'Layers of swirl when Swirl is over 0.'),
+      ...sizing('pattern', 1),
+    ],
+  }),
+  'paper:water': paper({
+    id: 'paper:water',
+    label: 'Water',
+    doc: 'Caustic light over a ground in one or two layers, with slow waves under it.',
+    shader: 'water',
+    sizing: 'object',
+    noiseTexture: false,
+    imageMask: false,
+    imageSource: true,
+    palette: { back: 'u_colorBack', front: 'u_colorHighlight' },
+    category: 'fluid',
+    uniforms: [
+      color('u_colorBack', 'Ground', '#909090'),
+      color('u_colorHighlight', 'Highlight', '#ffffff'),
+      f('u_highlights', 'Highlights', 0.4, 0, 1, 0.01, 'Light drawn along the caustics.'),
+      f('u_layering', 'Layering', 0.5, 0, 1, 0.01, 'A second layer of caustics.'),
+      f('u_edges', 'Edges', 0.8, 0, 1, 0.01, 'Caustics near the edges of the box.'),
+      f('u_waves', 'Waves', 0.3, 0, 1, 0.01, 'Slow waves under the caustics.'),
+      f('u_caustic', 'Caustic', 0.1, 0, 1, 0.01, 'How far the caustics bend the ground.'),
+      f('u_size', 'Size', 1, 0.01, 7, 0.01, 'Size of the pattern.'),
+      ...sizing('object', 0.8),
+    ],
+  }),
+  'paper:voronoi': paper({
+    id: 'paper:voronoi',
+    label: 'Voronoi',
+    doc: 'Cells that drift and divide, with gaps between them and a glow inside each.',
+    shader: 'voronoi',
+    sizing: 'pattern',
+    noiseTexture: true,
+    imageMask: false,
+    palette: { back: 'u_colorGap', colors: 'u_colors', front: 'u_colorGlow' },
+    category: 'graphic',
+    uniforms: [
+      colors('u_colors', 'Cell colors', '#ff8247,#ffe53d', 5),
+      int('u_stepsPerColor', 'Steps per color', 3, 1, 3),
+      color('u_colorGlow', 'Glow', '#ffffff'),
+      color('u_colorGap', 'Gap', '#2e0000'),
+      f('u_distortion', 'Distortion', 0.4, 0, 0.5, 0.01, 'How far the cell centres move.'),
+      f('u_gap', 'Gap width', 0.04, 0, 0.1, 0.001),
+      f('u_glow', 'Glow amount', 0, 0, 1, 0.01, 'The shadow inside each cell.'),
+      ...sizing('pattern', 0.5),
+    ],
+  }),
+  'paper:color-panels': paper({
+    id: 'paper:color-panels',
+    label: 'Color panels',
+    doc: 'See-through panels of colour that turn around a central axis.',
+    shader: 'colorPanels',
+    sizing: 'object',
+    noiseTexture: false,
+    imageMask: false,
+    palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'gradient',
+    uniforms: [
+      color('u_colorBack', 'Ground', '#000000'),
+      colors(
+        'u_colors',
+        'Panel colors',
+        '#ff9d00,#fd4f30,#809bff,#6d2eff,#333aff,#f15cff,#ffd557',
+        7,
+      ),
+      f('u_density', 'Density', 3, 0.25, 7, 0.01, 'The angle between two panels.'),
+      f('u_angle1', 'Skew 1', 0, -1, 1),
+      f('u_angle2', 'Skew 2', 0, -1, 1),
+      f('u_length', 'Length', 1.1, 0, 3, 0.01, 'Panel length against the box height.'),
+      bool('u_edges', 'Edges', 0, 'Light along the panel edges.'),
+      f('u_blur', 'Blur', 0, 0, 0.5, 0.01, 'Side blur; 0 keeps the edges sharp.'),
+      f('u_fadeIn', 'Fade in', 1, 0, 1, 0.01, 'Transparency near the axis.'),
+      f('u_fadeOut', 'Fade out', 0.3, 0, 1, 0.01, 'Transparency near the viewer.'),
+      f('u_gradient', 'Gradient', 0, 0, 1, 0.01, '0 a solid panel, 1 a gradient across it.'),
+      ...sizing('object', 0.8),
+    ],
+  }),
+  'paper:pulsing-border': paper({
+    id: 'paper:pulsing-border',
+    label: 'Pulsing border',
+    doc: 'Glowing spots of colour that run along the edge of the box and pulse.',
+    shader: 'pulsingBorder',
+    sizing: 'object',
+    noiseTexture: true,
+    imageMask: false,
+    palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'light',
+    uniforms: [
+      color('u_colorBack', 'Ground', '#000000'),
+      colors('u_colors', 'Colors', '#0dc1fd,#d915ef,#ff3f2ecc', 5),
+      f('u_roundness', 'Roundness', 0.25, 0, 1, 0.01, 'The corner radius of the border.'),
+      f('u_thickness', 'Thickness', 0.1, 0, 1),
+      f('u_softness', 'Softness', 0.75, 0, 1, 0.01, '0 a hard edge, 1 a smooth glow.'),
+      f('u_marginLeft', 'Margin left', 0, 0, 1),
+      f('u_marginRight', 'Margin right', 0, 0, 1),
+      f('u_marginTop', 'Margin top', 0, 0, 1),
+      f('u_marginBottom', 'Margin bottom', 0, 0, 1),
+      en('u_aspectRatio', 'Aspect ratio', 'auto', { auto: 0, square: 1 }),
+      f('u_intensity', 'Intensity', 0.2, 0, 1, 0.01, 'The thickness of each spot.'),
+      f('u_bloom', 'Bloom', 0.25, 0, 1, 0.01, '0 plain blending, 1 added light.'),
+      int('u_spots', 'Spots', 5, 1, 20, 'Spots per color.'),
+      f('u_spotSize', 'Spot size', 0.5, 0, 1),
+      f('u_pulse', 'Pulse', 0.25, 0, 1),
+      f('u_smoke', 'Smoke', 0.3, 0, 1, 0.01, 'A noisy glow past the border.'),
+      f('u_smokeSize', 'Smoke size', 0.6, 0, 1),
+      ...sizing('object', 0.6),
+    ],
+  }),
+  'paper:dot-orbit': paper({
+    id: 'paper:dot-orbit',
+    label: 'Dot orbit',
+    doc: 'A grid of dots, each circling its own cell, in steps between up to ten colours.',
+    shader: 'dotOrbit',
+    sizing: 'pattern',
+    noiseTexture: true,
+    imageMask: false,
+    palette: { back: 'u_colorBack', colors: 'u_colors' },
+    category: 'gradient',
+    uniforms: [
+      color('u_colorBack', 'Ground', '#000000'),
+      colors('u_colors', 'Colors', '#ffc96b,#ff6200,#ff2f00,#421100,#1a0000', 10),
+      int('u_stepsPerColor', 'Steps per color', 4, 1, 4),
+      f('u_size', 'Size', 1, 0, 1, 0.01, 'Dot radius against its cell.'),
+      f('u_sizeRange', 'Size range', 0, 0, 1, 0.01, '0 every dot one size; higher varies them.'),
+      f('u_spreading', 'Spreading', 1, 0, 1, 0.01, 'How far each dot moves from its cell centre.'),
+      ...sizing('pattern', 1),
     ],
   }),
 };

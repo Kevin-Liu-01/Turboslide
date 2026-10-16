@@ -34,6 +34,7 @@
     "./clipboard": "./src/clipboard.ts",
     "./MaterialMount": "./src/MaterialMount.tsx",
     "./reduce-motion": "./src/reduce-motion.ts",
+    "./live-plan": "./src/live-plan.ts",
     "./shader-frame": "./src/shader-frame.ts",
     "./canvas-measure": "./src/canvas-measure.ts",
     "./rotate": "./src/rotate.ts",
@@ -52,6 +53,7 @@
     "./present/SlideshowLayer": "./src/present/SlideshowLayer.tsx",
     "./present/PresentShortcuts": "./src/present/PresentShortcuts.tsx",
     "./present/PresenterConsole": "./src/present/PresenterConsole.tsx",
+    "./present/ShaderLayer": "./src/present/ShaderLayer.tsx",
     "./standalone/source": "./standalone/source.ts",
     "./standalone/runtime.ts": "./standalone/runtime.ts",
     "./package.json": "./package.json"

@@ -48,13 +48,17 @@
   display: none;
 }
 
+/* a row of worded options wraps rather than squeezing its words (the dither Pattern row's five,
+   the Glyphfield port's wave 2.4): each option keeps its own width */
 .ts-fo-toggles {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin: 4px 0;
 }
 
 .ts-fo-toggle {
+  flex: none;
   height: 28px;
   min-width: 28px;
   padding: 0 8px;

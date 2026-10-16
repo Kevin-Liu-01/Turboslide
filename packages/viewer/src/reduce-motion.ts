@@ -7,10 +7,21 @@
  * router's view transition and the stage's live shader (MaterialMount.tsx) read it. The stylesheets
  * read the same two sources in tokens.css, which zeroes every `--pt-dur-*` duration under either.
  * The attribute's name lives here, in the viewer, so the viewer's own modules can read it.
+ *
+ * The exit copy's attribute lives here for the same reason: a menu, the search card or a dialog
+ * leaves an inert copy of itself while its exit plays (packages/chrome/src/Layer.ts), and the
+ * copy keeps its classes for its look, so a reader that asks whether such a surface is open by
+ * class (InlineText's open plates, the editor's Escape) skips it with `NOT_EXIT_COPY`.
  */
 
 /** Present on the root while Tools > Preferences > Reduce motion is on. */
 export const REDUCE_MOTION_ATTRIBUTE = 'data-reduce-motion';
+
+/** Present on the inert copy a closed surface leaves while its exit animation plays. */
+export const EXIT_COPY_ATTRIBUTE = 'data-exiting';
+
+/** Appended to a surface's class selector, so the selector matches the open surface and never its exit copy. */
+export const NOT_EXIT_COPY = `:not([${EXIT_COPY_ATTRIBUTE}])`;
 
 const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 

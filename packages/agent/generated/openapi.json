@@ -663,7 +663,7 @@
       "post": {
         "operationId": "deck.set",
         "summary": "Set a deck field",
-        "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
+        "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
         "tags": [
           "deck"
         ],
@@ -14608,7 +14608,7 @@
       "post": {
         "operationId": "shader.insert",
         "summary": "Insert a shader",
-        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
         "tags": [
           "block"
         ],
@@ -14751,7 +14751,7 @@
       "post": {
         "operationId": "shader.set",
         "summary": "Set a shader field",
-        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
         "tags": [
           "block"
         ],
@@ -24103,6 +24103,25 @@
                   "color"
                 ],
                 "additionalProperties": false
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play moves the shaders and other live blocks in the show and the viewer, hold shows their stills; a slide’s own play wins. Play when absent. A viewer’s Reduce motion or Play animated patterns Off holds them for that viewer."
+                },
+                "description": "play moves the shaders and other live blocks in the show and the viewer, hold shows their stills; a slide’s own play wins. Play when absent. A viewer’s Reduce motion or Play animated patterns Off holds them for that viewer.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
+                ]
               }
             },
             "additionalProperties": false
@@ -24594,6 +24613,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -25100,6 +25138,25 @@
                   "off"
                 ]
               },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
+                ]
+              },
               "template": {
                 "title": "Layout",
                 "x-inspector": {
@@ -25597,6 +25654,25 @@
                   "off"
                 ]
               },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
+                ]
+              },
               "template": {
                 "title": "Layout",
                 "x-inspector": {
@@ -26081,6 +26157,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -26597,6 +26692,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -27744,6 +27858,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -33978,7 +34111,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -33988,7 +34122,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -38176,9 +38311,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -38230,9 +38365,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -44693,7 +44828,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -44703,7 +44839,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -48636,7 +48773,7 @@
           "path": {
             "type": "string",
             "pattern": "^\\/(title|theme|defaults(\\/[a-zA-Z]+)?)$",
-            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes"
+            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes"
           },
           "value": {
             "description": "The new value; omit it to remove the field"
@@ -55601,7 +55738,8 @@
               "bayer8",
               "bayer4",
               "blue64",
-              "random"
+              "random",
+              "halftone"
             ]
           },
           "cell": {
@@ -56104,10 +56242,12 @@
             "minItems": 1,
             "type": "array",
             "items": {
-              "type": "number",
-              "minimum": 0
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000,
+              "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
             },
-            "description": "Frame times in ms"
+            "description": "Frame times in ms, 0 to 60000"
           },
           "id": {
             "description": "The asset id; <id>-<anchor> per anchor when several",
@@ -60586,6 +60726,12 @@
             },
             "additionalProperties": false
           },
+          "anchor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
+          },
           "at": {
             "description": "The box in sheet px; the free rectangle when absent",
             "type": "object",
@@ -60996,9 +61142,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -61050,9 +61196,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -61526,9 +61672,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -61580,9 +61726,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -62044,8 +62190,10 @@
             "maxItems": 2
           },
           "timeMs": {
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "backend": {
             "type": "string",
@@ -73148,7 +73296,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -73158,7 +73307,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -73749,7 +73899,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "title": "Pattern",
                 "x-inspector": {
@@ -73759,7 +73910,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "group": "Block",
                   "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -74094,9 +74246,10 @@
             }
           },
           "anchor": {
-            "description": "The frame time in ms; the catalog default unless set",
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "dither": {
             "type": "object",
@@ -74107,7 +74260,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "title": "Pattern",
                 "x-inspector": {
@@ -74117,7 +74271,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "group": "Block",
                   "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."

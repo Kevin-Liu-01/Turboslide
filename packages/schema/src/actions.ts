@@ -46,6 +46,7 @@ import {
 import { CHART_KINDS, chartSeriesSchema } from './blocks/chart.ts';
 import {
   MATERIAL_CONTROL_NAMES,
+  materialAnchorSchema,
   materialBlockSchema,
   materialCatalogEntrySchema,
   materialControlsSchema,
@@ -1275,7 +1276,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.set': action({
     id: 'deck.set',
     label: 'Set a deck field',
-    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
+    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1285,7 +1286,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .regex(/^\/(title|theme|defaults(\/[a-zA-Z]+)?)$/)
         .describe(
-          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes',
+          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes',
         ),
       value: z.unknown().optional().describe('The new value; omit it to remove the field'),
       baseRevision,
@@ -2398,7 +2399,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe('A palette preset of the material, under the uniforms'),
       uniforms: materialUniformsSchema.optional(),
       size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
-      anchors: z.array(z.number().nonnegative()).min(1).describe('Frame times in ms'),
+      anchors: z.array(materialAnchorSchema).min(1).describe('Frame times in ms, 0 to 60000'),
       id: slugSchema.optional().describe('The asset id; <id>-<anchor> per anchor when several'),
       role: z.enum(['opener', 'mood', 'frame']).optional(),
       alt: z.string().optional(),
@@ -4336,7 +4337,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.insert': action({
     id: 'shader.insert',
     label: 'Insert a shader',
-    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
+    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4346,6 +4347,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       materialId: z.string().min(1).describe('A catalog id from shader.list (paper:liquid-metal)'),
       preset: z.string().optional().describe('A preset of the entry; its featured one when absent'),
       controls: materialControlsSchema.optional(),
+      anchor: materialAnchorSchema.optional(),
       at: positionObjectSchema
         .optional()
         .describe('The box in sheet px; the free rectangle when absent'),
@@ -4360,7 +4362,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: {
       usage:
-        'turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --at <at>',
+        'turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --anchor <anchor> --at <at>',
     },
     mcp: 'deck_shader_insert',
     example: {
@@ -4374,7 +4376,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.set': action({
     id: 'shader.set',
     label: 'Set a shader field',
-    doc: 'One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.',
+    doc: 'One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4485,7 +4487,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       uniforms: materialUniformsSchema.optional(),
       controls: materialControlsSchema.optional(),
       size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
-      timeMs: z.number().nonnegative().optional(),
+      timeMs: materialAnchorSchema.optional(),
       backend: z.enum(['angle-metal', 'swiftshader']).optional(),
     }),
     output: z.strictObject({
@@ -5807,11 +5809,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       materialId: z.string().min(1),
       preset: z.string().optional(),
       uniforms: materialUniformsSchema.optional(),
-      anchor: z
-        .number()
-        .nonnegative()
-        .optional()
-        .describe('The frame time in ms; the catalog default unless set'),
+      anchor: materialAnchorSchema.optional(),
       dither: pictureDitherSchema.optional(),
       /* the polish round's fix round 2 (build/b4.md R1; the row shaders.background.place-answers):
          the editor's own WebGL frame, so the function launches no browser for the ground; the

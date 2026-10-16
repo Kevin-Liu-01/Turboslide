@@ -11,7 +11,7 @@ import { deckRevision, getDeck } from '../server/decks';
 import type { DeckPayload, GetDeckInput } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
 import { AccessPage } from './-access-page';
-import { deckCardMeta } from './-deck-card';
+import { deckCardMeta, deckCardPicture } from './-deck-card';
 import { REFUSED_PAGE, RouteRefused, isAddressRefusal } from './-refused-page';
 
 // The viewer (SPEC 3.4, 6.1): slide, grid, book and present modes; the theme;
@@ -116,11 +116,12 @@ export function isNoLongerPublished(error: unknown): boolean {
 /**
  * The loader of /deck and /embed (SPEC-4 3.11): the revision, the first slide's payload, and the
  * request for the rest, which the viewer sends after it mounts (the module comment). Shared by
- * the two routes so they read the store the same way.
+ * the two routes so they read the store the same way. `card` asks for the link card's standing
+ * (GF-2.1), which /deck's head reads and /embed does not.
  */
 export async function loadDeckView(
   deckId: string,
-  deps: { theme?: Theme; p?: string },
+  deps: { theme?: Theme; p?: string; card?: true },
 ): Promise<DeckLoaderData> {
   const head = await deckRevision({
     data: { deckId, ...(deps.p === undefined ? {} : { publishToken: deps.p }) },
@@ -132,7 +133,9 @@ export async function loadDeckView(
     revision: head.revision,
     ...(deps.p === undefined ? {} : { publishToken: deps.p }),
   };
-  const payload = await getDeck({ data: { ...input, slides: 'first' } });
+  const payload = await getDeck({
+    data: { ...input, slides: 'first', ...(deps.card === true ? { card: true } : {}) },
+  });
   if (!payload) throw notFound();
   // the other slides are not read here: the viewer asks `getDeckSlides` for them once it has
   // mounted, through the CDN cacheable GET (VERIFICATION-4 finding 6)
@@ -142,7 +145,7 @@ export async function loadDeckView(
 export const Route = createFileRoute('/deck/$deckId')({
   validateSearch: validateDeckSearch,
   loaderDeps: ({ search }) => ({ theme: search.theme, p: search.p }),
-  loader: ({ params, deps }) => loadDeckView(params.deckId, deps),
+  loader: ({ params, deps }) => loadDeckView(params.deckId, { ...deps, card: true }),
   server: {
     // the 410 of a revoked publish token before the document renders (SPEC-3 6.4); every other
     // request goes on to the loader
@@ -160,6 +163,7 @@ export const Route = createFileRoute('/deck/$deckId')({
             id: loaderData.payload.deck.id,
             title: loaderData.payload.deck.title,
             slides: loaderData.payload.deck.slides.length,
+            picture: deckCardPicture(loaderData.payload, match.search.p),
           })
         : [{ title: 'Turboslide' }]),
       ...deckRobotsMeta(match.search),

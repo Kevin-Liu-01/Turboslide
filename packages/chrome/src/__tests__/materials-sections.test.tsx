@@ -1,4 +1,7 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -373,6 +376,16 @@ describe('the Format options Dither section', () => {
     }
   });
 
+  it('a row of worded options wraps rather than squeezing its words: the Pattern row holds five', () => {
+    /* read at 320 px on the dev server: before, the five patterns squeezed to "Bayer 8 b" and
+       "RandomHalftone"; after, three and two on two lines, each word whole */
+    const css = readFileSync(join(import.meta.dirname, '..', 'inspector', 'fields.css'), 'utf8');
+    const rule = (selector: string) =>
+      new RegExp(`(^|\\n)${selector.replace('.', '\\.')} \\{([^}]*)\\}`).exec(css)?.[2] ?? '';
+    expect(rule('.ts-fo-toggles')).toMatch(/flex-wrap: wrap;/);
+    expect(rule('.ts-fo-toggle')).toMatch(/flex: none;/);
+  });
+
   it('a slider previews through the editor’s handle on every input and commits once on release', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     const ditherPreview = vi.fn();
@@ -408,6 +421,13 @@ describe('the Format options Dither section', () => {
     expect(dispatch).toHaveBeenLastCalledWith(
       'block.set',
       expect.objectContaining({ value: { ...PHOTOGRAPH, pattern: 'blue64' } }),
+    );
+    /* the clustered-dot screen (the Glyphfield port, wave 2.4) */
+    expect(control('formatOptions.dither.pattern.halftone').textContent).toBe('Halftone');
+    fireEvent.click(control('formatOptions.dither.pattern.halftone'));
+    expect(dispatch).toHaveBeenLastCalledWith(
+      'block.set',
+      expect.objectContaining({ value: { ...PHOTOGRAPH, pattern: 'halftone' } }),
     );
     fireEvent.click(control('formatOptions.dither.polarity.same'));
     expect(dispatch).toHaveBeenLastCalledWith(

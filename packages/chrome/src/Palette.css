@@ -49,6 +49,22 @@
   }
 }
 
+/* the exit copy of the search card that closed (Layer.ts): the scrim fades and the card sinks
+   4 px over the leave duration, as a dialog's does */
+.pt-search[data-exiting] {
+  animation: pt-fade-out var(--pt-dur-leave) var(--pt-ease-in) both;
+}
+
+.pt-search[data-exiting] .pt-search-card {
+  animation: pt-search-out var(--pt-dur-leave) var(--pt-ease-in) both;
+}
+
+@keyframes pt-search-out {
+  to {
+    transform: translateY(4px);
+  }
+}
+
 /* ---- the tools row: the filter and the count; 9px around the 34px field,
    so the row is the 52px bar height (directive 8.8) ---- */
 .pt-search-tools {

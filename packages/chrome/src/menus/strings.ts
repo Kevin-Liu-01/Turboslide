@@ -31,6 +31,13 @@ export function stubTooltip(label: string, reason: string): string {
   return `${label} · ${stubClause(reason)}`;
 }
 
+/** Names as a sentence lists them: `a`, `a and b`, `a, b and c`. */
+export function andList(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
 /**
  * The refusals of round three (SPEC-3 6.8, 0.47), verbatim, and the two words of the persisted
  * queue notice. The e2e fixtures of share.spec.ts, comments.spec.ts and accounts.spec.ts read them
@@ -535,6 +542,15 @@ export const DIALOGS = {
     replace: 'Replace',
     replaceAll: 'Replace all',
   },
+  /* Slide > Playback (the shader design 3.1): the deck's and the slides' play or hold */
+  playback: {
+    title: 'Playback',
+    play: 'Play in the show',
+    hold: 'Hold the still',
+    note: 'A viewer with Reduce motion or Play animated patterns Off sees the still.',
+    apply: 'Apply',
+    applyToSelected: 'Apply to selected',
+  },
   slideNumbers: {
     title: 'Slide numbers',
     on: 'On',
@@ -642,7 +658,27 @@ export const PICKERS = {
   },
   lineEnds: { grid: 'Line decorations', doc: 'None, an arrow, a circle, a square or a diamond' },
   dashes: { list: 'Dashes', doc: 'Solid, dot, dash, dash dot, long dash or long dash dot' },
-  colors: { plate: 'Colors', none: 'None', custom: 'Custom', hex: 'Six hex digits; Enter applies' },
+  colors: {
+    plate: 'Colors',
+    none: 'None',
+    custom: 'Custom',
+    hex: 'Six hex digits; Enter applies',
+    /* the free colour field under the swatches (the Glyphfield port, wave 2 item 6): the parts
+       change a draft and Apply or Enter writes it once; the button labels are Title Case */
+    area: 'Saturation and brightness',
+    areaDoc: 'Drag, or press the arrow keys; Shift moves ten times as far; Enter applies',
+    hue: 'Hue',
+    hueDoc: 'Drag, or press the arrow keys; Shift moves 10 degrees; Enter applies',
+    oklch: 'OKLCH',
+    oklchDoc: 'Lightness, chroma and hue, as 63% 0.258 29; Enter applies',
+    pickScreen: 'Pick Screen Color',
+    pickScreenDoc: 'Takes the color of any point on the screen; Escape cancels',
+    apply: 'Apply',
+    applyDoc: 'Uses the color the field shows',
+    /* the area's spoken value */
+    areaValue: (saturation: number, brightness: number) =>
+      `Saturation ${saturation}%, brightness ${brightness}%`,
+  },
   weights: { list: 'Weights', none: 'None', px: (weight: number) => `${weight} px` },
 } as const;
 
@@ -914,6 +950,27 @@ export const PANELS = {
     lexicon: 'Words that never translate',
     lexiconLine: 'Kept as written when this presentation is translated',
     lexiconPlaceholder: 'One name per line',
+    /* the kit check at the panel's foot (the Glyphfield port, wave 2 item 6): the rows are the
+       findings' own sentences (kit-check.ts) */
+    check: 'Check',
+    checkClear: 'Text reaches 4.5:1 and every other color 3:1 on Background in both appearances',
+    fix: 'Fix',
+    /* Import Kit at the panel's foot (kit-import.ts) */
+    importKit: 'Import Kit',
+    importDoc: 'Takes the colors of a Glyphfield kit, its ZIP or its tokens.json, in one change',
+    importLabel: 'Brand kit: Import',
+    /* `refused` names the file's roles the kit has no place for, joined by `andList` ('' for
+       none), and `many` is true for two or more */
+    imported: (count: number, file: string, refused: string, many: boolean) => {
+      const taken =
+        count === 1
+          ? `1 color from ${file} is in the kit`
+          : `${count} colors from ${file} are in the kit`;
+      return refused === ''
+        ? taken
+        : `${taken}; ${many ? `its roles ${refused} have` : `its role ${refused} has`} no place in it`;
+    },
+    importFailed: (reason: string) => `The kit could not be imported: ${reason}`,
     reset: (kit: string) => `Reset to ${kit}`,
     resetDoc: (theme: string) =>
       `Removes this presentation’s brand kit; every slide draws the ${theme} theme`,

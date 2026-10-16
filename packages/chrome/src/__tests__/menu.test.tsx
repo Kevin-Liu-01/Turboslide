@@ -226,3 +226,63 @@ describe('the glyphs (item 57)', () => {
     for (const item of rows) if (item.icon !== undefined) expect(ICON_NAMES).toContain(item.icon);
   });
 });
+
+// Exit motion (the Glyphfield port, PLAN.md wave 2 item 7): the top list of a menu that closes
+// leaves an inert copy of itself while Menu.css fades it (Layer.ts), and a submenu closes with no
+// copy, so a walk across the rows never stacks fading lists. jsdom has neither the top layer nor
+// Web Animations: the stand-ins answer `showPopover` and one animation for an exit copy.
+describe('the exit copy (PLAN.md wave 2 item 7)', () => {
+  type Stand = {
+    showPopover?: () => void;
+    hidePopover?: () => void;
+    getAnimations?: () => unknown[];
+  };
+  const proto = HTMLElement.prototype as unknown as Stand;
+
+  beforeEach(() => {
+    proto.showPopover = () => undefined;
+    proto.hidePopover = () => undefined;
+    proto.getAnimations = function getAnimations(this: HTMLElement) {
+      return this.hasAttribute('data-exiting') ? [{}] : [];
+    };
+  });
+
+  afterEach(() => {
+    delete proto.showPopover;
+    delete proto.hidePopover;
+    delete proto.getAnimations;
+    for (const copy of document.querySelectorAll('[data-exiting]')) copy.remove();
+  });
+
+  function Host({ open }: { open: boolean }) {
+    return open ? <Harness /> : null;
+  }
+
+  const afterCommit = () =>
+    act(async () => {
+      await Promise.resolve();
+    });
+
+  it('leaves one copy of the top list when the menu closes, with no menu role or row id, and none for a submenu', async () => {
+    const view = render(<Host open />);
+    const lists = () => [...document.querySelectorAll<HTMLElement>('[role="menu"]')];
+    fireEvent.click(row('edit.more'));
+    expect(lists()).toHaveLength(2);
+    fireEvent.keyDown(lists()[1] as HTMLElement, { key: 'ArrowLeft' });
+    await afterCommit();
+    expect(lists()).toHaveLength(1);
+    expect(document.querySelectorAll('[data-exiting]')).toHaveLength(0);
+
+    view.rerender(<Host open={false} />);
+    await afterCommit();
+    expect(lists()).toEqual([]);
+    expect(document.querySelector('[data-menu-item], [data-control^="menu."]')).toBeNull();
+    const copies = [...document.querySelectorAll<HTMLElement>('[data-exiting]')];
+    expect(copies).toHaveLength(1);
+    expect(copies[0]?.classList.contains('ts-menu')).toBe(true);
+    expect(copies[0]?.classList.contains('is-sub')).toBe(false);
+    expect(copies[0]?.getAttribute('aria-hidden')).toBe('true');
+    expect(copies[0]?.hasAttribute('inert')).toBe(true);
+    expect(copies[0]?.textContent).toContain('Undo');
+  });
+});

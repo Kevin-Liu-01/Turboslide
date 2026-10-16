@@ -30,11 +30,14 @@ import {
   teardownAll,
   title,
   waitEditor,
+  waitRevision,
   sweepTemplateLeftovers,
   slideOrder,
   clickCard,
   zipEntries,
 } from './lib';
+import { contrastRatio } from '@turboslide/theme/contrast';
+
 import { chooseOption } from '../choose-option';
 import { brandThemes } from './brand-themes';
 
@@ -1758,6 +1761,149 @@ test(title('brand.panel.words-match-sheet'), async () => {
   expect(failures).toEqual([]);
 });
 
+/* the Glyphfield port, wave 2 item 6 (GF-2.6): the colour plate's free field where the Brand kit
+   panel's native colour wells stood, the kit check at the panel's foot with its Fix, and Import
+   Kit with a Glyphfield token file */
+test(title('brand.colors.free-field'), async () => {
+  test.setTimeout(240_000);
+  await openEditor(page, deck);
+  await menuPath(page, 'slide', 'slide.changeTheme');
+  if (
+    !(await ctl(page, 'panel.brand.color.primary.swatch')
+      .waitFor({ timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false))
+  )
+    test.skip(true, 'not on this build: panel.brand.color.primary.swatch');
+  const notes: string[] = [];
+  const appearance =
+    (await page.evaluate(() =>
+      document
+        .querySelector('[data-control^="panel.brand.color.appearance."][aria-checked="true"]')
+        ?.getAttribute('data-control')
+        ?.replace('panel.brand.color.appearance.', ''),
+    )) === 'dark'
+      ? 'dark'
+      : 'light';
+  const kitColor = async (role: string): Promise<string | undefined> =>
+    (
+      await invoke<{ brand?: { colors?: Record<string, Record<string, string>> } }>(
+        page,
+        'deck.info',
+      )
+    ).brand?.colors?.[appearance]?.[role];
+  const stageBlue = () =>
+    page.evaluate(() => {
+      const sheet = document
+        .querySelector('.ts-stagewrap.ts-editor .ts-stage')
+        ?.closest('.ts-sheet');
+      return sheet ? getComputedStyle(sheet).getPropertyValue('--blue').trim().toLowerCase() : '';
+    });
+  /* no native colour well is left in the panel */
+  expect(await page.locator('.ts-brand input[type="color"]').count()).toBe(0);
+  /* the Primary swatch opens the field; the arrow keys move a draft the sheet previews */
+  const before = await settled(page);
+  const blueBefore = await stageBlue();
+  await ctl(page, 'panel.brand.color.primary.swatch').click();
+  const area = ctl(page, 'panel.brand.color.primary.field.custom.area');
+  await area.waitFor({ timeout: 10_000 });
+  const start = await ctl(page, 'panel.brand.color.primary.field.hex').inputValue();
+  await area.focus();
+  await page.keyboard.press('Shift+ArrowDown');
+  await page.keyboard.press('Shift+ArrowLeft');
+  const draft = await ctl(page, 'panel.brand.color.primary.field.hex').inputValue();
+  await expect.poll(stageBlue, { timeout: 5000 }).toBe(draft);
+  const during = await state(page);
+  notes.push(
+    `${appearance}: Primary ${start} -> draft ${draft}; the sheet's --blue ${blueBefore} -> ${draft} at revision ${during.revision} (before ${before.revision})`,
+  );
+  expect(draft).not.toBe(start);
+  expect(during.revision).toBe(before.revision);
+  /* Apply writes one revision with the draft, and the field closes */
+  await ctl(page, 'panel.brand.color.primary.field.custom.apply').click();
+  await waitRevision(page, before.revision + 1);
+  await settled(page);
+  expect(await kitColor('primary')).toBe(draft);
+  await expect(area).toHaveCount(0);
+  expect((await state(page)).revision).toBe(before.revision + 1);
+  /* the kit check: a Text under 4.5:1 lists one row, and Fix writes a Text that reaches it */
+  const low = appearance === 'light' ? '#9aa3b5' : '#3a3f4a';
+  let s = await settled(page);
+  await invoke(page, 'brand.set', {
+    path: `/colors/${appearance}/text`,
+    value: low,
+    baseRevision: s.revision,
+  });
+  const row = ctl(page, `panel.brand.check.contrast.${appearance}.text`);
+  await row.waitFor({ timeout: 10_000 });
+  const sentence = (await row.locator('span').first().textContent()) ?? '';
+  s = await settled(page);
+  await ctl(page, `panel.brand.check.contrast.${appearance}.text.fix`).click();
+  await waitRevision(page, s.revision + 1);
+  await settled(page);
+  const fixed = (await kitColor('text')) ?? '';
+  const ground =
+    (await kitColor('background')) ??
+    (await page.evaluate(() => {
+      const sheet = document
+        .querySelector('.ts-stagewrap.ts-editor .ts-stage')
+        ?.closest('.ts-sheet');
+      return sheet ? getComputedStyle(sheet).getPropertyValue('--paper').trim() : '#ffffff';
+    }));
+  const ratio = contrastRatio(fixed, ground);
+  notes.push(`check: "${sentence}"; Fix wrote Text ${fixed}, ${ratio.toFixed(2)}:1 on ${ground}`);
+  expect(sentence).toMatch(
+    /^Text on Background measures [\d.]+:1 on (light|dark) slides; it needs 4\.5:1$/,
+  );
+  expect(fixed).not.toBe(low);
+  expect(ratio).toBeGreaterThanOrEqual(4.5);
+  await expect(row).toHaveCount(0);
+  /* Import Kit: a Glyphfield token file is one revision writing its roles in both appearances */
+  const tokens = {
+    color: {
+      ink: { $value: '#14161a' },
+      paper: { $value: '#fbfaf7' },
+      mark: { $value: '#d0402b' },
+    },
+    semantic: {
+      light: {
+        background: { $value: '{color.paper}' },
+        foreground: { $value: '{color.ink}' },
+        primary: { $value: '{color.mark}' },
+        border: { $value: '{color.ink}' },
+      },
+      dark: { background: { $value: '{color.ink}' }, foreground: { $value: '{color.paper}' } },
+    },
+  };
+  s = await settled(page);
+  await page.locator('[data-control="panel.brand.import.file"]').setInputFiles({
+    name: 'acme-kit.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(tokens)),
+  });
+  await waitRevision(page, s.revision + 1);
+  await settled(page);
+  const imported = (
+    await invoke<{ brand?: { colors?: Record<string, Record<string, string>> } }>(page, 'deck.info')
+  ).brand?.colors;
+  notes.push(`import: ${JSON.stringify(imported)} at revision ${(await state(page)).revision}`);
+  expect(imported?.light).toMatchObject({
+    background: '#fbfaf7',
+    text: '#14161a',
+    primary: '#d0402b',
+  });
+  expect(imported?.dark).toMatchObject({ background: '#14161a', text: '#fbfaf7' });
+  expect((await state(page)).revision).toBe(s.revision + 1);
+  /* the deck goes back to its theme's colours for the rows after this one */
+  s = await settled(page);
+  await invoke(page, 'brand.reset', { path: '/colors', baseRevision: s.revision }).catch(
+    () => undefined,
+  );
+  await settled(page);
+  await page.keyboard.press('Escape');
+  test.info().annotations.push({ type: 'brand', description: notes.join('; ') });
+});
+
 /* lane D3 of the design round (docs/DESIGN.md 7, 10.3, 11): its rows live in brand-themes.ts */
 const THEME_ROWS = brandThemes();
 
@@ -1781,4 +1927,6 @@ coverage(import.meta.filename, [
   'fonts.preload.italic-on-edit-only',
   /* the polish round (docs/archive/rounds/POLISH.md 2.5 item 49) */
   'brand.panel.words-match-sheet',
+  /* the Glyphfield port, wave 2 item 6 */
+  'brand.colors.free-field',
 ]);

@@ -551,6 +551,8 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
            docs/LANDING.md retired (pictures-three-widths, product-pictures, load-budget, grammar,
            capture-plain); the home rows it enters are counted by the home term below */
         5 +
+        /* the Glyphfield port, GF-2.6 (wave 2 item 6): brand.colors.free-field */
+        1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order; the design
            round's home rows are counted by its own term */

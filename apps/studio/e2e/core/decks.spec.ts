@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { BrowserContext, Page } from '@playwright/test';
+import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -2371,9 +2371,49 @@ test(title('decks.list.ruled-rows'), async () => {
 });
 
 // ---- the next program's Round 1 push B2d#18 (docs/NEXT.md 4.1.3 item 12, 4.1.5): a shared deck's card
+// The Glyphfield port's wave 2 item 1 (GF-2.1; routes/-deck-card.ts, server/deck-card.ts): the card's
+// picture is the first slide at 1200 by 675 from the render route when a stranger holding the link
+// may read the deck (an open deck, or the published player's token), and the site's card for every
+// other link. The stranger is a request context with no cookie, the way an unfurler arrives.
 
-test(title('decks.og.deck-card'), async () => {
-  test.setTimeout(90_000);
+/** The tags of a page's head as a request with no cookie reads them, the first of each name. */
+async function unfurlTags(
+  anon: APIRequestContext,
+  path: string,
+): Promise<{ status: number; tags: Record<string, string> }> {
+  const res = await anon.get(path, { maxRedirects: 0 });
+  const html = await res.text();
+  const tags: Record<string, string> = {};
+  const decode = (value: string) =>
+    value
+      .replace(/&quot;/g, '"')
+      .replace(/&#x27;|&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+  for (const [tag] of html.matchAll(/<meta\b[^>]*>/g)) {
+    const key = /\s(?:property|name)="([^"]+)"/.exec(tag)?.[1];
+    const content = /\scontent="([^"]*)"/.exec(tag)?.[1];
+    if (key !== undefined && content !== undefined && tags[key] === undefined)
+      tags[key] = decode(content);
+  }
+  return { status: res.status(), tags };
+}
+
+/** A card picture as a request with no cookie reads it: the status, the type and the PNG's size. */
+async function cardPictureRead(
+  anon: APIRequestContext,
+  url: string,
+): Promise<{ status: number; type: string; size: { width: number; height: number } | null }> {
+  const at = new URL(url);
+  const res = await anon.get(`${at.pathname}${at.search}`, { maxRedirects: 3, timeout: 90_000 });
+  const type = res.headers()['content-type'] ?? '';
+  const size = res.status() === 200 ? pngSize(Buffer.from(await res.body())) : null;
+  return { status: res.status(), type, size };
+}
+
+test(title('decks.og.deck-card'), async ({ playwright }) => {
+  test.setTimeout(300_000);
   const res = await page.goto(`/deck/${deck}`);
   expect(res?.status(), "the deck's page answers").toBe(200);
   await page.locator('.pt-viewer').first().waitFor({ timeout: 60_000 });
@@ -2419,6 +2459,93 @@ test(title('decks.og.deck-card'), async () => {
   expect(meta.ogImage ?? '', 'og:image is on www').toMatch(/^https:\/\/www\.turboslide\.com\//);
   expect(meta.ogDescription ?? '', 'og:description is one sentence').toMatch(/^[A-Z].*\.$/);
   expect(monoAddress, "the card's address is not set in monospace").toBe(false);
+  /* GF-2.1: a new deck is restricted, so even its owner's page names the site's card */
+  expect(meta.ogImage ?? '', 'a restricted deck keeps the site card').toMatch(
+    /\/og\/turboslide\.png$/,
+  );
+
+  const stranger = () => playwright.request.newContext({ baseURL: BASE, extraHTTPHeaders });
+  const cardPattern = (id: string, token?: string) =>
+    new RegExp(
+      `^https://www\\.turboslide\\.com/api/render/[a-z0-9-]+\\?deck=${id}&theme=(light|dark)&w=1200&r=\\d+${token === undefined ? '' : `&p=${token}`}$`,
+    );
+  const readings: string[] = [];
+
+  /* the published player: the link carries the token, so its card is the first slide */
+  await openEditor(page, deck);
+  const baseRevision = async () => {
+    const got = await invoke<{ record?: { revision: number } }>(page, 'share.get', { id: deck });
+    return got.record?.revision ?? 0;
+  };
+  const published = await invoke<{ url: string }>(page, 'deck.publish', {
+    id: deck,
+    baseRevision: await baseRevision(),
+  });
+  const token = new URL(published.url, BASE).searchParams.get('p') ?? '';
+  const playerPath = new URL(published.url, BASE);
+  let anon = await stranger();
+  let picture = '';
+  try {
+    const player = await unfurlTags(anon, `${playerPath.pathname}${playerPath.search}`);
+    picture = player.tags['og:image'] ?? '';
+    readings.push(
+      `player ${player.status}: og:image ${picture.replace(token, '<token>')}, ${player.tags['og:image:width']} by ${player.tags['og:image:height']}, alt "${player.tags['og:image:alt']}"`,
+    );
+    expect(player.status, "the published player's page answers a stranger").toBe(200);
+    expect(picture, 'the player link names the first slide with its token').toMatch(
+      cardPattern(deck, token),
+    );
+    expect(player.tags['twitter:image'], 'twitter:image is the same picture').toBe(picture);
+    expect(
+      [player.tags['og:image:width'], player.tags['og:image:height'], player.tags['og:image:type']],
+      'the picture is a 1200 by 675 PNG',
+    ).toEqual(['1200', '675', 'image/png']);
+    expect(player.tags['og:image:alt']).toBe(`The first slide of ${name}`);
+    const read = await cardPictureRead(anon, picture);
+    readings.push(`player picture ${read.status} ${read.type} ${JSON.stringify(read.size)}`);
+    expect(read.status, 'the picture answers a request with no cookie').toBe(200);
+    expect(read.type).toBe('image/png');
+    expect(read.size, 'the picture is 1200 by 675').toEqual({ width: 1200, height: 675 });
+    /* without the token the same picture is the restricted deck's: refused */
+    const bare = await cardPictureRead(anon, picture.replace(`&p=${token}`, ''));
+    readings.push(`picture without the token ${bare.status}`);
+    expect(bare.status, 'the picture without the token is refused').toBe(404);
+  } finally {
+    await anon.dispose();
+  }
+
+  /* unpublished: the player is gone and so is its picture */
+  await invoke(page, 'deck.unpublish', { id: deck, baseRevision: await baseRevision() });
+  anon = await stranger();
+  try {
+    const gone = await cardPictureRead(anon, picture);
+    readings.push(`picture after unpublish ${gone.status}`);
+    expect(gone.status, "an unpublished link's picture is refused").toBe(410);
+  } finally {
+    await anon.dispose();
+  }
+
+  /* the open seed deck: a stranger reads its first slide without any token */
+  anon = await stranger();
+  try {
+    const open = await unfurlTags(anon, '/deck/gt-brand');
+    const image = open.tags['og:image'] ?? '';
+    readings.push(`gt-brand ${open.status}: og:image ${image}`);
+    expect(open.status, 'the open seed deck answers a stranger').toBe(200);
+    expect(image, "the open deck's link names its first slide, with no token").toMatch(
+      cardPattern('gt-brand'),
+    );
+    const read = await cardPictureRead(anon, image);
+    readings.push(`gt-brand picture ${read.status} ${read.type} ${JSON.stringify(read.size)}`);
+    expect(read.status).toBe(200);
+    expect(read.size, "the open deck's picture is 1200 by 675").toEqual({
+      width: 1200,
+      height: 675,
+    });
+  } finally {
+    await anon.dispose();
+    test.info().annotations.push({ type: 'link card', description: readings.join('; ') });
+  }
 });
 
 // ---- the list and the trash (docs/archive/rounds/POLISH.md 2.7)

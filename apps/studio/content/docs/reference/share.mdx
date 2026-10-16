@@ -128,7 +128,7 @@ description: The actions of the share group, with their input fields and their n
 | Field          | Type                                | Required | Description                                                      |
 | -------------- | ----------------------------------- | -------- | ---------------------------------------------------------------- |
 | `id`           | string                              | yes      |                                                                  |
-| `who`          | object \| object                    | yes      |                                                                  |
+| `who`          | \{ principalId \} \| \{ email \}    | yes      |                                                                  |
 | `role`         | "viewer" \| "commenter" \| "editor" | yes      |                                                                  |
 | `baseRevision` | integer                             | yes      | The revision the caller read; a stale value is rejected with 409 |
 
@@ -142,11 +142,11 @@ description: The actions of the share group, with their input fields and their n
 
 **Remove access.** Removes a grant; the caller may remove their own at any role.
 
-| Field          | Type             | Required | Description                                                      |
-| -------------- | ---------------- | -------- | ---------------------------------------------------------------- |
-| `id`           | string           | yes      |                                                                  |
-| `who`          | object \| object | yes      |                                                                  |
-| `baseRevision` | integer          | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                             | Required | Description                                                      |
+| -------------- | -------------------------------- | -------- | ---------------------------------------------------------------- |
+| `id`           | string                           | yes      |                                                                  |
+| `who`          | \{ principalId \} \| \{ email \} | yes      |                                                                  |
+| `baseRevision` | integer                          | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide share remove <id> --email <email>`
 - MCP tool: `deck_remove_access`
@@ -158,12 +158,12 @@ description: The actions of the share group, with their input fields and their n
 
 **Access expiry.** Sets or clears a grant’s expiry, up to one year ahead.
 
-| Field          | Type             | Required | Description                                                      |
-| -------------- | ---------------- | -------- | ---------------------------------------------------------------- |
-| `id`           | string           | yes      |                                                                  |
-| `who`          | object \| object | yes      |                                                                  |
-| `expiresAt`    | string \| null   | yes      | An ISO time within a year, or null to clear                      |
-| `baseRevision` | integer          | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                             | Required | Description                                                      |
+| -------------- | -------------------------------- | -------- | ---------------------------------------------------------------- |
+| `id`           | string                           | yes      |                                                                  |
+| `who`          | \{ principalId \} \| \{ email \} | yes      |                                                                  |
+| `expiresAt`    | string \| null                   | yes      | An ISO time within a year, or null to clear                      |
+| `baseRevision` | integer                          | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide share expire <id> --email <email> --at <expiresAt>`
 - MCP tool: `deck_set_access_expiry`
@@ -244,11 +244,11 @@ description: The actions of the share group, with their input fields and their n
 
 **Transfer ownership.** Offers the deck to a signed in principal or an email, who accepts or declines; owner only, anonymous targets refused.
 
-| Field          | Type             | Required | Description                                                      |
-| -------------- | ---------------- | -------- | ---------------------------------------------------------------- |
-| `id`           | string           | yes      |                                                                  |
-| `to`           | object \| object | yes      |                                                                  |
-| `baseRevision` | integer          | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                             | Required | Description                                                      |
+| -------------- | -------------------------------- | -------- | ---------------------------------------------------------------- |
+| `id`           | string                           | yes      |                                                                  |
+| `to`           | \{ principalId \} \| \{ email \} | yes      |                                                                  |
+| `baseRevision` | integer                          | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide share transfer <id> --email <email>`
 - MCP tool: `deck_transfer_ownership`
@@ -305,12 +305,12 @@ description: The actions of the share group, with their input fields and their n
 
 **Email collaborators.** Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.
 
-| Field          | Type            | Required | Description                                                      |
-| -------------- | --------------- | -------- | ---------------------------------------------------------------- |
-| `id`           | string          | yes      |                                                                  |
-| `to`           | "all" \| object | yes      |                                                                  |
-| `message`      | string          | yes      |                                                                  |
-| `baseRevision` | integer         | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                        | Required | Description                                                      |
+| -------------- | --------------------------- | -------- | ---------------------------------------------------------------- |
+| `id`           | string                      | yes      |                                                                  |
+| `to`           | "all" \| \{ principalIds \} | yes      |                                                                  |
+| `message`      | string                      | yes      |                                                                  |
+| `baseRevision` | integer                     | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide share email <id> --message <message>`
 - MCP tool: `deck_email_collaborators`

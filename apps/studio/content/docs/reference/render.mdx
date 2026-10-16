@@ -10,13 +10,13 @@ description: The actions of the render group, with their input fields and their 
 
 **Render.** Renders slides in one or both themes at 1x or 2x and returns render records with image paths.
 
-| Field      | Type                | Required | Description                                      |
-| ---------- | ------------------- | -------- | ------------------------------------------------ |
-| `slideIds` | "all" \| string[]   | yes      | Slide ids, or 'all'                              |
-| `themes`   | "light" \| "dark"[] | no       | One or both themes                               |
-| `scale`    | 1 \| 2              | no       |                                                  |
-| `format`   | "png" \| "jpg"      | no       |                                                  |
-| `out`      | string              | no       | Output directory; defaults to .turboslide/render |
+| Field      | Type                  | Required | Description                                      |
+| ---------- | --------------------- | -------- | ------------------------------------------------ |
+| `slideIds` | "all" \| string[]     | yes      | Slide ids, or 'all'                              |
+| `themes`   | ("light" \| "dark")[] | no       | One or both themes                               |
+| `scale`    | 1 \| 2                | no       |                                                  |
+| `format`   | "png" \| "jpg"        | no       |                                                  |
+| `out`      | string                | no       | Output directory; defaults to .turboslide/render |
 
 - Command line: `turboslide render <slideIds> --theme <themes> --out <out> --json`
 - MCP tool: `deck_render`
@@ -28,15 +28,15 @@ description: The actions of the render group, with their input fields and their 
 
 **Contact sheet.** Renders a contact sheet per theme with a JSON cell map from cell boxes to slide ids.
 
-| Field      | Type                | Required | Description           |
-| ---------- | ------------------- | -------- | --------------------- |
-| `slideIds` | "all" \| string[]   | yes      | Slide ids, or 'all'   |
-| `themes`   | "light" \| "dark"[] | no       | One or both themes    |
-| `cols`     | integer             | no       |                       |
-| `thumb`    | integer             | no       | Thumbnail width in px |
-| `numbered` | boolean             | no       |                       |
-| `overlay`  | "lint" \| "plate"   | no       |                       |
-| `out`      | string              | no       |                       |
+| Field      | Type                  | Required | Description           |
+| ---------- | --------------------- | -------- | --------------------- |
+| `slideIds` | "all" \| string[]     | yes      | Slide ids, or 'all'   |
+| `themes`   | ("light" \| "dark")[] | no       | One or both themes    |
+| `cols`     | integer               | no       |                       |
+| `thumb`    | integer               | no       | Thumbnail width in px |
+| `numbered` | boolean               | no       |                       |
+| `overlay`  | "lint" \| "plate"     | no       |                       |
+| `out`      | string                | no       |                       |
 
 - Command line: `turboslide sheet <slideIds> --cols <cols> --thumb <thumb> --overlay <overlay>`
 - MCP tool: `deck_sheet`

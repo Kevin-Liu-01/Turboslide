@@ -38,12 +38,12 @@ description: The actions of the slide group, with their input fields and their n
 
 **Insert slide.** Inserts a slide into a section after the named slide, or first.
 
-| Field          | Type                                                     | Required | Description                                                      |
-| -------------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
-| `sectionId`    | string                                                   | yes      |                                                                  |
-| `after`        | string                                                   | no       |                                                                  |
-| `slide`        | object \| object \| object \| object \| object \| object | yes      |                                                                  |
-| `baseRevision` | integer                                                  | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                                                                               | Required | Description                                                      |
+| -------------- | ---------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `sectionId`    | string                                                                             | yes      |                                                                  |
+| `after`        | string                                                                             | no       |                                                                  |
+| `slide`        | \{ kind: "content" \| "opener" \| "mood" \| "closing" \| "title" \| "statement" \} | yes      |                                                                  |
+| `baseRevision` | integer                                                                            | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide slide insert --section <sectionId> --after <after> < slide.json`
 - MCP tool: `deck_insert_slide`
@@ -87,11 +87,11 @@ description: The actions of the slide group, with their input fields and their n
 
 **Patch slide.** Applies a mutation list to one slide and returns the normalized slide with its findings.
 
-| Field          | Type                                                                                                                                                                     | Required | Description                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------------------------------------------------- |
-| `slideId`      | string                                                                                                                                                                   | yes      |                                                                  |
-| `baseRevision` | integer                                                                                                                                                                  | yes      | The revision the caller read; a stale value is rejected with 409 |
-| `mutations`    | object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object \| object[] | yes      |                                                                  |
+| Field          | Type                                                                                                                                                                                                                                                                                                     | Required | Description                                                      |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `slideId`      | string                                                                                                                                                                                                                                                                                                   | yes      |                                                                  |
+| `baseRevision` | integer                                                                                                                                                                                                                                                                                                  | yes      | The revision the caller read; a stale value is rejected with 409 |
+| `mutations`    | \{ op: "slide.insert" \| "slide.remove" \| "slide.move" \| "slide.set" \| "slide.replace" \| "block.insert" \| "block.remove" \| "block.move" \| "block.set" \| "text.replace" \| "text.splice" \| "text.mark" \| "section.set" \| "asset.set" \| "asset.remove" \| "deck.set" \| "version.restore" \}[] | yes      |                                                                  |
 
 - Command line: `turboslide slide patch <slideId> --set <pointer>=<value>`
 - MCP tool: `deck_update_slide`
@@ -103,11 +103,11 @@ description: The actions of the slide group, with their input fields and their n
 
 **Replace slide.** Replaces a slide with the given document; what the source drawer’s Apply emits.
 
-| Field          | Type                                                     | Required | Description                                                      |
-| -------------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
-| `slideId`      | string                                                   | yes      |                                                                  |
-| `baseRevision` | integer                                                  | yes      | The revision the caller read; a stale value is rejected with 409 |
-| `slide`        | object \| object \| object \| object \| object \| object | yes      |                                                                  |
+| Field          | Type                                                                               | Required | Description                                                      |
+| -------------- | ---------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `slideId`      | string                                                                             | yes      |                                                                  |
+| `baseRevision` | integer                                                                            | yes      | The revision the caller read; a stale value is rejected with 409 |
+| `slide`        | \{ kind: "content" \| "opener" \| "mood" \| "closing" \| "title" \| "statement" \} | yes      |                                                                  |
 
 - Command line: `turboslide slide put <slideId> < slide.json`
 - MCP tool: `deck_replace_slide`
@@ -119,11 +119,11 @@ description: The actions of the slide group, with their input fields and their n
 
 **Set layout.** Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).
 
-| Field          | Type                                                     | Required | Description                                                      |
-| -------------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
-| `slideId`      | string                                                   | yes      |                                                                  |
-| `layout`       | object \| object \| object \| object \| object \| object | yes      | The target layout with its options                               |
-| `baseRevision` | integer                                                  | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                                                                             | Required | Description                                                      |
+| -------------- | -------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `slideId`      | string                                                                           | yes      |                                                                  |
+| `layout`       | \{ type: "cols" \| "split" \| "center" \| "left-mid" \| "stack" \| "freeform" \} | yes      | The target layout with its options                               |
+| `baseRevision` | integer                                                                          | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide slide set-layout <slideId> --type <type> --ratio <ratio> --gap <gap> --layout <layout>`
 - MCP tool: `deck_set_layout`
@@ -233,11 +233,11 @@ description: The actions of the slide group, with their input fields and their n
 
 **Change background.** Writes the background colour of slides in one write; null removes it and the theme default applies. A background picture is a picture object at the bottom of the stack.
 
-| Field          | Type           | Required | Description                                                      |
-| -------------- | -------------- | -------- | ---------------------------------------------------------------- |
-| `slideIds`     | string[]       | yes      | One or more slide ids                                            |
-| `background`   | object \| null | yes      |                                                                  |
-| `baseRevision` | integer        | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                | Required | Description                                                      |
+| -------------- | ------------------- | -------- | ---------------------------------------------------------------- |
+| `slideIds`     | string[]            | yes      | One or more slide ids                                            |
+| `background`   | \{ color \} \| null | yes      |                                                                  |
+| `baseRevision` | integer             | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide slide background <slideIds> --color <color>`
 - MCP tool: `deck_set_slide_background`
@@ -386,11 +386,11 @@ description: The actions of the slide group, with their input fields and their n
 
 **Transition.** Sets how slides enter in the slideshow and the shared view (none, crossfade, slide-fade, rise-fade, scale-fade, zoom-through, blur-swipe, flip-fade, spring-pop, rotate-fade, drift-fade), 0 to 3,000 ms, in one write: on the named slides, or as the deck's transition when no slide ids are given. null removes it; a slide without one takes the deck's, and a deck without one keeps the 120 ms fade and rise.
 
-| Field          | Type           | Required | Description                                                      |
-| -------------- | -------------- | -------- | ---------------------------------------------------------------- |
-| `slideIds`     | string[]       | no       | The slides; the deck’s transition when absent                    |
-| `transition`   | object \| null | yes      |                                                                  |
-| `baseRevision` | integer        | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                           | Required | Description                                                      |
+| -------------- | ------------------------------ | -------- | ---------------------------------------------------------------- |
+| `slideIds`     | string[]                       | no       | The slides; the deck’s transition when absent                    |
+| `transition`   | \{ name, durationMs \} \| null | yes      |                                                                  |
+| `baseRevision` | integer                        | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide slide transition <name>|none [--ms <ms>] [--from left|right|top|bottom] [--slides <slideIds>] [--clear]`
 - MCP tool: `deck_set_transition`
@@ -402,11 +402,11 @@ description: The actions of the slide group, with their input fields and their n
 
 **Advance.** Sets the timed advance in one write: the slideshow moves to the next slide afterMs after the last step of the slide ends, on the named slides or as the deck’s default when no slide ids are given. null removes it, and a click advances.
 
-| Field          | Type           | Required | Description                                                      |
-| -------------- | -------------- | -------- | ---------------------------------------------------------------- |
-| `slideIds`     | string[]       | no       | The slides; the deck’s advance when absent                       |
-| `advance`      | object \| null | yes      |                                                                  |
-| `baseRevision` | integer        | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                  | Required | Description                                                      |
+| -------------- | --------------------- | -------- | ---------------------------------------------------------------- |
+| `slideIds`     | string[]              | no       | The slides; the deck’s advance when absent                       |
+| `advance`      | \{ afterMs \} \| null | yes      |                                                                  |
+| `baseRevision` | integer               | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide slide advance <seconds>|off [--slides <slideIds>]`
 - MCP tool: `deck_set_advance`

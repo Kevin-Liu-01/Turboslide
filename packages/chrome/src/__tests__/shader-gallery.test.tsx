@@ -368,7 +368,7 @@ describe('the Shader gallery dialog', () => {
       expect(el?.getAttribute('data-tip'), el?.getAttribute('data-control') ?? '').toBeTruthy();
   });
 
-  it('the search narrows to "metal" and a chip narrows the grid; the empty state names the query', () => {
+  it('the search narrows to the Metal cards and a chip narrows the grid; the empty state names the query', () => {
     render(
       <Host state={host(vi.fn(() => Promise.resolve({})))}>
         <ShaderGalleryDialog />
@@ -377,9 +377,16 @@ describe('the Shader gallery dialog', () => {
     const search = control('dialog.shader.search') as HTMLInputElement;
     fireEvent.change(search, { target: { value: 'metal' } });
     let grid = control('dialog.shader.grid') as HTMLElement;
-    expect(grid.dataset.count).toBe('1');
+    /* Paper's liquid metal and Glyphfield's four Metal cards, as shaderGalleryEntries('metal') reads */
+    expect(grid.dataset.count).toBe('5');
     expect(grid.dataset.query).toBe('metal');
-    expect(cards().map((card) => card.dataset.material)).toEqual(['paper:liquid-metal']);
+    expect(cards().map((card) => card.dataset.material)).toEqual([
+      'paper:liquid-metal',
+      'glyph:liquid-glass',
+      'glyph:iridescent-foil',
+      'glyph:architectural-chrome',
+      'glyph:chrome-glares',
+    ]);
     fireEvent.change(search, { target: { value: '' } });
     fireEvent.click(control('dialog.shader.category.graphic') as HTMLElement);
     grid = control('dialog.shader.grid') as HTMLElement;

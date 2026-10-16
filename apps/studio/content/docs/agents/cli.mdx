@@ -51,6 +51,8 @@ turboslide export pptx --mode flatten --theme both --out exports
 
 ## Connect to a studio
 
-`turboslide login --to <url>` connects the command line to a hosted studio. It prints a code and the address `<url>/device`; open it while signed in, check that the code matches and click Approve. The command line then stores an API key for that studio, with the scopes the code asked for. `turboslide logout --to <url>` revokes it.
+`turboslide login --to <url>` connects the command line to a hosted studio. It prints a code and the address `<url>/device`; open it while signed in, check that the code matches and click Approve. The page says what the code asks for, such as "This code asks to read decks and edit decks", and when it was made. The command line then stores an API key for that studio, with the scopes the code asked for. `turboslide logout --to <url>` revokes it.
+
+The key expires 90 days after it is made. After that, every command to the studio prints "Your sign in expired. Run turboslide login." and exits 1; run `turboslide login --to <url>` again.
 
 `deck push <id> --to <url>` uploads a presentation folder to a studio, and `deck pull <id> --from <url>` downloads one.

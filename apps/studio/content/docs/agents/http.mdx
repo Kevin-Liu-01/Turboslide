@@ -35,7 +35,7 @@ An action's error answers with `{ "error": { "name", "status", "message", "code"
 | Status | Means                                                                                                                       |
 | ------ | --------------------------------------------------------------------------------------------------------------------------- |
 | 400    | The input is wrong. `code` and `pointer` name the field.                                                                    |
-| 401    | No key, or a key this studio does not accept.                                                                               |
+| 401    | No key, or a key this studio does not accept. A key from `turboslide login` past its 90 days answers `code: "key_expired"`. |
 | 403    | The key may read the presentation but not do this. `capability` names what is missing.                                      |
 | 404    | No such presentation, slide or object, or a presentation the key may not read. The two answer the same.                     |
 | 409    | The presentation changed since `baseRevision`, or another author holds the slide. The answer carries the current document.  |
@@ -43,6 +43,18 @@ An action's error answers with `{ "error": { "name", "status", "message", "code"
 | 429    | A quota is used up. The body is `{ "error": "rate_limited", "message", "quota" }` and `Retry-After` says when to try again. |
 | 501    | This studio does not run the action.                                                                                        |
 | 503    | The admin turned the feature off. The body is `{ "error": "unavailable", "message" }` with `Retry-After: 60`.               |
+
+## Send a write again
+
+A write that may have landed before a timeout can be sent again with `Idempotency-Key`: one value per write, such as a UUID, and the same key with the same body on the resend. A resend of a write that landed is not applied again; it answers 200 with that write's answer and the header `idempotent-replayed: true`.
+
+| Answer                          | Means                                                         |
+| ------------------------------- | ------------------------------------------------------------- |
+| 400 `invalid_idempotency_key`   | The key is not 1 to 255 visible ASCII characters.             |
+| 400 `idempotency_not_supported` | The action does not take a key.                               |
+| 422 `idempotency_key_reused`    | The key was already sent with another action or another body. |
+
+The writes to slides, objects, text, sections, pictures and the presentation's settings take the key, as do `version.restore`, `fix.run` and `assist.accept`; the OpenAPI document names the header on each of them. Making, copying, trashing or sharing a presentation, a template, a named version, a comment, a lease, presence, and the account and admin actions do not.
 
 ## Renders and downloads
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LiveClone } from '../LiveClone';
 import type { ViewerSlide } from '../model';
+import { hiddenAt, stepsOf } from '../slide-clock';
 import type { Theme } from '../theme';
 import type { PresentPlatform } from './presentKeys';
 import { presentKeyAction } from './presentKeys';
@@ -30,17 +31,24 @@ import './PresenterConsole.css';
  * stored frames through live clones; live shaders do not run here. Arrow keys, Space, the page
  * keys, Home, End and a number then Enter move the show; the route around the console publishes
  * every move to the slideshow window and feeds the audience's moves back in through `index`.
+ * A slide with click steps (HTML-SLIDES-DESIGN 2.6) reads "Step 2 of 4"; Next plays its next step
+ * before it leaves the slide, and the previews draw the slide clock's state (`hiddenAt`): the
+ * current step, then the next step or the next slide's start, never a live effect.
  */
 export type PresenterConsoleProps = {
   title: string;
   /** the play list: the deck's unskipped slides in order */
   slides: readonly ViewerSlide[];
   index: number;
+  /** the slide clock's step on the current slide (0 before the first click) and its click steps */
+  step?: number;
+  steps?: number;
   theme: Theme;
   /** a slideshow window answered on the channel */
   connected: boolean;
   platform: PresentPlatform;
-  onGoto: (index: number) => void;
+  /** a move: to a slide at its start, at the state after a step, or at its end ('end') */
+  onGoto: (index: number, step?: number | 'end') => void;
   /** a toast for the digit jump; the console has no toast of its own */
   onSay?: (message: string) => void;
   icons?: PresentIcons;
@@ -168,18 +176,21 @@ function Preview({
   theme,
   label,
   empty,
+  hidden,
 }: {
   slide: ViewerSlide | undefined;
   theme: Theme;
   label: string;
   empty: string;
+  /** the blocks hidden at the step the preview draws */
+  hidden: ReadonlyArray<string>;
 }) {
   return (
     <figure className="ts-presenter-preview">
       <figcaption>{label}</figcaption>
       <div className="ts-presenter-frame is-small" data-slide-id={slide?.id}>
         {slide ? (
-          <LiveClone html={slide.html} theme={theme} />
+          <LiveClone html={slide.html} theme={theme} hidden={hidden} />
         ) : (
           <span className="ts-presenter-empty">{empty}</span>
         )}
@@ -192,6 +203,8 @@ export function PresenterConsole({
   title,
   slides,
   index,
+  step: stepNow = 0,
+  steps: stepCount,
   theme,
   connected,
   platform,
@@ -205,6 +218,9 @@ export function PresenterConsole({
   const current = slides[at];
   const previous = at > 0 ? slides[at - 1] : undefined;
   const next = at < total - 1 ? slides[at + 1] : undefined;
+  const steps = stepCount ?? stepsOf(current?.motion);
+  /* the next preview: the current slide's next step while one remains, else the next slide's start */
+  const nextIsStep = current !== undefined && stepNow < steps;
   const clock = useClock();
   const [notesSize, setNotesSize] = useState<number>(NOTES_FONT.initial);
   const [listOpen, setListOpen] = useState(false);
@@ -218,10 +234,19 @@ export function PresenterConsole({
 
   const step = useCallback(
     (delta: number) => {
+      /* the slide's click steps first, then the slides; back from step 0 lands on the previous slide's end */
+      if (delta > 0 && stepNow < steps) {
+        onGoto(at, stepNow + 1);
+        return;
+      }
+      if (delta < 0 && stepNow > 0) {
+        onGoto(at, stepNow - 1);
+        return;
+      }
       const to = stepPlayIndex(at, delta, total);
-      if (to !== at) onGoto(to);
+      if (to !== at) onGoto(to, delta < 0 ? 'end' : 0);
     },
-    [at, total, onGoto],
+    [at, total, onGoto, stepNow, steps],
   );
 
   const stepNotes = (direction: -1 | 1) => {
@@ -326,7 +351,7 @@ export function PresenterConsole({
               className="ts-presenter-step"
               data-control="presenter.previous"
               aria-label={PRESENT_TEXT.previous}
-              disabled={at <= 0}
+              disabled={at <= 0 && stepNow <= 0}
               onClick={() => step(-1)}
               {...tip({ name: PRESENT_TEXT.previous, key: 'Left arrow' })}
             >
@@ -334,7 +359,13 @@ export function PresenterConsole({
             </button>
             <div className="ts-presenter-current">
               <div className="ts-presenter-frame is-current" data-slide-id={current?.id}>
-                {current ? <LiveClone html={current.html} theme={theme} /> : null}
+                {current ? (
+                  <LiveClone
+                    html={current.html}
+                    theme={theme}
+                    hidden={hiddenAt(current.motion, stepNow)}
+                  />
+                ) : null}
               </div>
               <div className="ts-presenter-pick">
                 <button
@@ -357,6 +388,17 @@ export function PresenterConsole({
                     ▾
                   </span>
                 </button>
+                {steps > 0 ? (
+                  <span
+                    className="ts-presenter-steps"
+                    data-control="presenter.step"
+                    data-step={stepNow}
+                    data-steps={steps}
+                    role="status"
+                  >
+                    {PRESENT_TEXT.stepOf(stepNow, steps)}
+                  </span>
+                ) : null}
                 {listOpen ? (
                   <SlideList
                     id="ts-presenter-list"
@@ -378,7 +420,7 @@ export function PresenterConsole({
               className="ts-presenter-step"
               data-control="presenter.next"
               aria-label={PRESENT_TEXT.next}
-              disabled={at >= total - 1}
+              disabled={at >= total - 1 && stepNow >= steps}
               onClick={() => step(1)}
               {...tip({ name: PRESENT_TEXT.next, key: 'Right arrow' })}
             >
@@ -391,12 +433,16 @@ export function PresenterConsole({
               theme={theme}
               label={PRESENT_TEXT.previousSlide}
               empty={PRESENT_TEXT.startOfShow}
+              hidden={hiddenAt(previous?.motion, stepsOf(previous?.motion))}
             />
             <Preview
-              slide={next}
+              slide={nextIsStep ? current : next}
               theme={theme}
-              label={PRESENT_TEXT.nextSlide}
+              label={nextIsStep ? PRESENT_TEXT.nextStep : PRESENT_TEXT.nextSlide}
               empty={PRESENT_TEXT.endOfShow}
+              hidden={
+                nextIsStep ? hiddenAt(current?.motion, stepNow + 1) : hiddenAt(next?.motion, 0)
+              }
             />
           </div>
         </section>

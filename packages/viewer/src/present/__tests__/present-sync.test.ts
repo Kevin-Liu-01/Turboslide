@@ -8,6 +8,7 @@ import type {
 } from '../presentSync';
 import {
   openPresentChannel,
+  PRESENT_PROTOCOL,
   parsePresentEnvelope,
   presentChannelName,
   presentStorageKey,
@@ -81,10 +82,25 @@ describe('openPresentChannel', () => {
     presenter.post({ type: 'hello' });
     audience.post({ type: 'goto', slideId: 'two' });
     expect(heardByAudience).toEqual([
-      { type: 'hello', from: presenter.id, role: 'presenter', v: 1, at: 1000, seq: 1 },
+      {
+        type: 'hello',
+        from: presenter.id,
+        role: 'presenter',
+        v: PRESENT_PROTOCOL,
+        at: 1000,
+        seq: 1,
+      },
     ]);
     expect(heardByPresenter).toEqual([
-      { type: 'goto', slideId: 'two', from: audience.id, role: 'audience', v: 1, at: 1000, seq: 1 },
+      {
+        type: 'goto',
+        slideId: 'two',
+        from: audience.id,
+        role: 'audience',
+        v: PRESENT_PROTOCOL,
+        at: 1000,
+        seq: 1,
+      },
     ]);
     /* another deck's channel is silent */
     const other: PresentMessage[] = [];
@@ -109,6 +125,8 @@ describe('openPresentChannel', () => {
       total: 6,
       blank: null,
       laser: false,
+      step: 0,
+      steps: 0,
     });
     a.post({
       type: 'state',
@@ -117,6 +135,8 @@ describe('openPresentChannel', () => {
       total: 6,
       blank: null,
       laser: false,
+      step: 0,
+      steps: 0,
     });
     expect(heard.map((m) => m.type)).toEqual(['state', 'state']);
     /* the sequence number makes a repeated state a different stored value */
@@ -136,7 +156,7 @@ describe('openPresentChannel', () => {
 });
 
 describe('parsePresentEnvelope', () => {
-  const base = { v: 1, from: 'w1', role: 'audience', at: 1, seq: 1 };
+  const base = { v: PRESENT_PROTOCOL, from: 'w1', role: 'audience', at: 1, seq: 1 };
 
   it('accepts the five message types with their fields, as an object or as JSON text', () => {
     expect(parsePresentEnvelope({ ...base, type: 'hello' })).not.toBeNull();
@@ -152,8 +172,13 @@ describe('parsePresentEnvelope', () => {
         total: 3,
         blank: 'white',
         laser: true,
+        step: 1,
+        steps: 3,
       }),
     ).not.toBeNull();
+    expect(parsePresentEnvelope({ ...base, type: 'goto', slideId: 'x', step: 2 })?.type).toBe(
+      'goto',
+    );
     expect(parsePresentEnvelope({ ...base, type: 'present', on: false })).not.toBeNull();
     expect(parsePresentEnvelope({ ...base, type: 'bye' })).not.toBeNull();
   });
@@ -161,7 +186,21 @@ describe('parsePresentEnvelope', () => {
   it('refuses noise, another protocol version and malformed fields', () => {
     expect(parsePresentEnvelope(null)).toBeNull();
     expect(parsePresentEnvelope('not json')).toBeNull();
-    expect(parsePresentEnvelope({ ...base, v: 2, type: 'hello' })).toBeNull();
+    /* a version 1 window, from before the slide clock, is ignored */
+    expect(parsePresentEnvelope({ ...base, v: 1, type: 'hello' })).toBeNull();
+    expect(parsePresentEnvelope({ ...base, v: 3, type: 'hello' })).toBeNull();
+    expect(parsePresentEnvelope({ ...base, type: 'goto', slideId: 'x', step: -1 })).toBeNull();
+    expect(
+      parsePresentEnvelope({
+        ...base,
+        type: 'state',
+        slideId: 'x',
+        index: 1,
+        total: 3,
+        blank: null,
+        laser: true,
+      }),
+    ).toBeNull();
     expect(parsePresentEnvelope({ ...base, type: 'dance' })).toBeNull();
     expect(parsePresentEnvelope({ ...base, role: 'viewer', type: 'hello' })).toBeNull();
     expect(parsePresentEnvelope({ ...base, type: 'goto' })).toBeNull();
@@ -175,6 +214,8 @@ describe('parsePresentEnvelope', () => {
         total: 3,
         blank: 'red',
         laser: true,
+        step: 0,
+        steps: 0,
       }),
     ).toBeNull();
   });

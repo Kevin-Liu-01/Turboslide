@@ -56,6 +56,9 @@ export const PRESENT_TEXT = {
   currentSlide: 'Current slide',
   previousSlide: 'Previous slide',
   nextSlide: 'Next slide',
+  /* the slide clock (HTML-SLIDES-DESIGN 2.6): the console's step readout and its next preview */
+  nextStep: 'Next step',
+  stepOf: (step: number, steps: number) => `Step ${step} of ${steps}`,
   endOfShow: 'End of the slideshow',
   startOfShow: 'Start of the slideshow',
   notes: 'Speaker notes',

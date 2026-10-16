@@ -7,10 +7,13 @@ import type { BlankSlide } from './presentModel';
  * keeps working with no network after load (R07 rule 29). The audience window reports its state
  * and follows `goto`; the presenter window says hello, follows the audience's moves and sends
  * `goto` for its own; `view.goto` in either window moves both because each publishes what it did.
- * The environment is injectable so the protocol is unit tested without a browser.
+ * The environment is injectable so the protocol is unit tested without a browser. Version 2
+ * (HTML-SLIDES-DESIGN 2.6) adds the slide clock's steps: `state` carries the step shown and the
+ * slide's step count, and `goto` may name a step, so each window follows the other's clicks; a
+ * version 1 window is ignored.
  */
 
-export const PRESENT_PROTOCOL = 1;
+export const PRESENT_PROTOCOL = 2;
 
 export type PresentRole = 'audience' | 'presenter';
 
@@ -25,9 +28,12 @@ export type PresentMessageBody =
       total: number;
       blank: BlankSlide | null;
       laser: boolean;
+      /** the slide clock's step shown (0 before the first click) and the slide's click steps */
+      step: number;
+      steps: number;
     }
-  /** move to a slide; both roles send it, each follows the other's */
-  | { type: 'goto'; slideId: string }
+  /** move to a slide, at the state after `step` when given (its start when absent); each role follows the other's */
+  | { type: 'goto'; slideId: string; step?: number }
   /** the presenter asks the audience window to leave (or enter) the show: view.present */
   | { type: 'present'; on: boolean }
   /** a window is closing */
@@ -97,6 +103,7 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
   switch (record.type) {
     case 'goto':
       if (typeof record.slideId !== 'string') return null;
+      if (record.step !== undefined && !isStep(record.step)) return null;
       break;
     case 'state':
       if (
@@ -104,7 +111,9 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
         typeof record.index !== 'number' ||
         typeof record.total !== 'number' ||
         typeof record.laser !== 'boolean' ||
-        !(record.blank === null || record.blank === 'black' || record.blank === 'white')
+        !(record.blank === null || record.blank === 'black' || record.blank === 'white') ||
+        !isStep(record.step) ||
+        !isStep(record.steps)
       )
         return null;
       break;
@@ -115,6 +124,10 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
       break;
   }
   return record as PresentEnvelope;
+}
+
+function isStep(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 10_000;
 }
 
 function safeParse(text: string): unknown {

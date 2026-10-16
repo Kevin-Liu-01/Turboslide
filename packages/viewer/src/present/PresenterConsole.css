@@ -258,6 +258,16 @@
   width: 100%;
 }
 
+/* the slide clock's step on the current slide (HTML-SLIDES-DESIGN 2.6), under the counter */
+.ts-presenter-steps {
+  display: block;
+  margin-top: 4px;
+  padding: 0 10px;
+  color: var(--pt-ink-2);
+  font-size: 12px;
+  font-variant-numeric: var(--pt-numerals);
+}
+
 /* the two previews at 0.3 of the current frame's width (SPEC 9.3) */
 .ts-presenter-previews {
   display: flex;

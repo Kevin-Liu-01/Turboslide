@@ -14,9 +14,11 @@ import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
 import { deckAppearance, slideTitle } from '@turboslide/schema/deck';
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { motionField } from '@turboslide/viewer/model';
 import type { ViewerSlide } from '@turboslide/viewer/model';
 import { PresenterConsole } from '@turboslide/viewer/present/PresenterConsole';
 import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
+import { stepsOf } from '@turboslide/viewer/slide-clock';
 import type { PresentChannel, PresentMessage } from '@turboslide/viewer/present/presentSync';
 import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
 import { installThemeBridge, readTheme } from '@turboslide/viewer/theme';
@@ -77,7 +79,8 @@ export function presenterSlides(
         theme,
         chrome: true,
         assetBase,
-        blockAttrs: false,
+        /* the block ids let the previews draw a slide at a step of its clock (LiveClone `hidden`) */
+        blockAttrs: true,
         gtWord: true,
       });
       out.push({
@@ -90,6 +93,7 @@ export function presenterSlides(
         /* the presenter's frames follow Insert > Slide numbers like the show's (render/deck.ts slideCounter) */
         counter: slideCounter(deck, slide, 1, 1) !== '',
         ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
+        ...motionField(deck.defaults, slide),
       });
     }
   }
@@ -99,6 +103,7 @@ export function presenterSlides(
 type Live = {
   play: readonly ViewerSlide[];
   index: number;
+  step: number;
   connected: boolean;
   revision: number;
 };
@@ -133,18 +138,29 @@ export function PresenterPage({
     [document, deckId, theme, parser],
   );
   const [index, setIndex] = useState(0);
+  /* the slide clock's step and the slide's click steps, from the audience's state or this console's moves */
+  const [clock, setClock] = useState({ step: 0, steps: 0 });
   const [connected, setConnected] = useState(false);
   const toast = useToast();
   const channel = useRef<PresentChannel | null>(null);
-  const live = useRef<Live>({ play, index, connected, revision: document.deck.revision });
-  live.current = { play, index, connected, revision: document.deck.revision };
+  const live = useRef<Live>({
+    play,
+    index,
+    step: clock.step,
+    connected,
+    revision: document.deck.revision,
+  });
+  live.current = { play, index, step: clock.step, connected, revision: document.deck.revision };
 
   useMountEffect(() => installThemeBridge());
 
   /* follow the audience window: its state on hello and on every move, and its own goto */
-  const follow = useCallback((slideId: string) => {
+  const follow = useCallback((slideId: string, step?: number, steps?: number) => {
     const at = live.current.play.findIndex((slide) => slide.id === slideId);
-    if (at >= 0) setIndex(at);
+    if (at < 0) return;
+    setIndex(at);
+    const motion = live.current.play[at]?.motion;
+    setClock({ step: step ?? 0, steps: steps ?? stepsOf(motion) });
   }, []);
 
   useMountEffect(() => {
@@ -152,10 +168,10 @@ export function PresenterPage({
       switch (message.type) {
         case 'state':
           setConnected(true);
-          follow(message.slideId);
+          follow(message.slideId, message.step, message.steps);
           return;
         case 'goto':
-          if (message.role === 'audience') follow(message.slideId);
+          if (message.role === 'audience') follow(message.slideId, message.step);
           return;
         case 'bye':
           if (message.role === 'audience') setConnected(false);
@@ -174,12 +190,16 @@ export function PresenterPage({
     };
   });
 
-  /* the console's own move: local first, then the audience window follows */
-  const goto = useCallback((to: number) => {
+  /* the console's own move: local first, then the audience window follows; a step names the
+     state after it on that slide (HTML-SLIDES-DESIGN 2.6), 'end' the slide after its last step */
+  const goto = useCallback((to: number, at: number | 'end' = 0) => {
     const target = live.current.play[to];
     if (target === undefined) return;
+    const steps = stepsOf(target.motion);
+    const step = at === 'end' ? steps : Math.max(0, Math.min(steps, at));
     setIndex(to);
-    channel.current?.post({ type: 'goto', slideId: target.id });
+    setClock({ step, steps });
+    channel.current?.post({ type: 'goto', slideId: target.id, step });
   }, []);
 
   /* the window API owner (SPEC 7.4: the presenter answers view.goto and view.present) */
@@ -204,6 +224,8 @@ export function PresenterPage({
         title={document.deck.title}
         slides={play}
         index={index}
+        step={clock.step}
+        steps={clock.steps}
         theme={theme}
         connected={connected}
         platform={platform}

@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 
 import { Frame } from './Frame';
 import { SHEET_W } from './model';
+import { applyHidden } from './slide-clock';
 import { applyThemeToTree } from './theme';
 import type { Theme } from './theme';
 
@@ -13,6 +14,11 @@ export type LiveCloneProps = {
   theme: Theme;
   /** the edge grid without the wordmark and counter; on by default, as the deck's cloneSlide does */
   frame?: boolean;
+  /**
+   * block ids drawn hidden: the presenter's previews show a slide at a step of its clock
+   * (`hiddenAt`), which needs the slide rendered with block attributes
+   */
+  hidden?: ReadonlyArray<string>;
 };
 
 /**
@@ -36,7 +42,9 @@ export function lazyPictures(html: string): string {
   return html.replace(/<img\b(?![^>]*\bloading=)/g, '<img loading="lazy" decoding="async"');
 }
 
-export function LiveClone({ html, theme, frame = true }: LiveCloneProps) {
+const NONE: ReadonlyArray<string> = [];
+
+export function LiveClone({ html, theme, frame = true, hidden = NONE }: LiveCloneProps) {
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
 
@@ -58,6 +66,16 @@ export function LiveClone({ html, theme, frame = true }: LiveCloneProps) {
     const el = body.current;
     if (el) applyThemeToTree(el, theme);
   }, [html, theme]);
+
+  /* the step's hidden blocks; a clone that never hid one never walks its blocks */
+  const hiddenKey = hidden.join(' ');
+  const hid = useRef(false);
+  useLayoutEffect(() => {
+    const el = body.current;
+    if (!el || (hiddenKey === '' && !hid.current)) return;
+    hid.current = hiddenKey !== '';
+    applyHidden(el, hiddenKey === '' ? NONE : hiddenKey.split(' '));
+  }, [html, hiddenKey]);
 
   return (
     <div ref={root} className="ts-sheet sheet is-clone" data-theme={theme} aria-hidden="true">

@@ -374,11 +374,8 @@ export function Slideshow({
   endedRef.current = ended;
 
   /* Reduce motion turns effects into cuts; a change builds the clock again at the same step */
-  const [reduced, setReduced] = useState(false);
-  useMountEffect(() => {
-    setReduced(motionReduced());
-    return onMotionReducedChange(() => setReduced(motionReduced()));
-  });
+  const [reduced, setReduced] = useState(motionReduced);
+  useMountEffect(() => onMotionReducedChange(() => setReduced(motionReduced())));
 
   /* the timed advance leaves the slide as the next key does */
   const advance = useRef(() => step(1));
@@ -416,7 +413,10 @@ export function Slideshow({
     });
     clock.current = made;
     return () => {
-      made.dispose();
+      /* a body leaving the stage keeps its last frame for its fade out; one that stays (the show
+         ended, a new render) returns to the authored state */
+      if (body.classList.contains('is-leaving')) made.freeze();
+      else made.dispose();
       if (clock.current === made) clock.current = null;
     };
   }, [currentId, currentHtml, currentMotion, reduced]);

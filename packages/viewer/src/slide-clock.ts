@@ -47,7 +47,13 @@ export type SlideClock = {
   seek: (ms: number) => void;
   pause: () => void;
   resume: () => void;
+  /** stops the clock and returns the slide body to its authored state */
   dispose: () => void;
+  /**
+   * stops the clock and keeps the frame drawn: for a body that is leaving the stage (its fade out),
+   * so an exited block does not show again for the length of the fade
+   */
+  freeze: () => void;
 };
 
 /** One Animation with the segment that plays it. */
@@ -503,6 +509,13 @@ export function createSlideClock(
     },
     pause,
     resume,
+    freeze: () => {
+      if (disposed) return;
+      disposed = true;
+      clearTimers();
+      doc.removeEventListener('visibilitychange', onVisibility);
+      for (const run of runs) run.animation.pause();
+    },
     dispose: () => {
       if (disposed) return;
       disposed = true;

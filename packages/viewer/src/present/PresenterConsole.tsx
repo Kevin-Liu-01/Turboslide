@@ -388,17 +388,6 @@ export function PresenterConsole({
                     ▾
                   </span>
                 </button>
-                {steps > 0 ? (
-                  <span
-                    className="ts-presenter-steps"
-                    data-control="presenter.step"
-                    data-step={stepNow}
-                    data-steps={steps}
-                    role="status"
-                  >
-                    {PRESENT_TEXT.stepOf(stepNow, steps)}
-                  </span>
-                ) : null}
                 {listOpen ? (
                   <SlideList
                     id="ts-presenter-list"
@@ -414,6 +403,17 @@ export function PresenterConsole({
                   />
                 ) : null}
               </div>
+              {steps > 0 ? (
+                <span
+                  className="ts-presenter-steps"
+                  data-control="presenter.step"
+                  data-step={stepNow}
+                  data-steps={steps}
+                  role="status"
+                >
+                  {PRESENT_TEXT.stepOf(stepNow, steps)}
+                </span>
+              ) : null}
             </div>
             <button
               type="button"

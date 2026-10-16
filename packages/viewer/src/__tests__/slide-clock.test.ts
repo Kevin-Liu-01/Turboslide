@@ -250,6 +250,15 @@ describe('createSlideClock', () => {
     expect(listeners.size).toBe(0);
   });
 
+  it('freezes a leaving body on its last frame instead of the authored state', () => {
+    const { clock, blocks, listeners } = create(threeClicks);
+    clock.next();
+    clock.freeze();
+    for (const animation of runsOf(blocks[0] as FakeElement))
+      expect(animation.playState).toBe('paused');
+    expect(listeners.size).toBe(0);
+  });
+
   it('skips an effect whose block is gone', () => {
     const { clock } = create({
       effects: [...threeClicks.effects, effect('fx-4', 'gone', 'click')],

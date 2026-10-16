@@ -1650,6 +1650,8 @@ const SITE_LANDING = [
   'home.page.layout',
   'home.title.one-line',
   'home.title.stacks',
+  /* the polish step's row of the arcs' presses, beside the title's rows (2026-10-15) */
+  'home.title.press',
   'home.hero.poster-first',
   'home.budget.first-script',
 ];

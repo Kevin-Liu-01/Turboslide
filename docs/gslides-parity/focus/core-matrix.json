@@ -10400,25 +10400,34 @@
     {
       "id": "home.title.one-line",
       "feature": "decks",
-      "interaction": "The h1 reads \"Presentations for people and agents\"; at 1440 in both appearances it is one line inside the 1280 px column with both stacks; at 390 it is two or three lines",
+      "interaction": "The h1 reads and is named \"Presentations for people and agents\"; at 1440 in both appearances it is one line inside the 1280 px column, with its two arcs inside the column and \"people\" and \"and\" one word space apart (the arcs take no width in the line); at 390 it is three lines, \"Presentations for\", \"people\" and \"and agents\"",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "docs/SITE.md B, D8 (72 px so the line and its two stacks fit the 1280 px column)",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
+      "evidence": "docs/SITE.md B, D8 (72 px so the line fits the 1280 px column); Kevin's note of 2026-10-15 on the stacks",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production"
     },
     {
       "id": "home.title.stacks",
       "feature": "decks",
-      "interaction": "Each stack sits within 12 px after its word, never above its line and in the upper three quarters of it, over no other line's text; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are images found by role and name, and the tooltip names an agent on hover and on focus",
+      "interaction": "Each arc starts at its word's top right corner and rises from it; at 1440 and 390 in both appearances no avatar covers a letter of the h1, reaches under the bar or leaves the screen; avatars are 36 px or more at 1440 and 24 px or more at 390, each in a solid ring; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are buttons found by role and name",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "docs/SITE.md B; Kevin's request of 2026-10-14 (avatars at the top right of people, the four agents beside agents)",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
+      "evidence": "docs/SITE.md B; Kevin's request of 2026-10-14 (avatars at the top right of people, the four agents beside agents) and his note of 2026-10-15 (\"make them look better coooolrr in an arc and make them interactable\")",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production"
+    },
+    {
+      "id": "home.title.press",
+      "feature": "decks",
+      "interaction": "At 1440 a pointer over the people arc fans it open; each arc is one tab stop whose arrow keys, Home and End move the focus along it, and each avatar is described by what pressing it does; in the live editor, Enter on Codex makes a write within 4 s, a click on Argon 905 brings that person into the room's roster, and a click on OpenClaw brings it in with a comment on the slide; each guest leaves within 30 s",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "docs/SITE.md B and section 5 (the press, the guests); Kevin's note of 2026-10-15 (\"make them interactable\")",
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the polish step, 2026-10-15: the arcs' presses reach the live editor of the hero; not yet read on production"
     },
     {
       "id": "home.hero.poster-first",
       "feature": "decks",
-      "interaction": "The editor's box is 16:10 above 720 px and at most 560 px tall at 390; the poster of the page's appearance and width is drawn in it and is the one poster fetched; the box keeps its size",
+      "interaction": "The editor's box is 2:1 above 720 px, so at 1440 by 900 the stage's whole slide is above the fold, and at most 560 px tall at 390; the poster of the page's appearance and width is drawn in it and is the one poster fetched; the box keeps its size",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md A.3; the judge's reading of the prototype (the caption under the fold at 1440)",

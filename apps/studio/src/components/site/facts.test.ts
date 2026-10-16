@@ -2,13 +2,16 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+import { MATERIAL_IDS } from '@turboslide/materials/catalog';
 import { ACTIONS } from '@turboslide/schema/actions';
+import { THEME_IDS } from '@turboslide/schema/brand';
+import { LAYOUT_IDS } from '@turboslide/schema/deck';
 
 import { AGENTS_SCREEN } from './copy';
 import { SITE_FACTS } from './facts';
 
-// The landing's counts (docs/SITE.md A.1): every number of facts.ts recomputed from the action
-// table and the generated contracts, and the names of slide.new on each transport read from the
+// The site's counts (docs/SITE.md A.1): every number of facts.ts recomputed from the action
+// table, the layout and theme ids, the material catalog and the generated contracts, and the names of slide.new on each transport read from the
 // generated files, so the page never states a count or a name the tree does not have.
 
 const root = new URL('../../../../../', import.meta.url);
@@ -26,6 +29,9 @@ describe('the landing’s facts', () => {
       mcp: on('mcp'),
       http: on('http'),
       page: on('window'),
+      layouts: LAYOUT_IDS.length,
+      themes: THEME_IDS.length,
+      materials: MATERIAL_IDS.length,
     });
   });
 

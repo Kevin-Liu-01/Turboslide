@@ -68,8 +68,11 @@ const STATIC_FILES = [
  * and named by content under /assets.
  */
 const STATIC_FOLDERS = ['brand'];
-/** SPEC-4 0.43: /home is prerendered; the start plugin writes either shape. */
-const PRERENDERED = [{ route: '/home', files: ['home/index.html', 'home.html'] }];
+/** SPEC-4 0.43: /home and the site pages are prerendered; the start plugin writes either shape. */
+const PRERENDERED = ['home', 'features', 'faq', 'about'].map((page) => ({
+  route: `/${page}`,
+  files: [`${page}/index.html`, `${page}.html`],
+}));
 /** Vercel's per function size cap (docs/hosting.md section 6); the 200 MB gate waits for round five (SPEC-4 0.35). */
 const FUNCTION_CAP_BYTES = 250 * 1024 * 1024;
 

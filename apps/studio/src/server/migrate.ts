@@ -3,10 +3,10 @@
 // deployment runs on (`exportBlobClient`) and the private documents store of layout v2
 // (`TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, blob-vercel.ts
 // `DOCUMENTS_TOKEN_VARIABLES`; `TURBOSLIDE_BLOB_PRIVATE_DIR` opens a folder as the
-// private store for a rehearsal on a checkout). One step per call, resumable from the cursor
-// `meta.json` keeps (packages/store/src/migrate.ts). The route that runs it is the admin's
-// bearer through B4's dispatcher (`registerMigrateStorage`, b2.md request); nothing here checks
-// the caller.
+// private store for a rehearsal on a checkout). One call of a step at a time, inside its budget
+// (packages/store/src/migrate.ts; docs/hosting.md section 10). The route that runs it is the
+// admin's bearer through B4's dispatcher (`registerMigrateStorage`, b2.md request); nothing here
+// checks the caller.
 import type { Dispatcher } from '@turboslide/agent/dispatch';
 import { diskBlobClient } from '@turboslide/store/blob-disk';
 import type { BlobClient } from '@turboslide/store/blob-store';
@@ -17,7 +17,7 @@ import {
 } from '@turboslide/store/blob-vercel';
 import { MIGRATION_STEPS, runMigrationStep } from '@turboslide/store/hosted';
 import type { MigrationClients, MigrationResult, MigrationStep } from '@turboslide/store/hosted';
-import { hasBlobToken } from '@turboslide/store/select';
+import { hasBlobToken, sharesPublicStore } from '@turboslide/store/select';
 
 import { exportBlobClient } from './root';
 
@@ -32,7 +32,7 @@ export function documentsBlobClient(
   if (documents !== undefined) return documents;
   const dir = env[DOCUMENTS_DIR_VARIABLE];
   if (dir !== undefined && dir !== '') {
-    documents = diskBlobClient(dir);
+    documents = diskBlobClient(dir, { hidden: true });
     return documents;
   }
   if (!hasDocumentsToken(env)) {
@@ -59,22 +59,35 @@ export async function migrationClients(
   return { legacy, documents: documentsBlobClient(env) };
 }
 
-export type MigrateStorageInput = { step: MigrationStep; batch?: number };
+export type MigrateStorageInput = {
+  step: MigrationStep;
+  budgetMs?: number;
+  concurrency?: number;
+  backupAt?: string;
+};
 
 export function isMigrationStep(value: unknown): value is MigrationStep {
   return typeof value === 'string' && (MIGRATION_STEPS as readonly string[]).includes(value);
 }
 
-/** One step from the cursor; the action's output. */
-export async function runMigrateStorage(input: MigrateStorageInput): Promise<MigrationResult> {
+/**
+ * One call of a step; the action's output. Whether the deployment shares the public store with
+ * production (a preview, or anything but production that holds the public token) is read from its
+ * environment, never from the input.
+ */
+export async function runMigrateStorage(
+  input: MigrateStorageInput,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): Promise<MigrationResult> {
   if (!isMigrationStep(input.step))
     throw new TypeError(`step must be one of ${MIGRATION_STEPS.join(', ')}`);
-  const clients = await migrationClients();
-  return runMigrationStep(
-    clients,
-    input.step,
-    input.batch === undefined ? {} : { batch: input.batch },
-  );
+  const { budgetMs, concurrency, backupAt } = input;
+  return runMigrationStep(await migrationClients(env), input.step, {
+    ...(budgetMs === undefined ? {} : { budgetMs }),
+    ...(concurrency === undefined ? {} : { concurrency }),
+    ...(backupAt === undefined ? {} : { backupAt }),
+    sharedPublicStore: sharesPublicStore(env),
+  });
 }
 
 /** Registers `admin.migrateStorage` on a dispatcher whose caller was checked as the admin. */

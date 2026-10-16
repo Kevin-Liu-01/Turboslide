@@ -12,14 +12,21 @@ import { runDeckAction } from '../dispatch.ts';
 import { UsageError } from '../exit.ts';
 import { deckIdArg, whoFlag } from './share.ts';
 
+/** The budget of one migration call the CLI sends (HR-K1#4b), in seconds. */
+export const DEFAULT_MIGRATION_BUDGET_S = 240;
+
 export const ADMIN_USAGE = `usage: turboslide admin <flag|assign-owner|bootstrap|migrate-storage|mail|avatar-sweep> ...
   admin flag <name> [on|off]        read or flip a kill switch (admin.flag); names: ${FLAG_NAMES.join(', ')}
   admin assign-owner <id> --email <a@x>|--principal <id>
                                     set a deck's owner (admin.assignOwner)
   admin bootstrap --to <url> --email <a@x>
                                     the static bearer gives an email the admin role and mints the first key (admin.bootstrap)
-  admin migrate-storage <plan|copy|verify|rekey|cutover|delete|rollback> --to <url> [--batch <n>]
-                                    one step of the storage layout v2 migration (admin.migrateStorage)
+  admin migrate-storage <plan|freeze|copy|verify|switch|unfreeze|rekey|rollback|delete> --to <url>
+                       [--budget <s>] [--concurrency <n>] [--i-have-a-backup <iso>]
+                                    one call of a step of the storage layout v2 migration in one
+                                    window (admin.migrateStorage; docs/hosting.md 10): the call
+                                    answers after --budget seconds (120 to 240, 240 by default);
+                                    delete names the time the backup of the private store began
   admin mail --to <url> [--since <iso>] [--limit <n>]
                                     the mail captured under TURBOSLIDE_MAIL=capture (admin.mail.list)
   admin avatar-sweep --to <url> [--dry-run]
@@ -104,25 +111,50 @@ export async function admin(ctx: CommandContext): Promise<number> {
           `admin migrate-storage wants one of ${MIGRATION_STEPS.join(', ')}\n${ADMIN_USAGE}`,
         );
       }
-      const batch = flagString(ctx.args, 'batch');
+      const backupAt = flagString(ctx.args, 'i-have-a-backup');
+      const concurrency = flagString(ctx.args, 'concurrency');
+      const budget = flagNumber(ctx.args, 'budget', DEFAULT_MIGRATION_BUDGET_S);
+      if (!(budget >= 120 && budget <= 240))
+        throw new UsageError('admin migrate-storage wants --budget between 120 and 240 seconds');
       const result = await runDeckAction<{
         step: string;
-        cursor: string | null;
-        processed: number;
-        verified: number;
-        failed: string[];
+        state: string;
+        frozen: boolean;
         done: boolean;
-        dualRead: boolean;
+        processed: number;
+        remaining: number;
+        rows: string[];
+        rowCount: number;
+        settlesAt: string | null;
+        expiresAt: string | null;
+        perSecond: number | null;
+        rekeyAfter: string | null;
+        note: string | null;
       }>(
         ctx,
         'admin.migrateStorage',
-        { step, ...(batch !== undefined ? { batch: flagNumber(ctx.args, 'batch', 50) } : {}) },
+        {
+          step,
+          budgetMs: Math.round(budget * 1000),
+          ...(concurrency === undefined
+            ? {}
+            : { concurrency: flagNumber(ctx.args, 'concurrency', 32) }),
+          ...(backupAt === undefined ? {} : { backupAt }),
+        },
         { hostedOnly: true },
       );
       ctx.out.result(result);
+      const times = [
+        ...(result.settlesAt === null ? [] : [`settles ${result.settlesAt}`]),
+        ...(result.expiresAt === null ? [] : [`frozen until ${result.expiresAt} at most`]),
+        ...(result.perSecond === null ? [] : [`${result.perSecond} a second`]),
+        ...(result.rekeyAfter === null ? [] : [`run rekey again from ${result.rekeyAfter}`]),
+      ];
       ctx.out.human(
-        `${result.step}: ${result.processed} processed, ${result.verified} verified, ${result.failed.length} failed; ${result.done ? 'done' : `cursor ${result.cursor ?? 'start'}`}; dual read ${result.dualRead ? 'on' : 'off'}`,
+        `${result.step}: ${result.state}${result.frozen ? ' frozen' : ''}, ${result.done ? 'done' : 'not done'}; ${result.processed} processed, ${result.remaining} remaining, ${result.rowCount} rows${times.length === 0 ? '' : `; ${times.join(', ')}`}`,
       );
+      if (result.note !== null) ctx.out.human(`  ${result.note}`);
+      for (const line of result.rows) ctx.out.human(`  ${line}`);
       return 0;
     }
     case 'mail': {

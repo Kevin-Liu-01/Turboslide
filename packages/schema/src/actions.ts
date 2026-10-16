@@ -1019,16 +1019,21 @@ export const tokenRecordSchema = z.strictObject({
   lastUsedAt: z.string().nullable(),
 });
 
-/** The storage migration steps (SPEC-3 11.5; `rekey`, hardening K1#4). packages/store migrate.ts holds the same list. */
+/** The storage migration steps (SPEC-3 11.5; hardening K1#4 and HR-K1#4b). packages/store migrate.ts holds the same list. */
 export const MIGRATION_STEPS = [
   'plan',
+  'freeze',
   'copy',
   'verify',
+  'switch',
+  'unfreeze',
   'rekey',
-  'cutover',
-  'delete',
   'rollback',
+  'delete',
 ] as const;
+
+/** Where documents live (HR-K1#4b). packages/store migrate.ts holds the same list. */
+export const STORAGE_STATES = ['v1', 'dual', 'v2'] as const;
 
 const studioUrl = z
   .string()
@@ -5615,25 +5620,65 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'admin.migrateStorage': action({
     id: 'admin.migrateStorage',
     label: 'Migrate storage',
-    doc: 'Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.',
+    doc: 'Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.',
     group: 'admin',
     mutates: true,
     transports: ['cli', 'http'],
     milestone: 'GS3',
     input: z.strictObject({
       step: z.enum(MIGRATION_STEPS),
-      batch: z.number().int().positive().max(1000).optional(),
+      budgetMs: z
+        .number()
+        .int()
+        .min(120_000)
+        .max(240_000)
+        .optional()
+        .describe('How long the call works before it answers; 240 s by default'),
+      concurrency: z
+        .number()
+        .int()
+        .min(1)
+        .max(128)
+        .optional()
+        .describe('copy and rollback: the store requests in flight; 32 by default'),
+      backupAt: z
+        .string()
+        .min(1)
+        .max(64)
+        .optional()
+        .describe(
+          'delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one',
+        ),
     }),
     output: z.strictObject({
       step: z.enum(MIGRATION_STEPS),
-      cursor: z.string().nullable(),
-      processed: z.number().int().nonnegative(),
-      verified: z.number().int().nonnegative(),
-      failed: z.array(z.string()),
+      state: z.enum(STORAGE_STATES).describe("The layout record's state when the call answered"),
+      frozen: z.boolean().describe('Document writes are refused now'),
       done: z.boolean(),
-      dualRead: z.boolean().describe('True while both stores are read'),
+      clean: z.boolean().describe('The call found no row'),
+      processed: z.number().int().nonnegative(),
+      remaining: z.number().int().nonnegative(),
+      rows: z.array(z.string()).describe("The call's rows, the first 200"),
+      rowCount: z.number().int().nonnegative(),
+      planned: z.number().int().nonnegative().nullable(),
+      settlesAt: z.string().nullable(),
+      expiresAt: z.string().nullable(),
+      switchedAt: z.string().nullable(),
+      listMs: z.number().int().nonnegative().nullable(),
+      perSecond: z.number().int().nonnegative().nullable(),
+      retries: z.number().int().nonnegative(),
+      rekeyAfter: z
+        .string()
+        .nullable()
+        .describe('rekey: when a pass must begin to copy the twins written under a replaced key'),
+      note: z.string().nullable(),
     }),
-    cli: { usage: 'turboslide admin migrate-storage <step> --to <to> --batch <batch>' },
+    cli: {
+      // the CLI's --budget is in seconds and fills budgetMs (apps/cli/src/commands/admin.ts)
+      omit: ['budgetMs'],
+      usage:
+        'turboslide admin migrate-storage <step> --to <to> --budget <budget> --concurrency <concurrency> --i-have-a-backup <backupAt>',
+    },
     example: { step: 'plan' },
   }),
   'admin.mail.list': action({

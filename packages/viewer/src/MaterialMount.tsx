@@ -353,8 +353,8 @@ export function MaterialMount({
   }, [html]);
 
   /* reduced motion (5.6): speed 0 on every mount, followed live when the system setting or Tools >
-     Preferences > Reduce motion flips; show mode also follows the person's Play animated patterns
-     Off (live-plan.ts), so both are read as one word that remounts on a change */
+     Preferences > Reduce motion flips; the person's Play animated patterns Off (live-plan.ts) holds
+     the same way, and in show mode mounts nothing */
   const [reduced, setReduced] = useState<boolean>(() => motionReduced());
   const [personHolds, setPersonHolds] = useState<boolean>(
     () => pageLiveSettings('play').preference === 'off',
@@ -368,7 +368,6 @@ export function MaterialMount({
     [],
   );
 
-  const showHolds = mode === 'show' && personHolds;
   const selectedKey = selected === undefined ? 'all' : (selected ?? []).join(' ');
   const lowRes = scale !== undefined && scale < 1;
   /* the error callback and the palette by reference and by value (the header's third paragraph):
@@ -400,7 +399,7 @@ export function MaterialMount({
               engine: paperEngineRuns(),
               area: areaOf(element),
             })),
-            { reduced, preference: showHolds ? 'off' : 'show', play },
+            { reduced, preference: personHolds ? 'off' : 'show', play },
           )
         : planMounts(
             roots.map((element) => ({
@@ -425,7 +424,10 @@ export function MaterialMount({
           if (!alive) return;
           for (const { recipe, host, plan, id } of targets) {
             const own = recipe.speed ?? 1;
-            const playSpeed = reduced || plan === 'still' ? 0 : speed * own;
+            /* Play animated patterns Off holds everywhere for the person (the shader design 3.1):
+               in the editor the selected block still mounts, at speed 0, so a slider or the Still
+               group previews on it */
+            const playSpeed = reduced || personHolds || plan === 'still' ? 0 : speed * own;
             /* a playing mount is paced at `fps` (5.6): Paper mounts at speed 0 and the pacer moves
                its frame, so a Speed preview that starts it later is capped too */
             const paced = plan === 'play' && fps > 0;
@@ -487,7 +489,7 @@ export function MaterialMount({
     reduced,
     mode,
     play,
-    showHolds,
+    personHolds,
   ]);
   return null;
 }

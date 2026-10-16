@@ -1062,7 +1062,8 @@ async function showLayerBuilt(p: Page, _id: string): Promise<boolean> {
 async function setDeckPlayback(p: Page, play: 'play' | 'hold'): Promise<void> {
   await menuPath(p, 'slide', 'slide.playback');
   await expect(ctl(p, 'dialog.playback')).toBeVisible({ timeout: 8000 });
-  await ctl(p, `dialog.playback.${play}`).check();
+  /* the radio's input sits under its drawn dot, so the check is forced */
+  await ctl(p, `dialog.playback.${play}`).check({ force: true });
   await ctl(p, 'dialog.playback.apply').click();
   await expect(ctl(p, 'dialog.playback')).toHaveCount(0, { timeout: 8000 });
 }

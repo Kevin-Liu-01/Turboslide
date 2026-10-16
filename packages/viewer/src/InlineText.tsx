@@ -41,6 +41,7 @@ import {
 import type { Run, RunMarks, SlideLinkKeyword, Text as Markup } from '@turboslide/schema/text';
 
 import { bracketOf } from './keys';
+import { NOT_EXIT_COPY } from './reduce-motion';
 import {
   addressRangeAt,
   colorFromCss,
@@ -692,8 +693,16 @@ function isTransientTarget(target: EventTarget | null): boolean {
 /** The menus among the transient surfaces: their rows keep the focus for the keyboard's walk, so a row that is a button parks without the refocus. */
 const MENU_SELECTOR = '[role="menu"], [role="menubar"], .ts-context-menu, .ts-menu-root';
 
-/** A chrome plate or menu that is open: while one is, a parked session leaves the focus with it. */
-const OPEN_PLATE_SELECTOR = '.ts-menu, .ts-plate-anchored, .ts-context-menu, .ts-layout-plate';
+/**
+ * A chrome plate or menu that is open: while one is, a parked session leaves the focus with it. A
+ * closed menu's exit copy (packages/chrome/src/Layer.ts) keeps the menu's classes and is not open.
+ */
+const OPEN_PLATE_SELECTOR = `.ts-menu${NOT_EXIT_COPY}, .ts-plate-anchored, .ts-context-menu${NOT_EXIT_COPY}, .ts-layout-plate`;
+
+/** True while a chrome plate or menu is open in the document (`OPEN_PLATE_SELECTOR`). */
+export function chromePlateOpen(root: ParentNode = document): boolean {
+  return root.querySelector(OPEN_PLATE_SELECTOR) !== null;
+}
 
 /** The verdict for the element a blur handed the focus to. */
 export function blurVerdictOf(to: EventTarget | null): BlurVerdict {
@@ -2607,7 +2616,7 @@ export function InlineText({
     const resumeAfterChrome = () => {
       window.setTimeout(() => {
         if (done.current || !parked.current || pressing) return;
-        if (document.querySelector(OPEN_PLATE_SELECTOR) !== null) return;
+        if (chromePlateOpen()) return;
         if (
           document.querySelector(
             '.ts-stagewrap.ts-editor[data-tool], .ts-stagewrap.ts-editor[data-paint]',

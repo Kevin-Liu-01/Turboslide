@@ -327,7 +327,8 @@ export const probeState = (): ShellProbeState => {
     selected: Boolean(document.querySelector('.ts-overlay .ts-select')),
     source: Boolean(document.querySelector('.ts-drawer')),
     twin: Boolean(document.querySelector('.ts-twin')),
-    menu: Boolean(document.querySelector('.ts-menu')),
+    /* a closed menu's exit copy (data-exiting, packages/chrome/src/Layer.ts) is not an open menu */
+    menu: Boolean(document.querySelector('.ts-menu:not([data-exiting])')),
     rpanel: document.querySelector<HTMLElement>('.pt-viewer[data-rpanel]')?.dataset.rpanel ?? null,
   };
 };

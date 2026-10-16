@@ -152,9 +152,10 @@ async function openShare(page: Page): Promise<void> {
     .waitFor({ timeout: 30_000 });
 }
 
-/** Closes whatever dialog is open with Escape. */
+/** Closes whatever dialog is open with Escape (a closed one's fading exit copy is not open). */
 async function closeDialogs(page: Page): Promise<void> {
-  for (let i = 0; i < 3 && (await page.locator('.ts-dialog').count()) > 0; i += 1) {
+  const open = page.locator('.ts-dialog:not([data-exiting] *)');
+  for (let i = 0; i < 3 && (await open.count()) > 0; i += 1) {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(250);
   }

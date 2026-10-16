@@ -198,6 +198,11 @@
   }
 }
 
+/* the exit copy of a menu that closed (Layer.ts): the plate fades over the leave duration */
+.ts-menu[data-exiting] {
+  animation: pt-fade-out var(--pt-dur-leave) var(--pt-ease-in) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ts-menu,
   .ts-dropdown-list {

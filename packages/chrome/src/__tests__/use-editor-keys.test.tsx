@@ -202,6 +202,22 @@ describe('useEditorKeys and the indent chords', () => {
     expect(escape).toHaveBeenCalledTimes(1);
   });
 
+  it("runs the shell's Escape while only a closed dialog's exit copy is in the document (Layer.ts, PLAN.md wave 2 item 7)", () => {
+    const escape = vi.fn(() => true);
+    const h = { ...handlers(), escape };
+    render(<Host context={withText} handlers={h} />);
+    const copy = document.createElement('div');
+    copy.className = 'ts-dialog-scrim';
+    copy.setAttribute('data-exiting', '');
+    document.body.appendChild(copy);
+    try {
+      fireEvent.keyDown(document.body, { key: 'Escape' });
+      expect(escape).toHaveBeenCalledTimes(1);
+    } finally {
+      copy.remove();
+    }
+  });
+
   it('leaves the other chords to a chrome field and runs a menu chord from the canvas', () => {
     const runItem = vi.fn();
     const view = render(<Host context={withText} handlers={handlers(runItem)} />);

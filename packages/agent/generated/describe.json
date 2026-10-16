@@ -119,6 +119,13 @@
         "shader.frame",
         "shader.capture",
         "shader.render",
+        "motion.list",
+        "motion.add",
+        "motion.set",
+        "motion.remove",
+        "motion.move",
+        "slide.transition",
+        "slide.advance",
         "presence.list",
         "presence.follow",
         "presence.unfollow",
@@ -338,6 +345,13 @@
     "shader.frame",
     "shader.capture",
     "shader.render",
+    "motion.list",
+    "motion.add",
+    "motion.set",
+    "motion.remove",
+    "motion.move",
+    "slide.transition",
+    "slide.advance",
     "presence.list",
     "presence.follow",
     "presence.unfollow",
@@ -1225,6 +1239,55 @@
       "mutates": false,
       "milestone": "P1",
       "group": "render"
+    },
+    "motion.list": {
+      "label": "List animations",
+      "doc": "A slide's effects in play order, its transition and timed advance as they resolve (the slide's, else the deck's), and the rehearsal schedule: each effect's step, start and end in ms since the slide appeared, with every click at the end of the previous step; the step count and the length. An effect whose block is gone is listed under dangling and skipped by the schedule.",
+      "mutates": false,
+      "milestone": "P1",
+      "group": "slide"
+    },
+    "motion.add": {
+      "label": "Add animation",
+      "doc": "Adds one effect to a slide's block and answers its id: an enter, emphasis or exit effect with a preset (fade, rise-in, slide-in, pop-in, wipe, draw, push-in, float, pulse, type-on, word-rise, line-reveal, glyph-stagger, tracking-in), keyframes on CSS properties or a motion path, starting on a click (the default), with the previous effect or after it, with a delay and a duration (500 ms by default). Refuses a block that is not on the slide and a text preset or split on a block without text.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "slide"
+    },
+    "motion.set": {
+      "label": "Change animation",
+      "doc": "Writes one field inside one effect by JSON pointer (/start, /durationMs, /delayMs, /motion/preset, /motion/keyframes/0/style/opacity, ...); an absent value removes the field. The effect must stay valid and its id cannot change.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "slide"
+    },
+    "motion.remove": {
+      "label": "Remove animation",
+      "doc": "Removes one effect from a slide; the block stays where it is.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "slide"
+    },
+    "motion.move": {
+      "label": "Reorder animation",
+      "doc": "Moves one effect to a place in the slide’s play order, which reorders the steps; an index past the end puts it last.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "slide"
+    },
+    "slide.transition": {
+      "label": "Transition",
+      "doc": "Sets how slides enter in the slideshow and the shared view (none, crossfade, slide-fade, rise-fade, scale-fade, zoom-through, blur-swipe, flip-fade, spring-pop, rotate-fade, drift-fade), 0 to 3,000 ms, in one write: on the named slides, or as the deck's transition when no slide ids are given. null removes it; a slide without one takes the deck's, and a deck without one keeps the 120 ms fade and rise.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "slide"
+    },
+    "slide.advance": {
+      "label": "Advance",
+      "doc": "Sets the timed advance in one write: the slideshow moves to the next slide afterMs after the last step of the slide ends, on the named slides or as the deck’s default when no slide ids are given. null removes it, and a click advances.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "slide"
     },
     "presence.list": {
       "label": "Collaborators",

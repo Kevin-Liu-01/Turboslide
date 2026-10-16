@@ -125,6 +125,13 @@
       "text.replaceAll",
       "diagram.insert",
       "slide.lease",
+      "motion.list",
+      "motion.add",
+      "motion.set",
+      "motion.remove",
+      "motion.move",
+      "slide.transition",
+      "slide.advance",
       "slide.setBackgroundPicture",
       "slide.setBackgroundMaterial"
     ],
@@ -299,7 +306,7 @@
       "account.forget"
     ]
   },
-  "actionCount": 194,
+  "actionCount": 201,
   "resources": [
     {
       "uri": "deck://manifest",

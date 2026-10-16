@@ -220,6 +220,21 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'password',
   'on',
   'dither',
+  // the slide clock (HTML-SLIDES-DESIGN 2.4; commands/motion.ts): motion add's presets, keyframes,
+  // path and timing, and slide transition's length
+  'enter',
+  'emphasis',
+  'exit',
+  'keyframes',
+  'path',
+  'delay',
+  'ms',
+  'easing',
+  'repeat',
+  'split',
+  'stagger',
+  'amount',
+  'index',
 ]);
 
 /**

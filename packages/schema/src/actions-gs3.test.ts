@@ -165,9 +165,9 @@ const GROUP_COUNTS: Partial<Record<ActionGroup, number>> = {
 };
 
 describe('the round three action table (SPEC-3 12)', () => {
-  it('grows the table from 105 to 169, then to 183 in the product round (four brand, seven template and three assist rows), three logo rows in the features round, six shader rows in its ship two, the picture sweep in the people round and theme.list in the design round, counted once from ACTION_IDS', () => {
-    expect(ACTION_IDS).toHaveLength(194);
-    expect(new Set(ACTION_IDS).size).toBe(194);
+  it('grows the table from 105 to 169, then to 183 in the product round (four brand, seven template and three assist rows), three logo rows in the features round, six shader rows in its ship two, the picture sweep in the people round, theme.list in the design round and the seven slide clock rows of HTML slides wave A, counted once from ACTION_IDS', () => {
+    expect(ACTION_IDS).toHaveLength(201);
+    expect(new Set(ACTION_IDS).size).toBe(201);
     expect(ACTION_IDS).toContain('theme.list');
     expect([...GS3_ACTION_IDS]).toEqual(IDS);
     expect(GS3_ACTION_IDS).toHaveLength(64);

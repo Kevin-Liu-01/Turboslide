@@ -15333,6 +15333,967 @@
         }
       }
     },
+    "/api/actions/motion.list": {
+      "post": {
+        "operationId": "motion.list",
+        "summary": "List animations",
+        "description": "A slide's effects in play order, its transition and timed advance as they resolve (the slide's, else the deck's), and the rehearsal schedule: each effect's step, start and end in ms since the slide appeared, with every click at the end of the previous step; the step count and the length. An effect whose block is gone is listed under dangling and skipped by the schedule.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": false,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotionListInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MotionListOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/motion.add": {
+      "post": {
+        "operationId": "motion.add",
+        "summary": "Add animation",
+        "description": "Adds one effect to a slide's block and answers its id: an enter, emphasis or exit effect with a preset (fade, rise-in, slide-in, pop-in, wipe, draw, push-in, float, pulse, type-on, word-rise, line-reveal, glyph-stagger, tracking-in), keyframes on CSS properties or a motion path, starting on a click (the default), with the previous effect or after it, with a delay and a duration (500 ms by default). Refuses a block that is not on the slide and a text preset or split on a block without text.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotionAddInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MotionAddOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/motion.set": {
+      "post": {
+        "operationId": "motion.set",
+        "summary": "Change animation",
+        "description": "Writes one field inside one effect by JSON pointer (/start, /durationMs, /delayMs, /motion/preset, /motion/keyframes/0/style/opacity, ...); an absent value removes the field. The effect must stay valid and its id cannot change.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotionSetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MotionSetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/motion.remove": {
+      "post": {
+        "operationId": "motion.remove",
+        "summary": "Remove animation",
+        "description": "Removes one effect from a slide; the block stays where it is.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotionRemoveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MotionSetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/motion.move": {
+      "post": {
+        "operationId": "motion.move",
+        "summary": "Reorder animation",
+        "description": "Moves one effect to a place in the slide’s play order, which reorders the steps; an index past the end puts it last.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotionMoveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MotionSetOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/slide.transition": {
+      "post": {
+        "operationId": "slide.transition",
+        "summary": "Transition",
+        "description": "Sets how slides enter in the slideshow and the shared view (none, crossfade, slide-fade, rise-fade, scale-fade, zoom-through, blur-swipe, flip-fade, spring-pop, rotate-fade, drift-fade), 0 to 3,000 ms, in one write: on the named slides, or as the deck's transition when no slide ids are given. null removes it; a slide without one takes the deck's, and a deck without one keeps the 120 ms fade and rise.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlideTransitionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideTransitionOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/slide.advance": {
+      "post": {
+        "operationId": "slide.advance",
+        "summary": "Advance",
+        "description": "Sets the timed advance in one write: the slideshow moves to the next slide afterMs after the last step of the slide ends, on the named slides or as the deck’s default when no slide ids are given. null removes it, and a click advances.",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "P1",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlideAdvanceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideAdvanceOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in P1 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/presence.list": {
       "post": {
         "operationId": "presence.list",
@@ -23864,6 +24825,78 @@
                   "color"
                 ],
                 "additionalProperties": false
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The transition every slide without its own takes; slide.transition without slide ids writes it."
+                },
+                "description": "The transition every slide without its own takes; slide.transition without slide ids writes it.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The timed advance every slide without its own takes; slide.advance without slide ids writes it."
+                },
+                "description": "The timed advance every slide without its own takes; slide.advance without slide ids writes it.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
               }
             },
             "additionalProperties": false
@@ -24726,6 +25759,366 @@
                 ],
                 "additionalProperties": false
               },
+              "effects": {
+                "title": "Animations",
+                "x-inspector": {
+                  "label": "Animations",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them."
+                },
+                "description": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.",
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "description": "The effect id, unique on the slide"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$",
+                      "description": "The block the effect animates"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ],
+                      "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                    },
+                    "motion": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string",
+                              "enum": [
+                                "fade",
+                                "rise-in",
+                                "slide-in",
+                                "pop-in",
+                                "wipe",
+                                "draw",
+                                "push-in",
+                                "float",
+                                "pulse",
+                                "type-on",
+                                "word-rise",
+                                "line-reveal",
+                                "glyph-stagger",
+                                "tracking-in"
+                              ]
+                            },
+                            "from": {
+                              "description": "The side slide-in and wipe come from",
+                              "type": "string",
+                              "enum": [
+                                "left",
+                                "right",
+                                "top",
+                                "bottom"
+                              ]
+                            },
+                            "amount": {
+                              "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 2000
+                            }
+                          },
+                          "required": [
+                            "preset"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "keyframes": {
+                              "minItems": 2,
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "0 to 1 across the effect"
+                                  },
+                                  "style": {
+                                    "type": "object",
+                                    "propertyNames": {
+                                      "type": "string"
+                                    },
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "CSS property to value, at most 16 properties"
+                                  },
+                                  "easing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "linear",
+                                          "ease-out-expo",
+                                          "ease-in-out",
+                                          "overshoot"
+                                        ]
+                                      },
+                                      {
+                                        "type": "array",
+                                        "prefixItems": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ],
+                                        "items": false,
+                                        "minItems": 4,
+                                        "maxItems": 4
+                                      }
+                                    ],
+                                    "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                                  }
+                                },
+                                "required": [
+                                  "at",
+                                  "style"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Two to 32 keyframes, at rising from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "keyframes"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "maxLength": 4000,
+                              "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                            },
+                            "rotate": {
+                              "description": "Turn the block along the path",
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "path"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "A preset, keyframes, or a motion path"
+                    },
+                    "start": {
+                      "type": "string",
+                      "enum": [
+                        "click",
+                        "with",
+                        "after"
+                      ],
+                      "description": "click, with the previous effect, or after it"
+                    },
+                    "delayMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60000
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60000
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "ease-out-expo",
+                            "ease-in-out",
+                            "overshoot"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ],
+                      "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                    },
+                    "repeat": {
+                      "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "string",
+                          "const": "slide"
+                        }
+                      ]
+                    },
+                    "split": {
+                      "description": "Text blocks only: one animation per line, word or glyph",
+                      "type": "object",
+                      "properties": {
+                        "by": {
+                          "type": "string",
+                          "enum": [
+                            "line",
+                            "word",
+                            "glyph"
+                          ]
+                        },
+                        "staggerMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2000,
+                          "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                        }
+                      },
+                      "required": [
+                        "by",
+                        "staggerMs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "motion",
+                    "start",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent."
+                },
+                "description": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "Moves to the next slide this many milliseconds after the last step; a click advances when absent."
+                },
+                "description": "Moves to the next slide this many milliseconds after the last step; a click advances when absent.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
+              },
               "ext": {
                 "type": "object",
                 "propertyNames": {
@@ -25225,6 +26618,366 @@
                 ],
                 "additionalProperties": false
               },
+              "effects": {
+                "title": "Animations",
+                "x-inspector": {
+                  "label": "Animations",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them."
+                },
+                "description": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.",
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "description": "The effect id, unique on the slide"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$",
+                      "description": "The block the effect animates"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ],
+                      "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                    },
+                    "motion": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string",
+                              "enum": [
+                                "fade",
+                                "rise-in",
+                                "slide-in",
+                                "pop-in",
+                                "wipe",
+                                "draw",
+                                "push-in",
+                                "float",
+                                "pulse",
+                                "type-on",
+                                "word-rise",
+                                "line-reveal",
+                                "glyph-stagger",
+                                "tracking-in"
+                              ]
+                            },
+                            "from": {
+                              "description": "The side slide-in and wipe come from",
+                              "type": "string",
+                              "enum": [
+                                "left",
+                                "right",
+                                "top",
+                                "bottom"
+                              ]
+                            },
+                            "amount": {
+                              "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 2000
+                            }
+                          },
+                          "required": [
+                            "preset"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "keyframes": {
+                              "minItems": 2,
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "0 to 1 across the effect"
+                                  },
+                                  "style": {
+                                    "type": "object",
+                                    "propertyNames": {
+                                      "type": "string"
+                                    },
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "CSS property to value, at most 16 properties"
+                                  },
+                                  "easing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "linear",
+                                          "ease-out-expo",
+                                          "ease-in-out",
+                                          "overshoot"
+                                        ]
+                                      },
+                                      {
+                                        "type": "array",
+                                        "prefixItems": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ],
+                                        "items": false,
+                                        "minItems": 4,
+                                        "maxItems": 4
+                                      }
+                                    ],
+                                    "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                                  }
+                                },
+                                "required": [
+                                  "at",
+                                  "style"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Two to 32 keyframes, at rising from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "keyframes"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "maxLength": 4000,
+                              "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                            },
+                            "rotate": {
+                              "description": "Turn the block along the path",
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "path"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "A preset, keyframes, or a motion path"
+                    },
+                    "start": {
+                      "type": "string",
+                      "enum": [
+                        "click",
+                        "with",
+                        "after"
+                      ],
+                      "description": "click, with the previous effect, or after it"
+                    },
+                    "delayMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60000
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60000
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "ease-out-expo",
+                            "ease-in-out",
+                            "overshoot"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ],
+                      "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                    },
+                    "repeat": {
+                      "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "string",
+                          "const": "slide"
+                        }
+                      ]
+                    },
+                    "split": {
+                      "description": "Text blocks only: one animation per line, word or glyph",
+                      "type": "object",
+                      "properties": {
+                        "by": {
+                          "type": "string",
+                          "enum": [
+                            "line",
+                            "word",
+                            "glyph"
+                          ]
+                        },
+                        "staggerMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2000,
+                          "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                        }
+                      },
+                      "required": [
+                        "by",
+                        "staggerMs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "motion",
+                    "start",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent."
+                },
+                "description": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "Moves to the next slide this many milliseconds after the last step; a click advances when absent."
+                },
+                "description": "Moves to the next slide this many milliseconds after the last step; a click advances when absent.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
+              },
               "ext": {
                 "type": "object",
                 "propertyNames": {
@@ -25717,6 +27470,366 @@
                 ],
                 "additionalProperties": false
               },
+              "effects": {
+                "title": "Animations",
+                "x-inspector": {
+                  "label": "Animations",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them."
+                },
+                "description": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.",
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "description": "The effect id, unique on the slide"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$",
+                      "description": "The block the effect animates"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ],
+                      "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                    },
+                    "motion": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string",
+                              "enum": [
+                                "fade",
+                                "rise-in",
+                                "slide-in",
+                                "pop-in",
+                                "wipe",
+                                "draw",
+                                "push-in",
+                                "float",
+                                "pulse",
+                                "type-on",
+                                "word-rise",
+                                "line-reveal",
+                                "glyph-stagger",
+                                "tracking-in"
+                              ]
+                            },
+                            "from": {
+                              "description": "The side slide-in and wipe come from",
+                              "type": "string",
+                              "enum": [
+                                "left",
+                                "right",
+                                "top",
+                                "bottom"
+                              ]
+                            },
+                            "amount": {
+                              "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 2000
+                            }
+                          },
+                          "required": [
+                            "preset"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "keyframes": {
+                              "minItems": 2,
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "0 to 1 across the effect"
+                                  },
+                                  "style": {
+                                    "type": "object",
+                                    "propertyNames": {
+                                      "type": "string"
+                                    },
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "CSS property to value, at most 16 properties"
+                                  },
+                                  "easing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "linear",
+                                          "ease-out-expo",
+                                          "ease-in-out",
+                                          "overshoot"
+                                        ]
+                                      },
+                                      {
+                                        "type": "array",
+                                        "prefixItems": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ],
+                                        "items": false,
+                                        "minItems": 4,
+                                        "maxItems": 4
+                                      }
+                                    ],
+                                    "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                                  }
+                                },
+                                "required": [
+                                  "at",
+                                  "style"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Two to 32 keyframes, at rising from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "keyframes"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "maxLength": 4000,
+                              "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                            },
+                            "rotate": {
+                              "description": "Turn the block along the path",
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "path"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "A preset, keyframes, or a motion path"
+                    },
+                    "start": {
+                      "type": "string",
+                      "enum": [
+                        "click",
+                        "with",
+                        "after"
+                      ],
+                      "description": "click, with the previous effect, or after it"
+                    },
+                    "delayMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60000
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60000
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "ease-out-expo",
+                            "ease-in-out",
+                            "overshoot"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ],
+                      "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                    },
+                    "repeat": {
+                      "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "string",
+                          "const": "slide"
+                        }
+                      ]
+                    },
+                    "split": {
+                      "description": "Text blocks only: one animation per line, word or glyph",
+                      "type": "object",
+                      "properties": {
+                        "by": {
+                          "type": "string",
+                          "enum": [
+                            "line",
+                            "word",
+                            "glyph"
+                          ]
+                        },
+                        "staggerMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2000,
+                          "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                        }
+                      },
+                      "required": [
+                        "by",
+                        "staggerMs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "motion",
+                    "start",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent."
+                },
+                "description": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "Moves to the next slide this many milliseconds after the last step; a click advances when absent."
+                },
+                "description": "Moves to the next slide this many milliseconds after the last step; a click advances when absent.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
+              },
               "ext": {
                 "type": "object",
                 "propertyNames": {
@@ -26195,6 +28308,366 @@
                 "required": [
                   "kind",
                   "boxes"
+                ],
+                "additionalProperties": false
+              },
+              "effects": {
+                "title": "Animations",
+                "x-inspector": {
+                  "label": "Animations",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them."
+                },
+                "description": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.",
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "description": "The effect id, unique on the slide"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$",
+                      "description": "The block the effect animates"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ],
+                      "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                    },
+                    "motion": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string",
+                              "enum": [
+                                "fade",
+                                "rise-in",
+                                "slide-in",
+                                "pop-in",
+                                "wipe",
+                                "draw",
+                                "push-in",
+                                "float",
+                                "pulse",
+                                "type-on",
+                                "word-rise",
+                                "line-reveal",
+                                "glyph-stagger",
+                                "tracking-in"
+                              ]
+                            },
+                            "from": {
+                              "description": "The side slide-in and wipe come from",
+                              "type": "string",
+                              "enum": [
+                                "left",
+                                "right",
+                                "top",
+                                "bottom"
+                              ]
+                            },
+                            "amount": {
+                              "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 2000
+                            }
+                          },
+                          "required": [
+                            "preset"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "keyframes": {
+                              "minItems": 2,
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "0 to 1 across the effect"
+                                  },
+                                  "style": {
+                                    "type": "object",
+                                    "propertyNames": {
+                                      "type": "string"
+                                    },
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "CSS property to value, at most 16 properties"
+                                  },
+                                  "easing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "linear",
+                                          "ease-out-expo",
+                                          "ease-in-out",
+                                          "overshoot"
+                                        ]
+                                      },
+                                      {
+                                        "type": "array",
+                                        "prefixItems": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ],
+                                        "items": false,
+                                        "minItems": 4,
+                                        "maxItems": 4
+                                      }
+                                    ],
+                                    "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                                  }
+                                },
+                                "required": [
+                                  "at",
+                                  "style"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Two to 32 keyframes, at rising from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "keyframes"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "maxLength": 4000,
+                              "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                            },
+                            "rotate": {
+                              "description": "Turn the block along the path",
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "path"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "A preset, keyframes, or a motion path"
+                    },
+                    "start": {
+                      "type": "string",
+                      "enum": [
+                        "click",
+                        "with",
+                        "after"
+                      ],
+                      "description": "click, with the previous effect, or after it"
+                    },
+                    "delayMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60000
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60000
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "ease-out-expo",
+                            "ease-in-out",
+                            "overshoot"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ],
+                      "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                    },
+                    "repeat": {
+                      "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "string",
+                          "const": "slide"
+                        }
+                      ]
+                    },
+                    "split": {
+                      "description": "Text blocks only: one animation per line, word or glyph",
+                      "type": "object",
+                      "properties": {
+                        "by": {
+                          "type": "string",
+                          "enum": [
+                            "line",
+                            "word",
+                            "glyph"
+                          ]
+                        },
+                        "staggerMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2000,
+                          "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                        }
+                      },
+                      "required": [
+                        "by",
+                        "staggerMs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "motion",
+                    "start",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent."
+                },
+                "description": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "Moves to the next slide this many milliseconds after the last step; a click advances when absent."
+                },
+                "description": "Moves to the next slide this many milliseconds after the last step; a click advances when absent.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
                 ],
                 "additionalProperties": false
               },
@@ -26706,6 +29179,366 @@
                 "required": [
                   "kind",
                   "boxes"
+                ],
+                "additionalProperties": false
+              },
+              "effects": {
+                "title": "Animations",
+                "x-inspector": {
+                  "label": "Animations",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them."
+                },
+                "description": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.",
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "description": "The effect id, unique on the slide"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$",
+                      "description": "The block the effect animates"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ],
+                      "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                    },
+                    "motion": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string",
+                              "enum": [
+                                "fade",
+                                "rise-in",
+                                "slide-in",
+                                "pop-in",
+                                "wipe",
+                                "draw",
+                                "push-in",
+                                "float",
+                                "pulse",
+                                "type-on",
+                                "word-rise",
+                                "line-reveal",
+                                "glyph-stagger",
+                                "tracking-in"
+                              ]
+                            },
+                            "from": {
+                              "description": "The side slide-in and wipe come from",
+                              "type": "string",
+                              "enum": [
+                                "left",
+                                "right",
+                                "top",
+                                "bottom"
+                              ]
+                            },
+                            "amount": {
+                              "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 2000
+                            }
+                          },
+                          "required": [
+                            "preset"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "keyframes": {
+                              "minItems": 2,
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "0 to 1 across the effect"
+                                  },
+                                  "style": {
+                                    "type": "object",
+                                    "propertyNames": {
+                                      "type": "string"
+                                    },
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "CSS property to value, at most 16 properties"
+                                  },
+                                  "easing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "linear",
+                                          "ease-out-expo",
+                                          "ease-in-out",
+                                          "overshoot"
+                                        ]
+                                      },
+                                      {
+                                        "type": "array",
+                                        "prefixItems": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ],
+                                        "items": false,
+                                        "minItems": 4,
+                                        "maxItems": 4
+                                      }
+                                    ],
+                                    "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                                  }
+                                },
+                                "required": [
+                                  "at",
+                                  "style"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Two to 32 keyframes, at rising from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "keyframes"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "maxLength": 4000,
+                              "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                            },
+                            "rotate": {
+                              "description": "Turn the block along the path",
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "path"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "A preset, keyframes, or a motion path"
+                    },
+                    "start": {
+                      "type": "string",
+                      "enum": [
+                        "click",
+                        "with",
+                        "after"
+                      ],
+                      "description": "click, with the previous effect, or after it"
+                    },
+                    "delayMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60000
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60000
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "ease-out-expo",
+                            "ease-in-out",
+                            "overshoot"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ],
+                      "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                    },
+                    "repeat": {
+                      "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "string",
+                          "const": "slide"
+                        }
+                      ]
+                    },
+                    "split": {
+                      "description": "Text blocks only: one animation per line, word or glyph",
+                      "type": "object",
+                      "properties": {
+                        "by": {
+                          "type": "string",
+                          "enum": [
+                            "line",
+                            "word",
+                            "glyph"
+                          ]
+                        },
+                        "staggerMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2000,
+                          "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                        }
+                      },
+                      "required": [
+                        "by",
+                        "staggerMs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "motion",
+                    "start",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent."
+                },
+                "description": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "Moves to the next slide this many milliseconds after the last step; a click advances when absent."
+                },
+                "description": "Moves to the next slide this many milliseconds after the last step; a click advances when absent.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
                 ],
                 "additionalProperties": false
               },
@@ -27848,6 +30681,366 @@
                 "required": [
                   "kind",
                   "boxes"
+                ],
+                "additionalProperties": false
+              },
+              "effects": {
+                "title": "Animations",
+                "x-inspector": {
+                  "label": "Animations",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them."
+                },
+                "description": "The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.",
+                "maxItems": 200,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "description": "The effect id, unique on the slide"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$",
+                      "description": "The block the effect animates"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ],
+                      "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                    },
+                    "motion": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string",
+                              "enum": [
+                                "fade",
+                                "rise-in",
+                                "slide-in",
+                                "pop-in",
+                                "wipe",
+                                "draw",
+                                "push-in",
+                                "float",
+                                "pulse",
+                                "type-on",
+                                "word-rise",
+                                "line-reveal",
+                                "glyph-stagger",
+                                "tracking-in"
+                              ]
+                            },
+                            "from": {
+                              "description": "The side slide-in and wipe come from",
+                              "type": "string",
+                              "enum": [
+                                "left",
+                                "right",
+                                "top",
+                                "bottom"
+                              ]
+                            },
+                            "amount": {
+                              "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 2000
+                            }
+                          },
+                          "required": [
+                            "preset"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "keyframes": {
+                              "minItems": 2,
+                              "maxItems": 32,
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "at": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "0 to 1 across the effect"
+                                  },
+                                  "style": {
+                                    "type": "object",
+                                    "propertyNames": {
+                                      "type": "string"
+                                    },
+                                    "additionalProperties": {
+                                      "type": "string"
+                                    },
+                                    "description": "CSS property to value, at most 16 properties"
+                                  },
+                                  "easing": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string",
+                                        "enum": [
+                                          "linear",
+                                          "ease-out-expo",
+                                          "ease-in-out",
+                                          "overshoot"
+                                        ]
+                                      },
+                                      {
+                                        "type": "array",
+                                        "prefixItems": [
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          },
+                                          {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 1
+                                          },
+                                          {
+                                            "type": "number"
+                                          }
+                                        ],
+                                        "items": false,
+                                        "minItems": 4,
+                                        "maxItems": 4
+                                      }
+                                    ],
+                                    "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                                  }
+                                },
+                                "required": [
+                                  "at",
+                                  "style"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "description": "Two to 32 keyframes, at rising from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "keyframes"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "path": {
+                              "type": "string",
+                              "maxLength": 4000,
+                              "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                            },
+                            "rotate": {
+                              "description": "Turn the block along the path",
+                              "type": "boolean",
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "path"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ],
+                      "description": "A preset, keyframes, or a motion path"
+                    },
+                    "start": {
+                      "type": "string",
+                      "enum": [
+                        "click",
+                        "with",
+                        "after"
+                      ],
+                      "description": "click, with the previous effect, or after it"
+                    },
+                    "delayMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 60000
+                    },
+                    "durationMs": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 60000
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "linear",
+                            "ease-out-expo",
+                            "ease-in-out",
+                            "overshoot"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ],
+                      "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                    },
+                    "repeat": {
+                      "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        {
+                          "type": "string",
+                          "const": "slide"
+                        }
+                      ]
+                    },
+                    "split": {
+                      "description": "Text blocks only: one animation per line, word or glyph",
+                      "type": "object",
+                      "properties": {
+                        "by": {
+                          "type": "string",
+                          "enum": [
+                            "line",
+                            "word",
+                            "glyph"
+                          ]
+                        },
+                        "staggerMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2000,
+                          "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                        }
+                      },
+                      "required": [
+                        "by",
+                        "staggerMs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "motion",
+                    "start",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transition": {
+                "title": "Transition",
+                "x-inspector": {
+                  "label": "Transition",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent."
+                },
+                "description": "How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.",
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              "advance": {
+                "title": "Advance",
+                "x-inspector": {
+                  "label": "Advance",
+                  "control": "json",
+                  "group": "Slide",
+                  "help": "Moves to the next slide this many milliseconds after the last step; a click advances when absent."
+                },
+                "description": "Moves to the next slide this many milliseconds after the last step; a click advances when absent.",
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
                 ],
                 "additionalProperties": false
               },
@@ -61968,6 +65161,1754 @@
         },
         "required": [
           "themes"
+        ],
+        "additionalProperties": false
+      },
+      "MotionListInput": {
+        "$id": "#/components/schemas/MotionListInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "slideId"
+        ],
+        "additionalProperties": false
+      },
+      "MotionListOutput": {
+        "$id": "#/components/schemas/MotionListOutput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                  "description": "The effect id, unique on the slide"
+                },
+                "block": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$",
+                  "description": "The block the effect animates"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "enter",
+                    "emphasis",
+                    "exit"
+                  ],
+                  "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                },
+                "motion": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "preset": {
+                          "type": "string",
+                          "enum": [
+                            "fade",
+                            "rise-in",
+                            "slide-in",
+                            "pop-in",
+                            "wipe",
+                            "draw",
+                            "push-in",
+                            "float",
+                            "pulse",
+                            "type-on",
+                            "word-rise",
+                            "line-reveal",
+                            "glyph-stagger",
+                            "tracking-in"
+                          ]
+                        },
+                        "from": {
+                          "description": "The side slide-in and wipe come from",
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "right",
+                            "top",
+                            "bottom"
+                          ]
+                        },
+                        "amount": {
+                          "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 2000
+                        }
+                      },
+                      "required": [
+                        "preset"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "keyframes": {
+                          "minItems": 2,
+                          "maxItems": 32,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1,
+                                "description": "0 to 1 across the effect"
+                              },
+                              "style": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "CSS property to value, at most 16 properties"
+                              },
+                              "easing": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "linear",
+                                      "ease-out-expo",
+                                      "ease-in-out",
+                                      "overshoot"
+                                    ]
+                                  },
+                                  {
+                                    "type": "array",
+                                    "prefixItems": [
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "items": false,
+                                    "minItems": 4,
+                                    "maxItems": 4
+                                  }
+                                ],
+                                "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "style"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Two to 32 keyframes, at rising from 0 to 1"
+                        }
+                      },
+                      "required": [
+                        "keyframes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 4000,
+                          "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                        },
+                        "rotate": {
+                          "description": "Turn the block along the path",
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "path"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ],
+                  "description": "A preset, keyframes, or a motion path"
+                },
+                "start": {
+                  "type": "string",
+                  "enum": [
+                    "click",
+                    "with",
+                    "after"
+                  ],
+                  "description": "click, with the previous effect, or after it"
+                },
+                "delayMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 60000
+                },
+                "durationMs": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60000
+                },
+                "easing": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "linear",
+                        "ease-out-expo",
+                        "ease-in-out",
+                        "overshoot"
+                      ]
+                    },
+                    {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 4,
+                      "maxItems": 4
+                    }
+                  ],
+                  "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                },
+                "repeat": {
+                  "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100
+                    },
+                    {
+                      "type": "string",
+                      "const": "slide"
+                    }
+                  ]
+                },
+                "split": {
+                  "description": "Text blocks only: one animation per line, word or glyph",
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "type": "string",
+                      "enum": [
+                        "line",
+                        "word",
+                        "glyph"
+                      ]
+                    },
+                    "staggerMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2000,
+                      "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "staggerMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "block",
+                "role",
+                "motion",
+                "start",
+                "durationMs"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "transition": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "advance": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "transitionMs": {
+                "type": "number",
+                "minimum": 0
+              },
+              "steps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "The clicks the slide waits for"
+              },
+              "lengthMs": {
+                "type": "number",
+                "minimum": 0
+              },
+              "segments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "startMs": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "endMs": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "step",
+                    "startMs",
+                    "endMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "effects": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "block": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]*$"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "enter",
+                        "emphasis",
+                        "exit"
+                      ]
+                    },
+                    "step": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "startMs": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "endMs": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "block",
+                    "role",
+                    "step",
+                    "startMs",
+                    "endMs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "transitionMs",
+              "steps",
+              "lengthMs",
+              "segments",
+              "effects"
+            ],
+            "additionalProperties": false
+          },
+          "dangling": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "Effect ids whose block is not on the slide"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "slideId",
+          "effects",
+          "transition",
+          "advance",
+          "schedule",
+          "dangling",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "MotionAddInput": {
+        "$id": "#/components/schemas/MotionAddInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effect": {
+            "type": "object",
+            "properties": {
+              "block": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "description": "The block the effect animates"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "enter",
+                  "emphasis",
+                  "exit"
+                ],
+                "description": "enter (hidden before), emphasis, or exit (hidden after)"
+              },
+              "motion": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "preset": {
+                        "type": "string",
+                        "enum": [
+                          "fade",
+                          "rise-in",
+                          "slide-in",
+                          "pop-in",
+                          "wipe",
+                          "draw",
+                          "push-in",
+                          "float",
+                          "pulse",
+                          "type-on",
+                          "word-rise",
+                          "line-reveal",
+                          "glyph-stagger",
+                          "tracking-in"
+                        ]
+                      },
+                      "from": {
+                        "description": "The side slide-in and wipe come from",
+                        "type": "string",
+                        "enum": [
+                          "left",
+                          "right",
+                          "top",
+                          "bottom"
+                        ]
+                      },
+                      "amount": {
+                        "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 2000
+                      }
+                    },
+                    "required": [
+                      "preset"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "keyframes": {
+                        "minItems": 2,
+                        "maxItems": 32,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 1,
+                              "description": "0 to 1 across the effect"
+                            },
+                            "style": {
+                              "type": "object",
+                              "propertyNames": {
+                                "type": "string"
+                              },
+                              "additionalProperties": {
+                                "type": "string"
+                              },
+                              "description": "CSS property to value, at most 16 properties"
+                            },
+                            "easing": {
+                              "anyOf": [
+                                {
+                                  "type": "string",
+                                  "enum": [
+                                    "linear",
+                                    "ease-out-expo",
+                                    "ease-in-out",
+                                    "overshoot"
+                                  ]
+                                },
+                                {
+                                  "type": "array",
+                                  "prefixItems": [
+                                    {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 1
+                                    },
+                                    {
+                                      "type": "number"
+                                    },
+                                    {
+                                      "type": "number",
+                                      "minimum": 0,
+                                      "maximum": 1
+                                    },
+                                    {
+                                      "type": "number"
+                                    }
+                                  ],
+                                  "items": false,
+                                  "minItems": 4,
+                                  "maxItems": 4
+                                }
+                              ],
+                              "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                            }
+                          },
+                          "required": [
+                            "at",
+                            "style"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "description": "Two to 32 keyframes, at rising from 0 to 1"
+                      }
+                    },
+                    "required": [
+                      "keyframes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "maxLength": 4000,
+                        "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                      },
+                      "rotate": {
+                        "description": "Turn the block along the path",
+                        "type": "boolean",
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": false
+                  }
+                ],
+                "description": "A preset, keyframes, or a motion path"
+              },
+              "start": {
+                "description": "click when absent",
+                "type": "string",
+                "enum": [
+                  "click",
+                  "with",
+                  "after"
+                ]
+              },
+              "delayMs": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 60000
+              },
+              "durationMs": {
+                "description": "500 ms when absent",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 60000
+              },
+              "easing": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "linear",
+                      "ease-out-expo",
+                      "ease-in-out",
+                      "overshoot"
+                    ]
+                  },
+                  {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 4,
+                    "maxItems": 4
+                  }
+                ],
+                "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+              },
+              "repeat": {
+                "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  {
+                    "type": "string",
+                    "const": "slide"
+                  }
+                ]
+              },
+              "split": {
+                "description": "Text blocks only: one animation per line, word or glyph",
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "string",
+                    "enum": [
+                      "line",
+                      "word",
+                      "glyph"
+                    ]
+                  },
+                  "staggerMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2000,
+                    "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                  }
+                },
+                "required": [
+                  "by",
+                  "staggerMs"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "block",
+              "role",
+              "motion"
+            ],
+            "additionalProperties": false
+          },
+          "index": {
+            "description": "Where the effect goes in play order; last when absent",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "effect",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "MotionAddOutput": {
+        "$id": "#/components/schemas/MotionAddOutput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                  "description": "The effect id, unique on the slide"
+                },
+                "block": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$",
+                  "description": "The block the effect animates"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "enter",
+                    "emphasis",
+                    "exit"
+                  ],
+                  "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                },
+                "motion": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "preset": {
+                          "type": "string",
+                          "enum": [
+                            "fade",
+                            "rise-in",
+                            "slide-in",
+                            "pop-in",
+                            "wipe",
+                            "draw",
+                            "push-in",
+                            "float",
+                            "pulse",
+                            "type-on",
+                            "word-rise",
+                            "line-reveal",
+                            "glyph-stagger",
+                            "tracking-in"
+                          ]
+                        },
+                        "from": {
+                          "description": "The side slide-in and wipe come from",
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "right",
+                            "top",
+                            "bottom"
+                          ]
+                        },
+                        "amount": {
+                          "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 2000
+                        }
+                      },
+                      "required": [
+                        "preset"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "keyframes": {
+                          "minItems": 2,
+                          "maxItems": 32,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1,
+                                "description": "0 to 1 across the effect"
+                              },
+                              "style": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "CSS property to value, at most 16 properties"
+                              },
+                              "easing": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "linear",
+                                      "ease-out-expo",
+                                      "ease-in-out",
+                                      "overshoot"
+                                    ]
+                                  },
+                                  {
+                                    "type": "array",
+                                    "prefixItems": [
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "items": false,
+                                    "minItems": 4,
+                                    "maxItems": 4
+                                  }
+                                ],
+                                "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "style"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Two to 32 keyframes, at rising from 0 to 1"
+                        }
+                      },
+                      "required": [
+                        "keyframes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 4000,
+                          "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                        },
+                        "rotate": {
+                          "description": "Turn the block along the path",
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "path"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ],
+                  "description": "A preset, keyframes, or a motion path"
+                },
+                "start": {
+                  "type": "string",
+                  "enum": [
+                    "click",
+                    "with",
+                    "after"
+                  ],
+                  "description": "click, with the previous effect, or after it"
+                },
+                "delayMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 60000
+                },
+                "durationMs": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60000
+                },
+                "easing": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "linear",
+                        "ease-out-expo",
+                        "ease-in-out",
+                        "overshoot"
+                      ]
+                    },
+                    {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 4,
+                      "maxItems": 4
+                    }
+                  ],
+                  "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                },
+                "repeat": {
+                  "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100
+                    },
+                    {
+                      "type": "string",
+                      "const": "slide"
+                    }
+                  ]
+                },
+                "split": {
+                  "description": "Text blocks only: one animation per line, word or glyph",
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "type": "string",
+                      "enum": [
+                        "line",
+                        "word",
+                        "glyph"
+                      ]
+                    },
+                    "staggerMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2000,
+                      "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "staggerMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "block",
+                "role",
+                "motion",
+                "start",
+                "durationMs"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            }
+          },
+          "effectId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "slideId",
+          "effects",
+          "revision",
+          "findings",
+          "effectId"
+        ],
+        "additionalProperties": false
+      },
+      "MotionSetInput": {
+        "$id": "#/components/schemas/MotionSetInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effectId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(\\/[^/]+)+$",
+            "description": "JSON pointer inside the effect, such as /durationMs or /motion/preset"
+          },
+          "value": {
+            "description": "The new value; absent removes the field"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "effectId",
+          "path",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "MotionSetOutput": {
+        "$id": "#/components/schemas/MotionSetOutput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                  "description": "The effect id, unique on the slide"
+                },
+                "block": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$",
+                  "description": "The block the effect animates"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "enter",
+                    "emphasis",
+                    "exit"
+                  ],
+                  "description": "enter (hidden before), emphasis, or exit (hidden after)"
+                },
+                "motion": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "preset": {
+                          "type": "string",
+                          "enum": [
+                            "fade",
+                            "rise-in",
+                            "slide-in",
+                            "pop-in",
+                            "wipe",
+                            "draw",
+                            "push-in",
+                            "float",
+                            "pulse",
+                            "type-on",
+                            "word-rise",
+                            "line-reveal",
+                            "glyph-stagger",
+                            "tracking-in"
+                          ]
+                        },
+                        "from": {
+                          "description": "The side slide-in and wipe come from",
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "right",
+                            "top",
+                            "bottom"
+                          ]
+                        },
+                        "amount": {
+                          "description": "The travel in sheet px, or the scale change in percent for pop-in and push-in",
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 2000
+                        }
+                      },
+                      "required": [
+                        "preset"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "keyframes": {
+                          "minItems": 2,
+                          "maxItems": 32,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1,
+                                "description": "0 to 1 across the effect"
+                              },
+                              "style": {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {
+                                  "type": "string"
+                                },
+                                "description": "CSS property to value, at most 16 properties"
+                              },
+                              "easing": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "linear",
+                                      "ease-out-expo",
+                                      "ease-in-out",
+                                      "overshoot"
+                                    ]
+                                  },
+                                  {
+                                    "type": "array",
+                                    "prefixItems": [
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number",
+                                        "minimum": 0,
+                                        "maximum": 1
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "items": false,
+                                    "minItems": 4,
+                                    "maxItems": 4
+                                  }
+                                ],
+                                "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "style"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "description": "Two to 32 keyframes, at rising from 0 to 1"
+                        }
+                      },
+                      "required": [
+                        "keyframes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 4000,
+                          "description": "SVG path data in sheet px: M, L, C, Q and Z, at most 64 commands"
+                        },
+                        "rotate": {
+                          "description": "Turn the block along the path",
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "path"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ],
+                  "description": "A preset, keyframes, or a motion path"
+                },
+                "start": {
+                  "type": "string",
+                  "enum": [
+                    "click",
+                    "with",
+                    "after"
+                  ],
+                  "description": "click, with the previous effect, or after it"
+                },
+                "delayMs": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 60000
+                },
+                "durationMs": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 60000
+                },
+                "easing": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "linear",
+                        "ease-out-expo",
+                        "ease-in-out",
+                        "overshoot"
+                      ]
+                    },
+                    {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 4,
+                      "maxItems": 4
+                    }
+                  ],
+                  "description": "linear, ease-out-expo, ease-in-out, overshoot, or a cubic Bézier [x1, y1, x2, y2] with x1 and x2 from 0 to 1"
+                },
+                "repeat": {
+                  "description": "Emphasis only: a count, or 'slide' to repeat until the slide leaves",
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 100
+                    },
+                    {
+                      "type": "string",
+                      "const": "slide"
+                    }
+                  ]
+                },
+                "split": {
+                  "description": "Text blocks only: one animation per line, word or glyph",
+                  "type": "object",
+                  "properties": {
+                    "by": {
+                      "type": "string",
+                      "enum": [
+                        "line",
+                        "word",
+                        "glyph"
+                      ]
+                    },
+                    "staggerMs": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2000,
+                      "description": "Milliseconds between units; 0 spreads the starts over half the duration"
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "staggerMs"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "block",
+                "role",
+                "motion",
+                "start",
+                "durationMs"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            }
+          }
+        },
+        "required": [
+          "slideId",
+          "effects",
+          "revision",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "MotionRemoveInput": {
+        "$id": "#/components/schemas/MotionRemoveInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effectId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "effectId",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "MotionMoveInput": {
+        "$id": "#/components/schemas/MotionMoveInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "effectId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The new place in play order, from 0"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "effectId",
+          "index",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "SlideTransitionInput": {
+        "$id": "#/components/schemas/SlideTransitionInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "description": "The slides; the deck’s transition when absent",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "transition": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "transition",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "SlideTransitionOutput": {
+        "$id": "#/components/schemas/SlideTransitionOutput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The slides written; empty for the deck"
+          },
+          "transition": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "crossfade",
+                      "slide-fade",
+                      "rise-fade",
+                      "scale-fade",
+                      "zoom-through",
+                      "blur-swipe",
+                      "flip-fade",
+                      "spring-pop",
+                      "rotate-fade",
+                      "drift-fade"
+                    ]
+                  },
+                  "durationMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3000
+                  },
+                  "from": {
+                    "description": "The side a directional transition comes from",
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "right",
+                      "top",
+                      "bottom"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "durationMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "slideIds",
+          "transition",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "SlideAdvanceInput": {
+        "$id": "#/components/schemas/SlideAdvanceInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "description": "The slides; the deck’s advance when absent",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "advance": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "advance",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "SlideAdvanceOutput": {
+        "$id": "#/components/schemas/SlideAdvanceOutput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The slides written; empty for the deck"
+          },
+          "advance": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "afterMs": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600000,
+                    "description": "Milliseconds after the last step ends"
+                  }
+                },
+                "required": [
+                  "afterMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "slideIds",
+          "advance",
+          "revision"
         ],
         "additionalProperties": false
       },

@@ -86,6 +86,15 @@ import {
 import { positionObjectSchema } from './position.ts';
 import { renderRecordSchema } from './render.ts';
 import { RULE_IDS } from './rules.ts';
+import {
+  advanceSchema,
+  EFFECT_PRESETS,
+  effectSchema,
+  EFFECT_ROLES,
+  newEffectSchema,
+  transitionSchema,
+  TRANSITION_NAMES,
+} from './motion.ts';
 import { DASHES, LINE_ENDS, LINE_KINDS, isClosedShapeKind } from './shapes.ts';
 import {
   BULLET_PRESETS,
@@ -321,6 +330,16 @@ export const ACTION_IDS = [
   // the design round's theme library (docs/DESIGN.md 7.8), before the round three block so
   // GS3_ACTION_IDS keeps its slice
   'theme.list',
+  // HTML slides wave A, the slide clock (HTML-SLIDES-DESIGN 2.4): the effects of a slide, its
+  // transition and its timed advance, before the round three block so GS3_ACTION_IDS keeps its
+  // slice
+  'motion.list',
+  'motion.add',
+  'motion.set',
+  'motion.remove',
+  'motion.move',
+  'slide.transition',
+  'slide.advance',
   // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
   'presence.list',
   'presence.follow',
@@ -1120,6 +1139,38 @@ export type AssistProposeInput = z.infer<typeof assistProposeInputSchema>;
 export type TailorInput = z.infer<typeof tailorInputSchema>;
 
 const A = ALL_TRANSPORTS;
+
+/** The rehearsal schedule motion.list answers (motion.ts `scheduleOf`). */
+const motionScheduleSchema = z.strictObject({
+  transitionMs: z.number().nonnegative(),
+  steps: z.number().int().nonnegative().describe('The clicks the slide waits for'),
+  lengthMs: z.number().nonnegative(),
+  segments: z.array(
+    z.strictObject({
+      step: z.number().int().nonnegative(),
+      startMs: z.number().nonnegative(),
+      endMs: z.number().nonnegative(),
+    }),
+  ),
+  effects: z.array(
+    z.strictObject({
+      id: slugSchema,
+      block: blockIdSchema,
+      role: z.enum(EFFECT_ROLES),
+      step: z.number().int().nonnegative(),
+      startMs: z.number().nonnegative(),
+      endMs: z.number().nonnegative(),
+    }),
+  ),
+});
+
+/** What every effect write answers: the slide's effects after the write. */
+const motionWriteOutput = z.strictObject({
+  slideId: slugSchema,
+  effects: z.array(effectSchema),
+  revision,
+  findings: z.array(findingSchema),
+});
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
 
 /**
@@ -4164,6 +4215,171 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide theme list' },
     mcp: 'deck_list_themes',
     example: {},
+  }),
+  /* HTML slides wave A, the slide clock (HTML-SLIDES-DESIGN 2.4): each write is one slide.set of
+     the slide's whole /effects (or /transition, /advance), so two writers to one slide's effects
+     follow slide.set's last-writer rule and no index pointer goes stale under concurrent edits */
+  'motion.list': action({
+    id: 'motion.list',
+    label: 'List animations',
+    doc: `A slide's effects in play order, its transition and timed advance as they resolve (the slide's, else the deck's), and the rehearsal schedule: each effect's step, start and end in ms since the slide appeared, with every click at the end of the previous step; the step count and the length. An effect whose block is gone is listed under dangling and skipped by the schedule.`,
+    group: 'slide',
+    mutates: false,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({ slideId: slugSchema }),
+    output: z.strictObject({
+      slideId: slugSchema,
+      effects: z.array(effectSchema),
+      transition: transitionSchema.nullable(),
+      advance: advanceSchema.nullable(),
+      schedule: motionScheduleSchema,
+      dangling: z.array(slugSchema).describe('Effect ids whose block is not on the slide'),
+      revision,
+    }),
+    cli: { usage: 'turboslide motion list <slideId>' },
+    mcp: 'deck_list_animations',
+    example: { slideId: 'content-rule' },
+  }),
+  'motion.add': action({
+    id: 'motion.add',
+    label: 'Add animation',
+    doc: `Adds one effect to a slide's block and answers its id: an enter, emphasis or exit effect with a preset (${EFFECT_PRESETS.join(', ')}), keyframes on CSS properties or a motion path, starting on a click (the default), with the previous effect or after it, with a delay and a duration (500 ms by default). Refuses a block that is not on the slide and a text preset or split on a block without text.`,
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slideId: slugSchema,
+      effect: newEffectSchema,
+      index: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe('Where the effect goes in play order; last when absent'),
+      baseRevision,
+    }),
+    output: motionWriteOutput.extend({ effectId: slugSchema }),
+    cli: {
+      usage:
+        'turboslide motion add <slideId> --block <blockId> --enter <preset>|--emphasis <preset>|--exit <preset>|--keyframes <json>|--path <d> [--start click|with|after] [--delay <ms>] [--ms <ms>] [--from left|right|top|bottom] [--split line|word|glyph]',
+    },
+    mcp: 'deck_add_animation',
+    example: {
+      slideId: 'content-rule',
+      effect: { block: 'b1', role: 'enter', motion: { preset: 'rise-in' }, start: 'click' },
+      baseRevision: 412,
+    },
+  }),
+  'motion.set': action({
+    id: 'motion.set',
+    label: 'Change animation',
+    doc: 'Writes one field inside one effect by JSON pointer (/start, /durationMs, /delayMs, /motion/preset, /motion/keyframes/0/style/opacity, ...); an absent value removes the field. The effect must stay valid and its id cannot change.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slideId: slugSchema,
+      effectId: slugSchema,
+      path: z
+        .string()
+        .regex(/^(\/[^/]+)+$/)
+        .describe('JSON pointer inside the effect, such as /durationMs or /motion/preset'),
+      value: z.unknown().optional().describe('The new value; absent removes the field'),
+      baseRevision,
+    }),
+    output: motionWriteOutput,
+    cli: { usage: 'turboslide motion set <slideId> <effectId> <path> <value>' },
+    mcp: 'deck_set_animation',
+    example: {
+      slideId: 'content-rule',
+      effectId: 'fx-1',
+      path: '/durationMs',
+      value: 800,
+      baseRevision: 412,
+    },
+  }),
+  'motion.remove': action({
+    id: 'motion.remove',
+    label: 'Remove animation',
+    doc: 'Removes one effect from a slide; the block stays where it is.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({ slideId: slugSchema, effectId: slugSchema, baseRevision }),
+    output: motionWriteOutput,
+    cli: { usage: 'turboslide motion remove <slideId> <effectId>' },
+    mcp: 'deck_remove_animation',
+    example: { slideId: 'content-rule', effectId: 'fx-1', baseRevision: 412 },
+  }),
+  'motion.move': action({
+    id: 'motion.move',
+    label: 'Reorder animation',
+    doc: 'Moves one effect to a place in the slide’s play order, which reorders the steps; an index past the end puts it last.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slideId: slugSchema,
+      effectId: slugSchema,
+      index: z.number().int().nonnegative().describe('The new place in play order, from 0'),
+      baseRevision,
+    }),
+    output: motionWriteOutput,
+    cli: { usage: 'turboslide motion move <slideId> <effectId> <index>' },
+    mcp: 'deck_move_animation',
+    example: { slideId: 'content-rule', effectId: 'fx-1', index: 0, baseRevision: 412 },
+  }),
+  'slide.transition': action({
+    id: 'slide.transition',
+    label: 'Transition',
+    doc: `Sets how slides enter in the slideshow and the shared view (${TRANSITION_NAMES.join(', ')}), 0 to 3,000 ms, in one write: on the named slides, or as the deck's transition when no slide ids are given. null removes it; a slide without one takes the deck's, and a deck without one keeps the 120 ms fade and rise.`,
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slideIds: slideIdList.optional().describe('The slides; the deck’s transition when absent'),
+      transition: transitionSchema.nullable(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      slideIds: z.array(slugSchema).describe('The slides written; empty for the deck'),
+      transition: transitionSchema.nullable(),
+      revision,
+    }),
+    cli: {
+      usage:
+        'turboslide slide transition <name>|none [--ms <ms>] [--from left|right|top|bottom] [--slides <slideIds>] [--clear]',
+    },
+    mcp: 'deck_set_transition',
+    example: { transition: { name: 'crossfade', durationMs: 400 }, baseRevision: 412 },
+  }),
+  'slide.advance': action({
+    id: 'slide.advance',
+    label: 'Advance',
+    doc: 'Sets the timed advance in one write: the slideshow moves to the next slide afterMs after the last step of the slide ends, on the named slides or as the deck’s default when no slide ids are given. null removes it, and a click advances.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slideIds: slideIdList.optional().describe('The slides; the deck’s advance when absent'),
+      advance: advanceSchema.nullable(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      slideIds: z.array(slugSchema).describe('The slides written; empty for the deck'),
+      advance: advanceSchema.nullable(),
+      revision,
+    }),
+    cli: { usage: 'turboslide slide advance <seconds>|off [--slides <slideIds>]' },
+    mcp: 'deck_set_advance',
+    example: { slideIds: ['content-rule'], advance: { afterMs: 5000 }, baseRevision: 412 },
   }),
   /* the features round's logo picker over thesvg.org (docs/archive/rounds/FEATURES.md 4.2, 4.4, 4.11; audit-logos
      8; B6): a deck less search over the cached index, the insert as a stored asset with its `logo`

@@ -117,7 +117,20 @@ import {
 } from '@turboslide/schema/freeform';
 import type { Author, BlockSlot, Lease, Mutation, Version } from '@turboslide/schema/mutations';
 import { slideFieldOf, slideFieldPath } from '@turboslide/schema/mutations';
-import { getAt, jsonEqual } from '@turboslide/schema/pointer';
+import type { Advance, Effect, NewEffect, Schedule, Transition } from '@turboslide/schema/motion';
+import {
+  effectFromInput,
+  effectSchema,
+  effectSplit,
+  effectsWithCopies,
+  effectsWithoutBlocks,
+  freeEffectId,
+  moveEffect,
+  scheduleOf,
+  slideAdvance,
+  slideTransition,
+} from '@turboslide/schema/motion';
+import { getAt, jsonEqual, setAt } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
 import type { RenderRecord } from '@turboslide/schema/render';
@@ -546,6 +559,7 @@ export async function blockRemove(
   const committed = await commit(deps, ctx, input.baseRevision, [
     ...detach,
     { op: 'block.remove', slideId: input.slideId, blockId: input.blockId },
+    ...effectsAfterRemove(slide, input.blockId),
   ]);
   return slideResult(deps, committed, input.slideId);
 }
@@ -1579,6 +1593,14 @@ export async function blockDuplicate(
       block: copy,
     });
   }
+  // a copy takes the original's effects under new ids, as a copied object keeps its animations
+  if (slide.effects !== undefined && slide.effects.some((effect) => mapping.has(effect.block)))
+    mutations.push({
+      op: 'slide.set',
+      slideId: slide.id,
+      path: '/effects',
+      value: effectsWithCopies(slide.effects, mapping),
+    });
   const committed = await commit(deps, ctx, input.baseRevision, mutations);
   return { ...slideResult(deps, committed, input.slideId), blockIds: ids };
 }
@@ -3931,6 +3953,253 @@ export async function slideSetBackgroundPicture(
 }
 
 // ---------------------------------------------------------------------------------------------
+// The slide clock (HTML-SLIDES-DESIGN 2.4): motion.list, add, set, remove and move, and
+// slide.transition and slide.advance. Every effect write is one slide.set of the slide's whole
+// /effects, so two writers follow slide.set's last-writer rule and no index pointer goes stale;
+// the reducer's validation refuses an effect the schema refuses, with the pointer and a sentence.
+
+export type MotionListInput = { slideId: string };
+export type MotionAddInput = Rev & { slideId: string; effect: NewEffect; index?: number };
+export type MotionSetInput = Rev & {
+  slideId: string;
+  effectId: string;
+  path: string;
+  value?: unknown;
+};
+export type MotionRemoveInput = Rev & { slideId: string; effectId: string };
+export type MotionMoveInput = Rev & { slideId: string; effectId: string; index: number };
+export type SlideTransitionInput = Rev & {
+  slideIds?: string[];
+  transition: Transition | null;
+};
+export type SlideAdvanceInput = Rev & { slideIds?: string[]; advance: Advance | null };
+export type MotionWriteResult = {
+  slideId: string;
+  effects: Effect[];
+  revision: number;
+  findings: Finding[];
+};
+export type MotionListResult = {
+  slideId: string;
+  effects: Effect[];
+  transition: Transition | null;
+  advance: Advance | null;
+  schedule: Schedule;
+  dangling: string[];
+  revision: number;
+};
+
+/** Every block of a slide by id, nested blocks included: what an effect can target. */
+function blocksById(slide: Slide): Map<string, Block> {
+  const out = new Map<string, Block>();
+  walkBlocks(
+    slideBlocks(slide).map((row) => row.block),
+    '',
+    (block) => {
+      out.set(block.id, block);
+    },
+  );
+  return out;
+}
+
+/** The write that takes a removed block's effects with it (its nested blocks' too), or none. */
+function effectsAfterRemove(slide: Slide, blockId: string): Mutation[] {
+  if (slide.effects === undefined || slide.effects.length === 0) return [];
+  const block = blocksById(slide).get(blockId);
+  const removed = new Set<string>([blockId]);
+  if (block !== undefined)
+    walkBlocks([block], '', (child) => {
+      removed.add(child.id);
+    });
+  const effects = effectsWithoutBlocks(slide.effects, removed);
+  if (effects.length === slide.effects.length) return [];
+  return [
+    {
+      op: 'slide.set',
+      slideId: slide.id,
+      path: '/effects',
+      ...(effects.length > 0 ? { value: effects } : {}),
+    },
+  ];
+}
+
+function requireEffect(slide: Slide, effectId: string): Effect {
+  const effect = slide.effects?.find((row) => row.id === effectId);
+  if (effect === undefined) throw new RangeError(`No effect "${effectId}" on slide "${slide.id}"`);
+  return effect;
+}
+
+/** Writes a slide's whole effect list (an empty list removes the field) and answers it. */
+async function writeEffects(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  baseRevision: number,
+  slideId: string,
+  effects: Effect[],
+): Promise<MotionWriteResult> {
+  const committed = await commit(deps, ctx, baseRevision, [
+    {
+      op: 'slide.set',
+      slideId,
+      path: '/effects',
+      ...(effects.length > 0 ? { value: effects } : {}),
+    },
+  ]);
+  return {
+    slideId,
+    effects: requireSlide(committed.document, slideId).effects ?? [],
+    revision: committed.revision,
+    findings: findingsFor(deps, committed.document, slideId),
+  };
+}
+
+export async function motionList(
+  deps: StoreActionDeps,
+  input: MotionListInput,
+): Promise<MotionListResult> {
+  const document = (await deps.store.read()).document;
+  const slide = requireSlide(document, input.slideId);
+  const blocks = new Set(blocksById(slide).keys());
+  const transition = slideTransition(document.deck.defaults, slide);
+  const effects = slide.effects ?? [];
+  return {
+    slideId: slide.id,
+    effects,
+    transition: transition ?? null,
+    advance: slideAdvance(document.deck.defaults, slide) ?? null,
+    schedule: scheduleOf(slide, { blocks, ...(transition !== undefined ? { transition } : {}) }),
+    dangling: effects.filter((effect) => !blocks.has(effect.block)).map((effect) => effect.id),
+    revision: document.deck.revision,
+  };
+}
+
+export async function motionAdd(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: MotionAddInput,
+): Promise<MotionWriteResult & { effectId: string }> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  const block = blocksById(slide).get(input.effect.block);
+  if (block === undefined)
+    throw new RangeError(`No block "${input.effect.block}" on slide "${slide.id}"`);
+  if (effectSplit(input.effect as Effect) !== undefined && blockTextPaths(block).length === 0)
+    throw new TypeError(
+      `Block "${block.id}" is a ${block.type} block with no text; a text preset or split is for blocks that hold text`,
+    );
+  const effects = [...(slide.effects ?? [])];
+  const effectId = freeEffectId(effects);
+  const index = Math.min(input.index ?? effects.length, effects.length);
+  effects.splice(index, 0, effectFromInput(input.effect, effectId));
+  const result = await writeEffects(deps, ctx, input.baseRevision, slide.id, effects);
+  return { ...result, effectId };
+}
+
+export async function motionSet(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: MotionSetInput,
+): Promise<MotionWriteResult> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  const effect = requireEffect(slide, input.effectId);
+  if (input.path === '/id' || input.path.startsWith('/id/'))
+    throw new TypeError(
+      'motion.set does not change an effect id; motion.remove and motion.add replace an effect',
+    );
+  const next = JSON.parse(JSON.stringify(effect)) as Effect;
+  try {
+    setAt(next, input.path, input.value);
+  } catch (error) {
+    throw new TypeError(
+      `motion.set cannot write ${input.path} in effect "${effect.id}": ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  const parsed = effectSchema.safeParse(next);
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    const at = first === undefined ? '' : first.path.map(String).join('/');
+    throw new TypeError(
+      `Effect "${effect.id}" ${at === '' ? '' : `at /${at} `}is refused: ${first?.message ?? 'invalid'}`,
+    );
+  }
+  if (input.path === '/block' || input.path.startsWith('/block/')) {
+    if (!blocksById(slide).has(parsed.data.block))
+      throw new RangeError(`No block "${parsed.data.block}" on slide "${slide.id}"`);
+  }
+  const effects = (slide.effects ?? []).map((row) => (row.id === effect.id ? parsed.data : row));
+  return writeEffects(deps, ctx, input.baseRevision, slide.id, effects);
+}
+
+export async function motionRemove(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: MotionRemoveInput,
+): Promise<MotionWriteResult> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  requireEffect(slide, input.effectId);
+  const effects = (slide.effects ?? []).filter((row) => row.id !== input.effectId);
+  return writeEffects(deps, ctx, input.baseRevision, slide.id, effects);
+}
+
+export async function motionMove(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: MotionMoveInput,
+): Promise<MotionWriteResult> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  requireEffect(slide, input.effectId);
+  const effects = moveEffect(slide.effects ?? [], input.effectId, input.index);
+  return writeEffects(deps, ctx, input.baseRevision, slide.id, effects);
+}
+
+/**
+ * slide.transition and slide.advance: one slide.set per named slide, or one deck.set of the
+ * deck's default when no slide ids are given; null removes the field.
+ */
+async function writeSlideOrDeckField(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: Rev & { slideIds?: string[] },
+  field: 'transition' | 'advance',
+  value: Transition | Advance | null,
+): Promise<{ slideIds: string[]; revision: number }> {
+  const current = (await deps.store.read()).document;
+  const slides = input.slideIds === undefined ? [] : slidesInOrder(current, input.slideIds);
+  const mutations: Mutation[] =
+    input.slideIds === undefined
+      ? [{ op: 'deck.set', path: `/defaults/${field}`, ...(value !== null ? { value } : {}) }]
+      : slides.map((slide) => ({
+          op: 'slide.set',
+          slideId: slide.id,
+          path: `/${field}`,
+          ...(value !== null ? { value } : {}),
+        }));
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return { slideIds: slides.map((slide) => slide.id), revision: committed.revision };
+}
+
+export async function slideSetTransition(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideTransitionInput,
+): Promise<{ slideIds: string[]; transition: Transition | null; revision: number }> {
+  const written = await writeSlideOrDeckField(deps, ctx, input, 'transition', input.transition);
+  return { ...written, transition: input.transition };
+}
+
+export async function slideSetAdvance(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideAdvanceInput,
+): Promise<{ slideIds: string[]; advance: Advance | null; revision: number }> {
+  const written = await writeSlideOrDeckField(deps, ctx, input, 'advance', input.advance);
+  return { ...written, advance: input.advance };
+}
+
+// ---------------------------------------------------------------------------------------------
 // Registration
 
 /** Registers every store-backed action on a dispatcher; inputs arrive validated by the action's schema. */
@@ -4210,5 +4479,34 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   dispatcher.register(
     'picture.materialize',
     on<PictureMaterializeInput>((i, c) => pictureMaterialize(deps, c, i)),
+  );
+  // the slide clock (HTML-SLIDES-DESIGN 2.4)
+  dispatcher.register(
+    'motion.list',
+    on<MotionListInput>((i) => motionList(deps, i)),
+  );
+  dispatcher.register(
+    'motion.add',
+    on<MotionAddInput>((i, c) => motionAdd(deps, c, i)),
+  );
+  dispatcher.register(
+    'motion.set',
+    on<MotionSetInput>((i, c) => motionSet(deps, c, i)),
+  );
+  dispatcher.register(
+    'motion.remove',
+    on<MotionRemoveInput>((i, c) => motionRemove(deps, c, i)),
+  );
+  dispatcher.register(
+    'motion.move',
+    on<MotionMoveInput>((i, c) => motionMove(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.transition',
+    on<SlideTransitionInput>((i, c) => slideSetTransition(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.advance',
+    on<SlideAdvanceInput>((i, c) => slideSetAdvance(deps, c, i)),
   );
 }

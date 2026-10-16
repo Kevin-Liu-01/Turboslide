@@ -26,6 +26,7 @@ import { lint } from './commands/lint.ts';
 import { logo } from './commands/logo.ts';
 import { material } from './commands/material.ts';
 import { mcp } from './commands/mcp.ts';
+import { motion } from './commands/motion.ts';
 import { render } from './commands/render.ts';
 import { sections } from './commands/sections.ts';
 import { shape } from './commands/shape.ts';
@@ -327,6 +328,7 @@ const COMMANDS: Record<string, Command> = {
   tailor,
   assist,
   shader,
+  motion,
 };
 
 /** The registered command names, for the check that every `cli.usage` line names one (item 119). */

@@ -9,6 +9,8 @@ import { dirname, join } from 'node:path';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { Layout } from '@turboslide/schema/deck';
 import { LAYOUT_IDS, layoutSchema } from '@turboslide/schema/deck';
+import type { Advance, Transition } from '@turboslide/schema/motion';
+import { DIRECTIONS, TRANSITION_NAMES, transitionSchema } from '@turboslide/schema/motion';
 import { isLayoutId } from '@turboslide/schema/layouts';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { mutationSchema } from '@turboslide/schema/mutations';
@@ -27,8 +29,10 @@ import {
   slideNew,
   slideRemove,
   slideReplace,
+  slideSetAdvance,
   slideSetBackground,
   slideSetLayout,
+  slideSetTransition,
   slideSkip,
   slideToCanvas,
   slideUpdate,
@@ -49,7 +53,7 @@ import { measureSlidesHeadless } from '../deps/canvas.ts';
 import { decksDirFor } from './deck.ts';
 import { slideGet } from './slides.ts';
 
-const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background|background-picture|background-material> ...
+const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background|background-picture|background-material|transition|advance> ...
   slide background-picture <ids> --asset <assetId>|--file <path>|--url <url> [--alt <text>] [--dither] [--no-replace]
                                     a covering picture at the back of each slide, dithered when asked (slide.setBackgroundPicture)
   slide background-material <ids> <materialId> [--preset <name>] [--anchor <ms>] [--dither]
@@ -76,7 +80,12 @@ const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-lay
                                                (what the hosted studio and the render worker run)
   slide background <id,id,...> --color <color> | --off
                                                the slides' background colour, or the theme default again (slide.setBackground)
+  slide transition <name> [--ms <ms>] [--from <side>] [--slides <id,id,...>] | --clear [--slides <id,id,...>]
+                                               how slides enter in the slideshow, on the named slides or the deck (slide.transition)
+  slide advance <seconds>|off [--slides <id,id,...>]
+                                               move on after the last step, on the named slides or the deck (slide.advance)
 The layouts: ${LAYOUT_IDS.join(', ')}.
+The transitions: ${TRANSITION_NAMES.join(', ')}; the sides: ${DIRECTIONS.join(', ')}.
 Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.`;
 
 export async function slide(ctx: CommandContext): Promise<number> {
@@ -117,6 +126,10 @@ export async function slide(ctx: CommandContext): Promise<number> {
       return slideBackgroundPictureCommand(inner);
     case 'background-material':
       return slideBackgroundMaterialCommand(inner);
+    case 'transition':
+      return slideTransitionCommand(inner);
+    case 'advance':
+      return slideAdvanceCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "slide ${sub ?? ''}"\n${USAGE}`);
   }
@@ -536,6 +549,79 @@ async function slideMoveCommand(ctx: CommandContext): Promise<number> {
   ctx.out.result(result);
   ctx.out.human(
     `moved ${slideId} to ${sectionId}${after !== undefined ? ` after ${after}` : ' first'}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+/** `--slides <id,id,...>`, or undefined for the deck's default. */
+function slidesFlag(ctx: CommandContext): string[] | undefined {
+  const raw = flagString(ctx.args, 'slides');
+  if (raw === undefined) return undefined;
+  const ids = raw
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id !== '');
+  if (ids.length === 0) throw new UsageError(`--slides wants one or more slide ids\n${USAGE}`);
+  return ids;
+}
+
+async function slideTransitionCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = slidesFlag(ctx);
+  const clear = flagBoolean(ctx.args, 'clear');
+  let transition: Transition | null = null;
+  if (!clear) {
+    const name = requirePositional(ctx, 0, USAGE);
+    const ms = flagString(ctx.args, 'ms');
+    const from = flagString(ctx.args, 'from');
+    const parsed = transitionSchema.safeParse({
+      name,
+      durationMs: ms === undefined ? (name === 'none' ? 0 : 400) : Number(ms),
+      ...(from !== undefined ? { from } : {}),
+    });
+    if (!parsed.success)
+      throw new UsageError(
+        `slide transition: ${parsed.error.issues[0]?.message ?? 'invalid'}; the transitions are ${TRANSITION_NAMES.join(', ')}, 0 to 3000 ms`,
+      );
+    transition = parsed.data;
+  }
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideSetTransition(storeDeps(ctx, store), writeContext(ctx), {
+      ...(slideIds !== undefined ? { slideIds } : {}),
+      transition,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  const where = result.slideIds.length > 0 ? result.slideIds.join(', ') : 'the deck';
+  ctx.out.human(
+    `${result.transition === null ? 'cleared the transition of' : `set ${result.transition.name} ${result.transition.durationMs} ms on`} ${where}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+async function slideAdvanceCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = slidesFlag(ctx);
+  const raw = requirePositional(ctx, 0, USAGE);
+  let advance: Advance | null = null;
+  if (raw !== 'off') {
+    const seconds = Number(raw);
+    if (!Number.isFinite(seconds) || seconds < 0 || seconds > 600)
+      throw new UsageError(`slide advance wants seconds from 0 to 600, or off; got ${raw}`);
+    advance = { afterMs: Math.round(seconds * 1000) };
+  }
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideSetAdvance(storeDeps(ctx, store), writeContext(ctx), {
+      ...(slideIds !== undefined ? { slideIds } : {}),
+      advance,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  const where = result.slideIds.length > 0 ? result.slideIds.join(', ') : 'the deck';
+  ctx.out.human(
+    `${result.advance === null ? 'a click advances' : `advances after ${result.advance.afterMs} ms`} on ${where}: revision ${result.revision}`,
   );
   return 0;
 }

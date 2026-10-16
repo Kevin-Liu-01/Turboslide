@@ -4975,6 +4975,209 @@
       "milestone": "P1"
     },
     {
+      "action": "motion.list",
+      "usage": "turboslide motion list <slideId>",
+      "command": [
+        "motion",
+        "list"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "P1"
+    },
+    {
+      "action": "motion.add",
+      "usage": "turboslide motion add <slideId> --block <blockId> --enter <preset>|--emphasis <preset>|--exit <preset>|--keyframes <json>|--path <d> [--start click|with|after] [--delay <ms>] [--ms <ms>] [--from left|right|top|bottom] [--split line|word|glyph]",
+      "command": [
+        "motion",
+        "add"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "effect",
+          "flag": "--effect",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "index",
+          "flag": "--index",
+          "type": "integer",
+          "required": false,
+          "description": "Where the effect goes in play order; last when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--block",
+          "template": "<blockId>"
+        },
+        {
+          "flag": "--enter",
+          "template": "<preset>|--emphasis"
+        }
+      ],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "motion.set",
+      "usage": "turboslide motion set <slideId> <effectId> <path> <value>",
+      "command": [
+        "motion",
+        "set"
+      ],
+      "positionals": [
+        "slideId",
+        "effectId",
+        "path",
+        "value"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "motion.remove",
+      "usage": "turboslide motion remove <slideId> <effectId>",
+      "command": [
+        "motion",
+        "remove"
+      ],
+      "positionals": [
+        "slideId",
+        "effectId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "motion.move",
+      "usage": "turboslide motion move <slideId> <effectId> <index>",
+      "command": [
+        "motion",
+        "move"
+      ],
+      "positionals": [
+        "slideId",
+        "effectId",
+        "index"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "slide.transition",
+      "usage": "turboslide slide transition <name>|none [--ms <ms>] [--from left|right|top|bottom] [--slides <slideIds>] [--clear]",
+      "command": [
+        "slide",
+        "transition"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "slideIds",
+          "flag": "--slide-ids",
+          "type": "string[]",
+          "required": false,
+          "description": "The slides; the deck’s transition when absent"
+        },
+        {
+          "key": "transition",
+          "flag": "--transition",
+          "type": "object | null",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
+      "action": "slide.advance",
+      "usage": "turboslide slide advance <seconds>|off [--slides <slideIds>]",
+      "command": [
+        "slide",
+        "advance"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "slideIds",
+          "flag": "--slide-ids",
+          "type": "string[]",
+          "required": false,
+          "description": "The slides; the deck’s advance when absent"
+        },
+        {
+          "key": "advance",
+          "flag": "--advance",
+          "type": "object | null",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
       "action": "presence.list",
       "usage": "turboslide presence list",
       "command": [

@@ -78,6 +78,13 @@ import {
   slideSetBackground,
   slideSetLayout,
   slideSkip,
+  motionAdd,
+  motionList,
+  motionMove,
+  motionRemove,
+  motionSet,
+  slideSetAdvance,
+  slideSetTransition,
   slideToCanvas,
   slideUpdate,
   tableCellStyle,
@@ -135,6 +142,13 @@ import type {
   SlideSetBackgroundInput,
   SlideSetLayoutInput,
   SlideSkipInput,
+  MotionAddInput,
+  MotionListInput,
+  MotionMoveInput,
+  MotionRemoveInput,
+  MotionSetInput,
+  SlideAdvanceInput,
+  SlideTransitionInput,
   SlideToCanvasInput,
   SlideUpdateInput,
   StoreActionDeps,
@@ -4216,6 +4230,23 @@ export function createEditorController(init: {
   );
   on<DeckGuidesInput>('deck.guides', (input) =>
     deckGuides(storeDeps('deck.guides'), context, input),
+  );
+  /* the slide clock (HTML-SLIDES-DESIGN 2.4): the effect writes, the transition and the advance,
+     each one commit and one history entry, as every other store action on this transport */
+  on<MotionListInput>('motion.list', (input) => motionList(storeDeps('motion.list'), input));
+  on<MotionAddInput>('motion.add', (input) => motionAdd(storeDeps('motion.add'), context, input));
+  on<MotionSetInput>('motion.set', (input) => motionSet(storeDeps('motion.set'), context, input));
+  on<MotionRemoveInput>('motion.remove', (input) =>
+    motionRemove(storeDeps('motion.remove'), context, input),
+  );
+  on<MotionMoveInput>('motion.move', (input) =>
+    motionMove(storeDeps('motion.move'), context, input),
+  );
+  on<SlideTransitionInput>('slide.transition', (input) =>
+    slideSetTransition(storeDeps('slide.transition'), context, input),
+  );
+  on<SlideAdvanceInput>('slide.advance', (input) =>
+    slideSetAdvance(storeDeps('slide.advance'), context, input),
   );
   on<SlideSetBackgroundInput>('slide.setBackground', (input) =>
     slideSetBackground(storeDeps('slide.setBackground'), context, input),

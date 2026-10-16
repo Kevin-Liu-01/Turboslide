@@ -7,17 +7,17 @@
 // `cliCommands` the length of packages/agent/generated/cli.json `actions`, and `features` the
 // features table's where cells and shortcuts (the menu model's paths, keys.ts's Mac and other forms).
 export const FACTS_DATA = {
-  factsSha256: 'fb4cfdd0cc5789b4132760bee8bfcbf75e052f3a190dd13fca38ec88b6013092',
-  actions: 194,
-  mcpTools: 170,
-  httpPaths: 178,
+  factsSha256: '705f247821f306e4984abd29c38222b4ed13bf3ffd1fdf3cb870f93880122cfb',
+  actions: 201,
+  mcpTools: 177,
+  httpPaths: 185,
   layouts: 22,
   materials: 17,
   checkSteps: 33,
   parityRows: 3369,
   shapes: 135,
   menus: 9,
-  cliCommands: 181,
+  cliCommands: 188,
   mismatchPercent: 0.003,
   licence: 'MIT',
   features: [

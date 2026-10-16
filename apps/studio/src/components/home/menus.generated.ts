@@ -42,8 +42,8 @@ export type MiniMenu = {
 
 /** sha256 of packages/chrome/src/menus/model.ts and keys.ts the menus were read from */
 export const MINI_SOURCES = {
-  model: '6c3cf1d44c3e71c3b7b769f0d28ad83676be4164520157d5097b8adb76b2bb0b',
-  keys: '9ef709f8c8a999497f482b7ab500b05a99dcad5e408e11b02e0f36d7d5e74959',
+  model: '084c8f7a646f1c975da448efd845c5984a7d8e907df9c5bb9122b2be2da9508d',
+  keys: 'cd546c797c826cea3c3b73e1df44a1abeaba5cc8ec390c2c6b0d064ac730791a',
 } as const;
 
 /**
@@ -306,6 +306,7 @@ const PACKED: readonly (readonly [string, string, readonly Packed[]])[] = [
           ['', 'Curved connector'],
         ],
       ],
+      ['', 'Animation', 16],
       ['', 'Link', 17, '⌘K', 'Ctrl+K'],
       ['', 'Comment', 16, '⌥⌘M', 'Ctrl+Alt+M'],
       ['insert.newSlide', 'New slide', 3, '⌃M', 'Ctrl+M', 0, { b: ['Ctrl+M', 'Ctrl+M'] }],
@@ -606,6 +607,7 @@ const PACKED: readonly (readonly [string, string, readonly Packed[]])[] = [
       ],
       ['', 'Change background', 1],
       ['', 'Apply layout'],
+      ['', 'Transition'],
       ['slide.changeTheme', 'Change theme', 3],
     ],
   ],

@@ -2,7 +2,8 @@ import { createServerFn } from '@tanstack/react-start';
 import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 import { DECK_TEMPLATES } from '@turboslide/schema/actions';
-import { deckAppearance, isTrashed, slideTitle } from '@turboslide/schema/deck';
+import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
+import { deckAppearance, isTrashed, slidePlay, slideTitle } from '@turboslide/schema/deck';
 import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Author } from '@turboslide/schema/mutations';
@@ -227,6 +228,8 @@ function buildViewerDeck(
         /* the show's, the view route's and the print route's frames follow Insert > Slide numbers
            through the same rule the editor stage and the exports read (return/build/b5.md request 12) */
         counter: slideCounter(deck, slide, 1, 1) !== '',
+        /* the slide's Playback for the viewer's and the show's ShaderLayer (the shader design 3.1) */
+        ...(slidePlay(deck, slide) === 'hold' ? { play: 'hold' as const } : {}),
         ...(options.notes && slide.notes !== undefined ? { notes: slide.notes } : {}),
       });
     }
@@ -253,6 +256,8 @@ function buildViewerDeck(
         options.theme,
         bandAssetResolver(deck, (_id, _theme, path) => assetBase + path),
       ),
+      /* the deck's shader palette, so a shader the viewer plays draws the colours of its still */
+      palette: shaderPaletteOfDeck(deck),
     },
     skipped,
   };

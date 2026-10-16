@@ -7594,17 +7594,17 @@
     {
       "id": "shaders.show.plays-when-on",
       "feature": "shaders",
-      "interaction": "With Play animated patterns on, the block's Play in the show on and no reduced motion, the show's title slide has one canvas and two clips 900 ms apart differ",
+      "interaction": "With Play animated patterns on, the presentation's Playback on Play in the show (Slide > Playback > Apply) and no reduced motion, the show's title slide has one canvas and two clips 900 ms apart differ",
       "driver": "core/shaders.spec.ts",
       "today": "broken",
       "severity": 3,
       "evidence": "audit-shaders 10 (s12-slideshow.png, walk-run2.json row 22)",
       "parks": [
         "tools.preferences.playShaders",
-        "formatOptions.shader.play"
+        "slide.playback"
       ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.6 (B5 present/ShaderLayer.tsx; B1 the View row); question 5 of section 9: motion.play 'show' on insert with the setting's default In the show only; the show is started from the slide the block is on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
+      "note": "Ship two P1; the shader design 3.6 (packages/viewer/src/present/ShaderLayer.tsx and Slide > Playback, which replace the per block formatOptions.shader.play and motion.play); the show is started from the slide the block is on; recorded not driven while menu.slide.playback is absent from the Slide menu, the show's ShaderLayer and the row landing as one commit"
     },
     {
       "id": "shaders.show.frame-when-off",
@@ -7617,7 +7617,7 @@
         "tools.preferences.playShaders"
       ],
       "setup": "a shader inserted through Insert > Shader when the row is on the build, else shader.insert or block.insert of a material block through the window API, then its frame awaited (shader.capture as the fallback); never a driven step",
-      "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.6 (B5; B1 the View row); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on; recorded not driven while formatOptions.shader.play is absent from the Shader section (the P1 item's own control, drawn only when its rows are green: shaders.panel.section-groups), the show's ShaderLayer and the control landing as one commit"
+      "note": "Ship two P1; the shader design 3.6 (live-plan.ts: the person's Off and reduced motion can only hold); the reduced motion half is a second context with prefers-reduced-motion: reduce and the setting on; recorded not driven while menu.slide.playback is absent from the Slide menu"
     },
     {
       "id": "shaders.insert.gallery-hover-live",

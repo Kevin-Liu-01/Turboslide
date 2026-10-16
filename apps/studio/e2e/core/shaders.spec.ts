@@ -1042,18 +1042,29 @@ async function showCanvases(
     await p.waitForTimeout(250);
   }
 }
-/* the P1 item the two show rows measure (docs/archive/rounds/FEATURES.md 5.2 item 4, 5.6): the show's
-   ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx) and the Shader section's Play in the
-   show control land as one commit, and the section draws Play in the show only when the item is
-   on the build (7.1 `shaders.panel.section-groups`), so the control's presence is the item's; a
-   build without it draws the frame in the show and the rows read not driven with the reason,
-   never a red row on a layer no lane built (the fix round of ship two, finding 5) */
+/* the item the two show rows measure (docs/archive/rounds/FEATURES.md 5.2 item 4, 5.6; the shader
+   design 3.6): the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx) and Slide >
+   Playback land as one commit, so the Slide menu's row is the item's presence; a build without it
+   draws the frame in the show and the rows read not driven with the reason, never a red row on a
+   layer no lane built (the fix round of ship two, finding 5). The per block
+   formatOptions.shader.play is not built: the slide's and the deck's Playback replace it. */
 const SHOW_LANE =
-  "not on this build: formatOptions.shader.play and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; docs/archive/rounds/FEATURES.md 5.6, B5 with B1, P1); the show draws the frame until they land";
-/** True when the Shader section draws Play in the show, the P1 item's own control. */
-async function showLayerBuilt(p: Page, id: string): Promise<boolean> {
-  if (!(await openShaderSection(p, id))) return false;
-  return (await ctl(p, 'formatOptions.shader.play').count()) > 0;
+  "not on this build: Slide > Playback (menu.slide.playback) and the show's ShaderLayer (packages/viewer/src/present/ShaderLayer.tsx; the shader design 3.6); the show draws the frame until they land";
+/** True when the Slide menu draws Playback, the item's own row. */
+async function showLayerBuilt(p: Page, _id: string): Promise<boolean> {
+  await ctl(p, 'menubar.slide').click();
+  await p.locator('#ts-menu-slide').waitFor({ timeout: 8000 });
+  const built = (await ctl(p, 'menu.slide.playback').count()) > 0;
+  await p.keyboard.press('Escape');
+  return built;
+}
+/** Sets the whole presentation's Playback through Slide > Playback > Apply (the shader design 3.1). */
+async function setDeckPlayback(p: Page, play: 'play' | 'hold'): Promise<void> {
+  await menuPath(p, 'slide', 'slide.playback');
+  await expect(ctl(p, 'dialog.playback')).toBeVisible({ timeout: 8000 });
+  await ctl(p, `dialog.playback.${play}`).check();
+  await ctl(p, 'dialog.playback.apply').click();
+  await expect(ctl(p, 'dialog.playback')).toHaveCount(0, { timeout: 8000 });
 }
 async function leaveShow(p: Page): Promise<void> {
   if ((await ctl(p, 'present.show').count()) > 0) {
@@ -1076,22 +1087,9 @@ test(title('shaders.show.plays-when-on'), async () => {
     );
   if (!(await showLayerBuilt(page, id))) test.skip(true, SHOW_LANE);
   await setPlayShaders(page, /^on$/i);
-  /* the block's Play in the show through the section's control */
-  let playHow = 'formatOptions.shader.play';
-  {
-    await openShaderSection(page, id);
-    const on = ctl(page, 'formatOptions.shader.play');
-    const pressed =
-      (await on.getAttribute('aria-pressed')) ?? (await on.getAttribute('aria-checked'));
-    if (pressed === 'false') {
-      await on.click();
-      playHow = 'formatOptions.shader.play clicked on';
-    } else {
-      const b = await block();
-      const motion = (b?.block['motion'] ?? null) as { play?: string } | null;
-      playHow = `formatOptions.shader.play already on (motion.play ${motion?.play ?? 'unset'})`;
-    }
-  }
+  /* the deck on play through Slide > Playback > Apply (the shader design 3.6) */
+  await setDeckPlayback(page, 'play');
+  const playHow = 'Slide > Playback > Play in the show, Apply';
   await waitFrame(page, slideId, id, { timeout: 15_000 });
   await page.keyboard.press('Escape');
   await clickCard(page, slideId);

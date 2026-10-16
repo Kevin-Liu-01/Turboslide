@@ -14,6 +14,7 @@ import type { MenuContext, MenuItem } from '@turboslide/chrome/menus/model';
 import { SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { stampLivePreference } from '@turboslide/viewer/live-plan';
 import type { ViewerSlide } from '@turboslide/viewer/model';
 import { presentKeyAction } from '@turboslide/viewer/present/presentKeys';
 import type { PresentPlatform } from '@turboslide/viewer/present/presentKeys';
@@ -117,7 +118,7 @@ const PLAY_SHADERS = {
   on: 'On',
   show: 'In the show only',
   off: 'Off',
-  doc: 'Whether the animated patterns on the slides move during the show',
+  doc: 'Off holds the animated patterns for you in the show and the viewer; the presentation’s Playback decides the rest',
 } as const;
 type PlayShaders = 'on' | 'show' | 'off';
 const isPlayShaders = (value: unknown): value is PlayShaders =>
@@ -617,6 +618,8 @@ export function Slideshow({
   });
   const pickPlayShaders = (value: PlayShaders) => {
     setPlayShaders(value);
+    /* the stage's mount follows the root's attribute at once (live-plan.ts) */
+    stampLivePreference(value);
     try {
       const stored = readStoredSettings(window.localStorage.getItem(SETTINGS_STORAGE));
       window.localStorage.setItem(

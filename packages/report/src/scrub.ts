@@ -14,7 +14,19 @@
 //     content, so `Unexpected token 'H', "Hello worl"... is not valid JSON` loses the words
 //   - a run of 20 or more letters, digits, `-` and `_` that holds a digit and a letter (an id, a
 //     digest, a session token, a part of a signed token)
+//   - a run of 20 or more letters, `-` and `_` without a digit that is not a camelCase or
+//     PascalCase name of whole words (a link token or an id that happens to hold no digit, about
+//     2.4 percent of 22 character tokens; `getBoundingClientRect` stays)
+//   - a path in the prose, outside a URL (`at /s/<token>`, `/deck/<id>/edit`): scrubbed as a
+//     URL's path is
 //   - a run of 7 or more digits (a time stamp, a revision far past the first)
+//
+// A message (`scrubMessage`, the line's message field) also loses every capitalized word inside a
+// sentence that has no code shape (`Secret Merger`, `Jane Doe` past its first word): the names
+// and titles deck text brings. What stays of deck text written into a message without quotes is
+// the residual of a pattern scrubber: a lowercase word, an all capitals word, a short token with a
+// digit (`Q7Z`) and the first word of a sentence, which the engines' own messages start with
+// (post-deploy review of b01cb984).
 //
 // Browser and Worker safe: no Node import.
 
@@ -61,6 +73,20 @@ const ID_BEFORE: ReadonlySet<string> = new Set([
 /** A segment that is an id by its form wherever it stands. */
 const ID_SEGMENT = /^(?=[A-Za-z_-]*\d)[A-Za-z0-9_.-]{20,}$|^\d{3,}$/;
 
+/**
+ * A camelCase or PascalCase name of whole words (a lowercase head, then words of a capital and two
+ * or more lowercase letters, or an acronym before the next word): `getBoundingClientRect`,
+ * `XMLHttpRequestEventTarget`. A random token of letters alone rarely has this shape
+ * (`AbCdEfGhIjKlMnOpQrStUv` does not), and a run of 20 lowercase letters never does.
+ */
+const WORDY_NAME =
+  /^(?:[a-z]{1,19}|[A-Z][a-z]{2,}|[A-Z]{2,}(?=[A-Z][a-z]))(?:[A-Z][a-z]{2,}|[A-Z]{2,}(?=[A-Z][a-z]|$))+$/;
+
+/** True for a run of 20 or more letters, `-` and `_` with no digit that is a token, not a name. */
+function digitFreeToken(run: string): boolean {
+  return run.length >= 20 && /^[A-Za-z_-]+$/.test(run) && !WORDY_NAME.test(run);
+}
+
 /** Folders whose files are the app's own built chunks: their names are kept for the stack. */
 const CHUNK_FOLDERS: ReadonlySet<string> = new Set(['assets', '_build', 'node_modules', 'src']);
 
@@ -79,7 +105,12 @@ export function scrubPath(pathname: string): string {
       isLast && CHUNK_FOLDERS.has(before) && /^[\w.-]{1,80}\.(?:m?js|tsx?|css)$/.test(segment);
     if (segment === '') out.push(segment);
     else if (chunkFile) out.push(segment);
-    else if (ID_BEFORE.has(before.toLowerCase()) || ID_SEGMENT.test(segment)) out.push('$');
+    else if (
+      ID_BEFORE.has(before.toLowerCase()) ||
+      ID_SEGMENT.test(segment) ||
+      digitFreeToken(segment)
+    )
+      out.push('$');
     else if (/^[A-Za-z0-9_.$-]{1,40}$/.test(segment)) out.push(segment);
     else out.push('$');
   }
@@ -111,6 +142,10 @@ const IPV6_SHORT =
   /(?:\b[0-9a-f]{1,4}(?::[0-9a-f]{1,4}){0,6})?::(?:[0-9a-f]{1,4}(?::[0-9a-f]{1,4}){0,6}\b)?/gi;
 const QUOTED = /"([^"\n]*)"|'([^'\n]*)'|`([^`\n]*)`|‘([^’\n]*)’|“([^”\n]*)”/g;
 const LONG_ID = /(?<![\w-])(?=[A-Za-z_-]*\d)(?=[\d_-]*[A-Za-z])[A-Za-z0-9_-]{20,}(?![\w-])/g;
+const LONG_RUN = /(?<![\w-])[A-Za-z_-]{20,}(?![\w-])/g;
+/* a path in the prose: a `/` that no word, dot, colon, slash or placeholder touches before it
+   (a URL's own path was scrubbed with the URL), its segments up to a space, quote or `:line` */
+const BARE_PATH = /(?<![\w.:/$<>@~-])\/[A-Za-z0-9_.~%$-]+(?:\/[A-Za-z0-9_.~%$-]*)*/g;
 const LONG_DIGITS = /\b\d{7,}\b/g;
 const CONTROL = /[\u0000-\u0008\u000B-\u001F\u007F]/g;
 
@@ -155,10 +190,70 @@ export function scrubText(text: string, max: number = MESSAGE_MAX): string {
     (match.match(/[0-9a-f]{1,4}/gi)?.length ?? 0) >= 2 ? '<ip>' : match,
   );
   out = out.replace(QUOTED, scrubQuoted);
+  out = out.replace(BARE_PATH, (path) => scrubPath(path));
   out = out.replace(LONG_ID, '<id>');
+  out = out.replace(LONG_RUN, (run) => (digitFreeToken(run) ? '<id>' : run));
   out = out.replace(LONG_DIGITS, '<n>');
   out = out.trim();
-  return out.length > max ? `${out.slice(0, max - 1)}…` : out;
+  return cap(out, max);
+}
+
+function cap(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+/**
+ * Capitalized words a message keeps inside a sentence: the words before an auth value (whose
+ * value AUTH_VALUE took) and the global constructors the engines name.
+ */
+const KEPT_WORDS: ReadonlySet<string> = new Set([
+  'Bearer',
+  'Basic',
+  'Ticket',
+  'Token',
+  'Array',
+  'Blob',
+  'Boolean',
+  'Date',
+  'Document',
+  'Element',
+  'Error',
+  'Event',
+  'File',
+  'Function',
+  'Map',
+  'Node',
+  'Number',
+  'Object',
+  'Promise',
+  'Proxy',
+  'Request',
+  'Response',
+  'Set',
+  'String',
+  'Symbol',
+  'Window',
+  'Worker',
+]);
+
+const TITLE_WORD = /(?<![\w$.'’-])[A-Z][a-z]+(?:['’][a-z]+)?(?![\w$.(-])/g;
+
+/**
+ * A message as `scrubText` writes it, with every capitalized word inside a sentence written `…`
+ * unless it has a code shape or is one of KEPT_WORDS: the first word of the text and a word after
+ * `:`, `.`, `;`, `!` or `?` begin a sentence and stay (`TypeError: Cannot read …`).
+ */
+export function scrubMessage(text: string, max: number = MESSAGE_MAX): string {
+  const out = scrubText(text, Number.MAX_SAFE_INTEGER).replace(
+    TITLE_WORD,
+    (word: string, offset: number, whole: string) => {
+      const before = whole.slice(0, offset).trimEnd();
+      if (before === '' || /[:.;!?]$/.test(before)) return word;
+      if (KEPT_WORDS.has(word)) return word;
+      return '…';
+    },
+  );
+  return cap(out, max);
 }
 
 /**

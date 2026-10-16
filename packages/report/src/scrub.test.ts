@@ -5,6 +5,7 @@ import {
   MESSAGE_MAX,
   STACK_FRAMES_MAX,
   scrubPath,
+  scrubMessage,
   scrubRoute,
   scrubStack,
   scrubText,
@@ -133,10 +134,54 @@ describe('scrubStack', () => {
 
   test('the name@url form of the other engines; a frame is capped', () => {
     const frames = scrubStack(
-      `render@https://www.turboslide.com/assets/deck-C1.js:4:9\n${'x'.repeat(300)}@https://a.test/b.js:1:1`,
+      /* a long name of short parts: a run of 300 letters would read as a token (digitFreeToken) */
+      `render@https://www.turboslide.com/assets/deck-C1.js:4:9\n${'ab.'.repeat(100)}@https://a.test/b.js:1:1`,
     );
     expect(frames[0]).toBe('render@https://www.turboslide.com/assets/deck-C1.js:4:9');
     expect(frames[1]!.length).toBe(FRAME_MAX);
     expect(scrubStack(undefined)).toEqual([]);
+  });
+});
+
+// post-deploy review of b01cb984: one crafted report reached the production log with the deck's
+// words outside quotes and a share token in a bare path; locally "Jane Doe left the deck" and a
+// digit-free id passed too.
+describe('scrubMessage', () => {
+  test('the crafted report of the review loses its names, its address, its token and its path', () => {
+    const out = scrubMessage(
+      'Error: lay out Q7Z Secret Merger for jane@example.test from 203.0.113.9 with Bearer AbCdEf0123456789 at /s/AbCdEfGhIjKlMnOpQrStUv',
+    );
+    expect(out).toBe('Error: lay out Q7Z … … for <address> from <ip> with Bearer <token> at /s/$');
+    expect(scrubMessage('Jane Doe left the deck')).toBe('Jane … left the deck');
+    expect(scrubMessage('could not open the deck abcdefghijklmnopqrstuvwxyz')).toBe(
+      'could not open the deck <id>',
+    );
+    expect(scrubMessage('lost /deck/q3-board-review/edit while saving')).toBe(
+      'lost /deck/$/edit while saving',
+    );
+  });
+
+  test("the engines' own messages stay readable", () => {
+    for (const message of [
+      `TypeError: Cannot read properties of undefined (reading 'getBoundingClientRect')`,
+      'ResizeObserver loop completed with undelivered notifications.',
+      'Failed to construct XMLHttpRequestEventTarget: Illegal constructor',
+      'TypeError: undefined is not a Promise or an Object.keys result',
+      'SyntaxError: Unexpected end of JSON input',
+      'the ::before rule and ::',
+      'NetworkError when attempting to fetch resource.',
+    ])
+      expect(scrubMessage(message)).toBe(message);
+  });
+});
+
+describe('a token with no digit and a bare path', () => {
+  test('a digit-free token goes; a long camelCase name stays', () => {
+    expect(scrubText('link AbCdEfGhIjKlMnOpQrStUv revoked')).toBe('link <id> revoked');
+    expect(scrubText('at HTMLDocument.getBoundingClientRect')).toBe(
+      'at HTMLDocument.getBoundingClientRect',
+    );
+    expect(scrubPath('/x/abcdefghijklmnopqrstuvwxyz')).toBe('/x/$');
+    expect(scrubText('GET /api/decks/gt-brand/bundle 401')).toBe('GET /api/decks/$/bundle 401');
   });
 });

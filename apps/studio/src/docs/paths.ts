@@ -30,6 +30,9 @@ export function slugsOf(splat: string | undefined): string[] {
   return (splat ?? '').split('/').filter((part) => part !== '');
 }
 
+/** One entry of a page's on this page column: the h2 or h3 anchor, its words and its depth. */
+export type DocsTocEntry = { url: string; title: string; depth: number };
+
 /** What a docs page's loader hands its component and its head: plain data, no function. */
 export type DocsPageData = {
   url: string;
@@ -39,6 +42,13 @@ export type DocsPageData = {
   twin: string;
   /** the file under content/docs, for Edit This Page */
   file: string;
+  toc: DocsTocEntry[];
+  /**
+   * The article's body as HTML, read from the page's prerendered document by the browser's
+   * loader on a move between pages (hardening HR-PC#5). Absent from the server's data: the first
+   * load's body is in the document itself, so the payload never carries it a second time.
+   */
+  html?: string;
 };
 
 /** A docs page's head: the title, the description, the canonical address and the twin. */

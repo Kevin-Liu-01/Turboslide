@@ -110,6 +110,50 @@ export function onBodyClick(event: MouseEvent, navigate: (href: string) => void)
   navigate(href);
 }
 
+/** A docs table's scroll box (mdx.tsx `Table`), which carries the table's name in `data-label`. */
+const TABLE_SELECTOR = '.ts-docs-table';
+
+/**
+ * A table wider than its column, one that scrolls, is a region that Tab reaches, named by its
+ * columns, so the keyboard scrolls it too; a table that fits is neither, so a reference page's
+ * 43 tables are not 43 Tab stops and 43 landmarks of one name.
+ */
+export function markTable(box: HTMLElement): void {
+  if (box.scrollWidth > box.clientWidth) {
+    box.setAttribute('role', 'region');
+    box.setAttribute('tabindex', '0');
+    box.setAttribute('aria-label', box.dataset.label ?? 'Table');
+    return;
+  }
+  box.removeAttribute('role');
+  box.removeAttribute('tabindex');
+  box.removeAttribute('aria-label');
+}
+
+/**
+ * Marks each table of a body (`markTable`) and marks it again whenever its box or the table
+ * changes size: a window resize, a font that loads. Returns the function that stops watching.
+ */
+export function watchTables(body: Element): () => void {
+  const boxes = [...body.querySelectorAll<HTMLElement>(TABLE_SELECTOR)];
+  if (typeof ResizeObserver === 'undefined') {
+    boxes.forEach(markTable);
+    return () => {};
+  }
+  const observer = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const box = entry.target.closest<HTMLElement>(TABLE_SELECTOR);
+      if (box !== null) markTable(box);
+    }
+  });
+  for (const box of boxes) {
+    observer.observe(box);
+    const table = box.querySelector('table');
+    if (table !== null) observer.observe(table);
+  }
+  return () => observer.disconnect();
+}
+
 /** The body's key handler: the arrow keys move between the tabs of a Tabs block. */
 export function onBodyKeyDown(event: KeyboardEvent): void {
   if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;

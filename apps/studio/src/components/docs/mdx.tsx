@@ -449,18 +449,15 @@ function tableLabel(heads: readonly string[]): string {
 }
 
 /**
- * A table: a region that scrolls sideways when the table is wider than the column (a phone),
- * reached by Tab and named by its columns, so the keyboard scrolls it too; docs.css fades the edge
- * where more of the table is (`scroll(self inline)`), the cue that it scrolls.
+ * A table: a box that scrolls sideways when the table is wider than the column (a phone), with
+ * the table's name from its columns in `data-label`; in the browser a table that scrolls becomes
+ * a region that Tab reaches under that name, so the keyboard scrolls it too, and a table that
+ * fits stays plain (static-body.ts `watchTables`). docs.css fades the edge where more of the
+ * table is (`scroll(self inline)`), the cue that it scrolls.
  */
 function Table(props: ComponentProps<'table'>) {
   return (
-    <div
-      className="ts-docs-table pt-scroll-x"
-      role="region"
-      tabIndex={0}
-      aria-label={tableLabel(headsOf(props.children))}
-    >
+    <div className="ts-docs-table pt-scroll-x" data-label={tableLabel(headsOf(props.children))}>
       <table {...props} />
     </div>
   );

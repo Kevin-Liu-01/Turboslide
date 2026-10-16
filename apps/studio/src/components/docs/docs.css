@@ -496,8 +496,8 @@
   margin: 24px 0;
 }
 
-/* a table wider than the column scrolls sideways (mdx.tsx: a focusable region named by its
-   columns): its edge fades over 32 px where more of the table is, on the left once it has
+/* a table wider than the column scrolls sideways (static-body.ts watchTables: then a focusable
+   region named by its columns): its edge fades over 32 px where more of the table is, on the left once it has
    scrolled and on the right until its end, so a cut word reads as more to come. The scroll
    timeline drives the two fades; a table that fits has no timeline and no fade, and a browser
    without scroll timelines draws none */

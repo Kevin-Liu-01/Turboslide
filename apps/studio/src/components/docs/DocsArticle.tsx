@@ -16,7 +16,7 @@ import { docsPath } from './DocsShell';
 import { navName } from './DocsSidebar';
 import { DOCS_COMPONENTS, PathLink } from './mdx';
 import { revealIn } from './reveal';
-import { fetchArticle, onBodyClick, onBodyKeyDown } from './static-body';
+import { fetchArticle, onBodyClick, onBodyKeyDown, watchTables } from './static-body';
 
 export function pageData(page: DocsPage, toc: DocsTocEntry[] = []): DocsPageData {
   return {
@@ -167,13 +167,17 @@ function Facts() {
   );
 }
 
+/** The body's tables watched while the body is in the page (the page is keyed by its address). */
+const watchBody = (node: HTMLDivElement | null): (() => void) | undefined =>
+  node === null ? undefined : watchTables(node);
+
 /**
  * The article's body (hardening HR-PC#5, PERF-11). The server draws it from the page's compiled
  * MDX in the MDX components, its Suspense boundary inside the element. The browser never draws
  * it: on the first load it keeps the server's children (an element whose HTML is given is not
  * hydrated below itself), and after a move it sets the HTML the loader read from the page's
  * document. Copy, the tabs and the links to this site's pages run from the element's two
- * handlers (static-body.ts).
+ * handlers (static-body.ts), and a table that scrolls becomes a region Tab reaches (`watchTables`).
  */
 function Body({ data }: { data: DocsPageData }) {
   const router = useRouter();
@@ -193,6 +197,7 @@ function Body({ data }: { data: DocsPageData }) {
   return (
     <div
       className="ts-docs-body-text"
+      ref={watchBody}
       suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: data.html ?? '' }}
       onClick={(event) => onBodyClick(event.nativeEvent, (href) => void router.navigate({ href }))}

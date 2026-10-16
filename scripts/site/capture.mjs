@@ -8,7 +8,7 @@
 //   node scripts/site/capture.mjs --base http://localhost:4870 [--only hero|viewer|figures]
 //        [--hero /edit/<deck>] [--out <dir>]
 //
-// The hero: the editor at the hero box's size, 1280 by 800 (the box at 1440) and 358 by 560 (the
+// The hero: the editor at the hero box's size, 1280 by 640 (the box at 1440) and 358 by 560 (the
 // phone's box), device scale 2, in both appearances, after its first frame. `--hero` names the
 // page: the hero step's `/try?frame=1&still=1` by default, or a stored deck's share link
 // (`/s/<token>`, which signs the browser in to the deck and opens `/edit/<id>`). A tmp store's
@@ -97,7 +97,7 @@ async function hideDevNotice(tab) {
 
 async function hero(browser) {
   const sizes = [
-    { name: '1280', width: 1280, height: 800, mobile: false },
+    { name: '1280', width: 1280, height: 640, mobile: false },
     { name: '358', width: 358, height: 560, mobile: true },
   ];
   for (const size of sizes)

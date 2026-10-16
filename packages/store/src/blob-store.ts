@@ -33,6 +33,7 @@ import {
 } from 'node:fs';
 import { dirname, extname, join, posix } from 'node:path';
 
+import { ASSET_CATALOG_FILE, assetCatalogOf } from '@turboslide/schema/deck';
 import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson } from '@turboslide/schema/json';
 import { ConflictError } from '@turboslide/schema/errors';
@@ -58,6 +59,8 @@ import {
   SNAPSHOT_EVERY_RECORDS,
   SNAPSHOT_GRACE_MS,
   etagMd5,
+  headNamesManifest,
+  manifestKeyMatches,
   parseSnapshot,
   prunableSnapshots,
   pruneDue,
@@ -592,6 +595,15 @@ export function manifestSlideIds(bytes: Uint8Array): string[] {
     for (const id of list) if (typeof id === 'string' && isSafeKey(id)) ids.push(id);
   }
   return ids;
+}
+
+/** The asset catalog digest a `deck.json` body names (the external shape, hardening PS#12a), else null. */
+export function catalogDigestOf(bytes: Uint8Array): string | null {
+  try {
+    return assetCatalogOf(JSON.parse(new TextDecoder().decode(bytes)));
+  } catch {
+    return null;
+  }
 }
 
 /** The revision a `deck.json` body names, or null when the bytes are not a manifest with one. */
@@ -1501,9 +1513,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       holdsNoRecord ? fetchRecord('versions/1.json', next.files) : Promise.resolve(undefined),
     ]);
     const provenSnapshot =
-      snapshot !== null && quotedMd5(canonicalJson(snapshot.deck)) === deckHead.version
-        ? snapshot
-        : null;
+      snapshot !== null && headNamesManifest(snapshot.deck, deckHead.version) ? snapshot : null;
     // the manifest's body after a miss alone: a deck at rest has the snapshot of its last close,
     // and its reader pays no second body
     const manifestRead =
@@ -1699,6 +1709,22 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
      * A slide body in `unproven` (the CDN served it stale) is proven only when the replay rewrote
      * it from the records.
      */
+    /**
+     * The asset catalog beside a manifest in the external shape (hardening PS#12a, CRIT-M13):
+     * fetched by name into the mirror, so the folder's reader inlines it. True when the manifest
+     * is inline or the catalog's md5 is the one the manifest names; false when the CDN served
+     * another body, which leaves the document unproven. A catalog the store does not serve at all
+     * is a deck the store does not hold whole.
+     */
+    const pullAssetCatalog = async (manifest: Uint8Array): Promise<boolean> => {
+      const digest = catalogDigestOf(manifest);
+      if (digest === null) return true;
+      const catalog = await fetchBody(ASSET_CATALOG_FILE);
+      if (catalog === null)
+        throw new RangeError(`No asset catalog for deck ${deckId} in the Blob store`);
+      writeAtomic(pathOf(ASSET_CATALOG_FILE), catalog.bytes);
+      return etagMd5(quotedMd5(catalog.bytes)) === digest;
+    };
     let records = readVersionsCached(dir);
     const replayOnto = (
       base: DeckDocument,
@@ -1707,7 +1733,8 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       let document = base;
       const rewritten = new Set<string>();
       for (const record of [...records].sort((a, b) => a.n - b.n)) {
-        if (quotedMd5(canonicalJson(document.deck)) === deckHead.version) break;
+        // the head's manifest in either stored shape (hardening PS#12a)
+        if (headNamesManifest(document.deck, deckHead.version)) break;
         if (record.mutations.length === 0) continue;
         if (record.baseRevision !== document.deck.revision) continue;
         const from = document;
@@ -1724,11 +1751,14 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
             rewritten.add(id);
         }
       }
-      // deck.json's etag proves the manifest; a slide the CDN served stale needs the replay too
-      const derivedEtag = quotedMd5(canonicalJson(document.deck));
+      // deck.json's etag proves the manifest; a slide the CDN served stale needs the replay too,
+      // and an asset catalog the CDN served stale (ASSET_CATALOG_FILE in `unproven`) is never
+      // rewritten by one
       return {
         document,
-        proven: derivedEtag === deckHead.version && [...unproven].every((id) => rewritten.has(id)),
+        proven:
+          headNamesManifest(document.deck, deckHead.version) &&
+          [...unproven].every((id) => rewritten.has(id)),
       };
     };
     /** How many records with mutations sit above a revision: the replay's length from it. */
@@ -1809,6 +1839,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       if (deck === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
       manifestBody = deck.bytes;
       writeAtomic(pathOf('deck.json'), deck.bytes);
+      if (!(await pullAssetCatalog(deck.bytes))) unproven.add(ASSET_CATALOG_FILE);
       await eachLimit(manifestSlideIds(deck.bytes), 8, async (id) => {
         const relative = `slides/${id}.json`;
         const body = await fetchBody(relative);
@@ -1835,6 +1866,13 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       if (deck !== null && quotedMd5(deck.bytes) === deckHead.version) {
         const bodies = new Map<string, Uint8Array>();
         let lagging = 0;
+        const digest = catalogDigestOf(deck.bytes);
+        if (digest !== null) {
+          const catalog = await fetchBody(ASSET_CATALOG_FILE);
+          if (catalog !== null && etagMd5(quotedMd5(catalog.bytes)) === digest)
+            bodies.set(ASSET_CATALOG_FILE, catalog.bytes);
+          else lagging += 1;
+        }
         await eachLimit(manifestSlideIds(deck.bytes), 8, async (id) => {
           const relative = `slides/${id}.json`;
           const body = await fetchBody(relative);
@@ -1860,7 +1898,11 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     } else {
       // unprovable for now: reads keep the mirror's copy, write() refuses until a later pull proves one
       for (const relative of localDocuments(dir)) {
-        if (relative === 'deck.json' || relative.startsWith('slides/'))
+        if (
+          relative === 'deck.json' ||
+          relative === ASSET_CATALOG_FILE ||
+          relative.startsWith('slides/')
+        )
           next.files[relative] = quotedMd5(readFileSync(pathOf(relative)));
       }
     }
@@ -1973,7 +2015,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   /** The stored snapshot under a key when its manifest hashes to the key: the document that key names. */
   const provenSnapshotOf = async (key: string): Promise<DeckDocument | null> => {
     const stored = await readSnapshot(key);
-    return stored !== null && snapshotKey(canonicalJson(stored.deck)) === key ? stored : null;
+    return stored !== null && manifestKeyMatches(stored.deck, key) ? stored : null;
   };
 
   const putSnapshot = (key: string, body: Uint8Array): Promise<void> =>

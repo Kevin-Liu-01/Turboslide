@@ -5,7 +5,6 @@
 // never interleave. Leases live under <dir>/.turboslide/leases.json, which the repository's
 // .gitignore already excludes, because they expire; a lease another author holds refuses an
 // agent's write and warns on a human's (lease.ts, MILESTONES M4 item 2).
-import { createHash } from 'node:crypto';
 import {
   closeSync,
   existsSync,
@@ -19,7 +18,9 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
+import { createHash } from 'node:crypto';
 
+import { ASSET_CATALOG_FILE, assetCatalogOf, inlineAssetCatalog } from '@turboslide/schema/deck';
 import type { Deck, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
 import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
@@ -122,6 +123,30 @@ function rawOrder(deck: unknown): string[] {
   return ids;
 }
 
+/**
+ * The manifest with its asset catalog inline (hardening PS#12a, CRIT-M13): a `deck.json` in the
+ * external shape PS#12b writes names the md5 of `assets.json` beside it in `assetCatalog`, and
+ * reads as the inline manifest with that catalog in its place. A missing catalog is a TypeError,
+ * the error a manifest that does not validate answers. The folder's files are trusted as a slide
+ * body is: the Blob mirror proves the catalog against the manifest's digest before it counts the
+ * document proven (blob-store.ts `pull`). An inline manifest comes back as it is.
+ */
+function withAssetCatalog(
+  dir: string,
+  rawDeck: unknown,
+  stamps?: Array<readonly [string, string | null]>,
+): unknown {
+  const digest = assetCatalogOf(rawDeck);
+  if (digest === null) return rawDeck;
+  const catalogPath = join(dir, ASSET_CATALOG_FILE);
+  if (stamps !== undefined) stamps.push([ASSET_CATALOG_FILE, fileStamp(catalogPath)]);
+  if (!existsSync(catalogPath))
+    throw new TypeError(
+      `${join(dir, 'deck.json')} names the asset catalog ${digest}, and ${catalogPath} is missing`,
+    );
+  return inlineAssetCatalog(rawDeck, parseJson(readFileSync(catalogPath, 'utf8'), catalogPath));
+}
+
 /** Reads deck.json and the listed slide files, then validates and normalizes them (SPEC 4.4). */
 export function loadDeckDir(dir: string): Loaded {
   return readDeckDir(dir);
@@ -136,7 +161,11 @@ function readDeckDir(dir: string, stamps?: Array<readonly [string, string | null
   const manifestPath = join(dir, 'deck.json');
   if (stamps !== undefined) stamps.push(['deck.json', fileStamp(manifestPath)]);
   if (!existsSync(manifestPath)) throw new RangeError(`No deck.json in ${dir}`);
-  const rawDeck = parseJson(readFileSync(manifestPath, 'utf8'), manifestPath);
+  const rawDeck = withAssetCatalog(
+    dir,
+    parseJson(readFileSync(manifestPath, 'utf8'), manifestPath),
+    stamps,
+  );
   const rawSlides: Record<string, unknown> = {};
   for (const id of rawOrder(rawDeck)) {
     const path = slidePath(dir, id);

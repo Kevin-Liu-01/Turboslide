@@ -10,7 +10,8 @@
 // does the reads and writes and the tests run these helpers on their own.
 import { createHash } from 'node:crypto';
 
-import type { DeckDocument } from '@turboslide/schema/deck';
+import { externalManifestOf } from '@turboslide/schema/deck';
+import type { Deck, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
 import { validateDeck } from '@turboslide/schema/validate';
 
@@ -79,6 +80,25 @@ const MD5_HEX = /^[0-9a-f]{32}$/;
 /** The md5 of a body in lower case hex: the snapshot key of the `deck.json` bytes it belongs to. */
 export function snapshotKey(deckJsonBytes: Uint8Array | string): string {
   return createHash('md5').update(deckJsonBytes).digest('hex');
+}
+
+/**
+ * The keys a manifest can be stored under, lower case hex (hardening PS#12a, CRIT-M13): the md5 of
+ * its inline bytes, and the md5 of its external shape, the one PS#12b writes (the asset catalog in
+ * `assets.json` and `assetCatalog`, the md5 of the catalog's canonical bytes, in its place). A
+ * reader proves a head written in either shape against a document it holds; this release writes
+ * the inline shape alone. The external key is computed only when the inline one does not match.
+ */
+export function manifestKeyMatches(deck: Deck, key: string): boolean {
+  if (snapshotKey(canonicalJson(deck)) === key) return true;
+  const catalog = snapshotKey(canonicalJson(deck.assets));
+  return snapshotKey(canonicalJson(externalManifestOf(deck, catalog))) === key;
+}
+
+/** True when a head's etag names the manifest of `deck` in either stored shape (`manifestKeyMatches`). */
+export function headNamesManifest(deck: Deck, version: string): boolean {
+  const key = etagMd5(version);
+  return key !== null && manifestKeyMatches(deck, key);
 }
 
 export function isSnapshotKey(value: string): boolean {

@@ -231,7 +231,7 @@ describe('validateSlide reads the slide clock fields', () => {
     schemaVersion: 1,
     id: 'motion',
     kind: 'content',
-    layout: { type: 'cols', ratio: '1/1' },
+    layout: { type: 'stack' },
     slots: {
       main: [
         { id: 'h', type: 'heading', level: 'h2', text: 'Three points' },

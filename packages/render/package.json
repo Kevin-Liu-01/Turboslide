@@ -16,6 +16,7 @@
     "./geometry": "./src/geometry.ts",
     "./measure-dom": "./src/measure-dom.ts",
     "./text": "./src/text.ts",
+    "./motion": "./src/motion.ts",
     "./html": "./src/html.ts",
     "./block-css": "./src/block-css.ts",
     "./block-css-page": "./src/block-css-page.ts",

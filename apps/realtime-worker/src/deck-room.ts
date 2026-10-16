@@ -2760,9 +2760,21 @@ export class DeckRoom extends DurableObject<Env> {
     this.editedSinceOpen = true;
     if (admitted !== undefined) this.broadcast({ type: 'op', entry: admitted });
     const seq = admitted?.seq ?? meta.head;
-    // a run already in flight may have read the log before this entry: run again until it is covered
-    for (let run = 0; run < 3 && (this.meta?.covered ?? 0) < seq; run += 1)
-      await this.checkpoint(false);
+    // a run already in flight may have read the log before this entry: run again until it is
+    // covered. The entry is in the log from here on, so a checkpoint that fails answers ok with
+    // `covered` below `seq` and the alarm retries it (an alarm the storage refused leaves the tail
+    // to the sweep, HR-RT#6c); a 500 here made the function's serverComment read a failure, and a
+    // comment sent again added a second thread (wave 2, RT.md request 8)
+    try {
+      for (let run = 0; run < 3 && (this.meta?.covered ?? 0) < seq; run += 1)
+        await this.checkpoint(false);
+    } catch (error) {
+      await this.retryCheckpointLater('the comment checkpoint failed', error).catch(
+        () => undefined,
+      );
+      const kept = this.meta ?? meta;
+      return json({ ok: true, revision: kept.revision, seq, covered: kept.covered });
+    }
     const after = this.meta ?? meta;
     if (after.covered < seq) await this.afterAppend(Date.now());
     return json({ ok: true, revision: after.revision, seq, covered: after.covered });

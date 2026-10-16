@@ -204,11 +204,14 @@ export function resolveRecipe(
   };
 }
 
-/** `paper:liquid-metal` to `liquid-metal`, the base of a default asset id. */
+/** `paper:liquid-metal` to `liquid-metal` and `glyph:caustics` to `glyph-caustics`, the base of a default asset id. */
 export function materialSlug(materialId: string): string {
-  return materialId
-    .replace(/^[a-z]+:/, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  return (
+    materialId
+      /* a glyph:* slug keeps its engine, since glyph:mesh-gradient and paper:mesh-gradient both exist */
+      .replace(/^(?!glyph:)[a-z]+:/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  );
 }

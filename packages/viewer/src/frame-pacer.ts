@@ -93,9 +93,16 @@ const WAKE_EARLY_MS = 8;
  * times `speed` on each due frame, from the frame the mount shows (so a scrubber's `setFrame` is
  * kept). Returns the speed setter and the stop.
  */
+type PaceOptions = {
+  fps: number;
+  speed: number;
+  /** Called with the time of every drawn frame (the show's adaptive quality, render-quality.ts). */
+  onDraw?: (time: number) => void;
+};
+
 export function paceFrames(
   target: PacedTarget,
-  options: { fps: number; speed: number },
+  options: PaceOptions,
   clock: FrameClock = BROWSER_CLOCK,
 ): PacedFrames {
   const pacer = createFramePacer();
@@ -130,6 +137,7 @@ export function paceFrames(
     if (pacer.shouldDraw(time, options.fps)) {
       if (last !== null) target.setFrame(target.frame() + (time - last) * speed);
       last = time;
+      options.onDraw?.(time);
     }
     timerId = clock.after(request, Math.max(0, pacer.delayUntilNext(clock.now()) - WAKE_EARLY_MS));
   };
@@ -172,7 +180,7 @@ export function paceFrames(
  */
 export function paceHandle(
   handle: MaterialHandle,
-  options: { fps: number; speed: number },
+  options: PaceOptions,
   clock?: FrameClock,
 ): MaterialHandle {
   const loop = paceFrames(handle, options, clock);

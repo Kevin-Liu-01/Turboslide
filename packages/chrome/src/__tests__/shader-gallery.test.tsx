@@ -182,13 +182,28 @@ describe('the catalog as the gallery reads it', () => {
     );
   });
 
-  it('searches every word in the name, the description, the category and the engine; "metal" narrows to one card', () => {
-    expect(shaderGalleryEntries('metal').map((entry) => entry.id)).toEqual(['paper:liquid-metal']);
+  it('searches every word in the name, the description, the category and the engine; "metal" narrows to the Metal cards', () => {
+    expect(shaderGalleryEntries('metal').map((entry) => entry.id)).toEqual([
+      'paper:liquid-metal',
+      'glyph:liquid-glass',
+      'glyph:iridescent-foil',
+      'glyph:architectural-chrome',
+      'glyph:chrome-glares',
+    ]);
     expect(shaderGalleryEntries('meta').map((entry) => entry.id)).toEqual([
       'paper:liquid-metal',
       'paper:metaballs',
+      'glyph:liquid-glass',
+      'glyph:iridescent-foil',
+      'glyph:architectural-chrome',
+      'glyph:chrome-glares',
     ]);
-    expect(shaderGalleryEntries('Paper Shaders')).toHaveLength(GALLERY_MATERIAL_IDS.length);
+    expect(shaderGalleryEntries('Paper Shaders')).toHaveLength(
+      GALLERY_MATERIAL_IDS.filter((id) => id.startsWith('paper:')).length,
+    );
+    expect(shaderGalleryEntries('Glyphfield')).toHaveLength(
+      GALLERY_MATERIAL_IDS.filter((id) => id.startsWith('glyph:')).length,
+    );
     expect(shaderGalleryEntries('smoky ring').map((entry) => entry.id)).toEqual([
       'paper:smoke-ring',
     ]);
@@ -198,6 +213,7 @@ describe('the catalog as the gallery reads it', () => {
     ]);
     expect(shaderGalleryEntries('  metal   liquid ').map((entry) => entry.id)).toEqual([
       'paper:liquid-metal',
+      'glyph:liquid-glass',
     ]);
     /* the category is searched too: every card under the Fluid chip answers "fluid paper" */
     const fluid = shaderGalleryEntries('', 'fluid').map((entry) => entry.id);
@@ -211,14 +227,18 @@ describe('the catalog as the gallery reads it', () => {
     expect(shaderGalleryEntries('liquid', 'graphic')).toEqual([]);
     expect(shaderGalleryEntries('liquid', 'metal').map((entry) => entry.id)).toEqual([
       'paper:liquid-metal',
+      'glyph:liquid-glass',
     ]);
   });
 
-  it('names one engine family for Paper and draws no engine chips until a second exists', () => {
+  it('names an engine family per prefix and offers both engines once Glyphfield’s is in the catalog', () => {
     expect(engineOf('paper:liquid-metal')).toEqual({ family: 'paper', label: 'Paper Shaders' });
     expect(engineOf('proto:studio-field')).toEqual({ family: 'proto', label: 'Prototemplate' });
     expect(engineOf('glyph:mesh-gradient')).toEqual({ family: 'glyph', label: 'Glyphfield' });
-    expect(shaderEngines()).toEqual([{ family: 'paper', label: 'Paper Shaders' }]);
+    expect(shaderEngines()).toEqual([
+      { family: 'paper', label: 'Paper Shaders' },
+      { family: 'glyph', label: 'Glyphfield' },
+    ]);
   });
 
   it('lands the catalog’s featured preset: the diamond for liquid metal, the first preset where none is named', () => {

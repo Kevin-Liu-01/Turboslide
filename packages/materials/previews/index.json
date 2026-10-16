@@ -319,6 +319,744 @@
       "bytes": 2224
     },
     {
+      "materialId": "glyph:architectural-chrome",
+      "preset": "accent",
+      "file": "glyph-architectural-chrome--accent.webp",
+      "bytes": 1188
+    },
+    {
+      "materialId": "glyph:architectural-chrome",
+      "preset": "brand-blue",
+      "file": "glyph-architectural-chrome--brand-blue.webp",
+      "bytes": 1032
+    },
+    {
+      "materialId": "glyph:architectural-chrome",
+      "preset": "caption",
+      "file": "glyph-architectural-chrome--caption.webp",
+      "bytes": 798
+    },
+    {
+      "materialId": "glyph:architectural-chrome",
+      "preset": "hint",
+      "file": "glyph-architectural-chrome--hint.webp",
+      "bytes": 1166
+    },
+    {
+      "materialId": "glyph:architectural-chrome",
+      "preset": "ink-paper",
+      "file": "glyph-architectural-chrome--ink-paper.webp",
+      "bytes": 932
+    },
+    {
+      "materialId": "glyph:architectural-chrome",
+      "preset": "paper-ink",
+      "file": "glyph-architectural-chrome--paper-ink.webp",
+      "bytes": 968
+    },
+    {
+      "materialId": "glyph:architectural-chrome",
+      "file": "glyph-architectural-chrome.webp",
+      "bytes": 3876
+    },
+    {
+      "materialId": "glyph:caustics",
+      "preset": "accent",
+      "file": "glyph-caustics--accent.webp",
+      "bytes": 2258
+    },
+    {
+      "materialId": "glyph:caustics",
+      "preset": "brand-blue",
+      "file": "glyph-caustics--brand-blue.webp",
+      "bytes": 1882
+    },
+    {
+      "materialId": "glyph:caustics",
+      "preset": "caption",
+      "file": "glyph-caustics--caption.webp",
+      "bytes": 1548
+    },
+    {
+      "materialId": "glyph:caustics",
+      "preset": "hint",
+      "file": "glyph-caustics--hint.webp",
+      "bytes": 2324
+    },
+    {
+      "materialId": "glyph:caustics",
+      "preset": "ink-paper",
+      "file": "glyph-caustics--ink-paper.webp",
+      "bytes": 1782
+    },
+    {
+      "materialId": "glyph:caustics",
+      "preset": "paper-ink",
+      "file": "glyph-caustics--paper-ink.webp",
+      "bytes": 1836
+    },
+    {
+      "materialId": "glyph:caustics",
+      "file": "glyph-caustics.webp",
+      "bytes": 10976
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "preset": "accent",
+      "file": "glyph-chrome-glares--accent.webp",
+      "bytes": 644
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "preset": "brand-blue",
+      "file": "glyph-chrome-glares--brand-blue.webp",
+      "bytes": 548
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "preset": "caption",
+      "file": "glyph-chrome-glares--caption.webp",
+      "bytes": 398
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "preset": "hint",
+      "file": "glyph-chrome-glares--hint.webp",
+      "bytes": 592
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "preset": "ink-paper",
+      "file": "glyph-chrome-glares--ink-paper.webp",
+      "bytes": 460
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "preset": "paper-ink",
+      "file": "glyph-chrome-glares--paper-ink.webp",
+      "bytes": 500
+    },
+    {
+      "materialId": "glyph:chrome-glares",
+      "file": "glyph-chrome-glares.webp",
+      "bytes": 6414
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "preset": "accent",
+      "file": "glyph-dither-gradient--accent.webp",
+      "bytes": 790
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "preset": "brand-blue",
+      "file": "glyph-dither-gradient--brand-blue.webp",
+      "bytes": 606
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "preset": "caption",
+      "file": "glyph-dither-gradient--caption.webp",
+      "bytes": 538
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "preset": "hint",
+      "file": "glyph-dither-gradient--hint.webp",
+      "bytes": 1004
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "preset": "ink-paper",
+      "file": "glyph-dither-gradient--ink-paper.webp",
+      "bytes": 698
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "preset": "paper-ink",
+      "file": "glyph-dither-gradient--paper-ink.webp",
+      "bytes": 750
+    },
+    {
+      "materialId": "glyph:dither-gradient",
+      "file": "glyph-dither-gradient.webp",
+      "bytes": 20936
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "preset": "accent",
+      "file": "glyph-galactic-rings--accent.webp",
+      "bytes": 2024
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "preset": "brand-blue",
+      "file": "glyph-galactic-rings--brand-blue.webp",
+      "bytes": 1552
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "preset": "caption",
+      "file": "glyph-galactic-rings--caption.webp",
+      "bytes": 1126
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "preset": "hint",
+      "file": "glyph-galactic-rings--hint.webp",
+      "bytes": 1956
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "preset": "ink-paper",
+      "file": "glyph-galactic-rings--ink-paper.webp",
+      "bytes": 1284
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "preset": "paper-ink",
+      "file": "glyph-galactic-rings--paper-ink.webp",
+      "bytes": 1436
+    },
+    {
+      "materialId": "glyph:galactic-rings",
+      "file": "glyph-galactic-rings.webp",
+      "bytes": 7020
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "preset": "accent",
+      "file": "glyph-glyph-field--accent.webp",
+      "bytes": 1162
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "preset": "brand-blue",
+      "file": "glyph-glyph-field--brand-blue.webp",
+      "bytes": 916
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "preset": "caption",
+      "file": "glyph-glyph-field--caption.webp",
+      "bytes": 782
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "preset": "hint",
+      "file": "glyph-glyph-field--hint.webp",
+      "bytes": 1220
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "preset": "ink-paper",
+      "file": "glyph-glyph-field--ink-paper.webp",
+      "bytes": 880
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "preset": "paper-ink",
+      "file": "glyph-glyph-field--paper-ink.webp",
+      "bytes": 784
+    },
+    {
+      "materialId": "glyph:glyph-field",
+      "file": "glyph-glyph-field.webp",
+      "bytes": 8486
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "preset": "accent",
+      "file": "glyph-grain-gradient--accent.webp",
+      "bytes": 810
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "preset": "brand-blue",
+      "file": "glyph-grain-gradient--brand-blue.webp",
+      "bytes": 678
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "preset": "caption",
+      "file": "glyph-grain-gradient--caption.webp",
+      "bytes": 562
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "preset": "hint",
+      "file": "glyph-grain-gradient--hint.webp",
+      "bytes": 842
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "preset": "ink-paper",
+      "file": "glyph-grain-gradient--ink-paper.webp",
+      "bytes": 692
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "preset": "paper-ink",
+      "file": "glyph-grain-gradient--paper-ink.webp",
+      "bytes": 812
+    },
+    {
+      "materialId": "glyph:grain-gradient",
+      "file": "glyph-grain-gradient.webp",
+      "bytes": 14136
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "preset": "accent",
+      "file": "glyph-holo-cloth--accent.webp",
+      "bytes": 924
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "preset": "brand-blue",
+      "file": "glyph-holo-cloth--brand-blue.webp",
+      "bytes": 776
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "preset": "caption",
+      "file": "glyph-holo-cloth--caption.webp",
+      "bytes": 610
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "preset": "hint",
+      "file": "glyph-holo-cloth--hint.webp",
+      "bytes": 952
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "preset": "ink-paper",
+      "file": "glyph-holo-cloth--ink-paper.webp",
+      "bytes": 754
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "preset": "paper-ink",
+      "file": "glyph-holo-cloth--paper-ink.webp",
+      "bytes": 816
+    },
+    {
+      "materialId": "glyph:holo-cloth",
+      "file": "glyph-holo-cloth.webp",
+      "bytes": 9074
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "preset": "accent",
+      "file": "glyph-iridescent-foil--accent.webp",
+      "bytes": 1514
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "preset": "brand-blue",
+      "file": "glyph-iridescent-foil--brand-blue.webp",
+      "bytes": 1354
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "preset": "caption",
+      "file": "glyph-iridescent-foil--caption.webp",
+      "bytes": 1134
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "preset": "hint",
+      "file": "glyph-iridescent-foil--hint.webp",
+      "bytes": 1610
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "preset": "ink-paper",
+      "file": "glyph-iridescent-foil--ink-paper.webp",
+      "bytes": 1432
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "preset": "paper-ink",
+      "file": "glyph-iridescent-foil--paper-ink.webp",
+      "bytes": 1578
+    },
+    {
+      "materialId": "glyph:iridescent-foil",
+      "file": "glyph-iridescent-foil.webp",
+      "bytes": 14338
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "preset": "accent",
+      "file": "glyph-liquid-glass--accent.webp",
+      "bytes": 814
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "preset": "brand-blue",
+      "file": "glyph-liquid-glass--brand-blue.webp",
+      "bytes": 640
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "preset": "caption",
+      "file": "glyph-liquid-glass--caption.webp",
+      "bytes": 510
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "preset": "hint",
+      "file": "glyph-liquid-glass--hint.webp",
+      "bytes": 808
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "preset": "ink-paper",
+      "file": "glyph-liquid-glass--ink-paper.webp",
+      "bytes": 544
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "preset": "paper-ink",
+      "file": "glyph-liquid-glass--paper-ink.webp",
+      "bytes": 522
+    },
+    {
+      "materialId": "glyph:liquid-glass",
+      "file": "glyph-liquid-glass.webp",
+      "bytes": 9182
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "preset": "accent",
+      "file": "glyph-mesh-gradient--accent.webp",
+      "bytes": 504
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "preset": "brand-blue",
+      "file": "glyph-mesh-gradient--brand-blue.webp",
+      "bytes": 396
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "preset": "caption",
+      "file": "glyph-mesh-gradient--caption.webp",
+      "bytes": 312
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "preset": "hint",
+      "file": "glyph-mesh-gradient--hint.webp",
+      "bytes": 476
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "preset": "ink-paper",
+      "file": "glyph-mesh-gradient--ink-paper.webp",
+      "bytes": 344
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "preset": "paper-ink",
+      "file": "glyph-mesh-gradient--paper-ink.webp",
+      "bytes": 322
+    },
+    {
+      "materialId": "glyph:mesh-gradient",
+      "file": "glyph-mesh-gradient.webp",
+      "bytes": 9572
+    },
+    {
+      "materialId": "glyph:nebula",
+      "preset": "accent",
+      "file": "glyph-nebula--accent.webp",
+      "bytes": 1066
+    },
+    {
+      "materialId": "glyph:nebula",
+      "preset": "brand-blue",
+      "file": "glyph-nebula--brand-blue.webp",
+      "bytes": 936
+    },
+    {
+      "materialId": "glyph:nebula",
+      "preset": "caption",
+      "file": "glyph-nebula--caption.webp",
+      "bytes": 780
+    },
+    {
+      "materialId": "glyph:nebula",
+      "preset": "hint",
+      "file": "glyph-nebula--hint.webp",
+      "bytes": 1148
+    },
+    {
+      "materialId": "glyph:nebula",
+      "preset": "ink-paper",
+      "file": "glyph-nebula--ink-paper.webp",
+      "bytes": 984
+    },
+    {
+      "materialId": "glyph:nebula",
+      "preset": "paper-ink",
+      "file": "glyph-nebula--paper-ink.webp",
+      "bytes": 1146
+    },
+    {
+      "materialId": "glyph:nebula",
+      "file": "glyph-nebula.webp",
+      "bytes": 6926
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "preset": "accent",
+      "file": "glyph-orbit-gradient--accent.webp",
+      "bytes": 448
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "preset": "brand-blue",
+      "file": "glyph-orbit-gradient--brand-blue.webp",
+      "bytes": 398
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "preset": "caption",
+      "file": "glyph-orbit-gradient--caption.webp",
+      "bytes": 300
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "preset": "hint",
+      "file": "glyph-orbit-gradient--hint.webp",
+      "bytes": 418
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "preset": "ink-paper",
+      "file": "glyph-orbit-gradient--ink-paper.webp",
+      "bytes": 340
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "preset": "paper-ink",
+      "file": "glyph-orbit-gradient--paper-ink.webp",
+      "bytes": 390
+    },
+    {
+      "materialId": "glyph:orbit-gradient",
+      "file": "glyph-orbit-gradient.webp",
+      "bytes": 9102
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "preset": "accent",
+      "file": "glyph-radiant-void--accent.webp",
+      "bytes": 636
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "preset": "brand-blue",
+      "file": "glyph-radiant-void--brand-blue.webp",
+      "bytes": 598
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "preset": "caption",
+      "file": "glyph-radiant-void--caption.webp",
+      "bytes": 444
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "preset": "hint",
+      "file": "glyph-radiant-void--hint.webp",
+      "bytes": 636
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "preset": "ink-paper",
+      "file": "glyph-radiant-void--ink-paper.webp",
+      "bytes": 578
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "preset": "paper-ink",
+      "file": "glyph-radiant-void--paper-ink.webp",
+      "bytes": 644
+    },
+    {
+      "materialId": "glyph:radiant-void",
+      "file": "glyph-radiant-void.webp",
+      "bytes": 5280
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "preset": "accent",
+      "file": "glyph-relief-gradient--accent.webp",
+      "bytes": 708
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "preset": "brand-blue",
+      "file": "glyph-relief-gradient--brand-blue.webp",
+      "bytes": 564
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "preset": "caption",
+      "file": "glyph-relief-gradient--caption.webp",
+      "bytes": 466
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "preset": "hint",
+      "file": "glyph-relief-gradient--hint.webp",
+      "bytes": 738
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "preset": "ink-paper",
+      "file": "glyph-relief-gradient--ink-paper.webp",
+      "bytes": 536
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "preset": "paper-ink",
+      "file": "glyph-relief-gradient--paper-ink.webp",
+      "bytes": 542
+    },
+    {
+      "materialId": "glyph:relief-gradient",
+      "file": "glyph-relief-gradient.webp",
+      "bytes": 12466
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "preset": "accent",
+      "file": "glyph-silk-ribbons--accent.webp",
+      "bytes": 826
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "preset": "brand-blue",
+      "file": "glyph-silk-ribbons--brand-blue.webp",
+      "bytes": 696
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "preset": "caption",
+      "file": "glyph-silk-ribbons--caption.webp",
+      "bytes": 510
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "preset": "hint",
+      "file": "glyph-silk-ribbons--hint.webp",
+      "bytes": 806
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "preset": "ink-paper",
+      "file": "glyph-silk-ribbons--ink-paper.webp",
+      "bytes": 602
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "preset": "paper-ink",
+      "file": "glyph-silk-ribbons--paper-ink.webp",
+      "bytes": 644
+    },
+    {
+      "materialId": "glyph:silk-ribbons",
+      "file": "glyph-silk-ribbons.webp",
+      "bytes": 6132
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "preset": "accent",
+      "file": "glyph-soft-register--accent.webp",
+      "bytes": 1082
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "preset": "brand-blue",
+      "file": "glyph-soft-register--brand-blue.webp",
+      "bytes": 844
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "preset": "caption",
+      "file": "glyph-soft-register--caption.webp",
+      "bytes": 804
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "preset": "hint",
+      "file": "glyph-soft-register--hint.webp",
+      "bytes": 1282
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "preset": "ink-paper",
+      "file": "glyph-soft-register--ink-paper.webp",
+      "bytes": 1060
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "preset": "paper-ink",
+      "file": "glyph-soft-register--paper-ink.webp",
+      "bytes": 1128
+    },
+    {
+      "materialId": "glyph:soft-register",
+      "file": "glyph-soft-register.webp",
+      "bytes": 28244
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "preset": "accent",
+      "file": "glyph-spectral-bloom--accent.webp",
+      "bytes": 1064
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "preset": "brand-blue",
+      "file": "glyph-spectral-bloom--brand-blue.webp",
+      "bytes": 870
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "preset": "caption",
+      "file": "glyph-spectral-bloom--caption.webp",
+      "bytes": 652
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "preset": "hint",
+      "file": "glyph-spectral-bloom--hint.webp",
+      "bytes": 1062
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "preset": "ink-paper",
+      "file": "glyph-spectral-bloom--ink-paper.webp",
+      "bytes": 770
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "preset": "paper-ink",
+      "file": "glyph-spectral-bloom--paper-ink.webp",
+      "bytes": 806
+    },
+    {
+      "materialId": "glyph:spectral-bloom",
+      "file": "glyph-spectral-bloom.webp",
+      "bytes": 3318
+    },
+    {
       "materialId": "paper:god-rays",
       "preset": "accent",
       "file": "god-rays--accent.webp",

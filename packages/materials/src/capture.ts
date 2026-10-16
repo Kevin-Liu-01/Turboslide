@@ -38,12 +38,16 @@ import {
 import type { PlateSide, TwoToneRequestParams } from '@turboslide/headless/capture/shared';
 import { isSingleProcessBrowser, launchBrowser } from '@turboslide/headless/launch';
 import type { GpuBackend, LaunchOptions, LaunchedBrowser } from '@turboslide/headless/launch';
+import { themePaths } from '@turboslide/render/theme-node';
 import type { Asset } from '@turboslide/schema/assets';
 import type { MaterialUniforms } from '@turboslide/schema/blocks/material';
 import { getShaderNoiseTexture } from '@paper-design/shaders';
 
-import type { MaterialEntry } from './catalog.ts';
+import type { GlyphEntry, MaterialEntry } from './catalog.ts';
 import { entryWithPalette, requireMaterial } from './catalog.ts';
+import { GLYPH_FIELD_FONT_LOAD, glyphFrameOf, glyphProgramSpec } from './engine.ts';
+import { createGlyphRenderer } from './glyph/renderer.ts';
+import type { GlyphFrame, GlyphProgramSpec } from './glyph/renderer.ts';
 import { fragmentShaderExport, mipmapsFor, textureSources, toShaderUniforms } from './paper.ts';
 import type { ShaderPalette } from './presets.ts';
 import { materialSlug, resolveRecipe } from './recipe.ts';
@@ -302,6 +306,57 @@ export async function mountInPage(
   }, args);
 }
 
+/**
+ * Mounts a glyph entry in the capture page (PLAN wave 3.1, the hosted path of Glyphfield's engine):
+ * the renderer's own source text is sent to the page, so the hosted frame runs the code the
+ * editor runs, on a canvas in the host at the frame's pixels. `__name` answers esbuild's name
+ * helper when a dev transform wrapped the renderer's inner functions.
+ */
+export async function mountGlyphInPage(page: Page, spec: GlyphProgramSpec): Promise<void> {
+  await page.waitForSelector('html[data-paper-ready="1"]', { state: 'attached', timeout: 15_000 });
+  if (spec.kind === 'canvas2d') {
+    /* the glyph field draws in Inter, inlined from the fonts package as the render documents do */
+    const woff2 = await readFile(themePaths().interWoff2);
+    await page.addStyleTag({
+      content: `@font-face { font-family: 'Inter'; font-weight: 100 900; src: url(data:font/woff2;base64,${woff2.toString('base64')}) format('woff2'); }`,
+    });
+    await page.evaluate(
+      (face) => document.fonts.load(face).then(() => undefined),
+      GLYPH_FIELD_FONT_LOAD,
+    );
+  }
+  await page.addScriptTag({
+    content: `var __name = (target) => target;\nwindow.__createGlyphRenderer = ${createGlyphRenderer.toString()};`,
+  });
+  await page.evaluate((program) => {
+    type Renderer = { draw: (frame: unknown) => void };
+    const win = window as unknown as {
+      __createGlyphRenderer: (canvas: HTMLCanvasElement, spec: unknown, keep: boolean) => Renderer;
+      __glyph: Renderer;
+    };
+    const host = document.getElementById('host');
+    if (host === null) throw new Error('capture host missing');
+    const canvas = document.createElement('canvas');
+    host.prepend(canvas);
+    win.__glyph = win.__createGlyphRenderer(canvas, program, true);
+  }, spec);
+}
+
+/** Draws one glyph frame in the capture page and takes the canvas's element screenshot. */
+async function glyphFrameAt(page: Page, frame: GlyphFrame): Promise<Uint8Array> {
+  await page.evaluate(async (value) => {
+    const win = window as unknown as { __glyph: { draw: (frame: unknown) => void } };
+    win.__glyph.draw(value);
+    await new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => r(undefined))),
+    );
+  }, frame);
+  const shot = await page
+    .locator('#host canvas')
+    .screenshot({ type: 'png', animations: 'disabled' });
+  return new Uint8Array(shot);
+}
+
 async function frameAt(page: Page, anchor: number): Promise<Uint8Array> {
   await page.evaluate(async (ms) => {
     const mount = (window as unknown as { __mount: { setFrame: (ms: number) => void } }).__mount;
@@ -359,8 +414,12 @@ export async function renderMaterialFrames(
   const size = frameSizeOf(request.size);
   if (request.anchors.length === 0)
     throw new RangeError('material.capture wants at least one anchor');
-  const textures = textureSources(entry, noiseTextureSrc(paperDistDir(options.paperDist)));
-  const shaderUniforms = toShaderUniforms(entry, resolved.uniforms);
+  const glyph: GlyphEntry | null = entry.engine === 'glyph' ? entry : null;
+  const textures =
+    entry.engine === 'paper'
+      ? textureSources(entry, noiseTextureSrc(paperDistDir(options.paperDist)))
+      : {};
+  const shaderUniforms = entry.engine === 'paper' ? toShaderUniforms(entry, resolved.uniforms) : {};
 
   let launched: LaunchedBrowser | undefined;
   const browserHandle =
@@ -383,27 +442,38 @@ export async function renderMaterialFrames(
       const page = await context.newPage();
       await servePaper(page, paperDistDir(options.paperDist), size);
       await page.goto(`${CAPTURE_ORIGIN}/capture.html`, { waitUntil: 'load' });
-      const first = request.anchors[0] ?? 0;
-      const mounted = await mountInPage(page, {
-        shaderExport: fragmentShaderExport(entry),
-        uniforms: shaderUniforms as Record<string, unknown>,
-        textures,
-        mipmaps: mipmapsFor(entry),
-        frame: first,
-        width: size[0],
-        height: size[1],
-        maxPixelCount: size[0] * size[1] + 1,
-      });
-      if (mounted.width !== size[0] || mounted.height !== size[1]) {
-        throw new Error(
-          `the mount rendered at ${mounted.width} by ${mounted.height}, not ${size.join(' by ')} (the canvas did not reach the frame size)`,
-        );
-      }
-      if (request.settleMs !== undefined && request.settleMs > 0)
-        await page.waitForTimeout(request.settleMs);
-      for (const anchor of request.anchors) {
-        options.log?.(`material: ${entry.id} at ${anchor} ms`);
-        frames.push({ anchor, png: await frameAt(page, anchor) });
+      if (glyph !== null) {
+        await mountGlyphInPage(page, glyphProgramSpec(glyph));
+        if (request.settleMs !== undefined && request.settleMs > 0)
+          await page.waitForTimeout(request.settleMs);
+        for (const anchor of request.anchors) {
+          options.log?.(`material: ${entry.id} at ${anchor} ms`);
+          const frame = glyphFrameOf(glyph, resolved.uniforms, size[0], size[1], anchor);
+          frames.push({ anchor, png: await glyphFrameAt(page, frame) });
+        }
+      } else if (entry.engine === 'paper') {
+        const first = request.anchors[0] ?? 0;
+        const mounted = await mountInPage(page, {
+          shaderExport: fragmentShaderExport(entry),
+          uniforms: shaderUniforms as Record<string, unknown>,
+          textures,
+          mipmaps: mipmapsFor(entry),
+          frame: first,
+          width: size[0],
+          height: size[1],
+          maxPixelCount: size[0] * size[1] + 1,
+        });
+        if (mounted.width !== size[0] || mounted.height !== size[1]) {
+          throw new Error(
+            `the mount rendered at ${mounted.width} by ${mounted.height}, not ${size.join(' by ')} (the canvas did not reach the frame size)`,
+          );
+        }
+        if (request.settleMs !== undefined && request.settleMs > 0)
+          await page.waitForTimeout(request.settleMs);
+        for (const anchor of request.anchors) {
+          options.log?.(`material: ${entry.id} at ${anchor} ms`);
+          frames.push({ anchor, png: await frameAt(page, anchor) });
+        }
       }
     } finally {
       // the single-process serverless shell dies when a context is closed (headless launch.ts;

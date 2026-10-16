@@ -918,7 +918,7 @@ test(title('shaders.agent.list-insert-set-render'), async () => {
 });
 
 test(title('shaders.library.glyph-engines-render'), async () => {
-  test.setTimeout(300_000);
+  test.setTimeout(900_000);
   await openEditor(page, deck);
   await clickCard(page, slideId);
   const maybe = agentHeaders(base());
@@ -937,7 +937,27 @@ test(title('shaders.library.glyph-engines-render'), async () => {
       : ((body as { shaders?: { id: string; available?: boolean }[] })?.shaders ?? null);
   };
   const entries = (await read('shader.list')) ?? (await read('material.list')) ?? [];
-  const want = ['proto:studio-field', 'glyph:mesh-gradient', 'glyph:dither-gradient'];
+  /* Glyphfield's engine (PLAN wave 3): the house gradients, the thirteen originals, Holo cloth and
+     the glyph field; Prototemplate's studio field is its own item and joins when it lands */
+  const want = [
+    'glyph:mesh-gradient',
+    'glyph:dither-gradient',
+    'glyph:liquid-glass',
+    'glyph:caustics',
+    'glyph:iridescent-foil',
+    'glyph:nebula',
+    'glyph:silk-ribbons',
+    'glyph:spectral-bloom',
+    'glyph:architectural-chrome',
+    'glyph:radiant-void',
+    'glyph:galactic-rings',
+    'glyph:chrome-glares',
+    'glyph:relief-gradient',
+    'glyph:orbit-gradient',
+    'glyph:soft-register',
+    'glyph:holo-cloth',
+    'glyph:glyph-field',
+  ];
   const present = want.filter((id) => entries.some((e) => e.id === id && e.available !== false));
   test.info().annotations.push({
     type: 'engines',
@@ -962,7 +982,7 @@ test(title('shaders.library.glyph-engines-render'), async () => {
     expect(root?.canvas ?? 0, `${materialId} mounts`).toBe(1);
     expect(frame.asset, `${materialId} captures`).not.toBeNull();
   }
-  /* one PDF carries the three frames */
+  /* one PDF carries every frame */
   await page.keyboard.press('Escape');
   const pdf = await download(
     page,
@@ -971,7 +991,7 @@ test(title('shaders.library.glyph-engines-render'), async () => {
   );
   facts.push(`PDF ${pdf.bytes.length} bytes with ${pdfImages(pdf.bytes)} image objects`);
   test.info().annotations.push({ type: 'export', description: facts.join('; ') });
-  expect(pdfImages(pdf.bytes), 'the PDF carries the frames').toBeGreaterThanOrEqual(3);
+  expect(pdfImages(pdf.bytes), 'the PDF carries the frames').toBeGreaterThanOrEqual(want.length);
 });
 
 /** The Tools > Preferences > Play shaders rows (View > Play shaders before Round 1, docs/NEXT.md 4.1.3 item 20), or null when the row is not on the build. */

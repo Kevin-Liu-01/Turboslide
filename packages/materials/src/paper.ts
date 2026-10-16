@@ -41,7 +41,7 @@ import type {
   MaterialUniforms,
 } from '@turboslide/schema/blocks/material';
 
-import type { MaterialEntry, PaperShaderName } from './catalog.ts';
+import type { MaterialEntry, PaperEntry, PaperShaderName } from './catalog.ts';
 import { enumValue, isColorString, splitColors } from './recipe.ts';
 
 const SHADERS: Readonly<Record<PaperShaderName, string>> = {
@@ -71,12 +71,12 @@ const SHADERS: Readonly<Record<PaperShaderName, string>> = {
 };
 
 /** The GLSL of an entry, from the package. */
-export function fragmentShaderFor(entry: MaterialEntry): string {
+export function fragmentShaderFor(entry: PaperEntry): string {
   return SHADERS[entry.shader];
 }
 
 /** The `<name>FragmentShader` export the capture page reads off the module namespace. */
-export function fragmentShaderExport(entry: MaterialEntry): string {
+export function fragmentShaderExport(entry: PaperEntry): string {
   return `${entry.shader}FragmentShader`;
 }
 

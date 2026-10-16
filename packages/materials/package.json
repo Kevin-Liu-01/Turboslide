@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The material catalog (SPEC 5.4): Paper Shaders paper:* entries with uniform schemas and GT palette presets, the proto:* engines as unavailable entries (open question 9), recipe resolution and the recipe key, the main-thread mount for the editor's live preview, the headless capture of frozen frames at anchors (plain and two-tone) and the asset action handlers (asset.add, asset.dither, asset.capture, material.capture, material.list) every transport registers. The features round adds the eleven common controls (controls.ts), the kit palette (presets.ts), the frame key (recipe-key.ts), the gallery stills (previews.ts, previews/) and the shader.* actions.",
+  "description": "The material catalog (SPEC 5.4): Paper Shaders paper:* entries with uniform schemas and GT palette presets, the proto:* engines as unavailable entries (open question 9), recipe resolution and the recipe key, the main-thread mount for the editor's live preview, the headless capture of frozen frames at anchors (plain and two-tone) and the asset action handlers (asset.add, asset.dither, asset.capture, material.capture, material.list) every transport registers. The features round adds the eleven common controls (controls.ts), the kit palette (presets.ts), the frame key (recipe-key.ts), the gallery stills (previews.ts, previews/) and the shader.* actions. The Glyphfield port's wave 3 adds Glyphfield's own engine beside Paper (engine.ts, glyph/): the glyph:* entries on WebGL2 and the glyph field on Canvas 2D, with both capture paths.",
   "scripts": {
     "test": "vitest run"
   },

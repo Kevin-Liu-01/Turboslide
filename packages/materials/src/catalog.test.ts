@@ -17,6 +17,8 @@ import {
   listMaterials,
   requireMaterial,
 } from './catalog.ts';
+import type { MaterialEntry, PaperEntry } from './catalog.ts';
+import { glyphFrameOf, glyphProgramSpec } from './engine.ts';
 import {
   fragmentShaderFor,
   mipmapsFor,
@@ -33,12 +35,21 @@ import { recipeKey } from './recipe-key.ts';
 
 const REPO = join(import.meta.dirname, '..', '..', '..');
 
+const isPaper = (entry: MaterialEntry): entry is PaperEntry => entry.engine === 'paper';
+const PAPER_ENTRIES: PaperEntry[] = Object.values(MATERIALS).filter(isPaper);
+/** A Paper entry by id; throws for a glyph entry. */
+function paperEntry(id: string): PaperEntry {
+  const entry = requireMaterial(id);
+  if (!isPaper(entry)) throw new TypeError(`${id} is not a Paper entry`);
+  return entry;
+}
+
 describe('the catalog', () => {
   test('every entry parses as the schema entry, has a shader and every preset validates', () => {
     expect(MATERIAL_IDS.length).toBeGreaterThanOrEqual(17);
     for (const entry of Object.values(MATERIALS)) {
       expect(materialCatalogEntrySchema.safeParse(listMaterials(entry.id)[0]).success).toBe(true);
-      expect(fragmentShaderFor(entry)).toMatch(/^#version 300 es/);
+      if (isPaper(entry)) expect(fragmentShaderFor(entry)).toMatch(/^#version 300 es/);
       const names = new Set(entry.uniforms.map((spec) => spec.name));
       expect(names.size).toBe(entry.uniforms.length);
       for (const spec of entry.uniforms)
@@ -108,7 +119,7 @@ describe('six more Paper materials (the Glyphfield port, wave 2.2)', () => {
 
   test('are in the catalog and the gallery under Glyphfield’s names, each with its own shader', () => {
     for (const [id, label] of Object.entries(SIX)) {
-      const entry = requireMaterial(id);
+      const entry = paperEntry(id);
       expect(entry.label).toBe(label);
       expect(entry.available).toBe(true);
       expect(entry.still).toBe(false);
@@ -116,15 +127,13 @@ describe('six more Paper materials (the Glyphfield port, wave 2.2)', () => {
       expect(fragmentShaderFor(entry)).toMatch(/^#version 300 es/);
       expect(GALLERY_MATERIAL_IDS).toContain(id);
     }
-    expect(new Set(Object.keys(SIX).map((id) => fragmentShaderFor(requireMaterial(id)))).size).toBe(
-      6,
-    );
-    expect(MATERIAL_IDS).toHaveLength(23);
+    expect(new Set(Object.keys(SIX).map((id) => fragmentShaderFor(paperEntry(id)))).size).toBe(6);
+    expect(PAPER_ENTRIES).toHaveLength(23);
   });
 
   test('every uniform of every entry is one the shader or Paper’s sizing reads', () => {
     const SIZING = new Set(['u_fit', 'u_scale', 'u_rotation', 'u_offsetX', 'u_offsetY']);
-    for (const entry of Object.values(MATERIALS)) {
+    for (const entry of PAPER_ENTRIES) {
       const glsl = fragmentShaderFor(entry);
       for (const spec of entry.uniforms) {
         if (SIZING.has(spec.name) || /^u_(origin|world)/.test(spec.name)) continue;
@@ -143,7 +152,7 @@ describe('six more Paper materials (the Glyphfield port, wave 2.2)', () => {
       'paper:voronoi',
       'paper:warp',
     ]);
-    const water = requireMaterial('paper:water');
+    const water = paperEntry('paper:water');
     expect(Object.keys(textureSources(water, 'data:noise'))).toEqual(['u_image']);
     expect(mipmapsFor(water)).toEqual(['u_image']);
     /* water has no u_isImage: sending it made Paper warn on every frame */
@@ -266,5 +275,63 @@ describe('the recipe key', () => {
     expect(recipeKey(base)).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(recipeKey({ ...base, timeMs: 4000 })).not.toBe(recipeKey(base));
     expect(recipeKey({ ...base, backend: 'swiftshader' })).not.toBe(recipeKey(base));
+  });
+});
+
+describe('the glyph entries (the Glyphfield port, wave 3)', () => {
+  const GLYPH = Object.values(MATERIALS).filter((entry) => entry.engine === 'glyph');
+  const CURATED = [
+    'Liquid glass',
+    'Caustics',
+    'Iridescent foil',
+    'Nebula',
+    'Silk ribbons',
+    'Spectral bloom',
+    'Architectural chrome',
+    'Radiant void',
+    'Galactic rings',
+    'Chrome glares',
+    'Relief gradient',
+    'Orbit gradient',
+    'Soft register',
+  ];
+
+  test('the house gradients, the thirteen originals, Holo cloth and the glyph field, in sentence case', () => {
+    expect(GLYPH.map((entry) => entry.label).sort()).toEqual(
+      [
+        ...CURATED,
+        'Mesh gradient',
+        'Grain gradient',
+        'Dither gradient',
+        'Holo cloth',
+        'Glyph field',
+      ].sort(),
+    );
+    for (const entry of GLYPH) {
+      expect(entry.id).toMatch(/^glyph:[a-z-]+$/);
+      expect(listMaterials(entry.id)[0]?.engine).toMatch(/^Glyphfield (WebGL2|Canvas 2D)$/);
+      expect(GALLERY_MATERIAL_IDS).toContain(entry.id);
+    }
+  });
+
+  test('no entry names another studio or reference', () => {
+    for (const entry of Object.values(MATERIALS))
+      expect(`${entry.label} ${entry.doc} ${entry.credit}`, entry.id).not.toMatch(
+        /shaders\.com|evil rabbit|gradientool|grainient|design stud|holocloth|shadergradient/i,
+      );
+  });
+
+  test('every glyph entry is seekable: its frame is a function of the time alone', () => {
+    for (const entry of GLYPH) {
+      if (entry.engine !== 'glyph') continue;
+      const at = glyphFrameOf(entry, {}, 3200, 1800, 5500);
+      expect(at.time).toBeCloseTo(5.5 * entry.timeScale, 6);
+      expect(glyphFrameOf(entry, {}, 3200, 1800, 5500)).toEqual(at);
+      expect(entry.still).toBe(false);
+      const spec = glyphProgramSpec(entry);
+      if (spec.kind === 'webgl2')
+        expect(spec.fragment).toMatch(/^#version 300 es[\s\S]*void main\(\)/);
+      else expect(entry.id).toBe('glyph:glyph-field');
+    }
   });
 });

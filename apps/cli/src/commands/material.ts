@@ -47,7 +47,8 @@ async function materialListCommand(ctx: CommandContext): Promise<number> {
   ctx.out.result(entries);
   for (const entry of entries) {
     const state = entry.available ? '' : ' (not ported, open question 9)';
-    ctx.out.human(`${entry.id}  ${entry.label}${state}`);
+    const engine = entry.engine === undefined ? '' : ` (${entry.engine})`;
+    ctx.out.human(`${entry.id}  ${entry.label}${engine}${state}`);
     if (entry.available) {
       ctx.out.human(`  presets: ${entry.presets.map((p) => p.name).join(', ')}`);
       ctx.out.human(

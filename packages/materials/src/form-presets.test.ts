@@ -40,7 +40,9 @@ describe('form presets', () => {
     expect(forms('paper:water')).toEqual(['slow-motion']);
     for (const entry of Object.values(MATERIALS)) {
       const names = entry.presets.map((preset) => preset.name);
-      expect(names.slice(-forms(entry.id).length), entry.id).toEqual(forms(entry.id));
+      /* the glyph entries have no form presets; slice(-0) would read the whole list */
+      if (forms(entry.id).length > 0)
+        expect(names.slice(-forms(entry.id).length), entry.id).toEqual(forms(entry.id));
       expect(new Set(names).size, entry.id).toBe(names.length);
     }
   });

@@ -9,6 +9,7 @@ import type { PlayMode } from '@turboslide/schema/deck';
 
 import { MATERIAL_PLAY_EVENT } from './dither';
 import { paceHandle } from './frame-pacer';
+import { adaptivePixels } from './render-quality';
 import { onLiveSettingsChange, pageLiveSettings, paperEngineRuns, planLive } from './live-plan';
 import type { LiveSettings } from './live-plan';
 import { motionReduced } from './reduce-motion';
@@ -250,6 +251,12 @@ export function raiseCanvas(handle: MaterialHandle): void {
 /** The frames per second the editor's mount is capped at (5.6). */
 export const EDITOR_SHADER_FPS = 30;
 
+/**
+ * The mount's pixel cap, materials mount.ts `MOUNT_DEFAULTS.maxPixelCount` (a 3200 by 1800 frame),
+ * written out here since a value import would pull the lazy mount chunk into the stage's graph.
+ */
+const MOUNT_PIXEL_BUDGET = 3200 * 1800 + 1;
+
 // ---------------------------------------------------------------------------------------------
 // The registry of live mounts, by block id (the Shader section's live preview, 5.3)
 
@@ -448,7 +455,16 @@ export function MaterialMount({
                 }
                 // the canvas above the frame it covers (the header's second paragraph)
                 raiseCanvas(mounted);
-                const handle = paced ? paceHandle(mounted, { fps, speed: playSpeed }) : mounted;
+                /* the show halves the canvas's pixels after two slow windows (PLAN wave 3.3) */
+                const handle = paced
+                  ? paceHandle(mounted, {
+                      fps,
+                      speed: playSpeed,
+                      ...(mode === 'show'
+                        ? { onDraw: adaptivePixels(mounted, fps, MOUNT_PIXEL_BUDGET) }
+                        : {}),
+                    })
+                  : mounted;
                 handles.push({ id, handle });
                 if (id !== null) {
                   LIVE.set(id, handle);

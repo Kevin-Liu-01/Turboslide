@@ -1124,7 +1124,12 @@ export function frameFitsBox(size: [number, number], aspect: number): boolean {
 
 /** The credit line of a frame (5.5): "Shader: Liquid metal, Paper Shaders, rendered in Turboslide". */
 export function frameCredit(entry: MaterialEntry): string {
-  const upstream = entry.family === 'paper' ? 'Paper Shaders' : 'Prototemplate';
+  const upstream =
+    entry.family === 'paper'
+      ? 'Paper Shaders'
+      : entry.family === 'glyph'
+        ? 'Glyphfield'
+        : 'Prototemplate';
   return `Shader: ${entry.label}, ${upstream}, rendered in Turboslide`;
 }
 

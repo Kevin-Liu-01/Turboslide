@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { HOLD_LIVE_ATTRIBUTE, pagePreference } from '@turboslide/viewer/live-plan';
+import {
+  HOLD_LIVE_ATTRIBUTE,
+  PLAY_LIVE_ATTRIBUTE,
+  pagePreference,
+} from '@turboslide/viewer/live-plan';
 import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
 
 import {
@@ -109,10 +113,20 @@ describe('the preference stamps', () => {
     expect(pagePreference()).toBe('off');
     localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ playShaders: 'on' }));
     window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
+    /* On is stamped too: the editor's mount moves the selected pattern under On alone */
+    expect(pagePreference()).toBe('on');
+    expect(root().hasAttribute(PLAY_LIVE_ATTRIBUTE)).toBe(true);
+    localStorage.setItem(SETTINGS_STORAGE, JSON.stringify({ playShaders: 'show' }));
+    window.dispatchEvent(new StorageEvent('storage', { key: SETTINGS_STORAGE }));
     expect(pagePreference()).toBe('show');
     stampPreferences({ playShaders: 'off' });
     expect(root().hasAttribute(HOLD_LIVE_ATTRIBUTE)).toBe(true);
+    expect(root().hasAttribute(PLAY_LIVE_ATTRIBUTE)).toBe(false);
+    stampPreferences({ playShaders: 'on' });
+    expect(root().hasAttribute(HOLD_LIVE_ATTRIBUTE)).toBe(false);
+    expect(pagePreference()).toBe('on');
     stampPreferences({ playShaders: 'show' });
     expect(root().hasAttribute(HOLD_LIVE_ATTRIBUTE)).toBe(false);
+    expect(root().hasAttribute(PLAY_LIVE_ATTRIBUTE)).toBe(false);
   });
 });

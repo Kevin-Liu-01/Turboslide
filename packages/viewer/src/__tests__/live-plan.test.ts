@@ -4,7 +4,7 @@
 // that can run plays and every other root holds.
 import { describe, expect, it } from 'vitest';
 
-import { livePreferenceOf, planLive } from '../live-plan';
+import { editorPlays, livePreferenceOf, planLive } from '../live-plan';
 import type { LiveRootFacts, LiveSettings } from '../live-plan';
 
 const root = (area: number, more: Partial<LiveRootFacts> = {}): LiveRootFacts => ({
@@ -46,5 +46,17 @@ describe('livePreferenceOf', () => {
     expect(livePreferenceOf('show')).toBe('show');
     expect(livePreferenceOf(undefined)).toBe('show');
     expect(livePreferenceOf(true)).toBe('show');
+  });
+});
+
+describe('editorPlays', () => {
+  /* docs editor/objects: On moves the selected pattern while you edit; In the show only (the
+     default) and Off keep it on its still there (post-deploy review: On and In the show only
+     behaved the same in the editor) */
+  it('moves the editor’s selected pattern under On alone', () => {
+    expect(editorPlays('on')).toBe(true);
+    expect(editorPlays('show')).toBe(false);
+    expect(editorPlays('off')).toBe(false);
+    expect(editorPlays(livePreferenceOf(undefined))).toBe(false);
   });
 });

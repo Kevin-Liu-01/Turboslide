@@ -10,8 +10,14 @@ import type { PlayMode } from '@turboslide/schema/deck';
 import { MATERIAL_PLAY_EVENT } from './dither';
 import { paceHandle } from './frame-pacer';
 import { adaptivePixels } from './render-quality';
-import { onLiveSettingsChange, pageLiveSettings, paperEngineRuns, planLive } from './live-plan';
-import type { LiveSettings } from './live-plan';
+import {
+  editorPlays,
+  onLiveSettingsChange,
+  pageLiveSettings,
+  paperEngineRuns,
+  planLive,
+} from './live-plan';
+import type { LivePreference, LiveSettings } from './live-plan';
 import { motionReduced } from './reduce-motion';
 
 /**
@@ -363,17 +369,20 @@ export function MaterialMount({
      Preferences > Reduce motion flips; the person's Play animated patterns Off (live-plan.ts) holds
      the same way, and in show mode mounts nothing */
   const [reduced, setReduced] = useState<boolean>(() => motionReduced());
-  const [personHolds, setPersonHolds] = useState<boolean>(
-    () => pageLiveSettings('play').preference === 'off',
+  const [preference, setPreference] = useState<LivePreference>(
+    () => pageLiveSettings('play').preference,
   );
   useEffect(
     () =>
       onLiveSettingsChange(() => {
         setReduced(motionReduced());
-        setPersonHolds(pageLiveSettings('play').preference === 'off');
+        setPreference(pageLiveSettings('play').preference);
       }),
     [],
   );
+  /* the person holds this mount: Off everywhere; In the show only in the editor as well, where On
+     alone moves the selected pattern (live-plan.ts `editorPlays`) */
+  const personHolds = mode === 'show' ? preference === 'off' : !editorPlays(preference);
 
   const selectedKey = selected === undefined ? 'all' : (selected ?? []).join('\u0000');
   const lowRes = scale !== undefined && scale < 1;
@@ -406,7 +415,7 @@ export function MaterialMount({
               engine: paperEngineRuns(),
               area: areaOf(element),
             })),
-            { reduced, preference: personHolds ? 'off' : 'show', play },
+            { reduced, preference, play },
           )
         : planMounts(
             roots.map((element) => ({
@@ -431,9 +440,9 @@ export function MaterialMount({
           if (!alive) return;
           for (const { recipe, host, plan, id } of targets) {
             const own = recipe.speed ?? 1;
-            /* Play animated patterns Off holds everywhere for the person (the shader design 3.1):
-               in the editor the selected block still mounts, at speed 0, so a slider or the Still
-               group previews on it */
+            /* Play animated patterns Off holds everywhere for the person (the shader design 3.1),
+               and In the show only holds in the editor: the selected block still mounts, at
+               speed 0, so a slider or the Still group previews on it */
             const playSpeed = reduced || personHolds || plan === 'still' ? 0 : speed * own;
             /* a playing mount is paced at `fps` (5.6): Paper mounts at speed 0 and the pacer moves
                its frame, so a Speed preview that starts it later is capped too */
@@ -505,6 +514,7 @@ export function MaterialMount({
     reduced,
     mode,
     play,
+    preference,
     personHolds,
   ]);
   return null;

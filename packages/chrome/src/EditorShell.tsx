@@ -1388,6 +1388,15 @@ export function EditorShell({
           applyChromePreferences({ ...effectiveSettings, [setting]: on });
           return;
         }
+        /* the root's stamps follow at once, so the editor and a show in this tab hold or move
+           without a reload (post-deploy review: Off held only after a reload, and In the show
+           only kept holding until one) */
+        case 'playShaders': {
+          const next = typeof value === 'string' ? value : 'show';
+          setSetting(setting, next);
+          applyChromePreferences({ ...effectiveSettings, playShaders: next });
+          return;
+        }
         default: {
           const now = effectiveSettings[setting];
           setSetting(setting, typeof value === 'string' ? value : !(now === true));

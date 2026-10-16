@@ -4,6 +4,7 @@ import {
   angleOf,
   discsOf,
   fanBox,
+  fanDiscs,
   labelAngles,
   labelBox,
   orbitFor,
@@ -151,6 +152,77 @@ describe('the orbit of a stack', () => {
     });
     expect(turned).toBeGreaterThan(0);
     expect(turned).toBeLessThan(5);
+  });
+
+  // post-merge review: labelAngles counted only the glyphs, so at 390 px the labels of Neon 260
+  // and Xenon 734 ran under the agents' Claude Code avatar, and at 768 px OpenClaw's label turned
+  // 90 degrees onto Claude Code, the first avatar of its own stack. A label now counts every other
+  // avatar of both stacks as it counts a glyph.
+  describe('a name label and the other avatars', () => {
+    const open: OrbitInput = { ...people, glyphs: [], bounds: box(-600, -300, 700, 300) };
+    const orbit = orbitFor(open);
+    const sizes = Array.from({ length: 5 }, () => ({ w: 90, h: 20 }));
+    const STATES = [
+      [orbit.open, true],
+      [orbit.rest, true],
+      [orbit.rest, false],
+    ] as const;
+    const area = (a: Box, b: Box): number =>
+      Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) *
+      Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+    /* an avatar as drawn: its disc and its 2 px paper ring */
+    const drawn = (d: { x: number; y: number; r: number }): Box =>
+      box(d.x - d.r - 2, d.y - d.r - 2, d.x + d.r + 2, d.y + d.r + 2);
+    const labelAt = (i: number, theta: number, step: number, lifted: boolean): Box => {
+      const phi = angleOf(i, 5, orbit.mid, step);
+      return labelBox(pointAt(orbit.cx, orbit.cy, orbit.r, phi), phi, 36, theta, sizes[i]!, lifted);
+    };
+    /* the area a label covers of the other avatars of its fan, with the fan open, pressed and still */
+    const overSiblings = (i: number, theta: number): number =>
+      STATES.reduce(
+        (sum, [step, lifted]) =>
+          sum +
+          fanDiscs(orbit, 5, 36, step).reduce(
+            (part, disc, j) =>
+              j === i ? part : part + area(labelAt(i, theta, step, lifted), drawn(disc)),
+            0,
+          ),
+        0,
+      );
+    const radiusOf = (i: number): number => angleOf(i, 5, orbit.mid, orbit.open);
+
+    it('turns a label off an avatar of the other stack that lies on its radius', () => {
+      const onRadius = labelAt(0, radiusOf(0), orbit.open, true);
+      const other = {
+        x: (onRadius.x0 + onRadius.x1) / 2,
+        y: (onRadius.y0 + onRadius.y1) / 2,
+        r: 18,
+      };
+      const alone = labelAngles(orbit, 5, 36, sizes, [], open.bounds);
+      expect(alone[0]).toBe(radiusOf(0));
+      const angles = labelAngles(orbit, 5, 36, sizes, [], open.bounds, [other]);
+      expect(angles[0]).not.toBe(radiusOf(0));
+      angles.forEach((theta, i) => {
+        for (const [step, lifted] of STATES)
+          expect(area(labelAt(i, theta, step, lifted), drawn(other)), `label ${i}`).toBe(0);
+        expect(overSiblings(i, theta), `label ${i}`).toBe(0);
+      });
+    });
+
+    it('turns a label clear of its own fan when it must leave its radius', () => {
+      /* a glyph 20 by 30 px just over the second avatar's label on its radius */
+      const onRadius = labelAt(1, radiusOf(1), orbit.open, true);
+      const x = (onRadius.x0 + onRadius.x1) / 2;
+      const y = (onRadius.y0 + onRadius.y1) / 2 - 20;
+      const glyph = box(x - 10, y - 15, x + 10, y + 15);
+      const theta = labelAngles(orbit, 5, 36, sizes, [glyph], open.bounds)[1]!;
+      /* the nearest turn clear of the glyph, 45 degrees, laid the label over the first avatar */
+      expect(overSiblings(1, radiusOf(1) + 45)).toBeGreaterThan(0);
+      expect(theta).toBe(radiusOf(1) - 45);
+      expect(overSiblings(1, theta)).toBe(0);
+      for (const [step, lifted] of STATES)
+        expect(area(labelAt(1, theta, step, lifted), glyph)).toBe(0);
+    });
   });
 
   it('gives the open fan a hit area that covers every avatar', () => {

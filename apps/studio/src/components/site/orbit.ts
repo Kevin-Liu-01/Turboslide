@@ -8,8 +8,9 @@
  * the h1 in the page (each glyph's advance box from a Range, its ink from the canvas metrics of
  * the h1's own font) and writes the result to each stack as custom properties that site.css
  * reads; Title.tsx runs it after hydration, after the fonts load and at every change of the h1's
- * size, so the orbits follow every width and every wrap of the line. `labelAngles` then turns each
- * avatar's name label off its radius where the radius would lay it over a letter of the h1.
+ * size, so the orbits follow every width and every wrap of the line. Once both stacks are placed,
+ * `labelAngles` turns each avatar's name label off its radius where the radius would lay it over a
+ * letter of the h1 or another avatar of either stack.
  */
 
 /** A box in page pixels, y down. */
@@ -150,15 +151,17 @@ export function orbitFor(input: OrbitInput): Orbit {
   return fallback?.orbit ?? { cx, cy, r: r0, mid: prefer, rest: 0, open: 0 };
 }
 
+/** The discs of a placed stack's avatars with its fan at one step. */
+export function fanDiscs(orbit: Orbit, n: number, s: number, step: number): Disc[] {
+  return Array.from({ length: n }, (_, i) => {
+    const { x, y } = pointAt(orbit.cx, orbit.cy, orbit.r, angleOf(i, n, orbit.mid, step));
+    return { x, y, r: s / 2 };
+  });
+}
+
 /** The discs of a placed stack, at rest and with its fan open, for the stacks placed after it. */
 export function discsOf(orbit: Orbit, n: number, s: number): Disc[] {
-  const out: Disc[] = [];
-  for (const step of [orbit.rest, orbit.open])
-    for (let i = 0; i < n; i += 1) {
-      const { x, y } = pointAt(orbit.cx, orbit.cy, orbit.r, angleOf(i, n, orbit.mid, step));
-      out.push({ x, y, r: s / 2 });
-    }
-  return out;
+  return [...fanDiscs(orbit, n, s, orbit.rest), ...fanDiscs(orbit, n, s, orbit.open)];
 }
 
 /** The box the open fan covers, the hover area that keeps the fan open under the pointer. */
@@ -229,12 +232,17 @@ const LABEL_TURNS = [
   0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 120, -120, 150, -150, 180,
 ];
 
+/** The paper ring an avatar draws outside its own edge, in px (site.css `.site-av` box-shadow). */
+const PAPER_RING = 2;
+
 /**
  * The direction of each avatar's name label, in degrees: its radius with the fan open when the
- * label there covers no glyph and stays inside the bounds with the fan open (a hover, the focus),
- * at rest and lifted (a press) and at rest unlifted (Reduce motion), else the nearest turn off the
- * radius that does; with no such turn, the one whose label covers the least glyph and the least
- * room outside the bounds.
+ * label there covers no glyph and no other avatar and stays inside the bounds with the fan open
+ * (a hover, the focus), at rest and lifted (a press) and at rest unlifted (Reduce motion), else
+ * the nearest turn off the radius that does; with no such turn, the one whose label covers the
+ * least glyph and avatar and the least room outside the bounds. The other avatars are the
+ * stack's own at the label's step and `others`, the other stack's avatars at rest; a label over
+ * an avatar costs what a label over a glyph of the same area costs.
  */
 export function labelAngles(
   orbit: Orbit,
@@ -243,14 +251,19 @@ export function labelAngles(
   sizes: readonly { w: number; h: number }[],
   glyphs: readonly Box[],
   bounds: Box,
+  others: readonly Disc[] = [],
 ): number[] {
   const clear = 2;
-  const grown = glyphs.map((g) => ({
-    x0: g.x0 - clear,
-    y0: g.y0 - clear,
-    x1: g.x1 + clear,
-    y1: g.y1 + clear,
-  }));
+  const grow = (b: Box, by: number): Box => ({
+    x0: b.x0 - by,
+    y0: b.y0 - by,
+    x1: b.x1 + by,
+    y1: b.y1 + by,
+  });
+  const discBox = (d: Disc): Box =>
+    grow({ x0: d.x - d.r, y0: d.y - d.r, x1: d.x + d.r, y1: d.y + d.r }, PAPER_RING + clear);
+  const grown = glyphs.map((g) => grow(g, clear));
+  const still = others.map(discBox);
   const out: number[] = [];
   for (let i = 0; i < n; i += 1) {
     const size = sizes[i] ?? { w: 0, h: 0 };
@@ -260,7 +273,13 @@ export function labelAngles(
       { step: orbit.rest, lifted: false },
     ].map(({ step, lifted }) => {
       const phi = angleOf(i, n, orbit.mid, step);
-      return { phi, c: pointAt(orbit.cx, orbit.cy, orbit.r, phi), lifted };
+      const siblings = fanDiscs(orbit, n, s, step).filter((_, j) => j !== i);
+      return {
+        phi,
+        c: pointAt(orbit.cx, orbit.cy, orbit.r, phi),
+        lifted,
+        obstacles: [...grown, ...siblings.map(discBox), ...still],
+      };
     });
     const radius = states[0]!.phi;
     let best: { theta: number; cost: number } | null = null;
@@ -269,7 +288,7 @@ export function labelAngles(
       let cost = 0;
       for (const state of states) {
         const box = labelBox(state.c, state.phi, s, theta, size, state.lifted);
-        for (const g of grown) cost += overlap(box, g);
+        for (const obstacle of state.obstacles) cost += overlap(box, obstacle);
         const area = (box.x1 - box.x0) * (box.y1 - box.y0);
         cost += area - overlap(box, bounds);
       }
@@ -335,8 +354,9 @@ const deg = (value: number): string => `${Math.round(value * 100) / 100}deg`;
 
 /**
  * Lays out both stacks of the title in the page: the people first, then the agents clear of the
- * people's avatars. Each stack sits at its word's top right corner (site.css), so the orbit's
- * centre is written relative to that corner. Returns the orbits for the caller's reading.
+ * people's avatars, then each avatar's name label clear of the glyphs and of every avatar of both
+ * stacks. Each stack sits at its word's top right corner (site.css), so the orbit's centre is
+ * written relative to that corner. Returns the orbits for the caller's reading.
  */
 export function layoutTitle(h1: HTMLElement): Orbit[] {
   const glyphs = measureGlyphs(h1);
@@ -362,7 +382,7 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
     y1: bounds.y1,
   };
   const inks = glyphs.map((g) => g.box);
-  const orbits: Orbit[] = [];
+  const placed: { stack: HTMLElement; avatars: HTMLElement[]; s: number; orbit: Orbit }[] = [];
   const discs: Disc[] = [];
   for (const stack of h1.querySelectorAll<HTMLElement>('.site-stack')) {
     const word = stack.parentElement;
@@ -371,7 +391,7 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
     const own = glyphs.filter((g) => word.contains(g.node));
     const letter = own[own.length - 1];
     if (letter === undefined) continue;
-    const avatars = stack.querySelectorAll<HTMLElement>('.site-av');
+    const avatars = [...stack.querySelectorAll<HTMLElement>('.site-av')];
     const n = avatars.length;
     /* the avatar's laid out width: --s is a clamp() the custom property keeps unresolved */
     const s = avatars[0]?.offsetWidth ?? 32;
@@ -399,25 +419,30 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
     stack.style.setProperty('--hit-y', px(hit.y0 - oy - 4));
     stack.style.setProperty('--hit-w', px(hit.x1 - hit.x0 + 8));
     stack.style.setProperty('--hit-h', px(hit.y1 - hit.y0 + 8));
-    /* each name label's direction (site.css `--la`), off its radius where a letter is */
-    const font = getComputedStyle(avatars[0] ?? stack, '::after');
-    const ctx = document.createElement('canvas').getContext('2d');
-    if (ctx !== null) {
-      ctx.font = `${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
-      const padX = parseFloat(font.paddingLeft) + parseFloat(font.paddingRight);
-      const h =
-        parseFloat(font.lineHeight) + parseFloat(font.paddingTop) + parseFloat(font.paddingBottom);
-      const sizes = [...avatars].map((avatar) => ({
-        w: ctx.measureText(avatar.dataset.name ?? '').width + padX,
-        h: Number.isFinite(h) ? h : 20,
-      }));
-      labelAngles(orbit, n, s, sizes, inks, column).forEach((theta, i) =>
-        avatars[i]?.style.setProperty('--la', deg(theta)),
-      );
-    }
     stack.dataset.orbit = '';
-    orbits.push(orbit);
+    placed.push({ stack, avatars, s, orbit });
     discs.push(...discsOf(orbit, n, s));
   }
-  return orbits;
+  /* each name label's direction (site.css `--la`), off its radius where a letter or an avatar of
+     either stack is; the other stack stays at rest while this one's label shows */
+  const ctx = document.createElement('canvas').getContext('2d');
+  for (const { stack, avatars, s, orbit } of placed) {
+    if (ctx === null) break;
+    const font = getComputedStyle(avatars[0] ?? stack, '::after');
+    ctx.font = `${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
+    const padX = parseFloat(font.paddingLeft) + parseFloat(font.paddingRight);
+    const h =
+      parseFloat(font.lineHeight) + parseFloat(font.paddingTop) + parseFloat(font.paddingBottom);
+    const sizes = avatars.map((avatar) => ({
+      w: ctx.measureText(avatar.dataset.name ?? '').width + padX,
+      h: Number.isFinite(h) ? h : 20,
+    }));
+    const others = placed
+      .filter((other) => other.stack !== stack)
+      .flatMap((other) => fanDiscs(other.orbit, other.avatars.length, other.s, other.orbit.rest));
+    labelAngles(orbit, avatars.length, s, sizes, inks, column, others).forEach((theta, i) =>
+      avatars[i]?.style.setProperty('--la', deg(theta)),
+    );
+  }
+  return placed.map(({ orbit }) => orbit);
 }

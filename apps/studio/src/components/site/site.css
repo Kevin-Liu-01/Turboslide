@@ -3271,19 +3271,21 @@
   z-index: 1;
 }
 
-/* the lifted avatar: out along its radius, a little larger, on top, its name in a label; under
-   a pointer that hovers, on the keyboard's focus, and for a moment after a press (a touch) */
+/* the lifted avatar: out along its radius, a little larger, its name in a label, on top of every
+   avatar of both stacks (5, over the first avatar's 4), so a label that must touch an avatar
+   (orbit.ts labelAngles) is drawn over it; under a pointer that hovers, on the keyboard's focus,
+   and for a moment after a press (a touch) */
 .ts-site .site-av:focus-visible,
 .ts-site .site-av[data-pressed] {
   --up: calc(var(--s) * 0.12);
-  z-index: 4;
+  z-index: 5;
   scale: 1.1;
 }
 
 @media (hover: hover) {
   .ts-site .site-av:hover {
     --up: calc(var(--s) * 0.12);
-    z-index: 4;
+    z-index: 5;
     scale: 1.1;
   }
 

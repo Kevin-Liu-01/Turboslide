@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest, setCookie } from '@tanstack/react-start/server';
+import { getRequest, setCookie, setResponseStatus } from '@tanstack/react-start/server';
 import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
+import { errorStatus } from '@turboslide/schema/errors';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { AuthContext } from '@turboslide/identity/access';
@@ -847,6 +848,67 @@ export async function readDraftDeck(): Promise<EditorDeck> {
   return payload;
 }
 
+/**
+ * A store refusal as `writeDeck` answers it (the write freeze and the layout read, StorageFrozenError
+ * and StorageLayoutError; docs/hosting.md 10): a value, not a thrown error, since TanStack Start
+ * sends a server function's thrown error to the page with its message alone (`ShallowErrorPlugin`),
+ * which drops the name, `status` and `retryAfter` the page waits by (HR-K1#4b, finish round
+ * regression finding 2).
+ */
+type StoreBusyAnswer = {
+  ok: false;
+  code: 'busy';
+  name: string;
+  message: string;
+  retryAfter: number;
+};
+
+/**
+ * Runs `writeDeck`'s body; a store refusal that carries its own 503 and wait answers 503 with the
+ * refusal's name, sentence and wait in the body (`StoreBusyAnswer`), which `readWriteDeckAnswer`
+ * throws on the page as an error that carries them. The framework drops the headers a function
+ * sets on an answer that is not 2xx, so the wait travels in the body alone. `status` sets the
+ * request's own status by default.
+ */
+export async function answeringRefusals(
+  run: () => Promise<string>,
+  status: (code: number) => void = (code) => setResponseStatus(code),
+): Promise<string> {
+  try {
+    return await run();
+  } catch (error) {
+    const wait = (error as { retryAfter?: unknown } | null)?.retryAfter;
+    if (!(error instanceof Error) || errorStatus(error) !== 503 || typeof wait !== 'number')
+      throw error;
+    status(503);
+    const busy: StoreBusyAnswer = {
+      ok: false,
+      code: 'busy',
+      name: error.name,
+      message: error.message,
+      retryAfter: wait,
+    };
+    return JSON.stringify(busy);
+  }
+}
+
+/**
+ * `writeDeck`'s answer as the page reads it: a store refusal is thrown as an Error with the
+ * refusal's name, its sentence, `status` 503 and `retryAfter`, so `sendThroughFreeze` waits and
+ * sends the write again (editor/draft-retry.ts `storeWaitMs`), and any other caller gets the
+ * sentence as before.
+ */
+export function readWriteDeckAnswer(raw: string): WriteDeckResult {
+  const answer = JSON.parse(raw) as WriteDeckResult | StoreBusyAnswer;
+  if (!answer.ok && answer.code === 'busy')
+    throw Object.assign(new Error(answer.message), {
+      name: answer.name,
+      status: 503,
+      retryAfter: answer.retryAfter,
+    });
+  return answer;
+}
+
 export type WriteDeckInput = {
   deckId: string;
   write: Write;
@@ -888,6 +950,133 @@ export type WriteDeckResult =
     }
   | { ok: false; code: 'invalid'; message: string; index?: number; issues: Issue[] };
 
+/**
+ * The answer of `writeDeck` on the server (gslides-parity SPEC 6.1, SPEC-3 3.7 c, 11.3), which
+ * `writeDeckFn` runs inside `answeringRefusals`.
+ */
+async function writeDeckAnswer(data: WriteDeckInput): Promise<string> {
+  // the first save of a draft (SPEC 6.1): the deck is created from the blank template under the
+  // draft's id, then the write applies against revision 0; the id shape keeps any other missing
+  // deck a 404, and a write with a base above 0 names a deck that once existed, not a draft
+  // the strict, checkpointed write of round three (gslides-parity SPEC-3 3.7 c, 11.3): the
+  // author is the session's, never the body's, on a browser transport; the write is admitted
+  // through the room so every open tab receives it live, and checkpointed at once so the answer
+  // carries a revision and its record
+  const room = await import('./room');
+  const identity = await room.requestIdentity(getRequest());
+  sendMintedCookie(identity.setCookie);
+  let created = false;
+  let minted: { id: string; token: string } | undefined;
+  // the phases of a draft's first save, timed for the server log (the focus round, cycle 2;
+  // VERIFICATION C2-F9: a second tab's first write on /new did not move the address within
+  // 30 s on the blob tier and nothing named which of the create, the record, the room's open
+  // or the admission took the time): every phase over a second is logged with its duration
+  const phases: [string, number][] = [];
+  let phaseAt = performance.now();
+  const phase = (name: string): void => {
+    const now = performance.now();
+    phases.push([name, Math.round(now - phaseAt)]);
+    phaseAt = now;
+  };
+  if (data.write.baseRevision === 0 && (await isUnsavedDraft(data.deckId))) {
+    phase('draft check');
+    const from = await draftTemplateId();
+    // the new deck's record (SPEC-3 6.1) before the deck (H3, DATA-V3): restricted, this
+    // session its owner, so the decision below reads it (VERIFICATION-3 finding 4) and a failed
+    // record write leaves no deck behind; a request with no identity creates nothing
+    const access = await import('./access');
+    let recorded: Awaited<ReturnType<typeof access.createWithRecord>>['recorded'];
+    try {
+      ({ recorded } = await access.createWithRecord(data.deckId, identity.ctx, () =>
+        createStoredDeck({ name: DEFAULT_BLANK_TITLE, from, id: data.deckId }),
+      ));
+    } catch (error) {
+      if (error instanceof access.DeckIdTakenError || isDenied(error))
+        throw new RangeError(`No deck ${data.deckId}`);
+      throw error;
+    }
+    created = true;
+    if (recorded.general !== undefined)
+      minted = { id: recorded.general.linkId, token: recorded.general.token };
+    phase('record and create');
+  }
+  const decision = await room.decideFor(identity, data.deckId, 'write', 'writeDeck');
+  if (!decision.ok) {
+    throw new RangeError(`No deck ${data.deckId}`);
+  }
+  const author =
+    identity.ctx.agent !== undefined && data.write.author.kind === 'agent'
+      ? data.write.author
+      : room.authorOf(identity);
+  const deckRoom = await room.roomFor(data.deckId);
+  if (created) phase('decide and open the room');
+  const admitted = await room.admitServerWrite(deckRoom, {
+    author,
+    mutations: data.write.mutations,
+    baseRevision: data.write.baseRevision,
+    strict: true,
+    ...(data.write.note === undefined ? {} : { note: data.write.note }),
+  });
+  if (created) {
+    phase('admit');
+    const total = phases.reduce((sum, [, ms]) => sum + ms, 0);
+    if (total >= FIRST_SAVE_LOG_MS) {
+      console.error(
+        `turboslide write: the first save of ${data.deckId} took ${total} ms (${phases
+          .map(([name, ms]) => `${name} ${ms} ms`)
+          .join(', ')}) on the ${room.realtimeTier()} tier`,
+      );
+    }
+  }
+  if (admitted.ok) {
+    // the card's capture on save (card-thumb.ts): slide 1 renders once the writes settle
+    const { scheduleCardThumb } = await import('./card-thumb');
+    scheduleCardThumb(data.deckId);
+  }
+  let result: WriteDeckResult;
+  if (!admitted.ok) {
+    // the refusal in the server log with the ops and both revisions (the focus round, cycle 2):
+    // a refused server first write (a version.restore) shows the seller a notice in the panel
+    // and nothing else, and the walk of docs/FOCUS.md 6.1 read "restore changed the deck false"
+    // with no sentence anywhere (VERIFICATION F-versions); the log line names the mechanism
+    console.error(
+      `turboslide write: ${data.deckId} refused a ${data.write.mutations.map((m) => m.op).join(', ')} write at base ${data.write.baseRevision} as ${admitted.code}: ${admitted.message}`,
+    );
+  }
+  if (admitted.ok) {
+    const document = data.returnDocument === true ? (await deckRoom.live()).document : undefined;
+    result = {
+      ok: true,
+      revision: admitted.revision,
+      entry: admitted.record,
+      changed: [
+        ...new Set(admitted.record.mutations.flatMap((m) => ('slideId' in m ? [m.slideId] : []))),
+      ],
+      warnings: [],
+      issues: [],
+      ...(document === undefined ? {} : { document }),
+      ...(created ? { created: true } : {}),
+      ...(created && minted !== undefined ? { link: minted } : {}),
+      seq: admitted.seq,
+    };
+  } else if (admitted.code === 'conflict') {
+    result = {
+      ok: false,
+      code: 'conflict',
+      message: admitted.message,
+      currentRevision: admitted.currentRevision,
+      current: admitted.current,
+      // the records after the writer's base, with every other author as a stand-in to a writer
+      // who may not share the deck (hardening HR-SD#1d): any stale write from an editor's page
+      // answered the stored authors here, the owner's principal id among them
+      since: await versionsForReader(data.deckId, identity, admitted.since),
+    };
+  } else {
+    result = { ok: false, code: 'invalid', message: admitted.message, issues: [] };
+  }
+  return JSON.stringify(result);
+}
+
 const writeDeckFn = createServerFn({ method: 'POST' })
   .validator((raw: string): WriteDeckInput => {
     const input = parseJsonInput<Untrusted<WriteDeckInput>>(raw);
@@ -906,128 +1095,7 @@ const writeDeckFn = createServerFn({ method: 'POST' })
       ...(input.returnDocument === true ? { returnDocument: true } : {}),
     };
   })
-  .handler(async ({ data }): Promise<string> => {
-    // the first save of a draft (SPEC 6.1): the deck is created from the blank template under the
-    // draft's id, then the write applies against revision 0; the id shape keeps any other missing
-    // deck a 404, and a write with a base above 0 names a deck that once existed, not a draft
-    // the strict, checkpointed write of round three (gslides-parity SPEC-3 3.7 c, 11.3): the
-    // author is the session's, never the body's, on a browser transport; the write is admitted
-    // through the room so every open tab receives it live, and checkpointed at once so the answer
-    // carries a revision and its record
-    const room = await import('./room');
-    const identity = await room.requestIdentity(getRequest());
-    sendMintedCookie(identity.setCookie);
-    let created = false;
-    let minted: { id: string; token: string } | undefined;
-    // the phases of a draft's first save, timed for the server log (the focus round, cycle 2;
-    // VERIFICATION C2-F9: a second tab's first write on /new did not move the address within
-    // 30 s on the blob tier and nothing named which of the create, the record, the room's open
-    // or the admission took the time): every phase over a second is logged with its duration
-    const phases: [string, number][] = [];
-    let phaseAt = performance.now();
-    const phase = (name: string): void => {
-      const now = performance.now();
-      phases.push([name, Math.round(now - phaseAt)]);
-      phaseAt = now;
-    };
-    if (data.write.baseRevision === 0 && (await isUnsavedDraft(data.deckId))) {
-      phase('draft check');
-      const from = await draftTemplateId();
-      // the new deck's record (SPEC-3 6.1) before the deck (H3, DATA-V3): restricted, this
-      // session its owner, so the decision below reads it (VERIFICATION-3 finding 4) and a failed
-      // record write leaves no deck behind; a request with no identity creates nothing
-      const access = await import('./access');
-      let recorded: Awaited<ReturnType<typeof access.createWithRecord>>['recorded'];
-      try {
-        ({ recorded } = await access.createWithRecord(data.deckId, identity.ctx, () =>
-          createStoredDeck({ name: DEFAULT_BLANK_TITLE, from, id: data.deckId }),
-        ));
-      } catch (error) {
-        if (error instanceof access.DeckIdTakenError || isDenied(error))
-          throw new RangeError(`No deck ${data.deckId}`);
-        throw error;
-      }
-      created = true;
-      if (recorded.general !== undefined)
-        minted = { id: recorded.general.linkId, token: recorded.general.token };
-      phase('record and create');
-    }
-    const decision = await room.decideFor(identity, data.deckId, 'write', 'writeDeck');
-    if (!decision.ok) {
-      throw new RangeError(`No deck ${data.deckId}`);
-    }
-    const author =
-      identity.ctx.agent !== undefined && data.write.author.kind === 'agent'
-        ? data.write.author
-        : room.authorOf(identity);
-    const deckRoom = await room.roomFor(data.deckId);
-    if (created) phase('decide and open the room');
-    const admitted = await room.admitServerWrite(deckRoom, {
-      author,
-      mutations: data.write.mutations,
-      baseRevision: data.write.baseRevision,
-      strict: true,
-      ...(data.write.note === undefined ? {} : { note: data.write.note }),
-    });
-    if (created) {
-      phase('admit');
-      const total = phases.reduce((sum, [, ms]) => sum + ms, 0);
-      if (total >= FIRST_SAVE_LOG_MS) {
-        console.error(
-          `turboslide write: the first save of ${data.deckId} took ${total} ms (${phases
-            .map(([name, ms]) => `${name} ${ms} ms`)
-            .join(', ')}) on the ${room.realtimeTier()} tier`,
-        );
-      }
-    }
-    if (admitted.ok) {
-      // the card's capture on save (card-thumb.ts): slide 1 renders once the writes settle
-      const { scheduleCardThumb } = await import('./card-thumb');
-      scheduleCardThumb(data.deckId);
-    }
-    let result: WriteDeckResult;
-    if (!admitted.ok) {
-      // the refusal in the server log with the ops and both revisions (the focus round, cycle 2):
-      // a refused server first write (a version.restore) shows the seller a notice in the panel
-      // and nothing else, and the walk of docs/FOCUS.md 6.1 read "restore changed the deck false"
-      // with no sentence anywhere (VERIFICATION F-versions); the log line names the mechanism
-      console.error(
-        `turboslide write: ${data.deckId} refused a ${data.write.mutations.map((m) => m.op).join(', ')} write at base ${data.write.baseRevision} as ${admitted.code}: ${admitted.message}`,
-      );
-    }
-    if (admitted.ok) {
-      const document = data.returnDocument === true ? (await deckRoom.live()).document : undefined;
-      result = {
-        ok: true,
-        revision: admitted.revision,
-        entry: admitted.record,
-        changed: [
-          ...new Set(admitted.record.mutations.flatMap((m) => ('slideId' in m ? [m.slideId] : []))),
-        ],
-        warnings: [],
-        issues: [],
-        ...(document === undefined ? {} : { document }),
-        ...(created ? { created: true } : {}),
-        ...(created && minted !== undefined ? { link: minted } : {}),
-        seq: admitted.seq,
-      };
-    } else if (admitted.code === 'conflict') {
-      result = {
-        ok: false,
-        code: 'conflict',
-        message: admitted.message,
-        currentRevision: admitted.currentRevision,
-        current: admitted.current,
-        // the records after the writer's base, with every other author as a stand-in to a writer
-        // who may not share the deck (hardening HR-SD#1d): any stale write from an editor's page
-        // answered the stored authors here, the owner's principal id among them
-        since: await versionsForReader(data.deckId, identity, admitted.since),
-      };
-    } else {
-      result = { ok: false, code: 'invalid', message: admitted.message, issues: [] };
-    }
-    return JSON.stringify(result);
-  });
+  .handler(({ data }): Promise<string> => answeringRefusals(() => writeDeckAnswer(data)));
 
 /**
  * The event the page raises when a write created the deck (the first save of a draft, SPEC
@@ -1044,7 +1112,7 @@ export type DeckCreatedDetail = {
 
 /** One Write through the store: the authority behind every editor gesture and window action. */
 export async function writeDeck(input: WriteDeckInput): Promise<WriteDeckResult> {
-  const result = JSON.parse(await writeDeckFn({ data: JSON.stringify(input) })) as WriteDeckResult;
+  const result = readWriteDeckAnswer(await writeDeckFn({ data: JSON.stringify(input) }));
   if (result.ok && result.created === true && typeof window !== 'undefined') {
     const detail: DeckCreatedDetail = {
       deckId: input.deckId,

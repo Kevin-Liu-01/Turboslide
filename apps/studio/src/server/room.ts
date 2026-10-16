@@ -92,7 +92,7 @@ import { scopedCapabilities } from '@turboslide/schema/access';
 import type { AccessRecord } from '@turboslide/schema/access';
 import { threadParticipants } from '@turboslide/schema/comments';
 import type { DeckDocument } from '@turboslide/schema/deck';
-import { ConflictError } from '@turboslide/schema/errors';
+import { ConflictError, errorStatus } from '@turboslide/schema/errors';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { boundedBlobClient } from '@turboslide/store/blob-store';
 import type { BlobClient } from '@turboslide/store/blob-store';
@@ -3606,8 +3606,11 @@ export async function admitServerWrite(
     } catch (error) {
       // the store refused (a 429, a 5xx, the deadline): the caller's card reads the product's
       // sentence, never the SDK's (the focus round, cycle 3 fix round; VERIFICATION C3-F2 read
-      // "Vercel Blob: Too many requests" in the Share dialog)
+      // "Vercel Blob: Too many requests" in the Share dialog). A refusal that carries its own 503
+      // (the write freeze and the layout read, docs/hosting.md 10) is thrown as it is, so the
+      // caller reads the 503 and the freeze's sentence, never a 500
       if (isStoreBusy(error)) {
+        if (errorStatus(error) === 503) throw error;
         const wait = Math.ceil((storeRetryAfterMs(error) ?? 1000) / 1000);
         throw new Error(`The store did not answer; try again in ${wait} s`);
       }

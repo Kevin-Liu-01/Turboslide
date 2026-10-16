@@ -12,6 +12,8 @@ export type HttpErrorCode =
   | 'unknown_field'
   | 'invalid_input'
   | 'unauthorized'
+  /** a device key past its expiry (HR-SA#5): the CLI asks for `turboslide login` again */
+  | 'key_expired'
   | 'payload_too_large'
   | 'not_json'
   | 'unknown_action'

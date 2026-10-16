@@ -17,8 +17,8 @@ import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 // on both D1 databases today. The flows are the ones a browser, the CLI or an agent can reach: the magic link and the
 // code, the session reads and refresh, the sign outs, Google's callback (a new account with a
 // picture and a refresh token, the return without either, an address account linking Google),
-// the device flow, the API keys, the profile, the quotas, the captured mail, the admin actions
-// and the account's deletion. The fake answers as the Worker does, so a statement missing from
+// the device flow, the API keys, the profile, the quotas, the one limiter, the captured mail, the
+// admin actions and the account's deletion. The fake answers as the Worker does, so a statement missing from
 // apps/realtime-worker/src/db-statements.json fails the flow that sent it and the last test lists
 // it. `TURBOSLIDE_RECORD_STATEMENTS=write` turns the check off and writes the list from what the
 // flows sent:
@@ -44,6 +44,7 @@ import { fakeD1 } from './d1-fake.ts';
 import type { FakeD1 } from './d1-fake.ts';
 import { keyForDeviceGrant } from './device-grant.ts';
 import { buildIdentityRuntime, forgetAllAccountFacts, requestIdentity } from './identity.ts';
+import { dbLimitStore } from './limits.ts';
 import type { IdentityRuntime } from './identity.ts';
 import { AUTH_SCHEMA_KEY, AUTH_SCHEMA_VERSION } from './schema.ts';
 
@@ -535,6 +536,12 @@ describe('the accounts statements, recorded over a database in production’s st
     await runtime.quotas.take('record:probe', 3, 60_000);
     await runtime.quotas.peek('record:probe');
     await runtime.quotas.reset('record:probe');
+    // the one limiter (HR-SA#3): a take, a refusal and its read, a release, the prune
+    const limits = runtime.limits!;
+    expect((await limits.limit('record:limit', 1, 60_000)).ok).toBe(true);
+    expect((await limits.limit('record:limit', 1, 60_000)).ok).toBe(false);
+    await limits.release!('record:limit');
+    await dbLimitStore(runtime.db!.db).prune(Date.now());
     await actAs(admin, 'account.forget');
   });
 

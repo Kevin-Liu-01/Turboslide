@@ -8,10 +8,13 @@
 //
 // The resolver is synchronous on purpose: `requireAgentAuth(request)` (server/auth.ts) is called
 // without an await by the routes that exist, and `node:sqlite` reads synchronously. Postgres and
-// the D1 proxy have no synchronous read, so their store answers from a cache refreshed every five
-// seconds and after every write in this process; a revocation on another instance lands within
-// that window, the same class as the kill switch cache of SPEC-3 0.33 (docs/CLOUDFLARE.md 4.2:
-// any engine with no synchronous read takes the cache path).
+// the D1 proxy have no synchronous read, so their store answers from what this instance read
+// (docs/CLOUDFLARE.md 4.2: any engine with no synchronous read takes the cache path). Since
+// HR-SA#6 (AUTH-5) every request with a bearer is primed first (`prime`, awaited by the request
+// middleware and by `requestIdentity`): a key this instance has not read, or read more than
+// KEY_CACHE_MS ago, is read again by its hash before the synchronous checks run. So a new key works
+// on a cold instance, and a key revoked on another instance is refused here within KEY_CACHE_MS
+// however long this instance sat idle; a revoke on this instance clears its own view at once.
 //
 // `TURBOSLIDE_TOKEN` stays the bootstrap admin token: valid for every action while no key record
 // exists (today's deployments), for `admin.bootstrap` alone once one does (09 6.1). The per
@@ -30,6 +33,7 @@ import type { Scope } from '@turboslide/schema/access';
 import { SCOPES } from '@turboslide/schema/access';
 
 import type { AuthDb } from './db.ts';
+import { DEVICE_KEY_LEGACY_EXPIRY, DEVICE_KEY_NAME } from './device-grant.ts';
 import type { ApiKeyTable, AuthDatabase } from './schema.ts';
 
 export const TOKEN_PREFIX = 'ts_';
@@ -71,8 +75,16 @@ export type ApiKeyStore = {
   revoke: (tokenId: string, userId?: string, now?: Date) => Promise<ApiKeyRecord | null>;
   /** The live record of a secret, or null. */
   resolve: (secret: string) => Promise<ApiKeyRecord | null>;
-  /** The same, without an await (the route rule); null while a Postgres cache is cold. */
+  /** The same, without an await (the route rule); on the cache path, what `prime` read. */
   resolveSync: (secret: string) => ApiKeyRecord | null;
+  /**
+   * Makes the synchronous reads of this request fresh (HR-SA#6): on the cache path, a key not read
+   * yet or read more than KEY_CACHE_MS ago is read by its hash, and a bearer that is not a key
+   * reads the key count when it is not known to be above zero. Nothing to do on SQLite.
+   */
+  prime: (bearer: string) => Promise<void>;
+  /** The record of a secret whether or not it is live, so a refusal can say why (HR-SA#5). */
+  recordSync: (secret: string) => ApiKeyRecord | null;
   /** Stamps `lastUsedAt` at most once a minute per key. */
   touch: (tokenId: string, now?: Date) => Promise<void>;
   /** How many keys were ever minted (revoked ones count: the bootstrap rule is one way). */
@@ -108,10 +120,25 @@ export function newKeyId(random: (n: number) => Uint8Array = (n) => randomBytes(
   return `tok_${base64url(random(KEY_ID_BYTES))}`;
 }
 
+/**
+ * When a key stops working: its own `expiresAt`, or for a device key minted before HR-SA#5 with
+ * none, DEVICE_KEY_LEGACY_EXPIRY (AUTH-7, CRIT-M14; device-grant.ts). Applied at every read, so no
+ * stored row changes. Null for a key that never expires (one made with no expiry in Profile).
+ */
+export function keyExpiry(record: Pick<ApiKeyRecord, 'name' | 'expiresAt'>): string | null {
+  if (record.expiresAt !== null) return record.expiresAt;
+  return record.name === DEVICE_KEY_NAME ? DEVICE_KEY_LEGACY_EXPIRY : null;
+}
+
+/** Whether a key is past its expiry (keyExpiry); a revoked key is refused for that first. */
+export function isKeyExpired(record: ApiKeyRecord, now: Date = new Date()): boolean {
+  const expiry = keyExpiry(record);
+  return expiry !== null && Date.parse(expiry) <= now.getTime();
+}
+
 export function isKeyLive(record: ApiKeyRecord, now: Date = new Date()): boolean {
   if (!record.enabled || record.revokedAt !== null) return false;
-  if (record.expiresAt !== null && Date.parse(record.expiresAt) <= now.getTime()) return false;
-  return true;
+  return !isKeyExpired(record, now);
 }
 
 export function parseScopes(value: string): Scope[] {
@@ -211,6 +238,29 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
   };
   /* the cache path: every engine without the raw synchronous handle (Postgres, the D1 proxy) */
   const cached = auth.sqlite === undefined;
+  /* the keys `prime` read by hash, each with its time (HR-SA#6); a full refresh is newer than all */
+  const points = new Map<string, { record: ApiKeyRecord | null; at: number }>();
+  const reading = new Map<string, Promise<void>>();
+  const readPoint = (hash: string): Promise<void> => {
+    let pending = reading.get(hash);
+    if (pending === undefined) {
+      pending = (async () => {
+        const row = await db
+          .selectFrom('ts_api_key')
+          .selectAll()
+          .where('hash', '=', hash)
+          .executeTakeFirst();
+        points.set(hash, {
+          record: row === undefined ? null : rowToRecord(row),
+          at: now().getTime(),
+        });
+      })().finally(() => {
+        reading.delete(hash);
+      });
+      reading.set(hash, pending);
+    }
+    return pending;
+  };
   const refreshIfStale = (): void => {
     if (!cached) return;
     if (now().getTime() - refreshedAt >= KEY_CACHE_MS) void refresh().catch(() => undefined);
@@ -229,6 +279,8 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
       }
     }
     refreshIfStale();
+    const point = points.get(hash);
+    if (point !== undefined && point.at >= refreshedAt) return point.record;
     return cache.get(hash) ?? null;
   };
 
@@ -265,7 +317,11 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
         .set({ revokedAt: stamp, enabled: 0, updatedAt: stamp })
         .where('id', '=', tokenId)
         .execute();
-      if (cached) await refresh();
+      if (cached) {
+        // this instance's view of every key is the database's again, the revoked one included
+        points.clear();
+        await refresh();
+      }
       return { ...existing, revokedAt: stamp, enabled: false, updatedAt: stamp };
     },
     async resolve(secret) {
@@ -283,6 +339,24 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
       if (!isKeySecret(secret)) return null;
       const record = syncRow(hashSecret(secret));
       return record !== null && isKeyLive(record, now()) ? record : null;
+    },
+    recordSync(secret) {
+      if (!isKeySecret(secret)) return null;
+      return syncRow(hashSecret(secret));
+    },
+    async prime(bearer) {
+      if (!cached || bearer === '') return;
+      if (isKeySecret(bearer)) {
+        const hash = hashSecret(bearer);
+        const point = points.get(hash);
+        const seen = point !== undefined && point.at >= refreshedAt ? point.at : refreshedAt;
+        const known = point !== undefined || cache.has(hash);
+        if (!known || now().getTime() - seen >= KEY_CACHE_MS) await readPoint(hash);
+        return;
+      }
+      /* the static bearer: whether any key exists decides its reach (bootstrapOnly), so a cold or
+         stale count of zero is read again; once above zero it never goes back (revoked keys count) */
+      if (cachedCount === 0 && now().getTime() - refreshedAt >= KEY_CACHE_MS) await refresh();
     },
     async touch(tokenId, at = now()) {
       const last = lastTouch.get(tokenId) ?? 0;
@@ -358,15 +432,16 @@ export function memoryApiKeyStore(now: () => Date = () => new Date()): ApiKeySto
     },
     resolve: (secret) => Promise.resolve(store.resolveSync(secret)),
     resolveSync(secret) {
+      const rec = store.recordSync(secret);
+      return rec !== null && isKeyLive(rec, now()) ? rec : null;
+    },
+    recordSync(secret) {
       if (!isKeySecret(secret)) return null;
       const hash = hashSecret(secret);
-      for (const row of rows.values())
-        if (row.hash === hash) {
-          const rec = record(row);
-          return isKeyLive(rec, now()) ? rec : null;
-        }
+      for (const row of rows.values()) if (row.hash === hash) return record(row);
       return null;
     },
+    prime: () => Promise.resolve(),
     touch(tokenId, at = now()) {
       const row = rows.get(tokenId);
       if (row !== undefined) row.lastUsedAt = at.toISOString();
@@ -388,6 +463,8 @@ export function noApiKeyStore(): ApiKeyStore {
     revoke: () => Promise.resolve(null),
     resolve: () => Promise.resolve(null),
     resolveSync: () => null,
+    recordSync: () => null,
+    prime: () => Promise.resolve(),
     touch: () => Promise.resolve(),
     countSync: () => 0,
   };
@@ -407,13 +484,14 @@ export type BearerResolution =
   | { kind: 'bootstrap'; bootstrapOnly: boolean }
   | { kind: 'checkout' }
   | { kind: 'none' }
-  | { kind: 'refused'; reason: 'unknown_key' | 'not_a_key' };
+  | { kind: 'refused'; reason: 'unknown_key' | 'not_a_key' | 'key_expired' };
 
 export type BearerDeps = {
   env?: Readonly<Record<string, string | undefined>>;
   keys?: ApiKeyStore | null;
   /** The per checkout token, when the process runs on a checkout. */
   checkoutToken?: string | null;
+  now?: Date;
 };
 
 /**
@@ -428,10 +506,14 @@ export function resolveBearerSync(
   if (bearer === undefined || bearer === '') return { kind: 'none' };
   const keys = deps.keys ?? null;
   if (isKeySecret(bearer)) {
-    const record = keys?.resolveSync(bearer) ?? null;
-    return record === null
-      ? { kind: 'refused', reason: 'unknown_key' }
-      : { kind: 'api-key', record };
+    // a revoked key and an unknown one read the same; an expired key says so, so the CLI can ask
+    // for a new sign in (HR-SA#5)
+    const record = keys?.recordSync(bearer) ?? null;
+    if (record === null || !record.enabled || record.revokedAt !== null)
+      return { kind: 'refused', reason: 'unknown_key' };
+    if (isKeyExpired(record, deps.now ?? new Date()))
+      return { kind: 'refused', reason: 'key_expired' };
+    return { kind: 'api-key', record };
   }
   const staticToken = env[STATIC_TOKEN_ENV];
   if (staticToken !== undefined && staticToken !== '' && safeEqual(bearer, staticToken))

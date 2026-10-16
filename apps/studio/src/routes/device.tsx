@@ -4,6 +4,7 @@ import { getRequest } from '@tanstack/react-start/server';
 
 import { AuthPage } from '@turboslide/chrome/auth/AuthPage';
 import { AuthRefusal, cleanDeviceCode } from '@turboslide/chrome/auth/auth-model';
+import type { DeviceRequestFacts } from '@turboslide/chrome/auth/AuthPlate';
 
 import { MoodFigure } from '../components/home/MoodFigure';
 import { NO_SIGN_IN } from '../components/home/sign-in';
@@ -21,39 +22,58 @@ import { RouterLinkSlot } from './-link-slot';
 // calls are unchanged: `GET /api/auth/device?user_code=` binds the code to the session, then
 // `POST /api/auth/device/approve` or `deny` decides it. Five tries per code (RFC 8628 5.1; the
 // library's limit holds the same number per minute on the approve route), then a new code.
+// When the address names the code, the page reads the code's request for the signed in person and
+// shows what the key will do and when the code was made (HR-SA#5, AUTH-7).
 
 /** The tries a code has before the page asks for a new one (better-auth.ts DEVICE_ATTEMPTS). */
 export const DEVICE_ATTEMPTS = 5;
 
 type DeviceSearch = { user_code?: string };
 
-/** The deployment's methods and the address of the session, read once on the server. */
-type DeviceFacts = SignInFacts & { address: string | null };
+/** The deployment's methods, the address of the session and the code's request, read on the server. */
+type DeviceFacts = SignInFacts & { address: string | null; request: DeviceRequestFacts | null };
 
-const readDeviceFacts = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<DeviceFacts> => {
+const readDeviceFacts = createServerFn({ method: 'GET' })
+  .validator((input: { userCode?: string }): { userCode: string } => ({
+    userCode: typeof input?.userCode === 'string' ? cleanDeviceCode(input.userCode) : '',
+  }))
+  .handler(async ({ data }): Promise<DeviceFacts> => {
     try {
       const { accountSession, identityRuntime } = await import('../server/auth/identity');
       const runtime = identityRuntime();
-      if (runtime.auth === null) return { ...NO_SIGN_IN, address: null };
+      if (runtime.auth === null) return { ...NO_SIGN_IN, address: null, request: null };
       const session = await accountSession(runtime, getRequest());
+      let request: DeviceRequestFacts | null = null;
+      if (session !== null && data.userCode.length === 8) {
+        /* the library's own read of a code by its user code (the statement the Worker lists) */
+        const { deviceRequestOf } = await import('../server/auth/device-grant');
+        const context = await runtime.auth.$context;
+        const row = await context.adapter.findOne<{
+          scope?: string | null;
+          expiresAt: Date | string;
+          status: string;
+          userId?: string | null;
+        }>({ model: 'deviceCode', where: [{ field: 'userCode', value: data.userCode }] });
+        request = deviceRequestOf(row, session.account.userId);
+      }
       return {
         google: runtime.methods.google,
         github: runtime.methods.github,
         email: runtime.methods.email,
         signedIn: session !== null,
         address: session?.account.email ?? null,
+        request,
       };
     } catch {
-      return { ...NO_SIGN_IN, address: null };
+      return { ...NO_SIGN_IN, address: null, request: null };
     }
-  },
-);
+  });
 
 export const Route = createFileRoute('/device')({
   validateSearch: (search: Record<string, unknown>): DeviceSearch =>
     typeof search.user_code === 'string' ? { user_code: cleanDeviceCode(search.user_code) } : {},
-  loader: () => readDeviceFacts(),
+  loaderDeps: ({ search }) => ({ userCode: search.user_code ?? '' }),
+  loader: ({ deps }) => readDeviceFacts({ data: { userCode: deps.userCode } }),
   head: () => ({
     meta: [
       { title: 'Connect the command line, Turboslide' },
@@ -101,6 +121,7 @@ function DevicePage() {
       figure={<MoodFigure size="page" control="device.figure" />}
       deviceCode={code}
       deviceEmail={facts.address ?? ''}
+      deviceRequest={facts.request}
       /* the code signed this browser in: the page loads again as the account, at the code step */
       onSignedIn={() => window.location.assign(next)}
     />

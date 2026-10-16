@@ -20,7 +20,15 @@
 // read is proven against `head()` with that copy as the read that holds when the document's own
 // url serves a stale body (`provenGet`). Framework free; the studio's server/access.ts wires it.
 import { createHash, randomBytes } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  rmdirSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type { AccessRecord, GeneralAccess, ShareLink } from '@turboslide/schema/access';
@@ -658,6 +666,12 @@ export type IndexStore = {
     principalId: string,
     update: (index: DeckIndex) => DeckIndex | null,
   ) => Promise<DeckIndex>;
+  /**
+   * Removes the principal's index and everything stored under its folder (the Blob backend's
+   * immutable copies among it), for an account deletion (hardening HR-SD#2, DATA-V5); answers how
+   * many files went. A principal without an index answers 0.
+   */
+  remove: (principalId: string) => Promise<number>;
 };
 
 /** A file safe name for a principal id: everything outside `[A-Za-z0-9_-]` becomes `_`. */
@@ -696,6 +710,18 @@ export function fileIndexStore(stateDir: string): IndexStore {
       if (next === null) return current;
       writeAtomic(pathOf(principalId), new TextEncoder().encode(canonicalJson(next)));
       return next;
+    },
+    async remove(principalId) {
+      const path = pathOf(principalId);
+      if (!existsSync(path)) return 0;
+      rmSync(path, { force: true });
+      // the folder holds the index alone on this backend; it goes when nothing else is in it
+      try {
+        rmdirSync(dirname(path));
+      } catch {
+        // not empty, or gone already
+      }
+      return 1;
     },
   };
 }
@@ -739,6 +765,13 @@ export function blobIndexStore(client: BlobClient, options: ProvenReadOptions = 
       }
       throw new AccessPreconditionError(principalId, null);
     },
+    async remove(principalId) {
+      // the index and its immutable copies (`users/<folder>/.turboslide/copies/`); the trailing
+      // slash keeps another principal whose folder starts with this one's out of the listing
+      const entries = await client.list(`users/${principalFolder(principalId)}/`);
+      if (entries.length > 0) await client.del(entries.map((entry) => entry.pathname));
+      return entries.length;
+    },
   };
 }
 
@@ -755,6 +788,9 @@ export function memoryIndexStore(): IndexStore & { readonly indexes: Map<string,
       if (next === null) return current;
       indexes.set(principalId, next);
       return next;
+    },
+    async remove(principalId) {
+      return indexes.delete(principalId) ? 1 : 0;
     },
   };
 }

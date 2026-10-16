@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,6 +9,8 @@ import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
+
+import { STATIC_HEADERS, prerenderNonce, staticPageCsp } from './src/server/headers.ts';
 
 // Deployment build: `pnpm --filter @turboslide/studio build:deploy`. Nitro picks the target from
 // NITRO_PRESET: node-server (default), vercel (apps/studio/vercel.json; docs/hosting.md), bun
@@ -220,7 +222,11 @@ const DOCS_PRERENDER = [
   { path: '/sitemap.xml' },
 ];
 
-/** The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two). */
+/**
+ * The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two), with the
+ * static headers, because Vercel applies the first header rule a path matches and a twin's own rule
+ * comes before `/docs/**` (HR-W#3a).
+ */
 const DOCS_TWIN_RULES = Object.fromEntries(
   DOCS.map(({ page, twin }) => [
     twin,
@@ -228,6 +234,7 @@ const DOCS_TWIN_RULES = Object.fromEntries(
       headers: {
         'content-type': 'text/markdown; charset=utf-8',
         link: `<${DOCS_ORIGIN}${page}>; rel="canonical"`,
+        ...STATIC_HEADERS,
       },
     },
   ]),
@@ -244,20 +251,32 @@ const DOCS_TWIN_RULES = Object.fromEntries(
 // (site.ts TWIN_PATHS: hero-dark.png and the rest), so they take the icon set's day and week
 // rather than 1.6's immutable year until their names carry a hash. On the node-server build the
 // same rules run in h3, so the local check sees the redirect and the headers too.
+// The answers the CDN gives before the function runs carry the app's security headers
+// (`STATIC_HEADERS`, hardening HR-W#3a, SPEC-1): the root redirect, the prerendered pages, the docs'
+// twins, the icon and robots.txt. Nitro compiles a header rule into a route without `continue`, and
+// Vercel applies the first such route a path matches, so each rule of those paths carries the whole
+// set: `/docs` and `/home/` get rules of their own (`/docs/**` does not match `/docs` there, and the
+// static layer answers `/home/` with the page under the screenshots' `/home/**` year).
 const DAY = 'public, max-age=86400, stale-while-revalidate=604800';
 const WEEK = 'public, max-age=604800, stale-while-revalidate=2592000';
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 /** A prerendered page: the CDN's copy, revalidated by the browser on every visit. */
 const PAGE = 'public, max-age=0, must-revalidate';
 const ROUTE_RULES = {
-  '/': { redirect: { to: '/new', status: 307 as const }, headers: { 'x-robots-tag': 'noindex' } },
+  '/': {
+    redirect: { to: '/new', status: 307 as const },
+    headers: { 'x-robots-tag': 'noindex', ...STATIC_HEADERS },
+  },
   /* the prerendered pages (docs/POLISH-2.md 5.2): the header Vercel gives /home's static file, so the
      CDN serves a page and a browser asks again before using its copy; written for /home too, which
      the node server otherwise answered with the /home/** rule's year (h3 matches the page itself) */
-  '/home': { headers: { 'cache-control': PAGE } },
-  '/docs/**': { headers: { 'cache-control': PAGE } },
+  '/home': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/home/': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/docs': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/docs/**': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   ...DOCS_TWIN_RULES,
-  '/favicon.ico': { headers: { 'cache-control': DAY } },
+  '/favicon.ico': { headers: { 'cache-control': DAY, ...STATIC_HEADERS } },
+  '/robots.txt': { headers: { ...STATIC_HEADERS } },
   '/icon.svg': { headers: { 'cache-control': DAY } },
   '/apple-touch-icon.png': { headers: { 'cache-control': DAY } },
   '/og/turboslide.png': { headers: { 'cache-control': DAY } },
@@ -298,6 +317,62 @@ const PRERENDER = existsSync(HOME_ROUTE)
       },
     }
   : {};
+
+// The prerendered pages' policy (hardening HR-W#3b, SPEC-1, CRIT-W5). The build mints one nonce
+// (`prerenderNonce`, kept in TURBOSLIDE_PRERENDER_NONCE so the prerender's preview server reads
+// the same value), and the request middleware hands it to every page it renders while TanStack
+// Start prerenders. Once the prerender is done, `staticPagePolicy` adds one Vercel route to the
+// Build Output's config.json: a `content-security-policy` header written by headers.ts's builder,
+// with that nonce and `frame-ancestors 'none'`, on every prerendered page whose file is under
+// static/ and carries that nonce alone, with and without its trailing slash. The route is
+// `continue: true`, so the route rule of the path still applies its own headers after it. A page
+// the prerender skipped (the start plugin's retry does not run again, and a loaded machine times
+// a page out) is answered by the function with the request's nonce and the middleware's policy,
+// so the route never names it. It is a Vercel route and not a route rule: on the node server the
+// function renders these pages with the request's nonce, and h3 writes a route rule's headers
+// over the answer's. One nonce for every visitor is safe on these pages alone: they hold no deck
+// content and nothing of a person.
+const PRERENDER_NONCE = prerenderNonce();
+const STATIC_PAGES = existsSync(HOME_ROUTE) ? ['/home', ...DOCS.map(({ page }) => page)] : [];
+const VERCEL_OUTPUT = fileURLToPath(new URL('./.vercel/output/', import.meta.url));
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** True when the page's file is this build's: at least one nonce attribute, each the build's. */
+function carriesBuildNonce(file: string): boolean {
+  if (!existsSync(file)) return false;
+  const values = [...readFileSync(file, 'utf8').matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]);
+  return values.length > 0 && values.every((value) => value === PRERENDER_NONCE);
+}
+
+function staticPagePolicy(): Plugin {
+  return {
+    name: 'turboslide:static-page-policy',
+    enforce: 'post',
+    buildApp: {
+      order: 'post',
+      async handler(builder) {
+        const configPath = join(VERCEL_OUTPUT, 'config.json');
+        const headers = staticPageCsp(PRERENDER_NONCE);
+        if (!existsSync(configPath) || Object.keys(headers).length === 0) return;
+        // a node-server build leaves an older Vercel output alone: its pages carry another nonce
+        const pages = STATIC_PAGES.filter((page) =>
+          carriesBuildNonce(join(VERCEL_OUTPUT, 'static', page.slice(1), 'index.html')),
+        );
+        if (pages.length === 0) return;
+        const config = JSON.parse(readFileSync(configPath, 'utf8'));
+        config.routes.unshift({
+          src: `^(?:${pages.map(escapeRegExp).join('|')})/?$`,
+          headers,
+          continue: true,
+        });
+        writeFileSync(configPath, JSON.stringify(config, null, 2));
+        builder.config.logger.info(
+          `static page policy: ${pages.length} of ${STATIC_PAGES.length} prerendered pages carry the build's nonce and its header`,
+        );
+      },
+    },
+  };
+}
 
 // The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`):
 // React, the scheduler and the router in one chunk named `vendor`, so it caches across
@@ -424,6 +499,7 @@ export default defineConfig({
       },
     }),
     viteReact(),
+    staticPagePolicy(),
   ],
   server: {
     port: 4321,

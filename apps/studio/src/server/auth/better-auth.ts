@@ -16,7 +16,8 @@
 // alias.ts) and where the caller's other stores hear about a sign in or a deletion; they are
 // injected so this module knows the library and nothing of the studio's stores. Nothing here
 // prints a secret: the secret is `BETTER_AUTH_SECRET`, else a value derived from the identity
-// cookie's secret, so a checkout needs no variable.
+// cookie's secret, so a checkout needs no variable. Google's access and refresh tokens are stored
+// encrypted under that secret, and a Google ID token is never a sign in (HR-K2#7).
 import { betterAuth } from 'better-auth';
 import type { Auth, BetterAuthOptions } from 'better-auth';
 import { getMigrations } from 'better-auth/db/migration';
@@ -30,9 +31,10 @@ import { sha256Hex } from '@turboslide/identity/sha256';
 import type { AuthDb } from './db.ts';
 import { signInMail } from './mail/templates.ts';
 import type { MailMode, Mailer } from './mail/mailer.ts';
+import type { RateLimiter } from '../ratelimit.ts';
 import type { QuotaStore } from './quota.ts';
 import type { SecondaryStorage } from './secondary-storage.ts';
-import { notePairCode, signInBinding } from './signin-binding.ts';
+import { PAIR_PATH, notePairCode, signInBinding } from './signin-binding.ts';
 
 export const BETTER_AUTH_SECRET_VARIABLE = 'BETTER_AUTH_SECRET';
 export const GITHUB_ID_VARIABLE = 'GITHUB_CLIENT_ID';
@@ -68,6 +70,12 @@ export const COOKIE_PREFIX = 'ts';
 export const SESSION_IDLE_S = 7 * 24 * 60 * 60;
 export const SESSION_UPDATE_S = 24 * 60 * 60;
 export const SESSION_FRESH_S = 10 * 60;
+/**
+ * The life of a session's copy in its signed cookie (the library's cookie cache) and in an
+ * instance's session facts (identity.ts): a session ended elsewhere, by Sign out everywhere else
+ * or a sign out on another device, is refused within it (HR-SA#7, AUTH-6; it was 300 s).
+ */
+export const SESSION_CACHE_S = 60;
 /** The magic link and the code live 300 s; three attempts per code (SPEC-3 7.3). */
 export const SIGN_IN_EXPIRES_S = 300;
 export const OTP_ATTEMPTS = 3;
@@ -164,6 +172,43 @@ export function betterAuthSecret(env: Env, sessionSecret: string): string {
   return sha256Hex(`turboslide better-auth secret:${sessionSecret}`);
 }
 
+/**
+ * The library's rate limit storage over the one limiter (HR-SA#3): the library hands a key of the
+ * client's address and the path, and a rule in seconds; the key is counted as its digest under
+ * the library's secret, so `ts_limits` holds no address. The library's own memory store answers
+ * the same two fields.
+ */
+export function authLimitStorage(
+  limits: Pick<RateLimiter, 'limit'>,
+  secret: string,
+  now: () => number = () => Date.now(),
+): NonNullable<NonNullable<BetterAuthOptions['rateLimit']>['customStorage']> {
+  return {
+    async consume(key, rule) {
+      const counted = `auth:${sha256Hex(`${secret}:${key}`)}`;
+      const taken = await limits.limit(counted, rule.max, rule.window * 1000);
+      return taken.ok
+        ? { allowed: true, retryAfter: null }
+        : { allowed: false, retryAfter: Math.max(1, Math.ceil((taken.resetAt - now()) / 1000)) };
+    },
+  };
+}
+
+/**
+ * The routes of the mail sign in (HR-SA#4): every path the magic link and code plugins answer,
+ * read from the plugins themselves so a route the library adds is covered, and the second
+ * browser's code (`/sign-in/pair`), which only follows a mail.
+ */
+export function mailPaths(plugins: readonly { endpoints?: Record<string, unknown> }[]): string[] {
+  const paths = new Set<string>([PAIR_PATH]);
+  for (const plugin of plugins)
+    for (const endpoint of Object.values(plugin.endpoints ?? {})) {
+      const path = (endpoint as { path?: unknown }).path;
+      if (typeof path === 'string') paths.add(path);
+    }
+  return [...paths].sort();
+}
+
 export type SessionFacts = { id: string; userId: string; token: string };
 
 export type AuthDeps = {
@@ -174,6 +219,12 @@ export type AuthDeps = {
   mailer: Mailer;
   /** The per address mail quota (F42); memory when the runtime has no database. */
   quotas: QuotaStore;
+  /**
+   * The one limiter over the accounts database (HR-SA#3, AUTH-8), when the engine is shared by
+   * many instances: the library's sign in limits count in it (`authLimitStorage`), so an address
+   * spread over instances meets one count. Without it the library counts in this process.
+   */
+  limits?: RateLimiter;
   /** Redis when the deployment has one; sessions and counters move there. */
   secondaryStorage?: SecondaryStorage;
   hosted: boolean;
@@ -241,9 +292,50 @@ function buildAuth(deps: AuthDeps): Auth {
             // `accessType: 'offline'` and no `consent`, since nothing calls a Google API later
             // (docs/REALTIME.md 4.1; design-google-login.md 2.4)
             prompt: 'select_account' as const,
+            // the library stores Google's ID token as Google sent it (encryptOAuthTokens below
+            // covers the access and refresh tokens alone), and inside its hour that token is a
+            // sign in on `/sign-in/social`. Nothing here signs in with an ID token, so the provider
+            // refuses them there and on `/link-social`, and a reader of the account table holds
+            // no sign in (HR-K2#7, SPEC-2)
+            disableIdTokenSignIn: true,
           },
         }
       : {};
+  // the two mail plugins: the link and the code, in one mail (mail/templates.ts)
+  const mailPlugins = [
+    magicLink({
+      expiresIn: SIGN_IN_EXPIRES_S,
+      storeToken: 'hashed',
+      rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
+      sendMagicLink: async ({ email, url, token }, ctx) => {
+        // the code a second browser asks for, answered to the page that asked (HR-SA#2a)
+        notePairCode(ctx, token);
+        let code = '';
+        try {
+          code = (await api.createOtp?.(email, ctx?.headers ?? ctx?.request?.headers)) ?? '';
+        } catch (error) {
+          log(
+            `turboslide auth: code not created: ${error instanceof Error ? error.name : 'error'}`,
+          );
+        }
+        await sendSignIn(email, url, code);
+      },
+    }),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: SIGN_IN_EXPIRES_S,
+      allowedAttempts: OTP_ATTEMPTS,
+      storeOTP: 'hashed',
+      rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
+      sendVerificationOTP: async ({ email, otp }) => {
+        await sendSignIn(email, undefined, otp);
+      },
+    }),
+  ] as const;
+  // with TURBOSLIDE_MAIL=off no mail leaves, so the mail routes answer 404 before the library's
+  // limiter or any row (HR-SA#4, AUTH-8): a request wrote a verification row and a quota row for a
+  // mail that was dropped
+  const mailOff = deps.mailer.mode === 'off';
   const auth = betterAuth({
     appName: 'Turboslide',
     basePath: AUTH_BASE_PATH,
@@ -260,7 +352,7 @@ function buildAuth(deps: AuthDeps): Auth {
     // the stored session tokens are digests (token-at-rest.ts, HR-K2#5); this route compares them
     // with the cookie's token and would end the caller's own session too. Sign out everywhere
     // else is the `account.signOut` action, which ends the other sessions by id (actions.ts)
-    disabledPaths: ['/revoke-other-sessions'],
+    disabledPaths: ['/revoke-other-sessions', ...(mailOff ? mailPaths(mailPlugins) : [])],
     // on the `d1` kind the library takes the binding shaped facade over the proxy and runs its own
     // D1 dialect and index introspector (d1-proxy-dialect.ts: D1 refuses the generic SQLite index
     // read of getMigrations); on the other kinds the Kysely of db.ts with its type
@@ -283,7 +375,7 @@ function buildAuth(deps: AuthDeps): Auth {
       expiresIn: SESSION_IDLE_S,
       updateAge: SESSION_UPDATE_S,
       freshAge: SESSION_FRESH_S,
-      cookieCache: { enabled: true, maxAge: 5 * 60 },
+      cookieCache: { enabled: true, maxAge: SESSION_CACHE_S },
     },
     advanced: {
       cookiePrefix: COOKIE_PREFIX,
@@ -300,6 +392,15 @@ function buildAuth(deps: AuthDeps): Auth {
       window: 60,
       max: 100,
       storage: deps.secondaryStorage !== undefined ? 'secondary-storage' : 'memory',
+      // the shared limiter wins over both (HR-SA#3): every instance reads one count per address
+      ...(deps.limits !== undefined
+        ? {
+            customStorage: authLimitStorage(
+              deps.limits,
+              betterAuthSecret(deps.env, deps.sessionSecret),
+            ),
+          }
+        : {}),
       customRules: {
         '/sign-in/magic-link': { window: 3600, max: MAILS_PER_IP_PER_HOUR },
         '/email-otp/send-verification-otp': { window: 3600, max: MAILS_PER_IP_PER_HOUR },
@@ -313,6 +414,11 @@ function buildAuth(deps: AuthDeps): Auth {
         '/callback/google': { window: 60, max: SOCIAL_PER_MINUTE },
       },
     },
+    // Google's access and refresh tokens are stored encrypted under the library's secret, which
+    // the Worker and its database bearer never hold (HR-K2#7, SPEC-2). A row stored before this
+    // reads as it is (better-auth `oauth2/utils.mjs`) and is rewritten at the person's next
+    // Google sign in
+    account: { encryptOAuthTokens: true },
     user: {
       deleteUser: {
         enabled: true,
@@ -338,34 +444,7 @@ function buildAuth(deps: AuthDeps): Auth {
     },
     socialProviders: { ...github, ...google },
     plugins: [
-      magicLink({
-        expiresIn: SIGN_IN_EXPIRES_S,
-        storeToken: 'hashed',
-        rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
-        sendMagicLink: async ({ email, url, token }, ctx) => {
-          // the code a second browser asks for, answered to the page that asked (HR-SA#2a)
-          notePairCode(ctx, token);
-          let code = '';
-          try {
-            code = (await api.createOtp?.(email, ctx?.headers ?? ctx?.request?.headers)) ?? '';
-          } catch (error) {
-            log(
-              `turboslide auth: code not created: ${error instanceof Error ? error.name : 'error'}`,
-            );
-          }
-          await sendSignIn(email, url, code);
-        },
-      }),
-      emailOTP({
-        otpLength: 6,
-        expiresIn: SIGN_IN_EXPIRES_S,
-        allowedAttempts: OTP_ATTEMPTS,
-        storeOTP: 'hashed',
-        rateLimit: { window: 3600, max: MAILS_PER_IP_PER_HOUR },
-        sendVerificationOTP: async ({ email, otp }) => {
-          await sendSignIn(email, undefined, otp);
-        },
-      }),
+      ...mailPlugins,
       deviceAuthorization({
         expiresIn: DEVICE_EXPIRES,
         interval: DEVICE_INTERVAL,
@@ -413,10 +492,14 @@ export async function migrateBetterAuth(auth: TurboslideAuth): Promise<void> {
   await runMigrations();
 }
 
-/** The session the request's cookie names, or null. */
+/**
+ * The session the request's cookie names, or null. `fresh` reads the session row past the
+ * library's cookie cache, so a caller with a cache of its own (identity.ts) never stacks the two.
+ */
 export async function sessionOf(
   auth: TurboslideAuth,
   request: Request,
+  options: { fresh?: boolean } = {},
 ): Promise<{
   session: {
     id: string;
@@ -430,7 +513,10 @@ export async function sessionOf(
   };
   user: { id: string; email: string; emailVerified: boolean; name: string; image?: string | null };
 } | null> {
-  const result = await auth.api.getSession({ headers: request.headers });
+  const result = await auth.api.getSession({
+    headers: request.headers,
+    ...(options.fresh === true ? { query: { disableCookieCache: true } } : {}),
+  });
   if (result === null) return null;
   return {
     session: result.session,

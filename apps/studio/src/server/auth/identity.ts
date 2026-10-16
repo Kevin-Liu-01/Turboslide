@@ -13,8 +13,9 @@
 //   2. A sign in session (better-auth): the account principal `usr_<id>` with its address and the
 //      admin flag; the anonymous cookie beside it is linked to the account if it is not yet (7.4).
 //      The session's facts are read through a per instance cache under the SHA-256 of the session
-//      cookie for 300 s on the D1 engine (`accountSession`; docs/CLOUDFLARE.md 4.1), and a D1
-//      proxy that does not answer makes the request anonymous after one retry.
+//      cookie for 60 s on the D1 engine (`accountSession`; docs/CLOUDFLARE.md 4.1; HR-SA#7), the
+//      session row itself past the library's cookie cache, and a D1 proxy that does not answer
+//      makes the request anonymous after one retry.
 //   3. The anonymous cookie: `anon_<uuid>` with its record's typed name or label.
 //   4. Nothing: a fresh anonymous principal is minted and the cookie handed back to set.
 //
@@ -50,6 +51,7 @@ import { ensureDecks, isHosted, repoRoot, stateDir } from '../root';
 import { dbAliasStore, memoryAliasStore, mergePrincipalRecords } from './alias.ts';
 import type { AliasStore } from './alias.ts';
 import {
+  SESSION_CACHE_S,
   createAuth,
   isFreshSession,
   migrateBetterAuth,
@@ -75,6 +77,9 @@ import { dbQuotaStore, memoryQuotaStore } from './quota.ts';
 import type { QuotaStore } from './quota.ts';
 import { flagOf, markSchemaCurrent, schemaIsCurrent, stampOf } from './schema.ts';
 import { sessionSecret } from './secret.ts';
+import { dbLimiter } from '../ratelimit.ts';
+import type { RateLimiter } from '../ratelimit.ts';
+import { dbLimitStore } from './limits.ts';
 import { redisSecondaryStorage } from './secondary-storage.ts';
 import type { RedisKvLike } from './secondary-storage.ts';
 import { routePath } from '../headers.ts';
@@ -108,9 +113,13 @@ export type DeckIndexView = 'owned' | 'shared' | 'recent' | 'trash' | 'all';
 export type IdentityHooks = {
   /** After an anonymous id links to an account: the index and the inbox merge (B2). */
   onLinked: ((anonymousId: string, userId: string) => Promise<void>)[];
-  /** Before an account is deleted; throw to refuse (owned decks other people hold grants on). */
+  /**
+   * Before an account is deleted, while its rows are still there; a throw refuses the deletion.
+   * start.ts binds account-delete.ts (HR-SD#2): the account's decks to the trash, its grants on
+   * other decks, its deck index and its picture files.
+   */
   beforeDelete: ((userId: string) => Promise<void>)[];
-  /** After an account is deleted: the files, the aliases and the profile are this module's; the rest is the hook's. */
+  /** After an account is deleted: the aliases, the principal record, the keys and the profile are this module's; the rest is the hook's. */
   onDeleted: ((userId: string) => Promise<void>)[];
   /** Binds pending invitations (grants by email) to a principal on the first verified session (6.5). */
   bindInvitations: ((userId: string, email: string) => Promise<void>) | null;
@@ -144,6 +153,13 @@ export type IdentityRuntime = {
   aliases: AliasStore;
   profiles: ProfileStore;
   quotas: QuotaStore;
+  /**
+   * The one limiter over the accounts database (HR-SA#3): on the D1 and Postgres engines, which
+   * many instances share; null on SQLite (a checkout, one process) and with no database. start.ts
+   * binds it as the application's limiter and the download tokens' spent set, and better-auth's
+   * sign in limits count in it.
+   */
+  limits: RateLimiter | null;
   mailer: Mailer;
   principals: PrincipalStore;
   checkoutToken: string | null;
@@ -169,7 +185,7 @@ export type BuildRuntimeInput = {
   resend?: (apiKey: string) => Resend;
   /** The fetch the D1 proxy posts with; a test hands a fake `/db/query`. */
   fetch?: typeof fetch;
-  /** The session facts cache's life; the default is 300 s on the `d1` engine and off elsewhere. */
+  /** The session facts cache's life; the default is 60 s on the `d1` engine and off elsewhere. */
   sessionFactsCacheMs?: number;
   /** How long a failed migration stands before the next read runs it again (`READY_RETRY_MS`). */
   readyRetryMs?: number;
@@ -179,8 +195,12 @@ export type BuildRuntimeInput = {
 // The session facts cache (docs/CLOUDFLARE.md 4.1, 4.2; the rows `cost.d1.reads`,
 // `cost.d1.writes`)
 
-/** The cookie cache's life (better-auth.ts `cookieCache.maxAge`), the cache's too. */
-export const SESSION_FACTS_CACHE_MS = 5 * 60_000;
+/**
+ * The session facts cache's life: the library's cookie cache's (better-auth.ts SESSION_CACHE_S).
+ * A session ended on another instance, by Sign out everywhere else among them, is refused here
+ * within it (HR-SA#7, AUTH-6), since a miss reads the session row past the cookie cache.
+ */
+export const SESSION_FACTS_CACHE_MS = SESSION_CACHE_S * 1000;
 
 /**
  * How long a failed migration of the identity database stands before the next read of
@@ -352,6 +372,11 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
   /* the mail mode gates the email method (REALTIME.md 4.1, default 7.7): with TURBOSLIDE_MAIL=off
      the dialog hides the field, so a database with no sender never offers a mail that is dropped */
   const mailMode = selectMail(input.env).mode;
+  /* the engines several instances share hold the one limiter's counters (HR-SA#3) */
+  const limits =
+    db !== null && (db.kind === 'd1' || db.kind === 'postgres')
+      ? dbLimiter(dbLimitStore(db.db))
+      : null;
   const runtime: IdentityRuntime = {
     env: input.env,
     hosted: input.hosted,
@@ -366,6 +391,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     aliases: db !== null ? dbAliasStore(db.db) : memoryAliasStore(),
     profiles: db !== null ? dbProfileStore(db.db) : memoryProfileStore(),
     quotas: db !== null ? dbQuotaStore(db.db) : memoryQuotaStore(),
+    limits,
     mailer,
     principals,
     checkoutToken: input.hosted ? null : checkoutToken(input.stateDir, input.announce ?? log),
@@ -386,6 +412,7 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
       sessionSecret: secret,
       mailer,
       quotas: runtime.quotas,
+      ...(limits !== null ? { limits } : {}),
       hosted: input.hosted,
       ...(input.redis !== undefined
         ? { secondaryStorage: redisSecondaryStorage(input.redis) }
@@ -492,7 +519,10 @@ export async function setIdentityRuntime(runtime: IdentityRuntime | undefined): 
   if (previous !== undefined && previous !== runtime) await previous.close();
 }
 
-/** Binds the seams other builders provide; each call adds or replaces. */
+/**
+ * Binds the seams other builders provide; each call adds or replaces. A list hook is added once
+ * per function: start.ts binds its seams on every request (HR-SD#2).
+ */
 export function bindIdentityHooks(
   partial: Partial<Omit<IdentityHooks, 'onLinked' | 'beforeDelete' | 'onDeleted'>> & {
     onLinked?: IdentityHooks['onLinked'][number];
@@ -502,9 +532,12 @@ export function bindIdentityHooks(
   runtime: IdentityRuntime = identityRuntime(),
 ): void {
   const { onLinked, beforeDelete, onDeleted, ...rest } = partial;
-  if (onLinked !== undefined) runtime.hooks.onLinked.push(onLinked);
-  if (beforeDelete !== undefined) runtime.hooks.beforeDelete.push(beforeDelete);
-  if (onDeleted !== undefined) runtime.hooks.onDeleted.push(onDeleted);
+  const add = <T>(list: T[], hook: T | undefined): void => {
+    if (hook !== undefined && !list.includes(hook)) list.push(hook);
+  };
+  add(runtime.hooks.onLinked, onLinked);
+  add(runtime.hooks.beforeDelete, beforeDelete);
+  add(runtime.hooks.onDeleted, onDeleted);
   Object.assign(runtime.hooks, rest);
 }
 
@@ -598,7 +631,7 @@ function rememberSession(
 /**
  * Drops every cached session of an account principal (a rename, an avatar change, a deletion, a
  * sign out on this instance), so the next request reads the rows again inside the cookie cache's
- * 300 s. The room's `forgetIdentity` (room.ts) calls it beside its own cache drop.
+ * 60 s. The room's `forgetIdentity` (room.ts) calls it beside its own cache drop.
  */
 export function forgetAccountFacts(
   principalId: string,
@@ -620,7 +653,8 @@ async function readAccountSession(
   runtime: IdentityRuntime,
   request: Request,
 ): Promise<AccountSession | null> {
-  const found = await sessionOf(runtime.auth!, request);
+  // the session row itself: the facts cache is the one cache, so the two never stack (HR-SA#7)
+  const found = await sessionOf(runtime.auth!, request, { fresh: true });
   if (found === null) return null;
   const account = await accountFacts(runtime, found.user.id);
   if (account === null || account.profile.deletedAt !== null) return null;
@@ -632,11 +666,22 @@ async function readAccountSession(
 }
 
 /**
+ * The library's answer when its session read failed on the database: a 500 with the code
+ * FAILED_TO_GET_SESSION over the D1 proxy's own error, which it does not pass on. The session row
+ * is read past the cookie cache since HR-SA#7, so the proxy's failures arrive in this shape.
+ */
+function isSessionReadFailure(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  return (error as { body?: { code?: unknown } }).body?.code === 'FAILED_TO_GET_SESSION';
+}
+
+/**
  * The account session of a request and its facts (the user row, the profile, the aliases), or
  * null for a request with no live session: through the per instance cache under the SHA-256 of
- * the session cookie for the cookie cache's 300 s on the `d1` engine (`fresh: true` reads past
- * it; `forgetAccountFacts` drops it), so a signed in editor hour costs at most about twelve
- * misses of four to five indexed rows each (docs/CLOUDFLARE.md 2.2, `cost.d1.reads`). A refused
+ * the session cookie for the cookie cache's 60 s on the `d1` engine (`fresh: true` reads past
+ * it; `forgetAccountFacts` drops it), so a signed in editor hour costs at most about sixty
+ * misses of four to five indexed rows each per instance (docs/CLOUDFLARE.md 2.2,
+ * `cost.d1.reads`; twelve before HR-SA#7 cut the window from 300 s to 60 s). A refused
  * or timed out D1 proxy call is retried once and then read as no session, so the request falls
  * to its anonymous cookie (CLOUDFLARE.md 3.8's row for the D1 route) and the failure is logged
  * at most once a minute.
@@ -676,7 +721,7 @@ export async function accountSession(
       });
       break;
     } catch (error) {
-      const proxy = isD1ProxyError(error);
+      const proxy = isD1ProxyError(error) || isSessionReadFailure(error);
       if (proxy && attempt === 0) continue;
       if (now - d1FailureLoggedAt > 60_000) {
         d1FailureLoggedAt = now;
@@ -695,7 +740,7 @@ export async function accountSession(
 /**
  * Links the request's anonymous principal to the session's account once per cached session when
  * it owns no decks, and holds the question open when it does (HR-SA#2b): the alias read runs the
- * first time this instance sees the pair and not on every request of the 300 s (CLOUDFLARE.md
+ * first time this instance sees the pair and not on every request of the 60 s (CLOUDFLARE.md
  * 2.2), and an open question is counted once.
  */
 async function linkUnderSession(
@@ -1045,7 +1090,10 @@ export async function requestIdentity(
   options: { mint?: boolean; now?: Date; fresh?: boolean } = {},
 ): Promise<RequestIdentity> {
   const now = options.now ?? new Date();
-  const bearer = resolveBearerSync(bearerToken(request), {
+  // the key read by its hash first when this instance's view of it is missing or stale (HR-SA#6)
+  const given = bearerToken(request);
+  if (given !== undefined && given !== '') await runtime.keys.prime(given);
+  const bearer = resolveBearerSync(given, {
     env: runtime.env,
     keys: runtime.keys,
     checkoutToken: runtime.checkoutToken,

@@ -23,6 +23,10 @@
 //   ts_schema      one row `turboslide` carrying the schema version a boot wrote after it migrated
 //                  (CLOUDFLARE.md 4.2): a cold instance on the D1 engine reads it once and skips
 //                  the few dozen statements of the two migration sets when it matches
+//   ts_limits      the one limiter's counters (HR-SA#3, ratelimit.ts and limits.ts): a fixed
+//                  window per key, the key a SHA-256 digest, `reset_at` in epoch milliseconds, so
+//                  the sign in limits, the application quotas and the spent download tokens hold
+//                  across every instance of a deployment
 //
 // The two control tables of the realtime Worker (`rt_open`, `rt_flags`, CLOUDFLARE.md 3.6.2) are
 // not here: the wrangler migration apps/realtime-worker/migrations/0001_control.sql makes and seeds
@@ -148,6 +152,14 @@ export type SchemaTable = {
   v: string;
 };
 
+export type LimitsTable = {
+  /** The SHA-256 hex of the counted key (limits.ts), never the key itself. */
+  key: string;
+  count: number;
+  /** When the window ends, in epoch milliseconds (a string from Postgres' bigint). */
+  reset_at: number | string;
+};
+
 export type AuthDatabase = {
   user: UserTable;
   session: SessionTable;
@@ -160,6 +172,7 @@ export type AuthDatabase = {
   ts_quota: QuotaTable;
   ts_principal: PrincipalTable;
   ts_schema: SchemaTable;
+  ts_limits: LimitsTable;
 };
 
 /** The names of Turboslide's own tables, in creation order. */
@@ -171,6 +184,7 @@ export const TURBOSLIDE_TABLES = [
   'ts_quota',
   'ts_principal',
   'ts_schema',
+  'ts_limits',
 ] as const;
 
 /**
@@ -178,6 +192,12 @@ export const TURBOSLIDE_TABLES = [
  * `ts_schema` row records it on the D1 engine. Bump it when a table or a column changes here, and
  * when the better-auth dependency moves to a version whose tables differ, so the next cold
  * instance runs the two migration sets once more; a row that matches skips them.
+ *
+ * A table only added stays on the current version (HR-SA#3's `ts_limits`): on D1 the table comes
+ * from its wrangler migration, applied before the push, and the Worker's `/db` refuses every
+ * schema statement, so a build that read another version would try to migrate through `/db` and
+ * fail. The release before keeps reading this value, so it boots on the newer database and its
+ * rollback holds (docs/hardening/HARDENING.md 1.3 item 4).
  */
 export const AUTH_SCHEMA_VERSION = 'better-auth 1.7.4; turboslide 2026-10-01.1';
 export const AUTH_SCHEMA_KEY = 'turboslide';
@@ -263,6 +283,13 @@ export async function migrateTurboslideTables(db: Kysely<AuthDatabase>): Promise
     .ifNotExists()
     .addColumn('k', 'text', (col) => col.primaryKey())
     .addColumn('v', 'text', (col) => col.notNull())
+    .execute();
+  await db.schema
+    .createTable('ts_limits')
+    .ifNotExists()
+    .addColumn('key', 'text', (col) => col.primaryKey())
+    .addColumn('count', 'integer', (col) => col.notNull())
+    .addColumn('reset_at', 'bigint', (col) => col.notNull())
     .execute();
 }
 

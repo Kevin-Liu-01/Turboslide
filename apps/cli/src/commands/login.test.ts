@@ -4,7 +4,10 @@
 // slow_down, stores the key under hosts.json with `kind: 'api-key'` and the record ids, never
 // prints the key, and logout revokes the key through account.tokens.revoke with the bearer and
 // forgets the host; access_denied and an expired code read as the fixed sentences; a studio
-// without the flow names the alternative. Ids named for the coverage test: account.tokens.revoke.
+// without the flow names the alternative. A key past its 90 days (HR-SA#5, AUTH-7) is refused
+// with the code key_expired: a command prints "Your sign in expired. Run turboslide login." and
+// exits 1, and logout forgets the host. Ids named for the coverage test: account.tokens.revoke,
+// account.me.
 import { readFileSync, statSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -15,7 +18,13 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { runCli } from '../cli.ts';
-import { DEVICE_CODE_PATH, DEVICE_GRANT, DEVICE_TOKEN_PATH, deviceFlow } from './login.ts';
+import {
+  DEVICE_CODE_PATH,
+  DEVICE_GRANT,
+  DEVICE_TOKEN_PATH,
+  SIGN_IN_EXPIRED,
+  deviceFlow,
+} from './login.ts';
 
 type Run = { code: number; stdout: string; stderr: string; json: unknown };
 
@@ -25,7 +34,7 @@ const FAKE_DEVICE = 'dev_fake_device_code_0000';
 let root: string;
 let server: Server;
 let origin = '';
-let mode: 'grant' | 'deny' | 'expired' | 'absent' = 'grant';
+let mode: 'grant' | 'deny' | 'expired' | 'absent' | 'key-expired' = 'grant';
 const requests: { path: string; body: Record<string, unknown>; authorization?: string }[] = [];
 let polls = 0;
 
@@ -171,8 +180,15 @@ describe('turboslide login and logout over the device flow', () => {
             token_type: 'Bearer',
             token_id: 'tok_01FAKE',
             principal_id: 'usr_01FAKE',
+            expires_at: '2027-01-10T09:00:00.000Z',
           });
         }
+        if (mode === 'key-expired' && request.url?.startsWith('/api/actions/'))
+          return answer(401, {
+            error: { code: 'key_expired', message: 'the API key expired', status: 401 },
+          });
+        if (request.url === '/api/actions/account.me')
+          return answer(200, { principalId: 'usr_01FAKE', kind: 'account', name: 'Test' });
         if (request.url === '/api/actions/account.tokens.revoke') {
           if (request.headers.authorization !== `Bearer ${FAKE_KEY}`)
             return answer(401, { error: { code: 'unauthorized', message: 'unauthorized' } });
@@ -207,8 +223,10 @@ describe('turboslide login and logout over the device flow', () => {
       kind: 'api-key',
       tokenId: 'tok_01FAKE',
       principalId: 'usr_01FAKE',
+      expiresAt: '2027-01-10T09:00:00.000Z',
       path: join(root, 'config', 'hosts.json'),
     });
+    expect(result.stderr).toContain('works until 2027-01-10');
     expect(requests[0]).toMatchObject({
       path: DEVICE_CODE_PATH,
       body: { client_id: 'turboslide-cli-test' },
@@ -237,6 +255,22 @@ describe('turboslide login and logout over the device flow', () => {
     expect(again.code).toBe(0);
     expect(again.stderr).toMatch(/no credential is stored/);
   });
+
+  test('a key past its expiry: a hosted command prints the sentence and exits 1, and logout forgets the host', async () => {
+    mode = 'grant';
+    expect((await run(['login', '--to', origin])).code).toBe(0);
+    mode = 'key-expired';
+    const me = await run(['account', 'me', '--to', origin]);
+    expect(me.code).toBe(1);
+    expect(me.stderr).toContain(SIGN_IN_EXPIRED);
+    expect(me.stderr).toContain(`turboslide login --to ${origin}`);
+    expect(me.stdout + me.stderr).not.toContain(FAKE_KEY);
+    const out = await run(['logout', '--to', origin]);
+    expect(out.code, out.stderr).toBe(0);
+    expect(out.json).toEqual({ origin, revoked: false, forgotten: true });
+    expect(hosts().hosts[origin]).toBeUndefined();
+    mode = 'grant';
+  }, 15_000);
 
   test('access_denied and an expired code read as the fixed sentences; a studio without the flow names the alternative; --to is required', async () => {
     mode = 'deny';

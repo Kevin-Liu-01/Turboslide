@@ -1,14 +1,6 @@
+import { clean } from './search';
 import type { SearchIndex, SearchRow } from './search';
 import { pagesInOrder } from './source';
-
-/** A section's text with the markup the structure pass kept (a component's tag, the bold marks) taken out. */
-function clean(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\*\*|__/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /**
  * The search index (docs/POLISH-2.md 5.5): one row per heading section of every page, from the

@@ -14,6 +14,10 @@ repository root (taken from Glyphfield, MIT, Kevin Liu). Disposed mounts pool th
 context and compiled programs, and dispose no longer calls getError. Every other file of the
 package is used unmodified.
 
+The glyph:* materials (src/glyph/, src/engine.ts) are Kevin Liu's Glyphfield code (MIT): its GLSL
+programs, its colour conversion and its WebGL2 and Canvas 2D renderers. The GLSL prelude carries
+Dave Hoskins' hash without sine (MIT), and Holo cloth adapts HoloCloth by Dmitry Kurash (MIT).
+
 The full license text and the notices of every other third-party work Turboslide ships are in
 THIRD_PARTY_NOTICES.md at the repository root; the CLI and studio distributions carry that file
 (SPEC 11, Licensing). Frames rendered from these materials may be shipped, modified and sold.

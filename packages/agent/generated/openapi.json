@@ -11532,7 +11532,7 @@
       "post": {
         "operationId": "material.list",
         "summary": "List materials",
-        "description": "The material catalog: every paper:* entry with its uniform schema and palette presets, and the proto:* engines with their availability.",
+        "description": "The material catalog: every paper:* (Paper Shaders) and glyph:* (Glyphfield WebGL2 and Canvas 2D) entry with its engine, uniform schema and palette presets, and the proto:* engines with their availability.",
         "tags": [
           "asset"
         ],
@@ -56409,8 +56409,12 @@
               "type": "string",
               "enum": [
                 "paper",
+                "glyph",
                 "proto"
               ]
+            },
+            "engine": {
+              "type": "string"
             },
             "label": {
               "type": "string"
@@ -60362,8 +60366,12 @@
                   "type": "string",
                   "enum": [
                     "paper",
+                    "glyph",
                     "proto"
                   ]
+                },
+                "engine": {
+                  "type": "string"
                 },
                 "label": {
                   "type": "string"

@@ -475,19 +475,87 @@ is Glyphfield's `LiveMaterialSettings` (`src/lib/liveMaterials.ts`), the publish
 `src/lib/agentCatalog.ts` `AGENT_SHADER_LIBRARY.controls` and the mapping of `paperShaderControls.ts`
 `paperControlOverrides` onto the Paper families, rewritten against Turboslide's `u_*` uniform names
 with the three colours taken by the brand kit and one rotation axis; the Shader section's groups
-(`packages/chrome/src/inspector/shader.tsx`) follow `LiveMaterialControls.tsx`'s. The house
-renderers (`glyphfield-mesh-gradient`, `glyphfield-grain-gradient`, `glyphfield-dither-gradient`, the
-glyph field) are not ported in ship two (the P1 engine interface of docs/archive/rounds/FEATURES.md 5.2 waits; this
-notice extends to them when they land). Not shipped, with the reason (audit-shaders, the summary):
-ShaderGradient (MIT, with three.js and React Three Fiber), Pavel Dobryakov's WebGL Fluid Simulation
-(MIT; a stateful simulation no timestamp reconstructs) and HoloCloth (MIT, Justin Levine; a pointer
-lit textile) stay in Glyphfield, and no code or asset of theirs is in this repository.
-Prototemplate's studio field (`Prototemplate/src/lib/studio-field.ts`) is Kevin Liu's own code and
-needs no third party notice when it lands (P1). Source: Kevin Liu's Glyphfield repository.
+(`packages/chrome/src/inspector/shader.tsx`) follow `LiveMaterialControls.tsx`'s. Wave 3 of the
+Glyphfield port (PLAN.md 3.1 to 3.3) adds Glyphfield's own engine: `packages/materials/src/glyph/`
+holds the GLSL prelude and the program bodies of `src/lib/originalMaterialShaders.ts` and
+`src/lib/liveMaterialPolar.ts`, the colour conversion of `src/lib/materialColor.ts`, and the WebGL2
+quad and the glyph field of `src/components/LiveMaterialCanvas.tsx`; the `glyph:*` entries take the
+tuned looks of `src/lib/shaderLab.ts` and `src/lib/liveMaterials.ts`; and
+`packages/viewer/src/render-quality.ts` is the sampler of `src/lib/landingRenderQuality.ts`. Some of
+those programs are Glyphfield's own studies after public work, named here and nowhere in the
+interface: Spectral bloom, Architectural chrome and Soft register after Shaders.com's studies;
+Chrome glares after Evil Rabbit's shader studies (visual reference only); Relief gradient and
+Orbit gradient after Gradientool (visual reference only); Radiant void and Galactic rings after
+Grainient's freebies (visual reference only). No code or asset of those sites is in this repository.
+Holo cloth is Glyphfield's plain GLSL textile after HoloCloth by Dmitry Kurash (MIT, notice below);
+HoloCloth's Verlet simulation is not ported. The hash without sine in the prelude is Dave Hoskins'
+(MIT, notice below). Not shipped, with the reason (audit-shaders, the summary): ShaderGradient (MIT,
+with three.js and React Three Fiber) and Pavel Dobryakov's WebGL Fluid Simulation (MIT; a stateful
+simulation) stay in Glyphfield until the live frame of the HTML slides design exists, and no code
+or asset of theirs is in this repository. Prototemplate's studio field
+(`Prototemplate/src/lib/studio-field.ts`) is Kevin Liu's own code and needs no third party notice
+when it lands (P1). Source: Kevin Liu's Glyphfield repository.
 
     MIT License
 
     Copyright (c) 2026 Kevin Liu
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+## HoloCloth (MIT)
+
+What: the Holo cloth material (`glyph:holo-cloth`, `packages/materials/src/glyph/shaders.ts`) is
+Glyphfield's GLSL textile, which adapts the woven foil, the thread sheen and the view angle
+diffraction of [HoloCloth](https://github.com/dmitrykurash/holocloth) by Dmitry Kurash. Its Verlet
+cloth is not ported; the material is a function of time alone with the pointer fixed at the centre.
+
+    MIT License
+
+    Copyright (c) 2026 Dmitry Kurash
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+## Hash without Sine (MIT)
+
+What: the `hash12`, `hash22` and `hash33` functions of the glyph engine's GLSL prelude
+(`packages/materials/src/glyph/shaders.ts`), Dave Hoskins' hash without sine, which gives the same
+values on every GPU.
+
+    MIT License
+
+    Copyright (c) 2014 David Hoskins
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal

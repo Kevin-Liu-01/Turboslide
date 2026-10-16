@@ -1,11 +1,11 @@
-import { useLocation } from '@tanstack/react-router';
-import { Suspense, isValidElement, use, useState } from 'react';
+import { useLocation, useRouter } from '@tanstack/react-router';
+import { Suspense, isValidElement, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SITE } from '@turboslide/theme/brand/site';
 
 import { twinUrl } from '../../docs/paths';
-import type { DocsPageData } from '../../docs/paths';
+import type { DocsPageData, DocsTocEntry } from '../../docs/paths';
 import { closestPages, neighbours, source } from '../../docs/source';
 import type { DocsPage } from '../../docs/source';
 import { SiteIcon } from '../site/SiteIcon';
@@ -14,8 +14,9 @@ import { CopyPage } from './CopyPage';
 import { docsPath } from './DocsShell';
 import { navName } from './DocsSidebar';
 import { DOCS_COMPONENTS, PathLink } from './mdx';
+import { fetchArticle, onBodyClick, onBodyKeyDown } from './static-body';
 
-export function pageData(page: DocsPage): DocsPageData {
+export function pageData(page: DocsPage, toc: DocsTocEntry[] = []): DocsPageData {
   return {
     url: page.url,
     slugs: page.slugs,
@@ -23,20 +24,33 @@ export function pageData(page: DocsPage): DocsPageData {
     description: page.data.description ?? '',
     twin: twinUrl(page.slugs),
     file: page.path,
+    toc,
   };
 }
 
 /**
- * The loader of /docs and /docs/$ (docs/POLISH-2.md 5.2, C23), isomorphic: the page is found in
- * the frontmatter this module already holds and its body chunk is fetched by `preload()`, in the
- * prerender and in the browser alike, so a click between docs pages requests that page's chunk
- * and calls no server function. Undefined for a path that names no page.
+ * The loader of /docs and /docs/$ (docs/POLISH-2.md 5.2, C23; hardening HR-PC#5, PERF-11): the
+ * page is found in the frontmatter this module already holds. On the server (the prerender) the
+ * page's body chunk is loaded and its on this page entries go into the data as words; the body
+ * itself is drawn by the component into the document and never into the payload. In the
+ * browser the body and its entries are read from the page's prerendered document, so a click
+ * between docs pages fetches that file, loads no compiled MDX and calls no server function.
+ * Undefined for a path that names no page.
  */
 export async function loadDocsPage(slugs: string[]): Promise<DocsPageData | undefined> {
   const page = source.getPage(slugs);
   if (page === undefined) return undefined;
-  await page.data.preload();
-  return pageData(page);
+  if (import.meta.env.SSR) {
+    const { toc } = await page.data.load();
+    return pageData(
+      page,
+      toc
+        .filter((item) => item.depth <= 3)
+        .map((item) => ({ url: item.url, title: plainText(item.title), depth: item.depth })),
+    );
+  }
+  const article = await fetchArticle(page.url);
+  return { ...pageData(page, article.toc), html: article.html };
 }
 
 const REPOSITORY_CONTENT = `${SITE.repository}/edit/main/apps/studio/content/docs`;
@@ -63,13 +77,11 @@ export const TOOL_WORDS = {
  * then the on this page column (the numbered h2 entries with the current one in ink, then the page
  * tools: Copy Page, View as Markdown, Edit this page, Report an issue), then previous and next on
  * a hair rule. The three are one grid (docs.css): from 1280 px the column sits beside the article
- * and stays in view; under it the tools move under the article and the entries leave. The body and
- * the entries come from the page's chunk; on a first load they are in the server's HTML and
- * hydrate when the chunk arrives. The page is keyed by its address, so a move to another page
- * starts its entries over.
+ * and stays in view; under it the tools move under the article and the entries leave. The body is
+ * static HTML in the browser (Body below); the entries come from the loader's data. The page is
+ * keyed by its address, so a move to another page starts its entries over.
  */
 export function DocsArticle({ data }: { data: DocsPageData }) {
-  const page = source.getPage(data.slugs);
   const { previous, next } = neighbours(data.url);
   return (
     <div className="ts-docs-page" data-control="docs.page" data-page={data.url} key={data.url}>
@@ -81,18 +93,10 @@ export function DocsArticle({ data }: { data: DocsPageData }) {
           )}
           {data.url === '/docs' ? <Facts /> : null}
         </header>
-        {page === undefined ? null : (
-          <Suspense fallback={null}>
-            <Body page={page} />
-          </Suspense>
-        )}
+        <Body data={data} />
       </article>
       <div className="ts-docs-aside">
-        {page === undefined ? null : (
-          <Suspense fallback={null}>
-            <Contents page={page} />
-          </Suspense>
-        )}
+        <Contents toc={data.toc} />
         <PageTools data={data} />
       </div>
       {previous === undefined && next === undefined ? null : (
@@ -151,12 +155,37 @@ function Facts() {
   );
 }
 
-function Body({ page }: { page: DocsPage }) {
-  const Content = page.data.body;
+/**
+ * The article's body (hardening HR-PC#5, PERF-11). The server draws it from the page's compiled
+ * MDX in the MDX components, its Suspense boundary inside the element. The browser never draws
+ * it: on the first load it keeps the server's children (an element whose HTML is given is not
+ * hydrated below itself), and after a move it sets the HTML the loader read from the page's
+ * document. Copy, the tabs and the links to this site's pages run from the element's two
+ * handlers (static-body.ts).
+ */
+function Body({ data }: { data: DocsPageData }) {
+  const router = useRouter();
+  if (import.meta.env.SSR) {
+    const page = source.getPage(data.slugs);
+    const Content = page?.data.body;
+    return (
+      <div className="ts-docs-body-text">
+        {Content === undefined ? null : (
+          <Suspense fallback={null}>
+            <Content components={DOCS_COMPONENTS} />
+          </Suspense>
+        )}
+      </div>
+    );
+  }
   return (
-    <div className="ts-docs-body-text">
-      <Content components={DOCS_COMPONENTS} />
-    </div>
+    <div
+      className="ts-docs-body-text"
+      suppressHydrationWarning
+      dangerouslySetInnerHTML={{ __html: data.html ?? '' }}
+      onClick={(event) => onBodyClick(event.nativeEvent, (href) => void router.navigate({ href }))}
+      onKeyDown={(event) => onBodyKeyDown(event.nativeEvent)}
+    />
   );
 }
 
@@ -166,9 +195,7 @@ function Body({ page }: { page: DocsPage }) {
  * ink (`aria-current="true"`): the last h2 whose top has passed 120 px under the window's top, or
  * the last one once the page is scrolled to its end.
  */
-function Contents({ page }: { page: DocsPage }) {
-  const { toc } = use(page.data.load());
-  const items = toc.filter((item) => item.depth <= 3);
+function Contents({ toc: items }: { toc: DocsTocEntry[] }) {
   const [here, setHere] = useState('');
   useMountEffect(() => {
     let frame = 0;

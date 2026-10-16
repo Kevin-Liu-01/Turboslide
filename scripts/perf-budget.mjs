@@ -730,6 +730,7 @@ async function resources(page) {
   const summary = await page.evaluate(() => {
     const res = performance.getEntriesByType('resource');
     const js = res.filter((r) => /\.js(\?|$)/.test(r.name));
+    const css = res.filter((r) => /\.css(\?|$)/.test(r.name));
     const paint = Object.fromEntries(
       performance.getEntriesByType('paint').map((p) => [p.name, p.startTime]),
     );
@@ -749,6 +750,8 @@ async function resources(page) {
       jsCount: js.length,
       jsDecoded: js.reduce((a, r) => a + (r.decodedBodySize || 0), 0),
       jsTransfer: js.reduce((a, r) => a + (r.transferSize || 0), 0),
+      cssCount: css.length,
+      cssDecoded: css.reduce((a, r) => a + (r.decodedBodySize || 0), 0),
       largestJs: largest ? largest.decodedBodySize : null,
       largestJsName: largest ? largest.name.split('/').pop() : null,
       // every script of the sample by name, so a `js decoded` miss names the chunks it counted
@@ -777,6 +780,8 @@ async function routeLoads() {
     `/deck/${args.deck}`,
     `/edit/${args.deck}`,
     `/present/${args.deck}`,
+    /* a docs article (hardening HR-PC#5, PERF-11): its JavaScript and CSS are recorded rows */
+    '/docs/reference/block',
   ].filter((route) => args.routes === null || args.routes.has(route));
   for (const route of routes) {
     const samples = { cold: [], warm: [] };
@@ -866,6 +871,8 @@ async function routeLoads() {
         jsDecoded: med('jsDecoded'),
         jsTransfer: med('jsTransfer'),
         jsCount: med('jsCount'),
+        cssDecoded: med('cssDecoded'),
+        cssCount: med('cssCount'),
         largestJs: med('largestJs'),
         largestJsName: list[0]?.largestJsName ?? null,
         loafMax: med('loafMax'),
@@ -891,6 +898,8 @@ async function routeLoads() {
       assert('routes', label('lcp'), row.lcp, b.lcp);
       assert('routes', label('ready'), row.ready, b.ready);
       assert('routes', label('js decoded'), row.jsDecoded, b.jsDecoded, 'bytes');
+      /* a recorded row on every route (hardening HR-PC#7, PERF-16): the stylesheets' decoded bytes */
+      assert('routes', label('css decoded'), row.cssDecoded, b.cssDecoded, 'bytes');
       assert(
         'routes',
         label(`largest js (${row.largestJsName ?? '?'})`),

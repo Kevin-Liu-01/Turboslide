@@ -1,6 +1,6 @@
 // The shader.* actions on a file store (docs/archive/rounds/FEATURES.md 5.5, 5.8, 7.3): `shader.list` answers
 // the gallery's order with the categories, the previews and the control ranges; `shader.insert`
-// lands a shader object with its featured preset, `motion.play: 'show'` and the placement the deps
+// lands a shader object with its featured preset, no `motion`, and the placement the deps
 // hand in (the sheet's centre without one), converting the slide first; `shader.set` writes the
 // controls and the resolved uniforms in one write and a preset change clears both; `shader.frame`
 // stores the PNG under the key derived id, writes the block's `/asset` and removes the block's
@@ -196,7 +196,7 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
     });
     expect(inserted.blockId).toBe('shader');
     expect(inserted.block.preset).toBe('diamond');
-    expect(inserted.block.motion).toEqual({ play: 'show' });
+    expect(inserted.block.motion).toBeUndefined();
     expect(inserted.block.pos).toMatchObject(placed);
     expect(inserted.block.alt).toBe('The liquid metal shader');
     const afterInsert = await document();

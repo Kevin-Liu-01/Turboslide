@@ -1278,7 +1278,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.set': action({
     id: 'deck.set',
     label: 'Set a deck field',
-    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
+    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1288,7 +1288,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .regex(/^\/(title|theme|defaults(\/[a-zA-Z]+)?)$/)
         .describe(
-          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes',
+          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes',
         ),
       value: z.unknown().optional().describe('The new value; omit it to remove the field'),
       baseRevision,
@@ -4350,7 +4350,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.insert': action({
     id: 'shader.insert',
     label: 'Insert a shader',
-    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
+    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
     group: 'block',
     mutates: true,
     transports: A,

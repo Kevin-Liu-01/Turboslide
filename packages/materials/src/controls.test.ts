@@ -124,7 +124,8 @@ describe('the eleven controls', () => {
     const block = shaderBlockOf('shader', entry, { controls: { strength: 1.5, speed: 1 } });
     expect(block.preset).toBe('diamond');
     expect(block.controls).toEqual({ strength: 1.5, speed: 1 });
-    expect(block.motion).toEqual({ play: 'show' });
+    /* Playback is the slide's and the deck's (the shader design 3.1): the insert writes no motion */
+    expect(block.motion).toBeUndefined();
     expect(block.alt).toBe('The liquid metal shader');
     // liquid metal maps no strength key, so the uniforms stay the preset's; a mapped control writes them
     expect(block.uniforms).toBeUndefined();

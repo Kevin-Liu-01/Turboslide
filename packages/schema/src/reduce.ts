@@ -600,7 +600,7 @@ export function applyMutation(
       }
       if (!DECK_SET_ROOTS.has(root)) {
         throw new TypeError(
-          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/notes, /defaults/background), guides or brand; sections and assets have their own mutations`,
+          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes, /defaults/background), guides or brand; sections and assets have their own mutations`,
         );
       }
       const existed = hasAt(document.deck, mutation.path);

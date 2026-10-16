@@ -1,6 +1,6 @@
 // The pure writes of the shader library (docs/archive/rounds/FEATURES.md 5.2, 5.3, 5.8), browser safe: the block
 // an insert lands (the entry's featured preset, the controls with their resolved uniforms beside
-// them, `motion.play: 'show'`, the alt in the seller's words), where it lands (the caller's box,
+// them, the alt in the seller's words), where it lands (the caller's box,
 // the placement helper's rectangle, else the sheet's centre), the material block of a slide, the
 // deck's shader palette, and the mutations a Shader section write makes: a preset change writes
 // `/preset` and clears the control overrides and the uniforms; a controls change writes
@@ -71,7 +71,8 @@ export function parseAnchor(value: unknown, pointer: string): number | undefined
  * The block `shader.insert` and the gallery land (5.2, 5.4; question 5's default): the entry's
  * featured preset, the controls with their resolved uniforms beside them when any moves, the
  * still's moment when one is named (absent reads as 5,500 ms, so the insert never writes the
- * default), `motion.play: 'show'` and the alt in the seller's words.
+ * default) and the alt in the seller's words. No `motion`: the slide's and the presentation's
+ * Playback decide whether it moves in the show (the shader design 3.1).
  */
 export function shaderBlockOf(
   id: string,
@@ -89,7 +90,6 @@ export function shaderBlockOf(
     materialId: entry.id,
     ...(preset !== undefined ? { preset } : {}),
     ...(options.anchor !== undefined ? { anchor: parseAnchor(options.anchor, '/anchor') } : {}),
-    motion: { play: 'show' },
     alt: options.alt ?? `The ${entry.label.toLowerCase()} shader`,
   };
   const controls =

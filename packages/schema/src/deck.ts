@@ -86,6 +86,14 @@ export type Appearance = (typeof APPEARANCES)[number];
 export const COUNTER_MODES = ['on', 'off', 'skip-title'] as const;
 export type CounterMode = (typeof COUNTER_MODES)[number];
 
+/**
+ * Playback (the shader design 3.1, named for every live block as the HTML slides design 2.2 names
+ * it): whether the live blocks of a slide move in the show and the viewer, or hold their stills.
+ * Play when absent.
+ */
+export const PLAY_MODES = ['play', 'hold'] as const;
+export type PlayMode = (typeof PLAY_MODES)[number];
+
 // ---------------------------------------------------------------------------------------------
 // Types
 
@@ -108,6 +116,8 @@ export type Deck = {
     counter?: CounterMode;
     /** the background every slide without its own takes; what Add to theme writes (gslides-parity SPEC-2 2.6.2) */
     background?: SlideBackground;
+    /** whether the live blocks move in the show and the viewer; play when absent (Slide > Playback > Apply) */
+    play?: PlayMode;
   };
   /**
    * The deck's guides (gslides-parity SPEC-2 2.10): vertical lines at the x values and horizontal
@@ -156,6 +166,8 @@ export type SlideBase = {
    * absent, the slide follows the deck.
    */
   counter?: 'on' | 'off';
+  /** Slide > Playback > Apply to selected: this slide's live blocks play or hold whatever the deck says; absent, the slide follows the deck. */
+  play?: PlayMode;
   /** The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide until New slide or Apply layout runs. */
   template?: LayoutId;
   /**
@@ -506,6 +518,13 @@ const slideBase = {
     group: 'Slide',
     help: 'Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected).',
   }),
+  play: annotate(z.enum(PLAY_MODES).optional(), {
+    label: 'Playback',
+    control: 'select',
+    snap: PLAY_MODES,
+    group: 'Slide',
+    help: 'play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.',
+  }),
   template: annotate(z.enum(LAYOUT_IDS).optional(), {
     label: 'Layout',
     control: 'select',
@@ -670,6 +689,13 @@ export const deckSchema = z.strictObject({
         group: 'Slide',
         help: 'The background colour every slide without its own takes; Add to theme writes it.',
       }),
+      play: annotate(z.enum(PLAY_MODES).optional(), {
+        label: 'Playback',
+        control: 'select',
+        snap: PLAY_MODES,
+        group: 'Slide',
+        help: 'play moves the shaders and other live blocks in the show and the viewer, hold shows their stills; a slide’s own play wins. Play when absent. A viewer’s Reduce motion or Play animated patterns Off holds them for that viewer.',
+      }),
     })
     .optional(),
   guides: annotate(deckGuidesSchema.optional(), {
@@ -806,6 +832,19 @@ export function deckCounter(deck: Pick<Deck, 'brand' | 'defaults' | 'theme'>): C
  */
 export function deckCounterFormat(deck: Pick<Deck, 'brand' | 'theme'>): CounterFormat {
   return deck.brand?.counter?.format ?? themeFactsOf(deck.theme).counter.format;
+}
+
+/**
+ * Whether a slide's live blocks play or hold in the show and the viewer (the shader design 3.1,
+ * renamed `play` by the HTML slides design 2.2): the slide's own word, else the deck's, else play.
+ * The one reader; the viewer's live-plan.ts applies the person's settings over it, which can only
+ * hold.
+ */
+export function slidePlay(
+  deck: Pick<Deck, 'defaults'>,
+  slide: Pick<SlideBase, 'play'> | undefined,
+): PlayMode {
+  return slide?.play ?? deck.defaults?.play ?? 'play';
 }
 
 /** The deck's theme: the stored id, with the legacy `gt-ink-paper` read as General Translation. */

@@ -12608,9 +12608,9 @@
                 "label": "Motion",
                 "control": "json",
                 "group": "Block",
-                "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
               },
-              "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+              "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
               "type": "object",
               "properties": {
                 "play": {
@@ -27229,7 +27229,7 @@
         "path": {
           "type": "string",
           "pattern": "^\\/(title|theme|defaults(\\/[a-zA-Z]+)?)$",
-          "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes"
+          "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes"
         },
         "value": {
           "description": "The new value; omit it to remove the field"
@@ -35502,9 +35502,9 @@
                 "label": "Motion",
                 "control": "json",
                 "group": "Block",
-                "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
               },
-              "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+              "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
               "type": "object",
               "properties": {
                 "play": {
@@ -36520,9 +36520,9 @@
                 "label": "Motion",
                 "control": "json",
                 "group": "Block",
-                "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
               },
-              "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+              "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
               "type": "object",
               "properties": {
                 "play": {
@@ -39936,6 +39936,25 @@
                 "off"
               ]
             },
+            "play": {
+              "title": "Playback",
+              "x-inspector": {
+                "label": "Playback",
+                "control": "select",
+                "snap": [
+                  "play",
+                  "hold"
+                ],
+                "group": "Slide",
+                "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+              },
+              "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+              "type": "string",
+              "enum": [
+                "play",
+                "hold"
+              ]
+            },
             "template": {
               "title": "Layout",
               "x-inspector": {
@@ -40435,6 +40454,25 @@
                 "off"
               ]
             },
+            "play": {
+              "title": "Playback",
+              "x-inspector": {
+                "label": "Playback",
+                "control": "select",
+                "snap": [
+                  "play",
+                  "hold"
+                ],
+                "group": "Slide",
+                "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+              },
+              "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+              "type": "string",
+              "enum": [
+                "play",
+                "hold"
+              ]
+            },
             "template": {
               "title": "Layout",
               "x-inspector": {
@@ -40927,6 +40965,25 @@
                 "off"
               ]
             },
+            "play": {
+              "title": "Playback",
+              "x-inspector": {
+                "label": "Playback",
+                "control": "select",
+                "snap": [
+                  "play",
+                  "hold"
+                ],
+                "group": "Slide",
+                "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+              },
+              "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+              "type": "string",
+              "enum": [
+                "play",
+                "hold"
+              ]
+            },
             "template": {
               "title": "Layout",
               "x-inspector": {
@@ -41406,6 +41463,25 @@
               "enum": [
                 "on",
                 "off"
+              ]
+            },
+            "play": {
+              "title": "Playback",
+              "x-inspector": {
+                "label": "Playback",
+                "control": "select",
+                "snap": [
+                  "play",
+                  "hold"
+                ],
+                "group": "Slide",
+                "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+              },
+              "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+              "type": "string",
+              "enum": [
+                "play",
+                "hold"
               ]
             },
             "template": {
@@ -41917,6 +41993,25 @@
               "enum": [
                 "on",
                 "off"
+              ]
+            },
+            "play": {
+              "title": "Playback",
+              "x-inspector": {
+                "label": "Playback",
+                "control": "select",
+                "snap": [
+                  "play",
+                  "hold"
+                ],
+                "group": "Slide",
+                "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+              },
+              "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+              "type": "string",
+              "enum": [
+                "play",
+                "hold"
               ]
             },
             "template": {
@@ -43059,6 +43154,25 @@
               "enum": [
                 "on",
                 "off"
+              ]
+            },
+            "play": {
+              "title": "Playback",
+              "x-inspector": {
+                "label": "Playback",
+                "control": "select",
+                "snap": [
+                  "play",
+                  "hold"
+                ],
+                "group": "Slide",
+                "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+              },
+              "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+              "type": "string",
+              "enum": [
+                "play",
+                "hold"
               ]
             },
             "template": {
@@ -49183,7 +49297,7 @@
     {
       "name": "deck_set",
       "action": "deck.set",
-      "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
+      "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
       "inputSchema": {
         "$id": "#/$defs/DeckSetInput",
         "type": "object",
@@ -49191,7 +49305,7 @@
           "path": {
             "type": "string",
             "pattern": "^\\/(title|theme|defaults(\\/[a-zA-Z]+)?)$",
-            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes"
+            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes"
           },
           "value": {
             "description": "The new value; omit it to remove the field"
@@ -64722,7 +64836,7 @@
     {
       "name": "deck_shader_insert",
       "action": "shader.insert",
-      "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+      "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
       "inputSchema": {
         "$id": "#/$defs/ShaderInsertInput",
         "type": "object",
@@ -65271,9 +65385,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -65814,9 +65928,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {

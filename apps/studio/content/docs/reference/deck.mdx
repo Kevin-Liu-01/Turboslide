@@ -51,13 +51,13 @@ It takes no input.
 
 ## deck.set [#deck.set]
 
-**Set a deck field.** Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).
+**Set a deck field.** Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).
 
-| Field          | Type    | Required | Description                                                                                                |
-| -------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `path`         | string  | yes      | JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes |
-| `value`        | unknown | no       | The new value; omit it to remove the field                                                                 |
-| `baseRevision` | integer | yes      | The revision the caller read; a stale value is rejected with 409                                           |
+| Field          | Type    | Required | Description                                                                                                                |
+| -------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `path`         | string  | yes      | JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes |
+| `value`        | unknown | no       | The new value; omit it to remove the field                                                                                 |
+| `baseRevision` | integer | yes      | The revision the caller read; a stale value is rejected with 409                                                           |
 
 - Command line: `turboslide deck set <path> <value>`
 - MCP tool: `deck_set`

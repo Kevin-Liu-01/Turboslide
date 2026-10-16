@@ -7,7 +7,7 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 
 import type { EditorShellInput, IdentityView } from '../editor-shell';
 import { EditorShell } from '../EditorShell';
-import { SNACKBARS, TAB_ONLY } from '../menus/strings';
+import { SNACKBARS, TAB_ONLY, TITLE_ROW } from '../menus/strings';
 import { ShellContext } from '../shell-context';
 import type { ShellState } from '../shell-context';
 import { useSnackbar } from '../Snackbar';
@@ -289,6 +289,20 @@ describe('a presentation that lives in the tab alone (docs/SITE.md D10)', () => 
     fireEvent.click(container.querySelector('[data-control="deck.saveState"]')!);
     expect(snack(container)).toContain(TAB_ONLY.doc);
     expect(snack(container)).not.toContain(SNACKBARS.autosaved);
+  });
+
+  it('reads "In this tab only" while a write is in flight, never "Saving…"', () => {
+    const cell = (container: HTMLElement) =>
+      container.querySelector('[data-control="deck.saveState"]');
+    for (const state of ['unsaved', 'saving'] as const) {
+      const { container } = render(<Harness input={input({ tabOnly, save: { state } })} />);
+      expect(cell(container)?.textContent).toContain(TAB_ONLY.words);
+      expect(cell(container)?.textContent).not.toContain(TITLE_ROW.saving);
+      expect(cell(container)?.getAttribute('data-state')).toBe('saved');
+      cleanup();
+    }
+    const { container } = render(<Harness input={input({ save: { state: 'unsaved' } })} />);
+    expect(cell(container)?.textContent).toContain(TITLE_ROW.saving);
   });
 
   it('keeps the autosave sentence on a presentation the server saves', () => {

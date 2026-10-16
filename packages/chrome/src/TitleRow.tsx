@@ -262,35 +262,36 @@ function SaveState() {
     return () => window.clearTimeout(timer);
   }, [streamDown]);
   const reconnecting = !offline && streamDown && downForAWhile;
-  /* a presentation that lives in the tab alone (docs/SITE.md C.7) never reads "All changes
-     saved": the cell says where the changes are, and Saving while a write is in flight */
+  /* a presentation that lives in the tab alone (docs/SITE.md D10) is saved nowhere: the cell never
+     reads "All changes saved" or "Saving…", and a write in flight draws the settled cell, which
+     says where the changes are */
   const tabOnly = shell.input.tabOnly !== undefined;
-  const settled = saveWords(save.state, save.draft === true, offline, reconnecting);
+  const state =
+    tabOnly && (save.state === 'saving' || save.state === 'unsaved') ? 'saved' : save.state;
+  const settled = saveWords(state, save.draft === true, offline, reconnecting);
   const words = tabOnly && settled === TITLE_ROW.saved ? TAB_ONLY.words : settled;
   const item = itemById('title.saveState');
   /* Google shows a viewer and a commenter no save words: the cell is absent below `write`
      (SPEC-3 13.4; VERIFICATION-3 finding 10) */
   if (!isPresent(item, shell.menuContext)) return null;
-  const busy = save.state === 'saving' || save.state === 'unsaved';
+  const busy = state === 'saving' || state === 'unsaved';
   const icon = busy ? 'cloud-arrow-up' : 'cloud';
   /* a fresh draft that nothing has written yet (docs/archive/rounds/PRODUCT.md section 2 rank 30; audit-seller
      32): the cell keeps its width so the clock never moves, and its words wait for the first edit */
-  const untouched = save.draft === true && save.state === 'saved' && !offline && !reconnecting;
+  const untouched = save.draft === true && state === 'saved' && !offline && !reconnecting;
   return (
     <button
       type="button"
       className={cn(
         'ts-title-save',
-        save.state !== 'saved' && 'is-busy',
+        state !== 'saved' && 'is-busy',
         offline && 'is-offline',
         words === TITLE_ROW.reconnecting && 'is-reconnecting',
         untouched && 'is-untouched',
       )}
       data-control="deck.saveState"
       data-menu-item={item.id}
-      data-state={
-        offline ? 'offline' : words === TITLE_ROW.reconnecting ? 'reconnecting' : save.state
-      }
+      data-state={offline ? 'offline' : words === TITLE_ROW.reconnecting ? 'reconnecting' : state}
       aria-hidden={untouched ? true : undefined}
       tabIndex={untouched ? -1 : undefined}
       onClick={() => shell.runItem(item)}

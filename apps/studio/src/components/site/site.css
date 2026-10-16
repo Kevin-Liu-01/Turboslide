@@ -716,8 +716,9 @@
   margin-left: calc((100% + var(--site-gap)) / 4);
 }
 
-.ts-site .site-block-body code,
-.ts-site .site-faq-a code {
+/* inline code only: a code panel's `pre code` keeps the panel's colour and 13 px (CodePanel) */
+.ts-site .site-block-body :not(pre) > code,
+.ts-site .site-faq-a :not(pre) > code {
   font-size: 0.875em;
   color: var(--pt-ink);
 }

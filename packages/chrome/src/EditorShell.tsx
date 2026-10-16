@@ -235,6 +235,8 @@ const SignInDialog = lazyDialog(() => import('./dialogs/SignIn').then((m) => m.S
 const SlideNumbersDialog = lazyDialog(() =>
   import('./dialogs/SlideNumbers').then((m) => m.SlideNumbersDialog),
 );
+/* Slide > Playback (the shader design 3.1) */
+const PlaybackDialog = lazyDialog(() => import('./dialogs/Playback').then((m) => m.PlaybackDialog));
 const SpecialCharactersDialog = lazyDialog(() =>
   import('./dialogs/SpecialCharacters').then((m) => m.SpecialCharactersDialog),
 );
@@ -277,6 +279,7 @@ const LAZY_DIALOGS = [
   ShareDialog,
   SignInDialog,
   SlideNumbersDialog,
+  PlaybackDialog,
   SpecialCharactersDialog,
   DiagramPanel,
   EditHtmlPanel,
@@ -2360,6 +2363,8 @@ export function EditorShell({
         return <LogoDialog.Component target={dialog.target} />;
       case 'slideNumbers':
         return <SlideNumbersDialog.Component />;
+      case 'playback':
+        return <PlaybackDialog.Component />;
       case 'details':
         return <DetailsDialog.Component />;
       case 'findReplace':

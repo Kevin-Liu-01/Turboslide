@@ -2236,6 +2236,15 @@ const SLIDE: Menu = {
         doc: 'Keeps your content and moves it into the new layout',
       },
     ),
+    /* the shader design 3.1: play or hold for the deck and the selected slides, named for every
+       live block (the HTML slides design 2.2) */
+    now('slide.playback', 'Playback', dialog('Playback'), {
+      turboslide: true,
+      enabled: 'hasSlide',
+      icon: 'play',
+      doc: 'Whether shaders and other live content move in the show and the viewer or hold their still frame',
+      terms: ['shader', 'pattern', 'animation', 'motion', 'play', 'hold', 'still'],
+    }),
     later('slide.transition', 'Transition', STILL_SLIDES),
     /* the product round (docs/archive/rounds/PRODUCT.md 4.1) drew Edit theme and Change theme as two rows that open
        one panel. Round 1 (docs/NEXT.md 4.1.3 item 20; audit-clutter 50, 99) keeps Change theme;
@@ -2497,7 +2506,9 @@ const TOOLS: Menu = {
             'tools.preferences.playShaders.show',
             'In the show only',
             toggle('playShaders', 'show'),
-            { doc: 'Animated patterns hold their frame while you edit and move in the show' },
+            {
+              doc: 'Animated patterns hold their frame while you edit and move in the show and the viewer',
+            },
           ),
           now('tools.preferences.playShaders.off', 'Off', toggle('playShaders', 'off'), {
             doc: 'Animated patterns show their frame everywhere',

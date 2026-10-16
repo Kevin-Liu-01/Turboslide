@@ -42,7 +42,7 @@ export type MiniMenu = {
 
 /** sha256 of packages/chrome/src/menus/model.ts and keys.ts the menus were read from */
 export const MINI_SOURCES = {
-  model: '6c3cf1d44c3e71c3b7b769f0d28ad83676be4164520157d5097b8adb76b2bb0b',
+  model: '9e46179a9768e728713c09d31173e08386446c25748885ce48dc3bf4983bc6e9',
   keys: '9ef709f8c8a999497f482b7ab500b05a99dcad5e408e11b02e0f36d7d5e74959',
 } as const;
 
@@ -606,6 +606,7 @@ const PACKED: readonly (readonly [string, string, readonly Packed[]])[] = [
       ],
       ['', 'Change background', 1],
       ['', 'Apply layout'],
+      ['', 'Playback'],
       ['slide.changeTheme', 'Change theme', 3],
     ],
   ],

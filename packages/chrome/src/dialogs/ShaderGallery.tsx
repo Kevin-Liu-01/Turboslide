@@ -14,7 +14,7 @@ import { isFormPreset, shaderPaletteOf } from '@turboslide/materials/presets';
 import type { ShaderPalette } from '@turboslide/materials/presets';
 import { shaderPreviewUrl as previewUrlOf } from '@turboslide/materials/previews';
 import type { MaterialBlock, MaterialPreset } from '@turboslide/schema/blocks/material';
-import { MATERIAL_ANCHORS, materialBlockSchema } from '@turboslide/schema/blocks/material';
+import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 import { CATALOG } from '@turboslide/schema/catalog';
 import { deckAppearance } from '@turboslide/schema/deck';
 import type { BlockId } from '@turboslide/schema/ids';
@@ -148,15 +148,11 @@ export function shaderEngines(entries: MaterialEntry[] = insertableMaterials()):
   return [...seen].map(([family, label]) => ({ family, label }));
 }
 
-/** True while the schema knows the `motion` field of 5.1 (B5's), so the default of question 5 is written only then. */
-export function schemaHasMotion(): boolean {
-  return 'motion' in materialBlockSchema.shape;
-}
-
 /**
  * The material block a card inserts (5.2, 5.4): the catalog's blank with the entry, the preset,
- * the alt "The liquid metal shader" (5.1) and, once the schema carries it, `motion.play: 'show'`
- * (question 5's default). The plan's shader branch (B5) places it.
+ * the alt "The liquid metal shader" (5.1). No `motion`: the slide's and the presentation's
+ * Playback decide whether it moves in the show (the shader design 3.1). The plan's shader branch
+ * (B5) places it.
  */
 export function shaderBlockOf(
   id: BlockId,
@@ -172,8 +168,6 @@ export function shaderBlockOf(
   delete block.uniforms;
   if (preset === undefined) delete block.preset;
   else block.preset = preset.name;
-  if (schemaHasMotion())
-    (block as MaterialBlock & { motion?: { play: 'off' | 'show' } }).motion = { play: 'show' };
   return block;
 }
 

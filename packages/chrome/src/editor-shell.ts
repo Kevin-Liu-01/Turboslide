@@ -1006,6 +1006,8 @@ export const DIALOG_IDS = [
   'download',
   'downloadPdf',
   'slideNumbers',
+  /* Slide > Playback (the shader design 3.1) */
+  'playback',
   'details',
   'findReplace',
   'nameVersion',
@@ -1073,6 +1075,8 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
       return 'logo';
     case 'Slide numbers':
       return 'slideNumbers';
+    case 'Playback':
+      return 'playback';
     case 'Details':
       return 'details';
     case 'Find and replace':

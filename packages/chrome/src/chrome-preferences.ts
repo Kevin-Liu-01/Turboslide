@@ -10,23 +10,30 @@
  * viewer's reduce-motion.ts, whose `motionReduced()` is the one check in script for both the
  * system setting and this attribute. The editor removes the landing's `data-motion` on mount
  * (`leaveLandingMotion`), so its motion follows Reduce motion alone.
+ *
+ * Play animated patterns Off is stamped the same way, as `data-hold-live` (its name and reader
+ * live in the viewer's live-plan.ts), so the show and the viewer hold every live block for the
+ * person on any route (the shader design 3.1).
  */
+import { HOLD_LIVE_ATTRIBUTE } from '@turboslide/viewer/live-plan';
 import { REDUCE_MOTION_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
 
 /** Present while Show tooltips is off: the tooltip manager shows no plate. */
 export const HIDE_TOOLTIPS_ATTRIBUTE = 'data-hide-tooltips';
 
-/** The two stored settings these attributes stand for (`ts-editor-settings`). */
+/** The three stored settings these attributes stand for (`ts-editor-settings`). */
 export type ChromePreferences = {
   readonly reduceMotion?: boolean | string | undefined;
   readonly showTooltips?: boolean | string | undefined;
+  readonly playShaders?: boolean | string | undefined;
 };
 
-/** Stamps both attributes on the root from the editor's settings; `data-motion` is left alone. */
+/** Stamps the attributes on the root from the editor's settings; `data-motion` is left alone. */
 export function stampPreferences(settings: ChromePreferences): void {
   const root = document.documentElement;
   root.toggleAttribute(REDUCE_MOTION_ATTRIBUTE, settings.reduceMotion === true);
   root.toggleAttribute(HIDE_TOOLTIPS_ATTRIBUTE, settings.showTooltips === false);
+  root.toggleAttribute(HOLD_LIVE_ATTRIBUTE, settings.playShaders === 'off');
 }
 
 /**
@@ -53,9 +60,9 @@ const SETTINGS_KEY = 'ts-editor-settings';
  * settings under `ts-editor-settings` (editor-shell.ts `SETTINGS_STORAGE`) before first paint, and
  * read again on every `storage` event for that key, so a tab that is already open (the deck list,
  * the trash, the presenter console, another editor) follows a toggle made in another tab without
- * a reload. A cleared storage (the event's null key) clears both.
+ * a reload. A cleared storage (the event's null key) clears them.
  */
-export const PREFERENCES_BOOT_STATEMENT = `try{var tsPrefs=function(){var p=null;try{p=JSON.parse(localStorage.getItem('${SETTINGS_KEY}')||'null')}catch(e){}var r=document.documentElement;r.toggleAttribute('${REDUCE_MOTION_ATTRIBUTE}',!!p&&p.reduceMotion===true);r.toggleAttribute('${HIDE_TOOLTIPS_ATTRIBUTE}',!!p&&p.showTooltips===false)};tsPrefs();addEventListener('storage',function(e){if(e.key===null||e.key==='${SETTINGS_KEY}')tsPrefs()})}catch(e){}`;
+export const PREFERENCES_BOOT_STATEMENT = `try{var tsPrefs=function(){var p=null;try{p=JSON.parse(localStorage.getItem('${SETTINGS_KEY}')||'null')}catch(e){}var r=document.documentElement;r.toggleAttribute('${REDUCE_MOTION_ATTRIBUTE}',!!p&&p.reduceMotion===true);r.toggleAttribute('${HIDE_TOOLTIPS_ATTRIBUTE}',!!p&&p.showTooltips===false);r.toggleAttribute('${HOLD_LIVE_ATTRIBUTE}',!!p&&p.playShaders==='off')};tsPrefs();addEventListener('storage',function(e){if(e.key===null||e.key==='${SETTINGS_KEY}')tsPrefs()})}catch(e){}`;
 
 /** True when a `storage` event may have changed the stored settings (another tab wrote or cleared them). */
 export function settingsChanged(event: StorageEvent): boolean {

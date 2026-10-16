@@ -546,6 +546,15 @@ export const DIALOGS = {
     replace: 'Replace',
     replaceAll: 'Replace all',
   },
+  /* Slide > Playback (the shader design 3.1): the deck's and the slides' play or hold */
+  playback: {
+    title: 'Playback',
+    play: 'Play in the show',
+    hold: 'Hold the still',
+    note: 'A viewer with Reduce motion or Play animated patterns Off sees the still.',
+    apply: 'Apply',
+    applyToSelected: 'Apply to selected',
+  },
   slideNumbers: {
     title: 'Slide numbers',
     on: 'On',

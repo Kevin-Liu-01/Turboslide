@@ -591,7 +591,7 @@
     },
     "slide.setLayout": {
       "label": "Set layout",
-      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry.",
       "mutates": true,
       "milestone": "M6",
       "group": "slide"
@@ -1179,7 +1179,7 @@
     },
     "font.list": {
       "label": "Fonts",
-      "doc": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence (docs/archive/rounds/PRODUCT.md 4.2).",
+      "doc": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence.",
       "mutates": false,
       "milestone": "P1",
       "group": "render"

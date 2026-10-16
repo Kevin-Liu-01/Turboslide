@@ -3,53 +3,6 @@
 // else is reported on stderr by its message with exit 2 (its stack too when TURBOSLIDE_DEBUG is
 // set). runCli is pure over its streams so tests drive it.
 import { flagBoolean, flagString, parseArgs } from './args.ts';
-import { asset } from './commands/asset.ts';
-import { assist } from './commands/assist.ts';
-import { banner } from './commands/banner.ts';
-import { block } from './commands/block.ts';
-import { brand } from './commands/brand.ts';
-import { build } from './commands/build.ts';
-import { chart } from './commands/chart.ts';
-import { deck } from './commands/deck.ts';
-import { diagram } from './commands/diagram.ts';
-import { diff } from './commands/diff.ts';
-import { exportCommand } from './commands/export.ts';
-import { fix } from './commands/fix.ts';
-import { fonts } from './commands/fonts.ts';
-import { generate } from './commands/generate.ts';
-import { importCommand } from './commands/import.ts';
-import { info } from './commands/info.ts';
-import { judge } from './commands/judge.ts';
-import { lease } from './commands/lease.ts';
-import { line } from './commands/line.ts';
-import { lint } from './commands/lint.ts';
-import { logo } from './commands/logo.ts';
-import { material } from './commands/material.ts';
-import { mcp } from './commands/mcp.ts';
-import { motion } from './commands/motion.ts';
-import { render } from './commands/render.ts';
-import { sections } from './commands/sections.ts';
-import { shape } from './commands/shape.ts';
-import { shader } from './commands/shader.ts';
-import { sheet } from './commands/sheet.ts';
-import { slide } from './commands/slide.ts';
-import { slides } from './commands/slides.ts';
-import { table } from './commands/table.ts';
-import { tailor } from './commands/tailor.ts';
-import { template } from './commands/template.ts';
-import { theme } from './commands/theme.ts';
-import { text } from './commands/text.ts';
-import { validate } from './commands/validate.ts';
-import { version } from './commands/version.ts';
-import { account } from './commands/account.ts';
-import { activity } from './commands/activity.ts';
-import { admin } from './commands/admin.ts';
-import { comment, comments } from './commands/comment.ts';
-import { login, logout } from './commands/login.ts';
-import { notifications } from './commands/notifications.ts';
-import { picture } from './commands/picture.ts';
-import { presence, sync } from './commands/presence.ts';
-import { share } from './commands/share.ts';
 import { parseAuthor } from './context.ts';
 import type { CommandContext } from './context.ts';
 import { EXIT, GateError, UsageError } from './exit.ts';
@@ -279,56 +232,62 @@ Exit codes: 0; 1 findings at the gate or a verify failure; 2 usage or validation
 
 type Command = (ctx: CommandContext) => Promise<number>;
 
-const COMMANDS: Record<string, Command> = {
-  import: importCommand,
-  validate,
-  info,
-  deck,
-  brand,
-  template,
-  theme,
-  slides,
-  slide,
-  block,
-  text,
-  table,
-  chart,
-  shape,
-  line,
-  diagram,
-  sections,
-  asset,
-  logo,
-  material,
-  version,
-  lease,
-  diff,
-  fix,
-  render,
-  sheet,
-  lint,
-  judge,
-  build,
-  export: exportCommand,
-  fonts,
-  generate,
-  mcp,
-  comment,
-  comments,
-  notifications,
-  activity,
-  share,
-  presence,
-  sync,
-  account,
-  admin,
-  picture,
-  login,
-  logout,
-  tailor,
-  assist,
-  shader,
-  motion,
+/**
+ * Each command's module loads when the command runs (hardening HR-N#3, RUST-6): `--help` and
+ * `info` load no command they do not run, and Playwright loads only with the commands that drive
+ * a browser (render, export, capture and judge). Before, every module loaded first and the CLI
+ * spent 1.3 to 1.5 s of CPU before it printed help.
+ */
+const COMMANDS: Record<string, () => Promise<Command>> = {
+  import: async () => (await import('./commands/import.ts')).importCommand,
+  validate: async () => (await import('./commands/validate.ts')).validate,
+  info: async () => (await import('./commands/info.ts')).info,
+  deck: async () => (await import('./commands/deck.ts')).deck,
+  brand: async () => (await import('./commands/brand.ts')).brand,
+  template: async () => (await import('./commands/template.ts')).template,
+  theme: async () => (await import('./commands/theme.ts')).theme,
+  slides: async () => (await import('./commands/slides.ts')).slides,
+  slide: async () => (await import('./commands/slide.ts')).slide,
+  block: async () => (await import('./commands/block.ts')).block,
+  text: async () => (await import('./commands/text.ts')).text,
+  table: async () => (await import('./commands/table.ts')).table,
+  chart: async () => (await import('./commands/chart.ts')).chart,
+  shape: async () => (await import('./commands/shape.ts')).shape,
+  line: async () => (await import('./commands/line.ts')).line,
+  diagram: async () => (await import('./commands/diagram.ts')).diagram,
+  sections: async () => (await import('./commands/sections.ts')).sections,
+  asset: async () => (await import('./commands/asset.ts')).asset,
+  logo: async () => (await import('./commands/logo.ts')).logo,
+  material: async () => (await import('./commands/material.ts')).material,
+  version: async () => (await import('./commands/version.ts')).version,
+  lease: async () => (await import('./commands/lease.ts')).lease,
+  diff: async () => (await import('./commands/diff.ts')).diff,
+  fix: async () => (await import('./commands/fix.ts')).fix,
+  render: async () => (await import('./commands/render.ts')).render,
+  sheet: async () => (await import('./commands/sheet.ts')).sheet,
+  lint: async () => (await import('./commands/lint.ts')).lint,
+  judge: async () => (await import('./commands/judge.ts')).judge,
+  build: async () => (await import('./commands/build.ts')).build,
+  export: async () => (await import('./commands/export.ts')).exportCommand,
+  fonts: async () => (await import('./commands/fonts.ts')).fonts,
+  generate: async () => (await import('./commands/generate.ts')).generate,
+  mcp: async () => (await import('./commands/mcp.ts')).mcp,
+  comment: async () => (await import('./commands/comment.ts')).comment,
+  comments: async () => (await import('./commands/comment.ts')).comments,
+  notifications: async () => (await import('./commands/notifications.ts')).notifications,
+  activity: async () => (await import('./commands/activity.ts')).activity,
+  share: async () => (await import('./commands/share.ts')).share,
+  presence: async () => (await import('./commands/presence.ts')).presence,
+  sync: async () => (await import('./commands/presence.ts')).sync,
+  account: async () => (await import('./commands/account.ts')).account,
+  admin: async () => (await import('./commands/admin.ts')).admin,
+  picture: async () => (await import('./commands/picture.ts')).picture,
+  login: async () => (await import('./commands/login.ts')).login,
+  logout: async () => (await import('./commands/login.ts')).logout,
+  tailor: async () => (await import('./commands/tailor.ts')).tailor,
+  assist: async () => (await import('./commands/assist.ts')).assist,
+  shader: async () => (await import('./commands/shader.ts')).shader,
+  motion: async () => (await import('./commands/motion.ts')).motion,
 };
 
 /** The registered command names, for the check that every `cli.usage` line names one (item 119). */
@@ -375,14 +334,17 @@ export async function runCli(argv: readonly string[], options: RunOptions): Prom
     };
     // the banner (gslides-parity SPEC-4 0.17): `turboslide --version`, parsed before the command
     // table; `turboslide version ...` stays the version log command
-    if (!command && flagBoolean(args, 'version')) return await banner(ctx);
+    if (!command && flagBoolean(args, 'version'))
+      return await (await import('./commands/banner.ts')).banner(ctx);
     if (!command || command === 'help' || flagBoolean(args, 'help')) {
       options.streams.stdout(`${USAGE}\n`);
       return EXIT.ok;
     }
-    const handler = COMMANDS[command];
-    if (!handler) throw new UsageError(`unknown command "${command}"\n\n${USAGE}`);
-    return await handler(ctx);
+    const load = Object.hasOwn(COMMANDS, command) ? COMMANDS[command] : undefined;
+    if (!load) throw new UsageError(`unknown command "${command}"\n\n${USAGE}`);
+    return await (
+      await load()
+    )(ctx);
   } catch (error) {
     if (error instanceof UsageError || error instanceof GateError) {
       out.warn(`turboslide: ${error.message}`);

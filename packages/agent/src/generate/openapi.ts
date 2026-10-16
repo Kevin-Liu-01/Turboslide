@@ -253,6 +253,9 @@ export function generateOpenApi(): JsonSchema {
         operationId: spec.id,
         summary: spec.label,
         description: spec.doc,
+        /* the public reference of the action's group (HR-C#12, CLEANUP-14): a relative reference,
+           resolved against the studio that serves this document */
+        externalDocs: { url: `/docs/reference/${spec.group}` },
         tags: [spec.group],
         'x-mutates': spec.mutates,
         'x-milestone': spec.milestone,

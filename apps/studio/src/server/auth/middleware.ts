@@ -53,7 +53,8 @@ export function principalMiddleware() {
     if (request.headers.get('authorization') !== null) await primeBearer(request);
     const ensured = await ensurePrincipal(request, studioSessionSecret());
     if (ensured !== null) bindRequestPrincipal(request, ensured);
-    if (ensured?.minted && ensured.setCookie && mintsIdentityCookie(request, pathname)) {
+    // a minted id, or an id whose seal is older than 30 days and is re-sealed (HR-SA#9, AUTH-10)
+    if (ensured?.setCookie && mintsIdentityCookie(request, pathname)) {
       const value = ensured.setCookie.split(';')[0]?.slice(ensured.cookieName.length + 1) ?? '';
       setCookie(ensured.cookieName, value, {
         path: '/',

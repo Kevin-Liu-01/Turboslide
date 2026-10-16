@@ -1,0 +1,16 @@
+/* PanelBoundary (PanelBoundary.tsx, hardening HR-O#7): the sentence a failed filmstrip, side panel
+   or dialog draws in place. It takes the frame of the place (`pt-sb` or `ts-panel`) and lays its
+   two lines out at the top. Tokens only; radius 0. */
+.ts-panel-broken {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  font: 13px/1.45 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-panel-broken-text {
+  margin: 0;
+}

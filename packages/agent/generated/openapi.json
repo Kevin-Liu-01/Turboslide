@@ -260,6 +260,9 @@
         "operationId": "deck.info",
         "summary": "Deck info",
         "description": "Title, theme, sections with slide ids and titles, counts (the canvas slides, charts and guides included) and the current revision.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -381,6 +384,9 @@
         "operationId": "deck.create",
         "summary": "New deck",
         "description": "Creates a deck under decks/ from a template of the index (template.list), the deployment default when `from` is absent (Blank: one title slide in the Simple theme, light), and returns its id, revision and counts.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -521,6 +527,9 @@
         "operationId": "deck.rename",
         "summary": "Rename deck",
         "description": "Sets the deck title, the name the sidebar head, the toolbar and the deck list show; one deck.set of /title.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -664,6 +673,9 @@
         "operationId": "deck.set",
         "summary": "Set a deck field",
         "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -807,6 +819,9 @@
         "operationId": "deck.list",
         "summary": "List decks",
         "description": "The manifest facts of every deck under decks/ (id, title, slide and section counts, revision, the stamps), newest first; decks in the trash are left out unless asked.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -928,6 +943,9 @@
         "operationId": "deck.copy",
         "summary": "Make a copy",
         "description": "Copies a deck under a new id with a new title, every slide or the named ones, with or without the speaker notes, at revision 0 with an empty version log; the output names the new deck.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1068,6 +1086,9 @@
         "operationId": "deck.trash",
         "summary": "Move to trash",
         "description": "Moves a deck to the trash by writing trashedAt on its manifest: the home page, the fresh presentation route and deck.list leave it out until deck.restore clears the stamp or deck.remove deletes it; nothing else changes.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1208,6 +1229,9 @@
         "operationId": "deck.restore",
         "summary": "Restore from trash",
         "description": "Clears trashedAt on a deck in the trash, so the home page and deck.list show it again.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1348,6 +1372,9 @@
         "operationId": "deck.remove",
         "summary": "Delete forever",
         "description": "Deletes a deck: the folder under decks/ or the prefix in the Blob store, with its slides, assets and version log. Irreversible; the Trash page calls it, and `confirm` must be true.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1487,6 +1514,9 @@
         "operationId": "deck.setBackground",
         "summary": "Set theme background",
         "description": "Writes the background colour every slide without its own takes, what Add to theme writes; null removes it.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1630,6 +1660,9 @@
         "operationId": "deck.guides",
         "summary": "Set guides",
         "description": "Adds, removes, moves, sets or clears the deck’s guide lines, sheet pixels the same on every slide; the result is sorted and inside the sheet, and an empty result removes the field.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1773,6 +1806,9 @@
         "operationId": "template.list",
         "summary": "Templates",
         "description": "The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -1894,6 +1930,9 @@
         "operationId": "template.slides",
         "summary": "Template slides",
         "description": "The slides of one template in order with their titles and kinds, the rows the gallery and Import slides read.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -2015,6 +2054,9 @@
         "operationId": "template.create",
         "summary": "Save as template",
         "description": "Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery; a name an organisation template already carries replaces that template and keeps its slug (the dialog says so first).",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -2155,6 +2197,9 @@
         "operationId": "template.update",
         "summary": "Replace a template",
         "description": "Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -2295,6 +2340,9 @@
         "operationId": "template.rename",
         "summary": "Rename a template",
         "description": "Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -2435,6 +2483,9 @@
         "operationId": "template.delete",
         "summary": "Delete a template",
         "description": "Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -2575,6 +2626,9 @@
         "operationId": "template.setDefault",
         "summary": "Use for new presentations",
         "description": "Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. An agent token needs the admin scope.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -2715,6 +2769,9 @@
         "operationId": "slide.list",
         "summary": "List slides",
         "description": "Every slide in deck order with its number, section, title, kind and lint counts.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -2836,6 +2893,9 @@
         "operationId": "slide.get",
         "summary": "Get slide",
         "description": "The normalized slide, the assets it references and its last render record.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -2957,6 +3017,9 @@
         "operationId": "slide.insert",
         "summary": "Insert slide",
         "description": "Inserts a slide into a section after the named slide, or first.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3100,6 +3163,9 @@
         "operationId": "slide.remove",
         "summary": "Remove slide",
         "description": "Removes a slide from the deck and its section.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3243,6 +3309,9 @@
         "operationId": "slide.move",
         "summary": "Move slide",
         "description": "Moves a slide to a section after the named slide, or first.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3386,6 +3455,9 @@
         "operationId": "slide.update",
         "summary": "Patch slide",
         "description": "Applies a mutation list to one slide and returns the normalized slide with its findings.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3529,6 +3601,9 @@
         "operationId": "slide.replace",
         "summary": "Replace slide",
         "description": "Replaces a slide with the given document; what the source drawer’s Apply emits.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3671,7 +3746,10 @@
       "post": {
         "operationId": "slide.setLayout",
         "summary": "Set layout",
-        "description": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+        "description": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3815,6 +3893,9 @@
         "operationId": "slide.new",
         "summary": "New slide",
         "description": "Inserts one slide made from a layout with empty placeholders after the named slide (or first in the section), as one slide.insert with template set; a Section header starts a new section that takes the slides after the anchor.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -3958,6 +4039,9 @@
         "operationId": "slide.duplicate",
         "summary": "Duplicate slide",
         "description": "Copies the named slides with fresh ids after the last of them, in one write; a copied section header starts a new section.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4101,6 +4185,9 @@
         "operationId": "slide.skip",
         "summary": "Skip slide",
         "description": "Sets or clears skip on the named slides in one write: a skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4244,6 +4331,9 @@
         "operationId": "slide.applyLayout",
         "summary": "Apply layout",
         "description": "Applies a layout to the named slides in one write, one slide.replace per slide: the title, the body, the lists, the tables and the pictures move into the matching placeholders and the rest is appended; only a Title slide or a Main point drops what does not fit, and the output names the dropped blocks.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4387,6 +4477,9 @@
         "operationId": "slide.import",
         "summary": "Import slides",
         "description": "Copies slides from another deck after the named slide in one write: the assets they use are copied into this deck, colliding slide ids are renamed, and the output lists the slides and the assets that came over.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4530,6 +4623,9 @@
         "operationId": "slide.toCanvas",
         "summary": "Arrange by hand",
         "description": "Converts slides to the canvas, the freeform layout, every object taking the position box it is drawn at (measured on a rendered sheet); a slide already on the freeform layout is left as it is; one write, one browser page for the call.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4673,6 +4769,9 @@
         "operationId": "slide.setBackground",
         "summary": "Change background",
         "description": "Writes the background colour of slides in one write; null removes it and the theme default applies. A background picture is a picture object at the bottom of the stack.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4816,6 +4915,9 @@
         "operationId": "text.replaceAll",
         "summary": "Find and replace",
         "description": "Replaces every occurrence of a string in the visible text of the deck (every Text of every block, the title slide fields, the table cells and the speaker notes) in one write, case insensitive unless asked; the output counts the replacements.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -4959,6 +5061,9 @@
         "operationId": "block.set",
         "summary": "Set block property",
         "description": "Writes one property of a block by JSON pointer; an absent value deletes it.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5102,6 +5207,9 @@
         "operationId": "block.insert",
         "summary": "Insert block",
         "description": "Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5245,6 +5353,9 @@
         "operationId": "block.remove",
         "summary": "Remove block",
         "description": "Removes a block from its slide.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5388,6 +5499,9 @@
         "operationId": "block.move",
         "summary": "Move block",
         "description": "Moves a block to a slot after the named block, or first.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5531,6 +5645,9 @@
         "operationId": "block.align",
         "summary": "Align blocks",
         "description": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5674,6 +5791,9 @@
         "operationId": "block.distribute",
         "summary": "Distribute blocks",
         "description": "Spreads freeform blocks along one axis with equal gaps between the first and the last, or with a fixed gap; with snap the moved edges round to the 8 px grid.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5817,6 +5937,9 @@
         "operationId": "block.order",
         "summary": "Order block",
         "description": "Moves a freeform block through the stacking order, to the front or back or by one step, or to a given z rank, and renumbers the stack densely.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -5960,6 +6083,9 @@
         "operationId": "block.duplicate",
         "summary": "Duplicate block",
         "description": "Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6103,6 +6229,9 @@
         "operationId": "block.group",
         "summary": "Group",
         "description": "Writes one group tag on two or more objects of a slide in one write; the tag is generated when none is given; a slide that is not a canvas yet converts first.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6246,6 +6375,9 @@
         "operationId": "block.ungroup",
         "summary": "Ungroup",
         "description": "Removes the group tag from the named objects, or from every member of a named group, in one write.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6389,6 +6521,9 @@
         "operationId": "block.regroup",
         "summary": "Regroup",
         "description": "Writes a tag back on the named objects, the set the editor remembers from the last ungroup.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6532,6 +6667,9 @@
         "operationId": "block.rotate",
         "summary": "Rotate",
         "description": "Rotates objects to an angle or by an angle, degrees clockwise normalized to 0 up to 360, about each box or about the selection (a group rotation moves the members around the union centre); attached connectors follow; a slide that is not a canvas yet converts first.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6675,6 +6813,9 @@
         "operationId": "block.flip",
         "summary": "Flip",
         "description": "Toggles one flip axis on objects; about the selection every member also mirrors about the union centre and its angle becomes 360 minus itself (a group flip); attached connectors follow.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6818,6 +6959,9 @@
         "operationId": "block.crop",
         "summary": "Crop image",
         "description": "Writes the crop of a picture as fractions of it trimmed from each side; a slide that is not a canvas yet converts first when the picture is positioned.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -6961,6 +7105,9 @@
         "operationId": "block.mask",
         "summary": "Mask image",
         "description": "Clips a picture to a closed shape preset, or removes the mask with null.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7104,6 +7251,9 @@
         "operationId": "block.resetImage",
         "summary": "Reset image",
         "description": "Removes the crop, the mask, the adjustments and the round one crop anchor and aspect of a picture in one write.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7247,6 +7397,9 @@
         "operationId": "block.adjust",
         "summary": "Adjustments",
         "description": "Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1); null clears one.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7390,6 +7543,9 @@
         "operationId": "block.setAlt",
         "summary": "Alt text",
         "description": "Writes the description of an object: on the block for a shape, chart, line or text box, on the asset for a block that shows a picture, so two pictures of one asset share one description; the output names where it went.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7533,6 +7689,9 @@
         "operationId": "block.shadow",
         "summary": "Drop shadow",
         "description": "Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at their defaults.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7676,6 +7835,9 @@
         "operationId": "block.autofit",
         "summary": "Text fitting",
         "description": "Writes the fitting mode of a text carrying block: Do not autofit, Shrink text on overflow or Resize shape to fit text (grow, positioned blocks only); with apply the fit is measured and written in the same write, and the output names the fields written.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7819,6 +7981,9 @@
         "operationId": "text.style",
         "summary": "Text style",
         "description": "Marks a range of a Text italic, underlined, struck, superscript or subscript, gives it a text or highlight colour, or a size in pixels (true sets, false clears, null clears a colour or the size), as one text.replace of the whole Text; the output returns the new markup.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -7962,6 +8127,9 @@
         "operationId": "text.list",
         "summary": "List options",
         "description": "Writes the marker, the preset and the items’ levels of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8105,6 +8273,9 @@
         "operationId": "text.spacing",
         "summary": "Line and paragraph spacing",
         "description": "Writes the line spacing (a factor) and the space before and after paragraphs (px) of text blocks; null clears one.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8248,6 +8419,9 @@
         "operationId": "text.columns",
         "summary": "Columns",
         "description": "Writes the column count of text blocks, 1 to 3.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8391,6 +8565,9 @@
         "operationId": "text.indent",
         "summary": "Indent",
         "description": "Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8534,6 +8711,9 @@
         "operationId": "text.case",
         "summary": "Capitalization",
         "description": "Rewrites the characters of a range in lowercase, UPPERCASE or Title Case, marks and links kept, as one text.replace.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8677,6 +8857,9 @@
         "operationId": "text.insert",
         "summary": "Insert text",
         "description": "Inserts a string at a plain text offset of a Text, the special characters picker’s write, as one text.replace at [at, at].",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8820,6 +9003,9 @@
         "operationId": "chart.setData",
         "summary": "Edit chart data",
         "description": "Writes a chart’s categories and series in one write; every series carries one value per category.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -8963,6 +9149,9 @@
         "operationId": "chart.setKind",
         "summary": "Chart type",
         "description": "Writes a chart’s kind; a pie keeps the first series and the output names the dropped ones.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9106,6 +9295,9 @@
         "operationId": "table.merge",
         "summary": "Merge cells",
         "description": "Merges the cells from one corner to another into the anchor; the covered cells’ texts join the anchor’s with a line break.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9249,6 +9441,9 @@
         "operationId": "table.unmerge",
         "summary": "Unmerge cells",
         "description": "Removes the merge that covers a cell.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9392,6 +9587,9 @@
         "operationId": "table.insertRows",
         "summary": "Insert rows",
         "description": "Inserts rows above or below a row, merges and cell styles shifted, in one write.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9535,6 +9733,9 @@
         "operationId": "table.insertColumns",
         "summary": "Insert columns",
         "description": "Inserts columns left or right of a column, every row gaining empty cells, merges and cell styles shifted, in one write.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9678,6 +9879,9 @@
         "operationId": "table.deleteRows",
         "summary": "Delete rows",
         "description": "Deletes the rows from one index to another; deleting every row removes the table.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9821,6 +10025,9 @@
         "operationId": "table.deleteColumns",
         "summary": "Delete columns",
         "description": "Deletes the columns from one index to another; deleting every column removes the table.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -9964,6 +10171,9 @@
         "operationId": "table.distribute",
         "summary": "Distribute rows or columns",
         "description": "Gives every row an equal height or every column an equal width from a total; without a total the widths or heights clear so the content sizes them.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -10107,6 +10317,9 @@
         "operationId": "table.cellStyle",
         "summary": "Cell fill and border",
         "description": "Writes the fill and the border of cells in one write; null clears one; a border weight of 0 draws no border.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -10250,6 +10463,9 @@
         "operationId": "shape.set",
         "summary": "Shape",
         "description": "Writes the shape fields of shape blocks in one write: the preset, its adjust values, fill, border colour, weight, dash and corner radius; null clears one.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -10393,6 +10609,9 @@
         "operationId": "line.set",
         "summary": "Line",
         "description": "Writes the line fields of line blocks in one write: the kind, the start and end decorations, weight, dash, bend and points; a connect end attaches to a shape’s connection site and moves the end onto it, null detaches.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -10536,6 +10755,9 @@
         "operationId": "diagram.insert",
         "summary": "Insert diagram",
         "description": "Inserts a diagram template as one group of shape, text and line objects, centred on the sheet unless a box is given; a slide that is not a canvas yet converts first; the output names the ids.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -10679,6 +10901,9 @@
         "operationId": "section.set",
         "summary": "Set sections",
         "description": "Replaces the section list, the only place slide order lives.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -10822,6 +11047,9 @@
         "operationId": "slide.lease",
         "summary": "Lease slide",
         "description": "Takes a lease on a slide for the author; another author’s write is rejected with 409 unless forced.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -10962,6 +11190,9 @@
         "operationId": "asset.add",
         "summary": "Add asset",
         "description": "Adds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional two-tone treatment; returns the asset with twins and metrics.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -11105,6 +11336,9 @@
         "operationId": "asset.dither",
         "summary": "Dither asset",
         "description": "Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance; with fromRecorded it reads the committed twins back and verifies them cell for cell.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -11248,6 +11482,9 @@
         "operationId": "asset.capture",
         "summary": "Capture page",
         "description": "Captures a page at 1440 by 900 in one or both themes through a per-site recipe, optionally cropped to a region, with identical-region 2x detail crops as further assets.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -11390,6 +11627,9 @@
         "operationId": "material.capture",
         "summary": "Capture material",
         "description": "Renders a shader material at 3200 by 1800 and captures frozen frames at the given anchors as assets with recipe keys, through the two-tone screen when asked; one anchor returns the asset, several the list.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -11533,6 +11773,9 @@
         "operationId": "material.list",
         "summary": "List materials",
         "description": "The material catalog: every paper:* (Paper Shaders) and glyph:* (Glyphfield WebGL2 and Canvas 2D) entry with its engine, uniform schema and palette presets, and the proto:* engines with their availability.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -11654,6 +11897,9 @@
         "operationId": "render.slide",
         "summary": "Render",
         "description": "Renders slides in one or both themes at 1x or 2x and returns render records with image paths.",
+        "externalDocs": {
+          "url": "/docs/reference/render"
+        },
         "tags": [
           "render"
         ],
@@ -11775,6 +12021,9 @@
         "operationId": "render.sheet",
         "summary": "Contact sheet",
         "description": "Renders a contact sheet per theme with a JSON cell map from cell boxes to slide ids.",
+        "externalDocs": {
+          "url": "/docs/reference/render"
+        },
         "tags": [
           "render"
         ],
@@ -11896,6 +12145,9 @@
         "operationId": "lint.run",
         "summary": "Lint",
         "description": "Runs the grammar linter on slides in the static, rendered or both layers and returns findings.",
+        "externalDocs": {
+          "url": "/docs/reference/lint"
+        },
         "tags": [
           "lint"
         ],
@@ -12017,6 +12269,9 @@
         "operationId": "fix.run",
         "summary": "Fix",
         "description": "Applies the fix mutations of findings that carry one and reports what remains.",
+        "externalDocs": {
+          "url": "/docs/reference/lint"
+        },
         "tags": [
           "lint"
         ],
@@ -12160,6 +12415,9 @@
         "operationId": "diff.run",
         "summary": "Diff",
         "description": "The mutation list between two revisions in prose, optionally with before and after crops.",
+        "externalDocs": {
+          "url": "/docs/reference/version"
+        },
         "tags": [
           "version"
         ],
@@ -12281,6 +12539,9 @@
         "operationId": "version.save",
         "summary": "Save version",
         "description": "Saves a named version at the current revision.",
+        "externalDocs": {
+          "url": "/docs/reference/version"
+        },
         "tags": [
           "version"
         ],
@@ -12421,6 +12682,9 @@
         "operationId": "version.list",
         "summary": "List versions",
         "description": "The saved versions with author, note and revision.",
+        "externalDocs": {
+          "url": "/docs/reference/version"
+        },
         "tags": [
           "version"
         ],
@@ -12542,6 +12806,9 @@
         "operationId": "version.restore",
         "summary": "Restore version",
         "description": "Restores a version as a mutation, so it is undoable and visible in History.",
+        "externalDocs": {
+          "url": "/docs/reference/version"
+        },
         "tags": [
           "version"
         ],
@@ -12685,6 +12952,9 @@
         "operationId": "export.run",
         "summary": "Export",
         "description": "Exports the deck to PPTX in flatten (perfect, pixel identical) or native (editable text) mode and returns the verified report.",
+        "externalDocs": {
+          "url": "/docs/reference/export"
+        },
         "tags": [
           "export"
         ],
@@ -12806,6 +13076,9 @@
         "operationId": "export.text",
         "summary": "Download as plain text",
         "description": "The deck as plain text: one block of paragraphs per slide in order, table cells joined by tabs, a blank line between slides, the notes after each slide when asked; skipped slides left out unless asked.",
+        "externalDocs": {
+          "url": "/docs/reference/export"
+        },
         "tags": [
           "export"
         ],
@@ -12927,6 +13200,9 @@
         "operationId": "build.run",
         "summary": "Build standalone",
         "description": "Writes the single-file HTML deck with fonts and assets inlined and asserts the size budget.",
+        "externalDocs": {
+          "url": "/docs/reference/export"
+        },
         "tags": [
           "export"
         ],
@@ -13048,6 +13324,9 @@
         "operationId": "validate.run",
         "summary": "Validate",
         "description": "Validates a deck directory and returns the issues and the normalized document.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13169,6 +13448,9 @@
         "operationId": "deck.tailor",
         "summary": "Tailor for a customer",
         "description": "The tailoring pass as one write: replaces the customer name in every visible text and the notes, swaps the pictures whose alt text names the old customer for one asset, and skips the named slides; answers the counts per step and the slides that changed.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13312,6 +13594,9 @@
         "operationId": "assist.propose",
         "summary": "Ask the assistant",
         "description": "Asks the assistant for a proposal over the named slides: a shorter rewrite or speaker notes, or a free ask that resolves to one of the two; answers signed cards a caller accepts with assist.accept. A read: nothing is written until a card is accepted.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13433,6 +13718,9 @@
         "operationId": "assist.accept",
         "summary": "Accept a proposal",
         "description": "Writes one card assist.propose returned, as one write by the assistant: the signature, the expiry and the deck are verified, a card behind the deck is re based when its blocks are unchanged and refused otherwise.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13576,6 +13864,9 @@
         "operationId": "brand.get",
         "summary": "Brand kit",
         "description": "The brand kit record of the deck: the colour roles, the faces, the logo and footer slots, the slide numbers, the frame toggles and the words that never translate, drawn over the deck’s theme; an empty object for a deck that draws its theme alone.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13697,6 +13988,9 @@
         "operationId": "brand.set",
         "summary": "Set a brand kit field",
         "description": "Writes one value of the brand kit by JSON pointer (/colors/light/primary, /fonts/display, /mark, /footer/logo, /footer/text, /counter/format, /frame/rails, /positions/mark, /lexicon, /appearance, /name) as one deck.set mutation under /brand, the write every Brand kit panel control makes; an absent value removes the field. The record is validated before the commit.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13840,6 +14134,9 @@
         "operationId": "brand.reset",
         "summary": "Reset the brand kit",
         "description": "Removes the brand kit record, so the deck draws its theme alone (theme.list), or one field of it when a pointer is given, which then reads the theme’s value; a deck with nothing to remove writes no revision.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -13982,7 +14279,10 @@
       "post": {
         "operationId": "font.list",
         "summary": "Fonts",
-        "description": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence (docs/archive/rounds/PRODUCT.md 4.2).",
+        "description": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence.",
+        "externalDocs": {
+          "url": "/docs/reference/render"
+        },
         "tags": [
           "render"
         ],
@@ -14104,6 +14404,9 @@
         "operationId": "logo.search",
         "summary": "Find a logo",
         "description": "Searches the cached index of thesvg.org’s brand marks by title, slug, alias and category, ranked prefix, then word start, then substring, brands before community; answers each mark’s variants, its licence as recorded with the seller’s sentence, its brand site and guidelines and whether its default reads on paper and on ink, with the index’s date and its last upstream failure.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -14225,6 +14528,9 @@
         "operationId": "logo.insert",
         "summary": "Insert a logo",
         "description": "Stores a thesvg.org mark on the deck as an asset with the role logo, PNG twins at 3x of the logo size, the sanitized SVG as its source file and a source record naming the mark, its licence and its guidelines, never the source’s address; with slideId it places the picture at the logo size in the free area of the body slot, with blockId it swaps that picture’s asset and keeps the box, with everySlide or kit it writes the brand kit’s logo slots in the same write.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -14368,6 +14674,9 @@
         "operationId": "logo.refresh",
         "summary": "Refresh the logo index",
         "description": "Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -14488,6 +14797,9 @@
         "operationId": "shader.list",
         "summary": "List shaders",
         "description": "The shader library in the gallery’s order: each gallery entry with its category, featured preset, stills (the file names under packages/materials/previews), uniform schema and palette presets from this deck’s brand kit, plus the eleven common controls with their ranges and sentences and the five category chips. The gallery leaves out paper:perlin-noise, paper:simplex-noise and paper:waves; a named materialId answers any entry, and material.list lists all.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -14609,6 +14921,9 @@
         "operationId": "shader.insert",
         "summary": "Insert a shader",
         "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -14752,6 +15067,9 @@
         "operationId": "shader.set",
         "summary": "Set a shader field",
         "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -14895,6 +15213,9 @@
         "operationId": "shader.frame",
         "summary": "Store a shader frame",
         "description": "The client capture’s write (the editor’s own WebGL): stores the PNG under assets/frame-<16 hex of frameKey>@2x.png, writes the block’s /asset and removes the block’s superseded frame in one revision; the key is checked against the block as the document reads now, so a recipe that moved on answers 409; the same bytes under the same id store nothing. The orphan prune runs behind the response.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -15038,6 +15359,9 @@
         "operationId": "shader.capture",
         "summary": "Capture a shader’s frame",
         "description": "The hosted job for one shader block, the fallback when the editor has no WebGL and the agent’s route: the recipe rendered at the block’s box aspect with the long side 3200 in the capture browser, then the same write as shader.frame; bounded at 30 s hosted, answering one sentence.",
+        "externalDocs": {
+          "url": "/docs/reference/asset"
+        },
         "tags": [
           "asset"
         ],
@@ -15181,6 +15505,9 @@
         "operationId": "shader.render",
         "summary": "Render a shader",
         "description": "PNG bytes of a recipe for an agent or the CLI, no deck write and no browser of the caller’s: the material, a preset, uniforms or the common controls, the frame time and the pixels (3200 by 1800 unless a size with the long side 3200 is named); the deck’s brand kit colours the presets when the call names a deck.",
+        "externalDocs": {
+          "url": "/docs/reference/render"
+        },
         "tags": [
           "render"
         ],
@@ -15302,6 +15629,9 @@
         "operationId": "admin.avatar.sweep",
         "summary": "Sweep orphan pictures",
         "description": "Removes picture avatar files under u/ that no profile names and that are older than a day (an upload that never reached its record); by key, never by date or name; refused without an identity database.",
+        "externalDocs": {
+          "url": "/docs/reference/admin"
+        },
         "tags": [
           "admin"
         ],
@@ -15440,6 +15770,9 @@
         "operationId": "theme.list",
         "summary": "Themes",
         "description": "The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme.",
+        "externalDocs": {
+          "url": "/docs/reference/deck"
+        },
         "tags": [
           "deck"
         ],
@@ -15560,6 +15893,9 @@
         "operationId": "motion.list",
         "summary": "List animations",
         "description": "A slide's effects in play order, its transition and timed advance as they resolve (the slide's, else the deck's), and the rehearsal schedule: each effect's step, start and end in ms since the slide appeared, with every click at the end of the previous step; the step count and the length. An effect whose block is gone is listed under dangling and skipped by the schedule.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -15681,6 +16017,9 @@
         "operationId": "motion.add",
         "summary": "Add animation",
         "description": "Adds one effect to a slide's block and answers its id: an enter, emphasis or exit effect with a preset (fade, rise-in, slide-in, pop-in, wipe, draw, push-in, float, pulse, type-on, word-rise, line-reveal, glyph-stagger, tracking-in), keyframes on CSS properties or a motion path, starting on a click (the default), with the previous effect or after it, with a delay and a duration (500 ms by default). Refuses a block that is not on the slide and a text preset or split on a block without text.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -15824,6 +16163,9 @@
         "operationId": "motion.set",
         "summary": "Change animation",
         "description": "Writes one field inside one effect by JSON pointer (/start, /durationMs, /delayMs, /motion/preset, /motion/keyframes/0/style/opacity, ...); an absent value removes the field. The effect must stay valid and its id cannot change.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -15967,6 +16309,9 @@
         "operationId": "motion.remove",
         "summary": "Remove animation",
         "description": "Removes one effect from a slide; the block stays where it is.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -16110,6 +16455,9 @@
         "operationId": "motion.move",
         "summary": "Reorder animation",
         "description": "Moves one effect to a place in the slide’s play order, which reorders the steps; an index past the end puts it last.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -16253,6 +16601,9 @@
         "operationId": "slide.transition",
         "summary": "Transition",
         "description": "Sets how slides enter in the slideshow and the shared view (none, crossfade, slide-fade, rise-fade, scale-fade, zoom-through, blur-swipe, flip-fade, spring-pop, rotate-fade, drift-fade), 0 to 3,000 ms, in one write: on the named slides, or as the deck's transition when no slide ids are given. null removes it; a slide without one takes the deck's, and a deck without one keeps the 120 ms fade and rise.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -16396,6 +16747,9 @@
         "operationId": "slide.advance",
         "summary": "Advance",
         "description": "Sets the timed advance in one write: the slideshow moves to the next slide afterMs after the last step of the slide ends, on the named slides or as the deck’s default when no slide ids are given. null removes it, and a click advances.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -16539,6 +16893,9 @@
         "operationId": "presence.list",
         "summary": "Collaborators",
         "description": "The roster of the deck’s room with the computed mark, slide, selection, pointer and follow target per participant; server side on the window transport.",
+        "externalDocs": {
+          "url": "/docs/reference/presence"
+        },
         "tags": [
           "presence"
         ],
@@ -16660,6 +17017,9 @@
         "operationId": "presence.follow",
         "summary": "Follow",
         "description": "The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.",
+        "externalDocs": {
+          "url": "/docs/reference/presence"
+        },
         "tags": [
           "presence"
         ],
@@ -16800,6 +17160,9 @@
         "operationId": "presence.unfollow",
         "summary": "Stop following",
         "description": "The attached page stops following.",
+        "externalDocs": {
+          "url": "/docs/reference/presence"
+        },
         "tags": [
           "presence"
         ],
@@ -16940,6 +17303,9 @@
         "operationId": "presence.pointer",
         "summary": "Live pointer",
         "description": "Turns the caller’s live pointer on or off, persisted on the principal record per deck.",
+        "externalDocs": {
+          "url": "/docs/reference/presence"
+        },
         "tags": [
           "presence"
         ],
@@ -17080,6 +17446,9 @@
         "operationId": "sync.status",
         "summary": "Sync status",
         "description": "The client’s position in the room: the last stream entry, the revision, the pending and retained counts, the tier, the transport and whether the stream is connected.",
+        "externalDocs": {
+          "url": "/docs/reference/sync"
+        },
         "tags": [
           "sync"
         ],
@@ -17201,6 +17570,9 @@
         "operationId": "deck.watch",
         "summary": "Watch",
         "description": "Long polls for the checkpoints and comment entries since a revision, the polling form for a transport without a stream; answers at once when something is newer, else at the timeout.",
+        "externalDocs": {
+          "url": "/docs/reference/sync"
+        },
         "tags": [
           "sync"
         ],
@@ -17322,6 +17694,9 @@
         "operationId": "comment.add",
         "summary": "Comment",
         "description": "Starts a thread at an anchor (the deck, a slide, a block, a text range, a table cell or the notes) with a plain text body whose {@n} tokens name its mentions, optionally assigned; server side.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -17462,6 +17837,9 @@
         "operationId": "comment.reply",
         "summary": "Reply",
         "description": "Appends a reply to a thread; server side.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -17602,6 +17980,9 @@
         "operationId": "comment.edit",
         "summary": "Edit comment",
         "description": "Rewrites a comment’s body, its author only; 409 with the current thread when the thread moved since expectedUpdatedAt.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -17742,6 +18123,9 @@
         "operationId": "comment.delete",
         "summary": "Delete comment",
         "description": "Tombstones a comment, keeping its replies; the first comment’s tombstone keeps the thread; restore brings it back within 30 days.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -17882,6 +18266,9 @@
         "operationId": "comment.resolve",
         "summary": "Resolve",
         "description": "Marks a thread resolved; last writer wins.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18022,6 +18409,9 @@
         "operationId": "comment.reopen",
         "summary": "Re-open",
         "description": "Reopens a resolved thread; last writer wins.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18162,6 +18552,9 @@
         "operationId": "comment.assign",
         "summary": "Assign",
         "description": "Assigns a thread to a principal or an invitation (an agent principal is assignable), or clears the assignment with null; last writer wins.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18302,6 +18695,9 @@
         "operationId": "comment.done",
         "summary": "Mark as done",
         "description": "The assignee marks the thread done; last writer wins.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18442,6 +18838,9 @@
         "operationId": "comment.react",
         "summary": "React",
         "description": "Toggles the caller’s reaction on a comment from the 24 emoji palette; reactions are a set per emoji keyed by principal.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18582,6 +18981,9 @@
         "operationId": "comment.list",
         "summary": "Comments",
         "description": "The threads of the deck or a slide with their anchors resolved against the current document, filtered by block, state, assignment to the caller, author, search text or revision; 403 without readComments.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18703,6 +19105,9 @@
         "operationId": "comment.get",
         "summary": "Comment thread",
         "description": "One thread with its anchor resolved against the current document.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18824,6 +19229,9 @@
         "operationId": "comment.link",
         "summary": "Link to comment",
         "description": "The editor and the view URLs that open the deck on the thread’s slide with its card expanded; runs in the page on the window transport.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -18945,6 +19353,9 @@
         "operationId": "notification.list",
         "summary": "Notifications",
         "description": "The caller’s inbox, newest first: mentions, replies, assignments, resolutions, reactions, access requests and grants, coalesced per thread inside a 15 minute window.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -19066,6 +19477,9 @@
         "operationId": "notification.markRead",
         "summary": "Mark as read",
         "description": "Marks the named notifications read, or every one; answers the unread count.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -19206,6 +19620,9 @@
         "operationId": "notification.settings",
         "summary": "Notification settings",
         "description": "Reads or writes the caller’s per deck level (All comments, Comments for you, None), the email switch and, for the owner, whether commenters read the Activity panel; a read when every field is absent.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -19346,6 +19763,9 @@
         "operationId": "activity.list",
         "summary": "Activity",
         "description": "The merged activity feed of the deck: version windows, comment events, share events, requests, role changes, renames, restores, named versions, exports, imports and trash; editors and the owner, commenters when allowed.",
+        "externalDocs": {
+          "url": "/docs/reference/comment"
+        },
         "tags": [
           "comment"
         ],
@@ -19467,6 +19887,9 @@
         "operationId": "version.diff",
         "summary": "Show changes",
         "description": "The mutations between two revisions grouped by touched block and by author, the data behind Show changes; from omitted with staged is the last named version, to defaults to the current revision.",
+        "externalDocs": {
+          "url": "/docs/reference/version"
+        },
         "tags": [
           "version"
         ],
@@ -19588,6 +20011,9 @@
         "operationId": "share.get",
         "summary": "Sharing",
         "description": "The access record with its tokens hashed and the dead links of the last thirty days, plus the caller’s role, how it was reached and the capabilities it gives; a viewer receives the owner, the general access mode, their own grant and their capabilities only.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -19709,6 +20135,9 @@
         "operationId": "share.setGeneralAccess",
         "summary": "General access",
         "description": "Sets Restricted or Anyone with the link with its role; the link mode mints a token and answers its /s/ URL once.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -19849,6 +20278,9 @@
         "operationId": "share.createLink",
         "summary": "Create link",
         "description": "Mints a share link with a role, a label and an optional expiry and answers its /s/ URL once; several links with several roles may live at once.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -19989,6 +20421,9 @@
         "operationId": "share.revokeLink",
         "summary": "Revoke link",
         "description": "Revokes one link; every session grant that names it dies on its next request.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20129,6 +20564,9 @@
         "operationId": "share.rotateLink",
         "summary": "Rotate link",
         "description": "Mints a new token for a link and answers its URL once; the old token dies.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20269,6 +20707,9 @@
         "operationId": "share.stop",
         "summary": "Stop sharing",
         "description": "Sets Restricted and revokes every link.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20409,6 +20850,9 @@
         "operationId": "share.invite",
         "summary": "Share with people",
         "description": "Writes one grant per address with a role and an optional message and sends the invitations unless told not to; never says whether an account exists, and answers sent, queued or no-mail per address with the deck link for hand delivery.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20549,6 +20993,9 @@
         "operationId": "share.setRole",
         "summary": "Change role",
         "description": "Changes a grant’s role; the owner’s row is refused.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20689,6 +21136,9 @@
         "operationId": "share.remove",
         "summary": "Remove access",
         "description": "Removes a grant; the caller may remove their own at any role.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20829,6 +21279,9 @@
         "operationId": "share.setExpiry",
         "summary": "Access expiry",
         "description": "Sets or clears a grant’s expiry, up to one year ahead.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -20969,6 +21422,9 @@
         "operationId": "share.settings",
         "summary": "Sharing settings",
         "description": "The gear’s five switches: editors can share, viewers can download, viewers can see comments, show names to people with the link, allow embedded HTML blocks; owner only, with a re-authentication within 10 minutes on the window transport.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21109,6 +21565,9 @@
         "operationId": "share.requestAccess",
         "summary": "Request access",
         "description": "Asks the owner for a role with an optional message; always answers the same sentence, so a caller learns nothing about whether the deck exists; rate limited per IP, and an anonymous caller must give an email.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21248,6 +21707,9 @@
         "operationId": "share.listRequests",
         "summary": "Access requests",
         "description": "The pending requests with the requester’s label, email, role, message and time.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21369,6 +21831,9 @@
         "operationId": "share.respond",
         "summary": "Respond to request",
         "description": "Approves a request as a role or declines it with null; the requester is told when asked.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21509,6 +21974,9 @@
         "operationId": "share.transferOwnership",
         "summary": "Transfer ownership",
         "description": "Offers the deck to a signed in principal or an email, who accepts or declines; owner only, anonymous targets refused.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21649,6 +22117,9 @@
         "operationId": "share.acceptOwnership",
         "summary": "Accept ownership",
         "description": "The pending owner takes the deck; the previous owner becomes an editor.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21789,6 +22260,9 @@
         "operationId": "share.declineOwnership",
         "summary": "Decline ownership",
         "description": "The pending owner declines the offer.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -21929,6 +22403,9 @@
         "operationId": "share.claim",
         "summary": "Claim",
         "description": "A signed in principal claims an unowned deck (an admin any unowned deck); the deck then reads Anyone with the address can view, so every view link and the embed keep working while editing by address stops.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -22069,6 +22546,9 @@
         "operationId": "share.emailCollaborators",
         "summary": "Email collaborators",
         "description": "Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -22209,6 +22689,9 @@
         "operationId": "deck.publish",
         "summary": "Publish to the web",
         "description": "Mints the published player’s token and answers the player and embed URLs once; every edit is published, and the player never opens the editor.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -22349,6 +22832,9 @@
         "operationId": "deck.unpublish",
         "summary": "Stop publishing",
         "description": "Revokes the published token; the player and the embed answer 410.",
+        "externalDocs": {
+          "url": "/docs/reference/share"
+        },
         "tags": [
           "share"
         ],
@@ -22489,6 +22975,9 @@
         "operationId": "account.decks",
         "summary": "My presentations",
         "description": "The caller’s deck index with the owner and the caller’s role per row: owned, shared with me, recent, trash, or all for an admin; on a checkout every deck as owned.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -22610,6 +23099,9 @@
         "operationId": "account.tokens.create",
         "summary": "Create API key",
         "description": "Mints an API key owned by the caller with a name, scopes and an optional expiry, shown once; never over MCP, and refused on a checkout, which has no accounts.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -22749,6 +23241,9 @@
         "operationId": "account.tokens.list",
         "summary": "API keys",
         "description": "The caller’s API keys without their secrets.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -22870,6 +23365,9 @@
         "operationId": "account.tokens.revoke",
         "summary": "Revoke API key",
         "description": "Revokes one of the caller’s keys; its MCP sessions close.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -23010,6 +23508,9 @@
         "operationId": "account.me",
         "summary": "Account",
         "description": "The caller’s principal, trust state, label, mark, avatar choice and sessions; the CLI can write the mark as a PNG.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -23131,6 +23632,9 @@
         "operationId": "account.setName",
         "summary": "Change name",
         "description": "Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -23271,6 +23775,9 @@
         "operationId": "account.setAvatar",
         "summary": "Change avatar",
         "description": "Chooses the mark: initials, a glyph field, a dither plate, or a picture for signed in principals only.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -23411,6 +23918,9 @@
         "operationId": "account.sessions",
         "summary": "Sessions",
         "description": "The caller’s sign in sessions, the current one marked.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -23532,6 +24042,9 @@
         "operationId": "account.signOut",
         "summary": "Sign out",
         "description": "Ends one sign in session, or every other one with all.",
+        "externalDocs": {
+          "url": "/docs/reference/account"
+        },
         "tags": [
           "account"
         ],
@@ -23672,6 +24185,9 @@
         "operationId": "admin.bootstrap",
         "summary": "Bootstrap admin",
         "description": "With the static bearer, gives an email the admin role and mints the first API key, shown once.",
+        "externalDocs": {
+          "url": "/docs/reference/admin"
+        },
         "tags": [
           "admin"
         ],
@@ -23810,6 +24326,9 @@
         "operationId": "admin.assignOwner",
         "summary": "Assign owner",
         "description": "An admin sets a deck’s owner.",
+        "externalDocs": {
+          "url": "/docs/reference/admin"
+        },
         "tags": [
           "admin"
         ],
@@ -23950,6 +24469,9 @@
         "operationId": "admin.flag",
         "summary": "Kill switch",
         "description": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.",
+        "externalDocs": {
+          "url": "/docs/reference/admin"
+        },
         "tags": [
           "admin"
         ],
@@ -24089,7 +24611,10 @@
       "post": {
         "operationId": "admin.migrateStorage",
         "summary": "Migrate storage",
-        "description": "Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.",
+        "description": "Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget.",
+        "externalDocs": {
+          "url": "/docs/reference/admin"
+        },
         "tags": [
           "admin"
         ],
@@ -24228,6 +24753,9 @@
         "operationId": "admin.mail.list",
         "summary": "Captured mail",
         "description": "The mail captured under TURBOSLIDE_MAIL=capture, newest first; absent otherwise.",
+        "externalDocs": {
+          "url": "/docs/reference/admin"
+        },
         "tags": [
           "admin"
         ],
@@ -24347,6 +24875,9 @@
         "operationId": "picture.dither",
         "summary": "Dither",
         "description": "Writes the deck’s two tone screen over a picture’s continuous source as a non destructive field, or removes it with null; a slide that is not a canvas converts first when the picture is positioned; answers the variant key, the metrics and any warnings.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -24490,6 +25021,9 @@
         "operationId": "picture.materialize",
         "summary": "Materialize dithers",
         "description": "Writes the variant files and records of every dithered picture on the named slides, prunes the variants no picture references when asked, or names the missing variants without writing under dryRun; server side.",
+        "externalDocs": {
+          "url": "/docs/reference/block"
+        },
         "tags": [
           "block"
         ],
@@ -24633,6 +25167,9 @@
         "operationId": "slide.setBackgroundPicture",
         "summary": "Background picture",
         "description": "One write for a covering picture object at the back of each named slide with an optional dither, replacing the covering picture already there unless told not to; the file, url and upload forms run asset.add server side first.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -24776,6 +25313,9 @@
         "operationId": "slide.setBackgroundMaterial",
         "summary": "Background material",
         "description": "Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call, or stores the frame the client sends with `frame` without a render; server side.",
+        "externalDocs": {
+          "url": "/docs/reference/slide"
+        },
         "tags": [
           "slide"
         ],
@@ -25217,9 +25757,9 @@
               "label": "Brand kit",
               "control": "json",
               "group": "Slide",
-              "help": "The colours, faces, logo, footer, slide numbers and frame of this presentation over its theme; the Theme panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The theme alone when absent."
+              "help": "The colours, faces, logo, footer, slide numbers and frame of this presentation over its theme; the Theme panel and brand.set write it. The theme alone when absent."
             },
-            "description": "The colours, faces, logo, footer, slide numbers and frame of this presentation over its theme; the Theme panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The theme alone when absent.",
+            "description": "The colours, faces, logo, footer, slide numbers and frame of this presentation over its theme; the Theme panel and brand.set write it. The theme alone when absent.",
             "type": "object",
             "properties": {
               "name": {
@@ -30051,9 +30591,9 @@
                             700
                           ],
                           "group": "Text",
-                          "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                          "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                         },
-                        "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                        "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                         "type": "number",
                         "enum": [
                           300,
@@ -30249,9 +30789,9 @@
                             "fraunces"
                           ],
                           "group": "Text",
-                          "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                          "help": "A face from the font catalog by id; the theme’s face when absent."
                         },
-                        "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                        "description": "A face from the font catalog by id; the theme’s face when absent.",
                         "type": "string",
                         "enum": [
                           "inter",
@@ -30353,9 +30893,9 @@
                             700
                           ],
                           "group": "Text",
-                          "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                          "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                         },
-                        "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                        "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                         "type": "number",
                         "enum": [
                           300,
@@ -30551,9 +31091,9 @@
                             "fraunces"
                           ],
                           "group": "Text",
-                          "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                          "help": "A face from the font catalog by id; the theme’s face when absent."
                         },
-                        "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                        "description": "A face from the font catalog by id; the theme’s face when absent.",
                         "type": "string",
                         "enum": [
                           "inter",
@@ -31552,9 +32092,9 @@
                             700
                           ],
                           "group": "Text",
-                          "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                          "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                         },
-                        "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                        "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                         "type": "number",
                         "enum": [
                           300,
@@ -31750,9 +32290,9 @@
                             "fraunces"
                           ],
                           "group": "Text",
-                          "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                          "help": "A face from the font catalog by id; the theme’s face when absent."
                         },
-                        "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                        "description": "A face from the font catalog by id; the theme’s face when absent.",
                         "type": "string",
                         "enum": [
                           "inter",
@@ -32246,9 +32786,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -32532,9 +33072,9 @@
                         700
                       ],
                       "group": "Text",
-                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                     },
-                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                     "type": "number",
                     "enum": [
                       300,
@@ -32730,9 +33270,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id; the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id; the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -32896,9 +33436,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -33198,9 +33738,9 @@
                         700
                       ],
                       "group": "Text",
-                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                     },
-                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                     "type": "number",
                     "enum": [
                       300,
@@ -33396,9 +33936,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id; the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id; the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -33561,9 +34101,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -33783,9 +34323,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -34107,9 +34647,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -34432,9 +34972,9 @@
                         700
                       ],
                       "group": "Text",
-                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                     },
-                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                     "type": "number",
                     "enum": [
                       300,
@@ -34630,9 +35170,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id; the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id; the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -34786,9 +35326,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -35010,9 +35550,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -35262,9 +35802,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -35528,9 +36068,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -35789,9 +36329,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -36053,9 +36593,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -36314,9 +36854,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -36581,9 +37121,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -37594,9 +38134,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -37917,9 +38457,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -38252,9 +38792,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -38529,9 +39069,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -38836,9 +39376,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -39166,9 +39706,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -39435,9 +39975,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -40084,9 +40624,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -40326,9 +40866,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -40560,9 +41100,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -40792,9 +41332,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -41028,9 +41568,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -41291,9 +41831,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -41768,9 +42308,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -41966,9 +42506,9 @@
                     "accent"
                   ],
                   "group": "Block",
-                  "help": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md)."
+                  "help": "The box ground; none unless set. Tokens follow the theme."
                 },
-                "description": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md).",
+                "description": "The box ground; none unless set. Tokens follow the theme.",
                 "anyOf": [
                   {
                     "type": "string",
@@ -42212,9 +42752,9 @@
                         700
                       ],
                       "group": "Text",
-                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                     },
-                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                     "type": "number",
                     "enum": [
                       300,
@@ -42410,9 +42950,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id; the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id; the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -42735,9 +43275,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -43479,9 +44019,9 @@
                         700
                       ],
                       "group": "Text",
-                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                     },
-                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                     "type": "number",
                     "enum": [
                       300,
@@ -43677,9 +44217,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id; the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id; the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -44065,9 +44605,9 @@
                     "vertical-horizontal"
                   ],
                   "group": "Block",
-                  "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33)."
+                  "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on."
                 },
-                "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33).",
+                "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on.",
                 "type": "string",
                 "enum": [
                   "horizontal",
@@ -44274,9 +44814,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -44611,9 +45151,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -44850,9 +45390,9 @@
                         700
                       ],
                       "group": "Text",
-                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                     },
-                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                     "type": "number",
                     "enum": [
                       300,
@@ -45048,9 +45588,9 @@
                         "fraunces"
                       ],
                       "group": "Text",
-                      "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                      "help": "A face from the font catalog by id; the theme’s face when absent."
                     },
-                    "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                    "description": "A face from the font catalog by id; the theme’s face when absent.",
                     "type": "string",
                     "enum": [
                       "inter",
@@ -45474,9 +46014,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -45959,9 +46499,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -46837,9 +47377,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -47374,9 +47914,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -48332,9 +48872,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -54203,7 +54743,7 @@
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "id": {
-            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/archive/rounds/POLISH.md 2.8 item 99)",
+            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
@@ -60685,7 +61225,7 @@
             ]
           },
           "embedFonts": {
-            "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)",
+            "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds",
             "type": "boolean"
           },
           "headings": {
@@ -60723,7 +61263,7 @@
             "type": "boolean"
           },
           "svgVector": {
-            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/archive/rounds/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
+            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip; on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
             "type": "boolean"
           },
           "baseline": {
@@ -64130,9 +64670,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -64660,9 +65200,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {

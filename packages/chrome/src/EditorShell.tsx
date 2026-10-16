@@ -102,6 +102,7 @@ import type { TailControl } from './menus/toolbar-tails';
 import { Palette } from './Palette';
 import type { PaletteGroupId } from './palette-data';
 import { Panel } from './Panel';
+import { PanelBoundary } from './PanelBoundary';
 import { AssistPanel } from './panels/Assist';
 import { ColorPlate } from './pickers/ColorPlate';
 import { DashList } from './pickers/DashList';
@@ -2648,7 +2649,9 @@ export function EditorShell({
           <ToolbarTail />
         </div>
       )}
-      {sidebar}
+      <PanelBoundary place="filmstrip" control="filmstrip.broken" onError={input.onPanelError}>
+        {sidebar}
+      </PanelBoundary>
       <section className="pt-main" data-editor-main="">
         <div ref={stageRef} className="pt-stagewrap">
           {wordArtOpen ? (
@@ -2714,13 +2717,28 @@ export function EditorShell({
         {input.drawer}
       </section>
       <div className="ts-rpanel">
-        <Suspense fallback={null}>{panelNode}</Suspense>
+        <PanelBoundary
+          key={panel ?? ''}
+          place="panel"
+          control="panel.broken"
+          onError={input.onPanelError}
+        >
+          <Suspense fallback={null}>{panelNode}</Suspense>
+        </PanelBoundary>
       </div>
       {/* the bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25): its side
           panel toggle sits in the title row's right cluster (TitleRow.tsx `title.sidePanel`) */}
       {layoutPlate}
       {anchoredNode}
-      <Suspense fallback={null}>{dialogNode}</Suspense>
+      <PanelBoundary
+        key={dialog?.id ?? ''}
+        place="dialog"
+        control="dialog.broken"
+        onError={input.onPanelError}
+        onClose={closeDialog}
+      >
+        <Suspense fallback={null}>{dialogNode}</Suspense>
+      </PanelBoundary>
       <ToolFinder
         open={toolFinderOpen}
         document={input.document}

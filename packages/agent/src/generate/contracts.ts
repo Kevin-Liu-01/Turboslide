@@ -23,6 +23,7 @@ import { generateLlms, generateLlmsFull } from './llms.ts';
 import { generateManifest } from './manifest.ts';
 import { generateMcpTools } from './mcp.ts';
 import { generateOpenApi } from './openapi.ts';
+import { publicContract } from './public-text.ts';
 import { generateSkillReferences } from './skills.ts';
 
 /** The repository root, four levels above this file (packages/agent/src/generate). */
@@ -31,14 +32,15 @@ export const REPO_ROOT = fileURLToPath(new URL('../../../../', import.meta.url))
 export const GENERATED_DIR = 'packages/agent/generated';
 
 export function generateAll(): Record<string, string> {
-  /* the five contracts once: the docs' reference reads its counts from these same objects */
-  const contracts = {
+  /* the five contracts once: the docs' reference reads its counts from these same objects, with
+     no repository citation in them (HR-C#12, public-text.ts) */
+  const contracts = publicContract({
     cli: generateCli(),
     mcp: generateMcpTools(),
     describe: generateDescribe(),
     openapi: generateOpenApi(),
     manifest: generateManifest(),
-  };
+  });
   return {
     [`${GENERATED_DIR}/cli.json`]: stableJson(contracts.cli),
     [`${GENERATED_DIR}/mcp-tools.json`]: stableJson(contracts.mcp),

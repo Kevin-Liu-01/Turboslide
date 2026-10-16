@@ -26,6 +26,10 @@ export const ANON_COOKIE_MAX_AGE_S = 400 * 24 * 60 * 60;
 export const SESSION_SECRET_VARIABLE = 'TURBOSLIDE_SESSION_SECRET';
 /** The seal format version, the first segment of the cookie value. */
 export const SEAL_VERSION = 'v1';
+/** HR-SA#9 (AUTH-10): an issue time more than a minute ahead of the clock is refused. */
+export const ANON_COOKIE_FUTURE_SKEW_MS = 60 * 1000;
+/** HR-SA#9: a document load re-seals a cookie issued more than 30 days ago (middleware.ts). */
+export const ANON_COOKIE_RESEAL_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -91,10 +95,15 @@ export async function sealPrincipalCookie(
   return `${SEAL_VERSION}.${toBase64Url(payload)}.${toBase64Url(new Uint8Array(mac))}`;
 }
 
-/** The id inside a sealed value, or null when the value is malformed or the mac does not verify. */
+/**
+ * The id inside a sealed value, or null when the value is malformed, the mac does not verify, or
+ * the issue time is older than the cookie's 400 days or more than a minute ahead of `now`
+ * (HR-SA#9, AUTH-10: the server enforces the lifetime the browser's Max-Age only asks for).
+ */
 export async function unsealPrincipalCookie(
   value: string,
   secret: string,
+  now: number = Date.now(),
 ): Promise<SealedPrincipal | null> {
   const parts = value.split('.');
   if (parts.length !== 3 || parts[0] !== SEAL_VERSION) return null;
@@ -116,6 +125,8 @@ export async function unsealPrincipalCookie(
   const issuedAt = Number(text.slice(dot + 1));
   const parsed = parsePrincipalId(principalId);
   if (parsed === null || parsed.kind !== 'anonymous' || !Number.isFinite(issuedAt)) return null;
+  if (issuedAt < now - ANON_COOKIE_MAX_AGE_S * 1000) return null;
+  if (issuedAt > now + ANON_COOKIE_FUTURE_SKEW_MS) return null;
   return { principalId, issuedAt };
 }
 
@@ -325,22 +336,37 @@ export function expireAnonymousCookie(name: string): string {
   return serializeAnonymousCookie(name, '', 0);
 }
 
-/** The anonymous principal a request carries in a valid sealed cookie, or null. */
-export async function readPrincipal(request: Request, secret: string): Promise<Principal | null> {
+/** The sealed cookie a request carries under either name, or null. */
+async function readSealed(
+  request: Request,
+  secret: string,
+  now: number,
+): Promise<SealedPrincipal | null> {
   const cookies = parseCookies(request.headers.get('cookie'));
   for (const name of [ANON_COOKIE, ANON_COOKIE_INSECURE]) {
     const value = cookies.get(name);
     if (value === undefined) continue;
-    const sealed = await unsealPrincipalCookie(value, secret);
-    if (sealed !== null) return { id: sealed.principalId, kind: 'anonymous', admin: false };
+    const sealed = await unsealPrincipalCookie(value, secret, now);
+    if (sealed !== null) return sealed;
   }
   return null;
+}
+
+/** The anonymous principal a request carries in a valid sealed cookie, or null. */
+export async function readPrincipal(
+  request: Request,
+  secret: string,
+  now: number = Date.now(),
+): Promise<Principal | null> {
+  const sealed = await readSealed(request, secret, now);
+  return sealed === null ? null : { id: sealed.principalId, kind: 'anonymous', admin: false };
 }
 
 export type EnsuredPrincipal = {
   principal: Principal;
   /** True when this request minted the id; `setCookie` then carries the header to send. */
   minted: boolean;
+  /** The header to send: a minted id, or the same id re-sealed because its seal is old (HR-SA#9). */
   setCookie?: string;
   cookieName: string;
 };
@@ -362,12 +388,24 @@ export async function ensurePrincipal(
   options: EnsureOptions = {},
 ): Promise<EnsuredPrincipal | null> {
   const cookieName = anonymousCookieName(request);
-  const existing = await readPrincipal(request, secret);
-  if (existing !== null) return { principal: existing, minted: false, cookieName };
+  const now = options.now ?? Date.now();
+  const existing = await readSealed(request, secret, now);
+  if (existing !== null) {
+    const principal: Principal = { id: existing.principalId, kind: 'anonymous', admin: false };
+    if (existing.issuedAt >= now - ANON_COOKIE_RESEAL_AFTER_MS)
+      return { principal, minted: false, cookieName };
+    const value = await sealPrincipalCookie(existing.principalId, secret, now);
+    return {
+      principal,
+      minted: false,
+      setCookie: serializeAnonymousCookie(cookieName, value),
+      cookieName,
+    };
+  }
   if (request.headers.get('authorization')) return null;
   const uuid = (options.randomUUID ?? (() => crypto.randomUUID()))();
   const principalId = anonymousPrincipalId(uuid);
-  const value = await sealPrincipalCookie(principalId, secret, options.now ?? Date.now());
+  const value = await sealPrincipalCookie(principalId, secret, now);
   return {
     principal: { id: principalId, kind: 'anonymous', admin: false },
     minted: true,

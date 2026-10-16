@@ -569,15 +569,21 @@ export async function accountFacts(
   if (row === undefined) return null;
   const profile = await runtime.profiles.ensure(userId);
   const email = row.email.toLowerCase();
+  const emailVerified = flagOf(row.emailVerified);
   return {
     userId,
     principalId: accountPrincipalId(userId),
     email,
-    emailVerified: flagOf(row.emailVerified),
+    emailVerified,
     name: row.name,
-    admin: profile.admin || adminEmails(runtime.env).includes(email),
+    admin: profile.admin || namedAdmin(runtime, email, emailVerified),
     profile,
   };
+}
+
+/** HR-SA#8 (AUTH-9): `TURBOSLIDE_ADMIN_EMAILS` grants admin only to a verified address. */
+function namedAdmin(runtime: IdentityRuntime, email: string, emailVerified: boolean): boolean {
+  return emailVerified && adminEmails(runtime.env).includes(email);
 }
 
 async function accountProfile(
@@ -1009,7 +1015,7 @@ async function onSessionCreated(
   const facts = await accountFacts(runtime, session.userId);
   if (facts === null) return;
   await runtime.principals.touch(facts.principalId, new Date(), true);
-  if (adminEmails(runtime.env).includes(facts.email) && !facts.profile.admin)
+  if (namedAdmin(runtime, facts.email, facts.emailVerified) && !facts.profile.admin)
     await runtime.profiles.setAdmin(session.userId, true);
   if (request !== undefined) {
     // HR-SA#2b: an anonymous id that owns decks is asked about on /signin, never linked here

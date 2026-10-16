@@ -773,6 +773,11 @@ export type EditorShellInput = {
    */
   commit?: (mutations: Mutation[], label: string) => Promise<unknown>;
   history?: EditorHistory;
+  /**
+   * A render error the filmstrip, the side panel or a dialog caught (PanelBoundary.tsx, hardening
+   * HR-O#7): the studio reports it through the HR-O#2a reporter.
+   */
+  onPanelError?: (error: unknown) => void;
   save?: EditorSaveState;
   clipboard?: EditorClipboard;
   toggles?: EditorToggles;

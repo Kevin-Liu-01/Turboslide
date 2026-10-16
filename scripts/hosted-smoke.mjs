@@ -93,6 +93,10 @@
 // store keeps names). HR-K1#5a (CRIT-M4, DATA-3): `export URL signed` exports the scratch deck as
 // a one theme PDF through the sync export's JSON variant and requires every file's link to name
 // `/api/download/` and no store host.
+//
+// The Glyphfield port (GF-2.1): `deck card first slide` reads `/deck/<deck>` with no cookie, as a
+// link preview does, and requires `og:image` to name the open deck's first slide at 1200 by 675 on
+// the render route and that picture to answer with no cookie.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -932,6 +936,49 @@ async function thumbnailRows(base, deck, timeoutMs, cookie) {
 }
 
 /**
+ * The link card (GF-2.1, apps/studio/src/routes/-deck-card.ts): the open seed deck's page, read
+ * with no cookie as an unfurler reads it, names its first slide at 1200 by 675 on the render route
+ * in `og:image`, and that picture answers a request with no cookie: a 200 PNG whose
+ * `x-turboslide-thumb` says 1200x675, or a 302 to the stored object carrying the same header.
+ */
+async function deckCardRow(base, deck, timeoutMs) {
+  const page = await probe(base, `/deck/${encodeURIComponent(deck)}`, timeoutMs);
+  const tag = /<meta\b[^>]*\sproperty="og:image"[^>]*>/.exec(page.text)?.[0] ?? '';
+  const image = (/\scontent="([^"]*)"/.exec(tag)?.[1] ?? '').replace(/&amp;/g, '&');
+  let path = null;
+  try {
+    const at = new URL(image);
+    if (
+      at.pathname.startsWith('/api/render/') &&
+      at.searchParams.get('deck') === deck &&
+      at.searchParams.get('w') === '1200'
+    )
+      path = `${at.pathname}${at.search}`;
+  } catch {
+    // no URL in the tag: the row fails below with what the page named
+  }
+  const picture = path === null ? null : await probe(base, path, timeoutMs);
+  const sized = picture?.headers['x-turboslide-thumb'] === '1200x675';
+  const served =
+    picture !== null &&
+    sized &&
+    ((picture.status === 200 && picture.type.startsWith('image/png')) ||
+      (picture.status === 302 && /\.blob\.vercel-storage\.com\//.test(picture.location)));
+  return {
+    row: {
+      name: 'deck card first slide',
+      expect: `/deck/${deck} without a cookie names /api/render/<first slide>?deck=${deck}&w=1200 in og:image, and the picture answers without a cookie: a 200 image/png or a 302 to the stored object, x-turboslide-thumb 1200x675`,
+      detail: () =>
+        picture === null
+          ? `page ${page.status}; og:image ${image === '' ? 'absent' : image.slice(0, 120)}`
+          : `og:image ${path}; picture ${picture.status} ${picture.type || picture.location.replace(/\?.*$/, '').slice(0, 60)}; ${picture.headers['x-turboslide-thumb'] ?? 'no size'}; ${picture.headers['cache-control'] ?? 'no cache-control'}`,
+    },
+    r: picture ?? page,
+    ok: page.error === undefined && picture !== null && picture.error === undefined && served,
+  };
+}
+
+/**
  * The smoke's scratch deck (hardening HR-SD#5; the rows of K1 and SD#6 use the same deck): one
  * blank deck made with the bearer through `deck.create`, restricted to its creator as every new
  * deck is, and removed forever at the end of the run (`removeScratchDeck`), so the store is as it
@@ -1549,6 +1596,8 @@ async function main() {
   const access = await accessRow(base, args.deck, args.timeoutMs);
   results.push(access.result);
   results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs, access.cookie)));
+  // the link card (GF-2.1): the open deck's first slide, read with no cookie
+  results.push(await deckCardRow(base, args.deck, args.timeoutMs));
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
   // the polish round's build rows (docs/archive/rounds/POLISH.md section 0 item 2): the client's Play shaders row

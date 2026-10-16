@@ -23,6 +23,7 @@ import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
 import { slideCounter } from '@turboslide/render/deck';
 import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 
+import type { DeckCardStanding } from '../routes/-deck-card';
 import { viewerAssetBase } from './asset-base';
 import type { AuthContext } from './authorize';
 import type { ListingScope } from './deck-scope';
@@ -89,6 +90,13 @@ export type DeckPayload = {
    * SPEC-4 3.11): the viewer routes fetch the rest through `getDeckSlides` behind the document
    */
   partial?: true;
+  /**
+   * when the route asked (`card: true`, the /deck route): how a stranger holding only this address
+   * reaches the deck, its general access (`open`) or the address's publish token (`publish`), so
+   * the link unfurls with the first slide (GF-2.1, server/deck-card.ts); absent when a stranger
+   * cannot open the deck, and the link keeps the site's card
+   */
+  card?: DeckCardStanding;
 };
 
 /** The rest of a partial payload (SPEC-4 3.11): rendered HTML by slide id for the slides the document left out. */
@@ -841,6 +849,11 @@ export type GetDeckInput = {
    * newer revision; an answer whose document moved past it is not kept
    */
   revision?: number;
+  /**
+   * answer `card` (GF-2.1): the /deck route's link card asks whether a stranger holding only this
+   * address may read the deck; the answer is the same for every reader of the URL
+   */
+  card?: boolean;
 };
 
 /** The header of an answer the CDN may keep for a minute and serve stale for an hour (SPEC-4 3.11). */
@@ -1001,6 +1014,8 @@ const deckInputValidator = (input: GetDeckInput): GetDeckInput => {
     throw new Error('revision must be a non negative integer');
   if (input.slides !== undefined && input.slides !== 'all' && input.slides !== 'first')
     throw new Error("slides must be 'all' or 'first'");
+  if (input.card !== undefined && typeof input.card !== 'boolean')
+    throw new Error('card must be a boolean');
   return input;
 };
 
@@ -1076,6 +1091,12 @@ export const getDeck = createServerFn({ method: 'GET' })
       },
       await viewerAssetBase(loaded.servedId),
     );
+    // the link card (GF-2.1): asked as a stranger holding this address, the same for every reader
+    let card: DeckCardStanding | null = null;
+    if (data.card === true) {
+      const { readerCardStanding } = await import('./deck-card');
+      card = await readerCardStanding(data.deckId, data.publishToken, shape.via);
+    }
     return {
       deck: built.deck,
       theme,
@@ -1083,6 +1104,7 @@ export const getDeck = createServerFn({ method: 'GET' })
       issues: loaded.issues,
       skipped: built.skipped,
       ...(data.slides === 'first' && built.deck.slides.length > 1 ? { partial: true } : {}),
+      ...(card === null ? {} : { card }),
     };
   });
 

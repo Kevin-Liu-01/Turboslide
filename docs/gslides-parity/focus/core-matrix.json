@@ -10088,7 +10088,7 @@
     {
       "id": "decks.og.deck-card",
       "feature": "decks",
-      "interaction": "A deck's page carries `og:title` equal to the deck's title, `og:url` and `og:image` on `www.turboslide.com`; the card's address is set in Inter",
+      "interaction": "A deck's page carries `og:title` equal to the deck's title, `og:url` and `og:image` on `www.turboslide.com`; the card's address is set in Inter; a restricted deck keeps the site card, while the published player's link and the open seed deck name their first slide at 1200 by 675 on the render route, which a request with no cookie reads, and the picture is refused without the token and after unpublish",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 2,

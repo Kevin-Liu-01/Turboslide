@@ -22,6 +22,7 @@ import {
   thumbsPrefix,
 } from '@turboslide/store/blob-store';
 
+import { DECK_CARD_SIZE } from '../routes/-deck-card';
 import {
   ensureDeckAssets,
   exportBlobClient,
@@ -70,6 +71,14 @@ export const THUMB_WIDTHS = [160, 320, 640] as const;
 export type ThumbWidth = (typeof THUMB_WIDTHS)[number];
 /** 320 px is 0.2x: crisp for the 64 px sidebar mini at any pixel ratio and for a 272 px grid tile at 1x. */
 export const DEFAULT_THUMB_WIDTH: ThumbWidth = 320;
+/**
+ * The deck card's width (GF-2.1): the first slide a link unfurls with, rendered, downsized and
+ * stored as a thumbnail is, and asked for through the card rule alone (deck-card.ts), never through
+ * the thumbnail grant or a session, so it is not one of `THUMB_WIDTHS`.
+ */
+export const CARD_THUMB_WIDTH = DECK_CARD_SIZE.width;
+/** Every width this module renders and stores: the thumbnails' and the card's. */
+export type ThumbRenderWidth = ThumbWidth | typeof CARD_THUMB_WIDTH;
 
 /** The sheet's aspect, so a thumbnail is width by width times 9/16 (SPEC 2.1). */
 const SHEET = { width: 1600, height: 900 } as const;
@@ -140,7 +149,7 @@ export type ThumbRequest = {
   deckId: string;
   slideId: string;
   theme: Theme;
-  width: ThumbWidth;
+  width: ThumbRenderWidth;
   /** the stamp the URL carries as `r`; null when it carries none */
   r?: string | null;
 };
@@ -200,7 +209,12 @@ export async function deckRevision(deckId: string): Promise<number> {
 }
 
 /** `<state>/thumbs/<deckId>/<stamp>/<theme>@<width>` under the state folder. */
-export function thumbsDir(deckId: string, stamp: string, theme: Theme, width: ThumbWidth): string {
+export function thumbsDir(
+  deckId: string,
+  stamp: string,
+  theme: Theme,
+  width: ThumbRenderWidth,
+): string {
   return join(stateDir(), 'thumbs', deckId, stamp, `${theme}@${width}`);
 }
 
@@ -208,7 +222,7 @@ export function thumbPath(
   deckId: string,
   stamp: string,
   theme: Theme,
-  width: ThumbWidth,
+  width: ThumbRenderWidth,
   slideId: string,
 ): string {
   return join(thumbsDir(deckId, stamp, theme, width), `${slideId}.png`);
@@ -347,7 +361,7 @@ export const THUMB_BLOB_MAX_AGE_S = 31_536_000;
 async function writeThumb(
   png: Uint8Array,
   path: string,
-  width: ThumbWidth,
+  width: ThumbRenderWidth,
 ): Promise<Uint8Array<ArrayBuffer>> {
   const image = await decodeImage(png);
   const small = downsample(image, width);

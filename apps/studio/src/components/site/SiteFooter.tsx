@@ -100,7 +100,7 @@ export function SiteFooter({ top = false }: { top?: boolean }) {
                 control="site.foot.build"
                 aria-label={FOOTER.build.name(BUILD_COMMIT)}
               >
-                {FOOTER.build.label} <code>{BUILD_COMMIT}</code>
+                {FOOTER.build.label} <span className="site-foot-sha">{BUILD_COMMIT}</span>
               </SiteLink>
             )}
           </p>

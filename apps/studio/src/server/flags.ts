@@ -1,6 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import {
+  ROOM_BEARER_VARIABLE,
+  ROOM_HOST_VARIABLE,
+  ROOM_INSECURE_VARIABLE,
+} from '@turboslide/realtime/select';
 import { FLAG_DEFAULTS, FLAG_NAMES } from '@turboslide/schema/access';
 import type { FlagName } from '@turboslide/schema/access';
 
@@ -8,13 +13,19 @@ import { logSecurityEvent } from './log';
 import { stateDir } from './root';
 
 /**
- * The kill switches (gslides-parity SPEC-3 0.33, 8.12; report 04 7.6, report 10 3.4): twelve
+ * The kill switches (gslides-parity SPEC-3 0.33, 8.12; report 04 7.6, report 10 3.4): thirteen
  * flags read per request with a 5 s in process cache and flipped by `turboslide admin flag <name>
- * on|off` with no deploy. Hosted, the flag lives at `flag:<name>` in Redis and is read through the
- * realtime channel's `flag()` (B2's `room.ts` binds the channel through `bindFlagReader`); on a
- * checkout it lives in `.turboslide/flags.json`. When the reader fails (Redis unreachable) the
- * flag takes the default of the table: `realtime` off (the `blob` tier), every other on, so an
- * outage of the counter store never turns exports or comments off by itself (SPEC-3 8.12).
+ * on|off` (`admin.flag`) with no deploy. On a deployment that holds the realtime Worker's host and
+ * room bearer (`TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_BEARER`) a switch is a row of the Worker's
+ * D1 table `rt_flags` (`on` or `off`), read with one `GET /control/flags` per 5 s and written with
+ * `POST /control/flags` (hardening HR-O#4, RELIABILITY-15), so a flip on one instance reads on
+ * every instance within 5 s; the `realtime` switch is the row the Worker's router already reads.
+ * Before HR-O#4 no hosted process bound a reader and each instance read its own ephemeral
+ * `flags.json`, so a flip reached one instance. A checkout without the Worker keeps
+ * `.turboslide/flags.json`. When the reader fails (the Worker unreachable) the flag takes the
+ * default of the table: `realtime` off (the `blob` tier), every other on, so an outage of the
+ * store never turns exports or comments off by itself (SPEC-3 8.12); the failure is one
+ * `redis.unavailable` line, the event name of the paging rule in log.ts.
  *
  * `requireFlag(name)` is what a route or a server function calls first: `null` when the switch is
  * on, else the 503 Response with the sentence the chrome shows, logged once as `flag.refused`
@@ -121,13 +132,19 @@ export const FLAG_REFUSALS: Readonly<Record<StudioFlagName, string>> = {
   assist: 'The assistant is off on this Turboslide',
 };
 
-export type FlagReader = (name: StudioFlagName) => Promise<boolean>;
+/** A switch's stored value; undefined when the store holds none, which reads as the default. */
+export type FlagReader = (name: StudioFlagName) => Promise<boolean | undefined>;
 
 export type FlagWriter = (name: StudioFlagName, value: boolean) => Promise<void>;
 
 type FlagState = {
   reader: FlagReader | null;
   writer: FlagWriter | null;
+  /**
+   * True when the reader keeps its own 5 s table (the Worker's store): a read it answered is not
+   * kept again here, so a flip reads everywhere within 5 s and not 5 s after the table's 5 s
+   */
+  readerCaches: boolean;
   cache: Map<StudioFlagName, { value: boolean; readAt: number }>;
   now: () => number;
 };
@@ -136,7 +153,13 @@ const STATE = Symbol.for('turboslide.studio.flags');
 
 function state(): FlagState {
   const store = globalThis as unknown as Record<symbol, FlagState | undefined>;
-  return (store[STATE] ??= { reader: null, writer: null, cache: new Map(), now: () => Date.now() });
+  return (store[STATE] ??= {
+    reader: null,
+    writer: null,
+    readerCaches: false,
+    cache: new Map(),
+    now: () => Date.now(),
+  });
 }
 
 /** The checkout's file: `{ "<name>": true | false }`, absent names at their default. */
@@ -163,7 +186,7 @@ export function writeFlagFile(
   writeFileSync(join(dir, FLAGS_FILE), `${JSON.stringify(flags, null, 2)}\n`);
 }
 
-/** The file reader and writer of a checkout (and of the tmp store, which has no Redis). */
+/** The file reader and writer of a checkout, and of any process without the realtime Worker's host. */
 export function fileFlagStore(dir: string = stateDir()): { read: FlagReader; write: FlagWriter } {
   return {
     read: (name) => Promise.resolve(readFlagFile(dir)[name] ?? STUDIO_FLAG_DEFAULTS[name]),
@@ -174,18 +197,121 @@ export function fileFlagStore(dir: string = stateDir()): { read: FlagReader; wri
   };
 }
 
+/** How long one call to the Worker's flag routes waits. */
+export const FLAG_CALL_MS = 3_000;
+
+/** The Worker's refusal or an answer that is not the flag table. */
+export class FlagStoreError extends Error {
+  readonly status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'FlagStoreError';
+    this.status = status;
+  }
+}
+
+export type WorkerFlagOptions = {
+  /** the Worker's host, `TURBOSLIDE_ROOM_HOST` */
+  host: string;
+  /** the room bearer, `TURBOSLIDE_ROOM_BEARER` */
+  bearer: string;
+  /** `http://` for a checkout's `wrangler dev` (`TURBOSLIDE_ROOM_INSECURE`) */
+  insecure?: boolean;
+  fetch?: typeof fetch;
+  now?: () => number;
+};
+
 /**
- * Binds the reader (and writer) the deployment uses: B2's realtime channel `flag()` hosted, the
- * file store otherwise. Clears the cache. Returns the previous pair so a test can restore it.
+ * The switches as rows of the Worker's `rt_flags` (hardening HR-O#4): one `GET /control/flags`
+ * answers every switch for FLAG_CACHE_MS and concurrent reads share it; a write is one
+ * `POST /control/flags` of `on` or `off` and drops the kept table. A row other than `on` or `off`,
+ * or none, reads as undefined, so the switch takes its default.
+ */
+export function workerFlagStore(options: WorkerFlagOptions): {
+  read: FlagReader;
+  write: FlagWriter;
+} {
+  const origin = `${options.insecure === true ? 'http' : 'https'}://${options.host}`;
+  const fetchFn = options.fetch ?? ((input, init) => fetch(input, init));
+  const now = options.now ?? (() => Date.now());
+  const authorization = `Bearer ${options.bearer}`;
+  let table: { at: number; rows: Promise<Record<string, string>> } | null = null;
+  const load = (): Promise<Record<string, string>> => {
+    const t = now();
+    if (table !== null && t - table.at < FLAG_CACHE_MS) return table.rows;
+    const rows = (async () => {
+      const response = await fetchFn(`${origin}/control/flags`, {
+        headers: { authorization },
+        signal: AbortSignal.timeout(FLAG_CALL_MS),
+      });
+      if (!response.ok)
+        throw new FlagStoreError(response.status, `GET /control/flags answered ${response.status}`);
+      const body = (await response.json()) as { flags?: unknown };
+      if (typeof body.flags !== 'object' || body.flags === null)
+        throw new FlagStoreError(response.status, 'GET /control/flags answered no table');
+      const out: Record<string, string> = {};
+      for (const [key, value] of Object.entries(body.flags))
+        if (typeof value === 'string') out[key] = value;
+      return out;
+    })();
+    const held = { at: t, rows };
+    table = held;
+    rows.catch(() => {
+      if (table === held) table = null;
+    });
+    return rows;
+  };
+  return {
+    async read(name) {
+      const value = (await load())[name];
+      return value === 'on' ? true : value === 'off' ? false : undefined;
+    },
+    async write(name, value) {
+      const response = await fetchFn(`${origin}/control/flags`, {
+        method: 'POST',
+        headers: { authorization, 'content-type': 'application/json' },
+        body: JSON.stringify({ [name]: value ? 'on' : 'off' }),
+        signal: AbortSignal.timeout(FLAG_CALL_MS),
+      });
+      table = null;
+      if (!response.ok)
+        throw new FlagStoreError(
+          response.status,
+          `POST /control/flags answered ${response.status}`,
+        );
+    },
+  };
+}
+
+/** The Worker's flag store when the environment names its host and room bearer; null otherwise. */
+export function workerFlagStoreOf(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): { read: FlagReader; write: FlagWriter } | null {
+  const host = env[ROOM_HOST_VARIABLE]?.trim() ?? '';
+  const bearer = env[ROOM_BEARER_VARIABLE]?.trim() ?? '';
+  if (host === '' || bearer === '') return null;
+  const insecure = env[ROOM_INSECURE_VARIABLE] === '1' || env[ROOM_INSECURE_VARIABLE] === 'true';
+  return workerFlagStore({ host, bearer, insecure });
+}
+
+/**
+ * Binds the reader (and writer) the deployment uses: the Worker's `rt_flags` when the process
+ * holds its host and bearer, the file store otherwise (`reader` below picks on first use). Clears
+ * the cache. Returns the previous pair so a test can restore it.
  */
 export function bindFlags(next: {
   read?: FlagReader | null;
   write?: FlagWriter | null;
   now?: () => number;
+  /** the reader keeps its own 5 s table (workerFlagStore) */
+  readerCaches?: boolean;
 }): { read: FlagReader | null; write: FlagWriter | null } {
   const s = state();
   const previous = { read: s.reader, write: s.writer };
-  if (next.read !== undefined) s.reader = next.read;
+  if (next.read !== undefined) {
+    s.reader = next.read;
+    s.readerCaches = next.readerCaches === true;
+  }
   if (next.write !== undefined) s.writer = next.write;
   if (next.now !== undefined) s.now = next.now;
   s.cache.clear();
@@ -195,9 +321,11 @@ export function bindFlags(next: {
 function reader(): FlagReader {
   const s = state();
   if (s.reader === null) {
-    const file = fileFlagStore();
-    s.reader = file.read;
-    s.writer ??= file.write;
+    const worker = workerFlagStoreOf();
+    const store = worker ?? fileFlagStore();
+    s.reader = store.read;
+    s.readerCaches = worker !== null;
+    s.writer ??= store.write;
   }
   return s.reader;
 }
@@ -219,6 +347,7 @@ export async function flagOn(name: StudioFlagName): Promise<boolean> {
     // nothing read is the default, never a refusal
     const read: boolean | undefined = await reader()(name);
     value = typeof read === 'boolean' ? read : STUDIO_FLAG_DEFAULTS[name];
+    if (s.readerCaches) return value;
   } catch (error) {
     if (!(FLAG_NAMES as readonly string[]).includes(name)) {
       value = STUDIO_FLAG_DEFAULTS[name];
@@ -227,6 +356,7 @@ export async function flagOn(name: StudioFlagName): Promise<boolean> {
         event: 'redis.unavailable',
         killSwitch: name,
         reason: error instanceof Error ? error.name : 'flag read failed',
+        ...(error instanceof FlagStoreError ? { status: error.status } : {}),
       });
       value = STUDIO_FLAG_DEFAULTS[name];
     }

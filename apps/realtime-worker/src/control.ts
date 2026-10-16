@@ -6,6 +6,7 @@
 // commit, listed by `GET /control/open` for the drain. Both tables are made by
 // migrations/0001_control.sql and never here; a missing table reads as `unset`. The counters are
 // per isolate (the dashboard stays the account's figure of record; build/r1.md R1-R5d).
+import { FLAG_NAMES } from '@turboslide/schema/access';
 
 export type RealtimeFlag = 'on' | 'off' | 'unset';
 
@@ -137,14 +138,25 @@ export async function readFlags(db: D1Database): Promise<Record<string, string> 
 
 const FLAG_KEY = /^[a-z][A-Za-z0-9]{0,31}$/;
 const FLAG_VALUE = /^[A-Za-z0-9_.:-]{1,64}$/;
+/**
+ * The kill switches (SPEC-3 8.12): rows the studio reads every 5 s and writes with `admin.flag`
+ * (hardening HR-O#4, apps/studio/src/server/flags.ts). Each takes `on` or `off` alone, so a
+ * mistyped value is refused here instead of reading as the switch's default on every instance.
+ */
+const SWITCHES: ReadonlySet<string> = new Set(FLAG_NAMES);
 
-/** Upserts the given flags; a key or a value outside the grammar is refused with a TypeError. */
+/**
+ * Upserts the given flags; a key or a value outside the grammar, or a kill switch with a value
+ * other than `on` or `off`, is refused with a TypeError.
+ */
 export async function writeFlags(db: D1Database, flags: Record<string, string>): Promise<void> {
   const statements: D1PreparedStatement[] = [];
   for (const [key, value] of Object.entries(flags)) {
     if (!FLAG_KEY.test(key)) throw new TypeError(`${JSON.stringify(key)} is not a flag name`);
     if (!FLAG_VALUE.test(value))
       throw new TypeError(`${JSON.stringify(value)} is not a flag value`);
+    if (SWITCHES.has(key) && value !== 'on' && value !== 'off')
+      throw new TypeError(`${JSON.stringify(key)} takes on or off`);
     statements.push(
       db
         .prepare(

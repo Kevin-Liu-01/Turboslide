@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { MATERIAL_IDS } from '@turboslide/materials/catalog';
+import { GALLERY_MATERIAL_IDS, materialEntry } from '@turboslide/materials/catalog';
 import { ACTIONS } from '@turboslide/schema/actions';
 import { THEME_IDS } from '@turboslide/schema/brand';
 import { LAYOUT_IDS } from '@turboslide/schema/deck';
@@ -31,7 +31,7 @@ describe('the landing’s facts', () => {
       page: on('window'),
       layouts: LAYOUT_IDS.length,
       themes: THEME_IDS.length,
-      materials: MATERIAL_IDS.length,
+      materials: GALLERY_MATERIAL_IDS.filter((id) => materialEntry(id)?.available === true).length,
     });
   });
 

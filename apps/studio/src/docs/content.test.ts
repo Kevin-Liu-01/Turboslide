@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { GALLERY_MATERIAL_IDS, materialEntry } from '@turboslide/materials/catalog';
+
 import { FIGURE_SIZES } from './figures';
 
 // The docs' content (docs/POLISH-2.md 5.6, C29): every MDX file under apps/studio/content/docs has
@@ -209,5 +211,34 @@ describe('the front page', () => {
         reference?.text ?? '',
       );
     expect(got[got.length - 1]).toEqual(['Every group', ...(counts?.slice(1) ?? [])]);
+  });
+});
+
+// The animated patterns of editor/objects (post-deploy review: the page said 20 patterns while the
+// gallery listed 38): the count it states is the gallery's, and each card's name sits in the row
+// of its group.
+describe('the animated patterns page', () => {
+  const objects = pages.get('/docs/editor/objects')?.text ?? '';
+  const cards = GALLERY_MATERIAL_IDS.flatMap((id) => {
+    const entry = materialEntry(id);
+    return entry?.available === true ? [entry] : [];
+  });
+
+  it("states the gallery's count", () => {
+    const stated = /opens a gallery of (\d+) patterns in five groups/.exec(objects)?.[1];
+    expect(Number(stated)).toBe(cards.length);
+  });
+
+  it('names every card in the row of its group', () => {
+    const rows = new Map(
+      [...objects.matchAll(/^\| (Fluid|Light|Metal|Gradient|Graphic)\s*\| ([^|]+)\|$/gm)].map(
+        (m) => [(m[1] ?? '').toLowerCase(), (m[2] ?? '').split(',').map((name) => name.trim())],
+      ),
+    );
+    expect([...rows.keys()].sort()).toEqual(['fluid', 'gradient', 'graphic', 'light', 'metal']);
+    const missing = cards.filter(
+      (entry) => !(rows.get(entry.category) ?? []).includes(entry.label),
+    );
+    expect(missing.map((entry) => entry.id)).toEqual([]);
   });
 });

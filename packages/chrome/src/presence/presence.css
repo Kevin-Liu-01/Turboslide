@@ -507,6 +507,27 @@
   max-width: 320px;
 }
 
+/* an agent with a brand mark (docs/SITE.md D5): its flags, pointer and caret in the site accent
+   (Kevin, 2026-10-16: "an actual accent color to highlight stuff, like people, and agents"), the
+   flag a fill behind the accent's text; its outline and drag ghost keep the hue, since the accent
+   is never a border or a ring */
+.ts-flag.has-brand {
+  background: var(--pt-accent-fill);
+  color: var(--pt-accent-text);
+}
+
+.ts-flag.has-brand .ts-chip {
+  border-color: var(--pt-accent-text);
+}
+
+.ts-remote-caret.has-brand {
+  background: var(--pt-accent);
+}
+
+.ts-remote-pointer.has-brand .ts-remote-pointer-fill {
+  fill: var(--pt-accent);
+}
+
 .ts-remote-outline {
   position: absolute;
   box-sizing: border-box;

@@ -283,7 +283,7 @@ export const CHROME_TOKENS: readonly ChromeToken[] = [
   {
     name: '--pt-accent',
     role: 'text',
-    note: 'The site accent (Kevin, 2026-10-16): the words people and agents of the landing title, a key word of a heading, the current item and a link under the pointer on /home, /features, /faq, /about and /docs. Orange solved to 4.5:1 on the paper of each appearance. Text, glyphs and fills only, never a border or a ring.',
+    note: 'The site accent (Kevin, 2026-10-16): the words people and agents of the landing title, a key word of a heading, the current item and a link under the pointer on /home, /features, /faq, /about and /docs, and the pointers, carets and flags of the agents in the hero. Orange solved to 4.5:1 on the paper of each appearance. Text, glyphs and fills only, never a border or a ring.',
     light: {
       kind: 'solve',
       seed: 'accent',

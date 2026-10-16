@@ -210,6 +210,25 @@ function docsAddresses(): { page: string; twin: string }[] {
 const DOCS = docsAddresses();
 
 /**
+ * The agent contracts as static files (hardening PS#9, PERF-14): the three routes answer the
+ * bundle's generated files with no per request data, so the CDN serves them and no request for
+ * them reaches the function or its cookie. Their headers are the routes' own: the type, and
+ * contracts.ts CONTRACTS_CACHE_CONTROL (a day at the CDN, five minutes in the browser).
+ */
+const CONTRACTS_CACHE = 'public, max-age=300, s-maxage=86400';
+const CONTRACT_FILES = [
+  { path: '/llms.txt', type: 'text/plain; charset=utf-8' },
+  { path: '/llms-full.txt', type: 'text/plain; charset=utf-8' },
+  { path: '/openapi.json', type: 'application/json; charset=utf-8' },
+];
+const CONTRACT_RULES = Object.fromEntries(
+  CONTRACT_FILES.map(({ path, type }) => [
+    path,
+    { headers: { 'content-type': type, 'cache-control': CONTRACTS_CACHE } },
+  ]),
+);
+
+/**
  * The prerendered docs files: each page, each twin, the search index, the agents' full text and the
  * sitemap (5.2, 5.7).
  */
@@ -257,6 +276,7 @@ const ROUTE_RULES = {
   '/home': { headers: { 'cache-control': PAGE } },
   '/docs/**': { headers: { 'cache-control': PAGE } },
   ...DOCS_TWIN_RULES,
+  ...CONTRACT_RULES,
   '/favicon.ico': { headers: { 'cache-control': DAY } },
   '/icon.svg': { headers: { 'cache-control': DAY } },
   '/apple-touch-icon.png': { headers: { 'cache-control': DAY } },
@@ -281,7 +301,11 @@ const ROUTE_RULES = {
 const HOME_ROUTE = fileURLToPath(new URL('./src/routes/home.tsx', import.meta.url));
 const PRERENDER = existsSync(HOME_ROUTE)
   ? {
-      pages: [{ path: '/home' }, ...DOCS_PRERENDER],
+      pages: [
+        { path: '/home' },
+        ...DOCS_PRERENDER,
+        ...CONTRACT_FILES.map(({ path }) => ({ path })),
+      ],
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: false,

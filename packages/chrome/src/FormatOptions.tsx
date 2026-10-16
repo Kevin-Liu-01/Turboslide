@@ -394,7 +394,11 @@ export function FormatOptions({
   const blockFindings = selected
     ? findings.filter((finding) => finding.blockId === selected.id)
     : [];
-  const slideFindings = findings.filter((finding) => finding.blockId === undefined);
+  /* this slide's own findings: the deck's list carries every slide's, and the Layout row drew one
+     layout/freeform mark per freeform slide of the deck (post-deploy review) */
+  const slideFindings = findings.filter(
+    (finding) => finding.blockId === undefined && finding.slideId === slide.id,
+  );
 
   const renderRows = (
     generated: Generated,

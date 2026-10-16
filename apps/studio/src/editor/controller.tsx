@@ -185,6 +185,7 @@ import type { MeAnswerFacts } from './own-identity';
 import { rowReflects } from './own-identity';
 import { roomTransport } from './transport';
 import type { Entry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
+import { REALTIME_TIERS } from '@turboslide/realtime/channel';
 import {
   clearPendingMirror,
   indexedDbPendingStore,
@@ -990,15 +991,22 @@ function isSlideFieldTextRun(document: DeckDocument, mutation: Mutation): boolea
 }
 
 /**
- * The origins the resync read answered (docs/archive/rounds/SYNC.md 3.2; write.ts `readEditorDeck` with
- * `since` answers `EditorDeck.origins`, B3's half): the records above the tab's old position
- * that name their origin, each with the seq its commit made and the op ids it folded, the
- * newest RESYNC_ORIGINS_MAX of them. The payload is parsed JSON, so each row is checked before
- * the room client reads it; a payload without the field answers none and the room client
- * re-folds its pending ops as before, and the bound (a head more than REPLAY_MAX_ENTRIES above
- * the old position) is the room client's own reading on the blob tier.
+ * What the resync read answers the room client beside the document. The origins
+ * (docs/archive/rounds/SYNC.md 3.2; write.ts `readEditorDeck` with `since` answers
+ * `EditorDeck.origins`, B3's half): the records above the tab's old position that name their
+ * origin, each with the seq its commit made and the op ids it folded, the newest
+ * RESYNC_ORIGINS_MAX of them. The position (hardening HR-RC#7, RELIABILITY-17): the stream
+ * position of the document on the tier the read ran on, the payload's `room.seq` and
+ * `room.tier`; on the do tier the tab's position becomes it, and a document at another position
+ * than the tab's returns the pending typed text as cards. The bound: the read's `bounded`, set
+ * when the records did not reach the old position (the server half, HR-RT#15); on the blob tier
+ * the room client also reads it off a head more than REPLAY_MAX_ENTRIES above the old position.
+ * The payload is parsed JSON, so each field is checked before the room client reads it; a
+ * payload without a field answers without it, and the room client keeps its reading as before.
  */
-function resyncOriginsOf(payload: EditorDeck): Pick<ResyncAnswer, 'origins'> {
+export function resyncAnswerOf(
+  payload: Pick<EditorDeck, 'origins' | 'room'> & { bounded?: unknown },
+): Omit<ResyncAnswer, 'document'> {
   const origins: ResyncOrigin[] = [];
   for (const row of payload.origins ?? []) {
     if (typeof row !== 'object' || row === null) continue;
@@ -1007,7 +1015,16 @@ function resyncOriginsOf(payload: EditorDeck): Pick<ResyncAnswer, 'origins'> {
     const ids = opIds.filter((id): id is string => typeof id === 'string' && id !== '');
     if (ids.length > 0) origins.push({ seq, opIds: ids });
   }
-  return origins.length === 0 ? {} : { origins };
+  const seq: unknown = payload.room?.seq;
+  const tier: unknown = payload.room?.tier;
+  const known = REALTIME_TIERS.find((word) => word === tier);
+  return {
+    ...(origins.length === 0 ? {} : { origins }),
+    ...(payload.bounded === true ? { bounded: true } : {}),
+    ...(typeof seq === 'number' && Number.isInteger(seq) && seq >= 0 && known !== undefined
+      ? { position: { seq, tier: known } }
+      : {}),
+  };
 }
 
 /**
@@ -2125,7 +2142,7 @@ export function createEditorController(init: {
           // stands when a reload lands below it
           serverRevision: Math.max(fresh, latest().serverRevision),
         });
-        return { document: payload.document, ...resyncOriginsOf(payload) };
+        return { document: payload.document, ...resyncAnswerOf(payload) };
       },
       /* the plate offers only what the server does not hold (docs/archive/rounds/POLISH.md item 109) */
       heldOps: async (opIds) => {

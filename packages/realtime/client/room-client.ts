@@ -443,6 +443,16 @@ export type ResyncAnswer = {
   document: DeckDocument;
   origins?: readonly ResyncOrigin[];
   bounded?: boolean;
+  /**
+   * The stream position of `document` on the tier the read ran on: the last entry it includes
+   * (the editor loader's `room.seq` and `room.tier`; hardening HR-RC#7). On a tier whose seq is
+   * not the revision (do, memory) the tab's position becomes it when the tab is on that tier.
+   * Without it a reload left the position behind the document: every POST went at the old base
+   * and was answered `resync` again, and the stream's replay from the old position applied the
+   * entries the document held a second time. A position of another tier is another numbering
+   * and is left alone; the hello of that tier resyncs the tab.
+   */
+  position?: { seq: number; tier: RealtimeTier };
 };
 
 export type RoomClientOptions = {
@@ -545,6 +555,17 @@ export type RoomClient = {
 
 function bytesOf(value: unknown): number {
   return new TextEncoder().encode(JSON.stringify(value)).byteLength;
+}
+
+/**
+ * Whether a change carries typed text: an op at plain text offsets of a Text (hardening HR-RC#7).
+ * Its offsets name the document it was typed on, so past the bound of a reload it returns to its
+ * author as a card rather than re-folding at the old offsets.
+ */
+function carriesText(mutations: readonly Mutation[] | undefined): boolean {
+  return (
+    mutations?.some((mutation) => isTextOp(mutation) || mutation.op === 'text.replace') ?? false
+  );
 }
 
 /**
@@ -1865,13 +1886,20 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /**
    * The pending ops the resync read acknowledged (docs/archive/rounds/SYNC.md 3.2, invariant 10): every op an
    * origin above the old position names is settled at that record's seq and leaves the queue,
-   * never re-sent. When the records did not reach the old position (`bounded`, or on the blob
-   * tier a head more than REPLAY_MAX_ENTRIES above it, where the seq is the revision), an op
-   * posted before the resync cannot be told from a lost first attempt and is dropped with the
-   * queue and returned to its author with the reject card's sentence, the way an op the document
-   * no longer takes is (invariant 3's bound); an op never posted (no id yet) stays and re-folds.
+   * never re-sent. Past the bound the pending ops cannot be placed on the document read: the
+   * records did not reach the old position (`bounded`, or on the blob tier a head more than
+   * REPLAY_MAX_ENTRIES above it, where the seq is the revision), or on a tier whose seq is not
+   * the revision the document is at another position than the tab's (`elsewhere`, hardening
+   * HR-RC#7), so it holds entries the ops were never moved past, or lacks ones they were. There
+   * an op posted before the resync cannot be told from a lost first attempt, and an op with typed
+   * text, posted or not, names offsets of the tab's document and not of this one (RELIABILITY-17:
+   * on the do tier the text landed at the old offsets): each is dropped with the queue and
+   * returned to its author with the reject card's sentence, the way an op the document no longer
+   * takes is (invariant 3's bound). An op the room admitted is in its log and stays for the
+   * document or the replay to settle (HR-RC#9); one never posted without text (a move, a slide
+   * added) names blocks by id and stays and re-folds.
    */
-  const settleFromResync = (answer: ResyncAnswer, since: number): void => {
+  const settleFromResync = (answer: ResyncAnswer, since: number, elsewhere: boolean): void => {
     for (const origin of answer.origins ?? []) {
       const own = pending.filter((op) => origin.opIds.includes(op.opId));
       if (own.length === 0) continue;
@@ -1884,11 +1912,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }
     const bounded =
       answer.bounded === true ||
-      (tier === 'blob' && answer.document.deck.revision - since > REPLAY_MAX_ENTRIES);
+      (tier === 'blob' && answer.document.deck.revision - since > REPLAY_MAX_ENTRIES) ||
+      elsewhere;
     if (!bounded) return;
     const kept: PendingOp[] = [];
     for (const op of pending) {
-      if (op.opId === '' || op.kind !== 'edit') {
+      if (
+        op.kind !== 'edit' ||
+        op.admitted !== undefined ||
+        (op.opId === '' && !carriesText(op.mutations))
+      ) {
         kept.push(op);
         continue;
       }
@@ -1911,20 +1944,34 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     if (answered === null || stopped) return;
     const answer: ResyncAnswer = 'slides' in answered ? { document: answered } : answered;
     const fresh = answer.document;
+    // the document's stream position on a tier whose seq is not the revision (hardening HR-RC#7):
+    // the loader names it, and the tab's own document is at `seq` now, with every pending op
+    // moved past the entries up to it (the stream may have moved it during the read)
+    const readAt = tier !== 'blob' && answer.position?.tier === tier ? answer.position.seq : null;
+    // entries the reload put aside: the tab had applied entries past the document, held some
+    // above its position, or the last hello named a head above it
+    const replay = readAt !== null && (readAt < seq || readAt < helloSeq || incoming.size > 0);
     server = fresh;
     revision = Math.max(revision, fresh.deck.revision);
     runEnds.clear();
-    settleFromResync(answer, since);
+    settleFromResync(answer, since, readAt !== null && readAt !== seq);
     // the reload brought the document to the head. On the blob tier the seq of an entry is the
     // revision its record made (blob.ts), so the fresh document's revision is the stream
     // position; a position left at the last hello buffered every later entry for good and the
     // document stopped moving while the revision climbed (hotfix 2 cause A3, "revision 2 vs 12").
-    seq = Math.max(seq, helloSeq, tier === 'blob' ? fresh.deck.revision : 0);
+    // On the do tier the position is the document's (HR-RC#7). Kept where it was, a 409 `resync`
+    // while the stream was down came before any hello named the head: every resend went at the
+    // old base and was answered `resync` again, a reload each time, and the stream's replay
+    // from the old position applied the entries the document held a second time
+    seq = readAt ?? Math.max(seq, helloSeq, tier === 'blob' ? fresh.deck.revision : 0);
     appliedAtSeq.clear();
     // the pending ops (re-folded on the fresh document) may flush
     caughtUp = true;
     incoming.clear();
     watchGap();
+    // the entries above the document come again from its position (HR-RC#7); a stream that is
+    // down opens from it on its own ladder
+    if (replay && stream !== null) reopenStream({ message: 'the stream replays from the reload' });
     retained = [];
     posted = [];
     // an op the room admitted at or below the new position is in the fresh document (HR-RC#9)
@@ -2361,6 +2408,30 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
           op.unconfirmed = { clientId: body.clientId, opens };
       }
       if (response.code === 'resync') {
+        // on a tier whose seq is not the revision (hardening HR-RC#7, RELIABILITY-17) the base is
+        // more than BASE_SEQ_WINDOW behind and a replay from the position can bring what landed:
+        // the replay moves the pending ops past it, where a reload re-folded the typed text at
+        // its old offsets. A stream whose replay is still coming (its hello named a head above the
+        // position) is waited for: the resend goes once the replay drains (noteCaughtUp).
+        // Otherwise the resend waits for the hello of a stream opened from the position (or
+        // RECONNECT_HOLD_MAX_MS), and only a stream that said hello is opened again: a stream
+        // that is down opens on its own ladder, and an open in flight is left to answer. Closing
+        // that open too, every resend's 409 (one each RECONNECT_HOLD_MAX_MS) closed the open
+        // before its hello and the stream never came back (the lane's browser reading on the
+        // memory tier: a 409 every 8 s for two minutes). A gap past the replay is a reload
+        if (
+          tier !== 'blob' &&
+          response.head !== undefined &&
+          response.head - seq <= REPLAY_MAX_ENTRIES
+        ) {
+          if (connected && seq < helloSeq) caughtUp = false;
+          else {
+            if (connected) reopenStream({ message: 'a write was answered resync' });
+            holdForHello();
+          }
+          emitStatus();
+          return;
+        }
         await resync(response.head ?? revision);
         return;
       }

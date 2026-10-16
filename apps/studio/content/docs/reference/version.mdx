@@ -10,14 +10,14 @@ description: The actions of the version group, with their input fields and their
 
 **Diff.** The mutation list between two revisions in prose, optionally with before and after crops.
 
-| Field    | Type                | Required | Description                                                     |
-| -------- | ------------------- | -------- | --------------------------------------------------------------- |
-| `from`   | integer             | no       | The older revision; omitted with staged, the last named version |
-| `to`     | integer             | no       | Defaults to the current revision                                |
-| `staged` | boolean             | no       | Diff from the newest named version below the current revision   |
-| `render` | boolean             | no       | Write before and after crops of every touched block             |
-| `themes` | "light" \| "dark"[] | no       | Themes to render the crops in; defaults to light                |
-| `out`    | string              | no       | Crop directory; defaults to .turboslide/diff                    |
+| Field    | Type                  | Required | Description                                                     |
+| -------- | --------------------- | -------- | --------------------------------------------------------------- |
+| `from`   | integer               | no       | The older revision; omitted with staged, the last named version |
+| `to`     | integer               | no       | Defaults to the current revision                                |
+| `staged` | boolean               | no       | Diff from the newest named version below the current revision   |
+| `render` | boolean               | no       | Write before and after crops of every touched block             |
+| `themes` | ("light" \| "dark")[] | no       | Themes to render the crops in; defaults to light                |
+| `out`    | string                | no       | Crop directory; defaults to .turboslide/diff                    |
 
 - Command line: `turboslide diff <from> <to> --staged --render --theme <themes> --out <out>`
 - MCP tool: `deck_diff`

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { excerptOf, rank } from './search';
+import { clean, excerptOf, rank } from './search';
 import type { SearchIndex } from './search';
 
 const INDEX: SearchIndex = {
@@ -57,5 +57,56 @@ describe('docs search', () => {
     const excerpt = excerptOf(long, ['target']);
     expect(excerpt.length).toBeLessThanOrEqual(121);
     expect(excerpt).toContain('target');
+  });
+
+  // post-deploy review (looks.md): a search for "slide" put "Objects on a slide" and its block.*
+  // sections above the Slides page, and snippets read as raw Markdown table text
+  it('ranks a page whose title is the word above a longer title and above sections', () => {
+    const reference: SearchIndex = {
+      rows: [
+        { u: '/docs/editor', t: 'The editor', h: 'The editor', a: '', x: 'Add a slide.' },
+        {
+          u: '/docs/reference/block',
+          t: 'Objects on a slide',
+          h: 'Objects on a slide',
+          a: '',
+          x: 'Every block action.',
+        },
+        {
+          u: '/docs/reference/block',
+          t: 'Objects on a slide',
+          h: 'block.add',
+          a: 'block-add',
+          x: 'Add a block to a slide.',
+        },
+        { u: '/docs/reference/slide', t: 'Slides', h: 'Slides', a: '', x: 'Every slide action.' },
+        {
+          u: '/docs/reference/slide',
+          t: 'Slides',
+          h: 'slide.new',
+          a: 'slide-new',
+          x: 'Add a slide.',
+        },
+      ],
+    };
+    expect(rank(reference, 'slide').map((hit) => `${hit.row.u}#${hit.row.a}`)).toEqual([
+      '/docs/reference/slide#',
+      '/docs/reference/block#',
+      '/docs/reference/slide#slide-new',
+      '/docs/editor#',
+      '/docs/reference/block#block-add',
+    ]);
+  });
+
+  it('reads a section as text: no backticks, column pipes or escapes', () => {
+    expect(
+      clean('Field Type Required Description `slideId` string yes `layout` object \\| null no'),
+    ).toBe('Field Type Required Description slideId string yes layout object | null no');
+    expect(clean('Run `turboslide slide transition <slideId> <kind>|none` now.')).toBe(
+      'Run turboslide slide transition <slideId> <kind>|none now.',
+    );
+    expect(clean('| a | b |  <Callout type="note">**Bold** text</Callout> Cmd \\[')).toBe(
+      'a b Bold text Cmd [',
+    );
   });
 });

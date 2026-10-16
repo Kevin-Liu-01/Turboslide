@@ -332,8 +332,8 @@
 }
 
 /* inline code: no ground, never broken inside a token. Code of 24 characters or fewer
-   (`.is-short`, a flag such as `--deck <dir>`) stays on one line, and in longer code a word of 24
-   characters or fewer (`.ts-docs-keep`, mdx.tsx) stays whole */
+   (`.is-short`, a flag such as `--deck <dir>`) stays on one line, and in longer code a flag with
+   its value and a word of 24 characters or fewer (`.ts-docs-keep`, mdx.tsx) stay whole */
 .ts-docs .ts-docs-body-text :not(pre) > code {
   font-size: 0.875em;
   color: var(--pt-ink);
@@ -494,6 +494,63 @@
 
 .ts-docs .ts-docs-table {
   margin: 24px 0;
+}
+
+/* a table wider than the column scrolls sideways (mdx.tsx: a focusable region named by its
+   columns): its edge fades over 32 px where more of the table is, on the left once it has
+   scrolled and on the right until its end, so a cut word reads as more to come. The scroll
+   timeline drives the two fades; a table that fits has no timeline and no fade, and a browser
+   without scroll timelines draws none */
+@property --ts-docs-fade-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --ts-docs-fade-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@supports (animation-timeline: scroll()) {
+  .ts-docs .ts-docs-table.pt-scroll-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--ts-docs-fade-l),
+      #000 calc(100% - var(--ts-docs-fade-r)),
+      transparent
+    );
+    animation: ts-docs-table-edges linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+
+@keyframes ts-docs-table-edges {
+  from {
+    --ts-docs-fade-l: 0px;
+    --ts-docs-fade-r: 32px;
+  }
+
+  4% {
+    --ts-docs-fade-l: 32px;
+  }
+
+  96% {
+    --ts-docs-fade-r: 32px;
+  }
+
+  to {
+    --ts-docs-fade-l: 32px;
+    --ts-docs-fade-r: 0px;
+  }
+}
+
+/* the keyboard's focus: the ring inside the region, the whole table unfaded under it */
+.ts-docs .ts-docs-table.pt-scroll-x:focus-visible {
+  outline-offset: -2px;
+  mask-image: none;
 }
 
 .ts-docs .ts-docs-table table {
@@ -708,6 +765,9 @@
 
 /* ---- on this page: numbered entries, the current one in ink, then the page tools ---- */
 
+/* the column scrolls on its own once its entries and tools run past the window (a reference
+   page's 27 entries), so the page tools are a scroll away at any point of the page; the reader's
+   section stays in view (DocsArticle.tsx) */
 .ts-docs .ts-docs-aside {
   grid-column: 2;
   grid-row: 1 / span 2;
@@ -716,6 +776,8 @@
   align-self: start;
   max-height: calc(100vh - var(--site-bar-h) - 48px);
   padding-bottom: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .ts-docs .ts-docs-toc .t-label {
@@ -1233,7 +1295,9 @@
     font-size: 12px;
   }
 
-  /* a long line wraps under its own indent, the prompt hanging in the margin */
+  /* a long line wraps under its own indent, the prompt hanging in the margin, between the runs
+     mdx.tsx keeps whole (a flag with its value, a word of 24 characters or fewer): only a longer
+     word breaks where it must */
   .ts-docs .ts-docs-code .ts-docs-ln {
     padding-left: 2ch;
     text-indent: -2ch;
@@ -1241,10 +1305,19 @@
     overflow-wrap: anywhere;
   }
 
+  .ts-docs .ts-docs-code .ts-docs-ln > .ts-docs-keep {
+    white-space: pre;
+  }
+
   /* a figure with a phone cut takes its width and its leader's place */
   .ts-docs .ts-docs-fig-frame,
   .ts-docs .ts-docs-leader {
     width: min(var(--fig-phone-w, var(--fig-w)), 100%);
+  }
+
+  /* the editor's top shows its left 285 px, where each row ends between two words (site.css) */
+  .ts-docs [data-figure='editor-top'] .ts-docs-fig-frame {
+    width: min(285px, 100%);
   }
 
   .ts-docs .ts-docs-leader i,

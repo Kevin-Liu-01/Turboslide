@@ -456,7 +456,7 @@
         {
           "key": "background",
           "flag": "--background",
-          "type": "object | null",
+          "type": "{ color } | null",
           "required": true,
           "description": "The colour, a palette token or a hex; null removes the default"
         },
@@ -849,7 +849,7 @@
         {
           "key": "mutations",
           "flag": "--mutations",
-          "type": "object | object | object | object | object | object | object | object | object | object | object | object | object | object | object | object | object[]",
+          "type": "{ op: \"slide.insert\" | \"slide.remove\" | \"slide.move\" | \"slide.set\" | \"slide.replace\" | \"block.insert\" | \"block.remove\" | \"block.move\" | \"block.set\" | \"text.replace\" | \"text.splice\" | \"text.mark\" | \"section.set\" | \"asset.set\" | \"asset.remove\" | \"deck.set\" | \"version.restore\" }[]",
           "required": true
         }
       ],
@@ -900,7 +900,7 @@
         {
           "key": "layout",
           "flag": "--layout",
-          "type": "object | object | object | object | object | object",
+          "type": "{ type: \"cols\" | \"split\" | \"center\" | \"left-mid\" | \"stack\" | \"freeform\" }",
           "required": true,
           "description": "The target layout with its options"
         },
@@ -1158,7 +1158,7 @@
         {
           "key": "background",
           "flag": "--background",
-          "type": "object | null",
+          "type": "{ color } | null",
           "required": true
         },
         {
@@ -1939,7 +1939,7 @@
         {
           "key": "shadow",
           "flag": "--shadow",
-          "type": "object | null",
+          "type": "{ color, opacity, angle, distance, blur } | null",
           "required": true
         },
         {
@@ -2705,7 +2705,7 @@
         {
           "key": "border",
           "flag": "--border",
-          "type": "object | null",
+          "type": "{ color, weight, dash } | null",
           "required": false
         },
         {
@@ -3113,7 +3113,7 @@
         {
           "key": "source",
           "flag": "--source",
-          "type": "object | object | object | object | object",
+          "type": "{ kind: \"material\" | \"capture\" | \"photo\" | \"file\" | \"logo\" }",
           "required": false,
           "description": "The provenance record; built from title, artist, license and sourceUrl when omitted"
         },
@@ -3228,7 +3228,7 @@
         {
           "key": "treatment",
           "flag": "--treatment",
-          "type": "object | object",
+          "type": "{ kind: \"two-tone\" | \"continuous\" }",
           "required": false,
           "description": "The full treatment to run; the recorded one with the params merged when omitted"
         },
@@ -3603,7 +3603,7 @@
         {
           "key": "themes",
           "flag": "--theme",
-          "type": "\"light\" | \"dark\"[]",
+          "type": "(\"light\" | \"dark\")[]",
           "required": false,
           "description": "One or both themes"
         },
@@ -3656,7 +3656,7 @@
         {
           "key": "themes",
           "flag": "--themes",
-          "type": "\"light\" | \"dark\"[]",
+          "type": "(\"light\" | \"dark\")[]",
           "required": false,
           "description": "One or both themes"
         },
@@ -3918,7 +3918,7 @@
         {
           "key": "themes",
           "flag": "--theme",
-          "type": "\"light\" | \"dark\"[]",
+          "type": "(\"light\" | \"dark\")[]",
           "required": false,
           "description": "Themes to render the crops in; defaults to light"
         },
@@ -4041,7 +4041,7 @@
         {
           "key": "theme",
           "flag": "--theme",
-          "type": "\"light\" | \"dark\"[]",
+          "type": "(\"light\" | \"dark\")[]",
           "required": false,
           "description": "One file per theme; defaults to both, which also writes <deckId>-both.zip"
         },
@@ -5137,7 +5137,7 @@
         {
           "key": "transition",
           "flag": "--transition",
-          "type": "object | null",
+          "type": "{ name, durationMs } | null",
           "required": true
         },
         {
@@ -5171,7 +5171,7 @@
         {
           "key": "advance",
           "flag": "--advance",
-          "type": "object | null",
+          "type": "{ afterMs } | null",
           "required": true
         },
         {
@@ -5370,7 +5370,7 @@
         {
           "key": "assignee",
           "flag": "--assignee",
-          "type": "object | object",
+          "type": "{ kind: \"principal\" | \"invite\" }",
           "required": false
         },
         {
@@ -5573,7 +5573,7 @@
         {
           "key": "assignee",
           "flag": "--assignee",
-          "type": "object | object | null",
+          "type": "{ kind: \"principal\" | \"invite\" } | null",
           "required": true
         },
         {
@@ -5870,7 +5870,7 @@
         {
           "key": "kinds",
           "flag": "--kind",
-          "type": "\"version\" | \"comment\" | \"share\" | \"request\" | \"role\" | \"rename\" | \"restore\" | \"named\" | \"export\" | \"import\" | \"trash\"[]",
+          "type": "(\"version\" | \"comment\" | \"share\" | \"request\" | \"role\" | \"rename\" | \"restore\" | \"named\" | \"export\" | \"import\" | \"trash\")[]",
           "required": false
         },
         {
@@ -6160,7 +6160,7 @@
         {
           "key": "who",
           "flag": "--who",
-          "type": "object | object",
+          "type": "{ principalId } | { email }",
           "required": true
         },
         {
@@ -6205,7 +6205,7 @@
         {
           "key": "who",
           "flag": "--who",
-          "type": "object | object",
+          "type": "{ principalId } | { email }",
           "required": true
         },
         {
@@ -6239,7 +6239,7 @@
         {
           "key": "who",
           "flag": "--who",
-          "type": "object | object",
+          "type": "{ principalId } | { email }",
           "required": true
         },
         {
@@ -6388,7 +6388,7 @@
         {
           "key": "to",
           "flag": "--to",
-          "type": "object | object",
+          "type": "{ principalId } | { email }",
           "required": true
         },
         {
@@ -6491,7 +6491,7 @@
         {
           "key": "to",
           "flag": "--to",
-          "type": "\"all\" | object",
+          "type": "\"all\" | { principalIds }",
           "required": true
         },
         {
@@ -6604,7 +6604,7 @@
         {
           "key": "scopes",
           "flag": "--scope",
-          "type": "\"read\" | \"comment\" | \"write\" | \"export\" | \"share\" | \"admin\"[]",
+          "type": "(\"read\" | \"comment\" | \"write\" | \"export\" | \"share\" | \"admin\")[]",
           "required": true
         },
         {
@@ -6838,7 +6838,7 @@
         {
           "key": "to",
           "flag": "--to",
-          "type": "object | object",
+          "type": "{ principalId } | { email }",
           "required": true
         },
         {
@@ -6966,7 +6966,7 @@
         {
           "key": "dither",
           "flag": "--dither",
-          "type": "object | null",
+          "type": "{ pattern } | null",
           "required": true
         },
         {

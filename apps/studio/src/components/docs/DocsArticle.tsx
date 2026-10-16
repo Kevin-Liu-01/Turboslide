@@ -1,5 +1,5 @@
 import { useLocation, useRouter } from '@tanstack/react-router';
-import { Suspense, isValidElement, useState } from 'react';
+import { Suspense, isValidElement, useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import { SITE } from '@turboslide/theme/brand/site';
@@ -15,6 +15,7 @@ import { CopyPage } from './CopyPage';
 import { docsPath } from './DocsShell';
 import { navName } from './DocsSidebar';
 import { DOCS_COMPONENTS, PathLink } from './mdx';
+import { revealIn } from './reveal';
 import { fetchArticle, onBodyClick, onBodyKeyDown } from './static-body';
 
 export function pageData(page: DocsPage, toc: DocsTocEntry[] = []): DocsPageData {
@@ -231,9 +232,24 @@ function Contents({ toc: items }: { toc: DocsTocEntry[] }) {
       cancelAnimationFrame(frame);
     };
   });
+  /* the column scrolls on its own when its entries run past the window (a reference page has
+     27): it keeps the reader's section in view (a new ref for each section) */
+  const toc = useCallback(
+    (nav: HTMLElement | null): void => {
+      const column = nav?.closest<HTMLElement>('.ts-docs-aside');
+      if (nav !== null && column !== null && column !== undefined && here !== '')
+        revealIn(column, nav.querySelector(`a[href="#${CSS.escape(here)}"]`), 'nearest');
+    },
+    [here],
+  );
   if (items.length === 0) return null;
   return (
-    <nav className="ts-docs-toc" aria-label={TOOL_WORDS.onThisPage} data-control="docs.toc">
+    <nav
+      className="ts-docs-toc"
+      aria-label={TOOL_WORDS.onThisPage}
+      data-control="docs.toc"
+      ref={toc}
+    >
       <p className="t-label">{TOOL_WORDS.onThisPage}</p>
       <ol>
         {items.map((item) => (

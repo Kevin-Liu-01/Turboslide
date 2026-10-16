@@ -218,10 +218,10 @@ It takes no input.
 
 **Set theme background.** Writes the background colour every slide without its own takes, what Add to theme writes; null removes it.
 
-| Field          | Type           | Required | Description                                                      |
-| -------------- | -------------- | -------- | ---------------------------------------------------------------- |
-| `background`   | object \| null | yes      | The colour, a palette token or a hex; null removes the default   |
-| `baseRevision` | integer        | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                | Required | Description                                                      |
+| -------------- | ------------------- | -------- | ---------------------------------------------------------------- |
+| `background`   | \{ color \} \| null | yes      | The colour, a palette token or a hex; null removes the default   |
+| `baseRevision` | integer             | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide deck background --color <color>`
 - MCP tool: `deck_set_background`

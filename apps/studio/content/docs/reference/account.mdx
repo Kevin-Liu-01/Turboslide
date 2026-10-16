@@ -24,11 +24,11 @@ description: The actions of the account group, with their input fields and their
 
 **Create API key.** Mints an API key owned by the caller with a name, scopes and an optional expiry, shown once; never over MCP, and refused on a checkout, which has no accounts.
 
-| Field       | Type                                                               | Required | Description |
-| ----------- | ------------------------------------------------------------------ | -------- | ----------- |
-| `name`      | string                                                             | yes      |             |
-| `scopes`    | "read" \| "comment" \| "write" \| "export" \| "share" \| "admin"[] | yes      |             |
-| `expiresAt` | string                                                             | no       |             |
+| Field       | Type                                                                 | Required | Description |
+| ----------- | -------------------------------------------------------------------- | -------- | ----------- |
+| `name`      | string                                                               | yes      |             |
+| `scopes`    | ("read" \| "comment" \| "write" \| "export" \| "share" \| "admin")[] | yes      |             |
+| `expiresAt` | string                                                               | no       |             |
 
 - Command line: `turboslide account tokens create --to <to> --name <name> --scope <scopes> --expires <expiresAt>`
 - MCP tool: No MCP tool.

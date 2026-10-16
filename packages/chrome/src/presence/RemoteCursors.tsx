@@ -47,8 +47,10 @@ import type { ViewerFacts } from './presence-model';
  * its hue as a person does, its outline still dashed, and while it names a step (`doing`) each of
  * its flags reads the step after its name ("Codex: adding a chart"), the step alone with its mark
  * on a stage under 560 px wide, the flag as wide as its words, and its outline draws no flag of
- * its own while its pointer carries one. Everything is absolute inside the overlay, so it moves
- * nothing (05 rule 4).
+ * its own while its pointer carries one. Such an agent's pointer, caret and flags draw in the
+ * site accent (presence.css `has-brand`); its outline and drag ghost keep its hue, since the
+ * accent is never a border. Everything is absolute inside the overlay, so it moves nothing
+ * (05 rule 4).
  */
 export type RemoteCursorsProps = {
   view: EditorOverlayView;
@@ -195,6 +197,7 @@ export function Flag({
         faded && 'is-faded',
         halo && 'has-halo',
         step !== null && 'has-step',
+        more === undefined && participant.brand !== undefined && 'has-brand',
       )}
       style={{
         left: x,
@@ -434,7 +437,12 @@ export function RemoteCursors({
         return (
           <span key={`caret:${caret.participant.clientId}`} className="ts-remote-caret-group">
             <span
-              className={cn('ts-remote-caret', caret.dim && 'is-dim', halo && 'has-halo')}
+              className={cn(
+                'ts-remote-caret',
+                caret.dim && 'is-dim',
+                halo && 'has-halo',
+                caret.participant.brand !== undefined && 'has-brand',
+              )}
               style={{
                 left: caret.box[0] * k,
                 top: caret.box[1] * k,
@@ -476,6 +484,7 @@ export function RemoteCursors({
                     COLLAB_CLASSES.remotePointer,
                     'ts-remote-pointer',
                     halo && 'has-halo',
+                    each.brand !== undefined && 'has-brand',
                   )}
                   viewBox={`0 0 ${pointerSize.width} ${pointerSize.height}`}
                   width={pointerSize.width}

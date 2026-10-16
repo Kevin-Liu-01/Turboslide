@@ -38,11 +38,11 @@ description: The actions of the admin group, with their input fields and their n
 
 **Assign owner.** An admin sets a deck’s owner.
 
-| Field          | Type             | Required | Description                                                      |
-| -------------- | ---------------- | -------- | ---------------------------------------------------------------- |
-| `id`           | string           | yes      |                                                                  |
-| `to`           | object \| object | yes      |                                                                  |
-| `baseRevision` | integer          | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                             | Required | Description                                                      |
+| -------------- | -------------------------------- | -------- | ---------------------------------------------------------------- |
+| `id`           | string                           | yes      |                                                                  |
+| `to`           | \{ principalId \} \| \{ email \} | yes      |                                                                  |
+| `baseRevision` | integer                          | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide admin assign-owner <id> --email <email>`
 - MCP tool: `deck_assign_owner`

@@ -10,26 +10,26 @@ description: The actions of the asset group, with their input fields and their n
 
 **Add asset.** Adds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional two-tone treatment; returns the asset with twins and metrics.
 
-| Field           | Type                                           | Required | Description                                                                                                                              |
-| --------------- | ---------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`            | string                                         | no       | The asset id; a slug of the file name when omitted                                                                                       |
-| `file`          | string                                         | no       | A path on the machine, or a data: URL from the studio’s drop or paste                                                                    |
-| `url`           | string                                         | no       | An http(s) URL to fetch, 25 MB at most                                                                                                   |
-| `role`          | one of 10 values                               | yes      |                                                                                                                                          |
-| `alt`           | string                                         | yes      |                                                                                                                                          |
-| `source`        | object \| object \| object \| object \| object | no       | The provenance record; built from title, artist, license and sourceUrl when omitted                                                      |
-| `title`         | string                                         | no       | The picture’s name as the source states it                                                                                               |
-| `artist`        | string                                         | no       |                                                                                                                                          |
-| `license`       | string                                         | no       | CC0, CC BY, CC BY-SA 4.0, public domain, or the text                                                                                     |
-| `shareAlike`    | boolean                                        | no       | The license is share-alike: the credit must appear on the plate                                                                          |
-| `sourceUrl`     | string                                         | no       | Where the picture came from                                                                                                              |
-| `credit`        | string                                         | no       | The plate credit; composed from artist and license when omitted                                                                          |
-| `twoTone`       | boolean                                        | no       | Run the two-tone pipeline; the source is kept as assets/\<id\>.source.\<ext\>                                                            |
-| `treatment`     | object                                         | no       |                                                                                                                                          |
-| `plate`         | "lower-left" \| "lower-right" \| "upper-left"  | no       | The plate rectangle the metrics are screened against                                                                                     |
-| `upload`        | string                                         | no       | Hosted: the key of a presigned client upload under uploads/\<principalId\>/ on the private store, for files over 3 MB                    |
-| `replaceSource` | string                                         | no       | Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins |
-| `baseRevision`  | integer                                        | yes      | The revision the caller read; a stale value is rejected with 409                                                                         |
+| Field           | Type                                                               | Required | Description                                                                                                                              |
+| --------------- | ------------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`            | string                                                             | no       | The asset id; a slug of the file name when omitted                                                                                       |
+| `file`          | string                                                             | no       | A path on the machine, or a data: URL from the studio’s drop or paste                                                                    |
+| `url`           | string                                                             | no       | An http(s) URL to fetch, 25 MB at most                                                                                                   |
+| `role`          | one of 10 values                                                   | yes      |                                                                                                                                          |
+| `alt`           | string                                                             | yes      |                                                                                                                                          |
+| `source`        | \{ kind: "material" \| "capture" \| "photo" \| "file" \| "logo" \} | no       | The provenance record; built from title, artist, license and sourceUrl when omitted                                                      |
+| `title`         | string                                                             | no       | The picture’s name as the source states it                                                                                               |
+| `artist`        | string                                                             | no       |                                                                                                                                          |
+| `license`       | string                                                             | no       | CC0, CC BY, CC BY-SA 4.0, public domain, or the text                                                                                     |
+| `shareAlike`    | boolean                                                            | no       | The license is share-alike: the credit must appear on the plate                                                                          |
+| `sourceUrl`     | string                                                             | no       | Where the picture came from                                                                                                              |
+| `credit`        | string                                                             | no       | The plate credit; composed from artist and license when omitted                                                                          |
+| `twoTone`       | boolean                                                            | no       | Run the two-tone pipeline; the source is kept as assets/\<id\>.source.\<ext\>                                                            |
+| `treatment`     | object                                                             | no       |                                                                                                                                          |
+| `plate`         | "lower-left" \| "lower-right" \| "upper-left"                      | no       | The plate rectangle the metrics are screened against                                                                                     |
+| `upload`        | string                                                             | no       | Hosted: the key of a presigned client upload under uploads/\<principalId\>/ on the private store, for files over 3 MB                    |
+| `replaceSource` | string                                                             | no       | Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins |
+| `baseRevision`  | integer                                                            | yes      | The revision the caller read; a stale value is rejected with 409                                                                         |
 
 - Command line: `turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate> --replace-source <replaceSource>`
 - MCP tool: `deck_asset_add`
@@ -44,7 +44,7 @@ description: The actions of the asset group, with their input fields and their n
 | Field          | Type                                                       | Required | Description                                                                     |
 | -------------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------- |
 | `assetId`      | string                                                     | no       | Required unless allTwoTone                                                      |
-| `treatment`    | object \| object                                           | no       | The full treatment to run; the recorded one with the params merged when omitted |
+| `treatment`    | \{ kind: "two-tone" \| "continuous" \}                     | no       | The full treatment to run; the recorded one with the params merged when omitted |
 | `params`       | object                                                     | no       | Parameters merged over the recorded treatment (--gamma, --black on the CLI)     |
 | `plate`        | "lower-left" \| "lower-right" \| "upper-left"              | no       | The plate rectangle the metrics are screened against                            |
 | `source`       | string                                                     | no       | The continuous source when the asset records none                               |

@@ -8,7 +8,8 @@
  * the h1 in the page (each glyph's advance box from a Range, its ink from the canvas metrics of
  * the h1's own font) and writes the result to each stack as custom properties that site.css
  * reads; Title.tsx runs it after hydration, after the fonts load and at every change of the h1's
- * size, so the orbits follow every width and every wrap of the line.
+ * size, so the orbits follow every width and every wrap of the line. `labelAngles` then turns each
+ * avatar's name label off its radius where the radius would lay it over a letter of the h1.
  */
 
 /** A box in page pixels, y down. */
@@ -174,6 +175,112 @@ export function fanBox(orbit: Orbit, n: number, s: number): Box {
   return box;
 }
 
+/** The lift of the avatar under the pointer or the focus (site.css `--up` and `scale`). */
+export const LIFT = 0.12;
+export const LIFT_SCALE = 1.1;
+/** The gap between an avatar's ring and its name label, in px (site.css `.site-av::after`). */
+export const LABEL_GAP = 6;
+/** The focus ring outside an avatar: a 2 px outline 3 px off it (site.css `.site-av:focus-visible`). */
+export const FOCUS_RING = 5;
+
+/**
+ * The room a lifted avatar and its focus ring take past its place on the orbit, in px: kept free
+ * under the bar, so the crest of an open fan never reaches the sticky bar's rule.
+ */
+export function liftRoom(s: number): number {
+  return s * (LIFT + (LIFT_SCALE - 1) / 2) + FOCUS_RING;
+}
+
+/**
+ * The box of an avatar's name label drawn in the direction `theta` (degrees) from the avatar
+ * centred at `c` on the radius `phi`, as site.css draws it: the label's edge `LABEL_GAP` px off
+ * the ring, the avatar lifted out along its radius and scaled about its centre when `lifted`.
+ */
+export function labelBox(
+  c: { x: number; y: number },
+  phi: number,
+  s: number,
+  theta: number,
+  size: { w: number; h: number },
+  lifted: boolean,
+): Box {
+  const up = lifted ? LIFT * s : 0;
+  const k = lifted ? LIFT_SCALE : 1;
+  const x = c.x + up * Math.cos(phi * RAD);
+  const y = c.y - up * Math.sin(phi * RAD);
+  const d = s / 2 + LABEL_GAP;
+  const ct = Math.cos(theta * RAD);
+  const st = Math.sin(theta * RAD);
+  const x0 = x + k * (d * ct + (-0.5 + 0.5 * ct) * size.w);
+  const y0 = y + k * (-d * st + (-0.5 - 0.5 * st) * size.h);
+  return { x0, y0, x1: x0 + k * size.w, y1: y0 + k * size.h };
+}
+
+/** The area two boxes share. */
+function overlap(a: Box, b: Box): number {
+  return (
+    Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) *
+    Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0))
+  );
+}
+
+/** The turns off the radius a label tries, in degrees, nearest first. */
+const LABEL_TURNS = [
+  0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 120, -120, 150, -150, 180,
+];
+
+/**
+ * The direction of each avatar's name label, in degrees: its radius with the fan open when the
+ * label there covers no glyph and stays inside the bounds with the fan open (a hover, the focus),
+ * at rest and lifted (a press) and at rest unlifted (Reduce motion), else the nearest turn off the
+ * radius that does; with no such turn, the one whose label covers the least glyph and the least
+ * room outside the bounds.
+ */
+export function labelAngles(
+  orbit: Orbit,
+  n: number,
+  s: number,
+  sizes: readonly { w: number; h: number }[],
+  glyphs: readonly Box[],
+  bounds: Box,
+): number[] {
+  const clear = 2;
+  const grown = glyphs.map((g) => ({
+    x0: g.x0 - clear,
+    y0: g.y0 - clear,
+    x1: g.x1 + clear,
+    y1: g.y1 + clear,
+  }));
+  const out: number[] = [];
+  for (let i = 0; i < n; i += 1) {
+    const size = sizes[i] ?? { w: 0, h: 0 };
+    const states = [
+      { step: orbit.open, lifted: true },
+      { step: orbit.rest, lifted: true },
+      { step: orbit.rest, lifted: false },
+    ].map(({ step, lifted }) => {
+      const phi = angleOf(i, n, orbit.mid, step);
+      return { phi, c: pointAt(orbit.cx, orbit.cy, orbit.r, phi), lifted };
+    });
+    const radius = states[0]!.phi;
+    let best: { theta: number; cost: number } | null = null;
+    for (const turn of LABEL_TURNS) {
+      const theta = radius + turn;
+      let cost = 0;
+      for (const state of states) {
+        const box = labelBox(state.c, state.phi, s, theta, size, state.lifted);
+        for (const g of grown) cost += overlap(box, g);
+        const area = (box.x1 - box.x0) * (box.y1 - box.y0);
+        cost += area - overlap(box, bounds);
+      }
+      if (best === null || cost < best.cost) best = { theta, cost };
+      if (cost < 1e-6) break;
+    }
+    out.push(best?.theta ?? radius);
+  }
+  return out;
+}
+
 /**
  * The angle each stack's fan centres on when site.css names none (its `--prefer`, in degrees):
  * over the right shoulder of its letter.
@@ -246,6 +353,15 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
     y0: area.top + window.scrollY + 4,
     y1: below + window.scrollY - 4,
   };
+  /* the labels keep to the hero's column: its content box, under the bar and over the lead */
+  const pad = getComputedStyle(section);
+  const column: Box = {
+    x0: bounds.x0 + parseFloat(pad.paddingLeft),
+    x1: bounds.x1 - parseFloat(pad.paddingRight),
+    y0: bounds.y0,
+    y1: bounds.y1,
+  };
+  const inks = glyphs.map((g) => g.box);
   const orbits: Orbit[] = [];
   const discs: Disc[] = [];
   for (const stack of h1.querySelectorAll<HTMLElement>('.site-stack')) {
@@ -264,7 +380,7 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
       letter: letter.box,
       glyphs: glyphs.filter((g) => g !== letter).map((g) => g.box),
       discs,
-      bounds,
+      bounds: { ...bounds, y0: bounds.y0 + liftRoom(s) },
       n,
       s,
       prefer: Number.isFinite(prefer) ? prefer : PREFER[kind],
@@ -283,6 +399,22 @@ export function layoutTitle(h1: HTMLElement): Orbit[] {
     stack.style.setProperty('--hit-y', px(hit.y0 - oy - 4));
     stack.style.setProperty('--hit-w', px(hit.x1 - hit.x0 + 8));
     stack.style.setProperty('--hit-h', px(hit.y1 - hit.y0 + 8));
+    /* each name label's direction (site.css `--la`), off its radius where a letter is */
+    const font = getComputedStyle(avatars[0] ?? stack, '::after');
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (ctx !== null) {
+      ctx.font = `${font.fontWeight} ${font.fontSize} ${font.fontFamily}`;
+      const padX = parseFloat(font.paddingLeft) + parseFloat(font.paddingRight);
+      const h =
+        parseFloat(font.lineHeight) + parseFloat(font.paddingTop) + parseFloat(font.paddingBottom);
+      const sizes = [...avatars].map((avatar) => ({
+        w: ctx.measureText(avatar.dataset.name ?? '').width + padX,
+        h: Number.isFinite(h) ? h : 20,
+      }));
+      labelAngles(orbit, n, s, sizes, inks, column).forEach((theta, i) =>
+        avatars[i]?.style.setProperty('--la', deg(theta)),
+      );
+    }
     stack.dataset.orbit = '';
     orbits.push(orbit);
     discs.push(...discsOf(orbit, n, s));

@@ -326,12 +326,12 @@ description: The actions of the block group, with their input fields and their n
 
 **Drop shadow.** Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at their defaults.
 
-| Field          | Type           | Required | Description                                                      |
-| -------------- | -------------- | -------- | ---------------------------------------------------------------- |
-| `slideId`      | string         | yes      |                                                                  |
-| `blockIds`     | string[]       | yes      |                                                                  |
-| `shadow`       | object \| null | yes      |                                                                  |
-| `baseRevision` | integer        | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                                                | Required | Description                                                      |
+| -------------- | --------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `slideId`      | string                                              | yes      |                                                                  |
+| `blockIds`     | string[]                                            | yes      |                                                                  |
+| `shadow`       | \{ color, opacity, angle, distance, blur \} \| null | yes      |                                                                  |
+| `baseRevision` | integer                                             | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide block shadow <slideId>#<blockId> --on --color <color> --opacity <opacity> --angle <angle> --distance <distance> --blur <blur>`
 - MCP tool: `deck_set_shadow`
@@ -663,7 +663,7 @@ description: The actions of the block group, with their input fields and their n
 | `blockId`      | string                                                                                                                                                         | yes      |                                                                  |
 | `cells`        | [integer, integer][]                                                                                                                                           | yes      |                                                                  |
 | `fill`         | "ink" \| "paper" \| "ink-2" \| "titanium" \| "hair" \| "hair-soft" \| "plate" \| "edge" \| "green" \| "amber" \| "red" \| "blue" \| "accent" \| string \| null | no       |                                                                  |
-| `border`       | object \| null                                                                                                                                                 | no       |                                                                  |
+| `border`       | \{ color, weight, dash \} \| null                                                                                                                              | no       |                                                                  |
 | `baseRevision` | integer                                                                                                                                                        | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide table cell-style <slideId>#<blockId> --at <cells> --fill <fill> --border-color <color> --border-weight <weight> --border-dash <dash>`
@@ -762,12 +762,12 @@ description: The actions of the block group, with their input fields and their n
 
 **Dither.** Writes the deck’s two tone screen over a picture’s continuous source as a non destructive field, or removes it with null; a slide that is not a canvas converts first when the picture is positioned; answers the variant key, the metrics and any warnings.
 
-| Field          | Type           | Required | Description                                                      |
-| -------------- | -------------- | -------- | ---------------------------------------------------------------- |
-| `slideId`      | string         | yes      |                                                                  |
-| `blockId`      | string         | yes      |                                                                  |
-| `dither`       | object \| null | yes      |                                                                  |
-| `baseRevision` | integer        | yes      | The revision the caller read; a stale value is rejected with 409 |
+| Field          | Type                  | Required | Description                                                      |
+| -------------- | --------------------- | -------- | ---------------------------------------------------------------- |
+| `slideId`      | string                | yes      |                                                                  |
+| `blockId`      | string                | yes      |                                                                  |
+| `dither`       | \{ pattern \} \| null | yes      |                                                                  |
+| `baseRevision` | integer               | yes      | The revision the caller read; a stale value is rejected with 409 |
 
 - Command line: `turboslide block dither <slideId>#<blockId> --pattern <pattern> --tone <tone> --cell <cell> --strength <strength> --black <black> --white <white> --gamma <gamma> --polarity <polarity> --off`
 - MCP tool: `deck_dither_picture`

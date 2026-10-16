@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { MOTION } from '@turboslide/chrome/menus/strings';
 import { GALLERY_MATERIAL_IDS, materialEntry } from '@turboslide/materials/catalog';
 
 import { FIGURE_SIZES } from './figures';
@@ -240,5 +241,36 @@ describe('the animated patterns page', () => {
       (entry) => !(rows.get(entry.category) ?? []).includes(entry.label),
     );
     expect(missing.map((entry) => entry.id)).toEqual([]);
+  });
+});
+
+// HTML slides wave A (post-deploy review): the editor's menu table, the slides, objects and
+// presenting pages describe the slide clock the editor ships: Insert > Animation and the Animate
+// panel, Slide > Playback and Slide > Transition, click steps in the show and the timed advance.
+// The words are the chrome's own (menus/strings.ts MOTION), so a renamed effect fails here.
+describe('the slide clock in the docs', () => {
+  const text = (url: string) => pages.get(url)?.text ?? '';
+  const row = (url: string, menu: string) =>
+    new RegExp(`^\\| ${menu}\\s*\\| (.+)\\|$`, 'm').exec(text(url))?.[1] ?? '';
+
+  it("names Animation, Playback and Transition in the editor's menu table", () => {
+    expect(row('/docs/editor', 'Insert')).toContain('an animation');
+    expect(row('/docs/editor', 'Slide')).toContain('Playback');
+    expect(row('/docs/editor', 'Slide')).toContain('Transition');
+  });
+
+  it('lists every transition, every start and every effect by the words the editor shows', () => {
+    const slides = text('/docs/editor/slides');
+    for (const { label } of Object.values(MOTION.transitions))
+      expect(slides).toContain(`| ${label}`);
+    const objects = text('/docs/editor/objects');
+    for (const { label } of Object.values(MOTION.starts)) expect(objects).toContain(label);
+    for (const label of Object.values(MOTION.presets)) expect(objects).toContain(label);
+  });
+
+  it('says a click in the show plays the next step before the next slide', () => {
+    const presenting = text('/docs/presenting');
+    expect(presenting).toContain('Next animation step, else next slide.');
+    expect(presenting).not.toMatch(/\| Next slide\.\s+\|/);
   });
 });

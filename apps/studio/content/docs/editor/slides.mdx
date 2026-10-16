@@ -47,6 +47,26 @@ A layout places the title, the body and the pictures on a slide. Turboslide has 
 
 **Slide > Change background** sets a color or a picture behind the selected slides. Reset to Theme goes back to the theme's background, and Add to Theme uses the color on every slide.
 
+## Transitions
+
+**Slide > Transition** sets how a slide enters in the slideshow and the shared view. Choose a transition, its duration from 0 to 3 seconds and, for a transition that moves in from a side, the side it comes from. Apply to selected sets it on the selected slides, and Apply to all sets it for the whole presentation. A slide without its own transition takes the presentation's, and a presentation without one keeps the show's quick fade and rise (Standard).
+
+| Transition      | How the slide enters                  |
+| --------------- | ------------------------------------- |
+| None            | Cuts to the slide.                    |
+| Crossfade       | Fades in.                             |
+| Slide and fade  | Slides in from a side as it fades in. |
+| Rise and fade   | Rises as it fades in.                 |
+| Scale and fade  | Grows to full size as it fades in.    |
+| Zoom through    | Shrinks to full size as it fades in.  |
+| Blur swipe      | Comes in from a side out of a blur.   |
+| Flip and fade   | Turns to face you as it fades in.     |
+| Spring pop      | Pops to full size as it fades in.     |
+| Rotate and fade | Turns upright as it fades in.         |
+| Drift and fade  | Drifts into place as it fades in.     |
+
+An agent sets the same field with `slide.transition`, and a timed advance with `slide.advance`: the slideshow moves to the next slide by itself a set time after the slide's last animation ends.
+
 ## Import slides from another presentation
 
 <Steps>

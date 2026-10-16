@@ -14,8 +14,9 @@ A slideshow shows the slides full screen, one at a time, in order. Skipped slide
     slide, and Cmd+Shift+Enter (Ctrl+Shift+F5 on Windows) starts from the first.
   </Step>
   <Step title="Move through the slides">
-    Press the Right arrow, Space or Enter, or click the slide, to go to the next slide. Press the
-    Left arrow or Backspace to go back.
+    Press the Right arrow, Space or Enter, or click the slide, to play the slide's next animation
+    step, or to go to the next slide once its steps are done. Press the Left arrow or Backspace to
+    go back a step.
   </Step>
   <Step title="Stop">Press Esc to end the slideshow and return to the editor.</Step>
 </Steps>
@@ -38,21 +39,23 @@ Open it from the arrow beside Slideshow, or press S during a slideshow. The two 
 
 ## Keys during a slideshow
 
-| Key                                                           | What it does                         |
-| ------------------------------------------------------------- | ------------------------------------ |
-| Esc                                                           | Stops presenting.                    |
-| Right arrow, Space, Enter, Page down, or a click on the slide | Next slide.                          |
-| Left arrow, Backspace, Page up                                | Previous slide.                      |
-| Home                                                          | First slide.                         |
-| End                                                           | Last slide.                          |
-| A number, then Enter                                          | Goes to that slide.                  |
-| S                                                             | Opens Presenter view.                |
-| L                                                             | Turns the laser pointer on or off.   |
-| B or .                                                        | Shows a black slide.                 |
-| W or ,                                                        | Shows a white slide.                 |
-| Any key                                                       | Returns from a black or white slide. |
-| Cmd+Shift+F or F11 (F11 on Windows)                           | Turns full screen on or off.         |
-| Cmd+P (Ctrl+P on Windows)                                     | Prints the presentation.             |
+| Key                                                           | What it does                          |
+| ------------------------------------------------------------- | ------------------------------------- |
+| Esc                                                           | Stops presenting.                     |
+| Right arrow, Space, Enter, Page down, or a click on the slide | Next animation step, else next slide. |
+| Left arrow, Backspace, Page up                                | Previous step, else previous slide.   |
+| Home                                                          | First slide.                          |
+| End                                                           | Last slide.                           |
+| A number, then Enter                                          | Goes to that slide.                   |
+| S                                                             | Opens Presenter view.                 |
+| L                                                             | Turns the laser pointer on or off.    |
+| B or .                                                        | Shows a black slide.                  |
+| W or ,                                                        | Shows a white slide.                  |
+| Any key                                                       | Returns from a black or white slide.  |
+| Cmd+Shift+F or F11 (F11 on Windows)                           | Turns full screen on or off.          |
+| Cmd+P (Ctrl+P on Windows)                                     | Prints the presentation.              |
+
+A slide's animations play in steps: an effect that starts On click waits for the next click or key, and the effects with it or after it follow on their own (see [Animations](/docs/editor/objects#animations)). Going back shows the slide as it was after the previous step, and from the first step it shows the previous slide as its last step left it. Home, End and a slide number open a slide at its start. A slide's transition plays as it enters (see [Transitions](/docs/editor/slides#transitions)), and a slide with a timed advance moves on by itself after its last step ends.
 
 The toolbar at the bottom left of a slideshow holds the slide list and an Options menu with speaker notes, the laser pointer, full screen, print and Exit.
 

@@ -70,6 +70,17 @@ Every moving pattern has a still: the moment that downloads, thumbnails and any 
 
 **Tools > Preferences > Play animated patterns** is a setting of this browser: On moves the selected pattern while you edit and the patterns in the slideshow and the viewer, In the show only (the default) moves them in the slideshow and the viewer alone, and Off shows the still everywhere. A change takes effect at once.
 
+## Animations
+
+Select an object and choose **Insert > Animation**, or Animation in the object's right click menu, to open the Animate panel. Add animation picks a role and an effect. An entrance or an exit takes Fade, Rise in, Slide in, Pop in, Wipe or Draw, and on an object with text also Type on, Word rise, Line reveal, Letter stagger or Tracking in; an exit plays its effect backwards. An emphasis takes Push in, Float or Pulse. Each effect then has:
+
+- **Effect**: how the object moves.
+- **Start**: On click waits for the next click or key in the slideshow, With previous starts with the effect before it, and After previous starts when the effect before it ends.
+- **Delay** and **Duration**, in seconds from 0 to 60.
+- **Remove**, which takes the effect off the object.
+
+The panel heads each effect with the step it plays in: When the slide opens, Click 1, Click 2 and so on. In the slideshow each click or key plays the slide's next step, and the show moves to the next slide once the steps are done. An agent writes the same effects with the `motion.*` actions.
+
 ## Arrange objects
 
 The Arrange menu orders, aligns, distributes, rotates and groups the selected objects.

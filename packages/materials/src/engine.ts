@@ -9,7 +9,7 @@
 // the editor, in the show and in every export.
 import type { MaterialUniformValue, MaterialUniforms } from '@turboslide/schema/blocks/material';
 
-import type { GlyphEntry, MaterialEntry, ShaderEngineName } from './catalog.ts';
+import type { GlyphEntry, ShaderEngineName } from './catalog.ts';
 import { hexToSrgb, shaderColor } from './glyph/color.ts';
 import type { GlyphColor, GlyphFrame, GlyphProgramSpec, GlyphRenderer } from './glyph/renderer.ts';
 import { createGlyphRenderer } from './glyph/renderer.ts';
@@ -33,19 +33,14 @@ export type ShaderEngine = {
   dispose: () => void;
 };
 
-/** The engine an entry runs on. */
-export function engineOf(entry: MaterialEntry): ShaderEngineName {
-  return entry.engine;
-}
-
 /** The fonts the glyph field draws with: Inter, the one typeface. */
-export const GLYPH_FIELD_FONT = 'Inter, InterVariable, system-ui, sans-serif';
+const GLYPH_FIELD_FONT = 'Inter, InterVariable, system-ui, sans-serif';
 
 /** The face the glyph field waits for before a capture (`document.fonts.load`). */
 export const GLYPH_FIELD_FONT_LOAD = '500 32px Inter';
 
 /** The letters the glyph field's grid cycles through. */
-export const GLYPH_FIELD_GLYPHS = 'GLYPHFIELD';
+const GLYPH_FIELD_GLYPHS = 'GLYPHFIELD';
 
 /** The program a glyph entry compiles: its GLSL on WebGL2, or the glyph field on Canvas 2D. */
 export function glyphProgramSpec(entry: GlyphEntry): GlyphProgramSpec {
@@ -109,7 +104,7 @@ export function glyphFrameOf(
   };
 }
 
-export type GlyphMountOptions = {
+type GlyphMountOptions = {
   speed: number;
   frame: number;
   minPixelRatio: number;

@@ -7,9 +7,9 @@
 // 250 ms) never counts as GPU pressure. Only the resolution changes: the material's uniforms and
 // its clock are untouched, so the still and the show agree.
 
-export type FrameWindow = 'slow' | 'smooth' | 'steady';
+type FrameWindow = 'slow' | 'smooth' | 'steady';
 
-export type RenderQuality = 'high' | 'low';
+type RenderQuality = 'high' | 'low';
 
 /** The windows' timing (Glyphfield's numbers). */
 const WARMUP_MS = 2_000;
@@ -112,7 +112,7 @@ export function createRenderQuality(fps: number): {
 }
 
 /** What adaptive quality drives: the mount's canvas and its pixel budget. */
-export type QualityTarget = {
+type QualityTarget = {
   canvas: () => HTMLCanvasElement;
   setPixelBudget: (maxPixelCount: number) => void;
 };

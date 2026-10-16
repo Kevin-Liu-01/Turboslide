@@ -9,7 +9,7 @@
 // one-step dither. Patterns are sized in a 900 px tall reference frame, the sheet's height.
 // Strings only, no DOM: the hosted capture reads them in Node.
 
-export const GLYPH_PROGRAM_IDS = [
+const GLYPH_PROGRAM_IDS = [
   'mesh-gradient',
   'grain-gradient',
   'dither-gradient',

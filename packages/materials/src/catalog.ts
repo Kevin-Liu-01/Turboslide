@@ -863,7 +863,7 @@ export function requireMaterial(id: string): MaterialEntry {
 }
 
 /** The engine's name `material.list` reports: Paper Shaders, Glyphfield WebGL2 or Glyphfield Canvas 2D. */
-export function engineLabelOf(entry: MaterialEntry): string {
+function engineLabelOf(entry: MaterialEntry): string {
   if (entry.engine === 'paper') return 'Paper Shaders';
   return entry.shader === 'glyph-field' ? 'Glyphfield Canvas 2D' : 'Glyphfield WebGL2';
 }

@@ -14,6 +14,7 @@ import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks
 import type { MaterialEntry, PaperEntry, ShaderEngineName } from './catalog.ts';
 import { entryWithPalette, requireMaterial } from './catalog.ts';
 import { mountGlyph } from './engine.ts';
+import type { ShaderEngine } from './engine.ts';
 import { fragmentShaderFor, mipmapsFor, textureSources, toShaderUniforms } from './paper.ts';
 import type { ShaderPalette } from './presets.ts';
 import type { ResolvedRecipe } from './recipe.ts';
@@ -104,7 +105,7 @@ export async function mountMaterial(
       : entryWithPalette(requireMaterial(recipe.materialId), options.palette);
   const resolved = resolveRecipe(entry, recipe);
   if (entry.engine === 'glyph') {
-    const engine = mountGlyph(host, entry, resolved.uniforms, {
+    const engine: ShaderEngine = mountGlyph(host, entry, resolved.uniforms, {
       speed: options.speed ?? 1,
       frame: options.frame ?? recipe.anchor ?? 0,
       minPixelRatio: options.minPixelRatio ?? MOUNT_DEFAULTS.minPixelRatio,

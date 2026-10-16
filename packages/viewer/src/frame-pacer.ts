@@ -93,7 +93,7 @@ const WAKE_EARLY_MS = 8;
  * times `speed` on each due frame, from the frame the mount shows (so a scrubber's `setFrame` is
  * kept). Returns the speed setter and the stop.
  */
-export type PaceOptions = {
+type PaceOptions = {
   fps: number;
   speed: number;
   /** Called with the time of every drawn frame (the show's adaptive quality, render-quality.ts). */

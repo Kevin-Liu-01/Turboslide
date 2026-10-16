@@ -2,7 +2,7 @@
 // Copied from Kevin Liu's Glyphfield (`src/lib/materialColor.ts`, MIT, THIRD_PARTY_NOTICES.md).
 // Pure; the client mount and the hosted capture both convert a recipe's colours with it.
 
-export type Vec3 = readonly [number, number, number];
+type Vec3 = readonly [number, number, number];
 
 export function hexToSrgb(hex: string): Vec3 {
   const value = Number.parseInt(hex.replace('#', '').slice(0, 6), 16);
@@ -13,11 +13,11 @@ function channelToLinear(channel: number): number {
   return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 }
 
-export function srgbToLinear([red, green, blue]: Vec3): Vec3 {
+function srgbToLinear([red, green, blue]: Vec3): Vec3 {
   return [channelToLinear(red), channelToLinear(green), channelToLinear(blue)];
 }
 
-export function linearToOklab([red, green, blue]: Vec3): Vec3 {
+function linearToOklab([red, green, blue]: Vec3): Vec3 {
   const long = Math.cbrt(0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue);
   const medium = Math.cbrt(0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue);
   const short = Math.cbrt(0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue);
@@ -28,7 +28,7 @@ export function linearToOklab([red, green, blue]: Vec3): Vec3 {
   ];
 }
 
-export type ShaderColor = { lab: Vec3; linear: Vec3 };
+type ShaderColor = { lab: Vec3; linear: Vec3 };
 
 /** A hex colour as the two forms the prelude reads (u_color_* and u_lab_*). */
 export function shaderColor(hex: string): ShaderColor {

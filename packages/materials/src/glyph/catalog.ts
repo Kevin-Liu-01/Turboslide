@@ -45,7 +45,7 @@ const BASE: Tuning = {
 };
 
 /** Glyphfield's `liveMaterialMotionRate`: a speed setting as a clock rate, at most 3. */
-export function glyphMotionRate(speed: number): number {
+function glyphMotionRate(speed: number): number {
   if (!Number.isFinite(speed) || speed <= 0) return 0;
   return Math.min(3, Math.sqrt(Math.min(1.5, speed)) * 2.1);
 }

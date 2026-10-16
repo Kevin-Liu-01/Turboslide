@@ -31,9 +31,10 @@ declare global {
 /**
  * The live editor of the landing (docs/SITE.md D1, C.5): the product's EditorRoot on the hero
  * deck, on the tab backend, with Claude Code and Codex at work. The session is made at the first
- * render, before the editor reads its backend. A navigation away from /try leaves for the window
- * around the frame, so the lockup, File > Open and New Presentation never load a page inside the
- * hero, and a leave never asks for the browser's leave prompt (frame.ts `tryBlocker`). `still`
+ * render, before the editor reads its backend. A navigation away from /try loads a new document in
+ * the window around the frame (or in this one, standing alone), so the lockup, File > Open and New
+ * Presentation never load a page inside the hero or carry the tab backend into another editor, and
+ * a leave never asks for the browser's leave prompt (frame.ts `tryBlocker`). `still`
  * holds the agents at their first pose (the poster's capture).
  */
 export function TryPage({

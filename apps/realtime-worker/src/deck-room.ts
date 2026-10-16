@@ -87,12 +87,19 @@ import { CURRENT_SCHEMA_VERSION } from '@turboslide/schema/migrations';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 
-import { noteAdmissionDisagreements, noteCallbacks, noteClosed, noteOpen } from './control.ts';
+import {
+  CALLBACKS_FAILING_TTL_MS,
+  noteAdmissionDisagreements,
+  noteCallbacks,
+  noteClosed,
+  noteOpen,
+} from './control.ts';
 import {
   DOC_DDL,
   ENTRY_COLUMNS,
   META_DDL,
   Sql,
+  StorageError,
   addCounters,
   chunkBody,
   countersOf,
@@ -438,6 +445,10 @@ export class DeckRoom extends DurableObject<Env> {
   private callbackFlaggedAt: number | null = null;
   /** the checkpoint call's deadline (CHECKPOINT_TIMEOUT_MS); a field so a Worker test can shorten it */
   private checkpointDeadlineMs = CHECKPOINT_TIMEOUT_MS;
+  /** writes the object's storage refused in a row (`StorageError`; RELIABILITY-22, HR-RT#12) */
+  private storageFailures = 0;
+  /** when the storage last refused a write; null once a write landed after it */
+  private storageFailedAt: number | null = null;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -571,6 +582,7 @@ export class DeckRoom extends DurableObject<Env> {
         tail,
         error: error instanceof Error ? error.message : String(error),
       });
+      await this.noteStorage(error);
       return json(
         { error: 'object', message: error instanceof Error ? error.message : String(error) },
         500,
@@ -630,6 +642,7 @@ export class DeckRoom extends DurableObject<Env> {
         t: frame.t,
         error: error instanceof Error ? error.message : String(error),
       });
+      await this.noteStorage(error);
       if (frame.t === 'ops') {
         this.send(
           member,
@@ -728,6 +741,7 @@ export class DeckRoom extends DurableObject<Env> {
 
   /** Logs a failed checkpoint at error with the deck and arms the alarm at the backoff (HR-RT#6b). */
   private async retryCheckpointLater(message: string, error: unknown): Promise<void> {
+    await this.noteStorage(error);
     this.checkpointFailures += 1;
     const wait = checkpointBackoffMs(this.checkpointFailures);
     this.log('error', message, {
@@ -1290,23 +1304,35 @@ export class DeckRoom extends DurableObject<Env> {
     const month = monthOf(now);
     const table = entriesTable(month);
     const admitted: Entry[] = [];
-    this.ctx.storage.transactionSync(() => {
-      if (!meta.months.includes(month)) {
-        for (const ddl of entriesDdl(table)) this.db.run(ddl);
-        meta.months = [...meta.months, month].sort();
-      }
-      for (const candidate of candidates) {
-        meta.head += 1;
-        const entry: Entry = { ...candidate, seq: meta.head };
-        this.db.run(
-          `INSERT INTO ${table} (${ENTRY_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          ...rowOfEntry(entry),
-        );
-        admitted.push(entry);
-      }
-      if (meta.firstUncommittedAt === null) meta.firstUncommittedAt = now;
-      this.writeMeta();
-    });
+    // a refused write rolls the transaction back, and the meta row in memory goes back with it:
+    // a head left ahead of the stored one would number the next entry past a seq no row holds
+    const before = { head: meta.head, months: meta.months, first: meta.firstUncommittedAt };
+    try {
+      this.ctx.storage.transactionSync(() => {
+        if (!meta.months.includes(month)) {
+          for (const ddl of entriesDdl(table)) this.db.run(ddl);
+          meta.months = [...meta.months, month].sort();
+        }
+        for (const candidate of candidates) {
+          meta.head += 1;
+          const entry: Entry = { ...candidate, seq: meta.head };
+          this.db.run(
+            `INSERT INTO ${table} (${ENTRY_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ...rowOfEntry(entry),
+          );
+          admitted.push(entry);
+        }
+        if (meta.firstUncommittedAt === null) meta.firstUncommittedAt = now;
+        this.writeMeta();
+      });
+    } catch (error) {
+      meta.head = before.head;
+      meta.months = before.months;
+      meta.firstUncommittedAt = before.first;
+      throw error;
+    }
+    this.storageFailures = 0;
+    this.storageFailedAt = null;
     this.lastEntryAt = now;
     return admitted;
   }
@@ -1641,7 +1667,13 @@ export class DeckRoom extends DurableObject<Env> {
     await this.alarmRead;
     if (this.alarmAt !== null && this.alarmAt <= at) return;
     this.alarmAt = at;
-    await this.ctx.storage.setAlarm(at);
+    try {
+      await this.ctx.storage.setAlarm(at);
+    } catch (error) {
+      // no alarm stands: the next arm sets one (HR-RT#12)
+      this.alarmAt = null;
+      throw new StorageError(error);
+    }
   }
 
   // -------------------------------------------------------------------------------------------
@@ -1818,6 +1850,10 @@ export class DeckRoom extends DurableObject<Env> {
     if (failure === null) {
       this.callbackFailures = 0;
       if (this.callbackFlaggedAt === null) return;
+      // an app call that answers says nothing of a storage that refused a write within the
+      // stamp's life; the row stays failing until the stamp runs out (HR-RT#12)
+      if (this.storageFailedAt !== null && now - this.storageFailedAt < CALLBACKS_FAILING_TTL_MS)
+        return;
       this.callbackFlaggedAt = null;
       await noteCallbacks(this.env.ACCOUNTS, 'ok', now).catch((error: unknown) =>
         this.log('warn', 'the callbacks row was not written', {
@@ -1841,6 +1877,37 @@ export class DeckRoom extends DurableObject<Env> {
       this.log('warn', 'the callbacks row was not written', {
         error: error instanceof Error ? error.message : String(error),
       }),
+    );
+  }
+
+  /**
+   * Counts the writes the object's storage refused in a row (`StorageError`; RELIABILITY-22,
+   * hardening HR-RT#12); at CALLBACK_FAILURES_BEFORE_FLAG the object writes `rt_flags.callbacks`
+   * as `failing:<ms>:storage:<kind>` (once a minute at most while they go on), the row an
+   * unreachable app writes, so `/health` answers `failing` and the function's flag reads off: its
+   * instances hand the tabs to the blob tier, which saves to the store, until the stamp runs out
+   * and they try the object again. Before this a spent daily cap answered every ops frame 500
+   * with `/health` at ok, and nothing saved until 00:00 UTC. Any other error changes nothing.
+   */
+  private async noteStorage(error: unknown): Promise<void> {
+    if (!(error instanceof StorageError)) return;
+    const now = Date.now();
+    this.storageFailures += 1;
+    this.storageFailedAt = now;
+    if (this.storageFailures < CALLBACK_FAILURES_BEFORE_FLAG) return;
+    if (this.callbackFlaggedAt !== null && now - this.callbackFlaggedAt < CALLBACK_FLAG_EVERY_MS)
+      return;
+    this.callbackFlaggedAt = now;
+    this.log('error', "the object's storage refuses writes", {
+      kind: error.kind,
+      error: error.message,
+      failures: this.storageFailures,
+    });
+    await noteCallbacks(this.env.ACCOUNTS, 'failing', now, `storage:${error.kind}`).catch(
+      (written: unknown) =>
+        this.log('warn', 'the callbacks row was not written', {
+          error: written instanceof Error ? written.message : String(written),
+        }),
     );
   }
 

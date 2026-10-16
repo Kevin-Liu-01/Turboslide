@@ -279,8 +279,31 @@ export function documentOfRows(
 }
 
 /**
+ * A statement the object's storage refused (RELIABILITY-22; hardening HR-RT#12), the daily cap
+ * of the Workers Free plan among them: past 100,000 rows written in a UTC day "further operations
+ * of that type will fail with an error" (docs/CLOUDFLARE.md 1.3). `Sql` throws it for every
+ * statement that fails and `DeckRoom.armAlarm` for an alarm the storage did not set, so the
+ * object tells its own storage failing from a failure of a deck or of the app. `kind` is the
+ * name of the error the storage threw.
+ */
+export class StorageError extends Error {
+  readonly kind: string;
+  constructor(cause: unknown) {
+    super(
+      `the object's storage refused a statement: ${cause instanceof Error ? cause.message : String(cause)}`,
+      {
+        cause,
+      },
+    );
+    this.name = 'StorageError';
+    this.kind = cause instanceof Error ? cause.name : typeof cause;
+  }
+}
+
+/**
  * The storage behind one object: every statement through `exec`, consumed at once, its row
- * counts summed into `counters` (the wake's) for `GET /rooms/:id/counters`.
+ * counts summed into `counters` (the wake's) for `GET /rooms/:id/counters`. A statement that
+ * fails throws `StorageError`.
  */
 export class Sql {
   readonly counters: Counters;
@@ -296,8 +319,14 @@ export class Sql {
     query: string,
     ...bindings: SqlStorageValue[]
   ): T[] {
-    const cursor = this.sql.exec<T>(query, ...bindings);
-    const rows = cursor.toArray();
+    let cursor: SqlStorageCursor<T>;
+    let rows: T[];
+    try {
+      cursor = this.sql.exec<T>(query, ...bindings);
+      rows = cursor.toArray();
+    } catch (error) {
+      throw new StorageError(error);
+    }
     this.counters.rowsRead += cursor.rowsRead;
     this.counters.rowsWritten += cursor.rowsWritten;
     return rows;
@@ -305,8 +334,13 @@ export class Sql {
 
   /** Runs one statement for its effect and answers the rows it wrote. */
   run(query: string, ...bindings: SqlStorageValue[]): number {
-    const cursor = this.sql.exec(query, ...bindings);
-    cursor.toArray();
+    let cursor: SqlStorageCursor<Record<string, SqlStorageValue>>;
+    try {
+      cursor = this.sql.exec(query, ...bindings);
+      cursor.toArray();
+    } catch (error) {
+      throw new StorageError(error);
+    }
     this.counters.rowsRead += cursor.rowsRead;
     this.counters.rowsWritten += cursor.rowsWritten;
     return cursor.rowsWritten;

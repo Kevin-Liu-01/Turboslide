@@ -13,11 +13,13 @@ export type RealtimeFlag = 'on' | 'off' | 'unset';
 /**
  * Whether the deck objects reach the app (3.8; VERIFICATION.md realtime pass 1 finding 7): an
  * object whose seed or checkpoint calls fail for the deployment's reason (no answer, a redirect,
- * 401, 403, a seed route's 5xx; deck-room.ts `AppCallError.reach`) twice in a row writes `rt_flags.callbacks` as `failing:<ms>:<status>`, and one
- * whose call answers after that writes `ok:<ms>`. `/health` reads `failing` while the stamp is
- * younger than CALLBACKS_FAILING_TTL_MS, and the function's flag reads off then, so its
- * instance hands the tabs to the blob tier as for an unreachable Worker (3.8 item 4); the stamp
- * running out lets the instance try the Worker again.
+ * 401, 403, a seed route's 5xx; deck-room.ts `AppCallError.reach`) twice in a row writes
+ * `rt_flags.callbacks` as `failing:<ms>:<status>`, and one whose call answers after that writes
+ * `ok:<ms>`. An object whose storage refuses two writes in a row (the daily cap, RELIABILITY-22)
+ * writes `failing:<ms>:storage:<kind>` the same way. `/health` reads `failing` while the stamp is
+ * younger than CALLBACKS_FAILING_TTL_MS, and the function's flag reads off then, so its instance
+ * hands the tabs to the blob tier as for an unreachable Worker (3.8 item 4); the stamp running out
+ * lets the instance try the Worker again.
  */
 export type CallbacksState = 'ok' | 'failing';
 
@@ -73,14 +75,17 @@ export async function callbacksState(db: D1Database, now = Date.now()): Promise<
   return callbacksStateOf(flagCache.callbacks, now);
 }
 
-/** The object's word on its app calls (`failing` with the status that failed, or `ok`); one upsert. */
+/**
+ * The object's word on its app calls and its storage: `failing` with the status of the call that
+ * failed or `storage:<kind>` for a write its storage refused (HR-RT#12), or `ok`; one upsert.
+ */
 export async function noteCallbacks(
   db: D1Database,
   state: CallbacksState,
   now: number,
-  status?: number,
+  cause?: number | `storage:${string}`,
 ): Promise<void> {
-  const value = state === 'failing' ? `failing:${now}:${status ?? 0}` : `ok:${now}`;
+  const value = state === 'failing' ? `failing:${now}:${cause ?? 0}` : `ok:${now}`;
   await db
     .prepare(
       'INSERT INTO rt_flags (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v',

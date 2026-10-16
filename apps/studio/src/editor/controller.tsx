@@ -268,6 +268,7 @@ import {
   batchedProgressLabel,
 } from './backend-server';
 import { partitionRoster, readClientIds, rememberClientId, tabToken } from './client-ids';
+import { sendThroughFreeze } from './draft-retry';
 
 /**
  * The editor, /edit/:deckId with ssr: false (SPEC 3.4, 6; MILESTONES M3). The chrome's
@@ -2378,8 +2379,20 @@ export function createEditorController(init: {
     draftInFlight = true;
     const run = draftChain.then(async () => {
       let answer: Awaited<ReturnType<EditorBackend['writeDeck']>>;
+      // a write freeze refuses the first save with 503 and a wait (HR-K1#4b): the write and the
+      // edits queued behind it stay, the sentence shows on the snackbar (each at most once a
+      // minute; the save words read Saving… through the wait), and the save goes again after it
+      const refusals = { count: 0 };
       try {
-        answer = await backend.writeDeck({ deckId, write, returnDocument: true });
+        answer = await sendThroughFreeze(
+          () => backend.writeDeck({ deckId, write, returnDocument: true }),
+          {
+          waiting: (refusal) => {
+            refusals.count += 1;
+            publish({ error: refusal.message });
+            sayRefusal(refusal);
+          },
+        });
       } catch (error) {
         draftInFlight = false;
         const failure = error instanceof Error ? error : new TypeError(String(error));
@@ -2406,6 +2419,12 @@ export function createEditorController(init: {
         error: null,
       });
       warmHomeCard();
+      // a refused try that created the deck before the freeze refused its write: the answer that
+      // landed did not create it, so the page learns here that the deck exists (as adoptCreatedDeck)
+      if (refusals.count > 0 && answer.created !== true && typeof window !== 'undefined') {
+        const detail: DeckCreatedDetail = { deckId, revision: answer.revision };
+        window.dispatchEvent(new CustomEvent(DECK_CREATED_EVENT, { detail }));
+      }
       /* the first write is in the room's base (the server's document at this clock), so its
          inverse is transformed past what lands after the attach and nothing before it (undo-bursts.ts);
          the bursts queued during the flight append their own clocks at the replay below */

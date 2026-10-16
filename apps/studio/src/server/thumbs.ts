@@ -21,6 +21,7 @@ import {
   thumbPathname,
   thumbsPrefix,
 } from '@turboslide/store/blob-store';
+import { isStorageFrozenError } from '@turboslide/store/migrate';
 
 import { DECK_CARD_SIZE } from '../routes/-deck-card';
 import {
@@ -335,8 +336,8 @@ export function afterResponse(work: Promise<unknown>, label: string): void {
  * Whether a stored thumbnail is answered as a 302 to its URL (hardening K1#2; DATA-2): only an
  * object a browser can read by its URL, one on a public store. The split client of layout v2
  * (packages/store migrate.ts) routes `.thumbs/` with the documents to the private store, whose
- * URLs answer only with its token, so an object there is streamed: per object, because during
- * the migration's dual read window one slide's thumbnail can be on either store. A deployment
+ * URLs answer only with its token, so an object there is streamed: per object, because the URL
+ * names the store that answered it, whichever the layout was when it was read. A deployment
  * whose one store is private (`TURBOSLIDE_BLOB_ACCESS=private`) streams every object, and so
  * does a URL that is no web address (a folder store's `file:`).
  */
@@ -371,6 +372,31 @@ async function writeThumb(
   return bytes;
 }
 
+/**
+ * Puts a rendered thumbnail to the store under its stamp; false when the store refused it because
+ * the layout record is frozen, or the deployment shares the public store before its cutover
+ * (HR-K1#4b). The disk cache holds the PNG then, and a render after the freeze stores it.
+ */
+export async function putThumb(
+  blob: BlobClient,
+  request: Pick<ThumbRequest, 'deckId' | 'slideId' | 'theme' | 'width'>,
+  stamp: string,
+  bytes: Uint8Array,
+): Promise<boolean> {
+  const { deckId, theme, width, slideId } = request;
+  try {
+    await blob.put(thumbPathname(deckId, stamp, theme, width, slideId), bytes, {
+      overwrite: true,
+      contentType: 'image/png',
+      cacheControlMaxAge: THUMB_BLOB_MAX_AGE_S,
+    });
+    return true;
+  } catch (error) {
+    if (isStorageFrozenError(error)) return false;
+    throw error;
+  }
+}
+
 /** Puts a thumbnail to the store under its stamp and prunes the slide's older stamps after it. */
 async function storeThumb(
   blob: BlobClient,
@@ -378,16 +404,8 @@ async function storeThumb(
   stamp: string,
   bytes: Uint8Array,
 ): Promise<void> {
-  await blob.put(
-    thumbPathname(request.deckId, stamp, request.theme, request.width, request.slideId),
-    bytes,
-    {
-      overwrite: true,
-      contentType: 'image/png',
-      cacheControlMaxAge: THUMB_BLOB_MAX_AGE_S,
-    },
-  );
-  await pruneThumbs(blob, request.deckId, request.slideId, request.theme, THUMB_KEEP);
+  if (await putThumb(blob, request, stamp, bytes))
+    await pruneThumbs(blob, request.deckId, request.slideId, request.theme, THUMB_KEEP);
 }
 
 /** Renders the slide at the deck's current state, writes the disk cache under `stamp` and, with a store, puts it there. */
@@ -405,14 +423,9 @@ async function renderThumb(
   });
   const path = thumbPath(request.deckId, stamp, request.theme, request.width, request.slideId);
   const png = await writeThumb(rendered.png, path, request.width);
-  if (blob !== null) {
-    // the put is what other instances read; it is awaited so a 302 issued next answers, the
-    // prune is retention and runs behind the response
-    await blob.put(
-      thumbPathname(request.deckId, stamp, request.theme, request.width, request.slideId),
-      png,
-      { overwrite: true, contentType: 'image/png', cacheControlMaxAge: THUMB_BLOB_MAX_AGE_S },
-    );
+  // the put is what other instances read; it is awaited so a 302 issued next answers, the prune
+  // is retention and runs behind the response
+  if (blob !== null && (await putThumb(blob, request, stamp, png))) {
     afterResponse(
       pruneThumbs(blob, request.deckId, request.slideId, request.theme, THUMB_KEEP),
       `prune ${request.deckId}/${request.slideId}`,

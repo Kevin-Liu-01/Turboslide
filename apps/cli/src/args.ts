@@ -24,6 +24,9 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'rule',
   'layers',
   'budget',
+  // admin migrate-storage (HR-K1#4b)
+  'i-have-a-backup',
+  'concurrency',
   'into',
   'url',
   'widths',

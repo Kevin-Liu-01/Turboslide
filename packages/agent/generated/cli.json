@@ -6680,7 +6680,7 @@
     },
     {
       "action": "admin.migrateStorage",
-      "usage": "turboslide admin migrate-storage <step> --to <to> --batch <batch>",
+      "usage": "turboslide admin migrate-storage <step> --to <to> --budget <budget> --concurrency <concurrency> --i-have-a-backup <backupAt>",
       "command": [
         "admin",
         "migrate-storage"
@@ -6690,16 +6690,28 @@
       ],
       "options": [
         {
-          "key": "batch",
-          "flag": "--batch",
+          "key": "concurrency",
+          "flag": "--concurrency",
           "type": "integer",
-          "required": false
+          "required": false,
+          "description": "copy and rollback: the store requests in flight; 32 by default"
+        },
+        {
+          "key": "backupAt",
+          "flag": "--i-have-a-backup",
+          "type": "string",
+          "required": false,
+          "description": "delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one"
         }
       ],
       "custom": [
         {
           "flag": "--to",
           "template": "<to>"
+        },
+        {
+          "flag": "--budget",
+          "template": "<budget>"
         }
       ],
       "mutates": true,

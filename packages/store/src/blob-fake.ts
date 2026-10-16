@@ -188,6 +188,13 @@ export function memoryBlobClient(
       }
       return [...out].sort();
     },
+    async files(prefix) {
+      calls.push({ op: 'files', pathname: prefix });
+      return listing().filter(
+        (entry) =>
+          entry.pathname.startsWith(prefix) && !entry.pathname.slice(prefix.length).includes('/'),
+      );
+    },
     async put(pathname, bytes, putOptions: BlobPutOptions) {
       calls.push({ op: 'put', pathname });
       const failure = failures.get(pathname);

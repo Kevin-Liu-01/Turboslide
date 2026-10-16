@@ -23110,7 +23110,7 @@
       "post": {
         "operationId": "admin.migrateStorage",
         "summary": "Migrate storage",
-        "description": "Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.",
+        "description": "Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.",
         "tags": [
           "admin"
         ],
@@ -73132,18 +73132,33 @@
             "type": "string",
             "enum": [
               "plan",
+              "freeze",
               "copy",
               "verify",
+              "switch",
+              "unfreeze",
               "rekey",
-              "cutover",
-              "delete",
-              "rollback"
+              "rollback",
+              "delete"
             ]
           },
-          "batch": {
+          "budgetMs": {
+            "description": "How long the call works before it answers; 240 s by default",
             "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 1000
+            "minimum": 120000,
+            "maximum": 240000
+          },
+          "concurrency": {
+            "description": "copy and rollback: the store requests in flight; 32 by default",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 128
+          },
+          "backupAt": {
+            "description": "delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
           }
         },
         "required": [
@@ -73159,52 +73174,150 @@
             "type": "string",
             "enum": [
               "plan",
+              "freeze",
               "copy",
               "verify",
+              "switch",
+              "unfreeze",
               "rekey",
-              "cutover",
-              "delete",
-              "rollback"
+              "rollback",
+              "delete"
             ]
           },
-          "cursor": {
-            "type": [
-              "string",
-              "null"
-            ]
+          "state": {
+            "type": "string",
+            "enum": [
+              "v1",
+              "dual",
+              "v2"
+            ],
+            "description": "The layout record's state when the call answered"
+          },
+          "frozen": {
+            "type": "boolean",
+            "description": "Document writes are refused now"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "clean": {
+            "type": "boolean",
+            "description": "The call found no row"
           },
           "processed": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "verified": {
+          "remaining": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "failed": {
+          "rows": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "The call's rows, the first 200"
           },
-          "done": {
-            "type": "boolean"
+          "rowCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           },
-          "dualRead": {
-            "type": "boolean",
-            "description": "True while both stores are read"
+          "planned": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settlesAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "switchedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "listMs": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "perSecond": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "retries": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rekeyAfter": {
+            "description": "rekey: when a pass must begin to copy the twins written under a replaced key",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
           "step",
-          "cursor",
-          "processed",
-          "verified",
-          "failed",
+          "state",
+          "frozen",
           "done",
-          "dualRead"
+          "clean",
+          "processed",
+          "remaining",
+          "rows",
+          "rowCount",
+          "planned",
+          "settlesAt",
+          "expiresAt",
+          "switchedAt",
+          "listMs",
+          "perSecond",
+          "retries",
+          "rekeyAfter",
+          "note"
         ],
         "additionalProperties": false
       },

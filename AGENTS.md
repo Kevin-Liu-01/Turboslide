@@ -373,7 +373,9 @@ under `TURBOSLIDE_SESSION_SECRET`; a hosted deployment without it derives the se
 `TURBOSLIDE_AUTH_DB` is set and Postgres when `DATABASE_URL` is set, else anonymous only; mail is
 captured with `TURBOSLIDE_MAIL=capture` on every preview. Documents move to a private Blob store
 (`turboslide-private`) while assets stay on the public one (`turboslide-decks`), through
-`turboslide admin migrate-storage` with a dual read window and a rollback flag (SPEC-3 8.9, 11.5).
+`turboslide admin migrate-storage`, one maintenance window per environment: a write freeze, a
+parallel copy, a verify and a switch, with a rollback before `delete` on production (SPEC-3 8.9,
+11.5; HR-K1#4b, `docs/hosting.md` 10).
 `authorize()` runs in shadow mode (`TURBOSLIDE_AUTHORIZE=shadow`, the default; `enforce` after the
 week SPEC-3 R3 and R5 name). `TURBOSLIDE_DOWNLOAD_SECRET` (16 bytes or more) is required on every
 hosted environment and on a tmp store. `docs/hosting.md` (B2's this round) carries the
@@ -390,8 +392,8 @@ sets to turn each one on. Previews and production run on the degraded tiers this
 with the row saying why) and the verifier measures them as they are. A second Blob store
 (private) may be created through the vercel CLI if SPEC-3 11.4 needs it, because Blob is part of
 the project's storage and not a Marketplace install; the storage migration runs on the preview
-store first and on production only after the verifier has proved the dual read window and the
-rollback flag. The WAF rules ship as `firewall/rules.json` and are applied in log mode only,
+store first and on production only after the verifier has proved the freeze, the switch and the
+rollback (HR-K1#4b). The WAF rules ship as `firewall/rules.json` and are applied in log mode only,
 through the Vercel API from the ship step, if the plan accepts them; a refusal is recorded and
 never worked around. `TURBOSLIDE_AUTHORIZE` ships in shadow mode on production (SPEC-3 R8) so no
 existing deck link breaks. At merge 2 the preview and production environments of the Vercel

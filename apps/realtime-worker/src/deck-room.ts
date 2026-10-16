@@ -370,7 +370,9 @@ export class AppCallError extends Error {
       (this.status >= 300 && this.status < 400) ||
       this.status === 401 ||
       this.status === 403 ||
-      (this.route === 'seed' && this.status >= 500)
+      // a seed 503 is the store's "not now" (a busy store, a layout record that did not read, a
+      // freeze; HR-K1#4b), which the route answers with retry-after: the deployment answered
+      (this.route === 'seed' && this.status >= 500 && this.status !== 503)
     );
   }
 }

@@ -1,248 +1,783 @@
-// The storage layout v2 migration on the fake (gslides-parity SPEC-3 11.5; MILESTONES-3 B2 day 6):
-// plan, copy, verify, cutover and delete move two decks' documents from the public store to the
-// private one byte for byte with their etags verified and the twins left where they are; the
-// split client reads through during the dual read window and writes private from the plan on;
-// the public documents leave in batches of at most 50; a rollback before the cutover flips the
-// reads back; the seeded deck's bytes never change.
+// The storage migration in one window (HR-K1#4b; docs/hosting.md section 10) on the fake stores:
+// each step and each refusal, the fail closed layout read, the dual read record of the migration
+// before HR-K1#4b, a deployment that shares the public store, the rollback of a switch, rekey,
+// delete and its preconditions, and the keyed twins. The race simulation is migrate-sim.test.ts,
+// the copy's throughput migrate-copy.test.ts.
 import { describe, expect, it } from 'vitest';
 
-import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
-import { canonicalJson } from '@turboslide/schema/json';
-
-import { blobAccessStore } from './access-store.ts';
-import { memoryBlobClient } from './blob-fake.ts';
-import type { FakeBlobClient } from './blob-fake.ts';
 import { legacyAssetKey, newAssetKey, newDeckRecord } from '@turboslide/schema/access';
 import { MIGRATION_STEPS as SCHEMA_MIGRATION_STEPS } from '@turboslide/schema/actions';
 
+import { blobAccessStore } from './access-store.ts';
+import type { BlobClient } from './blob-store.ts';
+import { memoryBlobClient } from './blob-fake.ts';
 import {
-  DELETE_BATCH,
+  DELETE_AFTER_SWITCH_MS,
+  FREEZE_HOLD_MS,
+  FREEZE_LIMIT_MS,
+  LIST_LAG_MS,
+  MIGRATION_META,
+  MIGRATION_PLAN,
+  MIGRATION_PROGRESS,
   MIGRATION_STEPS,
-  emptyMeta,
+  OLDER_DEPLOYMENT_ROW,
+  OPEN_AFTER_MS,
+  REKEY_SETTLE_MS,
+  StorageLayoutError,
   isPublicPath,
   keyedTwinsClient,
-  readMeta,
+  publicDocuments,
+  putLayoutRecord,
   runMigrationStep,
   splitBlobClient,
   twinKeyResolver,
-  writeMeta,
 } from './migrate.ts';
+import type { MigrationOptions, MigrationResult, MigrationStep } from './migrate.ts';
+import { sharesPublicStore } from './select.ts';
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
-const NOW = '2026-09-13T10:00:00.000Z';
+const T0 = Date.parse('2026-10-15T20:00:00.000Z');
+const NOW = new Date(T0).toISOString();
+const text = (got: { bytes: Uint8Array } | null): string | null =>
+  got === null ? null : decoder.decode(got.bytes);
+const body = (value: string) => encoder.encode(value);
 
-async function seedDeck(
-  client: FakeBlobClient,
-  deckId: string,
-  slides: number,
-): Promise<Map<string, Uint8Array>> {
-  const bytes = new Map<string, Uint8Array>();
-  const putJson = async (path: string, value: unknown): Promise<void> => {
-    const body = encoder.encode(canonicalJson(value));
-    bytes.set(path, body);
-    await client.put(path, body, { overwrite: false, contentType: 'application/json' });
-  };
-  const prefix = `decks/${deckId}/`;
-  await putJson(`${prefix}deck.json`, { ...WORKED_DECK, id: deckId });
-  for (const slide of WORKED_SLIDES.slice(0, slides))
-    await putJson(`${prefix}slides/${slide.id}.json`, slide);
-  await putJson(`${prefix}versions/1.json`, { n: 1, revision: 1, mutations: [] });
-  for (let i = 0; i < 60; i += 1)
-    await putJson(`${prefix}snapshots/${String(i).padStart(32, '0')}.json`, {
-      deck: { id: deckId, n: i },
+/** The documents and public objects of a production store, every root unit included. */
+const SEED: Record<string, string> = {
+  'decks/gt-brand/deck.json': '{"id":"gt-brand"}',
+  'decks/gt-brand/slides/s1.json': '{"id":"s1"}',
+  'decks/gt-brand/versions/1.json': '{"n":1}',
+  'decks/gt-brand/.turboslide/copies/a.json': '{}',
+  'decks/gt-brand/assets/mark.ab12.png': 'png-mark',
+  'decks/q4/deck.json': '{"id":"q4"}',
+  'decks/q4/assets/photo.cd34.webp': 'webp-photo',
+  'decks/index.json': '{"decks":2}',
+  'users/u1/decks.json': '{"decks":["gt-brand"]}',
+  'links/abc.json': '{"deck":"gt-brand"}',
+  'templates/t1/deck.json': '{"id":"t1"}',
+  'system/flags.json': '{}',
+  'index/decks.json': '[]',
+  'builds/b1/page.html': '<p>',
+  'vitals/v.json': '{}',
+  'top.json': '{"top":true}',
+  'exports/q4/job/deck.pdf': '%PDF',
+  'bundles/q4.zip': 'PK',
+  'u/AvatarKey/a-64.webp': 'avatar',
+  'd/q4/PublicKey0000000000000/assets/photo.cd34.webp': 'webp-photo',
+};
+const DOCUMENTS = Object.keys(SEED).filter((path) => !isPublicPath(path));
+
+function world(options: { shared?: boolean; seed?: boolean } = {}) {
+  const t = { now: T0 };
+  const clock = () => t.now;
+  const at = () => new Date(t.now).toISOString();
+  const legacy = memoryBlobClient('https://public.local', { now: at });
+  const documents = memoryBlobClient('https://private.local', { now: at });
+  const clients = { legacy, documents };
+  const shared = options.shared === true;
+  const run = (step: MigrationStep, extra: MigrationOptions = {}): Promise<MigrationResult> =>
+    runMigrationStep(clients, step, {
+      clock,
+      sleep: async (ms) => {
+        t.now += ms;
+      },
+      abortAfter: () => new AbortController().signal,
+      sharedPublicStore: shared,
+      concurrency: 4,
+      ...extra,
     });
-  await putJson(`${prefix}leases.json`, { leases: [] });
-  await putJson(`${prefix}access.json`, { schemaVersion: 1, deckId, owner: null });
-  await putJson(`${prefix}comments/index.json`, {
-    schemaVersion: 1,
-    deckId,
-    revision: 0,
-    updatedAt: NOW,
-    threads: [],
-  });
-  const twin = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]);
-  bytes.set(`${prefix}assets/mark.png`, twin);
-  await client.put(`${prefix}assets/mark.png`, twin, {
-    overwrite: false,
-    contentType: 'image/png',
-  });
-  return bytes;
+  const instance = () =>
+    splitBlobClient(clients, { ttlMs: 0, now: clock, sharedPublicStore: shared });
+  return {
+    t,
+    clock,
+    legacy,
+    documents,
+    clients,
+    run,
+    instance,
+    later: (ms: number) => {
+      t.now += ms;
+    },
+    async seed() {
+      for (const [path, value] of Object.entries(SEED))
+        await legacy.put(path, body(value), { overwrite: true });
+      legacy.calls.length = 0;
+    },
+    progress: () =>
+      JSON.parse(
+        text(
+          documents.blobs.has(MIGRATION_PROGRESS)
+            ? { bytes: documents.blobs.get(MIGRATION_PROGRESS)!.bytes }
+            : null,
+        ) ?? '{}',
+      ) as Record<string, unknown>,
+    meta: () =>
+      JSON.parse(decoder.decode(documents.blobs.get(MIGRATION_META)!.bytes)) as Record<
+        string,
+        unknown
+      >,
+    /** document puts and removals that reached the public store */
+    publicWrites: () =>
+      legacy.calls.filter((c) => (c.op === 'put' || c.op === 'del') && !isPublicPath(c.pathname)),
+  };
+}
+type World = ReturnType<typeof world>;
+
+/** The window from the counts to the switch; copy runs until it answers done. */
+async function window(w: World, copy: MigrationOptions = {}) {
+  const counts = await w.run('plan');
+  const frozen = await w.run('freeze');
+  w.t.now = Date.parse(frozen.settlesAt ?? '');
+  const plan = await w.run('plan');
+  const copies: MigrationResult[] = [];
+  do copies.push(await w.run('copy', copy));
+  while (!copies.at(-1)?.done && copies.length < 20);
+  w.later(LIST_LAG_MS);
+  const verify = await w.run('verify');
+  const switched = await w.run('switch');
+  return { counts, frozen, plan, copies, verify, switched };
 }
 
-describe('the storage migration', () => {
-  it('routes twins and exports to the public store and everything else to the documents store', () => {
+const opens = (w: World, switched: MigrationResult) => {
+  w.t.now = Date.parse(switched.switchedAt ?? '') + OPEN_AFTER_MS;
+};
+
+describe('the paths and the plan', () => {
+  it('routes twins, keyed twins, avatars, exports and bundles public, and every other path is a document', () => {
     expect(isPublicPath('decks/q4/assets/a.png')).toBe(true);
-    expect(isPublicPath('d/q4/key/a.png')).toBe(true);
+    expect(isPublicPath('d/q4/key/assets/a.png')).toBe(true);
+    expect(isPublicPath('u/AbCd/a-64.webp')).toBe(true);
     expect(isPublicPath('exports/q4/job/deck.pptx')).toBe(true);
-    // the picture avatars (docs/archive/rounds/PEOPLE.md 4.3): public, so an <img> loads them by URL
-    expect(isPublicPath('u/AbCdEfGhIjKlMnOpQrStUv/0123abcd-64.webp')).toBe(true);
-    expect(isPublicPath('decks/q4/deck.json')).toBe(false);
-    expect(isPublicPath('decks/q4/access.json')).toBe(false);
-    expect(isPublicPath('users/anon_x/decks.json')).toBe(false);
-    expect(isPublicPath('meta.json')).toBe(false);
+    expect(isPublicPath('bundles/q4.zip')).toBe(true);
+    for (const path of ['decks/q4/deck.json', 'users/u/decks.json', 'links/a.json', 'top.json'])
+      expect(isPublicPath(path)).toBe(false);
+    expect([...MIGRATION_STEPS]).toEqual([...SCHEMA_MIGRATION_STEPS]);
   });
 
-  it('migrates two decks byte for byte through plan, copy, verify, cutover and delete', async () => {
-    const legacy = memoryBlobClient('https://public.local', { now: () => NOW });
-    const documents = memoryBlobClient('https://private.local', {
-      now: () => '2026-09-13T11:00:00.000Z',
-    });
-    const gt = await seedDeck(legacy, 'gt-brand', 3);
-    const other = await seedDeck(legacy, 'q4-review', 2);
-    await legacy.put('decks/templates/blank/deck.json', encoder.encode('{}'), { overwrite: false });
-    const clients = { legacy, documents };
-    const split = splitBlobClient(clients, { ttlMs: 0 });
-
-    // before a plan: layout v1, everything on the public store
-    expect(await readMeta(documents)).toBeNull();
-    expect((await split.head('decks/gt-brand/deck.json'))?.pathname).toBe(
-      'decks/gt-brand/deck.json',
-    );
-
-    const plan = await runMigrationStep(clients, 'plan', { now: () => NOW });
-    expect(plan).toMatchObject({
+  it('counts every document of the public store, the root units and the top files included', async () => {
+    const w = world();
+    await w.seed();
+    expect((await publicDocuments(w.legacy)).map((e) => e.pathname)).toEqual([...DOCUMENTS].sort());
+    const counts = await w.run('plan');
+    expect(counts).toMatchObject({
       step: 'plan',
-      processed: 2,
+      state: 'v1',
       done: true,
-      dualRead: true,
-      failed: [],
+      processed: DOCUMENTS.length,
     });
-    expect((await readMeta(documents))?.decks).toEqual(['gt-brand', 'q4-review']);
-
-    // the dual read window: a document written now goes private and reads back; the public copy is still read
-    await split.put('decks/q4-review/slides/new.json', encoder.encode('{"id":"new"}'), {
-      overwrite: false,
-    });
-    expect(documents.blobs.has('decks/q4-review/slides/new.json')).toBe(true);
-    expect(legacy.blobs.has('decks/q4-review/slides/new.json')).toBe(false);
-    expect(decoder.decode((await split.get('decks/gt-brand/deck.json'))?.bytes)).toBe(
-      decoder.decode(gt.get('decks/gt-brand/deck.json')),
+    expect(counts.note).toMatch(
+      new RegExp(
+        `^counts: ${DOCUMENTS.length} public documents of \\d+ bytes listed in \\d+ ms; the private store holds 0$`,
+      ),
     );
-    expect((await split.list('decks/q4-review/')).map((entry) => entry.pathname)).toContain(
-      'decks/q4-review/slides/new.json',
-    );
-    expect((await split.list('decks/q4-review/')).map((entry) => entry.pathname)).toContain(
-      'decks/q4-review/assets/mark.png',
-    );
+    // a layout record before the progress, so the store never holds migration.json alone
+    expect(w.meta()).toMatchObject({ state: 'v1', layout: 'v1', failed: [OLDER_DEPLOYMENT_ROW] });
+    expect(w.progress()).toMatchObject({ planned: { run: null, count: DOCUMENTS.length } });
+    expect(w.documents.blobs.has(MIGRATION_PLAN)).toBe(false);
+    // the lease is given back
+    expect(w.progress().busyUntil).toBeUndefined();
+  });
+});
 
-    const copy1 = await runMigrationStep(clients, 'copy', { batch: 1, now: () => NOW });
-    expect(copy1).toMatchObject({ step: 'copy', cursor: 'gt-brand', processed: 1, done: false });
-    const copy2 = await runMigrationStep(clients, 'copy', { batch: 1, now: () => NOW });
-    expect(copy2).toMatchObject({
-      step: 'copy',
-      cursor: 'q4-review',
-      processed: 1,
-      done: true,
-      failed: [],
-    });
-    // every document is private with the same bytes and etag; the twins did not move
-    for (const [path, body] of [...gt, ...other]) {
-      if (isPublicPath(path)) {
-        expect(documents.blobs.has(path)).toBe(false);
-        continue;
-      }
-      const stored = documents.blobs.get(path);
-      expect(stored, path).toBeDefined();
-      expect(Buffer.compare(Buffer.from(stored!.bytes), Buffer.from(body)), path).toBe(0);
-      expect(stored!.version).toBe(legacy.blobs.get(path)?.version);
-    }
-    expect(documents.blobs.has('decks/templates/blank/deck.json')).toBe(false);
-    // a copy run again is idempotent
-    const again = await runMigrationStep(clients, 'copy', { batch: 5, now: () => NOW });
-    expect(again).toMatchObject({ processed: 2, done: true, failed: [] });
-
-    // a cutover before verify refuses with the unverified decks
-    const early = await runMigrationStep(clients, 'cutover', { now: () => NOW });
-    expect(early.done).toBe(false);
-    expect(early.failed).toEqual(['gt-brand: not verified', 'q4-review: not verified']);
-
-    const verify = await runMigrationStep(clients, 'verify', { batch: 5, now: () => NOW });
-    expect(verify).toMatchObject({
-      step: 'verify',
-      processed: 2,
-      verified: 2,
-      failed: [],
-      done: true,
-    });
-
-    const cutover = await runMigrationStep(clients, 'cutover', { now: () => NOW });
-    expect(cutover).toMatchObject({ step: 'cutover', done: true, dualRead: false, verified: 2 });
-    expect((await readMeta(documents))?.layout).toBe('v2');
-    // after the cutover a public only document is invisible; the twins still read
-    await legacy.put('decks/gt-brand/slides/ghost.json', encoder.encode('{}'), {
-      overwrite: false,
-    });
-    expect(await split.head('decks/gt-brand/slides/ghost.json')).toBeNull();
-    expect(await split.head('decks/gt-brand/assets/mark.png')).not.toBeNull();
-    expect((await split.list('decks/gt-brand/')).map((entry) => entry.pathname)).not.toContain(
-      'decks/gt-brand/slides/ghost.json',
-    );
-
-    legacy.calls.length = 0;
-    const del1 = await runMigrationStep(clients, 'delete', { batch: 1, now: () => NOW });
-    expect(del1).toMatchObject({ step: 'delete', cursor: 'gt-brand', done: false });
-    const del2 = await runMigrationStep(clients, 'delete', { batch: 1, now: () => NOW });
-    expect(del2).toMatchObject({ step: 'delete', cursor: 'q4-review', done: true });
-    const dels = legacy.calls.filter((call) => call.op === 'del');
-    expect(dels.length).toBeGreaterThan(2); // 68 documents per deck leave in batches, never one call
-    for (const [path] of [...gt, ...other]) {
-      expect(legacy.blobs.has(path), path).toBe(isPublicPath(path));
-    }
-    expect(legacy.blobs.has('decks/templates/blank/deck.json')).toBe(true);
-    // the migrated deck reads byte for byte through the split client
-    expect(decoder.decode((await split.get('decks/gt-brand/deck.json'))?.bytes)).toBe(
-      decoder.decode(gt.get('decks/gt-brand/deck.json')),
-    );
-    expect(DELETE_BATCH).toBe(50);
-    await expect(runMigrationStep(clients, 'rollback', { now: () => NOW })).rejects.toThrow(
-      /cutover happened/,
-    );
+describe('the layout read', () => {
+  it('reads v1 only on a store that never held a record, and fails closed otherwise', async () => {
+    const w = world();
+    await w.seed();
+    expect(text(await w.instance().get('links/abc.json'))).toBe(SEED['links/abc.json']);
+    // migration.json without meta.json: every request fails with 503 until the record reads
+    await w.documents.put(MIGRATION_PROGRESS, body('{"schemaVersion":1}'), { overwrite: true });
+    const refused = w.instance().get('links/abc.json');
+    await expect(refused).rejects.toBeInstanceOf(StorageLayoutError);
+    await expect(refused).rejects.toMatchObject({ status: 503, retryAfter: 5 });
+    await w.documents.del([MIGRATION_PROGRESS]);
+    // a root listing that names the record while its read answers absent
+    const listed: BlobClient = {
+      ...w.documents,
+      files: async () => [{ pathname: MIGRATION_META, url: '', size: 1, version: '"x"' }],
+    };
+    await expect(
+      splitBlobClient({ legacy: w.legacy, documents: listed }, { ttlMs: 0 }).get('links/abc.json'),
+    ).rejects.toThrow(/read absent while the store lists meta.json/);
+    // bytes that are no record, and a read that fails
+    await w.documents.put(MIGRATION_META, body('[1]'), { overwrite: true });
+    await expect(w.instance().get('links/abc.json')).rejects.toBeInstanceOf(StorageLayoutError);
+    await putLayoutRecord(w.documents, { state: 'v1' });
+    w.documents.failNextGet(MIGRATION_META, new Error('fetch failed'));
+    const one = w.instance();
+    await expect(one.get('links/abc.json')).rejects.toBeInstanceOf(StorageLayoutError);
+    expect(text(await one.get('links/abc.json'))).toBe(SEED['links/abc.json']);
+    // once a process read a record, an absence is a failed read
+    await w.documents.del([MIGRATION_META]);
+    await expect(one.get('links/abc.json')).rejects.toThrow(/absent after this process read it/);
   });
 
-  it('reports a copy whose etag differs, and a rollback before the cutover flips the reads back', async () => {
-    const legacy = memoryBlobClient('https://public.local', { now: () => NOW });
-    const documents = memoryBlobClient('https://private.local', { now: () => NOW });
-    await seedDeck(legacy, 'q4-review', 1);
-    const clients = { legacy, documents };
-    await runMigrationStep(clients, 'plan', { now: () => NOW });
-    // a private document that differs from the public one and is not newer does not verify
-    await documents.put(
-      'decks/q4-review/versions/1.json',
-      encoder.encode('{"n":1,"tampered":true}'),
-      { overwrite: false },
+  it('reads the dual read record of the migration before HR-K1#4b as that code did', async () => {
+    const w = world({ shared: true });
+    await w.seed();
+    const old = {
+      schemaVersion: 1,
+      layout: 'v1',
+      step: 'rekey',
+      decks: ['gt-brand'],
+      dualRead: true,
+      rollback: false,
+    };
+    await w.documents.put(MIGRATION_META, body(JSON.stringify(old)), { overwrite: true });
+    await w.documents.put('users/u1/decks.json', body('mine'), { overwrite: true });
+    const preview = w.instance();
+    // private first, the public store when absent there
+    expect(text(await preview.get('users/u1/decks.json'))).toBe('mine');
+    expect(text(await preview.get('links/abc.json'))).toBe(SEED['links/abc.json']);
+    expect((await preview.list('users/')).map((e) => e.pathname)).toEqual(['users/u1/decks.json']);
+    // written and removed on the private store alone
+    await preview.put('links/new.json', body('new'), { overwrite: false });
+    await preview.del(['users/u1/decks.json']);
+    expect(w.documents.blobs.has('links/new.json')).toBe(true);
+    expect(text(await preview.get('users/u1/decks.json'))).toBe(SEED['users/u1/decks.json']);
+    expect(w.publicWrites()).toEqual([]);
+    // layout v2, and a rolled back window
+    await w.documents.put(
+      MIGRATION_META,
+      body(JSON.stringify({ ...old, layout: 'v2', dualRead: false })),
+      { overwrite: true },
     );
-    await runMigrationStep(clients, 'copy', { now: () => NOW });
-    const verify = await runMigrationStep(clients, 'verify', { now: () => NOW });
-    expect(verify.verified).toBe(0);
-    expect(verify.failed[0]).toMatch(/versions\/1\.json has etag/);
-    const cutover = await runMigrationStep(clients, 'cutover', { now: () => NOW });
-    expect(cutover.done).toBe(false);
-
-    const split = splitBlobClient(clients, { ttlMs: 0 });
-    expect(decoder.decode((await split.get('decks/q4-review/versions/1.json'))?.bytes)).toContain(
-      'tampered',
-    );
-    const rollback = await runMigrationStep(clients, 'rollback', { now: () => NOW });
-    expect(rollback).toMatchObject({ step: 'rollback', done: true, dualRead: false });
-    expect((await readMeta(documents))?.rollback).toBe(true);
-    // reads and writes go public again
-    expect(
-      decoder.decode((await split.get('decks/q4-review/versions/1.json'))?.bytes),
-    ).not.toContain('tampered');
-    await split.put('decks/q4-review/slides/after.json', encoder.encode('{}'), {
-      overwrite: false,
+    expect(text(await w.instance().get('links/abc.json'))).toBeNull();
+    await w.documents.put(MIGRATION_META, body(JSON.stringify({ ...old, rollback: true })), {
+      overwrite: true,
     });
-    expect(legacy.blobs.has('decks/q4-review/slides/after.json')).toBe(true);
-    await expect(runMigrationStep(clients, 'copy', { now: () => NOW })).rejects.toThrow(
-      /rolled back/,
+    expect(text(await w.instance().get('users/u1/decks.json'))).toBe(SEED['users/u1/decks.json']);
+  });
+});
+
+describe('the split client', () => {
+  it('refuses every document write on a store that shares the public one before its switch', async () => {
+    const w = world({ shared: true });
+    await w.seed();
+    const preview = w.instance();
+    const put = preview.put('decks/q4/deck.json', body('x'), { overwrite: true });
+    await expect(put).rejects.toMatchObject({
+      name: 'StorageFrozenError',
+      status: 503,
+      retryAfter: 30,
+    });
+    await expect(
+      preview.del(['decks/q4/deck.json', 'decks/q4/assets/photo.cd34.webp']),
+    ).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    // reads and the public paths go on
+    expect(text(await preview.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
+    await preview.put('exports/q4/job/new.pdf', body('%PDF'), { overwrite: true });
+    expect(w.legacy.blobs.has('exports/q4/job/new.pdf')).toBe(true);
+    expect(w.publicWrites()).toEqual([]);
+    expect(sharesPublicStore({ VERCEL_ENV: 'preview' })).toBe(true);
+    expect(sharesPublicStore({ VERCEL_ENV: 'production', BLOB_READ_WRITE_TOKEN: 't' })).toBe(false);
+    expect(sharesPublicStore({ BLOB_READ_WRITE_TOKEN: 't' })).toBe(true);
+    expect(sharesPublicStore({})).toBe(false);
+  });
+
+  it('writes the record so that deployments from before HR-K1#4b read v2 on a shared store', async () => {
+    for (const shared of [false, true]) {
+      const w = world({ shared });
+      await w.seed();
+      await w.run('freeze');
+      expect(w.meta()).toMatchObject({
+        state: 'v1',
+        layout: shared ? 'v2' : 'v1',
+        dualRead: false,
+        rollback: false,
+        failed: [OLDER_DEPLOYMENT_ROW],
+      });
+    }
+  });
+});
+
+describe('the window', () => {
+  it('moves every document under one freeze, then reads and writes the private store', async () => {
+    const w = world();
+    await w.seed();
+    // a slow public store, so the copy needs several calls of its budget
+    const get = w.legacy.get.bind(w.legacy);
+    w.legacy.get = async (path, options) => {
+      w.later(1_000);
+      return get(path, options);
+    };
+    const app = w.instance();
+    const frozen = await w.run('freeze');
+    expect(frozen).toMatchObject({ state: 'v1', frozen: true });
+    expect(Date.parse(frozen.settlesAt ?? '')).toBe(T0 + 20_000 + 4 * 60_000);
+    expect(Date.parse(frozen.expiresAt ?? '')).toBe(
+      Date.parse(frozen.settlesAt ?? '') + FREEZE_HOLD_MS,
+    );
+    // every document write is refused with the freeze's sentence; reads go on from the public store
+    await expect(
+      app.put('decks/q4/deck.json', body('x'), { overwrite: true }),
+    ).rejects.toMatchObject({
+      name: 'StorageFrozenError',
+      message: expect.stringMatching(/^Saving is paused while the documents move between stores/),
+    });
+    expect(text(await app.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
+    await expect(w.run('plan')).rejects.toThrow(/the freeze settles at/);
+    await expect(w.run('copy')).rejects.toThrow(/settles at/);
+    w.t.now = Date.parse(frozen.settlesAt ?? '');
+    await expect(w.run('copy')).rejects.toThrow(/no plan of record/);
+    const plan = await w.run('plan');
+    expect(plan.note).toMatch(/^the plan of record: 14 public documents/);
+    const copies: MigrationResult[] = [];
+    do copies.push(await w.run('copy', { budgetMs: 15_000, concurrency: 1 }));
+    while (!copies.at(-1)?.done && copies.length < 20);
+    expect(copies.length).toBeGreaterThan(2);
+    expect(copies.at(-1)).toMatchObject({ done: true, remaining: 0, rowCount: 0 });
+    expect(copies.reduce((sum, c) => sum + c.processed, 0)).toBe(DOCUMENTS.length);
+    // the copy never writes the public store
+    expect(w.publicWrites()).toEqual([]);
+    await expect(w.run('verify')).rejects.toThrow(/run verify after it/);
+    await expect(w.run('switch')).rejects.toThrow(/no clean verify/);
+    w.later(LIST_LAG_MS);
+    expect(await w.run('verify')).toMatchObject({
+      done: true,
+      clean: true,
+      processed: DOCUMENTS.length,
+    });
+    const switched = await w.run('switch');
+    expect(switched).toMatchObject({ state: 'v2', frozen: true });
+    // every document is private with its bytes and etag; the public objects stayed
+    for (const path of DOCUMENTS) {
+      expect(w.documents.blobs.get(path)?.version, path).toBe(w.legacy.blobs.get(path)?.version);
+      expect(text(await app.get(path)), path).toBe(SEED[path]);
+    }
+    for (const path of Object.keys(SEED).filter(isPublicPath))
+      expect(w.documents.blobs.has(path)).toBe(false);
+    // writes open OPEN_AFTER_MS after the switch, on the private store
+    await expect(
+      app.put('decks/q4/deck.json', body('v2'), { overwrite: true }),
+    ).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    opens(w, switched);
+    await app.put('decks/q4/deck.json', body('v2'), { overwrite: true });
+    expect(text(await w.documents.get('decks/q4/deck.json'))).toBe('v2');
+    expect(text(await w.legacy.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
+    expect(w.publicWrites()).toEqual([]);
+    await expect(w.run('freeze')).rejects.toThrow(/switched to layout v2/);
+    await expect(w.run('plan')).rejects.toThrow(/nothing to plan/);
+  });
+
+  it('tries a 429 and a 5xx again, and a document that keeps failing is a row the next call tries first', async () => {
+    const w = world();
+    await w.seed();
+    const frozen = await w.run('freeze');
+    w.t.now = Date.parse(frozen.settlesAt ?? '');
+    await w.run('plan');
+    w.legacy.failNextGet(
+      'links/abc.json',
+      Object.assign(new Error('Vercel Blob: Too many requests'), { retryAfter: 2 }),
+    );
+    w.documents.failNextPut(
+      'users/u1/decks.json',
+      new Error('Vercel Blob: The blob service is currently not available. Please try again.'),
+    );
+    let refusals = 0;
+    const put = w.documents.put.bind(w.documents);
+    w.documents.put = async (path, bytes, options) => {
+      if (path === 'system/flags.json' && refusals < 7) {
+        refusals += 1;
+        throw new Error('fetch failed');
+      }
+      return put(path, bytes, options);
+    };
+    const first = await w.run('copy');
+    expect(first).toMatchObject({
+      done: false,
+      remaining: 1,
+      rowCount: 1,
+      rows: ['system/flags.json: fetch failed'],
+    });
+    expect(first.retries).toBe(2 + 4);
+    expect(w.progress()).toMatchObject({ copied: DOCUMENTS.length, failed: ['system/flags.json'] });
+    const second = await w.run('copy');
+    expect(second).toMatchObject({ done: true, remaining: 0, processed: 1, rowCount: 0 });
+    w.later(LIST_LAG_MS);
+    expect((await w.run('verify')).clean).toBe(true);
+  });
+
+  it('removes a private copy the plan does not name, except on a shared store', async () => {
+    for (const shared of [false, true]) {
+      const w = world({ shared });
+      await w.seed();
+      // a copy of an earlier run whose public document left since
+      await w.documents.put('links/gone.json', body('old'), { overwrite: true });
+      await window(w);
+      expect(w.documents.blobs.has('links/gone.json')).toBe(shared);
+    }
+  });
+
+  it('ends the freeze by itself when verify finds a write the freeze did not stop', async () => {
+    const w = world();
+    await w.seed();
+    const frozen = await w.run('freeze');
+    w.t.now = Date.parse(frozen.settlesAt ?? '');
+    await w.run('plan');
+    await w.run('copy');
+    // a writer outside the freeze (a checkout on the public token): the public store moved
+    await w.legacy.put('links/abc.json', body('outside'), { overwrite: true });
+    await w.documents.put('links/stray.json', body('x'), { overwrite: true });
+    w.later(LIST_LAG_MS);
+    const verify = await w.run('verify');
+    expect(verify).toMatchObject({ done: false, clean: false, state: 'v1', frozen: false });
+    expect(verify.rows).toEqual([
+      expect.stringMatching(/^public links\/abc.json: planned "\w+", found "\w+"$/),
+      'private links/stray.json: not planned',
+    ]);
+    expect(w.progress().endedAt).toMatch(/verify found 2 differences/);
+    await expect(w.run('switch')).rejects.toThrow(/no freeze of this run/);
+    await w.instance().put('links/abc.json', body('v1 again'), { overwrite: true });
+    expect(text(await w.legacy.get('links/abc.json'))).toBe('v1 again');
+  });
+
+  it('moves the end of a freeze while its calls come, never past its limit, and ends it by itself after', async () => {
+    const w = world();
+    await w.seed();
+    const frozen = await w.run('freeze');
+    const since = T0;
+    w.t.now = Date.parse(frozen.settlesAt ?? '') + 8 * 60_000;
+    const plan = await w.run('plan');
+    expect(Date.parse(plan.expiresAt ?? '')).toBe(w.t.now + FREEZE_HOLD_MS);
+    let last: MigrationResult | Error = plan;
+    let reached = 0;
+    while (!(last instanceof Error)) {
+      reached = Date.parse(last.expiresAt ?? '');
+      expect(reached).toBeLessThanOrEqual(since + FREEZE_LIMIT_MS);
+      w.later(8 * 60_000);
+      last = await w.run('copy').catch((error: Error) => error);
+    }
+    // the end reached the limit, and the call that came within 90 s of it ended the run
+    expect(reached).toBe(since + FREEZE_LIMIT_MS);
+    expect(String(last)).toMatch(/the run is over/);
+    expect(w.meta().frozen).toBeUndefined();
+    // a run whose operator stops: the freeze ends on its own and writes go to the public store
+    const stopped = world();
+    await stopped.seed();
+    const s = await stopped.run('freeze');
+    stopped.t.now = Date.parse(s.expiresAt ?? '');
+    await stopped.instance().put('links/abc.json', body('after'), { overwrite: true });
+    expect(text(await stopped.legacy.get('links/abc.json'))).toBe('after');
+  });
+
+  it('ends a freeze with unfreeze, which takes no lease and keeps the state; other steps wait for the lease', async () => {
+    const w = world();
+    await w.seed();
+    await w.run('freeze');
+    const progress = { ...w.progress(), busyUntil: new Date(T0 + 60_000).toISOString() };
+    await w.documents.put(MIGRATION_PROGRESS, body(JSON.stringify(progress)), { overwrite: true });
+    await expect(w.run('plan')).rejects.toThrow(/another call holds the migration/);
+    await expect(w.run('freeze')).rejects.toThrow(/another call holds the migration/);
+    expect(await w.run('unfreeze')).toMatchObject({ state: 'v1', frozen: false, done: true });
+    expect(w.progress()).toMatchObject({
+      busyUntil: progress.busyUntil,
+      endedAt: expect.stringMatching(/unfreeze$/),
+    });
+    await w.instance().put('links/abc.json', body('open'), { overwrite: true });
+    expect(text(await w.legacy.get('links/abc.json'))).toBe('open');
+  });
+
+  it('refuses a second freeze, a plan of another freeze, and a switch after a copy that followed the verify', async () => {
+    const w = world();
+    await w.seed();
+    const frozen = await w.run('freeze');
+    await expect(w.run('freeze')).rejects.toThrow(/a freeze runs until/);
+    w.t.now = Date.parse(frozen.settlesAt ?? '');
+    await w.run('plan');
+    await w.run('copy');
+    w.later(LIST_LAG_MS);
+    await w.run('verify');
+    await w.run('copy');
+    await expect(w.run('switch')).rejects.toThrow(/no clean verify after the last copy/);
+    // a new freeze makes the plan of the last one stale
+    await w.run('unfreeze');
+    const again = await w.run('freeze');
+    w.t.now = Date.parse(again.settlesAt ?? '');
+    await expect(w.run('copy')).rejects.toThrow(/plan of record is not of this freeze/);
+  });
+});
+
+describe('the rollback of a switch', () => {
+  it('copies back every write made on v2, removes what v2 removed, and names the v1 writes it met', async () => {
+    const w = world();
+    await w.seed();
+    const { switched } = await window(w);
+    opens(w, switched);
+    const app = w.instance();
+    await app.put('decks/q4/deck.json', body('v2 edit'), { overwrite: true });
+    await app.put('links/new.json', body('v2 new'), { overwrite: false });
+    await app.del(['templates/t1/deck.json']);
+    await app.put('decks/q4/assets/new.ef56.png', body('twin'), { overwrite: false });
+    // two writers that still ran v1 on the public store
+    await w.legacy.put('links/abc.json', body('stray v1'), { overwrite: true });
+    await w.legacy.put('system/stray.json', body('stray new'), { overwrite: true });
+    const first = await w.run('rollback');
+    expect(first).toMatchObject({ state: 'v2', frozen: true, done: false });
+    await expect(app.put('links/new.json', body('x'), { overwrite: true })).rejects.toMatchObject({
+      name: 'StorageFrozenError',
+    });
+    expect(text(await app.get('links/new.json'))).toBe('v2 new');
+    await expect(w.run('rollback')).rejects.toThrow(/settles at/);
+    w.t.now = Date.parse(first.settlesAt ?? '');
+    const back = await w.run('rollback');
+    expect(back).toMatchObject({ state: 'v1', frozen: true, done: true });
+    expect(back.rows.sort()).toEqual([
+      'links/abc.json: a v1 write since the switch, replaced by the v2 one',
+      'system/stray.json: a v1 write since the switch, kept',
+    ]);
+    expect(text(await w.legacy.get('decks/q4/deck.json'))).toBe('v2 edit');
+    expect(text(await w.legacy.get('links/new.json'))).toBe('v2 new');
+    expect(text(await w.legacy.get('links/abc.json'))).toBe(SEED['links/abc.json']);
+    expect(w.legacy.blobs.has('templates/t1/deck.json')).toBe(false);
+    expect(w.legacy.blobs.has('system/stray.json')).toBe(true);
+    // v1 again: the reads move first, the writes OPEN_AFTER_MS later, both on the public store
+    expect(text(await app.get('links/new.json'))).toBe('v2 new');
+    await expect(app.put('links/new.json', body('x'), { overwrite: true })).rejects.toMatchObject({
+      name: 'StorageFrozenError',
+    });
+    w.later(OPEN_AFTER_MS);
+    await app.put('links/new.json', body('v1 again'), { overwrite: true });
+    expect(text(await w.legacy.get('links/new.json'))).toBe('v1 again');
+    expect(text(await w.documents.get('links/new.json'))).toBe('v2 new');
+  });
+
+  it('refuses on a shared store, before a switch, and after delete began', async () => {
+    const shared = world({ shared: true });
+    await shared.seed();
+    await window(shared);
+    await expect(shared.run('rollback')).rejects.toThrow(/runs on production alone/);
+    const before = world();
+    await before.seed();
+    await before.run('freeze');
+    await expect(before.run('rollback')).rejects.toThrow(/after a recorded switch/);
+    const deleted = world();
+    await deleted.seed();
+    await window(deleted);
+    const progress = { ...deleted.progress(), deleteStartedAt: NOW };
+    await deleted.documents.put(MIGRATION_PROGRESS, body(JSON.stringify(progress)), {
+      overwrite: true,
+    });
+    await expect(deleted.run('rollback')).rejects.toThrow(/delete began at/);
+  });
+
+  it('ends a failed rollback with unfreeze, back on v2', async () => {
+    const w = world();
+    await w.seed();
+    await window(w);
+    await w.run('rollback');
+    expect(await w.run('unfreeze')).toMatchObject({ state: 'v2', frozen: false });
+  });
+});
+
+describe('rekey', () => {
+  const OWNER = 'usr_owner';
+
+  async function keyed() {
+    const w = world();
+    await w.seed();
+    // gt-brand's record holds the derived key; q4's a key of its own, readable by URL on v1
+    await blobAccessStore(w.legacy).write(
+      'gt-brand',
+      newDeckRecord('gt-brand', OWNER, legacyAssetKey('gt-brand'), NOW),
+    );
+    await blobAccessStore(w.legacy).write(
+      'q4',
+      newDeckRecord('q4', OWNER, 'PublicKey0000000000000', NOW),
+    );
+    const { switched } = await window(w);
+    opens(w, switched);
+    return w;
+  }
+
+  it("gives each deck a key of the environment's own, its twins copied under it first", async () => {
+    const w = await keyed();
+    const keys = ['GtBrandKey000000000000', 'Q4OwnKey00000000000000'];
+    const minted: string[] = [];
+    const first = await w.run('rekey', {
+      newKey: () => (minted.push(keys[minted.length] ?? 'x'), keys[minted.length - 1] ?? 'x'),
+    });
+    expect(first).toMatchObject({ done: true, processed: 2, rowCount: 0 });
+    const records = blobAccessStore(w.documents);
+    expect((await records.read('gt-brand'))?.record.assetKey).toBe(keys[0]);
+    const q4Key = (await records.read('q4'))?.record.assetKey;
+    expect(q4Key).toBe(keys[1]);
+    expect(text(await w.legacy.get(`d/gt-brand/${keys[0]}/assets/mark.ab12.png`))).toBe('png-mark');
+    expect(text(await w.legacy.get(`d/q4/${keys[1]}/assets/photo.cd34.webp`))).toBe('webp-photo');
+    // the public records keep their keys; the private ones are the environment's own
+    expect((await blobAccessStore(w.legacy).read('q4'))?.record.assetKey).toBe(
+      'PublicKey0000000000000',
+    );
+    // the rollback waits for a pass after the twin key caches
+    expect(first.rekeyAfter).not.toBeNull();
+    await expect(w.run('rollback')).rejects.toThrow(/run rekey from/);
+    // an instance that still read the old key wrote a twin at the old place
+    await w.legacy.put('decks/gt-brand/assets/late.9a9a.png', body('late'), { overwrite: false });
+    const early = await w.run('rekey', {
+      newKey: () => {
+        throw new Error('no new key');
+      },
+    });
+    expect(early.rekeyAfter).toBe(first.rekeyAfter);
+    w.t.now = Date.parse(first.rekeyAfter ?? '');
+    const settled = await w.run('rekey', {
+      newKey: () => {
+        throw new Error('no new key');
+      },
+    });
+    expect(settled).toMatchObject({ done: true, rekeyAfter: null, rowCount: 0 });
+    expect(text(await w.legacy.get(`d/gt-brand/${keys[0]}/assets/late.9a9a.png`))).toBe('late');
+    expect(REKEY_SETTLE_MS).toBe(10 * 60_000 + 120_000);
+  });
+
+  it('refuses before the switch and while frozen', async () => {
+    const w = world();
+    await w.seed();
+    await expect(w.run('rekey')).rejects.toThrow(/after a recorded switch/);
+    await window(w);
+    await expect(w.run('rekey')).rejects.toThrow(/frozen/);
+  });
+});
+
+describe('delete', () => {
+  it('waits for its preconditions, then removes the old twins of keyed decks and each public document of the plan', async () => {
+    const w = world();
+    await w.seed();
+    await blobAccessStore(w.legacy).write(
+      'gt-brand',
+      newDeckRecord('gt-brand', 'usr_o', legacyAssetKey('gt-brand'), NOW),
+    );
+    const { switched } = await window(w);
+    const switchedAt = Date.parse(switched.switchedAt ?? '');
+    opens(w, switched);
+    const backup = new Date(switchedAt + 3_600_000).toISOString();
+    const rekey = await w.run('rekey', { newKey: () => 'GtBrandKey000000000000' });
+    await expect(w.run('delete', { backupAt: backup })).rejects.toThrow(
+      /run verify on layout v2 first/,
+    );
+    // a writer that ran v1 after the switch
+    await w.legacy.put('links/abc.json', body('stray v1'), { overwrite: true });
+    const verify = await w.run('verify');
+    expect(verify.rows).toEqual([
+      expect.stringMatching(
+        /^links\/abc.json: planned "\w+", found "\w+"; written on the public store since the switch/,
+      ),
+    ]);
+    await expect(w.run('delete', { backupAt: backup })).rejects.toThrow(/run rekey until a pass/);
+    w.t.now = Date.parse(rekey.rekeyAfter ?? '');
+    expect(await w.run('rekey')).toMatchObject({ rekeyAfter: null });
+    await expect(w.run('delete', { backupAt: backup })).rejects.toThrow(
+      /waits a day after the switch/,
+    );
+    w.t.now = switchedAt + DELETE_AFTER_SWITCH_MS;
+    await expect(w.run('delete')).rejects.toThrow(/--i-have-a-backup/);
+    await expect(w.run('delete', { backupAt: 'yesterday' })).rejects.toThrow(/wants an ISO time/);
+    await expect(w.run('delete', { backupAt: new Date(switchedAt).toISOString() })).rejects.toThrow(
+      /at or before the switch/,
+    );
+    await expect(
+      w.run('delete', { backupAt: new Date(w.t.now + 1).toISOString() }),
+    ).rejects.toThrow(/later than now/);
+    const gone = await w.run('delete', { backupAt: backup });
+    expect(gone).toMatchObject({
+      done: true,
+      rows: [expect.stringMatching(/^links\/abc.json: .*; delete kept it$/)],
+    });
+    expect(text(await w.legacy.get('d/gt-brand/GtBrandKey000000000000/assets/mark.ab12.png'))).toBe(
+      'png-mark',
+    );
+    for (const path of Object.keys(SEED)) {
+      const kept = isPublicPath(path) && path !== 'decks/gt-brand/assets/mark.ab12.png';
+      expect(w.legacy.blobs.has(path), path).toBe(kept || path === 'links/abc.json');
+    }
+    // every document still reads from the private store
+    for (const path of DOCUMENTS) expect(text(await w.instance().get(path)), path).toBe(SEED[path]);
+    await expect(w.run('rollback')).rejects.toThrow(/delete began/);
+    const shared = world({ shared: true });
+    await shared.seed();
+    await window(shared);
+    await expect(shared.run('delete', { backupAt: backup })).rejects.toThrow(
+      /runs on production alone/,
     );
   });
 });
 
-// Hardening K1#3 (docs/hardening/HARDENING.md 4.1; DATA-2): a keyed deck's twins live under
-// `d/<id>/<assetKey>/` on the public store while every caller keeps naming them
-// `decks/<id>/assets/<file>`; a deck without a key passes through; the record's key is read once.
+describe("a preview's window on the shared public store", () => {
+  it('snapshots the public documents from the dual read record, never writing the public store', async () => {
+    const w = world({ shared: true });
+    await w.seed();
+    const old = { schemaVersion: 1, layout: 'v1', dualRead: true, rollback: false, decks: [] };
+    await w.documents.put(MIGRATION_META, body(JSON.stringify(old)), { overwrite: true });
+    await w.documents.put('users/u1/decks.json', body('preview list'), { overwrite: true });
+    await w.documents.put('links/preview.json', body('preview link'), { overwrite: true });
+    const preview = w.instance();
+    const frozen = await w.run('freeze');
+    expect(w.meta()).toMatchObject({ state: 'dual', layout: 'v2' });
+    await expect(preview.put('links/x.json', body('x'), { overwrite: true })).rejects.toMatchObject(
+      { name: 'StorageFrozenError' },
+    );
+    expect(text(await preview.get('links/preview.json'))).toBe('preview link');
+    w.t.now = Date.parse(frozen.settlesAt ?? '');
+    await w.run('plan');
+    // production goes on writing the public store during the preview's window: the copy takes a
+    // version written after the plan (the read of the planned etag gives up), and production
+    // writes that document again after the copy
+    await w.legacy.put('decks/index.json', body('production before the copy'), { overwrite: true });
+    await w.run('copy');
+    await w.legacy.put('decks/index.json', body('production after the copy'), { overwrite: true });
+    expect(text(await w.documents.get('decks/index.json'))).toBe('production before the copy');
+    await w.legacy.put('links/abc.json', body('production edit'), { overwrite: true });
+    await w.legacy.del(['vitals/v.json']);
+    await w.legacy.put('links/later.json', body('production new'), { overwrite: true });
+    w.later(LIST_LAG_MS);
+    const verify = await w.run('verify');
+    expect(verify).toMatchObject({ clean: true, done: true });
+    expect(verify.note).toMatch(
+      /^3 planned documents the other environment changed or removed since the plan; 1 more public documents; 15 private documents$/,
+    );
+    const switched = await w.run('switch');
+    opens(w, switched);
+    expect(text(await preview.get('users/u1/decks.json'))).toBe(SEED['users/u1/decks.json']);
+    expect(text(await preview.get('links/preview.json'))).toBe('preview link');
+    expect(text(await preview.get('links/later.json'))).toBeNull();
+    await preview.put('links/x.json', body('x'), { overwrite: true });
+    expect(w.documents.blobs.has('links/x.json')).toBe(true);
+    const production = new Set([
+      'decks/index.json',
+      'links/abc.json',
+      'vitals/v.json',
+      'links/later.json',
+    ]);
+    expect(w.publicWrites().filter((c) => !production.has(c.pathname))).toEqual([]);
+  });
+});
+
+describe('a twin removal on a shared store', () => {
+  it('leaves only from under a key the public record does not hold, never from the old place', async () => {
+    const store = memoryBlobClient('https://public.local');
+    for (const path of ['decks/x/assets/a.png', 'd/x/PUBLIC/assets/a.png', 'd/x/MINE/assets/a.png'])
+      await store.put(path, body('a'), { overwrite: true });
+    const removing = async (key: string) => {
+      const keyOf = async () => key;
+      await keyedTwinsClient(store, keyOf, { sharedKeyOf: async () => 'PUBLIC' }).del([
+        'decks/x/assets/a.png',
+      ]);
+    };
+    await removing('PUBLIC');
+    expect([...store.blobs.keys()].sort()).toEqual([
+      'd/x/MINE/assets/a.png',
+      'd/x/PUBLIC/assets/a.png',
+      'decks/x/assets/a.png',
+    ]);
+    await removing('MINE');
+    expect([...store.blobs.keys()].sort()).toEqual([
+      'd/x/PUBLIC/assets/a.png',
+      'decks/x/assets/a.png',
+    ]);
+  });
+});
+
 describe('the keyed twins (hardening K1#3)', () => {
   const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9, 9]);
 
@@ -339,7 +874,7 @@ describe('the keyed twins (hardening K1#3)', () => {
     const key = newAssetKey();
     const legacy = memoryBlobClient('https://public.local');
     const documents = memoryBlobClient('https://private.local');
-    await writeMeta(documents, { ...emptyMeta(NOW), layout: 'v2' });
+    await putLayoutRecord(documents, { state: 'v2' });
     const split = splitBlobClient({ legacy, documents }, { ttlMs: 0 });
     const twins = keyedTwinsClient(
       split,
@@ -355,129 +890,3 @@ describe('the keyed twins (hardening K1#3)', () => {
 // a random key of its own, copies its twins under `d/<id>/<assetKey>/` verified by etag and only
 // then writes the key; `delete` makes a last copy of any twin written at the old place since and
 // removes `decks/<id>/assets/`; a deck without a record keeps its twins; a re-run changes nothing.
-describe('the rekey step (hardening K1#4)', () => {
-  const KEY = 'Rk7Qw2Zp9LmX4cVb8NtY3a';
-
-  async function twoDecks() {
-    const legacy = memoryBlobClient('https://public.local', { now: () => NOW });
-    const documents = memoryBlobClient('https://private.local', {
-      now: () => '2026-09-13T11:00:00.000Z',
-    });
-    const gt = await seedDeck(legacy, 'gt-brand', 2);
-    const q4 = await seedDeck(legacy, 'q4-review', 2);
-    const extra = new Uint8Array([7, 7, 7]);
-    await legacy.put('decks/q4-review/assets/photo.ab12.webp', extra, { overwrite: false });
-    q4.set('decks/q4-review/assets/photo.ab12.webp', extra);
-    // the seed deck holds no record; the other deck's is a real one with the derived key
-    await legacy.del(['decks/gt-brand/access.json']);
-    await blobAccessStore(legacy).write(
-      'q4-review',
-      newDeckRecord('q4-review', 'usr_owner', legacyAssetKey('q4-review'), NOW),
-    );
-    return { legacy, documents, clients: { legacy, documents }, gt, q4 };
-  }
-
-  it('lists rekey between verify and cutover, as the action schema does', () => {
-    expect([...MIGRATION_STEPS]).toEqual([...SCHEMA_MIGRATION_STEPS]);
-    expect(MIGRATION_STEPS.indexOf('rekey')).toBe(MIGRATION_STEPS.indexOf('verify') + 1);
-  });
-
-  it('copies the twins under a new key byte for byte, then writes the key; a re-run is a no-op', async () => {
-    const { legacy, clients, q4 } = await twoDecks();
-    await runMigrationStep(clients, 'plan', { now: () => NOW });
-    // a deck is rekeyed once its documents are copied and verified
-    const early = await runMigrationStep(clients, 'rekey', { now: () => NOW, newKey: () => KEY });
-    expect(early.failed).toEqual([
-      'gt-brand: not verified; run copy and verify first',
-      'q4-review: not verified; run copy and verify first',
-    ]);
-    await runMigrationStep(clients, 'copy', { now: () => NOW });
-    await runMigrationStep(clients, 'verify', { now: () => NOW });
-    const keys: string[] = [];
-    const rekey = await runMigrationStep(clients, 'rekey', {
-      now: () => NOW,
-      newKey: () => {
-        keys.push(KEY);
-        return KEY;
-      },
-    });
-    expect(rekey).toMatchObject({ step: 'rekey', processed: 2, verified: 1, done: true });
-    expect(rekey.failed).toEqual([]);
-    expect(keys).toEqual([KEY]);
-    // the record names the key now
-    const stored = await blobAccessStore(splitBlobClient(clients, { ttlMs: 0 })).read('q4-review');
-    expect(stored?.record.assetKey).toBe(KEY);
-    // every twin under the key, equal bytes and etag; the old copies stay until delete
-    for (const name of ['mark.png', 'photo.ab12.webp']) {
-      const from = `decks/q4-review/assets/${name}`;
-      const to = `d/q4-review/${KEY}/assets/${name}`;
-      expect(legacy.blobs.get(to)?.bytes).toEqual(q4.get(from));
-      expect(legacy.blobs.get(to)?.version).toBe(legacy.blobs.get(from)?.version);
-    }
-    // the seed deck has no record and keeps its twins where they are
-    expect([...legacy.blobs.keys()].some((path) => path.startsWith('d/gt-brand/'))).toBe(false);
-    // a second pass mints nothing and writes nothing
-    const before = new Map([...legacy.blobs].map(([path, blob]) => [path, blob.version]));
-    const again = await runMigrationStep(clients, 'rekey', {
-      now: () => NOW,
-      newKey: () => {
-        throw new Error('a keyed deck takes no new key');
-      },
-    });
-    expect(again.failed).toEqual([]);
-    expect(new Map([...legacy.blobs].map(([path, blob]) => [path, blob.version]))).toEqual(before);
-  });
-
-  it('reads the twins through the keyed client after rekey, and delete moves a late twin then removes the old place', async () => {
-    const { legacy, documents, clients } = await twoDecks();
-    await runMigrationStep(clients, 'plan', { now: () => NOW });
-    await runMigrationStep(clients, 'copy', { now: () => NOW });
-    await runMigrationStep(clients, 'verify', { now: () => NOW });
-    await runMigrationStep(clients, 'rekey', { now: () => NOW, newKey: () => KEY });
-    // an instance that still read the deck as unkeyed wrote a twin at the old place
-    const late = new Uint8Array([5, 4, 3]);
-    await legacy.put('decks/q4-review/assets/late.cd34.png', late, { overwrite: false });
-    const cutover = await runMigrationStep(clients, 'cutover', { now: () => NOW });
-    expect(cutover.done).toBe(true);
-    const deleted = await runMigrationStep(clients, 'delete', { now: () => NOW, batch: 5 });
-    expect(deleted.failed).toEqual([]);
-    const paths = [...legacy.blobs.keys()];
-    expect(paths.filter((path) => path.startsWith('decks/q4-review/'))).toEqual([]);
-    expect(paths.filter((path) => path.startsWith(`d/q4-review/${KEY}/assets/`)).sort()).toEqual([
-      `d/q4-review/${KEY}/assets/late.cd34.png`,
-      `d/q4-review/${KEY}/assets/mark.png`,
-      `d/q4-review/${KEY}/assets/photo.ab12.webp`,
-    ]);
-    // the seed deck keeps its twins at their old place
-    expect(legacy.blobs.has('decks/gt-brand/assets/mark.png')).toBe(true);
-    // the deployment's client reads the deck's twins by their manifest names, under the key
-    const split = splitBlobClient({ legacy, documents }, { ttlMs: 0 });
-    const records = blobAccessStore(split);
-    const client = keyedTwinsClient(
-      split,
-      twinKeyResolver(async (deckId) => (await records.read(deckId))?.record ?? null),
-    );
-    expect((await client.get('decks/q4-review/assets/late.cd34.png'))?.bytes).toEqual(late);
-    expect((await client.head('decks/q4-review/assets/mark.png'))?.url).toBe(
-      `https://public.local/d/q4-review/${KEY}/assets/mark.png`,
-    );
-  });
-
-  it('fails a deck whose keyed copy holds other bytes, and leaves its record unkeyed', async () => {
-    const { legacy, clients } = await twoDecks();
-    await legacy.put(`d/q4-review/${KEY}/assets/mark.png`, new Uint8Array([0]), {
-      overwrite: false,
-    });
-    await runMigrationStep(clients, 'plan', { now: () => NOW });
-    await runMigrationStep(clients, 'copy', { now: () => NOW });
-    await runMigrationStep(clients, 'verify', { now: () => NOW });
-    const rekey = await runMigrationStep(clients, 'rekey', { now: () => NOW, newKey: () => KEY });
-    expect(rekey.failed).toEqual([
-      expect.stringMatching(
-        /^q4-review: d\/q4-review\/Rk7Qw2Zp9LmX4cVb8NtY3a\/assets\/mark\.png has etag/,
-      ),
-    ]);
-    const stored = await blobAccessStore(splitBlobClient(clients, { ttlMs: 0 })).read('q4-review');
-    expect(stored?.record.assetKey).toBe(legacyAssetKey('q4-review'));
-  });
-});

@@ -66,6 +66,11 @@ export type TabBackendOptions = {
   checkpointIdleMs?: number;
   /** the longest a checkpoint waits while ops keep coming */
   checkpointMaxMs?: number;
+  /**
+   * Where the document's asset paths resolve: the hero deck's pictures are static files of the
+   * site (hero-deck.ts HERO_ASSET_BASE), since no store holds a tab's deck; `/decks/<id>/` unless set.
+   */
+  assetBase?: string;
 };
 
 export type TabBackend = {
@@ -310,7 +315,7 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
       }
       return storage;
     },
-    assetBase: (id) => `/decks/${id}/`,
+    assetBase: (id) => options.assetBase ?? `/decks/${id}/`,
     createNewDeck: refusing,
     listDecks: refusing,
     readSourceDeckSlides: refusing,

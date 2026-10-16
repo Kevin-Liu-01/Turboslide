@@ -14,7 +14,7 @@ import { TRY_READY, framingWindow, isTryPress, isTryVisible, topWindow } from '.
 import type { TryPressed } from './frame';
 import { createGuests } from './guests';
 import type { GuestHandle, Guests } from './guests';
-import { heroDocument } from './hero-deck';
+import { HERO_ASSET_BASE, heroDocument } from './hero-deck';
 import type { AgentKey } from './script';
 import { createTabBackend } from './tab-backend';
 import type { TabPerson, TabRoom } from './tab-backend';
@@ -133,6 +133,7 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
   const { backend, room, payloadFor, join } = createTabBackend({
     deckId,
     document: heroDocument(deckId),
+    assetBase: HERO_ASSET_BASE,
     people: [visitor, TRY_AGENTS.claude, TRY_AGENTS.codex],
     tabOnly: {
       sentence: TAB_ONLY.sentence,
@@ -310,14 +311,19 @@ export function createTrySession(options: { win: Window; still: boolean }): TryS
     win.addEventListener('message', onMessage);
     win.document.addEventListener('visibilitychange', onVisibility);
     onVisibility();
-    /* ready once the editor drew its filmstrip and the visitor's roster holds both agents */
+    /* ready once the editor drew its filmstrip, every dithered picture drew its first frame (until
+       then it shows its continuous source, dither-runtime.ts) and the visitor's roster holds both
+       agents */
     let readyTimer: ReturnType<typeof setInterval> | undefined;
     const startedAt = Date.now();
     readyTimer = setInterval(() => {
       const roster = visitorController?.getSnapshot().roster ?? [];
       const agents = roster.filter((row) => row.kind === 'agent').length;
       const drawn = win.document.querySelector('.ts-filmstrip .ts-card') !== null;
-      if ((drawn && agents >= 2) || Date.now() - startedAt > 10_000) {
+      const dithered = [...win.document.querySelectorAll('[data-dither-state="live"]')].every(
+        (root) => root.querySelector('canvas.picture-dither:not([hidden])') !== null,
+      );
+      if ((drawn && dithered && agents >= 2) || Date.now() - startedAt > 10_000) {
         if (readyTimer !== undefined) clearInterval(readyTimer);
         readyTimer = undefined;
         pose();

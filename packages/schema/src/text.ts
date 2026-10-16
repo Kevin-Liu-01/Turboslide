@@ -486,13 +486,46 @@ export function serializeRuns(runs: ReadonlyArray<Run>): Text {
 }
 
 /**
+ * The characters the canonical memo holds, keys and values together (about 2 MB of strings); the
+ * oldest entry leaves first (HR-RT#16).
+ */
+const CANONICAL_MEMO_CHARS = 1_000_000;
+const canonicalMemo = new Map<Text, Text>();
+let canonicalMemoChars = 0;
+let canonicalParses = 0;
+
+function rememberCanonical(text: Text, canonical: Text): void {
+  const chars = text.length + canonical.length;
+  if (chars > CANONICAL_MEMO_CHARS / 16) return;
+  for (const [key, value] of canonicalMemo) {
+    if (canonicalMemoChars + chars <= CANONICAL_MEMO_CHARS) break;
+    canonicalMemo.delete(key);
+    canonicalMemoChars -= key.length + value.length;
+  }
+  canonicalMemo.set(text, canonical);
+  canonicalMemoChars += chars;
+}
+
+/**
  * parse then serialize: the form the validator stores so escapes are canonical (SPEC 4.4). Runs
  * per paragraph, so a paragraph break never joins two paragraphs' markup (gslides-parity SPEC 7.4).
+ * HR-RT#16 (RUST-7): one bounded memo keyed by the input string serves the validator and the
+ * reducer, so a Text that did not change is parsed once, not on every validation.
  */
 export function canonicalText(text: Text): Text {
-  return splitParagraphs(text)
+  const known = canonicalMemo.get(text);
+  if (known !== undefined) return known;
+  canonicalParses += 1;
+  const canonical = splitParagraphs(text)
     .map((paragraph) => serializeRuns(parseText(paragraph)))
     .join('\n');
+  rememberCanonical(text, canonical);
+  return canonical;
+}
+
+/** How many Texts `canonicalText` parsed in this process, for the memo's call count test. */
+export function canonicalTextParses(): number {
+  return canonicalParses;
 }
 
 /** The visible characters with markup removed; what the copy rules read. */

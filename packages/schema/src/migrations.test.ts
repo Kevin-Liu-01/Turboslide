@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 
 import { SCHEMA_VERSION } from './deck.ts';
 import { CURRENT_SCHEMA_VERSION, MIGRATIONS, migrate } from './migrations.ts';
+import { canonicalTextParses } from './text.ts';
 import { validateDeck } from './validate.ts';
 
 const DECKS = join(import.meta.dirname, '..', '..', '..', 'decks');
@@ -95,5 +96,21 @@ describe('the blank template', () => {
     const slide = readJson(join(dir, 'slides', 'title.json'));
     expect(slide).toMatchObject({ kind: 'title', heading: '', lead: '', template: 'title' });
     expect(slideFiles(dir)).toEqual(['title.json']);
+  });
+});
+
+describe('the canonical Text memo (HR-RT#16, RUST-7)', () => {
+  it('parses each distinct Text of the GT deck once over ten validations', () => {
+    const dir = join(DECKS, 'gt-brand');
+    const input = () => {
+      const slides: Record<string, unknown> = {};
+      for (const file of slideFiles(dir))
+        slides[file.slice(0, -'.json'.length)] = readJson(join(dir, 'slides', file));
+      return { deck: readJson(join(dir, 'deck.json')), slides };
+    };
+    const first = validateDeck(input());
+    const afterFirst = canonicalTextParses();
+    for (let i = 1; i < 10; i += 1) expect(validateDeck(input()).deck).toEqual(first.deck);
+    expect(canonicalTextParses()).toBe(afterFirst);
   });
 });

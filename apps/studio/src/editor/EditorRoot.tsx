@@ -109,6 +109,7 @@ import { showStageSize } from '../components/show-stage';
 import { useMountEffect } from '../components/useMountEffect';
 import { rememberLinkUrl } from '@turboslide/chrome/dialogs/share-links';
 import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
+import { reportRouteError } from '../report-errors';
 import { RouterLinkSlot } from '../routes/-link-slot';
 import { readRecent, recordDeckOpened, updateDeckFacts } from '../routes/-recent';
 import type { DeckOpenFacts } from '../routes/-recent';
@@ -1720,6 +1721,8 @@ export function EditorRoot({
 
   const editorInput: EditorShellInput = {
     deckId,
+    /* a filmstrip, side panel or dialog that fails to render reports here (hardening HR-O#7) */
+    onPanelError: reportRouteError,
     /* the title row's mark is the router's Link to /decks (SPEC-4 0.16, 1.10): a same document
        transition with the list's loader preloaded on intent, in place of a document load */
     linkComponent: RouterLinkSlot,

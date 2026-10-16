@@ -308,6 +308,31 @@ describe('lintStatic', () => {
     expect(wide.filter((f) => f.rule === 'chart/size')).toEqual([]);
   });
 
+  test('asset/twin-or-border asks a neutral picture object for a frame, unless a mask clips it', () => {
+    const picture = (mask?: 'ellipse') => ({
+      id: 'photo',
+      type: 'picture' as const,
+      asset: 'neutral-shot',
+      ...(mask === undefined ? {} : { mask }),
+      pos: { x: 943, y: 320, w: 520, h: 520, z: 0 },
+    });
+    const run = (mask?: 'ellipse') =>
+      lintStatic({
+        deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['p'] }] },
+        slides: {
+          p: {
+            schemaVersion: 1,
+            id: 'p',
+            kind: 'content',
+            layout: { type: 'freeform' },
+            slots: { main: [picture(mask)] },
+          } as Slide,
+        },
+      }).filter((f) => f.rule === 'asset/twin-or-border');
+    expect(run().map((f) => f.blockId)).toEqual(['photo']);
+    expect(run('ellipse')).toEqual([]);
+  });
+
   test('copy/empty-placeholder names the empty title and the empty cell at severity 1, and the empty Texts trip no other rule', () => {
     const empty = findings.filter((f) => f.rule === 'copy/empty-placeholder');
     expect(empty).toHaveLength(2);

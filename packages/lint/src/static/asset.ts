@@ -74,7 +74,11 @@ export function checkAssets(ctx: LintContext): Finding[] {
           block.pos.x + block.pos.w >= 1600 &&
           block.pos.y + block.pos.h >= 900;
         const framed = block.frame !== undefined;
-        if (asset && 'neutral' in asset.twins && !framed && !covers) {
+        // a mask clips the frame, which is the box's border, down to four short arcs where the
+        // shape meets the box, and the border insets the picture and its dither cells, so a
+        // masked picture's edge is its shape's own
+        const masked = block.mask !== undefined;
+        if (asset && 'neutral' in asset.twins && !framed && !covers && !masked) {
           out.push(
             ctx.finding('asset/twin-or-border', slide.id, {
               blockId: block.id,

@@ -35,7 +35,7 @@ beforeEach(async () => {
       TURBOSLIDE_AUTH_DB: 'state/auth.sqlite',
       TURBOSLIDE_MAIL: 'capture',
       TURBOSLIDE_SESSION_SECRET: SECRET,
-      TURBOSLIDE_ADMIN_EMAILS: 'admin@example.test',
+      TURBOSLIDE_ADMIN_EMAILS: 'admin@example.test, unverified-admin@example.test',
     },
     root: dir,
     stateDir: join(dir, 'state'),
@@ -75,11 +75,19 @@ function cookiesOf(response: Response, previous = ''): string {
 }
 
 /** A user row the way better-auth would create it, for the tests that need an account first. */
-async function insertUser(id: string, email: string, name = ''): Promise<void> {
+async function insertUser(id: string, email: string, name = '', verified = true): Promise<void> {
   const stamp = new Date().toISOString();
   await runtime
     .db!.db.insertInto('user')
-    .values({ id, name, email, emailVerified: 1, image: null, createdAt: stamp, updatedAt: stamp })
+    .values({
+      id,
+      name,
+      email,
+      emailVerified: verified ? 1 : 0,
+      image: null,
+      createdAt: stamp,
+      updatedAt: stamp,
+    })
     .execute();
 }
 
@@ -400,6 +408,14 @@ describe('sign in through the library', () => {
     expect(admin.ctx.principal?.admin).toBe(true);
     expect((await accountFacts(runtime, adminId))?.admin).toBe(true);
     expect(decide(null, admin.ctx, 'remove')).toEqual({ ok: true, role: 'owner', via: 'admin' });
+  });
+
+  test('an admin address that is not verified is not the admin (HR-SA#8)', async () => {
+    const userId = `unverified-${Date.now()}`;
+    await insertUser(userId, 'unverified-admin@example.test', '', false);
+    const facts = await accountFacts(runtime, userId);
+    expect(facts?.emailVerified).toBe(false);
+    expect(facts?.admin).toBe(false);
   });
 
   test('the fourth sign in mail for one address in ten minutes is withheld with the same answer', async () => {

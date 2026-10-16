@@ -43,6 +43,7 @@
     "./render": "./src/render.ts",
     "./ext": "./src/ext.ts",
     "./style-text": "./src/style-text.ts",
+    "./motion": "./src/motion.ts",
     "./export": "./src/export.ts",
     "./errors": "./src/errors.ts",
     "./jitless": "./src/jitless.ts",

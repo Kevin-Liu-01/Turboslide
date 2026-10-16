@@ -27,7 +27,15 @@ import { isRecord, migrate } from './migrations.ts';
 import { getAt, joinPointer, setAt } from './pointer.ts';
 import { DITHER_NO_SOURCE_MESSAGE } from './blocks/dither.ts';
 import { hasContinuousSource } from './assets.ts';
-import { SLIDE_LINK_KEYWORDS, canonicalText, refusedLinksOf, slideLinksOf } from './text.ts';
+import { MOTION_LIMITS, effectSplit, splitUnitCount } from './motion.ts';
+import type { Text } from './text.ts';
+import {
+  SLIDE_LINK_KEYWORDS,
+  canonicalText,
+  plainText,
+  refusedLinksOf,
+  slideLinksOf,
+} from './text.ts';
 
 export type IssueCode =
   | 'not_object'
@@ -55,7 +63,9 @@ export type IssueCode =
   /** a connector attached to a block that is missing, unpositioned or a line, a site out of range, or an end off its site (SPEC-2 2.4.7) */
   | 'connect'
   /** the deck's guides unsorted or repeated (SPEC-2 2.10) */
-  | 'guides';
+  | 'guides'
+  /** a split effect on a block without text, or over 400 units (the slide clock, motion.ts) */
+  | 'motion';
 
 export type Issue = {
   code: IssueCode;
@@ -468,6 +478,56 @@ function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
 }
 
 /**
+ * The effects' checks that need the slide's blocks (the slide clock, motion.ts; the schema holds
+ * the rest): a split effect animates a text block's lines, words or glyphs, so a split on a block
+ * without text is refused (severity 3), and a split over 400 units is a warning (severity 2),
+ * because typing into the block must never be refused. An effect whose block is gone is not an
+ * issue: two people can remove a block and edit its effects at once, and the compiler skips it.
+ */
+function checkMotion(slide: Slide, file: string, issues: Issue[]): void {
+  if (slide.effects === undefined || slide.effects.length === 0) return;
+  const blocks = new Map<string, Block>();
+  for (const list of blockLists(slide))
+    walkBlocks(list.blocks, list.pointer, (block) => {
+      blocks.set(block.id, block);
+    });
+  slide.effects.forEach((effect, index) => {
+    const split = effectSplit(effect);
+    const block = blocks.get(effect.block);
+    if (split === undefined || block === undefined) return;
+    const paths = blockTextPaths(block);
+    if (paths.length === 0) {
+      issues.push(
+        issue(
+          'motion',
+          3,
+          file,
+          `/effects/${index}`,
+          `Effect "${effect.id}" splits block "${effect.block}", a ${block.type} block with no text; a text preset or split is for blocks that hold text`,
+        ),
+      );
+      return;
+    }
+    const text = paths
+      .map((path) => getAt(block, path))
+      .filter((value): value is string => typeof value === 'string')
+      .map((value) => plainText(value as Text))
+      .join(' ');
+    const units = splitUnitCount(text, split.by);
+    if (units > MOTION_LIMITS.splitUnits)
+      issues.push(
+        issue(
+          'motion',
+          2,
+          file,
+          `/effects/${index}/split`,
+          `Effect "${effect.id}" splits ${units} ${split.by}s; the slideshow animates at most ${MOTION_LIMITS.splitUnits} and shows the rest with the last one`,
+        ),
+      );
+  });
+}
+
+/**
  * The slide links of a slide (gslides-parity SPEC 7.2.7, 7.2.8): every block `link` naming a
  * slide and every `#s/<id>` run link, with the pointer of the field that carries it. The four
  * keywords (next, previous, first, last) name positions and are never checked against the deck.
@@ -542,6 +602,7 @@ export function validateSlide(input: unknown, fileLabel?: string): SlideValidati
   }
   const slide = parsed.data;
   normalizeSlide(slide, file, issues);
+  checkMotion(slide, file, issues);
   const ext = extPointers(slide);
   if (ext.length > 0) {
     issues.push(

@@ -29,6 +29,8 @@ import type { Text } from './text.ts';
 import { multilineTextSchema, plainText, textSchema } from './text.ts';
 import type { Typography } from './typography.ts';
 import { typographyObjectSchema } from './typography.ts';
+import type { Advance, Effect, Transition } from './motion.ts';
+import { advanceSchema, effectsSchema, transitionSchema } from './motion.ts';
 
 export const SCHEMA_VERSION = 1;
 
@@ -108,6 +110,10 @@ export type Deck = {
     counter?: CounterMode;
     /** the background every slide without its own takes; what Add to theme writes (gslides-parity SPEC-2 2.6.2) */
     background?: SlideBackground;
+    /** the transition every slide without its own takes (motion.ts); today's 120 ms fade and rise when absent */
+    transition?: Transition;
+    /** the timed advance every slide without its own takes (motion.ts); a click advances when absent */
+    advance?: Advance;
   };
   /**
    * The deck's guides (gslides-parity SPEC-2 2.10): vertical lines at the x values and horizontal
@@ -172,6 +178,16 @@ export type SlideBase = {
    * validator's `ext` issue does not fire on a converted slide.
    */
   grammar?: GrammarRecord;
+  /**
+   * The slide's effects in play order (motion.ts, the slide clock): enter, emphasis and exit
+   * effects on its blocks, each starting on a click, with the previous effect or after it. Every
+   * still surface draws the authored state, every block in place.
+   */
+  effects?: Effect[];
+  /** The transition into the slide; the deck's when absent (motion.ts). */
+  transition?: Transition;
+  /** Leave the slide this long after its last step ends; the deck's when absent (motion.ts). */
+  advance?: Advance;
   ext?: Record<string, unknown>;
 };
 
@@ -525,6 +541,24 @@ const slideBase = {
     group: 'Slide',
     help: 'The layout and fields the slide had before it was arranged by hand; Apply layout re-flows from it.',
   }),
+  effects: annotate(effectsSchema.optional(), {
+    label: 'Animations',
+    control: 'json',
+    group: 'Slide',
+    help: 'The enter, emphasis and exit effects on this slide’s blocks in play order; motion.add and the Animate command write them.',
+  }),
+  transition: annotate(transitionSchema.optional(), {
+    label: 'Transition',
+    control: 'json',
+    group: 'Slide',
+    help: 'How the slide enters in the slideshow and the shared view; the presentation’s transition when absent.',
+  }),
+  advance: annotate(advanceSchema.optional(), {
+    label: 'Advance',
+    control: 'json',
+    group: 'Slide',
+    help: 'Moves to the next slide this many milliseconds after the last step; a click advances when absent.',
+  }),
   ext: extSchema,
 };
 
@@ -669,6 +703,18 @@ export const deckSchema = z.strictObject({
         control: 'json',
         group: 'Slide',
         help: 'The background colour every slide without its own takes; Add to theme writes it.',
+      }),
+      transition: annotate(transitionSchema.optional(), {
+        label: 'Transition',
+        control: 'json',
+        group: 'Slide',
+        help: 'The transition every slide without its own takes; slide.transition without slide ids writes it.',
+      }),
+      advance: annotate(advanceSchema.optional(), {
+        label: 'Advance',
+        control: 'json',
+        group: 'Slide',
+        help: 'The timed advance every slide without its own takes; slide.advance without slide ids writes it.',
       }),
     })
     .optional(),

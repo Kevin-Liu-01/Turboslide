@@ -360,6 +360,10 @@ function keptFields(slide: Slide, layout: LayoutId) {
     ...(slide.tags !== undefined ? { tags: slide.tags } : {}),
     ...(slide.skip !== undefined ? { skip: slide.skip } : {}),
     ...(slide.background !== undefined ? { background: slide.background } : {}),
+    /* the slide clock (motion.ts): the effects target block ids, which the conversion keeps */
+    ...(slide.effects !== undefined ? { effects: slide.effects } : {}),
+    ...(slide.transition !== undefined ? { transition: slide.transition } : {}),
+    ...(slide.advance !== undefined ? { advance: slide.advance } : {}),
     ...(slide.ext !== undefined ? { ext: slide.ext } : {}),
     template: layout,
   };

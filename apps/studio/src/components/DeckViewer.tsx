@@ -28,6 +28,7 @@ import { deferredSlidesOf, mergeDeferredSlides } from './deferred-slides';
 import { Slideshow } from './Slideshow';
 import type { SlideshowState } from './Slideshow';
 import { useMountEffect } from './useMountEffect';
+import { useSlideClock } from './useSlideClock';
 import { useStudioSession } from './useStudioSession';
 
 /**
@@ -279,10 +280,69 @@ function StageBridge({
   const play = useMemo(() => playList(deck.slides), [deck.slides]);
   /* the show's step (Slideshow fills it): a click plays the slide's next step before it moves on */
   const showStep = useRef<((delta: number) => void) | null>(null);
-  /* a click on the sheet: the next step or slide of the show while presenting, the shell's paging otherwise */
+  /* the viewer's and the embed's slide mode run the slide clock as the show does (HTML-SLIDES-DESIGN
+     2.6): the paging keys and a click on the sheet step through a slide's effects, then the
+     slides, and back from step 0 lands on the previous slide's end; the show builds its own */
+  const viewStep = useRef<(delta: number) => void>(() => undefined);
+  const view = useSlideClock({
+    scope: () => document,
+    slide,
+    enabled: !shell.present && shell.mode === 'slide',
+    onAdvance: () => viewStep.current(1),
+  });
+  const shellRef = useRef(shell);
+  shellRef.current = shell;
+  /** Before the shell pages back: the previous slide enters at its end. */
+  const enterPrevious = (): void => {
+    const now = shellRef.current;
+    const previous = now.paged[now.index - 1];
+    if (previous !== undefined) view.enter(previous.id, 'end');
+  };
+  viewStep.current = (delta: number) => {
+    const clock = view.clock.current;
+    if (clock !== null && (delta > 0 ? clock.next() : clock.back())) return;
+    if (delta < 0) enterPrevious();
+    shellRef.current.step(delta);
+  };
+  /* the paging keys of the shell (useShellKeys), read first: this listener registers on mount
+     before the shell's own, so a key the clock takes is marked handled and the shell skips it */
+  useMountEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.isComposing) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const clock = view.clock.current;
+      if (clock === null) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+      )
+        return;
+      const key = event.key;
+      const low = key.length === 1 ? key.toLowerCase() : key;
+      const next =
+        key === 'ArrowRight' || key === ' ' || key === 'PageDown' || low === 'j' || low === 'l';
+      const back =
+        key === 'ArrowLeft' ||
+        key === 'PageUp' ||
+        low === 'k' ||
+        low === 'h' ||
+        key === 'Backspace';
+      if (!next && !back) return;
+      if (next ? clock.next() : clock.back()) {
+        event.preventDefault();
+        return;
+      }
+      if (back) enterPrevious();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  });
+  /* a click on the sheet: the next step or slide of the show while presenting, the slide clock and
+     the shell's paging otherwise */
   const onStep = (delta: number) => {
     if (!shell.present) {
-      shell.step(delta);
+      viewStep.current(delta);
       return;
     }
     if (showStep.current !== null) {

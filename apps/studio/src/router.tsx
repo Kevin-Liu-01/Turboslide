@@ -4,6 +4,7 @@ import { getGlobalStartContext } from '@tanstack/react-start';
 
 import { setDitherWorkerFactory } from '@turboslide/viewer/dither';
 
+import { installErrorReporter, reportRouteError } from './report-errors';
 import { routeTree } from './routeTree.gen';
 import { PageRefused } from './routes/-refused-page';
 
@@ -95,9 +96,17 @@ export function getRouter() {
     // shell around it stands; the page's Reload is `router.invalidate()`. The /edit route names
     // its own component for its two headings (routes/edit.$deckId.tsx EditRefused).
     defaultErrorComponent: PageRefused,
+    // The error the page stands for also reaches the log (hardening HR-O#2b, RELIABILITY-14): in
+    // the browser a route's catch boundary hands it here, and one scrubbed line goes to
+    // /api/x/errors (report-errors.ts). A loader's not found answer never reaches it.
+    defaultOnCatch: reportRouteError,
     ...(nonce === undefined ? {} : { ssr: { nonce } }),
   });
 
+  // the page's uncaught errors and unhandled rejections, under the route the router matched
+  installErrorReporter(
+    () => router.state.matches.at(-1)?.routeId ?? globalThis.location?.pathname ?? '/',
+  );
   return router;
 }
 

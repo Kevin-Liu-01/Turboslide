@@ -38,13 +38,14 @@ import {
 import type { PlateSide, TwoToneRequestParams } from '@turboslide/headless/capture/shared';
 import { isSingleProcessBrowser, launchBrowser } from '@turboslide/headless/launch';
 import type { GpuBackend, LaunchOptions, LaunchedBrowser } from '@turboslide/headless/launch';
+import { themePaths } from '@turboslide/render/theme-node';
 import type { Asset } from '@turboslide/schema/assets';
 import type { MaterialUniforms } from '@turboslide/schema/blocks/material';
 import { getShaderNoiseTexture } from '@paper-design/shaders';
 
 import type { GlyphEntry, MaterialEntry } from './catalog.ts';
 import { entryWithPalette, requireMaterial } from './catalog.ts';
-import { glyphFrameOf, glyphProgramSpec } from './engine.ts';
+import { GLYPH_FIELD_FONT_LOAD, glyphFrameOf, glyphProgramSpec } from './engine.ts';
 import { createGlyphRenderer } from './glyph/renderer.ts';
 import type { GlyphFrame, GlyphProgramSpec } from './glyph/renderer.ts';
 import { fragmentShaderExport, mipmapsFor, textureSources, toShaderUniforms } from './paper.ts';
@@ -313,6 +314,17 @@ export async function mountInPage(
  */
 export async function mountGlyphInPage(page: Page, spec: GlyphProgramSpec): Promise<void> {
   await page.waitForSelector('html[data-paper-ready="1"]', { state: 'attached', timeout: 15_000 });
+  if (spec.kind === 'canvas2d') {
+    /* the glyph field draws in Inter, inlined from the fonts package as the render documents do */
+    const woff2 = await readFile(themePaths().interWoff2);
+    await page.addStyleTag({
+      content: `@font-face { font-family: 'Inter'; font-weight: 100 900; src: url(data:font/woff2;base64,${woff2.toString('base64')}) format('woff2'); }`,
+    });
+    await page.evaluate(
+      (face) => document.fonts.load(face).then(() => undefined),
+      GLYPH_FIELD_FONT_LOAD,
+    );
+  }
   await page.addScriptTag({
     content: `var __name = (target) => target;\nwindow.__createGlyphRenderer = ${createGlyphRenderer.toString()};`,
   });

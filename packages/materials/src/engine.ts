@@ -41,6 +41,9 @@ export function engineOf(entry: MaterialEntry): ShaderEngineName {
 /** The fonts the glyph field draws with: Inter, the one typeface. */
 export const GLYPH_FIELD_FONT = 'Inter, InterVariable, system-ui, sans-serif';
 
+/** The face the glyph field waits for before a capture (`document.fonts.load`). */
+export const GLYPH_FIELD_FONT_LOAD = '500 32px Inter';
+
 /** The letters the glyph field's grid cycles through. */
 export const GLYPH_FIELD_GLYPHS = 'GLYPHFIELD';
 
@@ -141,9 +144,10 @@ export function mountGlyph(
   });
   if (view.getComputedStyle(host).position === 'static') host.style.position = 'relative';
   host.prepend(canvas);
+  const program = glyphProgramSpec(entry);
   let renderer: GlyphRenderer;
   try {
-    renderer = createGlyphRenderer(canvas, glyphProgramSpec(entry), options.preserveDrawingBuffer);
+    renderer = createGlyphRenderer(canvas, program, options.preserveDrawingBuffer);
   } catch (error) {
     canvas.remove();
     throw error;
@@ -198,6 +202,11 @@ export function mountGlyph(
     draw();
   });
   observer.observe(host);
+  /* the glyph field draws in Inter: once the face is loaded, the frame is drawn again in it */
+  const fontReady: Promise<unknown> =
+    program.kind === 'canvas2d' && doc.fonts !== undefined
+      ? doc.fonts.load(GLYPH_FIELD_FONT_LOAD).then(draw, () => undefined)
+      : Promise.resolve();
   play();
 
   return {
@@ -218,6 +227,7 @@ export function mountGlyph(
     canvas: () => canvas,
     reachSize: async (width, height) => {
       target = { width, height };
+      await fontReady;
       for (let i = 0; i < 240 && box.width === 0; i += 1)
         await new Promise((resolve) => view.requestAnimationFrame(resolve));
       draw();

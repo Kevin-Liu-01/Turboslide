@@ -642,9 +642,6 @@ export async function requestIdentity(
       record: null,
     };
   }
-  const touched = await principalStore()
-    .touch(principal.id, new Date(), true)
-    .catch(() => null);
   /* the display name typed on another instance (b1.md R17) and the avatar choice chosen there
      (docs/archive/rounds/PEOPLE.md 3.13; b4.md R4): the principal store of the blob tier is a file store per
      instance, so what `account.setName` and `account.setAvatar` wrote elsewhere rides the
@@ -653,15 +650,22 @@ export async function requestIdentity(
      (`freshIndex`, the editor boot; docs/archive/rounds/PEOPLE.md 6.4), and applied by access.ts
      recordWithIndexFacts: a record that carries a name keeps it; the index's non picture choice
      replaces the record's unless the record's choice is a picture, which the index never carries
-     and a stale glyph must not outlive */
-  const facts =
-    touched === null
-      ? null
-      : await (
-          options.freshIndex === true
-            ? refreshIndexFacts(principal.id)
-            : indexFactsFor(principal.id)
-        ).catch(() => null);
+     and a stale glyph must not outlive.
+     The touch, the index facts, the index's link grants and the link grant cookie's are read
+     together (hardening PS#5, PERF-4): none needs another's answer, since the facts change the
+     name and the avatar alone and the record's own grants join the index's after the round.
+     Before, the four ran one after another inside every caller's first read */
+  const [touched, facts, indexGrants, cookieGrants] = await Promise.all([
+    principalStore()
+      .touch(principal.id, new Date(), true)
+      .catch(() => null),
+    (options.freshIndex === true
+      ? refreshIndexFacts(principal.id)
+      : indexFactsFor(principal.id)
+    ).catch(() => null),
+    linkGrantsFor(principal.id, null),
+    cookieLinkGrants(request, principal.id),
+  ]);
   const record =
     touched !== null && facts !== null ? recordWithIndexFacts(touched, facts) : touched;
   return {
@@ -672,8 +676,8 @@ export async function requestIdentity(
     ctx: {
       principal,
       linkGrants: unionLinkGrants(
-        await linkGrantsFor(principal.id, record),
-        await cookieLinkGrants(request, principal.id),
+        unionLinkGrants(touched?.linkGrants ?? [], indexGrants),
+        cookieGrants,
       ),
     },
     principalId: principal.id,

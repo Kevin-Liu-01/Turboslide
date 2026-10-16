@@ -468,212 +468,242 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    /* each store read of the chain is one `server-timing` entry of the answer (docs/NEXT.md 3.2
+    /* each store read of the loader is one `server-timing` entry of the answer (docs/NEXT.md 3.2
        H9; audit-performance item 2 names the chain): loaded here with the room, since the module
-       imports node:async_hooks and the client stub of this file must not */
-    const { timed } = await import('./server-timing');
-    if (!(await timed('deck-head', () => hasStoredDeck(data.deckId)))) return JSON.stringify(null);
-    // the room and the identity (round three): loaded here, not at the top, so the client stub of
-    // this module never pulls the channel's Node graph (agent-actions.ts explains the rule)
-    const room = await import('./room');
-    const access = await import('./access');
-    const auth = await import('./auth/identity');
-    /* the caller's index read past this instance's cache (docs/archive/rounds/PEOPLE.md 6.4): a reload's payload
-       carries the name and the choice written on another instance at once */
-    const identity = await timed('identity', () =>
-      room.requestIdentity(getRequest(), { freshIndex: true }),
-    );
-    sendMintedCookie(identity.setCookie);
-    const decision = await timed('access', () =>
-      room.decideFor(identity, data.deckId, 'read', 'readEditorDeck'),
-    );
-    if (!decision.ok) return JSON.stringify(null);
-    /* an invitation by email binds to the account whose verified address it names at that
-       account's first read of the deck (docs/archive/rounds/PEOPLE.md 3.10; SPEC-3 6.5; access.ts
-       bindEmailGrants says why here and not at sign in): the decision above admitted the invitee
-       through the address, and the record the payload carries below names them from now on */
-    if (identity.kind === 'signedIn' && identity.ctx.principal !== null) {
-      const principal = identity.ctx.principal;
-      await timed('grants', () => access.bindEmailGrants(data.deckId, principal)).catch(() => null);
-    }
-    const runtime = auth.identityRuntime();
-    const deckRoom = await timed('room', () => room.roomFor(data.deckId));
-    // the head on the blob tier (the focus round, cycle 2): a page load and a tab's reload read
-    // the store's current document, not this instance's mirror as it stood within the sync
-    // window (750 ms), and a caller that names the revision it learned from a write's answer
-    // (`atLeast`, the editor's resync after a version.restore) gets a document at or above it
-    // (room.ts liveAtLeast). The show's loader reads here too, so a slide skipped a moment
-    // before the show opened is left out on every instance (b4.md FR8)
-    let live: Awaited<ReturnType<typeof room.liveAtLeast>>;
-    let read: Awaited<ReturnType<typeof deckRoom.store.read>>;
-    let versions: Awaited<ReturnType<typeof deckRoom.store.listVersions>>;
-    let leases: Awaited<ReturnType<typeof deckRoom.store.leases>>;
+       imports node:async_hooks and the client stub of this file must not. The room, the access
+       module and the loader's rounds load here too, never at the top, so the client stub of this
+       module never pulls the channel's Node graph (agent-actions.ts explains the rule) */
+    const [{ timed }, room, access, auth, { loadEditorReads }] = await Promise.all([
+      import('./server-timing'),
+      import('./room'),
+      import('./access'),
+      import('./auth/identity'),
+      import('./editor-load'),
+    ]);
+    /* the reads in three rounds (hardening PS#5, PERF-4; editor-load.ts): the deck's head, the
+       caller, the room, the access record and the default kit first; then the decision, the
+       invitation binding, the resolved caller, the room's document, the three store reads and
+       the comment authors; then the views and the room ticket. Before, each read waited on the
+       one before it, 13 in a row */
+    let answer: string | null;
     try {
-      live = await timed('live', () => room.liveAtLeast(deckRoom, data.atLeast));
-      [read, versions, leases] = await Promise.all([
-        timed('document', () => deckRoom.store.read()),
-        timed('versions', () => deckRoom.store.listVersions()),
-        timed('leases', () => deckRoom.store.leases()),
-      ]);
+      answer = await loadEditorReads<string>({
+        deckHead: () => timed('deck-head', () => hasStoredDeck(data.deckId)),
+        /* the caller's index read past this instance's cache (docs/archive/rounds/PEOPLE.md
+           6.4): a reload's payload carries the name and the choice written on another instance
+           at once */
+        identity: async () => {
+          const identity = await timed('identity', () =>
+            room.requestIdentity(getRequest(), { freshIndex: true }),
+          );
+          sendMintedCookie(identity.setCookie);
+          return identity;
+        },
+        room: () => timed('room', () => room.roomFor(data.deckId)),
+        accessRecord: () => timed('access-record', () => access.effectiveAccess(data.deckId)),
+        /* the deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1): the name Reset
+           reads, the default logo; the store's template index is pulled first so a default set
+           on another instance holds */
+        templates: () => timed('templates', () => defaultKitOfCollection()),
+        decide: (identity) =>
+          timed('access', () => room.decideFor(identity, data.deckId, 'read', 'readEditorDeck')),
+        /* an invitation by email binds to the account whose verified address it names at that
+           account's first read of the deck (docs/archive/rounds/PEOPLE.md 3.10; SPEC-3 6.5;
+           access.ts bindEmailGrants says why here and not at sign in): the binding needs the
+           invitation alone, so it runs beside the decision, and the record the payload carries
+           names the invitee from this load on */
+        bindGrants: (identity) => {
+          const principal = identity.ctx.principal;
+          if (identity.kind !== 'signedIn' || principal === null) return Promise.resolve(null);
+          return timed('grants', () => access.bindEmailGrants(data.deckId, principal)).catch(
+            () => null,
+          );
+        },
+        // the head on the blob tier (the focus round, cycle 2): a page load and a tab's reload
+        // read the store's current document, not this instance's mirror as it stood within the
+        // sync window (750 ms), and a caller that names the revision it learned from a write's
+        // answer (`atLeast`, the editor's resync after a version.restore) gets a document at or
+        // above it (room.ts liveAtLeast). The show's loader reads here too, so a slide skipped a
+        // moment before the show opened is left out on every instance (b4.md FR8)
+        live: (deckRoom) => timed('live', () => room.liveAtLeast(deckRoom, data.atLeast)),
+        document: (deckRoom) => timed('document', () => deckRoom.store.read()),
+        versions: (deckRoom) => timed('versions', () => deckRoom.store.listVersions()),
+        leases: (deckRoom) => timed('leases', () => deckRoom.store.leases()),
+        // the log for the resync read's answer, off the mirror the reads beside it sync
+        records:
+          data.since === undefined
+            ? null
+            : (deckRoom) => timed('records', () => deckRoom.store.records()),
+        commentAuthors: (deckRoom) =>
+          timed('comments', async () => (await import('./comments')).liveThreads(deckRoom))
+            .then(({ threads }) =>
+              [...threads.values()].flatMap((thread) =>
+                [thread.comment, ...thread.replies].map((comment) => comment.author.principalId),
+              ),
+            )
+            .catch(() => [] as string[]),
+        // the caller as the room resolves it (docs/archive/rounds/PEOPLE.md 3.6): the account
+        // behind a session or an aliased cookie, else the record's name or label
+        resolve: (identity) => timed('resolve', () => room.resolveRequestIdentity(identity)),
+        finish: async (reads) => {
+          const { identity, record, decision, live, read, resolved } = reads;
+          const runtime = auth.identityRuntime();
+          const standing = access.standingOf(decision, record);
+          const selection = room.realtimeSelection();
+          // the resync read's answer (docs/archive/rounds/SYNC.md 3.2): the origins of the
+          // records above the tab's old position, so the client drops every pending op a record
+          // already names instead of re-folding it, and `bounded` when those records do not
+          // reach the position, on every tier (HR-RT#15)
+          const resync =
+            data.since === undefined || reads.records === undefined
+              ? undefined
+              : resyncReadSince(reads.records, data.since, selection.tier);
+          const roomFacts: EditorRoom = {
+            seq: live.seq,
+            tier: selection.tier,
+            notice: selection.notice,
+            // a reader without history replays from this document's position and never below it
+            // (HR-SD#1e): the stream route and the ticket route read the token the loader signs
+            // here
+            ...(standing.capabilities.includes('history')
+              ? {}
+              : {
+                  floor: (await import('./replay-floor')).mintReplayFloor(
+                    { deckId: data.deckId, identity: identity.identity, tier: selection.tier },
+                    live.seq,
+                  ),
+                }),
+          };
+          const result: EditorDeck = {
+            deckId: data.deckId,
+            // the room's document carries the store's trash stamp (withTrashStamp says why)
+            document: withTrashStamp(live.document, read.document.deck.trashedAt),
+            issues: read.issues,
+            ok: read.ok,
+            sprite: readSprite(),
+            versions: reads.versions,
+            ...(resync === undefined ? {} : { origins: resync.origins, bounded: resync.bounded }),
+            leases: reads.leases,
+            hosting: hostingFacts(),
+            assistMode: (await import('./assist')).assistMode(),
+            defaultKit: reads.kit,
+            room: roomFacts,
+            identity: ownIdentityOf(resolved),
+            ...(standing.role !== null ? { role: standing.role } : {}),
+            ...(standing.via !== null ? { via: standing.via } : {}),
+            capabilities: standing.capabilities,
+            access: record,
+            auth: {
+              signIn: runtime.methods.available,
+              email: runtime.methods.email,
+              passkeys: runtime.methods.passkeys,
+              passkeysNotice: runtime.methods.passkeysNotice,
+              github: runtime.methods.github,
+              google: runtime.methods.google,
+              mail: runtime.mailMode,
+            },
+          };
+          const shaped = shapeByRole(result, standing.capabilities);
+          /* the people the page names, resolved once (docs/archive/rounds/PEOPLE.md 3.8): the
+             shaped log's authors (a role without history names none), the comment authors for a
+             role with readComments, the record's people; the address for the owner and a grant
+             holder (SPEC-3 4.8), a role word for a verified person read by a link visitor
+             without the owner's switch (0.12; 4.5) */
+          const commentAuthors = standing.capabilities.includes('readComments')
+            ? reads.commentAuthors
+            : [];
+          const byLink = standing.via === 'link' || standing.via === 'open';
+          /* a reader who may not share the deck reads no other person's principal id (hardening
+             HR-SD#1, DATA-V2): the record is the reader's (the own grants and requests, no
+             links), and the people it names, the version authors and the lease holders carry
+             stand-ins */
+          const own = ownIdsOf(identity);
+          const sharer = standing.capabilities.includes('share');
+          const seen = sharer ? record : access.recordForReader(record, own, (id) => id);
+          // round three: the views and the room ticket together
+          const [views, roomExtra] = await Promise.all([
+            timed('views', () =>
+              room.identityViewsFor(
+                peopleOf({ versions: shaped.versions, commentAuthors, access: seen }),
+                {
+                  showEmail: standing.via === 'owner' || standing.via === 'grant',
+                  roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
+                  access: record,
+                },
+              ),
+            ),
+            // the do tier (docs/CLOUDFLARE.md 3.3, 3.6.1): the socket URL and the ticket of the
+            // reader's decision ride the payload; a mint that fails leaves the room without one
+            // and the transport asks the ticket route
+            (async (): Promise<Pick<EditorRoom, 'url' | 'ticket' | 'ticketExpiresAt'>> => {
+              if (selection.tier !== 'do') return {};
+              try {
+                const ticketing = await import('./room-ticket');
+                // the document's position is the reader's replay floor (HR-SD#1e): the ticket's `fl`
+                const reader = await room.viewerFacts(
+                  data.deckId,
+                  decision,
+                  identity.ctx,
+                  identity.identity,
+                  { floor: live.seq },
+                );
+                const minted = ticketing.mintRoomTicket(
+                  ticketing.ticketClaimsFor({
+                    deckId: data.deckId,
+                    clientId: room.mintClientId(data.deckId, identity.identity),
+                    identity: identity.identity,
+                    kind: identity.kind,
+                    principalId: identity.principalId,
+                    role: decision.role,
+                    reader,
+                    resolved,
+                    origin: new URL(getRequest().url).origin,
+                  }),
+                );
+                const url = ticketing.roomUrlFor(data.deckId);
+                return {
+                  ...(url === null ? {} : { url }),
+                  ticket: minted.ticket,
+                  ticketExpiresAt: minted.expiresAt,
+                };
+              } catch (error) {
+                console.error(
+                  `turboslide editor: the room ticket was not minted for ${data.deckId}: ${error instanceof Error ? error.message : String(error)}`,
+                );
+                return {};
+              }
+            })(),
+          ]);
+          let out: { payload: EditorDeck; identities: Record<string, EditorIdentity> } = {
+            payload: { ...shaped, room: { ...roomFacts, ...roomExtra } },
+            identities: views,
+          };
+          if (!sharer) {
+            const { standInsFor, withStandIns } = await import('./stand-ins');
+            const people = standInsFor(data.deckId, own);
+            out = withStandIns(out.payload, views, people, {
+              readerRecord: access.recordForReader(record, own, people),
+            });
+          }
+          // the trim after the shaping: a role without history carries an empty log and no count
+          return JSON.stringify({
+            ...out.payload,
+            identities: out.identities,
+            versions: trimVersionLog(out.payload.versions),
+            ...(out.payload.versions.length > 0 || standing.capabilities.includes('history')
+              ? { versionCount: out.payload.versions.length }
+              : {}),
+          });
+        },
+      });
     } catch (error) {
-      /* a deck deleted forever a moment ago (docs/archive/rounds/POLISH.md item 98; audit-tables item 20): the
-         listing still names it while the index catches up and the read meets no files; the
-         address answers 404, never 500 */
+      /* a deck deleted forever a moment ago (docs/archive/rounds/POLISH.md item 98;
+         audit-tables item 20): the listing still names it while the index catches up and the
+         read meets no files; the address answers 404, never 500 */
       if (isGoneDeck(error)) return JSON.stringify(null);
       throw error;
     }
-    // the resync read's answer (docs/archive/rounds/SYNC.md 3.2): the origins of the records above the tab's
-    // old position, off the mirror the reads above synced (no store call of its own), so the
-    // client drops every pending op a record already names instead of re-folding it, and
-    // `bounded` when those records do not reach the position, on every tier (HR-RT#15)
-    const resync =
-      data.since === undefined
-        ? undefined
-        : resyncReadSince(
-            await timed('records', () => deckRoom.store.records()),
-            data.since,
-            room.realtimeSelection().tier,
-          );
-    const record = await timed('access-record', () => access.effectiveAccess(data.deckId));
-    const standing = access.standingOf(decision, record);
-    // the caller as the room resolves it (docs/archive/rounds/PEOPLE.md 3.6): the account behind a session or
-    // an aliased cookie, else the record's name or label
-    const resolved = await timed('resolve', () => room.resolveRequestIdentity(identity));
-    const selection = room.realtimeSelection();
-    // the do tier (docs/CLOUDFLARE.md 3.3, 3.6.1): the socket URL and the ticket of the reader's
-    // decision ride the payload; a mint that fails leaves the room without one and the transport
-    // asks the ticket route
-    let roomExtra: Pick<EditorRoom, 'url' | 'ticket' | 'ticketExpiresAt'> = {};
-    if (selection.tier === 'do') {
-      try {
-        const ticketing = await import('./room-ticket');
-        // the document's position is the reader's replay floor (HR-SD#1e): the ticket's `fl`
-        const reader = await room.viewerFacts(
-          data.deckId,
-          decision,
-          identity.ctx,
-          identity.identity,
-          { floor: live.seq },
-        );
-        const minted = ticketing.mintRoomTicket(
-          ticketing.ticketClaimsFor({
-            deckId: data.deckId,
-            clientId: room.mintClientId(data.deckId, identity.identity),
-            identity: identity.identity,
-            kind: identity.kind,
-            principalId: identity.principalId,
-            role: decision.role,
-            reader,
-            resolved,
-            origin: new URL(getRequest().url).origin,
-          }),
-        );
-        const url = ticketing.roomUrlFor(data.deckId);
-        roomExtra = {
-          ...(url === null ? {} : { url }),
-          ticket: minted.ticket,
-          ticketExpiresAt: minted.expiresAt,
-        };
-      } catch (error) {
-        console.error(
-          `turboslide editor: the room ticket was not minted for ${data.deckId}: ${error instanceof Error ? error.message : String(error)}`,
-        );
-      }
-    }
-    const result: EditorDeck = {
-      deckId: data.deckId,
-      // the room's document carries the store's trash stamp (withTrashStamp says why)
-      document: withTrashStamp(live.document, read.document.deck.trashedAt),
-      issues: read.issues,
-      ok: read.ok,
-      sprite: readSprite(),
-      versions,
-      ...(resync === undefined ? {} : { origins: resync.origins, bounded: resync.bounded }),
-      leases,
-      hosting: hostingFacts(),
-      assistMode: (await import('./assist')).assistMode(),
-      /* the deployment's default kit (docs/archive/rounds/PRODUCT.md 4.1): the name Reset reads, the default logo;
-         the store's template index is pulled first so a default set on another instance holds */
-      defaultKit: await timed('templates', () => defaultKitOfCollection()),
-      room: {
-        seq: live.seq,
-        tier: selection.tier,
-        notice: selection.notice,
-        ...roomExtra,
-        // a reader without history replays from this document's position and never below it
-        // (HR-SD#1e): the stream route and the ticket route read the token the loader signs here
-        ...(standing.capabilities.includes('history')
-          ? {}
-          : {
-              floor: (await import('./replay-floor')).mintReplayFloor(
-                { deckId: data.deckId, identity: identity.identity, tier: selection.tier },
-                live.seq,
-              ),
-            }),
-      },
-      identity: ownIdentityOf(resolved),
-      ...(standing.role !== null ? { role: standing.role } : {}),
-      ...(standing.via !== null ? { via: standing.via } : {}),
-      capabilities: standing.capabilities,
-      access: record,
-      auth: {
-        signIn: runtime.methods.available,
-        email: runtime.methods.email,
-        passkeys: runtime.methods.passkeys,
-        passkeysNotice: runtime.methods.passkeysNotice,
-        github: runtime.methods.github,
-        google: runtime.methods.google,
-        mail: runtime.mailMode,
-      },
-    };
-    const shaped = shapeByRole(result, standing.capabilities);
-    /* the people the page names, resolved once (docs/archive/rounds/PEOPLE.md 3.8): the shaped log's authors (a
-       role without history names none), the comment authors for a role with readComments, the
-       record's people; the address for the owner and a grant holder (SPEC-3 4.8), a role word for
-       a verified person read by a link visitor without the owner's switch (0.12; 4.5) */
-    const commentAuthors = standing.capabilities.includes('readComments')
-      ? await timed('comments', async () => (await import('./comments')).liveThreads(deckRoom))
-          .then(({ threads }) =>
-            [...threads.values()].flatMap((thread) =>
-              [thread.comment, ...thread.replies].map((comment) => comment.author.principalId),
-            ),
-          )
-          .catch(() => [] as string[])
-      : [];
-    const byLink = standing.via === 'link' || standing.via === 'open';
-    /* a reader who may not share the deck reads no other person's principal id (hardening
-       HR-SD#1, DATA-V2): the record is the reader's (the own grants and requests, no links), and
-       the people it names, the version authors and the lease holders carry stand-ins */
-    const own = ownIdsOf(identity);
-    const sharer = standing.capabilities.includes('share');
-    const seen = sharer ? record : access.recordForReader(record, own, (id) => id);
-    const views = await timed('views', () =>
-      room.identityViewsFor(peopleOf({ versions: shaped.versions, commentAuthors, access: seen }), {
-        showEmail: standing.via === 'owner' || standing.via === 'grant',
-        roleWords: byLink && !(record.settings.showNamesToLinkVisitors ?? false),
-        access: record,
-      }),
-    );
-    let answer: { payload: EditorDeck; identities: Record<string, EditorIdentity> } = {
-      payload: shaped,
-      identities: views,
-    };
-    if (!sharer) {
-      const { standInsFor, withStandIns } = await import('./stand-ins');
-      const people = standInsFor(data.deckId, own);
-      answer = withStandIns(shaped, views, people, {
-        readerRecord: access.recordForReader(record, own, people),
-      });
-    }
-    // the trim after the shaping: a role without history carries an empty log and no count
-    return JSON.stringify({
-      ...answer.payload,
-      identities: answer.identities,
-      versions: trimVersionLog(answer.payload.versions),
-      ...(answer.payload.versions.length > 0 || standing.capabilities.includes('history')
-        ? { versionCount: answer.payload.versions.length }
-        : {}),
-    });
+    return answer ?? JSON.stringify(null);
   });
 
 /**

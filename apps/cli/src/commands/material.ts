@@ -9,6 +9,7 @@ import { isAbsolute, resolve } from 'node:path';
 
 import type { Asset } from '@turboslide/schema/assets';
 import type { MaterialUniforms } from '@turboslide/schema/blocks/material';
+import { materialAnchorSchema } from '@turboslide/schema/blocks/material';
 import { materialCapture, materialList } from '@turboslide/materials/actions';
 import { parseRecipeFile } from '@turboslide/materials/capture';
 
@@ -59,9 +60,12 @@ async function materialListCommand(ctx: CommandContext): Promise<number> {
 
 function anchorsFlag(ctx: CommandContext): number[] {
   const raw = flagList(ctx.args, 'anchor', []);
-  const anchors = raw.map((s) => Number(s));
-  if (anchors.some((n) => !Number.isFinite(n) || n < 0))
-    throw new UsageError(`--anchor wants frame times in ms, got ${raw.join(',')}`);
+  /* the one anchor schema (the shader design 2.3): whole ms from 0 to 60000 */
+  const anchors = raw.map((s) => (s.trim() === '' ? Number.NaN : Number(s)));
+  if (anchors.some((n) => !materialAnchorSchema.safeParse(n).success))
+    throw new UsageError(
+      `--anchor wants frame times as whole ms from 0 to 60000, got ${raw.join(',')}`,
+    );
   return anchors;
 }
 

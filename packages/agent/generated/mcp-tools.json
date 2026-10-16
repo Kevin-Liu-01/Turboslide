@@ -12554,9 +12554,9 @@
                   7000
                 ],
                 "group": "Block",
-                "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
               },
-              "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+              "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
               "type": "number",
               "minimum": 0
             },
@@ -31838,10 +31838,12 @@
           "minItems": 1,
           "type": "array",
           "items": {
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
-          "description": "Frame times in ms"
+          "description": "Frame times in ms, 0 to 60000"
         },
         "id": {
           "description": "The asset id; <id>-<anchor> per anchor when several",
@@ -35030,6 +35032,12 @@
           },
           "additionalProperties": false
         },
+        "anchor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
+        },
         "at": {
           "description": "The box in sheet px; the free rectangle when absent",
           "type": "object",
@@ -35440,9 +35448,9 @@
                   7000
                 ],
                 "group": "Block",
-                "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
               },
-              "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+              "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
               "type": "number",
               "minimum": 0
             },
@@ -36095,8 +36103,10 @@
           "maxItems": 2
         },
         "timeMs": {
-          "type": "number",
-          "minimum": 0
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         "backend": {
           "type": "string",
@@ -36456,9 +36466,9 @@
                   7000
                 ],
                 "group": "Block",
-                "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
               },
-              "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+              "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
               "type": "number",
               "minimum": 0
             },
@@ -44900,9 +44910,10 @@
           }
         },
         "anchor": {
-          "description": "The frame time in ms; the catalog default unless set",
-          "type": "number",
-          "minimum": 0
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         "dither": {
           "type": "object",
@@ -60094,10 +60105,12 @@
             "minItems": 1,
             "type": "array",
             "items": {
-              "type": "number",
-              "minimum": 0
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000,
+              "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
             },
-            "description": "Frame times in ms"
+            "description": "Frame times in ms, 0 to 60000"
           },
           "id": {
             "description": "The asset id; <id>-<anchor> per anchor when several",
@@ -64709,7 +64722,7 @@
     {
       "name": "deck_shader_insert",
       "action": "shader.insert",
-      "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+      "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
       "inputSchema": {
         "$id": "#/$defs/ShaderInsertInput",
         "type": "object",
@@ -64787,6 +64800,12 @@
               }
             },
             "additionalProperties": false
+          },
+          "anchor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "at": {
             "description": "The box in sheet px; the free rectangle when absent",
@@ -65198,9 +65217,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -65439,7 +65458,7 @@
     {
       "name": "deck_shader_set",
       "action": "shader.set",
-      "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+      "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
       "inputSchema": {
         "$id": "#/$defs/ShaderSetInput",
         "type": "object",
@@ -65741,9 +65760,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -66298,8 +66317,10 @@
             "maxItems": 2
           },
           "timeMs": {
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "backend": {
             "type": "string",
@@ -89815,9 +89836,10 @@
             }
           },
           "anchor": {
-            "description": "The frame time in ms; the catalog default unless set",
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "dither": {
             "type": "object",

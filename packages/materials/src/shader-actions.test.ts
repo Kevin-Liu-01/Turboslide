@@ -406,7 +406,66 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
     ).rejects.toThrow(RangeError);
   });
 
-  it("stores the pixels of a frame alone, and refuses a frame whose aspect is not the box's (SHADERS-DESIGN.md 1.5)", async () => {
+  it('writes the still moment an insert names, and refuses an anchor that is not a whole ms from 0 to 60000 (the shader design 2.3)', async () => {
+    const slideId = 'canvas-opener';
+    deps.placeInsert = () => ({ x: 200, y: 300, w: 480, h: 272 });
+    const inserted = await shaderInsert(deps, ctx, {
+      baseRevision: await revision(),
+      slideId,
+      materialId: 'paper:liquid-metal',
+      anchor: 7250,
+    });
+    expect(inserted.block.anchor).toBe(7250);
+    const plain = await shaderInsert(deps, ctx, {
+      baseRevision: await revision(),
+      slideId,
+      materialId: 'paper:liquid-metal',
+    });
+    expect(plain.block.anchor).toBeUndefined();
+    for (const anchor of [-1, 60_001, 5.5]) {
+      await expect(
+        shaderInsert(deps, ctx, {
+          baseRevision: await revision(),
+          slideId,
+          materialId: 'paper:liquid-metal',
+          anchor,
+        }),
+      ).rejects.toThrow(TypeError);
+      expect(
+        ACTIONS['shader.insert'].input.safeParse({
+          slideId,
+          materialId: 'paper:liquid-metal',
+          anchor,
+        }).success,
+      ).toBe(false);
+      await expect(
+        shaderSet(deps, ctx, {
+          baseRevision: await revision(),
+          slideId,
+          blockId: inserted.blockId,
+          path: '/anchor',
+          value: anchor,
+        }),
+      ).rejects.toThrow('invalid input at /value');
+    }
+    const set = await shaderSet(deps, ctx, {
+      baseRevision: await revision(),
+      slideId,
+      blockId: inserted.blockId,
+      path: '/anchor',
+      value: 60_000,
+    });
+    expect(set.block.anchor).toBe(60_000);
+    const cleared = await shaderSet(deps, ctx, {
+      baseRevision: set.revision,
+      slideId,
+      blockId: inserted.blockId,
+      path: '/anchor',
+    });
+    expect(cleared.block.anchor).toBeUndefined();
+  });
+
+  it("stores the pixels of a frame alone, and refuses a frame whose aspect is not the box's (the shader design 1.5)", async () => {
     const script = '<script>alert(1)</script>';
     const sent = pngOf(3200, 1814, [40, 80, 120], script);
     expect(Buffer.from(sent).includes(Buffer.from('tEXt'))).toBe(true);

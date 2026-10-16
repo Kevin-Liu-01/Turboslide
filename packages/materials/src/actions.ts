@@ -975,6 +975,8 @@ export type ShaderInsertInput = Rev & {
   materialId: string;
   preset?: string;
   controls?: MaterialControls;
+  /** The still's moment in ms, 0 to 60,000 (the shader design 2.3); 5,500 when absent. */
+  anchor?: number;
   at?: Position;
   alt?: string;
 };
@@ -1011,6 +1013,7 @@ export async function shaderInsert(
   const made = shaderBlockOf(blockId, entry, {
     ...(input.preset !== undefined ? { preset: input.preset } : {}),
     ...(input.controls !== undefined ? { controls: input.controls } : {}),
+    ...(input.anchor !== undefined ? { anchor: input.anchor } : {}),
     ...(input.alt !== undefined ? { alt: input.alt } : {}),
   });
   const pos = shaderInsertPosition(deps, canvas, input.at);
@@ -1095,7 +1098,7 @@ export const FRAME_PIXEL_LIMIT = 3200 * 3200;
  * The frame's bytes as the PNG the twin is written from: a PNG or a WebP decoded with the
  * intake's settings (`failOn: 'error'`, at most 3200 by 3200 pixels) and written again as a
  * lossless PNG of the pixels alone, so no byte a browser sent (a text chunk, trailing bytes)
- * reaches the public store (docs/security.md section 10; SHADERS-DESIGN.md 1.5). The WebP is the
+ * reaches the public store (docs/security.md section 10; the shader design 1.5). The WebP is the
  * client's fallback for a PNG over the function's body cap (viewer shader-frame.ts and
  * docs/archive/rounds/POLISH.md item 36). Anything else is refused as a frame.
  */
@@ -1108,7 +1111,7 @@ export async function frameBytesAsPng(bytes: Uint8Array): Promise<Uint8Array> {
 }
 
 /**
- * True when a frame's size fits its block's box (SHADERS-DESIGN.md 1.5): the long side is 3200 and
+ * True when a frame's size fits its block's box (the shader design 1.5): the long side is 3200 and
  * the aspect, to two decimals as the frame key reads it, is within 0.01 of the box's. A capture
  * made at the box's aspect passes after a resize that kept the key; a square frame for a wide box
  * does not.

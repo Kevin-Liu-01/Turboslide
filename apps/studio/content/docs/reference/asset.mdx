@@ -99,7 +99,7 @@ description: The actions of the asset group, with their input fields and their n
 | `preset`       | string                                        | no       | A palette preset of the material, under the uniforms             |
 | `uniforms`     | record                                        | no       |                                                                  |
 | `size`         | [integer, integer]                            | no       |                                                                  |
-| `anchors`      | number[]                                      | yes      | Frame times in ms                                                |
+| `anchors`      | integer[]                                     | yes      | Frame times in ms, 0 to 60000                                    |
 | `id`           | string                                        | no       | The asset id; \<id\>-\<anchor\> per anchor when several          |
 | `role`         | "opener" \| "mood" \| "frame"                 | no       |                                                                  |
 | `alt`          | string                                        | no       |                                                                  |

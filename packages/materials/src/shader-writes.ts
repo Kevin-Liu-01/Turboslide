@@ -4,7 +4,8 @@
 // the placement helper's rectangle, else the sheet's centre), the material block of a slide, the
 // deck's shader palette, and the mutations a Shader section write makes: a preset change writes
 // `/preset` and clears the control overrides and the uniforms; a controls change writes
-// `/controls` and the resolved `/uniforms` together; any other pointer is one `block.set`. The
+// `/controls` and the resolved `/uniforms` together; `/anchor` parses through the one anchor
+// schema (the shader design 2.3); any other pointer is one `block.set`. The
 // Shader section (packages/chrome inspector/shader.tsx) dispatches these as one `slide.update`
 // and the `shader.set` handler (actions.ts) commits them as one write, so one gesture is one
 // history entry on every transport.
@@ -13,7 +14,7 @@ import type {
   MaterialControls,
   MaterialUniforms,
 } from '@turboslide/schema/blocks/material';
-import { materialControlsSchema } from '@turboslide/schema/blocks/material';
+import { materialAnchorSchema, materialControlsSchema } from '@turboslide/schema/blocks/material';
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
@@ -52,14 +53,30 @@ export function entryForBlock(deck: Deck, block: Pick<MaterialBlock, 'materialId
 export const SHADER_INSERT_SIZE: readonly [number, number] = [480, 272];
 
 /**
+ * The anchor a write names, parsed through the one schema (the shader design 2.3): a whole number
+ * of ms from 0 to 60,000, or absent. Anything else is a TypeError naming the pointer, which every
+ * transport answers as 400.
+ */
+export function parseAnchor(value: unknown, pointer: string): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = materialAnchorSchema.safeParse(value);
+  if (!parsed.success)
+    throw new TypeError(
+      `invalid input at ${pointer}: the still's moment is a whole number of ms from 0 to 60000; got ${JSON.stringify(value)}`,
+    );
+  return parsed.data;
+}
+
+/**
  * The block `shader.insert` and the gallery land (5.2, 5.4; question 5's default): the entry's
- * featured preset, the controls with their resolved uniforms beside them when any moves,
- * `motion.play: 'show'` and the alt in the seller's words.
+ * featured preset, the controls with their resolved uniforms beside them when any moves, the
+ * still's moment when one is named (absent reads as 5,500 ms, so the insert never writes the
+ * default), `motion.play: 'show'` and the alt in the seller's words.
  */
 export function shaderBlockOf(
   id: string,
   entry: MaterialEntry,
-  options: { preset?: string; controls?: MaterialControls; alt?: string } = {},
+  options: { preset?: string; controls?: MaterialControls; anchor?: number; alt?: string } = {},
 ): MaterialBlock {
   const preset = options.preset ?? featuredPresetOf(entry);
   if (preset !== undefined && !entry.presets.some((candidate) => candidate.name === preset))
@@ -71,6 +88,7 @@ export function shaderBlockOf(
     type: 'material',
     materialId: entry.id,
     ...(preset !== undefined ? { preset } : {}),
+    ...(options.anchor !== undefined ? { anchor: parseAnchor(options.anchor, '/anchor') } : {}),
     motion: { play: 'show' },
     alt: options.alt ?? `The ${entry.label.toLowerCase()} shader`,
   };
@@ -128,6 +146,7 @@ export function shaderSetMutations(
     if (block.uniforms !== undefined) mutations.push(set('/uniforms', undefined));
     return mutations;
   }
+  if (path === '/anchor') return [set('/anchor', parseAnchor(value, '/value'))];
   if (path === '/controls' || path.startsWith('/controls/')) {
     const entry = entryWithPalette(requireMaterial(block.materialId), shaderPaletteOfDeck(deck));
     let controls: MaterialControls | undefined;

@@ -6,17 +6,23 @@ import { describe, expect, it } from 'vitest';
 import { shapePath } from '@turboslide/schema/shapes';
 
 import {
+  ARROW_DOWN_TRAY,
   ARROW_LEFT,
   BOOK_OPEN,
   CHAT_BUBBLE_LEFT_RIGHT,
+  CHECK_BADGE,
+  CHEVRON_DOWN,
   DOCUMENT_TEXT,
   EXCLAMATION_TRIANGLE,
   GLOBE_ALT,
   Glyph,
   ICON_NAMES,
   Icon,
+  LOCK_CLOSED,
   PENCIL_SQUARE,
   PLUS,
+  QUESTION_MARK_CIRCLE,
+  USER_GROUP,
   WINDOW,
   iconPaths,
 } from '../icons';
@@ -180,6 +186,11 @@ describe('the icon table', () => {
       window: WINDOW,
       'exclamation-triangle': EXCLAMATION_TRIANGLE,
       plus: PLUS,
+      'arrow-down-tray': ARROW_DOWN_TRAY,
+      'check-badge': CHECK_BADGE,
+      'chevron-down': CHEVRON_DOWN,
+      'lock-closed': LOCK_CLOSED,
+      'user-group': USER_GROUP,
     } as const;
     for (const [name, paths] of Object.entries(exported)) {
       expect(ICON_NAMES, name).toContain(name);
@@ -190,6 +201,7 @@ describe('the icon table', () => {
     expect(iconPaths('pencil')).toBe(PENCIL_SQUARE);
     expect(iconPaths('document')).toBe(DOCUMENT_TEXT);
     expect(iconPaths('chat')).toBe(CHAT_BUBBLE_LEFT_RIGHT);
+    expect(iconPaths('help')).toBe(QUESTION_MARK_CIRCLE);
     /* Glyph draws what Icon draws */
     for (const name of ['globe-alt', 'window', 'exclamation-triangle', 'arrow-left'] as const)
       expect(renderToStaticMarkup(createElement(Glyph, { paths: iconPaths(name) })), name).toBe(

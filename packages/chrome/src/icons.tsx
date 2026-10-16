@@ -241,12 +241,13 @@ const ARROWS_POINTING_OUT: readonly IconPath[] = [
 ];
 
 /*
- * The glyphs the site pages draw (/home and /docs; docs/SITE.md D11), one exported constant each, so
- * a page that imports a few of them carries those paths alone: the table below names the same
- * constants, and nothing of the table reaches a page that never renders `Icon` (a probe bundle of
- * two glyphs and `Glyph` read 1,934 B minified on 2026-10-14). Heroicons 20 solid; the four the
- * table lacked (arrow-left, globe-alt, window, exclamation-triangle) were copied from heroicons
- * 2.2.0 optimized/20/solid on 2026-10-14.
+ * The glyphs the site pages draw (/home, /features, /faq, /about and /docs; docs/SITE.md D11), one
+ * exported constant each, so a page that imports a few of them carries those paths alone: the
+ * table below names the same constants, and nothing of the table reaches a page that never renders
+ * `Icon` (a probe bundle of two glyphs and `Glyph` read 1,934 B minified on 2026-10-14). Heroicons
+ * 20 solid; the four the table lacked (arrow-left, globe-alt, window, exclamation-triangle) were
+ * copied from heroicons 2.2.0 optimized/20/solid on 2026-10-14. The pages step moved six of the
+ * table's own glyphs out as constants (chevron-down to question-mark-circle, below).
  */
 /* plus */
 export const PLUS: readonly IconPath[] = [
@@ -415,6 +416,55 @@ export const EXCLAMATION_TRIANGLE: readonly IconPath[] = [
   },
 ];
 
+/* chevron-down */
+export const CHEVRON_DOWN: readonly IconPath[] = [
+  {
+    d: 'M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z',
+    evenodd: true,
+  },
+];
+
+/* arrow-down-tray */
+export const ARROW_DOWN_TRAY: readonly IconPath[] = [
+  {
+    d: 'M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z',
+  },
+  {
+    d: 'M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z',
+  },
+];
+
+/* user-group */
+export const USER_GROUP: readonly IconPath[] = [
+  {
+    d: 'M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.326a.78.78 0 0 1-.358-.442 3 3 0 0 1 4.308-3.516 6.484 6.484 0 0 0-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 0 1-2.07-.655ZM16.44 15.98a4.97 4.97 0 0 0 2.07-.654.78.78 0 0 0 .357-.442 3 3 0 0 0-4.308-3.517 6.484 6.484 0 0 1 1.907 3.96 2.32 2.32 0 0 1-.026.654ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.304 16.19a.844.844 0 0 1-.277-.71 5 5 0 0 1 9.947 0 .843.843 0 0 1-.277.71A6.975 6.975 0 0 1 10 18a6.974 6.974 0 0 1-4.696-1.81Z',
+  },
+];
+
+/* check-badge */
+export const CHECK_BADGE: readonly IconPath[] = [
+  {
+    d: 'M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z',
+    evenodd: true,
+  },
+];
+
+/* lock-closed */
+export const LOCK_CLOSED: readonly IconPath[] = [
+  {
+    d: 'M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z',
+    evenodd: true,
+  },
+];
+
+/* question-mark-circle */
+export const QUESTION_MARK_CIRCLE: readonly IconPath[] = [
+  {
+    d: 'M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
+    evenodd: true,
+  },
+];
+
 const PATHS: Record<IconName, readonly IconPath[]> = {
   sidebar: BARS_3_BOTTOM_LEFT,
   text: BARS_3_BOTTOM_LEFT,
@@ -496,12 +546,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
     },
   ],
   /* question-mark-circle */
-  help: [
-    {
-      d: 'M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z',
-      evenodd: true,
-    },
-  ],
+  help: QUESTION_MARK_CIRCLE,
   /* magnifying-glass */
   search: [
     {
@@ -512,12 +557,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   /* document-text */
   document: DOCUMENT_TEXT,
   /* chevron-down */
-  'chevron-down': [
-    {
-      d: 'M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z',
-      evenodd: true,
-    },
-  ],
+  'chevron-down': CHEVRON_DOWN,
   /* photo */
   photo: PHOTO,
   /* queue-list */
@@ -531,12 +571,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   /* presentation-chart-bar */
   deck: PRESENTATION_CHART_BAR,
   /* check-badge */
-  'check-badge': [
-    {
-      d: 'M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z',
-      evenodd: true,
-    },
-  ],
+  'check-badge': CHECK_BADGE,
   /* stop: the box primitive */
   box: [
     {
@@ -752,14 +787,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M4.75 3A1.75 1.75 0 0 0 3 4.75v2.752l.104-.002h13.792c.035 0 .07 0 .104.002V6.75A1.75 1.75 0 0 0 15.25 5h-3.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H4.75ZM3.104 9a1.75 1.75 0 0 0-1.673 2.265l1.385 4.5A1.75 1.75 0 0 0 4.488 17h11.023a1.75 1.75 0 0 0 1.673-1.235l1.384-4.5A1.75 1.75 0 0 0 16.896 9H3.104Z',
     },
   ],
-  'arrow-down-tray': [
-    {
-      d: 'M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z',
-    },
-    {
-      d: 'M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z',
-    },
-  ],
+  'arrow-down-tray': ARROW_DOWN_TRAY,
   'arrow-up-tray': [
     {
       d: 'M9.25 13.25a.75.75 0 0 0 1.5 0V4.636l2.955 3.129a.75.75 0 0 0 1.09-1.03l-4.25-4.5a.75.75 0 0 0-1.09 0l-4.25 4.5a.75.75 0 1 0 1.09 1.03L9.25 4.636v8.614Z',
@@ -1036,20 +1064,11 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       evenodd: true,
     },
   ],
-  'lock-closed': [
-    {
-      d: 'M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z',
-      evenodd: true,
-    },
-  ],
+  'lock-closed': LOCK_CLOSED,
   'light-bulb': LIGHT_BULB,
   'command-line': COMMAND_LINE,
   'puzzle-piece': PUZZLE_PIECE,
-  'user-group': [
-    {
-      d: 'M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.326a.78.78 0 0 1-.358-.442 3 3 0 0 1 4.308-3.516 6.484 6.484 0 0 0-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 0 1-2.07-.655ZM16.44 15.98a4.97 4.97 0 0 0 2.07-.654.78.78 0 0 0 .357-.442 3 3 0 0 0-4.308-3.517 6.484 6.484 0 0 1 1.907 3.96 2.32 2.32 0 0 1-.026.654ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.304 16.19a.844.844 0 0 1-.277-.71 5 5 0 0 1 9.947 0 .843.843 0 0 1-.277.71A6.975 6.975 0 0 1 10 18a6.974 6.974 0 0 1-4.696-1.81Z',
-    },
-  ],
+  'user-group': USER_GROUP,
   variable: [
     {
       d: 'M15.212 2.079a.75.75 0 0 1 1.006.336A16.932 16.932 0 0 1 18 10c0 2.724-.641 5.3-1.782 7.585a.75.75 0 1 1-1.342-.67A15.432 15.432 0 0 0 16.5 10c0-2.486-.585-4.834-1.624-6.915a.75.75 0 0 1 .336-1.006Zm-10.424 0a.75.75 0 0 1 .336 1.006A15.433 15.433 0 0 0 3.5 10c0 2.486.585 4.834 1.624 6.915a.75.75 0 1 1-1.342.67A16.933 16.933 0 0 1 2 10c0-2.724.641-5.3 1.782-7.585a.75.75 0 0 1 1.006-.336Zm2.285 3.554a1.5 1.5 0 0 1 2.219.677l.856 2.08 1.146-1.77a2.25 2.25 0 0 1 3.137-.65l.235.156a.75.75 0 1 1-.832 1.248l-.235-.156a.75.75 0 0 0-1.045.216l-1.71 2.644 1.251 3.04.739-.492a.75.75 0 1 1 .832 1.248l-.739.493a1.5 1.5 0 0 1-2.219-.677l-.856-2.08-1.146 1.77a2.25 2.25 0 0 1-3.137.65l-.235-.156a.75.75 0 0 1 .832-1.248l.235.157a.75.75 0 0 0 1.045-.217l1.71-2.644-1.251-3.04-.739.492a.75.75 0 0 1-.832-1.248l.739-.493Z',

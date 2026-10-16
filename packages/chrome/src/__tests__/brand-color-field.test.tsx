@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { THEME_CSS_STYLE_ID } from '@turboslide/render/theme-css';
+import { deckAppearance } from '@turboslide/schema/deck';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Mutation } from '@turboslide/schema/mutations';
@@ -127,5 +128,55 @@ describe('the Brand kit panel’s colour field', { timeout: 15_000 }, () => {
     expect(document.getElementById(THEME_CSS_STYLE_ID)).toBeNull();
     expect(swatch.style.background).toBe(before);
     expect(document.activeElement).toBe(swatch);
+  });
+});
+
+// The kit check at the panel's foot (kit-check.ts): a deck whose kit Text is under 4.5:1 lists the
+// finding with Fix, and Fix is one kit write of the fixed colour; a kit with nothing to fix says
+// what was measured.
+describe('the Brand kit panel’s check', { timeout: 15_000 }, () => {
+  it('says what it measured when nothing is under its ratio', () => {
+    const { container } = panel();
+    expect(container.querySelector('[data-control="panel.brand.check"]')?.textContent).toBe(
+      'Text reaches 4.5:1 and every other color 3:1 on Background in both appearances',
+    );
+  });
+
+  it('lists a Text under 4.5:1 with Fix, and Fix writes the fixed colour once', async () => {
+    const appearance = deckAppearance(doc.deck);
+    const shown: DeckDocument = {
+      ...doc,
+      deck: {
+        ...doc.deck,
+        brand: {
+          ...doc.deck.brand,
+          colors: { [appearance]: { text: appearance === 'light' ? '#9aa3b5' : '#3a3f4a' } },
+        },
+      },
+    };
+    const { container, commit } = panel(shown);
+    const row = container.querySelector(
+      `[data-control="panel.brand.check.contrast.${appearance}.text"]`,
+    );
+    expect(row?.textContent).toMatch(
+      /^Text on Background measures [\d.]+:1 on (light|dark) slides; it needs 4\.5:1Fix$/,
+    );
+    const fix = row?.querySelector<HTMLButtonElement>('button');
+    expect(fix?.getAttribute('data-control')).toBe(
+      `panel.brand.check.contrast.${appearance}.text.fix`,
+    );
+    await act(async () => {
+      fix?.click();
+    });
+    expect(commit).toHaveBeenCalledTimes(1);
+    const [mutations, label] = commit.mock.calls[0] ?? [[], ''];
+    expect(label).toBe('Brand kit: Text');
+    expect(mutations).toEqual([
+      {
+        op: 'deck.set',
+        path: `/brand/colors/${appearance}/text`,
+        value: expect.stringMatching(/^#[0-9a-f]{6}$/),
+      },
+    ]);
   });
 });

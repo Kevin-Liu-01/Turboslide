@@ -44,6 +44,7 @@ import { THEME_RECORDS, themeName, themeRecord } from '@turboslide/theme/themes'
 import type { TokenName } from '@turboslide/theme/tokens';
 import { LiveClone } from '@turboslide/viewer/LiveClone';
 
+import { BrandKitCheck } from './BrandKitCheck';
 import { useEditorShell } from './editor-shell-context';
 import { FontDropdown } from './FontPicker';
 import type { SlideRenderer } from './LayoutGrid';
@@ -67,17 +68,19 @@ import './ThemesPanel.css';
  * draft the same way and writes on Apply, where a native colour well stood), Fonts (Display and
  * Text, each the Font dropdown), Footer (the logo kind and the text), Slide numbers (Show,
  * Format, Skip title slides), Frame (Rails, Rules, Crosses with one sentence each), Words that
- * never translate, and Reset to the deployment's kit at the foot. Every control's write is one
- * commit through the editor's `commit(mutations, label)`, so the sheet, the filmstrip clones and
- * every collaborator re render at once, Cmd+Z takes one field back and Version history lists it
- * as its own row ("Brand kit: Primary"); the kit's slots draw from the record and take no drag
- * this round (question 8). The renderer arrives as a prop (the chrome package does not depend on
- * @turboslide/render for the tiles).
+ * never translate, the kit check (BrandKitCheck: each colour pair or logo under its contrast,
+ * with Fix where the fix is one write), and Reset to the deployment's kit at the foot. Every
+ * control's write is one commit through the editor's `commit(mutations, label)`, so the sheet,
+ * the filmstrip clones and every collaborator re render at once, Cmd+Z takes one field back and
+ * Version history lists it as its own row ("Brand kit: Primary"); the kit's slots draw from the
+ * record and take no drag this round (question 8). The renderer arrives as a prop (the chrome
+ * package does not depend on @turboslide/render for the tiles).
  *
  * Ids (PRODUCT.md 7.1): `panel.brand`, `panel.brand.logo.*`, `panel.brand.color.<role>.swatch`
  * and `.hex`, the colour field's `panel.brand.color.<role>.field.*`,
  * `panel.brand.color.appearance.*`, `panel.brand.font.*`, `panel.brand.footer.*`,
- * `panel.brand.counter.*`, `panel.brand.frame.*`, `panel.brand.lexicon`, `panel.brand.reset`.
+ * `panel.brand.counter.*`, `panel.brand.frame.*`, `panel.brand.lexicon`, `panel.brand.check.*`,
+ * `panel.brand.reset`.
  * The Appearance section keeps `panel.themes` on its wrapper for the rows written against it.
  */
 export type ThemesPanelProps = {
@@ -1181,6 +1184,14 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
         />
         <p className="ts-brand-line">{words.lexiconLine}</p>
       </section>
+
+      <BrandKitCheck
+        deck={deck}
+        appearance={current}
+        logoSrc={markKind === 'picture' ? logoSrc : undefined}
+        disabled={commit === undefined}
+        onFix={(pointer, value) => void writeKit(pointer, value)}
+      />
 
       <div className="ts-brand-foot">
         <button

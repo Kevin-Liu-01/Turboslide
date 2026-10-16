@@ -938,6 +938,11 @@ export const PANELS = {
     lexicon: 'Words that never translate',
     lexiconLine: 'Kept as written when this presentation is translated',
     lexiconPlaceholder: 'One name per line',
+    /* the kit check at the panel's foot (the Glyphfield port, wave 2 item 6): the rows are the
+       findings' own sentences (kit-check.ts) */
+    check: 'Check',
+    checkClear: 'Text reaches 4.5:1 and every other color 3:1 on Background in both appearances',
+    fix: 'Fix',
     reset: (kit: string) => `Reset to ${kit}`,
     resetDoc: (theme: string) =>
       `Removes this presentation’s brand kit; every slide draws the ${theme} theme`,

@@ -323,6 +323,28 @@
   accent-color: var(--pt-ink);
 }
 
+/* the kit check (BrandKitCheck.tsx): one row per finding, its sentence and its Fix */
+.ts-brand-check-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-brand-finding {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  font: 12px/1.4 var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-brand-finding .ts-fo-button {
+  flex: none;
+}
+
 .ts-brand-foot {
   display: flex;
   justify-content: flex-end;

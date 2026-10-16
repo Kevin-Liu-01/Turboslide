@@ -1,10 +1,12 @@
 // The colour spaces of the free colour field (pickers/ColorField.tsx in the chrome; the Glyphfield
 // port, wave 2 item 6, from Glyphfield's src/lib/color.ts): HSV for the saturation and value area
-// and the hue range, OKLCH for the typed field. Every value in and out is an sRGB `#rrggbb`, the
+// and the hue range, OKLCH for the typed field and for the Brand kit check's Fix, which moves a
+// colour's OKLCH lightness until it reaches a contrast (`adjustForContrast`, from Glyphfield's
+// src/lib/brandHealth.ts). Every value in and out is an sRGB `#rrggbb`, the
 // form a custom colour takes in a deck (schema/color.ts), lower case. A page cannot afford
 // colorjs.io, so this file is the one copy the browser paths import; color-space.test.ts pins it
 // to colorjs.io.
-import { parseColor, toHex } from './contrast.ts';
+import { composite, contrastRatio, parseColor, toHex } from './contrast.ts';
 
 /** Hue 0 to 360, saturation and value 0 to 1. */
 export type Hsv = { h: number; s: number; v: number };
@@ -154,4 +156,38 @@ export function parseOklch(text: string): Oklch | null {
   const h = Number(match[4]);
   if (![raw, c, h].every(Number.isFinite)) return null;
   return { l: clamp01(match[2] === '%' ? raw / 100 : raw), c: Math.max(0, c), h: wrapHue(h) };
+}
+
+/**
+ * The colour nearest in OKLCH lightness to `color`, with its hue and chroma, that reaches `ratio`
+ * on `ground` (WCAG 2.2, through contrast.ts), with 0.02 to spare against rounding; `color` itself
+ * when it already does. A translucent colour is first composited on the ground. On a light ground
+ * the colour darkens and on a dark one it lightens, ending at black or white when nothing between
+ * reaches the ratio. Null when either is not a colour.
+ */
+export function adjustForContrast(color: string, ground: string, ratio: number): string | null {
+  const base = parseColor(ground);
+  const top = parseColor(color);
+  if (base === null || top === null) return null;
+  const opaque = toHex(top.a < 1 ? composite(top, { ...base, a: 1 }) : top);
+  const groundHex = toHex({ ...base, a: 1 });
+  if (contrastRatio(opaque, groundHex) >= ratio) return opaque;
+  const start = hexToOklch(opaque);
+  const back = hexToOklch(groundHex);
+  if (start === null || back === null) return null;
+  const darken = back.l >= 0.6;
+  let low = darken ? 0 : start.l;
+  let high = darken ? start.l : 1;
+  let best = darken ? '#000000' : '#ffffff';
+  for (let step = 0; step < 24; step += 1) {
+    const l = (low + high) / 2;
+    const candidate = oklchToHex({ ...start, l });
+    if (contrastRatio(candidate, groundHex) >= ratio + 0.02) {
+      best = candidate;
+      if (darken) low = l;
+      else high = l;
+    } else if (darken) high = l;
+    else low = l;
+  }
+  return best;
 }

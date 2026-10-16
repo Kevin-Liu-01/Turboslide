@@ -3,7 +3,9 @@
 import Color from 'colorjs.io';
 import { describe, expect, it } from 'vitest';
 
+import { contrastRatio } from './contrast.ts';
 import {
+  adjustForContrast,
   formatOklch,
   hexToHsv,
   hexToOklch,
@@ -110,5 +112,42 @@ describe('the typed forms', () => {
     expect(parseOklch('#ff0000')).toBeNull();
     const red = parseOklch('oklch(62.8% 0.258 29.2)');
     expect(red === null ? null : oklchToHex(red)).toBe('#ff0000');
+  });
+});
+
+describe('adjustForContrast', () => {
+  it('keeps a colour that already reaches the ratio, as an opaque hex', () => {
+    expect(adjustForContrast('#2f5ce0', '#ffffff', 3)).toBe('#2f5ce0');
+    /* a translucent ink is composited on the ground first */
+    expect(adjustForContrast('rgba(0, 0, 0, 0.5)', '#ffffff', 3)).toBe('#808080');
+  });
+
+  it('darkens on a light ground and lightens on a dark one, keeping the hue, to the ratio', () => {
+    for (const [color, ground, ratio] of [
+      ['#a0b4ff', '#ffffff', 4.5],
+      ['#a9b6c4', '#fafaf7', 3],
+      ['#2f5ce0', '#0b0b0c', 4.5],
+      ['#4b3a2a', '#151515', 3],
+    ] as const) {
+      const fixed = adjustForContrast(color, ground, ratio);
+      if (fixed === null) throw new Error(color);
+      const ours = contrastRatio(fixed, ground);
+      expect(ours, `${color} on ${ground}`).toBeGreaterThanOrEqual(ratio);
+      /* the nearest: 0.1 under the ratio more would not reach it */
+      expect(ours, `${color} on ${ground}`).toBeLessThan(ratio + 0.15);
+      const [before, after] = [hexToOklch(color), hexToOklch(fixed)];
+      const dark = (hexToOklch(ground)?.l ?? 0) < 0.6;
+      expect((after?.l ?? 0) > (before?.l ?? 0), `${color} lighter`).toBe(dark);
+      if ((after?.c ?? 0) > 0.02) {
+        const delta = Math.abs((after?.h ?? 0) - (before?.h ?? 0));
+        expect(Math.min(delta, 360 - delta), `${color} hue`).toBeLessThan(6);
+      }
+    }
+  });
+
+  it('ends at black or white when no lightness reaches the ratio, and refuses a non colour', () => {
+    expect(adjustForContrast('#999999', '#a0a0a0', 21)).toBe('#000000');
+    expect(adjustForContrast('#777777', '#101010', 21)).toBe('#ffffff');
+    expect(adjustForContrast('ink', '#ffffff', 3)).toBeNull();
   });
 });

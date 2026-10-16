@@ -99,6 +99,10 @@ function depthBefore(node: AnyNode, parent: Args[1]): number {
 }
 
 const stringify: Stringify = (node, parent, state, info) => {
+  /* the twin is plain Markdown, which needs no escape before a brace: MDX's `\{` stays out of
+     the text an agent reads (`{ color } | null`, a reference page's type). A literal backslash
+     before a brace keeps its own escape, `\\{`. */
+  if (node.type === 'text') return state.safe(node.value, info).replace(/\\\{/g, '{');
   if (!isElement(node)) return undefined;
   switch (node.name) {
     case 'Callout': {

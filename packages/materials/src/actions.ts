@@ -104,6 +104,7 @@ import {
   FRAME_LONG_SIDE,
   anchorOf,
   frameAssetId,
+  frameIsStale,
   frameKeyOf,
   frameSizeFor,
   materialAspectOf,
@@ -986,7 +987,20 @@ export type ShaderInsertOutput = {
   slideId: string;
   blockId: string;
   block: MaterialBlock;
+  /** True while the block has no still for its recipe and moment (`stillPendingOf`). */
+  stillPending: boolean;
 };
+
+/**
+ * Whether a shader block written by `shader.insert` or `shader.set` waits for its still: the
+ * frame downloads, renders and thumbnails draw. An open editor that can write the deck captures
+ * it; without one the caller runs `shader.capture`, or a PDF or PPTX draws a grey plate or the
+ * older moment (post-deploy review: eight HTTP inserts exported as grey boxes and a moved anchor
+ * kept the 5.5 s frame, with nothing in the answer to say so).
+ */
+export function stillPendingOf(document: DeckDocument, block: MaterialBlock): boolean {
+  return frameIsStale(block, document.deck.assets, shaderPaletteOfDeck(document.deck));
+}
 
 /** `shader.insert`: one `block.insert` of a shader object on the named slide, converted first when it is not a canvas. */
 export async function shaderInsert(
@@ -1022,7 +1036,13 @@ export async function shaderInsert(
   const committed = await commitMutations(deps, ctx, baseRevision, [
     { op: 'block.insert', slideId: input.slideId, slot: 'main', block: block as Block },
   ]);
-  return { revision: committed.revision, slideId: input.slideId, blockId, block };
+  return {
+    revision: committed.revision,
+    slideId: input.slideId,
+    blockId,
+    block,
+    stillPending: stillPendingOf(committed.document, block),
+  };
 }
 
 export type ShaderSetInput = Rev & {
@@ -1033,7 +1053,7 @@ export type ShaderSetInput = Rev & {
   value?: unknown;
 };
 
-export type ShaderSetOutput = { revision: number; block: MaterialBlock };
+export type ShaderSetOutput = { revision: number; block: MaterialBlock; stillPending: boolean };
 
 /** `shader.set`: the section's write on any transport. */
 export async function shaderSet(
@@ -1046,7 +1066,11 @@ export async function shaderSet(
   const mutations = shaderSetMutations(current.deck, input.slideId, block, input.path, input.value);
   const committed = await commitMutations(deps, ctx, input.baseRevision, mutations);
   const after = requireMaterialBlock(committed.document, input.slideId, input.blockId).block;
-  return { revision: committed.revision, block: after };
+  return {
+    revision: committed.revision,
+    block: after,
+    stillPending: stillPendingOf(committed.document, after),
+  };
 }
 
 export type ShaderFrameInput = Rev & {

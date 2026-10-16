@@ -14,6 +14,7 @@ import { fieldRunsFirst, retargetFieldRuns, slideToConvertFor } from './convert-
 import { createExportModeGate } from './export-mode';
 import {
   agentEntriesOf,
+  agentWroteOutside,
   endsFollowOnAction,
   endsFollowOnPanel,
   endsFollowOnSlide,
@@ -1498,6 +1499,27 @@ export function createEditorController(init: {
    * whoever wrote it, so the deck's name and the tab no longer diverge from the slide. Before this
    * the slide changed with no banner and Cmd+Z took the seller's own last edit back instead.
    */
+  /**
+   * The stills an agent's write left stale (shader.insert, shader.set /anchor over HTTP or MCP;
+   * the post-deploy review: eight agent inserts exported as grey boxes and a moved anchor kept the
+   * 5.5 s frame while an editor sat open for 60 s). No tab of the room made that write, so no
+   * tab's own commit schedules the still (`afterCommit`): an editor that can write the deck
+   * captures what the write left stale once the document has taken it, as it does on open. A
+   * person's write in another tab stays that tab's to capture.
+   */
+  const captureAgentStills = (entries: ReadonlyArray<Entry>): void => {
+    if (room === null || !hasCapability('write')) return;
+    const outside = agentWroteOutside(entries, {
+      clientId: room.clientId(),
+      earlierIds: latest().ownClientIds,
+      assistNotes: ownAssistNotes,
+    });
+    if (!outside) return;
+    setTimeout(() => {
+      if (alive) shaderFrames.scheduleStale();
+    }, 0);
+  };
+
   const announceAgentWrite = (entries: ReadonlyArray<Entry>): void => {
     if (room === null) return;
     const client = room;
@@ -1953,11 +1975,13 @@ export function createEditorController(init: {
           case 'op':
             announceRemoteText(event.entry);
             announceAgentWrite([event.entry]);
+            captureAgentStills([event.entry]);
             if (event.entry.kind === 'comment') scheduleCommentsRefresh();
             return;
           case 'ops':
             for (const entry of event.entries) announceRemoteText(entry);
             announceAgentWrite(event.entries);
+            captureAgentStills(event.entries);
             if (event.entries.some((entry) => entry.kind === 'comment')) scheduleCommentsRefresh();
             return;
           case 'hello':

@@ -195,6 +195,8 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
       materialId: 'paper:liquid-metal',
     });
     expect(inserted.blockId).toBe('shader');
+    /* an insert has no still yet: the answer says so (post-deploy review) */
+    expect(inserted.stillPending).toBe(true);
     expect(inserted.block.preset).toBe('diamond');
     expect(inserted.block.motion).toBeUndefined();
     expect(inserted.block.pos).toMatchObject(placed);
@@ -314,14 +316,24 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
     expect(again.existed).toBe(true);
     expect(again.revision).toBe(afterFrame.deck.revision);
 
+    // a write that leaves the key alone keeps the still; a moved anchor waits for its own
+    const alt = await shaderSet(deps, ctx, {
+      baseRevision: afterFrame.deck.revision,
+      slideId,
+      blockId: 'shader',
+      path: '/alt',
+      value: 'A liquid metal sphere',
+    });
+    expect(alt.stillPending).toBe(false);
     // a moved recipe: the old key is a conflict, the new key supersedes the old frame in one write
     const moved = await shaderSet(deps, ctx, {
-      baseRevision: afterFrame.deck.revision,
+      baseRevision: alt.revision,
       slideId,
       blockId: 'shader',
       path: '/anchor',
       value: 7000,
     });
+    expect(moved.stillPending).toBe(true);
     await expect(
       shaderFrame(deps, ctx, {
         baseRevision: moved.revision,

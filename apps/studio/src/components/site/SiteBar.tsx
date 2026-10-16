@@ -9,9 +9,10 @@ import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 
 /**
- * The bar of /home and /docs (docs/SITE.md A.1, D7): one sticky 56 px row in the 1280 px column
- * with a hairline under it. The lockup (the T in a box at 24 px and the word) links to /home;
- * then `slot` (the docs put their search there); then Documentation and GitHub, one hairline, the
+ * The bar of the site pages and /docs (docs/SITE.md A.1, D7): one sticky 56 px row in the 1280 px
+ * column with a hairline under it. The lockup (the T in a box at 24 px and the word) links to
+ * /home; then `slot` (the docs put their search there); then Features, Documentation, About, FAQ
+ * and GitHub (About, FAQ and GitHub leave under 1024 px), one hairline, the
  * product's own theme button, Sign In and New Presentation with its solid plus. At 720 px and
  * under the row keeps the lockup, the slot, the theme button and New Presentation (site.css).
  *
@@ -57,7 +58,7 @@ export function SiteBar({
                   href={link.href}
                   external={link.external}
                   control={link.id}
-                  className="site-bar-link"
+                  className={link.wide ? 'site-bar-link is-wide' : 'site-bar-link'}
                 >
                   {link.label}
                 </SiteLink>

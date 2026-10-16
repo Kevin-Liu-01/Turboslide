@@ -18,9 +18,14 @@ const MAKER = 'https://generaltranslation.com';
 export const NAV = {
   skip: 'Skip to Content',
   lockup: { word: 'Turboslide', name: 'Turboslide home' },
+  /* `wide` links leave the bar under 1024 px, where the row has room for two (site.css); the
+     footer carries every one */
   links: [
-    { id: 'site.nav.docs', label: 'Documentation', href: '/docs', external: false },
-    { id: 'site.nav.github', label: 'GitHub', href: REPOSITORY, external: true },
+    { id: 'site.nav.features', label: 'Features', href: '/features', external: false, wide: false },
+    { id: 'site.nav.docs', label: 'Documentation', href: '/docs', external: false, wide: false },
+    { id: 'site.nav.about', label: 'About', href: '/about', external: false, wide: true },
+    { id: 'site.nav.faq', label: 'FAQ', href: '/faq', external: false, wide: true },
+    { id: 'site.nav.github', label: 'GitHub', href: REPOSITORY, external: true, wide: true },
   ],
   newPresentation: { label: 'New Presentation', href: '/new' },
 } as const;

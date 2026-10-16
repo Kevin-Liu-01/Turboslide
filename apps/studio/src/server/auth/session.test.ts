@@ -2,8 +2,10 @@ import { describe, expect, test } from 'vitest';
 
 import {
   ANON_COOKIE,
+  ANON_COOKIE_FUTURE_SKEW_MS,
   ANON_COOKIE_INSECURE,
   ANON_COOKIE_MAX_AGE_S,
+  ANON_COOKIE_RESEAL_AFTER_MS,
   anonymousCookieName,
   ensurePrincipal,
   expireAnonymousCookie,
@@ -37,10 +39,24 @@ describe('the seal', () => {
     expect(value.split('.')).toHaveLength(3);
     expect(value.startsWith('v1.')).toBe(true);
     expect(value).not.toContain(UUID);
-    expect(await unsealPrincipalCookie(value, SECRET)).toEqual({
+    expect(await unsealPrincipalCookie(value, SECRET, 1_757_764_800_000)).toEqual({
       principalId: ID,
       issuedAt: 1_757_764_800_000,
     });
+  });
+
+  test('refuses an issue time past 400 days or more than a minute ahead (HR-SA#9)', async () => {
+    const T = 1_790_000_000_000;
+    const value = await sealPrincipalCookie(ID, SECRET, T);
+    const maxAgeMs = ANON_COOKIE_MAX_AGE_S * 1000;
+    expect(await unsealPrincipalCookie(value, SECRET, T + maxAgeMs)).not.toBeNull();
+    expect(await unsealPrincipalCookie(value, SECRET, T + maxAgeMs + 1)).toBeNull();
+    expect(
+      await unsealPrincipalCookie(value, SECRET, T - ANON_COOKIE_FUTURE_SKEW_MS),
+    ).not.toBeNull();
+    expect(
+      await unsealPrincipalCookie(value, SECRET, T - ANON_COOKIE_FUTURE_SKEW_MS - 1),
+    ).toBeNull();
   });
 
   test('refuses a tampered value, another secret and other shapes', async () => {
@@ -120,12 +136,36 @@ describe('readPrincipal and ensurePrincipal', () => {
     const again = request('https://turboslide.vercel.app/edit/x', {
       cookie: `${ANON_COOKIE}=${value}`,
     });
-    expect(await readPrincipal(again, SECRET)).toEqual({ id: ID, kind: 'anonymous', admin: false });
-    const kept = await ensurePrincipal(again, SECRET);
+    const later = 1_757_764_800_000 + 1000;
+    expect(await readPrincipal(again, SECRET, later)).toEqual({
+      id: ID,
+      kind: 'anonymous',
+      admin: false,
+    });
+    const kept = await ensurePrincipal(again, SECRET, { now: later });
     expect(kept).toEqual({
       principal: { id: ID, kind: 'anonymous', admin: false },
       minted: false,
       cookieName: ANON_COOKIE,
+    });
+  });
+
+  test('a seal older than 30 days is re-sealed for the same id (HR-SA#9)', async () => {
+    const T = 1_790_000_000_000;
+    const value = await sealPrincipalCookie(ID, SECRET, T);
+    const req = request('https://turboslide.vercel.app/edit/x', {
+      cookie: `${ANON_COOKIE}=${value}`,
+    });
+    const fresh = await ensurePrincipal(req, SECRET, { now: T + ANON_COOKIE_RESEAL_AFTER_MS });
+    expect(fresh?.setCookie).toBeUndefined();
+    const now = T + ANON_COOKIE_RESEAL_AFTER_MS + 1;
+    const old = await ensurePrincipal(req, SECRET, { now });
+    expect(old?.minted).toBe(false);
+    expect(old?.principal.id).toBe(ID);
+    const resealed = old?.setCookie?.split(';')[0]?.slice(ANON_COOKIE.length + 1) ?? '';
+    expect(await unsealPrincipalCookie(resealed, SECRET, now)).toEqual({
+      principalId: ID,
+      issuedAt: now,
     });
   });
 
@@ -165,7 +205,6 @@ describe('readPrincipal and ensurePrincipal', () => {
     });
     expect(await ensurePrincipal(agent, SECRET)).toBeNull();
   });
-
 });
 
 describe('the link grant cookie', () => {

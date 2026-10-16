@@ -1,15 +1,21 @@
 /**
  * The runs of a line of code that a narrow line never breaks inside (docs/SITE.md 6, the docs'
  * code and the site pages' inline code and code panels): a flag with its value (`--theme
- * light,dark`, `--to https://www.turboslide.com`) while the two are at most KEEP_PAIR characters,
- * and any other word of at most KEEP characters, so a line never ends after a flag's hyphens or
- * inside a short word. A longer word, and the space between runs, wraps as the line allows.
+ * light,dark`, `--out renders`) while the two are at most KEEP_PAIR characters, and any other
+ * word of at most KEEP characters, so a line never ends after a flag's hyphens or inside a short
+ * word. A longer pair breaks at its space, and a longer word wraps as the line allows.
  */
 
 /** The longest word kept whole, in characters. */
 export const KEEP = 24;
-/** The longest flag and value kept on one line together, in characters. */
-export const KEEP_PAIR = 40;
+/**
+ * The longest flag and value kept on one line together, in characters: a run that fits the
+ * narrowest column that sets code, an FAQ answer at 320 px (252 px; 29 characters of 14 px
+ * monospace at 0.6 em are 244 px). At 40 the share page's `--editors-can-share
+ * <editorsCanShare>` (37) and /faq's `--to https://www.turboslide.com` (31) ran past the column
+ * into the gutter.
+ */
+export const KEEP_PAIR = 29;
 
 export type CodeRun = { text: string; keep: boolean };
 

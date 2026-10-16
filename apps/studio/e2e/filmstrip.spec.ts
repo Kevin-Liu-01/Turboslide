@@ -31,7 +31,8 @@ const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-film';
 const DECK_DIR = join(ROOT, 'decks', DECK);
 
-/* the card menu of the default view (docs/FOCUS.md 3.4 parks Change theme and Transition) */
+/* the card menu of the default view (docs/FOCUS.md 3.4 parks Change theme; Transition opens its
+   dialog since HTML-SLIDES-DESIGN 2.5) */
 const CARD_ORDER = [
   'Cut',
   'Copy',
@@ -42,6 +43,7 @@ const CARD_ORDER = [
   'Skip slide',
   'Change background',
   'Apply layout',
+  'Transition',
   'Move slide',
   'Comment',
 ];
@@ -195,9 +197,9 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
       .allTextContents();
     expect(labels).toEqual(CARD_ORDER);
     await expect(menu(page).locator('[role="separator"]')).toHaveCount(4);
-    /* the two parked rows are absent, not disabled (docs/FOCUS.md 3.1) */
+    /* the parked row is absent, not disabled (docs/FOCUS.md 3.1); Transition is live */
     await expect(menu(page).locator('[data-menu-item="slide.changeTheme"]')).toHaveCount(0);
-    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).toHaveCount(0);
+    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).toHaveCount(1);
     /* Comment on a thumbnail anchors a comment to that slide (SPEC-3 5.3, 13.1; the row was Later
        in round two and is enabled in Editing mode with the comment capability) */
     await expect(menu(page).locator('[data-menu-item="insert.comment"]')).not.toHaveAttribute(
@@ -209,8 +211,8 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     await page.keyboard.press('Escape');
     await expect(menu(page)).toHaveCount(0);
     await expect(card(page, 'content-rule')).toBeFocused();
-    /* behind Tools > Advanced tools the menu is SPEC 4.2's whole order, Transition disabled with
-       its stub sentence (docs/FOCUS.md 3.1: hidden while off, present while on) */
+    /* behind Tools > Advanced tools the menu is SPEC 4.2's whole order, Transition enabled
+       (docs/FOCUS.md 3.1: the parked row is hidden while off, present while on) */
     await setAdvancedTools(page, true);
     await card(page, 'content-rule').click({ button: 'right' });
     await expect(menu(page)).toBeVisible();
@@ -219,7 +221,7 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
         .locator(':scope > .ts-menu-group > [role^="menuitem"] .ts-menu-label')
         .allTextContents(),
     ).toEqual(CARD_ORDER_ADVANCED);
-    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).toHaveAttribute(
+    await expect(menu(page).locator('[data-menu-item="slide.transition"]')).not.toHaveAttribute(
       'aria-disabled',
       'true',
     );

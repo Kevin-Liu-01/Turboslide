@@ -310,7 +310,7 @@ describe('the filmstrip', () => {
     expect(document.querySelector('[role="menu"][aria-label="Slide menu"]')).toBeNull();
   });
 
-  it('leaves the Later row out of the card menu while Advanced tools is off (docs/FOCUS.md 3.1)', () => {
+  it('draws the card menu with Transition while Advanced tools is off (HTML-SLIDES-DESIGN 2.5)', () => {
     harness();
     fireEvent.contextMenu(card('thesis'), { clientX: 120, clientY: 80 });
     const menu = document.querySelector('[role="menu"][aria-label="Slide menu"]');
@@ -329,12 +329,14 @@ describe('the filmstrip', () => {
       'Change background',
       'Apply layout',
       'Change theme',
+      'Transition',
       'Move slide',
       'Comment',
     ]);
-    /* Change theme returned in the return round (docs/archive/rounds/RETURN.md 2.13); the Later row stays out */
+    /* Change theme returned in the return round (docs/archive/rounds/RETURN.md 2.13) and
+       Transition with its dialog (HTML-SLIDES-DESIGN 2.5) */
     expect(document.querySelector('[data-menu-item="slide.changeTheme"]')).not.toBeNull();
-    expect(document.querySelector('[data-menu-item="slide.transition"]')).toBeNull();
+    expect(document.querySelector('[data-menu-item="slide.transition"]')).not.toBeNull();
     fireEvent.keyDown(menu!, { key: 'Escape' });
   });
 

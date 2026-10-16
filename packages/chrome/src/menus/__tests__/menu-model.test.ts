@@ -322,7 +322,8 @@ const SPEC_ROWS: Row[] = [
     { was: 'omit' },
   ),
   row('insert', 'now', ['insert.specialCharacters'], { was: 'omit' }),
-  row('insert', 'omit', ['insert.animation']),
+  /* the slide clock (HTML-SLIDES-DESIGN 2.5): Insert > Animation opens the Animate panel */
+  row('insert', 'now', ['insert.animation']),
   row('insert', 'now', ['insert.link']),
   /* SPEC-3 5.3, 13.1: the card at the selection */
   row('insert', 'now', ['insert.comment'], { was3: 'later' }),
@@ -468,7 +469,8 @@ const SPEC_ROWS: Row[] = [
   /* SPEC-2 0.74: one Background dialog on every slide kind; the picture sources left the row */
   row('slide', 'now', ['slide.changeBackground']),
   row('slide', 'now', ['slide.applyLayout']),
-  row('slide', 'later', ['slide.transition']),
+  /* HTML-SLIDES-DESIGN 2.5: Slide > Transition is a dialog */
+  row('slide', 'now', ['slide.transition']),
   /* the product round (docs/archive/rounds/PRODUCT.md 4.1) drew Edit theme as a second way into the Brand kit
      panel; Round 1 (docs/NEXT.md 4.1.3 item 20) omits it in Google's position */
   row('slide', 'omit', ['slide.editTheme']),
@@ -667,13 +669,13 @@ const COUNTS: Record<string, Counts> = {
   view: [15, 1, 2],
   /* 22 with the Shapes gallery as its own row, All shapes (docs/FOCUS.md section 4, cycle 2); 23
      with the features round's Logo row (docs/archive/rounds/FEATURES.md 4.3) */
-  insert: [23, 3, 5],
+  insert: [24, 3, 4],
   /* the product round adds Font, Add a caption and Use on every slide (docs/archive/rounds/PRODUCT.md 4.2, section 2 rank 10, 4.4);
      the features round adds Tabular figures (docs/archive/rounds/FEATURES.md 3.1 item 4) */
   format: [32, 2, 0],
   /* Edit theme opened the Brand kit panel from the product round (docs/archive/rounds/PRODUCT.md 4.1) until Round 1
      omitted it (docs/NEXT.md 4.1.3 item 20) */
-  slide: [8, 1, 1],
+  slide: [9, 0, 1],
   arrange: [7, 0, 0],
   /* the product round: Preferences with Link detection, Tailor for a customer and Assist (docs/archive/rounds/PRODUCT.md section 2 rank 9, 5, 6);
      Round 1 (docs/NEXT.md 4.1.3 item 20): Assist left and Appearance joined Preferences; 19 with
@@ -689,7 +691,6 @@ const COUNTS: Record<string, Counts> = {
  * gone: every comment row is Now (SPEC-3 5.3).
  */
 const LATER_CLAUSES = new Set<string>([
-  'The GT theme presents still slides',
   'Link to a recording instead',
   'Start from the GT brand deck on the home page',
   'The GT theme is 16:9 at 1600 by 900',
@@ -826,7 +827,8 @@ describe('the SPEC rows', () => {
     /* Round 1 (docs/NEXT.md 4.1.3 item 20): Tools > Assist left (one Now row fewer) and Edit
        theme is omitted (one Now row to Omit); 160 with the Glyphfield port's Preferences row
        (PLAN.md wave 1 item 7: Reduce motion and Show tooltips) */
-    expect(total).toEqual([160, 15, 25]);
+    /* 162, 14 and 24 with Insert > Animation and Slide > Transition (HTML-SLIDES-DESIGN 2.5) */
+    expect(total).toEqual([162, 14, 24]);
     /* 188 with the Shapes gallery row (docs/FOCUS.md section 4, cycle 2); 197 with the product
        round's nine rows (docs/archive/rounds/PRODUCT.md sections 2, 4, 5 and 6); 199 with the features round's two;
        198 after Round 1's cuts; 199 with Sign In as text; 200 with the Glyphfield port's row */
@@ -1909,7 +1911,7 @@ describe('predicates and labels', () => {
     expect(resolveLabel(itemById('slide.skipSlide'), DEFAULT_MENU_CONTEXT)).toBe('Skip slide');
     expect(resolveLabel(itemById('slide.skipSlide'), skipped)).toBe('Unskip slide');
     expect(tooltipDoc(itemById('slide.transition'), DEFAULT_MENU_CONTEXT)).toBe(
-      `${STUB_PREFIX}. The GT theme presents still slides`,
+      'How the slide comes in during the show, for the selected slides or all of them',
     );
     expect(tooltipDoc(itemById('format.bulletsNumbering.bulleted'), DEFAULT_MENU_CONTEXT)).toBe(
       'Nine bullet styles; the button and the key apply the first',
@@ -2013,16 +2015,17 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       if (control.status === 'later')
         expect(control.stubReason?.length ?? 0, control.control).toBeGreaterThan(0);
     }
-    /* SPEC-3 5.3: Insert comment is live; Transition is the one Later control of the default tail */
+    /* SPEC-3 5.3: Insert comment is live; HTML-SLIDES-DESIGN 2.5: Transition opens its dialog,
+       so the default tail has no Later control */
     expect(
       TOOLBAR_TAIL_DEFAULT.filter((control) => control.status === 'later').map(
         (control) => control.label,
       ),
-    ).toEqual(['Transition']);
+    ).toEqual([]);
   });
 
   it('lists the card menu in the order of SPEC 4.2', () => {
-    /* the Later row Transition is drawn behind Tools > Advanced tools (docs/FOCUS.md 3.1) */
+    /* Transition is a Now row since HTML-SLIDES-DESIGN 2.5, drawn in both contexts */
     const on: MenuContext = {
       ...DEFAULT_MENU_CONTEXT,
       settings: { ...DEFAULT_MENU_CONTEXT.settings, advancedTools: true },
@@ -2051,9 +2054,9 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       'Comment',
     ];
     expect(labelsOf(on)).toEqual(order);
-    /* with the switch off the Later row leaves (docs/FOCUS.md 3.4); Change theme returned with
-       the return round (docs/archive/rounds/RETURN.md 2.13) and stays in the card menu */
-    expect(labelsOf(DEFAULT_MENU_CONTEXT)).toEqual(order.filter((label) => label !== 'Transition'));
+    /* Change theme returned with the return round (docs/archive/rounds/RETURN.md 2.13) and
+       Transition with its dialog (HTML-SLIDES-DESIGN 2.5): both stay in the card menu */
+    expect(labelsOf(DEFAULT_MENU_CONTEXT)).toEqual(order);
   });
 
   it('builds every right-click menu from menu bar items, dividers between the groups of 4.3', () => {
@@ -2079,8 +2082,24 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     expect(emptyOff.filter((entry) => entry === DIVIDER)).toHaveLength(4);
     expect(emptyOff.at(-1)).toBe(itemById('view.guides'));
     expect(emptyOff.some((entry) => entry !== DIVIDER && entry.id === 'slide.transition')).toBe(
-      false,
+      true,
     );
+    /* HTML-SLIDES-DESIGN 2.5: every object menu has Animation, which opens the Animate panel */
+    for (const target of [
+      'textBlock',
+      'image',
+      'shape',
+      'line',
+      'group',
+      'chart',
+      'table',
+    ] as const)
+      expect(
+        contextMenuItems(target, DEFAULT_MENU_CONTEXT).some(
+          (entry) => entry !== DIVIDER && entry.id === 'insert.animation',
+        ),
+        target,
+      ).toBe(true);
     const textOff = contextMenuItems('textBlock', DEFAULT_MENU_CONTEXT).map((entry) =>
       entry === DIVIDER ? '-' : entry.id,
     );
@@ -3043,9 +3062,8 @@ describe('the return round: the flags of the returned and the parked rows (docs/
     expect(isPresent(itemById('format.image.replaceImage.fromThisPresentation'), OFF)).toBe(false);
   });
 
-  it('keeps the Later stubs Later: Transition, Indentation options, Edit guides, Email collaborators', () => {
+  it('keeps the Later stubs Later: Indentation options, Edit guides, Email collaborators', () => {
     for (const id of [
-      'slide.transition',
       'format.alignIndent.indentationOptions',
       'view.guides.edit',
       'file.email.collaborators',

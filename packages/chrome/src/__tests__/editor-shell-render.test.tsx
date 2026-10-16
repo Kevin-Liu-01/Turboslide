@@ -441,7 +441,7 @@ describe('the editor shell in its default state', () => {
         .filter((control) => control.status !== 'later' && control.advanced !== true)
         .map((control) => control.control),
     );
-    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition, the Later
+    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition, a parked
        control, is absent while the switch is off (asserted behind the switch below) */
     const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
     /* docs/archive/rounds/POLISH.md 2.6 item 66: with nothing selected the button waits for a selection */
@@ -485,10 +485,9 @@ describe('the editor shell in its default state', () => {
     expect(controls).toEqual(
       [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT].map((control) => control.control),
     );
-    /* Transition is the Later control, in the tab order, aria-disabled, with the stub sentence */
+    /* Transition is a parked control that opens Slide > Transition (HTML-SLIDES-DESIGN 2.5) */
     const transition = toolbar.querySelector('[data-control="toolbar.transition"]') as HTMLElement;
-    expect(transition.getAttribute('aria-disabled')).toBe('true');
-    expect(transition.hasAttribute('disabled')).toBe(false);
+    expect(transition.getAttribute('aria-disabled')).toBeNull();
     expect(container.querySelector('.pt-viewer')?.hasAttribute('data-advanced-tools')).toBe(true);
     /* no bottom bar with the switch on either (rank 25); Grid view stays a View menu row */
     expect(container.querySelector('[data-control="bottombar"]')).toBeNull();

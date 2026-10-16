@@ -1060,7 +1060,11 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
     status: 'later',
     reason: 'The web page download is the HTML form of the presentation',
   },
-  { google: 'animations-panel', status: 'later', reason: 'The GT theme presents still slides' },
+  {
+    google: 'animations-panel',
+    status: 'later',
+    reason: 'Insert > Animation opens the Animate panel for the selected object',
+  },
   { google: 'animation-preview', status: 'omit', reason: 'No animations' },
   { google: 'open-explore', status: 'later', reason: 'Turboslide has no Explore panel' },
   {

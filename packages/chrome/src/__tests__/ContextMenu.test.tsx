@@ -50,7 +50,7 @@ const CARD_ORDER = [
  * The same menu with the switch off: the Later row Transition is absent (docs/FOCUS.md 3.1, 3.4);
  * Change theme returned to the default view in the return round (docs/archive/rounds/RETURN.md 2.13).
  */
-const CARD_ORDER_DEFAULT = CARD_ORDER.filter((label) => label !== 'Transition');
+const CARD_ORDER_DEFAULT = CARD_ORDER;
 
 /** The right-clicked card, mounted before the menu so focus can return to it. */
 function mountCard(): HTMLElement {
@@ -157,9 +157,9 @@ describe('ContextMenu', () => {
     expect(dup?.textContent).toContain('⌘D');
     const newSlide = document.querySelector('[data-menu-item="slide.newSlide"]');
     expect(newSlide?.textContent).toContain('⌃M');
-    /* the stubs are present and disabled, with the stub sentence; Comment is live (SPEC-3 5.3) */
+    /* Transition opens its dialog (HTML-SLIDES-DESIGN 2.5); Comment is live (SPEC-3 5.3) */
     const transition = document.querySelector('[data-menu-item="slide.transition"]');
-    expect(transition?.getAttribute('aria-disabled')).toBe('true');
+    expect(transition?.getAttribute('aria-disabled')).toBeNull();
     const comment = document.querySelector('[data-menu-item="insert.comment"]');
     expect(comment).not.toBeNull();
     expect(comment?.getAttribute('aria-disabled')).toBeNull();
@@ -182,11 +182,11 @@ describe('ContextMenu', () => {
     expect(document.activeElement).toBe(document.querySelector('[data-menu-item="edit.cut"]'));
   });
 
-  it('leaves the Later row out of the card menu while Advanced tools is off (docs/FOCUS.md 3.1)', () => {
+  it('draws Transition in the card menu while Advanced tools is off (HTML-SLIDES-DESIGN 2.5)', () => {
     render(<Harness context={CTX} />);
     const labels = rows().map((row) => row.querySelector('.ts-menu-label')?.textContent);
     expect(labels).toEqual(CARD_ORDER_DEFAULT.filter((label) => label !== '-'));
-    expect(document.querySelector('[data-menu-item="slide.transition"]')).toBeNull();
+    expect(document.querySelector('[data-menu-item="slide.transition"]')).not.toBeNull();
     expect(
       document.querySelectorAll('[role="menu"][aria-label="Slide menu"] [role="separator"]'),
     ).toHaveLength(4);

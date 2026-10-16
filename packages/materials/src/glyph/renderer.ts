@@ -85,6 +85,7 @@ export function createGlyphRenderer(
       return (ring && !opening) || crossbar;
     };
     const fontSize = 32;
+    const blurs = 'filter' in context;
     return {
       draw: (frame) => {
         sizeTo(frame.width, frame.height);
@@ -101,7 +102,7 @@ export function createGlyphRenderer(
         context.setTransform(ratio, 0, 0, ratio, 0, 0);
         context.globalCompositeOperation = 'source-over';
         context.globalAlpha = 1;
-        context.filter = 'none';
+        if (blurs) context.filter = 'none';
         const backdrop = context.createRadialGradient(
           width * 0.5,
           height * 0.5,
@@ -174,14 +175,16 @@ export function createGlyphRenderer(
           context.fillStyle = rgb(point.color, point.opacity);
           glyphAt(point.glyph, point.x, point.y, point.size);
         }
-        /* bloom: a blurred additive copy of the glyphs */
-        context.save();
-        context.setTransform(1, 0, 0, 1, 0, 0);
-        context.globalCompositeOperation = 'lighter';
-        context.globalAlpha = Math.min(0.85, 0.35 + frame.strength * 0.4);
-        context.filter = `blur(${Math.round(Math.max(4, (fieldScale / columns) * 0.9) * ratio)}px)`;
-        context.drawImage(canvas, 0, 0);
-        context.restore();
+        /* bloom: a blurred additive copy of the glyphs, where canvas filters exist (not WebKit) */
+        if (blurs) {
+          context.save();
+          context.setTransform(1, 0, 0, 1, 0, 0);
+          context.globalCompositeOperation = 'lighter';
+          context.globalAlpha = Math.min(0.85, 0.35 + frame.strength * 0.4);
+          context.filter = `blur(${Math.round(Math.max(4, (fieldScale / columns) * 0.9) * ratio)}px)`;
+          context.drawImage(canvas, 0, 0);
+          context.restore();
+        }
         const particles = Math.round(28 + frame.grain * 0.72);
         for (let index = 0; index < particles; index += 1) {
           const phase = index * 29.17;

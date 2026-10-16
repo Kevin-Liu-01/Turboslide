@@ -7,6 +7,7 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 
 import type { EditorShellInput, IdentityView } from '../editor-shell';
 import { EditorShell } from '../EditorShell';
+import { SNACKBARS, TAB_ONLY } from '../menus/strings';
 import { ShellContext } from '../shell-context';
 import type { ShellState } from '../shell-context';
 import { useSnackbar } from '../Snackbar';
@@ -268,5 +269,31 @@ describe('the More key', () => {
     const rows = roster({ presence: { others: [other] } });
     expect(rows).toHaveLength(1);
     expect(rows[0]).toContain('Bismuth 168');
+  });
+});
+
+describe('a presentation that lives in the tab alone (docs/SITE.md D10)', () => {
+  const tabOnly = {
+    sentence: TAB_ONLY.sentence,
+    dialogs: [],
+    action: { label: TAB_ONLY.action, run: () => undefined },
+  };
+  const snack = (container: HTMLElement) =>
+    container.querySelector('[data-control="snackbar"]')?.textContent ?? '';
+
+  it('says where the changes are on Cmd+S and on a click of the save cell, never that they are saved', () => {
+    const { container } = render(<Harness input={input({ tabOnly, save: { state: 'saved' } })} />);
+    fireEvent.keyDown(document.body, { key: 's', code: 'KeyS', metaKey: true, ctrlKey: true });
+    expect(snack(container)).toContain(TAB_ONLY.doc);
+    expect(snack(container)).not.toContain(SNACKBARS.autosaved);
+    fireEvent.click(container.querySelector('[data-control="deck.saveState"]')!);
+    expect(snack(container)).toContain(TAB_ONLY.doc);
+    expect(snack(container)).not.toContain(SNACKBARS.autosaved);
+  });
+
+  it('keeps the autosave sentence on a presentation the server saves', () => {
+    const { container } = render(<Harness input={input({ save: { state: 'saved' } })} />);
+    fireEvent.click(container.querySelector('[data-control="deck.saveState"]')!);
+    expect(snack(container)).toContain(SNACKBARS.autosaved);
   });
 });

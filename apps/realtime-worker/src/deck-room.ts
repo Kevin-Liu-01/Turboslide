@@ -311,21 +311,30 @@ function parseIntVar(value: string | undefined, fallback: number): number {
 /**
  * An app call the object made (the seed route, the checkpoint route) that failed. `reach` names
  * the failures of the deployment and not of one deck (no answer, a redirect such as a protected
- * preview's sign in page, 401, 403, and a seed route's 5xx); a 404 (a deck removed) and a 409 (a
- * conflict) are the deck's. Thrown by `fetchSeed` and `postCheckpoint` so the failure count of 3.8
- * reads one class.
+ * preview's sign in page, 401, 403, and a seed route's 5xx); a 404 (a deck removed), a 409 (a
+ * conflict) and a checkpoint that passed its deadline are the deck's. Thrown by `fetchSeed` and
+ * `postCheckpoint` so the failure count of 3.8 reads one class.
  */
 export class AppCallError extends Error {
   readonly status: number;
   readonly route: 'seed' | 'checkpoint';
   /** the route's own word that the deck is gone (`{ gone: true }` on a 404; HR-RT#7) */
   readonly gone: boolean;
-  constructor(route: 'seed' | 'checkpoint', status: number, message?: string, gone = false) {
+  /** the call had no answer within its deadline (`withDeadline`; RELIABILITY-12, HR-RT#11) */
+  readonly deadline: boolean;
+  constructor(
+    route: 'seed' | 'checkpoint',
+    status: number,
+    message?: string,
+    gone = false,
+    deadline = false,
+  ) {
     super(message ?? `the ${route} route answered ${status}`);
     this.name = 'AppCallError';
     this.route = route;
     this.status = status;
     this.gone = gone;
+    this.deadline = deadline;
   }
   /**
    * Whether the deployment, not the deck, explains the failure (status 0 is no answer): no answer,
@@ -333,9 +342,14 @@ export class AppCallError extends Error {
    * that answers 5xx leaves the tabs editing (the entries wait in the object's rows and the alarm
    * retries), and one deck whose commit throws must not hand every tab of the deployment to the
    * blob tier; a seed route that answers 5xx leaves the tab with no socket at all, and the page
-   * that asked for it was served, so the route and not the deck is what fails.
+   * that asked for it was served, so the route and not the deck is what fails. A checkpoint that
+   * passed its deadline is the deck's too (RELIABILITY-12, hardening HR-RT#11): its runs were
+   * slow, a large deck or a slow store, and two of them on one object wrote the row as failing
+   * and moved every tab of every deck to the blob tier for 120 s. A checkpoint with no answer for
+   * any other reason (no connection) still counts.
    */
   get reach(): boolean {
+    if (this.deadline && this.route === 'checkpoint') return false;
     return (
       this.status === 0 ||
       (this.status >= 300 && this.status < 400) ||
@@ -346,15 +360,29 @@ export class AppCallError extends Error {
   }
 }
 
+/** A call `withDeadline` gave up on: no answer within its time. */
+export class DeadlineError extends Error {
+  constructor(ms: number) {
+    super(`no answer within ${ms} ms`);
+    this.name = 'DeadlineError';
+  }
+}
+
 /**
  * Runs `run` under an abort deadline of `ms` and clears the deadline the moment it settles, so no
- * timer outlives the call (the object hibernates only with nothing pending; `appCall`).
+ * timer outlives the call (the object hibernates only with nothing pending; `appCall`). A call
+ * the deadline ended throws `DeadlineError`, whatever the aborted fetch threw, so the caller
+ * tells a slow answer from a lost connection (HR-RT#11).
  */
 async function withDeadline<T>(ms: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(new Error(`no answer within ${ms} ms`)), ms);
+  const deadline = new DeadlineError(ms);
+  const timer = setTimeout(() => controller.abort(deadline), ms);
   try {
     return await run(controller.signal);
+  } catch (error) {
+    if (controller.signal.aborted) throw deadline;
+    throw error;
   } finally {
     clearTimeout(timer);
   }
@@ -408,6 +436,8 @@ export class DeckRoom extends DurableObject<Env> {
   private callbackFailures = 0;
   /** when this object last wrote the `callbacks` row as failing; null once a call succeeded after it */
   private callbackFlaggedAt: number | null = null;
+  /** the checkpoint call's deadline (CHECKPOINT_TIMEOUT_MS); a field so a Worker test can shorten it */
+  private checkpointDeadlineMs = CHECKPOINT_TIMEOUT_MS;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -1757,6 +1787,8 @@ export class DeckRoom extends DurableObject<Env> {
         route,
         0,
         `the ${route} route did not answer: ${error instanceof Error ? error.message : String(error)}`,
+        false,
+        error instanceof DeadlineError,
       );
       await this.noteCallback(failure);
       throw failure;
@@ -2260,7 +2292,7 @@ export class DeckRoom extends DurableObject<Env> {
         },
         body: JSON.stringify({ ...body, ...(revision === undefined ? {} : { revision }) }),
       },
-      CHECKPOINT_TIMEOUT_MS,
+      this.checkpointDeadlineMs,
     );
     if (answer.status === 409) {
       const conflict = (answer.body ?? {}) as {

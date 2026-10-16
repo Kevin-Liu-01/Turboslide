@@ -54,10 +54,19 @@ export const AGENTS = [
   { brand: 'hermes', hue: 4 },
 ] as const;
 
-/** The tooltip sentence under an avatar's name. */
-export const AVATAR_DOCS = {
-  person: 'A visitor without an account works under a generated name like this one.',
-  agent: 'An agent that runs Turboslide’s actions over the command line, MCP or HTTP.',
+/**
+ * What pressing an avatar does, read by a screen reader after the avatar's name (each button's
+ * `aria-describedby`); the label a pointer or the focus lifts names the avatar alone.
+ */
+export const AVATAR_PRESS = {
+  person: {
+    id: 'site-press-person',
+    sentence: 'Pressing brings this person into the editor below for a short visit.',
+  },
+  agent: {
+    id: 'site-press-agent',
+    sentence: 'Pressing has this agent take its next step in the editor below.',
+  },
 } as const;
 
 export const HERO = {

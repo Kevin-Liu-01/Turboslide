@@ -11,7 +11,7 @@ import {
 
 import {
   AGENTS_SCREEN,
-  AVATAR_DOCS,
+  AVATAR_PRESS,
   DOCS_FOOTER,
   FOOTER,
   HERO,
@@ -62,8 +62,8 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['hero.figure.label', HERO.figure.label],
   ['hero.figure.caption', HERO.figure.caption],
   ['hero.figure.alt', HERO.figure.alt],
-  ['avatar.person', AVATAR_DOCS.person],
-  ['avatar.agent', AVATAR_DOCS.agent],
+  ['avatar.person', AVATAR_PRESS.person.sentence],
+  ['avatar.agent', AVATAR_PRESS.agent.sentence],
   ['agents.label', AGENTS_SCREEN.label],
   ['agents.sentence', AGENTS_SCREEN.sentence],
   ['agents.terminal', AGENTS_SCREEN.terminal.label],

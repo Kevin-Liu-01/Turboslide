@@ -547,6 +547,14 @@ export const ACCEPTED: readonly Acceptance[] = [
     owner: 'the integrator',
   },
   {
+    rule: 'css/no-shadow',
+    file: 'apps/studio/src/components/site/site.css',
+    match: '.ts-site .site-av { box-shadow',
+    reason:
+      "The avatars of /home's title arcs (docs/SITE.md B; Kevin's note of 2026-10-15, \"make them look better coooolrr in an arc\", and the polish step's brief: a 2 px ring in the page colour between overlapping avatars and a soft shadow): round avatars that overlap on an arc and lift under the pointer. The one soft shadow on the site; never on a plate, a panel or the product's chrome.",
+    owner: 'the integrator',
+  },
+  {
     rule: 'css/z-index',
     file: 'packages/viewer/src/MaterialMount.tsx',
     match: 'host.style.zIndex = style.zIndex',

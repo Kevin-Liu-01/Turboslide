@@ -765,6 +765,9 @@
 
 /* ---- on this page: numbered entries, the current one in ink, then the page tools ---- */
 
+/* the column scrolls on its own once its entries and tools run past the window (a reference
+   page's 27 entries), so the page tools are a scroll away at any point of the page; the reader's
+   section stays in view (DocsArticle.tsx) */
 .ts-docs .ts-docs-aside {
   grid-column: 2;
   grid-row: 1 / span 2;
@@ -773,6 +776,8 @@
   align-self: start;
   max-height: calc(100vh - var(--site-bar-h) - 48px);
   padding-bottom: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .ts-docs .ts-docs-toc .t-label {

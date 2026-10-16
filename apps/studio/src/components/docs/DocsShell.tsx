@@ -1,5 +1,5 @@
 import { useLocation } from '@tanstack/react-router';
-import { Suspense, lazy, useRef, useState } from 'react';
+import { Suspense, lazy, useCallback, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 /* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
@@ -12,6 +12,7 @@ import { SiteFooter } from '../site/SiteFooter';
 import { SiteLink } from '../site/SiteLink';
 import { useMountEffect } from '../useMountEffect';
 import { DocsSidebar, placeOf } from './DocsSidebar';
+import { revealIn } from './reveal';
 
 const SearchWindow = lazy(() => import('./SearchWindow'));
 
@@ -49,6 +50,14 @@ export function DocsShell({ children }: { children: ReactNode }) {
   const [mac, setMac] = useState(true);
   const opener = useRef<HTMLElement | null>(null);
   const contents = useRef<HTMLDetailsElement>(null);
+  /* the navigation scrolls on its own: on every page it brings the page's entry into view (a
+     new ref for each page, which React calls once the page's entry is drawn) */
+  const side = useCallback(
+    (column: HTMLElement | null): void => {
+      if (column !== null) revealIn(column, column.querySelector(`a[href="${current}"]`), 'center');
+    },
+    [current],
+  );
 
   const openSearch = (): void => {
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -107,7 +116,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
     <div className="ts-site ts-docs" id="top" data-control="docs">
       <SiteBar docs slot={slot} />
       <div className="site-wrap ts-docs-body">
-        <aside className="ts-docs-side pt-scroll">
+        <aside className="ts-docs-side pt-scroll" ref={side}>
           <DocsSidebar tree={tree} current={current} />
         </aside>
         <main id="main" className="ts-docs-main">

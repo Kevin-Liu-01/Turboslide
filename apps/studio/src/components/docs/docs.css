@@ -1315,6 +1315,11 @@
     width: min(var(--fig-phone-w, var(--fig-w)), 100%);
   }
 
+  /* the editor's top shows its left 285 px, where each row ends between two words (site.css) */
+  .ts-docs [data-figure='editor-top'] .ts-docs-fig-frame {
+    width: min(285px, 100%);
+  }
+
   .ts-docs .ts-docs-leader i,
   .ts-docs .ts-docs-leader span {
     left: var(--fig-phone-at, var(--fig-at));

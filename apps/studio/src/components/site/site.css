@@ -2799,6 +2799,26 @@
   color: var(--pt-titanium);
 }
 
+/* a phone cut whose right edge falls inside a phrase is drawn through a narrower box at its own
+   scale: the editor's top (editor-top, 340 px wide at 390) shows its left 285 px, where each row
+   ends between two words (the title row after its clock, before "Last edit"; the menus after
+   Format; the toolbar after Fit). The docs' Figure 1 takes the same box (docs.css) */
+@media (max-width: 720px) {
+  .ts-site [data-figure='editor-top'] .site-crop-frame {
+    width: min(285px, 100%);
+  }
+
+  .ts-site [data-figure='editor-top'] .site-pic {
+    overflow: hidden;
+  }
+
+  .ts-site [data-figure='editor-top'] .site-pic img {
+    width: 340px;
+    max-width: none;
+    height: auto;
+  }
+}
+
 .ts-site .site-code .site-term {
   max-width: 720px;
 }

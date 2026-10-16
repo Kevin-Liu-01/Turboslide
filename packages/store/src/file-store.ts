@@ -22,7 +22,7 @@ import { basename, dirname, join } from 'node:path';
 
 import type { Deck, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
-import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
+import type { Author, Lease, Mutation, Version } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import { applyWrite } from '@turboslide/schema/reduce';
 import { validateDeck } from '@turboslide/schema/validate';
@@ -46,6 +46,7 @@ import type {
   LeasePolicy,
   ReadResult,
   StoreListener,
+  StoreWrite,
   VersionRecord,
   WriteOptions,
   WriteOutcome,
@@ -56,7 +57,10 @@ import {
   nextVersionNumber,
   readVersions,
   recordAtRevision,
+  recordMinor,
+  recordNamingOps,
   toVersion,
+  versionRecordText,
   writeVersion,
 } from './versions.ts';
 import { watchDeck } from './watch.ts';
@@ -83,6 +87,13 @@ export type FileStoreOptions = {
    * text anchors the write moved and writes the sidecar under the same lock).
    */
   onWrite?: (before: DeckDocument, after: DeckDocument, mutations: ReadonlyArray<Mutation>) => void;
+  /**
+   * Keep the store's contract on a write that names its origin (store.ts `DeckStore.write`;
+   * hardening HR-O#6): a write whose op id a record above its base names is answered with that
+   * record (`replayed`), and a committed write's record stores its origin. The tmp backend sets
+   * it; the Blob store's FileStore does not, since the Blob store keeps the contract itself.
+   */
+  origins?: boolean;
 };
 
 export type FileStore = DeckStore & { readonly dir: string; readonly leaseFile: string };
@@ -286,12 +297,30 @@ export function openFileStore(options: FileStoreOptions): FileStore {
       return loadDeckDir(dir).document.deck.revision;
     },
 
-    write(write: Write, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
+    write(write: StoreWrite, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
       return locked(async () => {
         const loaded = loadDeckDir(dir);
         const current = loaded.document;
+        const origin = options.origins === true ? write.origin : undefined;
         const now = clock();
         const warnings: string[] = [];
+        const records = readVersions(dir);
+        if (origin !== undefined) {
+          // the resend of a write that committed: its record, nothing claimed or written
+          const replayed = recordNamingOps(records, write.baseRevision, origin.opIds);
+          if (replayed !== undefined) {
+            return {
+              ok: true,
+              document: current,
+              revision: replayed.revision,
+              entry: replayed,
+              changed: [],
+              issues: [],
+              warnings,
+              replayed,
+            };
+          }
+        }
         if (writeOptions.force !== true) {
           const policy = policyFor(write.author);
           const leases = readLeases(leaseFile);
@@ -311,13 +340,12 @@ export function openFileStore(options: FileStoreOptions): FileStore {
             warnings.push(describeLease(held));
           }
         }
-        const records = readVersions(dir);
         const result = applyWrite(current, write, {
           now,
           resolveVersion: (n) => documentAtVersion(current, records, n),
         });
         if (!result.ok) return result;
-        const changed = writeSlideFiles(dir, current, result.document);
+        const minor = recordMinor(current, result.document);
         const entry: VersionRecord = {
           n: nextVersionNumber(records),
           revision: result.document.deck.revision,
@@ -328,8 +356,15 @@ export function openFileStore(options: FileStoreOptions): FileStore {
           mutations: result.entry.mutations,
           inverse: result.inverse,
           ...(writeOptions.ops !== undefined ? { ops: writeOptions.ops } : {}),
+          ...(origin !== undefined ? { origin } : {}),
+          ...(minor !== undefined ? { schemaMinor: minor } : {}),
         };
-        writeVersion(dir, entry);
+        // the record's text before any file changes: a record that cannot be written refuses the
+        // write whole, so the slide files never move without the record and the manifest (the
+        // wave 3b verify's finding 1: a refused record left a slide file one write ahead)
+        const recordText = versionRecordText(entry);
+        const changed = writeSlideFiles(dir, current, result.document);
+        writeVersion(dir, entry, recordText);
         writeManifest(dir, result.document.deck);
         // the comment anchors follow the text they name (gslides-parity SPEC-3 0.52): the shift
         // entries a checkout's write produces are written to the sidecar under this same lock

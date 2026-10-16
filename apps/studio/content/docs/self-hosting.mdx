@@ -29,6 +29,8 @@ node apps/studio/.output/server/index.mjs
 
 The build writes a Node server to `apps/studio/.output`. The same build with `NITRO_PRESET=vercel` writes a Vercel deployment.
 
+On SIGTERM or Ctrl+C the server stops taking requests, saves the edits it still holds, and exits within 10 seconds, so a process manager can restart it without waiting out its kill timeout.
+
 ## Where presentations are stored
 
 The studio picks one store when it starts:

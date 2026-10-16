@@ -18,6 +18,7 @@ import type { CommentOp } from '@turboslide/schema/comments';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 
 import type { RealtimeChannel, RoomEvent, RosterEntry } from './channel.ts';
+import { ROOM_WRITE_OP_ID_HEADER } from './frames.ts';
 import { checkDeckId } from './keys.ts';
 
 /** How long a function trusts the Worker's `/health` answer (3.8 item 4). */
@@ -78,7 +79,8 @@ export type RoomWriteBody = {
 };
 
 export type RoomWriteAnswer =
-  | { ok: true; revision: number; seq: number; record?: unknown }
+  /** `replayed` when the object held an entry under the write's op id and answered that one (HR-O#6) */
+  | { ok: true; revision: number; seq: number; record?: unknown; replayed?: true }
   | { ok: false; code: 'conflict'; message: string; currentRevision: number }
   | { ok: false; code: 'invalid'; message: string };
 
@@ -98,7 +100,8 @@ export type DoChannel = RealtimeChannel & {
   health: () => Promise<RoomHealth | null>;
   document: (deckId: string) => Promise<RoomDocument | null>;
   flush: (deckId: string) => Promise<RoomFlush>;
-  serverWrite: (deckId: string, body: RoomWriteBody) => Promise<RoomWriteAnswer>;
+  /** `opId`, a keyed agent write's op id (HR-O#6), rides ROOM_WRITE_OP_ID_HEADER. */
+  serverWrite: (deckId: string, body: RoomWriteBody, opId?: string) => Promise<RoomWriteAnswer>;
   serverComment: (deckId: string, body: RoomCommentBody) => Promise<RoomCommentAnswer>;
   external: (deckId: string, body: RoomExternalBody) => Promise<void>;
   accessChanged: (deckId: string, principalIds?: readonly string[]) => Promise<void>;
@@ -147,10 +150,11 @@ export function doChannel(options: DoChannelOptions): DoChannel {
     route: string,
     body?: unknown,
     timeoutMs = DO_CALL_TIMEOUT_MS,
+    extra: Record<string, string> = {},
   ): Promise<Response> => {
     return fetchFn(`${origin}${route}`, {
       method,
-      headers: headers(body !== undefined),
+      headers: { ...headers(body !== undefined), ...extra },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       signal: AbortSignal.timeout(timeoutMs),
     });
@@ -298,8 +302,16 @@ export function doChannel(options: DoChannelOptions): DoChannel {
       return (await response.json()) as RoomFlush;
     },
 
-    async serverWrite(deckId, body) {
-      const response = await call('POST', roomRoute(deckId, 'write'), body);
+    async serverWrite(deckId, body, opId) {
+      // a header and not a body field, so an object of the release before reads the body it
+      // knows and takes a fresh op id, as for CHECKPOINT_BOUNDED_HEADER
+      const response = await call(
+        'POST',
+        roomRoute(deckId, 'write'),
+        body,
+        DO_CALL_TIMEOUT_MS,
+        opId === undefined ? {} : { [ROOM_WRITE_OP_ID_HEADER]: opId },
+      );
       if (response.status === 409 || response.status === 400 || response.ok) {
         return (await response.json()) as RoomWriteAnswer;
       }

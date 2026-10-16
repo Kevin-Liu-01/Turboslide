@@ -57,8 +57,12 @@ const device = (problem?: 'code-wrong' | 'spent' | 'expired'): GalleryState => (
   deviceCode: 'WDJBMJHT',
 });
 
-/** Every state of docs/POLISH-2.md 4.4, by its id. */
-export const GALLERY_STATES: Readonly<Record<string, GalleryState>> = {
+/**
+ * Every state of docs/POLISH-2.md 4.4, by its id. Not exported: the router's code splitting keeps
+ * a route file's exports in the chunk every route loads, and only the gallery reads the states
+ * (hardening HR-PC#2, PERF-9).
+ */
+const GALLERY_STATES: Readonly<Record<string, GalleryState>> = {
   'methods.google': { methods: GOOGLE, initial: { step: 'methods' } },
   'methods.google-email': { methods: GOOGLE_EMAIL, initial: { step: 'methods' } },
   'methods.all': { methods: ALL, initial: { step: 'methods' } },

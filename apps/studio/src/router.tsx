@@ -2,7 +2,7 @@ import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import type { ParsedLocation } from '@tanstack/react-router';
 import { getGlobalStartContext } from '@tanstack/react-start';
 
-import { setDitherWorkerFactory } from '@turboslide/viewer/dither';
+import { setDitherWorkerFactory } from '@turboslide/viewer/dither-factory';
 import { motionReduced } from '@turboslide/viewer/reduce-motion';
 
 import { routeTree } from './routeTree.gen';
@@ -14,7 +14,9 @@ import { PageRefused } from './routes/-refused-page';
  * (the editor's stage, the viewer's stage, the live clones) draws its overlays off the main
  * thread through `@turboslide/viewer/dither`'s shared host; on the server, and in a browser
  * without workers, the main thread stages stand in. Vite resolves the `new URL(..., import.meta.url)`
- * worker in dev and in the build.
+ * worker in dev and in the build. The factory goes into `@turboslide/viewer/dither-factory`, a
+ * module without imports, so the dither pipeline stays out of the chunk every route loads
+ * (hardening HR-PC#2, PERF-9: about 30 KB of it).
  */
 function registerDitherWorker(): void {
   if (typeof window === 'undefined' || typeof Worker === 'undefined') return;

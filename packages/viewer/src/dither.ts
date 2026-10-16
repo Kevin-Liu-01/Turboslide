@@ -16,6 +16,9 @@ import {
 } from '@turboslide/render/runtime';
 import type { DitherBaseRequest, DitherFramePayload, DitherHost } from '@turboslide/render/runtime';
 
+import { ditherWorkerFactory } from './dither-factory';
+import type { DitherWorkerLike } from './dither-factory';
+
 /**
  * The live dither ramp canvas (SPEC 5.4; tail:104-114), drawn from
  * @turboslide/effects: one cell per canvas pixel at half the CSS size (the
@@ -108,10 +111,10 @@ export type DitherWorkerReply =
   | { kind: 'stale'; id: number; key: string; ok: false }
   | { kind: 'error'; id: number; key: string; ok: false; error: string };
 
-/** The worker surface the hosts drive; `new Worker(...)` satisfies it. */
-export type DitherWorkerLike = Pick<Worker, 'postMessage' | 'terminate'> & {
-  addEventListener: (type: 'message', listener: (event: MessageEvent<unknown>) => void) => void;
-};
+/* the worker surface and its factory slot live in ./dither-factory.ts, which the router imports
+   without this pipeline (hardening HR-PC#2) */
+export type { DitherWorkerLike } from './dither-factory';
+export { setDitherWorkerFactory } from './dither-factory';
 
 /** The stage 1 spec of a base request (dither-runtime.ts) in the effects package's shape. */
 export function specOfRequest(request: DitherBaseRequest): ToneBaseSpec {
@@ -280,21 +283,19 @@ export function workerDitherHost(worker: DitherWorkerLike): DitherHost {
   };
 }
 
-let factory: (() => DitherWorkerLike) | null = null;
 let shared: DitherHost | null = null;
-
-/** Registers the studio's worker factory (apps/studio router.tsx); the shared host is rebuilt on the next draw. */
-export function setDitherWorkerFactory(make: (() => DitherWorkerLike) | null): void {
-  factory = make;
-  shared = null;
-}
+/* the factory registration the shared host was built for: a later `setDitherWorkerFactory`
+   (apps/studio router.tsx) rebuilds the host on the next draw */
+let sharedGeneration = -1;
 
 /** The host every draw uses: the worker when a factory exists and the page has workers, else the main thread. */
 export function ditherHost(): DitherHost {
-  if (shared !== null) return shared;
-  if (factory !== null && typeof Worker !== 'undefined') {
+  const { make, generation } = ditherWorkerFactory();
+  if (shared !== null && sharedGeneration === generation) return shared;
+  sharedGeneration = generation;
+  if (make !== null && typeof Worker !== 'undefined') {
     try {
-      shared = workerDitherHost(factory());
+      shared = workerDitherHost(make());
       return shared;
     } catch {
       // a worker that fails to construct: the main thread stages stand in
@@ -312,6 +313,7 @@ export function resetDitherHost(): void {
 /** Sets the shared host directly (tests). */
 export function setDitherHost(host: DitherHost | null): void {
   shared = host;
+  sharedGeneration = ditherWorkerFactory().generation;
 }
 
 function documentTheme(): DitherTheme {

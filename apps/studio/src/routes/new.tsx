@@ -3,7 +3,8 @@ import { useMemo, useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { parseAuthor } from '@turboslide/schema/mutations';
-import { TITLE_ROW } from '@turboslide/chrome/menus/strings';
+/* the page title's words without the rest of the strings file (hardening HR-PC#2) */
+import { TITLE_ROW } from '@turboslide/chrome/menus/page-words';
 
 import { EditorSkeleton } from '../components/EditorSkeleton';
 import { useMountEffect } from '../components/useMountEffect';

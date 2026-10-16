@@ -361,6 +361,16 @@ export type RealtimeChannel = {
   /** the last seq of the stream, 0 for an empty one */
   head: (deckId: string) => Promise<number>;
   /**
+   * Raises the stream's head to `seq` when it is below it, so the next entry numbers above the
+   * seqs the deck's records already cover (the room's open, room.ts `createRoom`). The memory
+   * stream starts empty in every new process while the records keep the previous process's ops
+   * ranges: without the floor a tab's entries after a restart took seqs at or below the covered
+   * one and were never applied or checkpointed (the wave 3b verify's finding 6). The redis stream
+   * outlives a restart of the app and the blob and do tiers number by their own store, so only
+   * the memory channel has it.
+   */
+  floor?: (deckId: string, seq: number) => Promise<void>;
+  /**
    * Delivers every admitted `op`, every presence change and every published event of the deck
    * to the listener, in stream order; the return value unsubscribes. One subscription per
    * instance per deck on Redis, however many listeners (report 10 F24). A `passive` listener

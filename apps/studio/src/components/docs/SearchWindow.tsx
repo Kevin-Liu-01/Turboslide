@@ -1,7 +1,8 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useRef, useState } from 'react';
 
-import { Icon } from '@turboslide/chrome/icons';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
 import { useLayer } from '@turboslide/chrome/Layer';
 
 import { SEARCH_INDEX_URL, rank } from '../../docs/search';

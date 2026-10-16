@@ -7,8 +7,10 @@ import { getRequest } from '@tanstack/react-start/server';
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { DeleteForeverDialog } from '@turboslide/chrome/dialogs/DeleteForever';
 import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
-import { Icon } from '@turboslide/chrome/icons';
-import { HOME } from '@turboslide/chrome/menus/strings';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
+/* the page words without the rest of the strings file (hardening HR-PC#2) */
+import { HOME } from '@turboslide/chrome/menus/page-words';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 

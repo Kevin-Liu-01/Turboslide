@@ -27,7 +27,7 @@ Every slide is a canvas: the first canvas write on a slide that is not on the fr
 
 1. Read the slide you will touch (`slide.get`) and keep its `revision`.
 2. Make the smallest change: `block.set` for one property, `slide.update` with a mutation list, `slide.replace` only for a whole slide.
-3. Send `baseRevision` and your author: `--author agent:<runId>` on the CLI, the `x-turboslide-author` header (or `?author=`) over HTTP and on the MCP initialize request. A stale revision returns 409 with `currentRevision` and the current document: re-read it, rebase your change, retry once.
+3. Send `baseRevision` and your author: `--author agent:<runId>` on the CLI, the `x-turboslide-author` header (or `?author=`) over HTTP and on the MCP initialize request. Over HTTP send `Idempotency-Key: <a new UUID>` on each write whose OpenAPI entry names it, and after a timeout send the same request with the same key: a write that landed is not applied again and answers 200 with its answer and `idempotent-replayed: true`; a key reused with another body is 422. A stale revision returns 409 with `currentRevision` and the current document: re-read it, rebase your change, retry once.
 4. Take `slide.lease` before a series of writes to one slide. An agent write to a slide another author holds is refused with 409 and the holder unless `force` is set (`--force`, `?force=1` or `x-turboslide-force: 1`); a human's write warns and goes through. Release the lease when done.
 5. Re-read from the response. Writes return the normalized slide and its findings, so the re-read is free; text may have been canonicalized.
 

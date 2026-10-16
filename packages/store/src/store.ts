@@ -58,6 +58,13 @@ export type VersionRecord = Version & {
    */
   origin?: WriteOrigin;
   /**
+   * The minor of the documents whose blocks, sections and slides the record carries, when above
+   * this release's (RELIABILITY-19; `versions.ts` recordMinor): a write to a deck a newer release
+   * wrote stamps it, so the fields kept from that release read in the record as they do in the
+   * files. Absent on every record of a deck this release wrote.
+   */
+  schemaMinor?: number;
+  /**
    * The Blob backend's immutable document of this entry (gslides-parity SPEC-2 8.2): the md5 of
    * the `deck.json` bytes the write pushed, naming `snapshots/<md5>.json`. Absent on the file and
    * tmp stores and on records written before the round.

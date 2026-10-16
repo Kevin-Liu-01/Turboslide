@@ -1,4 +1,8 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import type { ComponentType } from 'react';
@@ -9,7 +13,7 @@ import type { SelectSlotProps } from '@turboslide/viewer/select-slot';
 
 import { openLayers, resetLayersForTests } from '../Layer';
 import type { PlaceOptions } from '../place';
-import { SELECT_MAX_HEIGHT, Select } from '../Select';
+import { SELECT_MAX_HEIGHT, SELECT_MAX_ROWS, SELECT_ROW_HEIGHT, Select } from '../Select';
 import type { SelectGroup, SelectOption, SelectProps } from '../Select';
 import { TIP_DELAY_MS, TIP_ID, hideTooltip, resetTooltipTiming, tipProps } from '../Tooltip';
 import { chooseOption } from './choose-option';
@@ -851,7 +855,7 @@ describe('placement and layer (3.6)', () => {
       matchWidth: true,
       maxHeight: SELECT_MAX_HEIGHT,
     });
-    expect(SELECT_MAX_HEIGHT).toBe(288);
+    expect(SELECT_MAX_HEIGHT).toBe(290);
     expect(list().style.position).toBe('fixed');
   });
 
@@ -874,5 +878,214 @@ describe('the viewer slot (3.13)', () => {
   it('takes the component as its type', () => {
     const slot: ComponentType<SelectSlotProps> = Select;
     expect(slot).toBe(Select);
+  });
+});
+
+// The dropdown round's last visual pass (verify-final-3-visual.md), F1: the trigger's width followed
+// the chosen label, so the controls beside it moved (on /decks, Title shrank the sort field from
+// 157 to 67 px and the view toggle moved 90 px).
+describe('the trigger width (the last visual pass, F1)', () => {
+  it('stands every option label and the placeholder in hidden cells of the trigger, out of its text and its name', () => {
+    render(
+      <Harness
+        options={[...POSITIONS, { value: 'pic', label: 'Picture', icon: 'text' }]}
+        initial="next"
+        placeholder="Slides in this presentation"
+      />,
+    );
+    const sizers = [...trigger().querySelectorAll<HTMLElement>('.ts-dropdown-sizer')];
+    expect(sizers.map((sizer) => sizer.dataset.label)).toEqual([
+      'Slides in this presentation',
+      'None',
+      'Next slide',
+      'Previous slide',
+      'First slide',
+      'Last slide',
+      'Picture',
+    ]);
+    for (const sizer of sizers) {
+      expect(sizer.getAttribute('aria-hidden')).toBe('true');
+      /* the words are generated content: no text a test, a screen reader or a copy reads */
+      expect(sizer.textContent).toBe('');
+    }
+    /* an option that draws an icon in the trigger keeps the icon's slot in its cell */
+    expect(sizers.map((sizer) => sizer.hasAttribute('data-icon'))).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
+    expect(trigger().textContent).toBe('Next slide');
+    expect(screen.getByRole('combobox', { name: 'Slide' })).toBe(trigger());
+  });
+
+  // the wave 3b verify's finding 7: Share's role field took 136 px for "Viewer", sized over the
+  // row's actions it never shows, and left a person's name 40 px at 390
+  it('stands no cell for a group of actions, which the trigger never shows', () => {
+    render(
+      <Harness
+        options={[
+          { options: POSITIONS.slice(1, 3) },
+          {
+            actions: true,
+            options: [
+              { value: 'expiry', label: 'Add expiration' },
+              { value: 'remove', label: 'Remove access' },
+            ],
+          },
+        ]}
+        initial="next"
+      />,
+    );
+    const sizers = [...trigger().querySelectorAll<HTMLElement>('.ts-dropdown-sizer')];
+    expect(sizers.map((sizer) => sizer.dataset.label)).toEqual(['Next slide', 'Previous slide']);
+    /* the actions are rows of the list as before */
+    expect(
+      [...list().querySelectorAll<HTMLElement>('[role="option"]')].map((row) => row.dataset.value),
+    ).toEqual(['next', 'previous', 'expiry', 'remove']);
+  });
+});
+
+// The dropdown round's last visual pass (verify-final-3-visual.md), F2: a list stayed open after its
+// trigger left the window (a finger drag that started on the open trigger scrolled the panel, a
+// scroll by script), pinned at the window's edge over other fields.
+describe('a trigger scrolled out of view (the last visual pass, F2)', () => {
+  it('closes its list with no change once its trigger is scrolled out of the window or of the box that holds it', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    const panel = screen.getByTestId('panel');
+    panel.getBoundingClientRect = () =>
+      ({
+        x: 0,
+        y: 100,
+        left: 0,
+        top: 100,
+        right: 320,
+        bottom: 700,
+        width: 320,
+        height: 600,
+      }) as DOMRect;
+    let top = 300;
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: top,
+        left: 40,
+        top,
+        right: 240,
+        bottom: top + 32,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
+    fireEvent.click(trigger());
+    /* the page's own scroll that leaves the trigger in the panel's box keeps the list on it */
+    top = 120;
+    fireEvent.scroll(panel);
+    expect(isOpen()).toBe(true);
+    /* past the panel's top edge (a finger drag, a scroll by script): closed, nothing chosen */
+    top = 40;
+    fireEvent.scroll(panel);
+    expect(isOpen()).toBe(false);
+    expect(trigger().value).toBe('next');
+    /* the window's edge clips it the same way: below the 768 px window of jsdom */
+    top = 300;
+    fireEvent.click(trigger());
+    expect(isOpen()).toBe(true);
+    top = 800;
+    fireEvent.scroll(document);
+    expect(isOpen()).toBe(false);
+  });
+
+  it('counts a touch drag that starts on the open trigger as the person scrolling', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    let top = 300;
+    trigger().getBoundingClientRect = () =>
+      ({
+        x: 40,
+        y: top,
+        left: 40,
+        top,
+        right: 240,
+        bottom: top + 32,
+        width: 200,
+        height: 32,
+      }) as DOMRect;
+    fireEvent.click(trigger());
+    fireEvent.pointerDown(trigger(), { pointerType: 'touch' });
+    top = 260;
+    fireEvent.scroll(screen.getByTestId('panel'));
+    expect(isOpen()).toBe(false);
+    expect(trigger().value).toBe('next');
+  });
+
+  /* The integrator's fix of HR-DD#2 (docs/hardening/build/integrator-wave3b.md): the editor's
+     body is `overflow: hidden` with a box 0 px tall, and read as a clip it closed the list on
+     every scroll, the page's own 40 px panel scroll of chrome.select.placement included. The
+     root's and the body's overflow belong to the viewport, which the window's rect reads. */
+  it('reads no clip from the body or the root, whose overflow is the window', () => {
+    render(
+      <div data-testid="panel" style={{ overflow: 'auto' }}>
+        <Harness initial="next" />
+      </div>,
+    );
+    const zeroTall = () =>
+      ({ x: 0, y: 0, left: 0, top: 0, right: 1024, bottom: 0, width: 1024, height: 0 }) as DOMRect;
+    const bodyRect = document.body.getBoundingClientRect;
+    const rootRect = document.documentElement.getBoundingClientRect;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.getBoundingClientRect = zeroTall;
+    document.documentElement.getBoundingClientRect = zeroTall;
+    try {
+      let top = 470;
+      trigger().getBoundingClientRect = () =>
+        ({
+          x: 40,
+          y: top,
+          left: 40,
+          top,
+          right: 240,
+          bottom: top + 30,
+          width: 200,
+          height: 30,
+        }) as DOMRect;
+      fireEvent.click(trigger());
+      top = 430;
+      fireEvent.scroll(screen.getByTestId('panel'));
+      expect(isOpen()).toBe(true);
+      /* the window's edge still closes it */
+      top = 800;
+      fireEvent.scroll(document);
+      expect(isOpen()).toBe(false);
+      expect(trigger().value).toBe('next');
+    } finally {
+      document.body.getBoundingClientRect = bodyRect;
+      document.documentElement.getBoundingClientRect = rootRect;
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+  });
+});
+
+// The dropdown round's last visual pass (verify-final-3-visual.md), F8: a list of exactly ten rows
+// scrolled by 2 px and drew the scrollbar, since the cap counted the rows and the padding and not
+// the plate's 1 px border of a border-box list.
+describe('the ten row cap (the last visual pass, F8)', () => {
+  it('holds ten rows, the 4 px of padding above and below and the plate border, so ten rows never scroll', () => {
+    expect(SELECT_MAX_HEIGHT).toBe(SELECT_MAX_ROWS * SELECT_ROW_HEIGHT + 8 + 2);
+    const here = import.meta.dirname ?? join(fileURLToPath(import.meta.url), '..');
+    const css = readFileSync(join(here, '..', 'Select.css'), 'utf8');
+    const rule = /\.ts-dropdown-list \{[^}]*\}/.exec(css)?.[0] ?? '';
+    expect(rule).toContain(`max-height: ${SELECT_MAX_HEIGHT}px`);
   });
 });

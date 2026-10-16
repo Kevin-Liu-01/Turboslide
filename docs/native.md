@@ -279,6 +279,50 @@ tuned in either language, so the verify loop should crop to blocks before scorin
 for the module; the parity run of fifteen assets through three implementations took 7.2 s of test
 time including the JPEG decodes.
 
+## The logo sanitizer's fuzz harness (hardening HR-N#2)
+
+`apps/studio/src/server/logo-sanitize.ts` reads untrusted SVG (thesvg.org marks, uploads under
+the 2 MB cap) with its own XML reader. Section 6.1 of `docs/hardening/HARDENING.md` keeps it in
+TypeScript with a fuzz harness, and names the port to `roxmltree` in wasm only if the harness finds
+a parser defect. `logo-sanitize.fuzz.test.ts` runs 20,000 generated cases (8 recorded seeds of
+2,500) over the 24 fixture marks and three hostile files: elements off the list, attributes and
+their case, entities, CDATA, comments, prefixes, `url(` and `href` forms with CSS escapes,
+declarations, nesting from 1 to 20,000 levels, and byte noise. Each case is refused with the
+sanitizer's two errors, or its output reads again with listed elements and attributes only,
+`#id` references, CSS values that load nothing once their escapes are decoded, and the same output
+from a second sanitize.
+
+On `origin/main` `f7e97039` 1,366 of the 20,000 cases failed (2026-10-12 02:01 PDT, load 351). A case
+with two faults counts in two rows:
+
+| Failure                                                                                  | Cases |
+| ---------------------------------------------------------------------------------------- | ----: |
+| a RangeError from a reference past U+10FFFF, not the sanitizer's broken file error       |   278 |
+| a RangeError from the walk's recursion, from nesting of 2,000 and 20,000 levels          |   175 |
+| an output holding a character XML forbids (U+0, U+1, U+FFFE, U+FFFF, surrogates)         |   398 |
+| a `<style>` kept with `@\69mport`, an escaped `url(` or a quoted address in `image-set(` |   501 |
+| a presentation attribute or `style` kept with an escaped `url(` (`u\72l(`, `\75 rl(`)    |    42 |
+
+The logo route reads any error as a broken file; the upload intake passes a RangeError on as an
+unexpected error. None is a confusion of the reader: the tree it builds is the tree the serializer
+writes. The fixes
+are in TypeScript in the same module: a reference or a character XML forbids is a broken file,
+an element deeper than 256 levels (libxml2's default limit) is a broken file, and every CSS check
+reads the value with its escapes decoded and refuses a quoted address in `image-set(`, `image(`,
+`cross-fade(` and `src(`. After them the run passes with 6,821 cases answered and 13,179 refused.
+So the verdict of 6.1 stands: the sanitizer stays in TypeScript, and no port to `roxmltree` follows.
+
+CPU per call (`process.cpuUsage`, user plus system), the reading for 6.1, at a one minute load of
+345 to 347 on 2026-10-12 02:04 PDT. CPU time moves less with load than wall time, but at this load
+treat it as an upper bound:
+
+| Input                                              |  Calls | CPU per call |
+| -------------------------------------------------- | -----: | -----------: |
+| the 20,000 generated cases, refusals included      | 20,000 |      50.4 us |
+| the 24 unmutated fixture marks (22,666 characters) |  1,200 |      21.0 us |
+
+A logo insert or an upload calls it once, so the sanitizer is not a cost worth a port.
+
 ## Round four: the committed outputs and the CI rebuild rule
 
 The Google Slides parity round four (SPEC-4 0.38, 3.9; `docs/archive/gslides-parity/MILESTONES-4.md` B4

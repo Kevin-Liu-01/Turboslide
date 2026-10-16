@@ -815,6 +815,17 @@ export async function sweepDerivedIfDue(now: number = Date.now()): Promise<Sweep
 }
 
 /**
+ * Waits for the sweep in flight, if one runs, and puts off the next routine one (hardening HR-O#8,
+ * PERF-18): the node-server build's SIGTERM path, so the process never exits half way through
+ * removing a folder. A sweep that fails is the sweep's to report; shutdown goes on.
+ */
+export async function settleDerivedSweep(): Promise<void> {
+  const state = sweepState();
+  state.last = Number.POSITIVE_INFINITY;
+  if (state.running !== null) await state.running.catch(() => undefined);
+}
+
+/**
  * The error a caller gets when a write met ENOSPC and the sweep did not make room: retryable,
  * so the transports should answer it as a 503 with the seconds to wait, never as a plain 500.
  */

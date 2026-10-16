@@ -9,12 +9,18 @@ import { optionLabel, optionValue } from './props';
  * the section of an opener. The trigger is the control itself, so the label and data-control sit
  * on it. An optional field offers the None row, which removes the field.
  */
-export function SelectControl({ spec, onChange, disabled }: ControlProps) {
+export function SelectControl({ spec, onChange, disabled, labelledBy }: ControlProps) {
   const options = spec.options ?? [];
   const current = spec.value === undefined ? '' : String(spec.value);
   const known = options.some((option) => String(option) === current);
+  /* the row that removes the field reads "None", or "Default" where one of the schema's own tags
+     reads "none" (the chart's Legend: "none" hides the legend, and removing the field draws the
+     default one), so no two rows read alike (the dropdown round's last visual pass, F5) */
+  const clears = options.some((option) => optionLabel(option).toLowerCase() === 'none')
+    ? 'Default'
+    : 'None';
   const rows: SelectOption[] = [
-    ...(spec.optional || current === '' ? [{ value: '', label: 'None' }] : []),
+    ...(spec.optional || current === '' ? [{ value: '', label: clears }] : []),
     ...(!known && current !== '' ? [{ value: current, label: optionLabel(current) }] : []),
     ...options.map((option) => ({ value: String(option), label: optionLabel(option) })),
   ];
@@ -24,6 +30,7 @@ export function SelectControl({ spec, onChange, disabled }: ControlProps) {
       value={current}
       options={rows}
       label={spec.label}
+      {...(labelledBy === undefined ? {} : { labelledBy })}
       control={spec.control}
       disabled={disabled}
       tip={{

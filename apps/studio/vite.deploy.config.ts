@@ -384,8 +384,20 @@ function staticPagePolicy(): Plugin {
 // into the chunk every route preloads (polish two, requests A-R1 and P2-D-2; the node-server build
 // of 2026-10-07). With the docs' lazy chunks in the graph the group takes effect, so the chunk
 // every route preloads is named `vendor` and holds the app's shared modules with the libraries.
-const VENDOR_TEST =
-  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
+// The group holds libraries alone (hardening HR-PC#2, PERF-9): the group takes in its modules'
+// dependencies, and the start runtime's hydration entry imports the app's router (the route tree,
+// every route file's options and what they import), so with it the `vendor` chunk carried about
+// 124 KB of the app's modules and changed with every deployment. The modules on that path (the
+// default client entry, `@tanstack/react-start/client`, the start client's index, `StartClient`
+// and `hydrateStart`, and the core's `client/` entry) stay out of the group and land in the entry
+// chunk with the app; the router and React stay in it.
+const VENDOR_EXCLUDE =
+  /@tanstack[\\/](?:react-start[\\/]dist[\\/](?:plugin[\\/]|esm[\\/]client\.js)|react-start-client[\\/]dist[\\/]esm[\\/](?:index|StartClient|hydrateStart)\.js|start-client-core[\\/]dist[\\/]esm[\\/]client[\\/])/;
+const VENDOR_TEST = new RegExp(
+  `^(?!.*${VENDOR_EXCLUDE.source})` +
+    /.*node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/
+      .source,
+);
 // The landing's shared modules (polish two, request P2-N-2): the copy, the facts, the generated
 // assets and timings that /home's route and its live bands both import, in one chunk, so /home's
 // document names one preload for them where it named one per module (seven links, about 0.8 KB of
@@ -399,15 +411,35 @@ const HOME_SHARED_TEST =
 // default: a deployment ships no map.
 const CLIENT_SOURCEMAP: boolean | 'hidden' =
   process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
+// The shader gallery's stills stay files (hardening HR-PC#3, PERF-8): `shaderPreviewUrl`'s glob
+// of packages/materials/previews/*.webp put every still under the 4 KB inline limit into the
+// chunk the viewer and the editor load as a data URL, about 120 KB of base64 in a 138,850 B chunk.
+// As files, a still is fetched when the gallery or a card shows it and cached with the build.
+const MATERIAL_PREVIEW = /[\\/]materials[\\/]previews[\\/][^\\/]+\.webp$/;
 const CLIENT_BUILD = {
   build: {
     sourcemap: CLIENT_SOURCEMAP,
+    assetsInlineLimit: (file: string): boolean | undefined =>
+      MATERIAL_PREVIEW.test(file) ? false : undefined,
     rolldownOptions: {
       output: {
         codeSplitting: {
           groups: [
             { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
+            /* the landing's own modules alone, not the modules they import (the brand's site
+               facts, which every route's head reads): with their dependencies the chunk joined
+               the root graph once the vendor group stopped holding the app (hardening HR-PC#2) */
+            {
+              name: 'home-shared',
+              test: HOME_SHARED_TEST,
+              priority: 5,
+              includeDependenciesRecursively: false,
+            },
+            /* the app's part of the graph every route loads (the root route, the router, each
+               route file's options and what they import) in one chunk beside `vendor`, where
+               the bundler would otherwise cut it into a chunk per module the lazy routes share
+               (hardening HR-PC#2) */
+            { name: 'app', tags: ['$initial' as const], priority: 1 },
           ],
         },
       },
@@ -458,7 +490,15 @@ export default defineConfig({
           fallthrough: true,
         },
       ],
-      plugins: [`${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`],
+      plugins: [
+        `${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`,
+        // the node-server build commits its rooms and exits on SIGTERM (hardening HR-O#8,
+        // PERF-18); a Vercel function's life is the platform's
+        ...((process.env.NITRO_PRESET ?? 'node-server') === 'node-server' &&
+        process.env.VERCEL === undefined
+          ? [fileURLToPath(new URL('./src/server/plugins/shutdown.ts', import.meta.url))]
+          : []),
+      ],
       vercel: {
         functions: { maxDuration: 300 },
         // the seed deck's twins are static files the CDN answers before the asset route runs,

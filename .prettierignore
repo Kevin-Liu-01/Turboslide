@@ -43,3 +43,7 @@ apps/realtime-worker/worker-configuration.d.ts
 # recorded/ are the bytes the build's sha256 covers (scripts/build-home-assets.ts --check), written
 # in the CLI's own JSON form, which the formatter must never reflow
 apps/studio/home-deck
+
+# The previous release's validator, bundled from git by packages/schema/scripts/pin-previous-validator.mjs
+# (docs/hardening/HARDENING.md HR-O#5): generated and minified, compared by its sha256, never reflowed
+packages/schema/fixtures/previous-validator/validate.mjs

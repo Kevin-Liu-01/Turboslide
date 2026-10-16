@@ -289,7 +289,7 @@ export function MaterialMount({
   const [reduced, setReduced] = useState<boolean>(() => motionReduced());
   useEffect(() => onMotionReducedChange(() => setReduced(motionReduced())), []);
 
-  const selectedKey = selected === undefined ? 'all' : (selected ?? []).join(' ');
+  const selectedKey = selected === undefined ? 'all' : (selected ?? []).join('\u0000');
   const lowRes = scale !== undefined && scale < 1;
   /* the error callback and the palette by reference and by value (the header's third paragraph):
      a parent's new arrow per render, or a palette object of the same colours, never remounts */

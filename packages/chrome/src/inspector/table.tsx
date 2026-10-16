@@ -8,6 +8,7 @@ import type { Color } from '@turboslide/schema/color';
 import { COLOR_TOKENS } from '@turboslide/schema/color';
 import type { Dash } from '@turboslide/schema/shapes';
 import { DASHES, DASH_LABELS } from '@turboslide/schema/shapes';
+import { SESSION_PARK_ATTRIBUTE } from '@turboslide/viewer/InlineText';
 
 import type { EditorDispatch } from '../dispatch';
 import type { EditorHandle, EditorSelection } from '../editor-shell';
@@ -431,7 +432,19 @@ export function TableSection({
         </div>
       </div>
 
-      <div className="ts-table-group" role="group" aria-label="Cell" data-group="cell">
+      {/* the Cell group's fields act on the cell whose text the caret is in, so a press or the
+          focus on one parks that cell's text session instead of ending it, as the toolbar's size
+          field does: ended, the cell was no longer chosen, and the field took the disabled
+          attribute under the press that should have opened it (the dropdown round's last
+          keyboard pass, F4; the same on the native select before the round). The session takes
+          the focus back when the field lets it go, and a press on the stage ends it */}
+      <div
+        className="ts-table-group"
+        role="group"
+        aria-label="Cell"
+        data-group="cell"
+        {...{ [SESSION_PARK_ATTRIBUTE]: 'true' }}
+      >
         <span className="ts-table-heading">
           Cell
           {cellWords !== null ? <span className="ts-table-heading-detail">{cellWords}</span> : null}

@@ -159,7 +159,7 @@
   max-width: 260px;
   height: 22px;
   padding: 0 8px;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-field);
   border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);

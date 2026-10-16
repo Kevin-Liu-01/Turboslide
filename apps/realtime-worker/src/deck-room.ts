@@ -30,6 +30,8 @@ import {
   JOIN_WINDOW_MS,
   REAUTH_GRACE_MS,
   ROOM_PROTOCOL,
+  ROOM_WRITE_OP_ID_HEADER,
+  ROOM_WRITE_OP_ID_PATTERN,
   TICKET_GRACE_MS,
   ackOf,
   parseUpFrame,
@@ -2536,11 +2538,23 @@ export class DeckRoom extends DurableObject<Env> {
         400,
       );
     const body = parsed.data;
+    // a keyed agent write's op id (RELIABILITY-21, hardening HR-O#6): a malformed one is refused,
+    // an absent one is a fresh server id as before
+    const keyed = request.headers.get(ROOM_WRITE_OP_ID_HEADER);
+    if (keyed !== null && !ROOM_WRITE_OP_ID_PATTERN.test(keyed))
+      return json({ ok: false, code: 'invalid', message: 'the op id header is malformed' }, 400);
     await this.ensureLive();
     const meta = this.meta;
     const live = this.live;
     if (meta === null || live === null)
       return json({ ok: false, code: 'invalid', message: 'the room has no document' }, 503);
+    const clientId = body.clientId.slice(0, 64);
+    if (keyed !== null) {
+      // the resend of a write the room admitted: answered with that entry, never admitted twice,
+      // whatever its base reads now (the first attempt moved the revision past it)
+      const already = this.findEntry(clientId, keyed);
+      if (already !== undefined) return json(await this.writeAnswer(already.seq, true));
+    }
     const now = Date.now();
     if (body.baseRevision !== meta.revision) {
       const mine = new Set(touchedSlides(body.mutations));
@@ -2564,7 +2578,7 @@ export class DeckRoom extends DurableObject<Env> {
         );
       }
     }
-    const opId = `server:${crypto.randomUUID()}`;
+    const opId = keyed ?? `server:${crypto.randomUUID()}`;
     const placed = landCandidate(
       live.document,
       { opId, kind: 'edit', mutations: body.mutations },
@@ -2584,7 +2598,7 @@ export class DeckRoom extends DurableObject<Env> {
       rev: meta.revision,
       kind: 'edit',
       author: body.author,
-      clientId: body.clientId.slice(0, 64),
+      clientId,
       opId,
       mutations: placed.mutations,
       at: new Date(now).toISOString(),
@@ -2594,18 +2608,26 @@ export class DeckRoom extends DurableObject<Env> {
     this.live = { document: placed.document, seq: meta.head };
     this.editedSinceOpen = true;
     if (admitted !== undefined) this.broadcast({ type: 'op', entry: admitted });
-    const seq = admitted?.seq ?? meta.head;
-    // the checkpoint at once (3.2): the record exists before the agent's answer
-    await this.checkpoint(false);
+    return json(await this.writeAnswer(admitted?.seq ?? meta.head, false));
+  }
+
+  /**
+   * The answer to an agent's write once its entry is at `seq`: the checkpoint at once (3.2), so
+   * the record exists before the agent's answer, and the record of the run that covered it when
+   * this object's last run did. `replayed` marks the answer to a resend (HR-O#6).
+   */
+  private async writeAnswer(seq: number, replayed: boolean): Promise<Record<string, unknown>> {
+    if ((this.meta?.covered ?? 0) < seq) await this.checkpoint(false);
     const record = this.lastRun.find(
       (row) => row.ops !== undefined && row.ops.fromSeq <= seq && seq <= row.ops.toSeq,
     );
-    return json({
+    return {
       ok: true,
-      revision: this.meta?.revision ?? meta.revision,
+      revision: this.meta?.revision ?? 0,
       seq,
       ...(record === undefined ? {} : { record }),
-    });
+      ...(replayed ? { replayed: true } : {}),
+    };
   }
 
   /**

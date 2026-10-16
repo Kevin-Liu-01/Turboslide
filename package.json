@@ -34,6 +34,7 @@
     "@types/node": "catalog:",
     "colorjs.io": "catalog:",
     "eslint": "catalog:",
+    "knip": "catalog:",
     "pixelmatch": "catalog:",
     "playwright-core": "catalog:",
     "prettier": "catalog:",

@@ -1,4 +1,5 @@
 import { NotImplementedError } from '@turboslide/schema/errors';
+import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { describe, expect, it } from 'vitest';
 import { createDispatcher } from './dispatch.ts';
 
@@ -46,5 +47,55 @@ describe('the dispatcher', () => {
     dispatcher.register('deck.info', () => ({ wrong: true }));
     await expect(dispatcher.dispatch('deck.info', {}, context)).rejects.toThrow(/invalid result/);
     expect(dispatcher.implemented()).toEqual(['deck.info', 'slide.list', 'version.list']);
+  });
+
+  // the wave 3b verify's finding 2 (RELIABILITY-19): a deck a newer minor wrote keeps that minor's
+  // fields in its files, so the answer of an action over it carries them; the check keeps them in
+  // place instead of answering 500 after the store committed the write
+  it("keeps a newer minor's fields in a deck action's answer, and every other fault stands", async () => {
+    const dispatcher = createDispatcher();
+    const sections = structuredClone(WORKED_DECK.sections).map((section, index) =>
+      index === 0 ? { ...section, futureSection: 'kept' } : section,
+    );
+    dispatcher.register('slide.move', () => ({ sections, revision: 413 }));
+    const moved = await dispatcher.dispatch(
+      'slide.move',
+      { slideId: 'content-rule', sectionId: 'brand', baseRevision: 412 },
+      context,
+    );
+    expect(moved).toEqual({ sections, revision: 413 });
+    expect(Object.keys((moved as { sections: object[] }).sections[0] ?? {})).toEqual(
+      Object.keys(sections[0] ?? {}),
+    );
+    const plain = WORKED_SLIDES.find((slide) => slide.id === 'content-rule');
+    if (plain === undefined) throw new Error('fixture');
+    const slide = structuredClone(plain) as unknown as {
+      slots: { left: Record<string, unknown>[] };
+    } & Record<string, unknown>;
+    slide.schemaMinor = 2;
+    slide.slots.left[0] = { ...slide.slots.left[0], futureShadow: 'soft' };
+    dispatcher.register('block.set', () => ({ slide, revision: 414, findings: [] }));
+    const set = await dispatcher.dispatch(
+      'block.set',
+      { slideId: 'content-rule', blockId: 'p1', path: '/text', value: 'x', baseRevision: 413 },
+      context,
+    );
+    expect((set as { slide: typeof slide }).slide.slots.left[0]).toMatchObject({
+      futureShadow: 'soft',
+    });
+    // a fault that is not an unknown field is refused as before
+    dispatcher.register('slide.move', () => ({ sections, revision: 'four' }));
+    await expect(
+      dispatcher.dispatch(
+        'slide.move',
+        { slideId: 'content-rule', sectionId: 'brand', baseRevision: 412 },
+        context,
+      ),
+    ).rejects.toThrow(/invalid result/);
+    // an answer about people and access holds no document, so a field it should not carry is refused
+    dispatcher.register('account.tokens.list', () => ({ tokens: [], secret: 'x' }));
+    await expect(dispatcher.dispatch('account.tokens.list', {}, context)).rejects.toThrow(
+      /invalid result/,
+    );
   });
 });

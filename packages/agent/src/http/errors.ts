@@ -20,7 +20,13 @@ export type HttpErrorCode =
   | 'not_on_http'
   | 'method_not_allowed'
   | 'no_session'
-  | 'unknown_deck';
+  | 'unknown_deck'
+  /** an Idempotency-Key that is not 1 to 255 visible ASCII characters (hardening HR-O#6) */
+  | 'invalid_idempotency_key'
+  /** an Idempotency-Key on a writing action that does not take one (dispatch.ts takesIdempotencyKey) */
+  | 'idempotency_not_supported'
+  /** an Idempotency-Key a request with another action or body already used */
+  | 'idempotency_key_reused';
 
 export type HttpError = {
   name: string;

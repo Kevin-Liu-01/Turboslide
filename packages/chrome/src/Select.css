@@ -61,11 +61,42 @@
 }
 
 .ts-dropdown-value {
-  display: flex;
+  display: grid;
   flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+}
+
+/* the shown words and the sizers share one grid cell, so the cell is as wide as the widest label
+   the trigger may show (Select.tsx; the dropdown round's last visual pass, F1); a site's width or
+   the compact maximum still bounds it, and the shown words then end in an ellipsis */
+.ts-dropdown-shown,
+.ts-dropdown-sizer {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+.ts-dropdown-shown {
+  display: flex;
   align-items: center;
   gap: 6px;
-  min-width: 0;
+}
+
+.ts-dropdown-sizer {
+  height: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.ts-dropdown-sizer::before {
+  content: attr(data-label);
+}
+
+/* the 14 px icon and the 6 px gap an option with an icon draws before its words */
+.ts-dropdown-sizer[data-icon] {
+  padding-left: 20px;
 }
 
 .ts-dropdown-text {
@@ -117,11 +148,12 @@
 }
 
 /* the list: as wide as its longest row from its trigger's width (place() writes min-width, which
-   wins over this max-width when the trigger is wider) to 320 px; ten rows tall at most, longer
-   lists scroll in the shared scrollbar (tokens.css, no rule here) */
+   wins over this max-width when the trigger is wider) to 320 px; ten rows tall at most with the
+   plate's padding and its 1 px border (SELECT_MAX_HEIGHT, the list is border-box), longer lists
+   scroll in the shared scrollbar (tokens.css, no rule here) */
 .ts-dropdown-list {
   min-width: 0;
-  max-height: 288px;
+  max-height: 290px;
 }
 
 .ts-dropdown-list[hidden] {

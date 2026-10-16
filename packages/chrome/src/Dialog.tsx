@@ -6,7 +6,8 @@ import type {
 import { useEffect, useId, useRef } from 'react';
 
 import { HoldButton, useFocusHold } from './FocusHold';
-import { Icon } from './icons';
+/* the base glyphs alone (hardening HR-PC#2): the editor registers the whole set as it loads */
+import { Icon } from './icons-base';
 import { cn } from './lib/cn';
 import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';

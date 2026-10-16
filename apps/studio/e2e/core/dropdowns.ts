@@ -959,14 +959,15 @@ export function chromeDropdowns(): string[] {
       await expect(end).toHaveAttribute('aria-expanded', 'false');
       expect(await end.getAttribute('value'), 'the scroll changes nothing').toBe(value);
       await page.keyboard.press('Escape');
-      /* the Link dialog's seventeen options: 288 px at most, scrolling, the active row in view */
+      /* the Link dialog's seventeen options: ten rows at most (290 px with the plate's padding and
+         border, SELECT_MAX_HEIGHT), scrolling, the active row in view */
       await openLinkDialog(page);
       const slide = triggerOf(page, 'dialog.link.slide');
       await slide.click();
       const tall = await openFacts(slide);
       readings.push(`Link: ${JSON.stringify(tall.list)} ${tall.rows.length} rows`);
       expect(tall.rows.length, 'None, four positions and twelve slides').toBe(17);
-      expect(tall.list.height, 'ten rows at most').toBeLessThanOrEqual(288.5);
+      expect(tall.list.height, 'ten rows at most').toBeLessThanOrEqual(290.5);
       expect(tall.list.scrollable, 'the list scrolls').toBe(true);
       expect(inside(tall), 'inside the viewport by 8 px').toBe(true);
       for (const key of ['PageDown', 'PageDown']) {

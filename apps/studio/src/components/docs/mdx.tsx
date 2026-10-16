@@ -2,7 +2,8 @@ import { Link } from '@tanstack/react-router';
 import { Children, isValidElement, useId, useRef, useState } from 'react';
 import type { ComponentProps, ComponentType, ReactElement, ReactNode } from 'react';
 
-import { Icon } from '@turboslide/chrome/icons';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
 import type { IconName } from '@turboslide/chrome/icons';
 
 import { calloutLabel, countsText } from '../../docs/markdown';

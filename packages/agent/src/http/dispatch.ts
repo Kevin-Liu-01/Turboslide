@@ -7,7 +7,9 @@
 // becomes the one body shape of errors.ts with the status of the error class. GET describes the
 // action (its schemas, transports and whether a handler is registered) so an agent can read one
 // endpoint before calling it.
-import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
+import { createHash } from 'node:crypto';
+
+import type { ActionGroup, ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import type { Author } from '@turboslide/schema/mutations';
 import { z } from 'zod';
@@ -87,6 +89,115 @@ export function refuseSpoofedLocalhost(request: Request, env: Env = process.env)
     'unauthorized',
     `the agent surface is open only on localhost; this instance (host ${socketHost(request) || 'unknown'}) has no ${'TURBOSLIDE_TOKEN'} set, so requests off localhost are refused`,
   );
+}
+
+/**
+ * `Idempotency-Key` (RELIABILITY-21, hardening HR-O#6): a caller that may resend a write after a
+ * timeout sends one key per write, and the same key with the same body on the resend. The studio
+ * makes the key the write's op id in the room and the record's `origin`, so the resend is never
+ * applied twice and is answered with the action's answer, rebuilt from the records the first
+ * attempt made. One to 255 visible ASCII characters; a UUID per write is the expected form.
+ */
+export const IDEMPOTENCY_KEY_HEADER = 'idempotency-key';
+const IDEMPOTENCY_KEY = /^[\x21-\x7e]{1,255}$/;
+
+/** The request's key, undefined when it sends none; a `refuse` body for a malformed one. */
+export function requestIdempotencyKey(
+  request: Request,
+): { ok: true; key: string | undefined } | { ok: false; response: Response } {
+  const value = request.headers.get(IDEMPOTENCY_KEY_HEADER);
+  if (value === null) return { ok: true, key: undefined };
+  const key = value.trim();
+  if (IDEMPOTENCY_KEY.test(key)) return { ok: true, key };
+  return {
+    ok: false,
+    response: refuse(
+      400,
+      'invalid_idempotency_key',
+      'Idempotency-Key takes 1 to 255 visible ASCII characters, one value per write, such as a UUID',
+    ),
+  };
+}
+
+/**
+ * Who sent a key, the key, and the fingerprint of the request it came with (the wave 3b verify's
+ * finding 4): the three name one keyed request.
+ */
+export type IdempotencyScope = { caller: string; key: string; fingerprint: string };
+
+function digest(text: string): string {
+  return createHash('sha256').update(text).digest('base64url');
+}
+
+/** JSON with every object's keys in order, so two encodings of one body read alike. */
+function sortedJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(sortedJson).join(',')}]`;
+  if (typeof value === 'object' && value !== null) {
+    const entries = Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    return `{${entries.map(([key, inner]) => `${JSON.stringify(key)}:${sortedJson(inner)}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'null';
+}
+
+/**
+ * The fingerprint of a keyed request: 10 base64url characters of the hash of the action and the
+ * body. A resend carries the same one. The same key sent with another action or another body
+ * carries another, which the route refuses with 422 `idempotency_key_reused` (the IETF
+ * Idempotency-Key draft's answer), where it was answered as the first request's resend and the
+ * write was dropped (the wave 3b verify's finding 4).
+ */
+export function idempotencyFingerprint(action: string, body: unknown): string {
+  return digest(`${action}\n${sortedJson(body)}`).slice(0, 10);
+}
+
+/**
+ * `idem-` and 22 base64url characters of the hash of the caller and the key: the start of every op
+ * id of the key, whatever request it came with. Two callers that pick the same key never meet.
+ */
+export function idempotencyKeyPrefix(scope: Pick<IdempotencyScope, 'caller' | 'key'>): string {
+  return `idem-${digest(`${scope.caller}\n${scope.key}`).slice(0, 22)}`;
+}
+
+/**
+ * The op id the `n`th store write of a keyed request carries: the key's prefix, the request's
+ * fingerprint, and `-<n>` from the second write of an action that writes more than once, within
+ * the room's 64 characters. A resend makes the same writes in the same order, so each one meets
+ * its first attempt's id; the first write's id is the prefix and the fingerprint alone.
+ */
+export function idempotentOpId(scope: IdempotencyScope, n = 1): string {
+  const id = `${idempotencyKeyPrefix(scope)}${scope.fingerprint}`;
+  return n === 1 ? id : `${id}-${n}`;
+}
+
+/**
+ * The writing actions that take `Idempotency-Key` (the wave 3b verify's finding 5): every durable
+ * effect of theirs is a document write through the deck store, which carries the key as the op id
+ * of the write and the `origin` of its record, and the asset bytes some of them put have digest
+ * names, so a resend puts the same bytes again. The other writing actions (a deck made, copied,
+ * trashed or removed, a template, a named version, a lease, a comment, a share, presence, an
+ * account or an operator change) act outside the version log, which is where a key is found, so
+ * the route refuses a key on them with 400 `idempotency_not_supported` instead of promising what
+ * it cannot keep, and the OpenAPI document names the header on these alone.
+ */
+const KEYED_GROUPS: ReadonlySet<ActionGroup> = new Set<ActionGroup>(['slide', 'block', 'asset']);
+const KEYED_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>([
+  'deck.rename',
+  'deck.set',
+  'section.set',
+  'deck.setBackground',
+  'deck.guides',
+  'deck.tailor',
+  'brand.set',
+  'brand.reset',
+  'assist.accept',
+  'fix.run',
+  'version.restore',
+]);
+const UNKEYED_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>(['slide.lease']);
+
+export function takesIdempotencyKey(spec: ActionSpec): boolean {
+  if (!spec.mutates || UNKEYED_ACTIONS.has(spec.id)) return false;
+  return KEYED_GROUPS.has(spec.group) || KEYED_ACTIONS.has(spec.id);
 }
 
 /** The actions whose bodies may carry an upload and get the larger cap. */
@@ -241,6 +352,8 @@ export async function handleActionRequest(
   } catch (error) {
     return errorResponse(error, actionId);
   }
+  const keyed = requestIdempotencyKey(request);
+  if (!keyed.ok) return keyed.response;
   const body = await readJsonBody(request, bodyLimitFor(spec));
   if (!body.ok) return body.response;
   const force = requestForce(request);

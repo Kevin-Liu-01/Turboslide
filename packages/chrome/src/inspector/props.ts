@@ -22,6 +22,12 @@ export type ControlProps = {
   onChange: (value: unknown) => void;
   context?: ControlContext;
   disabled?: boolean;
+  /**
+   * the id of the words a row draws beside the control, which name it to a person where the
+   * control's label carries the block's id for the window API (`t: Align`); a control that takes
+   * it names itself by them through aria-labelledby (the typography rows)
+   */
+  labelledBy?: string;
 };
 
 /**

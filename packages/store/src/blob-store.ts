@@ -72,7 +72,7 @@ import {
   readVersions,
   recordAtRevision,
   recordNamingOps,
-  versionRecordSchema,
+  safeParseRecord,
   writeVersion,
 } from './versions.ts';
 import type { FileStore } from './file-store.ts';
@@ -554,7 +554,7 @@ export const CLAIM_GRACE_MS = 60_000;
 /** A stored record's bytes as a record, or null when they do not parse. */
 function parseRecordBytes(bytes: Uint8Array): VersionRecord | null {
   try {
-    const parsed = versionRecordSchema.safeParse(JSON.parse(new TextDecoder().decode(bytes)));
+    const parsed = safeParseRecord(JSON.parse(new TextDecoder().decode(bytes)));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
@@ -2027,7 +2027,14 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
             };
           }
         }
-        const outcome = await file.write(write, writeOptions);
+        // a local apply that throws (a record this release cannot write, a disk fault) may leave
+        // the mirror part way into the write: it is discarded, as after a failed commit below, so
+        // this instance's next write starts from the store's bodies and never pushes a slide the
+        // store has no record of (the wave 3b verify's finding 1)
+        const outcome = await file.write(write, writeOptions).catch((error: unknown) => {
+          discard();
+          throw error;
+        });
         if (!outcome.ok) return outcome;
         // the snapshot key (SPEC-2 8.2, 0.40): the md5 of the deck.json bytes about to be pushed,
         // which is the etag the store will answer for them; the record of this commit names it.
@@ -2038,7 +2045,12 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           snapshot: key,
           ...(writeOrigin && write.origin !== undefined ? { origin: write.origin } : {}),
         };
-        writeVersion(dir, entry);
+        try {
+          writeVersion(dir, entry);
+        } catch (error) {
+          discard();
+          throw error;
+        }
         const record = `versions/${entry.n}.json`;
         let claimed = false;
         /** A claim this write stored and cannot commit leaves the store (best effort). */

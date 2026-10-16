@@ -195,6 +195,32 @@ describe('Inspector sections', () => {
     });
   });
 
+  /* the dropdown round's last keyboard pass, F2: a screen reader read the typography fields as
+     "dd-text: Align" and "dd-text: Columns", the block's id first, where every other field reads
+     its label alone. The row's words name the field and its list; the window API keeps the
+     label it addresses (`t: Align`) */
+  it('names the typography Align and Columns fields and their lists by the row words alone', () => {
+    render(
+      <Inspector
+        deck={WORKED_DECK}
+        slide={freeform}
+        blockId="t"
+        revision={7}
+        dispatch={vi.fn<EditorDispatch>(async () => ({}))}
+      />,
+    );
+    for (const name of ['Align', 'Columns']) {
+      const field = screen.getByRole('combobox', { name });
+      expect(field.getAttribute('aria-label')).toBe(`t: ${name}`);
+      /* the list is named by the same words as its field */
+      const list = document.getElementById(field.getAttribute('aria-controls') ?? '')!;
+      const words = field.getAttribute('aria-labelledby') ?? '';
+      expect(list.getAttribute('aria-labelledby')).toBe(words);
+      expect(document.getElementById(words)?.textContent).toBe(name);
+      expect(screen.getByLabelText(`t: ${name}`, { selector: '[role="combobox"]' })).toBe(field);
+    }
+  });
+
   it('clears the typography Align and Columns through their None row, as set() does', () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     const slide: Slide = {

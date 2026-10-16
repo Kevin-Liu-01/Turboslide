@@ -9,7 +9,14 @@ import { join } from 'node:path';
 import { z } from 'zod';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { schemaMinorSchema } from '@turboslide/schema/deck';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
+import {
+  CURRENT_SCHEMA_MINOR,
+  isRecord,
+  migrateMutations,
+  parseTolerant,
+} from '@turboslide/schema/migrations';
 import type { Version } from '@turboslide/schema/mutations';
 import { mutationSchema, versionSchema } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -81,6 +88,9 @@ export const versionRecordSchema = versionSchema.extend({
   // written (RECORD_ORIGIN_WRITES), so a reader on the older deployment never stops on a record
   // the newer one wrote; a record without it parses as before the round
   origin: writeOriginSchema.optional(),
+  // the minor of a release that stores a field this one does not know in a record (RELIABILITY-19,
+  // hardening HR-O#5): read before any release writes it, so a rollback reads that release's log
+  schemaMinor: schemaMinorSchema,
 });
 
 /** A parsed record with `ops` narrowed to the range the schema's refinement proved. */
@@ -135,9 +145,26 @@ export function versionPath(dir: string, n: number): string {
   return join(dir, VERSIONS_DIR, `${n}.json`);
 }
 
+/**
+ * A stored record's value through the documents chain (RELIABILITY-19, hardening HR-O#5): the
+ * slides its mutations and its inverse carry are migrated like slide files, and a record or a
+ * slide of a newer minor keeps the fields this release does not know (`parseTolerant`), so the
+ * log of a deck a newer release wrote reads after a rollback. The one parse of a record.
+ */
+export function safeParseRecord(raw: unknown) {
+  const value = isRecord(raw)
+    ? {
+        ...raw,
+        mutations: migrateMutations(raw.mutations),
+        ...('inverse' in raw ? { inverse: migrateMutations(raw.inverse) } : {}),
+      }
+    : raw;
+  return parseTolerant(versionRecordSchema, value);
+}
+
 /** One version record from the text of its file; a text that is not a record is a TypeError naming the file. */
 export function parseVersionRecord(text: string, file: string): VersionRecord {
-  const parsed = versionRecordSchema.safeParse(parseJson(text, file));
+  const parsed = safeParseRecord(parseJson(text, file));
   if (!parsed.success) {
     const first = parsed.error.issues[0];
     throw new TypeError(
@@ -149,7 +176,29 @@ export function parseVersionRecord(text: string, file: string): VersionRecord {
 
 /** The text of a version record's file, as the store writes it. */
 export function versionRecordText(record: VersionRecord): string {
-  return canonicalJson(versionRecordSchema.parse(record));
+  const parsed = safeParseRecord(record);
+  if (!parsed.success) throw parsed.error;
+  return canonicalJson(parsed.data);
+}
+
+/**
+ * The `schemaMinor` a write's record carries (RELIABILITY-19; the wave 3b verify's finding 1 of
+ * HR-O#5): the highest minor of the manifest and the slides of the documents the write read and
+ * made, when it is above this release's, else undefined. A record's mutations and inverse copy
+ * blocks, sections and slides out of those files, and a block or a section has no stamp of its
+ * own, so without the record's stamp a kept field in them (the block a `block.remove` keeps in
+ * its inverse, the sections of a `section.set`) read as an unknown field of this release and the
+ * record could not be written. A deck this release wrote stamps no record, so its records stay
+ * strict. Pure.
+ */
+export function recordMinor(...documents: ReadonlyArray<DeckDocument>): number | undefined {
+  let minor = 0;
+  for (const document of documents) {
+    minor = Math.max(minor, document.deck.schemaMinor ?? 0);
+    for (const slide of Object.values(document.slides))
+      minor = Math.max(minor, slide.schemaMinor ?? 0);
+  }
+  return minor > CURRENT_SCHEMA_MINOR ? minor : undefined;
 }
 
 /** Every entry under versions/, sorted by n; a file that is not a record is a TypeError. */
@@ -170,10 +219,15 @@ export function readVersions(dir: string): VersionRecord[] {
   return records.sort((a, b) => a.n - b.n);
 }
 
-export function writeVersion(dir: string, record: VersionRecord): string {
+/** Writes a record's file; `text` is its `versionRecordText`, when the caller made it first. */
+export function writeVersion(
+  dir: string,
+  record: VersionRecord,
+  text: string = versionRecordText(record),
+): string {
   const path = versionPath(dir, record.n);
   mkdirSync(join(dir, VERSIONS_DIR), { recursive: true });
-  writeFileSync(path, versionRecordText(record));
+  writeFileSync(path, text);
   return path;
 }
 

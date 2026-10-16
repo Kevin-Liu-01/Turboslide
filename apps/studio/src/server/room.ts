@@ -93,7 +93,7 @@ import type { AccessRecord } from '@turboslide/schema/access';
 import { threadParticipants } from '@turboslide/schema/comments';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
-import type { Author, Mutation } from '@turboslide/schema/mutations';
+import type { Author, Mutation, WriteOrigin } from '@turboslide/schema/mutations';
 import { boundedBlobClient } from '@turboslide/store/blob-store';
 import type { BlobClient } from '@turboslide/store/blob-store';
 import { localIndexEtag, watchSidecarIndex } from '@turboslide/store/comments-store';
@@ -1053,6 +1053,11 @@ async function createRoom(deckId: string): Promise<Room> {
   const read = await store.read();
   const records = await store.records();
   const coveredAtOpen = coveredSeq(records);
+  // a memory stream starts empty in a new process while the records keep the seqs the process
+  // before covered: its head is raised to them, so the entries this process appends number above
+  // what the records cover and are applied and checkpointed (the wave 3b verify's finding 6: after
+  // a restart a fresh tab's typing took seqs 1 to 3 under a covered 3 and was never committed)
+  if (onDo === null && selection.tier !== 'blob') await channel.floor?.(deckId, coveredAtOpen);
   const live: Live = {
     seq: coveredAtOpen,
     document: read.document,
@@ -1572,6 +1577,8 @@ export async function roomBackedStore(deckId: string, store: DeckStore): Promise
         baseRevision: write.baseRevision,
         strict: true,
         ...(write.note === undefined ? {} : { note: write.note }),
+        // a keyed agent write's op id (server/idempotency.ts; hardening HR-O#6)
+        ...(write.origin === undefined ? {} : { origin: write.origin }),
       });
       if (!admitted.ok) {
         if (admitted.code === 'conflict') {
@@ -1616,6 +1623,26 @@ export async function closeRoom(deckId: string): Promise<void> {
   if (s === undefined || pending === undefined) return;
   s.rooms.delete(deckId);
   await (await pending).close().catch(() => undefined);
+}
+
+/**
+ * Commits the tail of every room this instance holds on the memory and redis tiers, then closes
+ * every room (hardening HR-O#8, PERF-18): the node-server build's SIGTERM path, so the entries the
+ * memory channel holds in this process reach the store before it exits. The do tier's object
+ * keeps its own tail (its checkpoint would post back to this process's closed listener), and the
+ * blob tier has none. A room whose flush fails is logged by `flushRoom` and the others go on.
+ */
+export async function flushRooms(): Promise<void> {
+  const s = shared.__turboslideRoom;
+  if (s === undefined) return;
+  for (const [deckId, pending] of [...s.rooms]) {
+    const tier = await pending.then(
+      (room) => room.tier,
+      () => null,
+    );
+    if (tier === 'memory' || tier === 'redis') await flushRoom(deckId);
+  }
+  await closeRooms();
 }
 
 /** Forgets every room on this instance (a test, a deck removal). */
@@ -3540,6 +3567,12 @@ export type ServerWriteInput = {
   /** keep the exact revision check; the default is the per touched slide rule of 3.7 c */
   strict?: boolean;
   note?: string;
+  /**
+   * The op id of a keyed agent write (RELIABILITY-21, hardening HR-O#6): the store answers a
+   * write whose op id a record names with that record, and on the do tier the object answers the
+   * entry it already holds under the op id. Absent, a server write takes a fresh op id.
+   */
+  origin?: WriteOrigin;
 };
 
 export type ServerWriteResult =
@@ -3600,6 +3633,7 @@ export async function admitServerWrite(
           author: input.author,
           mutations: input.mutations,
           ...(input.note === undefined ? {} : { note: input.note }),
+          ...(input.origin === undefined ? {} : { origin: input.origin }),
         },
         { force: true },
       );
@@ -3669,14 +3703,18 @@ export async function admitServerWrite(
     // the do tier (docs/CLOUDFLARE.md 3.2 "An agent HTTP write"): the write enters the object's
     // order under the bearer with `agent:<principalId>` as its client id, fans out as an `op`,
     // and the object checkpoints at once, so the record exists before this answer
-    const answer = await onDo.serverWrite(deckId, {
-      author: input.author,
-      clientId: serverClientId(input.author),
-      mutations: input.mutations,
-      baseRevision: input.baseRevision,
-      ...(input.strict === undefined ? {} : { strict: input.strict }),
-      ...(input.note === undefined ? {} : { note: input.note }),
-    });
+    const answer = await onDo.serverWrite(
+      deckId,
+      {
+        author: input.author,
+        clientId: serverClientId(input.author),
+        mutations: input.mutations,
+        baseRevision: input.baseRevision,
+        ...(input.strict === undefined ? {} : { strict: input.strict }),
+        ...(input.note === undefined ? {} : { note: input.note }),
+      },
+      input.origin?.opIds[0],
+    );
     const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
     if (!answer.ok) {
       if (answer.code === 'conflict') {

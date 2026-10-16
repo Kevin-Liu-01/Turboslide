@@ -13,6 +13,7 @@
   "dependencies": {
     "@turboslide/identity": "workspace:*",
     "@turboslide/realtime": "workspace:*",
+    "@turboslide/report": "workspace:*",
     "@turboslide/schema": "workspace:*"
   },
   "devDependencies": {

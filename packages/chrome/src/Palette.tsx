@@ -100,9 +100,10 @@ export function Palette({
   const [wasOpen, setWasOpen] = useState(open);
   const card = useRef<HTMLDivElement>(null);
   /* the search card and its scrim in the dialog layer of the stacking scale, in the browser's top
-     layer (docs/DESIGN.md 2.2, 2.3) */
+     layer (docs/DESIGN.md 2.2, 2.3); on close they leave an exit copy that fades out (Layer.ts,
+     Palette.css) */
   const scrim = useRef<HTMLDivElement>(null);
-  useLayer(scrim, { layer: 'dialog', open });
+  useLayer(scrim, { layer: 'dialog', open, exit: true });
 
   /* a fresh open starts empty: the query, the row and the prompt reset as the card comes back
      (state adjusted during render from a prop change, the documented pattern) */

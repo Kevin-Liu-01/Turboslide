@@ -82,6 +82,23 @@ describe('comments at the checkpoint', () => {
     a.close();
   });
 
+  it('answers ok for a comment it admitted when the checkpoint after it fails, and covers it on the retry', async () => {
+    const a = await connect(deck, await mint({ deck, cid: CID_A }));
+    await a.next(isEvent('hello'));
+    app.failTimes = 1;
+    const answer = await postComment(deck);
+    // the entry is in the log: a 500 here made the function send the comment again (RT.md request 8)
+    expect(answer.status).toBe(200);
+    expect(await answer.json()).toMatchObject({ ok: true, seq: 1, covered: 0 });
+    await call(`/rooms/${deck}/flush`, { method: 'POST', body: '{}' });
+    const after = (await (await call(`/rooms/${deck}/counters`)).json()) as {
+      head: number;
+      covered: number;
+    };
+    expect(after).toMatchObject({ head: 1, covered: 1 });
+    a.close();
+  });
+
   it('keeps a comment the sidecar refused as a dead letter', async () => {
     const a = await connect(deck, await mint({ deck, cid: CID_A }));
     await a.next(isEvent('hello'));

@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,6 +9,9 @@ import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
+
+import { STATIC_HEADERS, prerenderNonce, staticPageCsp } from './src/server/headers.ts';
+import { buildDefine } from './src/server/build-commit';
 
 // Deployment build: `pnpm --filter @turboslide/studio build:deploy`. Nitro picks the target from
 // NITRO_PRESET: node-server (default), vercel (apps/studio/vercel.json; docs/hosting.md), bun
@@ -210,6 +213,25 @@ function docsAddresses(): { page: string; twin: string }[] {
 const DOCS = docsAddresses();
 
 /**
+ * The agent contracts as static files (hardening PS#9, PERF-14): the three routes answer the
+ * bundle's generated files with no per request data, so the CDN serves them and no request for
+ * them reaches the function or its cookie. Their headers are the routes' own: the type, and
+ * contracts.ts CONTRACTS_CACHE_CONTROL (a day at the CDN, five minutes in the browser).
+ */
+const CONTRACTS_CACHE = 'public, max-age=300, s-maxage=86400';
+const CONTRACT_FILES = [
+  { path: '/llms.txt', type: 'text/plain; charset=utf-8' },
+  { path: '/llms-full.txt', type: 'text/plain; charset=utf-8' },
+  { path: '/openapi.json', type: 'application/json; charset=utf-8' },
+];
+const CONTRACT_RULES = Object.fromEntries(
+  CONTRACT_FILES.map(({ path, type }) => [
+    path,
+    { headers: { 'content-type': type, 'cache-control': CONTRACTS_CACHE, ...STATIC_HEADERS } },
+  ]),
+);
+
+/**
  * The prerendered docs files: each page, each twin, the search index, the agents' full text and the
  * sitemap (5.2, 5.7).
  */
@@ -220,7 +242,11 @@ const DOCS_PRERENDER = [
   { path: '/sitemap.xml' },
 ];
 
-/** The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two). */
+/**
+ * The twins' headers on their static copies (routes/docs.{$}[.]md.ts writes the same two), with the
+ * static headers, because Vercel applies the first header rule a path matches and a twin's own rule
+ * comes before `/docs/**` (HR-W#3a).
+ */
 const DOCS_TWIN_RULES = Object.fromEntries(
   DOCS.map(({ page, twin }) => [
     twin,
@@ -228,6 +254,7 @@ const DOCS_TWIN_RULES = Object.fromEntries(
       headers: {
         'content-type': 'text/markdown; charset=utf-8',
         link: `<${DOCS_ORIGIN}${page}>; rel="canonical"`,
+        ...STATIC_HEADERS,
       },
     },
   ]),
@@ -244,20 +271,37 @@ const DOCS_TWIN_RULES = Object.fromEntries(
 // (site.ts TWIN_PATHS: hero-dark.png and the rest), so they take the icon set's day and week
 // rather than 1.6's immutable year until their names carry a hash. On the node-server build the
 // same rules run in h3, so the local check sees the redirect and the headers too.
+// The answers the CDN gives before the function runs carry the app's security headers
+// (`STATIC_HEADERS`, hardening HR-W#3a, SPEC-1): the root redirect, the prerendered pages, the docs'
+// twins, the icon and robots.txt. Nitro compiles a header rule into a route without `continue`, and
+// Vercel applies the first such route a path matches, so each rule of those paths carries the whole
+// set: `/docs` and `/home/` get rules of their own (`/docs/**` does not match `/docs` there, and the
+// static layer answers `/home/` with the page under the screenshots' `/home/**` year).
 const DAY = 'public, max-age=86400, stale-while-revalidate=604800';
 const WEEK = 'public, max-age=604800, stale-while-revalidate=2592000';
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 /** A prerendered page: the CDN's copy, revalidated by the browser on every visit. */
 const PAGE = 'public, max-age=0, must-revalidate';
 const ROUTE_RULES = {
-  '/': { redirect: { to: '/new', status: 307 as const }, headers: { 'x-robots-tag': 'noindex' } },
+  '/': {
+    redirect: { to: '/new', status: 307 as const },
+    headers: { 'x-robots-tag': 'noindex', ...STATIC_HEADERS },
+  },
   /* the prerendered pages (docs/POLISH-2.md 5.2): the header Vercel gives /home's static file, so the
      CDN serves a page and a browser asks again before using its copy; written for /home too, which
      the node server otherwise answered with the /home/** rule's year (h3 matches the page itself) */
-  '/home': { headers: { 'cache-control': PAGE } },
-  '/docs/**': { headers: { 'cache-control': PAGE } },
+  '/home': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/home/': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  /* the site pages of the pages step, prerendered as /home is */
+  '/features': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/faq': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/about': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/docs': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/docs/**': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   ...DOCS_TWIN_RULES,
-  '/favicon.ico': { headers: { 'cache-control': DAY } },
+  ...CONTRACT_RULES,
+  '/favicon.ico': { headers: { 'cache-control': DAY, ...STATIC_HEADERS } },
+  '/robots.txt': { headers: { ...STATIC_HEADERS } },
   '/icon.svg': { headers: { 'cache-control': DAY } },
   '/apple-touch-icon.png': { headers: { 'cache-control': DAY } },
   '/og/turboslide.png': { headers: { 'cache-control': DAY } },
@@ -281,7 +325,14 @@ const ROUTE_RULES = {
 const HOME_ROUTE = fileURLToPath(new URL('./src/routes/home.tsx', import.meta.url));
 const PRERENDER = existsSync(HOME_ROUTE)
   ? {
-      pages: [{ path: '/home' }, ...DOCS_PRERENDER],
+      pages: [
+        { path: '/home' },
+        { path: '/features' },
+        { path: '/faq' },
+        { path: '/about' },
+        ...DOCS_PRERENDER,
+        ...CONTRACT_FILES.map(({ path }) => ({ path })),
+      ],
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: false,
@@ -299,6 +350,64 @@ const PRERENDER = existsSync(HOME_ROUTE)
     }
   : {};
 
+// The prerendered pages' policy (hardening HR-W#3b, SPEC-1, CRIT-W5). The build mints one nonce
+// (`prerenderNonce`, kept in TURBOSLIDE_PRERENDER_NONCE so the prerender's preview server reads
+// the same value), and the request middleware hands it to every page it renders while TanStack
+// Start prerenders. Once the prerender is done, `staticPagePolicy` adds one Vercel route to the
+// Build Output's config.json: a `content-security-policy` header written by headers.ts's builder,
+// with that nonce and `frame-ancestors 'none'`, on every prerendered page whose file is under
+// static/ and carries that nonce alone, with and without its trailing slash. The route is
+// `continue: true`, so the route rule of the path still applies its own headers after it. A page
+// the prerender skipped (the start plugin's retry does not run again, and a loaded machine times
+// a page out) is answered by the function with the request's nonce and the middleware's policy,
+// so the route never names it. It is a Vercel route and not a route rule: on the node server the
+// function renders these pages with the request's nonce, and h3 writes a route rule's headers
+// over the answer's. One nonce for every visitor is safe on these pages alone: they hold no deck
+// content and nothing of a person.
+const PRERENDER_NONCE = prerenderNonce();
+const STATIC_PAGES = existsSync(HOME_ROUTE)
+  ? ['/home', '/features', '/faq', '/about', ...DOCS.map(({ page }) => page)]
+  : [];
+const VERCEL_OUTPUT = fileURLToPath(new URL('./.vercel/output/', import.meta.url));
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** True when the page's file is this build's: at least one nonce attribute, each the build's. */
+function carriesBuildNonce(file: string): boolean {
+  if (!existsSync(file)) return false;
+  const values = [...readFileSync(file, 'utf8').matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]);
+  return values.length > 0 && values.every((value) => value === PRERENDER_NONCE);
+}
+
+function staticPagePolicy(): Plugin {
+  return {
+    name: 'turboslide:static-page-policy',
+    enforce: 'post',
+    buildApp: {
+      order: 'post',
+      async handler(builder) {
+        const configPath = join(VERCEL_OUTPUT, 'config.json');
+        const headers = staticPageCsp(PRERENDER_NONCE);
+        if (!existsSync(configPath) || Object.keys(headers).length === 0) return;
+        // a node-server build leaves an older Vercel output alone: its pages carry another nonce
+        const pages = STATIC_PAGES.filter((page) =>
+          carriesBuildNonce(join(VERCEL_OUTPUT, 'static', page.slice(1), 'index.html')),
+        );
+        if (pages.length === 0) return;
+        const config = JSON.parse(readFileSync(configPath, 'utf8'));
+        config.routes.unshift({
+          src: `^(?:${pages.map(escapeRegExp).join('|')})/?$`,
+          headers,
+          continue: true,
+        });
+        writeFileSync(configPath, JSON.stringify(config, null, 2));
+        builder.config.logger.info(
+          `static page policy: ${pages.length} of ${STATIC_PAGES.length} prerendered pages carry the build's nonce and its header`,
+        );
+      },
+    },
+  };
+}
+
 // The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`):
 // React, the scheduler and the router in one chunk named `vendor`, so it caches across
 // deployments while the app's chunks change. One group and no split by package: the boundary
@@ -309,14 +418,20 @@ const PRERENDER = existsSync(HOME_ROUTE)
 // into the chunk every route preloads (polish two, requests A-R1 and P2-D-2; the node-server build
 // of 2026-10-07). With the docs' lazy chunks in the graph the group takes effect, so the chunk
 // every route preloads is named `vendor` and holds the app's shared modules with the libraries.
-const VENDOR_TEST =
-  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
-// The landing's shared modules (polish two, request P2-N-2): the copy, the facts, the generated
-// assets and timings that /home's route and its live bands both import, in one chunk, so /home's
-// document names one preload for them where it named one per module (seven links, about 0.8 KB of
-// its 100,000 B line). Only the landing imports them (components/home and its live/ folder).
-const HOME_SHARED_TEST =
-  /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
+// The group holds libraries alone (hardening HR-PC#2, PERF-9): the group takes in its modules'
+// dependencies, and the start runtime's hydration entry imports the app's router (the route tree,
+// every route file's options and what they import), so with it the `vendor` chunk carried about
+// 124 KB of the app's modules and changed with every deployment. The modules on that path (the
+// default client entry, `@tanstack/react-start/client`, the start client's index, `StartClient`
+// and `hydrateStart`, and the core's `client/` entry) stay out of the group and land in the entry
+// chunk with the app; the router and React stay in it.
+const VENDOR_EXCLUDE =
+  /@tanstack[\\/](?:react-start[\\/]dist[\\/](?:plugin[\\/]|esm[\\/]client\.js)|react-start-client[\\/]dist[\\/]esm[\\/](?:index|StartClient|hydrateStart)\.js|start-client-core[\\/]dist[\\/]esm[\\/]client[\\/])/;
+const VENDOR_TEST = new RegExp(
+  `^(?!.*${VENDOR_EXCLUDE.source})` +
+    /.*node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/
+      .source,
+);
 // Hidden source maps for the client chunks, opt in (the focus round, cycle 3 stream fix round's
 // fix round; VERIFICATION C2-F18): `TURBOSLIDE_CLIENT_SOURCEMAP=1` writes a `.map` beside every
 // chunk with no `sourceMappingURL` comment, so the served bytes are the same and
@@ -324,15 +439,26 @@ const HOME_SHARED_TEST =
 // default: a deployment ships no map.
 const CLIENT_SOURCEMAP: boolean | 'hidden' =
   process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
+// The shader gallery's stills stay files (hardening HR-PC#3, PERF-8): `shaderPreviewUrl`'s glob
+// of packages/materials/previews/*.webp put every still under the 4 KB inline limit into the
+// chunk the viewer and the editor load as a data URL, about 120 KB of base64 in a 138,850 B chunk.
+// As files, a still is fetched when the gallery or a card shows it and cached with the build.
+const MATERIAL_PREVIEW = /[\\/]materials[\\/]previews[\\/][^\\/]+\.webp$/;
 const CLIENT_BUILD = {
   build: {
     sourcemap: CLIENT_SOURCEMAP,
+    assetsInlineLimit: (file: string): boolean | undefined =>
+      MATERIAL_PREVIEW.test(file) ? false : undefined,
     rolldownOptions: {
       output: {
         codeSplitting: {
           groups: [
             { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
+            /* the app's part of the graph every route loads (the root route, the router, each
+               route file's options and what they import) in one chunk beside `vendor`, where
+               the bundler would otherwise cut it into a chunk per module the lazy routes share
+               (hardening HR-PC#2) */
+            { name: 'app', tags: ['$initial' as const], priority: 1 },
           ],
         },
       },
@@ -357,6 +483,8 @@ const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  /* the build's commit for the site footer (components/site/build.ts) */
+  define: buildDefine(),
   environments: { client: CLIENT_BUILD },
   plugins: [
     externalServerOnly(),
@@ -383,7 +511,15 @@ export default defineConfig({
           fallthrough: true,
         },
       ],
-      plugins: [`${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`],
+      plugins: [
+        `${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`,
+        // the node-server build commits its rooms and exits on SIGTERM (hardening HR-O#8,
+        // PERF-18); a Vercel function's life is the platform's
+        ...((process.env.NITRO_PRESET ?? 'node-server') === 'node-server' &&
+        process.env.VERCEL === undefined
+          ? [fileURLToPath(new URL('./src/server/plugins/shutdown.ts', import.meta.url))]
+          : []),
+      ],
       vercel: {
         functions: { maxDuration: 300 },
         // the seed deck's twins are static files the CDN answers before the asset route runs,
@@ -424,6 +560,7 @@ export default defineConfig({
       },
     }),
     viteReact(),
+    staticPagePolicy(),
   ],
   server: {
     port: 4321,

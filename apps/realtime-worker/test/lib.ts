@@ -259,6 +259,8 @@ export type FakeApp = {
   revisionCheck: 'none' | 'conflict' | 'log';
   /** the next checkpoint commits, then its answer is lost this many times (the object reads no answer) */
   loseAnswerTimes: number;
+  /** the next checkpoint gets no answer until the object's deadline aborts it, this many times (HR-RT#11) */
+  hangTimes: number;
   /**
    * The route's budget as a count (HR-RT#4): a call that names the bounded header commits at most
    * this many edit entries and answers `toSeq`, the last seq it handled; null commits every entry.
@@ -340,6 +342,13 @@ function installFakeFetch(): void {
       const isBounded = headers.get('x-turboslide-checkpoint-bounded') === '1';
       app.bounded.push(isBounded);
       app.protocols.push(headers.get('x-turboslide-protocol'));
+      if (app.hangTimes > 0) {
+        app.hangTimes -= 1;
+        const signal = init?.signal ?? null;
+        return new Promise<Response>((_resolve, reject) => {
+          signal?.addEventListener('abort', () => reject(signal.reason), { once: true });
+        });
+      }
       if (app.gone) return json({ error: 'not_found', gone: true }, 404);
       if (app.notFoundPlain) return new Response('Not Found', { status: 404 });
       if (app.failTimes > 0) {
@@ -452,6 +461,7 @@ export function fakeApp(
     seedGone: false,
     revisionCheck: 'none',
     loseAnswerTimes: 0,
+    hangTimes: 0,
     budgetEntries: null,
     bounded: [],
     refuseComments: false,

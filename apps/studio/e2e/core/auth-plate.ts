@@ -724,7 +724,9 @@ export function authPlateRows(): string[] {
               `${where}: ${Math.round(facts.heading.top - facts.mark.bottom)} px from the mark to the heading`,
             );
           if (
-            !read.boxes.some((b) => b.kind === 'sentence' && /move to your account\./.test(b.text))
+            !read.boxes.some(
+              (b) => b.kind === 'sentence' && /share them with people by name\./.test(b.text),
+            )
           )
             failures.push(`${where}: no lede`);
           for (const b of read.boxes.filter((x) => x.kind === 'button' || x.kind === 'input')) {

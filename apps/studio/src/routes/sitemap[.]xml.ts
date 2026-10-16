@@ -4,6 +4,9 @@ import { SITE } from '@turboslide/theme/brand/site';
 
 import { CONTRACTS_CACHE_CONTROL } from '../server/contracts';
 
+/** The site pages: the landing, then the features, the questions and the about page. */
+const SITE_PAGES = ['/home', '/features', '/faq', '/about'];
+
 /** The site's indexable pages in the sitemap's XML, at absolute addresses. */
 function sitemapXml(origin: string, paths: readonly string[]): string {
   const urls = paths.map((path) => `  <url><loc>${origin}${path}</loc></url>`).join('\n');
@@ -11,7 +14,7 @@ function sitemapXml(origin: string, paths: readonly string[]): string {
 }
 
 /**
- * /sitemap.xml (docs/POLISH-2.md 5.2): the product page and every docs page at the public origin.
+ * /sitemap.xml (docs/POLISH-2.md 5.2): the site pages and every docs page at the public origin.
  * The other routes carry a person's presentations or the editor and stay out. Prerendered at build;
  * robots.txt names it. The handler imports the docs' content when it runs.
  */
@@ -20,7 +23,7 @@ export const Route = createFileRoute('/sitemap.xml')({
     handlers: {
       GET: async () => {
         const { pagesInOrder } = await import('../docs/source');
-        const paths = ['/home', ...pagesInOrder().map((page) => page.url)];
+        const paths = [...SITE_PAGES, ...pagesInOrder().map((page) => page.url)];
         return new Response(sitemapXml(SITE.origin(), paths), {
           headers: {
             'content-type': 'application/xml; charset=utf-8',

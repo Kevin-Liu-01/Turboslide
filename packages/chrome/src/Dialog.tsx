@@ -6,7 +6,8 @@ import type {
 import { useEffect, useId, useRef } from 'react';
 
 import { HoldButton, useFocusHold } from './FocusHold';
-import { Icon } from './icons';
+/* the base glyphs alone (hardening HR-PC#2): the editor registers the whole set as it loads */
+import { Icon } from './icons-base';
 import { cn } from './lib/cn';
 import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
@@ -162,7 +163,11 @@ export function recentMenuRow(): string | null {
 export function focusableIn(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
     (el) =>
-      el.getAttribute('aria-hidden') !== 'true' && !el.hidden && !insideClosedDetails(el, root),
+      el.getAttribute('aria-hidden') !== 'true' &&
+      !el.hidden &&
+      /* an inert subtree takes no focus: a closed confirm's exit copy inside its dialog (Layer.ts) */
+      el.closest('[inert]') === null &&
+      !insideClosedDetails(el, root),
   );
 }
 
@@ -258,9 +263,10 @@ export function Dialog({
   /* the scrim with its card, or the floating card, in the dialog layer of the stacking scale: the
      browser's top layer through popover="manual", never showModal(), so a menu, a select list or
      a snackbar raised from the dialog stays above it and takes the pointer (docs/DESIGN.md 2.2,
-     2.3, decision C2); the Tab trap and aria-modal below stay the dialog's own */
+     2.3, decision C2); the Tab trap and aria-modal below stay the dialog's own. On close the scrim
+     and the card leave an exit copy that fades out (Layer.ts, Dialog.css) */
   const layer = useRef<HTMLDivElement>(null);
-  useLayer(layer, { layer: 'dialog' });
+  useLayer(layer, { layer: 'dialog', exit: true });
   const opener = useRef<HTMLElement | null>(null);
   /* the menu row that opened this dialog, when a menu did (item 65): the focus returns to its
      menubar button, since the row itself left with the menu */

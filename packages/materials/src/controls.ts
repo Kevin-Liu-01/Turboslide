@@ -299,8 +299,13 @@ function numberOf(value: MaterialUniformValue | undefined, fallback: number): nu
 /** The uniform names of an entry a control moves, by control. */
 export type ControlMap = Readonly<Record<MaterialControlName, ReadonlyArray<string>>>;
 
+/* numbers alone: a switch of the same name (color panels' u_edges) is no amount to scale */
 function keysOf(entry: MaterialEntry, group: ReadonlyArray<string>): string[] {
-  const names = new Set(entry.uniforms.map((spec) => spec.name));
+  const names = new Set(
+    entry.uniforms
+      .filter((spec) => spec.kind === 'float' || spec.kind === 'int')
+      .map((spec) => spec.name),
+  );
   return group.map((key) => `u_${key}`).filter((name) => names.has(name));
 }
 

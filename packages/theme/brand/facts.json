@@ -22,11 +22,11 @@
     "source": "packages/schema/src/shapes.ts SHAPE_PRESETS"
   },
   "materials": {
-    "count": 17,
+    "count": 23,
     "source": "packages/materials/src/catalog.ts MATERIAL_IDS"
   },
   "checkSteps": {
-    "count": 33,
+    "count": 34,
     "source": "node scripts/check.mjs --list"
   },
   "parityRows": {

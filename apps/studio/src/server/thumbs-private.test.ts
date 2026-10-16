@@ -14,7 +14,7 @@ import { CONTENT_RULE } from '@turboslide/schema/fixtures';
 import type { BlobClient } from '@turboslide/store/blob-store';
 import { thumbPathname } from '@turboslide/store/blob-store';
 import { memoryBlobClient } from '@turboslide/store/blob-fake';
-import { emptyMeta, splitBlobClient, writeMeta } from '@turboslide/store/migrate';
+import { putLayoutRecord, splitBlobClient } from '@turboslide/store/migrate';
 
 const state = vi.hoisted(() => ({ dir: '', blob: null as BlobClient | null }));
 
@@ -72,7 +72,7 @@ describe('a private stored thumbnail is streamed (hardening K1#2)', () => {
   it('answers 200 with the PNG and no location when the split client keeps .thumbs/ private', async () => {
     const legacy = memoryBlobClient('https://ab12.public.blob.vercel-storage.com');
     const documents = memoryBlobClient('https://ab12.private.blob.vercel-storage.com');
-    await writeMeta(documents, { ...emptyMeta('2026-10-08T22:00:00.000Z'), layout: 'v2' });
+    await putLayoutRecord(documents, { state: 'v2' });
     const split = splitBlobClient({ legacy, documents }, { ttlMs: 0 });
     const pathname = thumbPathname(DECK, stamp, 'light', 320, SLIDE);
     await split.put(pathname, PNG, { overwrite: true, contentType: 'image/png' });

@@ -54,7 +54,7 @@ import {
   followConnectors,
 } from '@turboslide/schema/connect';
 import type { DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
-import { slideOrder, slideTitle } from '@turboslide/schema/deck';
+import { slideOrder, slidePlay, slideTitle } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type {
   AlignEdge,
@@ -8005,6 +8005,7 @@ export function Editor({
           />
           {/* the live shader over every material frame of the slide (SPEC 5.3, 5.4; M5): it re-mounts on every commit that moves or resizes an object (SPEC-2 0.94) */}
           {/* the features round, ship two (docs/archive/rounds/FEATURES.md 5.6, 5.7; build/b5/integrator-hunks.md R6): one live mount per stage (the selected shader plays, the others show their frame), the deck's kit palette, 1x device pixels below zoom 100 */}
+          {/* while presenting, show mode (the shader design 3.3): the slide's Playback and the person's settings decide, and the largest shader plays */}
           <MaterialMount
             body={body}
             html={shownHtml}
@@ -8012,6 +8013,8 @@ export function Editor({
             selected={ids}
             palette={shaderPalette}
             scale={k}
+            mode={present ? 'show' : 'edit'}
+            play={slidePlay(doc.deck, slide)}
           />
         </Sheet>
       </div>

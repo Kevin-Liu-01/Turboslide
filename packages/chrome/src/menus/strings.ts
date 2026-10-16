@@ -8,6 +8,12 @@
  * the `.ts` extension so the parity audit script can load the model under Node.
  */
 import { AUTH_WORDS } from '../auth/auth-words.ts';
+import { HOME, TITLE_ROW } from './page-words.ts';
+
+// the title row's and the home page's words live in ./page-words.ts (hardening HR-PC#2): the page
+// titles of the route files read them there without the rest of this file, which every route
+// would otherwise load
+export { HOME, TITLE_ROW };
 
 /** The first sentence of every stub tooltip (SPEC "How to read this specification", Later). */
 export const STUB_PREFIX = 'Not available in Turboslide yet';
@@ -25,30 +31,12 @@ export function stubTooltip(label: string, reason: string): string {
   return `${label} · ${stubClause(reason)}`;
 }
 
-/** The title row (SPEC 12 "Title row"; SPEC-3 4.2, 15 add the fifth save phrase and the slots). */
-export const TITLE_ROW = {
-  untitled: 'Untitled presentation',
-  notSaved: 'Not saved yet',
-  saving: 'Saving…',
-  saved: 'All changes saved',
-  retrying: "Couldn't save, retrying",
-  /* SPEC-3 15: the fifth save phrase; the five stack in one fixed cell (9.2 E5) */
-  offline: 'Offline. Changes will save when you reconnect',
-  /* the focus round's blob tier budget (cycle 3 fix round, build/b7.md FR3-R5): the store refused
-     the room's poll (a 429, a 5xx) and the poll backs off; the word stands until a poll succeeds.
-     The ellipsis as `saving` carries it; the sixth phrase in the same cell, shorter than `offline` */
-  reconnecting: 'Reconnecting…',
-  lastEdit: (ago: string) => `Last edit ${ago}`,
-  /* SPEC-3 4.2: the newest record's author through resolvePrincipal, never the tab's own */
-  lastEditBy: (ago: string, name: string) => `Last edit ${ago} by ${name}`,
-  showAllComments: 'Show all comments',
-  notifications: 'Notifications',
-  /* the inbox plate's count: two tabular digits, "99+" beyond (SPEC-3 4.2) */
-  unread: (count: number) => (count > 99 ? '99+' : String(count)),
-  slideshow: 'Slideshow',
-  share: 'Share',
-  viewOnly: 'View only',
-} as const;
+/** Names as a sentence lists them: `a`, `a and b`, `a, b and c`. */
+export function andList(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
 
 /**
  * The refusals of round three (SPEC-3 6.8, 0.47), verbatim, and the two words of the persisted
@@ -84,6 +72,19 @@ export const REFUSALS = {
   notSignedInOwner:
     'Not signed in. Sign in, or copy an edit link, to get back to this presentation from another browser',
   signInToUpload: 'Sign in to upload a picture',
+} as const;
+
+/**
+ * The words of an editor whose presentation lives in the browser tab alone (the landing's live
+ * editor, docs/SITE.md D10, C.7): the save cell's phrase and its sentence, and the one sentence a
+ * feature that needs the server answers, with the snackbar's button.
+ */
+export const TAB_ONLY = {
+  words: 'In this tab only',
+  doc: 'Changes stay in this browser tab and are gone when it closes',
+  /* one line of the snackbar (its 560 px, ellipsis past it), the button beside it says the rest */
+  sentence: 'This presentation lives only in this tab.',
+  action: 'New Presentation',
 } as const;
 
 /**
@@ -274,6 +275,8 @@ export const ACCOUNT = {
     thisBrowser: 'This browser',
     signOut: 'Sign out',
     signOutEverywhereElse: 'Sign out everywhere else',
+    /** beside Sign out everywhere else: how soon another device stops (HR-SA#7, AUTH-6) */
+    signedOutWithinMinute: 'Other devices are signed out within a minute',
     keys: 'API keys',
     keyShownOnce: 'A key is shown once; copy it now',
     revoke: 'Revoke',
@@ -539,6 +542,15 @@ export const DIALOGS = {
     replace: 'Replace',
     replaceAll: 'Replace all',
   },
+  /* Slide > Playback (the shader design 3.1): the deck's and the slides' play or hold */
+  playback: {
+    title: 'Playback',
+    play: 'Play in the show',
+    hold: 'Hold the still',
+    note: 'A viewer with Reduce motion or Play animated patterns Off sees the still.',
+    apply: 'Apply',
+    applyToSelected: 'Apply to selected',
+  },
   slideNumbers: {
     title: 'Slide numbers',
     on: 'On',
@@ -710,7 +722,27 @@ export const PICKERS = {
   },
   lineEnds: { grid: 'Line decorations', doc: 'None, an arrow, a circle, a square or a diamond' },
   dashes: { list: 'Dashes', doc: 'Solid, dot, dash, dash dot, long dash or long dash dot' },
-  colors: { plate: 'Colors', none: 'None', custom: 'Custom', hex: 'Six hex digits; Enter applies' },
+  colors: {
+    plate: 'Colors',
+    none: 'None',
+    custom: 'Custom',
+    hex: 'Six hex digits; Enter applies',
+    /* the free colour field under the swatches (the Glyphfield port, wave 2 item 6): the parts
+       change a draft and Apply or Enter writes it once; the button labels are Title Case */
+    area: 'Saturation and brightness',
+    areaDoc: 'Drag, or press the arrow keys; Shift moves ten times as far; Enter applies',
+    hue: 'Hue',
+    hueDoc: 'Drag, or press the arrow keys; Shift moves 10 degrees; Enter applies',
+    oklch: 'OKLCH',
+    oklchDoc: 'Lightness, chroma and hue, as 63% 0.258 29; Enter applies',
+    pickScreen: 'Pick Screen Color',
+    pickScreenDoc: 'Takes the color of any point on the screen; Escape cancels',
+    apply: 'Apply',
+    applyDoc: 'Uses the color the field shows',
+    /* the area's spoken value */
+    areaValue: (saturation: number, brightness: number) =>
+      `Saturation ${saturation}%, brightness ${brightness}%`,
+  },
   weights: { list: 'Weights', none: 'None', px: (weight: number) => `${weight} px` },
 } as const;
 
@@ -982,6 +1014,27 @@ export const PANELS = {
     lexicon: 'Words that never translate',
     lexiconLine: 'Kept as written when this presentation is translated',
     lexiconPlaceholder: 'One name per line',
+    /* the kit check at the panel's foot (the Glyphfield port, wave 2 item 6): the rows are the
+       findings' own sentences (kit-check.ts) */
+    check: 'Check',
+    checkClear: 'Text reaches 4.5:1 and every other color 3:1 on Background in both appearances',
+    fix: 'Fix',
+    /* Import Kit at the panel's foot (kit-import.ts) */
+    importKit: 'Import Kit',
+    importDoc: 'Takes the colors of a Glyphfield kit, its ZIP or its tokens.json, in one change',
+    importLabel: 'Brand kit: Import',
+    /* `refused` names the file's roles the kit has no place for, joined by `andList` ('' for
+       none), and `many` is true for two or more */
+    imported: (count: number, file: string, refused: string, many: boolean) => {
+      const taken =
+        count === 1
+          ? `1 color from ${file} is in the kit`
+          : `${count} colors from ${file} are in the kit`;
+      return refused === ''
+        ? taken
+        : `${taken}; ${many ? `its roles ${refused} have` : `its role ${refused} has`} no place in it`;
+    },
+    importFailed: (reason: string) => `The kit could not be imported: ${reason}`,
     reset: (kit: string) => `Reset to ${kit}`,
     resetDoc: (theme: string) =>
       `Removes this presentation’s brand kit; every slide draws the ${theme} theme`,
@@ -1085,38 +1138,6 @@ export const FILMSTRIP = {
   skipped: 'Skipped: not shown when presenting or in downloads',
   empty: 'Click + to add a slide',
   gtLayouts: 'More layouts',
-} as const;
-
-/** The home page and the trash (SPEC 12 "Home"). */
-export const HOME = {
-  startNew: 'Start a new presentation',
-  blank: 'Blank presentation',
-  gtBrand: 'GT brand deck',
-  gallery: 'Template gallery',
-  /* the list's heading and the page title; the button back to the list is `back` */
-  recent: 'Recent presentations',
-  /* the trash's and the gallery's button back to the list: Title Case, as every button is
-     (DECK-GRAMMAR 22; design round pass 2 finding 6, request 7) */
-  back: 'Recent Presentations',
-  search: 'Search presentations',
-  opened: (ago: string) => `Opened ${ago}`,
-  edited: (date: string) => `Edited ${date}`,
-  sortOpened: 'Last opened by me',
-  sortModified: 'Last modified',
-  sortTitle: 'Title',
-  /* the admin's filter on /decks (docs/NEXT.md 3.2 H2, question 8): the viewer's own and shared
-     presentations by default, every presentation on the deployment on request */
-  showOwn: 'Yours and shared with you',
-  showAll: 'Every presentation',
-  trash: 'Trash',
-  empty: 'No presentations yet. Start one above',
-  trashEmpty: 'Trash is empty',
-  restore: 'Restore',
-  deleteForever: 'Delete Forever',
-  /* the snackbar that names the act when the store refuses it keeps a sentence's case */
-  deleteForeverRefused: (reason: string) => `Delete forever: ${reason}`,
-  emptyTrash: 'Empty Trash',
-  inTrash: 'This presentation is in the trash · Restore',
 } as const;
 
 /** The PowerPoint import refusal (SPEC 12 "Import"). */

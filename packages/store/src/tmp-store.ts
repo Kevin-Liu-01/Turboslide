@@ -245,7 +245,8 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
       const dir = join(decksDir, deckId);
       if (!existsSync(join(dir, 'deck.json')))
         throw new RangeError(`No deck ${deckId} under decks/`);
-      return openFileStore({ dir, ...storeOptions });
+      // the origin contract of DeckStore.write, as the Blob store keeps it (hardening HR-O#6)
+      return openFileStore({ dir, ...storeOptions, origins: true });
     },
     async create(input) {
       await overlay.ready();

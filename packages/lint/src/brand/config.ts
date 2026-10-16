@@ -252,12 +252,6 @@ export type CodeSurface = { file: string; selector: string; reason: string };
 
 export const CODE_SURFACES: readonly CodeSurface[] = [
   {
-    file: 'apps/studio/src/routes/home.css',
-    selector: '.ts-home-panel',
-    reason:
-      "The /home terminals: the hero's agent terminal and the agents band's console, the page's only code surfaces (LANDING.md 2.0 \"The two panels\"; DECK-GRAMMAR.md:31, Kevin's pick of the hero's terminal, question 18).",
-  },
-  {
     file: 'packages/chrome/src/EditHtmlPanel.css',
     selector: '.ts-edit-html-field textarea',
     reason: "The HTML block's source field: code.",
@@ -353,7 +347,7 @@ export const CODE_SURFACES: readonly CodeSurface[] = [
 /**
  * The classes of a rail wrapper in TSX (gt-ui single-rail `.tc-rail`): a wrapper inside a wrapper
  * draws the column's pair twice. `ts-rails` is the element that draws the 1104 px column's pair
- * on /home, /decks and Not found (`apps/studio/src/components/home/grammar.css`, B2a#15).
+ * on /decks and Not found (`apps/studio/src/components/home/grammar.css`, B2a#15).
  */
 export const RAIL_WRAPPER_CLASSES: readonly string[] = ['tc-rail', 'ts-rail', 'ts-rails'];
 
@@ -498,14 +492,6 @@ export const ACCEPTED: readonly Acceptance[] = [
   },
   {
     rule: 'gt-ui/cta-title-case',
-    file: 'packages/chrome/src/dialogs/ImportSlides.tsx',
-    match: 'Select a file from your device',
-    reason:
-      'A sentence case button label in the Import slides dialog, from before Round 1 and outside every item of NEXT.md 4.1.3; build/b5.md request 6.',
-    owner: 'the integrator',
-  },
-  {
-    rule: 'gt-ui/cta-title-case',
     file: 'packages/chrome/src/dialogs/Open.tsx',
     match: 'Select a file from your device',
     reason:
@@ -553,19 +539,19 @@ export const ACCEPTED: readonly Acceptance[] = [
     owner: 'the integrator',
   },
   {
-    rule: 'css/z-index',
-    file: 'apps/studio/src/components/home/live/paint.ts',
-    match: 'el.style.zIndex = z',
+    rule: 'css/no-eyebrow',
+    file: 'apps/studio/src/components/site/site.css',
+    match: '.ts-site .t-label',
     reason:
-      "A block of the landing's live slide brought to front (20) or sent to back (0) over the renderer's order + 1: local order inside the slide sheet's own stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
+      "The Workbench labels of /home and /docs (docs/SITE.md D9; Kevin's pick of the Workbench direction, 2026-10-14): 12 px capitals at +0.06em that name a figure, a table, a navigation group or a screen number, never set above a page's heading at 1024 px and over; on a phone a screen's number and label sit above its one sentence, the accepted case.",
     owner: 'the integrator',
   },
   {
-    rule: 'css/z-index',
-    file: 'apps/studio/src/components/home/live/theme.ts',
-    match: "zIndex: '10'",
+    rule: 'css/no-shadow',
+    file: 'apps/studio/src/components/site/site.css',
+    match: '.ts-site .site-av { box-shadow',
     reason:
-      "The printed field's canvas over the slide's own blocks (10): local order inside the slide sheet's stacking context, never a floating surface. The design round, DR-D4#4; build/d4.md request to D1.",
+      "The avatars of /home's title arcs (docs/SITE.md B; Kevin's note of 2026-10-15, \"make them look better coooolrr in an arc\", and the polish step's brief: a 2 px ring in the page colour between overlapping avatars and a soft shadow): round avatars that overlap on an arc and lift under the pointer. The one soft shadow on the site; never on a plate, a panel or the product's chrome.",
     owner: 'the integrator',
   },
   {

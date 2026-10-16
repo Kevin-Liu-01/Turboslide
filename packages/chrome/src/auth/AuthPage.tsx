@@ -7,7 +7,7 @@ import { ThemeButton } from '../ThemeButton';
 import { TurboslideMark } from '../TurboslideMark';
 import type { AuthMethods, AuthPurpose, AuthState } from './auth-model';
 import { AuthPlate, useAuthState } from './AuthPlate';
-import type { AuthActions } from './AuthPlate';
+import type { AuthActions, DeviceRequestFacts } from './AuthPlate';
 
 /**
  * The page host of the auth plate (docs/POLISH-2.md 4.2, C13, C18): /signin and /device, after
@@ -35,6 +35,7 @@ export type AuthPageProps = {
   onTryAgain?: () => void;
   deviceCode?: string;
   deviceEmail?: string;
+  deviceRequest?: DeviceRequestFacts | null;
   now?: () => number;
   sentAt?: number;
 };
@@ -53,6 +54,7 @@ export function AuthPage({
   onTryAgain,
   deviceCode,
   deviceEmail,
+  deviceRequest,
   now,
   sentAt,
 }: AuthPageProps) {
@@ -103,6 +105,7 @@ export function AuthPage({
             {...(onTryAgain === undefined ? {} : { onTryAgain })}
             {...(deviceCode === undefined ? {} : { deviceCode })}
             {...(deviceEmail === undefined ? {} : { deviceEmail })}
+            {...(deviceRequest === undefined ? {} : { deviceRequest })}
             {...(now === undefined ? {} : { now })}
             {...(sentAt === undefined ? {} : { sentAt })}
           />

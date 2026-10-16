@@ -657,10 +657,15 @@ const has = (page, selector) =>
     .catch(() => false);
 const closeMenus = async (page) => {
   /* one Escape closes the menu; a second lands on the stage and clears the selection (the
-     product round's editor), so it is pressed only while a menu is still open */
+     product round's editor), so it is pressed only while a menu is still open; a closed menu's
+     fading exit copy (data-exiting, packages/chrome/src/Layer.ts) has no id and is not open */
   await press(page, 'Escape');
   await sleep(150);
-  if ((await page.locator('[id^="ts-menu-"]:visible, .ts-context-menu:visible').count()) > 0) {
+  if (
+    (await page
+      .locator('[id^="ts-menu-"]:visible, .ts-context-menu:not([data-exiting]):visible')
+      .count()) > 0
+  ) {
     await press(page, 'Escape');
     await sleep(150);
   }

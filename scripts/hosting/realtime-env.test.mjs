@@ -1508,3 +1508,47 @@ describe('db-unlisted (HR-K2#3)', () => {
     }
   });
 });
+
+describe('worker-secrets: the alert channel (HR-O#3)', () => {
+  const ALERT_KEY = 're_fake_alert_key_000000000000';
+  const puts = (plan) =>
+    plan.filter((s) => s.kind === 'wrangler').map((s) => [s.args.join(' '), s.source?.key]);
+
+  it('puts the alert key and address on each Worker, the environment’s own key first', () => {
+    writePrivateFile(
+      FILES.alert.name,
+      `TURBOSLIDE_ALERT_RESEND_KEY=${ALERT_KEY}\nTURBOSLIDE_ALERT_TO=oncall@example.test\nTURBOSLIDE_ALERT_TO_PREVIEW=preview@example.test\n`,
+    );
+    const prod = planFor('worker-secrets', options('worker-secrets'), filesOf());
+    expect(puts(prod).slice(-2)).toEqual([
+      ['secret put TURBOSLIDE_ALERT_RESEND_KEY', 'TURBOSLIDE_ALERT_RESEND_KEY'],
+      ['secret put TURBOSLIDE_ALERT_TO', 'TURBOSLIDE_ALERT_TO'],
+    ]);
+    const preview = planFor(
+      'worker-secrets',
+      options('worker-secrets', { env: 'preview' }),
+      filesOf(),
+    );
+    expect(puts(preview).slice(-2)).toEqual([
+      ['secret put TURBOSLIDE_ALERT_RESEND_KEY --env preview', 'TURBOSLIDE_ALERT_RESEND_KEY'],
+      ['secret put TURBOSLIDE_ALERT_TO --env preview', 'TURBOSLIDE_ALERT_TO_PREVIEW'],
+    ]);
+    // no value is in the plan; the executor reads it from the file onto stdin
+    expect(JSON.stringify(prod)).not.toContain(ALERT_KEY);
+  });
+
+  it('an absent or open file puts nothing and says why', () => {
+    const absent = planFor('worker-secrets', options('worker-secrets'), filesOf());
+    expect(puts(absent).map(([args]) => args)).not.toContain('secret put TURBOSLIDE_ALERT_TO');
+    expect(absent.some((s) => s.kind === 'note' && s.text.startsWith('alert.env is absent'))).toBe(
+      true,
+    );
+    writeFileSync(join(config, FILES.alert.name), `TURBOSLIDE_ALERT_TO=oncall@example.test\n`);
+    chmodSync(join(config, FILES.alert.name), 0o644);
+    const open = planFor('worker-secrets', options('worker-secrets'), filesOf());
+    expect(puts(open).some(([args]) => args.includes('ALERT'))).toBe(false);
+    expect(open.some((s) => s.kind === 'note' && s.text.startsWith('alert.env has mode 644'))).toBe(
+      true,
+    );
+  });
+});

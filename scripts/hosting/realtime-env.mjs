@@ -51,7 +51,10 @@
 //                   secret put <NAME>` one at a time (--env preview for the preview Worker, which also
 //                   takes VERCEL_AUTOMATION_BYPASS_SECRET from vercel-bypass.env when the file
 //                   exists). `--from-shared` (production, docs/hosting.md 13.8 phase 2) first puts
-//                   the shared pair as the three <NAME>_PREVIOUS secrets the Worker keeps taking
+//                   the shared pair as the three <NAME>_PREVIOUS secrets the Worker keeps taking.
+//                   HR-O#3: also TURBOSLIDE_ALERT_RESEND_KEY and TURBOSLIDE_ALERT_TO from alert.env,
+//                   each the environment's own key (<NAME>_PRODUCTION, <NAME>_PREVIEW) or else the
+//                   unsuffixed one, so the scheduled check mails an incident with no studio mailer
 //   worker-settle   13.8 phase 4: `wrangler secret delete` of the three <NAME>_PREVIOUS secrets
 //   worker-rollback ended with HR-K2#4 (exit 2 with the reason): it was 13.8 step 3's way back,
 //                   the shared pair on a Worker that took the room bearer on /db; the way back
@@ -183,6 +186,19 @@ export const FILES = Object.freeze({
     ],
   },
   bypass: { name: 'vercel-bypass.env', keys: ['VERCEL_AUTOMATION_BYPASS_SECRET'] },
+  // the alert channel of the Worker's scheduled check (HR-O#3, question 6): a Resend key with
+  // sending access only and the address the incidents go to, one pair or one per environment
+  alert: {
+    name: 'alert.env',
+    keys: [
+      'TURBOSLIDE_ALERT_RESEND_KEY',
+      'TURBOSLIDE_ALERT_TO',
+      'TURBOSLIDE_ALERT_RESEND_KEY_PRODUCTION',
+      'TURBOSLIDE_ALERT_TO_PRODUCTION',
+      'TURBOSLIDE_ALERT_RESEND_KEY_PREVIEW',
+      'TURBOSLIDE_ALERT_TO_PREVIEW',
+    ],
+  },
   cloudflare: {
     name: 'cloudflare.env',
     public: true,
@@ -438,6 +454,17 @@ export function roomHostFor(environment, options, files) {
 export function databaseFor(environment, files) {
   const key = environment === 'preview' ? 'D1_ACCOUNTS_PREVIEW_NAME' : 'D1_ACCOUNTS_NAME';
   return files.cloudflare.values.get(key) ?? DEFAULT_DATABASES[environment];
+}
+
+/** The two Worker secrets of the alert channel (HR-O#3), put by `worker-secrets` from alert.env. */
+export const ALERT_NAMES = Object.freeze(['TURBOSLIDE_ALERT_RESEND_KEY', 'TURBOSLIDE_ALERT_TO']);
+
+/** Where an environment's alert value comes from in alert.env: its own key, else the shared one. */
+export function alertSource(name, environment, alert) {
+  const own = `${name}_${environment.toUpperCase()}`;
+  if (alert.values.has(own)) return { file: 'alert', key: own };
+  if (alert.values.has(name)) return { file: 'alert', key: name };
+  return null;
 }
 
 /** The room.env key of an environment's own value of one of the three secrets. */
@@ -1027,6 +1054,33 @@ export function planFor(sub, options, files) {
             }),
           );
       }
+      // HR-O#3: the alert channel, whatever the mail settings of the studio say
+      const alert = files.alert;
+      if (!alert.exists || !alert.private)
+        steps.push(
+          step('note', {
+            text: `${FILES.alert.name} ${alert.exists ? `has mode ${octal(alert.mode)}; chmod 600 it` : 'is absent'}: the ${e} Worker keeps its alert key and address, and without them an incident is a line at error and a field of /health (HR-O#3, question 6)`,
+          }),
+        );
+      else
+        for (const name of ALERT_NAMES) {
+          const source = alertSource(name, e, alert);
+          if (source === null) {
+            steps.push(
+              step('note', {
+                text: `${name}: ${FILES.alert.name} has neither ${name}_${e.toUpperCase()} nor ${name}; the ${e} Worker keeps its value`,
+              }),
+            );
+            continue;
+          }
+          steps.push(
+            put(
+              name,
+              source,
+              `${name} on the ${e} Worker (the value on stdin, from ${source.key})`,
+            ),
+          );
+        }
       steps.push(
         step('note', {
           text: 'each `wrangler secret put` creates and deploys a new version of the Worker at once (the wrangler skill); the Vercel environment takes the same three values with `do` (docs/hosting.md 13.8)',

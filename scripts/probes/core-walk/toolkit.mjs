@@ -40,6 +40,12 @@ export class SetupFailed extends Error {
   }
 }
 
+/**
+ * The open right click menu. A closed menu leaves an inert copy of itself with its classes while
+ * its exit fades (`data-exiting`, packages/chrome/src/Layer.ts); the copy is never the open menu.
+ */
+const CONTEXT_MENU = '.ts-context-menu:not([data-exiting])';
+
 /** The probe helpers whose first argument is the page. */
 const PAGE_FIRST = [
   'typeHuman',
@@ -412,9 +418,9 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
       .evaluate(() => {
         const visible = (el) => el.getClientRects().length > 0;
         return {
-          menus: [...document.querySelectorAll('[id^="ts-menu-"], .ts-context-menu')].filter(
-            visible,
-          ).length,
+          menus: [
+            ...document.querySelectorAll('[id^="ts-menu-"], .ts-context-menu:not([data-exiting])'),
+          ].filter(visible).length,
           dialogs: [...document.querySelectorAll('.ts-dialog-scrim [role="dialog"]')].filter(
             visible,
           ).length,
@@ -616,19 +622,19 @@ export function createToolkit({ page, context, browser, BASE, headers, lib, repo
   /** The rows of an open menubar menu. */
   t.menuRows = (menuId) => t.rowsUnder(`#ts-menu-${menuId}`);
   /** The rows of the open right click menu. */
-  t.contextRows = () => t.rowsUnder('.ts-context-menu');
+  t.contextRows = () => t.rowsUnder(CONTEXT_MENU);
   /** Right clicks at a point and waits for the context menu. */
   t.rightClickAt = async (x, y) => {
     await t.moveHuman({ x: x - 30, y: y - 20 }, { x, y }, 6);
     await sleep(rand(40, 90));
     await page.mouse.click(x, y, { button: 'right' });
     await page
-      .locator('.ts-context-menu')
+      .locator(CONTEXT_MENU)
       .first()
       .waitFor({ timeout: 6000 })
       .catch(() => undefined);
     await sleep(rand(200, 350));
-    return t.has('.ts-context-menu');
+    return t.has(CONTEXT_MENU);
   };
   /** Clicks a row of the open right click menu. */
   t.clickContextRow = async (rowId) => {

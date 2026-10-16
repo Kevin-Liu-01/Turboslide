@@ -560,6 +560,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -660,7 +663,7 @@
       "post": {
         "operationId": "deck.set",
         "summary": "Set a deck field",
-        "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
+        "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
         "tags": [
           "deck"
         ],
@@ -700,6 +703,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -1520,6 +1526,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -1660,6 +1669,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -2984,6 +2996,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3124,6 +3139,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3264,6 +3282,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3404,6 +3425,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3544,6 +3568,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3684,6 +3711,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3824,6 +3854,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -3964,6 +3997,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4104,6 +4140,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4244,6 +4283,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4384,6 +4426,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4524,6 +4569,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4664,6 +4712,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4804,6 +4855,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -4944,6 +4998,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5084,6 +5141,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5224,6 +5284,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5364,6 +5427,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5464,7 +5530,7 @@
       "post": {
         "operationId": "block.align",
         "summary": "Align blocks",
-        "description": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
+        "description": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
         "tags": [
           "block"
         ],
@@ -5504,6 +5570,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5644,6 +5713,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5784,6 +5856,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -5924,6 +5999,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6064,6 +6142,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6204,6 +6285,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6344,6 +6428,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6484,6 +6571,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6624,6 +6714,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6764,6 +6857,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -6904,6 +7000,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7044,6 +7143,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7184,6 +7286,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7324,6 +7429,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7464,6 +7572,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7604,6 +7715,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7744,6 +7858,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -7884,6 +8001,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8024,6 +8144,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8164,6 +8287,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8304,6 +8430,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8444,6 +8573,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8584,6 +8716,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8724,6 +8859,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -8864,6 +9002,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9004,6 +9145,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9144,6 +9288,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9284,6 +9431,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9424,6 +9574,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9564,6 +9717,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9704,6 +9860,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9844,6 +10003,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -9984,6 +10146,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -10124,6 +10289,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -10264,6 +10432,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -10404,6 +10575,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -10544,6 +10718,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -10824,6 +11001,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -10964,6 +11144,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -11103,6 +11286,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -11243,6 +11429,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -11867,6 +12056,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -12389,6 +12581,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -13013,6 +13208,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -13274,6 +13472,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -13535,6 +13736,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -13675,6 +13879,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -14057,6 +14264,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -14398,7 +14608,7 @@
       "post": {
         "operationId": "shader.insert",
         "summary": "Insert a shader",
-        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+        "description": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
         "tags": [
           "block"
         ],
@@ -14438,6 +14648,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -14538,7 +14751,7 @@
       "post": {
         "operationId": "shader.set",
         "summary": "Set a shader field",
-        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+        "description": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
         "tags": [
           "block"
         ],
@@ -14578,6 +14791,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -14718,6 +14934,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -14858,6 +15077,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -15498,6 +15720,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -15638,6 +15863,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -15778,6 +16006,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -15918,6 +16149,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -16058,6 +16292,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -16198,6 +16435,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -16419,7 +16659,7 @@
       "post": {
         "operationId": "presence.follow",
         "summary": "Follow",
-        "description": "The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.",
+        "description": "The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.",
         "tags": [
           "presence"
         ],
@@ -21828,7 +22068,7 @@
       "post": {
         "operationId": "share.emailCollaborators",
         "summary": "Email collaborators",
-        "description": "Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.",
+        "description": "Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.",
         "tags": [
           "share"
         ],
@@ -22890,7 +23130,7 @@
       "post": {
         "operationId": "account.setName",
         "summary": "Change name",
-        "description": "Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
+        "description": "Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
         "tags": [
           "account"
         ],
@@ -23709,7 +23949,7 @@
       "post": {
         "operationId": "admin.flag",
         "summary": "Kill switch",
-        "description": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.",
+        "description": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.",
         "tags": [
           "admin"
         ],
@@ -23849,7 +24089,7 @@
       "post": {
         "operationId": "admin.migrateStorage",
         "summary": "Migrate storage",
-        "description": "Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.",
+        "description": "Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.",
         "tags": [
           "admin"
         ],
@@ -24146,6 +24386,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -24286,6 +24529,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -24426,6 +24672,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -24566,6 +24815,9 @@
               "type": "boolean"
             },
             "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
         "requestBody": {
@@ -24672,6 +24924,11 @@
           "schemaVersion": {
             "type": "number",
             "const": 1
+          },
+          "schemaMinor": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
           },
           "id": {
             "type": "string",
@@ -24897,6 +25154,25 @@
                   "afterMs"
                 ],
                 "additionalProperties": false
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play moves the shaders and other live blocks in the show and the viewer, hold shows their stills; a slide’s own play wins. Play when absent. A viewer’s Reduce motion or Play animated patterns Off holds them for that viewer."
+                },
+                "description": "play moves the shaders and other live blocks in the show and the viewer, hold shows their stills; a slide’s own play wins. Play when absent. A viewer’s Reduce motion or Play animated patterns Off holds them for that viewer.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
+                ]
               }
             },
             "additionalProperties": false
@@ -25312,6 +25588,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -25383,6 +25664,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -26171,6 +26471,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -26242,6 +26547,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -27023,6 +27347,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -27094,6 +27423,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -27864,6 +28212,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -27935,6 +28288,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -28735,6 +29107,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -28806,6 +29183,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -30237,6 +30633,11 @@
                 "type": "number",
                 "const": 1
               },
+              "schemaMinor": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
               "id": {
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -30308,6 +30709,25 @@
                 "enum": [
                   "on",
                   "off"
+                ]
+              },
+              "play": {
+                "title": "Playback",
+                "x-inspector": {
+                  "label": "Playback",
+                  "control": "select",
+                  "snap": [
+                    "play",
+                    "hold"
+                  ],
+                  "group": "Slide",
+                  "help": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent."
+                },
+                "description": "play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.",
+                "type": "string",
+                "enum": [
+                  "play",
+                  "hold"
                 ]
               },
               "template": {
@@ -36902,7 +37322,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -36912,7 +37333,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -41100,9 +41522,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -41154,9 +41576,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -47617,7 +48039,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -47627,7 +48050,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -51560,7 +51984,7 @@
           "path": {
             "type": "string",
             "pattern": "^\\/(title|theme|defaults(\\/[a-zA-Z]+)?)$",
-            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes"
+            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes"
           },
           "value": {
             "description": "The new value; omit it to remove the field"
@@ -58170,7 +58594,7 @@
             "type": "string"
           },
           "replaceSource": {
-            "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)",
+            "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
@@ -58519,13 +58943,14 @@
             "type": "boolean"
           },
           "pattern": {
-            "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
+            "description": "The threshold texture to regenerate the twins with; bayer8 unless set",
             "type": "string",
             "enum": [
               "bayer8",
               "bayer4",
               "blue64",
-              "random"
+              "random",
+              "halftone"
             ]
           },
           "cell": {
@@ -58952,7 +59377,7 @@
             ]
           },
           "allowHosts": {
-            "description": "Hosts beyond the built-in allowlist (SPEC 11 captureHosts)",
+            "description": "Hosts beyond the built-in allowlist",
             "type": "array",
             "items": {
               "type": "string"
@@ -59028,10 +59453,12 @@
             "minItems": 1,
             "type": "array",
             "items": {
-              "type": "number",
-              "minimum": 0
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000,
+              "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
             },
-            "description": "Frame times in ms"
+            "description": "Frame times in ms, 0 to 60000"
           },
           "id": {
             "description": "The asset id; <id>-<anchor> per anchor when several",
@@ -60226,7 +60653,7 @@
             ]
           },
           "mode": {
-            "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
+            "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent",
             "type": "string",
             "enum": [
               "native",
@@ -60246,7 +60673,7 @@
             }
           },
           "fonts": {
-            "description": "The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
+            "description": "The export font set: standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
             "type": "string",
             "enum": [
               "exact",
@@ -60258,12 +60685,12 @@
             "type": "boolean"
           },
           "headings": {
-            "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
+            "description": "Write every heading as a PNG instead of a text box",
             "type": "string",
             "const": "raster"
           },
           "rasterScale": {
-            "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)",
+            "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3",
             "anyOf": [
               {
                 "type": "string",
@@ -60280,7 +60707,7 @@
             ]
           },
           "pictureScale": {
-            "description": "The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)",
+            "description": "The scale two-tone pictures are regenerated at from the one-bit image",
             "type": "number",
             "enum": [
               2,
@@ -60288,7 +60715,7 @@
             ]
           },
           "excludeShareAlike": {
-            "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
+            "description": "Replace share-alike pictures with the paper plate and its credit",
             "type": "boolean"
           },
           "svgVector": {
@@ -60304,7 +60731,7 @@
             ]
           },
           "verify": {
-            "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)",
+            "description": "Render the files back through LibreOffice and diff every page against the web render",
             "type": "boolean"
           },
           "slideIds": {
@@ -60367,7 +60794,7 @@
             "additionalProperties": false
           },
           "merge": {
-            "description": "Hosted only: build the file from the stored batches of the job (SPEC-2 8.1)",
+            "description": "Hosted only: build the file from the stored batches of the job",
             "type": "object",
             "properties": {
               "jobId": {
@@ -60736,7 +61163,7 @@
             "type": "boolean"
           },
           "includeComments": {
-            "description": "Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)",
+            "description": "Append each slide’s comment threads, for readers with readComments",
             "type": "boolean"
           }
         },
@@ -63510,6 +63937,12 @@
             },
             "additionalProperties": false
           },
+          "anchor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
+          },
           "at": {
             "description": "The box in sheet px; the free rectangle when absent",
             "type": "object",
@@ -63920,9 +64353,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -63974,9 +64407,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -64450,9 +64883,9 @@
                     7000
                   ],
                   "group": "Block",
-                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                  "help": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent."
                 },
-                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent.",
                 "type": "number",
                 "minimum": 0
               },
@@ -64504,9 +64937,9 @@
                   "label": "Motion",
                   "control": "json",
                   "group": "Block",
-                  "help": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame."
+                  "help": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it."
                 },
-                "description": "Whether the show plays the shader (play: off or show) and at what speed; every still surface draws the frame.",
+                "description": "Superseded by the slide’s and the presentation’s Playback (slide /play, deck /defaults/play); nothing reads it, and the Speed control sets the speed. Kept for the decks that hold it.",
                 "type": "object",
                 "properties": {
                   "play": {
@@ -64968,8 +65401,10 @@
             "maxItems": 2
           },
           "timeMs": {
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "backend": {
             "type": "string",
@@ -69642,7 +70077,7 @@
             ]
           },
           "baseRevision": {
-            "description": "The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)",
+            "description": "The comments revision the caller read; a stale value never refuses",
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
@@ -73203,7 +73638,7 @@
           },
           "activityForCommenters": {
             "type": "boolean",
-            "description": "The owner lets commenters read the Activity panel (SPEC-3 5.7)"
+            "description": "The owner lets commenters read the Activity panel"
           }
         },
         "required": [
@@ -77656,18 +78091,33 @@
             "type": "string",
             "enum": [
               "plan",
+              "freeze",
               "copy",
               "verify",
+              "switch",
+              "unfreeze",
               "rekey",
-              "cutover",
-              "delete",
-              "rollback"
+              "rollback",
+              "delete"
             ]
           },
-          "batch": {
+          "budgetMs": {
+            "description": "How long the call works before it answers; 240 s by default",
             "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 1000
+            "minimum": 120000,
+            "maximum": 240000
+          },
+          "concurrency": {
+            "description": "copy and rollback: the store requests in flight; 32 by default",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 128
+          },
+          "backupAt": {
+            "description": "delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
           }
         },
         "required": [
@@ -77683,52 +78133,150 @@
             "type": "string",
             "enum": [
               "plan",
+              "freeze",
               "copy",
               "verify",
+              "switch",
+              "unfreeze",
               "rekey",
-              "cutover",
-              "delete",
-              "rollback"
+              "rollback",
+              "delete"
             ]
           },
-          "cursor": {
-            "type": [
-              "string",
-              "null"
-            ]
+          "state": {
+            "type": "string",
+            "enum": [
+              "v1",
+              "dual",
+              "v2"
+            ],
+            "description": "The layout record's state when the call answered"
+          },
+          "frozen": {
+            "type": "boolean",
+            "description": "Document writes are refused now"
+          },
+          "done": {
+            "type": "boolean"
+          },
+          "clean": {
+            "type": "boolean",
+            "description": "The call found no row"
           },
           "processed": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "verified": {
+          "remaining": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "failed": {
+          "rows": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "The call's rows, the first 200"
           },
-          "done": {
-            "type": "boolean"
+          "rowCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
           },
-          "dualRead": {
-            "type": "boolean",
-            "description": "True while both stores are read"
+          "planned": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settlesAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "switchedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "listMs": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "perSecond": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "retries": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "rekeyAfter": {
+            "description": "rekey: when a pass must begin to copy the twins written under a replaced key",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
           "step",
-          "cursor",
-          "processed",
-          "verified",
-          "failed",
+          "state",
+          "frozen",
           "done",
-          "dualRead"
+          "clean",
+          "processed",
+          "remaining",
+          "rows",
+          "rowCount",
+          "planned",
+          "settlesAt",
+          "expiresAt",
+          "switchedAt",
+          "listMs",
+          "perSecond",
+          "retries",
+          "rekeyAfter",
+          "note"
         ],
         "additionalProperties": false
       },
@@ -77820,7 +78368,8 @@
                       "bayer8",
                       "bayer4",
                       "blue64",
-                      "random"
+                      "random",
+                      "halftone"
                     ],
                     "title": "Pattern",
                     "x-inspector": {
@@ -77830,7 +78379,8 @@
                         "bayer8",
                         "bayer4",
                         "blue64",
-                        "random"
+                        "random",
+                        "halftone"
                       ],
                       "group": "Block",
                       "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -78421,7 +78971,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "title": "Pattern",
                 "x-inspector": {
@@ -78431,7 +78982,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "group": "Block",
                   "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -78766,9 +79318,10 @@
             }
           },
           "anchor": {
-            "description": "The frame time in ms; the catalog default unless set",
-            "type": "number",
-            "minimum": 0
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60000,
+            "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
           },
           "dither": {
             "type": "object",
@@ -78779,7 +79332,8 @@
                   "bayer8",
                   "bayer4",
                   "blue64",
-                  "random"
+                  "random",
+                  "halftone"
                 ],
                 "title": "Pattern",
                 "x-inspector": {
@@ -78789,7 +79343,8 @@
                     "bayer8",
                     "bayer4",
                     "blue64",
-                    "random"
+                    "random",
+                    "halftone"
                   ],
                   "group": "Block",
                   "help": "The threshold texture; Bayer 8 by 8 is the deck’s two tone screen."
@@ -79179,6 +79734,18 @@
         "required": [
           "error"
         ]
+      }
+    },
+    "parameters": {
+      "IdempotencyKey": {
+        "name": "idempotency-key",
+        "in": "header",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "pattern": "^[\\x21-\\x7e]{1,255}$"
+        },
+        "description": "One value per write, such as a UUID: a resend with the same key and body is not applied again and is answered 200 with the answer of the write that landed (idempotent-replayed: true); the same key with another action or body is 422 idempotency_key_reused. Named on the writing actions that take it; on another writing action a key is 400 idempotency_not_supported (hardening HR-O#6)"
       }
     },
     "securitySchemes": {

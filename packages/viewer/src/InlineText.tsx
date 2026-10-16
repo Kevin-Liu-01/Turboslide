@@ -41,6 +41,7 @@ import {
 import type { Run, RunMarks, SlideLinkKeyword, Text as Markup } from '@turboslide/schema/text';
 
 import { bracketOf } from './keys';
+import { NOT_EXIT_COPY } from './reduce-motion';
 import {
   addressRangeAt,
   colorFromCss,
@@ -692,8 +693,16 @@ function isTransientTarget(target: EventTarget | null): boolean {
 /** The menus among the transient surfaces: their rows keep the focus for the keyboard's walk, so a row that is a button parks without the refocus. */
 const MENU_SELECTOR = '[role="menu"], [role="menubar"], .ts-context-menu, .ts-menu-root';
 
-/** A chrome plate or menu that is open: while one is, a parked session leaves the focus with it. */
-const OPEN_PLATE_SELECTOR = '.ts-menu, .ts-plate-anchored, .ts-context-menu, .ts-layout-plate';
+/**
+ * A chrome plate or menu that is open: while one is, a parked session leaves the focus with it. A
+ * closed menu's exit copy (packages/chrome/src/Layer.ts) keeps the menu's classes and is not open.
+ */
+const OPEN_PLATE_SELECTOR = `.ts-menu${NOT_EXIT_COPY}, .ts-plate-anchored, .ts-context-menu${NOT_EXIT_COPY}, .ts-layout-plate`;
+
+/** True while a chrome plate or menu is open in the document (`OPEN_PLATE_SELECTOR`). */
+export function chromePlateOpen(root: ParentNode = document): boolean {
+  return root.querySelector(OPEN_PLATE_SELECTOR) !== null;
+}
 
 /** The verdict for the element a blur handed the focus to. */
 export function blurVerdictOf(to: EventTarget | null): BlurVerdict {
@@ -1704,6 +1713,38 @@ export function popoverSlideOf(link: string | null): string {
   return slideLinkTarget(link)?.slide ?? '';
 }
 
+/** The distance the link popover and the link chip keep from the window's left and right edges. */
+export const POPOVER_MARGIN = 8;
+
+/**
+ * Where the link popover or the link chip stands, in the CSS pixels of its offset parent (the
+ * overlay over the sheet): under the anchor's box, above it only when the window ends first and
+ * the sheet has room above, and at the anchor's left edge moved left to keep `POPOVER_MARGIN` from
+ * the window's right edge and never past its left one. `origin` is the offset parent's box in the
+ * window and `width` and `height` the plate's drawn size. Pure, so link-popover.test.ts pins it:
+ * the stage's box stood in for the overlay's, which stands `fit.left` px to its right, and the
+ * width was taken as 560 px, so the popover ran 32 px past the right edge at 1440 and, 581 px wide
+ * in a 390 px window, held Apply and Remove past it (the dropdown round's last visual pass, F7 and
+ * its note on the phone).
+ */
+export function popoverPlace(input: {
+  anchor: Box;
+  k: number;
+  width: number;
+  height: number;
+  origin: { left: number; top: number };
+  view: { width: number; height: number };
+}): { left: number; top: number } {
+  const { anchor, k, width, height, origin, view } = input;
+  const below = (anchor[1] + anchor[3]) * k + POPOVER_GAP;
+  const above = anchor[1] * k - height - POPOVER_GAP;
+  const fitsBelow = origin.top + below + height <= view.height - POPOVER_MARGIN;
+  const top = fitsBelow || above < 0 ? below : above;
+  const right = view.width - POPOVER_MARGIN - origin.left - width;
+  const left = Math.max(POPOVER_MARGIN - origin.left, Math.min(anchor[0] * k, right));
+  return { left, top };
+}
+
 /**
  * True when the extended selection of a Home or End key should stop at the visual line and not
  * the document (docs/archive/rounds/PRODUCT.md section 2 rank 18; audit-seller 18): on macOS the browser reads
@@ -1797,6 +1838,9 @@ export type InlineTextHandle = {
 const POPOVER_H = 72;
 const POPOVER_GAP = 6;
 
+/** A drawn link popover or chip: its size and its offset parent's place in the window. */
+type PlateFrame = { width: number; height: number; left: number; top: number };
+
 /**
  * The editing session on one run (SPEC 6.4; gslides-parity SPEC 10.2). Mounting makes the
  * element editable, strips the prompt and places the caret; every keystroke restarts the 400 ms
@@ -1838,6 +1882,10 @@ export function InlineText({
   const done = useRef(false);
   const burstTimer = useRef(0);
   const popover = useRef<HTMLDivElement>(null);
+  const chip = useRef<HTMLDivElement>(null);
+  /* the drawn size of the popover or the chip and the box of their offset parent, read once drawn
+     (popoverPlace) */
+  const [plateFrame, setPlateFrame] = useState<PlateFrame | null>(null);
   const linkField = useRef<HTMLInputElement>(null);
   /* the shared dropdown the studio hands the viewer (select-slot.ts; DROPDOWNS.md 3.13): absent
      with no provider, where the URL field works alone */
@@ -2607,7 +2655,7 @@ export function InlineText({
     const resumeAfterChrome = () => {
       window.setTimeout(() => {
         if (done.current || !parked.current || pressing) return;
-        if (document.querySelector(OPEN_PLATE_SELECTOR) !== null) return;
+        if (chromePlateOpen()) return;
         if (
           document.querySelector(
             '.ts-stagewrap.ts-editor[data-tool], .ts-stagewrap.ts-editor[data-paint]',
@@ -2806,19 +2854,43 @@ export function InlineText({
   };
 
   /* under the selection's box and inside the viewport (docs/archive/rounds/POLISH.md 2.6 item 70; audit-chrome
-     item 22 read the bar at the page's corner): above the box only when the viewport ends first */
-  const place = (height: number, width = 560) => {
+     item 22 read the bar at the page's corner): above the box only when the viewport ends first.
+     Before the plate is drawn its size is the estimate and its offset parent the stage; the layout
+     effect below reads both and places it again before the browser paints */
+  const place = (height: number, width: number) => {
     const stage = element.closest('.ts-stagewrap')?.getBoundingClientRect();
-    const anchor = blockBox ?? box;
-    const below = (anchor[1] + anchor[3]) * k + POPOVER_GAP;
-    const above = anchor[1] * k - height - POPOVER_GAP;
-    const fitsBelow = stage === undefined || stage.top + below + height <= window.innerHeight - 8;
-    const top = fitsBelow || above < 0 ? below : above;
-    const room =
-      stage === undefined ? Number.POSITIVE_INFINITY : window.innerWidth - 8 - stage.left;
-    const left = Math.max(0, Math.min(anchor[0] * k, room - width));
-    return { left, top };
+    return popoverPlace({
+      anchor: blockBox ?? box,
+      k,
+      width: plateFrame?.width ?? width,
+      height: plateFrame?.height ?? height,
+      origin: plateFrame ?? { left: stage?.left ?? 0, top: stage?.top ?? 0 },
+      view: { width: window.innerWidth, height: window.innerHeight },
+    });
   };
+
+  /* the drawn plate (the popover, else the chip): a frame that differs from the last one places
+     it again; equal frames end the loop */
+  useLayoutEffect(() => {
+    const plate = popover.current ?? chip.current;
+    if (plate === null) return;
+    const parent = (plate.offsetParent ?? plate.parentElement)?.getBoundingClientRect();
+    const next: PlateFrame = {
+      width: plate.offsetWidth,
+      height: plate.offsetHeight,
+      left: parent?.left ?? 0,
+      top: parent?.top ?? 0,
+    };
+    setPlateFrame((last) =>
+      last !== null &&
+      Math.abs(last.width - next.width) < 0.5 &&
+      Math.abs(last.height - next.height) < 0.5 &&
+      Math.abs(last.left - next.left) < 0.5 &&
+      Math.abs(last.top - next.top) < 0.5
+        ? last
+        : next,
+    );
+  });
 
   if (linkOpen) {
     const shownText = linkText.length > 48 ? `${linkText.slice(0, 47)}\u2026` : linkText;
@@ -2829,7 +2901,7 @@ export function InlineText({
         role="dialog"
         aria-label="Link"
         data-control="popover.link"
-        style={place(POPOVER_H)}
+        style={place(POPOVER_H, 560)}
         onBlur={onPopoverBlur}
         onKeyDown={onLinkKey}
       >
@@ -2912,6 +2984,7 @@ export function InlineText({
     const style = place(32, 420);
     return (
       <div
+        ref={chip}
         className="ts-link-chip pt-float"
         role="group"
         aria-label="Link"

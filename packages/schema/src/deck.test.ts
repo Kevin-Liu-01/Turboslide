@@ -4,7 +4,15 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Block, HtmlBlock } from './blocks.ts';
-import { derivedSlideTitle, htmlBlockTitle, slideTitle, TITLE_MAX_CHARS } from './deck.ts';
+import {
+  deckSchema,
+  derivedSlideTitle,
+  htmlBlockTitle,
+  slidePlay,
+  slideSchema,
+  slideTitle,
+  TITLE_MAX_CHARS,
+} from './deck.ts';
 import type { ContentSlide } from './deck.ts';
 import { CONTENT_RULE, MOOD_EARTH_SLIDE, OPENER_BRAND, THESIS, TITLE } from './fixtures.ts';
 
@@ -164,5 +172,27 @@ describe('slideTitle', () => {
     expect(slideTitle(empty, 9)).toBe('Slide 9');
     expect(slideTitle(empty)).toBe('content-rule');
     expect(slideTitle(escapeSlide('bare', '<div>no heading</div>'), 84)).toBe('Slide 84');
+  });
+});
+
+/* Playback (the shader design 3.1 and 3.8, renamed `play` by the HTML slides design 2.2): the
+   slide's word wins, then the deck's, then play */
+describe('slidePlay', () => {
+  const slide = stack('s', []);
+  it('plays when neither the deck nor the slide says', () => {
+    expect(slidePlay({}, slide)).toBe('play');
+    expect(slidePlay({ defaults: {} }, undefined)).toBe('play');
+  });
+  it('follows the deck alone', () => {
+    expect(slidePlay({ defaults: { play: 'hold' } }, slide)).toBe('hold');
+  });
+  it('takes the slide over the deck, both ways', () => {
+    expect(slidePlay({ defaults: { play: 'hold' } }, { ...slide, play: 'play' })).toBe('play');
+    expect(slidePlay({ defaults: { play: 'play' } }, { ...slide, play: 'hold' })).toBe('hold');
+  });
+  it('is a field of the deck defaults and of every slide, and refuses another word', () => {
+    expect(deckSchema.shape.defaults.unwrap().shape.play.safeParse('hold').success).toBe(true);
+    expect(slideSchema.safeParse({ ...slide, play: 'hold' }).success).toBe(true);
+    expect(slideSchema.safeParse({ ...slide, play: 'loop' }).success).toBe(false);
   });
 });

@@ -160,6 +160,7 @@
   --pt-dur-sb: 220ms; /* the sidebar column */
   --pt-dur-loop: 1.2s; /* a looping state: the saving and exporting pulses, the upload sweep */
   --pt-ease-out: ease-out;
+  --pt-ease-in: ease-in; /* a leaving surface's exit copy */
   --pt-ease: cubic-bezier(0.2, 0, 0, 1); /* the sidebar column */
 }
 
@@ -596,6 +597,18 @@ body[data-shell] {
   to {
     opacity: 0;
   }
+}
+
+/* The exit copy a menu, the search card or a dialog leaves as it closes (Layer.ts): the copy's own
+   sheet animates it (Menu.css, Palette.css, Dialog.css) at --pt-dur-leave; nothing inside it
+   moves on its own, so a part with an enter animation (a dialog's card) never plays it again, and
+   it takes no pointer. */
+[data-exiting] {
+  pointer-events: none;
+}
+
+[data-exiting] * {
+  animation: none;
 }
 
 /* Reduced motion: every duration goes to zero, so each transition and

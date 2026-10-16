@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { BrowserContext, Page } from '@playwright/test';
+import type { APIRequestContext, BrowserContext, Page } from '@playwright/test';
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -155,12 +155,10 @@ test(title('decks.home.new-presentation'), async () => {
       for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
         rules.remove();
     });
-  /* the landing (docs/LANDING.md 2.10, 6.7): the close band's New Presentation reaches /new the
-     same way as the hero's; both are document navigations to /new */
-  const close = page.locator('[data-band="close"] a[href="/new"]', {
-    hasText: /New Presentation/i,
-  });
-  await expect(close, "the close band's New Presentation").toHaveCount(1);
+  /* the site build (docs/SITE.md A.1, A.3): the bar's New Presentation reaches /new the same way
+     as the hero's; both are document navigations to /new */
+  const bar = page.locator('.site-bar a[href="/new"]', { hasText: /New Presentation/i });
+  await expect(bar, "the bar's New Presentation").toHaveCount(1);
   const hero = page.locator('main a[href="/new"]', { hasText: /New Presentation/i }).first();
   await hero.click();
   await page.waitForURL(/\/new/, { timeout: 20_000 });
@@ -175,7 +173,7 @@ test(title('decks.home.new-presentation'), async () => {
       for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
         rules.remove();
     });
-  await page.locator('[data-band="close"] a[href="/new"]').click();
+  await page.locator('.site-bar a[href="/new"]').click();
   await page.waitForURL(/\/new/, { timeout: 20_000 });
   await waitEditor(page);
   const second = await invoke<{ id: string }>(page, 'deck.info');
@@ -1376,10 +1374,9 @@ test(title('decks.recent.this-browser-sentence'), async () => {
 
 test(title('decks.home.seller-lead'), async ({ browser }) => {
   test.setTimeout(90_000);
-  /* the landing (docs/LANDING.md 2.2, 6.7, the second pass; docs/DESIGN.md 8.2 since DR-D4#2): the
-     h1 is page text in two locked lines, "Presentations for people and agents"; in a fresh context
-     (no visit recorded) the lead's first sentence is the first visit sentence; the second hero
-     button opens the GT brand deck */
+  /* the site build (docs/SITE.md A.3, B): the h1 is page text, "Presentations for people and
+     agents", one line at 1440 (home.title.one-line reads its boxes); the lead begins with what
+     Turboslide is; the second hero button opens the GT brand deck */
   const fresh = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: 1440, height: 900 },
@@ -1387,7 +1384,7 @@ test(title('decks.home.seller-lead'), async ({ browser }) => {
   try {
     const p = await fresh.newPage();
     await p.goto('/home');
-    await p.locator('main[data-hydrated]').waitFor({ timeout: 30_000 });
+    await p.locator('.ts-site[data-hydrated]').waitFor({ timeout: 30_000 });
     if (OIDC)
       await p.evaluate(() => {
         for (const rules of document.querySelectorAll('script[type="speculationrules"]'))
@@ -1395,14 +1392,12 @@ test(title('decks.home.seller-lead'), async ({ browser }) => {
       });
     const h1 = await p.locator('main h1').first().textContent();
     expect(h1?.replace(/\s+/g, ' ').trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
-    const lines = (await p.locator('main h1 .ts-h1-line').allTextContents()).map((l) => l.trim());
-    expect(lines, 'two locked lines').toEqual(['Presentations for', 'people and agents']);
-    const lead = await p.locator('[data-band="hero"] .ts-hero-lead').first().textContent();
+    const lead = await p.locator('.site-hero .t-lead').first().textContent();
     expect(
       lead?.replace(/\s+/g, ' ').trim().startsWith('Turboslide is a slides editor in the browser.'),
       "the lead begins with the first visit's sentence",
     ).toBe(true);
-    const deckButton = p.locator('[data-band="hero"] a[href="/deck/gt-brand"]').first();
+    const deckButton = p.locator('.site-hero a[href="/deck/gt-brand"]').first();
     await expect(deckButton, 'the second button opens the example deck').toHaveText(
       'Open the Example Deck',
     );
@@ -1817,14 +1812,14 @@ test(title('chrome.appearance.first-visit-follows-os'), async ({ browser }) => {
   const theme = () => p.evaluate(() => document.documentElement.getAttribute('data-theme'));
   try {
     await p.goto('/home');
-    await p.waitForSelector('.ts-product, main', { timeout: 30_000 });
+    await p.waitForSelector('.ts-site, main', { timeout: 30_000 });
     const home = await theme();
     await p.goto('/new');
     await waitEditor(p);
     const fresh = await theme();
     await p.evaluate(() => localStorage.setItem('gt-theme', 'dark'));
     await p.goto('/home');
-    await p.waitForSelector('.ts-product, main', { timeout: 30_000 });
+    await p.waitForSelector('.ts-site, main', { timeout: 30_000 });
     const stored = await theme();
     test.info().annotations.push({
       type: 'appearance',
@@ -1844,7 +1839,7 @@ test(title('chrome.appearance.first-visit-follows-os'), async ({ browser }) => {
   const q = await dark.newPage();
   try {
     await q.goto('/home');
-    await q.waitForSelector('.ts-product, main', { timeout: 30_000 });
+    await q.waitForSelector('.ts-site, main', { timeout: 30_000 });
     expect(
       await q.evaluate(() => document.documentElement.getAttribute('data-theme')),
       'a dark system opens dark',
@@ -2007,10 +2002,7 @@ async function homeOpen(p: Page): Promise<number> {
   const t0 = Date.now();
   const response = await p.goto('/home');
   expect(response?.status(), '/home answers 200').toBe(200);
-  await p
-    .locator('main.ts-product[data-hydrated], main[data-hydrated]')
-    .first()
-    .waitFor({ timeout: 30_000 });
+  await p.locator('.ts-site[data-hydrated]').first().waitFor({ timeout: 30_000 });
   await p.evaluate(() => document.fonts.ready);
   return Date.now() - t0;
 }
@@ -2023,118 +2015,13 @@ async function homeScroll(p: Page): Promise<void> {
   }
   await p.waitForTimeout(400);
 }
-/**
- * The widths LANDING.md section 2 gives each slide instance, at 1,024 px of content and at 358
- * (the second pass: the agents band's slide 5 above the console at 588 and 358 from V3#13, 2.9),
- * as the design round redrew three bands (docs/DESIGN.md 8.2, 8.5, 8.6): the hero frame's slide
- * 540 and 324 inside the editor frame's chrome, the lighthouse 648 beside the Format options
- * panel, Tailor's stage 640 beside its dialog with its filmstrip of five across the top (118.4 and
- * 66.8 each).
- */
-const HOME_SHEET_WIDTHS: Readonly<Record<string, readonly [number, number]>> = {
-  hero: [540, 324],
-  agents: [588, 358],
-  'tailor-stage': [640, 358],
-  'tailor-thumb-title': [118.4, 66.8],
-  'tailor-thumb-plan': [118.4, 66.8],
-  'tailor-thumb-gets': [118.4, 66.8],
-  'tailor-thumb-ships': [118.4, 66.8],
-  'tailor-thumb-next-steps': [118.4, 66.8],
-  canvas: [648, 358],
-  present: [588, 358],
-  close: [1024, 358],
-};
-/** The narrowest width the page holds without a sideways scroll (docs/LANDING.md 5, 2.1). */
-const HOME_NARROWEST = { width: 320, height: 640 };
-
-test(title('decks.home.pictures-three-widths'), async ({ browser }) => {
-  test.setTimeout(300_000);
-  const failures: string[] = [];
-  const notes: string[] = [];
-  for (const size of [...HOME_WIDTHS, HOME_NARROWEST])
-    for (const theme of ['dark', 'light'] as const) {
-      const { context: fresh, page: p } = await homeContext(browser, size, theme);
-      try {
-        await homeOpen(p);
-        /* every band's chunk, so the slides below the first screen are in place */
-        await homeScroll(p);
-        const narrow = size.width < 720;
-        const facts = await p.evaluate(() => {
-          const sheets = [...document.querySelectorAll<HTMLElement>('main [data-sheet]')].map(
-            (el) => {
-              const r = el.getBoundingClientRect();
-              return {
-                sheet: el.getAttribute('data-sheet') ?? '',
-                w: Math.round(r.width * 10) / 10,
-                h: Math.round(r.height * 10) / 10,
-              };
-            },
-          );
-          const seam = document.querySelector<HTMLElement>('[data-seam-root] .ts-seam-box');
-          /* a filmstrip that scrolls inside its frame (2.2, 2.7) holds thumbnails past the
-             viewport's edge, clipped by the scroller: they cross nothing the reader sees */
-          const inScroller = (el: Element) => {
-            for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
-              if (getComputedStyle(a).overflowX === 'visible') continue;
-              const r = a.getBoundingClientRect();
-              if (r.left >= -1 && r.right <= innerWidth + 1) return true;
-            }
-            return false;
-          };
-          const wide = [...document.querySelectorAll('main *')].filter((el) => {
-            const r = el.getBoundingClientRect();
-            return r.width > 0 && (r.right > innerWidth + 1 || r.left < -1) && !inScroller(el);
-          }).length;
-          return {
-            sheets,
-            seam: seam ? Math.round(seam.getBoundingClientRect().width) : null,
-            wide,
-            height: document.documentElement.scrollHeight,
-            overflow: document.documentElement.scrollWidth > innerWidth,
-          };
-        });
-        const label = `${size.width} ${theme}`;
-        notes.push(
-          `${label}: height ${facts.height}, sheets ${facts.sheets.map((s) => `${s.sheet} ${s.w}`).join(', ')}, seam ${facts.seam}, wide ${facts.wide}`,
-        );
-        for (const [sheet, [wideW, narrowW]] of Object.entries(HOME_SHEET_WIDTHS)) {
-          /* at 320 the column is 288 px: the widths are read at the three widths of section 2 */
-          if (size.width < 390) break;
-          const found = facts.sheets.find((s) => s.sheet === sheet);
-          const want = narrow ? narrowW : wideW;
-          if (!found) failures.push(`${label}: no ${sheet} slide`);
-          else {
-            if (Math.abs(found.w - want) > 1.5)
-              failures.push(`${label}: ${sheet} is ${found.w} px wide (section 2 says ${want})`);
-            if (Math.abs(found.h - (found.w * 9) / 16) > 1.5)
-              failures.push(`${label}: ${sheet} is ${found.w} by ${found.h}, not 16 by 9`);
-          }
-        }
-        const seamWant = narrow ? 358 : 1024;
-        if (size.width >= 390 && (facts.seam === null || Math.abs(facts.seam - seamWant) > 1.5))
-          failures.push(
-            `${label}: the export slide is ${facts.seam} px wide (section 2 says ${seamWant})`,
-          );
-        if (facts.overflow || facts.wide > 0)
-          failures.push(`${label}: ${facts.wide} elements wider than the viewport`);
-        /* question 11: under 14,000 px at 1440 (and 1280), 15,000 at 390 */
-        if (facts.height >= (narrow ? 15_000 : 14_000))
-          failures.push(`${label}: the page is ${facts.height} px tall`);
-      } finally {
-        await fresh.close();
-      }
-    }
-  test.info().annotations.push({ type: 'home', description: notes.join(' | ') });
-  expect(failures, 'the widths of docs/LANDING.md section 2 at 1440, 1280 and 390').toEqual([]);
-});
-
 test(title('decks.home.copy-rules'), async ({ browser }) => {
   test.setTimeout(240_000);
-  /* copy.test.ts with the rules of LANDING.md 2.17, run from the checkout beside the spec */
+  /* the site's copy.test.ts (docs/SITE.md A.1), run from the checkout beside the spec */
   const root = resolve(import.meta.dirname, '..', '..', '..', '..');
   const vitest = spawnSync(
     resolve(root, 'node_modules', '.bin', 'vitest'),
-    ['run', 'apps/studio/src/components/home/copy.test.ts'],
+    ['run', 'apps/studio/src/components/site/copy.test.ts'],
     { cwd: root, encoding: 'utf8', timeout: 180_000 },
   );
   const tail = `${vitest.stdout ?? ''}${vitest.stderr ?? ''}`
@@ -2153,17 +2040,15 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
   try {
     await homeOpen(p);
     const copy = await p.evaluate(() => {
-      const main = document.querySelector('main.ts-product, main') as HTMLElement;
+      const main = document.querySelector('main') as HTMLElement;
       const headings = [...main.querySelectorAll('h1, h2')].map((h) =>
         (h.textContent ?? '').replace(/\s+/g, ' ').trim(),
       );
-      /* the page's own copy: outside the slides, the two panels, Version history's rows, the
-         editor frame's drawn chrome, the features table's shortcuts and the Tailor dialog's
-         product strings (LANDING.md 2.17); the export band's Editable text side is slide 7 as
-         the PowerPoint file holds it, so it counts as a slide */
+      /* the page's own copy (docs/SITE.md A.1): outside the recorded run and the code of the
+         transports table, the key chips, the editor's poster and frame, and the viewer's address */
       const clone = main.cloneNode(true) as HTMLElement;
       for (const el of clone.querySelectorAll(
-        'script, style, template, [data-home-slides], .ts-seam-editable, .ts-home-panel, [data-history], [data-tailor-from], [data-tailor-count], [data-tailor-apply], .ts-tailor-dialog .ts-row-key, .ts-slide-row-title, [data-hero-title], [data-hero-counter], [data-hero-thumb], [aria-hidden="true"], kbd, .ts-sr, .ts-skip, [hidden]',
+        'script, style, template, pre, code, kbd, picture, iframe, .site-fig-address, [aria-hidden="true"], [hidden]',
       ))
         el.remove();
       document.body.append(clone);
@@ -2192,93 +2077,6 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
   } finally {
     await fresh.close();
   }
-});
-
-test(title('decks.home.product-pictures'), async ({ browser }) => {
-  test.setTimeout(240_000);
-  /* every slide on /home is the renderSlide output of the page deck built from
-     apps/studio/home-deck, and every picture a file part or a still in assets.json or an inlined
-     still of slides.generated.ts: build-home-assets.ts --check exits 0 (LANDING.md 6.7) */
-  const root = resolve(import.meta.dirname, '..', '..', '..', '..');
-  const check = spawnSync(process.execPath, ['scripts/build-home-assets.ts', '--check'], {
-    cwd: root,
-    encoding: 'utf8',
-    timeout: 180_000,
-  });
-  const tail = `${check.stdout ?? ''}${check.stderr ?? ''}`
-    .trim()
-    .split('\n')
-    .slice(-2)
-    .join(' | ');
-  test.info().annotations.push({
-    type: 'build-home-assets --check',
-    description: `exit ${check.status}: ${tail}`,
-  });
-  const failures: string[] = [];
-  const notes: string[] = [];
-  for (const theme of ['dark', 'light'] as const) {
-    const { context: fresh, page: p } = await homeContext(
-      browser,
-      { width: 1440, height: 900 },
-      theme,
-    );
-    try {
-      await homeOpen(p);
-      await homeScroll(p);
-      await p.waitForTimeout(1500);
-      const facts = await p.evaluate(() => {
-        const roots = [...document.querySelectorAll<HTMLElement>('main [data-home-slides]')];
-        const pictures = [...document.querySelectorAll<HTMLImageElement>('main img')]
-          .filter((img) => img.getBoundingClientRect().width > 0)
-          .map((img) => img.getAttribute('src') ?? '');
-        const masks = [...document.querySelectorAll<HTMLElement>('main [data-field]')].map(
-          (el) =>
-            `${el.getAttribute('data-field')} ${getComputedStyle(el).getPropertyValue('--ts-still').slice(0, 40)}`,
-        );
-        return {
-          instances: roots.map(
-            (r) => `${r.getAttribute('data-instance')}=${r.getAttribute('data-slide')}`,
-          ),
-          themes: roots.filter((r) => r.hasAttribute('data-theme')).length,
-          pictures,
-          masks,
-        };
-      });
-      notes.push(
-        `${theme}: ${facts.instances.length} instances (${facts.instances.join(', ')}); pictures ${facts.pictures.join(', ')}; fields ${facts.masks.join('; ')}`,
-      );
-      /* the first screen's ten (the hero frame's slide and its nine thumbnails) and every band's */
-      const nine = [
-        'title',
-        'plan',
-        'gets',
-        'ships',
-        'next-steps',
-        'lighthouse',
-        'field',
-        'pattern',
-        'close',
-      ];
-      if (facts.instances.length < 10)
-        failures.push(`${theme}: ${facts.instances.length} slide instances, fewer than 10`);
-      for (const instance of facts.instances)
-        if (!nine.includes(instance.split('=')[1] ?? ''))
-          failures.push(`${theme}: the instance ${instance} draws no slide of the page deck`);
-      if (facts.themes > 0)
-        failures.push(`${theme}: ${facts.themes} slides carry their own data-theme`);
-      /* role, appearance and variant, then the hash: the design round's figures name their 1x and
-         2x files x1 and x2 (scripts/home/figures.ts) */
-      for (const src of facts.pictures)
-        if (!/^\/home\/[a-z][a-z0-9-]*-[0-9a-f]{10}\.(webp|png|jpg)$/.test(src))
-          failures.push(`${theme}: the picture ${src} is not a hashed file of assets.json`);
-      if (facts.pictures.length === 0) failures.push(`${theme}: no picture shown`);
-    } finally {
-      await fresh.close();
-    }
-  }
-  test.info().annotations.push({ type: 'pictures', description: notes.join(' | ') });
-  expect(check.status, 'build-home-assets.ts --check exits 0').toBe(0);
-  expect(failures).toEqual([]);
 });
 
 test(title('decks.home.links-and-card'), async ({ browser, request }) => {
@@ -2342,136 +2140,10 @@ test(title('decks.home.links-and-card'), async ({ browser, request }) => {
   }
 });
 
-/* A cold load of /home at 1440 by 900 in the dark appearance in a node process of its own, through
-   playwright-core, which the runner does not trace: the pictures requested and the long animation
-   frames before the first scroll. The runner's trace (`trace: 'retain-on-failure'`, which this
-   file keeps) snapshots the page by reading every element's computed style, which resolves the
-   canvas band's mask under `content-visibility: auto` and requests its still. Read on 2026-10-04
-   against the node-server build of d6f02a18: traced, the lighthouse's still (4,592 B) at 201 to
-   209 ms from the CSS in 3 of 3 loads; untraced, or traced without DOM snapshots, none in 3 of 3
-   (the integrator's fixer, build/integrator.md "Landing second pass, fix round"). */
-const COLD_HOME = `
-const { chromium } = await import('playwright-core');
-const oidc = process.env.VERCEL_OIDC_TOKEN;
-const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1440, height: 900 },
-  extraHTTPHeaders: oidc ? { 'x-vercel-trusted-oidc-idp-token': oidc } : {} });
-await context.addInitScript(() => {
-  try { localStorage.setItem('gt-theme', 'dark'); } catch {}
-  window.__loaf = [];
-  try {
-    new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) window.__loaf.push(Math.round(entry.duration));
-    }).observe({ type: 'long-animation-frame', buffered: true });
-  } catch {}
-});
-const page = await context.newPage();
-await page.goto(new URL('/home', process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4321').href);
-await page.locator('main#top[data-hydrated]').waitFor({ timeout: 30000 });
-await page.evaluate(() => document.fonts.ready);
-await page.waitForTimeout(1500);
-const facts = await page.evaluate(() => {
-  const pictures = performance.getEntriesByType('resource')
-    .filter((r) => r.initiatorType === 'img' || /\\.(png|jpe?g|webp|avif|svg)(\\?|$)/.test(r.name));
-  return {
-    pictures: pictures.reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0),
-    paths: pictures.map((r) => new URL(r.name).pathname),
-    longFrames: window.__loaf.filter((d) => d > 100),
-  };
-});
-await browser.close();
-process.stdout.write(JSON.stringify(facts));
-`;
-
-function coldHome(): { pictures: number; paths: string[]; longFrames: number[] } {
-  const run = spawnSync(process.execPath, ['--input-type=module', '-e', COLD_HOME], {
-    cwd: resolve(import.meta.dirname, '..', '..', '..', '..'),
-    encoding: 'utf8',
-    timeout: 120_000,
-  });
-  if (run.status !== 0) throw new Error(`the cold load exited ${run.status}: ${run.stderr}`);
-  return JSON.parse(run.stdout) as { pictures: number; paths: string[]; longFrames: number[] };
-}
-
-test(title('decks.home.load-budget'), async ({ browser }) => {
-  test.setTimeout(240_000);
-  /* a measure row (docs/LANDING.md 4.1, the budgets of the landing): its numbers are recorded
-     beside their lines; the document is reported against 60 KB until audit item 13 serves the
-     renderer's CSS as a file (Kevin's answer 10), and the gating lines are home.budget.*; the
-     pictures and the long frames before the first scroll are read cold (`coldHome`) */
-  const cold = coldHome();
-  const { context: fresh, page: p } = await homeContext(
-    browser,
-    { width: 1440, height: 900 },
-    'dark',
-  );
-  try {
-    const readyMs = await homeOpen(p);
-    await p.waitForTimeout(1500);
-    const before = await p.evaluate(() => {
-      const nav = performance.getEntriesByType('navigation')[0] as
-        PerformanceNavigationTiming | undefined;
-      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-      const pictures = resources.filter(
-        (r) => r.initiatorType === 'img' || /\.(png|jpe?g|webp|avif|svg)(\?|$)/.test(r.name),
-      );
-      const decodedJs = resources
-        .filter((r) => r.initiatorType === 'script' || /\.m?js(\?|$)/.test(r.name))
-        .reduce((n, r) => n + (r.decodedBodySize || 0), 0);
-      const w = window as unknown as {
-        __loaf: number[];
-        __lcp: { ms: number; element: string } | null;
-      };
-      return {
-        ttfb: nav ? Math.round(nav.responseStart) : null,
-        documentBytes: nav ? nav.decodedBodySize || nav.transferSize : null,
-        pictures: pictures.reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0),
-        pictureCount: pictures.length,
-        js: decodedJs,
-        lcp: w.__lcp?.ms ?? 0,
-        lcpElement: w.__lcp?.element ?? '',
-        longFrames: w.__loaf.filter((d) => d > 100),
-      };
-    });
-    await homeScroll(p);
-    await p.waitForTimeout(1500);
-    const after = await p.evaluate(() => {
-      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-      return resources
-        .filter(
-          (r) => r.initiatorType === 'img' || /\.(png|jpe?g|webp|avif|svg)(\?|$)/.test(r.name),
-        )
-        .reduce((n, r) => n + (r.transferSize || r.encodedBodySize || 0), 0);
-    });
-    const lines = [
-      `first byte ${before.ttfb} ms (line 150)`,
-      `LCP ${before.lcp} ms on ${before.lcpElement || 'no element'} (line 400 cold, the h1)`,
-      `ready ${readyMs} ms (line 500)`,
-      `pictures before the first scroll ${cold.pictures} B in ${cold.paths.length} requests, read cold (line 0)${cold.paths.length > 0 ? `: ${cold.paths.join(', ')}` : ''}`,
-      `pictures after a full scroll ${after} B (line 200000)`,
-      `document ${before.documentBytes} B decoded (reported against 60000 until audit item 13; gated at 100000 by home.budget.bytes-first)`,
-      `long animation frames over 100 ms ${cold.longFrames.length}, read cold${cold.longFrames.length > 0 ? ` (${cold.longFrames.join(', ')} ms)` : ''}`,
-      `JavaScript decoded ${before.js} B (reported against 600000)`,
-      `under the runner's trace: pictures before the first scroll ${before.pictures} B in ${before.pictureCount} requests; long animation frames over 100 ms ${before.longFrames.length}`,
-    ];
-    for (const line of lines) test.info().annotations.push({ type: 'measure', description: line });
-    expect(before.ttfb ?? 9999, lines[0]).toBeLessThanOrEqual(150);
-    expect(before.lcp, lines[1]).toBeLessThanOrEqual(400);
-    expect(/^h1/.test(before.lcpElement), lines[1]).toBe(true);
-    expect(readyMs, lines[2]).toBeLessThanOrEqual(500);
-    expect(cold.paths, lines[3]).toEqual([]);
-    expect(after, lines[4]).toBeLessThanOrEqual(200_000);
-    expect(cold.longFrames, lines[6]).toEqual([]);
-  } finally {
-    await fresh.close();
-  }
-});
-
 test(title('decks.home.layout-shift'), async ({ browser }) => {
   test.setTimeout(300_000);
-  /* CLS 0 at the three widths in both appearances over the load, a full scroll and the bands'
-     resting states (docs/LANDING.md 4.1; the hero sequence and the in view motions join with
-     their pushes, which hold this row) */
+  /* CLS 0 at the three widths in both appearances over the load and a full scroll (docs/SITE.md
+     A.3: the poster's box holds its size; Sign In's slot holds its width) */
   const failures: string[] = [];
   const notes: string[] = [];
   for (const size of HOME_WIDTHS)
@@ -2510,278 +2182,6 @@ test(title('decks.home.layout-shift'), async ({ browser }) => {
       }
     }
   test.info().annotations.push({ type: 'layout shift', description: notes.join(' | ') });
-  expect(failures).toEqual([]);
-});
-
-// ---- the landing's grammar (docs/LANDING.md 2.0; Round 1's B2a rule kept): the rails, the seams,
-// the 58 px bar, no icon before a heading, the monospace on the two #101010 panels alone (the hero's
-// terminal and the agents band's console, LANDING.md 2.0 "The two panels"), and no sheet
-// wider than a thumbnail drawing a frame
-
-/** The selection colour, which /home draws only while something is being worked on (answer 3). */
-const SELECTION_BLUE = 'rgb(47, 92, 224)';
-
-test(title('decks.home.grammar'), async ({ browser }) => {
-  test.setTimeout(240_000);
-  const failures: string[] = [];
-  const notes: string[] = [];
-  for (const theme of ['light', 'dark'] as const) {
-    const { context: fresh, page: p } = await homeContext(
-      browser,
-      { width: 1440, height: 900 },
-      theme,
-    );
-    try {
-      await homeOpen(p);
-      /* every band's chunk in place, so the sheets below the first screen are read filled */
-      await homeScroll(p);
-      await p.evaluate(() => window.scrollTo(0, 0));
-      await p.waitForTimeout(400);
-      const facts = await p.evaluate(() => {
-        const num = (v: string) => Math.round(parseFloat(v) * 100) / 100;
-        const rails = [...document.querySelectorAll<HTMLElement>('main.ts-product .ts-rails')].map(
-          (el) => {
-            const r = el.getBoundingClientRect();
-            const cs = getComputedStyle(el);
-            return {
-              left: Math.round(r.left),
-              width: Math.round(r.width),
-              borders: `${cs.borderLeftWidth} ${cs.borderLeftStyle} ${cs.borderRightWidth} ${cs.borderRightStyle}`,
-            };
-          },
-        );
-        const page = document.documentElement.scrollHeight;
-        const others = [...document.querySelectorAll<HTMLElement>('main.ts-product *')]
-          .filter((el) => !el.classList.contains('ts-rails'))
-          .filter((el) => {
-            const r = el.getBoundingClientRect();
-            const cs = getComputedStyle(el);
-            return (
-              r.height > page * 0.5 &&
-              (parseFloat(cs.borderLeftWidth) > 0 || parseFloat(cs.borderRightWidth) > 0)
-            );
-          }).length;
-        const crosses = [...document.querySelectorAll<HTMLElement>('main.ts-product .ts-seam')].map(
-          (el) => {
-            const r = el.getBoundingClientRect();
-            const own = getComputedStyle(el);
-            const padBottom = r.bottom - parseFloat(own.borderBottomWidth);
-            const one = (pseudo: '::before' | '::after') => {
-              const cs = getComputedStyle(el, pseudo);
-              const top = padBottom - parseFloat(cs.bottom) - parseFloat(cs.height);
-              return {
-                w: num(cs.width),
-                h: num(cs.height),
-                x: Math.round(r.left + parseFloat(cs.left) + 4),
-                y: Math.round(top + 4),
-              };
-            };
-            return {
-              band: el.getAttribute('data-band') ?? el.className.split(' ')[0] ?? '',
-              seam: Math.round(r.bottom) - 1,
-              before: one('::before'),
-              after: one('::after'),
-            };
-          },
-        );
-        const nav = document.querySelector<HTMLElement>('.ts-product-nav-row');
-        const headings = [...document.querySelectorAll<HTMLElement>('main h1, main h2')].map(
-          (h) => ({
-            text: (h.textContent ?? '').trim(),
-            svg: h.querySelectorAll('svg').length,
-            before: h.previousElementSibling?.tagName.toLowerCase() === 'svg',
-          }),
-        );
-        const panel = document.querySelector<HTMLElement>('.ts-home-panel');
-        const panelFacts = panel
-          ? {
-              background: getComputedStyle(panel).backgroundColor,
-              color: getComputedStyle(panel).color,
-              font: getComputedStyle(panel).fontFamily,
-              count: document.querySelectorAll('.ts-home-panel').length,
-            }
-          : null;
-        const mono = [...document.querySelectorAll<HTMLElement>('main.ts-product *')].filter(
-          (el) =>
-            el.closest('.ts-home-panel') === null &&
-            el.closest('[data-home-slides]') === null &&
-            /monospace|Menlo|Consolas|SF Mono/.test(getComputedStyle(el).fontFamily) &&
-            (el.textContent ?? '').trim() !== '',
-        ).length;
-        /* no sheet wider than a thumbnail draws a frame; a thumbnail keeps its 1 px edge */
-        const frames = [...document.querySelectorAll<HTMLElement>('main [data-sheet]')].map(
-          (el) => {
-            const sheet = el.querySelector<HTMLElement>('.ts-sheet');
-            const cs = sheet ? getComputedStyle(sheet) : null;
-            const after = getComputedStyle(el, '::after');
-            return {
-              sheet: el.getAttribute('data-sheet') ?? '',
-              thumb: el.classList.contains('is-thumb'),
-              /* the chosen thumbnail (the stage's slide) draws a 2 px ink edge in place of the 1 px */
-              chosen: el.closest('[data-selected]') !== null,
-              border: cs ? parseFloat(cs.borderTopWidth) : -1,
-              shadow: cs ? cs.boxShadow : '',
-              edge: after.content !== 'none' ? parseFloat(after.borderTopWidth) : 0,
-            };
-          },
-        );
-        return {
-          rails,
-          others,
-          crosses,
-          navHeight: nav ? Math.round(nav.getBoundingClientRect().height) : null,
-          headings,
-          panel: panelFacts,
-          mono,
-          frames,
-        };
-      });
-      const label = `1440 ${theme}`;
-      notes.push(
-        `${label}: rails ${JSON.stringify(facts.rails)}, other long side lines ${facts.others}, ${facts.crosses.length} seams, nav ${facts.navHeight} px, panel ${JSON.stringify(facts.panel)}, monospace outside the panel ${facts.mono}, frames ${facts.frames.map((f) => `${f.sheet} ${f.border}/${f.edge}`).join(', ')}`,
-      );
-      if (facts.rails.length !== 1) failures.push(`${label}: ${facts.rails.length} rail elements`);
-      const rail = facts.rails[0];
-      if (rail !== undefined) {
-        if (rail.left !== 168 || rail.width !== 1104)
-          failures.push(`${label}: the rails stand at ${rail.left} and ${rail.left + rail.width}`);
-        if (rail.borders !== '1px solid 1px solid')
-          failures.push(`${label}: the rails are ${rail.borders}`);
-      }
-      if (facts.others > 0) failures.push(`${label}: ${facts.others} more long vertical lines`);
-      if (facts.crosses.length < 9) failures.push(`${label}: ${facts.crosses.length} seams`);
-      for (const c of facts.crosses)
-        for (const [side, cross, x] of [
-          ['left', c.before, 168],
-          ['right', c.after, 1271],
-        ] as const) {
-          if (cross.w !== 9 || cross.h !== 9)
-            failures.push(`${label}: ${c.band} ${side} cross ${cross.w} by ${cross.h}`);
-          if (Math.abs(cross.x - x) > 1 || Math.abs(cross.y - c.seam) > 1)
-            failures.push(
-              `${label}: ${c.band} ${side} cross centred at ${cross.x},${cross.y}, the seam at ${x},${c.seam}`,
-            );
-        }
-      if (facts.navHeight !== 58)
-        failures.push(`${label}: the navigation is ${facts.navHeight} px`);
-      for (const h of facts.headings)
-        if (h.svg > 0 || h.before) failures.push(`${label}: an icon at the heading "${h.text}"`);
-      if (facts.panel?.count !== 2)
-        failures.push(`${label}: ${facts.panel?.count ?? 0} panels, not 2`);
-      if (facts.panel?.background !== 'rgb(16, 16, 16)')
-        failures.push(`${label}: the panel sits on ${facts.panel?.background}`);
-      if (!/monospace|Menlo|Consolas/.test(facts.panel?.font ?? ''))
-        failures.push(`${label}: the panel is set in ${facts.panel?.font}`);
-      if (facts.mono > 0)
-        failures.push(`${label}: ${facts.mono} monospace runs outside the panels`);
-      for (const f of facts.frames) {
-        if (f.border !== 0 || (f.shadow !== 'none' && f.shadow !== ''))
-          failures.push(
-            `${label}: the ${f.sheet} sheet draws a frame (${f.border} px, ${f.shadow})`,
-          );
-        if (f.thumb && f.edge !== (f.chosen ? 2 : 1))
-          failures.push(`${label}: the thumbnail ${f.sheet} has no ${f.chosen ? 2 : 1} px edge`);
-        if (!f.thumb && f.edge !== 0) failures.push(`${label}: the ${f.sheet} sheet draws an edge`);
-      }
-    } finally {
-      await fresh.close();
-    }
-  }
-  test.info().annotations.push({ type: 'grammar', description: notes.join(' | ') });
-  expect(failures).toEqual([]);
-});
-
-test(title('decks.home.capture-plain'), async ({ browser }) => {
-  test.setTimeout(240_000);
-  /* no selection ring, chip, handle, caret or guide is drawn at rest (docs/LANDING.md 6.7): the
-     page, read itself, draws nothing in the selection colour and holds no overlay and no focused
-     text field after a full scroll (Kevin's answer 3: the blue only while something is worked on).
-     Restated in the design round (DESIGN.md 8.0 "Colour" and 8.7, question 34): the kits band's
-     Colors row shows the kit's six colours, and General Translation's Primary and Accent are
-     #2f5ce0, so a swatch of that row painted in the value its row reads is left out of the scan,
-     as home.kits.restyle leaves it out; a swatch in any other colour is read as before */
-  const failures: string[] = [];
-  const notes: string[] = [];
-  for (const theme of ['light', 'dark'] as const) {
-    for (const size of [
-      { width: 1440, height: 900 },
-      { width: 390, height: 844 },
-    ]) {
-      const { context: fresh, page: p } = await homeContext(browser, size, theme);
-      try {
-        await homeOpen(p);
-        await homeScroll(p);
-        await p.waitForTimeout(600);
-        const facts = await p.evaluate((blue) => {
-          const blues: string[] = [];
-          /* the Colors row's swatches painted in their row's value, and of those the blue ones */
-          const swatches = { shown: 0, blue: 0 };
-          const paintOf = (hex: string): string => {
-            const n = Number.parseInt(hex.slice(1), 16);
-            return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
-          };
-          for (const el of document.querySelectorAll<HTMLElement>('body *')) {
-            const cs = getComputedStyle(el);
-            if (el.matches('[data-kit-roles] > li > i')) {
-              const hex = (el.parentElement?.querySelector('.pt-num')?.textContent ?? '').trim();
-              if (/^#[0-9a-f]{6}$/.test(hex) && cs.backgroundColor === paintOf(hex)) {
-                swatches.shown += 1;
-                if (cs.backgroundColor === blue) swatches.blue += 1;
-                continue;
-              }
-            }
-            const hits = [
-              cs.color,
-              cs.backgroundColor,
-              parseFloat(cs.borderTopWidth) > 0 ? cs.borderTopColor : '',
-              parseFloat(cs.borderLeftWidth) > 0 ? cs.borderLeftColor : '',
-              cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 ? cs.outlineColor : '',
-            ];
-            if (hits.includes(blue) && el.getBoundingClientRect().width > 0)
-              blues.push(`${el.tagName.toLowerCase()}.${el.className.toString().split(' ')[0]}`);
-          }
-          const active = document.activeElement;
-          return {
-            blues,
-            swatches,
-            /* drawn ones: the version view waits hidden in the agents band until a row is shown.
-               The two people band's presence marks (`.ts-people-marks`, one layer a screen) are the
-               staged sequence's ink outline and flag, which 2.10 draws at rest as B's still; they
-               are the other person's, never the visitor's selection, and the blue check above
-               still reads them */
-            overlays: [
-              ...document.querySelectorAll(
-                '.ts-home-sel-layer, [data-live-overlay], .ts-home-guide, .ts-home-ring, .ts-home-flag',
-              ),
-            ].filter(
-              (el) => el.getClientRects().length > 0 && el.closest('.ts-people-marks') === null,
-            ).length,
-            focused: active && active !== document.body ? active.tagName.toLowerCase() : 'none',
-          };
-        }, SELECTION_BLUE);
-        const label = `${size.width} ${theme}`;
-        notes.push(
-          `${label}: ${facts.blues.length} elements in the selection blue, ${facts.overlays} overlays, focus on ${facts.focused}; the Colors row's ${facts.swatches.shown} swatches in their values (${facts.swatches.blue} of them #2f5ce0) left out`,
-        );
-        /* the row's six swatches are drawn and painted in their values, so the scan leaves out
-           exactly them */
-        if (facts.swatches.shown !== 6)
-          failures.push(
-            `${label}: ${facts.swatches.shown} of the Colors row's 6 swatches painted in their values`,
-          );
-        if (facts.blues.length > 0)
-          failures.push(
-            `${label}: the selection blue at rest on ${facts.blues.slice(0, 5).join(', ')}`,
-          );
-        if (facts.overlays > 0)
-          failures.push(`${label}: ${facts.overlays} selection overlays at rest`);
-        if (facts.focused !== 'none') failures.push(`${label}: focus at rest on ${facts.focused}`);
-      } finally {
-        await fresh.close();
-      }
-    }
-  }
-  test.info().annotations.push({ type: 'rest', description: notes.join(' | ') });
   expect(failures).toEqual([]);
 });
 
@@ -2832,7 +2232,7 @@ test(title('decks.home.phone'), async ({ browser }) => {
         const width = document.documentElement.clientWidth;
         const nav = [
           ...document.querySelectorAll<HTMLElement>(
-            '.ts-product-nav-row > *, .ts-product-nav-links > *, .ts-product-nav-signin > *',
+            '.site-bar-row > *, .site-bar-nav > *, .site-bar-act > *',
           ),
         ]
           .filter((el) => el.getBoundingClientRect().width > 0)
@@ -2853,7 +2253,7 @@ test(title('decks.home.phone'), async ({ browser }) => {
           }
           return false;
         };
-        const crossing = [...document.querySelectorAll<HTMLElement>('main.ts-product *')]
+        const crossing = [...document.querySelectorAll<HTMLElement>('.ts-site main *')]
           .filter((el) => {
             const r = el.getBoundingClientRect();
             return r.width > 0 && (r.right > width + 1 || r.left < -1) && !inScroller(el);
@@ -2971,9 +2371,49 @@ test(title('decks.list.ruled-rows'), async () => {
 });
 
 // ---- the next program's Round 1 push B2d#18 (docs/NEXT.md 4.1.3 item 12, 4.1.5): a shared deck's card
+// The Glyphfield port's wave 2 item 1 (GF-2.1; routes/-deck-card.ts, server/deck-card.ts): the card's
+// picture is the first slide at 1200 by 675 from the render route when a stranger holding the link
+// may read the deck (an open deck, or the published player's token), and the site's card for every
+// other link. The stranger is a request context with no cookie, the way an unfurler arrives.
 
-test(title('decks.og.deck-card'), async () => {
-  test.setTimeout(90_000);
+/** The tags of a page's head as a request with no cookie reads them, the first of each name. */
+async function unfurlTags(
+  anon: APIRequestContext,
+  path: string,
+): Promise<{ status: number; tags: Record<string, string> }> {
+  const res = await anon.get(path, { maxRedirects: 0 });
+  const html = await res.text();
+  const tags: Record<string, string> = {};
+  const decode = (value: string) =>
+    value
+      .replace(/&quot;/g, '"')
+      .replace(/&#x27;|&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+  for (const [tag] of html.matchAll(/<meta\b[^>]*>/g)) {
+    const key = /\s(?:property|name)="([^"]+)"/.exec(tag)?.[1];
+    const content = /\scontent="([^"]*)"/.exec(tag)?.[1];
+    if (key !== undefined && content !== undefined && tags[key] === undefined)
+      tags[key] = decode(content);
+  }
+  return { status: res.status(), tags };
+}
+
+/** A card picture as a request with no cookie reads it: the status, the type and the PNG's size. */
+async function cardPictureRead(
+  anon: APIRequestContext,
+  url: string,
+): Promise<{ status: number; type: string; size: { width: number; height: number } | null }> {
+  const at = new URL(url);
+  const res = await anon.get(`${at.pathname}${at.search}`, { maxRedirects: 3, timeout: 90_000 });
+  const type = res.headers()['content-type'] ?? '';
+  const size = res.status() === 200 ? pngSize(Buffer.from(await res.body())) : null;
+  return { status: res.status(), type, size };
+}
+
+test(title('decks.og.deck-card'), async ({ playwright }) => {
+  test.setTimeout(300_000);
   const res = await page.goto(`/deck/${deck}`);
   expect(res?.status(), "the deck's page answers").toBe(200);
   await page.locator('.pt-viewer').first().waitFor({ timeout: 60_000 });
@@ -3019,6 +2459,93 @@ test(title('decks.og.deck-card'), async () => {
   expect(meta.ogImage ?? '', 'og:image is on www').toMatch(/^https:\/\/www\.turboslide\.com\//);
   expect(meta.ogDescription ?? '', 'og:description is one sentence').toMatch(/^[A-Z].*\.$/);
   expect(monoAddress, "the card's address is not set in monospace").toBe(false);
+  /* GF-2.1: a new deck is restricted, so even its owner's page names the site's card */
+  expect(meta.ogImage ?? '', 'a restricted deck keeps the site card').toMatch(
+    /\/og\/turboslide\.png$/,
+  );
+
+  const stranger = () => playwright.request.newContext({ baseURL: BASE, extraHTTPHeaders });
+  const cardPattern = (id: string, token?: string) =>
+    new RegExp(
+      `^https://www\\.turboslide\\.com/api/render/[a-z0-9-]+\\?deck=${id}&theme=(light|dark)&w=1200&r=\\d+${token === undefined ? '' : `&p=${token}`}$`,
+    );
+  const readings: string[] = [];
+
+  /* the published player: the link carries the token, so its card is the first slide */
+  await openEditor(page, deck);
+  const baseRevision = async () => {
+    const got = await invoke<{ record?: { revision: number } }>(page, 'share.get', { id: deck });
+    return got.record?.revision ?? 0;
+  };
+  const published = await invoke<{ url: string }>(page, 'deck.publish', {
+    id: deck,
+    baseRevision: await baseRevision(),
+  });
+  const token = new URL(published.url, BASE).searchParams.get('p') ?? '';
+  const playerPath = new URL(published.url, BASE);
+  let anon = await stranger();
+  let picture = '';
+  try {
+    const player = await unfurlTags(anon, `${playerPath.pathname}${playerPath.search}`);
+    picture = player.tags['og:image'] ?? '';
+    readings.push(
+      `player ${player.status}: og:image ${picture.replace(token, '<token>')}, ${player.tags['og:image:width']} by ${player.tags['og:image:height']}, alt "${player.tags['og:image:alt']}"`,
+    );
+    expect(player.status, "the published player's page answers a stranger").toBe(200);
+    expect(picture, 'the player link names the first slide with its token').toMatch(
+      cardPattern(deck, token),
+    );
+    expect(player.tags['twitter:image'], 'twitter:image is the same picture').toBe(picture);
+    expect(
+      [player.tags['og:image:width'], player.tags['og:image:height'], player.tags['og:image:type']],
+      'the picture is a 1200 by 675 PNG',
+    ).toEqual(['1200', '675', 'image/png']);
+    expect(player.tags['og:image:alt']).toBe(`The first slide of ${name}`);
+    const read = await cardPictureRead(anon, picture);
+    readings.push(`player picture ${read.status} ${read.type} ${JSON.stringify(read.size)}`);
+    expect(read.status, 'the picture answers a request with no cookie').toBe(200);
+    expect(read.type).toBe('image/png');
+    expect(read.size, 'the picture is 1200 by 675').toEqual({ width: 1200, height: 675 });
+    /* without the token the same picture is the restricted deck's: refused */
+    const bare = await cardPictureRead(anon, picture.replace(`&p=${token}`, ''));
+    readings.push(`picture without the token ${bare.status}`);
+    expect(bare.status, 'the picture without the token is refused').toBe(404);
+  } finally {
+    await anon.dispose();
+  }
+
+  /* unpublished: the player is gone and so is its picture */
+  await invoke(page, 'deck.unpublish', { id: deck, baseRevision: await baseRevision() });
+  anon = await stranger();
+  try {
+    const gone = await cardPictureRead(anon, picture);
+    readings.push(`picture after unpublish ${gone.status}`);
+    expect(gone.status, "an unpublished link's picture is refused").toBe(410);
+  } finally {
+    await anon.dispose();
+  }
+
+  /* the open seed deck: a stranger reads its first slide without any token */
+  anon = await stranger();
+  try {
+    const open = await unfurlTags(anon, '/deck/gt-brand');
+    const image = open.tags['og:image'] ?? '';
+    readings.push(`gt-brand ${open.status}: og:image ${image}`);
+    expect(open.status, 'the open seed deck answers a stranger').toBe(200);
+    expect(image, "the open deck's link names its first slide, with no token").toMatch(
+      cardPattern('gt-brand'),
+    );
+    const read = await cardPictureRead(anon, image);
+    readings.push(`gt-brand picture ${read.status} ${read.type} ${JSON.stringify(read.size)}`);
+    expect(read.status).toBe(200);
+    expect(read.size, "the open deck's picture is 1200 by 675").toEqual({
+      width: 1200,
+      height: 675,
+    });
+  } finally {
+    await anon.dispose();
+    test.info().annotations.push({ type: 'link card', description: readings.join('; ') });
+  }
 });
 
 // ---- the list and the trash (docs/archive/rounds/POLISH.md 2.7)
@@ -3897,11 +3424,8 @@ coverage(import.meta.filename, [
   'chrome.appearance.first-visit-follows-os',
   'brand.appearance.default',
   /* the polish round (docs/archive/rounds/POLISH.md 2.7, section 3, 5.1) */
-  'decks.home.pictures-three-widths',
   'decks.home.copy-rules',
-  'decks.home.product-pictures',
   'decks.home.links-and-card',
-  'decks.home.load-budget',
   'decks.home.layout-shift',
   'decks.recent.keeps-new-deck',
   'decks.card.rename-everywhere',
@@ -3923,8 +3447,6 @@ coverage(import.meta.filename, [
   /* the next program's Round 1 push B1#2 (docs/NEXT.md 4.1.3 item 3, 4.1.5) */
   'decks.manifest.paper',
   /* the next program's Round 1 push B2a#15 (docs/NEXT.md 4.1.3 item 9, 4.1.5) */
-  'decks.home.grammar',
-  'decks.home.capture-plain',
   'decks.home.copy',
   'decks.home.phone',
   /* the next program's Round 1 push B2b#16 (docs/NEXT.md 4.1.3 item 10, 4.1.5) */

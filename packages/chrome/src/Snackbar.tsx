@@ -1,7 +1,8 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useCallback, useRef, useState } from 'react';
 
-import { Icon } from './icons';
+/* the base glyphs alone (hardening HR-PC#2): the editor registers the whole set as it loads */
+import { Icon } from './icons-base';
 import { useLayer } from './Layer';
 import { useMountEffect } from './lib/useMountEffect';
 import { tipProps } from './Tooltip';

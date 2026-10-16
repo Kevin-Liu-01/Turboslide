@@ -146,7 +146,9 @@ Apache POI and python-pptx projects for the same purpose.
 
 What: the 63 Heroicons 20 solid symbols in `packages/theme/assets/sprite.svg` and
 `packages/theme/src/sprite.ts`, copied from the GT deck's `parts/head.html`, which took them from
-`optimized/20/solid` of https://github.com/tailwindlabs/heroicons.
+`optimized/20/solid` of https://github.com/tailwindlabs/heroicons; and the Heroicons 20 solid
+paths of the chrome's icon table, `packages/chrome/src/icons.tsx`, which the editor, `/home` and
+`/docs` draw, copied from heroicons 2.2.0 `optimized/20/solid`.
 
     MIT License
 
@@ -190,7 +192,10 @@ and requires the LICENSE and NOTICE text below to travel with the distribution (
 materials carry the credit "Material: <name>, Paper Shaders, rendered in Turboslide" (the M5
 capture) or "Shader: <name>, Paper Shaders, rendered in Turboslide" (a frame of the shader library,
 docs/archive/rounds/FEATURES.md 5.5). The gallery's stills under `packages/materials/previews/` are renders of the
-same shaders at anchor 5500 (`scripts/build-shader-previews.mjs`).
+same shaders at anchor 5500 (`scripts/build-shader-previews.mjs`). The form presets in
+`packages/materials/src/form-presets.ts` copy the shape values of Paper's authored presets from
+`@paper-design/shaders-react` 0.0.78 (Apache 2.0, the same NOTICE, not a dependency) as data, with
+every colour replaced by the brand kit's.
 
 NOTICE:
 
@@ -644,6 +649,13 @@ open, credit and copyleft licences alone. The ten mark fixture under
 on 2026-09-22 (Figma, Vercel, GitHub, Stripe and Anthropic under CC0-1.0, OpenAI under MIT, Amazon
 EC2 under CC-BY-ND-2.0 from AWS's own package) and three drawings of Turboslide's own for the
 tests (Acme, Gradientco, Northwind), so the tests and the preview run without the network.
+
+`packages/chrome/src/presence/agent-marks.tsx` carries the path data of four marks as thesvg.org
+served them on 2026-10-14, each recorded there under MIT: Claude Code (`claude-code/color`), Codex
+(`codex-openai/color`), OpenClaw (`openclaw-moltbot-clawdbot/color`) and Hermes of Nous Research
+(`nousresearch-hermes/mono`). The landing's title and the editor draw them beside the agents'
+names. They are shown to identify the tool, never to imply endorsement, and each mark belongs to
+its owner.
 
 ## Everything else
 

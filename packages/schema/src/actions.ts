@@ -46,6 +46,7 @@ import {
 import { CHART_KINDS, chartSeriesSchema } from './blocks/chart.ts';
 import {
   MATERIAL_CONTROL_NAMES,
+  materialAnchorSchema,
   materialBlockSchema,
   materialCatalogEntrySchema,
   materialControlsSchema,
@@ -825,9 +826,7 @@ export type NotificationLevel = (typeof NOTIFICATION_LEVELS)[number];
 export const notificationSettingsSchema = z.strictObject({
   level: z.enum(NOTIFICATION_LEVELS),
   email: z.boolean().describe('Email digests for a signed in grant holder'),
-  activityForCommenters: z
-    .boolean()
-    .describe('The owner lets commenters read the Activity panel (SPEC-3 5.7)'),
+  activityForCommenters: z.boolean().describe('The owner lets commenters read the Activity panel'),
 });
 
 /** The activity feed's event kinds (SPEC-3 5.7). */
@@ -1038,16 +1037,21 @@ export const tokenRecordSchema = z.strictObject({
   lastUsedAt: z.string().nullable(),
 });
 
-/** The storage migration steps (SPEC-3 11.5; `rekey`, hardening K1#4). packages/store migrate.ts holds the same list. */
+/** The storage migration steps (SPEC-3 11.5; hardening K1#4 and HR-K1#4b). packages/store migrate.ts holds the same list. */
 export const MIGRATION_STEPS = [
   'plan',
+  'freeze',
   'copy',
   'verify',
+  'switch',
+  'unfreeze',
   'rekey',
-  'cutover',
-  'delete',
   'rollback',
+  'delete',
 ] as const;
+
+/** Where documents live (HR-K1#4b). packages/store migrate.ts holds the same list. */
+export const STORAGE_STATES = ['v1', 'dual', 'v2'] as const;
 
 const studioUrl = z
   .string()
@@ -1328,7 +1332,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.set': action({
     id: 'deck.set',
     label: 'Set a deck field',
-    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
+    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1338,7 +1342,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .regex(/^\/(title|theme|defaults(\/[a-zA-Z]+)?)$/)
         .describe(
-          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes',
+          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter, /defaults/play or /defaults/notes',
         ),
       value: z.unknown().optional().describe('The new value; omit it to remove the field'),
       baseRevision,
@@ -2114,7 +2118,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.align': action({
     id: 'block.align',
     label: 'Align blocks',
-    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
+    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
     group: 'block',
     mutates: true,
     transports: A,
@@ -2312,7 +2316,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       replaceSource: slugSchema
         .optional()
         .describe(
-          'Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)',
+          'Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins',
         ),
       baseRevision,
     }),
@@ -2368,9 +2372,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       pattern: z
         .enum(DITHER_PATTERNS)
         .optional()
-        .describe(
-          'The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)',
-        ),
+        .describe('The threshold texture to regenerate the twins with; bayer8 unless set'),
       cell: z.literal(DITHER_CELLS).optional().describe('Sheet pixels per cell; 2 unless set'),
       tone: z.enum(DITHER_TONES).optional().describe('two, three or original; two unless set'),
       baseRevision,
@@ -2420,10 +2422,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['jpg', 'png'])
         .optional()
         .describe('The twin file format; jpg at quality 92 by default'),
-      allowHosts: z
-        .array(z.string())
-        .optional()
-        .describe('Hosts beyond the built-in allowlist (SPEC 11 captureHosts)'),
+      allowHosts: z.array(z.string()).optional().describe('Hosts beyond the built-in allowlist'),
       baseRevision,
     }),
     output: assetSchema,
@@ -2456,7 +2455,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe('A palette preset of the material, under the uniforms'),
       uniforms: materialUniformsSchema.optional(),
       size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
-      anchors: z.array(z.number().nonnegative()).min(1).describe('Frame times in ms'),
+      anchors: z.array(materialAnchorSchema).min(1).describe('Frame times in ms, 0 to 60000'),
       id: slugSchema.optional().describe('The asset id; <id>-<anchor> per anchor when several'),
       role: z.enum(['opener', 'mood', 'frame']).optional(),
       alt: z.string().optional(),
@@ -2793,7 +2792,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['native', 'flatten'])
         .optional()
         .describe(
-          'Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)',
+          'Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent',
         ),
       theme: themes
         .optional()
@@ -2802,7 +2801,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['exact', 'standard'])
         .optional()
         .describe(
-          'The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard',
+          'The export font set: standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard',
         ),
       embedFonts: z
         .boolean()
@@ -2813,25 +2812,21 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       headings: z
         .literal('raster')
         .optional()
-        .describe('Write every heading as a PNG instead of a text box (SPEC 8.3)'),
+        .describe('Write every heading as a PNG instead of a text box'),
       rasterScale: z
         .union([z.literal('auto'), z.literal(2), z.literal(3)])
         .optional()
         .describe(
-          'Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)',
+          'Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3',
         ),
       pictureScale: z
         .literal([2, 3])
         .optional()
-        .describe(
-          'The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)',
-        ),
+        .describe('The scale two-tone pictures are regenerated at from the one-bit image'),
       excludeShareAlike: z
         .boolean()
         .optional()
-        .describe(
-          'Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)',
-        ),
+        .describe('Replace share-alike pictures with the paper plate and its credit'),
       svgVector: z
         .boolean()
         .optional()
@@ -2848,7 +2843,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .boolean()
         .optional()
         .describe(
-          'Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)',
+          'Render the files back through LibreOffice and diff every page against the web render',
         ),
       slideIds: slideIdsOrAll.optional().describe("A subset to export; defaults to 'all'"),
       includeSkipped: z
@@ -2876,7 +2871,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       merge: z
         .strictObject({ jobId: z.string().min(1) })
         .optional()
-        .describe('Hosted only: build the file from the stored batches of the job (SPEC-2 8.1)'),
+        .describe('Hosted only: build the file from the stored batches of the job'),
     }),
     output: exportReportSchema,
     cli: {
@@ -2934,9 +2929,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       includeComments: z
         .boolean()
         .optional()
-        .describe(
-          'Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)',
-        ),
+        .describe('Append each slide’s comment threads, for readers with readComments'),
     }),
     output: z.strictObject({
       text: z.string(),
@@ -4565,7 +4558,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.insert': action({
     id: 'shader.insert',
     label: 'Insert a shader',
-    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
+    doc: 'Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4575,6 +4568,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       materialId: z.string().min(1).describe('A catalog id from shader.list (paper:liquid-metal)'),
       preset: z.string().optional().describe('A preset of the entry; its featured one when absent'),
       controls: materialControlsSchema.optional(),
+      anchor: materialAnchorSchema.optional(),
       at: positionObjectSchema
         .optional()
         .describe('The box in sheet px; the free rectangle when absent'),
@@ -4589,7 +4583,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: {
       usage:
-        'turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --at <at>',
+        'turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --anchor <anchor> --at <at>',
     },
     mcp: 'deck_shader_insert',
     example: {
@@ -4603,7 +4597,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'shader.set': action({
     id: 'shader.set',
     label: 'Set a shader field',
-    doc: 'One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.',
+    doc: 'One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.',
     group: 'block',
     mutates: true,
     transports: A,
@@ -4714,7 +4708,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       uniforms: materialUniformsSchema.optional(),
       controls: materialControlsSchema.optional(),
       size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
-      timeMs: z.number().nonnegative().optional(),
+      timeMs: materialAnchorSchema.optional(),
       backend: z.enum(['angle-metal', 'swiftshader']).optional(),
     }),
     output: z.strictObject({
@@ -4749,7 +4743,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'presence.follow': action({
     id: 'presence.follow',
     label: 'Follow',
-    doc: 'The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.',
+    doc: 'The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.',
     group: 'presence',
     mutates: true,
     transports: A,
@@ -4877,9 +4871,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       assignee: mentionSchema.optional(),
       baseRevision: commentsRevision
         .optional()
-        .describe(
-          'The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)',
-        ),
+        .describe('The comments revision the caller read; a stale value never refuses'),
     }),
     output: threadResultSchema,
     cli: { usage: 'turboslide comment add <anchor> -m <text> --mention <who> --assign <who>' },
@@ -5553,7 +5545,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'share.emailCollaborators': action({
     id: 'share.emailCollaborators',
     label: 'Email collaborators',
-    doc: 'Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.',
+    doc: 'Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.',
     group: 'share',
     mutates: true,
     transports: A,
@@ -5693,7 +5685,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'account.setName': action({
     id: 'account.setName',
     label: 'Change name',
-    doc: 'Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.',
+    doc: 'Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.',
     group: 'account',
     mutates: true,
     transports: A,
@@ -5809,7 +5801,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'admin.flag': action({
     id: 'admin.flag',
     label: 'Kill switch',
-    doc: 'Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.',
+    doc: 'Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.',
     group: 'admin',
     mutates: true,
     transports: A,
@@ -5831,25 +5823,65 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'admin.migrateStorage': action({
     id: 'admin.migrateStorage',
     label: 'Migrate storage',
-    doc: 'Runs one step of the storage layout v2 migration (plan, copy, verify, rekey, cutover, delete or rollback) from its cursor, in batches.',
+    doc: 'Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.',
     group: 'admin',
     mutates: true,
     transports: ['cli', 'http'],
     milestone: 'GS3',
     input: z.strictObject({
       step: z.enum(MIGRATION_STEPS),
-      batch: z.number().int().positive().max(1000).optional(),
+      budgetMs: z
+        .number()
+        .int()
+        .min(120_000)
+        .max(240_000)
+        .optional()
+        .describe('How long the call works before it answers; 240 s by default'),
+      concurrency: z
+        .number()
+        .int()
+        .min(1)
+        .max(128)
+        .optional()
+        .describe('copy and rollback: the store requests in flight; 32 by default'),
+      backupAt: z
+        .string()
+        .min(1)
+        .max(64)
+        .optional()
+        .describe(
+          'delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one',
+        ),
     }),
     output: z.strictObject({
       step: z.enum(MIGRATION_STEPS),
-      cursor: z.string().nullable(),
-      processed: z.number().int().nonnegative(),
-      verified: z.number().int().nonnegative(),
-      failed: z.array(z.string()),
+      state: z.enum(STORAGE_STATES).describe("The layout record's state when the call answered"),
+      frozen: z.boolean().describe('Document writes are refused now'),
       done: z.boolean(),
-      dualRead: z.boolean().describe('True while both stores are read'),
+      clean: z.boolean().describe('The call found no row'),
+      processed: z.number().int().nonnegative(),
+      remaining: z.number().int().nonnegative(),
+      rows: z.array(z.string()).describe("The call's rows, the first 200"),
+      rowCount: z.number().int().nonnegative(),
+      planned: z.number().int().nonnegative().nullable(),
+      settlesAt: z.string().nullable(),
+      expiresAt: z.string().nullable(),
+      switchedAt: z.string().nullable(),
+      listMs: z.number().int().nonnegative().nullable(),
+      perSecond: z.number().int().nonnegative().nullable(),
+      retries: z.number().int().nonnegative(),
+      rekeyAfter: z
+        .string()
+        .nullable()
+        .describe('rekey: when a pass must begin to copy the twins written under a replaced key'),
+      note: z.string().nullable(),
     }),
-    cli: { usage: 'turboslide admin migrate-storage <step> --to <to> --batch <batch>' },
+    cli: {
+      // the CLI's --budget is in seconds and fills budgetMs (apps/cli/src/commands/admin.ts)
+      omit: ['budgetMs'],
+      usage:
+        'turboslide admin migrate-storage <step> --to <to> --budget <budget> --concurrency <concurrency> --i-have-a-backup <backupAt>',
+    },
     example: { step: 'plan' },
   }),
   'admin.mail.list': action({
@@ -6038,11 +6070,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       materialId: z.string().min(1),
       preset: z.string().optional(),
       uniforms: materialUniformsSchema.optional(),
-      anchor: z
-        .number()
-        .nonnegative()
-        .optional()
-        .describe('The frame time in ms; the catalog default unless set'),
+      anchor: materialAnchorSchema.optional(),
       dither: pictureDitherSchema.optional(),
       /* the polish round's fix round 2 (build/b4.md R1; the row shaders.background.place-answers):
          the editor's own WebGL frame, so the function launches no browser for the ground; the

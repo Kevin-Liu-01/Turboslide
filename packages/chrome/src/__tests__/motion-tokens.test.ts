@@ -9,6 +9,8 @@ import { join, relative, resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { EXIT_COPY_ATTRIBUTE } from '@turboslide/viewer/reduce-motion';
+
 const PACKAGES = resolve(import.meta.dirname, '../../..');
 const ROOTS = [join(PACKAGES, 'chrome/src'), join(PACKAGES, 'viewer/src')];
 const TOKENS = join(PACKAGES, 'chrome/src/tokens.css');
@@ -138,5 +140,59 @@ describe('the motion tokens', () => {
       '.g { transition: opacity 0ms; }',
     ].join('\n');
     expect(literalDurations(css).map((f) => f.line)).toEqual([1, 2, 3]);
+  });
+});
+
+// The exit copies of Layer.ts (the Glyphfield port, PLAN.md wave 2 item 7): a closed menu, search
+// card or dialog leaves an inert copy marked `data-exiting`, and its own sheet animates the copy
+// with opacity and transform alone at the leave duration, so the reduced blocks above stop it too.
+describe('the exit copies (PLAN.md wave 2 item 7)', () => {
+  const read = (name: string) => readFileSync(join(PACKAGES, 'chrome/src', name), 'utf8');
+  /** The declarations of the first rule whose selector list names `selector`. */
+  const ruleOf = (css: string, selector: string): string | undefined => {
+    const at = css.indexOf(selector);
+    if (at < 0) return undefined;
+    const open = css.indexOf('{', at);
+    return css.slice(open + 1, css.indexOf('}', open));
+  };
+  /** The properties a keyframes block sets. */
+  const keyframeProps = (css: string, name: string): string[] => {
+    const at = css.indexOf(`@keyframes ${name} {`);
+    const end = css.indexOf('\n}', at);
+    return [...css.slice(at, end).matchAll(/([a-z-]+):/g)].map((m) => m[1] ?? '');
+  };
+
+  it('animates each copy and its card at --pt-dur-leave with opacity and transform alone', () => {
+    expect(EXIT_COPY_ATTRIBUTE).toBe('data-exiting');
+    const rows: Array<[string, string, string]> = [
+      ['Menu.css', '.ts-menu[data-exiting]', 'pt-fade-out'],
+      ['Palette.css', '.pt-search[data-exiting] {', 'pt-fade-out'],
+      ['Palette.css', '.pt-search[data-exiting] .pt-search-card', 'pt-search-out'],
+      ['Dialog.css', '.ts-dialog-float[data-exiting] {', 'pt-fade-out'],
+      ['Dialog.css', '.ts-dialog-float[data-exiting] .ts-dialog', 'ts-dialog-out'],
+    ];
+    for (const [sheet, selector, keyframes] of rows) {
+      const css = read(sheet);
+      expect(ruleOf(css, selector), `${sheet} ${selector}`).toContain(
+        `animation: ${keyframes} var(--pt-dur-leave) var(--pt-ease-in) both;`,
+      );
+      const props = keyframeProps(
+        keyframes === 'pt-fade-out' ? read('tokens.css') : css,
+        keyframes,
+      );
+      expect(props.length, keyframes).toBeGreaterThan(0);
+      for (const prop of props)
+        expect(['opacity', 'transform'], `${keyframes} ${prop}`).toContain(prop);
+    }
+    expect(read('Dialog.css')).toContain(
+      '.ts-dialog-scrim[data-exiting],\n.ts-dialog-float[data-exiting] {',
+    );
+  });
+
+  it('stops every part inside a copy and takes the pointer off it, from tokens.css', () => {
+    const css = read('tokens.css');
+    expect(ruleOf(css, '[data-exiting] {')).toContain('pointer-events: none;');
+    expect(ruleOf(css, '[data-exiting] * {')).toContain('animation: none;');
+    expect(css).toMatch(/--pt-ease-in: ease-in;/);
   });
 });

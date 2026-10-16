@@ -1,0 +1,93 @@
+--- a/gt-follow.sh
++++ b/gt-follow.sh
+@@ -43,6 +43,13 @@
+ # database (never session, verification, deviceCode, ts_mail, ts_quota or rt_open) into
+ # $DIR/backups/accounts-<yyyy-mm-dd>.sql (file 600, folder 700), keeps the newest eight, and
+ # never uploads or commits one; every other poll it reads the folder and does nothing.
++# (10, hardening HR-RT#18, docs/hardening/HARDENING.md 4.6) a Worker deploy closes every editor's
++# socket, so the production Worker deploys only when the push changes what it would upload: the
++# tree's scripts/hosting/worker-hash.mjs prints the SHA-256 of `wrangler deploy --dry-run`'s
++# bundle with wrangler.jsonc, every Worker deploy passes it as --var TURBOSLIDE_BUNDLE_HASH, and
++# when the production Worker's /health answers the same `bundle` the deploy is skipped and the
++# Worker keeps its commit stamp; a kept Worker is never redeployed by a rollback. The preview
++# Worker still follows every push, since its app origin is the push's preview URL.
+ #
+ #   gt-follow.sh                       the loop (started detached, see README.md)
+ #   gt-follow.sh --check <origin>      the check alone against an origin, exit 0 green, 1 red, 2 error
+@@ -218,6 +225,10 @@
+   local envflag=('--env' '') vars=('--var' "TURBOSLIDE_BUILD_COMMIT:$sha") envp=()
+   [ "$environment" = preview ] && envflag=('--env' 'preview')
+   [ -n "$origin" ] && vars+=('--var' "TURBOSLIDE_APP_ORIGIN:$origin")
++  # the bundle's hash for /health (hardening HR-RT#18); a tree without the script deploys without it
++  local hash=
++  [ -f "$WT/scripts/hosting/worker-hash.mjs" ] && hash=$(cd "$WT" && node scripts/hosting/worker-hash.mjs --env "$environment" 2>/dev/null)
++  [[ $hash =~ ^[0-9a-f]{64}$ ]] && vars+=('--var' "TURBOSLIDE_BUNDLE_HASH:$hash")
+   [ -n "$CF_ACCOUNT_ID" ] && envp=("CLOUDFLARE_ACCOUNT_ID=$CF_ACCOUNT_ID")
+   (cd "$dir" && env -u VERCEL_OIDC_TOKEN "${envp[@]}" pnpm exec wrangler deploy "${envflag[@]}" "${vars[@]}") > "$out" 2>&1
+   local code=$?
+@@ -241,6 +252,23 @@
+     n=$((n + 1)); [ $n -ge 3 ] && return $code
+     sleep 10
+   done
++}
++# Whether the production Worker already runs the push's bundle (hardening HR-RT#18): the tree's
++# hash (scripts/hosting/worker-hash.mjs --env production, 64 hex) equals the `bundle` that the
++# production Worker's /health answers. 0 the same bundle (no deploy, so no editor's socket
++# closes), 1 another, an empty or an unreadable one (the Worker deploys as before). Sets
++# WORKER_HASH_NOTE for the log.
++WORKER_HASH_NOTE=
++worker_kept() {
++  local hash live
++  if [ ! -f "$WT/scripts/hosting/worker-hash.mjs" ]; then WORKER_HASH_NOTE="the tree has no worker-hash.mjs"; return 1; fi
++  hash=$(cd "$WT" && node scripts/hosting/worker-hash.mjs --env production 2>/dev/null)
++  if ! [[ $hash =~ ^[0-9a-f]{64}$ ]]; then WORKER_HASH_NOTE="the tree's bundle hash could not be read"; return 1; fi
++  live=$(curl -s -S --max-time 10 "https://$(cf_host production)/health" 2>/dev/null | node -e 'let t="";process.stdin.on("data",d=>t+=d).on("end",()=>{let b="";try{const j=JSON.parse(t);if(typeof j.bundle==="string")b=j.bundle;}catch{}console.log(b);});')
++  if [ "$live" = "$hash" ]; then WORKER_HASH_NOTE="bundle ${hash:0:12} unchanged"; return 0; fi
++  local shown=${live:0:12}
++  WORKER_HASH_NOTE="bundle ${hash:0:12}, production answers ${shown:-none}"
++  return 1
+ }
+ # The previous sha's Worker redeployed to production (docs/CLOUDFLARE.md 5.6 item 3): the worktree
+ # is checked out at $1 (the last deployed sha), the Worker deployed with that sha's stamp and
+@@ -567,15 +595,21 @@
+     fi
+     log "$ROOM_HOST_VARIABLE is among the production environment names and the tree expects the do tier; deploying $sha to production"
+   fi
+-  if [ -n "$WORKER_PASS" ]; then
++  # the production Worker deploys only for a bundle it does not run (hardening HR-RT#18), and only
++  # a Worker this pass deployed is rolled back below
++  WORKER_PROD_DEPLOYED=
++  if [ -n "$WORKER_PASS" ] && worker_kept; then
++    log "kept Worker $(cf_host production) for $sha: $WORKER_HASH_NOTE, no deploy, no socket closed"
++  elif [ -n "$WORKER_PASS" ]; then
+     if ! worker_deploy production "$sha" "" "$GUARD/$tag-worker-production.out"; then
+       PASS_NOTE="the production Worker deploy for $sha failed: $WORKER_NOTE"; PASS_NUMBERS="$CHECK_NUMBERS"; return 2
+     fi
++    WORKER_PROD_DEPLOYED=1
+     if ! worker_health "$(cf_host production)" "$sha" ""; then
+       local wb; wb=$(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")
+       PASS_NOTE="the production Worker's /health did not answer $short: $WORKER_HEALTH; $wb"; PASS_NUMBERS="$CHECK_NUMBERS"; return 2
+     fi
+-    log "deployed Worker $(cf_host production) for $sha ($WORKER_HEALTH)"
++    log "deployed Worker $(cf_host production) for $sha ($WORKER_HEALTH; $WORKER_HASH_NOTE)"
+   fi
+   local pout
+   pout=$(cd "$WT" && env -u VERCEL_OIDC_TOKEN vercel deploy --prod --yes --non-interactive --archive=tgz --scope "$SCOPE" -e "TURBOSLIDE_BUILD_COMMIT=$sha" --build-env "TURBOSLIDE_BUILD_COMMIT=$sha" 2>&1)
+@@ -602,7 +636,7 @@
+     sleep 20
+     local now; now=$(cd "$WT" && vercel inspect "$PROD" --scope "$SCOPE" 2>&1 | awk '$1=="url"{print $2}')
+     local wb=
+-    [ -n "$WORKER_PASS" ] && wb="; $(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")"
++    [ -n "$WORKER_PROD_DEPLOYED" ] && wb="; $(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")"
+     PASS_NOTE="production smoke red after the promote of $url (production deployment $live): ${SMOKE_RED:-$SMOKE_RED}; promoted $prev back ($back); $PROD now serves ${now:-unknown}$wb"
+     PASS_NUMBERS="$CHECK_NUMBERS; $prodLine"; PASS_URL=$url
+     return 1
+@@ -647,7 +681,7 @@
+         rtBack=$(cd "$WT" && env -u VERCEL_OIDC_TOKEN vercel promote "$prev" --scope "$SCOPE" --yes 2>&1 | scrub | grep -v '^$' | tail -1 | cut -c1-160)
+         sleep 20
+         rtNow=$(cd "$WT" && vercel inspect "$PROD" --scope "$SCOPE" 2>&1 | awk '$1=="url"{print $2}')
+-        [ -n "$WORKER_PASS" ] && rtWb="; $(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")"
++        [ -n "$WORKER_PROD_DEPLOYED" ] && rtWb="; $(worker_rollback "$(cat "$LAST" 2>/dev/null)" "$sha")"
+         PASS_NOTE="production realtime rows red twice after the promote of $url (production deployment $live): $rtRed; promoted $prev back ($rtBack); $PROD now serves ${rtNow:-unknown}$rtWb"
+         PASS_NUMBERS="$CHECK_NUMBERS; $prodLine"; PASS_URL=$url
+         return 1

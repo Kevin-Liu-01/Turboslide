@@ -982,3 +982,62 @@ describe('the focus after a close and the trap (docs/archive/rounds/POLISH.md 2.
     expect(document.activeElement).toBe(last);
   });
 });
+
+// Exit motion (the Glyphfield port, PLAN.md wave 2 item 7): a dialog closes at once, so the
+// accessibility tree and the focus see it gone, and its scrim leaves an inert copy while
+// Dialog.css fades the copy and sinks its card (Layer.ts). jsdom has neither the top layer nor Web
+// Animations: the stand-ins answer `showPopover` and one animation for an exit copy.
+describe('Dialog exit copy (PLAN.md wave 2 item 7)', () => {
+  type Stand = {
+    showPopover?: () => void;
+    hidePopover?: () => void;
+    getAnimations?: () => unknown[];
+  };
+  const proto = HTMLElement.prototype as unknown as Stand;
+
+  afterEach(() => {
+    delete proto.showPopover;
+    delete proto.hidePopover;
+    delete proto.getAnimations;
+    for (const copy of document.querySelectorAll('[data-exiting]')) copy.remove();
+  });
+
+  it('leaves a copy of the scrim and card with no dialog role, title id or control id, and the focus back on the opener', async () => {
+    proto.showPopover = () => undefined;
+    proto.hidePopover = () => undefined;
+    proto.getAnimations = function getAnimations(this: HTMLElement) {
+      return this.hasAttribute('data-exiting') ? [{}] : [];
+    };
+    function Host() {
+      const [open, setOpen] = useState(true);
+      return (
+        <>
+          <button type="button" id="opener">
+            Open
+          </button>
+          {open ? (
+            <Dialog title="Make a copy" onClose={() => setOpen(false)} control="dialog.test" cancel>
+              <DialogField label="Name">
+                <input type="text" data-control="dialog.test.name" />
+              </DialogField>
+            </Dialog>
+          ) : null}
+        </>
+      );
+    }
+    render(<Host />);
+    (document.getElementById('opener') as HTMLElement).focus();
+    fireEvent.keyDown(document.body, { key: 'Escape' });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    const copy = document.querySelector<HTMLElement>('[data-exiting]');
+    expect(copy?.classList.contains('ts-dialog-scrim')).toBe(true);
+    expect(copy?.querySelector('.ts-dialog')?.textContent).toContain('Make a copy');
+    expect(copy?.querySelector('[role], [id], [data-control], [aria-modal]')).toBeNull();
+    expect(copy?.hasAttribute('inert')).toBe(true);
+    /* the copy's buttons are out of every trap's reach */
+    expect(focusableIn(copy as HTMLElement)).toEqual([]);
+  });
+});

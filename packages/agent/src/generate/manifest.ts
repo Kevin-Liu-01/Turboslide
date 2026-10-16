@@ -21,8 +21,10 @@ export type ExecutionRules = {
     deck: string;
     author: string;
     force: string;
+    idempotency: string;
     auth: string;
-    limits: { writeBytes: number; assetBytes: number };
+    /** asset bytes without an account and signed in (docs/security.md 10) */
+    limits: { writeBytes: number; assetBytes: number; assetBytesSignedIn: number };
     errors: string;
   };
   mcp: {
@@ -46,27 +48,34 @@ export const EXECUTION_RULES: ExecutionRules = {
     body: 'One JSON object, the action input exactly as the input schema states it; unknown fields are refused with 400 and code unknown_field plus a JSON pointer.',
     deck: '?deck=<slug> names the deck; without it the instance default (gt-brand) is used.',
     author:
-      'x-turboslide-author: agent:<runId> (or ?author=); a request without one writes as agent:http.',
+      "Every write is recorded under the caller's identity: an API key's owner as agent:<tokenId>. x-turboslide-author: agent:<runId> (or ?author=) only labels the run; without a key, a request that names no author writes as agent:http.",
     force:
       '?force=1 (or x-turboslide-force: 1) writes to a slide another author leased; without it the write is 409 with the holder and the current document.',
-    auth: 'Authorization: Bearer <TURBOSLIDE_TOKEN> on every deployed instance; open only on localhost when the instance has no token; a request off localhost without a token is 401.',
-    limits: { writeBytes: 1024 * 1024, assetBytes: 25 * 1024 * 1024 },
+    idempotency:
+      "Idempotency-Key: <one value per write, such as a UUID> on a POST of a writing action that takes it (its OpenAPI entry names the header: the slide, block, text, section, deck setting, asset and restore writes) makes it safe to resend after a timeout: send the same key with the same body, and a write that already landed is not applied again and is answered 200 with that write's answer and the idempotent-replayed: true header. The same key with another action or body is 422 idempotency_key_reused; a key on another writing action is 400 idempotency_not_supported. 1 to 255 visible ASCII characters; anything else is 400 invalid_idempotency_key.",
+    auth: "Authorization: Bearer <key> on every deployed instance, an API key from turboslide login acting for its owner with its scopes (read, comment, write, export, share, admin); TURBOSLIDE_TOKEN is the bootstrap bearer until a key exists; open only on localhost when the instance has no token; a request off localhost without one is 401. A key without the share scope reads other people's ids as per deck stand-ins (ref_ and 22 characters).",
+    limits: {
+      writeBytes: 1024 * 1024,
+      assetBytes: 25 * 1024 * 1024,
+      assetBytesSignedIn: 50 * 1024 * 1024,
+    },
     errors:
-      '{ error: { name, status, message, code?, pointer?, currentRevision?, current?, holder?, milestone? } }; TypeError 400, RangeError 404, ConflictError 409, NotImplementedError 501, Error 500.',
+      '{ error: { name, status, message, code?, pointer?, currentRevision?, current?, holder?, capability?, milestone? } }; TypeError 400, no key 401, ForbiddenError 403 with the capability named, RangeError 404 (also a deck the caller may not read, the same answer as a missing one), ConflictError 409, a revoked publish token or an expired download 410, NotImplementedError 501, Error 500. A quota answers 429 with Retry-After and { error: "rate_limited", message, quota }; a kill switch answers 503 with Retry-After: 60 and { error: "unavailable", message }.',
   },
   mcp: {
     path: '/mcp',
     transport:
       'MCP streamable HTTP: POST JSON-RPC to /mcp (initialize first), GET for the notification stream, DELETE to end the session; the mcp-session-id header carries the session.',
     session:
-      'One MCP session is bound to one deck and one author at initialize; tools are deck_<action> for every implemented action on the mcp transport.',
+      'One MCP session is bound to one deck and one caller at initialize; tools are deck_<action> for every implemented action on the mcp transport.',
     deck: '?deck=<slug> on the initialize request; the instance default otherwise.',
-    author: 'x-turboslide-author or ?author= on the initialize request; agent:mcp-http otherwise.',
+    author:
+      "The key's owner is the author of every write; x-turboslide-author or ?author= on the initialize request only labels the run (agent:mcp-http without one).",
     viewTools:
       'deck_goto_slide (view.goto) is listed when a studio page is attached to the deck and runs in that page: the editor at /edit while it is visible, and a /deck, /present or /embed page opened with ?agent=1 while it is visible; a page hidden for 10 s detaches and the call answers 404 until it is shown again.',
   },
   leases:
-    'slide.lease takes ten minutes on a slide; an agent write to a slide another author holds is 409 with the holder unless force is set; a human write warns and goes through (SPEC 6.7).',
+    'slide.lease takes ten minutes on a slide; an agent write to a slide another author holds is 409 with the holder unless force is set; a human write warns and goes through.',
   revisions:
     'Every mutating action takes baseRevision; a stale one is 409 with currentRevision and the current document; re-read from the response and retry once.',
 };

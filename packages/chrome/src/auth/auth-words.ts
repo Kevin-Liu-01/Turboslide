@@ -16,7 +16,8 @@ export const AUTH_WORDS = {
   /** the page's heading and the window's title on the methods step */
   heading: 'Sign in to Turboslide',
   windowTitle: 'Sign in',
-  lede: 'The presentations you made in this browser move to your account.',
+  /** the browser's own decks are asked about after sign in (merge, HR-SA#2b), never moved silently */
+  lede: 'Sign in to open your presentations on another computer and to share them with people by name.',
   /** drawn where Google is a method (docs/NEXT.md 4.3.2 item 7) */
   foot: 'Turboslide uses the name and the address of your Google account. It reads nothing else from Google after you sign in.',
   google: 'Continue with Google',
@@ -105,6 +106,19 @@ export const AUTH_WORDS = {
     approve: 'Approve',
     deny: 'Deny',
     foot: 'Approve only a code you started from your own terminal.',
+    /** what the code asks for and when it was made (HR-SA#5, AUTH-7), when the address names it */
+    scopes: {
+      read: 'read decks',
+      comment: 'comment on decks',
+      write: 'edit decks',
+      export: 'export decks',
+      share: 'share decks',
+      admin: 'administer the deployment',
+    } satisfies Record<string, string>,
+    asks: (words: readonly string[]) =>
+      `This code asks to ${words.length < 2 ? (words[0] ?? 'read decks') : `${words.slice(0, -1).join(', ')} and ${words[words.length - 1]}`}.`,
+    made: (time: string) => `It was made at ${time}.`,
+    lifetime: 'The terminal stays signed in for 90 days.',
     problems: {
       'code-wrong': 'That code does not match. Check the terminal and try again.',
       spent: 'That code had five wrong tries. Run turboslide login again for a new one.',

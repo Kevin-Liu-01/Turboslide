@@ -230,9 +230,15 @@ export const ROWS16: readonly string[] = [
   '................',
 ];
 
-/** The rows as path data of whole pixel rectangles, one run per row segment, offset by (ox, oy). */
-export function rowsPath(rows: readonly string[] = ROWS16, ox = 0, oy = 0): string {
-  let d = '';
+/** One run of ink in a rows drawing: a whole pixel rectangle one row tall. */
+export type RowRun = { readonly x: number; readonly y: number; readonly width: number };
+
+/**
+ * The runs of a rows drawing, top to bottom and left to right: the rectangles `rowsPath` draws,
+ * one each, for a drawing that moves them one by one (the site footer's animated mark).
+ */
+export function rowRuns(rows: readonly string[] = ROWS16): RowRun[] {
+  const runs: RowRun[] = [];
   rows.forEach((row, y) => {
     let x = 0;
     while (x < row.length) {
@@ -240,13 +246,20 @@ export function rowsPath(rows: readonly string[] = ROWS16, ox = 0, oy = 0): stri
         x += 1;
         continue;
       }
-      let run = 1;
-      while (x + run < row.length && row[x + run] === '#') run += 1;
-      d += `M${x + ox} ${y + oy}h${run}v1h-${run}z`;
-      x += run;
+      let width = 1;
+      while (x + width < row.length && row[x + width] === '#') width += 1;
+      runs.push({ x, y, width });
+      x += width;
     }
   });
-  return d;
+  return runs;
+}
+
+/** The rows as path data of whole pixel rectangles, one run per row segment, offset by (ox, oy). */
+export function rowsPath(rows: readonly string[] = ROWS16, ox = 0, oy = 0): string {
+  return rowRuns(rows)
+    .map(({ x, y, width }) => `M${x + ox} ${y + oy}h${width}v1h-${width}z`)
+    .join('');
 }
 
 /** The rows' path at the origin (the 16 px drawing's own file), committed as data with its sha256. */

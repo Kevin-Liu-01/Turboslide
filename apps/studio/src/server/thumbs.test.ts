@@ -13,6 +13,7 @@ import {
   thumbPathname,
   thumbsPrefix,
 } from '@turboslide/store/blob-store';
+import { putLayoutRecord, splitBlobClient } from '@turboslide/store/migrate';
 
 import {
   IMMUTABLE_CACHE_CONTROL,
@@ -21,6 +22,7 @@ import {
   PRIVATE_REDIRECT_CACHE_CONTROL,
   REVALIDATE_CACHE_CONTROL,
   isThumbStamp,
+  putThumb,
   slideStamp,
   storedThumbIsPublic,
   thumbCacheControl,
@@ -322,5 +324,27 @@ describe('the store layout and the retention (SPEC-4 0.31)', () => {
     });
     expect(await pruneThumbs(fake, 'gt-brand', 'title', 'light', THUMB_KEEP)).toEqual([]);
     expect(fake.blobs.has(thumbPathname('gt-brand', 's1', 'light', 320, 'title'))).toBe(true);
+  });
+});
+
+describe('a thumbnail put while the layout is frozen (HR-K1#4b)', () => {
+  it('is skipped, so the render still answers its PNG, and stored again once the freeze ends', async () => {
+    const legacy = memoryBlobClient('https://public.local');
+    const documents = memoryBlobClient('https://private.local');
+    const split = splitBlobClient({ legacy, documents }, { ttlMs: 0 });
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+    const path = thumbPathname(request.deckId, 'aaaa0002', request.theme, 320, request.slideId);
+    const now = Date.now();
+    await putLayoutRecord(documents, {
+      frozen: { since: now, settlesAt: now + 30_000, expiresAt: now + 60_000 },
+    });
+    expect(await putThumb(split, request, 'aaaa0002', png)).toBe(false);
+    expect(legacy.blobs.has(path)).toBe(false);
+    await putLayoutRecord(documents, { state: 'v1' });
+    expect(await putThumb(split, request, 'aaaa0002', png)).toBe(true);
+    expect(legacy.blobs.has(path)).toBe(true);
+    // any other refusal is still the caller's
+    legacy.failNextPut(path, new Error('fetch failed'));
+    await expect(putThumb(split, request, 'aaaa0002', png)).rejects.toThrow('fetch failed');
   });
 });

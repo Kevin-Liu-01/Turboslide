@@ -46,8 +46,8 @@
 // as skipped, never as passed.
 //
 // Round four (gslides-parity SPEC-4 2.6, 4.1, 0.31, 0.38; MILESTONES-4 "Integrator"; build-4/b1.md
-// R12, b2.md R4, b4.md R11): `/home` is a 200 product page (the `main.ts-product` root, the hero
-// sentence, the Speculation Rules script, no noindex); the icon set, the card, the eight twins
+// R12, b2.md R4, b4.md R11): `/home` is a 200 product page (the `.ts-site` root, the hero
+// caption, the Speculation Rules script, no noindex); the icon set, the card, the eight twins
 // under `/brand/` and `/home` are requested twice and the second answer must be a 200 of the right
 // type, at the byte count `apps/studio/public/brand-manifest.json` records when the checkout is
 // beside the script, and `x-vercel-cache: HIT` on an https deployment (the static layer answers
@@ -75,9 +75,8 @@
 // left the View menu for Tools > Preferences in Round 1, docs/NEXT.md 4.1.3 items 20 and 21, and took
 // the seller's noun of question 10); on a Vite dev server (the shell's
 // entry under `/@id/`) it reads the menu model through `/@fs/<checkout>/packages/chrome/src/menus/model.ts`.
-// The `/home` row's marks are the remade page's (section 3): the root `class="ts-product"` (the
-// element carries `id="top"` first), the hero lead as React writes it (polish two's two sentences,
-// docs/POLISH-2.md 3.4), and the Speculation Rules script.
+// The `/home` row's marks are the site build's page (docs/SITE.md): the root `class="ts-site"`
+// (the element carries `id="top"` first), the hero's caption, and the Speculation Rules script.
 //
 // The hardening round (docs/hardening/HARDENING.md 8.3; HR-SD#5, CRIT-M2): `access answer reads
 // enforce` reads `/api/access/<deck>` (`authorize: 'enforce'`) and keeps the identity cookie the
@@ -92,7 +91,17 @@
 // file name with no identity, and the picture by its asset key (a deployment alone: a local tmp
 // store keeps names). HR-K1#5a (CRIT-M4, DATA-3): `export URL signed` exports the scratch deck as
 // a one theme PDF through the sync export's JSON variant and requires every file's link to name
-// `/api/download/` and no store host.
+// `/api/download/` and no store host. HR-W#3a (SPEC-1, WEB-4): `static headers /home`, `/home/`
+// and `/docs` read the answers the CDN gives before the function runs, whose headers come from the
+// route rules of apps/studio/vite.deploy.config.ts: nosniff, `x-frame-options: DENY`, COOP, the
+// referrer and permissions policies, and on https the long HSTS value. HR-W#3b (SPEC-1, CRIT-W5):
+// `static csp /home` and `static csp /docs` require an enforced policy with `frame-ancestors
+// 'none'` whose nonce is the one value of every nonce attribute on the page (on Vercel the build's
+// one nonce, which the route header names; on a node server the request's).
+//
+// The Glyphfield port (GF-2.1): `deck card first slide` reads `/deck/<deck>` with no cookie, as a
+// link preview does, and requires `og:image` to name the open deck's first slide at 1200 by 675 on
+// the render route and that picture to answer with no cookie.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -369,14 +378,13 @@ const SHELL_MARKS = ['<!DOCTYPE html>', 'gt-theme', '<script'];
 const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 
 /**
- * What the served /home carries (SPEC-4 2.6; the polish round's page, docs/archive/rounds/POLISH.md section 3,
- * b7.md request 2): the root's class (`<main id="top" class="ts-product"`), the hero lead as React
- * writes it (polish two, docs/POLISH-2.md 3.4; the description metas carry a longer sentence, so
- * this text is the hero's alone), the Speculation Rules script.
+ * What the served /home carries (SPEC-4 2.6; the site build, docs/SITE.md): the root's class
+ * (`<div id="top" class="ts-site"`), the hero's caption, which only the page's body writes, and
+ * the Speculation Rules script.
  */
 const HOME_MARKS = [
-  'class="ts-product"',
-  'Turboslide is a slides editor in the browser. No account is needed.',
+  'class="ts-site"',
+  'Claude Code and Codex are editing this presentation with you.',
   '<script type="speculationrules"',
 ];
 
@@ -495,13 +503,12 @@ function checks(deck, asset) {
       detail: (r) => `${r.bytes} chars`,
     },
     {
-      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4), the polish round's page (docs/archive/rounds/POLISH.md 3.7):
-      // the product page's root, the hero lead's sentence as React serialises it (the apostrophe
-      // is &#x27;), the Speculation Rules script, indexable
+      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4), the site build (docs/SITE.md): the page's
+      // root, the hero's caption, the Speculation Rules script, indexable
       name: '/home',
       path: '/home',
       expect:
-        'a 200 product page: main.ts-product, the hero sentence, a speculationrules script, no noindex',
+        'a 200 product page: the .ts-site root, the hero caption, a speculationrules script, no noindex',
       // the noindex meta is the app's and is always asserted; the x-robots-tag header is asserted on
       // production and on a local server, and reported on a preview: Vercel stamps
       // `x-robots-tag: noindex` on every answer of a non production deployment (measured on the
@@ -546,6 +553,45 @@ const PAGE_HEADERS = [
 
 function missingHeaders(r, names) {
   return names.filter((name) => !(name in r.headers));
+}
+
+/**
+ * The security headers a static answer lacks (hardening HR-W#3a): the values of
+ * apps/studio/src/server/headers.ts STATIC_HEADERS, HSTS on https only.
+ */
+function missingStaticHeaders(r, https) {
+  const expected = {
+    'x-content-type-options': /^nosniff$/,
+    'x-frame-options': /^DENY$/,
+    'cross-origin-opener-policy': /^same-origin$/,
+    'referrer-policy': /^strict-origin-when-cross-origin$/,
+    'permissions-policy': /geolocation=\(\)/,
+    ...(https
+      ? { 'strict-transport-security': /max-age=63072000; includeSubDomains; preload/ }
+      : {}),
+  };
+  return Object.entries(expected)
+    .filter(([name, value]) => !value.test(r.headers[name] ?? ''))
+    .map(([name]) => name);
+}
+
+/**
+ * Why a prerendered page's policy does not hold (hardening HR-W#3b), or null: an enforced policy
+ * with `frame-ancestors 'none'` and no report only twin, whose nonce is the page's one value.
+ */
+function staticCspProblem(r) {
+  const csp = r.headers['content-security-policy'];
+  if (typeof csp !== 'string') return 'no enforced policy';
+  if ('content-security-policy-report-only' in r.headers) return 'a report only policy beside it';
+  if (!/(?:^|;)\s*frame-ancestors 'none'(?:;|$)/.test(csp)) return "no frame-ancestors 'none'";
+  const nonce = /'nonce-([A-Za-z0-9+/=]+)'/.exec(csp)?.[1];
+  if (nonce === undefined) return 'no nonce in the policy';
+  const values = new Set([...r.text.matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]));
+  if (values.size === 0) return 'no nonce on the page';
+  if (values.size > 1 || !values.has(nonce)) {
+    return `the page's ${values.size} nonce value(s) are not the policy's`;
+  }
+  return null;
 }
 
 function cspOf(r) {
@@ -624,6 +670,41 @@ function securityChecks(base, deck, args) {
     detail: (r) =>
       `${r.status}; ${'content-security-policy' in r.headers ? 'enforced' : 'no enforced policy'}; ${'content-security-policy-report-only' in r.headers ? 'report only present' : 'no report only policy'}`,
   });
+  /* HR-W#3a (SPEC-1, WEB-4): the CDN answers the prerendered pages before the function runs, so
+     their headers are the route rules'; /home/ is the same file under the screenshots' folder on
+     Vercel, and a node server answers it with the app's redirect to /home, which carries them too */
+  for (const path of ['/home', '/home/', '/docs']) {
+    const answered = (r) =>
+      r.status === 200 ||
+      (path.endsWith('/') &&
+        [301, 302, 307, 308].includes(r.status) &&
+        r.headers.location === path.slice(0, -1));
+    rows.push({
+      name: `static headers ${path}`,
+      path,
+      expect: `a 200 page${path.endsWith('/') ? ' (or a redirect to the path without the slash)' : ''} with nosniff, X-Frame-Options DENY, COOP, the referrer and permissions policies${https ? ' and the long HSTS' : ''}`,
+      pass: (r) => answered(r) && missingStaticHeaders(r, https).length === 0,
+      detail: (r) => {
+        const missing = missingStaticHeaders(r, https);
+        return `${r.status}; ${missing.length === 0 ? 'every header' : `missing ${missing.join(', ')}`}; x-frame-options ${r.headers['x-frame-options'] ?? 'none'}; ${r.headers['x-vercel-cache'] ? `x-vercel-cache ${r.headers['x-vercel-cache']}` : 'no cache header'}`;
+      },
+    });
+  }
+  /* HR-W#3b (SPEC-1, CRIT-W5): the prerendered pages enforce the policy, framed by no site, and
+     every tag the page trusts carries the nonce the policy names */
+  for (const path of ['/home', '/docs']) {
+    rows.push({
+      name: `static csp ${path}`,
+      path,
+      expect:
+        "a 200 page with an enforced policy, frame-ancestors 'none', and the policy's nonce on every nonced tag",
+      pass: (r) => r.status === 200 && staticCspProblem(r) === null,
+      detail: (r) => {
+        const nonces = new Set([...r.text.matchAll(/\snonce="([^"]*)"/g)].map((m) => m[1]));
+        return `${r.status}; ${staticCspProblem(r) ?? "enforced, the page's nonce"}; ${nonces.size} nonce value(s) on the page`;
+      },
+    });
+  }
   rows.push({
     name: 'json asset attachment',
     path: `/decks/${deck}/assets/${args.jsonAsset ?? 'liquid-metal-diamond.recipe.json'}`,
@@ -688,6 +769,17 @@ function securityChecks(base, deck, args) {
     pass: (r) => r.status === 204,
     detail: (r) => `${r.status}`,
   });
+  /* hardening PS#9 (PERF-14): the contracts are static files and a request that is not a document
+     load or a server function mints no identity cookie, so the CDN keeps the answer */
+  for (const path of ['/llms.txt', '/llms-full.txt', '/openapi.json']) {
+    rows.push({
+      name: `no cookie on contracts ${path}`,
+      path,
+      expect: '200 with no identity cookie',
+      pass: (r) => r.status === 200 && r.cookie === '',
+      detail: (r) => `${r.status}${r.cookie === '' ? '' : ', a cookie minted'}`,
+    });
+  }
   if (args.restricted) {
     for (const path of [
       `/deck/${args.restricted}`,
@@ -929,6 +1021,49 @@ async function thumbnailRows(base, deck, timeoutMs, cookie) {
       (storedRedirect(second, isPrivateOnly) || (body && immutable && (!https || cache === 'HIT'))),
   });
   return rows;
+}
+
+/**
+ * The link card (GF-2.1, apps/studio/src/routes/-deck-card.ts): the open seed deck's page, read
+ * with no cookie as an unfurler reads it, names its first slide at 1200 by 675 on the render route
+ * in `og:image`, and that picture answers a request with no cookie: a 200 PNG whose
+ * `x-turboslide-thumb` says 1200x675, or a 302 to the stored object carrying the same header.
+ */
+async function deckCardRow(base, deck, timeoutMs) {
+  const page = await probe(base, `/deck/${encodeURIComponent(deck)}`, timeoutMs);
+  const tag = /<meta\b[^>]*\sproperty="og:image"[^>]*>/.exec(page.text)?.[0] ?? '';
+  const image = (/\scontent="([^"]*)"/.exec(tag)?.[1] ?? '').replace(/&amp;/g, '&');
+  let path = null;
+  try {
+    const at = new URL(image);
+    if (
+      at.pathname.startsWith('/api/render/') &&
+      at.searchParams.get('deck') === deck &&
+      at.searchParams.get('w') === '1200'
+    )
+      path = `${at.pathname}${at.search}`;
+  } catch {
+    // no URL in the tag: the row fails below with what the page named
+  }
+  const picture = path === null ? null : await probe(base, path, timeoutMs);
+  const sized = picture?.headers['x-turboslide-thumb'] === '1200x675';
+  const served =
+    picture !== null &&
+    sized &&
+    ((picture.status === 200 && picture.type.startsWith('image/png')) ||
+      (picture.status === 302 && /\.blob\.vercel-storage\.com\//.test(picture.location)));
+  return {
+    row: {
+      name: 'deck card first slide',
+      expect: `/deck/${deck} without a cookie names /api/render/<first slide>?deck=${deck}&w=1200 in og:image, and the picture answers without a cookie: a 200 image/png or a 302 to the stored object, x-turboslide-thumb 1200x675`,
+      detail: () =>
+        picture === null
+          ? `page ${page.status}; og:image ${image === '' ? 'absent' : image.slice(0, 120)}`
+          : `og:image ${path}; picture ${picture.status} ${picture.type || picture.location.replace(/\?.*$/, '').slice(0, 60)}; ${picture.headers['x-turboslide-thumb'] ?? 'no size'}; ${picture.headers['cache-control'] ?? 'no cache-control'}`,
+    },
+    r: picture ?? page,
+    ok: page.error === undefined && picture !== null && picture.error === undefined && served,
+  };
 }
 
 /**
@@ -1549,6 +1684,8 @@ async function main() {
   const access = await accessRow(base, args.deck, args.timeoutMs);
   results.push(access.result);
   results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs, access.cookie)));
+  // the link card (GF-2.1): the open deck's first slide, read with no cookie
+  results.push(await deckCardRow(base, args.deck, args.timeoutMs));
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
   // the polish round's build rows (docs/archive/rounds/POLISH.md section 0 item 2): the client's Play shaders row

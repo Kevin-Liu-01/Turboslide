@@ -126,6 +126,13 @@
 // feature `decks` (AREA_FEATURE), so a red theme row blocks the ship. The round's rows reuse the
 // drivers that exist; no driver is added.
 //
+// The site build (docs/SITE.md, 2026-10-14) replaced the landing of docs/LANDING.md with the
+// Workbench page: its landing step retired the 84 `home.*` rows (the landing round's, the design
+// round's and polish two's) and five `decks.home.*` rows with their modules, restated five more
+// `decks.home.*` rows for the new page, and entered the site's `home.*` rows on the same driver,
+// `core/home.spec.ts`, each not driven until a run reads it and noted "The site build". The hero
+// step appended the nine `home.hero.*` rows of the live editor after them on the same driver.
+//
 //   node scripts/probes/core-matrix.mjs            prints the counts of 6.3 from the file
 //   node scripts/probes/core-matrix.mjs --ids      prints every id, one per line
 //   node scripts/probes/core-matrix.mjs --emit-parked docs/gslides-parity/focus/ship-<commit>.json
@@ -576,6 +583,8 @@ export const DECLARED_CONTROL_IDS = Object.freeze([
   'formatOptions.shader.play',
   'formatOptions.shader.frame.scrubber',
   'formatOptions.shader.frame.capture',
+  /* the Still group of the Glyphfield port (its shader design, 2.2): templated in inspector/shader.tsx */
+  'formatOptions.shader.still',
   /* the vector round (docs/archive/rounds/VECTOR.md 4.8): the six ids the svg rows' `parks` name, each read where
      it acts through `isParked` of parked-controls.ts (the chooser's accept list and the client
      sniff, the paste and drop handlers, the URL path, the copy handler, the Download dialog); the

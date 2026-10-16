@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode, RefObject } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import { applyThemeToTree } from './theme';
@@ -21,6 +21,8 @@ export type SlideViewProps = {
   /** renderSlide output (SPEC 5.2), set as innerHTML (SPEC 5.3) */
   html: string;
   theme: Theme;
+  /** a layer over the current body (the stage's ShaderLayer), handed the body's ref */
+  layer?: (body: RefObject<HTMLDivElement | null>) => ReactNode;
 };
 
 /** One keyed body of stage content: the slide it shows and its HTML. */
@@ -36,7 +38,7 @@ type Slot = { key: string; html: string };
  * slide re-renders when its JSON changes; then drawDither runs on every
  * canvas.dither), so the HTML string itself stays theme neutral.
  */
-export function SlideView({ slideId, html, theme }: SlideViewProps) {
+export function SlideView({ slideId, html, theme, layer }: SlideViewProps) {
   const body = useRef<HTMLDivElement>(null);
   const last = useRef<Slot | null>(null);
   const [leaving, setLeaving] = useState<Slot | null>(null);
@@ -82,6 +84,7 @@ export function SlideView({ slideId, html, theme }: SlideViewProps) {
         style={STAGE_STYLE}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {layer?.(body)}
     </>
   );
 }

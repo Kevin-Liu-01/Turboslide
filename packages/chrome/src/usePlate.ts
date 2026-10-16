@@ -46,6 +46,8 @@ export type UsePlateOptions = {
   matchWidth?: boolean;
   /** the largest max-height written, in px (a dropdown's ten rows) */
   maxHeight?: number;
+  /** leaves an exit copy when the plate leaves the document as it closes (Layer.ts `exit`) */
+  exit?: boolean;
 };
 
 function samePlace(a: Placed | null, b: Placed): boolean {
@@ -78,8 +80,9 @@ export function usePlate(
     follow,
     matchWidth,
     maxHeight,
+    exit,
   } = options;
-  useLayer(ref, { layer, open });
+  useLayer(ref, { layer, open, ...(exit === undefined ? {} : { exit }) });
   const [placed, setPlaced] = useState<Placed | null>(null);
   useLayoutEffect(() => {
     const element = ref.current;

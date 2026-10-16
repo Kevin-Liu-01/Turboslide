@@ -546,6 +546,12 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         /* the Round 1 follow-up, lane B (verify-r1.md finding 12): export.pptx.rotated-frames */
         1 +
         /* the Round 1 follow-up, lane A item 1 (verify-r1.md finding 2): slides.import.example-deck */
+        1 -
+        /* the site build (docs/SITE.md, 2026-10-14): five decks.home rows of the landing of
+           docs/LANDING.md retired (pictures-three-widths, product-pictures, load-budget, grammar,
+           capture-plain); the home rows it enters are counted by the home term below */
+        5 +
+        /* the Glyphfield port, GF-2.6 (wave 2 item 6): brand.colors.free-field */
         1 +
         /* the landing round (docs/LANDING.md 6.7): each push enters its own home rows, so the
            count reads the ones entered and the landing block below holds their order; the design
@@ -562,15 +568,16 @@ describe('the product round (docs/archive/rounds/PRODUCT.md section 8)', () => {
         POLISH2_RETIRED.filter((id) => !isCoreId(id)).length +
         /* the dropdown round (docs/DROPDOWNS.md 7.1): DD-C#2 enters its eight rows; none retires */
         CORE_MATRIX.filter(isDropdownsRow).length -
-        DROPDOWNS_RETIRED.filter((id) => !isCoreId(id)).length,
+        DROPDOWNS_RETIRED.filter((id) => !isCoreId(id)).length +
+        /* the site build's docs step (docs/SITE.md section 6): four help.docs rows of the
+           Workbench reference; help.docs.page is restated in place */
+        SITE_DOCS.length,
     );
     expect(CORE_MATRIX.filter((r) => isMeasureRow(r) && !isCostRow(r)).map((r) => r.id)).toEqual([
       'export.download.large-deck-pdf',
       'export.download.large-deck-pptx',
       /* the features round, ship two (docs/archive/rounds/FEATURES.md 7.2): the editor's longest animation frame */
       'shaders.perf.editor-frame',
-      /* the polish round (docs/archive/rounds/POLISH.md 3.5): the home page's load budget */
-      'decks.home.load-budget',
       /* the landing round (docs/LANDING.md 6.7): its measure rows entered so far, in push order */
       ...CORE_MATRIX.filter((r) => areaOf(r.id) === 'home' && isMeasureRow(r)).map((r) => r.id),
     ]);
@@ -1176,8 +1183,10 @@ describe('the polish round (docs/archive/rounds/POLISH.md section 5)', () => {
   );
 
   it('holds the 130 rows of 5.1 with the round, the item and the lane in their notes', () => {
-    /* 130 new rows plus the six carried rows whose notes gained the round */
-    expect(polish.length).toBe(136);
+    /* 130 new rows plus the six carried rows whose notes gained the round, less the three the
+       site build retired with the old landing (docs/SITE.md: decks.home.pictures-three-widths,
+       decks.home.product-pictures, decks.home.load-budget) */
+    expect(polish.length).toBe(133);
     const carried = [
       'assist.viewer.disabled',
       'decks.home.seller-lead',
@@ -1191,7 +1200,7 @@ describe('the polish round (docs/archive/rounds/POLISH.md section 5)', () => {
         polish.some((row) => row.id === id),
         id,
       ).toBe(true);
-    expect(polish.filter((row) => !carried.includes(row.id)).length).toBe(130);
+    expect(polish.filter((row) => !carried.includes(row.id)).length).toBe(127);
     expect(isCoreId('tables.cells.prompt-hovered-only')).toBe(false);
     expect(coreRow('tables.cells.no-prompt').driver).toBe(PROBE_DRIVER);
     /* every new row names its item or the home page's section */
@@ -1219,12 +1228,13 @@ describe('the polish round (docs/archive/rounds/POLISH.md section 5)', () => {
     expect(coreRow('images.panel.drop-shadow').parks).toEqual(['formatOptions.picture.shadow']);
     expect(DECLARED_CONTROL_IDS).toContain('formatOptions.picture.shadow');
     expect(coreRow('collab.follow.anonymous-editor').parks).toEqual(['title.presence.follow']);
-    /* the one measurement row of the round records its numbers and never holds the ship */
-    expect(isMeasureRow(coreRow('decks.home.load-budget'))).toBe(true);
-    const { measured, blocking } = parkedFeaturesOf({ 'decks.home.load-budget': 'failed' }, [
-      coreRow('decks.home.load-budget'),
+    /* the one measurement row of the round, the old landing's load budget, left with the site
+       build (docs/SITE.md); a measurement row still records its numbers and never holds the ship */
+    expect(isCoreId('decks.home.load-budget')).toBe(false);
+    const { measured, blocking } = parkedFeaturesOf({ 'shaders.perf.editor-frame': 'failed' }, [
+      coreRow('shaders.perf.editor-frame'),
     ]);
-    expect(measured.map((m) => m.id)).toEqual(['decks.home.load-budget']);
+    expect(measured.map((m) => m.id)).toEqual(['shaders.perf.editor-frame']);
     expect(blocking).toEqual([]);
     /* a row the table names with two drivers carries the spec that reads the file or the show */
     expect(coreRow('tables.header.rule-with-text').driver).toBe('core/export.spec.ts');
@@ -1632,125 +1642,43 @@ describe('the Cloudflare phase of the realtime round (docs/CLOUDFLARE.md section
   });
 });
 
-// The landing round (docs/LANDING.md 6.7): the `home.*` rows under the unparkable decks feature,
-// one driver over the lane modules of apps/studio/e2e/core/home/. The first pass (pushes 1 to 7,
-// build/integrator.md "Landing, day 0" 5.1) entered 37 rows in push order; the second pass (pushes
-// 8 to 20) restates rows in place, keeping their ids, appends its new rows in its push order and
-// retires four first pass ids in the push that enters their replacements (RETIRED). So at every
-// push the matrix's home rows read, in order, the first pass's rows not yet replaced, then a prefix
-// of the second pass's new rows; a first pass row carries its first note until its push restates
-// it, and every second pass row reads "docs/LANDING.md 6.7 (second pass)". The four measure rows
-// carry `measure` and no severity.
-const LANDING_FIRST = [
-  /* push 1 */
-  'home.page.order',
-  'home.page.markup-final',
-  'home.hero.type',
-  'home.parts.table',
-  'home.budget.bytes-first',
-  'home.budget.bytes-page',
-  'home.budget.shared',
-  'home.budget.lcp',
-  'home.a11y.skip-and-contrast',
-  /* push 2 */
-  'home.hero.select',
-  'home.hero.edit',
-  'home.canvas.gestures',
-  'home.canvas.log',
-  'home.objects.keyboard',
-  'home.budget.live-module',
-  /* push 3 */
-  'home.tailor.apply',
-  'home.tailor.theme',
-  'home.tailor.filmstrip',
-  /* push 4 */
-  'home.agents.rest',
-  'home.agents.run',
-  'home.agents.typed',
-  'home.agents.transports',
-  'home.agents.history',
-  'home.agents.recorded',
-  /* push 5 */
-  'home.present.show',
-  'home.present.focus',
-  'home.present.print',
-  /* push 6 */
-  'home.export.seam',
-  'home.export.figure',
-  /* push 7 */
-  'home.motion.hero',
-  'home.motion.in-view',
-  'home.motion.rest',
-  'home.motion.reduced',
-  'home.motion.hidden-tab',
-  'home.budget.frame',
-  'home.budget.main-thread',
-  'home.a11y.keyboard-walk',
+// The site build (docs/SITE.md, 2026-10-14): the Workbench page replaced the landing of
+// docs/LANDING.md, whose 84 `home.*` rows (the landing round's, the design round's and polish
+// two's) and five `decks.home.*` rows were retired in the landing step's commit. The `home.*` rows
+// are the site's, under the unparkable decks feature on one driver, core/home.spec.ts, over the
+// lane modules of apps/studio/e2e/core/home/; the landing step enters SITE_LANDING, not driven
+// until a run reads them; the hero step appends its rows after them.
+const SITE_LANDING = [
+  'home.page.layout',
+  'home.title.one-line',
+  'home.title.stacks',
+  /* the polish step's row of the arcs' presses, beside the title's rows (2026-10-15) */
+  'home.title.press',
+  'home.hero.poster-first',
+  'home.budget.first-script',
 ];
-/* the second pass's new rows in push order (LANDING.md 6.7, 6.8) */
-const LANDING_SECOND = [
-  /* V1#8 */
-  'home.page.bands-after-load',
-  'home.hero.stage',
-  'home.lead.visit',
-  'home.numbers.row',
-  'home.features.table',
-  /* V4#9 */
-  'home.motion.pause',
-  'home.motion.develop',
-  /* V2#11 */
-  'home.menus.bar',
-  'home.menus.rows',
-  /* V2#12 */
-  'home.kits.restyle',
-  'home.kits.color',
-  /* V3#13 */
-  'home.agents.chips',
-  /* V2#14 */
-  'home.versions.scrub',
-  'home.versions.restore',
-  /* V1#15 */
-  'home.hero.run',
-  /* V3#17 */
-  'home.export.loupe',
-  /* V4#18 */
-  'home.interludes.glyphs',
-  'home.motion.loops',
-  'home.motion.offscreen',
-  /* V4#19 */
-  'home.patterns.pair',
-  /* V4#20 */
-  'home.people.loop',
-  'home.people.type',
+/* the hero step's rows of the live editor, after the landing step's (docs/SITE.md section 5) */
+const SITE_HERO = [
+  'home.hero.swap-no-shift',
+  'home.hero.agents-work',
+  'home.hero.visitor-types',
+  'home.hero.no-writes',
+  'home.hero.fresh-on-reload',
+  'home.hero.paused',
+  'home.hero.reduced-motion',
+  'home.hero.phone',
+  'home.hero.server-features-sentence',
 ];
-/* the Round 1 follow-up's lane E rows (verify-landing.md findings 1 to 6, read on production
-   2026-10-05), in the order lane E enters them; each note reads "Round 1 follow-up, lane E item <n>" */
-const LANDING_FOLLOWUP = [
-  'home.menus.readout',
-  'home.present.no-prompts',
-  'home.hero.thumb-frames',
-  'home.export.pdf-appearance',
-  'home.export.one-mark',
+/* the docs step's rows of the Workbench reference, after the hero step's (docs/SITE.md section 6) */
+const SITE_DOCS = [
+  'help.docs.sections',
+  'help.docs.figures',
+  'help.docs.footer',
+  'help.docs.nav-weight',
 ];
-const FOLLOWUP_NOTE = /^Round 1 follow-up, lane E item \d/;
-/* a first pass id and the second pass row that replaces it (LANDING.md 6.7) */
-const RETIRED = {
-  'home.parts.table': 'home.features.table',
-  'home.tailor.theme': 'home.kits.restyle',
-  'home.agents.run': 'home.agents.chips',
-  'home.motion.hero': 'home.motion.develop',
-};
-const LANDING_MEASURE = [
-  'home.budget.shared',
-  'home.budget.lcp',
-  'home.budget.frame',
-  'home.budget.main-thread',
-];
-const FIRST_NOTE =
-  /^docs\/LANDING\.md 6\.7; bound fixed in docs\/gslides-parity\/landing\/build\/integrator\.md/;
-const SECOND_NOTE = /^docs\/LANDING\.md 6\.7 \(second pass\)/;
+const SITE_NOTE = /^The site build \(docs\/SITE\.md;/;
 
-describe('the landing round', () => {
+describe('the site build', () => {
   it('holds the home area under the unparkable decks feature with its one driver', () => {
     expect(AREA_FEATURE.home).toBe('decks');
     expect(UNPARKABLE_FEATURES).toContain('decks');
@@ -1758,59 +1686,53 @@ describe('the landing round', () => {
     expect(CORE_SPEC_DRIVERS).toContain('core/home.spec.ts');
     expect(specPathOf('core/home.spec.ts')).toBe('apps/studio/e2e/core/home.spec.ts');
     expect(rowsForDriver('home.spec.ts')).toEqual(rowsForDriver('core/home.spec.ts'));
-    expect(LANDING_FIRST.length).toBe(37);
-    const all = [...LANDING_FIRST, ...LANDING_SECOND, ...LANDING_FOLLOWUP];
-    expect(new Set(all).size).toBe(all.length);
-    for (const [old, next] of Object.entries(RETIRED)) {
-      expect(LANDING_FIRST).toContain(old);
-      expect(LANDING_SECOND).toContain(next);
-    }
   });
 
-  it('enters the home rows in push order, each on the driver with its note', () => {
-    /* the design round's home rows (docs/DESIGN.md 11) are its own block's, below */
-    /* and polish two's (docs/POLISH-2.md 6.3) are its block's, at the end */
-    const home = CORE_MATRIX.filter(
-      (row) => areaOf(row.id) === 'home' && !isDesignRow(row) && !isPolish2Row(row),
-    ).map((row) => row.id);
-    const ids = new Set(home);
-    /* the second pass's rows entered are a prefix of its push order (no push's row before an
-       earlier push's), wherever in the home rows a lane placed them (beside its band's first
-       pass rows, as V2 and V3 do), and every first pass row is kept but the retired */
-    const second = LANDING_SECOND.filter((id) => ids.has(id));
-    expect(second).toEqual(LANDING_SECOND.slice(0, second.length));
-    const firstKept = LANDING_FIRST.filter((id) => !(id in RETIRED && ids.has(RETIRED[id])));
-    /* the follow-up's rows entered are a prefix of lane E's order, as the second pass's are */
-    const followup = LANDING_FOLLOWUP.filter((id) => ids.has(id));
-    expect(followup).toEqual(LANDING_FOLLOWUP.slice(0, followup.length));
-    expect([...home].sort()).toEqual([...firstKept, ...second, ...followup].sort());
-    expect(home.length).toBe(firstKept.length + second.length + followup.length);
-    expect(
-      rowsForDriver('core/home.spec.ts')
-        .filter((row) => !isDesignRow(row) && !isPolish2Row(row))
-        .map((row) => row.id),
-    ).toEqual(home);
-    for (const row of CORE_MATRIX.filter(
-      (candidate) =>
-        areaOf(candidate.id) === 'home' && !isDesignRow(candidate) && !isPolish2Row(candidate),
-    )) {
+  it("enters the landing step's home rows first, each on the driver with the site note", () => {
+    const home = CORE_MATRIX.filter((row) => areaOf(row.id) === 'home').map((row) => row.id);
+    expect(home.slice(0, SITE_LANDING.length)).toEqual(SITE_LANDING);
+    /* the hero step's rows follow, not driven until a run on a deployment reads them */
+    expect(home.slice(SITE_LANDING.length, SITE_LANDING.length + SITE_HERO.length)).toEqual(
+      SITE_HERO,
+    );
+    for (const id of SITE_HERO) {
+      expect(coreRow(id).today, id).toBe('not driven');
+      expect(coreRow(id).note, id).toMatch(/the hero step/);
+    }
+    expect(rowsForDriver('core/home.spec.ts').map((row) => row.id)).toEqual(home);
+    for (const row of CORE_MATRIX.filter((candidate) => areaOf(candidate.id) === 'home')) {
       expect(row.feature, row.id).toBe('decks');
       expect(row.driver, row.id).toBe('core/home.spec.ts');
-      expect(isCoreId(row.id), row.id).toBe(true);
-      if (LANDING_SECOND.includes(row.id)) expect(row.note, row.id).toMatch(SECOND_NOTE);
-      else if (LANDING_FOLLOWUP.includes(row.id)) expect(row.note, row.id).toMatch(FOLLOWUP_NOTE);
-      else
-        expect(row.note, row.id).toMatch(new RegExp(`${FIRST_NOTE.source}|${SECOND_NOTE.source}`));
-      if (LANDING_MEASURE.includes(row.id)) {
-        expect(isMeasureRow(row), row.id).toBe(true);
-        expect(row.today, row.id).toBe('not driven');
-        expect(row.severity, row.id).toBeUndefined();
-      } else {
-        expect(isMeasureRow(row), row.id).toBe(false);
-        expect(row.today, row.id).toBe('broken');
-        expect([1, 2], row.id).toContain(row.severity);
-      }
+      expect(row.note, row.id).toMatch(SITE_NOTE);
+      expect(isMeasureRow(row), row.id).toBe(false);
     }
+    for (const id of SITE_LANDING) {
+      expect(coreRow(id).today, id).toBe('not driven');
+      expect(coreRow(id).severity, id).toBeUndefined();
+    }
+    /* the docs step's rows follow the hero step's, on the docs' driver, not driven until a run
+       on a deployment reads them */
+    const ids = CORE_MATRIX.map((row) => row.id);
+    const after = ids.indexOf(SITE_HERO[SITE_HERO.length - 1]);
+    expect(ids.slice(after + 1, after + 1 + SITE_DOCS.length)).toEqual(SITE_DOCS);
+    for (const id of SITE_DOCS) {
+      const row = coreRow(id);
+      expect(row.feature, id).toBe('help');
+      expect(row.driver, id).toBe('core/docs.spec.ts');
+      expect(row.today, id).toBe('not driven');
+      expect(row.note, id).toMatch(SITE_NOTE);
+      expect(row.note, id).toMatch(/the docs step/);
+    }
+    /* help.docs.page is restated in place for the Workbench reference */
+    expect(coreRow('help.docs.page').interaction).toMatch(/56 px bar/);
+    /* the old landing's rows are gone with their modules */
+    for (const id of [
+      'home.page.order',
+      'home.hero.run',
+      'decks.home.grammar',
+      'decks.home.load-budget',
+    ])
+      expect(isCoreId(id), id).toBe(false);
   });
 });
 

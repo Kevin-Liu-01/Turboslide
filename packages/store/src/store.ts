@@ -58,6 +58,13 @@ export type VersionRecord = Version & {
    */
   origin?: WriteOrigin;
   /**
+   * The minor of the documents whose blocks, sections and slides the record carries, when above
+   * this release's (RELIABILITY-19; `versions.ts` recordMinor): a write to a deck a newer release
+   * wrote stamps it, so the fields kept from that release read in the record as they do in the
+   * files. Absent on every record of a deck this release wrote.
+   */
+  schemaMinor?: number;
+  /**
    * The Blob backend's immutable document of this entry (gslides-parity SPEC-2 8.2): the md5 of
    * the `deck.json` bytes the write pushed, naming `snapshots/<md5>.json`. Absent on the file and
    * tmp stores and on records written before the round.
@@ -200,6 +207,14 @@ export type DeckStore = {
   listVersions: () => Promise<Version[]>;
   /** The same entries with baseRevision and the inverse mutations, for range resolution. */
   records: () => Promise<VersionRecord[]>;
+  /**
+   * The newest records, oldest first, reaching down at least to the newest one that carries
+   * `ops`, or the whole log when none does (wave 2 PS.md request 1): what the checkpoint's
+   * `knownCovered` reads, so a fresh Blob mirror answers from its log floor instead of reading
+   * every record below it. A store that holds its whole log leaves it out, and the caller reads
+   * `records()`.
+   */
+  newestRecords?: () => Promise<VersionRecord[]>;
   /** The document as it was after version n; 0 is the state before the first entry. */
   documentAt: (n: number) => Promise<DeckDocument>;
   /** The document at a revision the log reaches. */

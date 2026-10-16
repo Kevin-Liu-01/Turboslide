@@ -189,6 +189,7 @@ import type { ShellState } from '@turboslide/chrome/shell-context';
 import type { ShellMode } from '@turboslide/chrome/shell-data';
 import { planPlayList } from '@turboslide/export/batch/plan';
 import {
+  brandOfRow,
   identityIndex,
   identityOfPrincipal,
   identityView,
@@ -197,14 +198,9 @@ import {
 } from './identity-index';
 import type { MeAnswerFacts } from './own-identity';
 import { rowReflects } from './own-identity';
-import { roomTransport } from './transport';
 import type { Entry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
-import {
-  clearPendingMirror,
-  indexedDbPendingStore,
-  memoryPendingStore,
-} from '@turboslide/realtime/client/pending-store';
-import type { PendingStore } from '@turboslide/realtime/client/pending-store';
+import { REALTIME_TIERS } from '@turboslide/realtime/channel';
+import { clearPendingMirror } from '@turboslide/realtime/client/pending-store';
 import { createRoomClient } from '@turboslide/realtime/client/room-client';
 import type {
   PersistedOffer,
@@ -234,8 +230,10 @@ import {
   isCanvasSlide,
   isTrashed,
   slideBlocks,
+  slidePlay,
   slideTitle,
 } from '@turboslide/schema/deck';
+import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
 import type { Asset } from '@turboslide/schema/assets';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
 import type { Block } from '@turboslide/schema/blocks';
@@ -269,41 +267,22 @@ import {
 } from '@turboslide/viewer/shader-frame';
 import type { Theme } from '@turboslide/viewer/theme';
 
+import type { RunDeckActionAnswer, ServerSideWindowAction } from '../server/agent-actions';
+import type { ExportReportRowEntry, ExportRunInput, SyncExportAnswer } from '../server/download';
+import type { DeckCreatedDetail, EditorDeck } from '../server/write';
+import { editorBackend } from './backend';
+import type { EditorBackend } from './backend';
 import {
+  DECK_CREATED_EVENT,
+  EXPORT_POLL_MS,
   SERVER_SIDE_WINDOW_ACTIONS_F1,
   SERVER_SIDE_WINDOW_ACTIONS_F2,
   SERVER_SIDE_WINDOW_ACTIONS_GS3,
   SERVER_SIDE_WINDOW_ACTIONS_P1,
-  runDeckAction,
-  runDeckActionDetailed,
-} from '../server/agent-actions';
-import type { RunDeckActionAnswer, ServerSideWindowAction } from '../server/agent-actions';
-import { createNewDeck } from '../server/decks';
-import {
-  EXPORT_POLL_MS,
   batchedProgressLabel,
-  pollExport,
-  runBatchedExport,
-  runBuild,
-  signDownload,
-  startExport,
-  syncExport,
-} from '../server/download';
-import type { ExportReportRowEntry, ExportRunInput, SyncExportAnswer } from '../server/download';
-import { lintSlides } from '../server/lint';
-import { renderSlideImages } from '../server/render';
-import { warmThumbnails } from '../server/warm';
-import {
-  DECK_CREATED_EVENT,
-  heldOpIds,
-  leaseSlide,
-  listVersions,
-  readEditorDeck,
-  saveVersion,
-  writeDeck,
-} from '../server/write';
-import type { DeckCreatedDetail, EditorDeck } from '../server/write';
+} from './backend-server';
 import { partitionRoster, readClientIds, rememberClientId, tabToken } from './client-ids';
+import { sendThroughFreeze } from './draft-retry';
 
 /**
  * The editor, /edit/:deckId with ssr: false (SPEC 3.4, 6; MILESTONES M3). The chrome's
@@ -330,11 +309,6 @@ import { partitionRoster, readClientIds, rememberClientId, tabToken } from './cl
    them beside the index, so the unit test reads them without this module's graph */
 export { identityView, participantOf };
 
-/** The pending queue mirror: IndexedDB in a browser, memory where it is missing (SPEC-3 0.7). */
-function pendingStoreFor(): PendingStore {
-  return typeof indexedDB === 'undefined' ? memoryPendingStore() : indexedDbPendingStore();
-}
-
 /**
  * A write whose `baseRevision` is not the revision the tab reports (SPEC-3 3.10; `checkBase`).
  * A ConflictError to the agent surface, which reads the revision and retries itself; a class of
@@ -357,7 +331,8 @@ const EXTERNAL_BANNER_MS = 8000;
 /** The floor between two snackbars of one refusal sentence (C3-F3; `sayRefusal`). */
 const REFUSAL_SNACKBAR_SPACING_MS = 60_000;
 
-export const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
+/** The address of a deck's assets, from the document's backend (backend.ts). */
+export const ASSET_BASE = (deckId: string): string => editorBackend().assetBase(deckId);
 
 // ---------------------------------------------------------------------------------------------
 // Comments, the inbox and the sign in exchanges as the chrome reads them (SPEC-3 5.3, 5.5, 7.3)
@@ -792,42 +767,6 @@ export function validateBeforeApply(
   return null;
 }
 
-/**
- * Uploads bytes through the picture intake's presigned path (B4's R17; server/upload.ts): the
- * grant from `POST /api/x/upload/picture`, the `PUT` of the bytes to the grant's address, and the
- * key the write names. A non 2xx answer at either step throws with the server's sentence.
- */
-export async function presignUpload(
-  deckId: string,
-  contentType: string,
-  bytes: Uint8Array,
-  fetchFn: typeof fetch = (input, init) => fetch(input, init),
-): Promise<string> {
-  const issued = await fetchFn('/api/x/upload/picture', {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({ deckId, contentType, bytes: bytes.byteLength }),
-  });
-  if (!issued.ok) {
-    const body = await issued.text().catch(() => '');
-    throw new Error(
-      `the upload was refused (HTTP ${issued.status})${body ? `: ${body.slice(0, 160)}` : ''}`,
-    );
-  }
-  const grant = (await issued.json()) as { key?: unknown; url?: unknown; method?: unknown };
-  if (typeof grant.key !== 'string' || typeof grant.url !== 'string')
-    throw new Error('the upload grant named no key or address');
-  const put = await fetchFn(grant.url, {
-    method: typeof grant.method === 'string' ? grant.method : 'PUT',
-    credentials: 'same-origin',
-    headers: { 'content-type': contentType },
-    body: new Blob([bytes as BlobPart], { type: contentType }),
-  });
-  if (!put.ok) throw new Error(`the upload did not land (HTTP ${put.status})`);
-  return grant.key;
-}
-
 export function slideOrder(document: DeckDocument): string[] {
   return document.deck.sections.flatMap((section) => section.slideIds);
 }
@@ -913,6 +852,7 @@ function downloadUrlOf(url: string): string {
  * section 6, option 2) while the page never holds the token.
  */
 async function runSyncExport(
+  backend: EditorBackend,
   deckId: string,
   input: ExportRunInput,
   onLine?: (line: string | undefined, rows?: ReadonlyArray<ExportReportRowEntry>) => void,
@@ -922,7 +862,7 @@ async function runSyncExport(
      export runs, and a poll every EXPORT_POLL_MS reads it until the call settles; a poll that
      fails is skipped, never the export */
   const progressJobId = onLine === undefined ? undefined : newSyncProgressJobId();
-  const call = syncExport({
+  const call = backend.syncExport({
     deckId,
     input,
     ...(progressJobId === undefined ? {} : { progressJobId }),
@@ -933,7 +873,7 @@ async function runSyncExport(
     await sleep(SYNC_PROGRESS_POLL_MS);
     while (!settled) {
       try {
-        const answer = await pollExport({ jobId: progressJobId });
+        const answer = await backend.pollExport({ jobId: progressJobId });
         if (settled) break;
         /* the report rows of the export's wait for a pending shader frame ride the same poll
            (the features round, ship two, docs/archive/rounds/FEATURES.md 5.5; build/b7.md R1) */
@@ -1004,15 +944,22 @@ function isSlideFieldTextRun(document: DeckDocument, mutation: Mutation): boolea
 }
 
 /**
- * The origins the resync read answered (docs/archive/rounds/SYNC.md 3.2; write.ts `readEditorDeck` with
- * `since` answers `EditorDeck.origins`, B3's half): the records above the tab's old position
- * that name their origin, each with the seq its commit made and the op ids it folded, the
- * newest RESYNC_ORIGINS_MAX of them. The payload is parsed JSON, so each row is checked before
- * the room client reads it; a payload without the field answers none and the room client
- * re-folds its pending ops as before, and the bound (a head more than REPLAY_MAX_ENTRIES above
- * the old position) is the room client's own reading on the blob tier.
+ * What the resync read answers the room client beside the document. The origins
+ * (docs/archive/rounds/SYNC.md 3.2; write.ts `readEditorDeck` with `since` answers
+ * `EditorDeck.origins`, B3's half): the records above the tab's old position that name their
+ * origin, each with the seq its commit made and the op ids it folded, the newest
+ * RESYNC_ORIGINS_MAX of them. The position (hardening HR-RC#7, RELIABILITY-17): the stream
+ * position of the document on the tier the read ran on, the payload's `room.seq` and
+ * `room.tier`; on the do tier the tab's position becomes it, and a document at another position
+ * than the tab's returns the pending typed text as cards. The bound: the read's `bounded`, set
+ * when the records did not reach the old position (the server half, HR-RT#15); on the blob tier
+ * the room client also reads it off a head more than REPLAY_MAX_ENTRIES above the old position.
+ * The payload is parsed JSON, so each field is checked before the room client reads it; a
+ * payload without a field answers without it, and the room client keeps its reading as before.
  */
-function resyncOriginsOf(payload: EditorDeck): Pick<ResyncAnswer, 'origins'> {
+export function resyncAnswerOf(
+  payload: Pick<EditorDeck, 'origins' | 'room'> & { bounded?: unknown },
+): Omit<ResyncAnswer, 'document'> {
   const origins: ResyncOrigin[] = [];
   for (const row of payload.origins ?? []) {
     if (typeof row !== 'object' || row === null) continue;
@@ -1021,7 +968,16 @@ function resyncOriginsOf(payload: EditorDeck): Pick<ResyncAnswer, 'origins'> {
     const ids = opIds.filter((id): id is string => typeof id === 'string' && id !== '');
     if (ids.length > 0) origins.push({ seq, opIds: ids });
   }
-  return origins.length === 0 ? {} : { origins };
+  const seq: unknown = payload.room?.seq;
+  const tier: unknown = payload.room?.tier;
+  const known = REALTIME_TIERS.find((word) => word === tier);
+  return {
+    ...(origins.length === 0 ? {} : { origins }),
+    ...(payload.bounded === true ? { bounded: true } : {}),
+    ...(typeof seq === 'number' && Number.isInteger(seq) && seq >= 0 && known !== undefined
+      ? { position: { seq, tier: known } }
+      : {}),
+  };
 }
 
 /**
@@ -1052,8 +1008,11 @@ export function createEditorController(init: {
   onDeckCreated?: (deckId: string) => void;
   /** the thread whose card opens on load (`?comment=`) */
   initialThread?: string;
+  /** the backend this controller runs on (backend.ts); the document's bound one by default */
+  backend?: EditorBackend;
 }): EditorController {
   const { deckId, author } = init;
+  const backend = init.backend ?? editorBackend();
   const history = createEditHistory();
   /* the local revision each history entry produced, for the History rows */
   const revisionOf = new Map<number, number>();
@@ -1077,9 +1036,9 @@ export function createEditorController(init: {
     const first = slideOrder(latest().document)[0];
     if (first === undefined) return;
     homeCardWarmed = true;
-    warmThumbnails({ data: { deckId, theme: readTheme(), slideIds: [first] } }).catch(
-      () => undefined,
-    );
+    backend
+      .warmThumbnails({ data: { deckId, theme: readTheme(), slideIds: [first] } })
+      .catch(() => undefined);
   };
   const listeners = new Set<() => void>();
   let alive = false;
@@ -1171,15 +1130,9 @@ export function createEditorController(init: {
   };
   let versionsTimer: ReturnType<typeof setTimeout> | undefined;
   const identity = init.payload.identity;
-  const pendingStore = pendingStoreFor();
-  /* the tab's memory of its client ids (hotfix 2 cause B1): sessionStorage is per tab and survives a reload */
-  const idStorage = (): Storage | null => {
-    try {
-      return typeof sessionStorage === 'undefined' ? null : sessionStorage;
-    } catch {
-      return null;
-    }
-  };
+  const pendingStore = backend.pendingStore();
+  /* the tab's memory of its client ids (hotfix 2 cause B1): sessionStorage on the server backend */
+  const idStorage = () => backend.idStorage(author);
 
   const initialOrder = slideOrder(init.payload.document);
   let snapshot: EditorSnapshot = {
@@ -1265,7 +1218,7 @@ export function createEditorController(init: {
     html: Map<string, string>,
   ): Map<string, string> => {
     const theme = readTheme();
-    const deckKey = renderDeckStamp(document.deck, theme, ASSET_BASE(deckId));
+    const deckKey = renderDeckStamp(document.deck, theme, backend.assetBase(deckId));
     for (const id of slideOrder(document)) {
       if (html.has(id)) continue;
       const slide = document.slides[id];
@@ -1284,7 +1237,7 @@ export function createEditorController(init: {
       const rendered = renderSlide(document.deck, slide, {
         theme,
         chrome: true,
-        assetBase: ASSET_BASE(deckId),
+        assetBase: backend.assetBase(deckId),
         blockAttrs: true,
         gtWord: true,
       }).html;
@@ -1445,7 +1398,8 @@ export function createEditorController(init: {
     if (versionsTimer !== undefined) clearTimeout(versionsTimer);
     versionsTimer = setTimeout(() => {
       versionsTimer = undefined;
-      listVersions({ deckId })
+      backend
+        .listVersions({ deckId })
         .then((versions) => publish({ versions }))
         .catch(() => undefined);
     }, 500);
@@ -1552,11 +1506,18 @@ export function createEditorController(init: {
        agent writes with `author.kind: 'agent'`, the token's label and the run id, under the room's
        `agent:<principalId>` client id (the blob tier's record keeps `store`), so a write through
        POST /api/actions reaches this banner the way the assist's and the checkout agent's did */
+    /* an agent whose roster row names a brand works beside the person with its own pointer,
+       caret and chip (docs/SITE.md D5): its writes are a collaborator's, never an outside write */
+    const branded = new Set(
+      latest()
+        .roster.filter((row) => brandOfRow(row) !== null)
+        .map((row) => row.clientId),
+    );
     const mine = agentEntriesOf(entries, {
       clientId: client.clientId(),
       earlierIds: latest().ownClientIds,
       assistNotes: ownAssistNotes,
-    });
+    }).filter((entry) => !branded.has(entry.clientId));
     if (mine.length === 0) return;
     const mutations: Mutation[] = mine.flatMap((entry) => entry.mutations ?? []);
     const before = beforeRemote;
@@ -1910,7 +1871,7 @@ export function createEditorController(init: {
    * read right after the deck's own creation keeps the standing it has (`keep`).
    */
   const refreshAccess = async (onMissing: MissingAccessPolicy = 'reload'): Promise<void> => {
-    const payload = await readAccessWithRetries(() => readEditorDeck({ deckId }));
+    const payload = await readAccessWithRetries(() => backend.readEditorDeck({ deckId }));
     if (payload === null) {
       if (onMissing === 'reload') window.location.reload();
       return;
@@ -1942,7 +1903,7 @@ export function createEditorController(init: {
     const now = (): string => new Date().toISOString();
     const client = createRoomClient({
       deckId,
-      transport: roomTransport(deckId, tabToken(idStorage()), roomFacts),
+      transport: backend.roomTransport(deckId, tabToken(idStorage()), roomFacts, author),
       document,
       seq,
       tier,
@@ -2092,7 +2053,7 @@ export function createEditorController(init: {
         // pending ops those records name instead of re-sending them (invariant 10)
         let payload: EditorDeck | null;
         try {
-          payload = await readEditorDeck({
+          payload = await backend.readEditorDeck({
             deckId,
             ...(revision > 0 ? { atLeast: revision } : {}),
             since,
@@ -2139,13 +2100,27 @@ export function createEditorController(init: {
           // stands when a reload lands below it
           serverRevision: Math.max(fresh, latest().serverRevision),
         });
-        return { document: payload.document, ...resyncOriginsOf(payload) };
+        return { document: payload.document, ...resyncAnswerOf(payload) };
       },
       /* the plate offers only what the server does not hold (docs/archive/rounds/POLISH.md item 109) */
       heldOps: async (opIds) => {
         if (opIds.length === 0) return new Set<string>();
-        const answer = await heldOpIds({ deckId, opIds: [...opIds] });
+        const answer = await backend.heldOpIds({ deckId, opIds: [...opIds] });
         return new Set(answer.held);
+      },
+      /* asked once ops POSTs have answered 404 for a minute (hardening HR-RC#8, RELIABILITY-18).
+         The loader reads past this instance's copy: a room it holds syncs the store by force,
+         and an instance without one heads the store (root.ts `hasStoredDeck`). A deck the store
+         does not hold, or one the caller may no longer read, answers null or the loader's
+         "No deck <id>"; only then do the ops return to their author. Any other failure keeps
+         them, as a 5xx does */
+      hasStoredDeck: async () => {
+        try {
+          return (await backend.readEditorDeck({ deckId })) !== null;
+        } catch (error) {
+          if (error instanceof Error && /\bno deck\b/i.test(error.message)) return false;
+          throw error;
+        }
       },
       onPersisted: (offer) => {
         const apply = offer.apply;
@@ -2417,9 +2392,22 @@ export function createEditorController(init: {
     publish({ pending: snapshot.pending + 1 });
     draftInFlight = true;
     const run = draftChain.then(async () => {
-      let answer: Awaited<ReturnType<typeof writeDeck>>;
+      let answer: Awaited<ReturnType<EditorBackend['writeDeck']>>;
+      // a write freeze refuses the first save with 503 and a wait (HR-K1#4b): the write and the
+      // edits queued behind it stay, the sentence shows on the snackbar (each at most once a
+      // minute; the save words read Saving… through the wait), and the save goes again after it
+      const refusals = { count: 0 };
       try {
-        answer = await writeDeck({ deckId, write, returnDocument: true });
+        answer = await sendThroughFreeze(
+          () => backend.writeDeck({ deckId, write, returnDocument: true }),
+          {
+            waiting: (refusal) => {
+              refusals.count += 1;
+              publish({ error: refusal.message });
+              sayRefusal(refusal);
+            },
+          },
+        );
       } catch (error) {
         draftInFlight = false;
         const failure = error instanceof Error ? error : new TypeError(String(error));
@@ -2446,6 +2434,12 @@ export function createEditorController(init: {
         error: null,
       });
       warmHomeCard();
+      // a refused try that created the deck before the freeze refused its write: the answer that
+      // landed did not create it, so the page learns here that the deck exists (as adoptCreatedDeck)
+      if (refusals.count > 0 && answer.created !== true && typeof window !== 'undefined') {
+        const detail: DeckCreatedDetail = { deckId, revision: answer.revision };
+        window.dispatchEvent(new CustomEvent(DECK_CREATED_EVENT, { detail }));
+      }
       /* the first write is in the room's base (the server's document at this clock), so its
          inverse is transformed past what lands after the attach and nothing before it (undo-bursts.ts);
          the bursts queued during the flight append their own clocks at the replay below */
@@ -2533,9 +2527,11 @@ export function createEditorController(init: {
         forward: mutations.length,
         inverse: applied.inverse.length,
       });
+      /* a presentation that lives in the tab alone stores no name (docs/SITE.md D10): no prompt */
       if (
         identity !== undefined &&
         identity.trust === 'label' &&
+        backend.tabOnly === undefined &&
         !latest().namePrompt &&
         !promptedName
       ) {
@@ -2784,12 +2780,7 @@ export function createEditorController(init: {
     action: 'assist.propose' | 'assist.accept',
     input: unknown,
   ): Promise<unknown> => {
-    const response = await fetch(`/api/assist?deck=${encodeURIComponent(deckId)}`, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ action, input }),
-    });
+    const response = await backend.assistPost(deckId, JSON.stringify({ action, input }));
     const text = await response.text();
     let payload: unknown = null;
     try {
@@ -2902,7 +2893,7 @@ export function createEditorController(init: {
       publish({ external: null, error: null });
       return;
     }
-    const payload = await readEditorDeck({ deckId });
+    const payload = await backend.readEditorDeck({ deckId });
     if (!payload) return;
     history.clear();
     publish({
@@ -2935,7 +2926,7 @@ export function createEditorController(init: {
   ): Promise<Committed> => {
     await idle();
     const write: Write = { baseRevision: latest().serverRevision, author, mutations };
-    const result = await writeDeck({ deckId, write, returnDocument: true });
+    const result = await backend.writeDeck({ deckId, write, returnDocument: true });
     if (!result.ok) {
       if (result.code === 'conflict') {
         publish({ error: result.message });
@@ -2966,14 +2957,14 @@ export function createEditorController(init: {
   };
 
   const refreshVersions = async (): Promise<Version[]> => {
-    const versions = await listVersions({ deckId });
+    const versions = await backend.listVersions({ deckId });
     publish({ versions });
     return versions;
   };
 
   const saveVersionNamed = async (note: string): Promise<Version> => {
     await idle();
-    const version = await saveVersion({ deckId, author, note });
+    const version = await backend.saveVersion({ deckId, author, note });
     publish({ versions: [...snapshot.versions, version], versionPrompt: false });
     /* the one sentence is the caller's (the Name version dialog, the panel's notice; docs/archive/rounds/POLISH.md
        item 91): "Saved the version <name>", never a second "Version 7 saved" beside it */
@@ -3203,7 +3194,7 @@ export function createEditorController(init: {
    * @turboslide/schema/diagrams (SPEC-2 2.8.3). The measurers read the slides of the current
    * snapshot (the store's read is the local document).
    */
-  const measureOptions = () => ({ assetBase: ASSET_BASE(deckId) });
+  const measureOptions = () => ({ assetBase: backend.assetBase(deckId) });
   /** The tail of this tab's client id, so a minted slide id never meets another tab's (item 99). */
   const idSuffix = (): string | undefined => {
     const id = room?.clientId();
@@ -3268,7 +3259,7 @@ export function createEditorController(init: {
     };
   });
   on<{ name: string; from: DeckTemplateId; id?: string }>('deck.create', async (input) => {
-    const created = await createNewDeck(input);
+    const created = await backend.createNewDeck(input);
     // the seller's words, never an id (docs/archive/rounds/PRODUCT.md section 2 rank 14)
     const count = created.counts.slides;
     say(`Created ${created.title}, ${count} slide${count === 1 ? '' : 's'}`);
@@ -3285,7 +3276,7 @@ export function createEditorController(init: {
   const adoptCreatedDeck = async (known?: EditorDeck): Promise<void> => {
     let payload: EditorDeck | null;
     try {
-      payload = known ?? (await readEditorDeck({ deckId }));
+      payload = known ?? (await backend.readEditorDeck({ deckId }));
     } catch (error) {
       draftInFlight = false;
       rejectDraftQueue(error instanceof Error ? error : new TypeError(String(error)));
@@ -3393,13 +3384,18 @@ export function createEditorController(init: {
       if (draft) draftInFlight = true;
       let answer: RunDeckActionAnswer;
       try {
-        answer = await runDeckActionDetailed({ deckId, action: id, input: request, author });
+        answer = await backend.runDeckActionDetailed({
+          deckId,
+          action: id,
+          input: request,
+          author,
+        });
       } catch (error) {
         if (draft) {
           // the action may have created the deck before it failed (a picture sharp refused):
           // the deck is adopted the same way, so the address moves and the room attaches, and
           // the bursts typed meanwhile follow; otherwise they return to their author
-          const stored = await readEditorDeck({ deckId }).catch(() => null);
+          const stored = await backend.readEditorDeck({ deckId }).catch(() => null);
           if (stored !== null) await adoptCreatedDeck(stored).catch(() => undefined);
           else {
             draftInFlight = false;
@@ -3514,7 +3510,7 @@ export function createEditorController(init: {
           ...(input.slideIds !== undefined ? { slideIds: input.slideIds } : {}),
         });
         if (input.format !== 'pdf' && exportBatchSize > 0 && ids.length > exportBatchSize) {
-          const merged = await runBatchedExport(deckId, input, (progress) =>
+          const merged = await backend.runBatchedExport(deckId, input, (progress) =>
             publish({
               artifact: {
                 progress: {
@@ -3544,7 +3540,7 @@ export function createEditorController(init: {
           if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
           return run.report;
         }
-        const run = await runSyncExport(deckId, input, (line, rows) =>
+        const run = await runSyncExport(backend, deckId, input, (line, rows) =>
           publish({
             artifact: {
               progress: {
@@ -3561,9 +3557,9 @@ export function createEditorController(init: {
         if (first?.url !== undefined) await triggerDownload(downloadUrlOf(first.url));
         return run.report;
       }
-      const started = await startExport({ deckId, input });
+      const started = await backend.startExport({ deckId, input });
       for (;;) {
-        const poll = await pollExport({ jobId: started.jobId });
+        const poll = await backend.pollExport({ jobId: started.jobId });
         if (poll.status === 'done' && poll.report) {
           const run: ArtifactRun = {
             kind: 'export',
@@ -3603,7 +3599,7 @@ export function createEditorController(init: {
   on<{ out: string; budgetMB?: number; quality?: number }>('build.run', async (input) => {
     publish({ artifact: { progress: { label: 'Building the standalone file' }, run: null } });
     try {
-      const built = await runBuild({
+      const built = await backend.runBuild({
         deckId,
         ...(input.budgetMB !== undefined ? { budgetMB: input.budgetMB } : {}),
       });
@@ -3873,7 +3869,7 @@ export function createEditorController(init: {
     'slide.lease',
     async (input) => {
       requireSlide(input.slideId);
-      const lease = await leaseSlide({
+      const lease = await backend.leaseSlide({
         deckId,
         slideId: input.slideId,
         author,
@@ -4023,7 +4019,7 @@ export function createEditorController(init: {
       on<unknown>(id, async (input) => {
         // a comment write through the window API is this tab's own and ends its follow too
         if (!readsOnly(input) && endsFollowOnAction(id)) stopFollowing();
-        const output = await runDeckAction({ deckId, action: id, input, author });
+        const output = await backend.runDeckAction({ deckId, action: id, input, author });
         if (!readsOnly(input)) {
           applyAnsweredThread(output);
           scheduleCommentsRefresh();
@@ -4059,7 +4055,7 @@ export function createEditorController(init: {
      edits keep the old label and nothing links the two. The menu row asks first (the
      forgetBrowser dialog); the window API acts at once, the agent having asked. */
   on<Record<string, never>>('account.forget', async () => {
-    const output = (await runDeckAction({
+    const output = (await backend.runDeckAction({
       deckId,
       action: 'account.forget',
       input: {},
@@ -4082,7 +4078,7 @@ export function createEditorController(init: {
     layers?: 'static' | 'rendered' | 'both';
     rule?: Finding['rule'];
   }>('lint.run', (input) =>
-    lintSlides({
+    backend.lintSlides({
       deckId,
       slideIds: input.slideIds,
       ...(input.layers !== undefined ? { layers: input.layers } : {}),
@@ -4128,7 +4124,7 @@ export function createEditorController(init: {
   on<{ slideIds: 'all' | string[]; themes?: Theme[]; scale?: 1 | 2; format?: 'png' | 'jpg' }>(
     'render.slide',
     (input) =>
-      renderSlideImages({
+      backend.renderSlideImages({
         deckId,
         slideIds: input.slideIds,
         ...(input.themes !== undefined ? { themes: input.themes } : {}),
@@ -4395,7 +4391,7 @@ export function createEditorController(init: {
     sectionId?: string;
     baseRevision: number;
   }>('slide.import', async (input) => {
-    const output = (await runDeckAction({
+    const output = (await backend.runDeckAction({
       deckId,
       action: 'slide.import',
       input,
@@ -4674,7 +4670,7 @@ export function createEditorController(init: {
       await idle();
       const before = latest().document.deck.revision;
       try {
-        const answer = await runDeckActionDetailed({
+        const answer = await backend.runDeckActionDetailed({
           deckId,
           action: 'shader.frame',
           input: { ...input, baseRevision: reportedRevision() },
@@ -4699,7 +4695,7 @@ export function createEditorController(init: {
     },
     captureHosted: async (slideId, blockId) => {
       await idle();
-      const answer = await runDeckActionDetailed({
+      const answer = await backend.runDeckActionDetailed({
         deckId,
         action: 'shader.capture',
         input: { slideId, blockId, baseRevision: reportedRevision() },
@@ -4714,7 +4710,7 @@ export function createEditorController(init: {
     },
     /* the presigned path for a frame over the function's body cap (B4's R17, docs/archive/rounds/POLISH.md
        item 36): the picture intake's grant, then the PUT, then the key `shader.frame` reads */
-    upload: (bytes) => presignUpload(deckId, 'image/png', bytes),
+    upload: (bytes) => backend.presignUpload(deckId, 'image/png', bytes),
     uploadAbove: FRAME_UPLOAD_ABOVE_BYTES,
     onError: (error) => {
       console.warn('shader frame', error);
@@ -4909,7 +4905,7 @@ export function createEditorController(init: {
       if (warmed.has(theme)) return;
       warmed.add(theme);
       const slideIds = slideOrder(latest().document).slice(0, GRID_WARM_TILES);
-      warmThumbnails({ data: { deckId, theme, slideIds } }).catch((error: unknown) => {
+      backend.warmThumbnails({ data: { deckId, theme, slideIds } }).catch((error: unknown) => {
         warmed.delete(theme);
         say(`The thumbnails could not be drawn: ${errorMessage(error)}`);
       });
@@ -4929,7 +4925,7 @@ export function createEditorController(init: {
           await triggerDownload(downloadUrlOf(file.url));
           return;
         }
-        const { url } = await signDownload(
+        const { url } = await backend.signDownload(
           run.kind === 'export'
             ? { kind: 'job', jobId: run.jobId, name: file.name }
             : { kind: 'build', deckId, name: file.name },
@@ -5053,6 +5049,8 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
         counter: slideCounter(deck, slide, 1, 1) !== '',
         // the slide clock's input for the show (HTML-SLIDES-DESIGN 2.6); none on a slide without motion
         ...motionField(deck.defaults, slide),
+        // the slide's Playback for the read only show's ShaderLayer (the shader design 3.1)
+        ...(slidePlay(deck, slide) === 'hold' ? { play: 'hold' as const } : {}),
       });
     }
   }
@@ -5072,5 +5070,7 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
       readTheme(),
       bandAssetResolver(deck, (_id, _theme, path) => assetBase + path),
     ),
+    /* the deck's shader palette, so a shader the show plays draws the colours of its still */
+    palette: shaderPaletteOfDeck(deck),
   };
 }

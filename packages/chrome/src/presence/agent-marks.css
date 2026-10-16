@@ -1,0 +1,12 @@
+/* The agent marks (agent-marks.tsx): a mark whose own colour does not read on a dark ground
+   (thesvg.org records Hermes's #2d6376 as not reading on ink) draws in the ink of the dark
+   appearance. The svg's own colour is a presentation attribute, so this rule wins over it. */
+:root[data-theme='dark'] .ts-agent-mark[data-ink-on-dark],
+.ts-overlay[data-theme='dark'] .ts-agent-mark[data-ink-on-dark] {
+  color: var(--pt-ink);
+}
+
+.ts-agent-mark {
+  display: block;
+  flex: none;
+}

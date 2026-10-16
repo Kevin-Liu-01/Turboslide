@@ -34,6 +34,16 @@ import { advanceSchema, effectsSchema, transitionSchema } from './motion.ts';
 
 export const SCHEMA_VERSION = 1;
 
+/**
+ * The minor this release writes (RELIABILITY-19, hardening HR-O#5). A release that adds a field
+ * raises it and stamps `schemaMinor` on the files it writes; a release reads a file of a higher
+ * minor by keeping the fields it does not know and writing them back unchanged
+ * (migrations.ts `parseTolerant`), so a rollback past an additive release still opens and saves
+ * every deck. A field that is renamed or removed raises SCHEMA_VERSION instead, with a migration.
+ * Minor 0 is never written: a file without the field is minor 0.
+ */
+export const SCHEMA_MINOR = 0;
+
 /** The appearance a new deck opens in when the deployment's kit is silent (docs/archive/rounds/PRODUCT.md section 1, question 1): one line to flip. */
 export { DEFAULT_APPEARANCE } from './brand.ts';
 
@@ -88,6 +98,14 @@ export type Appearance = (typeof APPEARANCES)[number];
 export const COUNTER_MODES = ['on', 'off', 'skip-title'] as const;
 export type CounterMode = (typeof COUNTER_MODES)[number];
 
+/**
+ * Playback (the shader design 3.1, named for every live block as the HTML slides design 2.2 names
+ * it): whether the live blocks of a slide move in the show and the viewer, or hold their stills.
+ * Play when absent.
+ */
+export const PLAY_MODES = ['play', 'hold'] as const;
+export type PlayMode = (typeof PLAY_MODES)[number];
+
 // ---------------------------------------------------------------------------------------------
 // Types
 
@@ -96,6 +114,8 @@ export type Section = { id: SectionId; name: string; slideIds: SlideId[] };
 
 export type Deck = {
   schemaVersion: 1;
+  /** the minor of the release that wrote the file, when above 0 (SCHEMA_MINOR) */
+  schemaMinor?: number;
   /** slug, stable: 'gt-brand' */
   id: string;
   title: string;
@@ -114,6 +134,8 @@ export type Deck = {
     transition?: Transition;
     /** the timed advance every slide without its own takes (motion.ts); a click advances when absent */
     advance?: Advance;
+    /** whether the live blocks move in the show and the viewer; play when absent (Slide > Playback > Apply) */
+    play?: PlayMode;
   };
   /**
    * The deck's guides (gslides-parity SPEC-2 2.10): vertical lines at the x values and horizontal
@@ -145,6 +167,8 @@ export type Deck = {
 export type SlideBase = {
   /** on every slide file so one slide can be read, validated and migrated alone */
   schemaVersion: 1;
+  /** the minor of the release that wrote the file, when above 0 (SCHEMA_MINOR) */
+  schemaMinor?: number;
   id: SlideId;
   /** overrides the derived title (first heading, big or plate title) */
   title?: string;
@@ -162,6 +186,8 @@ export type SlideBase = {
    * absent, the slide follows the deck.
    */
   counter?: 'on' | 'off';
+  /** Slide > Playback > Apply to selected: this slide's live blocks play or hold whatever the deck says; absent, the slide follows the deck. */
+  play?: PlayMode;
   /** The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide until New slide or Apply layout runs. */
   template?: LayoutId;
   /**
@@ -494,8 +520,12 @@ export const grammarRecordSchema = z.strictObject({
     .optional(),
 }) satisfies z.ZodType<GrammarRecord>;
 
+/** `schemaMinor` as a file stores it: an integer above 0, absent on minor 0 (SCHEMA_MINOR). */
+export const schemaMinorSchema = z.number().int().positive().optional();
+
 const slideBase = {
   schemaVersion: z.literal(SCHEMA_VERSION),
+  schemaMinor: schemaMinorSchema,
   id: annotate(slugSchema, { label: 'Id', control: 'readonly', group: 'Slide' }),
   title: annotate(z.string().optional(), {
     label: 'Title override',
@@ -521,6 +551,13 @@ const slideBase = {
     snap: ['on', 'off'],
     group: 'Slide',
     help: 'Numbers this slide, or takes its number away, whatever the presentation’s Slide numbers say (Insert > Slide numbers > Apply to selected).',
+  }),
+  play: annotate(z.enum(PLAY_MODES).optional(), {
+    label: 'Playback',
+    control: 'select',
+    snap: PLAY_MODES,
+    group: 'Slide',
+    help: 'play or hold this slide’s shaders in the show and the viewer, over the presentation’s Playback. Follows it when absent.',
   }),
   template: annotate(z.enum(LAYOUT_IDS).optional(), {
     label: 'Layout',
@@ -670,6 +707,7 @@ export const isoDateSchema = z
 
 export const deckSchema = z.strictObject({
   schemaVersion: z.literal(SCHEMA_VERSION),
+  schemaMinor: schemaMinorSchema,
   id: slugSchema,
   title: annotate(z.string().min(1), { label: 'Title', control: 'text', group: 'Slide' }),
   theme: annotate(z.enum(THEMES), {
@@ -715,6 +753,13 @@ export const deckSchema = z.strictObject({
         control: 'json',
         group: 'Slide',
         help: 'The timed advance every slide without its own takes; slide.advance without slide ids writes it.',
+      }),
+      play: annotate(z.enum(PLAY_MODES).optional(), {
+        label: 'Playback',
+        control: 'select',
+        snap: PLAY_MODES,
+        group: 'Slide',
+        help: 'play moves the shaders and other live blocks in the show and the viewer, hold shows their stills; a slide’s own play wins. Play when absent. A viewer’s Reduce motion or Play animated patterns Off holds them for that viewer.',
       }),
     })
     .optional(),
@@ -852,6 +897,19 @@ export function deckCounter(deck: Pick<Deck, 'brand' | 'defaults' | 'theme'>): C
  */
 export function deckCounterFormat(deck: Pick<Deck, 'brand' | 'theme'>): CounterFormat {
   return deck.brand?.counter?.format ?? themeFactsOf(deck.theme).counter.format;
+}
+
+/**
+ * Whether a slide's live blocks play or hold in the show and the viewer (the shader design 3.1,
+ * renamed `play` by the HTML slides design 2.2): the slide's own word, else the deck's, else play.
+ * The one reader; the viewer's live-plan.ts applies the person's settings over it, which can only
+ * hold.
+ */
+export function slidePlay(
+  deck: Pick<Deck, 'defaults'>,
+  slide: Pick<SlideBase, 'play'> | undefined,
+): PlayMode {
+  return slide?.play ?? deck.defaults?.play ?? 'play';
 }
 
 /** The deck's theme: the stored id, with the legacy `gt-ink-paper` read as General Translation. */
@@ -1041,4 +1099,76 @@ function decodeEntities(text: string): string {
     if (body.startsWith('#')) return String.fromCodePoint(Number.parseInt(body.slice(1), 10));
     return NAMED_ENTITIES[body.toLowerCase()] ?? whole;
   });
+}
+
+// ---------------------------------------------------------------------------------------------
+// The stored manifest's two shapes (hardening PS#12a, PERF-3 item 3, CRIT-M13)
+//
+// `deck.json` holds the asset catalog inline (`assets`), 96,275 B of the GT deck's manifest, and
+// a commit rewrites all of it for a one paragraph edit. A later release (PS#12b) keeps the catalog
+// in `assets.json` beside `deck.json`, rewritten only by a commit that changes an asset, and the
+// manifest names the catalog's md5 (`assetCatalog`, the store's etag for its bytes) in the place
+// the catalog held. This release reads both shapes and writes the inline one alone, so a rollback
+// from PS#12b lands on a release that reads every manifest PS#12b stored (1.3 item 4). The pair is
+// read as one document: the manifest's key order with `assetCatalog` swapped for `assets` in
+// place, so the inline form's canonical bytes are the ones a writer of that form would store.
+
+/** The catalog file beside `deck.json` in the external shape. */
+export const ASSET_CATALOG_FILE = 'assets.json';
+
+/** The md5 of a catalog's bytes, lower case hex: what `assetCatalog` holds. */
+export const assetCatalogDigestSchema = z.string().regex(/^[0-9a-f]{32}$/);
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * The catalog digest a raw manifest names when it is in the external shape (no `assets`, an
+ * `assetCatalog` of 32 hex characters), else null. A manifest that carries both is the inline
+ * shape with a stray field, which validation reports.
+ */
+export function assetCatalogOf(raw: unknown): string | null {
+  if (!isPlainRecord(raw) || 'assets' in raw) return null;
+  const parsed = assetCatalogDigestSchema.safeParse(raw['assetCatalog']);
+  return parsed.success ? parsed.data : null;
+}
+
+/** Copies `raw` with the key `from` replaced by `to` (holding `value`) at the same place. */
+function swapKey(
+  raw: Record<string, unknown>,
+  from: string,
+  to: string,
+  value: unknown,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(raw)) {
+    if (key === from) out[to] = value;
+    else if (key !== to) out[key] = field;
+  }
+  return out;
+}
+
+/**
+ * The inline manifest of an external one: `assetCatalog` replaced by the catalog `assets.json`
+ * holds, in its place. A manifest already inline comes back as it is. The digest is not checked
+ * here; the store compares the catalog's md5 with `assetCatalogOf` before it calls this.
+ */
+export function inlineAssetCatalog(raw: unknown, catalog: unknown): unknown {
+  if (assetCatalogOf(raw) === null) return raw;
+  return swapKey(raw as Record<string, unknown>, 'assetCatalog', 'assets', catalog);
+}
+
+/**
+ * The external shape of a manifest: `assets` replaced in place by `assetCatalog`, the md5 of the
+ * catalog's canonical bytes, which the caller computes (this package has no hash). The store
+ * hashes it to prove a head written in that shape (blob-store.ts `manifestKeys`).
+ */
+export function externalManifestOf(deck: Deck, catalogDigest: string): Record<string, unknown> {
+  return swapKey(
+    deck as unknown as Record<string, unknown>,
+    'assets',
+    'assetCatalog',
+    catalogDigest,
+  );
 }

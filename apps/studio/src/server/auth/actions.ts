@@ -16,6 +16,7 @@ import { newPrincipalRecord } from '@turboslide/identity/principal';
 import type { Scope } from '@turboslide/schema/access';
 import { isActionId } from '@turboslide/schema/actions';
 import type { IndexAvatarChoice } from '@turboslide/store/hosted';
+import { sharesPublicStore } from '@turboslide/store/select';
 import type { DeckHead } from '@turboslide/store/templates';
 
 import { openDeckStore } from '../root';
@@ -67,6 +68,8 @@ export type AccountActionDeps = {
   /** The names held in the presentation (the owner, the roster, the version log); the default reads the version log. */
   namesInUse?: (deckId: string | undefined, callerId: string | null) => Promise<string[]>;
   now?: () => Date;
+  /** The environment the avatar sweep checks for a shared public store; `process.env` by default. */
+  env?: Readonly<Record<string, string | undefined>>;
 };
 
 /** The header Forget this browser sets so the boot script and the room client clear their mirrors. */
@@ -80,6 +83,12 @@ export const KEY_SCOPE_FOR_ACCOUNT =
   'This API key cannot change its owner’s name or avatar: it needs the write scope';
 /** The id of the janitor's action; registered once the schema header declares it (PEOPLE.md 4.6). */
 export const AVATAR_SWEEP_ACTION = 'admin.avatar.sweep';
+/**
+ * The sweep refused on a deployment that shares the public store with production (HR-K1#4b): it
+ * reads its own profiles, so every production avatar under u/ would read as an orphan.
+ */
+export const AVATAR_SWEEP_SHARED_STORE =
+  'The avatar sweep runs on production alone: this deployment shares the public store, and its profiles do not name production avatars';
 
 /**
  * The person an account action changes (docs/archive/rounds/PEOPLE.md 4.7): the anonymous or account principal
@@ -417,7 +426,7 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
      resolves the new record at once (b1.md R18), and onto the principal's deck index, the
      carrier every instance reads (R17; PEOPLE.md 3.13): a refused index write leaves the record
      standing. The account's cached session facts leave too (identity.ts `accountSession`, the D1
-     engine's 300 s cache; docs/CLOUDFLARE.md 4.1), so a renamed account reads its new name on the
+     engine's 60 s cache; docs/CLOUDFLARE.md 4.1), so a renamed account reads its new name on the
      next request of this instance */
   const propagate = async (
     principalId: string,
@@ -517,7 +526,8 @@ export function registerAccountActions(dispatcher: Dispatcher, deps: AccountActi
     const { identity, request } = facts;
     if (rt.auth === null || identity.kind !== 'account' || request === undefined)
       return { signedOut: 0 };
-    /* a revoked session must not answer from the facts cache for the rest of its 300 s */
+    /* a revoked session must not answer from this instance's facts cache for the rest of its 60 s;
+       other instances refuse it within those 60 s (HR-SA#7) */
     if (identity.principalId !== null) forgetAccountFacts(identity.principalId, rt);
     const listed = (await rt.auth.api.listSessions({ headers: request.headers })) as {
       id: string;
@@ -663,6 +673,8 @@ export function registerAdminActions(dispatcher: Dispatcher, deps: AccountAction
       const { dryRun } = input as { dryRun?: boolean };
       const facts = await deps.facts();
       requireAdmin(facts.identity);
+      if (sharesPublicStore(deps.env ?? process.env))
+        throw new TypeError(AVATAR_SWEEP_SHARED_STORE);
       const rt = runtime();
       if (rt.db === null) throw new RangeError(AVATAR_SWEEP_NEEDS_DATABASE);
       return sweepOrphanAvatars(avatarStore(), rt.profiles, {

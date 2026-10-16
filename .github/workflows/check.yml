@@ -1,0 +1,72 @@
+# The checks every push to main runs on GitHub (docs/hardening/HARDENING.md HR-W#5, RUST-3): the
+# type check, the unit tests of every vitest project, the dependency audit and the realtime
+# Worker's tests. The guard (~/.config/turboslide/gt-follow.sh) still decides what reaches
+# production; this job records the same tree's checks where anyone can read them.
+#
+# Every action is pinned by its commit (the tag beside it is the release the commit was read from
+# on 2026-10-12), the token reads the repository and nothing more, and checkout leaves no
+# credential in the git config. Browser tests skip: the runner has no Chrome for Testing, and the
+# local chain (scripts/check.mjs) and the guard run them. The tests that read the Prototemplate
+# checkout skip too, since the runner has none. The Rust crate's tests are not here; the native
+# job (HR-N#4) carries them.
+name: check
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      TURBOSLIDE_SKIP_BROWSER: '1'
+      TURBOSLIDE_SKIP_BROWSER_TESTS: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node first, so pnpm 11 runs on the Node the workspace's engines name, not the runner's own
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.13.0'
+          package-manager-cache: false
+
+      # pnpm at the version package.json's packageManager names, with the store cached by the
+      # lockfile's hash
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          cache: true
+
+      # the install and the route tree (check steps 1 and 2): routeTree.gen.ts is generated and
+      # never tracked, and the type check reads it
+      - name: Install
+        id: install
+        run: pnpm install --frozen-lockfile && pnpm exec tsr generate --config apps/studio/tsr.config.json
+
+      # each check runs once the install passed, whatever an earlier check answered, so one red
+      # step never hides another
+      - name: Dependency audit (check step 28)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: node scripts/check.mjs --audit
+
+      - name: Type check (check step 4)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm exec tsc -b
+
+      - name: Realtime Worker tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm --filter @turboslide/realtime-worker test
+
+      - name: Unit tests (check step 5)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm test

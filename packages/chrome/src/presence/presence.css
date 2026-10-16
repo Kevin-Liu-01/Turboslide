@@ -34,6 +34,14 @@
   border-style: dashed;
 }
 
+/* an agent's brand mark (docs/SITE.md D5): drawn on paper in its own colours, on every surface,
+   the flag's ink plate included, so a mark drawn in currentColor reads */
+.ts-chip.has-brand,
+.ts-flag .ts-chip.has-brand {
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
 .ts-chip.is-blank {
   width: 24px;
   height: 24px;
@@ -481,7 +489,7 @@
 
 .ts-remote-outline.is-agent {
   border-style: dashed;
-  border-color: var(--pt-ink);
+  border-color: var(--ts-hue, var(--pt-ink));
 }
 
 /* The drag ghost (the realtime round, docs/REALTIME.md 3.5; row realtime.block.drag-live): the

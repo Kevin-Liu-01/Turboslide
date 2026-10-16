@@ -6,17 +6,20 @@
 // commit, listed by `GET /control/open` for the drain. Both tables are made by
 // migrations/0001_control.sql and never here; a missing table reads as `unset`. The counters are
 // per isolate (the dashboard stays the account's figure of record; build/r1.md R1-R5d).
+import { FLAG_NAMES } from '@turboslide/schema/access';
 
 export type RealtimeFlag = 'on' | 'off' | 'unset';
 
 /**
  * Whether the deck objects reach the app (3.8; VERIFICATION.md realtime pass 1 finding 7): an
  * object whose seed or checkpoint calls fail for the deployment's reason (no answer, a redirect,
- * 401, 403, a seed route's 5xx; deck-room.ts `AppCallError.reach`) twice in a row writes `rt_flags.callbacks` as `failing:<ms>:<status>`, and one
- * whose call answers after that writes `ok:<ms>`. `/health` reads `failing` while the stamp is
- * younger than CALLBACKS_FAILING_TTL_MS, and the function's flag reads off then, so its
- * instance hands the tabs to the blob tier as for an unreachable Worker (3.8 item 4); the stamp
- * running out lets the instance try the Worker again.
+ * 401, 403, a seed route's 5xx; deck-room.ts `AppCallError.reach`) twice in a row writes
+ * `rt_flags.callbacks` as `failing:<ms>:<status>`, and one whose call answers after that writes
+ * `ok:<ms>`. An object whose storage refuses two writes in a row (the daily cap, RELIABILITY-22)
+ * writes `failing:<ms>:storage:<kind>` the same way. `/health` reads `failing` while the stamp is
+ * younger than CALLBACKS_FAILING_TTL_MS, and the function's flag reads off then, so its instance
+ * hands the tabs to the blob tier as for an unreachable Worker (3.8 item 4); the stamp running out
+ * lets the instance try the Worker again.
  */
 export type CallbacksState = 'ok' | 'failing';
 
@@ -72,14 +75,17 @@ export async function callbacksState(db: D1Database, now = Date.now()): Promise<
   return callbacksStateOf(flagCache.callbacks, now);
 }
 
-/** The object's word on its app calls (`failing` with the status that failed, or `ok`); one upsert. */
+/**
+ * The object's word on its app calls and its storage: `failing` with the status of the call that
+ * failed or `storage:<kind>` for a write its storage refused (HR-RT#12), or `ok`; one upsert.
+ */
 export async function noteCallbacks(
   db: D1Database,
   state: CallbacksState,
   now: number,
-  status?: number,
+  cause?: number | `storage:${string}`,
 ): Promise<void> {
-  const value = state === 'failing' ? `failing:${now}:${status ?? 0}` : `ok:${now}`;
+  const value = state === 'failing' ? `failing:${now}:${cause ?? 0}` : `ok:${now}`;
   await db
     .prepare(
       'INSERT INTO rt_flags (k, v) VALUES (?, ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v',
@@ -137,14 +143,25 @@ export async function readFlags(db: D1Database): Promise<Record<string, string> 
 
 const FLAG_KEY = /^[a-z][A-Za-z0-9]{0,31}$/;
 const FLAG_VALUE = /^[A-Za-z0-9_.:-]{1,64}$/;
+/**
+ * The kill switches (SPEC-3 8.12): rows the studio reads every 5 s and writes with `admin.flag`
+ * (hardening HR-O#4, apps/studio/src/server/flags.ts). Each takes `on` or `off` alone, so a
+ * mistyped value is refused here instead of reading as the switch's default on every instance.
+ */
+const SWITCHES: ReadonlySet<string> = new Set(FLAG_NAMES);
 
-/** Upserts the given flags; a key or a value outside the grammar is refused with a TypeError. */
+/**
+ * Upserts the given flags; a key or a value outside the grammar, or a kill switch with a value
+ * other than `on` or `off`, is refused with a TypeError.
+ */
 export async function writeFlags(db: D1Database, flags: Record<string, string>): Promise<void> {
   const statements: D1PreparedStatement[] = [];
   for (const [key, value] of Object.entries(flags)) {
     if (!FLAG_KEY.test(key)) throw new TypeError(`${JSON.stringify(key)} is not a flag name`);
     if (!FLAG_VALUE.test(value))
       throw new TypeError(`${JSON.stringify(value)} is not a flag value`);
+    if (SWITCHES.has(key) && value !== 'on' && value !== 'off')
+      throw new TypeError(`${JSON.stringify(key)} takes on or off`);
     statements.push(
       db
         .prepare(

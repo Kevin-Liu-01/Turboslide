@@ -20,9 +20,9 @@ function header(): string[] {
   return [
     '# Turboslide',
     '',
-    '> A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API (SPEC 1, 7.1).',
+    '> A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API.',
     '',
-    'Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX with a verified report, pixel identical in its default mode (docs/pptx.md). There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.',
+    'Turboslide keeps a presentation as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX with a verified report, pixel identical in its default mode. There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.',
     '',
   ];
 }
@@ -57,8 +57,9 @@ function execution(): string[] {
     `- Deck: ${http.deck}`,
     `- Author: ${http.author}`,
     `- Force: ${http.force}`,
+    `- Retries: ${http.idempotency}`,
     `- Auth: ${http.auth}`,
-    `- Limits: ${http.limits.writeBytes} bytes per write body, ${http.limits.assetBytes} bytes per asset upload.`,
+    `- Limits: ${http.limits.writeBytes} bytes per write body; ${http.limits.assetBytes} bytes per picture without an account, ${http.limits.assetBytesSignedIn} signed in. A hosted studio refuses SVG and re-encodes every picture; HEIF and JXL are refused and an animated GIF keeps its first frame.`,
     `- Errors: ${http.errors}`,
     '',
     '## MCP over HTTP',
@@ -90,8 +91,8 @@ function rendersAndExports(): string[] {
     '- POST /api/export/<deckId> takes the export.run input as one JSON object (format defaults to pptx; out is ignored, the file lands in the job folder). ?sync=1 (or "sync": true in the body) runs the export inside the request and answers the file, or the ExportReport with the files and their URLs under ?format=json (or Accept: application/json); the X-Turboslide-Export-Report header carries the summary.',
     '- A hosted studio (a serverless function) runs every POST synchronously, ?sync=1 or not, and says so in X-Turboslide-Sync: hosted: a queued job would get CPU only while another request kept the instance busy, and its record lives on that instance alone. Send ?sync=1 so the request means the same everywhere.',
     "- In a checkout or against the Docker worker, a POST without ?sync=1 answers 202 with the job and a Location to poll: GET /api/export/<deckId>?job=<id> for the record (the ExportReport under report once done), GET without job for the deck's jobs.",
-    '- A file over 4.5 MB cannot leave a function: the route answers 302 to the stored copy when the deployment has a Blob store, else 413 with the JSON body; export one theme or a slide subset then.',
-    '- Auth: both routes require Authorization: Bearer <TURBOSLIDE_TOKEN> when the instance has the token set (the thumbnail variant of the render route stays open for the editor); without it they are open.',
+    '- A file over 4.5 MB cannot leave a function: with a Blob store the route answers 302 to /api/download/s.<token>, a link signed for the caller that expires in ten minutes (410 after, 403 to anyone else) and never the store address; without one it answers 413 with the JSON body; export one theme or a slide subset then.',
+    '- Auth: both routes require Authorization: Bearer <TURBOSLIDE_TOKEN> when the instance has the token set; without it they are open. The thumbnail variant (?w=) is answered only to a caller who can read the deck.',
     '',
   ];
 }

@@ -37,7 +37,7 @@ import { validateDocument, validateTouched } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
 import { touchedSlides } from '@turboslide/store/store';
 
-import { CAPS } from './admission.ts';
+import { CAPS, MB } from './admission.ts';
 import { entryRun, runTieSide } from './channel.ts';
 import type { Entry, NewEntry, RejectReason, RoomEvent, RosterEntry } from './channel.ts';
 import {
@@ -102,7 +102,81 @@ export type Rejected = { opId: string; reason: RejectReason; message?: string };
  * HR-RC#4, RELIABILITY-7).
  */
 export function slideBytes(slide: Slide): number {
-  return new TextEncoder().encode(canonicalJson(slide)).byteLength;
+  return utf8Bytes(canonicalJson(slide));
+}
+
+function utf8Bytes(text: string): number {
+  return new TextEncoder().encode(text).byteLength;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The deck cap (RUST-4; hardening HR-RT#10)
+
+/** The refusal's sentence when an entry would take the deck past `CAPS.deckMaxBytes`. */
+export const DECK_OVERSIZE_SENTENCE = `This presentation would pass ${CAPS.deckMaxBytes / MB} MB. Remove slides to make room.`;
+
+/**
+ * The canonical bytes of the documents the admission measured, by object: a slide (`slideBytes`)
+ * and a whole document (`deckBytes`). The admission never writes through a document or a slide it
+ * placed (`applyMutations` copies, `applyMutationsTouched` clones what it writes; CRIT-M17), so
+ * an object's bytes do not change once read. Weak, so a document the room let go takes its
+ * entry with it.
+ */
+const slideSizes = new WeakMap<Slide, number>();
+const deckSizes = new WeakMap<DeckDocument, number>();
+
+function sizeOfSlide(slide: Slide): number {
+  let bytes = slideSizes.get(slide);
+  if (bytes === undefined) {
+    bytes = slideBytes(slide);
+    slideSizes.set(slide, bytes);
+  }
+  return bytes;
+}
+
+/**
+ * A deck's bytes as the cap reads them (RUST-4): every slide's canonical JSON and the manifest's,
+ * in UTF-8, the files the store writes for the document. Counted in full once per document
+ * object; the admission carries the count from a document to the next (`deckBytesAfter`), so
+ * the object and the function's rooms keep a running total. Pure.
+ */
+export function deckBytes(document: DeckDocument): number {
+  const known = deckSizes.get(document);
+  if (known !== undefined) return known;
+  let total = utf8Bytes(canonicalJson(document.deck));
+  for (const slide of Object.values(document.slides)) total += sizeOfSlide(slide);
+  deckSizes.set(document, total);
+  return total;
+}
+
+/**
+ * The bytes of `after`, the document `mutations` made of `before`. A write of slides alone
+ * (`slideLevelTargets`) changes those slides and, through the title rule, the manifest's title
+ * and nothing else of the manifest (reduce.ts `applyMutationsTouched`), so the total moves by
+ * those slides' bytes and the title's. Any other write is counted in full, as it validates the
+ * whole document too.
+ */
+function deckBytesAfter(
+  before: DeckDocument,
+  after: DeckDocument,
+  mutations: ReadonlyArray<Mutation>,
+): number {
+  const known = deckSizes.get(after);
+  if (known !== undefined) return known;
+  const targets = slideLevelTargets(mutations);
+  if (targets === null) return deckBytes(after);
+  let total = deckBytes(before);
+  for (const slideId of targets) {
+    const was = before.slides[slideId];
+    const now = after.slides[slideId];
+    if (was !== undefined) total -= sizeOfSlide(was);
+    if (now !== undefined) total += sizeOfSlide(now);
+  }
+  if (before.deck.title !== after.deck.title)
+    total +=
+      utf8Bytes(JSON.stringify(after.deck.title)) - utf8Bytes(JSON.stringify(before.deck.title));
+  deckSizes.set(after, total);
+  return total;
 }
 
 /**
@@ -471,9 +545,18 @@ function landWith(
   const { mutations, document: next } = placed;
   for (const slideId of touchedSlides(mutations)) {
     const slide = next.slides[slideId];
-    if (slide !== undefined && slideBytes(slide) > CAPS.slideMaxBytes) {
+    if (slide !== undefined && sizeOfSlide(slide) > CAPS.slideMaxBytes) {
       return { ok: false, rejected: { opId: candidate.opId, reason: 'too-large' } };
     }
+  }
+  // the deck cap (RUST-4, HR-RT#10): an entry that would take the deck past it is refused; one
+  // that keeps or lowers the bytes of a deck already past it lands, so that deck can be trimmed
+  const bytes = deckBytesAfter(document, next, mutations);
+  if (bytes > CAPS.deckMaxBytes && bytes > deckBytes(document)) {
+    return {
+      ok: false,
+      rejected: { opId: candidate.opId, reason: 'too-large', message: DECK_OVERSIZE_SENTENCE },
+    };
   }
   // a write of slides is judged on those slides and, when the title followed a heading, the
   // manifest; a write of the deck on the whole document (HR-RT#5a)

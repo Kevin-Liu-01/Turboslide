@@ -5,6 +5,8 @@ import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
+import { buildDefine } from './src/server/build-commit';
+
 // Measured hazards, SPEC 3.3 item 5 (tanstack report sections 5.5 and 6.3):
 // - devtools() stays in every Vite config. It strips the Solid-based <TanStackDevtools> from the
 //   production bundle; without it every SSR request returned 500 and Solid chunks landed in the
@@ -57,28 +59,41 @@ function externalServerOnly(): Plugin {
   };
 }
 
-// The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`)
-// and the landing's shared group, the same groups as vite.deploy.config.ts (which says why each
-// test reads as it does) so `pnpm build` and scripts/check-client-bundle.mjs
-// read the chunks the deployment ships: React, the scheduler and the router in one `vendor`
+// The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`),
+// the same group as vite.deploy.config.ts (which says why its test reads as it does; the
+// landing's shared group left with the old landing, docs/SITE.md), so `pnpm build` and
+// scripts/check-client-bundle.mjs read the chunks the deployment ships: React, the scheduler and the router in one `vendor`
 // chunk that caches across deployments while the app's chunks change. The client environment
 // alone.
-const VENDOR_TEST =
-  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/;
-const HOME_SHARED_TEST =
-  /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
+// libraries alone, the hydration entry's path to the app's router left out (vite.deploy.config.ts
+// says why; hardening HR-PC#2)
+const VENDOR_EXCLUDE =
+  /@tanstack[\\/](?:react-start[\\/]dist[\\/](?:plugin[\\/]|esm[\\/]client\.js)|react-start-client[\\/]dist[\\/]esm[\\/](?:index|StartClient|hydrateStart)\.js|start-client-core[\\/]dist[\\/]esm[\\/]client[\\/])/;
+const VENDOR_TEST = new RegExp(
+  `^(?!.*${VENDOR_EXCLUDE.source})` +
+    /.*node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/
+      .source,
+);
 // Hidden source maps, opt in with TURBOSLIDE_CLIENT_SOURCEMAP=1 (vite.deploy.config.ts says why).
 const CLIENT_SOURCEMAP: boolean | 'hidden' =
   process.env.TURBOSLIDE_CLIENT_SOURCEMAP === '1' ? 'hidden' : false;
+// the shader gallery's stills stay files (vite.deploy.config.ts says why; hardening HR-PC#3)
+const MATERIAL_PREVIEW = /[\\/]materials[\\/]previews[\\/][^\\/]+\.webp$/;
 const CLIENT_BUILD = {
   build: {
     sourcemap: CLIENT_SOURCEMAP,
+    assetsInlineLimit: (file: string): boolean | undefined =>
+      MATERIAL_PREVIEW.test(file) ? false : undefined,
     rolldownOptions: {
       output: {
         codeSplitting: {
           groups: [
             { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            { name: 'home-shared', test: HOME_SHARED_TEST, priority: 5 },
+            /* the app's part of the graph every route loads (the root route, the router, each
+               route file's options and what they import) in one chunk beside `vendor`, where
+               the bundler would otherwise cut it into a chunk per module the lazy routes share
+               (hardening HR-PC#2) */
+            { name: 'app', tags: ['$initial' as const], priority: 1 },
           ],
         },
       },
@@ -110,6 +125,8 @@ const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  /* the build's commit for the site footer (components/site/build.ts) */
+  define: buildDefine(),
   environments: { client: CLIENT_BUILD },
   plugins: [externalServerOnly(), fumadocsMdx(DOCS_MDX), devtools(), tanstackStart(), viteReact()],
   server: {

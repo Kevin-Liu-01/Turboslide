@@ -7,9 +7,11 @@ import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { Dialog } from '@turboslide/chrome/Dialog';
 import { Menu } from '@turboslide/chrome/Menu';
 import type { MenuCloseReason } from '@turboslide/chrome/Menu';
-import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/model';
+import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/context';
 import type { MenuItem } from '@turboslide/chrome/menus/model';
-import { HOME, TITLE_ROW } from '@turboslide/chrome/menus/strings';
+/* the page words without the rest of the strings file, which the root chunk would carry for the
+   page title and the exported words (hardening HR-PC#2) */
+import { HOME, TITLE_ROW } from '@turboslide/chrome/menus/page-words';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { LiveClone } from '@turboslide/viewer/LiveClone';

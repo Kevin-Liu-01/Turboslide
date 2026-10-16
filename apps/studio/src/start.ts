@@ -56,9 +56,10 @@ async function serverRequestMiddleware(): Promise<AnyRequestMiddleware[]> {
  * (b2.md R13), the identity runtime finds a share link and lists a caller's decks through the
  * store (b3.md R14a), and on the redis tier the rate limiter, the kill switches' reader and the
  * download nonce set ride the same Redis client (b4.md 2.4.3e, 2.4.7); with Upstash REST
- * variables the limiter is the Upstash one; hosted with neither, the limiter stays in memory per
- * instance and the process logs that once (b4.md section 3). Idempotent: binding twice rebinds
- * the same seams.
+ * variables the limiter is the Upstash one; an accounts database many instances share (D1,
+ * Postgres) binds the one limiter over its `ts_limits` table for both, last, so it wins (HR-SA#3);
+ * hosted with none, the limiter stays in memory per instance and the process logs that once
+ * (b4.md section 3). Idempotent: binding twice rebinds the same seams.
  */
 async function bindServerSeams(): Promise<void> {
   const [authorize, access, identity, root, room, ratelimit, tokens, index] = await Promise.all([
@@ -78,6 +79,9 @@ async function bindServerSeams(): Promise<void> {
     // miss falls back to the scan of every stored deck's record
     findShareLink: (hash, options) => access.findShareLink(hash, options),
     deckIndex: (principalId, view) => index.accountDecks({ principalId, admin: false }, view),
+    // before an account's rows go, its decks move to the trash and its grants on other decks, its
+    // deck index and its picture files go (HR-SD#2); one function, so it is bound once
+    beforeDelete: (await import('./server/auth/account-delete')).beforeAccountDelete,
   });
   const redis = room.redisCommands();
   if (redis !== null) {
@@ -116,7 +120,22 @@ async function bindServerSeams(): Promise<void> {
       ),
     );
   }
-  // On the platform with neither: Fluid compute runs several instances, the quotas count per
+  // The one limiter (HR-SA#3, AUTH-8): when the accounts engine is one many instances share (D1
+  // on both Vercel projects), the quotas and the download tokens' spent set count in its
+  // `ts_limits` table, as better-auth's sign in limits do (identity.ts builds it with the runtime).
+  // A runtime that cannot be built (a SQLite file named on a hosted process, a half set D1 pair)
+  // is the identity paths' to report, as before, and the limiter stays as the lines above left it
+  let limits: ReturnType<typeof identity.identityRuntime>['limits'] = null;
+  try {
+    limits = identity.identityRuntime().limits;
+  } catch {
+    limits = null;
+  }
+  if (limits !== null) {
+    ratelimit.bindRateLimiter(limits);
+    tokens.bindSpentSet(tokens.limiterSpentSet(limits));
+  }
+  // On the platform with none of them: Fluid compute runs several instances, the quotas count per
   // instance and do not hold (VERIFICATION-3 finding 17); one `config.degraded` line names the
   // variables, and the WAF rules carry the limits. A checkout is one process, tmp store or not.
   const platform = process.env.VERCEL !== undefined && process.env.VERCEL !== '';

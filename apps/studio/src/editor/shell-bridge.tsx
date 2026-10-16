@@ -12,6 +12,7 @@ import { authorLabel } from '@turboslide/store/store';
 
 import { exitPresentFullscreen } from '../components/presentActions';
 import { useStudioSession } from '../components/useStudioSession';
+import { editorBackend } from './backend';
 import type { EditorController } from './controller';
 
 // The shell glue of the editor, moved verbatim from routes/edit.$deckId.tsx in the round four
@@ -75,9 +76,14 @@ function useStudioOwner(adapter: StudioAdapter, owner: HTMLElement | null): void
  * handle (MILESTONES M4 item 1).
  */
 export function SessionBridge({ deckId, author }: { deckId: string; author: Author }) {
-  /* a prerendered /new attaches once shown (SPEC-4 0.42), never while hidden */
+  /* a prerendered /new attaches once shown (SPEC-4 0.42), never while hidden; a backend without
+     the server's registry (the tab backend of /try, backend.ts) never attaches */
   const shown = useShown();
-  useStudioSession({ deckId, author: authorLabel(author), enabled: shown });
+  useStudioSession({
+    deckId,
+    author: authorLabel(author),
+    enabled: shown && editorBackend().attachesSession,
+  });
   return null;
 }
 

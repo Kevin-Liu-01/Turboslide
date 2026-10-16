@@ -12,6 +12,9 @@
 //   node scripts/build-shader-previews.mjs --check    exits 1 when a catalog entry or a preset has
 //                                                     no still, or a still has no entry
 //   node scripts/build-shader-previews.mjs --only paper:liquid-metal,paper:gem-smoke
+//   node scripts/build-shader-previews.mjs --missing  renders only the stills that have no file,
+//                                                     so new entries and presets leave the
+//                                                     committed stills byte for byte
 //
 // Run from the repository root with Node 24 (type stripping, no build step). Nothing here touches
 // a deck or a store.
@@ -46,6 +49,7 @@ const args = process.argv.slice(2);
 const check = args.includes('--check');
 const onlyAt = args.indexOf('--only');
 const only = onlyAt === -1 ? null : new Set((args[onlyAt + 1] ?? '').split(',').filter(Boolean));
+const missingOnly = args.includes('--missing');
 
 /**
  * Every still the catalog asks for: the material's card and one tile per preset, for every entry,
@@ -90,7 +94,11 @@ if (check) {
 }
 
 mkdirSync(OUT, { recursive: true });
-const rows = wanted().filter((row) => only === null || only.has(row.materialId));
+const rows = wanted().filter(
+  (row) =>
+    (only === null || only.has(row.materialId)) &&
+    (!missingOnly || !existsSync(join(OUT, row.file))),
+);
 const launched = await launchBrowser();
 const started = performance.now();
 const written = [];

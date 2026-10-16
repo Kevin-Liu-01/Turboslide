@@ -96,7 +96,10 @@ The default command is the job queue (`apps/render-worker/src/main.ts`) on port 
 process; renders are cached under `<work>/cache/<deckId>/<revision>/<theme>@<scale>x/`. The studio
 facade routes `/api/render/:slideId` and `/api/export/:deckId` call the worker when
 `TURBOSLIDE_WORKER_URL` is set and run the same queue in process otherwise (still over the CLI, so
-Chromium and LibreOffice never run inside the web app).
+Chromium and LibreOffice never run inside the web app). The process needs
+`TURBOSLIDE_WORKER_TOKEN` (32 characters or more), which every route but `/healthz` requires as
+its bearer; `node apps/render-worker/src/main.ts --local` serves 127.0.0.1 without one, for a
+checkout (`docs/security.md` section 19).
 
 LibreOffice version: the milestone names 26.8, the first release with variable font support
 (https://blog.documentfoundation.org/blog/2026/08/26/libreoffice-26-8/). The Document Foundation

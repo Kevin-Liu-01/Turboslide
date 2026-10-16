@@ -30,6 +30,8 @@ import {
   JOIN_WINDOW_MS,
   REAUTH_GRACE_MS,
   ROOM_PROTOCOL,
+  ROOM_WRITE_OP_ID_HEADER,
+  ROOM_WRITE_OP_ID_PATTERN,
   TICKET_GRACE_MS,
   ackOf,
   parseUpFrame,
@@ -87,12 +89,19 @@ import { CURRENT_SCHEMA_VERSION } from '@turboslide/schema/migrations';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
 
-import { noteAdmissionDisagreements, noteCallbacks, noteClosed, noteOpen } from './control.ts';
+import {
+  CALLBACKS_FAILING_TTL_MS,
+  noteAdmissionDisagreements,
+  noteCallbacks,
+  noteClosed,
+  noteOpen,
+} from './control.ts';
 import {
   DOC_DDL,
   ENTRY_COLUMNS,
   META_DDL,
   Sql,
+  StorageError,
   addCounters,
   chunkBody,
   countersOf,
@@ -147,8 +156,14 @@ export const SEED_TIMEOUT_MS = 25_000;
 /** The entries one checkpoint run posts at most (checkpoint.ts's triggers, read as a page). */
 export const CHECKPOINT_MAX_ENTRIES = 2000;
 export const CHECKPOINT_MAX_BYTES = 1024 * 1024;
-/** The entries kept behind `covered` before a month table may be dropped (checkpoint.ts STREAM_RETAIN_ENTRIES). */
-export const RETAIN_ENTRIES = 10_000;
+/**
+ * The entries kept behind `covered` before a past month's table is dropped: the replay window
+ * (REPLAY_MAX_ENTRIES, 2,000; RELIABILITY-20, hardening HR-RT#13), 10,000 before. A tab further
+ * behind than the window reloads from the store, and an op it sends again that a record holds is
+ * answered from the log by the checkpoint route (HR-RT#1), so nothing older is read. Tables go
+ * whole (`compact`), never a row at a time, since a deleted row is billed as a row written.
+ */
+export const RETAIN_ENTRIES = REPLAY_MAX_ENTRIES;
 /** The wait a capped socket's close reason names. */
 export const CAP_RETRY_AFTER_S = 5;
 /** The address cap, as `CAPS.streams.ip`. */
@@ -311,21 +326,30 @@ function parseIntVar(value: string | undefined, fallback: number): number {
 /**
  * An app call the object made (the seed route, the checkpoint route) that failed. `reach` names
  * the failures of the deployment and not of one deck (no answer, a redirect such as a protected
- * preview's sign in page, 401, 403, and a seed route's 5xx); a 404 (a deck removed) and a 409 (a
- * conflict) are the deck's. Thrown by `fetchSeed` and `postCheckpoint` so the failure count of 3.8
- * reads one class.
+ * preview's sign in page, 401, 403, and a seed route's 5xx); a 404 (a deck removed), a 409 (a
+ * conflict) and a checkpoint that passed its deadline are the deck's. Thrown by `fetchSeed` and
+ * `postCheckpoint` so the failure count of 3.8 reads one class.
  */
 export class AppCallError extends Error {
   readonly status: number;
   readonly route: 'seed' | 'checkpoint';
   /** the route's own word that the deck is gone (`{ gone: true }` on a 404; HR-RT#7) */
   readonly gone: boolean;
-  constructor(route: 'seed' | 'checkpoint', status: number, message?: string, gone = false) {
+  /** the call had no answer within its deadline (`withDeadline`; RELIABILITY-12, HR-RT#11) */
+  readonly deadline: boolean;
+  constructor(
+    route: 'seed' | 'checkpoint',
+    status: number,
+    message?: string,
+    gone = false,
+    deadline = false,
+  ) {
     super(message ?? `the ${route} route answered ${status}`);
     this.name = 'AppCallError';
     this.route = route;
     this.status = status;
     this.gone = gone;
+    this.deadline = deadline;
   }
   /**
    * Whether the deployment, not the deck, explains the failure (status 0 is no answer): no answer,
@@ -333,28 +357,49 @@ export class AppCallError extends Error {
    * that answers 5xx leaves the tabs editing (the entries wait in the object's rows and the alarm
    * retries), and one deck whose commit throws must not hand every tab of the deployment to the
    * blob tier; a seed route that answers 5xx leaves the tab with no socket at all, and the page
-   * that asked for it was served, so the route and not the deck is what fails.
+   * that asked for it was served, so the route and not the deck is what fails. A checkpoint that
+   * passed its deadline is the deck's too (RELIABILITY-12, hardening HR-RT#11): its runs were
+   * slow, a large deck or a slow store, and two of them on one object wrote the row as failing
+   * and moved every tab of every deck to the blob tier for 120 s. A checkpoint with no answer for
+   * any other reason (no connection) still counts.
    */
   get reach(): boolean {
+    if (this.deadline && this.route === 'checkpoint') return false;
     return (
       this.status === 0 ||
       (this.status >= 300 && this.status < 400) ||
       this.status === 401 ||
       this.status === 403 ||
-      (this.route === 'seed' && this.status >= 500)
+      // a seed 503 is the store's "not now" (a busy store, a layout record that did not read, a
+      // freeze; HR-K1#4b), which the route answers with retry-after: the deployment answered
+      (this.route === 'seed' && this.status >= 500 && this.status !== 503)
     );
+  }
+}
+
+/** A call `withDeadline` gave up on: no answer within its time. */
+export class DeadlineError extends Error {
+  constructor(ms: number) {
+    super(`no answer within ${ms} ms`);
+    this.name = 'DeadlineError';
   }
 }
 
 /**
  * Runs `run` under an abort deadline of `ms` and clears the deadline the moment it settles, so no
- * timer outlives the call (the object hibernates only with nothing pending; `appCall`).
+ * timer outlives the call (the object hibernates only with nothing pending; `appCall`). A call
+ * the deadline ended throws `DeadlineError`, whatever the aborted fetch threw, so the caller
+ * tells a slow answer from a lost connection (HR-RT#11).
  */
 async function withDeadline<T>(ms: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(new Error(`no answer within ${ms} ms`)), ms);
+  const deadline = new DeadlineError(ms);
+  const timer = setTimeout(() => controller.abort(deadline), ms);
   try {
     return await run(controller.signal);
+  } catch (error) {
+    if (controller.signal.aborted) throw deadline;
+    throw error;
   } finally {
     clearTimeout(timer);
   }
@@ -408,6 +453,17 @@ export class DeckRoom extends DurableObject<Env> {
   private callbackFailures = 0;
   /** when this object last wrote the `callbacks` row as failing; null once a call succeeded after it */
   private callbackFlaggedAt: number | null = null;
+  /** the checkpoint call's deadline (CHECKPOINT_TIMEOUT_MS); a field so a Worker test can shorten it */
+  private checkpointDeadlineMs = CHECKPOINT_TIMEOUT_MS;
+  /** writes the object's storage refused in a row (`StorageError`; RELIABILITY-22, HR-RT#12) */
+  private storageFailures = 0;
+  /** when the storage last refused a write; null once a write landed after it */
+  private storageFailedAt: number | null = null;
+  /**
+   * The deck was removed and its storage deleted (`httpPurge`; RELIABILITY-20, HR-RT#13): every
+   * later request to this instance answers 404 `gone` until the runtime evicts it
+   */
+  private purged = false;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -494,6 +550,11 @@ export class DeckRoom extends DurableObject<Env> {
     this.rememberDeck(deckId);
     this.colo = request.headers.get(COLO_HEADER) ?? this.colo;
     try {
+      if (this.purged && tail !== 'purge') {
+        if (request.headers.get('upgrade')?.toLowerCase() === 'websocket')
+          return this.refuseUpgrade(CLOSE_CODES.forbidden, 'gone');
+        return json({ error: 'not_found', gone: true }, 404);
+      }
       if (request.headers.get(REALTIME_HEADER) === 'off') {
         await this.handOff();
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket')
@@ -529,6 +590,8 @@ export class DeckRoom extends DurableObject<Env> {
           return json({ rows: this.deadLetters() });
         case 'held':
           return this.httpHeld(request);
+        case 'purge':
+          return this.httpPurge();
         case 'sweep':
           return this.httpSweep();
         case 'access-changed':
@@ -541,6 +604,7 @@ export class DeckRoom extends DurableObject<Env> {
         tail,
         error: error instanceof Error ? error.message : String(error),
       });
+      await this.noteStorage(error);
       return json(
         { error: 'object', message: error instanceof Error ? error.message : String(error) },
         500,
@@ -600,6 +664,7 @@ export class DeckRoom extends DurableObject<Env> {
         t: frame.t,
         error: error instanceof Error ? error.message : String(error),
       });
+      await this.noteStorage(error);
       if (frame.t === 'ops') {
         this.send(
           member,
@@ -667,6 +732,7 @@ export class DeckRoom extends DurableObject<Env> {
   }
 
   override async alarm(): Promise<void> {
+    if (this.purged) return;
     this.counters.alarms += 1;
     this.alarmAt = null;
     const now = Date.now();
@@ -698,6 +764,7 @@ export class DeckRoom extends DurableObject<Env> {
 
   /** Logs a failed checkpoint at error with the deck and arms the alarm at the backoff (HR-RT#6b). */
   private async retryCheckpointLater(message: string, error: unknown): Promise<void> {
+    await this.noteStorage(error);
     this.checkpointFailures += 1;
     const wait = checkpointBackoffMs(this.checkpointFailures);
     this.log('error', message, {
@@ -1260,23 +1327,35 @@ export class DeckRoom extends DurableObject<Env> {
     const month = monthOf(now);
     const table = entriesTable(month);
     const admitted: Entry[] = [];
-    this.ctx.storage.transactionSync(() => {
-      if (!meta.months.includes(month)) {
-        for (const ddl of entriesDdl(table)) this.db.run(ddl);
-        meta.months = [...meta.months, month].sort();
-      }
-      for (const candidate of candidates) {
-        meta.head += 1;
-        const entry: Entry = { ...candidate, seq: meta.head };
-        this.db.run(
-          `INSERT INTO ${table} (${ENTRY_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          ...rowOfEntry(entry),
-        );
-        admitted.push(entry);
-      }
-      if (meta.firstUncommittedAt === null) meta.firstUncommittedAt = now;
-      this.writeMeta();
-    });
+    // a refused write rolls the transaction back, and the meta row in memory goes back with it:
+    // a head left ahead of the stored one would number the next entry past a seq no row holds
+    const before = { head: meta.head, months: meta.months, first: meta.firstUncommittedAt };
+    try {
+      this.ctx.storage.transactionSync(() => {
+        if (!meta.months.includes(month)) {
+          for (const ddl of entriesDdl(table)) this.db.run(ddl);
+          meta.months = [...meta.months, month].sort();
+        }
+        for (const candidate of candidates) {
+          meta.head += 1;
+          const entry: Entry = { ...candidate, seq: meta.head };
+          this.db.run(
+            `INSERT INTO ${table} (${ENTRY_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ...rowOfEntry(entry),
+          );
+          admitted.push(entry);
+        }
+        if (meta.firstUncommittedAt === null) meta.firstUncommittedAt = now;
+        this.writeMeta();
+      });
+    } catch (error) {
+      meta.head = before.head;
+      meta.months = before.months;
+      meta.firstUncommittedAt = before.first;
+      throw error;
+    }
+    this.storageFailures = 0;
+    this.storageFailedAt = null;
     this.lastEntryAt = now;
     return admitted;
   }
@@ -1611,7 +1690,13 @@ export class DeckRoom extends DurableObject<Env> {
     await this.alarmRead;
     if (this.alarmAt !== null && this.alarmAt <= at) return;
     this.alarmAt = at;
-    await this.ctx.storage.setAlarm(at);
+    try {
+      await this.ctx.storage.setAlarm(at);
+    } catch (error) {
+      // no alarm stands: the next arm sets one (HR-RT#12)
+      this.alarmAt = null;
+      throw new StorageError(error);
+    }
   }
 
   // -------------------------------------------------------------------------------------------
@@ -1757,6 +1842,8 @@ export class DeckRoom extends DurableObject<Env> {
         route,
         0,
         `the ${route} route did not answer: ${error instanceof Error ? error.message : String(error)}`,
+        false,
+        error instanceof DeadlineError,
       );
       await this.noteCallback(failure);
       throw failure;
@@ -1786,6 +1873,10 @@ export class DeckRoom extends DurableObject<Env> {
     if (failure === null) {
       this.callbackFailures = 0;
       if (this.callbackFlaggedAt === null) return;
+      // an app call that answers says nothing of a storage that refused a write within the
+      // stamp's life; the row stays failing until the stamp runs out (HR-RT#12)
+      if (this.storageFailedAt !== null && now - this.storageFailedAt < CALLBACKS_FAILING_TTL_MS)
+        return;
       this.callbackFlaggedAt = null;
       await noteCallbacks(this.env.ACCOUNTS, 'ok', now).catch((error: unknown) =>
         this.log('warn', 'the callbacks row was not written', {
@@ -1809,6 +1900,37 @@ export class DeckRoom extends DurableObject<Env> {
       this.log('warn', 'the callbacks row was not written', {
         error: error instanceof Error ? error.message : String(error),
       }),
+    );
+  }
+
+  /**
+   * Counts the writes the object's storage refused in a row (`StorageError`; RELIABILITY-22,
+   * hardening HR-RT#12); at CALLBACK_FAILURES_BEFORE_FLAG the object writes `rt_flags.callbacks`
+   * as `failing:<ms>:storage:<kind>` (once a minute at most while they go on), the row an
+   * unreachable app writes, so `/health` answers `failing` and the function's flag reads off: its
+   * instances hand the tabs to the blob tier, which saves to the store, until the stamp runs out
+   * and they try the object again. Before this a spent daily cap answered every ops frame 500
+   * with `/health` at ok, and nothing saved until 00:00 UTC. Any other error changes nothing.
+   */
+  private async noteStorage(error: unknown): Promise<void> {
+    if (!(error instanceof StorageError)) return;
+    const now = Date.now();
+    this.storageFailures += 1;
+    this.storageFailedAt = now;
+    if (this.storageFailures < CALLBACK_FAILURES_BEFORE_FLAG) return;
+    if (this.callbackFlaggedAt !== null && now - this.callbackFlaggedAt < CALLBACK_FLAG_EVERY_MS)
+      return;
+    this.callbackFlaggedAt = now;
+    this.log('error', "the object's storage refuses writes", {
+      kind: error.kind,
+      error: error.message,
+      failures: this.storageFailures,
+    });
+    await noteCallbacks(this.env.ACCOUNTS, 'failing', now, `storage:${error.kind}`).catch(
+      (written: unknown) =>
+        this.log('warn', 'the callbacks row was not written', {
+          error: written instanceof Error ? written.message : String(written),
+        }),
     );
   }
 
@@ -2260,7 +2382,7 @@ export class DeckRoom extends DurableObject<Env> {
         },
         body: JSON.stringify({ ...body, ...(revision === undefined ? {} : { revision }) }),
       },
-      CHECKPOINT_TIMEOUT_MS,
+      this.checkpointDeadlineMs,
     );
     if (answer.status === 409) {
       const conflict = (answer.body ?? {}) as {
@@ -2536,11 +2658,23 @@ export class DeckRoom extends DurableObject<Env> {
         400,
       );
     const body = parsed.data;
+    // a keyed agent write's op id (RELIABILITY-21, hardening HR-O#6): a malformed one is refused,
+    // an absent one is a fresh server id as before
+    const keyed = request.headers.get(ROOM_WRITE_OP_ID_HEADER);
+    if (keyed !== null && !ROOM_WRITE_OP_ID_PATTERN.test(keyed))
+      return json({ ok: false, code: 'invalid', message: 'the op id header is malformed' }, 400);
     await this.ensureLive();
     const meta = this.meta;
     const live = this.live;
     if (meta === null || live === null)
       return json({ ok: false, code: 'invalid', message: 'the room has no document' }, 503);
+    const clientId = body.clientId.slice(0, 64);
+    if (keyed !== null) {
+      // the resend of a write the room admitted: answered with that entry, never admitted twice,
+      // whatever its base reads now (the first attempt moved the revision past it)
+      const already = this.findEntry(clientId, keyed);
+      if (already !== undefined) return json(await this.writeAnswer(already.seq, true));
+    }
     const now = Date.now();
     if (body.baseRevision !== meta.revision) {
       const mine = new Set(touchedSlides(body.mutations));
@@ -2564,7 +2698,7 @@ export class DeckRoom extends DurableObject<Env> {
         );
       }
     }
-    const opId = `server:${crypto.randomUUID()}`;
+    const opId = keyed ?? `server:${crypto.randomUUID()}`;
     const placed = landCandidate(
       live.document,
       { opId, kind: 'edit', mutations: body.mutations },
@@ -2584,7 +2718,7 @@ export class DeckRoom extends DurableObject<Env> {
       rev: meta.revision,
       kind: 'edit',
       author: body.author,
-      clientId: body.clientId.slice(0, 64),
+      clientId,
       opId,
       mutations: placed.mutations,
       at: new Date(now).toISOString(),
@@ -2594,18 +2728,26 @@ export class DeckRoom extends DurableObject<Env> {
     this.live = { document: placed.document, seq: meta.head };
     this.editedSinceOpen = true;
     if (admitted !== undefined) this.broadcast({ type: 'op', entry: admitted });
-    const seq = admitted?.seq ?? meta.head;
-    // the checkpoint at once (3.2): the record exists before the agent's answer
-    await this.checkpoint(false);
+    return json(await this.writeAnswer(admitted?.seq ?? meta.head, false));
+  }
+
+  /**
+   * The answer to an agent's write once its entry is at `seq`: the checkpoint at once (3.2), so
+   * the record exists before the agent's answer, and the record of the run that covered it when
+   * this object's last run did. `replayed` marks the answer to a resend (HR-O#6).
+   */
+  private async writeAnswer(seq: number, replayed: boolean): Promise<Record<string, unknown>> {
+    if ((this.meta?.covered ?? 0) < seq) await this.checkpoint(false);
     const record = this.lastRun.find(
       (row) => row.ops !== undefined && row.ops.fromSeq <= seq && seq <= row.ops.toSeq,
     );
-    return json({
+    return {
       ok: true,
-      revision: this.meta?.revision ?? meta.revision,
+      revision: this.meta?.revision ?? 0,
       seq,
       ...(record === undefined ? {} : { record }),
-    });
+      ...(replayed ? { replayed: true } : {}),
+    };
   }
 
   /**
@@ -2642,9 +2784,21 @@ export class DeckRoom extends DurableObject<Env> {
     this.editedSinceOpen = true;
     if (admitted !== undefined) this.broadcast({ type: 'op', entry: admitted });
     const seq = admitted?.seq ?? meta.head;
-    // a run already in flight may have read the log before this entry: run again until it is covered
-    for (let run = 0; run < 3 && (this.meta?.covered ?? 0) < seq; run += 1)
-      await this.checkpoint(false);
+    // a run already in flight may have read the log before this entry: run again until it is
+    // covered. The entry is in the log from here on, so a checkpoint that fails answers ok with
+    // `covered` below `seq` and the alarm retries it (an alarm the storage refused leaves the tail
+    // to the sweep, HR-RT#6c); a 500 here made the function's serverComment read a failure, and a
+    // comment sent again added a second thread (wave 2, RT.md request 8)
+    try {
+      for (let run = 0; run < 3 && (this.meta?.covered ?? 0) < seq; run += 1)
+        await this.checkpoint(false);
+    } catch (error) {
+      await this.retryCheckpointLater('the comment checkpoint failed', error).catch(
+        () => undefined,
+      );
+      const kept = this.meta ?? meta;
+      return json({ ok: true, revision: kept.revision, seq, covered: kept.covered });
+    }
     const after = this.meta ?? meta;
     if (after.covered < seq) await this.afterAppend(Date.now());
     return json({ ok: true, revision: after.revision, seq, covered: after.covered });
@@ -2723,6 +2877,40 @@ export class DeckRoom extends DurableObject<Env> {
       if (this.findEntry(opId.slice(0, colon), opId) !== undefined) held.push(opId);
     }
     return json({ held });
+  }
+
+  /**
+   * A removed deck's object lets everything go (RELIABILITY-20; hardening HR-RT#13): before this no
+   * path called `deleteAll`, so a deleted deck's text stayed in the object's SQLite for good, every
+   * entry of a deck under 10,000 entries among it, and the account's storage grew toward the
+   * plan's 5 GB. The function posts this under the bearer once the store removed the deck
+   * (decks.ts `deck.remove`, room.ts `purgeRoom`). Every socket closes with 4403 `gone` (the tab
+   * asks the ticket route, which refuses a removed deck), a checkpoint or a seed in flight
+   * settles first, then the alarm and the whole storage go, the SQL tables, the KV and the dead
+   * letters with them, and the deck's `rt_open` row. The object answers 404 `gone` from then on;
+   * a later wake starts empty. Idempotent.
+   */
+  private async httpPurge(): Promise<Response> {
+    if (!this.purged) {
+      this.purged = true;
+      // no last close runs for the sockets closed here: the meta row is gone first
+      const meta = this.meta;
+      this.meta = null;
+      for (const member of [...this.members.values()])
+        this.closeMember(member, CLOSE_CODES.forbidden, 'gone');
+      for (const ws of this.ctx.getWebSockets()) this.closeWs(ws, CLOSE_CODES.forbidden, 'gone');
+      await Promise.allSettled([this.checkpointing, this.seeding]);
+      await this.ctx.storage.deleteAlarm();
+      await this.ctx.storage.deleteAll();
+      this.alarmAt = null;
+      this.live = null;
+      this.closePending = false;
+      this.deckStored = false;
+      this.log('info', 'purged', { head: meta?.head ?? 0, covered: meta?.covered ?? 0 });
+      if (this.deckId !== null)
+        await noteClosed(this.env.ACCOUNTS, this.deckId).catch(() => undefined);
+    }
+    return json({ ok: true, purged: true });
   }
 
   private async httpFlush(): Promise<Response> {

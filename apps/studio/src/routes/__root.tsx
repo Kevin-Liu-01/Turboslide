@@ -48,6 +48,7 @@ const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
   '/decks/trash',
   '/print/$deckId',
   '/edit/$deckId',
+  '/try',
 ]);
 
 /**

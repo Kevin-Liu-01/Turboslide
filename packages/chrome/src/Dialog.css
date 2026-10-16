@@ -56,6 +56,24 @@
   }
 }
 
+/* the exit copy of a dialog that closed (Layer.ts): the scrim fades and the card sinks 4 px over
+   the leave duration, the enter reversed and shorter */
+.ts-dialog-scrim[data-exiting],
+.ts-dialog-float[data-exiting] {
+  animation: pt-fade-out var(--pt-dur-leave) var(--pt-ease-in) both;
+}
+
+.ts-dialog-scrim[data-exiting] .ts-dialog,
+.ts-dialog-float[data-exiting] .ts-dialog {
+  animation: ts-dialog-out var(--pt-dur-leave) var(--pt-ease-in) both;
+}
+
+@keyframes ts-dialog-out {
+  to {
+    transform: translateY(4px);
+  }
+}
+
 .ts-dialog-head {
   display: flex;
   align-items: flex-start;

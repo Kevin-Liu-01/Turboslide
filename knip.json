@@ -1,0 +1,81 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": [
+    "docs/gslides-parity/**",
+    "docs/archive/**",
+    "**/generated/**",
+    "packages/native/wasm/**",
+    "apps/realtime-worker/worker-configuration.d.ts"
+  ],
+  "ignoreBinaries": ["du", "openssl", "pdftotext", "pgrep", "vercel"],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/**/*.{mjs,ts,mts}",
+        "docker/*.mjs",
+        "docs/readme/*.mjs",
+        "playwright.config.ts",
+        "vitest.config.ts",
+        "eslint.config.js"
+      ],
+      "project": ["scripts/**/*.{mjs,ts,mts}", "docker/*.mjs", "docs/readme/*.mjs"],
+      "ignoreDependencies": ["@turboslide/cli"]
+    },
+    "apps/studio": {
+      "entry": [
+        "src/routes/**/*.{ts,tsx}",
+        "src/router.tsx",
+        "src/start.ts",
+        "src/workers/*.ts",
+        "vite.config.ts",
+        "vite.deploy.config.ts",
+        "vite.no-watch.config.ts",
+        "vitest.config.ts",
+        "e2e/**/*.{ts,mts}",
+        "src/**/*.test.{ts,tsx}"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.{ts,mts}", "*.config.ts"]
+    },
+    "apps/cli": {
+      "entry": [
+        "bin/*.mjs",
+        "src/**/*.test.ts",
+        "e2e/*.mjs",
+        "tsdown.config.ts",
+        "vitest.config.ts"
+      ],
+      "project": ["src/**/*.ts", "bin/*.mjs", "e2e/*.mjs"]
+    },
+    "apps/realtime-worker": {
+      "vitest": false,
+      "entry": ["src/index.ts", "test/**/*.ts", "vitest.config.ts"],
+      "project": ["src/**/*.ts", "test/**/*.ts"],
+      "ignoreDependencies": ["cloudflare"]
+    },
+    "apps/render-worker": {
+      "entry": ["src/main.ts", "src/**/*.test.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/*": {
+      "entry": [
+        "scripts/**/*.{mjs,ts,mts}",
+        "src/**/*.test.{ts,tsx}",
+        "**/__tests__/**/*.{ts,tsx}",
+        "client/**/*.test.ts",
+        "standalone/**/*.test.ts",
+        "vitest.config.ts",
+        "src/brand/main.ts",
+        "src/calibration/run.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,mts}",
+        "client/**/*.ts",
+        "standalone/**/*.ts",
+        "brand/**/*.ts",
+        "scripts/**/*.{mjs,ts,mts}"
+      ]
+    },
+    "packages/native/npm/*": { "entry": [], "project": [] },
+    "tooling/*": {}
+  }
+}

@@ -4,6 +4,7 @@
 // HTTP, the named document schemas and the one error body under components. The studio serves
 // the committed JSON at /openapi.json.
 import { actionsOn } from '@turboslide/schema/actions';
+import { takesIdempotencyKey } from '../http/dispatch.ts';
 import type { JsonSchema } from './json-schema.ts';
 import { generateNamedSchemas } from './named.ts';
 
@@ -92,6 +93,15 @@ const forceParameter = {
   schema: { type: 'boolean' },
   description:
     'Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form',
+};
+
+const idempotencyParameter = {
+  name: 'idempotency-key',
+  in: 'header',
+  required: false,
+  schema: { type: 'string', pattern: '^[\\x21-\\x7e]{1,255}$' },
+  description:
+    'One value per write, such as a UUID: a resend with the same key and body is not applied again and is answered 200 with the answer of the write that landed (idempotent-replayed: true); the same key with another action or body is 422 idempotency_key_reused. Named on the writing actions that take it; on another writing action a key is 400 idempotency_not_supported (hardening HR-O#6)',
 };
 
 const actionParameter = {
@@ -247,7 +257,14 @@ export function generateOpenApi(): JsonSchema {
         'x-mutates': spec.mutates,
         'x-milestone': spec.milestone,
         'x-transports': spec.transports,
-        parameters: [deckParameter, authorParameter, ...(spec.mutates ? [forceParameter] : [])],
+        parameters: [
+          deckParameter,
+          authorParameter,
+          ...(spec.mutates ? [forceParameter] : []),
+          ...(takesIdempotencyKey(spec)
+            ? [{ $ref: '#/components/parameters/IdempotencyKey' }]
+            : []),
+        ],
         requestBody: {
           required: true,
           content: {
@@ -288,6 +305,7 @@ export function generateOpenApi(): JsonSchema {
     paths,
     components: {
       schemas,
+      parameters: { IdempotencyKey: idempotencyParameter },
       securitySchemes: {
         bearer: {
           type: 'http',

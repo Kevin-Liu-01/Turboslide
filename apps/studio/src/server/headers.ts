@@ -109,6 +109,23 @@ export const HSTS = 'max-age=63072000; includeSubDomains; preload';
 export const PERMISSIONS_POLICY =
   'geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()';
 
+/**
+ * The headers of an answer the CDN serves before the function runs (hardening HR-W#3a, SPEC-1,
+ * WEB-4): the prerendered /home and docs pages, the docs' markdown twins, the root redirect, the
+ * icon and robots.txt. The middleware never sees those requests, so vite.deploy.config.ts writes
+ * these into the route rules, which Vercel applies in front of the static file and Nitro applies
+ * on the node server. The values are the ones `securityHeadersFor` sets on an https page that is
+ * not the embed (headers.test.ts holds the two equal).
+ */
+export const STATIC_HEADERS: Readonly<Record<string, string>> = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'cross-origin-opener-policy': 'same-origin',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': PERMISSIONS_POLICY,
+  'strict-transport-security': HSTS,
+};
+
 /** The customer domains the embed is sold for, beside Prototemplate; a comma list in the variable. */
 export const EMBED_ANCESTORS_ENV = 'TURBOSLIDE_EMBED_ANCESTORS';
 
@@ -157,6 +174,15 @@ export function isEmbedPath(pathname: string): boolean {
   return path === '/embed' || path.startsWith('/embed/');
 }
 
+/**
+ * The landing's live editor (docs/SITE.md D1, C.5): /home frames it from the same origin, so it
+ * answers `X-Frame-Options: SAMEORIGIN` and `frame-ancestors 'self'` where every other page but
+ * the embed answers DENY and 'none'.
+ */
+export function isSameOriginFramePath(pathname: string): boolean {
+  return routePath(pathname) === '/try';
+}
+
 /** The link exchange route (SPEC-3 6.4): `Referrer-Policy: no-referrer`, unsafe methods only under CSRF. */
 export function isExchangePath(pathname: string): boolean {
   const path = routePath(pathname);
@@ -183,6 +209,41 @@ export function requestIdOf(request: Request): string {
 /** A CSP nonce: 128 bits, base64. */
 export function mintNonce(): string {
   return randomBytes(16).toString('base64');
+}
+
+/** A nonce as `mintNonce` writes it: 16 bytes in base64. */
+const NONCE_SHAPE = /^[A-Za-z0-9+/]{22}==$/;
+
+/** The variable that carries the build's one nonce to the prerender (hardening HR-W#3b). */
+export const PRERENDER_NONCE_ENV = 'TURBOSLIDE_PRERENDER_NONCE';
+
+/**
+ * The build's one nonce for the prerendered pages (hardening HR-W#3b, SPEC-1, CRIT-W5).
+ * vite.deploy.config.ts calls it when it loads. The first call mints the value into the process
+ * environment, so the second load of the config by the prerender's preview server, and the server
+ * that preview starts, read the same value, and the route header names the nonce every
+ * prerendered page carries.
+ */
+export function prerenderNonce(env: Record<string, string | undefined> = process.env): string {
+  const current = env[PRERENDER_NONCE_ENV];
+  if (current !== undefined && NONCE_SHAPE.test(current)) return current;
+  const nonce = mintNonce();
+  env[PRERENDER_NONCE_ENV] = nonce;
+  return nonce;
+}
+
+/**
+ * The nonce of one request: the build's while TanStack Start prerenders the static pages (it sets
+ * `TSS_PRERENDERING` in the build process before it starts the preview server), a fresh one on
+ * every other request. A deployment never runs with `TSS_PRERENDERING`, so no answer the function
+ * gives a person reuses the build's value.
+ */
+export function requestNonce(env: Env = process.env): string {
+  const build = env[PRERENDER_NONCE_ENV];
+  if (env.TSS_PRERENDERING === 'true' && build !== undefined && NONCE_SHAPE.test(build)) {
+    return build;
+  }
+  return mintNonce();
 }
 
 export type CspOptions = {
@@ -240,9 +301,11 @@ export function publicStoreOrigin(env: Env = process.env): string | null {
 }
 export const PRESIGN_HOST_ENV = 'TURBOSLIDE_PRESIGN_HOST';
 /**
- * The CSP switch. Unset, the policy is enforced on the document routes (`isDocumentPath`) and
- * report only elsewhere (docs/hardening/HARDENING.md HR-W#2). `report` sends it report only on
- * every route, the way back; `enforce` enforces it on every route; `off` sends none.
+ * The CSP switch. Unset, the policy is enforced on the document routes (`isDocumentPath`) and the
+ * prerendered pages (`isStaticPagePath`), and report only elsewhere (docs/hardening/HARDENING.md
+ * HR-W#2, HR-W#3b). `report` sends it report only on every route, the way back; `enforce`
+ * enforces it on every route; `off` sends none. The prerendered pages' route header reads the
+ * variable when the build runs.
  */
 export const CSP_MODE_ENV = 'TURBOSLIDE_CSP';
 
@@ -261,6 +324,7 @@ export const DOCUMENT_ROUTES: ReadonlyArray<string> = [
   '/s',
   '/edit',
   '/new',
+  '/try',
 ];
 
 export function isDocumentPath(pathname: string): boolean {
@@ -268,13 +332,32 @@ export function isDocumentPath(pathname: string): boolean {
   return DOCUMENT_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
 }
 
-/** The mode of the policy on one path: the variable when it is set, else enforce on a document route. */
+/**
+ * The pages the build prerenders: the landing and the docs (hardening HR-W#3b, SPEC-1). They hold
+ * no deck content and nothing of a person. On Vercel the CDN answers each from its file, and the
+ * route header vite.deploy.config.ts writes carries the policy with the build's one nonce; where
+ * the function answers them (a node server, a docs address with no page) the middleware enforces
+ * the same policy with the request's nonce.
+ */
+export const STATIC_PAGE_ROUTES: ReadonlyArray<string> = ['/home', '/docs'];
+
+export function isStaticPagePath(pathname: string): boolean {
+  const path = routePath(pathname);
+  return STATIC_PAGE_ROUTES.some((route) => path === route || path.startsWith(`${route}/`));
+}
+
+/**
+ * The mode of the policy on one path: the variable when it is set, else enforce on a document
+ * route and a prerendered page.
+ */
 export function cspMode(env: Env = process.env, pathname?: string): CspMode {
   const value = env[CSP_MODE_ENV]?.trim().toLowerCase();
   if (value === 'enforce') return 'enforce';
   if (value === 'report') return 'report';
   if (value === 'off' || value === '0' || value === 'false') return 'off';
-  return pathname !== undefined && isDocumentPath(pathname) ? 'enforce' : 'report';
+  return pathname !== undefined && (isDocumentPath(pathname) || isStaticPagePath(pathname))
+    ? 'enforce'
+    : 'report';
 }
 
 /** The report endpoint, a POST route under the WAF visible prefix (`x.csp.$.ts`). */
@@ -329,7 +412,12 @@ export function buildCsp(options: CspOptions): string {
     "base-uri 'none'",
     "form-action 'self'",
   ];
-  if (options.frameAncestors !== false) directives.push(frameAncestorsOf(embed, env));
+  if (options.frameAncestors !== false)
+    directives.push(
+      options.pathname !== undefined && isSameOriginFramePath(options.pathname)
+        ? "frame-ancestors 'self'"
+        : frameAncestorsOf(embed, env),
+    );
   if (env.VERCEL !== undefined && env.VERCEL !== '' && options.reportOnly !== true)
     directives.push('upgrade-insecure-requests');
   if (options.reportUri !== undefined) directives.push(`report-uri ${options.reportUri}`);
@@ -339,6 +427,22 @@ export function buildCsp(options: CspOptions): string {
 /** The frame rule: the embed's ancestors on `/embed`, none anywhere else. */
 function frameAncestorsOf(embed: boolean, env: Env): string {
   return embed ? `frame-ancestors ${embedAncestors(env).join(' ')}` : "frame-ancestors 'none'";
+}
+
+/**
+ * The policy header of the prerendered pages (hardening HR-W#3b): the policy `securityHeadersFor`
+ * gives a prerendered page, with the build's nonce and `frame-ancestors 'none'`. Enforced unless
+ * `TURBOSLIDE_CSP` reads `report` (report only) or `off` (none) when the build runs.
+ * vite.deploy.config.ts writes it into the Vercel route of every prerendered page.
+ */
+export function staticPageCsp(nonce: string, env: Env = process.env): Record<string, string> {
+  const pathname = STATIC_PAGE_ROUTES[0];
+  const mode = cspMode(env, pathname);
+  if (mode === 'off') return {};
+  const policy = { nonce, pathname, reportUri: CSP_REPORT_PATH, env };
+  return mode === 'report'
+    ? { 'content-security-policy-report-only': buildCsp({ ...policy, reportOnly: true }) }
+    : { 'content-security-policy': buildCsp(policy) };
 }
 
 export type SecurityHeaderOptions = {
@@ -367,7 +471,7 @@ export function securityHeadersFor(
   };
   if (options.secure) headers['strict-transport-security'] = HSTS;
   if (!embed) {
-    headers['x-frame-options'] = 'DENY';
+    headers['x-frame-options'] = isSameOriginFramePath(pathname) ? 'SAMEORIGIN' : 'DENY';
     headers['cross-origin-opener-policy'] = 'same-origin';
   }
   if (isAssetPath(pathname)) headers['cross-origin-resource-policy'] = 'same-site';
@@ -422,7 +526,8 @@ export function withHeaders(response: Response, headers: Record<string, string>)
 /**
  * The global request middleware (SPEC-3 8.8): mints the request's CSP nonce into the request
  * context (`context.nonce`, the field the framework's `RequestOptions` names, so `getRouter()` can
- * hand it to `ssr.nonce` and the root document to its boot script), lets the handler answer, and
+ * hand it to `ssr.nonce` and the root document to its boot script; the build's one nonce while the
+ * build prerenders, `requestNonce`, hardening HR-W#3b), lets the handler answer, and
  * sets the headers of `securityHeadersFor` on the answer without overriding one a route set. The
  * handler runs under the request's timing collector, and the answer carries `server-timing` with
  * the store reads it recorded, the instance's age and the time to the headers (server-timing.ts;
@@ -430,7 +535,7 @@ export function withHeaders(response: Response, headers: Record<string, string>)
  */
 export function securityHeadersMiddleware() {
   return createMiddleware({ type: 'request' }).server(async ({ request, next, pathname }) => {
-    const nonce = mintNonce();
+    const nonce = requestNonce();
     const requestId = requestIdOf(request);
     const timing = newRequestTiming();
     const facts = instanceFacts();

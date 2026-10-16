@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 
 import { bracketOf } from '@turboslide/viewer/keys';
+import { NOT_EXIT_COPY } from '@turboslide/viewer/reduce-motion';
 import { modalDialogOpen } from '@turboslide/viewer/Selection';
 
 import { RETIRED_KEYS, RETIRED_KEYS_STORAGE, retiredKeySentence } from './editor-shell';
@@ -81,6 +82,29 @@ function isChromeField(target: EventTarget | null): boolean {
   if (target.getAttribute('role') === 'combobox') return true;
   if (target.isContentEditable && target.closest('.ts-sheet, .ts-stage') === null) return true;
   return false;
+}
+
+/** The deck's history chords: Undo and the two Redo chords (`edit.undo`, `edit.redo`). */
+const HISTORY_CHORDS: ReadonlySet<string> = new Set(['edit.undo', 'edit.redo']);
+
+/**
+ * True for Undo or Redo pressed on a closed dropdown trigger. The trigger keeps the field rule for
+ * its own keys (Backspace, the arrows, the letters of type ahead, the other chords), but a button
+ * holds no history of its own, so the deck's Undo and Redo reach the key table from it as they do
+ * from the Tabular figures checkbox: Cmd+Z right after a choice in Format options takes the choice
+ * back (the dropdown round's last keyboard pass, F3: Border weight 1 px to 2 px, revision 6 to 7,
+ * then Cmd+Z on the field left 2 px and revision 7). An open list keeps every key.
+ */
+function isHistoryOnDropdown(
+  event: KeyboardEvent,
+  platform: Platform,
+  table: ReadonlyArray<KeyBinding>,
+): boolean {
+  const target = event.target;
+  if (!(target instanceof HTMLElement) || target.getAttribute('role') !== 'combobox') return false;
+  if (target.getAttribute('aria-expanded') === 'true') return false;
+  if (!(event.metaKey || event.ctrlKey)) return false;
+  return bindingsFor(event, platform, table).some((binding) => HISTORY_CHORDS.has(binding.id));
 }
 
 /** The editable run on the canvas (the InlineText), where only modifier chords of the editor scope fire. */
@@ -193,7 +217,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
       const s = stateRef.current;
       const h = handlersRef.current;
       if (!s.enabled || event.isComposing || event.defaultPrevented) return;
-      const inField = isChromeField(event.target);
+      const inField = isChromeField(event.target) && !isHistoryOnDropdown(event, s.platform, table);
       const inCanvasText = isCanvasText(event.target);
       const modifier = event.metaKey || event.ctrlKey || event.altKey;
 
@@ -207,7 +231,7 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
         /* a modal dialog takes the key alone (its document listener closes it, Dialog.tsx); the
            shell's ladder would otherwise close an open panel with it, where Google closes the
            dialog and leaves the panel (b1 R30) */
-        if (document.querySelector('.ts-dialog-scrim') !== null) return;
+        if (document.querySelector(`.ts-dialog-scrim${NOT_EXIT_COPY}`) !== null) return;
         if (h.escape()) event.preventDefault();
         return;
       }

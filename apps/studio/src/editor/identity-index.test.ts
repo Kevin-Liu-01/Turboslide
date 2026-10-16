@@ -7,6 +7,7 @@ import type { Author, Version } from '@turboslide/schema/mutations';
 
 import type { EditorIdentity } from '../server/write';
 import {
+  brandOfRow,
   identityIndex,
   identityOfPrincipal,
   identityView,
@@ -303,5 +304,49 @@ describe('replaceRosterRow', () => {
     expect(next).not.toBe(roster);
     const joined = replaceRosterRow(next, entry(USR, 'c4', 'K', 3));
     expect(joined.map((row) => row.clientId)).toEqual(['c1', 'c2', 'c3', 'c4']);
+  });
+});
+
+describe('agents with a brand mark (docs/SITE.md D5)', () => {
+  const agentRow = (mark: Record<string, unknown>): RosterEntry => ({
+    ...entry('agent:claude-code', 'c9', 'Claude Code', 5),
+    trust: 'agent',
+    kind: 'agent',
+    mark,
+  });
+
+  it('keeps the hue and names the brand of an agent row whose mark names one', () => {
+    const view = participantOf(
+      agentRow({ variant: 'agent', brand: 'claude-code' }),
+      '2026-10-14T00:00:00.000Z',
+    );
+    expect(view.brand).toBe('claude-code');
+    expect(view.hue).toBe(6);
+    expect(view.kind).toBe('agent');
+  });
+
+  it('leaves every other agent as it was: no hue, no brand', () => {
+    for (const mark of [{ variant: 'agent' }, { variant: 'agent', brand: 'not-a-brand' }]) {
+      const view = participantOf(agentRow(mark), '2026-10-14T00:00:00.000Z');
+      expect(view.brand).toBeUndefined();
+      expect(view).not.toHaveProperty('hue');
+    }
+    /* a person's mark cannot name a brand */
+    expect(brandOfRow({ kind: 'human', mark: { brand: 'codex' } })).toBeNull();
+    expect(brandOfRow({ kind: 'agent', mark: { brand: 'codex' } })).toBe('codex');
+  });
+
+  it('carries the brand on a resolved agent identity', () => {
+    const view = identityView(
+      {
+        principalId: 'agent:codex',
+        label: 'Codex',
+        trust: 'agent',
+        kind: 'agent',
+        mark: { variant: 'agent', brand: 'codex' } as unknown as EditorIdentity['mark'],
+      },
+      author,
+    );
+    expect(view.brand).toBe('codex');
   });
 });

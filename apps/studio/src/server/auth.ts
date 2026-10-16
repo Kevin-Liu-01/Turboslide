@@ -20,7 +20,8 @@ import { BOOTSTRAP_ACTION, localTokenRequired, resolveBearerSync } from './auth/
  * - A `ts_` API key resolves to its record (server/auth/tokens.ts): the request acts for the
  *   key's owner with the key's scopes, and its author is the record's registered name under
  *   `agent:<tokenId>`, bound to the request so `?author=` and the header's name are ignored and
- *   the header carries a run id only (8.2). A revoked or unknown key answers 401.
+ *   the header carries a run id only (8.2). A revoked or unknown key answers 401, and a key past
+ *   its expiry 401 with the code `key_expired` (HR-SA#5).
  * - `TURBOSLIDE_TOKEN` stays the bootstrap admin token: every action while no key record exists
  *   (today's deployments), `admin.bootstrap` alone once one does (09 6.1).
  * - The localhost rule holds only when every host the request names is local (dispatch.ts,
@@ -38,6 +39,8 @@ export const MCP_DEFAULT_AUTHOR = 'agent:mcp-http';
 export const BOOTSTRAP_ONLY_MESSAGE =
   'the static bearer is the bootstrap token once an API key exists; sign in with turboslide login and use the key';
 export const UNKNOWN_KEY_MESSAGE = 'unknown or revoked API key';
+/** A key past its expiry (HR-SA#5); the code `key_expired` is what the CLI reads. */
+export const KEY_EXPIRED_MESSAGE = 'the API key expired; run turboslide login for a new one';
 export const LOCAL_TOKEN_MESSAGE =
   'the agent surface of this checkout takes the token in .turboslide/token as its bearer (TURBOSLIDE_LOCAL_TOKEN=require)';
 
@@ -89,6 +92,8 @@ export function agentAuthWith(
         };
       return { ok: true, mode: 'localhost' };
     case 'refused':
+      if (resolved.reason === 'key_expired')
+        return { ok: false, status: 401, code: 'key_expired', message: KEY_EXPIRED_MESSAGE };
       return {
         ok: false,
         status: 401,

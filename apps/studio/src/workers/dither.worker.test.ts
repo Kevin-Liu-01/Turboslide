@@ -61,6 +61,27 @@ describe('the dither worker (block level)', () => {
     }
   });
 
+  it('cuts the halftone screen as ditherPicture does in Node, other cells than bayer8 at its lit fraction', () => {
+    const halftone: PictureDither = { ...dither, pattern: 'halftone' };
+    const state = newBlockDitherState();
+    prepareBlockBase(state, 'k', source, baseSpecOf(halftone, box));
+    for (const theme of ['light', 'dark'] as const) {
+      const frame = blockFrame(state, {
+        kind: 'frame',
+        id: theme === 'light' ? 1 : 2,
+        key: 'k',
+        dither: halftone,
+        theme,
+      });
+      if (frame === null) throw new Error('no frame');
+      const reference = ditherPicture(source, box, halftone, theme);
+      expect(Buffer.from(frame.plane.data).equals(Buffer.from(reference.plane.data))).toBe(true);
+      const bayer = ditherPicture(source, box, dither, theme);
+      expect(Buffer.from(frame.plane.data).equals(Buffer.from(bayer.plane.data))).toBe(false);
+      expect(Math.abs(frame.litFraction - bayer.metrics.litFraction)).toBeLessThan(0.01);
+    }
+  });
+
   it('drops a request older than the newest served for its key, and answers null for an unknown key', () => {
     const state = newBlockDitherState();
     prepareBlockBase(state, 'k', source, baseSpecOf(dither, box));

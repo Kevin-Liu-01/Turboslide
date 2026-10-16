@@ -29,12 +29,14 @@ describe('the realtime worker router', () => {
       ok: true,
       protocol: 1,
       commit: '',
+      bundle: '',
       realtime: 'on',
       appOrigin: env.TURBOSLIDE_APP_ORIGIN,
       callbacks: 'ok',
       db: 'own',
       statements: 'enforce',
       admission: { mode: 'shadow', disagree: 0 },
+      alerts: { channel: 'unset', open: [] },
     });
   });
 

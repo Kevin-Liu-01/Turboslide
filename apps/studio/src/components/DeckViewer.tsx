@@ -368,6 +368,7 @@ function StageBridge({
         dir={shell.dir ?? 'next'}
         onStep={onStep}
         {...(deck.band === undefined ? {} : { band: deck.band })}
+        palette={deck.palette}
       />
       {shell.present ? (
         <Slideshow

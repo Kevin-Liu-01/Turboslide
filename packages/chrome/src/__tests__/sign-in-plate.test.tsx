@@ -167,6 +167,33 @@ describe('the page host', () => {
     expect(q('device.approve')?.textContent).toBe('Approve');
     expect(q('device.deny')?.textContent).toBe('Deny');
     expect(q('device.error')?.hasAttribute('data-reserved')).toBe(true);
+    /* no request facts were read: no request sentence, the key's lifetime in the foot */
+    expect(q('device.request')).toBeNull();
+    expect(document.querySelector('.ts-auth-foot-line')?.textContent).toContain(
+      AUTH_WORDS.device.lifetime,
+    );
+  });
+
+  it('names what the code in the address asks for and when it was made (HR-SA#5)', () => {
+    render(
+      <AuthPage
+        purpose="device"
+        control="device"
+        methods={GOOGLE}
+        actions={{ decideDevice: vi.fn(() => Promise.resolve(null)) }}
+        initial={{ step: 'device' }}
+        deviceCode="wdjb-mjht"
+        deviceEmail="ada@example.com"
+        deviceRequest={{ scopes: ['share', 'read', 'write'], madeAt: '22:41 UTC' }}
+      />,
+    );
+    expect(q('device.request')?.textContent).toBe(
+      'This code asks to read decks, edit decks and share decks. It was made at 22:41 UTC.',
+    );
+    /* another code typed over it is not the one the sentence is about */
+    fireEvent.paste(q('device.code.first')!, { clipboardData: { getData: () => 'abcd-efgh' } });
+    expect(q('device.request')).toBeNull();
+    expect(AUTH_WORDS.device.asks(['read decks'])).toBe('This code asks to read decks.');
   });
 });
 

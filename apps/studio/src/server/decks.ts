@@ -2,7 +2,8 @@ import { createServerFn } from '@tanstack/react-start';
 import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 import { DECK_TEMPLATES } from '@turboslide/schema/actions';
-import { deckAppearance, isTrashed, slideTitle } from '@turboslide/schema/deck';
+import { shaderPaletteOfDeck } from '@turboslide/materials/presets';
+import { deckAppearance, isTrashed, slidePlay, slideTitle } from '@turboslide/schema/deck';
 import type { Appearance, DeckDocument } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { Author } from '@turboslide/schema/mutations';
@@ -23,6 +24,7 @@ import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
 import { slideCounter } from '@turboslide/render/deck';
 import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 
+import type { DeckCardStanding } from '../routes/-deck-card';
 import { viewerAssetBase } from './asset-base';
 import type { AuthContext } from './authorize';
 import type { ListingScope } from './deck-scope';
@@ -89,6 +91,13 @@ export type DeckPayload = {
    * SPEC-4 3.11): the viewer routes fetch the rest through `getDeckSlides` behind the document
    */
   partial?: true;
+  /**
+   * when the route asked (`card: true`, the /deck route): how a stranger holding only this address
+   * reaches the deck, its general access (`open`) or the address's publish token (`publish`), so
+   * the link unfurls with the first slide (GF-2.1, server/deck-card.ts); absent when a stranger
+   * cannot open the deck, and the link keeps the site's card
+   */
+  card?: DeckCardStanding;
 };
 
 /** The rest of a partial payload (SPEC-4 3.11): rendered HTML by slide id for the slides the document left out. */
@@ -219,6 +228,8 @@ function buildViewerDeck(
         /* the show's, the view route's and the print route's frames follow Insert > Slide numbers
            through the same rule the editor stage and the exports read (return/build/b5.md request 12) */
         counter: slideCounter(deck, slide, 1, 1) !== '',
+        /* the slide's Playback for the viewer's and the show's ShaderLayer (the shader design 3.1) */
+        ...(slidePlay(deck, slide) === 'hold' ? { play: 'hold' as const } : {}),
         ...(options.notes && slide.notes !== undefined ? { notes: slide.notes } : {}),
         /* the slide clock's input for the show (HTML-SLIDES-DESIGN 2.6); a slide without motion adds nothing */
         ...motionField(deck.defaults, slide),
@@ -247,6 +258,8 @@ function buildViewerDeck(
         options.theme,
         bandAssetResolver(deck, (_id, _theme, path) => assetBase + path),
       ),
+      /* the deck's shader palette, so a shader the viewer plays draws the colours of its still */
+      palette: shaderPaletteOfDeck(deck),
     },
     skipped,
   };
@@ -656,9 +669,15 @@ const removeDeckFn = createServerFn({ method: 'POST' })
     // the deck's room on this instance goes first (room.ts closeRoom says why): a checkpoint run
     // pending or in flight would write the folder back after the removal (the focus round,
     // cycle 2; VERIFICATION C2-F19, `/deck/<id>` 200 after Delete forever on the check's server)
-    const { closeRoom } = await import('./room');
+    const { closeRoom, purgeRoom } = await import('./room');
     await closeRoom(data.deckId);
-    return mapStale(async () => (await ensureDecks()).remove(data.deckId, data.baseRevision));
+    const removed = await mapStale(async () =>
+      (await ensureDecks()).remove(data.deckId, data.baseRevision),
+    );
+    // the deck's Durable Object deletes its entries and rows once the store let the deck go
+    // (RELIABILITY-20, hardening HR-RT#13); a removal the store refused keeps them
+    await purgeRoom(data.deckId);
+    return removed;
   });
 
 export async function removeStoredDeck(
@@ -843,6 +862,11 @@ export type GetDeckInput = {
    * newer revision; an answer whose document moved past it is not kept
    */
   revision?: number;
+  /**
+   * answer `card` (GF-2.1): the /deck route's link card asks whether a stranger holding only this
+   * address may read the deck; the answer is the same for every reader of the URL
+   */
+  card?: boolean;
 };
 
 /** The header of an answer the CDN may keep for a minute and serve stale for an hour (SPEC-4 3.11). */
@@ -1003,6 +1027,8 @@ const deckInputValidator = (input: GetDeckInput): GetDeckInput => {
     throw new Error('revision must be a non negative integer');
   if (input.slides !== undefined && input.slides !== 'all' && input.slides !== 'first')
     throw new Error("slides must be 'all' or 'first'");
+  if (input.card !== undefined && typeof input.card !== 'boolean')
+    throw new Error('card must be a boolean');
   return input;
 };
 
@@ -1078,6 +1104,12 @@ export const getDeck = createServerFn({ method: 'GET' })
       },
       await viewerAssetBase(loaded.servedId),
     );
+    // the link card (GF-2.1): asked as a stranger holding this address, the same for every reader
+    let card: DeckCardStanding | null = null;
+    if (data.card === true) {
+      const { readerCardStanding } = await import('./deck-card');
+      card = await readerCardStanding(data.deckId, data.publishToken, shape.via);
+    }
     return {
       deck: built.deck,
       theme,
@@ -1085,6 +1117,7 @@ export const getDeck = createServerFn({ method: 'GET' })
       issues: loaded.issues,
       skipped: built.skipped,
       ...(data.slides === 'first' && built.deck.slides.length > 1 ? { partial: true } : {}),
+      ...(card === null ? {} : { card }),
     };
   });
 

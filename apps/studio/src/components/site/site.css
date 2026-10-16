@@ -1,0 +1,1707 @@
+/* The site stylesheet of /home and /docs (docs/SITE.md D7; the Workbench direction Kevin picked on
+   2026-10-14, design-r2/bench/README.md): the type scale, the 1280 px column, the bar, the buttons,
+   the framed figures with their corner crosses, the screens and the footer. The routes link it
+   from their head (`site.css?url`), so no rule reaches another page, and every selector starts at
+   the root class `.ts-site` (routes/-home-css.test.ts). Colours are the generated --pt- tokens of
+   packages/chrome/src/tokens.css, so the two appearances follow `html[data-theme]`; the one face
+   is the product's InterVariable 4.1 with its optical sizes. Spacing and component sizes are
+   multiples of 8 px and text line heights multiples of 4 px. No shadow with a blur or an offset;
+   colour transitions of 120 ms on hover alone, none under reduced motion. */
+
+/* ---- the root and its tokens ---- */
+
+.ts-site {
+  --site-page: 1280px;
+  --site-side: 32px;
+  --site-gap: 32px;
+  --site-bar-h: 56px;
+  display: block;
+  min-height: 100vh;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-size: 17px;
+  line-height: 28px;
+  letter-spacing: -0.012em;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  /* a weight the face lacks is never faked: the pages draw 400 and 500 alone */
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ts-site img {
+  display: block;
+  max-width: 100%;
+}
+
+.ts-site a {
+  color: inherit;
+}
+
+.ts-site :focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+.ts-site .site-wrap {
+  width: min(100% - 2 * var(--site-side), var(--site-page));
+  margin-inline: auto;
+}
+
+/* ---- the type scale: seven steps, two weights ---- */
+
+/* 72/72 display, the landing's h1: one line across the column at 1440 with its two stacks (D8:
+   80 px left no room for them); it steps down with the window and is 36/44 on a phone */
+.ts-site .t-display {
+  margin: 0;
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.032em;
+  text-wrap: balance;
+}
+
+/* 40/48 the docs title and the landing's one sentence per screen */
+.ts-site .t-title {
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+/* 24/32 a section head, set in the display cut by hand */
+.ts-site .t-head {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+  letter-spacing: -0.014em;
+  font-variation-settings: 'opsz' 32;
+  text-wrap: balance;
+}
+
+/* 20/28 the lead */
+.ts-site .t-lead {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.017em;
+  color: var(--pt-ink-2);
+  text-wrap: pretty;
+}
+
+/* 14/20 interface text: navigation, captions, tables, buttons */
+.ts-site .t-small {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.006em;
+}
+
+/* 12/16 a label in capitals: Inter has no small caps, so a label is capitals at 12 px, whose
+   cap height is the x-height of 16 px text; `case` lifts brackets and dashes to the capitals.
+   Labels name figures, tables, navigation groups and screen numbers (D9, accepted by name in
+   packages/lint/src/brand/config.ts) */
+.ts-site .t-label {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-feature-settings: 'case' 1;
+  font-variant-numeric: var(--pt-numerals);
+  color: var(--pt-titanium);
+}
+
+.ts-site p,
+.ts-site li,
+.ts-site figcaption {
+  text-wrap: pretty;
+}
+
+.ts-site pre,
+.ts-site code {
+  font-family: var(--pt-mono);
+  letter-spacing: 0;
+}
+
+/* a label with its solid icon: the icon in the label's colour, 8 px before the words */
+.ts-site .site-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-site .site-label svg {
+  flex: none;
+}
+
+.ts-site .site-label .site-num {
+  color: var(--pt-ink);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+/* ---- the mark: the T in a box (BoxedMark.tsx), the tab icon's plate, frame and ink ---- */
+
+.ts-site .site-mark {
+  display: block;
+  flex: none;
+}
+
+.ts-site .site-mark-plate {
+  fill: var(--pt-paper);
+}
+
+.ts-site .site-mark-frame {
+  fill: none;
+  stroke: var(--pt-edge);
+  stroke-width: 1;
+}
+
+.ts-site .site-mark-ink {
+  fill: var(--pt-ink);
+}
+
+.ts-site .site-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pt-ink);
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+  letter-spacing: -0.011em;
+}
+
+/* ---- buttons: 40 px, the 6 px control corner, Title Case words ---- */
+
+.ts-site .site-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--pt-radius);
+  background: none;
+  color: var(--pt-ink);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    border-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.ts-site .site-btn svg {
+  flex: none;
+}
+
+.ts-site .site-btn-ink {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.ts-site .site-btn-ink:hover {
+  background: var(--pt-ink-2);
+}
+
+.ts-site .site-btn-line {
+  border-color: var(--pt-field);
+}
+
+.ts-site .site-btn-line:hover,
+.ts-site .site-btn-quiet:hover {
+  background: var(--pt-plate);
+}
+
+.ts-site .site-btn-sm {
+  height: 32px;
+  padding: 0 12px;
+}
+
+/* a key chip, 4 px (.pt-kbd carries the corner and the figures) */
+.ts-site .site-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-field);
+  font-family: var(--pt-text);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+/* ---- the bar: sticky, 56 px, a hairline under it ---- */
+
+.ts-site .site-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--ts-layer-bar);
+  background: var(--pt-paper);
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-skip {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: var(--ts-layer-skip);
+}
+
+.ts-site .site-skip:focus {
+  top: 12px;
+}
+
+.ts-site .site-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: var(--site-bar-h);
+}
+
+.ts-site .site-bar-nav {
+  display: flex;
+  gap: 24px;
+  margin-left: auto;
+}
+
+.ts-site .site-bar-link {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.006em;
+  color: var(--pt-ink-2);
+  text-decoration: none;
+  transition: color 120ms ease-out;
+}
+
+.ts-site .site-bar-link:hover {
+  color: var(--pt-ink);
+}
+
+.ts-site .site-bar-rule {
+  width: 1px;
+  height: 24px;
+  background: var(--pt-hair);
+}
+
+.ts-site .site-bar-act {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Sign In's slot holds its width from the first paint, so its arrival moves nothing */
+.ts-site .site-bar-signin {
+  display: inline-flex;
+  justify-content: flex-end;
+  min-width: 72px;
+}
+
+/* ---- figures: a capture in a square frame with a 9 px cross at each corner ---- */
+
+.ts-site .site-fig {
+  margin: 0;
+}
+
+.ts-site .site-fig-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 12px;
+}
+
+.ts-site .site-fig-head .site-fig-note {
+  margin: 0;
+  color: var(--pt-ink-2);
+  text-align: right;
+}
+
+.ts-site .site-fig-address {
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-frame {
+  position: relative;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-site .site-x {
+  position: absolute;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  background:
+    linear-gradient(var(--pt-cross), var(--pt-cross)) center / 1px 9px no-repeat,
+    linear-gradient(var(--pt-cross), var(--pt-cross)) center / 9px 1px no-repeat;
+  pointer-events: none;
+}
+
+.ts-site .site-x.is-tl {
+  left: -5px;
+  top: -5px;
+}
+
+.ts-site .site-x.is-tr {
+  right: -5px;
+  top: -5px;
+}
+
+.ts-site .site-x.is-bl {
+  left: -5px;
+  bottom: -5px;
+}
+
+.ts-site .site-x.is-br {
+  right: -5px;
+  bottom: -5px;
+}
+
+/* a picture in each appearance (ThemePicture.tsx): the one html[data-theme] names is drawn, the
+   other is display: none and, being lazy, is never fetched until the appearance changes */
+.ts-site .site-pic,
+.ts-site .site-pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-site .site-pic img {
+  object-fit: cover;
+  object-position: left top;
+}
+
+.ts-site .site-pic.is-dark,
+:root[data-theme='dark'] .ts-site .site-pic.is-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-site .site-pic.is-dark {
+  display: block;
+}
+
+/* ---- the landing: screen 01, the hero ---- */
+
+.ts-site .site-hero {
+  /* room over the h1 for the arcs, which rise about 1.7 avatars over the cap line */
+  padding-top: 64px;
+}
+
+.ts-site .site-h1-word {
+  white-space: nowrap;
+}
+
+.ts-site .site-hero-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  align-items: start;
+  margin-top: 20px;
+}
+
+.ts-site .site-hero-row .t-lead {
+  grid-column: 1 / span 7;
+  margin: 0;
+  max-width: 37em;
+}
+
+.ts-site .site-hero-act {
+  grid-column: 8 / span 5;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.ts-site .site-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ts-site .site-hero-act .site-hero-note {
+  margin: 0;
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-hero .site-fig {
+  margin-top: 24px;
+}
+
+/* the editor's box: 1280 by 640 at 1440, so at 1440 by 900 the editor's stage shows its whole
+   slide above the fold (the stage is the box's height less the title row, the menus, the
+   toolbar, the speaker notes and its own margins); the poster fills it and the live editor's
+   frame takes the same box, so the swap moves nothing */
+.ts-site .site-hero-box {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  background: var(--pt-paper);
+  scroll-margin-top: calc(var(--site-bar-h) + 16px);
+}
+
+/* the live editor's frame (HeroBox.tsx): over the poster in the same box, shown once it says it
+   is ready, so the swap moves nothing */
+.ts-site .site-hero-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity 150ms var(--pt-ease-out);
+}
+
+.ts-site .site-hero-box[data-state='live'] .site-hero-frame,
+.ts-site .site-hero-box[data-state='done'] .site-hero-frame {
+  opacity: 1;
+}
+
+/* ---- the screens after the hero: a ruled title block, one sentence, one large figure ---- */
+
+.ts-site .site-screen {
+  padding-top: 128px;
+}
+
+.ts-site .site-screen-head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  border-top: 1px solid var(--pt-hair);
+  padding-top: 16px;
+  margin-bottom: 48px;
+}
+
+.ts-site .site-screen-head .t-label {
+  grid-column: 1 / span 3;
+  padding-top: 16px;
+}
+
+.ts-site .site-screen-head h2 {
+  grid-column: 4 / span 9;
+  margin: 0;
+  max-width: 21em;
+}
+
+/* screen 02: the recorded run beside the one action on each transport */
+.ts-site .site-agents {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  align-items: start;
+}
+
+/* the #101010 panel in both appearances, square, with a hair edge on the dark ground */
+.ts-site .site-term {
+  grid-column: 1 / span 7;
+  margin: 0;
+  background: var(--pt-panel-ink);
+  color: var(--pt-panel-text);
+  border: 1px solid var(--pt-panel-ink);
+}
+
+:root[data-theme='dark'] .ts-site .site-term {
+  border-color: var(--pt-hair);
+}
+
+.ts-site .site-term-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--pt-hair-on-ink);
+}
+
+:root[data-theme='dark'] .ts-site .site-term-head {
+  border-bottom-color: var(--pt-plate-on-ink);
+}
+
+.ts-site .site-term-head .t-label {
+  color: var(--pt-panel-text-2);
+}
+
+.ts-site .site-term pre {
+  margin: 0;
+  padding: 16px 16px 20px;
+  font-size: 13px;
+  line-height: 20px;
+  overflow-x: auto;
+}
+
+.ts-site .site-term .site-ln {
+  display: block;
+  white-space: pre-wrap;
+  padding-left: 2ch;
+  text-indent: -2ch;
+}
+
+.ts-site .site-term .site-ln.is-out {
+  color: var(--pt-panel-text-2);
+}
+
+.ts-site .site-term .site-ln.is-out + .site-ln.is-cmd {
+  margin-top: 12px;
+}
+
+.ts-site .site-term .site-ps {
+  color: var(--pt-panel-text-2);
+  user-select: none;
+}
+
+/* a flag and its value never break apart */
+.ts-site .site-term .site-nw {
+  white-space: nowrap;
+}
+
+.ts-site .site-transports {
+  grid-column: 8 / span 5;
+}
+
+.ts-site .site-spec {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ts-site .site-spec caption {
+  text-align: left;
+  padding-bottom: 12px;
+}
+
+.ts-site .site-spec th,
+.ts-site .site-spec td {
+  text-align: left;
+  vertical-align: baseline;
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid var(--pt-hair);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.006em;
+}
+
+.ts-site .site-spec thead th {
+  padding-top: 0;
+  padding-bottom: 8px;
+  border-bottom-color: var(--pt-edge);
+}
+
+.ts-site .site-spec th:last-child,
+.ts-site .site-spec td:last-child {
+  padding-right: 0;
+  text-align: right;
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-spec td code {
+  font-size: 13px;
+}
+
+.ts-site .site-spec tbody th,
+.ts-site .site-spec tfoot th,
+.ts-site .site-spec tfoot td {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ts-site .site-spec tbody th .site-label {
+  vertical-align: top;
+}
+
+.ts-site .site-spec tfoot th,
+.ts-site .site-spec tfoot td {
+  border-bottom: 0;
+}
+
+.ts-site .site-transports .site-note {
+  margin: 16px 0 0;
+  color: var(--pt-titanium);
+}
+
+/* screen 03: the viewer and the slideshow keys */
+.ts-site .site-viewer-box {
+  aspect-ratio: 2360 / 1784;
+  overflow: hidden;
+}
+
+.ts-site .site-keys {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  row-gap: 16px;
+  margin: 24px 0 0;
+  padding: 0;
+}
+
+.ts-site .site-keys div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ts-site .site-keys dt,
+.ts-site .site-keys dd {
+  margin: 0;
+}
+
+.ts-site .site-keys dd {
+  color: var(--pt-ink-2);
+}
+
+/* ---- the site pages: /features, /faq and /about (FeaturesPage.tsx, FaqPage.tsx, AboutPage.tsx) ----
+   The page's name in the display size with its lead, then numbered ruled blocks: the landing's
+   screen head (label in the first three columns, the sentence in the other nine) with the block's
+   body on the same nine columns. The bar's About, FAQ and GitHub leave under 1024 px. */
+
+.ts-site .site-page-head {
+  padding-top: 96px;
+}
+
+.ts-site .site-page-head .t-lead {
+  max-width: 36em;
+  margin: 24px 0 0;
+}
+
+.ts-site .site-page-head + .site-screen {
+  padding-top: 96px;
+}
+
+/* the counts of /features, read from facts.ts: four figures over a hairline */
+.ts-site .site-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  margin: 48px 0 0;
+  border-top: 1px solid var(--pt-hair);
+  padding-top: 16px;
+}
+
+.ts-site .site-counts dd {
+  margin: 8px 0 0;
+  font-size: 40px;
+  line-height: 48px;
+  letter-spacing: -0.022em;
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-counts a {
+  text-decoration: none;
+}
+
+.ts-site .site-counts a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+/* a block's body starts at the fourth column, under its sentence */
+.ts-site .site-block-body {
+  margin-left: calc((100% + var(--site-gap)) / 4);
+}
+
+.ts-site .site-block-body code,
+.ts-site .site-faq-a code {
+  font-size: 0.875em;
+  color: var(--pt-ink);
+}
+
+/* a crop of the product at its native width at most, or a code panel */
+.ts-site .site-crop {
+  margin: 0 0 40px;
+}
+
+.ts-site .site-crop-frame {
+  width: min(var(--crop-w), 100%);
+}
+
+.ts-site .site-crop .site-pic img {
+  height: auto;
+}
+
+.ts-site .site-crop figcaption {
+  margin-top: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-code .site-term {
+  max-width: 720px;
+}
+
+/* the features of a group, and the principles of /about: two columns of ruled items */
+.ts-site .site-feats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-site .site-feats li {
+  border-top: 1px solid var(--pt-hair);
+  padding: 16px 0 24px;
+}
+
+.ts-site .site-feat-name {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 500;
+}
+
+.ts-site .site-feat-name a {
+  text-decoration: none;
+}
+
+.ts-site .site-feat-name a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-site .site-feats p {
+  margin: 4px 0 0;
+  color: var(--pt-ink-2);
+}
+
+/* the chapter a block links to, and the links of /about: ink words with a solid arrow */
+.ts-site .site-block-more {
+  margin: 8px 0 0;
+}
+
+.ts-site .site-block-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.ts-site .site-block-more a,
+.ts-site .site-block-links a,
+.ts-site .site-faq-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ts-site .site-block-more a:hover,
+.ts-site .site-block-links a:hover,
+.ts-site .site-faq-links a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-site .site-block-text {
+  max-width: 40em;
+  margin: 0 0 16px;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-block-body > .site-btns {
+  margin: 32px 0 0;
+}
+
+/* /faq: the label in the first three columns, the disclosure list in the other nine */
+.ts-site .site-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-faq-label {
+  grid-column: 1 / span 3;
+  align-self: start;
+  padding-top: 24px;
+}
+
+.ts-site .site-faq {
+  grid-column: 4 / span 9;
+}
+
+.ts-site .site-faq-item {
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-faq-item summary {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 20px;
+  column-gap: 16px;
+  align-items: center;
+  padding: 20px 0;
+  list-style: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: -0.017em;
+}
+
+.ts-site .site-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.ts-site .site-faq-n {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: var(--pt-numerals);
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-faq-item summary svg {
+  color: var(--pt-titanium);
+  transition: rotate 120ms ease-out;
+}
+
+.ts-site .site-faq-item[open] summary svg {
+  rotate: 180deg;
+}
+
+.ts-site .site-faq-item summary:hover .site-faq-q {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.ts-site .site-faq-a {
+  max-width: calc(40em + 56px);
+  padding: 0 36px 24px 56px;
+}
+
+.ts-site .site-faq-a p {
+  margin: 0 0 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-faq-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+@media (max-width: 1023px) {
+  .ts-site .site-bar-link.is-wide {
+    display: none;
+  }
+
+  .ts-site .site-block-body {
+    margin-left: 0;
+  }
+
+  .ts-site .site-faq-label,
+  .ts-site .site-faq {
+    grid-column: 1 / -1;
+  }
+
+  .ts-site .site-faq-label {
+    padding: 16px 0 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .ts-site .site-page-head {
+    padding-top: 40px;
+  }
+
+  .ts-site .site-page-head .t-lead {
+    margin-top: 16px;
+  }
+
+  .ts-site .site-page-head + .site-screen {
+    padding-top: 72px;
+  }
+
+  .ts-site .site-counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 16px;
+    margin-top: 32px;
+  }
+
+  .ts-site .site-counts dd {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .ts-site .site-crop {
+    margin-bottom: 32px;
+  }
+
+  .ts-site .site-feats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-site .site-faq-item summary {
+    grid-template-columns: 24px minmax(0, 1fr) 20px;
+    column-gap: 12px;
+    padding: 16px 0;
+    font-size: 17px;
+    line-height: 24px;
+  }
+
+  .ts-site .site-faq-a {
+    padding: 0 0 20px 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-site .site-faq-item summary svg {
+    transition: none;
+  }
+}
+
+/* ---- the title's two arcs (Title.tsx, AvatarStack.tsx, docs/SITE.md B) ----
+   Each stack is placed from its word (`left: 100%`, `top` at the word's cap line: Inter's ascent
+   is 0.969em and its cap height 0.727em) and is out of the line's flow, so it takes no width and
+   the sentence keeps its word spacing. Its avatars sit on a circle of radius --r: avatar i at the
+   angle --a0 minus i steps of --da, the first with its lower left at the word's top right corner.
+   The arc rises from the corner, crests and settles, always over the line's own glyphs; hover
+   and focus widen the step (the fan opens) and lift the avatar under the pointer with its name.
+   On a phone the line breaks after "people" and the arc runs flat in the space after its word,
+   under the line above. */
+
+.ts-site .site-h1-word {
+  position: relative;
+}
+
+.ts-site .site-h1-br {
+  display: none;
+}
+
+.ts-site .site-stack {
+  --s: clamp(28px, 0.56em, 40px);
+  --r: calc(var(--s) * 3.2);
+  --a0: 125deg;
+  --da: 11.2deg;
+  /* the gap between the first avatar and the cap line */
+  --rise0: 3px;
+  position: absolute;
+  left: 100%;
+  top: 0.242em;
+  width: 0;
+  height: 0;
+  letter-spacing: 0;
+  line-height: 0;
+}
+
+/* the fan opens under a pointer and while an avatar has the keyboard's focus; the open fan
+   keeps a hit area over its span, so the pointer never falls between two avatars and closes it */
+.ts-site .site-stack:has(.site-av:focus-visible) {
+  --da: 17deg;
+}
+
+@media (hover: hover) {
+  .ts-site .site-stack:hover {
+    --da: 17deg;
+  }
+}
+
+.ts-site .site-stack:hover::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: calc(var(--s) * -1.9);
+  width: calc(var(--s) * (var(--n) * 0.95 + 0.4));
+  height: calc(var(--s) * 2.1);
+}
+
+.ts-site .site-av {
+  --phi: calc(var(--a0) - var(--i) * var(--da));
+  --up: 0px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: var(--s);
+  height: var(--s);
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--ts-hue);
+  border-radius: 50%;
+  background: #ffffff;
+  color: #0b0b0b;
+  font: inherit;
+  /* the 2 px page coloured ring that parts an avatar from the one it overlaps, then a soft
+     shadow (accepted by name in packages/lint/src/brand/config.ts) */
+  box-shadow:
+    0 0 0 2px var(--pt-paper),
+    0 4px 10px -3px rgb(0 0 0 / 0.32);
+  cursor: pointer;
+  translate: calc(var(--r) * (cos(var(--phi)) - cos(var(--a0))) + var(--up) * cos(var(--phi)))
+    calc(
+      var(--r) * (sin(var(--a0)) - sin(var(--phi))) - var(--s) - var(--rise0) - var(--up) *
+        sin(var(--phi))
+    );
+  transition:
+    translate 240ms var(--pt-ease),
+    scale 240ms var(--pt-ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* the first avatar on top, each later one under the one before it (local order, under 5) */
+.ts-site .site-av:nth-child(1) {
+  z-index: 4;
+}
+
+.ts-site .site-av:nth-child(2) {
+  z-index: 3;
+}
+
+.ts-site .site-av:nth-child(3) {
+  z-index: 2;
+}
+
+.ts-site .site-av:nth-child(4) {
+  z-index: 1;
+}
+
+/* the lifted avatar: out along its radius, a little larger, on top, its name in a label; under
+   a pointer that hovers, on the keyboard's focus, and for a moment after a press (a touch) */
+.ts-site .site-av:focus-visible,
+.ts-site .site-av[data-pressed] {
+  --up: calc(var(--s) * 0.12);
+  z-index: 4;
+  scale: 1.1;
+}
+
+@media (hover: hover) {
+  .ts-site .site-av:hover {
+    --up: calc(var(--s) * 0.12);
+    z-index: 4;
+    scale: 1.1;
+  }
+
+  .ts-site .site-av:hover::after {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.ts-site .site-av:focus-visible {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 3px;
+}
+
+.ts-site .site-av::after {
+  content: attr(data-name);
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  translate: -50% 0;
+  padding: 2px 6px;
+  border-radius: var(--pt-radius-sm);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ts-site .site-av:focus-visible::after,
+.ts-site .site-av[data-pressed]::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* a press: the ring in the avatar's hue spreads once and fades */
+.ts-site .site-av::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--ts-hue);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ts-site .site-av[data-pressed]::before {
+  animation: site-av-pulse 900ms var(--pt-ease-out) 1;
+}
+
+@keyframes site-av-pulse {
+  from {
+    opacity: 0.9;
+    scale: 1;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.7;
+  }
+}
+
+/* a person: the generated portrait, clipped to the round field */
+.ts-site .site-av .site-face {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.ts-site .site-face-bg {
+  fill: color-mix(in oklab, var(--ts-hue) 24%, #ffffff);
+}
+
+.ts-site .site-face-cloth {
+  fill: var(--ts-hue);
+}
+
+.ts-site .site-face-collar {
+  fill: color-mix(in oklab, var(--ts-hue) 30%, #ffffff);
+}
+
+.ts-site .site-face-skin,
+.ts-site .site-face-neck {
+  fill: color-mix(in oklab, var(--ts-hue) 7%, #fbf6ef);
+}
+
+.ts-site .site-face-neck {
+  fill: color-mix(in oklab, var(--ts-hue) 14%, #eadfd2);
+}
+
+.ts-site .site-face-hair {
+  fill: color-mix(in oklab, var(--ts-hue) 30%, #141414);
+}
+
+.ts-site .site-face-glasses {
+  fill: none;
+  stroke: #141414;
+  stroke-width: 1.1;
+}
+
+/* an agent: the tool's own mark, in its colours on paper, on a plate of its own that keeps those
+   colours in both appearances (the marks that draw in the ink of the dark appearance keep the
+   ink of the light one here) */
+.ts-site .site-av-plate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.ts-site .site-av-plate .ts-agent-mark {
+  width: 62%;
+  height: 62%;
+}
+
+.ts-site .site-av.is-agent .ts-agent-mark[data-ink-on-dark] {
+  color: #0b0b0b;
+}
+
+/* ---- the footer (SiteFooter.tsx): on every site page and the docs ---- */
+
+.ts-site .site-foot {
+  margin-top: 160px;
+  border-top: 1px solid var(--pt-hair);
+  padding: 64px 0 32px;
+}
+
+.ts-site .site-foot-top {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  row-gap: 48px;
+  align-items: start;
+}
+
+.ts-site .site-foot-brand {
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* the lockup: the animated mark at 80 px and the word in the display cut at 40/48 */
+.ts-site .site-foot .site-foot-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--pt-ink);
+  text-decoration: none;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 500;
+  letter-spacing: -0.024em;
+}
+
+.ts-site .site-foot-say {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-foot-cols {
+  grid-column: 5 / span 8;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  row-gap: 32px;
+}
+
+.ts-site .site-foot-cols h2 {
+  margin: 0 0 16px;
+}
+
+.ts-site .site-foot-cols ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-site .site-foot-cols li + li {
+  margin-top: 8px;
+}
+
+.ts-site .site-foot a {
+  color: var(--pt-ink-2);
+  text-decoration: none;
+  transition: color 120ms ease-out;
+}
+
+.ts-site .site-foot a:hover {
+  color: var(--pt-ink);
+}
+
+.ts-site .site-foot-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-top: 80px;
+  padding-top: 24px;
+  border-top: 1px solid var(--pt-hair-soft);
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-foot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 32px;
+  margin: 0;
+}
+
+/* the commit in Inter with tabular figures */
+.ts-site .site-foot-sha {
+  font-variant-numeric: var(--pt-numerals);
+}
+
+/* the appearance switch: Light and Dark in one 6 px group, the current one in ink; the pressed
+   look reads html[data-theme], so it is right from the first paint */
+.ts-site .site-appear {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+}
+
+.ts-site .site-appear-opt {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--pt-radius-sm);
+  background: none;
+  color: var(--pt-ink-2);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.ts-site .site-appear-opt:hover {
+  color: var(--pt-ink);
+}
+
+html[data-theme='light'] .ts-site .site-appear-opt[data-value='light'],
+html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+/* the animated mark (AnimatedMark.tsx): the 16 px rows build from the top, each run drawn from
+   its left end 45 ms after the row above, then the T slides out to the right and back in from
+   the left, once. Before it is first in view, without script and under reduced motion it is the
+   finished mark; off screen it pauses */
+.ts-site .site-mark-run {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+}
+
+.ts-site .site-mark[data-play] .site-mark-run {
+  animation: site-mark-build 220ms cubic-bezier(0.2, 0, 0, 1) calc(var(--row) * 45ms) backwards;
+}
+
+.ts-site .site-mark[data-play] .site-mark-slide {
+  animation: site-mark-slide 600ms 900ms;
+}
+
+.ts-site .site-mark[data-paused] .site-mark-run,
+.ts-site .site-mark[data-paused] .site-mark-slide {
+  animation-play-state: paused;
+}
+
+@keyframes site-mark-build {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes site-mark-slide {
+  0% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  40% {
+    transform: translateX(14px);
+    animation-timing-function: step-end;
+  }
+
+  40.5% {
+    transform: translateX(-14px);
+    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  100% {
+    transform: none;
+  }
+}
+
+/* ---- the layout breakpoint (BRAND_LAYOUT_MAX_PX, 1023 px): one column ---- */
+
+@media (max-width: 1023px) {
+  .ts-site .site-hero-row .t-lead,
+  .ts-site .site-screen-head .t-label,
+  .ts-site .site-screen-head h2,
+  .ts-site .site-term,
+  .ts-site .site-transports,
+  .ts-site .site-foot-brand,
+  .ts-site .site-foot-cols {
+    grid-column: 1 / -1;
+  }
+
+  .ts-site .site-hero-act {
+    grid-column: 1 / -1;
+    justify-self: start;
+    align-items: flex-start;
+    margin-top: 24px;
+  }
+
+  .ts-site .site-screen-head .t-label {
+    padding-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .ts-site .site-transports {
+    margin-top: 40px;
+  }
+
+  .ts-site .site-keys {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ---- a phone (BRAND_NARROW_MAX_PX, 720 px): 16 px margins and gutters ---- */
+
+@media (max-width: 720px) {
+  .ts-site {
+    --site-side: 16px;
+    --site-gap: 16px;
+    font-size: 16px;
+    letter-spacing: -0.011em;
+  }
+
+  .ts-site .t-display {
+    font-size: 36px;
+    line-height: 44px;
+    letter-spacing: -0.028em;
+  }
+
+  /* the line breaks after "people", so each arc has the space after its word; 26 px avatars on
+     a flat arc whose top stays under the line above (the first avatar centred on the cap line) */
+  .ts-site .site-h1-br {
+    display: inline;
+  }
+
+  .ts-site .site-stack {
+    --s: 26px;
+    --r: calc(var(--s) * 6);
+    --a0: 110deg;
+    --da: 6.4deg;
+    --rise0: -19px;
+  }
+
+  .ts-site .site-stack:has(.site-av:focus-visible) {
+    --da: 9.6deg;
+  }
+
+  @media (hover: hover) {
+    .ts-site .site-stack:hover {
+      --da: 9.6deg;
+    }
+  }
+
+  .ts-site .t-title {
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: -0.02em;
+  }
+
+  .ts-site .t-head {
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: -0.012em;
+  }
+
+  .ts-site .t-lead {
+    font-size: 18px;
+    letter-spacing: -0.015em;
+  }
+
+  .ts-site .site-bar-nav,
+  .ts-site .site-bar-rule,
+  .ts-site .site-bar-signin {
+    display: none;
+  }
+
+  .ts-site .site-bar-act {
+    margin-left: auto;
+  }
+
+  .ts-site .site-hero {
+    padding-top: 24px;
+  }
+
+  .ts-site .site-hero-row {
+    margin-top: 12px;
+  }
+
+  /* New Presentation with "No account is needed." beside it, then the example deck: the stage of
+     the editor below then ends above the fold at 390 by 844 */
+  .ts-site .site-hero-act {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 8px;
+    margin-top: 20px;
+    padding-top: 0;
+  }
+
+  .ts-site .site-hero-act .site-btns {
+    display: contents;
+  }
+
+  .ts-site .site-hero-act .site-btn-line {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .ts-site .site-hero-act .site-hero-note {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .ts-site .site-hero .site-fig {
+    margin-top: 28px;
+  }
+
+  /* the head row stacks: the label, then the sentence under it */
+  .ts-site .site-fig-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .ts-site .site-fig-head .site-fig-note {
+    text-align: left;
+  }
+
+  /* the phone's editor box: the full column, never taller than 72 percent of the screen, so a
+     thumb always has page outside the frame to scroll */
+  .ts-site .site-hero-box {
+    aspect-ratio: auto;
+    height: min(560px, 72svh);
+  }
+
+  .ts-site .site-viewer-box {
+    aspect-ratio: 780 / 1120;
+  }
+
+  .ts-site .site-screen {
+    padding-top: 96px;
+  }
+
+  .ts-site .site-screen-head {
+    margin-bottom: 32px;
+  }
+
+  .ts-site .site-term pre {
+    padding: 12px 12px 16px;
+    font-size: 12px;
+  }
+
+  .ts-site .site-term-head {
+    padding: 0 12px;
+  }
+
+  /* each transport as two lines: its name and count, then the call */
+  .ts-site .site-spec thead {
+    display: none;
+  }
+
+  .ts-site .site-spec tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--pt-hair);
+  }
+
+  .ts-site .site-spec th,
+  .ts-site .site-spec td {
+    border: 0;
+    padding: 0;
+  }
+
+  .ts-site .site-spec td:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 4px;
+    text-align: left;
+  }
+
+  .ts-site .site-spec td:last-child {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .ts-site .site-spec tfoot tr {
+    border-bottom: 0;
+  }
+
+  .ts-site .site-keys {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ts-site .site-foot {
+    margin-top: 112px;
+    padding-top: 48px;
+  }
+
+  .ts-site .site-foot-top {
+    row-gap: 40px;
+  }
+
+  /* the mark at 48 px (three times the 16 px grid) and the word at 28/36 */
+  .ts-site .site-foot .site-foot-lockup {
+    gap: 16px;
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: -0.02em;
+  }
+
+  .ts-site .site-foot-lockup .site-mark {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ts-site .site-foot-cols {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ts-site .site-foot-base {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 48px;
+  }
+
+  .ts-site .site-foot-meta {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-site .site-btn,
+  .ts-site .site-bar-link,
+  .ts-site .site-foot a,
+  .ts-site .site-appear-opt,
+  .ts-site .site-hero-frame,
+  .ts-site .site-av {
+    transition: none;
+  }
+
+  /* the arc keeps its place: no fan, no lift; the label and the focus ring change at once, and a
+     press shows the ring without the spread */
+  .ts-site .site-stack:hover,
+  .ts-site .site-stack:has(.site-av:focus-visible) {
+    --da: 11.2deg;
+  }
+
+  .ts-site .site-av:hover,
+  .ts-site .site-av:focus-visible,
+  .ts-site .site-av[data-pressed] {
+    --up: 0px;
+    scale: none;
+  }
+
+  .ts-site .site-av[data-pressed]::before {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* the finished mark, never the build or the slide */
+  .ts-site .site-mark[data-play] .site-mark-run,
+  .ts-site .site-mark[data-play] .site-mark-slide {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (max-width: 720px) {
+  .ts-site .site-stack:hover,
+  .ts-site .site-stack:has(.site-av:focus-visible) {
+    --da: 6.4deg;
+  }
+}

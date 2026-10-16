@@ -115,16 +115,20 @@ import { logSecurityEvent } from './log';
 import { measureSlidesThroughWorker } from './measure';
 import { registerMigrateStorage } from './migrate';
 import {
+  closeRoom,
   commentCallerFor,
   decideFor,
   inboxActorsFor,
   keyRoomIdentity,
+  purgeRoom,
   realtimeChannel,
   realtimeTier,
   redisCommands,
   requestIdentity as roomIdentity,
   roomBackedStore,
 } from './room';
+import type { EarlierAttempt, Idempotency } from './idempotency';
+import { keyedStore, replayStore } from './idempotency';
 import { isDoChannel } from '@turboslide/realtime/do';
 import {
   deckDir,
@@ -1099,7 +1103,13 @@ function registerHostedDeckActions(
     const { id, confirm, baseRevision } = input as DeckIdInput & { confirm?: boolean };
     if (confirm !== true) throw new TypeError('deck.remove needs confirm: true');
     await allowed(id, 'remove', 'deck.remove');
-    return mapStale(() => decks.remove(id, baseRevision));
+    // the order of the trash page's Delete forever (decks.ts removeDeckFn): this instance's room,
+    // then the store, then the deck's Durable Object, which deletes its entries and rows once the
+    // store let the deck go (RELIABILITY-20, hardening HR-RT#13); a refused removal keeps them
+    await closeRoom(id);
+    const removed = await mapStale(() => decks.remove(id, baseRevision));
+    await purgeRoom(id);
+    return removed;
   });
 }
 
@@ -1324,6 +1334,8 @@ export type DeckDispatcher = {
   source: DeckSource;
   /** The attached page the view actions run in, when one is attached at creation. */
   session: StudioSession | undefined;
+  /** The store the document actions read and write: the room's on the do tier, keyed when asked. */
+  live: DeckStore;
 };
 
 export type DeckDispatcherOptions = {
@@ -1335,6 +1347,18 @@ export type DeckDispatcherOptions = {
    * and no request in a unit test, where those actions act as an anonymous caller over the files.
    */
   request?: Request;
+  /**
+   * The caller and the `Idempotency-Key` of a keyed agent write (RELIABILITY-21, hardening
+   * HR-O#6): every document write of the request carries an op id made from them
+   * (server/idempotency.ts `keyedStore`).
+   */
+  idempotency?: Idempotency;
+  /**
+   * The earlier attempt of a keyed request this one resends: the document actions read the deck
+   * as that attempt did and its writes are answered by its records (server/idempotency.ts
+   * `replayStore`), so the action answers as it did then and writes nothing.
+   */
+  replay?: EarlierAttempt;
 };
 
 /**
@@ -1376,7 +1400,13 @@ export async function deckDispatcher(
   // object was not added. Try again"); through the room the record enters the object's order and
   // reaches every tab as an op. `putAsset`, `snapshots` and the other members ride the spread of
   // `roomBackedStore` unchanged, so a picture's bytes still go to the store.
-  const liveStore = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
+  const roomed = realtimeTier() === 'do' ? await roomBackedStore(deckId, deckStore) : deckStore;
+  const liveStore =
+    options.idempotency === undefined
+      ? roomed
+      : options.replay === undefined
+        ? keyedStore(roomed, options.idempotency)
+        : replayStore(roomed, options.idempotency, options.replay);
   const store = storeFor(deckId);
   const dispatcher = createDispatcher();
   const load = async (): Promise<DeckDocument> => (await liveStore.read()).document;
@@ -1581,6 +1611,7 @@ export async function deckDispatcher(
     dispatcher: people === undefined ? dispatcher : dispatcherWithStandIns(dispatcher, people),
     source,
     session,
+    live: liveStore,
   };
 }
 

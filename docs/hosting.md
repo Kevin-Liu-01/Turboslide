@@ -129,22 +129,23 @@ temp tree (`apps/studio/src/server/root.test.ts`); the Docker worker's own folde
 
 ### Layout
 
-One Vercel Blob store, public access, holds each deck under `decks/<id>/` in the layout of SPEC
-4.1: `deck.json`, `slides/<slideId>.json`, `versions/<n>.json`, `leases.json`, the sidecars
+One Vercel Blob store, public access, holds each deck under `decks/<id>/` in the layout of SPEC 4.1:
+`deck.json`, `slides/<slideId>.json`, `versions/<n>.json`, `leases.json`, the sidecars
 (`import-ids.json`, `import-report.json`, `known-findings.json`) and `assets/<file>`, the twins,
-whose public URLs the browser can read directly. Since the Google Slides parity round two the
-prefix also holds `snapshots/<md5>.json`, one immutable copy of the whole document per committed
-write (the subsection "Immutable per revision documents" below). Templates are not uploaded; they
-ship in the bundle. Produced exports live beside the decks under `exports/<deckId>/<jobId>/` (the
-files of a synchronous export; the plan, the parts and the files of a batched one, section 7).
-The editor's queued export keeps its record at `exports/.jobs/<jobId>.json`, a folder no deck id
-can name (the stream fix round two, `build/t1.md` C3S-F7): written `queued` when the export
-starts, rewritten `done` or `failed` by the instance that ran the job under `waitUntil` after its
-response, with the produced files stored under `exports/<deckId>/<jobId>/` and their `?download=1`
-addresses, so a poll on any instance answers from the record and a job no record names is refused
-in the product's words, never a 500. Records older than a day are pruned at the next export start;
-`deck.remove` deletes the stored files with the deck prefix and the small record outlives it until
-that prune.
+whose public URLs the browser can read directly. Since the Google Slides parity round two the prefix
+also holds `snapshots/<md5>.json`, immutable copies of the whole document: one per committed write
+until hardening PS#4, and since then one on every tenth record, for a restore, for a document over 3
+MB and at the deck's last close (the subsection "Immutable per revision documents" below). Templates
+are not uploaded; they ship in the bundle. Produced exports live beside the decks under
+`exports/<deckId>/<jobId>/` (the files of a synchronous export; the plan, the parts and the files of
+a batched one, section 7). The editor's queued export keeps its record at
+`exports/.jobs/<jobId>.json`, a folder no deck id can name (the stream fix round two, `build/t1.md`
+C3S-F7): written `queued` when the export starts, rewritten `done` or `failed` by the instance that
+ran the job under `waitUntil` after its response, with the produced files stored under
+`exports/<deckId>/<jobId>/` and their `?download=1` addresses, so a poll on any instance answers
+from the record and a job no record names is refused in the product's words, never a 500. Records
+older than a day are pruned at the next export start; `deck.remove` deletes the stored files with
+the deck prefix and the small record outlives it until that prune.
 
 ### Reads
 
@@ -221,18 +222,20 @@ per tick until the last stream closed.
 
 A write pulls first, then applies through `FileStore.write` on the mirror (the same `applyWrite`,
 lease check and version record as on disk), then pushes in this order. The focus round
-(docs/FOCUS.md section 5 ranks 3, 7, 20 and 21; `docs/gslides-parity/focus/build/b7.md`) changed
-the order that follows: the version record travels in the second round, before the commit, as a
-claim on its number (`overwrite` refused; a number another instance holds is `RecordTakenError`
-and the write runs once more from the store's current document; a claim older than 60 s is a
-stopped writer's and is taken over), so a record is never invisible to the other instances until
-the next commit; the fourth round is the removed bodies alone; every push of `deck.json` (the
-seed, `create`, `copy`, `trash`, `restore`) stores its snapshot first; `pull()` fetches the bodies
-the manifest names and proves each against its own head, and a lagging body leaves the document
-unproven (`StaleMirrorError`, a lost race for the room); and `list()` reads one head per deck (the
-mirror when its manifest row names the head's etag, else the origin body when its md5 is the etag,
-else the snapshot the etag names), so the listing shows a rename, a trash stamp or a restore within
-its own refresh. The steps as they were, for the record of round two:
+(docs/FOCUS.md section 5 ranks 3, 7, 20 and 21; `docs/gslides-parity/focus/build/b7.md`) changed the
+order that follows: the version record travels in the second round, before the commit, as a claim on
+its number (`overwrite` refused; a number another instance holds is `RecordTakenError` and the write
+runs once more from the store's current document; a claim older than 60 s is a stopped writer's and
+is taken over), so a record is never invisible to the other instances until the next commit; the
+fourth round is the removed bodies alone; every push of `deck.json` (the seed, `create`, `copy`,
+`trash`, `restore`) stores its snapshot first, and since hardening PS#4 a write stores it on every
+tenth record, for a version restore and above 3 MB alone, while a reader replays the records above
+its mirror or above the newest stored snapshot a record names; `pull()` fetches the bodies the
+manifest names and proves each against its own head, and a lagging body leaves the document unproven
+(`StaleMirrorError`, a lost race for the room); and `list()` reads one head per deck (the mirror
+when its manifest row names the head's etag, else the origin body when its md5 is the etag, else the
+snapshot the etag names), so the listing shows a rename, a trash stamp or a restore within its own
+refresh. The steps as they were, for the record of round two:
 
 1. `snapshots/<md5>.json`, the whole document as canonical JSON under the md5 of the `deck.json`
    bytes about to be pushed, with overwrite refused (the subsection below; gslides-parity SPEC-2
@@ -920,96 +923,208 @@ count the Upstash console showed during the preview gate.]
 Layout v1 (sections 4 and 5) is one public store: every document has a predictable public URL, and
 once roles exist (SPEC-3 6) a viewer link must not be a way to read `deck.json` or `access.json`
 by address (research 04 F8). Layout v2 keeps the twins on the public store, because a browser
-`<img>` needs a URL, and moves every document to a second, private store:
+`<img>` needs a URL, and moves every document to a private store of each environment:
 
-| Store                        | Access  | Holds                                                                                                                                             |
-| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `turboslide-decks` (today's) | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `exports/`, `bundles/`; `d/<id>/<assetKey>/*` and `u/<avatarKey>/*`          |
-| `turboslide-private` (new)   | private | `decks/<id>/{deck.json,slides/,versions/,snapshots/,leases.json,access.json,comments/,<sidecars>}`, `users/<principalId>/decks.json`, `meta.json` |
+| Store                                                   | Access  | Holds                                                                                                                                 |
+| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`, `exports/`, `bundles/` |
+| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`                |
+| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                             |
 
-The code (`packages/store/src/migrate.ts`, `blob-vercel.ts`): `vercelDocumentsClient(env)` opens
-the private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN`, or from `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`
-(the name the Vercel dashboard makes when the store is connected with the prefix
-`TURBOSLIDE_BLOB_PRIVATE`; hardening K1#4), with `access: private`; `splitBlobClient({
-legacy, documents })` is one `BlobClient` that routes by pathname (`isPublicPath`: twins, keyed
-twins, exports and bundles are public, everything else a document), reads a document from the
-private store first and, during the dual read window, from the public one when it is absent there,
-and writes every document private from the first request after the plan; `layoutBlobClient(env)`
-returns that client when the private token is set and the plain public client otherwise, so a
-deployment without the second store runs layout v1 unchanged. `openBlobStore` and `openHostedDecks`
-take the split client as their client with no change of their own. The layout is read from
-`meta.json` in the private store and cached for 5 s per process.
+The public store is shared: production, every preview and a development checkout with
+`BLOB_READ_WRITE_TOKEN` read the same objects. `sharesPublicStore(env)` (`packages/store/src/select.ts`)
+is true for a preview and for anything but production that holds the public token. A deployment
+that shares the public store never writes or removes a public document.
 
-The migration is `turboslide admin migrate-storage <step> [--batch <n>]` (`admin.migrateStorage`,
-the admin's bearer, then an API key), one step per call and resumable from the cursor `meta.json`
-keeps, so a function timeout never loses work:
+### 10.1 The code
 
-1. `plan`: lists `decks/` on the public store (the templates are not stored), writes `meta.json`
-   with `layout: 'v1'`, the deck list, `dualRead: true`. From here every document write goes
-   private and every read checks the private store first.
-2. `copy`: per deck (5 per call by default), every document of the public store that the private
-   one lacks is read and put with `overwrite: false`; the etag of the copy must equal the source's
-   (Vercel Blob's etag is the md5 of the body; the fake's too), else the deck is listed under
-   `failed`. A document already private is left alone: it is the copy of an earlier call, or a
-   write of the window, which is newer than the public copy.
-3. `verify`: per deck, a `head` per document compares the etags; a snapshot is compared byte for
-   byte; a private copy newer than the public one (a write of the window) passes. Verified decks
-   accumulate in `meta.verified`.
-4. `rekey` (hardening K1#4): per verified deck with a record, a random key of its own (22
-   base64url characters, about 132 bits) unless the record holds one; every twin under
-   `decks/<id>/assets/` is copied to `d/<id>/<assetKey>/assets/` with `overwrite: false` and its
-   etag compared; only then is the key written to the record, with the etag read. A deck without a
-   record (the seed deck) keeps its twins. A deck whose documents are not verified is listed under
-   `failed` until they are. Run it with `--batch 1` on a deck with hundreds of twins: each twin is
-   a head, a get and a put. Rekeyed decks accumulate in `meta.rekeyed`.
-5. `cutover`: refused with the list of unverified decks while any deck failed or is unverified;
-   otherwise flips `layout: 'v2'` and ends the dual read window. From here a document that exists
-   on the public store only is invisible.
-6. `delete`: per deck, the public documents leave in `del` batches of at most 50 paths, off the
-   request path (the CLI runs it after the cutover verified). For a deck with a key of its own,
-   any twin written at `decks/<id>/assets/` since `rekey` (an instance that read the deck as
-   unkeyed in the minute after the switch) is copied under the key first, then the old twins
-   leave too; a deck without a key keeps them.
-7. `rollback`: before the cutover, sets the rollback flag: reads and writes go to the public store
-   again, as if no plan had run; `plan` restarts the migration. After the cutover there is no
-   rollback flag; `deck pull` and `deck push` still move any deck.
+`packages/store/src/migrate.ts` holds the layout and the migration; `blob-vercel.ts` opens the
+private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`.
 
-Tested on the fake in `packages/store/src/migrate.test.ts`: two decks with 68 documents each move
-byte for byte with equal etags, the twins stay, the templates are not touched, a copy re-run is
-idempotent, the cutover before verify refuses, the public documents leave in batches, a tampered
-private copy fails verification and a rollback before the cutover flips the reads. The rehearsal
-on a checkout: `TURBOSLIDE_BLOB_PRIVATE_DIR=<folder>` opens a folder as the private store
-(`diskBlobClient`).
+- `splitBlobClient({ legacy, documents })` routes by path. `isPublicPath` (the twins under
+  `decks/<id>/assets/` and the folders `d/`, `u/`, `exports/`, `bundles/`) always goes to the public
+  store. Every other path is a document, deck folder or not, so the root units (`users/`, `links/`,
+  `templates/`, `system/`, `index/`, `builds/`, `vitals/`, `decks/index.json`) move with the decks.
+- The layout record is `meta.json` on the private store: `state` (`v1`, `dual` or `v2`), `frozen`
+  (`since`, `settlesAt`, `expiresAt`) and `opensAt`. A document is read and written on the public
+  store in `v1` and on the private store in `v2`. `dual` is the record the preview wrote on
+  2026-10-11 under the migration before this one: reads go to the private store first and to the
+  public store when absent there, writes go to the private store.
+- The read fails closed. A failed or late read of `meta.json` (5 s deadline) fails the request with
+  503 (`StorageLayoutError`) and is not cached. Only a confirmed absence on a private store that
+  lists neither `meta.json` nor `migration.json` reads as `v1`; a process that once read a record
+  never reads an absence as `v1`.
+- The only layout cache is the 5 s one of each process (`LAYOUT_TTL_MS`). Twin keys are cached for
+  10 minutes (`TWIN_KEY_TTL_MS`), which only `rekey` waits for.
+- While the record is frozen, and until `opensAt`, every document put and removal throws
+  `StorageFrozenError`: 503, `retry-after` 30 s and the sentence "Saving is paused while the
+  documents move between stores; your changes are kept, try again in a minute". Reads go on. A
+  deployment that shares the public store refuses document writes in `v1` the same way, so a
+  preview saves documents only after its own switch.
+- Every document put and removal carries a 90 s deadline (`DOCUMENT_WRITE_CAP_MS`), so the last
+  write an instance admitted before a freeze lands inside the settle.
 
-The keyed twins (hardening K1#3 and K1#4, `docs/hardening/HARDENING.md` 4.1). A deck created
-since K1#3 takes a random `assetKey` in its record (`newAssetKey`, packages/schema access.ts); a
-bundle upload, whose unpack writes the twins before the record, keeps the key derived from the id
-until `rekey`. The deployment's client (`layoutBlobClient`) is `keyedTwinsClient` over the store:
-every twin path `decks/<id>/assets/<file>` of a deck with a key of its own is read and written at
-`d/<id>/<assetKey>/assets/<file>`, the key read from the deck's record and kept for ten minutes (a
-deck without one is asked again after a minute), so the asset intake, the captures, the variants,
-the frames, the slide imports, the copies, the pull and the removal reach the keyed place with no
-change of their own. The manifest's twin paths stay `assets/<file>`, so `rekey` needs no
-`asset.set`; this replaces SPEC-3 11.5's rewrite of `twins` and `sourceFile`. A twin still at its
-old place is read there until `delete` moves it. The viewer payload names
+What the product does during a freeze:
+
+- `writeDeck` answers a refusal as a 503 value with its name, sentence and wait in the body
+  (`answeringRefusals`, `server/write.ts`), since the framework drops a thrown error's status. The
+  first save of a new deck keeps the write and the edits queued behind it and sends it again after
+  each wait, for up to 46 minutes, with the sentence on the snackbar (`editor/draft-retry.ts`).
+- On the `do` tier the edits wait in the Durable Object's rows and its alarm sends the checkpoint
+  again after a 503. The seed route answers a busy store with 503 and `retry-after`, which the
+  realtime Worker does not count as the deployment failing (`deck-room.ts` `AppCallError`), so no
+  tab leaves the `do` tier for it.
+- A server write (`admitServerWrite`) throws a 503 refusal as it is. A thumbnail put the freeze
+  refuses is skipped; the next render stores it.
+- The avatar sweep refuses on a deployment that shares the public store, since its profiles do not
+  name production's avatars.
+
+The keyed twins (hardening K1#3 and K1#4, `docs/hardening/HARDENING.md` 4.1). A deck created since
+K1#3 takes a random `assetKey` in its record (`newAssetKey`, packages/schema access.ts). The
+deployment's client (`layoutBlobClient`) is `keyedTwinsClient` over the store: every twin path
+`decks/<id>/assets/<file>` of a deck with a key of its own is read and written at
+`d/<id>/<assetKey>/assets/<file>`, so the asset intake, the captures, the variants, the frames, the
+copies, the pull and the removal reach the keyed place with no change of their own. A twin still at
+its old place is read there until `delete` moves it. The viewer payload names
 `https://<TURBOSLIDE_PUBLIC_STORE_HOST>/d/<id>/<assetKey>/` as its asset base for such a deck
-(`viewerAssetBase`, server/decks.ts), so the page loads every twin by key from the store's CDN; the
-editor's own asset base is still `/decks/<id>/` (the assets route) until its client takes the
-loader's.
+(`viewerAssetBase`, server/decks.ts). On a deployment that shares the public store a twin removed by
+name leaves only from under a key of the deployment's own, never from the old place and never from
+under the key of the deck's public record, which production may still read.
 
-Turning the private store on (Kevin; no agent creates a paid resource). Since 2026-10-08 the
-General Translation team holds three stores, connected to the project `turboslide-gt` in the
-dashboard with prefixes: `turboslide-private-preview` to Preview and `turboslide-private` to
-Production, each as `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, and `turboslide-backup` to
-Production as `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN`. Production's public store
-`turboslide-decks` and its `BLOB_READ_WRITE_TOKEN` are unchanged. A deployment that reads the
-private token runs the split client; before `plan` it reads and writes the public store alone, as
-layout v1 does, and asks the private store for `meta.json` once every 5 s. Run the migration on an
-environment only once hardening K1#5a serves it, because before K1#5a the web page build hands the
-browser the stored copy's URL, which a private store does not serve: on the preview `plan`, `copy`
-until `done`, `verify` until `done`, `rekey` until `done`; watch the editor, `/decks`, an export and
-a web page download for a day; then `cutover` and `delete`. Production repeats the same steps
-after the preview verified, at a quiet hour.
+### 10.2 The window
+
+A migration is one run on one environment, `turboslide admin migrate-storage <step>`
+(`admin.migrateStorage`, the admin's bearer), and every step but `unfreeze` takes a lease in
+`migration.json`, so one call runs at a time. A call works for `--budget` seconds (120 to 240, 240
+by default, under the function's 300 s) and answers.
+
+| Step               | What it does                                                                                                                                                                                                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan`             | Outside a freeze: the counts (public documents, bytes, the listing's time, the private store's count). Inside a settled freeze: the plan of record, every public document with its etag, in `migration/plan.json`.                                                                                                                      |
+| `freeze`           | Writes the record frozen with its state kept. `settlesAt` is 4 min 20 s out: the record's write (20 s), the layout cache (5 s), a write admitted just before (90 s), a write landing late (30 s), the listing lag (60 s) and 55 s of margin. `expiresAt` is 10 minutes after the settle.                                                |
+| `copy`             | Every planned document, 32 requests in flight by default (`--concurrency`, 1 to 128), each a get of the planned etag and a put with `overwrite`, checked by the etag the private store answers. Tried 5 times on a 429, a 5xx or a network error. Resumes from its cursor.                                                              |
+| `verify`           | From 60 s after the copy's last put: every planned document has a private copy with the planned etag, the public store still holds the plan, and the private store holds nothing else. A verify with rows ends the freeze by itself.                                                                                                    |
+| `switch`           | One record write: `v2`, not frozen, document writes open 30 s later (`opensAt`), so no instance writes the private store while another still reads the public one.                                                                                                                                                                      |
+| `unfreeze`         | Ends a freeze and keeps the state. Takes no lease.                                                                                                                                                                                                                                                                                      |
+| `rekey`            | On `v2`, open: each deck whose private record holds no key of the environment's own gets one, its twins copied under it, then the key written. A pass clean from 12 minutes after the last key it wrote closes it; the answer's `rekeyAfter` says when to run the next pass.                                                            |
+| `verify` (on `v2`) | Names each public document a `v1` writer changed or added since the switch; `delete` keeps them.                                                                                                                                                                                                                                        |
+| `rollback`         | Production only, after the switch and before `delete`, refused while a `rekey` pass is due: freezes `v2`, then after the settle copies back to the public store every private document whose etag it lacks, and writes `v1` with writes open 30 s later.                                                                                |
+| `delete`           | Production only, on `v2` not frozen, a day after the switch, after a `verify` on `v2` and a closed `rekey`, with `--i-have-a-backup <ISO>`, the time a backup of the private store began after the switch. Moves the old twins of keyed decks under their keys, then removes the public documents whose etag is the plan's, 50 a batch. |
+
+Every call inside the freeze checks that the freeze is this run's, that it settled and that more
+than 90 s of it is left, and moves `expiresAt` to 10 minutes after the call, never past 45 minutes
+from the freeze (`FREEZE_LIMIT_MS`). A freeze whose operator stops ends by itself at `expiresAt`, so
+the store is never left read only. A run that fails before the switch goes back to the state it
+froze with `unfreeze`, by itself when `verify` finds rows, or at `expiresAt`. Nothing reads the
+private store of a `v1` record before the switch.
+
+On a preview the private store is a one-time snapshot of the shared public documents. Production
+writes during the preview's window, so the preview's `verify` counts a planned document production
+changed or removed since the plan (whatever version the copy took) in its note, and a planned
+document production did not move must have the planned etag. The first copy removes nothing from
+the preview's private store, and the preview's writes since 2026-10-11 to a document the public
+store also holds are replaced by the public version. `rollback`, `delete` and the avatar sweep
+refuse on a preview. After its switch the preview reads its own private store, and production's
+later writes never reach it.
+
+Deployments from before this code know no freeze. On a shared public store every record tells them
+layout `v2`, so they write the preview's private store and remove no public document. On
+production the record's `layout` equals the state, and such a deployment ignores a freeze: no older
+production deployment may serve from the freeze to the end of the switch.
+
+### 10.3 The copy, measured
+
+`packages/store/src/migrate-copy.test.ts` copies 40,000 documents from a public fake whose reads
+take 50 ms to a private fake whose puts take 200 ms (the rehearsal of 2026-10-11 measured about
+200 ms per document copied one at a time against Vercel Blob), which answers 1 percent of puts with
+a 429, 0.5 percent with a 5xx and every put over 48 in flight with a 429, in virtual time:
+
+| In flight | Copy time | Calls | Per second | Retries (429s) | Rows | Verify |
+| --------- | --------- | ----- | ---------- | -------------- | ---- | ------ |
+| 8         | 1,331 s   | 6     | 30         | 603 (414)      | 0    | clean  |
+| 16        | 668 s     | 3     | 60         | 632 (429)      | 0    | clean  |
+| 32        | 333 s     | 2     | 120        | 575 (390)      | 0    | clean  |
+| 64        | 218 s     | 2     | 183        | 3,269 (3,063)  | 13   | clean  |
+
+32 is the default: twice the rate of 16 with few refusals, and 64 spends most of its calls on
+429s. The window's refused writes last the settle (4 min 20 s), the plan of record's listing, the
+copy (documents over the copy's rate), the listing lag (60 s), verify's listing and the 30 s after
+the switch. At about 92,000 documents (the shared public store's count in the k1/ship runbook of
+2026-10-13) and 120 a second that is about 19 minutes plus the two listings, which `plan`
+measures, inside the 45 minute limit. The preview's
+run reads the real rate in each copy answer (`perSecond`) and the real listing time (`listMs`);
+production's `--concurrency` is set from it.
+
+The race simulation (`packages/store/src/migrate-sim.ts`, `migrate-sim.test.ts` runs 200 seeds; the
+reading of record runs `node packages/store/src/migrate-sim.ts <from> <to>` in four processes of
+5,000 seeds) has three production and two preview instances, each with its layout cache and a
+clock skewed by up to 3 s, write, remove and read while each environment's operator runs the
+window, stops at a random step or ends it with `unfreeze`, and production sometimes rolls the
+switch back. Every store call takes a random time, and a write past its deadline lands up to 30 s
+later. Each seed checks that no accepted write is lost, no private document is read before its
+switch, no instance writes a public document after the switch, every freeze ends, and no write
+lands inside a closed record. 20,000 seeds on 2026-10-15: no violation, 3,153,172 writes, of
+which 2,363,422 were refused by a freeze; 15,008 production switches and 10,122 production
+rollbacks. That reading is of the code before the preview's `verify` counted production's writes:
+1,142 preview runs then ended with verify rows because production wrote a planned document twice
+during the window. The 20,000 seeds have not been read again since that change.
+
+### 10.4 The runbook
+
+Turning the private store on is Kevin's (no agent creates a paid resource). Since 2026-10-08 the
+project `turboslide-gt` holds `turboslide-private-preview` (Preview) and `turboslide-private`
+(Production), each as `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, and `turboslide-backup`
+(Production) as `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN`. The preview runs the window first, then
+production at a quiet hour. Every command runs from a checkout at this code, through the guard's
+token wrapper, which never prints a token:
+
+```sh
+PROD=https://www.turboslide.com
+URL=<the newest "deployed preview" URL of ~/.config/turboslide/gt-follow.log>   # production: URL=$PROD
+OIDC=                                                                           # production: OIDC=--no-oidc
+m() { node ~/.config/turboslide/with-tokens.mjs --base "$URL" --bearer-of "$PROD" $OIDC -- \
+  node apps/cli/bin/turboslide.mjs admin migrate-storage "$@" --to "$URL"; }
+```
+
+Before the window: this code serves `$URL`; on production the guard's loop is stopped for the
+window, so no deploy and no rollback to an older deployment happens during it; on the preview the
+preview Worker's `/health` names `$URL` as its `appOrigin`.
+
+```sh
+m plan                       # the counts; listMs and the document count give the window's length
+m freeze                     # note settlesAt and expiresAt
+m plan                       # after settlesAt: the plan of record
+while m copy --json | jq -e '.done | not' > /dev/null; do :; done
+                             # each call 240 s; the loop stops on done or on a refusal
+m verify                     # 60 s after the last copy; done and clean, or rows and the freeze ended
+m switch                     # v2; writes open 30 s later
+```
+
+Then on `$URL`: `/decks`, an existing deck in the editor and the viewer, a share link, a template
+and an export, which now read the private store.
+
+```sh
+while m rekey --json | jq -e '.done | not' > /dev/null; do :; done
+                             # one pass; run another pass from the answer's rekeyAfter until it reads null
+m verify                     # production: the public documents a v1 writer changed since the switch
+```
+
+The way out before the switch, at any step from `freeze` to `verify`: `m unfreeze`. If the operator
+stops, the freeze ends at its `expiresAt`, at most 10 minutes after the last call. After the switch
+on production, before `delete`: `m rollback` freezes `v2`, and after its `settlesAt`
+`while m rollback --json | jq -e '.state != "v1"' > /dev/null; do :; done` copies back and writes
+`v1`.
+
+`delete`, on production alone, a day or more after the switch: Kevin takes the backup of the
+private store into `turboslide-backup` (section 14), then:
+
+```sh
+while m delete --i-have-a-backup <backup start ISO> --json | jq -e '.done | not' > /dev/null; do :; done
+```
+
+Never in this runbook: a step against a deployment built before this code; `rollback`, `delete` or
+`avatar-sweep` against a preview (each refuses); a removal by hand on either store. After
+production's `delete`, HR-K1#5b and HR-K1#6 follow.
 
 ## 11. The runbook of the round three services
 
@@ -1687,8 +1802,10 @@ What a night copies, under `backup/<yyyy-mm-dd>/` with the pathnames the documen
 
 - per deck with a manifest: `deck.json`, `access.json`, `slides/`, `versions/`, `snapshots/` and
   `comments/`. `deck.json` is copied first and the deck's folder is listed after it: a commit
-  stores its snapshot before it pushes `deck.json` (section 4, Writes), so the backup holds the
-  snapshot its manifest names, and a restore reads that document whole;
+  that stores a snapshot stores it before it pushes `deck.json` (section 4, Writes), so the backup
+  holds every snapshot its records name. Since hardening PS#4 a deck copied in the middle of a
+  session may hold no snapshot of its manifest; a restore then reads the newest named snapshot and
+  replays the records above it, which the backup holds too;
 - `users/<principal>/decks.json`, the per principal deck indexes;
 - `links/<hash>.json`, the link hash index, so a restored deck's share links open.
 

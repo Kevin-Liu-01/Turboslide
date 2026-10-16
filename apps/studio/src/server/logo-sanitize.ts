@@ -313,6 +313,35 @@ export type SvgNode = SvgElement | SvgText;
 const NAME_START = /[A-Za-z_:]/;
 const NAME_CHAR = /[A-Za-z0-9_:.-]/;
 
+/**
+ * The deepest element the reader takes: libxml2's default limit, which the rasterizer's SVG
+ * reader applies, and deep enough for any drawn mark. Deeper nesting is a broken file, never a
+ * stack overflow in the walk (hardening HR-N#2: the fuzz harness reached one at 2,000 levels).
+ */
+const MAX_DEPTH = 256;
+
+/** A character XML 1.0 forbids in a document (production 2); a browser refuses a file holding one. */
+const NOT_XML_CHAR = /[^\t\n\r\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/u;
+
+/** True for a code point XML 1.0 allows, so a decoded reference never makes a file a browser refuses. */
+function isXmlCodePoint(code: number): boolean {
+  return (
+    code === 0x9 ||
+    code === 0xa ||
+    code === 0xd ||
+    (code >= 0x20 && code <= 0xd7ff) ||
+    (code >= 0xe000 && code <= 0xfffd) ||
+    (code >= 0x10000 && code <= 0x10ffff)
+  );
+}
+
+/** One numeric reference's character; a code point XML does not allow is a broken file. */
+function characterOf(code: number, body: string): string {
+  if (!isXmlCodePoint(code))
+    throw new LogoBrokenError(`a reference to a character XML forbids: &${body};`);
+  return String.fromCodePoint(code);
+}
+
 /** Decodes the five predefined entities and the numeric forms; a bare `&` or an unknown entity is a broken file. */
 function decodeEntities(text: string): string {
   if (!text.includes('&')) return text;
@@ -328,10 +357,8 @@ function decodeEntities(text: string): string {
     const semi = text.indexOf(';', amp + 1);
     if (semi === -1 || semi - amp > 34) throw new LogoBrokenError('xmlParseEntityRef: no name');
     const body = text.slice(amp + 1, semi);
-    if (/^#x[0-9a-fA-F]+$/.test(body))
-      out += String.fromCodePoint(Number.parseInt(body.slice(2), 16));
-    else if (/^#[0-9]+$/.test(body))
-      out += String.fromCodePoint(Number.parseInt(body.slice(1), 10));
+    if (/^#x[0-9a-fA-F]+$/.test(body)) out += characterOf(Number.parseInt(body.slice(2), 16), body);
+    else if (/^#[0-9]+$/.test(body)) out += characterOf(Number.parseInt(body.slice(1), 10), body);
     else {
       switch (body) {
         case 'amp':
@@ -361,8 +388,9 @@ function decodeEntities(text: string): string {
 /**
  * Reads one XML document into a tree: the declaration, comments, processing instructions and a
  * plain DOCTYPE are skipped, a DOCTYPE with an internal subset (an entity declaration) is refused,
- * CDATA becomes text, an unclosed or mismatched element is refused. Strict where SVG files are
- * regular and tolerant nowhere an attack could hide.
+ * CDATA becomes text, an unclosed or mismatched element is refused, and so are a character XML
+ * forbids and nesting past MAX_DEPTH. Strict where SVG files are regular and tolerant nowhere an
+ * attack could hide.
  */
 export function parseSvg(text: string): SvgElement {
   let i = 0;
@@ -373,6 +401,11 @@ export function parseSvg(text: string): SvgElement {
   const fail = (why: string): never => {
     throw new LogoBrokenError(`${why} at ${i}`);
   };
+  const forbidden = NOT_XML_CHAR.exec(text);
+  if (forbidden !== null) {
+    i = forbidden.index;
+    fail(`the character U+${(forbidden[0].codePointAt(0) ?? 0).toString(16)}, which XML forbids,`);
+  }
   const appendText = (raw: string): void => {
     const top = stack[stack.length - 1];
     if (top === undefined) {
@@ -477,6 +510,7 @@ export function parseSvg(text: string): SvgElement {
       i = close + 1;
     }
     const element: SvgElement = { kind: 'element', name, attributes, children: [] };
+    if (stack.length >= MAX_DEPTH) fail(`an element nested deeper than ${MAX_DEPTH} levels`);
     if (stack.length === 0) {
       if (root !== null) fail('a second root');
       root = element;
@@ -531,13 +565,40 @@ export function urlsAreLocal(value: string): boolean {
   return true;
 }
 
-/** A style value that imports, reaches out or runs anything. */
+/**
+ * A CSS value with its escapes decoded (CSS Syntax 3, 4.3.7), as a browser reads it: `u\72l(`
+ * is `url(` and `@\69mport` is `@import` (hardening HR-N#2: the fuzz harness found both forms
+ * kept). Every check below reads this form; the file keeps the value as it was written.
+ */
+function cssUnescaped(value: string): string {
+  if (!value.includes('\\')) return value;
+  return value.replace(
+    /\\([0-9a-fA-F]{1,6})[ \t\n\r\f]?|\\([\s\S])/g,
+    (_whole, hex: string | undefined, character: string | undefined) => {
+      if (hex === undefined) return character === '\n' ? '' : (character ?? '');
+      const code = Number.parseInt(hex, 16);
+      return code === 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)
+        ? '\uFFFD'
+        : String.fromCodePoint(code);
+    },
+  );
+}
+
+/**
+ * A style value that imports, reaches out or runs anything: `@import`, the script forms, a
+ * `url(` that is not `url(#<id>)`, and a quoted address in `image-set(`, `image(`,
+ * `cross-fade(` or `src(`, which load a string as a url.
+ */
 function styleReachesOut(value: string): boolean {
-  const lower = value.toLowerCase();
+  const lower = cssUnescaped(value).toLowerCase();
   if (lower.includes('@import') || lower.includes('expression(') || lower.includes('javascript:'))
     return true;
   if (lower.includes('behavior:') || lower.includes('-moz-binding')) return true;
-  return !urlsAreLocal(value);
+  if (
+    /(?:^|[^a-z0-9_-])(?:-webkit-)?(?:image-set|image|cross-fade|src)\(\s*['"](?!\s*#)/.test(lower)
+  )
+    return true;
+  return !urlsAreLocal(lower);
 }
 
 function elementDraws(element: SvgElement): boolean {
@@ -607,7 +668,7 @@ function keepAttribute(name: string, value: string, element: string): boolean {
   if (name === 'href' || name === 'xlink:href')
     return value.trim().startsWith('#') || (element === 'image' && isDataImageHref(value));
   if (name === 'style') return !styleReachesOut(value);
-  return urlsAreLocal(value);
+  return urlsAreLocal(cssUnescaped(value));
 }
 
 /** The href of an `image` element, `href` first, else `xlink:href`. */

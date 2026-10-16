@@ -9,6 +9,7 @@ import { toggleTheme } from '@turboslide/viewer/theme';
 
 import { EditorShell } from './EditorShell';
 import type { EditorShellInput } from './editor-shell';
+import { tabSnack } from './tab-only';
 import { HelpCard } from './HelpCard';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
@@ -252,8 +253,14 @@ export function ViewerShell({
   const snackbar = useSnackbar();
   const editorInput = editor;
   const isEditor = editorInput !== undefined;
-  /* the editor's messages go to the snackbar (SPEC 1.1); the viewer keeps its toast */
-  const sayNow = isEditor ? (msg: string) => snackbar.show(msg) : toast.say;
+  /* the editor's messages go to the snackbar (SPEC 1.1), the tab's sentence with its button
+     (docs/SITE.md D10); the viewer keeps its toast */
+  const sayNow = isEditor
+    ? (msg: string) => {
+        const snack = tabSnack(editorInput.tabOnly, msg);
+        snackbar.show(snack.text, snack.action);
+      }
+    : toast.say;
   const sayRef = useRef(sayNow);
   sayRef.current = sayNow;
 

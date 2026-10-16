@@ -56,16 +56,18 @@ const skipBrowser = process.env.TURBOSLIDE_SKIP_BROWSER !== undefined;
 let dir: string;
 let browser: LaunchedBrowser | undefined;
 
+/* a cold Chromium launch, and its close after the 3200 px frames, can pass the 10 s hook default
+   on a loaded machine (read twice in the wave 2.2 runs as "Hook timed out in 10000ms") */
 beforeAll(async () => {
   dir = await mkdtemp(join(tmpdir(), 'turboslide-material-'));
   await mkdir(join(dir, 'assets'), { recursive: true });
   if (!skipBrowser) browser = await launchBrowser();
-});
+}, 60_000);
 
 afterAll(async () => {
   await browser?.close();
   await rm(dir, { recursive: true, force: true });
-});
+}, 60_000);
 
 describe('the capture page', () => {
   test('resolves the shader dist and serves a module document', () => {
@@ -327,6 +329,38 @@ describe.skipIf(skipBrowser)('material capture in the browser', () => {
       `liquid metal diamond frame at 3200 by 1800 as PNG: ${png.byteLength} bytes (${browser.renderer})`,
     );
   });
+
+  test('the six Paper materials of the Glyphfield port (wave 2.2) render in the hosted capture at the anchor', async () => {
+    if (browser === undefined) throw new Error('no browser');
+    const six = [
+      'paper:warp',
+      'paper:water',
+      'paper:voronoi',
+      'paper:color-panels',
+      'paper:pulsing-border',
+      'paper:dot-orbit',
+    ];
+    const facts: string[] = [];
+    for (const materialId of six) {
+      const result = await captureMaterial(
+        { materialId, preset: 'ink-paper', anchors: [5500], size: [3200, 800], role: 'frame' },
+        { deckDir: dir, browser },
+      );
+      const frame = result.frames[0];
+      if (frame === undefined) throw new Error(`no frame for ${materialId}`);
+      const image = await decodeImage(frame.frame);
+      expect([image.width, image.height], materialId).toEqual([3200, 800]);
+      /* a drawn pattern, not an empty canvas or one flat ground: grey levels across the frame */
+      const gray = toGray(image);
+      const levels = new Set(gray.data).size;
+      let opaque = 0;
+      for (let i = 3; i < image.data.length; i += 4) if ((image.data[i] ?? 0) === 255) opaque += 1;
+      facts.push(`${materialId} ${levels} grey levels, ${frame.frame.byteLength} bytes`);
+      expect(levels, materialId).toBeGreaterThan(16);
+      expect(opaque / (image.width * image.height), materialId).toBeGreaterThan(0.99);
+    }
+    console.log(`wave 2.2 hosted frames (${browser.renderer}): ${facts.join('; ')}`);
+  }, 120_000);
 
   test('the liquid metal diamond at the recorded recipe, two-tone, clears the opener plate', async () => {
     if (browser === undefined) throw new Error('no browser');

@@ -1,8 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
+import { scrubRoute, scrubText } from '@turboslide/report/scrub';
+
 import { clientAddress } from '../../server/headers';
 import { logSecurityEvent } from '../../server/log';
 import { memoryLimiter } from '../../server/ratelimit';
+import { countReport } from '../../server/reports';
 
 // POST /api/x/csp/report (gslides-parity SPEC-3 0.31, 8.8): the report endpoint of the
 // `Content-Security-Policy-Report-Only` header (`report-uri`, the form every browser sends
@@ -12,7 +15,10 @@ import { memoryLimiter } from '../../server/ratelimit';
 // document's path and the line number, so the two report weeks before enforcement (SPEC-3 8.8,
 // 11.5 R8) read off the Drain. Bodies are capped at 16 KB and one address sends at most 60
 // reports a minute (a browser in a loop must not fill the log). No cookie, no identity, no
-// answer body: 204.
+// answer body: 204. Each report also adds one to its daily count (hardening HR-O#2c,
+// server/reports.ts): kind `csp`, the document's route with its ids as `$`, and the directive with
+// the blocked host as the key, which the seven days of zero on the document routes that HR-W#4
+// waits for are read from.
 
 const BODY_LIMIT = 16 * 1024;
 const REPORTS_PER_MINUTE = 60;
@@ -77,17 +83,23 @@ export const Route = createFileRoute('/api/x/csp/$')({
           return new Response(null, { status: 400 });
         }
         for (const report of reports.slice(0, 10)) {
+          const directive = (
+            report['effective-directive'] ??
+            report['violated-directive'] ??
+            'unknown'
+          ).slice(0, 64);
           logSecurityEvent({
             event: 'csp.report',
             ip: address === 'unknown' ? undefined : address,
-            reason: (
-              report['effective-directive'] ??
-              report['violated-directive'] ??
-              'unknown'
-            ).slice(0, 64),
+            reason: directive,
             action: pathOf(report['document-uri']),
             variantKey: hostOf(report['blocked-uri']),
             ...(typeof report['line-number'] === 'number' ? { seq: report['line-number'] } : {}),
+          });
+          await countReport({
+            kind: 'csp',
+            route: scrubRoute(pathOf(report['document-uri']) || '/'),
+            key: scrubText(`${directive} ${hostOf(report['blocked-uri']) || 'none'}`, 80),
           });
         }
         return new Response(null, { status: 204 });

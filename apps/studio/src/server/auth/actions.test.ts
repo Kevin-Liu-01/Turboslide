@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   ADMIN_ONLY,
+  AVATAR_SWEEP_SHARED_STORE,
   FORGET_HEADER,
   KEY_SCOPE_FOR_ACCOUNT,
   SIGN_IN_FOR_KEYS,
@@ -421,6 +422,35 @@ describe('API keys and the admin actions', () => {
     };
     expect(mail.mail[0]).toMatchObject({ to: 'a@example.test', kind: 'sign-in' });
     expect(mail.mail[0]?.sentAt).toMatch(/^\d{4}-/);
+  });
+
+  test('admin.avatar.sweep refuses on a deployment that shares the public store (HR-K1#4b)', async () => {
+    const withToken: IdentityRuntime = {
+      ...runtime,
+      env: { ...runtime.env, TURBOSLIDE_TOKEN: 'fake-static-bearer' },
+    };
+    facts = {
+      identity: await requestIdentity(
+        request('/api/actions/admin.avatar.sweep', {
+          headers: { authorization: 'Bearer fake-static-bearer' },
+        }),
+        withToken,
+      ),
+    };
+    store.files.set('u/OrphanKeyOrphanKey0001/a-64.webp', {
+      relative: 'u/OrphanKeyOrphanKey0001/a-64.webp',
+    } as AvatarFile);
+    const preview = createDispatcher();
+    registerAdminActions(preview, {
+      runtime,
+      facts: () => Promise.resolve(facts),
+      avatarStore: () => store,
+      env: { VERCEL_ENV: 'preview' },
+    });
+    await expect(
+      preview.dispatch('admin.avatar.sweep', { dryRun: false }, { author }),
+    ).rejects.toThrow(AVATAR_SWEEP_SHARED_STORE);
+    expect(store.files.size).toBe(1);
   });
 });
 

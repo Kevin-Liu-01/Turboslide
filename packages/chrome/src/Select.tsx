@@ -11,7 +11,8 @@ import { flushSync } from 'react-dom';
 import type { SelectSlotProps } from '@turboslide/viewer/select-slot';
 
 import { useFocusHold } from './FocusHold';
-import { Icon } from './icons';
+/* the base glyphs alone (hardening HR-PC#2): the editor registers the whole set as it loads */
+import { Icon } from './icons-base';
 import type { IconName } from './icons';
 import { cn } from './lib/cn';
 import { hideTooltip, hideTooltipUntilInput, tipProps } from './Tooltip';
@@ -56,6 +57,13 @@ export type SelectOption<T extends string = string> = {
 export type SelectGroup<T extends string = string> = {
   heading?: string;
   options: readonly SelectOption<T>[];
+  /**
+   * Rows that act and are never the field's value (Share's Transfer ownership, Add expiration and
+   * Remove access beside a person's role): the trigger's width is not sized over their words, so
+   * the field is as wide as the values it shows (the wave 3b verify's finding 7: the role field
+   * took 136 px for "Viewer" and left the person's name 40 px at 390)
+   */
+  actions?: boolean;
 };
 
 export type SelectProps<T extends string = string> = {
@@ -66,6 +74,13 @@ export type SelectProps<T extends string = string> = {
   onChange: (value: T) => void;
   /** the accessible name, as the site's aria-label is today */
   label: string;
+  /**
+   * the id of the visible words that name the field to a person, where `label` carries more for
+   * the window API (the inspector's generated fields: `t: Align` for `set()`, read as "Align"):
+   * the trigger and its list are named by them through aria-labelledby, which wins over aria-label
+   * in the accessible name, and the window API keeps reading aria-label
+   */
+  labelledBy?: string;
   /** the trigger's data-control; each option takes `<control>.<value>` */
   control?: string;
   /** 32 px for dialogs, panels and pages; 22 px for the inspector's rows */
@@ -88,8 +103,13 @@ export type SelectProps<T extends string = string> = {
 export const SELECT_MAX_ROWS = 10;
 /** A row's height (Menu.css `.ts-menu-item`). */
 export const SELECT_ROW_HEIGHT = 28;
-/** The list's height cap: ten rows and the plate's 4 px of padding above and below. */
-export const SELECT_MAX_HEIGHT = SELECT_MAX_ROWS * SELECT_ROW_HEIGHT + 8;
+/**
+ * The list's height cap: ten rows, the plate's 4 px of padding above and below, and its 1 px
+ * border above and below. The list is `border-box` (Menu.css) with the `.pt-float` border, so a cap
+ * of the rows and the padding alone left 286 px for 288 px of them, and a list of exactly ten rows
+ * scrolled by 2 px and drew the scrollbar (the dropdown round's last visual pass, F8).
+ */
+export const SELECT_MAX_HEIGHT = SELECT_MAX_ROWS * SELECT_ROW_HEIGHT + 8 + 2;
 /** PageUp and PageDown move this many enabled options. */
 export const SELECT_PAGE = 10;
 /** Letters typed within this many ms join the type ahead buffer (the menus', Menu.tsx). */
@@ -99,7 +119,7 @@ const LIST_GAP = 2;
 /** A label press closes an open list; the click the label then sends its control within this window is not an open. */
 const LABEL_CLICK_MS = 1000;
 
-type Row<T extends string> = { option: SelectOption<T>; index: number };
+type Row<T extends string> = { option: SelectOption<T>; index: number; action?: true };
 type Section<T extends string> = { heading?: string; rows: Row<T>[] };
 
 function isGroup<T extends string>(
@@ -118,8 +138,10 @@ function sectionsOf<T extends string>(
   const sections: Section<T>[] = [];
   const rows: Row<T>[] = [];
   let loose: Section<T> | null = null;
-  const add = (section: Section<T>, option: SelectOption<T>) => {
-    const row = { option, index: rows.length };
+  const add = (section: Section<T>, option: SelectOption<T>, action = false) => {
+    const row: Row<T> = action
+      ? { option, index: rows.length, action: true }
+      : { option, index: rows.length };
     rows.push(row);
     section.rows.push(row);
   };
@@ -128,7 +150,7 @@ function sectionsOf<T extends string>(
       loose = null;
       const section: Section<T> =
         entry.heading === undefined ? { rows: [] } : { heading: entry.heading, rows: [] };
-      for (const option of entry.options) add(section, option);
+      for (const option of entry.options) add(section, option, entry.actions === true);
       if (section.rows.length > 0) sections.push(section);
       continue;
     }
@@ -146,6 +168,38 @@ function folded(text: string): string {
   return text.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
 }
 
+/**
+ * True when nothing of the trigger shows: its box stands wholly outside the window, or outside the
+ * box of an element that holds it and clips its overflow (a panel, a dialog's card). An element
+ * with no box clips nothing (`display: contents`, a document that lays nothing out), and a trigger
+ * with no box is never clipped. The body and the root are not read: their overflow is the
+ * window's, which the first check reads (the editor's body is `overflow: hidden` with a box 0 px
+ * tall, and read as a clip it closed the list on every scroll).
+ */
+function clippedWhole(element: Element, box: DOMRect): boolean {
+  if (box.width === 0 && box.height === 0) return false;
+  const outside = (clip: { top: number; left: number; bottom: number; right: number }) =>
+    box.bottom <= clip.top ||
+    box.top >= clip.bottom ||
+    box.right <= clip.left ||
+    box.left >= clip.right;
+  if (outside({ top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth }))
+    return true;
+  for (
+    let node = element.parentElement;
+    node !== null && node !== document.body && node !== document.documentElement;
+    node = node.parentElement
+  ) {
+    const style = getComputedStyle(node);
+    if (!/auto|scroll|hidden|clip/.test(`${style.overflowX} ${style.overflowY} ${style.overflow}`))
+      continue;
+    const clip = node.getBoundingClientRect();
+    if (clip.width === 0 && clip.height === 0) continue;
+    if (outside(clip)) return true;
+  }
+  return false;
+}
+
 /** A key that types a character: one character and no modifier but Shift. */
 function isPrintable(event: ReactKeyboardEvent): boolean {
   return event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey;
@@ -156,6 +210,7 @@ export function Select<T extends string>({
   options,
   onChange,
   label,
+  labelledBy,
   control,
   size = 'field',
   tip,
@@ -178,6 +233,22 @@ export function Select<T extends string>({
     [rows],
   );
   const chosen = rows.find((row) => row.option.value === value);
+  /* every set of words the trigger may show, once each: the placeholder and each option's label,
+     with the icon's slot where the option draws one; a group of actions is never shown */
+  const sizes = useMemo(() => {
+    const seen = new Set<string>();
+    const out: { label: string; icon: boolean }[] = [];
+    const add = (words: string, icon: boolean) => {
+      const key = `${icon ? 'i' : 't'}:${words}`;
+      if (words === '' || seen.has(key)) return;
+      seen.add(key);
+      out.push({ label: words, icon });
+    };
+    if (placeholder !== undefined) add(placeholder, false);
+    for (const row of rows)
+      if (row.action !== true) add(row.option.label, row.option.icon !== undefined);
+    return out;
+  }, [rows, placeholder]);
 
   const [open, setOpen] = useState(false);
   const [activeRaw, setActive] = useState(-1);
@@ -285,27 +356,38 @@ export function Select<T extends string>({
      rule, question 6); a scroll the person makes of anything that holds the trigger closes it, as
      the system popup does (question 7; the list's own scroll does not count); the window losing
      focus closes it. While the list is open the trigger takes the scrolling keys and a press
-     outside closes it first, so the wheel is the person's one road to a scroll: after a wheel
-     outside the list, a scroll that moves the trigger closes it. A scroll the page makes itself
-     leaves the list on its trigger (place()'s autoUpdate follows it), and the trigger's new place
-     is where the next one is measured from: the focus scroll that brings a clipped trigger into
-     view on the press that opens it, a panel's first layout and its scroll anchoring, a smooth
-     scroll from PageDown still running (the keyboard verifier's pass 1, finding 5: a list opened
-     within about 100 ms of Format options laying out, or during such a scroll, closed by itself
-     about 14 ms later). The place is read at the scroll events, never at the wheel: a browser
-     scrolls on its compositor and hands the page a wheel with only passive listeners after the
-     scroll has moved the trigger (read in Format options at 1440 by 600, the wheel's target was
-     the section the trigger had left) */
+     outside closes it first, so the wheel and a finger drag that starts on the trigger are the
+     person's roads to a scroll: after either, a scroll that moves the trigger closes it. A scroll
+     the page makes itself leaves the list on its trigger (place()'s autoUpdate follows it), and
+     the trigger's new place is where the next one is measured from: the focus scroll that brings a
+     clipped trigger into view on the press that opens it, a panel's first layout and its scroll
+     anchoring, a smooth scroll from PageDown still running (the keyboard verifier's pass 1,
+     finding 5: a list opened within about 100 ms of Format options laying out, or during such a
+     scroll, closed by itself about 14 ms later). The place is read at the scroll events, never at
+     the wheel: a browser scrolls on its compositor and hands the page a wheel with only passive
+     listeners after the scroll has moved the trigger (read in Format options at 1440 by 600, the
+     wheel's target was the section the trigger had left). Any scroll that leaves nothing of the
+     trigger in the window or in the box that holds it closes the list: a touch scroll fires no
+     wheel, and a list that followed its trigger out of view stood pinned at the window's edge over
+     other fields, where a tap changed a field the person could not see (the dropdown round's last
+     visual pass, F2: at 390 a finger drag from the open Line type trigger left the list over Drop
+     shadow with its trigger below the window; in the Share card at 390 by 560 the list stood over
+     the dialog's title with its trigger 95 px above the window) */
   useEffect(() => {
     if (!open || trigger === null) return undefined;
     const opened = trigger.getBoundingClientRect();
     let at = { top: opened.top, left: opened.left };
-    /* the person turned the wheel outside the list since it opened */
+    /* the person turned the wheel outside the list, or put a finger on the trigger, since it opened */
     let wheeled = false;
     const onDown = (event: Event) => {
       const target = event.target;
       if (!(target instanceof Node)) return;
-      if (list.current?.contains(target) || trigger?.contains(target)) return;
+      if (list.current?.contains(target)) return;
+      if (trigger?.contains(target)) {
+        /* a finger down on the open trigger that moves scrolls what holds it */
+        if ((event as PointerEvent).pointerType === 'touch') wheeled = true;
+        return;
+      }
       const element = target instanceof Element ? target : target.parentElement;
       const wrapping = element?.closest('label');
       if (wrapping != null && trigger !== null && wrapping.contains(trigger))
@@ -323,7 +405,7 @@ export function Select<T extends string>({
       if (target !== document && !target.contains(trigger)) return;
       const now = trigger.getBoundingClientRect();
       const moved = Math.abs(now.top - at.top) > 0.5 || Math.abs(now.left - at.left) > 0.5;
-      if (wheeled && moved) setOpen(false);
+      if ((wheeled && moved) || clippedWhole(trigger, now)) setOpen(false);
       else at = { top: now.top, left: now.left };
     };
     const onWindowBlur = () => setOpen(false);
@@ -574,6 +656,7 @@ export function Select<T extends string>({
         aria-controls={listId}
         aria-activedescendant={open && active >= 0 ? optionId(active) : undefined}
         aria-label={label}
+        aria-labelledby={labelledBy}
         data-control={control}
         value={value}
         disabled={hold.disabled}
@@ -590,20 +673,37 @@ export function Select<T extends string>({
         onKeyUp={onKeyUp}
         onClick={onClick}
       >
+        {/* the shown words and, in the same grid cell, every label the trigger may show, so the
+            widest sets the trigger's width and a choice moves nothing beside it, as the select
+            did (the dropdown round's last visual pass, F1: on /decks, Title shrank the sort
+            field from 157 to 67 px and the view toggle moved 90 px). The cells draw their words
+            as generated content and are hidden from the tree: the trigger's text and its name
+            stay the chosen option's */}
         <span className="ts-dropdown-value">
-          {shown?.icon !== undefined ? (
-            <span className="ts-dropdown-icon" aria-hidden="true">
-              <Icon name={shown.icon} size={14} />
+          <span className="ts-dropdown-shown">
+            {shown?.icon !== undefined ? (
+              <span className="ts-dropdown-icon" aria-hidden="true">
+                <Icon name={shown.icon} size={14} />
+              </span>
+            ) : null}
+            {/* a placeholder is no value: a screen reader reads the field's name and an empty
+                value, never "Add expiration" as the chosen one (the verifier's finding 4) */}
+            <span
+              className="ts-dropdown-text"
+              aria-hidden={shown === undefined && words !== '' ? true : undefined}
+            >
+              {words}
             </span>
-          ) : null}
-          {/* a placeholder is no value: a screen reader reads the field's name and an empty
-              value, never "Add expiration" as the chosen one (the verifier's finding 4) */}
-          <span
-            className="ts-dropdown-text"
-            aria-hidden={shown === undefined && words !== '' ? true : undefined}
-          >
-            {words}
           </span>
+          {sizes.map((size) => (
+            <span
+              key={`${size.icon ? 'i' : 't'}:${size.label}`}
+              className="ts-dropdown-sizer"
+              aria-hidden="true"
+              data-label={size.label}
+              data-icon={size.icon ? '' : undefined}
+            />
+          ))}
         </span>
         <span className="ts-dropdown-chevron" aria-hidden="true">
           <Icon name="chevron-down" size={14} />
@@ -617,6 +717,7 @@ export function Select<T extends string>({
         id={listId}
         role="listbox"
         aria-label={label}
+        aria-labelledby={labelledBy}
         className="ts-dropdown-list pt-float"
         hidden={!open}
         style={open && placed === null ? { visibility: 'hidden' } : undefined}

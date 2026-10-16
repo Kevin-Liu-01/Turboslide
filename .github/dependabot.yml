@@ -1,0 +1,20 @@
+# Weekly update pull requests for the npm dependencies (the pnpm workspace and its catalog) and
+# for the actions .github/workflows pins by commit (docs/hardening/HARDENING.md HR-W#5). A release
+# is offered once it is seven days old, the age pnpm-workspace.yaml's catalog keeps. The Rust
+# crate is not listed: no CI job builds it until HR-N#4.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

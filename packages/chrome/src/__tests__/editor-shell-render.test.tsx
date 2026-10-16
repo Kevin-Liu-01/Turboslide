@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -1050,4 +1050,24 @@ describe('the Insert menu, compact mode and the title row', () => {
     fireEvent.click(comments);
     expect(container.querySelector('[data-control="panel.comments"]')).not.toBeNull();
   });
+});
+
+// Panel switches (the Glyphfield port, PLAN.md wave 2 item 7, from Glyphfield's tool switch): a
+// lazy panel opens in a transition, so the panel shown stays until the new module is ready and
+// the right column never shows an empty frame. The Diagram panel is the first lazy panel any test
+// of this file draws, so its module is still loading when the row is clicked.
+describe('panel switches', () => {
+  it('keeps the Comments panel while the Diagram panel loads, then shows the Diagram panel in its place', async () => {
+    const { container } = render(<Harness input={input()} shell={shellState()} />);
+    const row = container.querySelector('[data-control="title.row"]') as HTMLElement;
+    fireEvent.click(row.querySelector('[data-menu-item="title.comments"]') as HTMLElement);
+    const panel = (id: string) => container.querySelector(`[data-control="panel.${id}"]`);
+    expect(panel('comments')).not.toBeNull();
+    clickMenuPath(container, 'insert', 'insert.diagram');
+    /* the module is not ready yet: the column keeps what it showed */
+    expect(panel('comments')).not.toBeNull();
+    expect(panel('diagram')).toBeNull();
+    await waitFor(() => expect(panel('diagram')).not.toBeNull(), { timeout: 15_000 });
+    expect(panel('comments')).toBeNull();
+  }, 30_000);
 });

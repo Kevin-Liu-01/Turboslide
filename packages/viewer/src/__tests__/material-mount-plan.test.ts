@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { MaterialHandle } from '@turboslide/materials/mount';
 
-import { planMounts, raiseCanvas } from '../MaterialMount';
+import { planMounts, planShow, raiseCanvas } from '../MaterialMount';
 
 describe('planMounts', () => {
   it('plays the selected block alone and lets every other block draw its frame or its plate', () => {
@@ -90,5 +90,27 @@ describe('raiseCanvas', () => {
         },
       } as unknown as MaterialHandle),
     ).not.toThrow();
+  });
+});
+
+/* show mode (the shader design 3.3 and 3.8): the largest root that can run mounts alone */
+describe('planShow', () => {
+  const settings = { reduced: false, preference: 'show', play: 'play' } as const;
+  it('mounts the largest root alone and lets every other root draw its still', () => {
+    expect(
+      planShow(
+        [
+          { twoTone: false, engine: true, area: 100 },
+          { twoTone: false, engine: true, area: 400 },
+        ],
+        settings,
+      ),
+    ).toEqual(['frame', 'play']);
+  });
+  it('mounts nothing on a held slide, under reduced motion or for a two-tone root', () => {
+    const roots = [{ twoTone: false, engine: true, area: 100 }];
+    expect(planShow(roots, { ...settings, play: 'hold' })).toEqual(['frame']);
+    expect(planShow(roots, { ...settings, reduced: true })).toEqual(['frame']);
+    expect(planShow([{ twoTone: true, engine: true, area: 100 }], settings)).toEqual(['frame']);
   });
 });

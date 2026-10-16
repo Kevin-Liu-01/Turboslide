@@ -3195,7 +3195,7 @@
           "flag": "--replace-source",
           "type": "string",
           "required": false,
-          "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)"
+          "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins"
         },
         {
           "key": "baseRevision",
@@ -3282,14 +3282,15 @@
         {
           "key": "pattern",
           "flag": "--pattern",
-          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\"",
+          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\" | \"halftone\"",
           "required": false,
-          "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
+          "description": "The threshold texture to regenerate the twins with; bayer8 unless set",
           "enum": [
             "bayer8",
             "bayer4",
             "blue64",
-            "random"
+            "random",
+            "halftone"
           ]
         },
         {
@@ -3441,7 +3442,7 @@
           "flag": "--allow-hosts",
           "type": "string[]",
           "required": false,
-          "description": "Hosts beyond the built-in allowlist (SPEC 11 captureHosts)"
+          "description": "Hosts beyond the built-in allowlist"
         },
         {
           "key": "baseRevision",
@@ -3488,9 +3489,9 @@
         {
           "key": "anchors",
           "flag": "--anchor",
-          "type": "number[]",
+          "type": "integer[]",
           "required": true,
-          "description": "Frame times in ms"
+          "description": "Frame times in ms, 0 to 60000"
         },
         {
           "key": "id",
@@ -4031,7 +4032,7 @@
           "flag": "--mode",
           "type": "\"native\" | \"flatten\"",
           "required": false,
-          "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
+          "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent",
           "enum": [
             "native",
             "flatten"
@@ -4049,7 +4050,7 @@
           "flag": "--fonts",
           "type": "\"exact\" | \"standard\"",
           "required": false,
-          "description": "The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
+          "description": "The export font set: standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard",
           "enum": [
             "exact",
             "standard"
@@ -4067,21 +4068,21 @@
           "flag": "--headings",
           "type": "\"raster\"",
           "required": false,
-          "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)"
+          "description": "Write every heading as a PNG instead of a text box"
         },
         {
           "key": "rasterScale",
           "flag": "--raster-scale",
           "type": "\"auto\" | 2 | 3",
           "required": false,
-          "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)"
+          "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3"
         },
         {
           "key": "pictureScale",
           "flag": "--picture-scale",
           "type": "2 | 3",
           "required": false,
-          "description": "The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)",
+          "description": "The scale two-tone pictures are regenerated at from the one-bit image",
           "enum": [
             2,
             3
@@ -4092,7 +4093,7 @@
           "flag": "--exclude-share-alike",
           "type": "boolean",
           "required": false,
-          "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)"
+          "description": "Replace share-alike pictures with the paper plate and its credit"
         },
         {
           "key": "svgVector",
@@ -4117,7 +4118,7 @@
           "flag": "--verify",
           "type": "boolean",
           "required": false,
-          "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)"
+          "description": "Render the files back through LibreOffice and diff every page against the web render"
         },
         {
           "key": "slideIds",
@@ -4226,7 +4227,7 @@
           "flag": "--include-comments",
           "type": "boolean",
           "required": false,
-          "description": "Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)"
+          "description": "Append each slide’s comment threads, for readers with readComments"
         }
       ],
       "custom": [
@@ -4715,7 +4716,7 @@
     },
     {
       "action": "shader.insert",
-      "usage": "turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --at <at>",
+      "usage": "turboslide shader insert <slideId> <materialId> --preset <preset> --controls <controls> --anchor <anchor> --at <at>",
       "command": [
         "shader",
         "insert"
@@ -4737,6 +4738,13 @@
           "flag": "--controls",
           "type": "object",
           "required": false
+        },
+        {
+          "key": "anchor",
+          "flag": "--anchor",
+          "type": "integer",
+          "required": false,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         {
           "key": "at",
@@ -4912,8 +4920,9 @@
         {
           "key": "timeMs",
           "flag": "--time",
-          "type": "number",
-          "required": false
+          "type": "integer",
+          "required": false,
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         {
           "key": "backend",
@@ -5369,7 +5378,7 @@
           "flag": "--base-revision",
           "type": "integer",
           "required": false,
-          "description": "The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)"
+          "description": "The comments revision the caller read; a stale value never refuses"
         }
       ],
       "custom": [
@@ -6874,7 +6883,7 @@
     },
     {
       "action": "admin.migrateStorage",
-      "usage": "turboslide admin migrate-storage <step> --to <to> --batch <batch>",
+      "usage": "turboslide admin migrate-storage <step> --to <to> --budget <budget> --concurrency <concurrency> --i-have-a-backup <backupAt>",
       "command": [
         "admin",
         "migrate-storage"
@@ -6884,16 +6893,28 @@
       ],
       "options": [
         {
-          "key": "batch",
-          "flag": "--batch",
+          "key": "concurrency",
+          "flag": "--concurrency",
           "type": "integer",
-          "required": false
+          "required": false,
+          "description": "copy and rollback: the store requests in flight; 32 by default"
+        },
+        {
+          "key": "backupAt",
+          "flag": "--i-have-a-backup",
+          "type": "string",
+          "required": false,
+          "description": "delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one"
         }
       ],
       "custom": [
         {
           "flag": "--to",
           "template": "<to>"
+        },
+        {
+          "flag": "--budget",
+          "template": "<budget>"
         }
       ],
       "mutates": true,
@@ -7152,9 +7173,9 @@
         {
           "key": "anchor",
           "flag": "--anchor",
-          "type": "number",
+          "type": "integer",
           "required": false,
-          "description": "The frame time in ms; the catalog default unless set"
+          "description": "The moment the still holds, in milliseconds of the pattern's own clock; 5500 when absent"
         },
         {
           "key": "dither",

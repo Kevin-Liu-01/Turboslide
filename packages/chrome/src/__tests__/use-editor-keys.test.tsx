@@ -202,6 +202,22 @@ describe('useEditorKeys and the indent chords', () => {
     expect(escape).toHaveBeenCalledTimes(1);
   });
 
+  it("runs the shell's Escape while only a closed dialog's exit copy is in the document (Layer.ts, PLAN.md wave 2 item 7)", () => {
+    const escape = vi.fn(() => true);
+    const h = { ...handlers(), escape };
+    render(<Host context={withText} handlers={h} />);
+    const copy = document.createElement('div');
+    copy.className = 'ts-dialog-scrim';
+    copy.setAttribute('data-exiting', '');
+    document.body.appendChild(copy);
+    try {
+      fireEvent.keyDown(document.body, { key: 'Escape' });
+      expect(escape).toHaveBeenCalledTimes(1);
+    } finally {
+      copy.remove();
+    }
+  });
+
   it('leaves the other chords to a chrome field and runs a menu chord from the canvas', () => {
     const runItem = vi.fn();
     const view = render(<Host context={withText} handlers={handlers(runItem)} />);
@@ -354,6 +370,27 @@ describe('useEditorKeys and the dropdown trigger', () => {
     expect(runItem).not.toHaveBeenCalled();
     fireEvent.keyDown(document.body, { key: 'b', metaKey: true });
     expect(runItem).toHaveBeenCalledTimes(1);
+  });
+
+  /* the dropdown round's last keyboard pass, F3: Cmd+Z on a Format options dropdown right after a
+     choice undid nothing, since the trigger counted as a field and the browser has no history on
+     a button. Undo and Redo reach the deck from a closed trigger; an open list keeps every key */
+  it('runs Undo and Redo from a closed dropdown, and nothing from an open one', () => {
+    const runItem = vi.fn();
+    const undoable: MenuContext = { ...withText, history: { undo: true, redo: true } };
+    const view = render(<Host context={undoable} handlers={handlers(runItem)} />);
+    const dropdown = view.getByTestId('dropdown');
+    dropdown.setAttribute('aria-expanded', 'false');
+    dropdown.focus();
+    fireEvent.keyDown(dropdown, { key: 'z', metaKey: true });
+    fireEvent.keyDown(dropdown, { key: 'z', metaKey: true, shiftKey: true });
+    expect(runItem.mock.calls.map(([item]) => (item as MenuItem).id)).toEqual([
+      'edit.undo',
+      'edit.redo',
+    ]);
+    dropdown.setAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(dropdown, { key: 'z', metaKey: true });
+    expect(runItem).toHaveBeenCalledTimes(2);
   });
 });
 

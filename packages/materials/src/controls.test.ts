@@ -58,6 +58,17 @@ describe('the eleven controls', () => {
     expect(SHADER_CONTROL_BY_NAME.speed.sentence).toBe('how fast it plays in the show');
   });
 
+  test('a control scales numbers alone: color panels’ Edges switch is no amount (wave 2.2)', () => {
+    const panels = requireMaterial('paper:color-panels');
+    const map = controlMapOf(panels);
+    for (const name of MATERIAL_CONTROL_NAMES) expect(map[name], name).not.toContain('u_edges');
+    expect(map.density).toEqual(['u_density']);
+    const base = resolveRecipe(panels, { uniforms: { u_edges: 1 } }).uniforms;
+    expect(applyControls(panels, base, { detail: 8 })).not.toHaveProperty('u_edges');
+    /* water's u_edges is a number, and Detail moves it as Glyphfield's mapping does */
+    expect(controlMapOf(requireMaterial('paper:water')).detail).toEqual(['u_layering', 'u_edges']);
+  });
+
   test('every catalog entry maps the controls onto uniforms inside their ranges', () => {
     for (const entry of Object.values(MATERIALS)) {
       const map = controlMapOf(entry);
@@ -113,7 +124,8 @@ describe('the eleven controls', () => {
     const block = shaderBlockOf('shader', entry, { controls: { strength: 1.5, speed: 1 } });
     expect(block.preset).toBe('diamond');
     expect(block.controls).toEqual({ strength: 1.5, speed: 1 });
-    expect(block.motion).toEqual({ play: 'show' });
+    /* Playback is the slide's and the deck's (the shader design 3.1): the insert writes no motion */
+    expect(block.motion).toBeUndefined();
     expect(block.alt).toBe('The liquid metal shader');
     // liquid metal maps no strength key, so the uniforms stay the preset's; a mapped control writes them
     expect(block.uniforms).toBeUndefined();
@@ -178,9 +190,10 @@ describe('the kit palette', () => {
           material.presets.some((preset) => preset.name === row.name),
           material.id,
         ).toBe(true);
-    // the words are the seller's: sentence case, no id
+    // the words are the seller's: sentence case (a numeral may lead, Paper's 1960s), no id
     for (const material of Object.values(MATERIALS))
-      for (const preset of material.presets) expect(preset.label).toMatch(/^[A-Z][^_]*$/);
+      for (const preset of material.presets)
+        expect(preset.label, `${material.id} ${preset.name}`).toMatch(/^[A-Z0-9][^_A-Z]*$/);
   });
 
   test('the frame key follows the kit, the anchor, the recipe and the aspect, and names the asset', () => {

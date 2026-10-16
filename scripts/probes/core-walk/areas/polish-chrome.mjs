@@ -543,10 +543,10 @@ export async function run(t) {
       await t.press('Escape');
       await t.sleep(300);
       const listAfterOne = await t.has(LIST);
-      const menuAfterOne = await t.has('.ts-context-menu');
+      const menuAfterOne = await t.has('.ts-context-menu:not([data-exiting])');
       await t.press('Escape');
       await t.sleep(300);
-      const menuAfterTwo = await t.has('.ts-context-menu');
+      const menuAfterTwo = await t.has('.ts-context-menu:not([data-exiting])');
       await t.press('Escape');
       await t.clearAll();
       const ok = listOpen && !listAfterOne && menuAfterOne && !menuAfterTwo;
@@ -1173,7 +1173,8 @@ export async function run(t) {
       const contextAt = async (where, fn) => {
         await t.clearAll();
         await fn();
-        if (await t.has('.ts-context-menu')) take(await readRows('.ts-context-menu'), where);
+        if (await t.has('.ts-context-menu:not([data-exiting])'))
+          take(await readRows('.ts-context-menu:not([data-exiting])'), where);
         else missing.push(`${where}: no menu opened`);
         await t.press('Escape');
         await t.sleep(150);

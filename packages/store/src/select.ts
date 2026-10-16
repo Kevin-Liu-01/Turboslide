@@ -57,6 +57,19 @@ export function hasBlobToken(env: Env = process.env): boolean {
   return isSet(env[BLOB_TOKEN_VARIABLE]);
 }
 
+/**
+ * True on a deployment whose public Blob store another environment also reads (docs/hosting.md
+ * 10.1): every preview of `turboslide-gt`, and a checkout or development deployment that holds the
+ * public store's token. With a private store of its own (the split client) such a deployment writes
+ * no document before its own cutover; without one it runs layout v1 on the public store in every
+ * state. The storage migration's `delete`, `verify` and rollback of a cutover refuse there
+ * (HR-K1#4b), and so does the avatar sweep, since the public objects are production's too.
+ */
+export function sharesPublicStore(env: Env = process.env): boolean {
+  if (env.VERCEL_ENV === 'preview') return true;
+  return env.VERCEL_ENV !== 'production' && hasBlobToken(env);
+}
+
 /** True inside a Vercel build or function (Vercel sets VERCEL=1 in both). */
 export function isVercel(env: Env = process.env): boolean {
   return isSet(env.VERCEL);

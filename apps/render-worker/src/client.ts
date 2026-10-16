@@ -346,7 +346,8 @@ function createHttpClient(url: string, options: WorkerClientOptions): WorkerClie
     list: (kind) => getJson<PublicJob[]>(`/jobs${kind ? `?kind=${kind}` : ''}`),
     pruneJob: async () => undefined,
     freeBytes: async () => null,
-    health: () => getJson<unknown>('/healthz'),
+    // /status carries the versions and the queue behind the bearer; /healthz answers ok alone
+    health: () => getJson<unknown>('/status'),
     renderSlide: async (request) => {
       const path = `/render/${encodeURIComponent(request.deckId)}/${encodeURIComponent(request.slideId)}?theme=${request.theme}&scale=${request.scale}${request.format === 'jpg' ? '&format=jpg' : ''}`;
       const response = await fetch(`${base}${path}`, { headers: headers() });

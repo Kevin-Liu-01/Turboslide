@@ -688,6 +688,11 @@ export function DitherFormatSection({ block, write, assets }: DitherFormatSectio
               label: 'Random',
               doc: 'A hashed screen; the seed is under Advanced',
             },
+            {
+              value: 'halftone',
+              label: 'Halftone',
+              doc: 'Round dots on a 45 degree screen that grow with the tone',
+            },
           ]}
           pressed={resolved.pattern}
           onToggle={(value) => patch({ pattern: value })}

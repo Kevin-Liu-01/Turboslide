@@ -17,6 +17,8 @@ import type { Entry } from '@turboslide/realtime/channel';
 import { TITLE_ROW } from '@turboslide/chrome/menus/strings';
 import { BASE_SEQ_WINDOW } from '@turboslide/realtime/protocol';
 import { UNTITLED_DECK_TITLE } from '@turboslide/schema/reduce';
+import { errorStatus } from '@turboslide/schema/errors';
+import { StorageFrozenError, StorageLayoutError } from '@turboslide/store/migrate';
 import { DEFAULT_BLANK_TITLE } from '@turboslide/store/templates';
 
 import {
@@ -24,6 +26,7 @@ import {
   BLOB_APPEND_RETRIES,
   STALE_AFTER_REMOTE,
   admitOnBlob,
+  admitServerWrite,
   betweenEntries,
   blobRefusal,
   filterEventForReader,
@@ -488,6 +491,45 @@ describe('admitOnBlob and a resend (the focus round, cycle 3, VERIFICATION C2-F2
     expect(storeRefusalOf(new RangeError('No deck x'))).toBeNull();
     expect(storeRefusalOf(new TypeError('a bug'))).toBeNull();
     expect(storeRefusalOf(null)).toBeNull();
+  });
+
+  it("throws a server write's freeze and layout refusals as they are, with their 503, and keeps the product's sentence for any other busy store (HR-K1#4b; docs/hosting.md 10)", async () => {
+    type ServerRoom = Parameters<typeof admitServerWrite>[0];
+    const refusedWith = (error: Error) =>
+      admitServerWrite(
+        {
+          deckId: 'frozen-deck',
+          tier: 'blob',
+          channel: { tier: 'blob' },
+          store: {
+            write: async () => {
+              throw error;
+            },
+          },
+        } as unknown as ServerRoom,
+        {
+          author: { kind: 'human', name: 'Titanium 471' },
+          mutations: [splice(0, 0, 'q')],
+          baseRevision: 7,
+          strict: true,
+        },
+      ).then(
+        () => null,
+        (thrown: unknown) => thrown,
+      );
+    const frozen = new StorageFrozenError(
+      'Saving is paused while the documents move between stores',
+    );
+    const thrownFrozen = await refusedWith(frozen);
+    expect(thrownFrozen).toBe(frozen);
+    expect(errorStatus(thrownFrozen)).toBe(503);
+    const layout = new StorageLayoutError('The storage layout did not read');
+    expect(await refusedWith(layout)).toBe(layout);
+    const rateLimited = new Error('Vercel Blob: Too many requests - try again in 7 seconds.');
+    (rateLimited as { retryAfter?: number }).retryAfter = 7;
+    const thrownBusy = await refusedWith(rateLimited);
+    expect(thrownBusy).toBeInstanceOf(Error);
+    expect((thrownBusy as Error).message).toBe('The store did not answer; try again in 7 s');
   });
 
   it('spells the blank deck title the reducer follows the heading from as the store and the chrome spell it (docs/archive/rounds/SYNC.md 3.4)', () => {

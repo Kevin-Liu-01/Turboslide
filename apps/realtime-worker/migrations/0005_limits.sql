@@ -1,0 +1,12 @@
+-- The one limiter's counters (HR-SA#3, AUTH-8; docs/hardening/HARDENING.md 4.3): the table
+-- apps/studio/src/server/auth/schema.ts writes on the other engines, with the column types Kysely
+-- writes there. The studio's sign in limits, its quotas and its spent download tokens count here
+-- through apps/studio/src/server/auth/limits.ts, one upsert per take, so every function instance
+-- reads one count: a fixed window per key, the key the SHA-256 hex of the counted key (never an
+-- address or an id), `reset_at` in epoch milliseconds. Rows whose window ended are deleted by the
+-- studio every ten minutes per instance. The ts_schema row stays as 0003 wrote it: a table only
+-- added needs no new version, and the release before reads that version, so it boots on this
+-- database (the rollback of the push). Applied by `realtime-env.mjs worker-migrate
+-- [--env preview]` before the push that counts here; a studio that finds no table counts in its
+-- own memory and logs `config.degraded`.
+CREATE TABLE IF NOT EXISTS "ts_limits" ("key" text primary key, "count" integer not null, "reset_at" bigint not null);

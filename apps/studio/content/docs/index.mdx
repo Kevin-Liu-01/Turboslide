@@ -1,90 +1,142 @@
 ---
-title: Getting started
-description: Turboslide is a slides editor in the browser. Make a presentation, present it and send the link. No account is needed.
+title: Turboslide documentation
+description: Turboslide is a slides editor in the browser. Make a presentation, present it and send the link, or have an agent run the same actions. No account is needed.
 ---
 
-Open [turboslide.com/new](/new) to start a blank presentation. It is saved in this browser as you type. If you sign in later, the presentations you made in this browser move to your account.
+<Figure
+  name="editor-top"
+  alt="The top of the Turboslide editor: the title row with the presentation's name, the menus File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help, and the toolbar."
+  caption="The title row, the menus and the toolbar. Help > Search the menus (Alt+/) finds any command by its name."
+/>
 
-<Callout title="No account is needed">
-  You can make, present and download a presentation without an account. Sign in to share a
-  presentation with people by name and to open it on another computer.
-</Callout>
+## Getting started
 
-## Make your first presentation
+Open [turboslide.com/new](/new) to start a blank presentation. It is saved as you type, and there is no Save button. Without an account it belongs to this browser; [sign in](/docs/sharing#signing-in) to open it on another computer.
 
 <Steps>
   <Step title="Start a presentation">
     Go to [/new](/new), or pick a template from Your Presentations at [/decks](/decks).
   </Step>
   <Step title="Add and arrange slides">
-    Press Ctrl+M to add a slide after the current one. Press Cmd+D (Ctrl+D on Windows) to duplicate
-    it and Delete to remove it. Drag a card in the filmstrip on the left to move a slide.
+    Press Ctrl+M to add a slide after the current one. Drag a card in the filmstrip on the left to
+    move a slide.
   </Step>
   <Step title="Write on the slide">
-    Click a text box on the slide and type. Click under the slide, where it reads Click to add
-    speaker notes, to write what you will say.
+    Click a text box and type. Click under the slide, where it reads Click to add speaker notes, to
+    write what you will say.
   </Step>
-  <Step title="Present it">
-    Click Slideshow, or press Cmd+Enter (Ctrl+F5 on Windows). Open the arrow beside Slideshow and
-    choose Presenter view to see your notes and the next slide in a second window.
-  </Step>
+  <Step title="Present it">Click Slideshow, or press Cmd+Enter (Ctrl+F5 on Windows).</Step>
 </Steps>
 
-## What you need to know first
+## Use Turboslide
 
-- Every change is saved as you make it. There is no Save button. File > Version history lists earlier versions and restores one.
-- The menus at the top hold every command. Help > Search the menus (Alt+/) finds a command by its name, and Help > Keyboard shortcuts lists the keys.
-- A presentation you made without an account lives in this browser. Clearing the browser's site data removes it. Sign in, or download a Turboslide file under File > Download, to keep a copy elsewhere.
-- Share gives a link. Anyone with a view link can open the presentation; an edit link lets them change it.
+The editor, presenting, sharing and downloads, for people who make presentations.
 
-## Common tasks
+<Cards>
+  <Card title="The editor" href="/docs/editor">
+    The parts of the editor window, what each menu holds, and where to find speaker notes, Find and
+    replace and Version history.
+  </Card>
+  <Card title="Slides and layouts" href="/docs/editor/slides" sub>
+    Add, duplicate, skip, move and delete slides, pick a layout for each slide, and bring slides in
+    from another presentation.
+  </Card>
+  <Card title="Text, pictures and shapes" href="/docs/editor/objects" sub>
+    Write and format text, add and replace pictures and logos, draw shapes and lines, and edit
+    tables and charts.
+  </Card>
+  <Card title="Advanced tools" href="/docs/editor/advanced-tools" sub>
+    The Tools > Advanced tools switch shows more commands in the menus, on the toolbar and in the
+    right click menus.
+  </Card>
+  <Card title="Presenting" href="/docs/presenting">
+    Present a presentation full screen, use Presenter view with your notes and a timer, and the keys
+    that control a slideshow.
+  </Card>
+  <Card title="Sharing and people" href="/docs/sharing">
+    Share a presentation by link or with people by name, set what each person can do, and work on
+    one presentation together.
+  </Card>
+  <Card title="Themes and brand kits" href="/docs/themes">
+    Pick one of nine themes for every slide, and set your own logo, colors, fonts and footer in a
+    brand kit.
+  </Card>
+  <Card title="Download and export" href="/docs/export">
+    Download a presentation as PowerPoint, PDF, pictures, a web page or a Turboslide file, with or
+    without speaker notes and skipped slides.
+  </Card>
+  <Card title="Keyboard shortcuts" href="/docs/shortcuts">
+    Every keyboard shortcut the editor answers in its default view, with the key on a Mac and on
+    Windows.
+  </Card>
+  <Card title="Run Turboslide yourself" href="/docs/self-hosting">
+    Run the Turboslide studio from its repository on your own computer or server, and choose where
+    presentations are stored.
+  </Card>
+</Cards>
 
-| Task                                      | How                                                                         |
-| ----------------------------------------- | --------------------------------------------------------------------------- |
-| Open a presentation                       | Click its card on [Your Presentations](/decks), or press Cmd+O and pick it. |
-| Make a copy for a customer                | File > Make a copy, type the name, press Enter.                             |
-| Change a name across the presentation     | Edit > Find and replace, type the old and the new name, click Replace all.  |
-| Swap a logo                               | Drop the file on the picture, or right click it and choose Replace image.   |
-| Add, duplicate, delete and reorder slides | Ctrl+M adds, Cmd+D duplicates, Delete removes, drag a card to move it.      |
-| Hide slides that do not apply             | Select the cards, right click, choose Skip slide.                           |
-| Update a table or a number                | Click a cell and type; Tab moves to the next cell.                          |
-| Write what you will say                   | Click under the slide where it reads Click to add speaker notes.            |
-| Present over a call                       | Slideshow arrow > Presenter view, then share the slideshow window.          |
-| Send a PDF or a link                      | Share > Copy link, or File > Download > PDF Document.                       |
+## Agents
 
-## Agents use the same actions
+Every command in the menus is also an action that a program or an AI agent can run. The command line, MCP, HTTP and the page API are made from one table of actions, and each checks its input the same way.
 
-Every command in the menus is also an action that a program or an AI agent can run. The same actions are reachable four ways, and each one checks its input the same way.
+```sh
+turboslide info --json
+turboslide slide new --layout split --after title
+```
 
-<Tabs>
-  <Tab title="Command line">
-    The `turboslide` command line works on a presentation folder on your computer:
+<Cards>
+  <Card title="Agents" href="/docs/agents">
+    Every command in Turboslide is an action that a program or an AI agent can run, over the command
+    line, MCP, HTTP or an open page.
+  </Card>
+  <Card title="The command line" href="/docs/agents/cli">
+    Run every action from a terminal with the turboslide command, read its JSON output and exit
+    codes, and move presentations to and from a studio.
+  </Card>
+  <Card title="MCP" href="/docs/agents/mcp">
+    Use Turboslide's actions as MCP tools, over standard input and output from the command line or
+    over HTTP from a hosted studio.
+  </Card>
+  <Card title="HTTP actions" href="/docs/agents/http">
+    Call any action with one POST request, read its contract, and render slides and export files
+    over HTTP.
+  </Card>
+  <Card title="Skills" href="/docs/agents/skills">
+    Four skills that teach an AI agent how to write slides, call the actions, drive an open page and
+    check its work.
+  </Card>
+  <Card title="Deck grammar" href="/docs/agents/grammar">
+    How a slide is written as data, with the slide kinds, the layouts and the block types an agent
+    writes.
+  </Card>
+  <Card title="The page API" href="/docs/agents/browser">
+    Drive an open editor or viewer page with window.turboslide.studio, the same actions with access
+    to the page's controls and view.
+  </Card>
+</Cards>
 
-    ```sh
-    turboslide info --json
-    turboslide slide new --layout split --after title
-    ```
+## Action reference
 
-    See [The command line](/docs/agents/cli).
+Every action by group, with its input fields and its name on each transport. The numbers are the actions each transport runs.
 
-  </Tab>
-  <Tab title="MCP">
-    `turboslide mcp` runs an MCP server over standard input and output, and a hosted studio answers MCP at `/mcp`. Each action is a tool whose name starts with `deck_`. See [MCP](/docs/agents/mcp).
-  </Tab>
-  <Tab title="HTTP">
-    Send the action's input as JSON:
+| Group                                       | Actions | Command line | MCP | HTTP | Page |
+| ------------------------------------------- | ------: | -----------: | --: | ---: | ---: |
+| [Presentations](/docs/reference/deck)       |      32 |           32 |  26 |   27 |   26 |
+| [Slides](/docs/reference/slide)             |      20 |           20 |  20 |   20 |   20 |
+| [Objects on a slide](/docs/reference/block) |      43 |           43 |  43 |   43 |   43 |
+| [Pictures and files](/docs/reference/asset) |      11 |           11 |  11 |   11 |    9 |
+| [Renders](/docs/reference/render)           |       4 |            4 |   4 |    4 |    4 |
+| [Checks](/docs/reference/lint)              |       3 |            3 |   3 |    2 |    2 |
+| [Versions](/docs/reference/version)         |       5 |            5 |   5 |    5 |    5 |
+| [Downloads](/docs/reference/export)         |       5 |            5 |   3 |    3 |    3 |
+| [The view](/docs/reference/view)            |       5 |            0 |   2 |    0 |    5 |
+| [The studio page](/docs/reference/studio)   |       6 |            0 |   0 |    0 |    6 |
+| [Presence](/docs/reference/presence)        |       4 |            4 |   4 |    4 |    4 |
+| [Sync](/docs/reference/sync)                |       3 |            3 |   2 |    2 |    2 |
+| [Comments](/docs/reference/comment)         |      16 |           16 |  16 |   16 |   16 |
+| [Sharing](/docs/reference/share)            |      21 |           20 |  21 |   21 |   21 |
+| [Accounts](/docs/reference/account)         |      10 |            9 |   8 |    9 |   10 |
+| [Administration](/docs/reference/admin)     |       6 |            6 |   2 |    6 |    2 |
+| Every group                                 |     194 |          181 | 170 |  173 |  178 |
 
-    ```sh
-    curl -X POST "https://www.turboslide.com/api/actions/deck.info?deck=<id>" \
-      -H "authorization: Bearer <token>" \
-      -H "content-type: application/json" \
-      -d '{}'
-    ```
-
-    See [HTTP actions](/docs/agents/http).
-
-  </Tab>
-  <Tab title="Browser">
-    An open editor page exposes `window.turboslide.studio`, so a script in the page can call `invoke(<action>, input)`. See [The page API](/docs/agents/browser).
-  </Tab>
-</Tabs>
+The [action reference](/docs/reference) has a page for each group, generated from the action table.

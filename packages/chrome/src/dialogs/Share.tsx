@@ -1737,8 +1737,10 @@ function GrantRow({
           value={grant.role}
           options={[
             { options: ROLES },
-            /* the row's three actions in a group of their own after a divider (DROPDOWNS.md 3.9) */
+            /* the row's three actions in a group of their own after a divider (DROPDOWNS.md 3.9),
+               never the field's value, so the field is not sized over their words */
             {
+              actions: true,
               options: [
                 ...(canTransfer && identity?.kind === 'account'
                   ? [{ value: 'transfer' as const, label: DIALOGS.share.transferOwnership }]

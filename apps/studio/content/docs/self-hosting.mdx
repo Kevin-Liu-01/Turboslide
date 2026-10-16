@@ -27,7 +27,9 @@ NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy
 node apps/studio/.output/server/index.mjs
 ```
 
-The build writes a Node server to `apps/studio/.output`. The same build with `NITRO_PRESET=vercel` writes a Vercel deployment.
+The build writes a Node server to `apps/studio/.output`. The same build with `NITRO_PRESET=vercel` writes a Vercel deployment. A `node-server` build behind a proxy sets `TURBOSLIDE_TRUST_PROXY` so the studio reads the forwarded host; never set it on Vercel.
+
+On SIGTERM or Ctrl+C the server stops taking requests, saves the edits it still holds, and exits within 10 seconds, so a process manager can restart it without waiting out its kill timeout.
 
 ## Where presentations are stored
 
@@ -41,16 +43,66 @@ The studio picks one store when it starts:
 
 Set `TURBOSLIDE_STORE` to `file`, `tmp` or `blob` to choose one yourself. `TURBOSLIDE_OVERLAY_DIR` moves the temporary folder.
 
-## Settings
+The `blob` store takes a second, private Blob store with `TURBOSLIDE_BLOB_PRIVATE_TOKEN`. With it, every presentation's documents (slides, versions, comments, sharing records) are kept private, and only pictures and produced files stay on the public store, under a random key per presentation. Without it, the studio keeps everything on the one public store. `turboslide admin migrate-storage` moves an existing store to the private layout one resumable step at a time: `plan`, `copy`, `verify`, `rekey`, `cutover` and `delete`, with `rollback` before the cutover.
 
-| Variable                                   | What it sets                                                                                                 |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `TURBOSLIDE_STORE`                         | The store, as above.                                                                                         |
-| `BLOB_READ_WRITE_TOKEN`                    | The Blob store's token, for the `blob` store.                                                                |
-| `TURBOSLIDE_TOKEN`                         | The bearer token agents send to the HTTP actions and MCP. Without it, those routes answer only on localhost. |
-| `TURBOSLIDE_SESSION_SECRET`                | The key that signs sign in sessions, 32 characters or more.                                                  |
-| `TURBOSLIDE_DOWNLOAD_SECRET`               | The key that signs download addresses, 32 characters or more.                                                |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google. Without both, the studio offers no sign in.                                             |
-| `TURBOSLIDE_PUBLIC_ORIGIN`                 | The site's address, for links in the page head and the sign in mail.                                         |
+A nightly backup copies the documents to a third, private store set with `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN`. Pictures are not copied.
+
+## Required on a hosted server
+
+| Variable                     | What it sets                                                                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `TURBOSLIDE_SESSION_SECRET`  | The key that seals the browser's identity cookie, 32 characters or more. A checkout makes its own under `.turboslide/`.                                |
+| `TURBOSLIDE_DOWNLOAD_SECRET` | The key that signs download addresses, 16 bytes or more. Required on the `tmp` and `blob` stores, so an address made on one instance works on another. |
+| `BETTER_AUTH_SECRET`         | The key of account sessions. One value per deployment.                                                                                                 |
+| `TURBOSLIDE_PUBLIC_ORIGIN`   | The site's address, for links in the page head and the sign in mail.                                                                                   |
+| `TURBOSLIDE_TOKEN`           | The bootstrap bearer for agents and the admin. Once an API key exists it runs `admin.bootstrap` alone; agents use API keys.                            |
 
 Keep every token and secret out of the repository.
+
+## Sign in and accounts
+
+| Variable                                   | What it sets                                                                                                                                                        |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google. The redirect address is `<origin>/api/auth/callback/google`. `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` add GitHub the same way.            |
+| `DATABASE_URL`                             | A Postgres database for accounts. A checkout can use a SQLite file named by `TURBOSLIDE_AUTH_DB` instead. Without a database the studio offers no sign in.          |
+| `TURBOSLIDE_ACCOUNTS`                      | `d1` keeps accounts in the realtime Worker's D1 database. It needs `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`.                                               |
+| `TURBOSLIDE_AUTH_HOSTS`                    | The host names sign in accepts, as a list. The default is turboslide.com's hosts and localhost; a request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`. |
+| `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses whose account is the studio's admin from its first sign in.                                                                                               |
+| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field. `capture` keeps outgoing mail in the studio for tests.                                                  |
+| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in mail through Resend. Both are needed; with only the key, mail stays off.                                                                               |
+| `TURBOSLIDE_LOCAL_TOKEN`                   | `require` makes the agent surface on localhost ask for the checkout's own token in `.turboslide/token`.                                                             |
+
+A sign in mail's link and its six digit code sign in only the browser that asked for them. A link opened in another browser asks for the eight character code the first browser shows.
+
+## Working together
+
+| Variable                                                                   | What it sets                                                                                                                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `redis`, `blob` or `do`. Unset, the studio picks from the variables below.                |
+| `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` | The realtime Worker on Cloudflare (the `do` tier): its host, the key of its room tickets and the bearer of the studio's calls to it. |
+| `TURBOSLIDE_DB_BEARER`                                                     | The bearer of the Worker's database routes, for `TURBOSLIDE_ACCOUNTS=d1`.                                                            |
+| `REDIS_URL`                                                                | A Redis server for the `redis` tier. It also makes the limits below count across instances.                                          |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                       | Upstash Redis for the limits.                                                                                                        |
+
+## Limits and switches
+
+Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". Without `REDIS_URL` or the Upstash pair each server instance counts on its own, so a quota holds only on a single process.
+
+The admin can turn a feature off without a deploy:
+
+```sh
+turboslide admin flag exports --on false
+```
+
+The thirteen switches are `realtime`, `presence`, `comments`, `invites`, `email`, `exports`, `uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly` and `assist`. A switched off feature answers 503 with `Retry-After: 60` and one sentence, such as "Downloads are paused right now. Try again in a few minutes". Every instance reads a change within 5 seconds.
+
+## Security and the assistant
+
+| Variable                                   | What it sets                                                                                                                                                                                                                            |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TURBOSLIDE_CSP`                           | The page's Content Security Policy. Unset, the presentation pages (`/deck`, `/edit`, `/new`, `/present`, `/print`, `/embed`, `/s`, `/try`) enforce it and the other pages report; `report` only reports, `enforce` enforces everywhere. |
+| `TURBOSLIDE_EMBED_ANCESTORS`               | More sites that may embed a presentation's page, as a comma list of `https://` origins.                                                                                                                                                 |
+| `TURBOSLIDE_ASSIST`                        | `off` turns the assistant off ("The assistant is off on this Turboslide"); `fixture` answers with a fixed card for tests.                                                                                                               |
+| `ANTHROPIC_API_KEY`, `RAMP_ROUTER_API_KEY` | The assistant's model key. Without either, the assistant answers "The assistant is not set up on this Turboslide yet".                                                                                                                  |
+| `TURBOSLIDE_ASSIST_MODEL`                  | The model the router key uses.                                                                                                                                                                                                          |
+| `TURBOSLIDE_ASSIST_DAY_CAP`                | The assistant's calls per day for a person without an account. The default is 20.                                                                                                                                                       |

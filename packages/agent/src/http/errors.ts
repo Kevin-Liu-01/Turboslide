@@ -12,13 +12,21 @@ export type HttpErrorCode =
   | 'unknown_field'
   | 'invalid_input'
   | 'unauthorized'
+  /** a device key past its expiry (HR-SA#5): the CLI asks for `turboslide login` again */
+  | 'key_expired'
   | 'payload_too_large'
   | 'not_json'
   | 'unknown_action'
   | 'not_on_http'
   | 'method_not_allowed'
   | 'no_session'
-  | 'unknown_deck';
+  | 'unknown_deck'
+  /** an Idempotency-Key that is not 1 to 255 visible ASCII characters (hardening HR-O#6) */
+  | 'invalid_idempotency_key'
+  /** an Idempotency-Key on a writing action that does not take one (dispatch.ts takesIdempotencyKey) */
+  | 'idempotency_not_supported'
+  /** an Idempotency-Key a request with another action or body already used */
+  | 'idempotency_key_reused';
 
 export type HttpError = {
   name: string;

@@ -437,7 +437,7 @@
     },
     "deck.set": {
       "label": "Set a deck field",
-      "doc": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Theme panel and Slide numbers make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
+      "doc": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes) as one deck.set mutation, the write the Theme panel, Slide numbers and Playback make; an absent value removes the field. /theme takes an id of theme.list (gt-ink-paper is stored as general-translation).",
       "mutates": true,
       "milestone": "GS1",
       "group": "deck"
@@ -682,7 +682,7 @@
     },
     "block.align": {
       "label": "Align blocks",
-      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
+      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
       "mutates": true,
       "milestone": "M6",
       "group": "block"
@@ -1207,14 +1207,14 @@
     },
     "shader.insert": {
       "label": "Insert a shader",
-      "doc": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, motion.play show, in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
+      "doc": "Lands a shader as an object on the named slide: the entry’s featured preset unless one is named (the diamond for liquid metal), the common controls with their resolved uniforms beside them, the still’s moment when anchor is named (5500 ms when absent), in the largest free rectangle of the body slot (or at the box named), selected in the editor; a slide that is not a canvas converts first.",
       "mutates": true,
       "milestone": "P1",
       "group": "block"
     },
     "shader.set": {
       "label": "Set a shader field",
-      "doc": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; any other pointer (/anchor, /motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
+      "doc": "One write on a shader block: /preset writes the preset and clears the control overrides and the uniforms; /controls or /controls/<name> writes the controls and their resolved uniforms together; /anchor takes a whole number of ms from 0 to 60000, the moment the still holds; any other pointer (/motion, /uniforms, /twoTone, /plate) is one block.set. One history entry.",
       "mutates": true,
       "milestone": "P1",
       "group": "block"
@@ -1298,7 +1298,7 @@
     },
     "presence.follow": {
       "label": "Follow",
-      "doc": "The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.",
+      "doc": "The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.",
       "mutates": true,
       "milestone": "GS3",
       "group": "presence"
@@ -1578,7 +1578,7 @@
     },
     "share.emailCollaborators": {
       "label": "Email collaborators",
-      "doc": "Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.",
+      "doc": "Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.",
       "mutates": true,
       "milestone": "GS3",
       "group": "share"
@@ -1634,7 +1634,7 @@
     },
     "account.setName": {
       "label": "Change name",
-      "doc": "Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
+      "doc": "Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
       "mutates": true,
       "milestone": "GS3",
       "group": "account"
@@ -1676,7 +1676,7 @@
     },
     "admin.flag": {
       "label": "Kill switch",
-      "doc": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.",
+      "doc": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.",
       "mutates": true,
       "milestone": "GS3",
       "group": "admin"

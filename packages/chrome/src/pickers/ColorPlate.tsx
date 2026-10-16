@@ -1,11 +1,12 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 import type { DeckTokens } from '@turboslide/render/theme-css';
 import type { KitColor } from '@turboslide/schema/brand';
 import { KIT_COLORS, KIT_COLOR_TOKENS, KIT_COLOR_WORDS } from '@turboslide/schema/brand';
 import { COLOR_LABELS, COLOR_TOKENS, isHexColor } from '@turboslide/schema/color';
-import type { Color, ColorToken } from '@turboslide/schema/color';
+import type { Color, ColorToken, HexColor } from '@turboslide/schema/color';
+import { composite, parseColor, toHex } from '@turboslide/theme/contrast';
 import type { TokenName } from '@turboslide/theme/tokens';
 
 import { swatchPaint, useDeckTokens } from '../inspector/palette';
@@ -14,6 +15,7 @@ import { useMountEffect } from '../lib/useMountEffect';
 import { PICKERS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 import { usePlate, useStart } from '../usePlate';
+import { ColorField } from './ColorField';
 
 import './Pickers.css';
 
@@ -22,13 +24,19 @@ import './Pickers.css';
  * 4.1): the brand kit's six colours first (Text, Background, Captions, Hints, Primary, Accent,
  * each writing its token so the colour follows the kit; the role's name and hex in the tooltip,
  * the token id on its second line for agents), the theme tokens second, then None and the Custom
- * hex field, anchored under a toolbar button or a menu row (Format > Borders & lines > Border
- * color). Every swatch paints the colour the deck's slides draw, the deck's theme under its kit
- * in the deck's appearance (`useDeckTokens`; docs/DESIGN.md 7.5). `tones` is the older heading
- * and paragraph form: Ink and Muted only, kept for a block whose schema takes a tone and no
- * colour. The plate is a dialog that closes on Esc (focus returns to the anchor) and on a click
- * outside; the caller writes the field the plate stands for. The container is `<control>.menu`
- * (audit-brand 11: it shared `.plate` with the plate token's swatch).
+ * colour field (ColorField: a saturation and brightness area, hue, Hex, OKLCH, Pick Screen Color
+ * and Apply, the Glyphfield port's wave 2 item 6), anchored under a toolbar button or a menu row
+ * (Format > Borders & lines > Border color). The field starts from the colour the target draws
+ * and writes once, on Apply or Enter, so every pick of the plate is one write; a custom hex stays
+ * a `color/off-palette` finding of the lint. `hexOnly` draws the field alone for a value that
+ * takes a hex and no token (the Brand kit panel's six roles, where the native colour well stood),
+ * with `onPreview` hearing each draft. Every swatch paints the colour the deck's slides draw, the
+ * deck's theme under its kit in the deck's appearance (`useDeckTokens`; docs/DESIGN.md 7.5).
+ * `tones` is the older heading and paragraph form: Ink and Muted only, kept for a block whose
+ * schema takes a tone and no colour. The plate is a dialog that closes on Esc (focus returns to
+ * the anchor) and on a click outside; the caller writes the field the plate stands for. The
+ * container is `<control>.menu` (audit-brand 11: it shared `.plate` with the plate token's
+ * swatch).
  */
 export type ColorPlateProps = {
   anchor: HTMLElement;
@@ -40,6 +48,10 @@ export type ColorPlateProps = {
   onPick: (value: Color | 'none') => void;
   onClose: () => void;
   control: string;
+  /** the colour field alone, for a value that takes a hex and no token (the brand kit's roles) */
+  hexOnly?: boolean;
+  /** each draft colour of the field while it changes */
+  onPreview?: (hex: HexColor) => void;
 };
 
 /**
@@ -50,6 +62,19 @@ export function kitRoleHex(tokens: DeckTokens, role: KitColor): string {
   return tokens[KIT_COLOR_TOKENS[role] as TokenName];
 }
 
+/**
+ * The hex the colour field starts from: the colour the target draws on the deck's slides, a
+ * translucent token (the hairlines) composited on the deck's paper, the deck's ink for None.
+ */
+export function fieldStartHex(current: Color | 'none' | undefined, tokens: DeckTokens): string {
+  const paint =
+    current === undefined || current === 'none' ? tokens.ink : swatchPaint(current, tokens);
+  const color = parseColor(paint) ?? parseColor(tokens.ink);
+  if (color === null) return '#000000';
+  const paper = parseColor(tokens.paper);
+  return toHex(color.a < 1 && paper !== null ? composite(color, paper) : color);
+}
+
 export function ColorPlate({
   anchor,
   label,
@@ -58,9 +83,10 @@ export function ColorPlate({
   onPick,
   onClose,
   control,
+  hexOnly = false,
+  onPreview,
 }: ColorPlateProps) {
   const root = useRef<HTMLDivElement>(null);
-  const [hex, setHex] = useState('');
   /* in the popover layer, under its anchor and kept there while it is open (docs/DESIGN.md 2.3,
      2.4); it stands under the anchor until placed, since its first swatch takes the focus */
   const start = useStart(anchor);
@@ -76,7 +102,9 @@ export function ColorPlate({
      focus from the hex field to the None swatch mid word, Enter landed on that button and the
      value never reached the shape */
   useMountEffect(() => {
-    root.current?.querySelector<HTMLElement>('button')?.focus();
+    root.current
+      ?.querySelector<HTMLElement>(hexOnly ? `[data-control="${control}.custom.area"]` : 'button')
+      ?.focus();
   });
 
   useEffect(() => {
@@ -101,13 +129,14 @@ export function ColorPlate({
   /* the kit's six colours first: each swatch writes its token (KIT_COLOR_TOKENS), so a heading
      painted Primary follows the kit when the kit changes; the swatch paints the role's hex on the
      deck's slides */
-  const kitOptions: ReadonlyArray<{ value: ColorToken; role: KitColor; hex: string }> = tones
-    ? []
-    : KIT_COLORS.map((role) => ({
-        value: KIT_COLOR_TOKENS[role] as ColorToken,
-        role,
-        hex: kitRoleHex(deckColors, role),
-      }));
+  const kitOptions: ReadonlyArray<{ value: ColorToken; role: KitColor; hex: string }> =
+    tones || hexOnly
+      ? []
+      : KIT_COLORS.map((role) => ({
+          value: KIT_COLOR_TOKENS[role] as ColorToken,
+          role,
+          hex: kitRoleHex(deckColors, role),
+        }));
   const options: ReadonlyArray<{ value: Color | 'none'; label: string }> = tones
     ? [
         { value: 'ink', label: 'Ink' },
@@ -118,7 +147,6 @@ export function ColorPlate({
         { value: 'none', label: words.none },
       ];
   const shown: Color | 'none' = current ?? (tones ? 'ink' : 'none');
-  const hexTip = tipProps({ name: words.custom, doc: words.hex, key: 'Enter' });
 
   return (
     <div
@@ -151,51 +179,47 @@ export function ColorPlate({
           ))}
         </div>
       ) : null}
-      <div className="ts-color-grid">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            className={cn(
-              'ts-color-swatch',
-              shown === option.value && 'is-on',
-              option.value === 'none' && 'is-none',
-            )}
-            aria-label={option.label}
-            aria-pressed={shown === option.value}
-            data-control={`${control}.${option.value}`}
-            style={
-              option.value === 'none'
-                ? undefined
-                : { background: swatchPaint(option.value, deckColors) }
-            }
-            onClick={() => onPick(option.value)}
-            {...tipProps({ name: option.label })}
-          />
-        ))}
-      </div>
+      {hexOnly ? null : (
+        <div className="ts-color-grid">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={cn(
+                'ts-color-swatch',
+                shown === option.value && 'is-on',
+                option.value === 'none' && 'is-none',
+              )}
+              aria-label={option.label}
+              aria-pressed={shown === option.value}
+              data-control={`${control}.${option.value}`}
+              style={
+                option.value === 'none'
+                  ? undefined
+                  : { background: swatchPaint(option.value, deckColors) }
+              }
+              onClick={() => onPick(option.value)}
+              {...tipProps({ name: option.label })}
+            />
+          ))}
+        </div>
+      )}
       {tones ? null : (
-        <label className="ts-color-hex">
-          <span>{words.custom}</span>
-          <input
-            type="text"
-            value={hex}
-            placeholder="#rrggbb"
-            aria-label={words.custom}
-            data-control={`${control}.hex`}
-            spellCheck={false}
-            autoComplete="off"
-            {...hexTip}
-            onChange={(event) => setHex(event.target.value)}
-            onKeyDown={(event) => {
-              hexTip.onKeyDown(event);
-              if (event.key !== 'Enter') return;
-              event.preventDefault();
-              const value = hex.trim().startsWith('#') ? hex.trim() : `#${hex.trim()}`;
-              if (isHexColor(value)) onPick(value);
-            }}
-          />
-        </label>
+        <ColorField
+          value={fieldStartHex(current, deckColors)}
+          label={label}
+          control={control}
+          {...(onPreview === undefined
+            ? {}
+            : {
+                onDraft: (hex: string) => {
+                  if (isHexColor(hex)) onPreview(hex);
+                },
+              })}
+          onApply={(hex) => {
+            if (isHexColor(hex)) onPick(hex);
+          }}
+        />
       )}
     </div>
   );

@@ -6,9 +6,11 @@
  * kinds and the HTML string it sets as innerHTML (SPEC 5.3).
  */
 
+import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { FrameBand } from '@turboslide/render/stage';
 import { slideAdvance, slideTransition } from '@turboslide/schema/motion-core';
 import type { Advance, Effect, MotionFields, Transition } from '@turboslide/schema/motion-core';
+import type { PlayMode } from '@turboslide/schema/deck';
 
 /** The sheet (SPEC 2.1): 1600 by 900 sheet pixels. */
 export const SHEET_W = 1600;
@@ -53,6 +55,11 @@ export type ViewerSlide = {
    * advance resolved against the deck's defaults; absent on a slide with none of them
    */
   motion?: SlideMotion;
+  /**
+   * the slide's Playback (`slidePlay`: the slide's word, else the deck's; the shader design 3.1):
+   * hold keeps its live blocks still in the show and the viewer; play when absent
+   */
+  play?: PlayMode;
 };
 
 /** A slide's motion as the viewer carries it: the effects, the transition and the advance resolved. */
@@ -93,6 +100,8 @@ export type ViewerDeck = {
   fallback?: string;
   /** the brand kit's frame band (docs/archive/rounds/PRODUCT.md 4.1): the footer logo, the footer text and the counter's format; the GT band when absent */
   band?: FrameBand;
+  /** the deck's shader palette (`shaderPaletteOfDeck`), so a playing shader draws the colours of its still; the legacy palette when absent */
+  palette?: ShaderPalette;
 };
 
 /** The deck's title trim for rows and captions (tail.html titleOf): 72 characters, cut at a word. */

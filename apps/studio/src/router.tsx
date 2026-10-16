@@ -2,9 +2,10 @@ import { createRouter as createTanStackRouter } from '@tanstack/react-router';
 import type { ParsedLocation } from '@tanstack/react-router';
 import { getGlobalStartContext } from '@tanstack/react-start';
 
-import { setDitherWorkerFactory } from '@turboslide/viewer/dither';
+import { setDitherWorkerFactory } from '@turboslide/viewer/dither-factory';
 import { motionReduced } from '@turboslide/viewer/reduce-motion';
 
+import { installErrorReporter, reportRouteError } from './report-errors';
 import { routeTree } from './routeTree.gen';
 import { PageRefused } from './routes/-refused-page';
 
@@ -14,7 +15,9 @@ import { PageRefused } from './routes/-refused-page';
  * (the editor's stage, the viewer's stage, the live clones) draws its overlays off the main
  * thread through `@turboslide/viewer/dither`'s shared host; on the server, and in a browser
  * without workers, the main thread stages stand in. Vite resolves the `new URL(..., import.meta.url)`
- * worker in dev and in the build.
+ * worker in dev and in the build. The factory goes into `@turboslide/viewer/dither-factory`, a
+ * module without imports, so the dither pipeline stays out of the chunk every route loads
+ * (hardening HR-PC#2, PERF-9: about 30 KB of it).
  */
 function registerDitherWorker(): void {
   if (typeof window === 'undefined' || typeof Worker === 'undefined') return;
@@ -95,9 +98,17 @@ export function getRouter() {
     // shell around it stands; the page's Reload is `router.invalidate()`. The /edit route names
     // its own component for its two headings (routes/edit.$deckId.tsx EditRefused).
     defaultErrorComponent: PageRefused,
+    // The error the page stands for also reaches the log (hardening HR-O#2b, RELIABILITY-14): in
+    // the browser a route's catch boundary hands it here, and one scrubbed line goes to
+    // /api/x/errors (report-errors.ts). A loader's not found answer never reaches it.
+    defaultOnCatch: reportRouteError,
     ...(nonce === undefined ? {} : { ssr: { nonce } }),
   });
 
+  // the page's uncaught errors and unhandled rejections, under the route the router matched
+  installErrorReporter(
+    () => router.state.matches.at(-1)?.routeId ?? globalThis.location?.pathname ?? '/',
+  );
   return router;
 }
 

@@ -1,3 +1,4 @@
+import type { LimitStore } from './auth/limits.ts';
 import { logSecurityEvent } from './log';
 
 /**
@@ -8,7 +9,11 @@ import { logSecurityEvent } from './log';
  * `Retry-After` and one sentence the chrome shows (SPEC-3 6.8), logged once as `http.429` with the
  * quota name under `rule`.
  *
- * Backends behind one `RateLimiter` interface: `memoryLimiter` (a fixed window counter per key in
+ * Backends behind one `RateLimiter` interface: `dbLimiter` (HR-SA#3, AUTH-8: the one limiter of a
+ * hosted deployment, a fixed window per key in the accounts database's `ts_limits` table through
+ * auth/limits.ts, bound by start.ts when the accounts engine is D1 or Postgres; better-auth's sign
+ * in limits and the spent download tokens of tokens.ts count in it too, so every instance of a
+ * deployment reads one count), `memoryLimiter` (a fixed window counter per key in
  * this process: the checkout, the `tmp` store, and the fallback), `kvLimiter` over a key value
  * client (B3's `KvClient` shape; `start.ts` binds it over the room's ioredis client on the redis
  * tier, so `REDIS_URL` gives every instance the same counters), and `upstashLimiter` over the
@@ -336,7 +341,7 @@ export type LimitResult = {
 };
 
 export type RateLimiter = {
-  kind: 'memory' | 'kv' | 'upstash';
+  kind: 'memory' | 'kv' | 'upstash' | 'db';
   /** Counts `cost` against the key's window; `ok: false` when the count passes the limit. */
   limit: (key: string, limit: number, windowMs: number, cost?: number) => Promise<LimitResult>;
   /** Releases a concurrency slot taken with a window of 0. */
@@ -368,6 +373,75 @@ export function memoryLimiter(now: () => number = () => Date.now()): RateLimiter
       const row = rows.get(key);
       if (row === undefined) return;
       row.count = Math.max(0, row.count - cost);
+    },
+  };
+}
+
+/**
+ * A concurrency slot (a window of 0) is held this long in the shared store, so a slot an instance
+ * never released frees itself.
+ */
+export const DB_SLOT_MS = 60 * MINUTE;
+/** How often one process deletes the rows whose window ended. */
+export const DB_PRUNE_EVERY_MS = 10 * MINUTE;
+/** The least gap between two fallback lines of one process. */
+const DB_FALLBACK_LOG_MS = MINUTE;
+
+/**
+ * The one limiter of a hosted deployment (HR-SA#3, AUTH-8): every count in the accounts database
+ * through `store` (auth/limits.ts), one statement per take, so an instance counts what every other
+ * instance counted. A store that fails (the Worker deploying, the table not migrated yet) is
+ * logged as `config.degraded` at most once a minute, and the call counts in this process's memory
+ * as every instance did before, so a request is never refused because the counter could not be
+ * read. A cost above the limit is refused without a write.
+ */
+export function dbLimiter(
+  store: LimitStore,
+  options: { now?: () => number; fallback?: RateLimiter } = {},
+): RateLimiter {
+  const now = options.now ?? (() => Date.now());
+  const fallback = options.fallback ?? memoryLimiter(now);
+  let loggedAt = -Infinity;
+  let prunedAt = now();
+  const failed = (error: unknown): void => {
+    const t = now();
+    if (t - loggedAt < DB_FALLBACK_LOG_MS) return;
+    loggedAt = t;
+    logSecurityEvent({
+      event: 'config.degraded',
+      reason: `the shared limiter's store failed (${error instanceof Error ? error.message : String(error)}); this instance counts in memory until it answers`,
+    });
+  };
+  return {
+    kind: 'db',
+    async limit(key, limit, windowMs, cost = 1) {
+      const t = now();
+      const span = windowMs > 0 ? windowMs : DB_SLOT_MS;
+      if (cost > limit) return { ok: false, remaining: 0, resetAt: t + span };
+      let taken;
+      try {
+        taken = await store.take(key, cost, limit, span, t);
+      } catch (error) {
+        failed(error);
+        return fallback.limit(key, limit, windowMs, cost);
+      }
+      if (t - prunedAt >= DB_PRUNE_EVERY_MS) {
+        prunedAt = t;
+        void store.prune(t).catch(() => undefined);
+      }
+      return {
+        ok: taken.ok,
+        remaining: taken.ok ? Math.max(0, limit - taken.count) : 0,
+        resetAt: taken.resetAt,
+      };
+    },
+    async release(key, cost = 1) {
+      try {
+        await store.release(key, cost);
+      } catch (error) {
+        failed(error);
+        await fallback.release?.(key, cost);
+      }
     },
   };
 }

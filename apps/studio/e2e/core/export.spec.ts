@@ -801,7 +801,7 @@ test(title('tables.export.pptx-editable'), async () => {
   await cell.dblclick();
   await page.waitForTimeout(300);
   await cell.click({ button: 'right' });
-  await page.locator('.ts-context-menu').first().waitFor({ timeout: 6000 });
+  await page.locator('.ts-context-menu:not([data-exiting])').first().waitFor({ timeout: 6000 });
   await ctl(page, 'menu.format.table.insertColumnRight').click();
   await expect
     .poll(

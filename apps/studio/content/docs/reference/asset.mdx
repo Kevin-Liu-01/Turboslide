@@ -10,26 +10,26 @@ description: The actions of the asset group, with their input fields and their n
 
 **Add asset.** Adds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional two-tone treatment; returns the asset with twins and metrics.
 
-| Field           | Type                                           | Required | Description                                                                                                                                            |
-| --------------- | ---------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`            | string                                         | no       | The asset id; a slug of the file name when omitted                                                                                                     |
-| `file`          | string                                         | no       | A path on the machine, or a data: URL from the studio’s drop or paste                                                                                  |
-| `url`           | string                                         | no       | An http(s) URL to fetch, 25 MB at most                                                                                                                 |
-| `role`          | one of 10 values                               | yes      |                                                                                                                                                        |
-| `alt`           | string                                         | yes      |                                                                                                                                                        |
-| `source`        | object \| object \| object \| object \| object | no       | The provenance record; built from title, artist, license and sourceUrl when omitted                                                                    |
-| `title`         | string                                         | no       | The picture’s name as the source states it                                                                                                             |
-| `artist`        | string                                         | no       |                                                                                                                                                        |
-| `license`       | string                                         | no       | CC0, CC BY, CC BY-SA 4.0, public domain, or the text                                                                                                   |
-| `shareAlike`    | boolean                                        | no       | The license is share-alike: the credit must appear on the plate                                                                                        |
-| `sourceUrl`     | string                                         | no       | Where the picture came from                                                                                                                            |
-| `credit`        | string                                         | no       | The plate credit; composed from artist and license when omitted                                                                                        |
-| `twoTone`       | boolean                                        | no       | Run the two-tone pipeline; the source is kept as assets/\<id\>.source.\<ext\>                                                                          |
-| `treatment`     | object                                         | no       |                                                                                                                                                        |
-| `plate`         | "lower-left" \| "lower-right" \| "upper-left"  | no       | The plate rectangle the metrics are screened against                                                                                                   |
-| `upload`        | string                                         | no       | Hosted: the key of a presigned client upload under uploads/\<principalId\>/ on the private store, for files over 3 MB                                  |
-| `replaceSource` | string                                         | no       | Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1) |
-| `baseRevision`  | integer                                        | yes      | The revision the caller read; a stale value is rejected with 409                                                                                       |
+| Field           | Type                                           | Required | Description                                                                                                                              |
+| --------------- | ---------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`            | string                                         | no       | The asset id; a slug of the file name when omitted                                                                                       |
+| `file`          | string                                         | no       | A path on the machine, or a data: URL from the studio’s drop or paste                                                                    |
+| `url`           | string                                         | no       | An http(s) URL to fetch, 25 MB at most                                                                                                   |
+| `role`          | one of 10 values                               | yes      |                                                                                                                                          |
+| `alt`           | string                                         | yes      |                                                                                                                                          |
+| `source`        | object \| object \| object \| object \| object | no       | The provenance record; built from title, artist, license and sourceUrl when omitted                                                      |
+| `title`         | string                                         | no       | The picture’s name as the source states it                                                                                               |
+| `artist`        | string                                         | no       |                                                                                                                                          |
+| `license`       | string                                         | no       | CC0, CC BY, CC BY-SA 4.0, public domain, or the text                                                                                     |
+| `shareAlike`    | boolean                                        | no       | The license is share-alike: the credit must appear on the plate                                                                          |
+| `sourceUrl`     | string                                         | no       | Where the picture came from                                                                                                              |
+| `credit`        | string                                         | no       | The plate credit; composed from artist and license when omitted                                                                          |
+| `twoTone`       | boolean                                        | no       | Run the two-tone pipeline; the source is kept as assets/\<id\>.source.\<ext\>                                                            |
+| `treatment`     | object                                         | no       |                                                                                                                                          |
+| `plate`         | "lower-left" \| "lower-right" \| "upper-left"  | no       | The plate rectangle the metrics are screened against                                                                                     |
+| `upload`        | string                                         | no       | Hosted: the key of a presigned client upload under uploads/\<principalId\>/ on the private store, for files over 3 MB                    |
+| `replaceSource` | string                                         | no       | Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins |
+| `baseRevision`  | integer                                        | yes      | The revision the caller read; a stale value is rejected with 409                                                                         |
 
 - Command line: `turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate> --replace-source <replaceSource>`
 - MCP tool: `deck_asset_add`
@@ -41,20 +41,20 @@ description: The actions of the asset group, with their input fields and their n
 
 **Dither asset.** Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance; with fromRecorded it reads the committed twins back and verifies them cell for cell.
 
-| Field          | Type                                          | Required | Description                                                                         |
-| -------------- | --------------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| `assetId`      | string                                        | no       | Required unless allTwoTone                                                          |
-| `treatment`    | object \| object                              | no       | The full treatment to run; the recorded one with the params merged when omitted     |
-| `params`       | object                                        | no       | Parameters merged over the recorded treatment (--gamma, --black on the CLI)         |
-| `plate`        | "lower-left" \| "lower-right" \| "upper-left" | no       | The plate rectangle the metrics are screened against                                |
-| `source`       | string                                        | no       | The continuous source when the asset records none                                   |
-| `allTwoTone`   | boolean                                       | no       | Every asset with a two-tone treatment                                               |
-| `fromRecorded` | boolean                                       | no       | Read the committed twins back instead of regenerating; metrics are recomputed       |
-| `verifyCells`  | boolean                                       | no       | Regenerate from the source where one exists and count the cells that differ         |
-| `pattern`      | "bayer8" \| "bayer4" \| "blue64" \| "random"  | no       | The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5) |
-| `cell`         | 1 \| 2 \| 3 \| 4                              | no       | Sheet pixels per cell; 2 unless set                                                 |
-| `tone`         | "two" \| "three" \| "original"                | no       | two, three or original; two unless set                                              |
-| `baseRevision` | integer                                       | yes      | The revision the caller read; a stale value is rejected with 409                    |
+| Field          | Type                                                       | Required | Description                                                                     |
+| -------------- | ---------------------------------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| `assetId`      | string                                                     | no       | Required unless allTwoTone                                                      |
+| `treatment`    | object \| object                                           | no       | The full treatment to run; the recorded one with the params merged when omitted |
+| `params`       | object                                                     | no       | Parameters merged over the recorded treatment (--gamma, --black on the CLI)     |
+| `plate`        | "lower-left" \| "lower-right" \| "upper-left"              | no       | The plate rectangle the metrics are screened against                            |
+| `source`       | string                                                     | no       | The continuous source when the asset records none                               |
+| `allTwoTone`   | boolean                                                    | no       | Every asset with a two-tone treatment                                           |
+| `fromRecorded` | boolean                                                    | no       | Read the committed twins back instead of regenerating; metrics are recomputed   |
+| `verifyCells`  | boolean                                                    | no       | Regenerate from the source where one exists and count the cells that differ     |
+| `pattern`      | "bayer8" \| "bayer4" \| "blue64" \| "random" \| "halftone" | no       | The threshold texture to regenerate the twins with; bayer8 unless set           |
+| `cell`         | 1 \| 2 \| 3 \| 4                                           | no       | Sheet pixels per cell; 2 unless set                                             |
+| `tone`         | "two" \| "three" \| "original"                             | no       | two, three or original; two unless set                                          |
+| `baseRevision` | integer                                                    | yes      | The revision the caller read; a stale value is rejected with 409                |
 
 - Command line: `turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --pattern <pattern> --cell <cell> --tone <tone> --all-two-tone --from-recorded --verify-cells`
 - MCP tool: `deck_asset_dither`
@@ -80,7 +80,7 @@ description: The actions of the asset group, with their input fields and their n
 | `recipe`       | string                             | no       | The per-site recipe; gt-site by default                                          |
 | `settleMs`     | integer                            | no       |                                                                                  |
 | `format`       | "jpg" \| "png"                     | no       | The twin file format; jpg at quality 92 by default                               |
-| `allowHosts`   | string[]                           | no       | Hosts beyond the built-in allowlist (SPEC 11 captureHosts)                       |
+| `allowHosts`   | string[]                           | no       | Hosts beyond the built-in allowlist                                              |
 | `baseRevision` | integer                            | yes      | The revision the caller read; a stale value is rejected with 409                 |
 
 - Command line: `turboslide asset capture <url> --theme <theme> --scale <scale> --recipe <recipe> --region <region>`
@@ -99,7 +99,7 @@ description: The actions of the asset group, with their input fields and their n
 | `preset`       | string                                        | no       | A palette preset of the material, under the uniforms             |
 | `uniforms`     | record                                        | no       |                                                                  |
 | `size`         | [integer, integer]                            | no       |                                                                  |
-| `anchors`      | number[]                                      | yes      | Frame times in ms                                                |
+| `anchors`      | integer[]                                     | yes      | Frame times in ms, 0 to 60000                                    |
 | `id`           | string                                        | no       | The asset id; \<id\>-\<anchor\> per anchor when several          |
 | `role`         | "opener" \| "mood" \| "frame"                 | no       |                                                                  |
 | `alt`          | string                                        | no       |                                                                  |

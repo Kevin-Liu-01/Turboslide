@@ -19,6 +19,7 @@
     "./lua": "./src/lua.ts",
     "./coalesce": "./src/coalesce.ts",
     "./admission": "./src/admission.ts",
+    "./deck-cap-fixture": "./src/deck-cap-fixture.ts",
     "./room-core": "./src/room-core.ts",
     "./do": "./src/do.ts",
     "./frames": "./src/frames.ts",

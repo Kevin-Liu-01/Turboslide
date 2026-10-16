@@ -21,9 +21,12 @@
 // (SPEC-4 3.12): it imports the schema's runtime values, and this module sits in the browser's
 // root graph through dither-runtime.ts, so those imports put the shape table in the entry chunk.
 import type { Asset, AssetTwins, AssetVariant } from '@turboslide/schema/assets';
+import { DITHER_PATTERNS } from '@turboslide/schema/blocks/dither-values';
+import type { DitherPattern } from '@turboslide/schema/blocks/dither-values';
 import { sha256Hex } from './sha256.ts';
 
-export type DitherPattern = 'bayer8' | 'bayer4' | 'blue64' | 'random';
+/* the pattern list is the schema's (dither-values imports nothing, so the root graph stays lean) */
+export type { DitherPattern };
 export type DitherTone = 'two' | 'three' | 'original';
 export type DitherPolarity = 'auto' | 'dark-ground' | 'light-ground' | 'same';
 export type DitherChannel = 'gray' | 'r' | 'g' | 'b';
@@ -77,8 +80,6 @@ export const DITHER_PHOTOGRAPH: PictureDitherLike = {
 /** The Neutral preset, the identity: the toggle of the Format options section (SPEC-3 10.7). */
 export const DITHER_NEUTRAL: PictureDitherLike = { pattern: 'bayer8' };
 
-const PATTERNS: readonly DitherPattern[] = ['bayer8', 'bayer4', 'blue64', 'random'];
-
 /** The key order of the resolved record; fixed so two writers hash one string. */
 const KEY_ORDER: readonly (keyof ResolvedDither)[] = [
   'pattern',
@@ -120,7 +121,8 @@ export function readDither(block: object): PictureDitherLike | undefined {
   const value = (block as { dither?: unknown }).dither;
   if (value === null || typeof value !== 'object') return undefined;
   const pattern = (value as { pattern?: unknown }).pattern;
-  if (typeof pattern !== 'string' || !PATTERNS.includes(pattern as DitherPattern)) return undefined;
+  if (typeof pattern !== 'string' || !(DITHER_PATTERNS as readonly string[]).includes(pattern))
+    return undefined;
   return value as PictureDitherLike;
 }
 

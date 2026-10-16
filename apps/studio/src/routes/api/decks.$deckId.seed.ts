@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { jsonResponse } from '@turboslide/agent/http/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
+import { isStoreBusy, storeRetryAfterMs } from '@turboslide/store/pulse';
 import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 
 import { coveredSeq } from '../../server/checkpoint';
@@ -33,6 +34,19 @@ export const Route = createFileRoute('/api/decks/$deckId/seed')({
 async function serve(request: Request, deckId: string): Promise<Response> {
   if (!SLUG_PATTERN.test(deckId)) return jsonResponse({ error: 'not_found' }, 404);
   if (!roomBearerMatches(request)) return jsonResponse({ error: 'bearer' }, 401);
+  try {
+    return await serveSeed(request, deckId);
+  } catch (error) {
+    // the store's "not now" (its deadline, a 429, a layout record that did not read, a freeze;
+    // HR-K1#4b): 503 with retry-after, which the realtime Worker does not count as the
+    // deployment failing (deck-room.ts AppCallError.reach), so no tab leaves the do tier for it
+    if (!isStoreBusy(error)) throw error;
+    const seconds = Math.max(1, Math.ceil((storeRetryAfterMs(error) ?? 1000) / 1000));
+    return jsonResponse({ error: 'store_busy' }, 503, { 'retry-after': String(seconds) });
+  }
+}
+
+async function serveSeed(request: Request, deckId: string): Promise<Response> {
   if (!(await hasStoredDeck(deckId))) return jsonResponse({ error: 'not_found' }, 404);
   const url = new URL(request.url);
   const sinceRaw = url.searchParams.get('since');

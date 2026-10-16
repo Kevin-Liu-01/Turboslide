@@ -1673,8 +1673,8 @@ export async function run(t) {
 
   await t.step(
     'shaders.frame.scrubber-capture',
-    'drag the Frame scrubber; Capture this frame',
-    'the live canvas moves with the scrubber; the capture writes /anchor and a new asset within 5 s',
+    "drag the Still group's time scrubber and release it",
+    'the live canvas moves with the scrubber; the release writes /anchor and a new still lands within 5 s',
     async () => {
       const id = t.deck.shaderBlock;
       if (!id) return { ok: false, observed: 'no shader block on the slide' };
@@ -1686,59 +1686,56 @@ export async function run(t) {
           PANEL_LANE,
           'no Shader section in Format options (FEATURES.md 5.3)',
         );
-      const scrubber = await sliderOf('formatOptions.shader.frame.scrubber');
+      const scrubber = await sliderOf('formatOptions.shader.still.scrubber');
       if (!scrubber || !scrubber.range)
         return t.notBuilt(
-          'formatOptions.shader.frame.scrubber',
+          'formatOptions.shader.still.scrubber',
           PANEL_LANE,
-          'no Frame scrubber in the Shader section (P1, FEATURES.md 5.2 item 3)',
+          'no time scrubber in the Shader section (the Still group of the Glyphfield port)',
         );
       const block0 = (await t.blockOf(S, id))?.block ?? null;
       try {
         await restMount(id);
         await openShaderSection(id);
-        const s2 = (await sliderOf('formatOptions.shader.frame.scrubber')) ?? scrubber;
+        const s2 = (await sliderOf('formatOptions.shader.still.scrubber')) ?? scrubber;
         const clip = await clipOf(id);
         const before = await t.shotPixels(clip);
         const to = {
           x: Math.min(s2.rect.x + s2.rect.w - s2.pad, s2.thumb.x + 0.35 * (s2.rect.w - 2 * s2.pad)),
           y: s2.thumb.y,
         };
+        const t0 = Date.now();
         const during = await t.drag(s2.thumb, to, {
           steps: 10,
           during: async () => diffOf(before, await t.shotPixels(clip)),
         });
-        const capture = await t.visible('formatOptions.shader.frame.capture');
-        let anchor1 = null;
-        let asset1 = null;
-        let ms = null;
-        if (capture) {
-          const t0 = Date.now();
-          await t.clickControl('formatOptions.shader.frame.capture');
-          const got = await t
-            .pollUntil(
-              async () => (await t.blockOf(S, id))?.block ?? null,
-              (b) => b !== null && b.asset !== undefined && b.asset !== block0?.asset,
-              5000,
-              200,
-            )
-            .catch(async () => (await t.blockOf(S, id))?.block ?? null);
-          ms = Date.now() - t0;
-          anchor1 = got?.anchor ?? null;
-          asset1 = got?.asset ?? null;
-        }
+        /* the release writes /anchor; the still follows 800 ms after the write */
+        const got = await t
+          .pollUntil(
+            async () => (await t.blockOf(S, id))?.block ?? null,
+            (b) =>
+              b !== null &&
+              b.anchor !== block0?.anchor &&
+              b.asset !== undefined &&
+              b.asset !== block0?.asset,
+            5000,
+            200,
+          )
+          .catch(async () => (await t.blockOf(S, id))?.block ?? null);
+        const ms = Date.now() - t0;
+        const anchor1 = got?.anchor ?? null;
+        const asset1 = got?.asset ?? null;
         return {
           ok:
             during !== null &&
             during > 0.005 &&
-            capture &&
             anchor1 !== null &&
+            Number.isInteger(anchor1) &&
             anchor1 !== (block0?.anchor ?? null) &&
             asset1 !== null &&
             asset1 !== (block0?.asset ?? null) &&
-            ms !== null &&
             ms <= 5000,
-          observed: `the drag changed ${during === null ? 'an unread fraction of' : `${(during * 100).toFixed(1)} percent of`} the canvas; Capture this frame ${capture ? `wrote anchor ${block0?.anchor ?? 'none'} -> ${anchor1 ?? 'unchanged'} and asset ${block0?.asset ?? 'none'} -> ${asset1 ?? 'unchanged'} after ${ms} ms` : 'absent'}`,
+          observed: `the drag changed ${during === null ? 'an unread fraction of' : `${(during * 100).toFixed(1)} percent of`} the canvas; the release wrote anchor ${block0?.anchor ?? 'none'} -> ${anchor1 ?? 'unchanged'} and the still ${block0?.asset ?? 'none'} -> ${asset1 ?? 'unchanged'} after ${ms} ms`,
         };
       } finally {
         await wakeMount();

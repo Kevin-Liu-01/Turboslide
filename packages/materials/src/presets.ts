@@ -12,12 +12,17 @@
 // recipes as named presets besides: the liquid metal `diamond` and `sphere` of the Prototemplate
 // and Glyphfield opener (OPENERS.md, variant lm-gem-c5) and the gem smoke `brand-blue` and `fire`
 // of the two color openers, plus Paper's own defaults for reference. Presets read in sentence case
-// by role, never by General Translation's colours (audit-shaders 13). Colors are hex strings in the
-// recipe; a colors list is one comma-separated string. Browser safe.
+// by role, never by General Translation's colours (audit-shaders 13). The Glyphfield port lists
+// Paper's authored presets last as form presets (form-presets.ts, wave 2.3): Paper's shape in the
+// colours of a palette preset, so they follow the kit too. Colors are hex strings in the recipe; a
+// colors list is one comma-separated string. Browser safe.
 import type { MaterialPreset, MaterialUniforms } from '@turboslide/schema/blocks/material';
 import type { BrandKit, KitAppearance, KitColor } from '@turboslide/schema/brand';
 import type { Deck } from '@turboslide/schema/deck';
 import { deckAppearance } from '@turboslide/schema/deck';
+
+import { FORM_FIGURE_COLOURS, FORM_PRESETS } from './form-presets.ts';
+import type { FormPreset } from './form-presets.ts';
 
 /** The deck's tokens (packages/theme tokens.ts) the legacy presets draw from. */
 export const GT_PALETTE = {
@@ -34,12 +39,17 @@ export const GT_PALETTE = {
   transparent: '#00000000',
 } as const;
 
-/** Which uniforms of an entry play the ground, the figure, the color list and the inner fill. */
+/**
+ * Which uniforms of an entry play the ground, the figure, the color list and the inner fill.
+ * `ramp` is a color list with no ground uniform of its own (warp): it takes the ground first, then
+ * the second and the first figure colours, so the bands run from the ground to the figure.
+ */
 export type PaletteRoles = {
   back?: string;
   front?: string;
   colors?: string;
   inner?: string;
+  ramp?: string;
 };
 
 /**
@@ -99,6 +109,10 @@ function palette(
   if (roles.front !== undefined) out[roles.front] = values.front;
   if (roles.colors !== undefined) out[roles.colors] = values.colors;
   if (roles.inner !== undefined) out[roles.inner] = values.inner;
+  if (roles.ramp !== undefined) {
+    const [first, second] = values.colors.split(',');
+    out[roles.ramp] = [values.back, second ?? first, first].filter(Boolean).join(',');
+  }
   return out;
 }
 
@@ -379,10 +393,66 @@ function withKit(
   return preset;
 }
 
+/** The palette preset whose colours a form preset's ground takes (ink-paper for Text, paper-ink for Background). */
+const FORM_GROUND_PALETTE: Readonly<Record<FormPreset['ground'], string>> = {
+  text: 'ink-paper',
+  background: 'paper-ink',
+};
+
 /**
- * The palette presets, then the entry's own; an own preset replaces a palette preset of the same
- * name and keeps its place at the front so the tiles read the same. `values` is the deck's shader
- * palette (5.7); the legacy palette without one.
+ * A form preset (form-presets.ts, wave 2.3) as a preset of the entry: Paper's shape with the colours
+ * of its ground's palette preset over the shader palette handed in, so a kit change re colours it.
+ */
+function formPresetOf(
+  materialId: string,
+  form: FormPreset,
+  roles: PaletteRoles,
+  values: ShaderPalette,
+): MaterialPreset {
+  const colours = paletteValuesOf(FORM_GROUND_PALETTE[form.ground], values);
+  const figures: MaterialUniforms = {};
+  const second = colours?.colors.split(',')[1];
+  if (second !== undefined)
+    for (const name of FORM_FIGURE_COLOURS[materialId] ?? []) figures[name] = second;
+  const ground =
+    form.ground === 'text'
+      ? 'the kit’s Text colour as the ground with light figures'
+      : 'the kit’s Background as the ground with Text figures';
+  return {
+    name: form.name,
+    label: form.label,
+    doc: `A form Paper made for this pattern, in your kit’s colours: ${ground}.`,
+    uniforms: {
+      ...(colours === undefined ? {} : palette(roles, colours)),
+      ...figures,
+      ...form.uniforms,
+    },
+  };
+}
+
+/** The form presets of a material over a shader palette, in Glyphfield's order. */
+export function formPresetsFor(
+  materialId: string,
+  roles: PaletteRoles,
+  values: ShaderPalette = LEGACY_SHADER_PALETTE,
+): MaterialPreset[] {
+  return (FORM_PRESETS[materialId] ?? []).map((form) =>
+    formPresetOf(materialId, form, roles, values),
+  );
+}
+
+/**
+ * True when the preset is one of the material's form presets: the Shader section lists them, the
+ * gallery's cards keep to the kit looks and the recorded ones.
+ */
+export function isFormPreset(materialId: string, name: string): boolean {
+  return (FORM_PRESETS[materialId] ?? []).some((form) => form.name === name);
+}
+
+/**
+ * The palette presets, then the entry's own, then its form presets; an own preset replaces a
+ * palette preset of the same name and keeps its place at the front so the tiles read the same.
+ * `values` is the deck's shader palette (5.7); the legacy palette without one.
  */
 export function presetsFor(
   materialId: string,
@@ -398,5 +468,8 @@ export function presetsFor(
     .map((preset) => own.find((candidate) => candidate.name === preset.name))
     .filter((preset): preset is MaterialPreset => preset !== undefined);
   const rest = own.filter((preset) => !replaced.includes(preset));
-  return [...replaced, ...base, ...rest];
+  const forms = formPresetsFor(materialId, roles, values).filter(
+    (preset) => !ownNames.has(preset.name),
+  );
+  return [...replaced, ...base, ...rest, ...forms];
 }

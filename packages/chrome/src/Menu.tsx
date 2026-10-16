@@ -6,11 +6,14 @@ import type {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { Icon } from './icons';
+/* the base glyphs alone (hardening HR-PC#2): the editor registers the whole set as it loads */
+import { Icon } from './icons-base';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
-import { shortcutLabel, ariaKeyShortcuts, tooltipKey } from './menus/keys.ts';
-import type { MenuContext, MenuItem } from './menus/model.ts';
+/* the chord labels and the context readers, without the menu table and the key tables behind
+   ./menus/model.ts and ./menus/keys.ts (hardening HR-PC#2): a page that draws a menu and no
+   editor loads neither */
+import { shortcutLabel, ariaKeyShortcuts, tooltipKey } from './menus/chords.ts';
 import {
   DIVIDER,
   isChecked,
@@ -19,7 +22,8 @@ import {
   resolveLabel,
   tooltipDoc,
   visibleItems,
-} from './menus/model.ts';
+} from './menus/context.ts';
+import type { MenuContext, MenuItem } from './menus/model.ts';
 import { openRoster } from './presence/roster-hook';
 import { noteMenuRowActivated } from './Dialog';
 import { pointAnchor } from './place';
@@ -230,7 +234,9 @@ function MenuList({
   const root = useRef<HTMLDivElement>(null);
   const rows = useRef(new Map<string, HTMLElement>());
   /* the plate in the popover layer (docs/DESIGN.md 2.3): a submenu opens after its parent, so it
-     sits over it with no `+ level`; placed and followed by place() (2.4) */
+     sits over it with no `+ level`; placed and followed by place() (2.4). The top list fades out
+     as it closes through its exit copy (Layer.ts, Menu.css); a submenu closes at once, so a walk
+     across the rows of a menu never stacks fading lists */
   const reference = useMenuAnchor(anchor);
   const gap = placement === 'below' ? BELOW_GAP : 0;
   usePlate(root, {
@@ -240,6 +246,7 @@ function MenuList({
     ...(align === undefined ? {} : { align }),
     gap,
     fit: true,
+    exit: level === 0,
   });
   /* the list stands at its anchor until the first placement, never hidden: a keyboard opened list
      focuses its first row and a pointer opened one focuses itself as it mounts, and a hidden

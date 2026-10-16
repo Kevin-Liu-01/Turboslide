@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 
-import { blurVerdictOf, isParkingField } from '../InlineText';
+import { blurVerdictOf, chromePlateOpen, isParkingField } from '../InlineText';
 
 // The menu bar and the menu plates as transient surfaces (docs/archive/rounds/RETURN.md 2.14 item 2): a blur
 // into a menu bar title or a menu row parks the session and leaves the focus with the menu for
@@ -54,5 +54,28 @@ describe('blurVerdictOf on the menu bar and a menu plate', () => {
     } finally {
       toolbar.remove();
     }
+  });
+});
+
+// A closed menu leaves an inert copy of itself while its exit fades (packages/chrome/src/Layer.ts,
+// the Glyphfield port, PLAN.md wave 2 item 7). The copy keeps the menu's classes for its look, and a
+// parked text session must still take the focus back after a menu pick while the copy fades.
+describe('chromePlateOpen and a menu exit copy', () => {
+  it('reads an open menu or right click menu as open and its exit copy as closed', () => {
+    const menu = document.createElement('div');
+    menu.className = 'ts-menu pt-float';
+    const context = document.createElement('div');
+    context.className = 'ts-menu pt-float ts-context-menu';
+    for (const each of [menu, context]) {
+      document.body.append(each);
+      try {
+        expect(chromePlateOpen(), each.className).toBe(true);
+        each.setAttribute('data-exiting', '');
+        expect(chromePlateOpen(), `${each.className} exit copy`).toBe(false);
+      } finally {
+        each.remove();
+      }
+    }
+    expect(chromePlateOpen()).toBe(false);
   });
 });

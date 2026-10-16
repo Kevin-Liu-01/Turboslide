@@ -740,7 +740,10 @@ export async function pushBundle(
     },
     body: body.body,
   });
-  if (!response.ok) throw refused(options.to, response, (await readError(response)).message);
+  if (!response.ok) {
+    const { message, body } = await readError(response);
+    throw refused(options.to, response, message, body?.code);
+  }
   const result = (await response.json()) as UnpackResult & { editUrl?: string };
   return { ...result, url: new URL(result.editUrl ?? `/edit/${result.deckId}`, origin).toString() };
 }
@@ -756,7 +759,10 @@ export async function pullBundle(
     headers: { ...authHeaders(options.token), accept: `${BUNDLE_MEDIA_TYPE}, application/json` },
     redirect: 'follow',
   });
-  if (!response.ok) throw refused(options.from, response, (await readError(response)).message);
+  if (!response.ok) {
+    const { message, body } = await readError(response);
+    throw refused(options.from, response, message, body?.code);
+  }
   const type = response.headers.get('content-type') ?? '';
   if (type.includes('application/json')) {
     throw new UsageError(

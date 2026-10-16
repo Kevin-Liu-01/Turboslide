@@ -120,6 +120,11 @@ export function memoryChannel(options: MemoryChannelOptions = {}): MemoryChannel
       return roomOf(deckId).head;
     },
 
+    async floor(deckId, seq): Promise<void> {
+      const room = roomOf(deckId);
+      if (Number.isInteger(seq) && seq > room.head) room.head = seq;
+    },
+
     subscribe(deckId, onEvent): () => void {
       const room = roomOf(deckId);
       room.listeners.add(onEvent);

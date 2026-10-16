@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { COLLAB_CLASSES, COLLAB_GEOMETRY } from '@turboslide/render/collab';
+import { SHEET_WIDTH } from '@turboslide/schema/render';
 import type { Box } from '@turboslide/schema/render';
 import type { EditorOverlayView } from '@turboslide/viewer/Editor';
 
@@ -37,8 +38,10 @@ import type { ViewerFacts } from './presence-model';
  * draws at offset 0), and the pointer as Turboslide's own 12 by 16 polygon moved by transform
  * over 80 ms with the flag at its side, drawn for every access level, hidden in present mode and
  * above the cap. The caret's offset arrives already placed in this tab's frame (the room client's
- * caret transform). An agent's outline is dashed ink with no hue. Everything is absolute inside
- * the overlay, so it moves nothing (05 rule 4).
+ * caret transform). An agent's outline is dashed ink with no hue, and an agent draws no pointer
+ * and no drag ghost; an agent whose view names a brand mark (docs/SITE.md D5) draws all three in
+ * its hue as a person does, its outline still dashed. Everything is absolute inside the overlay,
+ * so it moves nothing (05 rule 4).
  */
 export type RemoteCursorsProps = {
   view: EditorOverlayView;
@@ -54,6 +57,11 @@ export type RemoteCursorsProps = {
 
 /** How far inside the own ring the remote outline draws when both hold a block (3.5), in CSS px. */
 export const INSIDE_OUTLINE_PX = 2;
+
+/** An agent without a brand mark: dashed ink, no hue, no pointer, no drag ghost (D5). */
+function plainAgent(participant: PresenceParticipant): boolean {
+  return participant.trust === 'agent' && participant.brand === undefined;
+}
 
 /**
  * The flag's words on a drag ghost: R3's `PRESENCE.movingFlag(first)` and `movingLabel(name)`
@@ -77,6 +85,18 @@ const movingLabelText = (name: string): string => {
 
 function place(box: Box, k: number): CSSProperties {
   return { left: box[0] * k, top: box[1] * k, width: box[2] * k, height: box[3] * k };
+}
+
+/**
+ * The left of a pointer's flag from the pointer's tip, in CSS px: at the tip's right as
+ * COLLAB_GEOMETRY places it, or at its left when the flag would run past the sheet's right edge,
+ * so the name stays whole on a narrow stage (a phone's sheet is about 330 px wide, where a
+ * 120 px flag at the right of a pointer past the sheet's middle was cut by the stage).
+ */
+export function pointerFlagLeft(tipX: number, k: number): number {
+  const { flag, pointer } = COLLAB_GEOMETRY;
+  if (tipX + pointer.flagOffset.x + flag.width <= SHEET_WIDTH * k) return pointer.flagOffset.x;
+  return -flag.width - 2;
 }
 
 /** The box inset by `px` CSS pixels on every side, for the outline inside the own ring. */
@@ -113,14 +133,18 @@ export function Flag({
   state,
 }: FlagProps) {
   const hue = hueHexOf(participant.hue);
+  /* a branded agent's flag names the tool whole ("Claude Code"), never its first word (D5) */
+  const short = participant.brand !== undefined ? name : flagText(name, 'label');
   const text =
     more !== undefined
       ? PRESENCE.more(more)
       : word === undefined
-        ? flagText(name, participant.trust)
+        ? participant.brand !== undefined
+          ? name
+          : flagText(name, participant.trust)
         : word === MOVING_WORD
-          ? movingFlagText(flagText(name, 'label'))
-          : `${flagText(name, 'label')} · ${word}`;
+          ? movingFlagText(short)
+          : `${short} · ${word}`;
   const label =
     more !== undefined
       ? PRESENCE.more(more)
@@ -178,7 +202,7 @@ export function RemoteCursors({
   /* the drag ghosts: the box another person is moving or resizing, while their pointer is down */
   const ghosts = others.flatMap((each) => {
     const drag = dragOf(each);
-    if (drag === null || each.trust === 'agent') return [];
+    if (drag === null || plainAgent(each)) return [];
     const box: Box = [drag.x, drag.y, drag.w, drag.h];
     return [{ participant: each, blockId: drag.blockId, box }];
   });
@@ -253,7 +277,7 @@ export function RemoteCursors({
       {outlines.map(({ blockId, box, holders }) => {
         const first = holders[0]!;
         const agent = first.trust === 'agent';
-        const hue = agent ? null : hueHexOf(first.hue);
+        const hue = plainAgent(first) ? null : hueHexOf(first.hue);
         /* both hold the block: the own ring stays at the edge and the remote outline draws 2 px
            inside it in the holder's hue (docs/REALTIME.md 3.5; audit-people.md defect 5) */
         const inside = selfBlocks.has(blockId);
@@ -373,7 +397,7 @@ export function RemoteCursors({
       })}
       {drawPointers
         ? others.flatMap((each) => {
-            if (!each.pointer || each.trust === 'agent') return [];
+            if (!each.pointer || plainAgent(each)) return [];
             const hue = hueHexOf(each.hue);
             const x = each.pointer.x * k;
             const y = each.pointer.y * k;
@@ -403,7 +427,7 @@ export function RemoteCursors({
                 <Flag
                   participant={each}
                   name={displayNameFor(each, viewer)}
-                  x={pointerSize.flagOffset.x}
+                  x={pointerFlagLeft(x, k)}
                   y={pointerSize.flagOffset.y}
                   halo={halo}
                 />

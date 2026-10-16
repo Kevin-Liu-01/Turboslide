@@ -26,7 +26,7 @@
     },
     {
       "id": "shaders.frame.scrubber-capture",
-      "parks": ["formatOptions.shader.frame.scrubber", "formatOptions.shader.frame.capture"]
+      "parks": ["formatOptions.shader.still"]
     },
     {
       "id": "shaders.library.glyph-engines-render",

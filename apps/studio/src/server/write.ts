@@ -28,7 +28,7 @@ import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { MailMode } from './auth/mail/mailer';
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
-import { originsSince } from './origins';
+import { resyncReadSince } from './origins';
 import type { RecordOrigin } from './origins';
 import {
   createStoredDeck,
@@ -235,9 +235,17 @@ export type EditorDeck = {
   /**
    * The origins of the records above the caller's `since` (docs/archive/rounds/SYNC.md 3.2): present when the
    * read carried `since` (the room client's resync), oldest first, at most RESYNC_ORIGINS_MAX
-   * records considered; the client acknowledges every pending op named here at its `seq`
+   * records considered; the client acknowledges every pending op named here at its `seq`, the
+   * record's place in the tab's position space (the revision on the blob tier, `ops.toSeq` on
+   * the stream tiers; origins.ts `resyncReadSince`)
    */
   origins?: RecordOrigin[];
+  /**
+   * With `origins`: true when the records the read answers do not reach the caller's `since`, so
+   * a pending op posted before the resync cannot be told from a lost first attempt and goes back
+   * to its author (RELIABILITY-17; hardening HR-RT#15), on every tier
+   */
+  bounded?: boolean;
   leases: Lease[];
   /** the store this studio runs on, for the banner over a store whose edits do not persist */
   hosting: HostingFacts;
@@ -516,11 +524,16 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     }
     // the resync read's answer (docs/archive/rounds/SYNC.md 3.2): the origins of the records above the tab's
     // old position, off the mirror the reads above synced (no store call of its own), so the
-    // client drops every pending op a record already names instead of re-folding it
-    const origins =
+    // client drops every pending op a record already names instead of re-folding it, and
+    // `bounded` when those records do not reach the position, on every tier (HR-RT#15)
+    const resync =
       data.since === undefined
         ? undefined
-        : originsSince(await timed('records', () => deckRoom.store.records()), data.since);
+        : resyncReadSince(
+            await timed('records', () => deckRoom.store.records()),
+            data.since,
+            room.realtimeSelection().tier,
+          );
     const record = await timed('access-record', () => access.effectiveAccess(data.deckId));
     const standing = access.standingOf(decision, record);
     // the caller as the room resolves it (docs/archive/rounds/PEOPLE.md 3.6): the account behind a session or
@@ -575,7 +588,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       ok: read.ok,
       sprite: readSprite(),
       versions,
-      ...(origins === undefined ? {} : { origins }),
+      ...(resync === undefined ? {} : { origins: resync.origins, bounded: resync.bounded }),
       leases,
       hosting: hostingFacts(),
       assistMode: (await import('./assist')).assistMode(),

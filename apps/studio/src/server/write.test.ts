@@ -4,7 +4,7 @@ import type { Version } from '@turboslide/schema/mutations';
 
 import type { VersionRecord } from '@turboslide/store/store';
 
-import { RESYNC_ORIGINS_MAX, originsSince } from './origins';
+import { RESYNC_ORIGINS_MAX, resyncReadSince } from './origins';
 import { EDITOR_VERSIONS_KEPT, shapeByRole, trimVersionLog, withTrashStamp } from './write';
 import type { EditorDeck } from './write';
 
@@ -29,7 +29,12 @@ function version(n: number, mutationCount = 1): Version {
   };
 }
 
-describe('originsSince', () => {
+// the blob tier's reading of the resync read (`resyncReadSince` with tier `blob`): a tab's seq is
+// the revision there; the stream tiers' reading is resync-read.test.ts (hardening HR-RT#15)
+const originsSince = (log: VersionRecord[], since: number, max?: number) =>
+  resyncReadSince(log, since, 'blob', max).origins;
+
+describe('the resync read on the blob tier', () => {
   const record = (n: number, opIds?: string[]): VersionRecord => ({
     ...version(n),
     baseRevision: n - 1,

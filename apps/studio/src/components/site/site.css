@@ -637,6 +637,19 @@
   color: var(--pt-titanium);
 }
 
+/* from 1024 to 1279 px the run and the table split the columns evenly: five columns there are
+   narrower than the table's longest name, studio.invoke('slide.new', input), which made the
+   page 4 px too wide at 1024 */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .ts-site .site-agents > .site-term {
+    grid-column: 1 / span 6;
+  }
+
+  .ts-site .site-transports {
+    grid-column: 7 / span 6;
+  }
+}
+
 /* screen 03: the viewer and the slideshow keys */
 .ts-site .site-viewer-box {
   aspect-ratio: 2360 / 1784;

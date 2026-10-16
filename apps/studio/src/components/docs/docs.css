@@ -767,15 +767,18 @@
 
 /* the column scrolls on its own once its entries and tools run past the window (a reference
    page's 27 entries), so the page tools are a scroll away at any point of the page; the reader's
-   section stays in view (DocsArticle.tsx) */
+   section stays in view (DocsArticle.tsx). The scroll box clips at its padding edge, so it keeps
+   4 px of padding on every side for a page tool's focus ring (a 2 px outline 2 px off it), and
+   the negative margin, the top and the height 4 px larger keep the content where it was */
 .ts-docs .ts-docs-aside {
   grid-column: 2;
   grid-row: 1 / span 2;
   position: sticky;
-  top: calc(var(--site-bar-h) + 32px);
+  top: calc(var(--site-bar-h) + 28px);
   align-self: start;
-  max-height: calc(100vh - var(--site-bar-h) - 48px);
-  padding-bottom: 16px;
+  max-height: calc(100vh - var(--site-bar-h) - 44px);
+  margin: -4px -4px 0;
+  padding: 4px 4px 16px;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -1143,8 +1146,8 @@
     position: static;
     max-height: none;
     overflow: visible;
-    margin-top: 32px;
-    padding-bottom: 0;
+    margin: 32px 0 0;
+    padding: 0;
   }
 
   .ts-docs .ts-docs-toc {

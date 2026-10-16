@@ -85,4 +85,32 @@ describe("the docs' stylesheets", () => {
     expect(all.length).toBeGreaterThan(100);
     expect(all.filter((selector) => !/(?:^|\s)\.ts-docs(?=$|[\s.:[])/.test(selector))).toEqual([]);
   });
+
+  // post-merge review: the on this page column scrolls on its own, and a scroll box clips at its
+  // padding edge, so it cut the left side of the focus ring of Copy Page, View as Markdown and
+  // Report an issue, and the top of Copy Page's ring on a page with no entries (/docs/agents/skills).
+  it("keeps a page tool's focus ring inside the on this page column", () => {
+    const ring =
+      /\.ts-site :focus-visible \{\s*outline: (\d+)px solid [^;]+;\s*outline-offset: (\d+)px;/.exec(
+        readFileSync(join(SITE, 'site.css'), 'utf8'),
+      );
+    const reach = Number(ring?.[1]) + Number(ring?.[2]);
+    expect(reach).toBe(4);
+    const aside = /\n\.ts-docs \.ts-docs-aside \{([^}]*)\}/.exec(
+      readFileSync(join(DOCS, 'docs.css'), 'utf8'),
+    )?.[1];
+    expect(aside).toContain('overflow-y: auto;');
+    const sides = (name: string): [number, number, number, number] => {
+      const values = (new RegExp(`\\s${name}: ([^;]+);`).exec(aside ?? '')?.[1] ?? '')
+        .split(' ')
+        .map((value) => parseFloat(value));
+      const [top = 0, right = top, bottom = top, left = right] = values;
+      return [top, right, bottom, left];
+    };
+    const [top, right, , left] = sides('padding');
+    for (const side of [top, right, left]) expect(side).toBeGreaterThanOrEqual(reach);
+    /* the content stays where it was: each padding is given back by a negative margin */
+    const [mTop, mRight, , mLeft] = sides('margin');
+    expect([mTop, mRight, mLeft]).toEqual([-top, -right, -left]);
+  });
 });

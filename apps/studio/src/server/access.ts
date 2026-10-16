@@ -46,7 +46,7 @@ import { isDoChannel } from '@turboslide/realtime/do';
 import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
 import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
-import { isPendingEmailGrantFor } from '@turboslide/identity/access';
+import { capabilitiesForStanding, isPendingEmailGrantFor } from '@turboslide/identity/access';
 import { recordWithStandIns } from '@turboslide/identity/stand-in';
 import { agentPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
 import type { LinkGrant, Principal } from '@turboslide/identity/access';
@@ -835,10 +835,20 @@ export async function createWithFreshId<T>(
   }
 }
 
-/** The capabilities a role holds on a record (SPEC-3 6.2), as the editor and `share.get` list them. */
-export function capabilitiesOf(role: Role | null, record: AccessRecord): Capability[] {
+/**
+ * The capabilities a standing holds on a record (SPEC-3 6.2), as the editor and `share.get` list
+ * them: the role's cells, less the ones a link or the open mode never gives (`decide()`'s
+ * `NOT_BY_LINK`, through `capabilitiesForStanding`). Without `via` an edit link's holder read as
+ * a sharer: the whole record, every invitee's address among it, and real principal ids.
+ */
+export function capabilitiesOf(
+  role: Role | null,
+  record: AccessRecord,
+  via: Via | null,
+): Capability[] {
   if (role === null) return [];
-  return [...capabilitiesForRole(role, record.settings)];
+  if (via === null) return [...capabilitiesForRole(role, record.settings)];
+  return [...capabilitiesForStanding(role, via, record.settings)];
 }
 
 export type CallerStanding = { role: Role | null; via: Via | null; capabilities: Capability[] };
@@ -852,7 +862,7 @@ export function standingOf(
   return {
     role: decision.role,
     via: decision.via,
-    capabilities: capabilitiesOf(decision.role, record),
+    capabilities: capabilitiesOf(decision.role, record, decision.via),
   };
 }
 
@@ -1127,8 +1137,12 @@ export type ShareGetView = {
 
 export type ShareResult<T> = { ok: true; value: T } | { ok: false; status: number; body: unknown };
 
-/** True for a role that holds the `share` capability on the record: the owner, and an editor while editors may share. */
-export function sharesDeck(record: AccessRecord, role: Role | null): boolean {
+/**
+ * True for a standing that holds the `share` capability on the record: the owner, and an editor
+ * by a grant while editors may share. A link or the open mode never shares (`NOT_BY_LINK`).
+ */
+export function sharesDeck(record: AccessRecord, role: Role | null, via: Via | null): boolean {
+  if (via === 'link' || via === 'open') return false;
   return role === 'owner' || (role === 'editor' && record.settings.editorsCanShare);
 }
 
@@ -1157,8 +1171,9 @@ export function shapeRecordFor(
   record: AccessRecord,
   role: Role | null,
   principalId: string | null,
+  via: Via | null,
 ): ShareGetView['record'] {
-  if (sharesDeck(record, role)) return record;
+  if (sharesDeck(record, role, via)) return record;
   const reader = recordForReader(record, new Set(principalId === null ? [] : [principalId]));
   const own = reader.grants[0];
   return {
@@ -1253,7 +1268,7 @@ export async function shareGetFor(
   return {
     ok: true,
     value: {
-      record: shapeRecordFor(record, standing.role, identity.principalId),
+      record: shapeRecordFor(record, standing.role, identity.principalId, standing.via),
       role: standing.role,
       via: standing.via,
       capabilities: standing.capabilities,

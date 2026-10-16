@@ -454,9 +454,9 @@ export const RETENTION: readonly RetentionClass[] = [
   },
   {
     id: 'access-requests',
-    retention: '30 days pending, then expired with one notice',
-    mechanism: 'the access record',
-    where: 'packages/store/src/access-store.ts',
+    retention: '30 days pending, then expired: unlisted, unanswerable, asked again',
+    mechanism: 'the access record, read through isRequestPending',
+    where: 'packages/schema/src/access.ts',
   },
   {
     id: 'share-links',

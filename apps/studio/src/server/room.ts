@@ -1787,7 +1787,7 @@ export async function commentCallerFor(
   /* a key holds its owner's role cut to its scopes (09 2.1; `decide()` reads the cell the same
      way): `share`, which keeps the ids, with the share scope alone, and `remove`, which deletes
      another author's comment, with the admin scope alone (HR-SD#1d) */
-  const role = capabilitiesOf(decision.role, record);
+  const role = capabilitiesOf(decision.role, record, decision.via);
   const capabilities =
     decision.via === 'agent' && identity.ctx.agent !== undefined
       ? scopedCapabilities(new Set(role), identity.ctx.agent.scopes)
@@ -2952,7 +2952,7 @@ export async function viewerFacts(
   /* a reader who may not share reads every other principal's id as its stand-in (hardening
      HR-SD#1; the fix round after verifier pass 2, F2): the reader's own ids pass, and a record
      that did not answer shares nothing and holds no history */
-  const capabilities = record === null ? [] : capabilitiesOf(decision.role, record);
+  const capabilities = record === null ? [] : capabilitiesOf(decision.role, record, decision.via);
   const share = capabilities.includes('share');
   const floor = capabilities.includes('history') ? { floor: null } : floorOf(options.floor);
   const own = [ctx.principal?.id, ...(ctx.principal?.aliases ?? [])].filter(

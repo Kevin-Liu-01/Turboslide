@@ -33,7 +33,8 @@ async function authorizeMode(page: Page, deckId: string): Promise<'shadow' | 'en
 }
 const SOURCE = 'gt-brand';
 const COPY = `e2e-share-${Date.now().toString(36)}`;
-const FOOTER = 'Speaker notes and skipped slides never travel with a view or comment link';
+const FOOTER =
+  'Speaker notes never travel with a view or comment link, and skipped slides never travel with a view link';
 
 type Access = {
   revision: number;

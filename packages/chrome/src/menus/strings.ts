@@ -499,7 +499,8 @@ export const DIALOGS = {
       allowHtmlBlocks: 'Allow embedded HTML blocks in this shared presentation',
       downloadNote: 'A screenshot or the browser’s own print command cannot be stopped',
     },
-    footer: 'Speaker notes and skipped slides never travel with a view or comment link',
+    footer:
+      'Speaker notes never travel with a view or comment link, and skipped slides never travel with a view link',
     publishToWeb: 'Publish to the web',
     claim: 'This presentation has no owner yet. Claim it to decide who can open and edit it.',
     claimButton: 'Claim',

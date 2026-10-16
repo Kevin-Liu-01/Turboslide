@@ -50,6 +50,7 @@ import type { SlideRenderer } from './LayoutGrid';
 import { cn } from './lib/cn';
 import { PANELS, SNACKBARS } from './menus/strings';
 import { Panel } from './Panel';
+import { ColorPlate } from './pickers/ColorPlate';
 import { Select } from './Select';
 import { tipProps } from './Tooltip';
 
@@ -62,17 +63,20 @@ import './ThemesPanel.css';
  * a Position dropdown for the title slide's logo and one for the footer's), Colors (the six roles,
  * Text, Background, Captions, Hints, Primary, Accent, each a swatch and a hex field in the chosen
  * appearance; typing previews on the sheet through a transient stylesheet, Enter or blur
- * commits, Escape reverts), Fonts (Display and Text, each the Font dropdown), Footer (the logo
- * kind and the text), Slide numbers (Show, Format, Skip title slides), Frame (Rails, Rules,
- * Crosses with one sentence each), Words that never translate, and Reset to the deployment's
- * kit at the foot. Every control's write is one commit through the editor's `commit(mutations,
- * label)`, so the sheet, the filmstrip clones and every collaborator re render at once, Cmd+Z
- * takes one field back and Version history lists it as its own row ("Brand kit: Primary"); the
- * kit's slots draw from the record and take no drag this round (question 8). The renderer
- * arrives as a prop (the chrome package does not depend on @turboslide/render for the tiles).
+ * commits, Escape reverts; the swatch opens the colour plate's free field, which previews each
+ * draft the same way and writes on Apply, where a native colour well stood), Fonts (Display and
+ * Text, each the Font dropdown), Footer (the logo kind and the text), Slide numbers (Show,
+ * Format, Skip title slides), Frame (Rails, Rules, Crosses with one sentence each), Words that
+ * never translate, and Reset to the deployment's kit at the foot. Every control's write is one
+ * commit through the editor's `commit(mutations, label)`, so the sheet, the filmstrip clones and
+ * every collaborator re render at once, Cmd+Z takes one field back and Version history lists it
+ * as its own row ("Brand kit: Primary"); the kit's slots draw from the record and take no drag
+ * this round (question 8). The renderer arrives as a prop (the chrome package does not depend on
+ * @turboslide/render for the tiles).
  *
  * Ids (PRODUCT.md 7.1): `panel.brand`, `panel.brand.logo.*`, `panel.brand.color.<role>.swatch`
- * and `.hex`, `panel.brand.color.appearance.*`, `panel.brand.font.*`, `panel.brand.footer.*`,
+ * and `.hex`, the colour field's `panel.brand.color.<role>.field.*`,
+ * `panel.brand.color.appearance.*`, `panel.brand.font.*`, `panel.brand.footer.*`,
  * `panel.brand.counter.*`, `panel.brand.frame.*`, `panel.brand.lexicon`, `panel.brand.reset`.
  * The Appearance section keeps `panel.themes` on its wrapper for the rows written against it.
  */
@@ -425,6 +429,10 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
   }
   /* the hex being typed per role, so the swatch follows the field before Enter (item 49) */
   const [typedHex, setTypedHex] = useState<Partial<Record<KitColor, HexColor>>>({});
+  /* the role whose swatch has the colour field open, and the swatch it hangs from */
+  const [colorField, setColorField] = useState<{ role: KitColor; anchor: HTMLElement } | null>(
+    null,
+  );
   const fileInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   void render;
@@ -667,6 +675,19 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     );
   };
 
+  /* the colour field closes without a write: its draft leaves the swatch and the sheet */
+  const closeColorField = () => {
+    if (colorField === null) return;
+    const { role } = colorField;
+    setColorField(null);
+    setTypedHex((held) => {
+      const next = { ...held };
+      delete next[role];
+      return next;
+    });
+    clearPreview();
+  };
+
   const colorRow = (role: KitColor) => {
     const hex = roleHex(kit, colorAppearance, role, deck.theme);
     const own = kit?.colors?.[colorAppearance]?.[role] !== undefined;
@@ -684,33 +705,41 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     };
     return (
       <div key={role} className="ts-brand-color" data-role={role}>
-        <label
+        <button
+          type="button"
           className={cn('ts-brand-swatch', own && 'is-own')}
           style={{ background: shown }}
+          aria-label={meaning.name}
+          aria-haspopup="dialog"
+          aria-expanded={colorField?.role === role}
           data-control={`panel.brand.color.${role}.swatch`}
+          disabled={commit === undefined}
           {...tipProps({ name: meaning.name, doc: `${meaning.line}. ${shown}` })}
-        >
-          <input
-            type="color"
-            value={hex}
-            aria-label={meaning.name}
-            disabled={commit === undefined}
-            onInput={(event) =>
-              previewKit(
-                kit,
-                colorAppearance,
-                role,
-                (event.target as HTMLInputElement).value as HexColor,
-                deck.theme,
-              )
+          onClick={(event) => {
+            const anchor = event.currentTarget;
+            if (colorField?.role === role) closeColorField();
+            else {
+              if (colorField !== null) closeColorField();
+              setColorField({ role, anchor });
             }
-            onChange={(event) => {
-              const next = event.target.value.toLowerCase() as HexColor;
-              clearPreview();
-              if (next !== hex.toLowerCase()) void writeKit(pointer, next);
+          }}
+        />
+        {colorField?.role === role ? (
+          <ColorPlate
+            anchor={colorField.anchor}
+            label={meaning.name}
+            current={hex as HexColor}
+            control={`panel.brand.color.${role}.field`}
+            hexOnly
+            onPreview={preview}
+            onPick={(value) => {
+              closeColorField();
+              if (value !== 'none' && value.toLowerCase() !== hex.toLowerCase())
+                void writeKit(pointer, value.toLowerCase());
             }}
+            onClose={closeColorField}
           />
-        </label>
+        ) : null}
         <span className="ts-brand-role">{meaning.name}</span>
         <HexField
           role={role}

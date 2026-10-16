@@ -646,7 +646,27 @@ export const PICKERS = {
   },
   lineEnds: { grid: 'Line decorations', doc: 'None, an arrow, a circle, a square or a diamond' },
   dashes: { list: 'Dashes', doc: 'Solid, dot, dash, dash dot, long dash or long dash dot' },
-  colors: { plate: 'Colors', none: 'None', custom: 'Custom', hex: 'Six hex digits; Enter applies' },
+  colors: {
+    plate: 'Colors',
+    none: 'None',
+    custom: 'Custom',
+    hex: 'Six hex digits; Enter applies',
+    /* the free colour field under the swatches (the Glyphfield port, wave 2 item 6): the parts
+       change a draft and Apply or Enter writes it once; the button labels are Title Case */
+    area: 'Saturation and brightness',
+    areaDoc: 'Drag, or press the arrow keys; Shift moves ten times as far; Enter applies',
+    hue: 'Hue',
+    hueDoc: 'Drag, or press the arrow keys; Shift moves 10 degrees; Enter applies',
+    oklch: 'OKLCH',
+    oklchDoc: 'Lightness, chroma and hue, as 63% 0.258 29; Enter applies',
+    pickScreen: 'Pick Screen Color',
+    pickScreenDoc: 'Takes the color of any point on the screen; Escape cancels',
+    apply: 'Apply',
+    applyDoc: 'Uses the color the field shows',
+    /* the area's spoken value */
+    areaValue: (saturation: number, brightness: number) =>
+      `Saturation ${saturation}%, brightness ${brightness}%`,
+  },
   weights: { list: 'Weights', none: 'None', px: (weight: number) => `${weight} px` },
 } as const;
 

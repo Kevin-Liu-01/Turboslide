@@ -1080,7 +1080,15 @@ function pickerPaint(
         const name = id.startsWith('kit.') ? (ROLE[id.slice(4)] ?? '') : id;
         return { el, id, name };
       })
-      .filter(({ el, name }) => el.tagName === 'BUTTON' && name !== '' && !SEMANTIC.has(name))
+      /* the colour field's buttons (`<control>.custom.*`, the Glyphfield port's wave 2.6) are
+         no swatches */
+      .filter(
+        ({ el, id, name }) =>
+          el.tagName === 'BUTTON' &&
+          name !== '' &&
+          !SEMANTIC.has(name) &&
+          !id.startsWith('custom.'),
+      )
       .map(({ el, id, name }) => ({
         id,
         paint: hexOf(parse(getComputedStyle(el).backgroundColor), paper),

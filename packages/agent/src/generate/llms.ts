@@ -36,8 +36,10 @@ function discovery(): string[] {
     `- ${manifest.discovery.openapi}: the OpenAPI 3.1 contract of POST /api/actions/<id>`,
     `- ${manifest.discovery.mcp}: MCP over streamable HTTP; \`turboslide mcp\` is the same server over stdio`,
     `- ${manifest.discovery.llmsFull}: this guide with every action and every lint rule`,
-    '- skills/turboslide-{create,api,studio,verify}/SKILL.md: the four skills with their generated reference tables',
-    '- docs/grammar.md: the deck grammar (slide kinds, layouts, blocks, rules)',
+    /* site addresses, not checkout paths: this file is served at /llms.txt, where a repository path
+       answered 404 (post-deploy review); the skills themselves live in the public repository */
+    '- /docs/agents/skills.md: the four skills (turboslide-create, turboslide-api, turboslide-studio, turboslide-verify), with links to each SKILL.md and its generated reference tables',
+    '- /docs/agents/grammar.md: the deck grammar (slide kinds, layouts, blocks, rules)',
     '',
   ];
 }

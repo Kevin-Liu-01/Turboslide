@@ -10,8 +10,8 @@ Turboslide keeps a presentation as typed JSON (deck.json plus slides/<id>.json),
 - /openapi.json: the OpenAPI 3.1 contract of POST /api/actions/<id>
 - /mcp: MCP over streamable HTTP; `turboslide mcp` is the same server over stdio
 - /llms-full.txt: this guide with every action and every lint rule
-- skills/turboslide-{create,api,studio,verify}/SKILL.md: the four skills with their generated reference tables
-- docs/grammar.md: the deck grammar (slide kinds, layouts, blocks, rules)
+- /docs/agents/skills.md: the four skills (turboslide-create, turboslide-api, turboslide-studio, turboslide-verify), with links to each SKILL.md and its generated reference tables
+- /docs/agents/grammar.md: the deck grammar (slide kinds, layouts, blocks, rules)
 
 ## Rules
 

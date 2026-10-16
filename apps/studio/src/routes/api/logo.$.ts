@@ -17,16 +17,8 @@ import {
 } from '../../server/authorize';
 import { assertFlag } from '../../server/flags';
 import { refuseForeignOrigin } from '../../server/headers';
-import { isLogoSlug, isLogoVariantKey } from '../../server/logo-index';
-import {
-  LOGO_STORE_BUSY_MESSAGE,
-  LOGO_STORE_RETRY_AFTER_S,
-  LogoUpstreamError,
-  isLogoStoreBusy,
-  logoInsert,
-  logoService,
-  refreshCredential,
-} from '../../server/logos';
+// the logo index (4.2 MB of marks) and the service load inside the handlers, never with the
+// router chunk (hardening PS#8, PERF-6)
 import type { LogoInsertInput } from '../../server/logos';
 import { flushRoom, readJsonBody, refuseCrossSite, refuseNonJson } from '../../server/room';
 import type { RouteRefusal } from '../../server/room';
@@ -97,7 +89,9 @@ function notFound(message: string): Response {
  * the product's sentence and the action, so the dialog and an agent ask again instead of reading
  * a 500; null for every other error, which stays the caller's to answer.
  */
-function storeBusy(error: unknown, action: string): Response | null {
+async function storeBusy(error: unknown, action: string): Promise<Response | null> {
+  const { LOGO_STORE_BUSY_MESSAGE, LOGO_STORE_RETRY_AFTER_S, isLogoStoreBusy } =
+    await import('../../server/logos');
   if (!isLogoStoreBusy(error)) return null;
   return jsonResponse(
     {
@@ -158,12 +152,14 @@ async function serve(request: Request, splat: string): Promise<Response> {
 
 /** The tile route (4.7). */
 async function serveMark(request: Request, slug: string, variant: string): Promise<Response> {
+  const { logoService } = await import('../../server/logos');
+  const { isLogoSlug, isLogoVariantKey } = await import('../../server/logo-index');
   if (!isLogoSlug(slug) || !isLogoVariantKey(variant)) return notFound(LOGO_WORDS.unknown(slug));
   let answer;
   try {
     answer = await (await logoService()).mark(slug, variant);
   } catch (error) {
-    return storeBusy(error, 'logo.mark') ?? errorResponse(error, 'logo.mark');
+    return (await storeBusy(error, 'logo.mark')) ?? errorResponse(error, 'logo.mark');
   }
   if (!answer.ok) {
     return jsonResponse(
@@ -196,6 +192,7 @@ async function serveMark(request: Request, slug: string, variant: string): Promi
 
 /** The dialog's search (4.3): the `logo.search` input read from the query string, its answer as JSON. */
 async function serveSearch(request: Request): Promise<Response> {
+  const { logoService } = await import('../../server/logos');
   const url = new URL(request.url);
   const raw: Record<string, unknown> = {
     query: url.searchParams.get('q') ?? url.searchParams.get('query') ?? '',
@@ -231,7 +228,7 @@ async function serveSearch(request: Request): Promise<Response> {
     ).search(query, options, since === null || since === '' ? {} : { since });
     return jsonResponse(answer);
   } catch (error) {
-    return storeBusy(error, 'logo.search') ?? errorResponse(error, 'logo.search');
+    return (await storeBusy(error, 'logo.search')) ?? errorResponse(error, 'logo.search');
   }
 }
 
@@ -243,6 +240,7 @@ async function serveSearch(request: Request): Promise<Response> {
  * personal one) refuses the cron its vercel.json shares.
  */
 async function serveCronRefresh(request: Request): Promise<Response> {
+  const { logoService, refreshCredential } = await import('../../server/logos');
   if (refreshCredential(request) !== 'cron')
     return refuse(
       401,
@@ -253,12 +251,13 @@ async function serveCronRefresh(request: Request): Promise<Response> {
     const counts = await (await logoService()).refresh({ dryRun: false });
     return jsonResponse({ ...counts, credential: 'cron' });
   } catch (error) {
-    return storeBusy(error, 'logo.refresh') ?? errorResponse(error, 'logo.refresh');
+    return (await storeBusy(error, 'logo.refresh')) ?? errorResponse(error, 'logo.refresh');
   }
 }
 
 /** The refresh (4.2): two credentials, a dry run answers the counts with no fetch. */
 async function serveRefresh(request: Request): Promise<Response> {
+  const { logoService, refreshCredential } = await import('../../server/logos');
   const credential = refreshCredential(request);
   if (credential === null)
     return refuse(
@@ -280,7 +279,7 @@ async function serveRefresh(request: Request): Promise<Response> {
     const counts = await (await logoService()).refresh({ dryRun });
     return jsonResponse({ ...counts, credential });
   } catch (error) {
-    return storeBusy(error, 'logo.refresh') ?? errorResponse(error, 'logo.refresh');
+    return (await storeBusy(error, 'logo.refresh')) ?? errorResponse(error, 'logo.refresh');
   }
 }
 
@@ -290,6 +289,7 @@ async function serveRefresh(request: Request): Promise<Response> {
  * first; the handler over the deck's store with the dispatcher for the canvas conversion.
  */
 async function serveInsert(request: Request): Promise<Response> {
+  const { LogoUpstreamError, logoInsert, logoService } = await import('../../server/logos');
   const url = new URL(request.url);
   const deckId = url.searchParams.get('deck') ?? '';
   if (!SLUG_PATTERN.test(deckId))
@@ -364,6 +364,6 @@ async function serveInsert(request: Request): Promise<Response> {
         503,
         { 'retry-after': '60' },
       );
-    return storeBusy(error, 'logo.insert') ?? errorResponse(error, 'logo.insert');
+    return (await storeBusy(error, 'logo.insert')) ?? errorResponse(error, 'logo.insert');
   }
 }

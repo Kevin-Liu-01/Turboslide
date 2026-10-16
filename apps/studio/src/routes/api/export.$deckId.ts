@@ -22,15 +22,6 @@ import {
 } from '../../server/export-sync';
 import type { SyncExportInput } from '../../server/export-sync';
 import {
-  batchedJobFile,
-  isProducedFileName,
-  cancelBatchedExport,
-  exportBatch,
-  isJobId,
-  mergeExport,
-  startBatchedExport,
-} from '../../server/export-batch';
-import {
   authorize,
   carriesBootstrapToken,
   denialBody,
@@ -129,6 +120,9 @@ async function jobFile(
   saveAs: string | null,
 ): Promise<Response> {
   if (!/^[a-z0-9-]+$/.test(jobId)) return badRequest('job must be a job id');
+  // the export batch and the PPTX scene module it imports load with the first request that
+  // needs them, never with the router (hardening PS#8, PERF-6)
+  const { batchedJobFile, isProducedFileName } = await import('../../server/export-batch');
   if (!isProducedFileName(name)) return badRequest('file must be a name');
   if (saveAs !== null && !isProducedFileName(saveAs)) return badRequest('as must be a name');
   try {
@@ -241,6 +235,20 @@ async function batchedPost(
   const bodyBatch = fields.batch as BatchField;
   const bodyMerge = fields.merge as MergeField;
   const cancel = query('cancel');
+  const merge = query('merge') ?? bodyMerge?.jobId;
+  const batch = query('batch');
+  const job = query('job');
+  if (
+    cancel === null &&
+    merge === undefined &&
+    batch === null &&
+    bodyBatch === undefined &&
+    query('start') !== '1'
+  )
+    return null;
+  // the export batch loads with a batch request alone (hardening PS#8, PERF-6)
+  const { cancelBatchedExport, exportBatch, isJobId, mergeExport, startBatchedExport } =
+    await import('../../server/export-batch');
   if (cancel !== null) {
     if (!isJobId(cancel)) return badRequest('cancel must name a job id');
     try {
@@ -249,7 +257,6 @@ async function batchedPost(
       return batchError(error);
     }
   }
-  const merge = query('merge') ?? bodyMerge?.jobId;
   if (merge !== undefined) {
     if (!isJobId(merge)) return badRequest('merge must name a job id');
     try {
@@ -260,8 +267,6 @@ async function batchedPost(
       return batchError(error);
     }
   }
-  const batch = query('batch');
-  const job = query('job');
   if (batch !== null || bodyBatch !== undefined) {
     const index = batch !== null ? Number(batch) : bodyBatch?.index;
     const jobId = job ?? bodyBatch?.jobId;

@@ -33,6 +33,7 @@ import { JsonLd } from '../components/site/JsonLd';
 import { siteData } from '../components/site/structured-data';
 import { useMountEffect } from '../components/useMountEffect';
 import appCss from '../styles.css?url';
+import { ANALYTICS_BOOT_SCRIPT, isMeasuredPath, stopAnalytics } from './-analytics';
 import { RouterLinkSlot } from './-link-slot';
 
 // The document shell (SPEC 3.4): the theme boot script runs in the head before
@@ -312,11 +313,19 @@ function DevtoolsMount() {
 function RootDocument({ children }: { children: ReactNode }) {
   /* the request's CSP nonce (SPEC-3 8.8): the router carries it from the security headers middleware
      (router.tsx requestNonce); the browser hides the attribute once the script ran, so the hydration
-     compare is suppressed on these three elements */
-  const nonce = useRouter().options.ssr?.nonce;
+     compare is suppressed on these elements */
+  const router = useRouter();
+  const nonce = router.options.ssr?.nonce;
   const slideless = useRouterState({
     select: (state) => drawsNoSlide(state.matches.map((match) => match.routeId)),
   });
+  /* a client navigation away from the measured pages turns analytics off for the rest of the
+     document before the new route renders its title (-analytics.ts) */
+  useMountEffect(() =>
+    router.subscribe('onBeforeNavigate', ({ toLocation }) => {
+      if (!isMeasuredPath(toLocation.pathname)) stopAnalytics();
+    }),
+  );
   return (
     // the boot script stamps data-theme before hydration, so the attribute is expected to differ from the server's markup
     <html lang="en" suppressHydrationWarning>
@@ -338,6 +347,12 @@ function RootDocument({ children }: { children: ReactNode }) {
           nonce={nonce}
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: THEME_COLOR_BOOT_SCRIPT }}
+        />
+        {/* Google Analytics on the measured pages of production alone (-analytics.ts) */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: ANALYTICS_BOOT_SCRIPT }}
         />
         <JsonLd data={siteData(SITE.origin())} />
         {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same

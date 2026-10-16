@@ -457,6 +457,38 @@ describe('the global headers and the CSP (SPEC-3 8.8; report 04 8.3)', () => {
     ).toBeUndefined();
   });
 
+  it('admits Google Analytics: gtag.js, its collect requests and its pixel (routes/-analytics.ts)', () => {
+    const csp = buildCsp({
+      nonce: 'n0nce',
+      publicStoreHost: 'abc.public.blob.vercel-storage.com',
+      env: { TURBOSLIDE_ROOM_HOST: 'rooms.example.workers.dev' },
+    });
+    const directive = (name: string) =>
+      csp
+        .split('; ')
+        .find((entry) => entry.startsWith(`${name} `))
+        ?.split(' ')
+        .slice(1) ?? [];
+    expect(directive('script-src')).toContain('https://www.googletagmanager.com');
+    expect(directive('script-src')).toContain("'strict-dynamic'");
+    for (const host of [
+      'https://*.google-analytics.com',
+      'https://*.analytics.google.com',
+      'https://*.googletagmanager.com',
+    ]) {
+      expect(directive('connect-src'), host).toContain(host);
+    }
+    expect(directive('connect-src')).toContain('wss://rooms.example.workers.dev');
+    expect(directive('img-src')).toEqual([
+      "'self'",
+      'data:',
+      'blob:',
+      'https://abc.public.blob.vercel-storage.com',
+      'https://*.google-analytics.com',
+      'https://*.googletagmanager.com',
+    ]);
+  });
+
   it('enforces the policy on the document routes by default and report only elsewhere (HR-W#2)', () => {
     const headerOf = (path: string, env: Record<string, string> = {}) => {
       const headers = securityHeadersFor(path, { ...base, env });

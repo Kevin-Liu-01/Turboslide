@@ -364,6 +364,18 @@ export function cspMode(env: Env = process.env, pathname?: string): CspMode {
 export const CSP_REPORT_PATH = '/api/x/csp/report';
 
 /**
+ * Google Analytics 4 on the measured pages of production (routes/-analytics.ts): gtag.js from the
+ * tag host (a nonced script loads it, so `'strict-dynamic'` already admits it; the host is for a
+ * browser without `'strict-dynamic'`), its collect requests and its pixel fallback.
+ */
+export const ANALYTICS_SOURCES = {
+  script: ' https://www.googletagmanager.com',
+  connect:
+    ' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com',
+  img: ' https://*.google-analytics.com https://*.googletagmanager.com',
+} as const;
+
+/**
  * The policy of SPEC-3 8.8, nonce based because `__root.tsx` renders an inline boot script:
  * `'strict-dynamic'` lets the scripts the nonced ones load run; `style-src 'unsafe-inline'` stays
  * because the renderer emits inline style attributes on every block (the reason `img-src` and
@@ -401,11 +413,11 @@ export function buildCsp(options: CspOptions): string {
        on every page the router builds it for, and without the keyword every page posted a
        script-src report for it (docs/archive/rounds/POLISH.md item 112; the polish round's verifier read two to
        four reports per page) */
-    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic' 'wasm-unsafe-eval'`,
+    `script-src 'self' 'nonce-${options.nonce}' 'strict-dynamic' 'wasm-unsafe-eval'${ANALYTICS_SOURCES.script}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob:${store}`,
+    `img-src 'self' data: blob:${store}${ANALYTICS_SOURCES.img}`,
     "font-src 'self' data:",
-    `connect-src 'self'${connect}`,
+    `connect-src 'self'${connect}${ANALYTICS_SOURCES.connect}`,
     "worker-src 'self' blob:",
     "frame-src 'self'",
     "object-src 'none'",

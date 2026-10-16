@@ -332,8 +332,8 @@
 }
 
 /* inline code: no ground, never broken inside a token. Code of 24 characters or fewer
-   (`.is-short`, a flag such as `--deck <dir>`) stays on one line, and in longer code a word of 24
-   characters or fewer (`.ts-docs-keep`, mdx.tsx) stays whole */
+   (`.is-short`, a flag such as `--deck <dir>`) stays on one line, and in longer code a flag with
+   its value and a word of 24 characters or fewer (`.ts-docs-keep`, mdx.tsx) stay whole */
 .ts-docs .ts-docs-body-text :not(pre) > code {
   font-size: 0.875em;
   color: var(--pt-ink);
@@ -1233,12 +1233,18 @@
     font-size: 12px;
   }
 
-  /* a long line wraps under its own indent, the prompt hanging in the margin */
+  /* a long line wraps under its own indent, the prompt hanging in the margin, between the runs
+     mdx.tsx keeps whole (a flag with its value, a word of 24 characters or fewer): only a longer
+     word breaks where it must */
   .ts-docs .ts-docs-code .ts-docs-ln {
     padding-left: 2ch;
     text-indent: -2ch;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  .ts-docs .ts-docs-code .ts-docs-ln > .ts-docs-keep {
+    white-space: pre;
   }
 
   /* a figure with a phone cut takes its width and its leader's place */

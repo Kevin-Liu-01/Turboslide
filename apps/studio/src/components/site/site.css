@@ -2774,6 +2774,13 @@
   color: var(--pt-ink);
 }
 
+/* inline code never breaks inside a token (InlineCode.tsx): code of 24 characters or fewer stays
+   on one line, and in longer code a flag with its value and a short word stay whole */
+.ts-site :not(pre) > code.is-short,
+.ts-site :not(pre) > code > .site-keep {
+  white-space: nowrap;
+}
+
 /* a crop of the product at its native width at most, or a code panel */
 .ts-site .site-crop {
   margin: 0 0 40px;

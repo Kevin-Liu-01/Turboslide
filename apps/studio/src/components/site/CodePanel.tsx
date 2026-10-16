@@ -1,6 +1,9 @@
+import { codeRuns } from './code-runs';
+
 /**
  * A code panel of the site pages: commands on the #101010 panel of the landing's recorded run
- * (site.css `.site-term`), each line after a prompt, with the panel's label and a caption.
+ * (site.css `.site-term`), each line after a prompt, with the panel's label and a caption. A
+ * narrow panel wraps a line between its runs (code-runs.ts), so a flag stays with its value.
  */
 export function CodePanel({
   label,
@@ -24,7 +27,15 @@ export function CodePanel({
                 <span className="site-ps" aria-hidden="true">
                   ${' '}
                 </span>
-                {line}
+                {codeRuns(line).map((run, at) =>
+                  run.keep ? (
+                    <span key={at} className="site-nw">
+                      {run.text}
+                    </span>
+                  ) : (
+                    run.text
+                  ),
+                )}
               </span>
             ))}
           </code>

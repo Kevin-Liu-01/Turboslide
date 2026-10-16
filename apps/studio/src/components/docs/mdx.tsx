@@ -6,6 +6,7 @@ import { FIGURE_SIZES } from '../../docs/figures';
 import { calloutLabel, countsText, figureSource } from '../../docs/markdown';
 import type { CountsProps } from '../../docs/markdown';
 import type { DocsPage } from '../../docs/source';
+import { KEEP, codeRuns } from '../site/code-runs';
 import { Frame } from '../site/Frame';
 import { SiteIcon } from '../site/SiteIcon';
 import type { SiteIconName } from '../site/SiteIcon';
@@ -375,14 +376,13 @@ function Pre(props: ComponentProps<'pre'>) {
 
 /**
  * Inline code (docs.css): no ground, in the platform monospace. Code of 24 characters or fewer, a
- * flag such as `--deck <dir>`, stays on one line; in longer code each word of 24 characters or
- * fewer stays whole, so a line never ends after a flag's hyphens. A code block (its text ends in
- * a newline) is drawn one line to a block, so a narrow screen wraps a line under its own indent;
- * a shell line that is not the continuation of the line before it starts with the prompt, drawn
- * by docs.css and never copied.
+ * flag such as `--deck <dir>`, stays on one line; in longer code a flag stays with its value and
+ * each other word of 24 characters or fewer stays whole (`codeRuns`), so a line never ends after
+ * a flag's hyphens. A code block (its text ends in a newline) is drawn one line to a block, so a
+ * narrow screen wraps a line under its own indent, between the same runs; a shell line that is
+ * not the continuation of the line before it starts with the prompt, drawn by docs.css and never
+ * copied.
  */
-const KEEP = 24;
-
 function Code(props: ComponentProps<'code'>) {
   const text = props.children;
   if (typeof text !== 'string') return <code {...props} />;
@@ -397,7 +397,17 @@ function Code(props: ComponentProps<'code'>) {
             className="ts-docs-ln"
             {...(shell && !(lines[at - 1] ?? '').endsWith('\\') ? { 'data-prompt': '' } : {})}
           >
-            {line === '' ? '\u00a0' : line}
+            {line === ''
+              ? '\u00a0'
+              : codeRuns(line).map((run, i) =>
+                  run.keep ? (
+                    <span key={i} className="ts-docs-keep">
+                      {run.text}
+                    </span>
+                  ) : (
+                    run.text
+                  ),
+                )}
           </span>
         ))}
       </code>
@@ -407,13 +417,13 @@ function Code(props: ComponentProps<'code'>) {
     return <code {...props} className={`${props.className ?? ''} is-short`.trim()} />;
   return (
     <code {...props}>
-      {text.split(/(\s+)/).map((part, at) =>
-        part !== '' && part.length <= KEEP && !/\s/.test(part) ? (
+      {codeRuns(text).map((run, at) =>
+        run.keep ? (
           <span key={at} className="ts-docs-keep">
-            {part}
+            {run.text}
           </span>
         ) : (
-          part
+          run.text
         ),
       )}
     </code>

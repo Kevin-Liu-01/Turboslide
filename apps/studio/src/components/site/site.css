@@ -3609,34 +3609,34 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     letter-spacing: -0.028em;
   }
 
-  /* the line breaks after "people", so each orbit has the space after its letter; 24 px
+  /* the line breaks after "people", so each orbit has the space after its letter; 22 px
      avatars, the people on the right of the "e" between the lines above and below, the agents
-     over and after the "s" */
+     over and after the "s", so the h1 keeps the display step's 44 px lines (24 px avatars
+     needed 52 px lines, 24 px more height) */
   .ts-site .site-h1-br {
     display: inline;
   }
 
-  /* 52 px lines, so an orbit has room between a line and the next */
-  .ts-site .site-hero .t-display {
-    line-height: 52px;
-  }
-
   .ts-site .site-h1-word {
-    --s: 24px;
+    --s: 22px;
   }
 
+  /* the orbits orbit.ts finds at 390; the ring between letter and avatar is its 4 px floor here.
+     The people's fan has no room to open between the lines, so focus lifts without a fan */
   .ts-site .site-stack {
     --cx: -0.244em;
-    --mid: -6deg;
-    --rest: 33.2deg;
-    --open: 48deg;
+    --r: calc(0.27em + 4px + var(--s) / 2);
+    --mid: 1deg;
+    --rest: 30deg;
+    --open: 30deg;
     --prefer: 10;
   }
 
   .ts-site .site-stack[data-stack='agents'] {
     --cx: -0.217em;
-    --mid: 22.5deg;
-    --open: 45deg;
+    --mid: 26.5deg;
+    --rest: 31.6deg;
+    --open: 43deg;
     --prefer: 20;
   }
 

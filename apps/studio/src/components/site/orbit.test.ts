@@ -23,15 +23,15 @@ const DESKTOP: Box[] = [
 ];
 const DESKTOP_BOUNDS = box(-600, -110, 700, 46);
 
-/** The phone's "people" alone on its 52 px line, between "Presentations for" and "and agents". */
+/** The phone's "people" alone on its 44 px line, between "Presentations for" and "and agents". */
 const PHONE_E = box(-9, -10, 9, 10);
 const PHONE: Box[] = [
-  box(-89, -62, 167, -42), // "Presentations for", down to its baseline
+  box(-89, -54, 167, -34), // "Presentations for", down to its baseline
   box(-89, -18, -12, 10), // "peopl", up to the l
-  box(-89, 42, 79, 62), // "and agents" from its x-height
-  box(45, 38, 55, 62), // the t of "agents"
+  box(-89, 34, 79, 54), // "and agents" from its x-height
+  box(45, 30, 55, 54), // the t of "agents"
 ];
-const PHONE_BOUNDS = box(-89, -90, 269, 90);
+const PHONE_BOUNDS = box(-89, -82, 269, 82);
 
 function avatars(orbit: Orbit, n: number, step: number): { x: number; y: number }[] {
   return Array.from({ length: n }, (_, i) =>
@@ -106,7 +106,7 @@ describe('the orbit of a stack', () => {
       discs: [],
       bounds: PHONE_BOUNDS,
       n: 5,
-      s: 24,
+      s: 22,
       prefer: 10,
     };
     const orbit = orbitFor(input);

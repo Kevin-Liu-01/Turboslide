@@ -105,7 +105,7 @@ It takes no input.
 | --------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`      | string  | yes      | The deck id under decks/                                                                                                                                                           |
 | `to`      | string  | yes      | The studio, such as https://turboslide.vercel.app                                                                                                                                  |
-| `token`   | string  | no       | The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use                                                                 |
+| `token`   | string  | no       | The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use                                    |
 | `as`      | string  | no       | The id the deck takes on the studio; the local id when absent                                                                                                                      |
 | `replace` | boolean | no       | Replace the deck of that id on the studio                                                                                                                                          |
 | `fromUrl` | string  | no       | A bundle already stored at a URL the studio may read (the deck store Blob host); the studio fetches it instead of receiving the bytes, for bundles over a function 4.5 MB body cap |
@@ -120,13 +120,13 @@ It takes no input.
 
 **Pull deck from a studio.** Downloads a deck bundle from a hosted studio through GET /api/decks/\<id\>/bundle with the bearer token and unpacks it into decks/, so the deck can be edited locally (docs/deck-transfer.md).
 
-| Field     | Type    | Required | Description                                                                                                        |
-| --------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| `id`      | string  | yes      | The deck id on the studio                                                                                          |
-| `from`    | string  | yes      | The studio, such as https://turboslide.vercel.app                                                                  |
-| `token`   | string  | no       | The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use |
-| `as`      | string  | no       | The id the deck takes under decks/; the id on the studio when absent                                               |
-| `replace` | boolean | no       | Replace the local deck of that id                                                                                  |
+| Field     | Type    | Required | Description                                                                                                                                     |
+| --------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`      | string  | yes      | The deck id on the studio                                                                                                                       |
+| `from`    | string  | yes      | The studio, such as https://turboslide.vercel.app                                                                                               |
+| `token`   | string  | no       | The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use |
+| `as`      | string  | no       | The id the deck takes under decks/; the id on the studio when absent                                                                            |
+| `replace` | boolean | no       | Replace the local deck of that id                                                                                                               |
 
 - Command line: `turboslide deck pull <id> --from <from> --token <token> --as <as> --replace`
 - MCP tool: No MCP tool.

@@ -314,7 +314,7 @@ export function generateOpenApi(): JsonSchema {
           type: 'http',
           scheme: 'bearer',
           description:
-            'TURBOSLIDE_TOKEN of the deployment (SPEC 11). Required on every host but localhost; an instance without a token serves localhost only.',
+            "An API key from turboslide login, acting for its owner with its scopes; the deployment's TURBOSLIDE_TOKEN is the bootstrap bearer until a key exists. Required on every host but localhost; an instance without a token serves localhost only.",
         },
       },
     },

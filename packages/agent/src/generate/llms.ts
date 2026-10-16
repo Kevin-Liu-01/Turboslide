@@ -94,7 +94,7 @@ function rendersAndExports(): string[] {
     '- A hosted studio (a serverless function) runs every POST synchronously, ?sync=1 or not, and says so in X-Turboslide-Sync: hosted: a queued job would get CPU only while another request kept the instance busy, and its record lives on that instance alone. Send ?sync=1 so the request means the same everywhere.',
     "- In a checkout or against the Docker worker, a POST without ?sync=1 answers 202 with the job and a Location to poll: GET /api/export/<deckId>?job=<id> for the record (the ExportReport under report once done), GET without job for the deck's jobs.",
     '- A file over 4.5 MB cannot leave a function: with a Blob store the route answers 302 to /api/download/s.<token>, a link signed for the caller that expires in ten minutes (410 after, 403 to anyone else) and never the store address; without one it answers 413 with the JSON body; export one theme or a slide subset then.',
-    '- Auth: both routes require Authorization: Bearer <TURBOSLIDE_TOKEN> when the instance has the token set; without it they are open. The thumbnail variant (?w=) is answered only to a caller who can read the deck.',
+    "- Auth: both routes take Authorization: Bearer <key> when the instance has a token set: an API key from turboslide login, acting for its owner with its scopes (read for a render, export for an export), or the deployment's TURBOSLIDE_TOKEN; without a token set they are open. The thumbnail variant (?w=) is answered only to a caller who can read the deck.",
     '',
   ];
 }

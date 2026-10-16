@@ -10,11 +10,12 @@ import type { Theme } from '@turboslide/schema/render';
 
 import { boundPrincipal } from '../../server/auth/session';
 import { authorize, denialBody, requestContext } from '../../server/authorize';
-import type { Decision } from '../../server/authorize';
+import type { AuthContext, Decision } from '../../server/authorize';
 import { cardSlideOf, cardStanding } from '../../server/deck-card';
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
 import { scrubServerPaths, withoutServerPaths } from '../../server/paths-out';
+import { ROUTE_BEARER_REQUIRED, bearerKeyContext } from '../../server/route-caller';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import {
   CARD_THUMB_WIDTH,
@@ -56,7 +57,8 @@ import type { RenderGrantTarget } from '../../server/tokens';
 // the record as JSON.
 //
 // Authentication (SPEC 11): TURBOSLIDE_TOKEN, when set, is required as `Authorization: Bearer
-// <token>` for the full-size render and its JSON variant. The thumbnail variant (?w=) stays open
+// <token>`, or a live API key in its place (server/route-caller.ts), for the full-size render and
+// its JSON variant. The thumbnail variant (?w=) stays open
 // with the token set: the editor's sidebar embeds it as <img>, which carries no header, its result
 // is cached per revision on the instance, and the work it can start is bounded to the deck's slides
 // at three widths and two themes. Unset (a checkout), the whole route is open. The editor's own
@@ -89,19 +91,24 @@ function worker(): WorkerClient {
   return client;
 }
 
-/** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, except for thumbnails and a granted picture. */
-function unauthorized(request: Request, url: URL, granted: boolean): Response | null {
+/**
+ * The M2 rule of this route: a bearer when TURBOSLIDE_TOKEN is set, except for thumbnails and a
+ * granted picture. The bearer is the deployment's token or a live API key (`key`, the post-deploy
+ * review: /docs/agents/http documents this route for a key and it answered 401 to every one).
+ */
+function unauthorized(
+  request: Request,
+  url: URL,
+  granted: boolean,
+  key: AuthContext | null,
+): Response | null {
   const token = process.env.TURBOSLIDE_TOKEN;
   if (token === undefined || token === '') return null;
   if (url.searchParams.has('w')) return null;
-  if (granted) return null;
+  if (granted || key !== null) return null;
   const given = bearerToken(request);
   if (given !== undefined && safeEqual(given, token)) return null;
-  return refuse(
-    401,
-    'unauthorized',
-    'bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>',
-  );
+  return refuse(401, 'unauthorized', ROUTE_BEARER_REQUIRED);
 }
 
 /**
@@ -177,7 +184,8 @@ export const Route = createFileRoute('/api/render/$slideId')({
         const target = grantTargetOf(url, params.slideId);
         const granted =
           target !== null && verifyRenderGrant(target, url.searchParams.get(RENDER_GRANT_QUERY));
-        const denied = unauthorized(request, url, granted);
+        const key = granted ? null : await bearerKeyContext(request);
+        const denied = unauthorized(request, url, granted, key);
         if (denied) return denied;
         const deckId = url.searchParams.get('deck') ?? 'gt-brand';
         const slideId = params.slideId;
@@ -276,9 +284,10 @@ export const Route = createFileRoute('/api/render/$slideId')({
           (url.searchParams.get('format') === 'json' ||
             (request.headers.get('accept') ?? '').includes('application/json'));
         if (!granted) {
-          // the full size render: authorize(read) for the bearer or the cookie (SPEC-3 6.2); a
-          // grant was minted after that decision passed for the caller (server/render.ts)
-          const ctx = await requestContext(request);
+          // the full size render: authorize(read) for the API key, the bearer or the cookie
+          // (SPEC-3 6.2); a grant was minted after that decision passed for the caller
+          // (server/render.ts)
+          const ctx = key ?? (await requestContext(request));
           const decision = await authorize(ctx, deckId, 'read', {
             action: 'render.slide',
             transport: 'route',

@@ -1404,7 +1404,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .optional()
         .describe(
-          'The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use',
+          "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use",
         ),
       as: slugSchema
         .optional()
@@ -1442,7 +1442,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .string()
         .optional()
         .describe(
-          'The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use',
+          "The bearer: an API key from turboslide login, or the deployment's TURBOSLIDE_TOKEN; kept in ~/.config/turboslide/hosts.json after the first use",
         ),
       as: slugSchema
         .optional()

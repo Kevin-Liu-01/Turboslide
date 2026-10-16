@@ -9,11 +9,12 @@ import { authorize, contextForIdentity, denialBody, requestContext } from '../..
 import type { AuthContext } from '../../server/authorize';
 import {
   DOWNLOAD_PURPOSE,
-  bundleRouteAdmission,
+  bundleRouteAdmissionWithKey,
   exportDeckBundle,
   storeBundleCopy,
 } from '../../server/bundle-core';
 import { VERCEL_BODY_CAP, contentDisposition } from '../../server/export-sync';
+import { bearerKeyContext } from '../../server/route-caller';
 
 // GET /api/decks/:deckId/bundle (docs/deck-transfer.md): the deck as one bundle zip, packed from
 // the store (synced first, so the blob backend answers the current revision from any instance,
@@ -38,14 +39,21 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
       GET: async ({ params, request }) => {
         if (!SLUG_PATTERN.test(params.deckId))
           return refuse(400, 'invalid_input', 'deckId must be a slug');
-        const admission = bundleRouteAdmission(request, DOWNLOAD_PURPOSE, params.deckId);
+        const admission = await bundleRouteAdmissionWithKey(
+          request,
+          DOWNLOAD_PURPOSE,
+          params.deckId,
+          bearerKeyContext,
+        );
         if (admission instanceof Response) return admission;
         // a bundle carries the notes and every slide: `exportNotes` for the identity behind the
         // ticket or the request (gslides-parity SPEC-3 6.3, 8.2)
         const ctx: AuthContext =
           admission.kind === 'ticket'
             ? contextForIdentity(admission.identity)
-            : await requestContext(request);
+            : admission.kind === 'key'
+              ? admission.ctx
+              : await requestContext(request);
         const decision = await authorize(ctx, params.deckId, 'exportNotes', {
           action: 'deck.pack',
           transport: 'route',

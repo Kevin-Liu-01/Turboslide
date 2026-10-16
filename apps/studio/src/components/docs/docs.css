@@ -496,6 +496,63 @@
   margin: 24px 0;
 }
 
+/* a table wider than the column scrolls sideways (mdx.tsx: a focusable region named by its
+   columns): its edge fades over 32 px where more of the table is, on the left once it has
+   scrolled and on the right until its end, so a cut word reads as more to come. The scroll
+   timeline drives the two fades; a table that fits has no timeline and no fade, and a browser
+   without scroll timelines draws none */
+@property --ts-docs-fade-l {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --ts-docs-fade-r {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@supports (animation-timeline: scroll()) {
+  .ts-docs .ts-docs-table.pt-scroll-x {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--ts-docs-fade-l),
+      #000 calc(100% - var(--ts-docs-fade-r)),
+      transparent
+    );
+    animation: ts-docs-table-edges linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+
+@keyframes ts-docs-table-edges {
+  from {
+    --ts-docs-fade-l: 0px;
+    --ts-docs-fade-r: 32px;
+  }
+
+  4% {
+    --ts-docs-fade-l: 32px;
+  }
+
+  96% {
+    --ts-docs-fade-r: 32px;
+  }
+
+  to {
+    --ts-docs-fade-l: 32px;
+    --ts-docs-fade-r: 0px;
+  }
+}
+
+/* the keyboard's focus: the ring inside the region, the whole table unfaded under it */
+.ts-docs .ts-docs-table.pt-scroll-x:focus-visible {
+  outline-offset: -2px;
+  mask-image: none;
+}
+
 .ts-docs .ts-docs-table table {
   width: 100%;
   border-collapse: collapse;

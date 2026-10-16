@@ -430,9 +430,37 @@ function Code(props: ComponentProps<'code'>) {
   );
 }
 
+/** The words of a table's head cells, in order. */
+function headsOf(node: ReactNode): string[] {
+  return Children.toArray(node).flatMap((child) => {
+    if (!isValidElement<{ children?: ReactNode }>(child)) return [];
+    if (child.type === Th || child.type === 'th') return [textOf(child.props.children).trim()];
+    return headsOf(child.props.children);
+  });
+}
+
+/** The name of a table's scroll region: the columns it has ("Field, Type and Required"). */
+function tableLabel(heads: readonly string[]): string {
+  const named = heads.filter((head) => head !== '');
+  if (named.length === 0) return 'Table';
+  const last = named[named.length - 1];
+  const list = named.length === 1 ? last : `${named.slice(0, -1).join(', ')} and ${last}`;
+  return `Table with the columns ${list}`;
+}
+
+/**
+ * A table: a region that scrolls sideways when the table is wider than the column (a phone),
+ * reached by Tab and named by its columns, so the keyboard scrolls it too; docs.css fades the edge
+ * where more of the table is (`scroll(self inline)`), the cue that it scrolls.
+ */
 function Table(props: ComponentProps<'table'>) {
   return (
-    <div className="ts-docs-table pt-scroll-x">
+    <div
+      className="ts-docs-table pt-scroll-x"
+      role="region"
+      tabIndex={0}
+      aria-label={tableLabel(headsOf(props.children))}
+    >
       <table {...props} />
     </div>
   );

@@ -5,6 +5,12 @@ description: The parts of the editor window, what each menu holds, and where to 
 
 The editor opens at `/edit/<id>` for a presentation you own or can edit, and at `/new` for a new one. It has four areas: the title row and the menus at the top, the toolbar under them, the filmstrip on the left and the slide in the middle. Speaker notes sit under the slide.
 
+<Figure
+  name="editor-top"
+  alt="The top of the Turboslide editor: the title row with the presentation's name, the menus File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help, and the toolbar."
+  caption="The title row, the menus and the toolbar."
+/>
+
 ## The title row
 
 The title row shows the presentation's name. Click the name to rename it. On the right are the people who have the presentation open, Share and Slideshow.
@@ -64,9 +70,25 @@ The notes pane under the slide holds what you will say for that slide. Click whe
 
 Edit > Find and replace (Cmd+Shift+H, or Ctrl+H on Windows) finds text on every slide and in the speaker notes. Type the text to find and the text to put in its place. Next and Prev step through the matches, Replace changes the current one, and Replace all changes every match as one step that Undo reverses.
 
+## Assist
+
+Click **Assist** in the title row (Cmd+J) to open the assistant beside the slide. With a slide selected it offers Make it shorter and Write speaker notes, which ask the assistant, and Tailor for a customer, which opens a dialog and asks no one. You can also type a request about the slide.
+
+The assistant answers with a card that shows the text before and after, with the changed words marked. Nothing changes until you click Accept; the change is one step that Undo reverses. Dismiss drops the card. The assistant only changes the text and the speaker notes of the slide it was asked about.
+
+Commenters and editors can use it. Without an account it takes 20 requests a day unless the studio sets another number; signed in, 300. A studio whose admin turned it off shows "The assistant is off on this Turboslide".
+
 ## Version history
 
 Every change is saved as you make it, so there is no Save button. File > Version history > See version history (Cmd+Option+Shift+H) lists the saved versions with the time and the person who made each change. Click a version to see the presentation as it was, and click Restore this version to bring it back. File > Version history > Name current version gives the current version a name, so you can find it later.
+
+Version history is open to editors and the owner. An editor who may not share sees the other authors as stand-ins rather than their names; see [What other people see](/docs/sharing#what-other-people-see).
+
+## Saving offline and limits
+
+While the editor cannot reach the studio, your changes wait in this browser and are sent when it reconnects. The editor counts them, for example "3 unsaved changes from this browser". Up to 1 MB of changes can wait; past that the editor shows "Unsaved changes are full. Reconnect to save them." Changes that waited more than 24 hours come back as "Unsaved changes from Oct 7" with Copy Text and Discard, so you can copy their text instead of writing over newer work.
+
+A slide holds at most 200 kB. A change that would pass it is refused with "This slide would pass 200 kB. Split the text into another slide."
 
 ## Modes
 

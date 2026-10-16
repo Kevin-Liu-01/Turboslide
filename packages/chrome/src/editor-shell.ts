@@ -45,6 +45,8 @@ import type { Theme } from '@turboslide/viewer/theme';
 import { FEATURED_MATERIAL_IDS, requireMaterial } from '@turboslide/materials/catalog';
 import { shaderBlockOf } from '@turboslide/materials/shader-writes';
 
+import type { AgentBrand } from './presence/agent-marks';
+import type { EditorTabOnly } from './tab-only';
 import type { SlideRenderer } from './LayoutGrid';
 
 import type { EditorDispatch } from './dispatch';
@@ -272,6 +274,12 @@ export type IdentityView = {
    * two ids are one person to the label suffix and to the version panel's You (build/b5.md R9)
    */
   accountId?: string;
+  /**
+   * an agent's brand mark (presence/agent-marks.tsx; docs/SITE.md D5): the chip draws the mark in
+   * place of the agent field, and the presence layer draws the agent's hue, pointer and drag ghost
+   * as a person's. Only the landing's tab room writes one.
+   */
+  brand?: AgentBrand;
 };
 
 /**
@@ -868,6 +876,12 @@ export type EditorShellInput = {
   };
   /** navigation; window.location and window.open when absent */
   navigate?: (path: string, newTab?: boolean) => void;
+  /**
+   * The presentation lives in the browser tab alone (the landing's live editor; docs/SITE.md D10):
+   * the save cell reads `TAB_ONLY.words`, a dialog of `dialogs` says `sentence` with `action` in
+   * place of opening, and a snackbar that carries the sentence carries the action.
+   */
+  tabOnly?: EditorTabOnly;
   /** the deck.trash snackbar's Undo restored the deck (the route re-enables the editor) */
   onTrashed?: () => void;
   /* round three (SPEC-3 seams): every field optional until B2 wires the room client (day 4) */

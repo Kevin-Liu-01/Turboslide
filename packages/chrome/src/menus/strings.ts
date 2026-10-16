@@ -68,6 +68,19 @@ export const REFUSALS = {
 } as const;
 
 /**
+ * The words of an editor whose presentation lives in the browser tab alone (the landing's live
+ * editor, docs/SITE.md D10, C.7): the save cell's phrase and its sentence, and the one sentence a
+ * feature that needs the server answers, with the snackbar's button.
+ */
+export const TAB_ONLY = {
+  words: 'In this tab only',
+  doc: 'Changes stay in this browser tab and are gone when it closes',
+  /* one line of the snackbar (its 560 px, ellipsis past it), the button beside it says the rest */
+  sentence: 'This presentation lives only in this tab.',
+  action: 'New Presentation',
+} as const;
+
+/**
  * The presence surfaces (SPEC-3 4.2 to 4.9, 15): the roster, the chips, the flags, the Following
  * plate and the announcements. Names are text everywhere (7.2); the trust word beside a typed
  * name is "guest" (15, Kevin's list keeps "visitor" as the alternative).

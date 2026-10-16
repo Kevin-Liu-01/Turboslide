@@ -107,17 +107,15 @@ import type { PresentHost } from '../components/presentActions';
 import { Slideshow } from '../components/Slideshow';
 import { showStageSize } from '../components/show-stage';
 import { useMountEffect } from '../components/useMountEffect';
-import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../server/bundle';
-import { listDecks, readSourceDeckSlides, restoreStoredDeck } from '../server/decks';
-import { exportCapabilities } from '../server/download';
 import { rememberLinkUrl } from '@turboslide/chrome/dialogs/share-links';
-import { DECK_CREATED_EVENT, holdDraft } from '../server/write';
 import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
 import { RouterLinkSlot } from '../routes/-link-slot';
 import { readRecent, recordDeckOpened, updateDeckFacts } from '../routes/-recent';
 import type { DeckOpenFacts } from '../routes/-recent';
+import { editorBackend } from './backend';
+import type { EditorBackend } from './backend';
+import { DECK_CREATED_EVENT } from './backend-server';
 import {
-  ASSET_BASE,
   createEditorController,
   errorMessage,
   identityView,
@@ -155,8 +153,8 @@ import '../routes/edit.$deckId.css';
 
 /** How long one listing of the store stands in for the next one (EditorRoot listDecks). */
 export const DECK_LIST_TTL_MS = 20_000;
-let deckListCache: { at: number; rows: Promise<Awaited<ReturnType<typeof listDecks>>> } | null =
-  null;
+type DeckListing = Awaited<ReturnType<EditorBackend['listDecks']>>;
+let deckListCache: { at: number; rows: Promise<DeckListing> } | null = null;
 /**
  * The store's listing, one in flight at a time and reused for DECK_LIST_TTL_MS: the File menu's
  * open warms it and the Open and Import slides dialogs read the same promise, so a dialog opened
@@ -180,11 +178,11 @@ function recentDeckRows(): DeckHeadRow[] {
   }));
 }
 
-function listDecksCached(): Promise<Awaited<ReturnType<typeof listDecks>>> {
+function listDecksCached(): Promise<DeckListing> {
   const now = Date.now();
   if (deckListCache !== null && now - deckListCache.at < DECK_LIST_TTL_MS)
     return deckListCache.rows;
-  const rows = listDecks();
+  const rows = editorBackend().listDecks();
   deckListCache = { at: now, rows };
   rows.catch(() => {
     if (deckListCache?.rows === rows) deckListCache = null;
@@ -265,38 +263,6 @@ function bodyOfInput(body: CommentBodyInput): CommentBody {
         : { kind: 'invite' as const, inviteId: id },
     ),
   };
-}
-
-/**
- * One call of better-auth's routes (SPEC-3 7.3; B3's `/api/auth/$`): the magic link mail with
- * its six digit code, the code exchange, sign out and the social redirects (GitHub, Google). Same
- * origin, JSON, the
- * library's own cookies; a refusal's sentence is the dialog's error row.
- */
-async function authPost(path: string, body: unknown): Promise<unknown> {
-  const response = await fetch(`/api/auth/${path}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-    credentials: 'same-origin',
-  });
-  if (!response.ok) {
-    let message = `Sign in did not complete (${response.status})`;
-    try {
-      const data = (await response.json()) as {
-        message?: string;
-        error?: { message?: string } | string;
-      };
-      message =
-        data.message ??
-        (typeof data.error === 'string' ? data.error : data.error?.message) ??
-        message;
-    } catch {
-      // no body
-    }
-    throw new Error(message);
-  }
-  return response.json().catch(() => null);
 }
 
 /** The address the sign in mail's link and the social callbacks return to: this deck, no token. */
@@ -464,7 +430,7 @@ function regionOf(target: EventTarget | null): FocusRegion | null {
  * server function, the zip as the body; answers the new deck's id.
  */
 async function uploadBundleFile(file: File): Promise<{ id: string }> {
-  const ticket = await bundleUploadTicket();
+  const ticket = await editorBackend().bundleUploadTicket();
   if (file.size > ticket.maxBytes) {
     throw new Error(
       `${file.name} is ${file.size} bytes; a bundle is at most ${ticket.maxBytes} bytes`,
@@ -508,6 +474,8 @@ type EditorRootProps = {
   author: Author;
   onSearch: (patch: Partial<EditSearch>) => void;
   onDeckCreated: (deckId: string) => void;
+  /** the controller once made, for a route that drives the editor beside the person (/try's runner) */
+  onController?: (controller: EditorController) => void;
 };
 
 /**
@@ -536,8 +504,17 @@ function openFactsOf(document: EditorDeck['document']): DeckOpenFacts {
 /** The Slideshow arrow of the title row (TitleRow.tsx): a pointer over it preloads the presenter route. */
 const PRESENT_ARROW = '[data-control="present.arrow"]';
 
-export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: EditorRootProps) {
+export function EditorRoot({
+  payload,
+  search,
+  author,
+  onSearch,
+  onDeckCreated,
+  onController,
+}: EditorRootProps) {
   const router = useRouter();
+  /* the document's backend (backend.ts): the server's on /new and /edit, the tab's on /try */
+  const backend = editorBackend();
   const [controller] = useState(() =>
     createEditorController({
       deckId: payload.deckId,
@@ -547,6 +524,10 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       ...(search.comment !== undefined ? { initialThread: search.comment } : {}),
     }),
   );
+  /* the controller React kept (a development render makes the initializer's work twice) */
+  useLayoutEffect(() => {
+    onController?.(controller);
+  }, [controller, onController]);
   const [capabilities, setCapabilities] = useState<ExportCapabilities | null>(null);
   /* View > Mode for an editor (SPEC-3 5.3): Editing or Commenting; Viewing is the `?edit=0` flag */
   const [chosenMode, setChosenMode] = useState<'editing' | 'commenting'>('editing');
@@ -588,8 +569,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     if (document.title !== next) document.title = next;
     /* the mirror's card reads the new name too (docs/archive/rounds/POLISH.md item 76): a rename in the title
        field or through File > Rename reaches /decks before the listing catches up */
-    if (!draft) updateDeckFacts(snap.deckId, { title: deckTitle });
-  }, [deckTitle, draft, snap.deckId]);
+    if (!draft && backend.recordsRecent) updateDeckFacts(snap.deckId, { title: deckTitle });
+  }, [deckTitle, draft, snap.deckId, backend]);
   /* the caret's marks and range inside a run (the toolbar's pressed state and Format options' Text
      colour), reported by the stage; a state so the shell re-reads the selection facts on change */
   const [caret, setCaret] = useState<CaretInfo | null>(null);
@@ -624,12 +605,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     const stopBridge = installThemeBridge();
     // a draft stays the same draft while this editor holds it (server/write.ts holdDraft): the
     // loader of /new reruns on every search change and would otherwise mint another
-    const releaseDraft = payload.draft === true ? holdDraft(payload.deckId) : () => undefined;
+    const releaseDraft =
+      payload.draft === true ? backend.holdDraft(payload.deckId) : () => undefined;
     // a /new document Chrome prerenders from /home's speculation rules (gslides-parity SPEC-4
     // 0.42) renders but must not attach: the room stream starts when the page is shown
     // (prerenderingchange); a document that is not prerendering starts at once
     const stopWaiting = whenShown(() => controller.start());
-    if (payload.draft !== true) recordDeckOpened(payload.deckId, openFactsOf(payload.document));
+    if (payload.draft !== true && backend.recordsRecent)
+      recordDeckOpened(payload.deckId, openFactsOf(payload.document));
     // the presenter's chunk and loader are in the cache before window.open (SPEC-4 0.36; PP 3.7):
     // the arrow is the chrome's, so the pointer is read at the document and the route preloaded
     // once per page
@@ -644,13 +627,15 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         .catch(() => undefined);
     };
     document.addEventListener('pointerover', onPointerOver, { passive: true });
-    exportCapabilities()
+    backend
+      .exportCapabilities()
       .then((caps) => {
         controller.setExportSync(caps.sync, caps.batchSize);
         setCapabilities(caps);
       })
       .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
-    connectFacts()
+    backend
+      .connectFacts()
       .then((facts) => setTokenRequired(facts.tokenRequired))
       .catch(() => undefined);
     /* the first write of a draft created the deck: the save words change and Recent counts it */
@@ -666,10 +651,11 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           detail.link.id,
           `${window.location.origin}/s/${detail.link.token}`,
         );
-      recordDeckOpened(detail.deckId, {
-        ...openFactsOf(controller.getSnapshot().document),
-        revision: detail.revision,
-      });
+      if (backend.recordsRecent)
+        recordDeckOpened(detail.deckId, {
+          ...openFactsOf(controller.getSnapshot().document),
+          revision: detail.revision,
+        });
     };
     window.addEventListener(DECK_CREATED_EVENT, onCreated);
     /* which region has focus (the menus, the toolbar and the dialogs leave it as it was) */
@@ -730,7 +716,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   );
   const { deck } = snap.document;
   const deckId = snap.deckId;
-  const assetBase = ASSET_BASE(deckId);
+  const assetBase = backend.assetBase(deckId);
   const slide = snap.document.slides[snap.activeSlide];
   /* the revision every chrome write bases on: the one the controller reports and checks against
      (`reportedRevision`, SPEC-3 3.10), never the document's alone. On the blob tier an ops POST
@@ -1046,16 +1032,18 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
      before the hand off rejects, and the sign in window says it under the provider's row
      (docs/POLISH-2.md 4.3) */
   const socialSignIn = (provider: 'github' | 'google'): Promise<void> =>
-    authPost('sign-in/social', {
-      provider,
-      callbackURL: signInReturnAddress(),
-      errorCallbackURL: signInErrorAddress(),
-    }).then((answer) => {
-      const url = (answer as { url?: string } | null)?.url;
-      /* the window says a refusal under the provider's row (the plate's request-failed line) */
-      if (typeof url !== 'string') throw new Error('Sign in did not complete.');
-      window.location.assign(url);
-    });
+    backend
+      .authPost('sign-in/social', {
+        provider,
+        callbackURL: signInReturnAddress(),
+        errorCallbackURL: signInErrorAddress(),
+      })
+      .then((answer) => {
+        const url = (answer as { url?: string } | null)?.url;
+        /* the window says a refusal under the provider's row (the plate's request-failed line) */
+        if (typeof url !== 'string') throw new Error('Sign in did not complete.');
+        window.location.assign(url);
+      });
   const account: EditorAccount = {
     principal,
     signedIn: payload.identity?.kind === 'account',
@@ -1092,13 +1080,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     ...(auth?.email === true
       ? {
           requestCode: (email) =>
-            authPost('sign-in/magic-link', {
+            backend.authPost('sign-in/magic-link', {
               email,
               callbackURL: signInReturnAddress(),
               errorCallbackURL: signInErrorAddress(),
             }),
           verifyCode: async (email, code) => {
-            await authPost('sign-in/email-otp', { email, otp: code });
+            await backend.authPost('sign-in/email-otp', { email, otp: code });
             window.location.reload();
           },
         }
@@ -1124,7 +1112,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
                 if (current === undefined) throw new RangeError('no current session');
                 await controller.invoke('account.signOut', { sessionId: current });
               } catch {
-                await authPost('sign-out', {});
+                await backend.authPost('sign-out', {});
               }
               window.location.reload();
               return null;
@@ -1382,14 +1370,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
 
   const scopeAttr = { [SCOPE_ATTRIBUTE]: `editor:${deckId}` };
 
-  /* navigation for the menu's route effects and the dialogs: a new tab, or a full load of another route */
-  const go = (path: string, newTab?: boolean): void => {
-    if (newTab) {
-      window.open(path, '_blank', 'noopener');
-      return;
-    }
-    window.location.assign(path);
-  };
+  /* navigation for the menu's route effects and the dialogs: a new tab, or a full load of another
+     route, in the window the backend names (the page around /try's frame) */
+  const go = (path: string, newTab?: boolean): void => backend.openPage(path, newTab);
 
   /* the Slideshow button's host (SPEC 9.1): the play list's first slide, goto and present as actions */
   const presentHost: PresentHost = {
@@ -1433,7 +1416,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       /* the bundle is saved from the page's own fetch of the ticket url (controller.tsx
          triggerDownload): a refused ticket rejects with the server's sentence and the shell says
          it instead of "The bundle is at" */
-      return bundleDownloadTicket({ deckId }).then(async ({ url }) => {
+      return backend.bundleDownloadTicket({ deckId }).then(async ({ url }) => {
         const saved = await triggerDownload(url);
         return { path: saved?.name ?? `${deckId}.zip`, url, name: saved?.name };
       });
@@ -1905,7 +1888,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
        dialogs draw them at once and fold them in above the listing after */
     recentDecks: recentDeckRows,
     readDeck: async (id) => {
-      const read = await readSourceDeckSlides({ deckId: id });
+      const read = await backend.readSourceDeckSlides({ deckId: id });
       if (read === null) throw new RangeError(`No presentation named ${id}`);
       return read;
     },
@@ -1936,9 +1919,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     present: {
       start: (fromBeginning) =>
         startSlideshow(presentHost, { from: fromBeginning ? 'beginning' : 'current' }),
-      presenterView: () => presenterView(presentHost),
+      /* Presenter view reads the presentation from the server in a second window (D10) */
+      presenterView: () =>
+        backend.tabOnly === undefined
+          ? presenterView(presentHost)
+          : controller.say(backend.tabOnly.sentence),
     },
     navigate: go,
+    ...(backend.tabOnly === undefined ? {} : { tabOnly: backend.tabOnly }),
     onTrashed: () => {
       void controller.reload();
     },
@@ -2203,7 +2191,7 @@ function EditorStage({
             theme={deckAppearance(snap.document.deck)}
             /* Tools > Preferences > Link detection reaches the stage (docs/archive/rounds/POLISH.md item 114) */
             linkDetection={editorShell.settings.linkDetection !== false}
-            assetBase={ASSET_BASE(snap.deckId)}
+            assetBase={editorBackend().assetBase(snap.deckId)}
             stageSize={stageSize}
             index={Math.max(0, shell.index)}
             total={shell.total}
@@ -2309,7 +2297,7 @@ function EditorStage({
             deckAppearance(snap.document.deck),
             bandAssetResolver(
               snap.document.deck,
-              (_id, _theme, path) => ASSET_BASE(snap.deckId) + path,
+              (_id, _theme, path) => editorBackend().assetBase(snap.deckId) + path,
             ),
           )}
         />
@@ -2434,7 +2422,8 @@ function TrashedBanner({ deckId, controller }: { deckId: string; controller: Edi
         {...tipProps({ name: HOME.restore, doc: 'Takes the presentation out of the trash' })}
         onClick={() => {
           setBusy(true);
-          restoreStoredDeck({ deckId })
+          editorBackend()
+            .restoreStoredDeck({ deckId })
             .then(() => controller.reload())
             .catch((error: unknown) => controller.say(errorMessage(error)))
             .finally(() => setBusy(false));

@@ -8,37 +8,45 @@ Every action has an HTTP endpoint: `POST /api/actions/<id>`. The body is the act
 ```sh
 curl -X POST "https://www.turboslide.com/api/actions/slide.list?deck=<id>" \
   -H "authorization: Bearer <token>" \
-  -H "x-turboslide-author: agent:my-run" \
   -H "content-type: application/json" \
   -d '{}'
 ```
 
 ## The request
 
-| Part         | What to send                                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------ |
-| Presentation | `?deck=<id>` names the presentation.                                                                               |
-| Author       | The `x-turboslide-author: agent:<runId>` header, or `?author=`. Without it the write is recorded as `agent:http`.  |
-| Force        | `?force=1` writes to a slide another author has leased. Without it, that write is refused with 409 and the holder. |
-| Token        | `Authorization: Bearer <token>` on a hosted studio. On localhost the routes answer without one.                    |
-| Size         | At most 1 MB per write and 25 MB per picture.                                                                      |
+| Part         | What to send                                                                                                                                                          |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Presentation | `?deck=<id>` names the presentation.                                                                                                                                  |
+| Token        | `Authorization: Bearer <key>` on a hosted studio, with an API key from `turboslide login`. On localhost the routes answer without one.                                |
+| Author       | Every write is recorded under the key's owner as `agent:<tokenId>`. The `x-turboslide-author` header and `?author=` only label the run; they never change the author. |
+| Force        | `?force=1` writes to a slide another author has leased. Without it, that write is refused with 409 and the holder.                                                    |
+| Size         | At most 1 MB per request body.                                                                                                                                        |
+
+A key's scopes limit what it may do: `read`, `comment`, `write`, `export`, `share` and `admin`. A key without the `share` scope reads other people's ids as stand-ins (`ref_` and 22 characters). The [account reference](/docs/reference/account) lists the key actions.
+
+A picture can be up to 25 MB without an account and 50 MB signed in. A hosted studio refuses SVG, re-encodes every picture, and flattens an animated GIF to its first frame; HEIF and JXL are refused everywhere.
 
 `GET /api/actions/<id>` returns the action's contract: the input and output JSON Schema, the transports and whether this studio runs it. `/openapi.json` is the OpenAPI 3.1 document of every endpoint, and `/api/agent` describes the studio.
 
 ## Errors
 
-An error answers with `{ "error": { "name", "status", "message", "code", "pointer", "currentRevision", "current", "holder" } }`; only the fields that apply are present.
+An action's error answers with `{ "error": { "name", "status", "message", "code", "pointer", "currentRevision", "current", "holder", "capability" } }`; only the fields that apply are present.
 
-| Status | Means                                                                                                                      |
-| ------ | -------------------------------------------------------------------------------------------------------------------------- |
-| 400    | The input is wrong. `code` and `pointer` name the field.                                                                   |
-| 401    | No token, or a token this studio does not accept.                                                                          |
-| 404    | No such presentation, slide or object.                                                                                     |
-| 409    | The presentation changed since `baseRevision`, or another author holds the slide. The answer carries the current document. |
-| 501    | This studio does not run the action.                                                                                       |
+| Status | Means                                                                                                                       |
+| ------ | --------------------------------------------------------------------------------------------------------------------------- |
+| 400    | The input is wrong. `code` and `pointer` name the field.                                                                    |
+| 401    | No key, or a key this studio does not accept.                                                                               |
+| 403    | The key may read the presentation but not do this. `capability` names what is missing.                                      |
+| 404    | No such presentation, slide or object, or a presentation the key may not read. The two answer the same.                     |
+| 409    | The presentation changed since `baseRevision`, or another author holds the slide. The answer carries the current document.  |
+| 410    | A revoked publish link, or a download address that expired.                                                                 |
+| 429    | A quota is used up. The body is `{ "error": "rate_limited", "message", "quota" }` and `Retry-After` says when to try again. |
+| 501    | This studio does not run the action.                                                                                        |
+| 503    | The admin turned the feature off. The body is `{ "error": "unavailable", "message" }` with `Retry-After: 60`.               |
 
 ## Renders and downloads
 
-- `GET /api/render/<slideId>?deck=<id>&theme=light&scale=1` answers the slide as a PNG. `?format=json` answers the render record instead.
+- `GET /api/render/<slideId>?deck=<id>&theme=light&scale=1` answers the slide as a PNG. `?format=json` answers the render record instead. A full size render needs the bearer.
+- `GET /api/render/<slideId>?deck=<id>&w=320` answers a thumbnail 160, 320 or 640 pixels wide to anyone who can open the presentation.
 - `POST /api/export/<id>?sync=1` with the `export.run` input answers the file. Send `?sync=1` every time: a hosted studio always works that way.
-- A file over 4.5 MB cannot be returned directly. The studio answers 302 to a stored copy when it has a Blob store, or 413; export one theme or fewer slides then.
+- A file over 4.5 MB cannot be returned directly. On a studio with a Blob store the answer is 302 to `/api/download/s.<token>`, an address signed for the caller that works for ten minutes and answers 410 after; without a Blob store it is 413, so export one theme or fewer slides.

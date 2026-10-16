@@ -11,6 +11,7 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
 import { STATIC_HEADERS, prerenderNonce, staticPageCsp } from './src/server/headers.ts';
+import { buildDefine } from './src/server/build-commit';
 
 // Deployment build: `pnpm --filter @turboslide/studio build:deploy`. Nitro picks the target from
 // NITRO_PRESET: node-server (default), vercel (apps/studio/vercel.json; docs/hosting.md), bun
@@ -272,6 +273,10 @@ const ROUTE_RULES = {
      the node server otherwise answered with the /home/** rule's year (h3 matches the page itself) */
   '/home': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   '/home/': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  /* the site pages of the pages step, prerendered as /home is */
+  '/features': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/faq': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
+  '/about': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   '/docs': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   '/docs/**': { headers: { 'cache-control': PAGE, ...STATIC_HEADERS } },
   ...DOCS_TWIN_RULES,
@@ -300,7 +305,13 @@ const ROUTE_RULES = {
 const HOME_ROUTE = fileURLToPath(new URL('./src/routes/home.tsx', import.meta.url));
 const PRERENDER = existsSync(HOME_ROUTE)
   ? {
-      pages: [{ path: '/home' }, ...DOCS_PRERENDER],
+      pages: [
+        { path: '/home' },
+        { path: '/features' },
+        { path: '/faq' },
+        { path: '/about' },
+        ...DOCS_PRERENDER,
+      ],
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: false,
@@ -333,7 +344,9 @@ const PRERENDER = existsSync(HOME_ROUTE)
 // over the answer's. One nonce for every visitor is safe on these pages alone: they hold no deck
 // content and nothing of a person.
 const PRERENDER_NONCE = prerenderNonce();
-const STATIC_PAGES = existsSync(HOME_ROUTE) ? ['/home', ...DOCS.map(({ page }) => page)] : [];
+const STATIC_PAGES = existsSync(HOME_ROUTE)
+  ? ['/home', '/features', '/faq', '/about', ...DOCS.map(({ page }) => page)]
+  : [];
 const VERCEL_OUTPUT = fileURLToPath(new URL('./.vercel/output/', import.meta.url));
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -398,12 +411,6 @@ const VENDOR_TEST = new RegExp(
     /.*node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/](?!server|cjs[\\/]react-dom-server)/
       .source,
 );
-// The landing's shared modules (polish two, request P2-N-2): the copy, the facts, the generated
-// assets and timings that /home's route and its live bands both import, in one chunk, so /home's
-// document names one preload for them where it named one per module (seven links, about 0.8 KB of
-// its 100,000 B line). Only the landing imports them (components/home and its live/ folder).
-const HOME_SHARED_TEST =
-  /apps[\\/]studio[\\/]src[\\/]components[\\/]home[\\/](?:copy|facts|facts-data|assets|deck\.generated|design-copy|sprite\.generated|people-timing|chrome\.generated)\.ts$/;
 // Hidden source maps for the client chunks, opt in (the focus round, cycle 3 stream fix round's
 // fix round; VERIFICATION C2-F18): `TURBOSLIDE_CLIENT_SOURCEMAP=1` writes a `.map` beside every
 // chunk with no `sourceMappingURL` comment, so the served bytes are the same and
@@ -426,15 +433,6 @@ const CLIENT_BUILD = {
         codeSplitting: {
           groups: [
             { name: 'vendor', test: VENDOR_TEST, priority: 10 },
-            /* the landing's own modules alone, not the modules they import (the brand's site
-               facts, which every route's head reads): with their dependencies the chunk joined
-               the root graph once the vendor group stopped holding the app (hardening HR-PC#2) */
-            {
-              name: 'home-shared',
-              test: HOME_SHARED_TEST,
-              priority: 5,
-              includeDependenciesRecursively: false,
-            },
             /* the app's part of the graph every route loads (the root route, the router, each
                route file's options and what they import) in one chunk beside `vendor`, where
                the bundler would otherwise cut it into a chunk per module the lazy routes share
@@ -464,6 +462,8 @@ const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  /* the build's commit for the site footer (components/site/build.ts) */
+  define: buildDefine(),
   environments: { client: CLIENT_BUILD },
   plugins: [
     externalServerOnly(),

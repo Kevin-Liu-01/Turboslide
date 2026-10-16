@@ -4,10 +4,13 @@ import { Suspense, lazy, useRef, useState } from 'react';
 import { Icon } from '@turboslide/chrome/icons-base';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 
+import { SiteIcon } from '../site/SiteIcon';
+
 const CopyPageMenu = lazy(() => import('./CopyPageMenu'));
 
 /**
- * Copy Page (docs/POLISH-2.md 5.6, 5.7): a split button in the page's header. The button writes
+ * Copy Page (docs/POLISH-2.md 5.6, 5.7): a split button at the head of the page tools (the on this
+ * page column, or under the article below 1280 px; docs/SITE.md section 6), with its solid icon. The button writes
  * the page's markdown twin to the clipboard through a `ClipboardItem` that holds the pending
  * fetch, so Safari accepts the write inside the click (General Translation's DocsPageActions.tsx
  * 145 to 155); the chevron opens the menu of the agents' addresses, a chunk loaded on its first
@@ -46,7 +49,7 @@ export function CopyPage({ twin, reference }: { twin: string; reference: boolean
         onClick={() => void copy()}
         {...tipProps({ name: 'Copy Page', doc: 'Copies this page as markdown for an agent.' })}
       >
-        <Icon name="clipboard" />
+        <SiteIcon name="clipboard-document" />
         <span className="ts-docs-swap" data-state={state}>
           <span className="is-idle">Copy Page</span>
           <span className="is-copied">Copied</span>

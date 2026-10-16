@@ -40,8 +40,8 @@ packages/native/wasm/
 apps/realtime-worker/worker-configuration.d.ts
 
 # The landing's fixture deck (docs/LANDING.md 6.1): the deck folder and the CLI's recordings under
-# recorded/ are the bytes the build's sha256 covers (scripts/build-home-assets.ts --check), written
-# in the CLI's own JSON form, which the formatter must never reflow
+# recorded/, written in the CLI's own JSON form, which the formatter must never reflow; screen 02 of
+# /home prints the recorded run (components/site/run.test.ts reads recorded/run.json)
 apps/studio/home-deck
 
 # The previous release's validator, bundled from git by packages/schema/scripts/pin-previous-validator.mjs

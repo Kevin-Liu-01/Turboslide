@@ -9,7 +9,11 @@ import { isCoreId } from './matrix';
 // The docs at /docs (docs/POLISH-2.md 5, 6.5): the `help.docs.*` rows of lane D. A row's test is
 // declared once its id is in the matrix (each push of the lane enters its own rows), so the file
 // carries every row's driver from the first push. The pages are read from the site itself: the
-// search index lists every page in the sidebar's order, which the rows walk.
+// search index lists every page in the sidebar's order, which the rows walk. Since the site build
+// (docs/SITE.md section 6) the docs draw the Workbench reference: the site's 56 px bar, the
+// navigation, the article and the on this page column, numbered sections, figures and the compact
+// footer; help.docs.page reads that layout, and the site build's docs step adds the sections,
+// figures, footer and nav-weight rows.
 //
 // The scrollbar reading needs the bars drawn: Playwright's Chromium runs with `--hide-scrollbars`,
 // so the page row launches one Chromium of its own without that switch (the shape of
@@ -114,13 +118,13 @@ async function settled(page: Page): Promise<void> {
 /** The facts of one docs view that the page row judges. */
 type View = {
   bar: number;
-  rails: boolean;
   lockup: boolean;
   documentation: boolean;
   searchPill: { visible: boolean; width: number; label: boolean };
   theme: boolean;
   newPresentation: boolean;
-  pagesButton: boolean;
+  side: boolean;
+  contents: boolean;
   groups: string[];
   current: string | null;
   h1: string;
@@ -129,7 +133,10 @@ type View = {
   article: number;
   toc: boolean;
   tocItems: number;
+  /** the page tools sit beside the article (the on this page column) or under it */
+  toolsBeside: boolean;
   pager: { previous: boolean; next: boolean };
+  footer: boolean;
   radii: { name: string; radius: string }[];
   shadows: string[];
   scrollbar: number;
@@ -154,18 +161,19 @@ async function viewOf(page: Page): Promise<View> {
     const radii: { name: string; radius: string }[] = [];
     const add = (name: string, selector: string): void => {
       const element = document.querySelector(selector);
-      if (element !== null) radii.push({ name, radius: radius(element) });
+      if (element !== null && shown(element)) radii.push({ name, radius: radius(element) });
     };
     add('button 6', '[data-control="docs.copyPage"]');
-    add('search pill 6', '[data-control="docs.search.open"]');
+    add('search 6', '[data-control="docs.search.open"]');
     add('new 6', '[data-control="docs.bar.new"]');
-    add('tab 6', '.ts-docs-tablist .pt-ib');
-    add('code 8', '.ts-docs-code');
-    add('callout 8', '.ts-docs-callout');
-    add('card 8', '.ts-docs-card');
-    add('pager 8', '.ts-docs-pager-link');
-    add('step 4', '.ts-docs-step-n');
+    add('code-copy 4', '.ts-docs-code-copy');
     add('key 4', '.ts-docs kbd.pt-kbd');
+    add('code 0', '.ts-docs-code');
+    add('callout 0', '.ts-docs-callout');
+    add('index 0', '.ts-docs-index-row');
+    add('figure 0', '.ts-docs-fig-frame');
+    add('pager 0', '.ts-docs-pager-link');
+    add('tab 0', '.ts-docs-tab');
     add('row 0', '.ts-docs-nav-link');
     add('toc 0', '.ts-docs-toc a');
     /* a shadow with an offset or a blur, anywhere in the page */
@@ -186,34 +194,40 @@ async function viewOf(page: Page): Promise<View> {
     const groups = [
       ...document.querySelectorAll('[data-control="docs.nav"] .ts-docs-nav-label'),
     ].map((label) => label.textContent?.trim() ?? '');
-    const current = q('[data-control="docs.nav"] [aria-current="page"]');
+    const current = q('[data-control="docs.nav"] [aria-current="page"] .ts-docs-nav-name');
     const side = q('.ts-docs-side');
+    const tools = q('[data-control="docs.tools"]');
+    const article = q('.ts-docs-article');
     return {
-      bar: q('.ts-page-frame-row')?.getBoundingClientRect().height ?? 0,
-      rails: q('.ts-docs .ts-rails') !== null,
-      lockup: shown(q('.ts-docs .ts-brand-lockup')),
+      bar: q('.ts-docs .site-bar-row')?.getBoundingClientRect().height ?? 0,
+      lockup: shown(q('.ts-docs .site-bar .site-lockup')),
       documentation: shown(q('[data-control="docs.bar.documentation"]')),
       searchPill: {
         visible: shown(pill),
         width: pill?.getBoundingClientRect().width ?? 0,
-        label:
-          shown(q('.ts-docs-search-label.is-long')) || shown(q('.ts-docs-search-label.is-short')),
+        label: shown(q('.ts-docs-search-label')),
       },
       theme: shown(q('.ts-docs [data-control="view.theme"]')),
       newPresentation: shown(q('[data-control="docs.bar.new"]')),
-      pagesButton: shown(q('[data-control="docs.menu"]')),
+      side: shown(side),
+      contents: shown(q('[data-control="docs.contents"]')),
       groups,
       current: current?.textContent?.trim() ?? null,
       h1: q('.ts-docs-title')?.textContent?.trim() ?? '',
       lead: q('.ts-docs-lead')?.textContent?.trim() ?? '',
       copyPage: shown(q('[data-control="docs.copyPage"]')),
-      article: q('.ts-docs-article')?.getBoundingClientRect().width ?? 0,
+      article: article?.getBoundingClientRect().width ?? 0,
       toc: shown(q('[data-control="docs.toc"]')),
       tocItems: document.querySelectorAll('[data-control="docs.toc"] li').length,
+      toolsBeside:
+        tools !== null &&
+        article !== null &&
+        tools.getBoundingClientRect().left > article.getBoundingClientRect().right,
       pager: {
         previous: shown(q('[data-control="docs.previous"]')),
         next: shown(q('[data-control="docs.next"]')),
       },
+      footer: shown(q('[data-control="site.foot.lockup"]')),
       radii,
       shadows,
       scrollbar: window.innerWidth - document.documentElement.clientWidth,
@@ -240,6 +254,11 @@ const RADIUS_WANT: Record<string, string> = {
   '0': '0px',
 };
 
+/**
+ * The Workbench reference's widths (docs/SITE.md section 6): the on this page column from 1280 px,
+ * the navigation beside the page from 1024 px (the Contents disclosure under it), the search field
+ * with its words from 1024 px (a 32 px button under it), New Presentation in the bar over 720 px.
+ */
 function judgeView(
   view: View,
   width: number,
@@ -248,43 +267,43 @@ function judgeView(
   last: boolean,
 ): string[] {
   const faults: string[] = [];
-  if (Math.round(view.bar) !== 58) faults.push(`bar ${view.bar} px`);
-  if (!view.rails) faults.push('no rails');
+  if (Math.round(view.bar) !== 56) faults.push(`bar ${view.bar} px`);
   if (!view.lockup) faults.push('no lockup');
   if (!view.theme) faults.push('no theme button');
-  if (width >= 720) {
-    if (!view.documentation) faults.push('no Documentation in the bar');
-    if (!view.searchPill.visible || !view.searchPill.label) faults.push('no search pill');
-    if (!view.newPresentation) faults.push('no New Presentation');
-    if (view.pagesButton) faults.push('a Pages button at 720 px and over');
+  if (!view.documentation) faults.push('no Documentation in the bar');
+  if (!view.searchPill.visible) faults.push('no search');
+  if (width >= 1024) {
+    if (!view.searchPill.label || Math.round(view.searchPill.width) !== 288)
+      faults.push(`the search field is ${view.searchPill.width} px`);
+    if (!view.side || view.contents) faults.push('no navigation beside the page');
     if (JSON.stringify(view.groups) !== JSON.stringify(GROUPS))
       faults.push(`groups ${JSON.stringify(view.groups)}`);
-    if (view.current === null) faults.push('no current page in the sidebar');
+    if (view.current === null) faults.push('no current page in the navigation');
   } else {
-    if (view.documentation) faults.push('Documentation in the bar under 720 px');
-    if (
-      !view.searchPill.visible ||
-      Math.round(view.searchPill.width) !== 32 ||
-      view.searchPill.label
-    )
-      faults.push(`search is not an icon button (${view.searchPill.width} px)`);
-    if (!view.pagesButton) faults.push('no Pages button');
+    if (view.searchPill.label || Math.round(view.searchPill.width) !== 32)
+      faults.push(`search is not a 32 px button (${view.searchPill.width} px)`);
+    if (view.side || !view.contents) faults.push('no Contents disclosure under 1024 px');
   }
+  if (width > 720 && !view.newPresentation) faults.push('no New Presentation');
+  if (width <= 720 && view.newPresentation) faults.push('New Presentation in the bar on a phone');
   if (view.h1 === '' || !sentenceCase(view.h1)) faults.push(`title "${view.h1}"`);
   if (view.lead === '') faults.push('no description');
   if (!view.copyPage) faults.push('no Copy Page');
-  if (view.article > 640.5) faults.push(`article ${view.article} px`);
-  if (width >= 1180 && view.tocItems > 0 && !view.toc) faults.push('no table of contents');
-  if (width < 1180 && view.toc) faults.push('a table of contents under 1180 px');
+  if (view.article > 720.5) faults.push(`article ${view.article} px`);
+  if (width >= 1280 && view.tocItems > 0 && !view.toc) faults.push('no on this page column');
+  if (width < 1280 && view.toc) faults.push('an on this page column under 1280 px');
+  if (width >= 1280 && !view.toolsBeside) faults.push('the page tools are not beside the article');
+  if (width < 1280 && view.toolsBeside) faults.push('the page tools are beside the article');
   if (!first && !view.pager.previous) faults.push('no Previous');
   if (!last && !view.pager.next) faults.push('no Next');
+  if (!view.footer) faults.push('no footer');
   for (const { name, radius } of view.radii) {
     const want = RADIUS_WANT[name.split(' ')[1] ?? ''];
     if (want !== undefined && radius !== want)
       faults.push(`${name.split(' ')[0]} corner ${radius}`);
   }
   if (view.shadows.length > 0) faults.push(`shadows ${view.shadows.slice(0, 3).join('; ')}`);
-  if (!view.sideScroll) faults.push('the sidebar is not .pt-scroll');
+  if (!view.sideScroll) faults.push('the navigation is not .pt-scroll');
   if (view.overflow > 0) faults.push(`the document is ${view.overflow} px wider than the window`);
   if (view.brokenCode.length > 0) faults.push(`code over two lines: ${view.brokenCode.join(', ')}`);
   return faults.map((fault) => `${url} at ${width}: ${fault}`);
@@ -330,26 +349,33 @@ row('help.docs.page', async () => {
             );
         }
       }
-      if (width < 720) {
-        /* the Pages button opens the sidebar as a sheet; Escape closes it */
-        await page.locator('[data-control="docs.menu"]').click();
-        const sheet = page.locator('[data-control="docs.sheet"]');
-        await expect(sheet).toBeVisible();
-        const sheetFacts = await sheet.evaluate((element) => ({
-          radius: getComputedStyle(element).borderTopLeftRadius,
-          links: element.querySelectorAll('a').length,
-          layer: element.closest('[data-layer]')?.getAttribute('data-layer') ?? null,
+      if (width < 1024) {
+        /* the Contents disclosure opens the navigation in place, marks the page and closes when a
+           page is chosen from it */
+        const contents = page.locator('[data-control="docs.contents"]');
+        await contents.locator('summary').click();
+        const nav = page.locator('[data-control="docs.contents.nav"]');
+        await expect(nav).toBeVisible();
+        const facts = await nav.evaluate((element) => ({
+          groups: [...element.querySelectorAll('.ts-docs-nav-label')].map(
+            (label) => label.textContent?.trim() ?? '',
+          ),
+          current: element.querySelector('[aria-current="page"]')?.textContent?.trim() ?? null,
+          scrim: document.querySelector('.ts-docs-scrim') !== null,
         }));
-        if (sheetFacts.radius !== '8px') faults.push(`the sheet's corner ${sheetFacts.radius}`);
-        if (sheetFacts.links < pages.length)
-          faults.push(`the sheet lists ${sheetFacts.links} pages`);
-        if (sheetFacts.layer !== 'dialog') faults.push(`the sheet's layer ${sheetFacts.layer}`);
-        await page.keyboard.press('Escape');
-        await expect(sheet).toBeHidden();
+        if (JSON.stringify(facts.groups) !== JSON.stringify(GROUPS))
+          faults.push(`the Contents groups ${JSON.stringify(facts.groups)}`);
+        if (facts.current === null) faults.push('the Contents marks no page');
+        if (facts.scrim) faults.push('the Contents draws a scrim');
+        await nav.locator('a[href="/docs/themes"]').click();
+        await page.waitForURL((address) => address.pathname === '/docs/themes', {
+          timeout: 60_000,
+        });
+        await expect(nav).toBeHidden();
       }
     }
-  /* no page scrolls sideways at 320 and 768 either (1440 and 390 are read above) */
-  for (const width of [320, 768]) {
+  /* no page scrolls sideways at 320, 768 and 1024 either (1440 and 390 are read above) */
+  for (const width of [320, 768, 1024]) {
     const page = await open(width, 'light');
     await page.goto(pages[0]?.url ?? '/docs');
     await hydrated(page);
@@ -376,6 +402,238 @@ row('help.docs.page', async () => {
   await expect(miss.locator('[data-control="docs.miss"]')).toBeVisible();
   await expect(miss.locator('[data-control="docs.nav"]')).toBeVisible();
   await expect(miss.locator('[data-control="docs.miss.page"]')).toHaveCount(3);
+  test.info().annotations.push({ type: 'measure', description: readings.join(' | ') });
+  expect(faults, faults.join('\n')).toEqual([]);
+});
+
+/**
+ * The numbered sections (docs/SITE.md section 6; plan E.4): every h2 of a page sits in a section
+ * with its anchor, a link to the heading's id whose number is drawn in the gutter 16 px left of
+ * the article from 1024 px and inline before the title under it; the heading's text stays its
+ * title; the on this page column numbers the same h2s; a click on the number puts the heading's id
+ * in the address.
+ */
+row('help.docs.sections', async () => {
+  const faults: string[] = [];
+  const readings: string[] = [];
+  for (const width of WIDTHS) {
+    const page = await open(width, 'light');
+    for (const url of ['/docs/sharing', '/docs/agents/http', '/docs']) {
+      await page.goto(url);
+      await hydrated(page);
+      await settled(page);
+      const facts = await page.evaluate(() => {
+        const sections = [...document.querySelectorAll('.ts-docs-body-text h2')].map((h2) => {
+          const anchor = h2.parentElement?.querySelector(':scope > a.ts-docs-anchor') ?? null;
+          const head = h2.getBoundingClientRect();
+          const box = anchor?.getBoundingClientRect();
+          return {
+            id: h2.id,
+            text: h2.textContent?.trim() ?? '',
+            href: anchor?.getAttribute('href') ?? null,
+            name: anchor?.getAttribute('aria-label') ?? null,
+            gap: box === undefined ? null : Math.round(head.left - box.right),
+            sameLine: box === undefined ? false : Math.abs(box.bottom - head.bottom) < 12,
+          };
+        });
+        const entries = document.querySelectorAll('[data-control="docs.toc"] li[data-depth="2"]');
+        return { sections, entries: entries.length };
+      });
+      if (facts.sections.length === 0) faults.push(`${url} at ${width}: no section`);
+      for (const section of facts.sections) {
+        if (section.href !== `#${section.id}`)
+          faults.push(`${url} at ${width}: "${section.text}" anchors ${section.href}`);
+        if (section.name !== `Link to ${section.text}`)
+          faults.push(`${url} at ${width}: "${section.text}" anchor named ${section.name}`);
+        if (/^\d/.test(section.text)) faults.push(`${url}: the heading's text holds its number`);
+        if (width >= 1024 && section.gap !== 16)
+          faults.push(`${url} at ${width}: "${section.text}" number ${section.gap} px from it`);
+        if (width < 1024 && (!section.sameLine || (section.gap ?? -1) < 0))
+          faults.push(`${url} at ${width}: "${section.text}" number not inline before it`);
+      }
+      if (width >= 1280 && facts.entries !== facts.sections.length)
+        faults.push(`${url}: ${facts.entries} entries for ${facts.sections.length} sections`);
+      readings.push(`${url} at ${width}: ${facts.sections.length} sections`);
+    }
+    const second = page.locator('.ts-docs-body-text a.ts-docs-anchor').nth(1);
+    const href = await second.getAttribute('href');
+    await second.click();
+    await page.waitForFunction((want) => window.location.hash === want, href);
+  }
+  test.info().annotations.push({ type: 'measure', description: readings.join(' | ') });
+  expect(faults, faults.join('\n')).toEqual([]);
+});
+
+/**
+ * The figures (plan E.5): each figure of a page draws its capture in the page's appearance alone
+ * (the other appearance's file is never fetched), at its native size at most, in the square frame,
+ * with alt text and "Figure N" before its caption; at 720 px and under a figure with a phone cut
+ * draws it.
+ */
+row('help.docs.figures', async () => {
+  const faults: string[] = [];
+  const readings: string[] = [];
+  for (const width of WIDTHS)
+    for (const appearance of APPEARANCES) {
+      const page = await open(width, appearance);
+      const asked: string[] = [];
+      page.on('request', (request) => {
+        if (request.url().includes('/docs/figures/')) asked.push(new URL(request.url()).pathname);
+      });
+      for (const url of ['/docs', '/docs/sharing', '/docs/themes', '/docs/export']) {
+        await page.goto(url);
+        await hydrated(page);
+        const figures = page.locator('figure.ts-docs-fig');
+        const count = await figures.count();
+        if (count === 0) faults.push(`${url}: no figure`);
+        for (let at = 0; at < count; at += 1) {
+          const figure = figures.nth(at);
+          await figure.scrollIntoViewIfNeeded();
+          const img = figure.locator(`picture.is-${appearance} img`);
+          await expect(img).toBeVisible({ timeout: 30_000 });
+          await page.waitForFunction(
+            (element) => element instanceof HTMLImageElement && element.complete,
+            await img.elementHandle(),
+          );
+          const facts = await figure.evaluate((element, mode) => {
+            const image = element.querySelector<HTMLImageElement>(`picture.is-${mode} img`);
+            const frame = element.querySelector('.ts-docs-fig-frame');
+            return {
+              name: element.getAttribute('data-figure') ?? '',
+              src: image?.currentSrc ?? '',
+              natural: image?.naturalWidth ?? 0,
+              alt: image?.alt ?? '',
+              shown: frame?.getBoundingClientRect().width ?? 0,
+              label: element.querySelector('figcaption .t-label')?.textContent?.trim() ?? '',
+              radius: frame === null ? '' : getComputedStyle(frame).borderTopLeftRadius,
+            };
+          }, appearance);
+          if (facts.natural === 0) faults.push(`${url} ${facts.name}: the picture did not load`);
+          if (!facts.src.includes(`-${appearance}.webp`))
+            faults.push(`${url} ${facts.name} in ${appearance}: ${facts.src}`);
+          if (
+            width <= 720 &&
+            /editor-top|title-row-share/.test(facts.name) &&
+            !facts.src.includes('-390-')
+          )
+            faults.push(`${url} ${facts.name}: no phone cut at ${width}`);
+          if (facts.shown > facts.natural / 2 + 2.5)
+            faults.push(`${url} ${facts.name}: drawn ${facts.shown} px from ${facts.natural} px`);
+          if (!facts.alt.endsWith('.')) faults.push(`${url} ${facts.name}: alt "${facts.alt}"`);
+          if (facts.label !== 'Figure') faults.push(`${url} ${facts.name}: label "${facts.label}"`);
+          if (facts.radius !== '0px') faults.push(`${url} ${facts.name}: corner ${facts.radius}`);
+        }
+      }
+      const other = appearance === 'light' ? '-dark.webp' : '-light.webp';
+      const wrong = asked.filter((path) => path.endsWith(other));
+      if (wrong.length > 0) faults.push(`${width} ${appearance}: fetched ${wrong.join(', ')}`);
+      readings.push(`${width} ${appearance}: ${asked.length} figure files`);
+    }
+  test.info().annotations.push({ type: 'measure', description: readings.join(' | ') });
+  expect(faults, faults.join('\n')).toEqual([]);
+});
+
+/**
+ * The site's footer under every docs page (docs/SITE.md, the footer): the lockup with the
+ * animated T in a box linking to /home, the four columns of links under their labels (Product,
+ * Agents, Docs, Project), the maker's link and the appearance switch, under the page; an external
+ * link opens in a new tab.
+ */
+row('help.docs.footer', async () => {
+  const faults: string[] = [];
+  for (const width of WIDTHS) {
+    const page = await open(width, 'dark');
+    for (const url of ['/docs', '/docs/reference/deck']) {
+      await page.goto(url);
+      await hydrated(page);
+      const facts = await page.evaluate(() => {
+        const foot = document.querySelector('.ts-docs .site-foot');
+        return {
+          lockup: foot?.querySelector('[data-control="site.foot.lockup"]')?.getAttribute('href'),
+          live: foot?.querySelectorAll('svg.site-mark-live .site-mark-run').length ?? 0,
+          columns: [...(foot?.querySelectorAll('.site-foot-cols h2') ?? [])].map(
+            (h) => h.textContent?.trim() ?? '',
+          ),
+          maker: foot?.querySelector('[data-control="site.foot.maker"]')?.textContent?.trim(),
+          switch: foot?.querySelectorAll('.site-appear button').length ?? 0,
+          external: [...(foot?.querySelectorAll('a[href^="http"]') ?? [])].map((a) =>
+            a.getAttribute('target'),
+          ),
+          below:
+            (foot?.getBoundingClientRect().top ?? 0) >=
+            (document.querySelector('.ts-docs-body')?.getBoundingClientRect().bottom ?? 0),
+        };
+      });
+      if (facts.lockup !== '/home')
+        faults.push(`${url} at ${width}: the mark links ${facts.lockup}`);
+      if (facts.live === 0) faults.push(`${url} at ${width}: no animated mark`);
+      if (
+        JSON.stringify(facts.columns) !== JSON.stringify(['Product', 'Agents', 'Docs', 'Project'])
+      )
+        faults.push(`${url} at ${width}: columns ${facts.columns.join(', ')}`);
+      if (facts.maker !== 'General Translation')
+        faults.push(`${url} at ${width}: the maker "${facts.maker}"`);
+      if (facts.switch !== 2) faults.push(`${url} at ${width}: ${facts.switch} appearance buttons`);
+      if (facts.external.some((target) => target !== '_blank'))
+        faults.push(`${url} at ${width}: an external link opens in the same tab`);
+      if (!facts.below) faults.push(`${url} at ${width}: the footer is not under the page`);
+    }
+  }
+  expect(faults, faults.join('\n')).toEqual([]);
+});
+
+/**
+ * The current page in the navigation is drawn at weight 500 (the judge read the prototype's at
+ * 700): its computed weight is 500, and its text's drawn width matches the same words set at 500
+ * on the page, not at 700, so no bolder face and no synthesized weight is drawn.
+ */
+row('help.docs.nav-weight', async () => {
+  const faults: string[] = [];
+  const readings: string[] = [];
+  for (const appearance of APPEARANCES) {
+    const page = await open(1440, appearance);
+    for (const url of ['/docs', '/docs/sharing', '/docs/reference']) {
+      await page.goto(url);
+      await hydrated(page);
+      await page.evaluate(() => document.fonts.ready);
+      const facts = await page.evaluate(() => {
+        const name = document.querySelector<HTMLElement>(
+          '[data-control="docs.nav"] [aria-current="page"] .ts-docs-nav-name',
+        );
+        if (name === null) return null;
+        const style = getComputedStyle(name);
+        const measure = (weight: string): number => {
+          const probe = document.createElement('span');
+          probe.textContent = name.textContent;
+          probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-family:${style.fontFamily};font-size:${style.fontSize};letter-spacing:${style.letterSpacing};font-weight:${weight};font-synthesis:none`;
+          name.parentElement?.appendChild(probe);
+          const width = probe.getBoundingClientRect().width;
+          probe.remove();
+          return width;
+        };
+        return {
+          text: name.textContent ?? '',
+          weight: style.fontWeight,
+          drawn: name.getBoundingClientRect().width,
+          at400: measure('400'),
+          at500: measure('500'),
+          at700: measure('700'),
+        };
+      });
+      if (facts === null) {
+        faults.push(`${url} ${appearance}: no current page`);
+        continue;
+      }
+      readings.push(
+        `${url} ${appearance} "${facts.text}": weight ${facts.weight}, ${facts.drawn.toFixed(2)} px (400 ${facts.at400.toFixed(2)}, 500 ${facts.at500.toFixed(2)}, 700 ${facts.at700.toFixed(2)})`,
+      );
+      if (facts.weight !== '500') faults.push(`${url} ${appearance}: weight ${facts.weight}`);
+      if (Math.abs(facts.drawn - facts.at500) > 0.5)
+        faults.push(`${url} ${appearance}: ${facts.drawn} px, ${facts.at500} px at 500`);
+      if (Math.abs(facts.drawn - facts.at700) < 1)
+        faults.push(`${url} ${appearance}: drawn as wide as 700`);
+    }
+  }
   test.info().annotations.push({ type: 'measure', description: readings.join(' | ') });
   expect(faults, faults.join('\n')).toEqual([]);
 });
@@ -570,7 +828,7 @@ row('help.docs.twin', async () => {
   const page = await open(1440, 'light');
   const pages = await pagesOf(page);
   const faults: string[] = [];
-  const forms = { quote: 0, numbered: 0, tabs: 0, cards: 0 };
+  const forms = { quote: 0, numbered: 0, tabs: 0, cards: 0, figures: 0 };
   for (const { url } of pages) {
     const twin = url === '/docs' ? '/docs/index.md' : `${url}.md`;
     const response = await page.request.get(`${base()}${twin}`, { headers: extraHTTPHeaders });
@@ -591,14 +849,23 @@ row('help.docs.twin', async () => {
     if (/^> \*\*[^*]+\.\*\*/m.test(text)) forms.quote += 1;
     if (/^1\. \*\*/m.test(text)) forms.numbered += 1;
     if (/^- \[[^\]]+\]\(\/[^)]*\)/m.test(text)) forms.cards += 1;
-    if (/^#{3,6} (?:Command line|MCP|HTTP|Browser)$/m.test(text)) forms.tabs += 1;
+    /* the tabs of export.mdx (the front page's tabs left with the site build's Overview) */
+    if (/^#{3,6} (?:Pictures|Editable text)$/m.test(text)) forms.tabs += 1;
+    /* a figure is its light picture and its caption (docs/SITE.md section 6) */
+    if (/^!\[[^\]]+\.\]\(\/docs\/figures\/[\w-]+-light\.webp\)$/m.test(text)) forms.figures += 1;
     await page.goto(url);
     const alternate = await page
       .locator('link[rel="alternate"][type="text/markdown"]')
       .getAttribute('href');
     if (alternate !== twin) faults.push(`${url}: alternate ${alternate}`);
   }
-  if (forms.quote === 0 || forms.numbered === 0 || forms.tabs === 0 || forms.cards === 0)
+  if (
+    forms.quote === 0 ||
+    forms.numbered === 0 ||
+    forms.tabs === 0 ||
+    forms.cards === 0 ||
+    forms.figures === 0
+  )
     faults.push(`component forms seen ${JSON.stringify(forms)}`);
   const llms = await (
     await page.request.get(`${base()}/llms.txt`, { headers: extraHTTPHeaders })
@@ -742,7 +1009,7 @@ row('help.docs.links', async () => {
   const faults: string[] = [];
   const page = await open(1440, 'light');
   await page.goto('/home');
-  const nav = page.locator('[data-control="home.nav.docs"]');
+  const nav = page.locator('[data-control="site.nav.docs"]');
   const navFacts = await nav.evaluate((element) => ({
     href: element.getAttribute('href'),
     target: element.getAttribute('target'),
@@ -754,7 +1021,7 @@ row('help.docs.links', async () => {
     (navFacts.glyph !== 'none' && navFacts.glyph !== 'normal')
   )
     faults.push(`the navigation's Documentation ${JSON.stringify(navFacts)}`);
-  const foot = page.locator('[data-control="home.foot.docs"]');
+  const foot = page.locator('[data-control="site.foot.docs.getting-started"]');
   const footFacts = await foot.evaluate((element) => ({
     href: element.getAttribute('href'),
     target: element.getAttribute('target'),

@@ -12,6 +12,7 @@ import type { IdentityView } from '../editor-shell';
 import { Icon } from '../icons';
 import { cn } from '../lib/cn';
 import { AGENT_SENTENCES, PRESENCE } from '../menus/strings';
+import { AgentMark } from './agent-marks';
 import { initialsFontSize, markCells, plateOf } from './mark-svg';
 import type { MarkSize } from './mark-svg';
 
@@ -29,7 +30,9 @@ import './presence.css';
  * name and the trust word: "Maya, guest", "Ada Lovelace, signed in") so no fact is colour alone
  * (4.9). Names are text: the initials render through a text node. The verified badge beside a
  * name on the text surfaces is `TrustMark`, drawn by the roster row, the comment card and list,
- * the version row, the account head, the Share rows and the Profile head.
+ * the version row, the account head, the Share rows and the Profile head. An agent whose view
+ * names a brand (`IdentityView.brand`; docs/SITE.md D5) draws its brand mark on paper in place of
+ * the field, inside the agent's dashed ring, in its own colours.
  */
 export type IdentityChipProps = {
   identity: IdentityView;
@@ -170,7 +173,8 @@ export function IdentityChip({
 }: IdentityChipProps) {
   const spec = markOf(identity, { hueSlot, self, presenter });
   const plate = plateOf(size);
-  const hue = spec.hue?.hex ?? null;
+  /* an agent's mark never colours (identity/marks.ts); a branded agent's chip takes the granted hue (D5) */
+  const hue = spec.hue?.hex ?? (identity.brand !== undefined ? hueHexOf(hueSlot) : null);
   /* a picture that failed to load draws the initials field in its place, so a 404 never leaves an
      empty box (parity, "the picture's limits and fallbacks"); keyed by the URL so a new picture
      after a rotation loads again */
@@ -194,6 +198,7 @@ export function IdentityChip({
         })
       : spec;
   const cells = markCells(drawn, size);
+  const brand = identity.brand;
   return (
     <span
       className={cn(
@@ -203,6 +208,7 @@ export function IdentityChip({
         presenter && 'is-presenter',
         halo && 'has-halo',
         spec.variant === 'agent' && 'is-agent',
+        brand !== undefined && 'has-brand',
         className,
       )}
       style={style}
@@ -212,10 +218,13 @@ export function IdentityChip({
       data-principal={identity.principalId}
       data-hue={spec.hue?.slot ?? undefined}
       data-picture={picture === undefined ? undefined : 'loaded'}
+      data-brand={brand}
       role="img"
       aria-label={chipName(identity)}
     >
-      {picture !== undefined ? (
+      {brand !== undefined ? (
+        <AgentMark brand={brand} size={plate} className="ts-chip-brand" />
+      ) : picture !== undefined ? (
         <img
           className="ts-chip-picture"
           src={picture.src}

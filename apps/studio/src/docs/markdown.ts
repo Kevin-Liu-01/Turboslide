@@ -4,7 +4,8 @@ import type { LLMsOptions } from 'fumadocs-core/mdx-plugins/remark-llms';
  * The markdown form of every docs component, for the twins (docs/POLISH-2.md 5.7, C27): fumadocs'
  * `remarkLLMs` writes each page's markdown at compile time and calls `stringify` for every node;
  * a component answers its own form and every other node keeps the default. A callout is a block
- * quote, steps a numbered list, tabs one subheading per tab, cards a list of links. Headings carry
+ * quote, steps a numbered list, tabs one subheading per tab, cards a list of links, a figure its
+ * light picture and its caption. Headings carry
  * no `[#id]` suffix. The function runs in the build alone (fumadocs-mdx evaluates source.ts's
  * options there); nothing here reaches a page's script.
  */
@@ -76,6 +77,15 @@ export function countsText({ total, cli, mcp, http, window }: CountsProps): stri
   return `${total} ${actions}: ${cli} on the command line, ${mcp} as MCP tools, ${http} as HTTP endpoints and ${window} in the page.`;
 }
 
+/**
+ * A docs figure's picture (components/docs/mdx.tsx `Figure`): /docs/figures/<name>-<appearance>.webp,
+ * or the -390- cut for a phone (apps/studio/public/docs/figures, written by
+ * scripts/site/capture.mjs).
+ */
+export function figureSource(name: string, appearance: 'light' | 'dark', phone: boolean): string {
+  return `/docs/figures/${name}${phone ? '-390' : ''}-${appearance}.webp`;
+}
+
 /** The depth of the heading before `node` in its parent, for the tabs' subheadings. */
 function depthBefore(node: AnyNode, parent: Args[1]): number {
   if (parent === undefined || !('children' in parent)) return 2;
@@ -134,6 +144,11 @@ const stringify: Stringify = (node, parent, state, info) => {
         http: attr(node, 'http') ?? '',
         window: attr(node, 'window') ?? '',
       });
+    case 'Figure': {
+      const name = attr(node, 'name') ?? '';
+      const caption = attr(node, 'caption') ?? '';
+      return `![${attr(node, 'alt') ?? ''}](${figureSource(name, 'light', false)})${caption === '' ? '' : `\n\n${caption}`}`;
+    }
     case 'Kbd':
       return node.children.length > 0
         ? flow(node.children as AnyNode[], state, info)

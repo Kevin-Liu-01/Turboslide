@@ -10,6 +10,7 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 | [../AGENTS.md](../AGENTS.md)                                  | The rules for working in this repository                                                                                        |
 | [NEXT.md](NEXT.md)                                            | The next program from 2026-10-02: the rounds for speed, cost, features, the brand and sign in                                   |
 | [LANDING.md](LANDING.md)                                      | The landing redesign of `/home`: one eight slide deck the visitor edits, tailors, runs and presents                             |
+| [SITE.md](SITE.md)                                            | The site of 2026-10-14: `/home` and `/docs` in the Workbench layout, the title's stacks, the agent marks and the solid icons    |
 | [DESIGN.md](DESIGN.md)                                        | The design round of 2026-10-05: layers, corners, Inter, colour, scrollbars, the theme library and the landing on every page     |
 | [POLISH-2.md](POLISH-2.md)                                    | Polish two of 2026-10-07: the face, the landing's bar and hero, the docs at `/docs` and the auth plate on every sign in surface |
 | [DROPDOWNS.md](DROPDOWNS.md)                                  | The dropdown round of 2026-10-08: one dropdown drawn by Turboslide in place of every native select                              |

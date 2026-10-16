@@ -15,7 +15,7 @@ description: The actions of the comment group, with their input fields and their
 | `anchor`       | object \| object \| object \| object \| object \| object | yes      | deck, slide:\<id\>, \<slide\>#\<block\>, \<slide\>#\<block\>/\<path\>:\<start\>-\<end\>, \<slide\>#\<block\>/cell:\<r\>,\<c\> or notes:\<slide\> on the CLI; the anchor object elsewhere |
 | `body`         | object                                                   | yes      |                                                                                                                                                                                          |
 | `assignee`     | object \| object                                         | no       |                                                                                                                                                                                          |
-| `baseRevision` | integer                                                  | no       | The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)                                                                                                          |
+| `baseRevision` | integer                                                  | no       | The comments revision the caller read; a stale value never refuses                                                                                                                       |
 
 - Command line: `turboslide comment add <anchor> -m <text> --mention <who> --assign <who>`
 - MCP tool: `deck_add_comment`

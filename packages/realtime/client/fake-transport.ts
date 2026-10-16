@@ -8,7 +8,9 @@
 // client reopens with its position as `since`), `offline` makes every POST throw, and
 // `refuseOpens` answers every open with a refusal (a 503 with `retry-after`, a 404) the way the
 // stream route does, until set back (the focus round, cycle 3 stream fix round, C3-F1). Test
-// code and the dev only page harness import it; nothing in production does.
+// code and the dev only page harness import it, and the landing's live editor runs its room on it:
+// the /try page's tab room (apps/studio/src/try/tab-room.ts; docs/SITE.md D3), whose identities
+// name their roster fields (`FakeIdentity.trust`, `kind`, `mark`, `hueSlot`).
 import type { DeckDocument } from '@turboslide/schema/deck';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -21,6 +23,7 @@ import type {
   Role,
   RoomEvent,
   RosterEntry,
+  Trust,
 } from '../src/channel.ts';
 import { entryRun } from '../src/channel.ts';
 import type { OpsPost, PresencePost } from '../src/protocol.ts';
@@ -38,6 +41,16 @@ export type FakeIdentity = {
   label: string;
   role: Role;
   author: Author;
+  /*
+   * The roster fields the room writes for this identity, as the studio's room derives them from
+   * the session (room.ts `rosterEntryFor`); absent, a generated label's: `label` trust, an
+   * initials mark, hue slot 0, a person.
+   */
+  trust?: Trust;
+  kind?: 'human' | 'agent';
+  mark?: Record<string, unknown>;
+  /** 0 to 5 on the wire */
+  hueSlot?: number;
 };
 
 export type FakeRoomServerOptions = {
@@ -141,10 +154,10 @@ export function fakeRoomServer(options: FakeRoomServerOptions): FakeRoomServer {
     ...post,
     principalId: identity.principalId,
     label: identity.label,
-    trust: 'label',
-    mark: { variant: 'initials', initials: identity.label[0] ?? 'T' },
-    hueSlot: 0,
-    kind: 'human',
+    trust: identity.trust ?? 'label',
+    mark: identity.mark ?? { variant: 'initials', initials: identity.label[0] ?? 'T' },
+    hueSlot: identity.hueSlot ?? 0,
+    kind: identity.kind ?? 'human',
     role: identity.role,
   });
 

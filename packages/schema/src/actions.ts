@@ -806,9 +806,7 @@ export type NotificationLevel = (typeof NOTIFICATION_LEVELS)[number];
 export const notificationSettingsSchema = z.strictObject({
   level: z.enum(NOTIFICATION_LEVELS),
   email: z.boolean().describe('Email digests for a signed in grant holder'),
-  activityForCommenters: z
-    .boolean()
-    .describe('The owner lets commenters read the Activity panel (SPEC-3 5.7)'),
+  activityForCommenters: z.boolean().describe('The owner lets commenters read the Activity panel'),
 });
 
 /** The activity feed's event kinds (SPEC-3 5.7). */
@@ -2063,7 +2061,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.align': action({
     id: 'block.align',
     label: 'Align blocks',
-    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (docs/FOCUS.md rank 14).",
+    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge is the extreme object's own edge unless snap is true, and the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first.",
     group: 'block',
     mutates: true,
     transports: A,
@@ -2261,7 +2259,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       replaceSource: slugSchema
         .optional()
         .describe(
-          'Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)',
+          'Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins',
         ),
       baseRevision,
     }),
@@ -2317,9 +2315,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       pattern: z
         .enum(DITHER_PATTERNS)
         .optional()
-        .describe(
-          'The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)',
-        ),
+        .describe('The threshold texture to regenerate the twins with; bayer8 unless set'),
       cell: z.literal(DITHER_CELLS).optional().describe('Sheet pixels per cell; 2 unless set'),
       tone: z.enum(DITHER_TONES).optional().describe('two, three or original; two unless set'),
       baseRevision,
@@ -2369,10 +2365,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['jpg', 'png'])
         .optional()
         .describe('The twin file format; jpg at quality 92 by default'),
-      allowHosts: z
-        .array(z.string())
-        .optional()
-        .describe('Hosts beyond the built-in allowlist (SPEC 11 captureHosts)'),
+      allowHosts: z.array(z.string()).optional().describe('Hosts beyond the built-in allowlist'),
       baseRevision,
     }),
     output: assetSchema,
@@ -2742,7 +2735,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['native', 'flatten'])
         .optional()
         .describe(
-          'Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)',
+          'Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent',
         ),
       theme: themes
         .optional()
@@ -2751,7 +2744,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['exact', 'standard'])
         .optional()
         .describe(
-          'The export font set (SPEC 8.4; docs/DESIGN.md 4.3): standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard',
+          'The export font set: standard names Inter, Inter Medium, Inter Display and Inter Display Medium, exact names Inter Text 14 to Inter Text 26; defaults to standard',
         ),
       embedFonts: z
         .boolean()
@@ -2762,25 +2755,21 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       headings: z
         .literal('raster')
         .optional()
-        .describe('Write every heading as a PNG instead of a text box (SPEC 8.3)'),
+        .describe('Write every heading as a PNG instead of a text box'),
       rasterScale: z
         .union([z.literal('auto'), z.literal(2), z.literal(3)])
         .optional()
         .describe(
-          'Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)',
+          'Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3',
         ),
       pictureScale: z
         .literal([2, 3])
         .optional()
-        .describe(
-          'The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)',
-        ),
+        .describe('The scale two-tone pictures are regenerated at from the one-bit image'),
       excludeShareAlike: z
         .boolean()
         .optional()
-        .describe(
-          'Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)',
-        ),
+        .describe('Replace share-alike pictures with the paper plate and its credit'),
       svgVector: z
         .boolean()
         .optional()
@@ -2797,7 +2786,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .boolean()
         .optional()
         .describe(
-          'Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)',
+          'Render the files back through LibreOffice and diff every page against the web render',
         ),
       slideIds: slideIdsOrAll.optional().describe("A subset to export; defaults to 'all'"),
       includeSkipped: z
@@ -2825,7 +2814,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       merge: z
         .strictObject({ jobId: z.string().min(1) })
         .optional()
-        .describe('Hosted only: build the file from the stored batches of the job (SPEC-2 8.1)'),
+        .describe('Hosted only: build the file from the stored batches of the job'),
     }),
     output: exportReportSchema,
     cli: {
@@ -2883,9 +2872,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       includeComments: z
         .boolean()
         .optional()
-        .describe(
-          'Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)',
-        ),
+        .describe('Append each slide’s comment threads, for readers with readComments'),
     }),
     output: z.strictObject({
       text: z.string(),
@@ -4533,7 +4520,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'presence.follow': action({
     id: 'presence.follow',
     label: 'Follow',
-    doc: 'The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.',
+    doc: 'The attached page follows a client’s slide and scroll. Every editor and the owner may follow, by link and without an account included; viewers, commenters and agents are refused with Go to slide offered instead.',
     group: 'presence',
     mutates: true,
     transports: A,
@@ -4661,9 +4648,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       assignee: mentionSchema.optional(),
       baseRevision: commentsRevision
         .optional()
-        .describe(
-          'The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)',
-        ),
+        .describe('The comments revision the caller read; a stale value never refuses'),
     }),
     output: threadResultSchema,
     cli: { usage: 'turboslide comment add <anchor> -m <text> --mention <who> --assign <who>' },
@@ -5337,7 +5322,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'share.emailCollaborators': action({
     id: 'share.emailCollaborators',
     label: 'Email collaborators',
-    doc: 'Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.',
+    doc: 'Sends a message to every collaborator or the named ones. Not built yet: it answers 501 not implemented.',
     group: 'share',
     mutates: true,
     transports: A,
@@ -5477,7 +5462,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'account.setName': action({
     id: 'account.setName',
     label: 'Change name',
-    doc: 'Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.',
+    doc: 'Sets the display name under the name rules (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.',
     group: 'account',
     mutates: true,
     transports: A,
@@ -5593,7 +5578,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'admin.flag': action({
     id: 'admin.flag',
     label: 'Kill switch',
-    doc: 'Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.',
+    doc: 'Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly, assist), read within 5 s by every instance.',
     group: 'admin',
     mutates: true,
     transports: A,

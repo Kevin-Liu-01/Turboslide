@@ -4,26 +4,23 @@ import type { ReactNode } from 'react';
 
 /* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
 import { Icon } from '@turboslide/chrome/icons-base';
-import { useLayer } from '@turboslide/chrome/Layer';
-import { ThemeButton } from '@turboslide/chrome/ThemeButton';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 
 import { source } from '../../docs/source';
-import { RouterLinkSlot } from '../../routes/-link-slot';
-import { PageFrame } from '../home/PageFrame';
+import { SiteBar } from '../site/SiteBar';
+import { SiteFooter } from '../site/SiteFooter';
+import { SiteLink } from '../site/SiteLink';
 import { useMountEffect } from '../useMountEffect';
-import { DocsSidebar } from './DocsSidebar';
-import { PathLink } from './mdx';
+import { DocsSidebar, placeOf } from './DocsSidebar';
 
 const SearchWindow = lazy(() => import('./SearchWindow'));
 
-/** The docs' words outside the pages (docs/POLISH-2.md 5.6). */
+/** The docs' words outside the pages (docs/SITE.md section 6). */
 export const DOCS_WORDS = {
   documentation: 'Documentation',
   search: 'Search the documentation',
-  searchShort: 'Search',
-  newPresentation: 'New Presentation',
-  menu: 'Menu',
+  contents: 'Contents',
+  in: 'in',
 } as const;
 
 /** The path of a docs address without a trailing slash, the form the page tree's urls take. */
@@ -32,13 +29,14 @@ export function docsPath(pathname: string): string {
 }
 
 /**
- * The docs layout (docs/POLISH-2.md 5.6): the page frame of the plain pages (PageFrame.tsx: the
- * 1104 px column, its rails, the 58 px bar with the lockup) with the docs' controls in the bar's
- * slot: a hairline and Documentation, the search pill, the shared theme button and New
- * Presentation. Under the bar the sidebar and the page (the route's outlet: the article and its
- * table of contents). Under 720 px the sidebar leaves the column for a Pages button that opens it
- * as a sheet (`.pt-window` on the dialog layer), the search pill becomes an icon button and
- * Documentation leaves the bar; under 560 px New Presentation leaves it too.
+ * The docs layout in the Workbench reference (docs/SITE.md section 6; plan E.1): the site's root
+ * `.ts-site` with the docs' own class, the site's bar with the docs' slot (a hairline,
+ * Documentation and the 288 px search field), then three columns across the 1280 px column: the
+ * navigation (224 px), the page (the route's outlet: the article, 720 px, and its on this page
+ * column, 208 px), then the site's footer. At 1024 to 1279 px the on this page column leaves and its
+ * tools move under the article (docs.css); at 1023 px and under one column, where the navigation
+ * becomes the Contents disclosure at the top of the page (a `<details>`, no sheet and no scrim) and
+ * the search field becomes a 32 px button.
  *
  * Cmd+K, Ctrl+K and / open the search; the window and the index load on the first open.
  */
@@ -46,15 +44,15 @@ export function DocsShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const current = docsPath(location.pathname);
   const tree = source.getPageTree();
+  const place = placeOf(tree, current);
   const [searching, setSearching] = useState(false);
-  const [sheet, setSheet] = useState(false);
   const [mac, setMac] = useState(true);
   const opener = useRef<HTMLElement | null>(null);
-  const menuButton = useRef<HTMLButtonElement>(null);
+  const contents = useRef<HTMLDetailsElement>(null);
 
   const openSearch = (): void => {
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setSheet(false);
+    if (contents.current !== null) contents.current.open = false;
     setSearching(true);
   };
   const closeSearch = (): void => {
@@ -83,117 +81,68 @@ export function DocsShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', keys);
   });
 
-  const bar = (
+  const slot = (
     <>
-      <span className="ts-docs-bar-rule" aria-hidden="true" />
-      <PathLink to="/docs" className="ts-docs-bar-title" data-control="docs.bar.documentation">
+      <span className="site-bar-rule" aria-hidden="true" />
+      <SiteLink href="/docs" control="docs.bar.documentation" className="ts-docs-crumb">
         {DOCS_WORDS.documentation}
-      </PathLink>
-      <span className="ts-docs-bar-end">
-        <button
-          type="button"
-          className="pt-ib ts-docs-search"
-          data-control="docs.search.open"
-          aria-label={DOCS_WORDS.search}
-          aria-haspopup="dialog"
-          onClick={openSearch}
-          {...tipProps({ name: DOCS_WORDS.search, key: mac ? '⌘K' : 'Ctrl+K' })}
-        >
-          <Icon name="search" />
-          <span className="ts-docs-search-label is-long">{DOCS_WORDS.search}</span>
-          <span className="ts-docs-search-label is-short">{DOCS_WORDS.searchShort}</span>
-          <kbd className="pt-kbd ts-docs-search-key">{mac ? '⌘K' : 'Ctrl K'}</kbd>
-        </button>
-        <ThemeButton className="ts-docs-theme" />
-        <PathLink to="/new" className="pt-ib is-solid ts-docs-new" data-control="docs.bar.new">
-          {DOCS_WORDS.newPresentation}
-        </PathLink>
-        <button
-          ref={menuButton}
-          type="button"
-          className="pt-ib pt-icon ts-docs-pages"
-          data-control="docs.menu"
-          aria-label={DOCS_WORDS.menu}
-          aria-haspopup="dialog"
-          aria-expanded={sheet}
-          onClick={() => setSheet((was) => !was)}
-          {...tipProps({ name: DOCS_WORDS.menu, doc: 'Every page of the documentation.' })}
-        >
-          <Icon name="bars-3" />
-        </button>
-      </span>
+      </SiteLink>
+      <button
+        type="button"
+        className="ts-docs-search"
+        data-control="docs.search.open"
+        aria-label={DOCS_WORDS.search}
+        aria-haspopup="dialog"
+        onClick={openSearch}
+        {...tipProps({ name: DOCS_WORDS.search, key: mac ? '⌘K' : 'Ctrl+K' })}
+      >
+        <Icon name="search" />
+        <span className="ts-docs-search-label">{DOCS_WORDS.search}</span>
+        <kbd className="pt-kbd ts-docs-search-key">{mac ? '⌘K' : 'Ctrl K'}</kbd>
+      </button>
     </>
   );
 
   return (
-    <PageFrame className="ts-docs" control="docs" linkComponent={RouterLinkSlot} bar={bar}>
-      <div className="ts-docs-body">
+    <div className="ts-site ts-docs" id="top" data-control="docs">
+      <SiteBar docs slot={slot} />
+      <div className="site-wrap ts-docs-body">
         <aside className="ts-docs-side pt-scroll">
           <DocsSidebar tree={tree} current={current} />
         </aside>
-        {children}
+        <main id="main" className="ts-docs-main">
+          <details ref={contents} className="ts-docs-contents" data-control="docs.contents">
+            <summary className="t-small">
+              <span className="ts-docs-contents-here">
+                {place === null ? (
+                  DOCS_WORDS.documentation
+                ) : (
+                  <>
+                    <b>{place.name}</b>
+                    {place.group === undefined ? null : ` ${DOCS_WORDS.in} ${place.group}`}
+                  </>
+                )}
+              </span>
+              <span className="t-label">{DOCS_WORDS.contents}</span>
+            </summary>
+            <DocsSidebar
+              tree={tree}
+              current={current}
+              control="docs.contents.nav"
+              onNavigate={() => {
+                if (contents.current !== null) contents.current.open = false;
+              }}
+            />
+          </details>
+          {children}
+        </main>
       </div>
-      {sheet ? (
-        <PagesSheet
-          onClose={(refocus) => {
-            setSheet(false);
-            if (refocus) menuButton.current?.focus();
-          }}
-        >
-          <DocsSidebar
-            tree={tree}
-            current={current}
-            control="docs.sheet.nav"
-            onNavigate={() => setSheet(false)}
-          />
-        </PagesSheet>
-      ) : null}
+      <SiteFooter />
       {searching ? (
         <Suspense fallback={null}>
           <SearchWindow onClose={closeSearch} />
         </Suspense>
       ) : null}
-    </PageFrame>
-  );
-}
-
-/** The sidebar on a phone: a window under the bar on the dialog layer, over the scrim. */
-function PagesSheet({
-  children,
-  onClose,
-}: {
-  children: ReactNode;
-  onClose: (refocus: boolean) => void;
-}) {
-  const scrim = useRef<HTMLDivElement>(null);
-  useLayer(scrim, { layer: 'dialog' });
-  useMountEffect(() => {
-    const current = scrim.current?.querySelector<HTMLAnchorElement>('[aria-current="page"]');
-    (current ?? scrim.current?.querySelector<HTMLAnchorElement>('a'))?.focus();
-  });
-  return (
-    <div
-      ref={scrim}
-      className="ts-docs-scrim is-sheet"
-      data-control="docs.sheet.scrim"
-      onPointerDown={(event) => {
-        if (event.target === scrim.current) onClose(false);
-      }}
-    >
-      <div
-        className="ts-docs-sheet pt-window pt-scroll"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Documentation pages"
-        data-control="docs.sheet"
-        onKeyDown={(event) => {
-          if (event.key !== 'Escape') return;
-          event.preventDefault();
-          onClose(true);
-        }}
-      >
-        {children}
-      </div>
     </div>
   );
 }

@@ -16,7 +16,8 @@ export const AUTH_WORDS = {
   /** the page's heading and the window's title on the methods step */
   heading: 'Sign in to Turboslide',
   windowTitle: 'Sign in',
-  lede: 'The presentations you made in this browser move to your account.',
+  /** the browser's own decks are asked about after sign in (merge, HR-SA#2b), never moved silently */
+  lede: 'Sign in to open your presentations on another computer and to share them with people by name.',
   /** drawn where Google is a method (docs/NEXT.md 4.3.2 item 7) */
   foot: 'Turboslide uses the name and the address of your Google account. It reads nothing else from Google after you sign in.',
   google: 'Continue with Google',

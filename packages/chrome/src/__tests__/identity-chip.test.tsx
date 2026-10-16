@@ -172,3 +172,33 @@ describe('the field', () => {
     expect(chip().querySelector('.ts-chip-stripe')).toBeNull();
   });
 });
+
+describe('an agent with a brand mark (docs/SITE.md D5)', () => {
+  const claude: IdentityView = {
+    principalId: 'agent:claude-code',
+    label: 'Claude Code',
+    trust: 'agent',
+    kind: 'agent',
+    brand: 'claude-code',
+  };
+
+  it('draws the brand mark in place of the agent field, inside the dashed ring, with its hue', () => {
+    render(<IdentityChip identity={claude} size={24} hueSlot={6} live />);
+    const element = chip();
+    expect(element.classList.contains('is-agent')).toBe(true);
+    expect(element.classList.contains('has-brand')).toBe(true);
+    expect(element.getAttribute('data-brand')).toBe('claude-code');
+    const mark = element.querySelector('svg.ts-agent-mark');
+    expect(mark?.getAttribute('width')).toBe('20');
+    expect(mark?.getAttribute('data-brand')).toBe('claude-code');
+    expect(element.querySelector('svg.ts-chip-plate')).toBeNull();
+    expect(element.querySelector('.ts-chip-stripe')).not.toBeNull();
+    expect(element.getAttribute('aria-label')).toBe('Claude Code');
+  });
+
+  it('leaves an agent without a brand on the agent field', () => {
+    render(<IdentityChip identity={{ ...claude, brand: undefined }} size={24} />);
+    expect(chip().querySelector('svg.ts-agent-mark')).toBeNull();
+    expect(chip().querySelector('svg.ts-chip-plate')).not.toBeNull();
+  });
+});

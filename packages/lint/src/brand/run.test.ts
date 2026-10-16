@@ -124,14 +124,11 @@ describe('the brand lint run', () => {
     ).toBe(true);
   });
 
-  test('since DR-D1#5 the three accepted inline z-index lines are weighed, so none is open or stale', () => {
-    // the verifier's pass 4 read these three lines as the round's only reported findings; read from
-    // the committed tree, each is weighed against its acceptance in config.ts
-    const files = [
-      'apps/studio/src/components/home/live/paint.ts',
-      'apps/studio/src/components/home/live/theme.ts',
-      'packages/viewer/src/MaterialMount.tsx',
-    ];
+  test('since DR-D1#5 the accepted inline z-index line is weighed, so none is open or stale', () => {
+    // the verifier's pass 4 read three lines as the round's only reported findings; the two of the
+    // old landing's live module left with it (docs/SITE.md), and the one left, read from the
+    // committed tree, is weighed against its acceptance in config.ts
+    const files = ['packages/viewer/src/MaterialMount.tsx'];
     const result = runBrandLint({
       root: ROOT,
       mode: 'enforce',
@@ -151,11 +148,7 @@ describe('the brand lint run', () => {
       rules: new Set<BrandRuleId>(['css/z-index']),
       accepted: [],
     });
-    expect(unaccepted.open.map((f) => f.rule)).toEqual([
-      'css/z-index',
-      'css/z-index',
-      'css/z-index',
-    ]);
+    expect(unaccepted.open.map((f) => f.rule)).toEqual(['css/z-index']);
     expect(unaccepted.failed).toBe(true);
   });
 

@@ -867,7 +867,7 @@ export const PAGES = {
   shotsName: 'Turboslide for people and agents',
   shotName: 'The product this answer is about',
   aboutShotsName: 'The editor and the viewer',
-  codeSource: 'From the documentation',
+  codeSource: 'From the docs',
   commands: (n: number): string => `${n} commands`,
   questionsName: 'Questions',
 } as const;

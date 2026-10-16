@@ -771,6 +771,11 @@
   min-height: 100%;
 }
 
+/* the panel's head on one line at every width */
+.ts-site .site-shot-term .site-term-head .t-label {
+  white-space: nowrap;
+}
+
 /* the prompt that waits after the last command, with a block cursor in the panel's text */
 .ts-site .site-shot-term .site-cursor {
   display: inline-block;

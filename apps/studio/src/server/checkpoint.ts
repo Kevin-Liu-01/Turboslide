@@ -544,12 +544,16 @@ export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {
    * mutations applied twice in the store, a doubled word). The records are the truth: a mirror
    * syncs first when the store has one (the redis tier over the Blob store), then the newest
    * `ops.toSeq` is taken, never below what this instance already knows (`covered()` moves it on
-   * another instance's checkpoint event too). One records read per run, under the lock.
+   * another instance's checkpoint event too). One records read per run, under the lock: the
+   * newest records down to one with `ops` where the store reads them so (`newestRecords`, a Blob
+   * mirror from its log floor; wave 2 PS.md request 1), else the whole log.
    */
   const knownCovered = async (): Promise<number> => {
     const synced = store as DeckStore & { sync?: (force?: boolean) => Promise<unknown> };
     if (typeof synced.sync === 'function') await synced.sync(true).catch(() => undefined);
-    covered = Math.max(covered, coveredSeq(await store.records()));
+    const records =
+      store.newestRecords === undefined ? await store.records() : await store.newestRecords();
+    covered = Math.max(covered, coveredSeq(records));
     return covered;
   };
 

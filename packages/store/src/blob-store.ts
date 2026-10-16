@@ -1282,6 +1282,8 @@ export type BlobStore = DeckStore & {
   snapshotCurrent: () => Promise<boolean>;
   /** how many reads the mirror answered while the store refused (the focus round, cycle 3 fix round) */
   degradedReads: () => number;
+  /** the newest records down to one that carries `ops` (DeckStore `newestRecords`) */
+  newestRecords: () => Promise<VersionRecord[]>;
 };
 
 export function openBlobStore(options: BlobStoreOptions): BlobStore {
@@ -2468,6 +2470,29 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       // the held origins ride the records this instance committed without the field, so the
       // channel's entries carry `covers` and the resync read's `origins` on this instance
       // (docs/archive/rounds/SYNC.md 3.2) on deployment N as they will everywhere on N plus 1
+      return withHeldOrigins(await file.records());
+    },
+
+    // the checkpoint's `knownCovered` wants the newest record with `ops` alone (wave 2 PS.md
+    // request 1): the records above the floor answer it unless none of them carries `ops`, and
+    // then the log is read down one LOG_FLOOR_RECORDS batch at a time until one does. Before this
+    // the first checkpoint of a fresh instance read the whole log, one get per record below the
+    // floor. A floor that does not move reads the whole log, as `records()` does
+    async newestRecords(): Promise<VersionRecord[]> {
+      await requirePresent();
+      let floor = readFloor(dir);
+      while (floor !== null) {
+        const above = floor;
+        const held = await file.records();
+        if (held.some((record) => record.n >= above && record.ops !== undefined)) break;
+        await wholeLog(Math.max(1, floor - LOG_FLOOR_RECORDS));
+        const next = readFloor(dir);
+        if (next !== null && next >= floor) {
+          await wholeLog();
+          break;
+        }
+        floor = next;
+      }
       return withHeldOrigins(await file.records());
     },
 

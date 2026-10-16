@@ -200,6 +200,14 @@ export type DeckStore = {
   listVersions: () => Promise<Version[]>;
   /** The same entries with baseRevision and the inverse mutations, for range resolution. */
   records: () => Promise<VersionRecord[]>;
+  /**
+   * The newest records, oldest first, reaching down at least to the newest one that carries
+   * `ops`, or the whole log when none does (wave 2 PS.md request 1): what the checkpoint's
+   * `knownCovered` reads, so a fresh Blob mirror answers from its log floor instead of reading
+   * every record below it. A store that holds its whole log leaves it out, and the caller reads
+   * `records()`.
+   */
+  newestRecords?: () => Promise<VersionRecord[]>;
   /** The document as it was after version n; 0 is the state before the first entry. */
   documentAt: (n: number) => Promise<DeckDocument>;
   /** The document at a revision the log reaches. */

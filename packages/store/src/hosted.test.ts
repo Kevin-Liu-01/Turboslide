@@ -3202,6 +3202,40 @@ describe('hosted stores', () => {
       // 65 commits through the store before the readings: a bound for a loaded machine
     }, 60_000);
 
+    it('reads the newest records down to one that carries ops, and no further (PS.md request 1)', async () => {
+      const { fake, a } = await blobPair();
+      await a.sync();
+      let base = 412;
+      const commit = async (i: number, ops?: { fromSeq: number; toSeq: number }) => {
+        clock = new Date(Date.parse('2026-09-11T10:00:00.000Z') + i * 60_000).toISOString();
+        const outcome = await a.write(
+          { baseRevision: base, author: agentA, mutations: [setSize(sizes[i % 3] as number)] },
+          ops === undefined ? {} : { ops },
+        );
+        expect(outcome.ok ? 'ok' : outcome.message).toBe('ok');
+        if (outcome.ok) base = outcome.revision;
+      };
+      const count = LOG_FLOOR_RECORDS + 15;
+      for (let i = 1; i <= count; i += 1)
+        await commit(i, i === 5 ? { fromSeq: 40, toSeq: 50 } : undefined);
+      // record 5 sits below a fresh mirror's floor: the read goes down to it
+      const c = mirror(fake, 'newest-ops');
+      await c.read();
+      expect(held(c)[1]).toBeGreaterThan(5);
+      const read = await c.newestRecords();
+      expect(read.filter((record) => record.ops !== undefined).map((record) => record.ops)).toEqual(
+        [{ fromSeq: 40, toSeq: 50 }],
+      );
+      expect(held(c)[1]).toBeLessThanOrEqual(5);
+      // the newest record carries ops: a fresh mirror reads nothing below its floor
+      await commit(count + 1, { fromSeq: 51, toSeq: 60 });
+      const d = mirror(fake, 'newest-ops-top');
+      await d.read();
+      const floorHeld = held(d);
+      expect((await d.newestRecords()).at(-1)?.ops).toEqual({ fromSeq: 51, toSeq: 60 });
+      expect(held(d)).toEqual(floorHeld);
+    }, 60_000);
+
     it('a mirror from the log floor removes no snapshot until it holds the whole log: a named version below the floor keeps its document', async () => {
       const { fake, a } = await blobPair();
       await a.sync();

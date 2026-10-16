@@ -3278,9 +3278,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -3564,9 +3564,9 @@
                       700
                     ],
                     "group": "Text",
-                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                   },
-                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                   "type": "number",
                   "enum": [
                     300,
@@ -3762,9 +3762,9 @@
                       "fraunces"
                     ],
                     "group": "Text",
-                    "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                    "help": "A face from the font catalog by id; the theme’s face when absent."
                   },
-                  "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                  "description": "A face from the font catalog by id; the theme’s face when absent.",
                   "type": "string",
                   "enum": [
                     "inter",
@@ -3928,9 +3928,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -4230,9 +4230,9 @@
                       700
                     ],
                     "group": "Text",
-                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                   },
-                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                   "type": "number",
                   "enum": [
                     300,
@@ -4428,9 +4428,9 @@
                       "fraunces"
                     ],
                     "group": "Text",
-                    "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                    "help": "A face from the font catalog by id; the theme’s face when absent."
                   },
-                  "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                  "description": "A face from the font catalog by id; the theme’s face when absent.",
                   "type": "string",
                   "enum": [
                     "inter",
@@ -4593,9 +4593,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -4815,9 +4815,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -5139,9 +5139,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -5464,9 +5464,9 @@
                       700
                     ],
                     "group": "Text",
-                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                   },
-                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                   "type": "number",
                   "enum": [
                     300,
@@ -5662,9 +5662,9 @@
                       "fraunces"
                     ],
                     "group": "Text",
-                    "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                    "help": "A face from the font catalog by id; the theme’s face when absent."
                   },
-                  "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                  "description": "A face from the font catalog by id; the theme’s face when absent.",
                   "type": "string",
                   "enum": [
                     "inter",
@@ -5818,9 +5818,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -6042,9 +6042,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -6294,9 +6294,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -6560,9 +6560,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -6821,9 +6821,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -7085,9 +7085,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -7346,9 +7346,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -7613,9 +7613,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -8626,9 +8626,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -8949,9 +8949,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -9284,9 +9284,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -9561,9 +9561,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -9868,9 +9868,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -10198,9 +10198,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -10467,9 +10467,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -11116,9 +11116,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -11358,9 +11358,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -11592,9 +11592,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -11824,9 +11824,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -12060,9 +12060,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -12323,9 +12323,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -12800,9 +12800,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -12998,9 +12998,9 @@
                   "accent"
                 ],
                 "group": "Block",
-                "help": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md)."
+                "help": "The box ground; none unless set. Tokens follow the theme."
               },
-              "description": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md).",
+              "description": "The box ground; none unless set. Tokens follow the theme.",
               "anyOf": [
                 {
                   "type": "string",
@@ -13244,9 +13244,9 @@
                       700
                     ],
                     "group": "Text",
-                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                   },
-                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                   "type": "number",
                   "enum": [
                     300,
@@ -13442,9 +13442,9 @@
                       "fraunces"
                     ],
                     "group": "Text",
-                    "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                    "help": "A face from the font catalog by id; the theme’s face when absent."
                   },
-                  "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                  "description": "A face from the font catalog by id; the theme’s face when absent.",
                   "type": "string",
                   "enum": [
                     "inter",
@@ -13767,9 +13767,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -14511,9 +14511,9 @@
                       700
                     ],
                     "group": "Text",
-                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                   },
-                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                   "type": "number",
                   "enum": [
                     300,
@@ -14709,9 +14709,9 @@
                       "fraunces"
                     ],
                     "group": "Text",
-                    "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                    "help": "A face from the font catalog by id; the theme’s face when absent."
                   },
-                  "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                  "description": "A face from the font catalog by id; the theme’s face when absent.",
                   "type": "string",
                   "enum": [
                     "inter",
@@ -15097,9 +15097,9 @@
                   "vertical-horizontal"
                 ],
                 "group": "Block",
-                "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33)."
+                "help": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on."
               },
-              "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on (docs/archive/rounds/POLISH.md item 33).",
+              "description": "The axis an elbow or curved connector leaves its start and arrives at its end along; horizontal unless set. horizontal-vertical and vertical-horizontal are the L that leaves along the first axis and arrives along the second. An attached end takes it from the connection site it sits on.",
               "type": "string",
               "enum": [
                 "horizontal",
@@ -15306,9 +15306,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -15643,9 +15643,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -15882,9 +15882,9 @@
                       700
                     ],
                     "group": "Text",
-                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                   },
-                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                  "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                   "type": "number",
                   "enum": [
                     300,
@@ -16080,9 +16080,9 @@
                       "fraunces"
                     ],
                     "group": "Text",
-                    "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                    "help": "A face from the font catalog by id; the theme’s face when absent."
                   },
-                  "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                  "description": "A face from the font catalog by id; the theme’s face when absent.",
                   "type": "string",
                   "enum": [
                     "inter",
@@ -16506,9 +16506,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -16991,9 +16991,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -17869,9 +17869,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -18406,9 +18406,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -19364,9 +19364,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -29955,7 +29955,7 @@
           ]
         },
         "embedFonts": {
-          "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)",
+          "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds",
           "type": "boolean"
         },
         "headings": {
@@ -29993,7 +29993,7 @@
           "type": "boolean"
         },
         "svgVector": {
-          "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/archive/rounds/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
+          "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip; on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
           "type": "boolean"
         },
         "baseline": {
@@ -35217,9 +35217,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -36235,9 +36235,9 @@
                 "label": "Position",
                 "control": "position",
                 "group": "Layout",
-                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
               },
-              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
               "type": "object",
               "properties": {
                 "x": {
@@ -42526,9 +42526,9 @@
                           700
                         ],
                         "group": "Text",
-                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                       },
-                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                       "type": "number",
                       "enum": [
                         300,
@@ -42724,9 +42724,9 @@
                           "fraunces"
                         ],
                         "group": "Text",
-                        "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                        "help": "A face from the font catalog by id; the theme’s face when absent."
                       },
-                      "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                      "description": "A face from the font catalog by id; the theme’s face when absent.",
                       "type": "string",
                       "enum": [
                         "inter",
@@ -42828,9 +42828,9 @@
                           700
                         ],
                         "group": "Text",
-                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                       },
-                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                       "type": "number",
                       "enum": [
                         300,
@@ -43026,9 +43026,9 @@
                           "fraunces"
                         ],
                         "group": "Text",
-                        "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                        "help": "A face from the font catalog by id; the theme’s face when absent."
                       },
-                      "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                      "description": "A face from the font catalog by id; the theme’s face when absent.",
                       "type": "string",
                       "enum": [
                         "inter",
@@ -43667,9 +43667,9 @@
                           700
                         ],
                         "group": "Text",
-                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                        "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so."
                       },
-                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                      "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so.",
                       "type": "number",
                       "enum": [
                         300,
@@ -43865,9 +43865,9 @@
                           "fraunces"
                         ],
                         "group": "Text",
-                        "help": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent."
+                        "help": "A face from the font catalog by id; the theme’s face when absent."
                       },
-                      "description": "A face from the font catalog by id (docs/archive/rounds/PRODUCT.md 4.2); the theme’s face when absent.",
+                      "description": "A face from the font catalog by id; the theme’s face when absent.",
                       "type": "string",
                       "enum": [
                         "inter",
@@ -44725,7 +44725,7 @@
           "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         },
         "id": {
-          "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/archive/rounds/POLISH.md 2.8 item 99)",
+          "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id",
           "type": "string",
           "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
         },
@@ -51479,7 +51479,7 @@
     {
       "name": "deck_set_layout",
       "action": "slide.setLayout",
-      "description": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+      "description": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured); from freeform the boxes are dropped and the blocks fall into the target slots by geometry.",
       "inputSchema": {
         "$id": "#/$defs/SlideSetLayoutInput",
         "type": "object",
@@ -51588,7 +51588,7 @@
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "id": {
-            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id (docs/archive/rounds/POLISH.md 2.8 item 99)",
+            "description": "The slide id; <layout>-<n> with the first free n when absent. A browser tab mints <layout>-<n>-<four base36 characters of its client id>, so two tabs adding a slide within the same moment never mint one id",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
@@ -61716,7 +61716,7 @@
             ]
           },
           "embedFonts": {
-            "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)",
+            "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds",
             "type": "boolean"
           },
           "headings": {
@@ -61754,7 +61754,7 @@
             "type": "boolean"
           },
           "svgVector": {
-            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip (docs/archive/rounds/VECTOR.md 4.6); on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
+            "description": "Write the vector of every svg picture and logo as asvg:svgBlip beside its PNG blip; on by default. false writes the PNG blip alone, which the parked control export.svg.vector selects",
             "type": "boolean"
           },
           "baseline": {
@@ -63932,7 +63932,7 @@
     {
       "name": "deck_fonts_list",
       "action": "font.list",
-      "description": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence (docs/archive/rounds/PRODUCT.md 4.2).",
+      "description": "The font catalog: every face with the name PowerPoint uses, its category, weights, italic and licence.",
       "inputSchema": {
         "$id": "#/$defs/DeckInfoInput",
         "type": "object",
@@ -65130,9 +65130,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {
@@ -65673,9 +65673,9 @@
                   "label": "Position",
                   "control": "position",
                   "group": "Layout",
-                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md)."
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere."
                 },
-                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).",
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere.",
                 "type": "object",
                 "properties": {
                   "x": {

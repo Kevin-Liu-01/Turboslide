@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { COLLAB_CLASSES, COLLAB_GEOMETRY } from '@turboslide/render/collab';
+import { SHEET_WIDTH } from '@turboslide/schema/render';
 import type { Box } from '@turboslide/schema/render';
 import type { EditorOverlayView } from '@turboslide/viewer/Editor';
 
@@ -84,6 +85,18 @@ const movingLabelText = (name: string): string => {
 
 function place(box: Box, k: number): CSSProperties {
   return { left: box[0] * k, top: box[1] * k, width: box[2] * k, height: box[3] * k };
+}
+
+/**
+ * The left of a pointer's flag from the pointer's tip, in CSS px: at the tip's right as
+ * COLLAB_GEOMETRY places it, or at its left when the flag would run past the sheet's right edge,
+ * so the name stays whole on a narrow stage (a phone's sheet is about 330 px wide, where a
+ * 120 px flag at the right of a pointer past the sheet's middle was cut by the stage).
+ */
+export function pointerFlagLeft(tipX: number, k: number): number {
+  const { flag, pointer } = COLLAB_GEOMETRY;
+  if (tipX + pointer.flagOffset.x + flag.width <= SHEET_WIDTH * k) return pointer.flagOffset.x;
+  return -flag.width - 2;
 }
 
 /** The box inset by `px` CSS pixels on every side, for the outline inside the own ring. */
@@ -414,7 +427,7 @@ export function RemoteCursors({
                 <Flag
                   participant={each}
                   name={displayNameFor(each, viewer)}
-                  x={pointerSize.flagOffset.x}
+                  x={pointerFlagLeft(x, k)}
                   y={pointerSize.flagOffset.y}
                   halo={halo}
                 />

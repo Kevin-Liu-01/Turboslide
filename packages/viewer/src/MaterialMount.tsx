@@ -5,10 +5,13 @@ import type { MaterialHandle, mountMaterial as mountMaterialFn } from '@turbosli
 import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks/material';
 import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
+import type { PlayMode } from '@turboslide/schema/deck';
 
 import { MATERIAL_PLAY_EVENT } from './dither';
 import { paceHandle } from './frame-pacer';
-import { motionReduced, onMotionReducedChange } from './reduce-motion';
+import { onLiveSettingsChange, pageLiveSettings, paperEngineRuns, planLive } from './live-plan';
+import type { LiveSettings } from './live-plan';
+import { motionReduced } from './reduce-motion';
 
 /**
  * The live material preview in the stage (SPEC 5.3: "materials mount on
@@ -44,6 +47,13 @@ import { motionReduced, onMotionReducedChange } from './reduce-motion';
  * Every live handle is registered by block id so the Shader section previews a slider through
  * `previewShaderUniforms` while it is held and writes on the release alone (5.3). Without
  * `selected` the mount behaves as before the round: every root mounts.
+ *
+ * Show mode (the shader design 3.3): the show and the viewer hand in `mode: 'show'` and the
+ * slide's Playback (`play`), and `planShow` applies live-plan.ts: under play and the person's
+ * settings the largest root that can run plays at 30 frames per second through the pacer, and
+ * every other root draws its still with no mount. Hold mounts nothing, so the stills stand alone.
+ * A slide change disposes the mount before the next body mounts, and the still stays painted under
+ * the canvas, so a slow mount or a lost context shows the still.
  *
  * The canvas sits above the frame (the fix round of ship two, verification F.5 item 1): Paper's
  * own stylesheet lays its canvas at `z-index: -1` inside the host, which it makes a stacking
@@ -83,6 +93,13 @@ export type MaterialMountProps = {
   scale?: number;
   /** The frames per second the editor's mount is capped at (5.6); 0 leaves Paper's loop alone. */
   fps?: number;
+  /**
+   * `show` in the show and the viewer (the shader design 3.3): live-plan.ts decides, `selected`
+   * is not read, and a held root mounts nothing. `edit` (the default) is the editor's rule above.
+   */
+  mode?: 'edit' | 'show';
+  /** Show mode: the slide's Playback (`slidePlay`); play when absent. */
+  play?: PlayMode;
 };
 
 type MountModule = { mountMaterial: typeof mountMaterialFn };
@@ -198,6 +215,26 @@ export function planMounts(
 }
 
 /**
+ * The rule of show mode over a stage's roots (live-plan.ts): the root that plays mounts, every
+ * other root draws its still. The facts are read off the DOM by the caller.
+ */
+export function planShow(
+  roots: ReadonlyArray<{ twoTone: boolean; engine: boolean; area: number }>,
+  settings: LiveSettings,
+): MountPlan[] {
+  return planLive(
+    roots.map(({ twoTone, engine, area }) => ({ still: twoTone, engine, area })),
+    settings,
+  ).map((plan) => (plan === 'play' ? 'play' : 'frame'));
+}
+
+/** A root's area on the page in CSS px², 0 when it is not laid out (a hidden stage). */
+function areaOf(root: Element): number {
+  const box = root.getBoundingClientRect();
+  return Math.max(0, box.width) * Math.max(0, box.height);
+}
+
+/**
  * Places a mount's canvas above the frame it covers (the header's second paragraph): an inline
  * z-index outranks Paper's layered `z-index: -1`, and the host's `overflow: hidden` keeps it in
  * the box.
@@ -298,6 +335,8 @@ export function MaterialMount({
   palette,
   scale,
   fps = EDITOR_SHADER_FPS,
+  mode = 'edit',
+  play = 'play',
 }: MaterialMountProps) {
   /* the block whose shader plays undithered (Play in the Material section); every new body stops it */
   const [playing, setPlaying] = useState<string | null>(null);
@@ -314,10 +353,22 @@ export function MaterialMount({
   }, [html]);
 
   /* reduced motion (5.6): speed 0 on every mount, followed live when the system setting or Tools >
-     Preferences > Reduce motion flips */
+     Preferences > Reduce motion flips; show mode also follows the person's Play animated patterns
+     Off (live-plan.ts), so both are read as one word that remounts on a change */
   const [reduced, setReduced] = useState<boolean>(() => motionReduced());
-  useEffect(() => onMotionReducedChange(() => setReduced(motionReduced())), []);
+  const [personHolds, setPersonHolds] = useState<boolean>(
+    () => pageLiveSettings('play').preference === 'off',
+  );
+  useEffect(
+    () =>
+      onLiveSettingsChange(() => {
+        setReduced(motionReduced());
+        setPersonHolds(pageLiveSettings('play').preference === 'off');
+      }),
+    [],
+  );
 
+  const showHolds = mode === 'show' && personHolds;
   const selectedKey = selected === undefined ? 'all' : (selected ?? []).join(' ');
   const lowRes = scale !== undefined && scale < 1;
   /* the error callback and the palette by reference and by value (the header's third paragraph):
@@ -341,10 +392,23 @@ export function MaterialMount({
     );
     // one live mount per stage (5.6): the plans are decided over every root at once, so two
     // frameless blocks never mount two stills and a selected block's mount stands alone
-    const plans = planMounts(
-      roots.map((element) => ({ id: blockIdOfRoot(element), hasFrame: rootHasFrame(element) })),
-      selected,
-    );
+    const plans =
+      mode === 'show'
+        ? planShow(
+            roots.map((element) => ({
+              twoTone: readRecipe(element)?.twoTone === true,
+              engine: paperEngineRuns(),
+              area: areaOf(element),
+            })),
+            { reduced, preference: showHolds ? 'off' : 'show', play },
+          )
+        : planMounts(
+            roots.map((element) => ({
+              id: blockIdOfRoot(element),
+              hasFrame: rootHasFrame(element),
+            })),
+            selected,
+          );
     const targets = roots.flatMap((element, index) => {
       const plan = plans[index] ?? 'frame';
       if (plan === 'frame') return [];
@@ -410,6 +474,20 @@ export function MaterialMount({
     // selectedKey stands for `selected` and paletteKey for `palette`, so a new array of the same
     // ids or a palette of the same colours does not remount; onError rides its ref
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [body, html, enabled, speed, playing, selectedKey, paletteKey, lowRes, fps, reduced]);
+  }, [
+    body,
+    html,
+    enabled,
+    speed,
+    playing,
+    selectedKey,
+    paletteKey,
+    lowRes,
+    fps,
+    reduced,
+    mode,
+    play,
+    showHolds,
+  ]);
   return null;
 }

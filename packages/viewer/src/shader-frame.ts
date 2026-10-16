@@ -41,9 +41,6 @@ import { loadMaterialMount } from './MaterialMount';
 /** The rest after the last change before a capture (5.5). */
 export const FRAME_DEBOUNCE_MS = 800;
 
-/** How many animation frames the capture waits for the host's box and for the canvas's size. */
-const CAPTURE_WAIT_FRAMES = 240;
-
 export type ShaderFrameCapture = {
   /** The frame's bytes: a PNG, or a WebP when the PNG was over the cap the capture was given. */
   bytes: Uint8Array;
@@ -99,8 +96,6 @@ export function webglRendererOf(canvas: HTMLCanvasElement): string {
     return 'webgl2';
   }
 }
-
-const nextFrame = (): Promise<void> => new Promise((r) => requestAnimationFrame(() => r()));
 
 /** The hidden host a capture mounts into: off the viewport, at half the frame in CSS px. */
 function captureHost(size: [number, number]): HTMLDivElement {
@@ -171,30 +166,15 @@ export async function captureShaderFrame(
         palette,
       },
     );
-    const mount = handle.mount as unknown as {
-      parentWidth: number;
-      devicePixelsSupported: boolean;
-      setMinPixelRatio: (ratio: number) => void;
-      setFrame: (ms: number) => void;
-      canvasElement: HTMLCanvasElement;
-    };
-    for (let i = 0; i < CAPTURE_WAIT_FRAMES && mount.parentWidth === 0; i += 1) await nextFrame();
-    // the fallback path of Paper's resize: the CSS box times max(dpr, minPixelRatio), so a 1x
-    // display also reaches the target pixels (materials capture.ts, the same clearing)
-    mount.devicePixelsSupported = false;
-    mount.setMinPixelRatio(2);
-    const canvas = mount.canvasElement;
-    for (
-      let i = 0;
-      i < CAPTURE_WAIT_FRAMES && (canvas.width !== size[0] || canvas.height !== size[1]);
-      i += 1
-    )
-      await nextFrame();
+    // either engine (Paper's or Glyphfield's, materials engine.ts) brings its canvas to the
+    // frame's pixels at any display ratio
+    await handle.reachSize(size[0], size[1]);
+    const canvas = handle.canvas();
     if (canvas.width !== size[0] || canvas.height !== size[1])
       throw new Error(
         `the capture canvas is ${canvas.width} by ${canvas.height}, not ${size[0]} by ${size[1]}`,
       );
-    mount.setFrame(anchor);
+    handle.setFrame(anchor);
     const renderer = webglRendererOf(canvas);
     const blob = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((result) => {

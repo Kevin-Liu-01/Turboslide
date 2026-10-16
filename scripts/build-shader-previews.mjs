@@ -38,8 +38,9 @@ const {
   cardPresetOf,
   shaderPreviewFile,
 } = await import('../packages/materials/src/previews.ts');
-const { CAPTURE_ORIGIN, mountInPage, noiseTextureSrc, paperDistDir, servePaper } =
+const { CAPTURE_ORIGIN, mountGlyphInPage, mountInPage, noiseTextureSrc, paperDistDir, servePaper } =
   await import('../packages/materials/src/capture.ts');
+const { glyphFrameOf, glyphProgramSpec } = await import('../packages/materials/src/engine.ts');
 const { fragmentShaderExport, mipmapsFor, textureSources, toShaderUniforms } =
   await import('../packages/materials/src/paper.ts');
 const { resolveRecipe } = await import('../packages/materials/src/recipe.ts');
@@ -128,16 +129,31 @@ try {
         const page = await context.newPage();
         await servePaper(page, paperDistDir(), renderSize);
         await page.goto(`${CAPTURE_ORIGIN}/capture.html`, { waitUntil: 'load' });
-        await mountInPage(page, {
-          shaderExport: fragmentShaderExport(entry),
-          uniforms: toShaderUniforms(entry, resolved.uniforms),
-          textures: textureSources(entry, noise),
-          mipmaps: mipmapsFor(entry),
-          frame: SHADER_PREVIEW_ANCHOR,
-          width: renderSize[0],
-          height: renderSize[1],
-          maxPixelCount: renderSize[0] * renderSize[1] + 1,
-        });
+        if (entry.engine === 'glyph') {
+          /* Glyphfield's engine (engine.ts): the renderer's own source in the page, one frame */
+          await mountGlyphInPage(page, glyphProgramSpec(entry));
+          const frame = glyphFrameOf(
+            entry,
+            resolved.uniforms,
+            renderSize[0],
+            renderSize[1],
+            SHADER_PREVIEW_ANCHOR,
+          );
+          await page.evaluate(async (value) => {
+            window.__glyph.draw(value);
+            await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          }, frame);
+        } else
+          await mountInPage(page, {
+            shaderExport: fragmentShaderExport(entry),
+            uniforms: toShaderUniforms(entry, resolved.uniforms),
+            textures: textureSources(entry, noise),
+            mipmaps: mipmapsFor(entry),
+            frame: SHADER_PREVIEW_ANCHOR,
+            width: renderSize[0],
+            height: renderSize[1],
+            maxPixelCount: renderSize[0] * renderSize[1] + 1,
+          });
         const png = await page
           .locator('#host canvas')
           .screenshot({ type: 'png', animations: 'disabled' });

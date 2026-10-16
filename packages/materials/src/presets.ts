@@ -50,6 +50,8 @@ export type PaletteRoles = {
   colors?: string;
   inner?: string;
   ramp?: string;
+  /** A single colour between the ground and the figure (the glyph engine's middle stop): the second colour of the list. */
+  mid?: string;
 };
 
 /**
@@ -109,6 +111,10 @@ function palette(
   if (roles.front !== undefined) out[roles.front] = values.front;
   if (roles.colors !== undefined) out[roles.colors] = values.colors;
   if (roles.inner !== undefined) out[roles.inner] = values.inner;
+  if (roles.mid !== undefined) {
+    const [first, second] = values.colors.split(',');
+    out[roles.mid] = second ?? first ?? values.front;
+  }
   if (roles.ramp !== undefined) {
     const [first, second] = values.colors.split(',');
     out[roles.ramp] = [values.back, second ?? first, first].filter(Boolean).join(',');

@@ -17,6 +17,8 @@ import type {
 } from '@turboslide/schema/blocks/material';
 
 import type { PaletteRoles, ShaderPalette } from './presets.ts';
+import { GLYPH_MATERIALS } from './glyph/catalog.ts';
+import type { GlyphProgramId } from './glyph/shaders.ts';
 import { LEGACY_SHADER_PALETTE, presetsFor } from './presets.ts';
 import { PROTO_MATERIALS } from './proto.ts';
 
@@ -66,8 +68,10 @@ export type PaperShaderName =
   | 'pulsingBorder'
   | 'dotOrbit';
 
-export type MaterialEntry = MaterialCatalogEntry & {
-  shader: PaperShaderName;
+/** The engine that draws an entry (PLAN wave 3.1, `engine.ts`): Paper Shaders, or Glyphfield's own. */
+export type ShaderEngineName = 'paper' | 'glyph';
+
+type EntryFields = MaterialCatalogEntry & {
   /** Paper's two sizing families: object (fit contain, the shape in the box) or pattern (fit none). */
   sizing: 'object' | 'pattern';
   /** The shader samples Paper's packaged noise texture through u_noiseTexture. */
@@ -87,6 +91,22 @@ export type MaterialEntry = MaterialCatalogEntry & {
   /** The preset an insert lands (5.2): the recorded recipe where one exists, else the first palette preset. */
   featuredPreset?: string;
 };
+
+/** A Paper Shaders entry: the fragment shader is the package's `<shader>FragmentShader`. */
+export type PaperEntry = EntryFields & { engine: 'paper'; shader: PaperShaderName };
+
+/**
+ * A Glyphfield entry (`glyph/catalog.ts`): a GLSL program of `glyph/shaders.ts` on WebGL2, or the
+ * glyph field on Canvas 2D; `timeScale` turns the frame's ms into the program's seconds at the
+ * material's tuned rate, the way Glyphfield's motion rate does.
+ */
+export type GlyphEntry = EntryFields & {
+  engine: 'glyph';
+  shader: GlyphProgramId | 'glyph-field';
+  timeScale: number;
+};
+
+export type MaterialEntry = PaperEntry | GlyphEntry;
 
 const PAPER_CREDIT = 'Material: {label}, Paper Shaders';
 const PAPER_LICENSE = 'Apache-2.0, Copyright 2026 Paper (THIRD_PARTY_NOTICES.md)';
@@ -176,15 +196,16 @@ function sizing(family: 'object' | 'pattern', scale = 1): MaterialUniformSpec[] 
 }
 
 type Base = Omit<
-  MaterialEntry,
-  'family' | 'available' | 'credit' | 'license' | 'presets' | 'still' | 'imageSource'
+  PaperEntry,
+  'engine' | 'family' | 'available' | 'credit' | 'license' | 'presets' | 'still' | 'imageSource'
 > & { still?: boolean; imageSource?: boolean };
 
-function paper(base: Base): MaterialEntry {
+function paper(base: Base): PaperEntry {
   return {
     ...base,
     still: base.still ?? false,
     imageSource: base.imageSource ?? false,
+    engine: 'paper',
     family: 'paper',
     available: true,
     credit: PAPER_CREDIT.replace('{label}', base.label.toLowerCase()),
@@ -193,7 +214,7 @@ function paper(base: Base): MaterialEntry {
   };
 }
 
-export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
+const PAPER_MATERIALS: Readonly<Record<string, PaperEntry>> = {
   'paper:liquid-metal': paper({
     id: 'paper:liquid-metal',
     label: 'Liquid metal',
@@ -759,6 +780,12 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   }),
 };
 
+/** Every entry: Paper's, then Glyphfield's (PLAN wave 3). */
+export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
+  ...PAPER_MATERIALS,
+  ...GLYPH_MATERIALS,
+};
+
 export const MATERIAL_IDS: ReadonlyArray<string> = Object.keys(MATERIALS);
 
 /**
@@ -835,7 +862,13 @@ export function requireMaterial(id: string): MaterialEntry {
   return entry;
 }
 
-/** The catalog as every transport reads it (material.list): the paper entries, then the proto stubs. */
+/** The engine's name `material.list` reports: Paper Shaders, Glyphfield WebGL2 or Glyphfield Canvas 2D. */
+export function engineLabelOf(entry: MaterialEntry): string {
+  if (entry.engine === 'paper') return 'Paper Shaders';
+  return entry.shader === 'glyph-field' ? 'Glyphfield Canvas 2D' : 'Glyphfield WebGL2';
+}
+
+/** The catalog as every transport reads it (material.list): the paper and glyph entries, then the proto stubs. */
 export function listMaterials(
   filter?: string,
   palette: ShaderPalette = LEGACY_SHADER_PALETTE,
@@ -843,7 +876,8 @@ export function listMaterials(
   const paperEntries: MaterialCatalogEntry[] = Object.values(MATERIALS).map((entry) => {
     const { id, family, label, doc, available, credit, license, uniforms, presets } =
       entryWithPalette(entry, palette);
-    return { id, family, label, doc, available, credit, license, uniforms, presets };
+    const engine = engineLabelOf(entry);
+    return { id, family, engine, label, doc, available, credit, license, uniforms, presets };
   });
   const all = [...paperEntries, ...PROTO_MATERIALS];
   return filter === undefined ? all : all.filter((entry) => entry.id === filter);

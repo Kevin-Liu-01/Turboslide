@@ -309,12 +309,15 @@ export type MaterialPreset = {
   uniforms: MaterialUniforms;
 };
 
-export type MaterialFamily = 'paper' | 'proto';
+/** `paper` (Paper Shaders), `glyph` (Glyphfield's own WebGL2 and Canvas 2D engine), `proto` (stubs). */
+export type MaterialFamily = 'paper' | 'glyph' | 'proto';
 
 export type MaterialCatalogEntry = {
-  /** `paper:liquid-metal`, `proto:event-horizon`. */
+  /** `paper:liquid-metal`, `glyph:liquid-glass`, `proto:event-horizon`. */
   id: string;
   family: MaterialFamily;
+  /** The engine that draws it: `Paper Shaders`, `Glyphfield WebGL2` or `Glyphfield Canvas 2D`; absent on a stub. */
+  engine?: string;
   label: string;
   doc: string;
   /** false for the proto:* engines until open question 9 is answered. */
@@ -348,7 +351,8 @@ export const materialPresetSchema = z.strictObject({
 
 export const materialCatalogEntrySchema = z.strictObject({
   id: z.string().min(1),
-  family: z.enum(['paper', 'proto']),
+  family: z.enum(['paper', 'glyph', 'proto']),
+  engine: z.string().optional(),
   label: z.string(),
   doc: z.string(),
   available: z.boolean(),

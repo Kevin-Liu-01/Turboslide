@@ -2440,7 +2440,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'material.list': action({
     id: 'material.list',
     label: 'List materials',
-    doc: 'The material catalog: every paper:* entry with its uniform schema and palette presets, and the proto:* engines with their availability.',
+    doc: 'The material catalog: every paper:* (Paper Shaders) and glyph:* (Glyphfield WebGL2 and Canvas 2D) entry with its engine, uniform schema and palette presets, and the proto:* engines with their availability.',
     group: 'asset',
     mutates: false,
     transports: A,

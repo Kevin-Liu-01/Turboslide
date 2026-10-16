@@ -6,11 +6,14 @@
 // handle whose setters take recipe values, so the inspector's Material section writes the same
 // `u_*` record the capture job hashes. Browser only (DOM); packages/viewer MaterialMount is the
 // React glue over it, and the capture page inlines the same steps for the headless frame.
+// Glyphfield's engine (PLAN wave 3.1, engine.ts) mounts a `glyph:*` entry through the same handle,
+// so the stage, the pacer, the gallery's hover and the client capture take either engine.
 import { ShaderMount, getShaderNoiseTexture } from '@paper-design/shaders';
 import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks/material';
 
-import type { MaterialEntry } from './catalog.ts';
+import type { MaterialEntry, PaperEntry, ShaderEngineName } from './catalog.ts';
 import { entryWithPalette, requireMaterial } from './catalog.ts';
+import { mountGlyph } from './engine.ts';
 import { fragmentShaderFor, mipmapsFor, textureSources, toShaderUniforms } from './paper.ts';
 import type { ShaderPalette } from './presets.ts';
 import type { ResolvedRecipe } from './recipe.ts';
@@ -41,17 +44,28 @@ export type MountOptions = {
 export type MaterialHandle = {
   entry: MaterialEntry;
   resolved: ResolvedRecipe;
-  mount: ShaderMount;
+  /** The engine drawing it (engine.ts). */
+  engine: ShaderEngineName;
   /** Recipe values (`u_*` names, hex colors): converted and pushed to the shader. */
   setUniforms: (uniforms: MaterialUniforms) => void;
   setFrame: (ms: number) => void;
   setSpeed: (speed: number) => void;
   /** The frame the shader shows, in ms. */
   frame: () => number;
-  /** The canvas Paper draws into, for a capture's `toBlob` and the perf rows' reads. */
+  /** The canvas the engine draws into, for a capture's `toBlob` and the perf rows' reads. */
   canvas: () => HTMLCanvasElement;
+  /** Resolves once the canvas is exactly `width` by `height` pixels at any display ratio (the client capture). */
+  reachSize: (width: number, height: number) => Promise<void>;
+  /** The most pixels the canvas may hold; the show's adaptive quality halves it (PLAN wave 3.3). */
+  setPixelBudget: (maxPixelCount: number) => void;
   dispose: () => void;
 };
+
+/** Frames a capture waits for the host's box and then the canvas's size, at most (four seconds at 60 Hz). */
+const SIZE_WAIT_FRAMES = 240;
+
+const nextFrame = (): Promise<void> =>
+  new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
 /** An image from a data URI, decoded, so ShaderMount's texture upload sees a complete image. */
 export async function loadImage(src: string): Promise<HTMLImageElement> {
@@ -62,9 +76,7 @@ export async function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /** The HTMLImageElement uniforms of an entry (the empty pixel mask, Paper's noise texture). */
-export async function loadTextures(
-  entry: MaterialEntry,
-): Promise<Record<string, HTMLImageElement>> {
+export async function loadTextures(entry: PaperEntry): Promise<Record<string, HTMLImageElement>> {
   const noise = getShaderNoiseTexture();
   const sources = textureSources(entry, noise?.src ?? '');
   const out: Record<string, HTMLImageElement> = {};
@@ -91,6 +103,45 @@ export async function mountMaterial(
       ? requireMaterial(recipe.materialId)
       : entryWithPalette(requireMaterial(recipe.materialId), options.palette);
   const resolved = resolveRecipe(entry, recipe);
+  if (entry.engine === 'glyph') {
+    const engine = mountGlyph(host, entry, resolved.uniforms, {
+      speed: options.speed ?? 1,
+      frame: options.frame ?? recipe.anchor ?? 0,
+      minPixelRatio: options.minPixelRatio ?? MOUNT_DEFAULTS.minPixelRatio,
+      maxPixelCount: options.maxPixelCount ?? MOUNT_DEFAULTS.maxPixelCount,
+      preserveDrawingBuffer: options.contextAttributes?.preserveDrawingBuffer === true,
+    });
+    return {
+      entry,
+      resolved,
+      engine: 'glyph',
+      setUniforms: (next) => {
+        const merged = resolveRecipe(entry, {
+          ...(resolved.preset !== undefined ? { preset: resolved.preset } : {}),
+          uniforms: { ...resolved.uniforms, ...next },
+        });
+        resolved.uniforms = merged.uniforms;
+        engine.setUniforms(merged.uniforms);
+      },
+      setFrame: engine.setFrame,
+      setSpeed: engine.setSpeed,
+      frame: engine.frame,
+      canvas: engine.canvas,
+      reachSize: engine.reachSize,
+      setPixelBudget: engine.setPixelBudget,
+      dispose: engine.dispose,
+    };
+  }
+  return mountPaper(host, entry, recipe, resolved, options);
+}
+
+async function mountPaper(
+  host: HTMLElement,
+  entry: PaperEntry,
+  recipe: MaterialRecipe,
+  resolved: ResolvedRecipe,
+  options: MountOptions,
+): Promise<MaterialHandle> {
   const uniforms = toShaderUniforms(entry, resolved.uniforms);
   const textures = await loadTextures(entry);
   const mount = new ShaderMount(
@@ -107,7 +158,7 @@ export async function mountMaterial(
   return {
     entry,
     resolved,
-    mount,
+    engine: 'paper',
     setUniforms: (next) => {
       const merged = resolveRecipe(entry, {
         ...(resolved.preset !== undefined ? { preset: resolved.preset } : {}),
@@ -120,6 +171,23 @@ export async function mountMaterial(
     setSpeed: (speed) => mount.setSpeed(speed),
     frame: () => mount.getCurrentFrame(),
     canvas: () => mount.canvasElement,
+    reachSize: async (width, height) => {
+      const internals = mount as unknown as { parentWidth: number; devicePixelsSupported: boolean };
+      for (let i = 0; i < SIZE_WAIT_FRAMES && internals.parentWidth === 0; i += 1)
+        await nextFrame();
+      // the fallback path of Paper's resize: the CSS box times max(dpr, minPixelRatio), so a 1x
+      // display also reaches the target pixels (capture.ts clears the same flag)
+      internals.devicePixelsSupported = false;
+      mount.setMinPixelRatio(2);
+      const canvas = mount.canvasElement;
+      for (
+        let i = 0;
+        i < SIZE_WAIT_FRAMES && (canvas.width !== width || canvas.height !== height);
+        i += 1
+      )
+        await nextFrame();
+    },
+    setPixelBudget: (maxPixelCount) => mount.setMaxPixelCount(maxPixelCount),
     dispose: () => mount.dispose(),
   };
 }

@@ -202,6 +202,8 @@ export function controlsAtDefault(controls: MaterialControls | undefined): boole
 
 /** Glyphfield's scaling groups, by the Paper uniform's name without its `u_` prefix. */
 const STRENGTH_KEYS = [
+  /* the glyph engine's own control uniforms (u_strength, u_detail, u_grain) map one to one */
+  'strength',
   'intensity',
   'contrast',
   'bloom',
@@ -212,6 +214,7 @@ const STRENGTH_KEYS = [
   'midIntensity',
 ] as const;
 const DETAIL_KEYS = [
+  'detail',
   'noiseIterations',
   'octaveCount',
   'foldCount',
@@ -265,7 +268,10 @@ const DENSITY_KEYS = [
   'folds',
   'mixing',
 ] as const;
-const GRAIN_KEYS = ['grainMixer', 'grainOverlay'] as const;
+const GRAIN_KEYS = ['grainMixer', 'grainOverlay', 'grain'] as const;
+
+/** Uniforms in a whole-number group (Detail) that stay fractional: the glyph engine's u_detail. */
+const FRACTIONAL_KEYS: ReadonlySet<string> = new Set(['u_detail']);
 
 /** Glyphfield's `controlFactor`: 1 at the default, bounded per group. */
 export function controlFactor(
@@ -392,10 +398,8 @@ export function applyControls(
       const spec = specs.get(key);
       if (spec === undefined) continue;
       const original = numberOf(base[key], typeof spec.default === 'number' ? spec.default : 0);
-      out[key] = clampToSpec(
-        spec,
-        scaled(original, factor, zeroSpan, integer || spec.kind === 'int'),
-      );
+      const whole = (integer && !FRACTIONAL_KEYS.has(key)) || spec.kind === 'int';
+      out[key] = clampToSpec(spec, scaled(original, factor, zeroSpan, whole));
     }
   };
   scaleGroup('strength', controlFactor(values.strength, 0.3, 0.35, 3.4), 0.35);
@@ -420,7 +424,9 @@ export function applyControls(
     const amount = Math.min(1, Math.max(0, values.grain / 100));
     for (const key of map.grain) {
       const spec = specs.get(key);
-      if (spec !== undefined) out[key] = clampToSpec(spec, amount);
+      /* Paper's grain mixers read 0 to 1; the glyph engine's u_grain reads the control's 0 to 100 */
+      if (spec !== undefined)
+        out[key] = clampToSpec(spec, key === 'u_grain' ? values.grain : amount);
     }
   }
   if (values.rotation !== DEFAULT_CONTROLS.rotation) {

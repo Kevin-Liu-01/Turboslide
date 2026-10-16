@@ -12,10 +12,14 @@ import { tipProps } from '../Tooltip';
 import { AccountMenu } from './AccountMenu';
 import { IdentityChip } from './IdentityChip';
 import { RosterMenu } from './RosterMenu';
+import { Flag } from './RemoteCursors';
 import {
   canFollow,
   chipTipDocOf,
   chipTipOf,
+  displayNameFor,
+  doingOf,
+  doingText,
   meOf,
   slideNumberOf,
   slotChips,
@@ -34,7 +38,10 @@ import {
  * while they are followed, or Go to slide where Follow is refused; the own chip opens the own
  * chip's menu (7.5). The row's width never changes when a person joins or leaves. The slot itself
  * carries a tooltip naming who is in the presentation now (docs/archive/rounds/PRODUCT.md section 2 rank 30;
- * audit-seller 32).
+ * audit-seller 32). An agent with a brand mark that names its step (docs/SITE.md D5) reads the
+ * step in its chip's name and tooltip ("Codex: adding a chart"), and hangs the same words in a
+ * flag under the slot, the flags in one row in the order of the chips; they sit outside the
+ * slot's tracks, so the row's width still never changes.
  *
  * The polish round (docs/archive/rounds/POLISH.md item 104; the row collab.follow.anonymous-editor): before it a
  * chip's click followed the person at once and a second click stopped, with no word on screen,
@@ -90,6 +97,11 @@ export function presenceSlotTip(others: number): { name: string; doc: string } {
 }
 const EMPTY: EditorPresence = { others: [] };
 
+/** The shown chips of agents with a brand mark that name a step (docs/SITE.md D5), in slot order. */
+function stepChips(shown: readonly PresenceParticipant[]): PresenceParticipant[] {
+  return shown.filter((participant) => doingOf(participant) !== null);
+}
+
 export function PresenceSlot() {
   const shell = useEditorShell();
   const { input } = shell;
@@ -141,6 +153,8 @@ export function PresenceSlot() {
         const n = slideNumberOf(input.document, participant.slideId);
         const following = presence.following === participant.clientId;
         const follows = followOffered && canFollow(participant, input.capabilities);
+        const doing = doingOf(participant);
+        const step = doing === null ? null : doingText(displayNameFor(participant, viewer), doing);
         return (
           <button
             key={participant.clientId}
@@ -151,13 +165,19 @@ export function PresenceSlot() {
             data-menu-item="title.presence.goTo"
             data-following={following ? '' : undefined}
             aria-label={
-              n === null ? (participant.name ?? participant.label) : PRESENCE.goToSlide(n)
+              step !== null
+                ? n === null
+                  ? step
+                  : `${step}, ${PRESENCE.goToSlide(n)}`
+                : n === null
+                  ? (participant.name ?? participant.label)
+                  : PRESENCE.goToSlide(n)
             }
             onClick={() => goTo(participant)}
             {...tipProps({
               name: following
                 ? PRESENCE.following(participant.name ?? participant.label)
-                : chipTipOf(participant, viewer, n),
+                : (step ?? chipTipOf(participant, viewer, n)),
               /* the trust sentence first (docs/archive/rounds/PEOPLE.md 3.7), then what a click does: the chip's
                  click is the one time jump; Follow is in the list while its row is offered
                  (docs/archive/rounds/POLISH.md item 104) */
@@ -182,6 +202,21 @@ export function PresenceSlot() {
           </button>
         );
       })}
+      {/* the steps of the agents with a brand mark (docs/SITE.md D5): one flag each in a row
+          under the slot, in the order of their chips */}
+      {stepChips(shown).length > 0 ? (
+        <span className="ts-presence-steps" aria-hidden="true">
+          {stepChips(shown).map((participant) => (
+            <Flag
+              key={`step:${participant.clientId}`}
+              participant={participant}
+              name={displayNameFor(participant, viewer)}
+              x={0}
+              y={0}
+            />
+          ))}
+        </span>
+      ) : null}
       {/* the roster's opener: `+N` once a fifth person joins, a people glyph while the chips fit,
           and nothing drawn while nobody else is present (docs/archive/rounds/RETURN.md 4.3: no empty box). The
           roster (Go to slide with the person's slide and role) needs an opener from the first other

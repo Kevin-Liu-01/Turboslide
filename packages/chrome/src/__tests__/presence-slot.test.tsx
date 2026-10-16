@@ -126,6 +126,52 @@ afterEach(async () => {
   document.body.innerHTML = '';
 });
 
+describe('the steps of agents with a brand mark (docs/SITE.md D5)', () => {
+  it('names the step in the chip and hangs it in a flag under the slot, in chip order', () => {
+    const claude = person(1, {
+      principalId: 'agent:claude-code',
+      label: 'Claude Code',
+      trust: 'agent',
+      kind: 'agent',
+      brand: 'claude-code',
+      doing: 'writing a point',
+    });
+    const codex = person(2, {
+      principalId: 'agent:codex',
+      label: 'Codex',
+      trust: 'agent',
+      kind: 'agent',
+      brand: 'codex',
+      doing: 'adding a chart',
+    });
+    const visitor = person(3);
+    const { container } = render(
+      <Harness
+        input={input({ presence: { others: [claude, visitor, codex] } })}
+        shell={shellState()}
+      />,
+    );
+    const presence = container.querySelector('[data-control="title.presence"]')!;
+    const chip = presence.querySelector('[data-control="presence.chip.c1"]')!;
+    expect(chip.getAttribute('aria-label')).toMatch(/^Claude Code: writing a point/);
+    const steps = presence.querySelector('.ts-presence-steps')!;
+    expect(Array.from(steps.querySelectorAll('.ts-flag-text')).map((el) => el.textContent)).toEqual(
+      ['Claude Code: writing a point', 'Codex: adding a chart'],
+    );
+    /* the slot keeps its tracks: the flags are outside them */
+    expect(presence.querySelectorAll('.ts-presence-slot')).toHaveLength(4);
+  });
+
+  it('draws no step flag for a person or for an agent without a brand mark', () => {
+    const plain = person(1, { trust: 'agent', kind: 'agent', label: 'Agent', doing: 'working' });
+    const human = person(2, { doing: 'typing' });
+    const { container } = render(
+      <Harness input={input({ presence: { others: [plain, human] } })} shell={shellState()} />,
+    );
+    expect(container.querySelector('.ts-presence-steps')).toBeNull();
+  });
+});
+
 describe('the title row slots', () => {
   it('exist from the first paint with nobody present: the presence slot, the comments glyph, the inbox plate at zero, Slideshow, Share', () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);

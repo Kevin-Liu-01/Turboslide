@@ -12,6 +12,7 @@ import { PlateMenu } from './PlateMenu';
 import {
   canFollow,
   displayNameFor,
+  doingOf,
   rosterRoleWord,
   slideNumberOf,
   trustSentenceFor,
@@ -195,6 +196,8 @@ export function RosterMenu({
                   : n !== null
                     ? `${self ? '' : ' · '}${PRESENCE.slide(n)}`
                     : ''}
+                {/* the step an agent with a brand mark names (docs/SITE.md D5) */}
+                {doingOf(participant) === null ? '' : ` · ${doingOf(participant)}`}
               </span>
             </span>
             {!self ? (

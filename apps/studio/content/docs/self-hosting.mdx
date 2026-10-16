@@ -68,7 +68,7 @@ Keep every token and secret out of the repository.
 | `TURBOSLIDE_ACCOUNTS`                      | `d1` keeps accounts in the realtime Worker's D1 database. It needs `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`.                                               |
 | `TURBOSLIDE_AUTH_HOSTS`                    | The host names sign in accepts, as a list. The default is turboslide.com's hosts and localhost; a request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`. |
 | `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses whose account is the studio's admin from its first sign in.                                                                                               |
-| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field. `capture` keeps outgoing mail in the studio for tests.                                                  |
+| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field, and the sign in mail's routes answer 404. `capture` keeps outgoing mail in the studio for tests.        |
 | `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in mail through Resend. Both are needed; with only the key, mail stays off.                                                                               |
 | `TURBOSLIDE_LOCAL_TOKEN`                   | `require` makes the agent surface on localhost ask for the checkout's own token in `.turboslide/token`.                                                             |
 
@@ -94,7 +94,29 @@ The admin can turn a feature off without a deploy:
 turboslide admin flag exports --on false
 ```
 
-The thirteen switches are `realtime`, `presence`, `comments`, `invites`, `email`, `exports`, `uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly` and `assist`. A switched off feature answers 503 with `Retry-After: 60` and one sentence, such as "Downloads are paused right now. Try again in a few minutes". Every instance reads a change within 5 seconds.
+The thirteen switches are `realtime`, `presence`, `comments`, `invites`, `email`, `exports`, `uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly` and `assist`. A switched off feature answers 503 with `Retry-After: 60` and one sentence, such as "Downloads are paused right now. Try again in a few minutes".
+
+With the realtime Worker (`TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_BEARER`), the switches are kept in the Worker's database and every instance reads a change within 5 seconds. Without the Worker, each instance keeps its own switches in `.turboslide/flags.json`. While the Worker does not answer, every switch reads on except `realtime`.
+
+## Health and error reports
+
+`GET /api/health` answers 200 with `{ "ok": true, "commit": "<build>" }` when the store reads the canary presentation and the accounts database answers, and 503 with `"ok": false` when either fails. `TURBOSLIDE_CANARY_DECK` names the canary, `gt-brand` by default. Each instance checks at most once every 30 seconds, whoever calls.
+
+The realtime Worker reads `/api/health` every five minutes and sends one mail through Resend when:
+
+- two reads in a row fail;
+- the night's backup is not done, or done with failures, at 06:00 UTC;
+- the month's restore drill fails.
+
+| Variable                      | What it sets                                                                              |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `TURBOSLIDE_ALERT_RESEND_KEY` | The Worker's own Resend key. The alert never reads `TURBOSLIDE_MAIL` or `RESEND_API_KEY`. |
+| `TURBOSLIDE_ALERT_TO`         | The addresses that receive an alert, as a comma list.                                     |
+| `TURBOSLIDE_ALERT_FROM`       | The sender. Unset, Resend's test address.                                                 |
+
+These are secrets of the Worker, not of the studio. Mails of one kind are at least an hour apart, and an alert that stays open sends no second mail. Without the key or an address, the Worker writes the alert to its log.
+
+The pages send their errors to `POST /api/x/errors`. The browser removes presentation text, mail and network addresses, tokens and cookies from a report, and the server removes them again before it writes the report to its log as one line. A report is at most 4 KB, and one address can send 30 a minute. Each report also adds one to a daily count by kind and page in the accounts database, kept for 30 days.
 
 ## Security and the assistant
 

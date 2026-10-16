@@ -29,7 +29,7 @@ The [action reference](/docs/reference) lists every action with its input fields
 - Every action that changes a presentation takes `baseRevision`, the revision the agent read. If the presentation changed since, the action is refused with status 409 and the current document. Read the response, then try again once.
 - Every write returns the normalized result. Read the new state from the response, not from memory.
 - An unknown field is refused with `unknown_field` and a JSON pointer to it.
-- Name yourself as the author: `--author agent:<runId>` on the command line, the `x-turboslide-author: agent:<runId>` header over HTTP.
+- On a studio, a write is recorded under the key's owner as `agent:<tokenId>`. `--author` on the command line and the `x-turboslide-author` header over HTTP only label the run; in a local folder `--author` names the author.
 - A claim about a presentation names the revision it was checked at.
 
 ## Leases
@@ -38,10 +38,12 @@ The [action reference](/docs/reference) lists every action with its input fields
 
 ## Tokens
 
-On a hosted studio such as turboslide.com, the HTTP actions and MCP need a bearer token: `Authorization: Bearer <token>`. `turboslide login --to https://www.turboslide.com` gets one: it prints a code, you approve the code at `/device` while signed in, and the command line stores the token. On your own computer the routes answer on localhost without a token.
+On a hosted studio such as turboslide.com, the HTTP actions and MCP need an API key: `Authorization: Bearer <key>`. `turboslide login --to https://www.turboslide.com` gets one: it prints a code, you approve the code at `/device` while signed in, and the command line stores the key. On your own computer the routes answer on localhost without a key.
+
+A key acts for the person who approved it, with that person's access to each presentation, and its scopes limit it further: `read`, `comment`, `write`, `export`, `share` and `admin`. A key without `share` reads other people's ids as stand-ins (`ref_` and 22 characters), as a person who may not share does. Comment actions work with a key wherever its owner may comment. The profile's API keys list shows each key and revokes it.
 
 <Callout type="warning" title="Keep tokens secret">
-  A token acts as you. Do not paste it into a presentation, a commit or a chat.
+  A key acts as you. Do not paste it into a presentation, a commit or a chat.
 </Callout>
 
 ## Skills

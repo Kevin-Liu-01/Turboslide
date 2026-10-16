@@ -65,8 +65,8 @@ Keep every token and secret out of the repository.
 | `DATABASE_URL`                             | A Postgres database for accounts. A checkout can use a SQLite file named by `TURBOSLIDE_AUTH_DB` instead. Without a database the studio offers no sign in.          |
 | `TURBOSLIDE_ACCOUNTS`                      | `d1` keeps accounts in the realtime Worker's D1 database. It needs `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`.                                               |
 | `TURBOSLIDE_AUTH_HOSTS`                    | The host names sign in accepts, as a list. The default is turboslide.com's hosts and localhost; a request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`. |
-| `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses that are the studio's admin. An address counts only once it is verified.                                                                                  |
-| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off: the email field is hidden and the link and code addresses answer 404. `capture` keeps outgoing mail in the studio for tests.      |
+| `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses whose account is the studio's admin from its first sign in.                                                                                               |
+| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field. `capture` keeps outgoing mail in the studio for tests.                                                  |
 | `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in mail through Resend. Both are needed; with only the key, mail stays off.                                                                               |
 | `TURBOSLIDE_LOCAL_TOKEN`                   | `require` makes the agent surface on localhost ask for the checkout's own token in `.turboslide/token`.                                                             |
 

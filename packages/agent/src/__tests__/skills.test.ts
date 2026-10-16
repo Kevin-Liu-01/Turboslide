@@ -81,8 +81,9 @@ describe('the reference tables', () => {
   it('actions.md names every action with its transports, CLI usage and MCP tool', () => {
     const text = read('skills/turboslide-api/references/actions.md');
     for (const id of ACTION_IDS) expect(text, id).toContain(`\`${id}\``);
+    /* a table cell escapes a pipe (markdownTable); motion.add's usage has alternatives */
     for (const spec of actionsOn('cli'))
-      if (spec.cli) expect(text, spec.id).toContain(spec.cli.usage);
+      if (spec.cli) expect(text, spec.id).toContain(spec.cli.usage.replace(/\|/g, '\\|'));
     for (const spec of actionsOn('mcp'))
       if (spec.mcp) expect(text, spec.id).toContain(`\`${spec.mcp}\``);
   });

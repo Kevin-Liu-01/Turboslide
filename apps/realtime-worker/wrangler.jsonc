@@ -91,6 +91,11 @@
     // `--var TURBOSLIDE_BUILD_COMMIT:<sha>` (the way /api/agent reads the Vercel deployment's
     // stamp, apps/studio/src/server/build-commit.ts)
     "TURBOSLIDE_BUILD_COMMIT": "",
+    // the SHA-256 of the bundle a deploy uploads, answered by /health as `bundle`; empty here and
+    // passed at the deploy as `--var TURBOSLIDE_BUNDLE_HASH:<hash>`, the hash
+    // scripts/hosting/worker-hash.mjs prints, so the guard deploys the production Worker, which
+    // closes every editor's socket, only when the hash changes (RELIABILITY-16, hardening HR-RT#18)
+    "TURBOSLIDE_BUNDLE_HASH": "",
   },
   "env": {
     // The preview Worker turboslide-realtime-preview: the gate's Worker (5.5 item 2), never a
@@ -118,6 +123,7 @@
         "TURBOSLIDE_CHECKPOINT_MAX_MS": "10000",
         "TURBOSLIDE_ADMISSION": "shadow",
         "TURBOSLIDE_BUILD_COMMIT": "",
+        "TURBOSLIDE_BUNDLE_HASH": "",
       },
     },
   },

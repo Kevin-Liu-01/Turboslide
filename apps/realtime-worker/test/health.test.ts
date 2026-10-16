@@ -29,6 +29,7 @@ describe('the realtime worker router', () => {
       ok: true,
       protocol: 1,
       commit: '',
+      bundle: '',
       realtime: 'on',
       appOrigin: env.TURBOSLIDE_APP_ORIGIN,
       callbacks: 'ok',

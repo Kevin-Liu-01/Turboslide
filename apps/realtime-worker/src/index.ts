@@ -17,10 +17,10 @@
 // flight (docs/hosting.md 13.8); it is never sent. A Worker without `TURBOSLIDE_DB_BEARER`
 // refuses every `/db` call and `/control/db-unlisted` and logs `db.bearer.missing` once per
 // isolate (HR-K2#4: the room bearer's fallback ended with the rotation). `GET /health` answers
-// `{ ok, protocol, commit, realtime, appOrigin, callbacks, db, statements }`, the last two
-// naming the bearer mode and the allowlist mode, never a value. `OPTIONS` answers CORS for the
-// ticket POSTs. A refused upgrade is accepted and closed with its code so the browser reads it
-// (3.6.3). The Worker's own work per request stays
+// `{ ok, protocol, commit, bundle, realtime, appOrigin, callbacks, db, statements, admission,
+// alerts }`, `db` and `statements` naming the bearer mode and the allowlist mode, never a value.
+// `OPTIONS` answers CORS for the ticket POSTs. A refused upgrade is accepted and closed with its
+// code so the browser reads it (3.6.3). The Worker's own work per request stays
 // under the Free plan's 10 ms: one HMAC verify and one JSON parse per upgrade, one digest compare
 // per bearer value. Request counts by class ride `GET /control/counters`.
 import {
@@ -73,6 +73,13 @@ export type HealthBody = {
   ok: true;
   protocol: number;
   commit: string;
+  /**
+   * The SHA-256 of the bundle this deploy uploaded (`TURBOSLIDE_BUNDLE_HASH`, which the deploy
+   * passes as `--var` from scripts/hosting/worker-hash.mjs; RELIABILITY-16, hardening HR-RT#18);
+   * the guard deploys the production Worker only when the push's hash differs. Empty when the
+   * deploy passed none
+   */
+  bundle: string;
   realtime: 'on' | 'off' | 'unset';
   appOrigin: string;
   /** whether the deck objects reach `appOrigin` (control.ts `CallbacksState`; 3.8) */
@@ -187,6 +194,7 @@ async function health(env: Env): Promise<HealthBody> {
     ok: true,
     protocol: protocolOf(env),
     commit: env.TURBOSLIDE_BUILD_COMMIT ?? '',
+    bundle: env.TURBOSLIDE_BUNDLE_HASH ?? '',
     realtime: await realtimeFlag(env.ACCOUNTS),
     appOrigin: env.TURBOSLIDE_APP_ORIGIN ?? '',
     callbacks: await callbacksState(env.ACCOUNTS),

@@ -259,7 +259,7 @@ import {
   announceTextChanged,
   readRunText,
 } from '@turboslide/viewer/InlineText';
-import { isPictureKind } from '@turboslide/viewer/model';
+import { isPictureKind, motionField } from '@turboslide/viewer/model';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import {
@@ -5051,6 +5051,8 @@ export function toViewerDeck(snap: EditorSnapshot, _draft: boolean): ViewerDeck 
         // the show's frame follows Insert > Slide numbers as the editor stage does (render/deck.ts
         // slideCounter; docs/archive/rounds/RETURN.md section 5 slides.numbers.apply, "in the show too")
         counter: slideCounter(deck, slide, 1, 1) !== '',
+        // the slide clock's input for the show (HTML-SLIDES-DESIGN 2.6); none on a slide without motion
+        ...motionField(deck.defaults, slide),
       });
     }
   }

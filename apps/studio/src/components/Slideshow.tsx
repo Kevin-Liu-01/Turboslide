@@ -34,6 +34,9 @@ import { BlankLayer, LaserPointer } from '@turboslide/viewer/present/SlideshowLa
 import { PRESENT_TEXT } from '@turboslide/viewer/present/strings';
 import { isControlTarget, isEditableTarget } from '@turboslide/viewer/present/ui';
 import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
+import { motionReduced, onMotionReducedChange } from '@turboslide/viewer/reduce-motion';
+import { createSlideClock } from '@turboslide/viewer/slide-clock';
+import type { ClockEntry, SlideClock } from '@turboslide/viewer/slide-clock';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import {
@@ -55,7 +58,11 @@ import './Slideshow.css';
  * show owns navigation while it is up: the keys and clicks move through the play list the caller
  * hands in (skipped slides already left out) and every move is one `onGoto`, the same select the
  * shell and `view.goto` use, so an agent's goto moves the show and the presenter window alike.
- * Nothing here talks to the network: the deck is in memory (R07 rule 29).
+ * Nothing here talks to the network: the deck is in memory (R07 rule 29). A slide with effects
+ * runs its slide clock (HTML-SLIDES-DESIGN 2.6) on the stage's slide body: the next key or a
+ * click plays its next step before the show leaves the slide, back shows the state after the
+ * previous step and from step 0 lands on the previous slide at its end, a jump enters a slide at
+ * its start, and the timed advance moves on by itself.
  */
 export type SlideshowState = {
   blank: BlankSlide | null;
@@ -75,6 +82,11 @@ export type SlideshowProps = {
   say: (message: string, hold?: number) => void;
   /** the presenting facts, for describe().state */
   onState?: (state: SlideshowState) => void;
+  /**
+   * filled with the show's step while it is up: the stage's click and swipe call it, so a click
+   * plays the slide's next step before it moves to the next slide
+   */
+  stepRef?: { current: ((delta: number) => void) | null };
 };
 
 type Popover = 'list' | 'options' | 'shortcuts' | null;
@@ -229,6 +241,16 @@ function optionsItems(state: { laser: boolean; fullscreen: boolean }): MenuItem[
   ];
 }
 
+/** The step facts of the state message: the clock's, when they belong to the slide shown. */
+function stepFacts(
+  facts: { slideId: string; step: number; steps: number },
+  slideId: string,
+): { step: number; steps: number } {
+  return facts.slideId === slideId
+    ? { step: facts.step, steps: facts.steps }
+    : { step: 0, steps: 0 };
+}
+
 function isFullscreen(): boolean {
   return typeof document !== 'undefined' && document.fullscreenElement !== null;
 }
@@ -242,6 +264,7 @@ export function Slideshow({
   onExit,
   say,
   onState,
+  stepRef,
 }: SlideshowProps) {
   const play = useMemo(() => playList(slides), [slides]);
   const index = currentPlayIndex(slides, play, activeId);
@@ -302,9 +325,18 @@ export function Slideshow({
   const live = useRef({ play, index, total, blank, laser, popover, activeId, onGoto, onExit, say });
   live.current = { play, index, total, blank, laser, popover, activeId, onGoto, onExit, say };
 
-  const goto = useCallback((to: number) => {
+  /* the slide clock of the slide shown, and where the next slide it builds enters */
+  const clock = useRef<SlideClock | null>(null);
+  const entry = useRef<{ slideId: string; at: ClockEntry } | null>(null);
+  const [steps, setSteps] = useState({ slideId: '', step: 0, steps: 0 });
+  const stepsRef = useRef(steps);
+  stepsRef.current = steps;
+
+  const goto = useCallback((to: number, at: ClockEntry = 'start') => {
     const target = live.current.play[to];
-    if (target !== undefined && target.id !== live.current.activeId) live.current.onGoto(target.id);
+    if (target === undefined || target.id === live.current.activeId) return;
+    entry.current = { slideId: target.id, at };
+    live.current.onGoto(target.id);
   }, []);
   const exit = useCallback(() => {
     exitPresentFullscreen();
@@ -320,17 +352,74 @@ export function Slideshow({
         else exit();
         return;
       }
+      /* the slide's own steps first (HTML-SLIDES-DESIGN 2.6) */
+      const slideClock = clock.current;
+      if (slideClock !== null && (delta > 0 ? slideClock.next() : slideClock.back())) return;
       if (delta > 0 && count > 0 && at >= count - 1) {
         setEnded(true);
         return;
       }
-      goto(stepPlayIndex(at, delta, count));
+      goto(stepPlayIndex(at, delta, count), delta < 0 ? 'end' : 'start');
     },
     [goto, exit],
   );
+  useLayoutEffect(() => {
+    if (stepRef === undefined) return undefined;
+    stepRef.current = step;
+    return () => {
+      if (stepRef.current === step) stepRef.current = null;
+    };
+  }, [stepRef, step]);
   const endedRef = useRef(false);
   endedRef.current = ended;
 
+  /* Reduce motion turns effects into cuts; a change builds the clock again at the same step */
+  const [reduced, setReduced] = useState(false);
+  useMountEffect(() => {
+    setReduced(motionReduced());
+    return onMotionReducedChange(() => setReduced(motionReduced()));
+  });
+
+  /* the timed advance leaves the slide as the next key does */
+  const advance = useRef(() => step(1));
+  advance.current = () => step(1);
+
+  /* the slide clock on the stage's slide body: built for each slide shown and each new render of
+     it, entered where the move asked (a jump and the next key at its start, back at its end, the
+     presenter window at its step), and disposed so the stage draws the slide as authored again */
+  const current = play[index];
+  const currentId = current?.id;
+  const currentHtml = current?.html;
+  const currentMotion = current?.motion;
+  useLayoutEffect(() => {
+    const stage = root.current?.parentElement;
+    if (currentId === undefined || currentMotion === undefined || !stage) {
+      const slideId = currentId ?? '';
+      setSteps((was) =>
+        was.slideId === slideId && was.steps === 0 ? was : { slideId, step: 0, steps: 0 },
+      );
+      return undefined;
+    }
+    const body = Array.from(
+      stage.querySelectorAll<HTMLElement>('.ts-stage > .pt-slide:not(.is-leaving)'),
+    ).find((el) => el.getAttribute('data-slide-id') === currentId);
+    if (body === undefined) return undefined;
+    const asked = entry.current?.slideId === currentId ? entry.current.at : null;
+    entry.current = null;
+    /* a new render of the slide shown (an agent's edit, Reduce motion) keeps its step */
+    const kept = stepsRef.current.slideId === currentId ? stepsRef.current.step : null;
+    const made = createSlideClock(body, currentMotion, {
+      reduced,
+      entry: asked ?? kept ?? 'start',
+      onAdvance: () => advance.current(),
+      onStep: (at, count) => setSteps({ slideId: currentId, step: at, steps: count }),
+    });
+    clock.current = made;
+    return () => {
+      made.dispose();
+      if (clock.current === made) clock.current = null;
+    };
+  }, [currentId, currentHtml, currentMotion, reduced]);
   const toggleFullscreen = useCallback(() => {
     if (isFullscreen()) exitPresentFullscreen();
     else requestPresentFullscreen();
@@ -510,13 +599,23 @@ export function Slideshow({
         case 'hello':
           postState();
           return;
-        case 'goto':
-          if (
-            message.slideId !== state.activeId &&
-            state.play.some((s) => s.id === message.slideId)
-          )
+        case 'goto': {
+          /* the presenter's move: a slide at its start or at the state after a step */
+          const at: ClockEntry =
+            message.step === undefined || message.step === 0 ? 'start' : message.step;
+          if (message.slideId === state.activeId) {
+            const slideClock = clock.current;
+            if (slideClock === null || message.step === undefined) return;
+            if (message.step === slideClock.step() + 1) slideClock.next();
+            else if (message.step !== slideClock.step()) slideClock.go(message.step);
+            return;
+          }
+          if (state.play.some((s) => s.id === message.slideId)) {
+            entry.current = { slideId: message.slideId, at };
             state.onGoto(message.slideId);
+          }
           return;
+        }
         case 'present':
           if (!message.on) exit();
           return;
@@ -536,6 +635,7 @@ export function Slideshow({
         total: state.total,
         blank: state.blank,
         laser: state.laser,
+        ...stepFacts(stepsRef.current, current?.id ?? state.activeId),
       });
     };
     postState();
@@ -548,16 +648,18 @@ export function Slideshow({
 
   /* every change of the facts reaches the presenter window */
   useEffect(() => {
-    const current = play[index];
+    const shown = play[index];
+    const slideId = shown?.id ?? activeId;
     channel.current?.post({
       type: 'state',
-      slideId: current?.id ?? activeId,
+      slideId,
       index,
       total,
       blank,
       laser,
+      ...stepFacts(steps, slideId),
     });
-  }, [activeId, index, total, blank, laser, play]);
+  }, [activeId, index, total, blank, laser, play, steps]);
 
   const closePopover = useCallback(
     (refocus: HTMLElement | null) => {
@@ -650,6 +752,8 @@ export function Slideshow({
       data-blank={blank ?? undefined}
       data-laser={laser ? 'true' : undefined}
       data-slide-id={play[index]?.id}
+      data-step={steps.slideId === play[index]?.id ? steps.step : 0}
+      data-steps={steps.slideId === play[index]?.id ? steps.steps : 0}
     >
       <PresentToolbar
         index={index}

@@ -7,6 +7,8 @@
  */
 
 import type { FrameBand } from '@turboslide/render/stage';
+import { slideAdvance, slideTransition } from '@turboslide/schema/motion-core';
+import type { Advance, Effect, MotionFields, Transition } from '@turboslide/schema/motion-core';
 
 /** The sheet (SPEC 2.1): 1600 by 900 sheet pixels. */
 export const SHEET_W = 1600;
@@ -46,7 +48,37 @@ export type ViewerSlide = {
   counter?: boolean;
   /** the layout the slide was made from (gslides-parity SPEC 7.2.2), for the Apply layout check */
   template?: string;
+  /**
+   * the slide clock's input (HTML-SLIDES-DESIGN 2.6): the effects, and the transition and timed
+   * advance resolved against the deck's defaults; absent on a slide with none of them
+   */
+  motion?: SlideMotion;
 };
+
+/** A slide's motion as the viewer carries it: the effects, the transition and the advance resolved. */
+export type SlideMotion = { effects: Effect[]; transition?: Transition; advance?: Advance };
+
+/**
+ * The `motion` field of a viewer slide, spread into each builder (the server's payload, the
+ * editor's and the presenter's): the slide's effects with its transition and advance, else the
+ * deck's; nothing for a slide with none, so a deck without motion carries the payload it did.
+ */
+export function motionField(
+  defaults: { transition?: Transition; advance?: Advance } | undefined,
+  slide: MotionFields,
+): { motion?: SlideMotion } {
+  const transition = slideTransition(defaults, slide);
+  const advance = slideAdvance(defaults, slide);
+  const effects = slide.effects ?? [];
+  if (effects.length === 0 && transition === undefined && advance === undefined) return {};
+  return {
+    motion: {
+      effects,
+      ...(transition !== undefined ? { transition } : {}),
+      ...(advance !== undefined ? { advance } : {}),
+    },
+  };
+}
 
 export type ViewerSection = { id: string; name: string; slideIds: readonly string[] };
 

@@ -2133,9 +2133,15 @@ function EditorStage({
       : undefined;
   /* the show runs over the unskipped slides (SPEC 9.2); a click on the sheet steps through them */
   const play = useMemo(() => playList(viewerDeck.slides), [viewerDeck.slides]);
+  /* the show's step (Slideshow fills it): a click plays the slide's next step before it moves on */
+  const showStep = useRef<((delta: number) => void) | null>(null);
   const onStep = (delta: number) => {
     if (!shell.present) {
       shell.step(delta);
+      return;
+    }
+    if (showStep.current !== null) {
+      showStep.current(delta);
       return;
     }
     const at = currentPlayIndex(viewerDeck.slides, play, shell.active);
@@ -2323,6 +2329,7 @@ function EditorStage({
           onGoto={shell.select}
           onExit={() => shell.setPresent(false)}
           say={say}
+          stepRef={showStep}
         />
       ) : null}
       {shell.mode === 'grid' ? (

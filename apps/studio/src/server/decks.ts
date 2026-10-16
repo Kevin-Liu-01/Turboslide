@@ -17,7 +17,7 @@ import type {
 import { StaleRevisionError } from '@turboslide/store/templates';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
-import { isPictureKind } from '@turboslide/viewer/model';
+import { isPictureKind, motionField } from '@turboslide/viewer/model';
 
 import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
 import { slideCounter } from '@turboslide/render/deck';
@@ -220,6 +220,8 @@ function buildViewerDeck(
            through the same rule the editor stage and the exports read (return/build/b5.md request 12) */
         counter: slideCounter(deck, slide, 1, 1) !== '',
         ...(options.notes && slide.notes !== undefined ? { notes: slide.notes } : {}),
+        /* the slide clock's input for the show (HTML-SLIDES-DESIGN 2.6); a slide without motion adds nothing */
+        ...motionField(deck.defaults, slide),
       });
     }
   }

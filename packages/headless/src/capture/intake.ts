@@ -244,14 +244,15 @@ export async function rasterizeSvg(
  * A continuous asset re-encoded in its own format at the twin size (SPEC-3 8.5, 0.29): sharp
  * decodes with the pixel budget and writes fresh bytes, so no byte of the input survives into the
  * store; an animated GIF is flattened to its first frame; svg never reaches here (the hosted svg
- * branch above takes it, and a checkout keeps it as it came).
+ * branch above takes it, and a checkout keeps it as it came). A caller with a smaller budget (a
+ * shader frame, 3200 by 3200 at most) names it in `limitInputPixels`.
  */
 export async function reencodeContinuous(
   bytes: Uint8Array,
-  info: { format: string },
+  info: { format: string; limitInputPixels?: number },
 ): Promise<{ bytes: Uint8Array; ext: string }> {
   const pipeline = sharp(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength), {
-    limitInputPixels: 64_000_000,
+    limitInputPixels: info.limitInputPixels ?? 64_000_000,
     failOn: 'error',
     animated: false,
   });

@@ -101,12 +101,14 @@ import {
   shaderSetMutations,
 } from './shader-writes.ts';
 import {
+  FRAME_LONG_SIDE,
   anchorOf,
   frameAssetId,
   frameKeyOf,
   frameSizeFor,
   materialAspectOf,
   recipeKey,
+  roundedAspect,
 } from './recipe-key.ts';
 import { supersededFrameOf } from '@turboslide/store/frames';
 
@@ -1086,17 +1088,35 @@ export function pngSize(bytes: Uint8Array): [number, number] {
   return [view.getUint32(16, false), view.getUint32(20, false)];
 }
 
+/** The most pixels a shader frame decodes to: 3200 by 3200, the long side on both axes. */
+export const FRAME_PIXEL_LIMIT = 3200 * 3200;
+
 /**
- * The frame's bytes as the PNG the twin is written from: a PNG as it came; a WebP decoded and
- * written as a lossless PNG at the same size (the client's fallback for a PNG over the function's
- * body cap, viewer shader-frame.ts and docs/archive/rounds/POLISH.md item 36, so the stored twin, the exports and
- * the card read one format as before). Anything else is refused as a frame.
+ * The frame's bytes as the PNG the twin is written from: a PNG or a WebP decoded with the
+ * intake's settings (`failOn: 'error'`, at most 3200 by 3200 pixels) and written again as a
+ * lossless PNG of the pixels alone, so no byte a browser sent (a text chunk, trailing bytes)
+ * reaches the public store (docs/security.md section 10; SHADERS-DESIGN.md 1.5). The WebP is the
+ * client's fallback for a PNG over the function's body cap (viewer shader-frame.ts and
+ * docs/archive/rounds/POLISH.md item 36). Anything else is refused as a frame.
  */
 export async function frameBytesAsPng(bytes: Uint8Array): Promise<Uint8Array> {
   const format = sniffImage(bytes);
-  if (format === 'png') return bytes;
-  if (format === 'webp') return (await reencodeContinuous(bytes, { format: 'png' })).bytes;
-  throw new RangeError('a shader frame is a PNG or a WebP');
+  if (format !== 'png' && format !== 'webp')
+    throw new RangeError('a shader frame is a PNG or a WebP');
+  return (await reencodeContinuous(bytes, { format: 'png', limitInputPixels: FRAME_PIXEL_LIMIT }))
+    .bytes;
+}
+
+/**
+ * True when a frame's size fits its block's box (SHADERS-DESIGN.md 1.5): the long side is 3200 and
+ * the aspect, to two decimals as the frame key reads it, is within 0.01 of the box's. A capture
+ * made at the box's aspect passes after a resize that kept the key; a square frame for a wide box
+ * does not.
+ */
+export function frameFitsBox(size: [number, number], aspect: number): boolean {
+  const [w, h] = size;
+  if (Math.max(w, h) !== FRAME_LONG_SIDE) return false;
+  return Math.abs(roundedAspect(w / h) - roundedAspect(aspect)) < 0.011;
 }
 
 /** The credit line of a frame (5.5): "Shader: Liquid metal, Paper Shaders, rendered in Turboslide". */
@@ -1179,9 +1199,9 @@ export async function commitFrame(
   const png = await frameBytesAsPng(bytes);
   const size = pngSize(png);
   const wanted = frameSizeFor(materialAspectOf(block));
-  if (Math.max(size[0], size[1]) !== wanted[0] && Math.max(size[0], size[1]) !== wanted[1])
+  if (!frameFitsBox(size, materialAspectOf(block)))
     throw new RangeError(
-      `a shader frame has the long side 3200 (docs/archive/rounds/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
+      `a shader frame is ${wanted[0]} by ${wanted[1]} for this box, the long side 3200 (docs/archive/rounds/FEATURES.md 5.5); got ${size[0]} by ${size[1]}`,
     );
   const assetId = frameAssetId(frameKey);
   const relative = `assets/${assetId}@2x.png`;

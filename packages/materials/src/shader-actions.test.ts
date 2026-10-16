@@ -29,6 +29,7 @@ import {
   SHADER_ACTION_ID_STRINGS,
   SHADER_INSERT_SIZE,
   frameBytesAsPng,
+  frameFitsBox,
   pngSize,
   shaderFrame,
   shaderInsert,
@@ -55,8 +56,16 @@ async function revision(): Promise<number> {
   return (await document()).deck.revision;
 }
 
-/** A PNG of one colour at a size, from scratch (the signature, IHDR, one IDAT of filter 0 rows, IEND). */
-function pngOf(width: number, height: number, rgb: [number, number, number]): Uint8Array {
+/**
+ * A PNG of one colour at a size, from scratch (the signature, IHDR, one IDAT of filter 0 rows, IEND),
+ * with a tEXt chunk before IEND when `text` is given.
+ */
+function pngOf(
+  width: number,
+  height: number,
+  rgb: [number, number, number],
+  text?: string,
+): Uint8Array {
   const crcTable = new Uint32Array(256).map((_, n) => {
     let c = n;
     for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
@@ -92,6 +101,7 @@ function pngOf(width: number, height: number, rgb: [number, number, number]): Ui
     new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk('IHDR', ihdr),
     chunk('IDAT', idat),
+    ...(text === undefined ? [] : [chunk('tEXt', new TextEncoder().encode(`Comment\0${text}`))]),
     chunk('IEND', new Uint8Array(0)),
   ];
   const out = new Uint8Array(parts.reduce((n, part) => n + part.length, 0));
@@ -363,7 +373,7 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
     // the transcode alone: a PNG of the WebP's pixels at the frame's size
     const back = await frameBytesAsPng(webp);
     expect(pngSize(back)).toEqual([3200, 1814]);
-    expect(await frameBytesAsPng(png)).toBe(png);
+    expect(pngSize(await frameBytesAsPng(png))).toEqual([3200, 1814]);
     await expect(
       frameBytesAsPng(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])),
     ).rejects.toThrow('a shader frame is a PNG or a WebP');
@@ -394,5 +404,21 @@ describe('shader.insert, shader.set and shader.frame on a file store', () => {
         bytes: base64(small),
       }),
     ).rejects.toThrow(RangeError);
+  });
+
+  it("stores the pixels of a frame alone, and refuses a frame whose aspect is not the box's (SHADERS-DESIGN.md 1.5)", async () => {
+    const script = '<script>alert(1)</script>';
+    const sent = pngOf(3200, 1814, [40, 80, 120], script);
+    expect(Buffer.from(sent).includes(Buffer.from('tEXt'))).toBe(true);
+    const stored = await frameBytesAsPng(sent);
+    expect(pngSize(stored)).toEqual([3200, 1814]);
+    expect(Buffer.from(stored).includes(Buffer.from('tEXt'))).toBe(false);
+    expect(Buffer.from(stored).includes(Buffer.from(script))).toBe(false);
+    expect(frameFitsBox([3200, 1814], 480 / 272)).toBe(true);
+    // a resize that kept the key's two decimals keeps the capture made before it
+    expect(frameFitsBox([3200, 1806], 480 / 272)).toBe(true);
+    expect(frameFitsBox([3200, 3200], 480 / 272)).toBe(false);
+    expect(frameFitsBox([1814, 3200], 480 / 272)).toBe(false);
+    expect(frameFitsBox([1600, 907], 480 / 272)).toBe(false);
   });
 });

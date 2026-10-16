@@ -70,7 +70,8 @@ describe('the first save of a new deck through a write freeze', () => {
 
   it("says each refusal's sentence on the snackbar while the first save waits", () => {
     const controller = readFileSync(join(import.meta.dirname, 'controller.tsx'), 'utf8');
-    const from = controller.indexOf('sendThroughFreeze(() => writeDeck(');
+    /* the first save goes through the editor's backend seam (backend.ts, 448281af8) */
+    const from = controller.search(/sendThroughFreeze\(\s*\(\) => backend\.writeDeck\(/);
     expect(from).toBeGreaterThan(0);
     const call = controller.slice(from, controller.indexOf('} catch (error) {', from));
     expect(call).toMatch(/waiting: \(refusal\) => \{[\s\S]*?\bsayRefusal\(refusal\);\s*\},/);

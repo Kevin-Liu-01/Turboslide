@@ -69,6 +69,13 @@ export type ToolEntry = {
   shape: 'object' | 'items' | 'value';
 };
 
+/* One conversion per schema and direction: 177 tools share 115 output schemas (the write result,
+   the slide), and every caller reads the result without writing to it. */
+const converted = {
+  input: new WeakMap<z.ZodType, JsonSchema>(),
+  output: new WeakMap<z.ZodType, JsonSchema>(),
+};
+
 /**
  * Zod to JSON Schema for the tool list, with the `$schema` marker dropped so the schema is plain.
  * The target is draft-07, the target the SDK's own McpServer uses for zod v4 and the dialect its
@@ -77,12 +84,18 @@ export type ToolEntry = {
  * render records' boxes). The committed mcp-tools.json keeps draft 2020-12 for readers.
  */
 export function toJsonSchema(schema: z.ZodType, io: 'input' | 'output'): JsonSchema {
-  const { $schema: _dropped, ...rest } = z.toJSONSchema(schema, {
-    target: 'draft-7',
-    io,
-    unrepresentable: 'any',
-  });
-  return rest;
+  const cache = converted[io];
+  let json = cache.get(schema);
+  if (json === undefined) {
+    const { $schema: _dropped, ...rest } = z.toJSONSchema(schema, {
+      target: 'draft-7',
+      io,
+      unrepresentable: 'any',
+    });
+    json = rest;
+    cache.set(schema, json);
+  }
+  return json;
 }
 
 type ObjectSchema = Tool['inputSchema'];
@@ -234,8 +247,25 @@ export function outputSchemaFor(spec: ActionSpec): JsonSchema {
   return wrappedOutputSchema(outputSchema, outputShape(outputSchema));
 }
 
-/** One tool entry for an action spec. */
+/*
+ * The tool part of an entry by action spec. The studio creates a server, and so derives every
+ * tool, for each MCP session; converting the inputs and outputs was most of a session's start
+ * (the output schemas inline the recursive Block union). The action table is static, so each spec
+ * is converted once per process. The entries share the tool definitions, which nothing writes.
+ */
+const derived = new WeakMap<ActionSpec, Omit<ToolEntry, 'alsoServes'>>();
+
+/** One tool entry for an action spec, with its own `alsoServes` list. */
 export function toolEntry(spec: ActionSpec): ToolEntry {
+  let entry = derived.get(spec);
+  if (entry === undefined) {
+    entry = deriveToolEntry(spec);
+    derived.set(spec, entry);
+  }
+  return { ...entry, alsoServes: [] };
+}
+
+function deriveToolEntry(spec: ActionSpec): Omit<ToolEntry, 'alsoServes'> {
   if (spec.mcp === undefined) throw new RangeError(`${spec.id} has no MCP tool name`);
   const inputSchema = toJsonSchema(spec.input, 'input');
   const outputSchema = toJsonSchema(spec.output, 'output');
@@ -244,7 +274,6 @@ export function toolEntry(spec: ActionSpec): ToolEntry {
   return {
     name: spec.mcp,
     action: spec.id,
-    alsoServes: [],
     spec,
     returnsImages,
     shape,

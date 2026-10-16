@@ -336,6 +336,9 @@ importers:
       '@turboslide/realtime':
         specifier: workspace:*
         version: link:../../packages/realtime
+      '@turboslide/report':
+        specifier: workspace:*
+        version: link:../../packages/report
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../../packages/schema

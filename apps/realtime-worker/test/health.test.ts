@@ -35,6 +35,7 @@ describe('the realtime worker router', () => {
       db: 'own',
       statements: 'enforce',
       admission: { mode: 'shadow', disagree: 0 },
+      alerts: { channel: 'unset', open: [] },
     });
   });
 

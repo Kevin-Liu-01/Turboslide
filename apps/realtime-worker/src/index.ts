@@ -58,6 +58,8 @@ import {
   REALTIME_HEADER,
 } from './deck-room.ts';
 import { authorizationToken, secretsMatchAny, verifyTicketRotating } from './ticket.ts';
+import { alertsHealth, watchOnce } from './watch.ts';
+import type { WatchKind } from './watch.ts';
 
 export { DeckRoom };
 
@@ -84,6 +86,11 @@ export type HealthBody = {
    * `shadow` placed differently from `full` so far (`rt_flags`), the count HR-RT#5b reads
    */
   admission: { mode: AdmissionMode; disagree: number };
+  /**
+   * The alert channel of the scheduled check (hardening HR-O#3): `set` when the Worker holds
+   * the alert key and address, and the kinds of incident open now (watch.ts); never a value
+   */
+  alerts: { channel: 'set' | 'unset'; open: WatchKind[] };
 };
 
 /**
@@ -187,6 +194,7 @@ async function health(env: Env): Promise<HealthBody> {
       mode: admissionModeOf(env.TURBOSLIDE_ADMISSION),
       disagree: await admissionDisagreements(env.ACCOUNTS),
     },
+    alerts: await alertsHealth(env),
   };
 }
 
@@ -474,6 +482,8 @@ export default {
     ctx: ExecutionContext,
   ): Promise<void> {
     ctx.waitUntil(sweepOpenDecks(env.ACCOUNTS, objectsOf(env)));
+    // the health check and the alert mail (hardening HR-O#3, watch.ts), on the sweep's cron
+    ctx.waitUntil(watchOnce(env));
   },
   async fetch(request: Request, env: Env): Promise<Response> {
     try {

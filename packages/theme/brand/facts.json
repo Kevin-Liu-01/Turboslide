@@ -22,7 +22,7 @@
     "source": "packages/schema/src/shapes.ts SHAPE_PRESETS"
   },
   "materials": {
-    "count": 23,
+    "count": 41,
     "source": "packages/materials/src/catalog.ts MATERIAL_IDS"
   },
   "checkSteps": {

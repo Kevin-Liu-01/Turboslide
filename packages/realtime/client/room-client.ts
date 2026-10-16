@@ -276,15 +276,18 @@ export const BACKOFF_MAX_MS = 8000;
  */
 export const RECONNECT_HOLD_MAX_MS = BACKOFF_MAX_MS;
 /**
- * How many times an ops POST answered 404 is sent again before the ops return to their author.
- * On the blob tier the store's head of a deck made seconds ago answers null on another instance
- * for a while (the class `apps/studio/src/editor/access-refresh.ts` names for the read side; the
- * polish round's sync fix round 3 read a resend answered 404 on the enforce preview 23 s after
- * the deck's first write), so the route's 404 is a moment's, not the deck's; a deck deleted
- * forever answers 404 on every retry and the ops return once these are spent (the ladder's
- * 500 ms doubling to BACKOFF_MAX_MS: about 15 s).
+ * How long ops POSTs answered 404 in a row are sent again before the client asks whether the
+ * deck is gone (hardening HR-RC#8, RELIABILITY-18). On the blob tier the store's head of a deck
+ * made seconds ago answers null on another instance for a while (the class
+ * `apps/studio/src/editor/access-refresh.ts` names for the read side; the polish round's sync
+ * fix round 3 read a resend answered 404 on the enforce preview 23 s after the deck's first
+ * write), so the route's 404 is a moment's, not the deck's. Every room client runs on a deck its
+ * tab loaded or created (the controller attaches it once the deck is in the store), so a 404 is
+ * sent again on the backoff ladder for this long. Past it the client asks `hasStoredDeck`: the
+ * ops return to their author only when the store says the deck is gone. Before this the ops
+ * returned after five retries, about 15 s, and the 23 s 404 took the words out of the slide.
  */
-export const NOT_FOUND_RETRY_MAX = 5;
+export const NOT_FOUND_RETRY_MS = 60_000;
 /** The longest wait a server's `retry-after` or `retry:` is honoured for before the next open. */
 export const REOPEN_WAIT_MAX_MS = 60_000;
 /** At most this many earlier ids ride an open's `retire` (server/room.ts RETIRE_MAX reads no more). */
@@ -504,6 +507,13 @@ export type RoomClientOptions = {
    * every unsaved op is offered.
    */
   heldOps?: (opIds: ReadonlyArray<string>) => Promise<ReadonlySet<string>>;
+  /**
+   * Whether the store holds the deck, asked by a read that heads the store and no instance's
+   * copy (hardening HR-RC#8): once ops POSTs have answered 404 for NOT_FOUND_RETRY_MS, the ops
+   * return to their author when this answers false, and stay pending and go again when it
+   * answers true or fails. Absent, the ops return once the window is spent.
+   */
+  hasStoredDeck?: () => Promise<boolean>;
   /** a pending op that no longer applies after a remote change was returned to its author */
   onUnplaceable?: (op: PendingOp) => void;
 };
@@ -1107,8 +1117,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let flushAt = Number.POSITIVE_INFINITY;
   let posting: Promise<void> | null = null;
   let backoff = 0;
-  /** the ops POSTs answered 404 in a row (NOT_FOUND_RETRY_MAX), reset by an answer that is not one */
-  let notFoundRetries = 0;
+  /**
+   * When the first of the ops POSTs answered 404 in a row was answered (NOT_FOUND_RETRY_MS),
+   * null after an answer that is not one; a `hasStoredDeck` that answers the deck is there
+   * starts the window again
+   */
+  let notFoundSince: number | null = null;
   let stopped = false;
   /**
    * The POSTs of this client on the blob tier whose commit may reach this tab as a store echo
@@ -2219,6 +2233,23 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     emitStatus();
   };
 
+  /**
+   * Whether ops answered 404 go again (hardening HR-RC#8, RELIABILITY-18): yes within
+   * NOT_FOUND_RETRY_MS of the first 404 in a row. Past it the store is asked: only its answer
+   * that the deck is gone returns the ops; its answer that the deck is there, or a failed ask,
+   * keeps them and starts the window again. With no way to ask, the ops return.
+   */
+  const sendAgainAfterNotFound = async (): Promise<boolean> => {
+    const at = now();
+    notFoundSince ??= at;
+    if (at - notFoundSince < NOT_FOUND_RETRY_MS) return true;
+    if (options.hasStoredDeck === undefined) return false;
+    const stored = await options.hasStoredDeck().catch(() => true);
+    if (!stored) return false;
+    notFoundSince = now();
+    return true;
+  };
+
   const flush = async (): Promise<void> => {
     if (posting !== null) {
       await posting;
@@ -2346,7 +2377,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       resending = false;
       if (response.ok) {
         backoff = 0;
-        notFoundRetries = 0;
+        notFoundSince = null;
         // the room answered for every op of the POST: admitted, refused or not reached
         for (const op of batch) delete op.unconfirmed;
         // what landed under the admitted entries first, so they drain at once (C3S-F8); an
@@ -2464,13 +2495,12 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         reopenStream({ message: 'the client binding lapsed' });
         return;
       }
-      if (response.status === 404 && notFoundRetries < NOT_FOUND_RETRY_MAX) {
+      if (response.status === 404 && (await sendAgainAfterNotFound())) {
         // the deck is unknown to the instance that answered (the blob tier's head of a fresh
-        // deck, NOT_FOUND_RETRY_MAX): the ops stay pending and go again after a backoff, to
+        // deck, NOT_FOUND_RETRY_MS): the ops stay pending and go again after a backoff, to
         // another instance or a later moment, the way a 5xx is resent; the record stays for the
         // echo. Before this the ops returned to the author at once and the word went to the card
         resending = true;
-        notFoundRetries += 1;
         emitStatus();
         backoff = Math.min(BACKOFF_MAX_MS, backoff === 0 ? 500 : backoff * 2);
         timers.setTimeout(() => void flush(), backoff);
@@ -2478,7 +2508,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       }
       // a refusal that will not change on a retry (a forbidden write, a deck gone for good): the
       // ops return to the author
-      notFoundRetries = 0;
+      notFoundSince = null;
       runEnds.clear();
       if (record !== null) posted = posted.filter((row) => row !== record);
       for (const op of batch) {

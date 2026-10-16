@@ -2150,6 +2150,20 @@ export function createEditorController(init: {
         const answer = await heldOpIds({ deckId, opIds: [...opIds] });
         return new Set(answer.held);
       },
+      /* asked once ops POSTs have answered 404 for a minute (hardening HR-RC#8, RELIABILITY-18).
+         The loader reads past this instance's copy: a room it holds syncs the store by force,
+         and an instance without one heads the store (root.ts `hasStoredDeck`). A deck the store
+         does not hold, or one the caller may no longer read, answers null or the loader's
+         "No deck <id>"; only then do the ops return to their author. Any other failure keeps
+         them, as a 5xx does */
+      hasStoredDeck: async () => {
+        try {
+          return (await readEditorDeck({ deckId })) !== null;
+        } catch (error) {
+          if (error instanceof Error && /\bno deck\b/i.test(error.message)) return false;
+          throw error;
+        }
+      },
       onPersisted: (offer) => {
         const apply = offer.apply;
         publish({

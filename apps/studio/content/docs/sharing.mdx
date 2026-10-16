@@ -31,25 +31,45 @@ Click **Share** in the title row to open the sharing dialog. What you can share 
   caption="The sharing dialog with Anyone with the link and Viewer chosen."
 />
 
-| Role      | Can do                                                   |
-| --------- | -------------------------------------------------------- |
-| Viewer    | Open and present the presentation.                       |
-| Commenter | Everything a viewer can do, and add and answer comments. |
-| Editor    | Everything a commenter can do, and change the slides.    |
+| Role      | Can do                                                   | Version history |
+| --------- | -------------------------------------------------------- | --------------- |
+| Viewer    | Open and present the presentation.                       | No              |
+| Commenter | Everything a viewer can do, and add and answer comments. | No              |
+| Editor    | Everything a commenter can do, and change the slides.    | Yes             |
 
-The dialog also makes three fixed links under More: a view link, a present link that opens the slideshow, and an edit link. Each one can be rotated or revoked, so an old address stops working.
+Speaker notes reach editors and the owner only. Skipped slides reach commenters, editors and the owner; a viewer's copy of the presentation leaves them out.
+
+The dialog also makes three fixed links under More: a view link, a present link that opens the slideshow, and an edit link. Each one can be rotated or revoked, so an old address stops working. A link never lets its holder share, change the sharing settings, trash or remove the presentation.
 
 ## Share with people by name
 
 Signed in, click More in the sharing dialog to add people by email and pick a role for each person. The people list shows the owner first, then each person with their role. Use the menu on a person's row to change the role, set an expiration date or remove their access.
 
-A person who opens a restricted presentation without access sees a page that lets them ask for it. The owner sees the request in the sharing dialog and can approve it there.
+A person who opens a restricted presentation without access sees a page that lets them ask for it. The owner sees the request in the sharing dialog and can approve it there. A request nobody answers expires after 30 days.
+
+The owner can always share. An editor can share while the setting Editors can change permissions and share is on; it is one of the five settings under the gear in the sharing dialog.
+
+## What other people see
+
+A person who may not share sees their own access and their own request, and nothing else from the people list: no links, no pending owner and no other person's address. That is every viewer and commenter, and an editor while editors cannot share.
+
+Where an answer names another person, such a reader gets a stand-in in place of that person's id: `ref_` and 22 characters. A stand-in stays the same for one person on one presentation and is different on every other presentation. Version authors, comment authors, the people who have the presentation open and the activity rows use the same stand-ins.
+
+## Version history and copies
+
+Viewers and commenters cannot open version history. The same holds for an agent key with their access: it cannot list versions, watch the presentation's changes or compare two revisions, and a viewer's live connection starts from the presentation as it was handed over, with no earlier changes. Editors open version history, and an editor who may not share sees the other authors as stand-ins.
+
+Make a copy with Copy comments needs the right to share. Without it, Make a copy answers "Only people who may share this presentation can copy its comments. Make the copy without Copy comments."
+
+## Pictures in a restricted presentation
+
+The thumbnails of a restricted presentation are served only to people who can open it, and only their own browser keeps a copy. Its pictures are served under the presentation's own key or to its readers; the same picture asked for by its file name answers not found.
 
 ## Work together
 
 Several people can edit one presentation at the same time, and changes from others appear as they are made. The title row shows a chip for everyone who has the presentation open, and View > Live pointers shows where their pointers are on the slide.
 
-Click a person's chip and choose Follow to have your editor show the slide they are on.
+Click a person's chip to go to the slide they have open. To keep following them, click Collaborators beside the chips and choose Follow on their row; the stage shows Following and their name with Stop. Every editor and owner can follow, including people who opened an edit link without an account. An agent cannot follow.
 
 ## Comments
 
@@ -57,10 +77,32 @@ Select an object, some text or a table cell and choose Insert > Comment (Cmd+Opt
 
 ## Signing in
 
-You do not need an account to make or present a presentation. Signing in with Continue with Google adds three things:
+You do not need an account to make or present a presentation. On turboslide.com you sign in with Continue with Google. Signing in adds three things:
 
-- The presentations you made in this browser move to your account, so you can open them on another computer.
+- You can open your presentations on another computer.
 - You can share a presentation with people by name.
 - Your name and picture show to the people you work with.
 
-A presentation made without an account lives in this browser until you sign in. Clearing the browser's site data removes it, so download a Turboslide file under File > Download if you want a copy.
+If this browser made presentations before you signed in, the sign in page asks first, for example "This browser has 3 decks made before you signed in. Add them to name@example.com?" Add Them moves them to your account. Keep Them Separate keeps them in this browser alone, and the question is not asked again. Signing out keeps the presentations this browser made on its own.
+
+A presentation made without an account belongs to this browser. Clearing the browser's site data loses access to it, so download a Turboslide file under File > Download if you want a copy.
+
+Your profile lists your sessions. Sign out everywhere else signs out your other devices within a minute. Delete account is refused while other people hold access to a presentation you own; transfer those first. Deleting the account moves every presentation it owns to the trash and removes its access to other people's presentations.
+
+<Callout title="On a studio that signs in by email">
+  A sign in mail's link and its six digit code sign in only the browser that asked for them. A link
+  opened in another browser asks for the eight character code that the first browser shows under
+  Check your email. Both expire in 5 minutes.
+</Callout>
+
+## Share from an agent
+
+The sharing dialog's actions run on the command line, over MCP and over HTTP. An agent acts as the person who owns its key, and each write is recorded under that person as `agent:<tokenId>`. The key's scopes limit what it may do: read, comment, write, export, share and admin. Other people's ids reach a key without the share scope as stand-ins.
+
+```sh
+turboslide share access <id> --mode link --role viewer
+turboslide share invite <id> --email name@example.com --role commenter
+turboslide share get <id>
+```
+
+The `x-turboslide-author` header and `--author` only label a run; they do not change who the write is recorded under.

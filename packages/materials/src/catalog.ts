@@ -605,7 +605,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:warp': paper({
     id: 'paper:warp',
     label: 'Warp',
-    doc: 'Colour bands warped by noise and swirls over checks, stripes or an edge, like marbled paint.',
+    doc: 'Colour bands warped by noise and swirls over checks, stripes or an edge.',
     shader: 'warp',
     sizing: 'pattern',
     noiseTexture: true,
@@ -635,7 +635,7 @@ export const MATERIALS: Readonly<Record<string, MaterialEntry>> = {
   'paper:water': paper({
     id: 'paper:water',
     label: 'Water',
-    doc: 'Caustic light over a ground, like sun through moving water.',
+    doc: 'Caustic light over a ground in one or two layers, with slow waves under it.',
     shader: 'water',
     sizing: 'object',
     noiseTexture: false,

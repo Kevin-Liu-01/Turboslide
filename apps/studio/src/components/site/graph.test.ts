@@ -75,7 +75,10 @@ describe("the landing's module graph", () => {
     expect(graph).toContain('apps/studio/src/components/site/Hero.tsx');
     expect(graph).toContain('apps/studio/src/components/site/AvatarStack.tsx');
     expect(graph).toContain('packages/chrome/src/presence/agent-marks.tsx');
-    expect(graph).toContain('packages/chrome/src/icons.tsx');
+    /* the solid icons by name from the chrome's glyph constants, never the editor's icon table
+       (docs/SITE.md D11) */
+    expect(graph).toContain('packages/chrome/src/glyphs.tsx');
+    expect(graph).not.toContain('packages/chrome/src/icons.tsx');
   });
 
   it('never reaches the editor, the action table, the shape definitions or the old landing', () => {

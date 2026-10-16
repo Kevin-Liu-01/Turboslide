@@ -34,5 +34,5 @@ export const SITE_FACTS: SiteFacts = {
   page: 185,
   layouts: 22,
   themes: 9,
-  materials: 23,
+  materials: 41,
 };

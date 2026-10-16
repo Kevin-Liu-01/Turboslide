@@ -3271,13 +3271,15 @@
   outline-offset: 3px;
 }
 
-/* the name: outside the avatar on its radius, its near edge 6 px from the ring */
+/* the name: outside the avatar, its near edge 6 px from the ring, on its radius or, where the
+   radius would lay it over a letter of the h1, turned off it (orbit.ts `labelAngles`, --la) */
 .ts-site .site-av::after {
+  --lab: var(--la, var(--phi));
   content: attr(data-name);
   position: absolute;
-  left: calc(50% + (var(--s) / 2 + 6px) * cos(var(--phi)));
-  top: calc(50% - (var(--s) / 2 + 6px) * sin(var(--phi)));
-  translate: calc(-50% + cos(var(--phi)) * 50%) calc(-50% - sin(var(--phi)) * 50%);
+  left: calc(50% + (var(--s) / 2 + 6px) * cos(var(--lab)));
+  top: calc(50% - (var(--s) / 2 + 6px) * sin(var(--lab)));
+  translate: calc(-50% + cos(var(--lab)) * 50%) calc(-50% - sin(var(--lab)) * 50%);
   padding: 2px 6px;
   border-radius: var(--pt-radius-sm);
   background: var(--pt-ink);

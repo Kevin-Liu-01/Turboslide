@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { angleOf, discsOf, fanBox, orbitFor, pointAt, STEP_MIN } from './orbit';
+import {
+  angleOf,
+  discsOf,
+  fanBox,
+  labelAngles,
+  labelBox,
+  orbitFor,
+  pointAt,
+  STEP_MIN,
+} from './orbit';
 import type { Box, Orbit, OrbitInput } from './orbit';
 
 // The title's orbits (orbit.ts; Kevin, 2026-10-16): each stack sits on a circle centred on its
@@ -117,6 +126,31 @@ describe('the orbit of a stack', () => {
   it('centres the fan on the preferred angle when the circle has the room', () => {
     const open: OrbitInput = { ...people, glyphs: [], prefer: 60 };
     expect(orbitFor(open).mid).toBe(60);
+  });
+
+  it('turns a name label off its radius where the radius lays it over a letter', () => {
+    const orbit = orbitFor(people);
+    const sizes = Array.from({ length: 5 }, () => ({ w: 90, h: 20 }));
+    const angles = labelAngles(orbit, 5, 36, sizes, DESKTOP, DESKTOP_BOUNDS);
+    const overlaps = (b: Box): boolean =>
+      DESKTOP.some((g) => b.x0 < g.x1 && b.x1 > g.x0 && b.y0 < g.y1 && b.y1 > g.y0);
+    let turned = 0;
+    angles.forEach((theta, i) => {
+      for (const step of [orbit.open, orbit.rest]) {
+        const phi = angleOf(i, 5, orbit.mid, step);
+        const c = pointAt(orbit.cx, orbit.cy, orbit.r, phi);
+        expect(overlaps(labelBox(c, phi, 36, theta, sizes[i]!, true))).toBe(false);
+      }
+      const radius = angleOf(i, 5, orbit.mid, orbit.open);
+      if (theta !== radius) turned += 1;
+      /* on its radius the label of the avatar beside "and" would cover the a */
+      if (i === 3) {
+        const c = pointAt(orbit.cx, orbit.cy, orbit.r, radius);
+        expect(overlaps(labelBox(c, radius, 36, radius, sizes[i]!, true))).toBe(true);
+      }
+    });
+    expect(turned).toBeGreaterThan(0);
+    expect(turned).toBeLessThan(5);
   });
 
   it('gives the open fan a hit area that covers every avatar', () => {

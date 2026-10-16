@@ -7,8 +7,8 @@
 // is forwarded as a join (the fallback carrier of 3.3) and the object waits 5 s for the frame.
 // `POST /rooms/:id/ops` and `/presence` carry `Authorization: Ticket` and are verified the same
 // way. The bearer routes (`/rooms/:id/{write,comment,flush,external,publish,roster,document,
-// counters,access-changed}`, `/control/{open,flags,counters}`) compare the room bearer in
-// constant time and forward. The database routes (`/db/{query,batch}`) take their own bearer,
+// counters,access-changed,dead-letters,held,purge}`, `/control/{open,flags,counters}`) compare
+// the room bearer in constant time and forward. The database routes (`/db/{query,batch}`) take their own bearer,
 // `TURBOSLIDE_DB_BEARER` (AUTH-3), so the room bearer, which the object also sends to the app and
 // the probes carry, reaches no account row; `/db/counters` reads no database and takes either;
 // `/control/db-unlisted` (the count of statements outside the allowlist, HR-K2#3) takes the
@@ -126,6 +126,8 @@ const BEARER_TAILS = new Set([
   'dead-letters',
   // which op ids the log holds, for the recovered writes plate (HR-RT#14)
   'held',
+  // a removed deck's object deletes its storage (RELIABILITY-20, HR-RT#13)
+  'purge',
 ]);
 const TICKET_TAILS = new Set(['ops', 'presence']);
 
@@ -350,7 +352,10 @@ async function serve(request: Request, env: Env): Promise<Response> {
             tail === 'roster' ||
             tail === 'document' ||
             tail === 'dead-letters' ||
-            tail === 'held'
+            tail === 'held' ||
+            // a purge runs with the realtime flag off too: an object handing off would flush
+            // the tail of a deck the store no longer holds instead of deleting it
+            tail === 'purge'
             ? 'on'
             : flag,
         ),

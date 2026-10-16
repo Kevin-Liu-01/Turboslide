@@ -1631,6 +1631,28 @@ export async function closeRoom(deckId: string): Promise<void> {
   await (await pending).close().catch(() => undefined);
 }
 
+/**
+ * A removed deck's Durable Object deletes its storage (RELIABILITY-20; hardening HR-RT#13): on an
+ * instance built for the do tier, `POST /rooms/:id/purge` under the bearer, also while the
+ * instance serves the blob tier after a hand off, since the object keeps what it held. Before
+ * this no path let an object's entries go, so a deleted deck's text stayed in the Worker's
+ * storage for good. `deck.remove` calls it once the store removed the deck (decks.ts), after
+ * `closeRoom`. A purge that fails is logged and the removal stands: the object then keeps its
+ * rows until a later removal of the same id. Nothing on the other tiers, whose stream is the
+ * instance's own.
+ */
+export async function purgeRoom(deckId: string): Promise<void> {
+  const onDo = state().doChannel;
+  if (onDo === null) return;
+  try {
+    await onDo.purge(deckId);
+  } catch (error) {
+    log(
+      `${deckId}: the object was not purged after the removal: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
 /** Forgets every room on this instance (a test, a deck removal). */
 export async function closeRooms(): Promise<void> {
   const s = shared.__turboslideRoom;

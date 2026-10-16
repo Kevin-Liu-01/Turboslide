@@ -115,10 +115,12 @@ import { logSecurityEvent } from './log';
 import { measureSlidesThroughWorker } from './measure';
 import { registerMigrateStorage } from './migrate';
 import {
+  closeRoom,
   commentCallerFor,
   decideFor,
   inboxActorsFor,
   keyRoomIdentity,
+  purgeRoom,
   realtimeChannel,
   realtimeTier,
   redisCommands,
@@ -1099,7 +1101,13 @@ function registerHostedDeckActions(
     const { id, confirm, baseRevision } = input as DeckIdInput & { confirm?: boolean };
     if (confirm !== true) throw new TypeError('deck.remove needs confirm: true');
     await allowed(id, 'remove', 'deck.remove');
-    return mapStale(() => decks.remove(id, baseRevision));
+    // the order of the trash page's Delete forever (decks.ts removeDeckFn): this instance's room,
+    // then the store, then the deck's Durable Object, which deletes its entries and rows once the
+    // store let the deck go (RELIABILITY-20, hardening HR-RT#13); a refused removal keeps them
+    await closeRoom(id);
+    const removed = await mapStale(() => decks.remove(id, baseRevision));
+    await purgeRoom(id);
+    return removed;
   });
 }
 

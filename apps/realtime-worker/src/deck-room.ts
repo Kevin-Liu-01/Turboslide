@@ -154,8 +154,14 @@ export const SEED_TIMEOUT_MS = 25_000;
 /** The entries one checkpoint run posts at most (checkpoint.ts's triggers, read as a page). */
 export const CHECKPOINT_MAX_ENTRIES = 2000;
 export const CHECKPOINT_MAX_BYTES = 1024 * 1024;
-/** The entries kept behind `covered` before a month table may be dropped (checkpoint.ts STREAM_RETAIN_ENTRIES). */
-export const RETAIN_ENTRIES = 10_000;
+/**
+ * The entries kept behind `covered` before a past month's table is dropped: the replay window
+ * (REPLAY_MAX_ENTRIES, 2,000; RELIABILITY-20, hardening HR-RT#13), 10,000 before. A tab further
+ * behind than the window reloads from the store, and an op it sends again that a record holds is
+ * answered from the log by the checkpoint route (HR-RT#1), so nothing older is read. Tables go
+ * whole (`compact`), never a row at a time, since a deleted row is billed as a row written.
+ */
+export const RETAIN_ENTRIES = REPLAY_MAX_ENTRIES;
 /** The wait a capped socket's close reason names. */
 export const CAP_RETRY_AFTER_S = 5;
 /** The address cap, as `CAPS.streams.ip`. */
@@ -449,6 +455,11 @@ export class DeckRoom extends DurableObject<Env> {
   private storageFailures = 0;
   /** when the storage last refused a write; null once a write landed after it */
   private storageFailedAt: number | null = null;
+  /**
+   * The deck was removed and its storage deleted (`httpPurge`; RELIABILITY-20, HR-RT#13): every
+   * later request to this instance answers 404 `gone` until the runtime evicts it
+   */
+  private purged = false;
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
@@ -535,6 +546,11 @@ export class DeckRoom extends DurableObject<Env> {
     this.rememberDeck(deckId);
     this.colo = request.headers.get(COLO_HEADER) ?? this.colo;
     try {
+      if (this.purged && tail !== 'purge') {
+        if (request.headers.get('upgrade')?.toLowerCase() === 'websocket')
+          return this.refuseUpgrade(CLOSE_CODES.forbidden, 'gone');
+        return json({ error: 'not_found', gone: true }, 404);
+      }
       if (request.headers.get(REALTIME_HEADER) === 'off') {
         await this.handOff();
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket')
@@ -570,6 +586,8 @@ export class DeckRoom extends DurableObject<Env> {
           return json({ rows: this.deadLetters() });
         case 'held':
           return this.httpHeld(request);
+        case 'purge':
+          return this.httpPurge();
         case 'sweep':
           return this.httpSweep();
         case 'access-changed':
@@ -710,6 +728,7 @@ export class DeckRoom extends DurableObject<Env> {
   }
 
   override async alarm(): Promise<void> {
+    if (this.purged) return;
     this.counters.alarms += 1;
     this.alarmAt = null;
     const now = Date.now();
@@ -2822,6 +2841,40 @@ export class DeckRoom extends DurableObject<Env> {
       if (this.findEntry(opId.slice(0, colon), opId) !== undefined) held.push(opId);
     }
     return json({ held });
+  }
+
+  /**
+   * A removed deck's object lets everything go (RELIABILITY-20; hardening HR-RT#13): before this no
+   * path called `deleteAll`, so a deleted deck's text stayed in the object's SQLite for good, every
+   * entry of a deck under 10,000 entries among it, and the account's storage grew toward the
+   * plan's 5 GB. The function posts this under the bearer once the store removed the deck
+   * (decks.ts `deck.remove`, room.ts `purgeRoom`). Every socket closes with 4403 `gone` (the tab
+   * asks the ticket route, which refuses a removed deck), a checkpoint or a seed in flight
+   * settles first, then the alarm and the whole storage go, the SQL tables, the KV and the dead
+   * letters with them, and the deck's `rt_open` row. The object answers 404 `gone` from then on;
+   * a later wake starts empty. Idempotent.
+   */
+  private async httpPurge(): Promise<Response> {
+    if (!this.purged) {
+      this.purged = true;
+      // no last close runs for the sockets closed here: the meta row is gone first
+      const meta = this.meta;
+      this.meta = null;
+      for (const member of [...this.members.values()])
+        this.closeMember(member, CLOSE_CODES.forbidden, 'gone');
+      for (const ws of this.ctx.getWebSockets()) this.closeWs(ws, CLOSE_CODES.forbidden, 'gone');
+      await Promise.allSettled([this.checkpointing, this.seeding]);
+      await this.ctx.storage.deleteAlarm();
+      await this.ctx.storage.deleteAll();
+      this.alarmAt = null;
+      this.live = null;
+      this.closePending = false;
+      this.deckStored = false;
+      this.log('info', 'purged', { head: meta?.head ?? 0, covered: meta?.covered ?? 0 });
+      if (this.deckId !== null)
+        await noteClosed(this.env.ACCOUNTS, this.deckId).catch(() => undefined);
+    }
+    return json({ ok: true, purged: true });
   }
 
   private async httpFlush(): Promise<Response> {

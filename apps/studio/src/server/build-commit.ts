@@ -22,3 +22,14 @@ export function buildCommit(
   }
   return null;
 }
+
+/**
+ * The Vite `define` of both configs (vite.config.ts, vite.deploy.config.ts) for the site footer's
+ * build line (components/site/build.ts): the build's commit at seven characters, or null, read
+ * once when the build starts.
+ */
+export function buildDefine(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): Record<string, string> {
+  return { __TURBOSLIDE_BUILD__: JSON.stringify(buildCommit(env)?.slice(0, 7) ?? null) };
+}

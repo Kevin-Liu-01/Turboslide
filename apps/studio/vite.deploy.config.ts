@@ -10,6 +10,8 @@ import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
+import { buildDefine } from './src/server/build-commit';
+
 // Deployment build: `pnpm --filter @turboslide/studio build:deploy`. Nitro picks the target from
 // NITRO_PRESET: node-server (default), vercel (apps/studio/vercel.json; docs/hosting.md), bun
 // (bundle only) (SPEC 3.2, 11; tanstack report section 6.2). Same routes and server functions as
@@ -255,6 +257,10 @@ const ROUTE_RULES = {
      CDN serves a page and a browser asks again before using its copy; written for /home too, which
      the node server otherwise answered with the /home/** rule's year (h3 matches the page itself) */
   '/home': { headers: { 'cache-control': PAGE } },
+  /* the site pages of the pages step, prerendered as /home is */
+  '/features': { headers: { 'cache-control': PAGE } },
+  '/faq': { headers: { 'cache-control': PAGE } },
+  '/about': { headers: { 'cache-control': PAGE } },
   '/docs/**': { headers: { 'cache-control': PAGE } },
   ...DOCS_TWIN_RULES,
   '/favicon.ico': { headers: { 'cache-control': DAY } },
@@ -281,7 +287,13 @@ const ROUTE_RULES = {
 const HOME_ROUTE = fileURLToPath(new URL('./src/routes/home.tsx', import.meta.url));
 const PRERENDER = existsSync(HOME_ROUTE)
   ? {
-      pages: [{ path: '/home' }, ...DOCS_PRERENDER],
+      pages: [
+        { path: '/home' },
+        { path: '/features' },
+        { path: '/faq' },
+        { path: '/about' },
+        ...DOCS_PRERENDER,
+      ],
       prerender: {
         enabled: true,
         autoStaticPathsDiscovery: false,
@@ -348,6 +360,8 @@ const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  /* the build's commit for the site footer (components/site/build.ts) */
+  define: buildDefine(),
   environments: { client: CLIENT_BUILD },
   plugins: [
     externalServerOnly(),

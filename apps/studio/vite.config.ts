@@ -5,6 +5,8 @@ import { fumadocsMdx } from 'fumadocs-mdx/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
+import { buildDefine } from './src/server/build-commit';
+
 // Measured hazards, SPEC 3.3 item 5 (tanstack report sections 5.5 and 6.3):
 // - devtools() stays in every Vite config. It strips the Solid-based <TanStackDevtools> from the
 //   production bundle; without it every SSR request returned 500 and Solid chunks landed in the
@@ -105,6 +107,8 @@ const DOCS_MDX: Parameters<typeof fumadocsMdx>[0] = {
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  /* the build's commit for the site footer (components/site/build.ts) */
+  define: buildDefine(),
   environments: { client: CLIENT_BUILD },
   plugins: [externalServerOnly(), fumadocsMdx(DOCS_MDX), devtools(), tanstackStart(), viteReact()],
   server: {

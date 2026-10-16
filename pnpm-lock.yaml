@@ -446,6 +446,9 @@ importers:
       '@turboslide/render-worker':
         specifier: workspace:*
         version: link:../render-worker
+      '@turboslide/report':
+        specifier: workspace:*
+        version: link:../../packages/report
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -996,6 +999,8 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+
+  packages/report: {}
 
   packages/schema:
     dependencies:

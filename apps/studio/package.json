@@ -35,6 +35,7 @@
     "@turboslide/realtime": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/render-worker": "workspace:*",
+    "@turboslide/report": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/store": "workspace:*",
     "@turboslide/theme": "workspace:*",

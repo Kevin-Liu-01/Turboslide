@@ -1,0 +1,15 @@
+{
+  "name": "@turboslide/report",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The error reporter's one module (hardening HR-O#2a, RELIABILITY-14): the scrubber that keeps deck text, addresses, tokens and cookies out of a report, and the line a browser posts to /api/x/errors and the server logs. Browser and Worker safe: no node: import.",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./scrub": "./src/scrub.ts",
+    "./line": "./src/line.ts",
+    "./package.json": "./package.json"
+  }
+}

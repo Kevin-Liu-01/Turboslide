@@ -665,6 +665,317 @@
   color: var(--pt-ink-2);
 }
 
+/* ---- the site pages: /features, /faq and /about (FeaturesPage.tsx, FaqPage.tsx, AboutPage.tsx) ----
+   The page's name in the display size with its lead, then numbered ruled blocks: the landing's
+   screen head (label in the first three columns, the sentence in the other nine) with the block's
+   body on the same nine columns. The bar's About, FAQ and GitHub leave under 1024 px. */
+
+.ts-site .site-page-head {
+  padding-top: 96px;
+}
+
+.ts-site .site-page-head .t-lead {
+  max-width: 36em;
+  margin: 24px 0 0;
+}
+
+.ts-site .site-page-head + .site-screen {
+  padding-top: 96px;
+}
+
+/* the counts of /features, read from facts.ts: four figures over a hairline */
+.ts-site .site-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  margin: 48px 0 0;
+  border-top: 1px solid var(--pt-hair);
+  padding-top: 16px;
+}
+
+.ts-site .site-counts dd {
+  margin: 8px 0 0;
+  font-size: 40px;
+  line-height: 48px;
+  letter-spacing: -0.022em;
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-counts a {
+  text-decoration: none;
+}
+
+.ts-site .site-counts a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+}
+
+/* a block's body starts at the fourth column, under its sentence */
+.ts-site .site-block-body {
+  margin-left: calc((100% + var(--site-gap)) / 4);
+}
+
+.ts-site .site-block-body code,
+.ts-site .site-faq-a code {
+  font-size: 0.875em;
+  color: var(--pt-ink);
+}
+
+/* a crop of the product at its native width at most, or a code panel */
+.ts-site .site-crop {
+  margin: 0 0 40px;
+}
+
+.ts-site .site-crop-frame {
+  width: min(var(--crop-w), 100%);
+}
+
+.ts-site .site-crop .site-pic img {
+  height: auto;
+}
+
+.ts-site .site-crop figcaption {
+  margin-top: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-code .site-term {
+  max-width: 720px;
+}
+
+/* the features of a group, and the principles of /about: two columns of ruled items */
+.ts-site .site-feats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-site .site-feats li {
+  border-top: 1px solid var(--pt-hair);
+  padding: 16px 0 24px;
+}
+
+.ts-site .site-feat-name {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: 500;
+}
+
+.ts-site .site-feat-name a {
+  text-decoration: none;
+}
+
+.ts-site .site-feat-name a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-site .site-feats p {
+  margin: 4px 0 0;
+  color: var(--pt-ink-2);
+}
+
+/* the chapter a block links to, and the links of /about: ink words with a solid arrow */
+.ts-site .site-block-more {
+  margin: 8px 0 0;
+}
+
+.ts-site .site-block-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.ts-site .site-block-more a,
+.ts-site .site-block-links a,
+.ts-site .site-faq-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ts-site .site-block-more a:hover,
+.ts-site .site-block-links a:hover,
+.ts-site .site-faq-links a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-site .site-block-text {
+  max-width: 40em;
+  margin: 0 0 16px;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-block-body > .site-btns {
+  margin: 32px 0 0;
+}
+
+/* /faq: the label in the first three columns, the disclosure list in the other nine */
+.ts-site .site-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-faq-label {
+  grid-column: 1 / span 3;
+  align-self: start;
+  padding-top: 24px;
+}
+
+.ts-site .site-faq {
+  grid-column: 4 / span 9;
+}
+
+.ts-site .site-faq-item {
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-faq-item summary {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 20px;
+  column-gap: 16px;
+  align-items: center;
+  padding: 20px 0;
+  list-style: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  letter-spacing: -0.017em;
+}
+
+.ts-site .site-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.ts-site .site-faq-n {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: var(--pt-numerals);
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-faq-item summary svg {
+  color: var(--pt-titanium);
+  transition: rotate 120ms ease-out;
+}
+
+.ts-site .site-faq-item[open] summary svg {
+  rotate: 180deg;
+}
+
+.ts-site .site-faq-item summary:hover .site-faq-q {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.ts-site .site-faq-a {
+  max-width: calc(40em + 56px);
+  padding: 0 36px 24px 56px;
+}
+
+.ts-site .site-faq-a p {
+  margin: 0 0 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-faq-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+@media (max-width: 1023px) {
+  .ts-site .site-bar-link.is-wide {
+    display: none;
+  }
+
+  .ts-site .site-block-body {
+    margin-left: 0;
+  }
+
+  .ts-site .site-faq-label,
+  .ts-site .site-faq {
+    grid-column: 1 / -1;
+  }
+
+  .ts-site .site-faq-label {
+    padding: 16px 0 8px;
+  }
+}
+
+@media (max-width: 720px) {
+  .ts-site .site-page-head {
+    padding-top: 40px;
+  }
+
+  .ts-site .site-page-head .t-lead {
+    margin-top: 16px;
+  }
+
+  .ts-site .site-page-head + .site-screen {
+    padding-top: 72px;
+  }
+
+  .ts-site .site-counts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 16px;
+    margin-top: 32px;
+  }
+
+  .ts-site .site-counts dd {
+    font-size: 28px;
+    line-height: 36px;
+  }
+
+  .ts-site .site-crop {
+    margin-bottom: 32px;
+  }
+
+  .ts-site .site-feats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-site .site-faq-item summary {
+    grid-template-columns: 24px minmax(0, 1fr) 20px;
+    column-gap: 12px;
+    padding: 16px 0;
+    font-size: 17px;
+    line-height: 24px;
+  }
+
+  .ts-site .site-faq-a {
+    padding: 0 0 20px 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-site .site-faq-item summary svg {
+    transition: none;
+  }
+}
+
 /* ---- the title's two arcs (Title.tsx, AvatarStack.tsx, docs/SITE.md B) ----
    Each stack is placed from its word (`left: 100%`, `top` at the word's cap line: Inter's ascent
    is 0.969em and its cap height 0.727em) and is out of the line's flow, so it takes no width and

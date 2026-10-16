@@ -73,6 +73,8 @@ export type TabBackend = {
   room: TabRoom;
   /** the editor payload one person opens the presentation with */
   payloadFor: (person: TabPerson) => EditorDeck;
+  /** lets one more person into the room (a visitor of the title's stacks, guests.ts) */
+  join: (person: TabPerson) => void;
 };
 
 /** The identity a person resolves to, as the studio's room resolves a principal (identity/resolve.ts). */
@@ -148,6 +150,8 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
     },
   });
   const people = new Map(options.people.map((person) => [person.author.principalId, person]));
+  /* everyone the room has let in, in order: the payload names them all */
+  const everyone = (): TabPerson[] => [...people.values()];
   const ids = new Map<string, IdStorage>();
   const comments = tabComments(() => server.document());
   const refuse = (): never => {
@@ -218,7 +222,7 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
       room: { seq: server.seq(), tier: 'memory', notice: null },
       ...(person === null ? {} : { identity: identityOf(person, true) }),
       identities: Object.fromEntries(
-        options.people.map((row) => [row.author.principalId, identityOf(row)]),
+        everyone().map((row) => [row.author.principalId, identityOf(row)]),
       ),
       role: person?.role ?? 'owner',
       via: 'owner',
@@ -362,5 +366,12 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
       unsubscribe();
     },
   };
-  return { backend, room, payloadFor: (person) => payloadOf(person) };
+  return {
+    backend,
+    room,
+    payloadFor: (person) => payloadOf(person),
+    join: (person) => {
+      people.set(person.author.principalId, person);
+    },
+  };
 }

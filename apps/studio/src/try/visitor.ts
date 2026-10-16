@@ -60,6 +60,7 @@ export function tryVisitor(options: {
   let controller: EditorController | null = null;
   let engaged = false;
   let lastKey = -Infinity;
+  let lastInput = -Infinity;
   let pointerDown = false;
   const touched = new Set<string>();
 
@@ -67,6 +68,7 @@ export function tryVisitor(options: {
     if (!event.isTrusted) return;
     engaged = true;
     pointerDown = true;
+    lastInput = Date.now();
   };
   const onPointerUp = (): void => {
     pointerDown = false;
@@ -75,6 +77,7 @@ export function tryVisitor(options: {
     if (!event.isTrusted) return;
     engaged = true;
     lastKey = Date.now();
+    lastInput = lastKey;
   };
   win.addEventListener('pointerdown', onPointerDown, true);
   win.addEventListener('pointerup', onPointerUp, true);
@@ -97,6 +100,7 @@ export function tryVisitor(options: {
     selectedBlock: () => controller?.getSnapshot().selection?.blockId ?? null,
     busy: () => pointerDown || editingText() || Date.now() - lastKey < TYPING_MS,
     engaged: () => engaged,
+    lastInput: () => lastInput,
     touched: () => touched,
     goto(slideId) {
       void controller?.invoke('view.goto', { slideId }).catch(() => undefined);

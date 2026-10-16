@@ -12,6 +12,11 @@ import { HERO_SLIDES } from './hero-deck';
  *
  * Strings carry two placeholders the runner fills: `{loop}`, the loop's number (so the ids an
  * agent mints are fresh each loop), and `$<key>`, a value an earlier step saved (`save`).
+ *
+ * Every slide looks finished at every moment a visitor or the poster can catch: what an agent adds
+ * arrives whole (the new slide with its heading, sentence and rows; the label box with its words),
+ * and typing only adds words at the end of a text that already reads, so the stage never shows an
+ * empty placeholder (script.test.ts).
  */
 export type AgentKey = 'claude' | 'codex';
 
@@ -57,11 +62,38 @@ export type Task = {
 
 export type AgentScript = Readonly<Record<AgentKey, readonly Task[]>>;
 
-/** The slide Claude Code adds each loop, and the box Codex places on the numbers slide. */
+/** The slide Claude Code adds each loop, and the label box Codex places on the numbers slide. */
 export const NEXT_STEPS = 'next-steps-{loop}';
 export const LABEL_BOX = 'label-{loop}';
 
 const { agenda, numbers, plan, shipped } = HERO_SLIDES;
+
+/** The slide Claude Code adds, whole: a heading, a sentence it then writes on, two rows. */
+export const NEXT_STEPS_SLIDE = {
+  schemaVersion: 1,
+  id: NEXT_STEPS,
+  kind: 'content',
+  template: 'rows',
+  layout: { type: 'cols', ratio: '5/7', gap: 72, align: 'center' },
+  slots: {
+    left: [
+      { id: 'h', type: 'heading', level: 'h2', text: 'Next steps' },
+      { id: 'p1', type: 'paragraph', text: 'Two releases next quarter.', measure: 56 },
+    ],
+    right: [
+      {
+        id: 'rows',
+        type: 'rows',
+        key: 180,
+        tight: true,
+        items: [
+          { key: 'January', value: 'One checkout for every region' },
+          { key: 'March', value: 'Returns start from the order page' },
+        ],
+      },
+    ],
+  },
+} as const;
 
 export const SCRIPT: AgentScript = {
   claude: [
@@ -72,23 +104,29 @@ export const SCRIPT: AgentScript = {
         { kind: 'hold', ms: 500 },
         {
           kind: 'act',
-          action: 'slide.new',
+          action: 'slide.insert',
           slide: NEXT_STEPS,
-          input: { layout: 'split', after: shipped, sectionId: 'deck', id: NEXT_STEPS },
+          input: { sectionId: 'deck', after: shipped, slide: NEXT_STEPS_SLIDE },
         },
       ],
       needs: [shipped],
     },
     {
-      name: 'Title the new slide',
+      name: 'Write on the new slide',
       steps: [
-        { kind: 'point', slide: NEXT_STEPS, at: { x: 260, y: 170 } },
-        { kind: 'type', slide: NEXT_STEPS, block: 'h', path: '/text', text: 'Next steps' },
+        { kind: 'point', slide: NEXT_STEPS, at: { x: 420, y: 520 } },
+        {
+          kind: 'type',
+          slide: NEXT_STEPS,
+          block: 'p1',
+          path: '/text',
+          text: ' Both ship to every region at once.',
+        },
       ],
-      needs: [`${NEXT_STEPS}#h`],
+      needs: [`${NEXT_STEPS}#p1`],
     },
     {
-      name: 'Ask Codex to label the box',
+      name: 'Ask Codex for the order count',
       steps: [
         { kind: 'wait', signal: 'box-placed' },
         { kind: 'point', slide: numbers, at: { x: 1240, y: 300 } },
@@ -100,27 +138,13 @@ export const SCRIPT: AgentScript = {
           block: LABEL_BOX,
           input: {
             anchor: { kind: 'block', slideId: numbers, blockId: LABEL_BOX },
-            body: { text: 'Label this with the quarter.', mentions: [] },
+            body: { text: 'Add the order count to this label.', mentions: [] },
           },
           save: { key: 'thread', from: 'thread.id' },
         },
         { kind: 'signal', signal: 'asked' },
       ],
       needs: [`${numbers}#${LABEL_BOX}`],
-    },
-    {
-      name: 'Write the new slide',
-      steps: [
-        { kind: 'point', slide: NEXT_STEPS, at: { x: 300, y: 330 } },
-        {
-          kind: 'type',
-          slide: NEXT_STEPS,
-          block: 'p1',
-          path: '/text',
-          text: 'One checkout ships to every region in January.',
-        },
-      ],
-      needs: [`${NEXT_STEPS}#p1`],
     },
     {
       name: 'Move the new slide up',
@@ -173,7 +197,7 @@ export const SCRIPT: AgentScript = {
       needs: [`${numbers}#chart`],
     },
     {
-      name: 'Place a box on the chart',
+      name: 'Place a label on the chart',
       steps: [
         { kind: 'point', slide: numbers, at: { x: 1010, y: 260 } },
         {
@@ -190,7 +214,7 @@ export const SCRIPT: AgentScript = {
               fill: 'plate',
               stroke: 'hair',
               padding: 16,
-              text: '',
+              text: 'Q4',
               pos: { x: 980, y: 236, w: 320, h: 80, z: 5 },
             },
           },
@@ -210,7 +234,7 @@ export const SCRIPT: AgentScript = {
           slide: numbers,
           block: LABEL_BOX,
           path: '/text',
-          text: 'Q4: 71,000 orders',
+          text: ': 71,000 orders',
         },
         {
           kind: 'act',

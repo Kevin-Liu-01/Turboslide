@@ -19,8 +19,14 @@ import type { AgentKey, AgentScript, SheetPoint, Step, Task } from './script';
  * slide order) waits while the visitor types or drags. No agent writes a slide, a block or a deck
  * field the visitor has written. A write that stays blocked for three seconds ends its task, and
  * the agent moves to its next task on another slide. Until the visitor's first click or key, the
- * director moves the visitor's stage to the slide an agent last wrote (one move every four seconds
+ * director moves the visitor's stage to the slide an agent sets out for or last wrote (one move every four seconds
  * at most), so the first screen shows the cursors and the typing.
+ *
+ * A press on the agent's avatar in the page's title (`nudge`) wakes the agent: its current pause
+ * or wait ends, so its next step comes at once, and the visitor's stage goes to the slide it works
+ * on and follows its next write. For WATCH_MS after a press the visitor counts as watching, not
+ * editing, until their next click or key in the frame; the rules on the visitor's selection, what
+ * they wrote and their typing hold throughout.
  *
  * It runs only while the frame's document is visible and the page says the frame is on screen;
  * paused, it writes nothing and posts no presence. Under reduced motion the pointer jumps to its
@@ -61,6 +67,8 @@ export type VisitorView = {
   touched: () => ReadonlySet<string>;
   /** moves the visitor's stage (the director) */
   goto: (slideId: string) => void;
+  /** when the visitor last clicked or typed in the frame (ms since the epoch), or -Infinity */
+  lastInput?: () => number;
 };
 
 /** One write as the runner made it, for the director, the specs and the tests. */
@@ -92,6 +100,10 @@ export type Runner = {
   setOnScreen: (on: boolean) => void;
   /** the document's visibility */
   setVisible: (visible: boolean) => void;
+  /** a press on the agent's avatar: it takes its next step now, and the visitor's stage follows */
+  nudge: (agent: AgentKey) => void;
+  /** the slide the agent's pointer or caret is on, or null before its first move */
+  slideOf: (agent: AgentKey) => string | null;
   state: () => RunnerState;
 };
 
@@ -119,6 +131,8 @@ export const WAIT_MS = 30_000;
 export const DIRECTOR_MS = 4000;
 /** The most slides the agents add and keep (a slide the visitor wrote on stays). */
 export const AGENT_SLIDES_MAX = 3;
+/** How long after a press the visitor counts as watching the agent, not editing. */
+export const WATCH_MS = 8000;
 
 /** A seeded generator (mulberry32), so a run repeats. */
 export function seeded(seed: number): () => number {
@@ -135,7 +149,10 @@ export function seeded(seed: number): () => number {
 const ease = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
 /** The writes that change the whole deck: the theme and the order of the slides. */
-const DECK_LEVEL = new Set(['deck.set', 'slide.move', 'slide.new', 'slide.remove']);
+const DECK_LEVEL = new Set(['deck.set', 'slide.move', 'slide.new', 'slide.insert', 'slide.remove']);
+
+/** The writes that add a slide of the agents' own. */
+const ADDS_SLIDE = new Set(['slide.new', 'slide.insert']);
 
 /** Fills `{loop}` and `$<key>` in every string of a value. */
 export function fill(value: unknown, loop: number, saved: ReadonlyMap<string, unknown>): unknown {
@@ -227,6 +244,14 @@ export function createRunner(options: RunnerOptions): Runner {
   let lastGoto = -Infinity;
   /* the agents finish a loop together: the barrier counts who is done with the current one */
   const doneWith = new Map<AgentKey, number>();
+  /* a press: the agents with a press not yet used, the wake of each agent's current pause, the
+     agents that left a task early for a press, the agents whose next write the visitor's stage
+     follows, and the watch after the last press */
+  const pressed = new Set<AgentKey>();
+  const wakers = new Map<AgentKey, () => void>();
+  const rushed = new Set<AgentKey>();
+  const follow = new Set<AgentKey>();
+  let watchFrom = -Infinity;
 
   const gate: Gate = {
     open: () => running && !paused && onScreen && visible,
@@ -236,6 +261,36 @@ export function createRunner(options: RunnerOptions): Runner {
   };
   const jitter = (from: number, to: number): number => from + (to - from) * random();
 
+  /** a pause a press ends early, leaving the press for the caller to use */
+  const doze = async (agent: AgentKey, ms: number): Promise<void> => {
+    if (pressed.has(agent)) return;
+    await Promise.race([
+      sleep(ms),
+      new Promise<void>((resolve) => {
+        wakers.set(agent, resolve);
+      }),
+    ]);
+    wakers.delete(agent);
+  };
+  /** a pause a press ends early: the press is used by the pause it ends, or by the next one */
+  const nap = async (agent: AgentKey, ms: number): Promise<void> => {
+    await doze(agent, ms);
+    pressed.delete(agent);
+  };
+  /** the visitor is editing: they engaged, and no press since their last click or key */
+  const editing = (): boolean => {
+    if (!visitor.engaged()) return false;
+    if (now() - watchFrom > WATCH_MS) return true;
+    return (visitor.lastInput?.() ?? -Infinity) > watchFrom;
+  };
+  /** moves the visitor's stage to a slide now, unless they type or hold the pointer down */
+  const show = (slideId: string): void => {
+    if (visitor.busy() || visitor.activeSlide() === slideId) return;
+    if (!exists(options.agents.claude.document(), slideId)) return;
+    lastGoto = now();
+    visitor.goto(slideId);
+  };
+
   const present = (agent: AgentKey, state: AgentPresence): void => {
     if (!gate.open()) return;
     pointers.set(agent, state);
@@ -243,14 +298,18 @@ export function createRunner(options: RunnerOptions): Runner {
     options.agents[agent].present(state);
   };
 
-  /** the director: the visitor's stage follows the agents until the visitor engages */
-  const direct = (): void => {
-    if (visitor.engaged() || lastWrite === null) return;
-    if (visitor.activeSlide() === lastWrite.slideId) return;
+  /**
+   * the director: the visitor's stage follows the agents until the visitor engages, to the slide
+   * an agent last wrote or, when `to` is given, the slide an agent sets out for
+   */
+  const direct = (to?: string): void => {
+    const slideId = to ?? lastWrite?.slideId;
+    if (editing() || slideId === undefined) return;
+    if (visitor.activeSlide() === slideId) return;
     if (now() - lastGoto < DIRECTOR_MS) return;
-    if (!exists(options.agents.claude.document(), lastWrite.slideId)) return;
+    if (!exists(options.agents.claude.document(), slideId)) return;
     lastGoto = now();
-    visitor.goto(lastWrite.slideId);
+    visitor.goto(slideId);
   };
 
   /** whether a write may land now (the rules of the module comment) */
@@ -262,16 +321,16 @@ export function createRunner(options: RunnerOptions): Runner {
   ): boolean => {
     const touched = visitor.touched();
     if (targetsOf(action, slideId, blockId, input).some((key) => touched.has(key))) return false;
-    if (!visitor.engaged()) return true;
-    if (visitor.activeSlide() === slideId) return false;
     if (
       blockId !== undefined &&
       visitor.selectedBlock() === blockId &&
-      visitor.activeSlide() === slideId
+      visitor.activeSlide() === slideId &&
+      visitor.engaged()
     )
       return false;
-    if (DECK_LEVEL.has(action) && visitor.busy()) return false;
-    return true;
+    if (DECK_LEVEL.has(action) && visitor.engaged() && visitor.busy()) return false;
+    /* while the visitor edits (engaged, and no press since their last input) their slide is theirs */
+    return !editing() || visitor.activeSlide() !== slideId;
   };
 
   /** waits until the write may land; false after BLOCKED_MS (the task ends) */
@@ -330,7 +389,8 @@ export function createRunner(options: RunnerOptions): Runner {
     writes += 1;
     lastWrite = record;
     options.onWrite?.(record);
-    direct();
+    if (follow.delete(agent)) show(slideId);
+    else direct();
   };
 
   const travel = async (
@@ -366,6 +426,7 @@ export function createRunner(options: RunnerOptions): Runner {
     if (!running) return false;
     switch (step.kind) {
       case 'point':
+        direct(at(step.slide));
         await travel(agent, at(step.slide), step.at);
         return true;
       case 'select': {
@@ -379,7 +440,7 @@ export function createRunner(options: RunnerOptions): Runner {
         return true;
       }
       case 'hold':
-        await sleep(step.ms);
+        await nap(agent, step.ms);
         return true;
       case 'signal':
         signals.set(step.signal, loop);
@@ -388,7 +449,12 @@ export function createRunner(options: RunnerOptions): Runner {
         const from = now();
         while (running && signals.get(step.signal) !== loop) {
           if (now() - from > WAIT_MS) return false;
-          await sleep(200);
+          /* a pressed agent leaves a wait and starts its next task at once */
+          if (pressed.delete(agent)) {
+            rushed.add(agent);
+            return false;
+          }
+          await doze(agent, 200);
         }
         return running;
       }
@@ -496,7 +562,7 @@ export function createRunner(options: RunnerOptions): Runner {
       return;
     }
     /* a slide add past the cap: the agents only restyle and move once three of their slides stay */
-    if (task.steps.some((step) => step.kind === 'act' && step.action === 'slide.new')) {
+    if (task.steps.some((step) => step.kind === 'act' && ADDS_SLIDE.has(step.action))) {
       const ours = Object.keys(document.slides).filter((id) => id.startsWith('next-steps-'));
       if (ours.length >= AGENT_SLIDES_MAX) {
         skipped += 1;
@@ -517,7 +583,7 @@ export function createRunner(options: RunnerOptions): Runner {
       for (const task of script[agent]) {
         if (!running) return;
         await runTask(agent, task);
-        await sleep(jitter(1200, 2000));
+        if (!rushed.delete(agent)) await nap(agent, jitter(1200, 2000));
       }
       /* the barrier: both agents finish the loop before the next starts */
       doneWith.set(agent, loop);
@@ -557,6 +623,16 @@ export function createRunner(options: RunnerOptions): Runner {
     setVisible(on) {
       visible = on;
     },
+    nudge(agent) {
+      if (!keys.includes(agent)) return;
+      pressed.add(agent);
+      watchFrom = now();
+      wakers.get(agent)?.();
+      follow.add(agent);
+      const at = pointers.get(agent)?.slideId;
+      if (at !== undefined) show(at);
+    },
+    slideOf: (agent) => pointers.get(agent)?.slideId ?? null,
     state: () => ({
       loop,
       tasks: { ...tasks },

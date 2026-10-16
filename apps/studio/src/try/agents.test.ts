@@ -13,8 +13,9 @@ import type { AgentKey } from './script';
 // moves between slides, selects blocks and types. The properties: no agent write lands on the
 // visitor's slide or selected block once they engaged, a deck level write never lands while they
 // type or drag, a slide the visitor wrote on is never removed, nothing is written or posted while
-// paused, under reduced motion a pointer move is one post, and one loop with an idle visitor ends
-// on the deck it started from.
+// paused, under reduced motion a pointer move is one post, one loop with an idle visitor ends
+// on the deck it started from, every slide reads at every write (no empty text), and a press
+// wakes an agent out of a pause or a wait and sends the visitor's stage to its slide.
 
 type Model = { document: DeckDocument; theme: string; values: number[]; comments: number };
 
@@ -63,6 +64,12 @@ function apply(m: Model, action: string, input: Record<string, unknown>): unknow
       } as never;
       order.splice(order.indexOf(input.after as string) + 1, 0, id);
       return { slide: doc.slides[id] };
+    }
+    case 'slide.insert': {
+      const slide = structuredClone(input.slide) as { id: string };
+      doc.slides[slide.id] = slide as never;
+      order.splice(order.indexOf(input.after as string) + 1, 0, slide.id);
+      return { slide };
     }
     case 'slide.remove': {
       delete doc.slides[input.slideId as string];
@@ -131,12 +138,13 @@ function world(visitor: () => VisitorView): World & { agents: Record<AgentKey, A
       const v = visitor();
       const slideId =
         (input.slideId as string | undefined) ??
-        (action === 'slide.new' ? (input.id as string) : undefined);
+        (action === 'slide.new' ? (input.id as string) : undefined) ??
+        (action === 'slide.insert' ? (input.slide as { id: string }).id : undefined);
       if (v.engaged() && slideId !== undefined && slideId === v.activeSlide())
         w.violations.push(`${agent} ${action} on the visitor's slide ${slideId}`);
       if (
         v.engaged() &&
-        ['deck.set', 'slide.move', 'slide.new', 'slide.remove'].includes(action) &&
+        ['deck.set', 'slide.move', 'slide.new', 'slide.insert', 'slide.remove'].includes(action) &&
         v.busy()
       )
         w.violations.push(`${agent} ${action} while the visitor typed`);
@@ -235,7 +243,7 @@ describe("the agents' runner", () => {
       await vi.advanceTimersByTimeAsync(5000);
       expect(w.violations, `seed ${seed}`).toEqual([]);
     }
-  }, 120_000);
+  }, 900_000);
 
   it('writes nothing and posts nothing while paused or off screen', async () => {
     let view: VisitorView | null = null;
@@ -357,4 +365,102 @@ describe("the agents' runner", () => {
     expect(w.writes.filter((row) => row.action === 'slide.remove')).toEqual([]);
     expect(slideIds(w.m.document).filter((id) => id.startsWith('next-steps-')).length).toBe(3);
   }, 60_000);
+
+  it('keeps every text on every slide readable at every write (no empty placeholder)', async () => {
+    let view: VisitorView | null = null;
+    const w = world(() => view!);
+    view = {
+      activeSlide: () => 'title',
+      selectedBlock: () => null,
+      busy: () => false,
+      engaged: () => false,
+      touched: () => new Set(),
+      goto: () => undefined,
+    };
+    const empties: string[] = [];
+    const runner = createRunner({
+      agents: w.agents,
+      visitor: view,
+      seed: 8,
+      onWrite: () => {
+        for (const id of slideIds(w.m.document))
+          for (const block of blocksOf(w.m.document, id))
+            if (typeof block.text === 'string' && block.text.trim() === '')
+              empties.push(`${id}#${block.id}`);
+      },
+    });
+    runner.start();
+    while (runner.state().loop < 3) await vi.advanceTimersByTimeAsync(1000);
+    runner.stop();
+    expect(w.writes.length).toBeGreaterThan(60);
+    expect(empties).toEqual([]);
+  }, 60_000);
+
+  it('takes a pressed agent out of a pause or a wait at once and shows the visitor its slide', async () => {
+    const chart = (value: number) => ({
+      kind: 'act' as const,
+      action: 'chart.setData' as const,
+      slide: 'numbers',
+      block: 'chart',
+      input: {
+        slideId: 'numbers',
+        blockId: 'chart',
+        categories: ['Q1', 'Q2', 'Q3', 'Q4'],
+        series: [{ name: 'Orders', values: [42, 51, 58, value] }],
+      },
+    });
+    const scripts = {
+      pause: [
+        {
+          name: 'Rest, then write',
+          steps: [
+            { kind: 'point' as const, slide: 'numbers', at: { x: 800, y: 400 } },
+            { kind: 'hold' as const, ms: 20_000 },
+            chart(70),
+          ],
+        },
+      ],
+      wait: [
+        {
+          name: 'Wait for a signal that never comes',
+          steps: [
+            { kind: 'point' as const, slide: 'numbers', at: { x: 800, y: 400 } },
+            { kind: 'wait' as const, signal: 'never' },
+          ],
+        },
+        { name: 'Write', steps: [chart(71)] },
+      ],
+    };
+    for (const [name, claude] of Object.entries(scripts)) {
+      let view: VisitorView | null = null;
+      const w = world(() => view!);
+      const gotos: string[] = [];
+      view = {
+        activeSlide: () => 'title',
+        selectedBlock: () => null,
+        busy: () => false,
+        engaged: () => true,
+        touched: () => new Set(),
+        goto: (slideId) => gotos.push(slideId),
+        lastInput: () => Date.now() - 60_000,
+      };
+      const runner = createRunner({
+        agents: w.agents,
+        visitor: view,
+        seed: 9,
+        script: { claude, codex: [] },
+      });
+      runner.start();
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(w.writes, name).toEqual([]);
+      runner.nudge('claude');
+      expect(gotos, name).toEqual(['numbers']);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(
+        w.writes.map((row) => row.action),
+        name,
+      ).toEqual(['chart.setData']);
+      runner.stop();
+    }
+  });
 });

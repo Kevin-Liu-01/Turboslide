@@ -20,6 +20,10 @@ declare global {
       entries: () => Promise<unknown[]>;
       versions: () => unknown[];
       visitor: string;
+      /** a press as the page's title sends it */
+      press: TrySession['press'];
+      /** the guests of the title's stacks in the room now */
+      guests: () => string[];
     };
   }
 }
@@ -59,6 +63,8 @@ export function TryPage({
       entries: () => session.room.entries(),
       versions: () => [...session.room.versions()],
       visitor: session.visitor.author.principalId,
+      press: (who) => session.press(who),
+      guests: () => session.guests.active(),
     };
     return () => {
       delete window.turboslideTry;

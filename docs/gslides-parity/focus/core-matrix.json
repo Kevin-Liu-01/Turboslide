@@ -7570,15 +7570,14 @@
     {
       "id": "shaders.frame.scrubber-capture",
       "feature": "shaders",
-      "interaction": "The Frame scrubber moves the live canvas; Capture this frame writes /anchor and a new asset within 5 s",
+      "interaction": "The Shader section's Still group: the held time scrubber moves the live canvas and writes nothing; the release writes /anchor in whole ms; Pause writes the moment the playing canvas shows; a still lands with timeMs at that moment within 5 s and the Editable PowerPoint's descr carries the anchor",
       "driver": "probe --core",
       "today": "not driven",
       "evidence": "audit-shaders 6 (s06-format-options-material-1440.png)",
       "parks": [
-        "formatOptions.shader.frame.scrubber",
-        "formatOptions.shader.frame.capture"
+        "formatOptions.shader.still"
       ],
-      "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.2 item 3 (B5); lands only under the P1 condition of section 1"
+      "note": "Ship two P1; docs/archive/rounds/FEATURES.md 5.2 item 3 (B5); the Still group of the Glyphfield port (its shader design, sections 2.2 and 2.6): formatOptions.shader.still.play, .still.scrubber and .still.time, parked as the family formatOptions.shader.still until the row is driven"
     },
     {
       "id": "shaders.view.play-setting",

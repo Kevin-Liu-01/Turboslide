@@ -4,6 +4,7 @@ import type { RefObject } from 'react';
 import type { MaterialHandle, mountMaterial as mountMaterialFn } from '@turboslide/materials/mount';
 import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { MaterialRecipe, MaterialUniforms } from '@turboslide/schema/blocks/material';
+import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 
 import { MATERIAL_PLAY_EVENT } from './dither';
 import { paceHandle } from './frame-pacer';
@@ -216,6 +217,34 @@ export const EDITOR_SHADER_FPS = 30;
 // The registry of live mounts, by block id (the Shader section's live preview, 5.3)
 
 const LIVE = new Map<string, MaterialHandle>();
+const LIVE_LISTENERS = new Set<() => void>();
+
+function liveChanged(): void {
+  for (const listener of LIVE_LISTENERS) listener();
+}
+
+/**
+ * Calls `listener` whenever a block's live mount lands or goes (a selection, the remount after a
+ * write), so the Shader section's Still group can hold the new mount on the still (the shader design
+ * 2.2). Returns the unsubscribe.
+ */
+export function onLiveShaderChange(listener: () => void): () => void {
+  LIVE_LISTENERS.add(listener);
+  return () => {
+    LIVE_LISTENERS.delete(listener);
+  };
+}
+
+/** The moment a block's live mount shows, in ms of the pattern's clock, or null when it has none. */
+export function liveShaderFrame(blockId: string): number | null {
+  const handle = LIVE.get(blockId);
+  if (handle === undefined) return null;
+  try {
+    return handle.frame();
+  } catch {
+    return null;
+  }
+}
 
 /** The live handle of a block on the stage, or null when it shows its frame. */
 export function liveShaderHandle(blockId: string): MaterialHandle | null {
@@ -243,7 +272,7 @@ export function previewShaderUniforms(blockId: string, uniforms: MaterialUniform
   }
 }
 
-/** Sets the frame of a block's live mount (the P1 Frame scrubber, 5.2 item 3). */
+/** Sets the frame of a block's live mount (the Still group's scrubber, the shader design 2.2). */
 export function previewShaderFrame(blockId: string, ms: number): boolean {
   const handle = LIVE.get(blockId);
   if (handle === undefined) return false;
@@ -340,7 +369,9 @@ export function MaterialMount({
             void _speed;
             mountMaterial(host, clean, {
               speed: paced ? 0 : playSpeed,
-              frame: recipe.anchor ?? 0,
+              /* the still's moment, 5,500 ms when absent as the frame key reads it, so a mount's
+                 first frame is the still (the shader design 2.4) */
+              frame: recipe.anchor ?? MATERIAL_ANCHORS[1],
               ...(palette !== undefined ? { palette } : {}),
               ...(lowRes ? { minPixelRatio: 1 } : {}),
             })
@@ -353,7 +384,10 @@ export function MaterialMount({
                 raiseCanvas(mounted);
                 const handle = paced ? paceHandle(mounted, { fps, speed: playSpeed }) : mounted;
                 handles.push({ id, handle });
-                if (id !== null) LIVE.set(id, handle);
+                if (id !== null) {
+                  LIVE.set(id, handle);
+                  liveChanged();
+                }
               })
               .catch((error: unknown) => {
                 if (alive) onError?.(error);
@@ -370,6 +404,7 @@ export function MaterialMount({
         if (id !== null && LIVE.get(id) === handle) LIVE.delete(id);
         handle.dispose();
       }
+      if (handles.length > 0) liveChanged();
       for (const host of created) host.remove();
     };
     // selectedKey stands for `selected` and paletteKey for `palette`, so a new array of the same

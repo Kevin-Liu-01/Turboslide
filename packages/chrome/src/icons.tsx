@@ -42,6 +42,8 @@ import {
   CLIPBOARD_DOCUMENT,
   CODE_BRACKET,
   COMMAND_LINE,
+  CUBE,
+  CURSOR_ARROW_RAYS,
   DOCUMENT_TEXT,
   EXCLAMATION_TRIANGLE,
   GLOBE_ALT,
@@ -75,6 +77,8 @@ export {
   CLIPBOARD_DOCUMENT,
   CODE_BRACKET,
   COMMAND_LINE,
+  CUBE,
+  CURSOR_ARROW_RAYS,
   DOCUMENT_TEXT,
   EXCLAMATION_TRIANGLE,
   GLOBE_ALT,
@@ -373,12 +377,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
   ],
   /* arrow-right */
   'arrow-right': ARROW_RIGHT,
-  /* cube */
-  cube: [
-    {
-      d: 'M10.362 1.093a.75.75 0 0 0-.724 0L2.523 5.018 10 9.143l7.477-4.125-7.115-3.925ZM18 6.443l-7.25 4v8.25l6.862-3.786A.75.75 0 0 0 18 14.25V6.443ZM9.25 18.693v-8.25l-7.25-4v7.807a.75.75 0 0 0 .388.657l6.862 3.786Z',
-    },
-  ],
+  cube: CUBE,
   /* swatch */
   swatch: [
     {
@@ -526,11 +525,7 @@ const PATHS: Record<IconName, readonly IconPath[]> = {
       d: 'M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z',
     },
   ],
-  'cursor-arrow-rays': [
-    {
-      d: 'M10 1a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 1ZM5.05 3.05a.75.75 0 0 1 1.06 0l1.062 1.06A.75.75 0 1 1 6.11 5.173L5.05 4.11a.75.75 0 0 1 0-1.06ZM14.95 3.05a.75.75 0 0 1 0 1.06l-1.06 1.062a.75.75 0 0 1-1.062-1.061l1.061-1.06a.75.75 0 0 1 1.06 0ZM3 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 3 8ZM14 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 14 8ZM7.172 10.828a.75.75 0 0 1 0 1.061L6.11 12.95a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM10.766 7.51a.75.75 0 0 0-1.37.365l-.492 6.861a.75.75 0 0 0 1.204.65l1.043-.799.985 3.678a.75.75 0 0 0 1.45-.388l-.978-3.646 1.292.204a.75.75 0 0 0 .74-1.16l-3.874-5.764Z',
-    },
-  ],
+  'cursor-arrow-rays': CURSOR_ARROW_RAYS,
   'square-2-stack': [
     {
       d: 'M2 4.25A2.25 2.25 0 0 1 4.25 2h6.5A2.25 2.25 0 0 1 13 4.25V5.5H9.25A3.75 3.75 0 0 0 5.5 9.25V13H4.25A2.25 2.25 0 0 1 2 10.75v-6.5Z',

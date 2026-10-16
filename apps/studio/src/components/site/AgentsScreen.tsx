@@ -1,14 +1,16 @@
 import { Fragment } from 'react';
 
+import { AgentsFlow } from './AgentsFlow';
 import { AGENTS_SCREEN } from './copy';
 import { SITE_FACTS } from './facts';
 import { RECORDED_RUN, commandParts } from './run';
 import { SiteIcon } from './SiteIcon';
 
 /**
- * Screen 02 (docs/SITE.md A.4): the ruled title block, then the run recorded from the CLI on the
+ * Screen 03 (docs/SITE.md A.4): the ruled title block, then the run recorded from the CLI on the
  * #101010 panel beside the one action, slide.new, on each transport with the reference's counts
- * (facts.ts). Static text: no replay and no motion.
+ * (facts.ts), and under them the one path every caller joins (AgentsFlow.tsx) with the note on
+ * the two checks. Static text: no replay and no motion.
  */
 export function AgentsScreen() {
   const { table } = AGENTS_SCREEN;
@@ -93,9 +95,9 @@ export function AgentsScreen() {
               </tr>
             </tfoot>
           </table>
-          <p className="site-note t-small">{AGENTS_SCREEN.note}</p>
         </div>
       </div>
+      <AgentsFlow />
     </section>
   );
 }

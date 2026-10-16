@@ -91,8 +91,39 @@ export const HERO = {
   },
 } as const;
 
-export const AGENTS_SCREEN = {
+/**
+ * Screen 02, Canvas (docs/SITE.md 9): the lighthouse slide after one drag and one turn of its
+ * heading, which the CLI wrote (canvas-pose.ts), beside the heading's box at rest and moved. The
+ * words on the slide are the slide's own (home-deck/slides/lighthouse.json).
+ */
+export const CANVAS_SCREEN = {
   number: '02',
+  label: 'Canvas',
+  sentence: 'Every object on a slide moves.',
+  figure: {
+    label: 'Mood slide',
+    note: 'The heading dragged off its plate and turned. The dashed box is where it was.',
+    alt: 'The lighthouse slide, a photograph of the Louisbourg lighthouse printed in a two tone dither. The heading, Louisbourg lighthouse, was dragged from the paper plate in the lower right to the sky in the upper left and turned 6 degrees to the left. The selection ring of the editor is on it.',
+  },
+  slide: {
+    heading: 'Louisbourg lighthouse',
+    paragraph:
+      'A lighthouse at Louisbourg, Nova Scotia, printed through an 8 by 8 screen at 2 px cells.',
+    credit: 'Photograph: Ken Heaton, CC BY-SA 4.0',
+    /** the editor's selection chip on the heading: its kind and its id */
+    chip: 'heading · h',
+  },
+  table: {
+    name: 'The heading’s box at rest and moved',
+    caption: 'The heading’s box, in slide px',
+    heads: { field: 'Format options', rest: 'At rest', moved: 'Moved' },
+    rows: { w: 'Width', h: 'Height', rotate: 'Rotate', x: 'X', y: 'Y' },
+  },
+  note: 'A drag writes this box with `block.set` and a turn with `block.rotate`, the same actions an agent runs from the command line.',
+} as const;
+
+export const AGENTS_SCREEN = {
+  number: '03',
   label: 'Agents',
   sentence: 'An agent runs the same actions as the menus.',
   terminal: {
@@ -110,11 +141,42 @@ export const AGENTS_SCREEN = {
     ],
     total: 'Every action',
   },
+  /**
+   * The path every caller of `slide.new` joins (docs/SITE.md A.4): the menu item and the four
+   * transports, the one handler, its two checks with their refusals, and the revision Version
+   * history records. Each label is the source's own: the menu row (packages/chrome/src/menus/
+   * model.ts, `action('slide.new')`), the dispatcher's input check (packages/agent/src/
+   * dispatch.ts), `errorStatus` (packages/schema/src/errors.ts), `commit` and its
+   * `baseRevision` (apps/cli/src/store-actions.ts), and the store's one entry per write.
+   */
+  flow: {
+    label: 'One path for every caller',
+    alt: 'The menu item Slide > New slide and the four transports run into one handler, slide.new. It checks the input against the action’s schema, then checks that baseRevision is current, and Version history records one new revision with its author. A failed input check answers 400 with the failing field, and a stale revision answers 409 with the current document.',
+    people: 'People',
+    agents: 'Agents',
+    menu: 'Slide > New slide',
+    stations: [
+      { id: 'handler', name: 'slide.new', sub: 'One handler for every caller', code: true },
+      {
+        id: 'input',
+        name: 'Input check',
+        sub: 'Against the action’s schema',
+        refusal: '400 and the failing field',
+      },
+      {
+        id: 'revision',
+        name: 'Revision check',
+        sub: '`baseRevision` is current',
+        refusal: '409 and the current document',
+      },
+      { id: 'history', name: 'Version history', sub: 'One new revision, with its author' },
+    ],
+  },
   note: 'Each transport checks an action’s input the same way. A write names the version of the presentation it read, and if the presentation changed since, it is refused with 409 and the current document.',
 } as const;
 
 export const PRESENT_SCREEN = {
-  number: '03',
+  number: '04',
   label: 'Present',
   sentence: 'Anyone with the link can open the presentation and present it.',
   figure: {
@@ -131,6 +193,148 @@ export const PRESENT_SCREEN = {
     { key: 'B', label: 'Black slide' },
     { key: 'Esc', label: 'Stop presenting' },
   ],
+  /**
+   * The row under the keys: the slideshow and presenter view, two windows that move together
+   * (apps/studio/content/docs/presenting.mdx). The console's own words come from the viewer
+   * (PRESENT_TEXT); the slides are slides 2 and 3 of the example deck the viewer above shows.
+   */
+  windows: {
+    label: 'Slideshow and presenter view',
+    note: 'Press S during a slideshow. Presenter view opens in a second window, and a move in either window moves both. A present link opens the slideshow without your notes.',
+    alt: 'Two windows. The slideshow, seen by the audience, shows the slide. S opens presenter view, seen by you, with the timer, the current slide, the next slide and the speaker notes. The left and right arrows in either window move both.',
+    show: { label: 'Slideshow', who: 'Seen by the audience' },
+    presenter: { label: 'Presenter view', who: 'Seen by you' },
+    opens: 'opens',
+    moveBoth: 'move both',
+    deck: 'GT brand deck',
+    /** a frozen reading of the console's timer, four seconds after it opened */
+    time: '0:04',
+    slide: { index: 2, total: 85, title: 'General Translation' },
+    next: 'Every product in every language',
+    notesSize: '16 px',
+  },
+} as const;
+
+/**
+ * Screen 05, Patterns (docs/SITE.md 9): a slide with the Dithering pattern beside the moments
+ * of its movement, one of them held as the still, and where the pattern moves
+ * (apps/studio/content/docs/editor/objects.mdx).
+ */
+export const PATTERNS_SCREEN = {
+  number: '05',
+  label: 'Patterns',
+  sentence: 'Patterns move in the show, and downloads keep the moment you choose.',
+  figure: {
+    label: 'A slide with the Dithering pattern',
+    address: 'Insert > Animated pattern',
+    alt: 'A slide titled Questions from Northwind with the Dithering pattern: a sphere printed in dots whose light moves around it.',
+  },
+  slide: {
+    heading: 'Questions from Northwind',
+    sentence: 'Thank you for the time today.',
+    counter: '8 / 9',
+  },
+  strip: {
+    name: 'The pattern at 0, 2, 4, 6, 8 and 10 seconds. The moment at 4 seconds is the still.',
+    seconds: [0, 2, 4, 6, 8, 10],
+    still: 4,
+    at: (s: number): string => `${s} s`,
+    stillAt: (s: number): string => `Still, ${s} s`,
+  },
+  table: {
+    caption: 'Where the pattern moves',
+    heads: { place: 'Place', pattern: 'Pattern' },
+    rows: [
+      { place: 'Slideshow and viewer', pattern: 'Moves' },
+      { place: 'Editor', pattern: 'Still' },
+      { place: 'PDF and PowerPoint file', pattern: 'Still' },
+      { place: 'Thumbnails', pattern: 'Still' },
+      { place: 'With Reduce motion on', pattern: 'Still' },
+    ],
+  },
+  note: 'Format options > Still picks the moment, from 0 to 60 seconds. Slide > Playback can hold the still in the show, and Tools > Preferences can play patterns in the editor.',
+} as const;
+
+/** One run of a file's sentence: plain words, or the words that name a part, underlined. */
+export type ExportRun = { text: string; part?: 'object' | 'hidden' };
+
+/**
+ * Screen 06, Export (docs/SITE.md 9): the files File > Download writes from one slide, then one
+ * slide cut by a seam between the two PowerPoint files, with the parts each file holds
+ * (export-parts.ts). The modes' names are the Download dialog's (DIALOGS.download), the file names
+ * `downloadFileName`'s, the numbers docs/pptx.md's.
+ */
+export const EXPORT_SCREEN = {
+  number: '06',
+  label: 'Export',
+  sentence: 'Download the presentation as a PDF or as a PowerPoint file.',
+  files: {
+    label: 'File > Download',
+    address: 'Northwind quarterly review, slide 3',
+    source: 'In the browser',
+    heading: 'Orders by quarter',
+    list: [
+      {
+        id: 'pdf',
+        kind: 'PDF',
+        name: 'Northwind quarterly review.pdf',
+        says: [{ text: 'One page per slide, 13.333 by 7.5 in, with text you can search.' }],
+      },
+      {
+        id: 'pictures',
+        kind: 'PowerPoint, Pictures',
+        name: 'Northwind quarterly review.pptx',
+        says: [
+          { text: 'The slide is ' },
+          { text: 'one picture', part: 'object' },
+          { text: ', 3200 by 1800, over its text in an ' },
+          { text: 'invisible layer', part: 'hidden' },
+          {
+            text: ' you can search. On each page, at most 0.1 percent of the pixels differ from the browser.',
+          },
+        ],
+      },
+      {
+        id: 'editable',
+        kind: 'PowerPoint, Editable text',
+        name: 'Northwind quarterly review (editable).pptx',
+        says: [
+          { text: 'The heading is a ' },
+          { text: 'text box', part: 'object' },
+          { text: ' and the chart is a ' },
+          { text: 'PowerPoint chart', part: 'object' },
+          { text: '. The layout is within 3 px of the browser.' },
+        ],
+      },
+    ],
+  },
+  seam: {
+    label: 'One slide in the two PowerPoint files',
+    note: 'Drag the seam to compare the two files. Each blue outline is one part of the file.',
+    pictures: 'Pictures',
+    editable: 'Editable text',
+    alt: (c: { text: number; rect: number; line: number }): string =>
+      `The opener field, a lit sphere printed in dots with a plate of text at the lower right. Left of the seam is the Pictures file, where the slide is one picture of 3200 by 1800 pixels. Right of it is the Editable text file, where the slide’s ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines are each outlined in blue over its background picture.`,
+    holds: {
+      pictures: (c: { text: number }): string =>
+        `One picture of the slide, the logo and ${c.text} text boxes of invisible text.`,
+      editable: (c: { text: number; rect: number; line: number }): string =>
+        `${c.text} text boxes, ${c.rect} rectangles, ${c.line} lines, the logo and the background picture.`,
+    },
+    chips: {
+      picture: 'Picture of the slide, 3200 by 1800',
+      invisible: 'Invisible text',
+      background: 'Background picture',
+      line: 'Line',
+      rect: 'Rectangle',
+      text: 'Text box',
+    },
+    slider: {
+      name: 'Where the two files meet',
+      value: (p: number): string => `Pictures on the left ${p} percent, Editable text on the rest`,
+    },
+  },
+  note: 'An agent runs the same export with the `export.run` action, for example `turboslide export pptx --mode native`.',
 } as const;
 
 /**

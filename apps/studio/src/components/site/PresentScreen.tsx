@@ -1,5 +1,6 @@
 import { PRESENT_SCREEN } from './copy';
 import { Frame } from './Frame';
+import { PresentWindows } from './PresentWindows';
 import { SiteIcon } from './SiteIcon';
 import { ThemePicture } from './ThemePicture';
 
@@ -9,9 +10,9 @@ import viewerDark from './pictures/viewer-1440-dark.webp?url';
 import viewerLight from './pictures/viewer-1440-light.webp?url';
 
 /**
- * Screen 03 (docs/SITE.md A.5): the ruled title block, the viewer captured on slide 2 of the
- * example deck the hero's second button opens (slide 1 draws a defect, V1 of the brief), and the
- * six slideshow keys as key chips.
+ * Screen 04 (docs/SITE.md A.5): the ruled title block, the viewer captured on slide 2 of the
+ * example deck the hero's second button opens (slide 1 draws a defect, V1 of the brief), the six
+ * slideshow keys as key chips, and the slideshow beside presenter view (PresentWindows.tsx).
  */
 export function PresentScreen() {
   const { figure } = PRESENT_SCREEN;
@@ -54,6 +55,7 @@ export function PresentScreen() {
           </div>
         ))}
       </dl>
+      <PresentWindows />
     </section>
   );
 }

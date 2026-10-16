@@ -665,6 +665,1905 @@
   color: var(--pt-ink-2);
 }
 
+/* ---- the seams: each screen head's rule runs to both edges of the window, as the bar's and the
+   footer's rules do, and a 9 px cross in --pt-cross stands where a seam meets an edge of the
+   1280 px column, on the pixel columns the frames' corner crosses use (Frame.tsx). The rule is
+   the head's own border-top, painted out by a border-image outset, which is ink overflow and
+   adds no scroll width. The column's rails are not drawn: text sits flush with the column. ---- */
+
+.ts-site .site-screen-head {
+  position: relative;
+  border-image: linear-gradient(var(--pt-hair) 0 0) 1 / 1px 0 0 0 / 0 100vw;
+}
+
+.ts-site .site-screen-head::before,
+.ts-site .site-foot::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  height: 9px;
+  background:
+    linear-gradient(var(--pt-cross) 0 0) 4px 0 / 1px 9px no-repeat,
+    linear-gradient(var(--pt-cross) 0 0) 0 4px / 9px 1px no-repeat,
+    linear-gradient(var(--pt-cross) 0 0) calc(100% - 4px) 0 / 1px 9px no-repeat,
+    linear-gradient(var(--pt-cross) 0 0) 100% 4px / 9px 1px no-repeat;
+  pointer-events: none;
+}
+
+.ts-site .site-screen-head::before {
+  left: -4px;
+  right: -4px;
+}
+
+/* the footer spans the window, so its crosses find the column the way .site-wrap sizes it */
+.ts-site .site-foot {
+  position: relative;
+}
+
+.ts-site .site-foot::before {
+  left: calc(50% - min(100% - 2 * var(--site-side), var(--site-page)) / 2 - 4px);
+  width: calc(min(100% - 2 * var(--site-side), var(--site-page)) + 8px);
+}
+
+/* ---- the landing's figures (docs/SITE.md 9): slides drawn on the page, a cell canvas
+   printed by cells.ts, the editor's selection drawn to Overlay.css, and ruled rows ---- */
+
+/* a cell canvas: one canvas pixel per cell, scaled up by whole device pixels */
+.ts-site .site-cells {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* a ruled row under a screen's first figure: its label and note in columns 1 to 3, its drawing
+   in columns 4 to 12; one column under 1024 px */
+.ts-site .site-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  margin-top: 72px;
+  border-top: 1px solid var(--pt-hair);
+  padding-top: 16px;
+}
+
+.ts-site .site-row-text {
+  grid-column: 1 / span 3;
+  padding-top: 16px;
+}
+
+.ts-site .site-row-note {
+  margin: 12px 0 0;
+  max-width: 30ch;
+  color: var(--pt-ink-2);
+}
+
+/* screen 02, Canvas: the slide in columns 1 to 8, the heading's box in 9 to 12 */
+.ts-site .site-canvas {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  align-items: start;
+}
+
+.ts-site .site-canvas-fig {
+  grid-column: 1 / span 8;
+}
+
+/* level with the frame, under the figure's head row */
+.ts-site .site-canvas-side {
+  grid-column: 9 / span 4;
+  padding-top: 28px;
+}
+
+/* a slide drawn on the page in the example theme's paper and ink (packages/theme/src/
+   gt-ink-paper/sheet.css), its own container, so a slide px is 100cqw / 1600 */
+.ts-site .site-sheet {
+  --s-titanium: #8a8f98;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  overflow: hidden;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  letter-spacing: 0;
+}
+
+/* an object at its box in slide px, turned about its centre */
+.ts-site .site-obj {
+  position: absolute;
+  left: calc(var(--x) / 1600 * 100%);
+  top: calc(var(--y) / 900 * 100%);
+  width: calc(var(--w) / 1600 * 100%);
+  height: calc(var(--h) / 900 * 100%);
+  margin: 0;
+  box-sizing: border-box;
+  rotate: var(--r, 0deg);
+}
+
+/* the theme's frame: two rails and two rules 56 slide px in, an 11 px cross where they meet */
+.ts-site .site-sheet-rule {
+  position: absolute;
+  background: var(--pt-hair);
+}
+
+.ts-site .site-sheet-rule.is-l,
+.ts-site .site-sheet-rule.is-r {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.ts-site .site-sheet-rule.is-l {
+  left: calc(56 / 1600 * 100%);
+}
+
+.ts-site .site-sheet-rule.is-r {
+  right: calc(56 / 1600 * 100%);
+}
+
+.ts-site .site-sheet-rule.is-t,
+.ts-site .site-sheet-rule.is-b {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.ts-site .site-sheet-rule.is-t {
+  top: calc(56 / 900 * 100%);
+}
+
+.ts-site .site-sheet-rule.is-b {
+  bottom: calc(56 / 900 * 100%);
+}
+
+.ts-site .site-sheet-x {
+  position: absolute;
+  width: calc(11 / 1600 * 100%);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background:
+    linear-gradient(var(--pt-cross), var(--pt-cross)) center / 1px 100% no-repeat,
+    linear-gradient(var(--pt-cross), var(--pt-cross)) center / 100% 1px no-repeat;
+}
+
+.ts-site .site-sheet-x.is-tl,
+.ts-site .site-sheet-x.is-bl {
+  left: calc(56 / 1600 * 100%);
+}
+
+.ts-site .site-sheet-x.is-tr,
+.ts-site .site-sheet-x.is-br {
+  left: calc(1544 / 1600 * 100%);
+}
+
+.ts-site .site-sheet-x.is-tl,
+.ts-site .site-sheet-x.is-tr {
+  top: calc(56 / 900 * 100%);
+}
+
+.ts-site .site-sheet-x.is-bl,
+.ts-site .site-sheet-x.is-br {
+  top: calc(844 / 900 * 100%);
+}
+
+/* the lighthouse slide's plate and words, in the theme's sizes (h2 44/47.5, p 22/33, credit
+   15/21.75) */
+.ts-site .site-lh-plate {
+  background: var(--pt-paper);
+}
+
+.ts-site .site-lh-h {
+  font-size: calc(44 / 1600 * 100cqw);
+  line-height: calc(47.515625 / 1600 * 100cqw);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+}
+
+.ts-site .site-lh-p {
+  font-size: calc(22 / 1600 * 100cqw);
+  line-height: calc(33 / 1600 * 100cqw);
+}
+
+.ts-site .site-lh-cap {
+  font-size: calc(15 / 1600 * 100cqw);
+  line-height: calc(21.75 / 1600 * 100cqw);
+  color: var(--s-titanium);
+}
+
+/* where the heading was, and the editor's selection where it is: the 1 px ring, eight 11 px
+   squares, the 12 px rotation ring 24 px over the top on its stem, and the upright chip */
+.ts-site .site-lh-ghost {
+  border: 1px dashed var(--pt-titanium);
+}
+
+.ts-site .site-lh-ring {
+  border: 1px solid var(--pt-select);
+}
+
+.ts-site .site-lh-sq {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-select);
+  background: var(--pt-paper);
+}
+
+.ts-site .site-lh-sq.is-n,
+.ts-site .site-lh-sq.is-s {
+  left: 50%;
+}
+
+.ts-site .site-lh-sq.is-w,
+.ts-site .site-lh-sq.is-e {
+  top: 50%;
+}
+
+.ts-site .site-lh-sq.is-nw,
+.ts-site .site-lh-sq.is-n,
+.ts-site .site-lh-sq.is-ne {
+  top: 0;
+}
+
+.ts-site .site-lh-sq.is-sw,
+.ts-site .site-lh-sq.is-s,
+.ts-site .site-lh-sq.is-se {
+  top: 100%;
+}
+
+.ts-site .site-lh-sq.is-nw,
+.ts-site .site-lh-sq.is-w,
+.ts-site .site-lh-sq.is-sw {
+  left: 0;
+}
+
+.ts-site .site-lh-sq.is-ne,
+.ts-site .site-lh-sq.is-e,
+.ts-site .site-lh-sq.is-se {
+  left: 100%;
+}
+
+.ts-site .site-lh-knob {
+  position: absolute;
+  left: 50%;
+  top: -24px;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-select);
+  border-radius: 50%;
+  background: var(--pt-paper);
+}
+
+.ts-site .site-lh-knob::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 13.5px;
+  margin-left: -0.5px;
+  background: var(--pt-select);
+}
+
+.ts-site .site-lh-chip {
+  position: absolute;
+  left: calc(var(--cx) / 1600 * 100%);
+  top: calc(var(--cy) / 900 * 100% - 28px);
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* no room over the box: the chip drops under it (Overlay.tsx chipStyle) */
+@container (max-width: 488px) {
+  .ts-site .site-lh-chip {
+    top: calc(var(--cb) / 900 * 100% + 10px);
+  }
+}
+
+/* under 560 px of slide the eight squares would cover the heading's letters: the ring, the
+   rotation ring and the chip stay */
+@container (max-width: 559px) {
+  .ts-site .site-lh-sq {
+    display: none;
+  }
+
+  .ts-site .site-lh-knob::after {
+    height: 18px;
+  }
+}
+
+/* the heading's box: the values right aligned, the changed ones in ink */
+.ts-site .site-canvas-spec th:not(:first-child),
+.ts-site .site-canvas-spec td {
+  text-align: right;
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-canvas-spec td {
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-canvas-spec td.is-changed {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+/* the keys of the two columns: the dashed box and the ring */
+.ts-site .site-canvas-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  box-sizing: border-box;
+}
+
+.ts-site .site-canvas-key.is-rest {
+  border: 1px dashed var(--pt-titanium);
+}
+
+.ts-site .site-canvas-key.is-moved {
+  border: 1px solid var(--pt-select);
+}
+
+.ts-site .site-canvas-side .site-note {
+  margin: 16px 0 0;
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-canvas-side .site-note code,
+.ts-site .site-ex-note code,
+.ts-site .site-flow-sub code {
+  font-size: 13px;
+  color: var(--pt-ink);
+}
+
+.ts-site .site-canvas-credit {
+  margin: 8px 0 0;
+  color: var(--pt-titanium);
+}
+
+/* screen 03, the one path: the callers in columns 1 to 3, the stations at the starts of
+   columns 4, 6, 8 and 10; 1 px rules in two solid tokens, so no junction darkens */
+.ts-site .site-flow {
+  margin-top: 48px;
+}
+
+.ts-site .site-flow-body {
+  --row: 40px;
+  --pad: 32px;
+  /* the rail runs on row 3, the MCP row, so two callers sit above it and two below */
+  --rail: calc(var(--pad) + 2 * var(--row) + 20px);
+  --col: calc((100% - 11 * var(--site-gap)) / 12);
+  --x4: calc(3 * var(--col) + 3 * var(--site-gap));
+  --x6: calc(5 * var(--col) + 5 * var(--site-gap));
+  --x8: calc(7 * var(--col) + 7 * var(--site-gap));
+  --x10: calc(9 * var(--col) + 9 * var(--site-gap));
+  position: relative;
+  height: calc(2 * var(--pad) + 5 * var(--row));
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.006em;
+}
+
+/* whole pixels, so every 1 px rule lands on one row or column of pixels */
+@supports (left: round(down, 1.5px, 1px)) {
+  .ts-site .site-flow-body {
+    --x4: round(down, calc(3 * var(--col) + 3 * var(--site-gap)), 1px);
+    --x6: round(down, calc(5 * var(--col) + 5 * var(--site-gap)), 1px);
+    --x8: round(down, calc(7 * var(--col) + 7 * var(--site-gap)), 1px);
+    --x10: round(down, calc(9 * var(--col) + 9 * var(--site-gap)), 1px);
+  }
+}
+
+.ts-site .site-flow-body ul,
+.ts-site .site-flow-body ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-site .site-flow-from {
+  position: absolute;
+  left: 0;
+  top: var(--pad);
+  width: calc(var(--x4) + 1px);
+}
+
+.ts-site .site-flow-from li {
+  display: flex;
+  align-items: center;
+  height: var(--row);
+  padding-left: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ts-site .site-flow-group {
+  flex: none;
+  width: 88px;
+}
+
+.ts-site .site-flow-from svg {
+  flex: none;
+  margin-right: 8px;
+}
+
+.ts-site .site-flow-wire {
+  flex: 1;
+  align-self: flex-start;
+  height: 1px;
+  margin: 20px 0 0 12px;
+  background: var(--pt-ink-2);
+}
+
+.ts-site .site-flow-bus,
+.ts-site .site-flow-rail {
+  position: absolute;
+  background: var(--pt-ink-2);
+}
+
+.ts-site .site-flow-bus {
+  left: var(--x4);
+  top: calc(var(--pad) + 20px);
+  width: 1px;
+  height: calc(4 * var(--row) + 1px);
+}
+
+.ts-site .site-flow-rail {
+  left: var(--x4);
+  top: var(--rail);
+  width: calc(var(--x10) - var(--x4) + 1px);
+  height: 1px;
+}
+
+.ts-site .site-flow-path {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-site .site-flow-path > li {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(2 * var(--col) + var(--site-gap));
+}
+
+.ts-site .site-flow-path > li:nth-child(1) {
+  left: var(--x4);
+}
+
+.ts-site .site-flow-path > li:nth-child(2) {
+  left: var(--x6);
+}
+
+.ts-site .site-flow-path > li:nth-child(3) {
+  left: var(--x8);
+}
+
+.ts-site .site-flow-path > li:nth-child(4) {
+  left: var(--x10);
+  width: calc(3 * var(--col) + 2 * var(--site-gap));
+}
+
+/* an 11 px square: filled for the action and its record, hollow for a check */
+.ts-site .site-flow-mark {
+  position: absolute;
+  left: -5px;
+  top: calc(var(--rail) - 5px);
+  width: 11px;
+  height: 11px;
+  box-sizing: border-box;
+  background: var(--pt-ink);
+}
+
+.ts-site .site-flow-path > .is-check .site-flow-mark {
+  border: 1px solid var(--pt-ink-2);
+  background: var(--pt-paper);
+}
+
+/* the words 12 px over the rail and 16 px right of the station */
+.ts-site .site-flow-text {
+  position: absolute;
+  left: 16px;
+  width: calc(100% + var(--site-gap) - 32px);
+  bottom: calc(100% - var(--rail) + 12px);
+}
+
+.ts-site .site-flow-path > li:nth-child(4) .site-flow-text {
+  width: auto;
+  right: 16px;
+}
+
+.ts-site .site-flow-name,
+.ts-site .site-flow-sub {
+  display: block;
+}
+
+.ts-site .site-flow-name {
+  font-weight: 500;
+}
+
+.ts-site .site-flow-name code {
+  font-size: 13px;
+}
+
+.ts-site .site-flow-sub {
+  color: var(--pt-titanium);
+}
+
+/* a refusal: a drop from the check, an elbow, then its words in the second ink */
+.ts-site .site-flow-out {
+  position: absolute;
+  left: 24px;
+  width: calc(100% + var(--site-gap) - 36px);
+  top: calc(var(--rail) + 30px);
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-flow-out::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: -24px;
+  width: 11px;
+  height: 34px;
+  border-left: 1px solid var(--pt-titanium);
+  border-bottom: 1px solid var(--pt-titanium);
+}
+
+.ts-site .site-flow-note {
+  margin: 16px 0 0;
+  max-width: 44em;
+  color: var(--pt-titanium);
+}
+
+/* screen 04, the slideshow and presenter view: two windows joined by one ink line */
+.ts-site .site-pv {
+  grid-column: 4 / span 9;
+  display: grid;
+  grid-template-columns: minmax(0, 38fr) 160px minmax(0, 46fr);
+  align-items: start;
+  margin: 0;
+  padding-top: 16px;
+}
+
+.ts-site .site-pv-win {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ts-site .site-pv-show {
+  grid-column: 1;
+}
+
+.ts-site .site-pv-pres {
+  grid-column: 3;
+}
+
+.ts-site .site-pv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  height: 20px;
+  white-space: nowrap;
+}
+
+.ts-site .site-pv-who {
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-pv-box {
+  position: relative;
+  border: 1px solid var(--pt-edge);
+}
+
+/* a slide of the example deck: its #101010 ground and its title in Inter 500 */
+.ts-site .site-pv-slide {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  container-type: inline-size;
+  background: var(--pt-panel-ink);
+  color: var(--pt-panel-text);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.ts-site .site-pv-slide > span {
+  position: absolute;
+  left: 9%;
+  top: 50%;
+  translate: 0 -50%;
+  font-size: clamp(12px, 7cqw, 24px);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ts-site .site-pv-slide.is-centre > span {
+  left: 6px;
+  right: 6px;
+  white-space: normal;
+  text-align: center;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: -0.006em;
+}
+
+:root[data-theme='dark'] .ts-site .site-pvc .site-pv-slide {
+  outline: 1px solid var(--pt-hair);
+  outline-offset: -1px;
+}
+
+/* the link from the slideshow's middle to presenter view, a 9 px marker on each window's edge,
+   S over the line and the arrows under it */
+.ts-site .site-pv-link {
+  position: absolute;
+  left: calc(100% + 0.5px);
+  top: 50%;
+  width: 161px;
+  height: 0;
+}
+
+.ts-site .site-pv-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -0.5px;
+  height: 1px;
+  background: var(--pt-ink);
+}
+
+.ts-site .site-pv-dot {
+  position: absolute;
+  top: -4.5px;
+  width: 9px;
+  height: 9px;
+  background: var(--pt-ink);
+}
+
+.ts-site .site-pv-dot.is-a {
+  left: -4.5px;
+}
+
+.ts-site .site-pv-dot.is-b {
+  right: -4.5px;
+}
+
+.ts-site .site-pv-say {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+}
+
+.ts-site .site-pv-say .site-kbd + span {
+  margin-left: 4px;
+}
+
+.ts-site .site-pv-say.is-up {
+  bottom: 12px;
+}
+
+.ts-site .site-pv-say.is-down {
+  top: 12px;
+}
+
+/* presenter view's console (PresenterConsole.tsx): its head, the stage and the notes column */
+.ts-site .site-pvc {
+  container-type: inline-size;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+  color: var(--pt-ink);
+}
+
+.ts-site .site-pvc-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  height: 32px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--pt-hair);
+  white-space: nowrap;
+}
+
+.ts-site .site-pvc-label {
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-pvc-timer b {
+  margin-left: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-pvc-title {
+  font-weight: 500;
+}
+
+.ts-site .site-pvc-on {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-site .site-pvc-on::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ts-site .site-pvc-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.ts-site .site-pvc-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+}
+
+/* the slide counter, a select in the product: the 6 px control corner */
+.ts-site .site-pvc-counter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
+  white-space: nowrap;
+}
+
+.ts-site .site-pvc-counter b {
+  font-weight: 500;
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-pvc-counter span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-pvc-counter svg {
+  flex: none;
+  fill: currentColor;
+}
+
+.ts-site .site-pvc-next {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: max(50%, 124px);
+  margin-top: 4px;
+}
+
+.ts-site .site-pvc-side {
+  min-width: 0;
+  border-left: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-pvc-tab {
+  display: flex;
+  align-items: flex-end;
+  height: 32px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-pvc-tab span {
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--pt-ink);
+  margin-bottom: -1px;
+}
+
+.ts-site .site-pvc-size {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-pvc-size i {
+  font-style: normal;
+  font-size: 14px;
+  color: var(--pt-ink);
+}
+
+/* a narrow console drops the deck's title from its head */
+@container (max-width: 420px) {
+  .ts-site .site-pvc-title {
+    display: none;
+  }
+
+  .ts-site .site-pvc-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}
+
+/* screen 05, Patterns: the figure in columns 1 to 7, the table in 8 to 12 */
+.ts-site .site-pp {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--site-gap);
+  align-items: start;
+}
+
+.ts-site .site-pp-fig {
+  grid-column: 1 / span 7;
+}
+
+.ts-site .site-pp-where {
+  grid-column: 8 / span 5;
+}
+
+/* the editor's stage ground inside the square frame */
+.ts-site .site-pp-ground {
+  padding: 24px;
+  background: var(--pt-plate);
+}
+
+.ts-site .site-pp-body {
+  --pp-gap: 16px;
+}
+
+.ts-site .site-pp-slide {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--pt-paper);
+}
+
+/* once laid out (PatternsScreen.tsx), the slide and the strip take whole pixels */
+.ts-site .site-pp-body[data-laid] .site-pp-slide {
+  width: var(--pp-w);
+  height: var(--pp-h);
+  aspect-ratio: auto;
+}
+
+.ts-site .site-pp-cells {
+  position: absolute;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
+}
+
+.ts-site .site-pp-sheet {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-site .site-pp-sheet text {
+  font-family: var(--pt-text);
+  fill: var(--pt-ink);
+}
+
+.ts-site .site-pp-sheet .is-num {
+  fill: var(--pt-titanium);
+}
+
+.ts-site .site-pp-sheet .site-mark-frame {
+  vector-effect: non-scaling-stroke;
+}
+
+/* the strip: the pattern at each moment, on one time axis */
+.ts-site .site-pp-time {
+  position: relative;
+  margin-top: 24px;
+}
+
+.ts-site .site-pp-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  column-gap: var(--pp-gap);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-site .site-pp-body[data-laid] .site-pp-strip {
+  grid-template-columns: repeat(var(--pp-n), var(--pp-shot));
+}
+
+.ts-site .site-pp-shot {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--pt-paper);
+}
+
+/* the one accent: the moment held as the still, ringed in the selection blue */
+.ts-site .site-pp-strip .is-still .site-pp-shot {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+/* the axis: one 1 px line from the first moment to the last, a 7 px tick at each, an 11 px ink
+   square at the still; a shot is an odd number of pixels wide, so each line fills one row */
+.ts-site .site-pp-tick {
+  position: relative;
+  height: 13px;
+  margin-top: 12px;
+}
+
+.ts-site .site-pp-tick::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 0.5px);
+  top: 6px;
+  width: calc(100% + var(--pp-gap));
+  height: 1px;
+  background: var(--pt-ink-2);
+}
+
+.ts-site .site-pp-strip li:last-child .site-pp-tick::before {
+  display: none;
+}
+
+.ts-site .site-pp-tick::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 0.5px);
+  top: 3px;
+  width: 1px;
+  height: 7px;
+  background: var(--pt-ink-2);
+}
+
+.ts-site .site-pp-strip .is-still .site-pp-tick::after {
+  left: calc(50% - 5.5px);
+  top: 1px;
+  width: 11px;
+  height: 11px;
+  background: var(--pt-ink);
+}
+
+.ts-site .site-pp-at {
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--pt-titanium);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+.ts-site .site-pp-strip .is-still .site-pp-at {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+/* the playhead: a 1 px ink line across the axis at the moment the slide shows, only while it
+   plays (never under reduced motion or without script) */
+.ts-site .site-pp-head {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 21px;
+  background: var(--pt-ink);
+}
+
+.ts-site .site-pp-time[data-playing] .site-pp-head {
+  display: block;
+}
+
+.ts-site .site-pp-where .site-note {
+  margin: 16px 0 0;
+  color: var(--pt-titanium);
+}
+
+/* the caption on the figure head's 20 px line, so the two heads share a baseline */
+.ts-site .site-pp-where .site-spec caption {
+  line-height: 20px;
+}
+
+/* screen 06, the files: the slide on the left, one line split three ways to the three files */
+.ts-site .site-ex-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.ts-site .site-ex {
+  --ex-pad: 40px;
+  --ex-src: 416px;
+  --ex-link: 48px;
+  --ex-thumb: 256px;
+  --ex-row-gap: 32px;
+  --ex-tap: calc(var(--ex-thumb) * 9 / 32);
+  display: grid;
+  grid-template-columns: var(--ex-src) minmax(0, 1fr);
+  align-items: center;
+  padding: var(--ex-pad);
+}
+
+.ts-site .site-ex-src {
+  position: relative;
+}
+
+.ts-site .site-ex-caption {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  padding-top: 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-ex-sheet {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-site .site-ex-sheet > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* the trunk: the slide's right edge to the spine */
+.ts-site .site-ex-src > .site-ex-sheet::after {
+  content: '';
+  position: absolute;
+  left: calc(100% + 1px);
+  top: 50%;
+  width: var(--ex-link);
+  height: 1px;
+  background: var(--pt-edge);
+}
+
+.ts-site .site-ex-files {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 calc(var(--ex-link) * 2);
+}
+
+.ts-site .site-ex-file {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--ex-thumb) minmax(0, 1fr);
+  column-gap: 32px;
+  align-items: start;
+}
+
+.ts-site .site-ex-file + .site-ex-file {
+  margin-top: var(--ex-row-gap);
+}
+
+/* the spine, one segment per row, from the row above to this row's tap */
+.ts-site .site-ex-file::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--ex-link) * -1);
+  top: calc(var(--ex-row-gap) * -1);
+  bottom: 0;
+  width: 1px;
+  background: var(--pt-edge);
+}
+
+.ts-site .site-ex-file:first-child::before {
+  top: var(--ex-tap);
+}
+
+.ts-site .site-ex-file:last-child::before {
+  bottom: auto;
+  height: calc(var(--ex-tap) + var(--ex-row-gap));
+}
+
+/* the tap: the spine to the file, ending in the square */
+.ts-site .site-ex-file::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--ex-link) * -1 + 1px);
+  top: var(--ex-tap);
+  width: calc(var(--ex-link) - 1px);
+  height: 1px;
+  background: var(--pt-edge);
+}
+
+.ts-site .site-ex-file > .site-ex-sheet::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  left: -6px;
+  top: calc(50% - 5.5px);
+  width: 11px;
+  height: 11px;
+  background: var(--pt-ink);
+}
+
+.ts-site .site-ex-file > .site-ex-sheet.is-picture {
+  border-color: transparent;
+}
+
+.ts-site .site-ex-what,
+.ts-site .site-ex-head,
+.ts-site .site-ex-name,
+.ts-site .site-ex-says {
+  display: block;
+}
+
+.ts-site .site-ex-name {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  overflow-wrap: anywhere;
+}
+
+.ts-site .site-ex-says {
+  max-width: 30em;
+  margin-top: 8px;
+  color: var(--pt-ink-2);
+}
+
+/* what a file holds: an object, a solid outline; invisible text, a dashed one; the words that
+   name a part carry the same stroke under them, so the sentences key the drawing */
+.ts-site .site-ex-obj {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-select);
+}
+
+.ts-site .site-ex-obj.is-hidden {
+  border-style: dashed;
+}
+
+.ts-site .site-ex-obj.is-whole {
+  inset: -1px;
+}
+
+.ts-site .site-ex-key {
+  text-decoration-line: underline;
+  text-decoration-color: var(--pt-select);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-site .site-ex-key.is-hidden {
+  text-decoration-style: dashed;
+}
+
+.ts-site .site-ex-note {
+  margin: 16px 0 0;
+  color: var(--pt-titanium);
+}
+
+/* a command never breaks at its flag's dashes */
+.ts-site .site-ex-note code {
+  white-space: nowrap;
+}
+
+/* screen 06, the seam: one slide, the Pictures file left of the cut, Editable text right of it */
+.ts-site .site-xs-fig {
+  grid-column: 4 / span 9;
+  margin: 0;
+  padding-top: 16px;
+}
+
+.ts-site .site-xs-holds {
+  display: grid;
+  row-gap: 16px;
+  margin: 24px 0 0;
+}
+
+.ts-site .site-xs-holds div {
+  border-top: 1px solid var(--pt-hair);
+  padding-top: 12px;
+}
+
+.ts-site .site-xs-holds dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.ts-site .site-xs-holds dt svg {
+  flex: none;
+  color: var(--pt-titanium);
+}
+
+.ts-site .site-xs-holds dd {
+  margin: 4px 0 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-xs {
+  --xs-cut: 50%;
+  --xs-titanium: #8a8f98;
+  --xs-bar-h: 40px;
+  position: relative;
+  touch-action: pan-y;
+}
+
+/* the strip over the slide: the two files' names at the ends, the knob at the cut */
+.ts-site .site-xs-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--xs-bar-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-site .site-xs-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+}
+
+.ts-site .site-xs-mode svg {
+  flex: none;
+  color: var(--pt-titanium);
+}
+
+/* the slide, its own container, so a slide px is 100cqw / 1600 */
+.ts-site .site-xs-sheet {
+  --u: calc(100cqw / 1600);
+  position: relative;
+  aspect-ratio: 16 / 9;
+  container-type: inline-size;
+  overflow: hidden;
+  background: var(--pt-paper);
+  user-select: none;
+}
+
+.ts-site .site-xs-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ts-site .site-xs-svg path {
+  fill: none;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  shape-rendering: crispEdges;
+}
+
+.ts-site .site-xs-svg .is-hair {
+  stroke: var(--pt-hair);
+}
+
+.ts-site .site-xs-svg .is-cross {
+  stroke: var(--pt-cross);
+}
+
+.ts-site .site-xs-svg .is-sel {
+  stroke: var(--pt-select);
+}
+
+/* a part at its box in slide px */
+.ts-site .site-xs-box {
+  position: absolute;
+  left: calc(var(--x) * var(--u));
+  top: calc(var(--y) * var(--u));
+  width: calc(var(--w) * var(--u));
+  height: calc(var(--h) * var(--u));
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.ts-site .site-xs-rect {
+  background: var(--pt-paper);
+}
+
+.ts-site .site-xs-mark {
+  display: block;
+}
+
+.ts-site .site-xs-mark .is-plate {
+  fill: var(--pt-paper);
+}
+
+.ts-site .site-xs-mark .is-frame {
+  fill: none;
+  stroke: var(--xs-titanium);
+}
+
+.ts-site .site-xs-mark .is-ink {
+  fill: var(--xs-titanium);
+}
+
+/* the slide's words at the browser's sizes, optical sizes and tracking */
+.ts-site .site-xs-text {
+  display: block;
+  color: var(--pt-ink);
+  white-space: nowrap;
+  font-size: calc(var(--fs) * var(--u));
+  line-height: calc(var(--lh) * var(--u));
+  letter-spacing: calc(var(--ls) * var(--u));
+  font-weight: var(--fw, 400);
+  font-variation-settings: 'opsz' var(--op);
+}
+
+.ts-site .site-xs-text.is-muted {
+  color: var(--xs-titanium);
+  font-variant-numeric: var(--pt-numerals);
+}
+
+/* each file's layer is clipped at the cut */
+.ts-site .site-xs-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ts-site .site-xs-layer.is-pictures {
+  clip-path: inset(0 calc(100% - var(--xs-cut)) 0 0);
+}
+
+.ts-site .site-xs-layer.is-editable {
+  clip-path: inset(0 0 0 var(--xs-cut));
+}
+
+/* a part's ring, the editor's selection ring (packages/chrome/src/Overlay.css) */
+.ts-site .site-xs-ring {
+  border: 1px solid var(--pt-select);
+}
+
+/* the Pictures file's text is there but invisible: a dashed ring */
+.ts-site .site-xs-ring.is-dash {
+  border-style: dashed;
+}
+
+/* the editor's square selection chip, at 12/16 for the page */
+.ts-site .site-xs-chip {
+  position: absolute;
+  left: calc(var(--x) * var(--u));
+  top: calc(var(--y) * var(--u));
+  height: 16px;
+  padding: 0 5px;
+  translate: var(--tx, 0) var(--ty, 0);
+  background: var(--pt-select);
+  color: var(--pt-select-text);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* the seam: an ink line in a paper casing from the knob down; the knob sits in the strip */
+.ts-site .site-xs-seam {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  left: var(--xs-cut);
+  width: 44px;
+  margin-left: -22px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.ts-site .site-xs-seam::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--xs-bar-h) / 2 + 12px);
+  bottom: 0;
+  left: 21px;
+  width: 3px;
+  background: linear-gradient(
+    to right,
+    var(--pt-paper) 0 1px,
+    var(--pt-ink) 1px 2px,
+    var(--pt-paper) 2px 3px
+  );
+}
+
+.ts-site .site-xs-knob {
+  position: absolute;
+  top: calc(var(--xs-bar-h) / 2 - 12px);
+  left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-field);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+}
+
+.ts-site .site-xs-knob path {
+  fill: none;
+  stroke: var(--pt-ink);
+  stroke-width: 1;
+  stroke-linecap: square;
+}
+
+.ts-site .site-xs-seam:focus-visible {
+  outline: none;
+}
+
+.ts-site .site-xs-seam:focus-visible .site-xs-knob {
+  outline: 2px solid var(--pt-select);
+  outline-offset: 2px;
+}
+
+/* the figures at the layout breakpoint (1023 px): one column */
+@media (max-width: 1279px) {
+  /* columns 1 to 3 are narrower: the group labels take 64 px */
+  .ts-site .site-flow-group {
+    width: 64px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ts-site .site-canvas-fig,
+  .ts-site .site-canvas-side,
+  .ts-site .site-row-text,
+  .ts-site .site-pv,
+  .ts-site .site-xs-fig,
+  .ts-site .site-pp-fig,
+  .ts-site .site-pp-where {
+    grid-column: 1 / -1;
+  }
+
+  .ts-site .site-canvas-side {
+    padding-top: 0;
+    margin-top: 32px;
+  }
+
+  .ts-site .site-row-text {
+    padding-top: 0;
+  }
+
+  .ts-site .site-row-note {
+    max-width: 44ch;
+  }
+
+  .ts-site .site-pv,
+  .ts-site .site-xs-fig {
+    padding-top: 24px;
+  }
+
+  .ts-site .site-xs-holds {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--site-gap);
+  }
+
+  .ts-site .site-pp-where {
+    margin-top: 40px;
+  }
+
+  /* the one path on one vertical rail, 20 px in from the frame */
+  .ts-site .site-flow {
+    margin-top: 40px;
+  }
+
+  .ts-site .site-flow-body {
+    height: auto;
+    padding: 24px 16px 28px 0;
+  }
+
+  .ts-site .site-flow-bus,
+  .ts-site .site-flow-rail {
+    display: none;
+  }
+
+  .ts-site .site-flow-from,
+  .ts-site .site-flow-path {
+    position: static;
+    width: auto;
+  }
+
+  .ts-site .site-flow-from li,
+  .ts-site .site-flow-path > li {
+    position: relative;
+    padding-left: 48px;
+  }
+
+  /* each row draws its own length of the rail, so the rail is one rule from the first caller to
+     Version history */
+  .ts-site .site-flow-from li::before,
+  .ts-site .site-flow-path > li::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--pt-ink-2);
+  }
+
+  .ts-site .site-flow-from li {
+    flex-wrap: wrap;
+    height: auto;
+  }
+
+  .ts-site .site-flow-who {
+    line-height: var(--row);
+  }
+
+  .ts-site .site-flow-from li.has-group {
+    padding-top: 8px;
+  }
+
+  .ts-site .site-flow-from li:first-child {
+    padding-top: 0;
+  }
+
+  /* the first caller's rule turns down into the rail: the group label and half a row */
+  .ts-site .site-flow-from li:first-child::before {
+    top: 44px;
+  }
+
+  .ts-site .site-flow-group {
+    flex-basis: 100%;
+    width: auto;
+    padding-bottom: 8px;
+  }
+
+  .ts-site .site-flow-group:empty {
+    display: none;
+  }
+
+  .ts-site .site-flow-wire {
+    position: absolute;
+    left: 20px;
+    bottom: 19px;
+    width: 16px;
+    margin: 0;
+  }
+
+  .ts-site .site-flow-body .site-flow-path {
+    position: relative;
+    padding-top: 16px;
+  }
+
+  .ts-site .site-flow-path::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    width: 1px;
+    height: 16px;
+    background: var(--pt-ink-2);
+  }
+
+  .ts-site .site-flow-path > li,
+  .ts-site .site-flow-path > li:nth-child(n) {
+    left: auto;
+    top: auto;
+    bottom: auto;
+    width: auto;
+    padding-bottom: 24px;
+  }
+
+  .ts-site .site-flow-path > li:last-child {
+    padding-bottom: 0;
+  }
+
+  .ts-site .site-flow-path > li:last-child::before {
+    bottom: auto;
+    height: 10px;
+  }
+
+  .ts-site .site-flow-mark {
+    left: 15px;
+    top: 5px;
+  }
+
+  .ts-site .site-flow-text,
+  .ts-site .site-flow-out,
+  .ts-site .site-flow-path > li:nth-child(4) .site-flow-text {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: auto;
+  }
+
+  /* a refusal hangs from its check's words */
+  .ts-site .site-flow-out {
+    display: block;
+    margin-top: 8px;
+    padding-left: 20px;
+  }
+
+  .ts-site .site-flow-out::before {
+    left: 2px;
+    top: 0;
+    width: 8px;
+    height: 9px;
+  }
+
+  /* the files under the slide; the line drops from the slide's lower left */
+  .ts-site .site-ex {
+    --ex-pad: 32px;
+    --ex-src: 100%;
+    --ex-thumb: 224px;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .ts-site .site-ex-src {
+    width: min(100%, 480px);
+  }
+
+  .ts-site .site-ex-caption {
+    position: static;
+    display: block;
+    padding-left: calc(var(--ex-link) / 2 + 16px);
+  }
+
+  .ts-site .site-ex-src > .site-ex-sheet::after {
+    left: calc(var(--ex-link) / 2 - 1px);
+    top: calc(100% + 1px);
+    width: 1px;
+    height: 56px;
+  }
+
+  .ts-site .site-ex-files {
+    margin-top: 24px;
+    padding-left: var(--ex-link);
+  }
+
+  .ts-site .site-ex-file::before {
+    left: calc(var(--ex-link) / -2);
+  }
+
+  .ts-site .site-ex-file:first-child::before {
+    top: 0;
+  }
+
+  .ts-site .site-ex-file::after {
+    left: calc(var(--ex-link) / -2 + 1px);
+    width: calc(var(--ex-link) / 2 - 1px);
+  }
+}
+
+/* a phone (720 px) */
+@media (max-width: 720px) {
+  .ts-site .site-row {
+    margin-top: 56px;
+  }
+
+  .ts-site .site-canvas-side {
+    margin-top: 24px;
+  }
+
+  /* the heading's box stays a table: three short columns fit, so the stacked rows of the
+     transports table are undone here */
+  .ts-site .site-spec.site-canvas-spec thead {
+    display: table-header-group;
+  }
+
+  .ts-site .site-spec.site-canvas-spec tr {
+    display: table-row;
+    padding: 0;
+    border: 0;
+  }
+
+  .ts-site .site-spec.site-canvas-spec th,
+  .ts-site .site-spec.site-canvas-spec td {
+    padding: 10px 16px 10px 0;
+    border-bottom: 1px solid var(--pt-hair);
+  }
+
+  .ts-site .site-spec.site-canvas-spec thead th {
+    padding-top: 0;
+    padding-bottom: 8px;
+    border-bottom-color: var(--pt-edge);
+  }
+
+  .ts-site .site-spec.site-canvas-spec th:last-child,
+  .ts-site .site-spec.site-canvas-spec td:last-child {
+    padding-right: 0;
+  }
+
+  .ts-site .site-spec.site-canvas-spec td:nth-child(2) {
+    margin: 0;
+    text-align: right;
+  }
+
+  .ts-site .site-spec.site-pp-spec tr {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ts-site .site-spec.site-pp-spec td:last-child {
+    grid-row: 1;
+    grid-column: 2;
+    margin: 0;
+    text-align: right;
+  }
+
+  /* the windows stack and the link turns down from the slideshow's foot to presenter view's
+     top, its words on the right of the line */
+  .ts-site .site-pv {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 16px;
+  }
+
+  .ts-site .site-pv-show,
+  .ts-site .site-pv-pres {
+    grid-column: 1;
+  }
+
+  .ts-site .site-pv-pres {
+    margin-top: 80px;
+  }
+
+  .ts-site .site-pv-link {
+    left: 50%;
+    top: calc(100% + 0.5px);
+    width: 0;
+    height: calc(80px + 20px + 8px + 1px);
+  }
+
+  .ts-site .site-pv-line {
+    left: -0.5px;
+    right: auto;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    height: auto;
+  }
+
+  .ts-site .site-pv-dot {
+    left: -4.5px;
+    right: auto;
+  }
+
+  .ts-site .site-pv-dot.is-a {
+    top: -4.5px;
+  }
+
+  .ts-site .site-pv-dot.is-b {
+    top: auto;
+    bottom: -4.5px;
+  }
+
+  .ts-site .site-pv-say {
+    left: 16px;
+    right: auto;
+    justify-content: flex-start;
+  }
+
+  .ts-site .site-pv-say.is-up {
+    top: 12px;
+    bottom: auto;
+  }
+
+  .ts-site .site-pv-say.is-down {
+    top: 44px;
+  }
+
+  /* four moments on a phone: 0, 2, 4 and 6 s */
+  .ts-site .site-pp-ground {
+    padding: 16px;
+  }
+
+  .ts-site .site-pp-body {
+    --pp-gap: 8px;
+  }
+
+  .ts-site .site-pp-time {
+    margin-top: 16px;
+  }
+
+  .ts-site .site-pp-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ts-site .site-pp-strip li:nth-child(n + 5) {
+    display: none;
+  }
+
+  .ts-site .site-pp-strip li:nth-child(4) .site-pp-tick::before {
+    display: none;
+  }
+
+  .ts-site .site-ex {
+    --ex-pad: 16px;
+    --ex-link: 32px;
+    --ex-thumb: 128px;
+    --ex-row-gap: 28px;
+  }
+
+  .ts-site .site-ex-caption {
+    padding-left: 32px;
+  }
+
+  .ts-site .site-ex-src > .site-ex-sheet::after {
+    height: 52px;
+  }
+
+  .ts-site .site-ex-files {
+    margin-top: 20px;
+  }
+
+  .ts-site .site-ex-file {
+    column-gap: 12px;
+  }
+
+  .ts-site .site-ex-what {
+    display: contents;
+  }
+
+  .ts-site .site-ex-what > .site-ex-head {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .ts-site .site-ex-what > .site-ex-says {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 12px;
+  }
+
+  .ts-site .site-xs-holds {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-site .site-xs-bar {
+    padding: 0 12px;
+  }
+
+  /* the rings of the footer's small parts and the chips leave; the counts beside say them */
+  .ts-site .site-xs-ring.is-small,
+  .ts-site .site-xs-chip {
+    display: none;
+  }
+}
+
 /* ---- the site pages: /features, /faq and /about (FeaturesPage.tsx, FaqPage.tsx, AboutPage.tsx) ----
    The page's name in the display size with its lead, then numbered ruled blocks: the landing's
    screen head (label in the first three columns, the sentence in the other nine) with the block's

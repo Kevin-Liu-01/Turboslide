@@ -28,7 +28,9 @@ function coloursOf(id: string, palette: ShaderPalette, preset: string): string[]
 
 describe('form presets', () => {
   test('every bound material lists Paper’s presets in Glyphfield’s order, the favourites first', () => {
-    for (const id of Object.keys(MATERIALS)) expect(forms(id).length, id).toBeGreaterThan(0);
+    /* the glyph entries (Glyphfield's own engine) have no Paper presets to port */
+    for (const entry of Object.values(MATERIALS))
+      if (entry.engine === 'paper') expect(forms(entry.id).length, entry.id).toBeGreaterThan(0);
     expect(Object.values(FORM_PRESETS).flat()).toHaveLength(71);
     expect(forms('paper:warp')).toEqual(['live-ink', 'cauldron-pot', 'kelp', 'nectar', 'passion']);
     expect(forms('paper:god-rays')).toEqual(['ether', 'warp', 'linear']);

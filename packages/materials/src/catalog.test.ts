@@ -76,9 +76,8 @@ describe('the catalog', () => {
   test('lists the proto engines as unavailable and refuses to capture them', () => {
     const listed = listMaterials();
     expect(listed.filter((entry) => entry.family === 'proto')).toHaveLength(PROTO_MATERIALS.length);
-    expect(listed.every((entry) => entry.family === 'paper' || entry.available === false)).toBe(
-      true,
-    );
+    /* the Paper and Glyphfield entries are available; only the proto stubs are not */
+    for (const entry of listed) expect(entry.available, entry.id).toBe(entry.family !== 'proto');
     expect(() => requireMaterial('proto:singularity')).toThrow(/open question 9/);
     expect(() => requireMaterial('paper:nothing')).toThrow(RangeError);
     expect(listMaterials('paper:gem-smoke')).toHaveLength(1);

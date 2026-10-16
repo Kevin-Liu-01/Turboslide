@@ -196,6 +196,27 @@
   outline-offset: 1px;
 }
 
+/* the step flags of agents with a brand mark (docs/SITE.md D5; PresenceSlot.tsx): one row under
+   the slot from its left edge, centred in the menu bar's row over its empty right side, so while
+   one is drawn the title row clips sideways only and lets them show below its edge */
+.ts-title-row:has(.ts-presence-steps) {
+  overflow: clip visible;
+}
+
+.ts-presence-steps {
+  position: absolute;
+  left: 0;
+  top: 43px;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.ts-presence-steps > .ts-flag {
+  position: static;
+  flex: 0 0 auto;
+}
+
 /* the +N chip: 32 by 24, an edge border, twelve pixel tabular figures; empty until a fifth joins */
 .ts-presence-more {
   width: 32px;
@@ -478,6 +499,12 @@
 
 .ts-flag.is-faded {
   opacity: 0;
+}
+
+/* a step flag (docs/SITE.md D5): as wide as the agent's name and step, "Codex: adding a chart" */
+.ts-flag.has-step {
+  width: auto;
+  max-width: 320px;
 }
 
 .ts-remote-outline {

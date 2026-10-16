@@ -1,17 +1,28 @@
 import { existsSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { validateDocument } from '@turboslide/schema/validate';
 
-import { HERO_ASSET_BASE, HERO_DECK_TITLE, HERO_SLIDES, heroDocument } from './hero-deck';
+import {
+  HERO_ASSET_BASE,
+  HERO_DECK_TITLE,
+  HERO_PICTURE,
+  HERO_SLIDES,
+  heroDocument,
+} from './hero-deck';
 
 // The presentation of the landing's live editor (docs/SITE.md C.8): it validates, the lint finds
 // nothing that must be fixed, and it carries no General Translation picture or mark (the judge's
-// correction of the Workbench prototype); its one picture is the Earth on the title slide. The
-// competitor guard (packages/lint/src/brand/competitor.ts) reads this folder's sources with the
-// rest of apps/studio/src.
+// correction of the Workbench prototype). It holds two pictures, served from the site's public
+// folder: the Earth on the title slide, and the drawing made for it, which no slide shows until
+// Claude Code places it. The competitor guard (packages/lint/src/brand/competitor.ts) reads this
+// folder's sources with the rest of apps/studio/src.
+
+const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'public');
 
 describe('the hero deck', () => {
   const document = heroDocument('try-test', new Date('2026-10-14T00:00:00.000Z'));
@@ -37,18 +48,25 @@ describe('the hero deck', () => {
     expect(blocking).toEqual([]);
   });
 
-  it('names no General Translation', () => {
-    expect(JSON.stringify(document)).not.toMatch(/general translation|gt-brand|mood-earth/i);
+  it('names no General Translation and holds the Earth and its own drawing, the drawing on no slide yet', () => {
+    const text = JSON.stringify(document);
+    expect(text).not.toMatch(/general translation|gt-brand|mood-earth/i);
+    expect(Object.keys(document.deck.assets).sort()).toEqual(['earth', HERO_PICTURE].sort());
+    expect(JSON.stringify(document.slides)).not.toContain(`"asset":"${HERO_PICTURE}"`);
   });
 
-  it('holds one picture, the Earth on the title slide: masked, dithered, credited and served', () => {
-    expect(Object.keys(document.deck.assets)).toEqual(['earth']);
+  it('serves its pictures from the site’s own files', () => {
+    for (const asset of Object.values(document.deck.assets)) {
+      for (const path of Object.values(asset.twins as Record<string, string>))
+        expect(existsSync(join(PUBLIC, HERO_ASSET_BASE, path)), path).toBe(true);
+    }
+  });
+
+  it('shows the Earth on the title slide: masked, dithered, credited and small', () => {
     const earth = document.deck.assets.earth!;
     expect(earth.source).toMatchObject({ kind: 'photo', license: 'public domain' });
     const twin = 'neutral' in earth.twins ? earth.twins.neutral : earth.twins.light;
-    const file = new URL(`../../public${HERO_ASSET_BASE}${twin}`, import.meta.url);
-    expect(existsSync(file)).toBe(true);
-    expect(statSync(file).size).toBeLessThan(80_000);
+    expect(statSync(join(PUBLIC, HERO_ASSET_BASE, twin)).size).toBeLessThan(80_000);
     const title = document.slides[HERO_SLIDES.title]!;
     const blocks = 'slots' in title ? Object.values(title.slots).flat() : [];
     expect(blocks.find((block) => block.id === 'earth')).toMatchObject({

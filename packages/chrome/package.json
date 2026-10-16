@@ -44,6 +44,7 @@
     "./Progress": "./src/Progress.tsx",
     "./ThemeButton": "./src/ThemeButton.tsx",
     "./presence/agent-marks": "./src/presence/agent-marks.tsx",
+    "./presence/presence-model": "./src/presence/presence-model.ts",
     "./useShellKeys": "./src/useShellKeys.ts",
     "./ViewerShell": "./src/ViewerShell.tsx",
     "./Overlay": "./src/Overlay.tsx",

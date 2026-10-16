@@ -8,6 +8,7 @@ import type { Author, Version } from '@turboslide/schema/mutations';
 import type { EditorIdentity } from '../server/write';
 import {
   brandOfRow,
+  doingOfRow,
   identityIndex,
   identityOfPrincipal,
   identityView,
@@ -323,6 +324,19 @@ describe('agents with a brand mark (docs/SITE.md D5)', () => {
     expect(view.brand).toBe('claude-code');
     expect(view.hue).toBe(6);
     expect(view.kind).toBe('agent');
+  });
+
+  it('carries the step a branded agent names, and no step for any other row', () => {
+    const at = '2026-10-14T00:00:00.000Z';
+    const named = participantOf(
+      agentRow({ variant: 'agent', brand: 'codex', doing: ' adding a chart ' }),
+      at,
+    );
+    expect(named.doing).toBe('adding a chart');
+    expect(participantOf(agentRow({ variant: 'agent', doing: 'working' }), at)).not.toHaveProperty(
+      'doing',
+    );
+    expect(doingOfRow({ kind: 'human', mark: { brand: 'codex', doing: 'typing' } })).toBeNull();
   });
 
   it('leaves every other agent as it was: no hue, no brand', () => {

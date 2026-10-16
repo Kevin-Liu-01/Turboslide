@@ -15,8 +15,12 @@ import {
   CARET_DIM_MS,
   FLAG_FADE_MS,
   displayNameFor,
+  doingOf,
+  doingShort,
+  doingText,
   dragOf,
   flagText,
+  flagWidthOf,
   keptCaretBox,
   pointersDrawn,
   stackFlags,
@@ -40,8 +44,11 @@ import type { ViewerFacts } from './presence-model';
  * above the cap. The caret's offset arrives already placed in this tab's frame (the room client's
  * caret transform). An agent's outline is dashed ink with no hue, and an agent draws no pointer
  * and no drag ghost; an agent whose view names a brand mark (docs/SITE.md D5) draws all three in
- * its hue as a person does, its outline still dashed. Everything is absolute inside the overlay,
- * so it moves nothing (05 rule 4).
+ * its hue as a person does, its outline still dashed, and while it names a step (`doing`) each of
+ * its flags reads the step after its name ("Codex: adding a chart"), the step alone with its mark
+ * on a stage under 560 px wide, the flag as wide as its words, and its outline draws no flag of
+ * its own while its pointer carries one. Everything is absolute inside the overlay, so it moves
+ * nothing (05 rule 4).
  */
 export type RemoteCursorsProps = {
   view: EditorOverlayView;
@@ -91,12 +98,32 @@ function place(box: Box, k: number): CSSProperties {
  * The left of a pointer's flag from the pointer's tip, in CSS px: at the tip's right as
  * COLLAB_GEOMETRY places it, or at its left when the flag would run past the sheet's right edge,
  * so the name stays whole on a narrow stage (a phone's sheet is about 330 px wide, where a
- * 120 px flag at the right of a pointer past the sheet's middle was cut by the stage).
+ * 120 px flag at the right of a pointer past the sheet's middle was cut by the stage). `width` is
+ * a step flag's own (flagWidthOf), the fixed 120 px otherwise.
  */
-export function pointerFlagLeft(tipX: number, k: number): number {
-  const { flag, pointer } = COLLAB_GEOMETRY;
-  if (tipX + pointer.flagOffset.x + flag.width <= SHEET_WIDTH * k) return pointer.flagOffset.x;
-  return -flag.width - 2;
+export function pointerFlagLeft(
+  tipX: number,
+  k: number,
+  width: number = COLLAB_GEOMETRY.flag.width,
+): number {
+  const { pointer } = COLLAB_GEOMETRY;
+  if (tipX + pointer.flagOffset.x + width <= SHEET_WIDTH * k) return pointer.flagOffset.x;
+  return Math.max(-width - 2, -tipX);
+}
+
+/** The stage width under which a step flag drops the name and keeps the mark and the step. */
+const COMPACT_STAGE_PX = 560;
+
+/** The words a flag draws for a participant naming a step, or null (docs/SITE.md D5). */
+export function stepWords(
+  participant: PresenceParticipant,
+  name: string,
+  compact: boolean,
+): { text: string; label: string; width: number } | null {
+  const doing = doingOf(participant);
+  if (doing === null) return null;
+  const text = compact ? doingShort(doing) : doingText(name, doing);
+  return { text, label: doingText(name, doing), width: flagWidthOf(text) };
 }
 
 /** The box inset by `px` CSS pixels on every side, for the outline inside the own ring. */
@@ -118,6 +145,8 @@ type FlagProps = {
   word?: string;
   /** the `data-state` the drivers read (`moving`) */
   state?: string;
+  /** a stage under COMPACT_STAGE_PX wide: a step flag draws the step without the name */
+  compact?: boolean;
 };
 
 /** The 120 by 18 name flag (11 6.5): an ink plate, the 14 px chip, the first name, "guest" when it fits, or the state word. */
@@ -131,11 +160,14 @@ export function Flag({
   more,
   word,
   state,
+  compact = false,
 }: FlagProps) {
   const hue = hueHexOf(participant.hue);
+  /* an agent naming its step: the step after its name, as wide as its words (docs/SITE.md D5) */
+  const step = more === undefined ? stepWords(participant, name, compact) : null;
   /* a branded agent's flag names the tool whole ("Claude Code"), never its first word (D5) */
   const short = participant.brand !== undefined ? name : flagText(name, 'label');
-  const text =
+  const plain =
     more !== undefined
       ? PRESENCE.more(more)
       : word === undefined
@@ -145,7 +177,7 @@ export function Flag({
         : word === MOVING_WORD
           ? movingFlagText(short)
           : `${short} · ${word}`;
-  const label =
+  const plainLabel =
     more !== undefined
       ? PRESENCE.more(more)
       : word === undefined
@@ -153,10 +185,22 @@ export function Flag({
         : word === MOVING_WORD
           ? movingLabelText(name)
           : `${name}, ${word}`;
+  const text = step?.text ?? plain;
+  const label = step?.label ?? plainLabel;
   return (
     <span
-      className={cn(COLLAB_CLASSES.flag, 'ts-flag', faded && 'is-faded', halo && 'has-halo')}
-      style={{ left: x, top: y, ...(hue === null ? {} : ({ '--ts-hue': hue } as CSSProperties)) }}
+      className={cn(
+        COLLAB_CLASSES.flag,
+        'ts-flag',
+        faded && 'is-faded',
+        halo && 'has-halo',
+        step !== null && 'has-step',
+      )}
+      style={{
+        left: x,
+        top: y,
+        ...(hue === null ? {} : ({ '--ts-hue': hue } as CSSProperties)),
+      }}
       data-client={participant.clientId}
       {...(state === undefined ? {} : { 'data-state': state })}
       role="img"
@@ -271,6 +315,17 @@ export function RemoteCursors({
 
   const drawPointers = pointersDrawn(presence, presence.others.length, present);
   const pointerSize = COLLAB_GEOMETRY.pointer;
+  /* a step flag's words and width (docs/SITE.md D5); the stage under 560 px drops the name */
+  const sheetW = SHEET_WIDTH * k;
+  const compact = sheetW < COMPACT_STAGE_PX;
+  const widthOf = (participant: PresenceParticipant): number =>
+    stepWords(participant, displayNameFor(participant, viewer), compact)?.width ?? flagW;
+  /* an agent naming its step whose pointer is drawn here carries its words on the pointer */
+  const onPointer = (participant: PresenceParticipant): boolean =>
+    drawPointers &&
+    participant.pointer !== undefined &&
+    participant.pointer !== null &&
+    doingOf(participant) !== null;
 
   return (
     <>
@@ -281,10 +336,15 @@ export function RemoteCursors({
         /* both hold the block: the own ring stays at the edge and the remote outline draws 2 px
            inside it in the holder's hue (docs/REALTIME.md 3.5; audit-people.md defect 5) */
         const inside = selfBlocks.has(blockId);
-        const flags = holders.slice(0, 2);
-        const more = holders.length - flags.length;
+        const flagged = holders.filter((holder) => !onPointer(holder));
+        const flags = flagged.slice(0, 2);
+        const more = flagged.length - flags.length;
         const right = (box[0] + box[2]) * k;
         const top = box[1] * k - flagH;
+        const lefts = flags.reduce<number[]>((out, holder, i) => {
+          const end = i === 0 ? right : out[i - 1]! - 2;
+          return [...out, end - widthOf(holder)];
+        }, []);
         return (
           <span key={`outline:${blockId}`} className="ts-remote-group" data-block={blockId}>
             <span
@@ -309,9 +369,10 @@ export function RemoteCursors({
                 key={holder.clientId}
                 participant={holder}
                 name={displayNameFor(holder, viewer)}
-                x={right - flagW - i * (flagW + 2)}
+                x={lefts[i] ?? right - flagW}
                 y={top < 0 ? (box[1] + box[3]) * k : top}
                 halo={halo}
+                compact={compact}
               />
             ))}
             {more > 0 ? (
@@ -320,7 +381,7 @@ export function RemoteCursors({
                 participant={first}
                 name=""
                 more={more}
-                x={right - flagW * 3 - 4}
+                x={(lefts[lefts.length - 1] ?? right) - flagW - 2}
                 y={top < 0 ? (box[1] + box[3]) * k : top}
                 halo={halo}
               />
@@ -358,11 +419,12 @@ export function RemoteCursors({
             <Flag
               participant={participant}
               name={displayNameFor(participant, viewer)}
-              x={right - flagW}
+              x={right - widthOf(participant)}
               y={top < 0 ? (box[1] + box[3]) * k : top}
               word={MOVING_WORD}
               state="moving"
               halo={halo}
+              compact={compact}
             />
           </span>
         );
@@ -387,10 +449,11 @@ export function RemoteCursors({
             <Flag
               participant={caret.participant}
               name={displayNameFor(caret.participant, viewer)}
-              x={x}
+              x={Math.max(0, Math.min(x, sheetW - widthOf(caret.participant)))}
               y={y}
               faded={caret.faded}
               halo={halo}
+              compact={compact}
             />
           </span>
         );
@@ -427,9 +490,10 @@ export function RemoteCursors({
                 <Flag
                   participant={each}
                   name={displayNameFor(each, viewer)}
-                  x={pointerFlagLeft(x, k)}
+                  x={pointerFlagLeft(x, k, widthOf(each))}
                   y={pointerSize.flagOffset.y}
                   halo={halo}
+                  compact={compact}
                 />
               </span>,
             ];

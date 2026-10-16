@@ -9,9 +9,13 @@
 export type Appearance = 'light' | 'dark';
 export const APPEARANCES: readonly Appearance[] = ['light', 'dark'];
 
-/** The brand's seeds (DESIGN.md 5.2): paper, ink, the second ink, titanium and five hues. */
+/**
+ * The brand's seeds (DESIGN.md 5.2): paper, ink, the second ink, titanium and five hues, and the
+ * site's accent (Kevin, 2026-10-16), an orange apart from the selection blue, the status hues
+ * and the six live hues of packages/identity/src/hues.ts.
+ */
 export type SeedName =
-  'paper' | 'ink' | 'ink2' | 'titanium' | 'blue' | 'green' | 'amber' | 'red' | 'guide';
+  'paper' | 'ink' | 'ink2' | 'titanium' | 'blue' | 'green' | 'amber' | 'red' | 'guide' | 'accent';
 
 export const SEEDS: Readonly<Record<Appearance, Readonly<Record<SeedName, string>>>> = {
   light: {
@@ -24,6 +28,7 @@ export const SEEDS: Readonly<Record<Appearance, Readonly<Record<SeedName, string
     amber: '#f0a020',
     red: '#e5484d',
     guide: '#d6336c',
+    accent: '#ff6a13',
   },
   dark: {
     paper: '#070707',
@@ -35,6 +40,7 @@ export const SEEDS: Readonly<Record<Appearance, Readonly<Record<SeedName, string
     amber: '#f0a020',
     red: '#e5484d',
     guide: '#d6336c',
+    accent: '#ff6a13',
   },
 };
 
@@ -274,6 +280,38 @@ export const CHROME_TOKENS: readonly ChromeToken[] = [
   },
   { name: '--pt-select-text', role: 'text', light: seed('paper') },
   { name: '--pt-guide', role: 'selection', light: seed('guide'), dark: hex('#f0397a') },
+  {
+    name: '--pt-accent',
+    role: 'text',
+    note: 'The site accent (Kevin, 2026-10-16): the words people and agents of the landing title, a key word of a heading, the current item and a link under the pointer on /home, /features, /faq, /about and /docs. Orange solved to 4.5:1 on the paper of each appearance. Text, glyphs and fills only, never a border or a ring.',
+    light: {
+      kind: 'solve',
+      seed: 'accent',
+      floor: FLOORS.text,
+      on: ['paper'],
+      direction: 'darker',
+    },
+    dark: {
+      kind: 'solve',
+      seed: 'accent',
+      floor: FLOORS.text,
+      on: ['paper'],
+      direction: 'lighter',
+    },
+  },
+  {
+    name: '--pt-accent-fill',
+    role: 'ground',
+    note: 'The accent as a fill behind --pt-accent-text: the light solve in both appearances, so white holds 4.5:1 on it on either paper.',
+    light: {
+      kind: 'solve',
+      seed: 'accent',
+      floor: FLOORS.text,
+      on: ['paper'],
+      direction: 'darker',
+    },
+  },
+  { name: '--pt-accent-text', role: 'text', light: seed('paper') },
 ];
 
 /** A ground in a pair: a token, or a translucent token composited over another (the hover ground). */
@@ -378,6 +416,19 @@ export const PAIRS: readonly ContrastPair[] = [
     floor: FLOORS.boundary,
   },
   { name: 'the selection on the ink', text: '--pt-select', ground: INK, floor: FLOORS.boundary },
+  { name: 'the accent on the paper', text: '--pt-accent', ground: PAPER, floor: FLOORS.text },
+  {
+    name: 'white text on the accent fill',
+    text: '--pt-accent-text',
+    ground: { token: '--pt-accent-fill' },
+    floor: FLOORS.text,
+  },
+  {
+    name: 'the accent fill on the paper',
+    text: '--pt-accent-fill',
+    ground: PAPER,
+    floor: FLOORS.glyph,
+  },
   { name: 'a guide on the paper', text: '--pt-guide', ground: PAPER, floor: FLOORS.boundary },
   { name: 'a guide on the ink', text: '--pt-guide', ground: INK, floor: FLOORS.boundary },
   { name: 'disabled text on the paper (exempt)', text: '--pt-disabled', ground: PAPER, floor: 0 },

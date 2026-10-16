@@ -10,14 +10,17 @@ import type { AgentPresence, VisitorView } from './agents';
  * from the edge of the slide the visitor is looking at, moves between its blocks for a few
  * seconds and leaves; OpenClaw or Hermes pressed in the agents stack joins the same way, leaves a
  * comment on that slide (a real `comment.add` through the page API's path) and resolves it before
- * it leaves. A guest writes nothing on a slide, so the visitor's work is never touched. A second
- * press while a guest is in the room keeps them longer. Visits pause with the agents (off screen,
- * hidden) and under reduced motion the pointer jumps instead of travelling.
+ * it leaves; while it is in the room its chip and flags say what it does ("reading this slide",
+ * "leaving a comment"). A guest writes nothing on a slide, so the visitor's work is never
+ * touched. A second press while a guest is in the room keeps them longer. Visits pause with the
+ * agents (off screen, hidden) and under reduced motion the pointer jumps instead of travelling.
  */
 
 /** One guest as a visit drives it: a headless editor controller on the tab room (session.ts). */
 export type GuestHandle = {
   present: (state: AgentPresence) => void;
+  /** names an agent's step in a few words (docs/SITE.md D5); a person names none */
+  say?: (words: string | null) => void;
   invoke: (action: string, input: unknown) => Promise<unknown>;
   /** leaves the room: the roster drops the guest */
   leave: () => void;
@@ -98,6 +101,7 @@ export function createGuests(options: GuestsOptions): Guests {
     let pointer = { x: 1580, y: 160 + random() * 560 };
     let arrived = false;
     let thread: string | null = null;
+    if (plan.kind === 'agent') handle.say?.('reading this slide');
     while (running && now() < stay.until) {
       await gate();
       const slideId = slideOf();
@@ -124,6 +128,7 @@ export function createGuests(options: GuestsOptions): Guests {
         options.onArrive?.(plan.key);
         if (plan.kind === 'agent' && plan.comment !== undefined)
           try {
+            handle.say?.('leaving a comment');
             const answer = (await handle.invoke('comment.add', {
               anchor: { kind: 'slide', slideId },
               body: { text: plan.comment, mentions: [] },
@@ -132,6 +137,7 @@ export function createGuests(options: GuestsOptions): Guests {
           } catch {
             thread = null;
           }
+        if (plan.kind === 'agent') handle.say?.('reading this slide');
       }
       await sleep(500 + random() * 700);
       if (block !== undefined && running)
@@ -140,6 +146,7 @@ export function createGuests(options: GuestsOptions): Guests {
     }
     if (thread !== null)
       try {
+        handle.say?.('resolving its comment');
         await handle.invoke('comment.resolve', { threadId: thread });
       } catch {
         /* the visitor may have resolved or removed it */

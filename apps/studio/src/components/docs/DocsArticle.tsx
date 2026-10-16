@@ -8,6 +8,7 @@ import { twinUrl } from '../../docs/paths';
 import type { DocsPageData, DocsTocEntry } from '../../docs/paths';
 import { closestPages, neighbours, source } from '../../docs/source';
 import type { DocsPage } from '../../docs/source';
+import { Keyed } from '../site/Keyed';
 import { SiteIcon } from '../site/SiteIcon';
 import { useMountEffect } from '../useMountEffect';
 import { CopyPage } from './CopyPage';
@@ -55,6 +56,14 @@ export async function loadDocsPage(slugs: string[]): Promise<DocsPageData | unde
 
 const REPOSITORY_CONTENT = `${SITE.repository}/edit/main/apps/studio/content/docs`;
 
+/**
+ * The key words of a page's title drawn in the site accent (Keyed.tsx), as every site page's head
+ * draws its own: the front page's.
+ */
+const TITLE_KEYS: Readonly<Record<string, readonly string[]>> = {
+  '/docs': ['documentation'],
+};
+
 /** The pages a generator writes (the action reference, the shortcuts and the grammar): no edit link. */
 const GENERATED_FILES = /^(?:reference\/|shortcuts\.mdx$|agents\/grammar\.mdx$)/;
 
@@ -87,7 +96,9 @@ export function DocsArticle({ data }: { data: DocsPageData }) {
     <div className="ts-docs-page" data-control="docs.page" data-page={data.url} key={data.url}>
       <article className="ts-docs-article">
         <header className="ts-docs-head">
-          <h1 className="ts-docs-title t-title">{data.title}</h1>
+          <h1 className="ts-docs-title t-title">
+            <Keyed text={data.title} keys={TITLE_KEYS[data.url] ?? []} />
+          </h1>
           {data.description === '' ? null : (
             <p className="ts-docs-lead t-lead">{data.description}</p>
           )}

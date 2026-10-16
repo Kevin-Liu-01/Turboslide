@@ -326,6 +326,12 @@ export type PresenceParticipant = IdentityView & {
   presenting?: boolean;
   idle?: boolean;
   lastSeenAt: string;
+  /**
+   * A few words naming the step an agent with a brand mark is taking ("adding a chart";
+   * docs/SITE.md D5): its flags read "Codex: adding a chart" and its chip in the title row hangs
+   * the same words under the presence slot. Only the landing's tab room writes them.
+   */
+  doing?: string;
 };
 
 /** The room as the title row, the filmstrip and the overlay read it (SPEC-3 4.2 to 4.7). */

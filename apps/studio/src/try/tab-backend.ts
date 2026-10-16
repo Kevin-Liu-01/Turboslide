@@ -80,6 +80,11 @@ export type TabBackend = {
   payloadFor: (person: TabPerson) => EditorDeck;
   /** lets one more person into the room (a visitor of the title's stacks, guests.ts) */
   join: (person: TabPerson) => void;
+  /**
+   * Names the step an agent with a brand mark is taking, a few words ("adding a chart"), or none
+   * with null: its roster row carries them from its next presence post (docs/SITE.md D5).
+   */
+  say: (principalId: string, words: string | null) => void;
 };
 
 /** The identity a person resolves to, as the studio's room resolves a principal (identity/resolve.ts). */
@@ -114,7 +119,12 @@ function identityOf(person: TabPerson, self = false): EditorIdentity {
   };
 }
 
-function fakeIdentityOf(person: TabPerson): FakeIdentity {
+/**
+ * The room's identity of a person. The mark is read at every presence post (fake-transport.ts
+ * `rosterEntry`), so an agent's step words (`say`) reach its roster row with its next post as the
+ * mark's `doing` (docs/SITE.md D5).
+ */
+function fakeIdentityOf(person: TabPerson, stepOf: () => string | undefined): FakeIdentity {
   return {
     principalId: person.author.principalId,
     label: person.author.name,
@@ -122,7 +132,10 @@ function fakeIdentityOf(person: TabPerson): FakeIdentity {
     author: person.author,
     trust: person.trust,
     kind: person.trust === 'agent' ? 'agent' : 'human',
-    mark: tabMarkOf(person),
+    get mark() {
+      const step = stepOf();
+      return { ...tabMarkOf(person), ...(step === undefined ? {} : { doing: step }) };
+    },
     hueSlot: person.hue - 1,
   };
 }
@@ -155,6 +168,8 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
     },
   });
   const people = new Map(options.people.map((person) => [person.author.principalId, person]));
+  /* the step words each agent names (`say`), read by its identity's mark */
+  const steps = new Map<string, string>();
   /* everyone the room has let in, in order: the payload names them all */
   const everyone = (): TabPerson[] => [...people.values()];
   const ids = new Map<string, IdStorage>();
@@ -303,7 +318,12 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
     roomTransport: (_deckId, _tab, _facts, author) => {
       const person = people.get(author.principalId ?? '');
       if (person === undefined) throw new RangeError(`${author.name} is not in this room`);
-      return server.transportFor(fakeIdentityOf(person));
+      const principal = person.author.principalId;
+      return server.transportFor(
+        fakeIdentityOf(person, () =>
+          person.brand === undefined ? undefined : steps.get(principal),
+        ),
+      );
     },
     pendingStore: () => memoryPendingStore(),
     idStorage: (author) => {
@@ -377,6 +397,10 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
     payloadFor: (person) => payloadOf(person),
     join: (person) => {
       people.set(person.author.principalId, person);
+    },
+    say: (principalId, words) => {
+      if (words === null || words.trim() === '') steps.delete(principalId);
+      else steps.set(principalId, words.trim());
     },
   };
 }

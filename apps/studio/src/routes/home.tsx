@@ -68,7 +68,7 @@ function HomePage() {
         <AgentsScreen />
         <PresentScreen />
       </main>
-      <SiteFooter />
+      <SiteFooter top />
     </div>
   );
 }

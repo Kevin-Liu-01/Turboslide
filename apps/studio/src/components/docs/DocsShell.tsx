@@ -7,7 +7,7 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 
 import { source } from '../../docs/source';
 import { SiteBar } from '../site/SiteBar';
-import { DocsFooter } from '../site/SiteFooter';
+import { SiteFooter } from '../site/SiteFooter';
 import { SiteLink } from '../site/SiteLink';
 import { useMountEffect } from '../useMountEffect';
 import { DocsSidebar, placeOf } from './DocsSidebar';
@@ -32,7 +32,7 @@ export function docsPath(pathname: string): string {
  * `.ts-site` with the docs' own class, the site's bar with the docs' slot (a hairline,
  * Documentation and the 288 px search field), then three columns across the 1280 px column: the
  * navigation (224 px), the page (the route's outlet: the article, 720 px, and its on this page
- * column, 208 px) and the compact footer. At 1024 to 1279 px the on this page column leaves and its
+ * column, 208 px), then the site's footer. At 1024 to 1279 px the on this page column leaves and its
  * tools move under the article (docs.css); at 1023 px and under one column, where the navigation
  * becomes the Contents disclosure at the top of the page (a `<details>`, no sheet and no scrim) and
  * the search field becomes a 32 px button.
@@ -136,7 +136,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
-      <DocsFooter />
+      <SiteFooter />
       {searching ? (
         <Suspense fallback={null}>
           <SearchWindow onClose={closeSearch} />

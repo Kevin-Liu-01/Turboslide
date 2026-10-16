@@ -911,34 +911,59 @@
   color: #0b0b0b;
 }
 
-/* ---- the footer ---- */
+/* ---- the footer (SiteFooter.tsx): on every site page and the docs ---- */
 
 .ts-site .site-foot {
   margin-top: 160px;
   border-top: 1px solid var(--pt-hair);
-  padding: 48px 0 40px;
+  padding: 64px 0 32px;
 }
 
 .ts-site .site-foot-top {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--site-gap);
+  row-gap: 48px;
   align-items: start;
 }
 
-.ts-site .site-foot-top .site-lockup {
-  grid-column: 1 / span 3;
+.ts-site .site-foot-brand {
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+/* the lockup: the animated mark at 80 px and the word in the display cut at 40/48 */
+.ts-site .site-foot .site-foot-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--pt-ink);
+  text-decoration: none;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 500;
+  letter-spacing: -0.024em;
+}
+
+.ts-site .site-foot-say {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--pt-ink-2);
 }
 
 .ts-site .site-foot-cols {
-  grid-column: 4 / span 9;
+  grid-column: 5 / span 8;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--site-gap);
+  row-gap: 32px;
 }
 
 .ts-site .site-foot-cols h2 {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
 }
 
 .ts-site .site-foot-cols ul {
@@ -961,49 +986,115 @@
   color: var(--pt-ink);
 }
 
-.ts-site .site-foot .site-lockup {
-  color: var(--pt-ink);
-}
-
 .ts-site .site-foot-base {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 64px;
-  padding-top: 16px;
+  gap: 16px 32px;
+  margin-top: 80px;
+  padding-top: 24px;
   border-top: 1px solid var(--pt-hair-soft);
   color: var(--pt-titanium);
 }
 
-.ts-site .site-foot-base p {
+.ts-site .site-foot-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 32px;
   margin: 0;
 }
 
-/* the docs' footer (SiteFooter.tsx DocsFooter): one compact row, the T in a box, the maker's
-   sentence and the repository's three links */
-.ts-site .site-foot.is-compact {
-  margin-top: 96px;
-  padding: 24px 0 32px;
+.ts-site .site-foot-meta code {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 
-.ts-site .site-foot-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  color: var(--pt-titanium);
+/* the appearance switch: Light and Dark in one 6 px group, the current one in ink; the pressed
+   look reads html[data-theme], so it is right from the first paint */
+.ts-site .site-appear {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
 }
 
-.ts-site .site-foot-row p {
-  margin: 0;
+.ts-site .site-appear-opt {
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--pt-ink-2);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: -0.006em;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out;
 }
 
-.ts-site .site-foot-row nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin-left: auto;
+.ts-site .site-appear-opt:hover {
+  color: var(--pt-ink);
+}
+
+html[data-theme='light'] .ts-site .site-appear-opt[data-value='light'],
+html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+/* the animated mark (AnimatedMark.tsx): the 16 px rows build from the top, each run drawn from
+   its left end 45 ms after the row above, then the T slides out to the right and back in from
+   the left, once. Before it is first in view, without script and under reduced motion it is the
+   finished mark; off screen it pauses */
+.ts-site .site-mark-run {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+}
+
+.ts-site .site-mark[data-play] .site-mark-run {
+  animation: site-mark-build 220ms cubic-bezier(0.2, 0, 0, 1) calc(var(--row) * 45ms) backwards;
+}
+
+.ts-site .site-mark[data-play] .site-mark-slide {
+  animation: site-mark-slide 600ms 900ms;
+}
+
+.ts-site .site-mark[data-paused] .site-mark-run,
+.ts-site .site-mark[data-paused] .site-mark-slide {
+  animation-play-state: paused;
+}
+
+@keyframes site-mark-build {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes site-mark-slide {
+  0% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  40% {
+    transform: translateX(14px);
+    animation-timing-function: step-end;
+  }
+
+  40.5% {
+    transform: translateX(-14px);
+    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+  }
+
+  100% {
+    transform: none;
+  }
 }
 
 /* ---- the layout breakpoint (BRAND_LAYOUT_MAX_PX, 1023 px): one column ---- */
@@ -1014,7 +1105,7 @@
   .ts-site .site-screen-head h2,
   .ts-site .site-term,
   .ts-site .site-transports,
-  .ts-site .site-foot-top .site-lockup,
+  .ts-site .site-foot-brand,
   .ts-site .site-foot-cols {
     grid-column: 1 / -1;
   }
@@ -1037,10 +1128,6 @@
 
   .ts-site .site-keys {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .ts-site .site-foot-cols {
-    margin-top: 32px;
   }
 }
 
@@ -1230,25 +1317,38 @@
 
   .ts-site .site-foot {
     margin-top: 112px;
+    padding-top: 48px;
+  }
+
+  .ts-site .site-foot-top {
+    row-gap: 40px;
+  }
+
+  /* the mark at 48 px (three times the 16 px grid) and the word at 28/36 */
+  .ts-site .site-foot .site-foot-lockup {
+    gap: 16px;
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: -0.02em;
+  }
+
+  .ts-site .site-foot-lockup .site-mark {
+    width: 48px;
+    height: 48px;
   }
 
   .ts-site .site-foot-cols {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    row-gap: 32px;
   }
 
   .ts-site .site-foot-base {
     flex-direction: column;
-    gap: 4px;
+    align-items: flex-start;
     margin-top: 48px;
   }
 
-  .ts-site .site-foot.is-compact {
-    margin-top: 80px;
-  }
-
-  .ts-site .site-foot-row nav {
-    margin-left: 0;
+  .ts-site .site-foot-meta {
+    flex-direction: column;
   }
 }
 
@@ -1256,6 +1356,7 @@
   .ts-site .site-btn,
   .ts-site .site-bar-link,
   .ts-site .site-foot a,
+  .ts-site .site-appear-opt,
   .ts-site .site-hero-frame,
   .ts-site .site-av {
     transition: none;
@@ -1278,6 +1379,12 @@
   .ts-site .site-av[data-pressed]::before {
     animation: none;
     opacity: 1;
+  }
+
+  /* the finished mark, never the build or the slide */
+  .ts-site .site-mark[data-play] .site-mark-run,
+  .ts-site .site-mark[data-play] .site-mark-slide {
+    animation: none;
   }
 }
 

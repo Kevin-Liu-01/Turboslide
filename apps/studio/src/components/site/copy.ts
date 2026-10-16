@@ -12,6 +12,8 @@ import { HOME_LEAD } from './meta';
 
 export const REPOSITORY = SITE.repository;
 const GITHUB_FILE = `${REPOSITORY}/blob/main`;
+/** General Translation, the maker the footer names. */
+const MAKER = 'https://generaltranslation.com';
 
 export const NAV = {
   skip: 'Skip to Content',
@@ -126,35 +128,59 @@ export const PRESENT_SCREEN = {
   ],
 } as const;
 
+/**
+ * The footer of every site page and the docs (SiteFooter.tsx): the lockup with the animated mark,
+ * one sentence, four columns of links, then the maker, the build and the appearance switch.
+ */
 export const FOOTER = {
-  name: 'Turboslide, back to the top',
+  word: 'Turboslide',
+  /** the lockup's name on /home, where it goes back to the top, and on every other page */
+  top: 'Turboslide, back to the top',
+  home: 'Turboslide home',
+  sentence:
+    'Turboslide is a slides editor in the browser. Every command in its menus is also an action that an agent can run.',
   nav: 'Footer',
   columns: [
     {
-      id: 'presentations',
-      title: 'Presentations',
+      id: 'product',
+      title: 'Product',
       icon: 'presentation-chart-bar',
       links: [
         { label: 'New presentation', href: '/new', external: false },
-        { label: 'Your presentations', href: '/decks', external: false },
+        { label: 'Features', href: '/features', external: false },
         { label: 'The example deck', href: '/deck/gt-brand', external: false },
       ],
     },
     {
-      id: 'documentation',
-      title: 'Documentation',
-      icon: 'book-open',
+      id: 'agents',
+      title: 'Agents',
+      icon: 'command-line',
       links: [
-        { label: 'Getting started', href: '/docs', external: false },
-        { label: 'Agents', href: '/docs/agents', external: false },
-        { label: 'Action reference', href: '/docs/reference', external: false },
+        { label: 'Command line', href: '/docs/agents/cli', external: false },
+        { label: 'MCP', href: '/docs/agents/mcp', external: false },
+        { label: 'HTTP', href: '/docs/agents/http', external: false },
+        { label: 'Skills', href: '/docs/agents/skills', external: false },
+        { label: 'llms.txt', href: '/llms.txt', external: false },
       ],
     },
     {
-      id: 'source',
-      title: 'Source',
+      id: 'docs',
+      title: 'Docs',
+      icon: 'book-open',
+      links: [
+        { label: 'Getting started', href: '/docs', external: false },
+        { label: 'Sharing', href: '/docs/sharing', external: false },
+        { label: 'Export', href: '/docs/export', external: false },
+        { label: 'Self-hosting', href: '/docs/self-hosting', external: false },
+      ],
+    },
+    {
+      id: 'project',
+      title: 'Project',
       icon: 'code-bracket',
       links: [
+        { label: 'About', href: '/about', external: false },
+        { label: 'FAQ', href: '/faq', external: false },
         { label: 'GitHub', href: REPOSITORY, external: true },
         { label: 'MIT License', href: `${GITHUB_FILE}/LICENSE`, external: true },
         {
@@ -165,18 +191,11 @@ export const FOOTER = {
       ],
     },
   ],
-  made: 'Turboslide is made by General Translation.',
-  licence: 'Turboslide is open source under the MIT License.',
-} as const;
-
-/** The docs' footer (docs/SITE.md section 6): the compact row under every docs page. */
-export const DOCS_FOOTER = {
-  name: 'Turboslide home',
-  nav: 'Footer',
-  made: FOOTER.made,
-  links: [
-    { label: 'GitHub', href: REPOSITORY },
-    { label: 'Report an issue', href: `${REPOSITORY}/issues` },
-    { label: 'MIT License', href: `${GITHUB_FILE}/LICENSE` },
-  ],
+  made: { before: 'Made by', name: 'General Translation', href: MAKER },
+  build: {
+    label: 'Build',
+    name: (commit: string): string => `Build ${commit}, the commit on GitHub`,
+    href: (commit: string): string => `${REPOSITORY}/commit/${commit}`,
+  },
+  appearance: { name: 'Appearance', light: 'Light', dark: 'Dark' },
 } as const;

@@ -1,22 +1,66 @@
-import { BoxedMark } from './BoxedMark';
-import { DOCS_FOOTER, FOOTER } from './copy';
+import { applyTheme, useTheme } from '@turboslide/viewer/theme';
+import type { Theme } from '@turboslide/viewer/theme';
+
+import { AnimatedMark } from './AnimatedMark';
+import { BUILD_COMMIT } from './build';
+import { FOOTER } from './copy';
 import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 
+const THEMES: readonly Theme[] = ['light', 'dark'];
+
 /**
- * The footer of /home (docs/SITE.md A.1): the lockup with the T in a box at 32 px, three columns
- * of links under capital labels with a solid icon each (Presentations, Documentation, Source),
- * then the two sentences on a soft rule. The lockup links back to the top of the page.
+ * The appearance switch: Light and Dark as two buttons in one 6 px group. The pressed one is
+ * drawn from `html[data-theme]` (site.css), so the first paint is right before any script runs;
+ * `aria-pressed` follows the same attribute once the page is hydrated (`useTheme`), and a press
+ * goes through `applyTheme`, the way the bar's theme button and the D key do.
  */
-export function SiteFooter() {
+function AppearanceSwitch() {
+  const theme = useTheme();
+  return (
+    <div className="site-appear" role="group" aria-label={FOOTER.appearance.name}>
+      {THEMES.map((value) => (
+        <button
+          key={value}
+          type="button"
+          className="site-appear-opt"
+          data-value={value}
+          data-control={`site.foot.appearance.${value}`}
+          aria-pressed={theme === value}
+          onClick={() => applyTheme(value)}
+        >
+          {FOOTER.appearance[value]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The footer of every site page and the docs (docs/SITE.md, the footer; Kevin, 2026-10-15: "make
+ * a ton better footer using the animated turboslide logo"). On the 12 column grid: the lockup,
+ * the animated T in a box at 80 px (48 px on a phone) with the word, and one sentence under it;
+ * four columns of links under capital labels with a solid icon each (Product, Agents, Docs,
+ * Project); then on a soft rule the maker, the build's commit and the appearance switch. On /home
+ * the lockup goes back to the top (`top`); everywhere else it goes to /home.
+ */
+export function SiteFooter({ top = false }: { top?: boolean }) {
   return (
     <footer className="site-foot">
       <div className="site-wrap">
         <div className="site-foot-top">
-          <a className="site-lockup site-lockup-lg" href="#top" aria-label={FOOTER.name}>
-            <BoxedMark size={32} />
-            <span>Turboslide</span>
-          </a>
+          <div className="site-foot-brand">
+            <SiteLink
+              href={top ? '#top' : '/home'}
+              control="site.foot.lockup"
+              className="site-foot-lockup"
+              aria-label={top ? FOOTER.top : FOOTER.home}
+            >
+              <AnimatedMark size={80} />
+              <span>{FOOTER.word}</span>
+            </SiteLink>
+            <p className="site-foot-say t-small">{FOOTER.sentence}</p>
+          </div>
           <nav className="site-foot-cols t-small" aria-label={FOOTER.nav}>
             {FOOTER.columns.map((column) => (
               <div key={column.id}>
@@ -42,43 +86,26 @@ export function SiteFooter() {
           </nav>
         </div>
         <div className="site-foot-base t-small">
-          <p>{FOOTER.made}</p>
-          <p>{FOOTER.licence}</p>
+          <p className="site-foot-meta">
+            <span>
+              {FOOTER.made.before}{' '}
+              <SiteLink href={FOOTER.made.href} external control="site.foot.maker">
+                {FOOTER.made.name}
+              </SiteLink>
+            </span>
+            {BUILD_COMMIT === null ? null : (
+              <SiteLink
+                href={FOOTER.build.href(BUILD_COMMIT)}
+                external
+                control="site.foot.build"
+                aria-label={FOOTER.build.name(BUILD_COMMIT)}
+              >
+                {FOOTER.build.label} <code>{BUILD_COMMIT}</code>
+              </SiteLink>
+            )}
+          </p>
+          <AppearanceSwitch />
         </div>
-      </div>
-    </footer>
-  );
-}
-
-/**
- * The docs' footer (docs/SITE.md section 6): one compact row under every docs page, the T in a
- * box linking to /home, the sentence that names the maker, and the repository's three links.
- */
-export function DocsFooter() {
-  return (
-    <footer className="site-foot is-compact">
-      <div className="site-wrap site-foot-row t-small">
-        <SiteLink
-          href="/home"
-          control="docs.foot.lockup"
-          className="site-lockup"
-          aria-label={DOCS_FOOTER.name}
-        >
-          <BoxedMark size={24} />
-        </SiteLink>
-        <p>{DOCS_FOOTER.made}</p>
-        <nav aria-label={DOCS_FOOTER.nav}>
-          {DOCS_FOOTER.links.map((link) => (
-            <SiteLink
-              key={link.href}
-              href={link.href}
-              external
-              control={`docs.foot.${link.label.toLowerCase().replace(/\W+/g, '-')}`}
-            >
-              {link.label}
-            </SiteLink>
-          ))}
-        </nav>
       </div>
     </footer>
   );

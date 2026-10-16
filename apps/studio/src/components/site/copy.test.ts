@@ -9,16 +9,7 @@ import {
   wordsOutsideSentenceCase,
 } from '@turboslide/theme/copy';
 
-import {
-  AGENTS_SCREEN,
-  AVATAR_PRESS,
-  DOCS_FOOTER,
-  FOOTER,
-  HERO,
-  NAV,
-  PRESENT_SCREEN,
-  TITLE_TEXT,
-} from './copy';
+import { AGENTS_SCREEN, AVATAR_PRESS, FOOTER, HERO, NAV, PRESENT_SCREEN, TITLE_TEXT } from './copy';
 import { HOME_META } from './meta';
 
 // The landing's words (docs/SITE.md A.1; plain technical English): no em dash, en dash or
@@ -39,6 +30,8 @@ const NAMES = [
   'CLI',
   'GitHub',
   'MIT License',
+  'FAQ',
+  'General Translation',
   'Page',
   'Northwind',
   'Share',
@@ -79,9 +72,10 @@ const sentences: ReadonlyArray<[string, string]> = [
     [`footer.${column.id}`, column.title],
     ...column.links.map((link): [string, string] => [`footer.${column.id}.link`, link.label]),
   ]),
-  ['footer.made', FOOTER.made],
-  ['footer.licence', FOOTER.licence],
-  ...DOCS_FOOTER.links.map((link): [string, string] => ['docs.footer.link', link.label]),
+  ['footer.sentence', FOOTER.sentence],
+  ['footer.made', `${FOOTER.made.before} ${FOOTER.made.name}.`],
+  ['footer.build', FOOTER.build.name('0123abc')],
+  ['footer.appearance', FOOTER.appearance.name],
 ];
 
 const buttons: ReadonlyArray<string> = [
@@ -89,6 +83,8 @@ const buttons: ReadonlyArray<string> = [
   NAV.newPresentation.label,
   HERO.primary.label,
   HERO.secondary.label,
+  FOOTER.appearance.light,
+  FOOTER.appearance.dark,
 ];
 
 describe('the landing’s copy', () => {

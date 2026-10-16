@@ -3,7 +3,14 @@
    JIT posted on every page) */
 import '@turboslide/schema/jitless';
 import { TanStackDevtools } from '@tanstack/react-devtools';
-import { HeadContent, Link, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
+import {
+  HeadContent,
+  Link,
+  Scripts,
+  createRootRoute,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -59,6 +66,29 @@ const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
 const ITALIC_PRELOAD_ROUTES: ReadonlySet<string> = new Set(['/edit/$deckId']);
 
 /**
+ * The routes that draw no slide (hardening HR-PC#7, PERF-16): the docs (the layout and every page
+ * under it), the site pages, the sign in and device pages and the sign in gallery. Every rule of
+ * the theme's sheet.css and stage.css and of the renderer's block CSS sits under `.ts-sheet`, the
+ * root class of a drawn slide, so these documents leave all three out: about 31 KB of stylesheet
+ * and 18 KB of inline CSS a page. The landing's try frame is the /try document, which keeps them.
+ */
+const SLIDELESS_ROUTES: ReadonlySet<string> = new Set([
+  '/docs',
+  '/home',
+  '/about',
+  '/features',
+  '/faq',
+  '/signin',
+  '/device',
+  '/dev/auth',
+]);
+
+/** Whether a page's matched routes draw no slide. */
+function drawsNoSlide(routeIds: readonly string[]): boolean {
+  return routeIds.some((id) => SLIDELESS_ROUTES.has(id));
+}
+
+/**
  * The theme boot script of the product round (docs/archive/rounds/PRODUCT.md 3.1.1; audit-interface 12): the
  * stored `gt-theme`, then the deck's older `gt-deck-theme`, then on a first visit the operating
  * system's appearance through `prefers-color-scheme`, dark only when the system says dark, so a
@@ -101,6 +131,7 @@ export const Route = createRootRoute({
     const leaf = matches[matches.length - 1];
     const noindex = leaf !== undefined && NOINDEX_ROUTES.has(leaf.routeId);
     const editor = leaf !== undefined && ITALIC_PRELOAD_ROUTES.has(leaf.routeId);
+    const slideless = drawsNoSlide(matches.map((match) => match.routeId));
     /* the card's absolute address (R02 4.1): TURBOSLIDE_PUBLIC_ORIGIN when the deployment sets
        it, else production; a route with a loader may set its own og:url from its request */
     const card = `${SITE.origin()}${SITE.card.path}`;
@@ -171,8 +202,12 @@ export const Route = createRootRoute({
         { rel: 'stylesheet', href: tokensCss },
         /* the identity tokens after the chrome tokens they read (SPEC-4 0.8) */
         { rel: 'stylesheet', href: brandCss },
-        { rel: 'stylesheet', href: sheetCss },
-        { rel: 'stylesheet', href: stageCss },
+        ...(slideless
+          ? []
+          : [
+              { rel: 'stylesheet', href: sheetCss },
+              { rel: 'stylesheet', href: stageCss },
+            ]),
         { rel: 'stylesheet', href: appCss },
       ],
     };
@@ -270,6 +305,9 @@ function RootDocument({ children }: { children: ReactNode }) {
      (router.tsx requestNonce); the browser hides the attribute once the script ran, so the hydration
      compare is suppressed on these three elements */
   const nonce = useRouter().options.ssr?.nonce;
+  const slideless = useRouterState({
+    select: (state) => drawsNoSlide(state.matches.map((match) => match.routeId)),
+  });
   return (
     // the boot script stamps data-theme before hydration, so the attribute is expected to differ from the server's markup
     <html lang="en" suppressHydrationWarning>
@@ -293,12 +331,15 @@ function RootDocument({ children }: { children: ReactNode }) {
           dangerouslySetInnerHTML={{ __html: THEME_COLOR_BOOT_SCRIPT }}
         />
         {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same
-            .ts-sheet root, without its comments (block-css-page.ts: 10,655 B less on every page) */}
-        <style
-          nonce={nonce}
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: PAGE_BLOCK_CSS }}
-        />
+            .ts-sheet root, without its comments (block-css-page.ts: 10,655 B less on every page);
+            none on a page that draws no slide (HR-PC#7) */}
+        {slideless ? null : (
+          <style
+            nonce={nonce}
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: PAGE_BLOCK_CSS }}
+          />
+        )}
       </head>
       <body>
         {children}

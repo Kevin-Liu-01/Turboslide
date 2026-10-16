@@ -97,7 +97,7 @@ import { detectPlatform } from './menus/keys';
 import type { KeyBinding } from './menus/keys';
 import { evaluate, findItem, isEnabled, itemById, resolveEffect } from './menus/model';
 import type { MenuId, MenuItem, MenuSetting, Platform } from './menus/model';
-import { CANVAS_NOTICES, PANELS, REFUSALS, SNACKBARS } from './menus/strings';
+import { CANVAS_NOTICES, PANELS, REFUSALS, SNACKBARS, TAB_ONLY } from './menus/strings';
 import type { TailControl } from './menus/toolbar-tails';
 import { Palette } from './Palette';
 import type { PaletteGroupId } from './palette-data';
@@ -1164,10 +1164,14 @@ export function EditorShell({
           return;
         case 'showSaveState': {
           const save = current.save;
+          /* a presentation that lives in the tab alone is saved nowhere (docs/SITE.md D10): the
+             cell says where its changes are, as its tooltip does */
           say(
-            save?.draft
-              ? 'Not saved yet: the first edit saves the presentation'
-              : SNACKBARS.autosaved,
+            current.tabOnly !== undefined
+              ? TAB_ONLY.doc
+              : save?.draft
+                ? 'Not saved yet: the first edit saves the presentation'
+                : SNACKBARS.autosaved,
           );
           return;
         }
@@ -1921,7 +1925,7 @@ export function EditorShell({
           openDialog('findReplace');
           return true;
         case 'key.save':
-          say(SNACKBARS.autosaved);
+          say(current.tabOnly !== undefined ? TAB_ONLY.doc : SNACKBARS.autosaved);
           return true;
         case 'key.moveToFilmstrip':
           document

@@ -36,7 +36,7 @@ import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
 import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
 import type { MenuContext } from '@turboslide/chrome/menus/model';
-import { HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import { HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { NOTES_DEFAULT_HEIGHT, NotesPane } from '@turboslide/chrome/NotesPane';
 import { Select } from '@turboslide/chrome/Select';
 import type { SidebarEdit } from '@turboslide/chrome/Sidebar';
@@ -145,6 +145,7 @@ import type {
 } from './controller';
 import type { EditSearch } from '../routes/-edit-search';
 import { partitionRoster } from './client-ids';
+import { leaveWarning, unsavedWrites } from './leave-warning';
 import { refusedText } from './refused-write';
 import { SessionBridge, ShellBridge, isPrerendering, whenShown } from './shell-bridge';
 
@@ -748,16 +749,17 @@ export function EditorRoot({
   }, [refusedByControl, controller]);
 
   /* the save words answer the save queue alone (docs/archive/rounds/POLISH.md item 100; SPEC-3 3.6): Saving…
-     while anything is pending or retained, the retry word while the client is sending a write
-     again after a failed POST or a 5xx, Offline from the browser's own word; a reject notice is
-     the card's or the snackbar's and never touches the save state (audit-collab item 3: the row
-     read "Couldn't save, retrying" for minutes while nothing retried) */
+     while anything is pending or retained or a server side write (an upload) runs, the retry
+     word while the client is sending a write again after a failed POST or a 5xx, Offline from
+     the browser's own word; a reject notice is the card's or the snackbar's and never touches the
+     save state (audit-collab item 3: the row read "Couldn't save, retrying" for minutes while
+     nothing retried) */
   const status: SaveState =
     snap.sync?.resending === true
       ? 'conflict'
       : snap.sync?.offline === true
         ? 'unsaved'
-        : snap.pending > 0
+        : snap.pending + snap.serverWrites > 0
           ? 'unsaved'
           : 'saved';
   /* the caller's standing, from the loader and again on every access event of the stream */
@@ -788,19 +790,13 @@ export function EditorRoot({
     setChosenMode(mode);
     if (search.edit === 0) onSearch({ edit: undefined });
   };
-  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6), and the presence leave on
-     the way out (hotfix 2 cause B1): a reload or a navigation fires `pagehide` and nothing else
-     that the room client sees, so the controller stops there and the room client posts the leave
-     with keepalive; a page the browser restores from its cache afterwards reloads, since its
-     stream and its client id are gone */
+  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6; none on the tab backend,
+     leave-warning.ts), and the presence leave on the way out (hotfix 2 cause B1): a reload or a
+     navigation fires `pagehide` and nothing else that the room client sees, so the controller
+     stops there and the room client posts the leave with keepalive; a page the browser restores
+     from its cache afterwards reloads, since its stream and its client id are gone */
   useEffect(() => {
-    const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      const current = controller.getSnapshot();
-      if ((current.sync?.pending ?? current.pending) > 0) {
-        event.preventDefault();
-        event.returnValue = REFUSALS.leaveAnyway;
-      }
-    };
+    const onBeforeUnload = leaveWarning(backend, () => unsavedWrites(controller.getSnapshot()));
     const onPageHide = () => controller.stop();
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) window.location.reload();
@@ -813,7 +809,7 @@ export function EditorRoot({
       window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('pageshow', onPageShow);
     };
-  }, [controller]);
+  }, [controller, backend]);
   /* the tab's presence (SPEC-3 3.8; docs/REALTIME.md 3.4, 3.5): the slide, the selection and the
      caret, coalesced by the room client. The caret carries `seq`, the room client's stream
      position when this state was taken, read through a ref so a position that moves under a

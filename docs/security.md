@@ -327,7 +327,11 @@ frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-
 minted per request into the request context (`context.nonce`); `getRouter()` hands it to
 `ssr.nonce` and the root document to its boot script (a request to the integrator for the two
 unowned files; until it lands the report endpoint records the inline boot script as a violation,
-which is the expected noise of the report weeks).
+which is the expected noise of the report weeks). Since 2026-10-16 `script-src` also names
+`https://www.googletagmanager.com`, and `img-src` and `connect-src` the Google Analytics hosts
+(`ANALYTICS_SOURCES` in `headers.ts`), for gtag.js on the measured public pages of production
+(`apps/studio/src/routes/-analytics.ts`: `/home`, `/about`, `/features`, `/faq` and `/docs` on
+www.turboslide.com; never the editor, the viewer or any other route).
 
 | Variable                       | What it does                                                                                                                                                                                                                                                                           |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

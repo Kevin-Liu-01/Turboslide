@@ -23,10 +23,10 @@ import {
 import { lintLists } from '../deps/theme.ts';
 import { EXIT, UsageError } from '../exit.ts';
 import { selectSlides } from '../select.ts';
-import { lintChrome } from './lint-chrome.ts';
 
 export async function lint(ctx: CommandContext): Promise<number> {
-  if (flagBoolean(ctx.args, 'chrome')) return lintChrome(ctx);
+  // the chrome audit drives a browser, so its module loads only for --chrome (hardening HR-N#3)
+  if (flagBoolean(ctx.args, 'chrome')) return (await import('./lint-chrome.ts')).lintChrome(ctx);
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
   const loaded = loadDeck(dir);
   const ids = selectSlides(loaded, ctx.rest);

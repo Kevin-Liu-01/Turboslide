@@ -29,6 +29,8 @@ import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
 
 import { MoodFigure } from '../components/home/MoodFigure';
 import { PageFrame } from '../components/home/PageFrame';
+import { JsonLd } from '../components/site/JsonLd';
+import { siteData } from '../components/site/structured-data';
 import { useMountEffect } from '../components/useMountEffect';
 import appCss from '../styles.css?url';
 import { RouterLinkSlot } from './-link-slot';
@@ -64,6 +66,12 @@ const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
  * route carries one font preload and the italic loads on first use through `font-display: swap`.
  */
 const ITALIC_PRELOAD_ROUTES: ReadonlySet<string> = new Set(['/edit/$deckId']);
+
+/**
+ * The Search Console token of the https://www.turboslide.com/ property, read from the head of the
+ * page `/` lands on; every route carries it, because `/` answers a 307 to /new.
+ */
+const GOOGLE_SITE_VERIFICATION = 'mvNROFtoLu1hm048arKrTbsx_md-cJS2mZL8L2sQjQ4';
 
 /**
  * The routes that draw no slide (hardening HR-PC#7, PERF-16): the docs (the layout and every page
@@ -143,6 +151,7 @@ export const Route = createRootRoute({
         { name: 'description', content: SITE.description },
         { name: 'application-name', content: SITE.name },
         { name: 'apple-mobile-web-app-title', content: SITE.name },
+        { name: 'google-site-verification', content: GOOGLE_SITE_VERIFICATION },
         /* one value, kept equal to --pt-paper by THEME_COLOR_BOOT_SCRIPT and the toggle (SPEC-4 1.6) */
         { name: 'theme-color', content: SITE.themeColor.dark },
         { property: 'og:site_name', content: SITE.name },
@@ -330,6 +339,7 @@ function RootDocument({ children }: { children: ReactNode }) {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: THEME_COLOR_BOOT_SCRIPT }}
         />
+        <JsonLd data={siteData(SITE.origin())} />
         {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same
             .ts-sheet root, without its comments (block-css-page.ts: 10,655 B less on every page);
             none on a page that draws no slide (HR-PC#7) */}

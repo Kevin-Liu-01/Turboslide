@@ -33,7 +33,12 @@ export function TransitionDialog() {
   const current =
     slide === undefined ? deck.defaults?.transition : slideTransition(deck.defaults, slide);
   const [choice, setChoice] = useState<Choice>(current?.name ?? 'standard');
-  const [seconds, setSeconds] = useState(String((current?.durationMs ?? DEFAULT_MS) / 1000));
+  /* a cut (None, 0 ms) offers the default length when a timed transition is picked */
+  const [seconds, setSeconds] = useState(
+    String(
+      (current !== undefined && current.durationMs > 0 ? current.durationMs : DEFAULT_MS) / 1000,
+    ),
+  );
   const [from, setFrom] = useState<Direction | 'default'>(current?.from ?? 'default');
   const [error, setError] = useState<string | null>(null);
   const selected = input.selectedSlideIds ?? [input.slideId];

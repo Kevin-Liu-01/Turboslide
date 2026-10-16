@@ -48,8 +48,9 @@ import { BrandKitCheck } from './BrandKitCheck';
 import { useEditorShell } from './editor-shell-context';
 import { FontDropdown } from './FontPicker';
 import type { SlideRenderer } from './LayoutGrid';
+import { kitColorsOf, readKitFile } from './kit-import';
 import { cn } from './lib/cn';
-import { PANELS, SNACKBARS } from './menus/strings';
+import { andList, PANELS, SNACKBARS } from './menus/strings';
 import { Panel } from './Panel';
 import { ColorPlate } from './pickers/ColorPlate';
 import { Select } from './Select';
@@ -69,18 +70,19 @@ import './ThemesPanel.css';
  * Text, each the Font dropdown), Footer (the logo kind and the text), Slide numbers (Show,
  * Format, Skip title slides), Frame (Rails, Rules, Crosses with one sentence each), Words that
  * never translate, the kit check (BrandKitCheck: each colour pair or logo under its contrast,
- * with Fix where the fix is one write), and Reset to the deployment's kit at the foot. Every
- * control's write is one commit through the editor's `commit(mutations, label)`, so the sheet,
- * the filmstrip clones and every collaborator re render at once, Cmd+Z takes one field back and
- * Version history lists it as its own row ("Brand kit: Primary"); the kit's slots draw from the
- * record and take no drag this round (question 8). The renderer arrives as a prop (the chrome
- * package does not depend on @turboslide/render for the tiles).
+ * with Fix where the fix is one write), and Import Kit (a Glyphfield kit's colours,
+ * kit-import.ts) and Reset to the deployment's kit at the foot. Every control's write is one
+ * commit through the editor's `commit(mutations, label)`, so the sheet, the filmstrip clones and
+ * every collaborator re render at once, Cmd+Z takes one field back and Version history lists it
+ * as its own row ("Brand kit: Primary"); the kit's slots draw from the record and take no drag
+ * this round (question 8). The renderer arrives as a prop (the chrome package does not depend on
+ * @turboslide/render for the tiles).
  *
  * Ids (PRODUCT.md 7.1): `panel.brand`, `panel.brand.logo.*`, `panel.brand.color.<role>.swatch`
  * and `.hex`, the colour field's `panel.brand.color.<role>.field.*`,
  * `panel.brand.color.appearance.*`, `panel.brand.font.*`, `panel.brand.footer.*`,
  * `panel.brand.counter.*`, `panel.brand.frame.*`, `panel.brand.lexicon`, `panel.brand.check.*`,
- * `panel.brand.reset`.
+ * `panel.brand.import` with its file field `.file`, `panel.brand.reset`.
  * The Appearance section keeps `panel.themes` on its wrapper for the rows written against it.
  */
 export type ThemesPanelProps = {
@@ -437,6 +439,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
     null,
   );
   const fileInput = useRef<HTMLInputElement>(null);
+  const kitInput = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   void render;
   /* the asset URL rule the tiles and the logo preview draw pictures with */
@@ -614,6 +617,25 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       onNotice?.(words.uploadFailed(error instanceof Error ? error.message : String(error)));
     } finally {
       setUploading(false);
+    }
+  };
+  /* Import Kit (kit-import.ts): a Glyphfield kit ZIP or its tokens.json gives the kit its colours
+     in one write, one history entry; a file it cannot read is refused in one sentence */
+  const importKit = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (file === undefined) return;
+    try {
+      const { writes, refused } = kitColorsOf(
+        await readKitFile(new Uint8Array(await file.arrayBuffer())),
+      );
+      await writeKitAll(writes, words.importLabel);
+      shell.say(
+        words.imported(writes.length, file.name, andList(refused), refused.length > 1),
+        undoAction(),
+      );
+    } catch (error) {
+      onNotice?.(words.importFailed(error instanceof Error ? error.message : String(error)));
     }
   };
   const removeLogo = () =>
@@ -1194,6 +1216,24 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
       />
 
       <div className="ts-brand-foot">
+        <input
+          ref={kitInput}
+          type="file"
+          accept=".zip,.json,application/zip,application/json"
+          hidden
+          data-control="panel.brand.import.file"
+          onChange={(event) => void importKit(event)}
+        />
+        <button
+          type="button"
+          className="pt-ib ts-fo-button"
+          data-control="panel.brand.import"
+          disabled={commit === undefined}
+          onClick={() => kitInput.current?.click()}
+          {...tipProps({ name: words.importKit, doc: words.importDoc })}
+        >
+          <span className="pt-lb">{words.importKit}</span>
+        </button>
         <button
           type="button"
           className="pt-ib ts-fo-button ts-brand-reset"

@@ -9017,6 +9017,15 @@
       "note": "Polish round; docs/archive/rounds/POLISH.md 2.5 item 49; B4"
     },
     {
+      "id": "brand.colors.free-field",
+      "feature": "brand",
+      "interaction": "Brand kit > Colors: no native colour well; the Primary swatch opens the colour field, two arrow keys move a draft the sheet's --blue previews within 5 s with no revision, and Apply writes one revision with the draft and closes the field; a Text under 4.5:1 lists one row in the kit check, and its Fix writes a Text that reaches 4.5:1 on Background and the row leaves; Import Kit with a Glyphfield token file is one revision that writes its light and dark roles",
+      "driver": "core/brand.spec.ts",
+      "today": "not driven",
+      "evidence": "the Glyphfield port plan (PLAN.md), wave 2 item 6",
+      "note": "The Glyphfield port, GF-2.6: the colour plate's free field where the panel's native colour wells stood (docs/DROPDOWNS.md question 1), the kit check and Import Kit"
+    },
+    {
       "id": "brand.template.blank-no-gt-mark",
       "feature": "brand",
       "interaction": "A deck from Blank is the Simple theme with no kit (deck.info names simple and no kit field) and shows no GT mark and no GT wordmark band in the editor, the PDF and the PPTX; the same deck set to General Translation for a moment draws the GT mark and adds it to the PDF and the PPTX (the control), and goes back to Simple",

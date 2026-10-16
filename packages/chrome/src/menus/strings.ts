@@ -25,6 +25,13 @@ export function stubTooltip(label: string, reason: string): string {
   return `${label} · ${stubClause(reason)}`;
 }
 
+/** Names as a sentence lists them: `a`, `a and b`, `a, b and c`. */
+export function andList(names: readonly string[]): string {
+  return names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
 /** The title row (SPEC 12 "Title row"; SPEC-3 4.2, 15 add the fifth save phrase and the slots). */
 export const TITLE_ROW = {
   untitled: 'Untitled presentation',
@@ -943,6 +950,22 @@ export const PANELS = {
     check: 'Check',
     checkClear: 'Text reaches 4.5:1 and every other color 3:1 on Background in both appearances',
     fix: 'Fix',
+    /* Import Kit at the panel's foot (kit-import.ts) */
+    importKit: 'Import Kit',
+    importDoc: 'Takes the colors of a Glyphfield kit, its ZIP or its tokens.json, in one change',
+    importLabel: 'Brand kit: Import',
+    /* `refused` names the file's roles the kit has no place for, joined by `andList` ('' for
+       none), and `many` is true for two or more */
+    imported: (count: number, file: string, refused: string, many: boolean) => {
+      const taken =
+        count === 1
+          ? `1 color from ${file} is in the kit`
+          : `${count} colors from ${file} are in the kit`;
+      return refused === ''
+        ? taken
+        : `${taken}; ${many ? `its roles ${refused} have` : `its role ${refused} has`} no place in it`;
+    },
+    importFailed: (reason: string) => `The kit could not be imported: ${reason}`,
     reset: (kit: string) => `Reset to ${kit}`,
     resetDoc: (theme: string) =>
       `Removes this presentation’s brand kit; every slide draws the ${theme} theme`,

@@ -180,3 +180,66 @@ describe('the Brand kit panel’s check', { timeout: 15_000 }, () => {
     ]);
   });
 });
+
+// Import Kit at the panel's foot (kit-import.ts): a Glyphfield token file is one kit write with the
+// label "Brand kit: Import", and a file that holds no colour role is refused with no write.
+describe('the Brand kit panel’s Import Kit', { timeout: 15_000 }, () => {
+  const tokens = {
+    color: { ink: { $value: '#14161a' }, paper: { $value: '#fbfaf7' } },
+    semantic: {
+      light: {
+        background: { $value: '{color.paper}' },
+        foreground: { $value: '{color.ink}' },
+        border: { $value: '{color.ink}' },
+      },
+    },
+  };
+  const choose = async (input: HTMLInputElement, text: string) => {
+    const file = new File([text], 'acme-kit.json', { type: 'application/json' });
+    await act(async () => {
+      fireEvent.change(input, { target: { files: [file] } });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+  };
+
+  it('writes the kit’s colours from a token file in one change', async () => {
+    const { container, commit } = panel();
+    const input = container.querySelector<HTMLInputElement>(
+      '[data-control="panel.brand.import.file"]',
+    );
+    expect(input?.accept).toBe('.zip,.json,application/zip,application/json');
+    if (input === null) throw new Error('no file field');
+    await choose(input, JSON.stringify(tokens));
+    expect(commit).toHaveBeenCalledTimes(1);
+    const [mutations, label] = commit.mock.calls[0] ?? [[], ''];
+    expect(label).toBe('Brand kit: Import');
+    expect(JSON.stringify(mutations)).toContain('#fbfaf7');
+    expect(JSON.stringify(mutations)).toContain('#14161a');
+    expect(say.mock.calls.at(-1)?.[0]).toBe(
+      '2 colors from acme-kit.json are in the kit; its role border has no place in it',
+    );
+  });
+
+  it('names one colour in the singular and two refused roles in the plural', async () => {
+    const { container } = panel();
+    const input = container.querySelector<HTMLInputElement>(
+      '[data-control="panel.brand.import.file"]',
+    );
+    if (input === null) throw new Error('no file field');
+    const light = { background: { $value: '{color.paper}' }, border: {}, focus: {} };
+    await choose(input, JSON.stringify({ color: tokens.color, semantic: { light } }));
+    expect(say.mock.calls.at(-1)?.[0]).toBe(
+      '1 color from acme-kit.json is in the kit; its roles border and focus have no place in it',
+    );
+  });
+
+  it('writes nothing for a file with no colour role', async () => {
+    const { container, commit } = panel();
+    const input = container.querySelector<HTMLInputElement>(
+      '[data-control="panel.brand.import.file"]',
+    );
+    if (input === null) throw new Error('no file field');
+    await choose(input, JSON.stringify({ color: tokens.color }));
+    expect(commit).not.toHaveBeenCalled();
+  });
+});

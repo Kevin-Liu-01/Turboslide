@@ -348,6 +348,7 @@
 .ts-brand-foot {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   padding: 12px 16px 16px;
 }
 

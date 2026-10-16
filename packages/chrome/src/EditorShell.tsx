@@ -2726,14 +2726,19 @@ export function EditorShell({
         {input.drawer}
       </section>
       <div className="ts-rpanel">
-        <PanelBoundary
-          key={panel ?? ''}
-          place="panel"
-          control="panel.broken"
-          onError={input.onPanelError}
-        >
-          <Suspense fallback={null}>{panelNode}</Suspense>
-        </PanelBoundary>
+        {/* the Suspense sits outside the boundary the panel id keys: a switch to a lazy panel is a
+            transition (switchPanel), and React keeps the shown panel only in a boundary that was
+            already mounted; a boundary mounted with the new key drew its empty fallback at once */}
+        <Suspense fallback={null}>
+          <PanelBoundary
+            key={panel ?? ''}
+            place="panel"
+            control="panel.broken"
+            onError={input.onPanelError}
+          >
+            {panelNode}
+          </PanelBoundary>
+        </Suspense>
       </div>
       {/* the bottom bar left in the product round (docs/archive/rounds/PRODUCT.md section 2 rank 25): its side
           panel toggle sits in the title row's right cluster (TitleRow.tsx `title.sidePanel`) */}

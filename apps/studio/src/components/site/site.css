@@ -288,8 +288,10 @@
   transition: color 120ms ease-out;
 }
 
-.ts-site .site-bar-link:hover {
-  color: var(--pt-ink);
+/* the link under the pointer and the page's own link in the site accent */
+.ts-site .site-bar-link:hover,
+.ts-site .site-bar-link[aria-current='page'] {
+  color: var(--pt-accent);
 }
 
 .ts-site .site-bar-rule {
@@ -1203,18 +1205,28 @@
   }
 }
 
-/* ---- the title's two arcs (Title.tsx, AvatarStack.tsx, docs/SITE.md B) ----
-   Each stack is placed from its word (`left: 100%`, `top` at the word's cap line: Inter's ascent
-   is 0.969em and its cap height 0.727em) and is out of the line's flow, so it takes no width and
-   the sentence keeps its word spacing. Its avatars sit on a circle of radius --r: avatar i at the
-   angle --a0 minus i steps of --da, the first with its lower left at the word's top right corner.
-   The arc rises from the corner, crests and settles, always over the line's own glyphs; hover
-   and focus widen the step (the fan opens) and lift the avatar under the pointer with its name.
-   On a phone the line breaks after "people" and the arc runs flat in the space after its word,
-   under the line above. */
+/* ---- the title's two orbits (Title.tsx, AvatarStack.tsx, orbit.ts, docs/SITE.md B) ----
+   The words "people" and "agents" in the site accent, each with its stack orbiting its last
+   letter (Kevin, 2026-10-16): avatar i sits on a circle of radius --r centred on the bowl of the
+   "e" or the "s" (--cx and --cy, measured from the word's top right corner, where the stack is
+   placed out of the line's flow so the sentence keeps its word spacing), at the angle --mid plus
+   (n - 1) / 2 - i steps of --da. orbit.ts measures the glyphs in the page and writes these values
+   clear of every letter at every width; the em values here are the orbits it finds at 1440 and at
+   390, drawn until the page hydrates. Hover and focus open the fan from --rest to --open about its
+   middle and lift the avatar under the pointer out along its radius, its name outside it on the
+   same radius. */
 
+/* --s, the avatar's diameter, is the word's, so the room after "people" can be measured in it */
 .ts-site .site-h1-word {
+  --s: clamp(28px, 0.5em, 36px);
   position: relative;
+  color: var(--pt-accent);
+}
+
+/* the room the people's orbit takes on the right of the "e" before "and": the orbit reaches
+   about 1.24 avatars less a quarter em past the letter's right side (orbit.ts), plus 10 px of air */
+.ts-site .site-h1-word.is-people {
+  margin-right: calc(var(--s) * 1.24 - 0.235em + 10px);
 }
 
 .ts-site .site-h1-br {
@@ -1222,44 +1234,55 @@
 }
 
 .ts-site .site-stack {
-  --s: clamp(28px, 0.56em, 40px);
-  --r: calc(var(--s) * 3.2);
-  --a0: 125deg;
-  --da: 11.2deg;
-  /* the gap between the first avatar and the cap line */
-  --rise0: 3px;
+  --cx: -0.24em;
+  --cy: 0.715em;
+  --r: calc(0.27em + var(--s) * 0.66);
+  --mid: 28deg;
+  --rest: 29.6deg;
+  --open: 32.5deg;
+  /* the angle orbit.ts centres the fan on when the orbit has the room, in degrees */
+  --prefer: 45;
+  --da: var(--rest);
   position: absolute;
   left: 100%;
-  top: 0.242em;
+  top: 0;
   width: 0;
   height: 0;
   letter-spacing: 0;
   line-height: 0;
 }
 
+.ts-site .site-stack[data-stack='agents'] {
+  --cx: -0.213em;
+  --mid: 27deg;
+  --open: 42.7deg;
+  --prefer: 45;
+}
+
 /* the fan opens under a pointer and while an avatar has the keyboard's focus; the open fan
-   keeps a hit area over its span, so the pointer never falls between two avatars and closes it */
+   keeps a hit area over its span (orbit.ts --hit-*), so the pointer never falls between two
+   avatars and closes it */
 .ts-site .site-stack:has(.site-av:focus-visible) {
-  --da: 17deg;
+  --da: var(--open);
 }
 
 @media (hover: hover) {
   .ts-site .site-stack:hover {
-    --da: 17deg;
+    --da: var(--open);
   }
 }
 
-.ts-site .site-stack:hover::before {
+.ts-site .site-stack[data-orbit]:hover::before {
   content: '';
   position: absolute;
-  left: -4px;
-  top: calc(var(--s) * -1.9);
-  width: calc(var(--s) * (var(--n) * 0.95 + 0.4));
-  height: calc(var(--s) * 2.1);
+  left: var(--hit-x);
+  top: var(--hit-y);
+  width: var(--hit-w);
+  height: var(--hit-h);
 }
 
 .ts-site .site-av {
-  --phi: calc(var(--a0) - var(--i) * var(--da));
+  --phi: calc(var(--mid) + ((var(--n) - 1) / 2 - var(--i)) * var(--da));
   --up: 0px;
   position: absolute;
   left: 0;
@@ -1280,15 +1303,16 @@
     0 0 0 2px var(--pt-paper),
     0 4px 10px -3px rgb(0 0 0 / 0.32);
   cursor: pointer;
-  translate: calc(var(--r) * (cos(var(--phi)) - cos(var(--a0))) + var(--up) * cos(var(--phi)))
-    calc(
-      var(--r) * (sin(var(--a0)) - sin(var(--phi))) - var(--s) - var(--rise0) - var(--up) *
-        sin(var(--phi))
-    );
+  translate: calc(var(--cx) + (var(--r) + var(--up)) * cos(var(--phi)) - var(--s) / 2)
+    calc(var(--cy) - (var(--r) + var(--up)) * sin(var(--phi)) - var(--s) / 2);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* the fan moves once the measured orbit is in place, so the first placement never animates */
+.ts-site .site-stack[data-orbit] .site-av {
   transition:
     translate 240ms var(--pt-ease),
     scale 240ms var(--pt-ease);
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* the first avatar on top, each later one under the one before it (local order, under 5) */
@@ -1335,12 +1359,13 @@
   outline-offset: 3px;
 }
 
+/* the name: outside the avatar on its radius, its near edge 6 px from the ring */
 .ts-site .site-av::after {
   content: attr(data-name);
   position: absolute;
-  left: 50%;
-  top: calc(100% + 8px);
-  translate: -50% 0;
+  left: calc(50% + (var(--s) / 2 + 6px) * cos(var(--phi)));
+  top: calc(50% - (var(--s) / 2 + 6px) * sin(var(--phi)));
+  translate: calc(-50% + cos(var(--phi)) * 50%) calc(-50% - sin(var(--phi)) * 50%);
   padding: 2px 6px;
   border-radius: var(--pt-radius-sm);
   background: var(--pt-ink);
@@ -1521,7 +1546,7 @@
 }
 
 .ts-site .site-foot a:hover {
-  color: var(--pt-ink);
+  color: var(--pt-accent);
 }
 
 .ts-site .site-foot-base {
@@ -1685,28 +1710,35 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     letter-spacing: -0.028em;
   }
 
-  /* the line breaks after "people", so each arc has the space after its word; 26 px avatars on
-     a flat arc whose top stays under the line above (the first avatar centred on the cap line) */
+  /* the line breaks after "people", so each orbit has the space after its letter; 24 px
+     avatars, the people on the right of the "e" between the lines above and below, the agents
+     over and after the "s" */
   .ts-site .site-h1-br {
     display: inline;
   }
 
+  /* 52 px lines, so an orbit has room between a line and the next */
+  .ts-site .site-hero .t-display {
+    line-height: 52px;
+  }
+
+  .ts-site .site-h1-word {
+    --s: 24px;
+  }
+
   .ts-site .site-stack {
-    --s: 26px;
-    --r: calc(var(--s) * 6);
-    --a0: 110deg;
-    --da: 6.4deg;
-    --rise0: -19px;
+    --cx: -0.244em;
+    --mid: -6deg;
+    --rest: 33.2deg;
+    --open: 48deg;
+    --prefer: 10;
   }
 
-  .ts-site .site-stack:has(.site-av:focus-visible) {
-    --da: 9.6deg;
-  }
-
-  @media (hover: hover) {
-    .ts-site .site-stack:hover {
-      --da: 9.6deg;
-    }
+  .ts-site .site-stack[data-stack='agents'] {
+    --cx: -0.217em;
+    --mid: 22.5deg;
+    --open: 45deg;
+    --prefer: 20;
   }
 
   .ts-site .t-title {
@@ -1900,11 +1932,15 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     transition: none;
   }
 
-  /* the arc keeps its place: no fan, no lift; the label and the focus ring change at once, and a
-     press shows the ring without the spread */
+  /* the orbit keeps its place: no fan, no lift; the label and the focus ring change at once,
+     and a press shows the ring without the spread */
   .ts-site .site-stack:hover,
   .ts-site .site-stack:has(.site-av:focus-visible) {
-    --da: 11.2deg;
+    --da: var(--rest);
+  }
+
+  .ts-site .site-stack[data-orbit] .site-av {
+    transition: none;
   }
 
   .ts-site .site-av:hover,
@@ -1923,12 +1959,5 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-mark[data-play] .site-mark-run,
   .ts-site .site-mark[data-play] .site-mark-slide {
     animation: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) and (max-width: 720px) {
-  .ts-site .site-stack:hover,
-  .ts-site .site-stack:has(.site-av:focus-visible) {
-    --da: 6.4deg;
   }
 }

@@ -80,6 +80,15 @@
   --pt-select: #2f5ce0; /* oklch(0.5267 0.2072 265.3) */
   --pt-select-text: #ffffff; /* oklch(1.0000 0.0000 0.0) */
   --pt-guide: #d6336c; /* oklch(0.5881 0.2010 5.2) */
+  /* The site accent (Kevin, 2026-10-16): the words people and agents of the landing title, a key
+     word of a heading, the current item and a link under the pointer on /home, /features, /faq,
+     /about and /docs. Orange solved to 4.5:1 on the paper of each appearance. Text, glyphs and
+     fills only, never a border or a ring. */
+  --pt-accent: #d44300; /* oklch(0.5856 0.1909 38.2) */
+  /* The accent as a fill behind --pt-accent-text: the light solve in both appearances, so white
+     holds 4.5:1 on it on either paper. */
+  --pt-accent-fill: #d44300; /* oklch(0.5856 0.1909 38.2) */
+  --pt-accent-text: #ffffff; /* oklch(1.0000 0.0000 0.0) */
 }
 
 :root[data-theme='dark'],
@@ -105,6 +114,7 @@
   --pt-status-refused: #e5484d; /* oklch(0.6256 0.1933 23.0) */
   --pt-select: #2f5ce0; /* oklch(0.5267 0.2072 265.3) */
   --pt-guide: #f0397a; /* oklch(0.6401 0.2204 5.0) */
+  --pt-accent: #ff6a13; /* oklch(0.7013 0.1996 43.7) */
 }
 /* colors:generated:end */
 

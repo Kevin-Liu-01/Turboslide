@@ -4,7 +4,7 @@ import { createDispatcher } from '@turboslide/agent/dispatch';
 import { ACTIONS } from '@turboslide/schema/actions';
 import type { ActionId } from '@turboslide/schema/actions';
 
-import { DECK_ID_ACTIONS, actionDeck } from './action-deck';
+import { DECK_ID_ACTIONS, actionDeck, inputDeckId } from './action-deck';
 
 // The share and publish actions name their deck in `id` and act on the dispatcher's deck. A call
 // to /api/actions/share.createLink with `id` and no ?deck= opened gt-brand, the default deck, and
@@ -102,7 +102,11 @@ describe('the deck of a share or publish call (server/action-deck.ts)', () => {
       deckId: 'q4',
       named: true,
     });
-    expect(actionDeck('share.createLink', 'gt-brand', { id: 'q4' }, 'gt-brand').ok).toBe(false);
+    expect(actionDeck('share.createLink', 'gt-brand', { id: 'q4' }, 'gt-brand')).toEqual({
+      ok: false,
+      message:
+        'share.createLink names deck "q4" in its input and "gt-brand" in ?deck=; name one deck',
+    });
     expect(actionDeck('deck.info', null, { id: 'q4' }, 'gt-brand')).toEqual({
       ok: true,
       deckId: 'gt-brand',
@@ -127,6 +131,15 @@ describe('the deck of a share or publish call (server/action-deck.ts)', () => {
           'share.createLink: invalid input at /id: a slug: lower-case letters and digits joined by single hyphens',
         pointer: '/id',
       });
+  });
+
+  it('reads the deck from id for these actions alone, and only a slug (the helper /mcp shares)', () => {
+    expect(inputDeckId('deck.publish', { id: 'q4' })).toBe('q4');
+    expect(inputDeckId('deck.info', { id: 'q4' })).toBeUndefined();
+    expect(inputDeckId('share.get', {})).toBeUndefined();
+    expect(inputDeckId('share.get', { id: '../x' })).toBeUndefined();
+    expect(inputDeckId('share.get', { id: 7 })).toBeUndefined();
+    expect(inputDeckId('share.get', null)).toBeUndefined();
   });
 
   it('refuses a write that names no deck with 400 deck_required before it opens one', async () => {

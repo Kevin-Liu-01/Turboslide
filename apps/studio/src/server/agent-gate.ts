@@ -20,6 +20,10 @@
 //   /api/actions route runs on a POST before any deck opens and `gatedDispatcher` runs on every
 //   MCP tool call). Before this, a write that forgot `?deck=` changed or shared gt-brand, the open
 //   seed deck (an editor link minted there on 2026-10-16 at 23:50Z).
+// - A share or publish tool runs on its session's deck only (`requireBoundDeckId`, which
+//   `gatedDispatcher` runs after `requireNamedDeck`): its handler acts on the bound deck whatever
+//   its input's `id` says, so an `id` naming another deck is 400. An /mcp session opened with
+//   ?deck=y ran a share or publish tool on y when its `id` named x.
 //
 // Every decision here enforces whatever `TURBOSLIDE_AUTHORIZE` says: the callers of this surface
 // are the admin or a key, and a key's reach must not wait for the enforce flip.
@@ -34,7 +38,7 @@ import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { ForbiddenError, GoneError } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
-import { DECK_ID_ACTIONS } from './action-deck';
+import { DECK_ID_ACTIONS, deckMismatch, inputDeckId } from './action-deck';
 import { agentAuth } from './auth';
 import { ADMIN_ONLY } from './auth/actions';
 import { identityRuntime, requestIdentity } from './auth/identity';
@@ -179,6 +183,31 @@ export function requireNamedDeck(call: {
 }): void {
   if (!call.deckNamed && writesBoundDeck(call.action, call.transport))
     throw new DeckRequiredError(call.action, call.transport);
+}
+
+/** A share or publish call whose input `id` names a deck other than the bound one: 400, `invalid_input`. */
+export class DeckMismatchError extends TypeError {
+  readonly status = 400;
+  readonly code = 'invalid_input';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'TypeError';
+  }
+}
+
+/**
+ * Refuses a DECK_ID_ACTIONS call (the share and publish actions, `admin.assignOwner`) whose input
+ * `id` names a deck other than the bound one, since its handler acts on the bound deck.
+ * `gatedDispatcher` runs it on every MCP tool call: a session is bound at initialize, to `?deck=`
+ * or the instance default, and a tool call cannot move it. /api/actions takes the bound deck from
+ * `id` when `?deck=` is absent and refuses the two when they differ (action-deck.ts actionDeck),
+ * so the rule holds there by construction. An `id` that is not a slug is left to the schema.
+ */
+export function requireBoundDeckId(call: GateCall): void {
+  const named = inputDeckId(call.action, call.input);
+  if (named !== undefined && named !== call.deckId)
+    throw new DeckMismatchError(deckMismatch(call.action, named, call.deckId, call.transport));
 }
 
 /** The scopes that let a key write; a capability whose own scopes are read or export ones needs `write` to mutate. */
@@ -326,8 +355,9 @@ export async function gateAgentAction(caller: AgentCaller, call: GateCall): Prom
 
 /**
  * The dispatcher of an MCP session: every call through the gate first, for the session's caller
- * and deck, after the deck rule (`requireNamedDeck`: a write on a session that named no deck is
- * refused before any decision).
+ * and deck, after the deck rules (`requireNamedDeck`: a write on a session that named no deck is
+ * refused before any decision; `requireBoundDeckId`: a share or publish tool whose `id` names
+ * another deck is refused).
  */
 export function gatedDispatcher(
   dispatcher: Dispatcher,
@@ -338,12 +368,9 @@ export function gatedDispatcher(
     ...dispatcher,
     dispatch: async (id, input, context) => {
       requireNamedDeck({ action: id, deckNamed: bound.deckNamed, transport: bound.transport });
-      await gateAgentAction(caller, {
-        action: id,
-        deckId: bound.deckId,
-        input,
-        transport: bound.transport,
-      });
+      const call = { action: id, deckId: bound.deckId, input, transport: bound.transport };
+      requireBoundDeckId(call);
+      await gateAgentAction(caller, call);
       return dispatcher.dispatch(id, input, context);
     },
   };

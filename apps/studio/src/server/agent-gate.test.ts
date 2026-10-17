@@ -11,11 +11,13 @@ import { accountPrincipalId } from '@turboslide/identity/ids';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { ACTIONS, actionsOn } from '@turboslide/schema/actions';
 
+import { DECK_ID_ACTIONS } from './action-deck';
 import {
   INPUT_DECKS,
   gateAgentAction,
   gateInputDecks,
   gatedDispatcher,
+  requireBoundDeckId,
   requireNamedDeck,
   writesBoundDeck,
 } from './agent-gate';
@@ -34,7 +36,8 @@ import type { RateLimiter } from './ratelimit';
 // for every MCP tool, read and write, with the answer a missing deck gets; a read key is refused
 // every write; a revoked key is refused; the read only switch and the write quota hold on MCP.
 // A write that lands on a deck and names none (no ?deck= on /api/actions or on the /mcp
-// initialize request) is 400 before it reaches a handler; a read runs on the default deck.
+// initialize request) is 400 before it reaches a handler; a read runs on the default deck. A share
+// or publish tool whose input `id` names a deck other than its session's is 400, naming both.
 // Shadow mode throughout: production runs it until the enforce flip, and the gate holds anyway.
 
 const existing = new Set<string>();
@@ -359,6 +362,57 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
     }
     expect(reached).toEqual([]);
   });
+
+  it('refuses a share or publish tool whose input id names another deck than the session’s, with both named, before the gate decides', async () => {
+    const recorder = createDispatcher();
+    for (const action of MCP_ACTIONS)
+      recorder.register(action, () => {
+        reached.push(action);
+        return Promise.resolve({});
+      });
+    const deckIdActions = MCP_ACTIONS.filter((action) => DECK_ID_ACTIONS.has(action));
+    expect(deckIdActions).toEqual(
+      expect.arrayContaining(['share.get', 'share.createLink', 'deck.publish', 'deck.unpublish']),
+    );
+    // a key that cannot read alpha: the gate's answer would be 404, the deck rule's comes first
+    const outsider = keyCaller('usr_carol', ['read', 'write', 'share']);
+    const bound = gatedDispatcher(recorder, outsider, {
+      deckId: 'alpha',
+      deckNamed: true,
+      transport: 'mcp',
+    });
+    for (const action of deckIdActions) {
+      // the same answer for a deck the caller cannot see and one that does not exist
+      for (const other of ['beta', 'ghost'])
+        expect(
+          await refusalOf(
+            bound.dispatch(action, { id: other }, { author: AUTHOR }).then(() => undefined),
+          ),
+          action,
+        ).toEqual({
+          status: 400,
+          message: `${action} names deck "${other}" in its input and this session is bound to deck "alpha": open a session with ?deck=${other} on the /mcp initialize request to act on "${other}"`,
+        });
+      // the bound deck, no id, or an id that is not a slug (the schema's): the rule passes them
+      for (const input of [{ id: 'alpha' }, {}, { id: '../x' }])
+        expect(
+          () => requireBoundDeckId({ action, deckId: 'alpha', input, transport: 'mcp' }),
+          `${action} ${JSON.stringify(input)}`,
+        ).not.toThrow();
+    }
+    // a session that names no deck is bound to the default: a share read naming another is refused
+    const unnamed = gatedDispatcher(recorder, outsider, {
+      deckId: 'gt-brand',
+      deckNamed: false,
+      transport: 'mcp',
+    });
+    expect(
+      await refusalOf(
+        unnamed.dispatch('share.get', { id: 'alpha' }, { author: AUTHOR }).then(() => undefined),
+      ),
+    ).toMatchObject({ status: 400, message: expect.stringContaining('bound to deck "gt-brand"') });
+    expect(reached).toEqual([]);
+  });
 });
 
 // The routes: /mcp over JSON-RPC (the SSE answers read whole) and /api/actions, the real identity
@@ -366,7 +420,12 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
 describe('the agent routes through the gate', () => {
   let dir = '';
   let runtime: IdentityRuntime;
-  const secrets: Record<'alice' | 'bob' | 'bobRead', string> = { alice: '', bob: '', bobRead: '' };
+  const secrets: Record<'alice' | 'aliceShare' | 'bob' | 'bobRead', string> = {
+    alice: '',
+    aliceShare: '',
+    bob: '',
+    bobRead: '',
+  };
   const users: Record<'alice' | 'bob', string> = { alice: '', bob: '' };
   let bobReadId = '';
   let next = 1;
@@ -396,6 +455,14 @@ describe('the agent routes through the gate', () => {
         scopes: ['read', 'write'],
       });
       secrets[who] = secret;
+      if (who === 'alice') {
+        const made = await runtime.keys.create({
+          userId: id,
+          name: 'alice share',
+          scopes: ['read', 'write', 'share'],
+        });
+        secrets.aliceShare = made.secret;
+      }
       if (who === 'bob') {
         const made = await runtime.keys.create({ userId: id, name: 'bob read', scopes: ['read'] });
         secrets.bobRead = made.secret;
@@ -504,6 +571,27 @@ describe('the agent routes through the gate', () => {
     if (result.isError !== true) return 200;
     const text = result.content?.[0]?.text ?? '{}';
     return (JSON.parse(text) as { error?: { status?: number } }).error?.status ?? 0;
+  }
+
+  /** A tool call's error body (status, message, pointer), or null when the tool answered. */
+  async function toolErrorOf(
+    s: Session,
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<{ status: number; message: string; pointer?: string } | null> {
+    const answer = await rpc(
+      s.deckId,
+      s.secret,
+      { jsonrpc: '2.0', id: next++, method: 'tools/call', params: { name, arguments: args } },
+      s.id,
+    );
+    const result = answer.body.result as { isError?: boolean; content?: { text?: string }[] };
+    if (result.isError !== true) return null;
+    return (
+      JSON.parse(result.content?.[0]?.text ?? '{}') as {
+        error: { status: number; message: string; pointer?: string };
+      }
+    ).error;
   }
 
   async function toolsOf(s: Session): Promise<string[]> {
@@ -739,6 +827,49 @@ describe('the agent routes through the gate', () => {
     expect(reached).toEqual([]);
     expect((await unnamedPost('deck.create', { name: 'Fresh' })).status).toBe(500);
     expect(reached).toEqual(['deck.create']);
+  });
+
+  it('refuses a share or publish tool whose id names a deck other than the session’s, and runs it on the session’s own', async () => {
+    // both decks are alice's, so the refusal is the mismatch and not the other deck's access
+    restrictedDeck('alpha', users.alice);
+    restrictedDeck('beta', users.alice);
+    const bound = await session('alpha', secrets.aliceShare);
+    const toolOf = (action: string): string =>
+      actionsOn('mcp').find((spec) => spec.id === action)?.mcp ?? '';
+    for (const [action, rest] of [
+      ['share.get', {}],
+      ['share.createLink', { role: 'editor', baseRevision: 0 }],
+      ['deck.publish', { baseRevision: 0 }],
+      ['deck.unpublish', { baseRevision: 0 }],
+    ] as const) {
+      const tool = toolOf(action);
+      reached.length = 0;
+      expect(await toolErrorOf(bound, tool, { id: 'beta', ...rest }), tool).toMatchObject({
+        status: 400,
+        message: `${action} names deck "beta" in its input and this session is bound to deck "alpha": open a session with ?deck=beta on the /mcp initialize request to act on "beta"`,
+      });
+      expect(reached, tool).toEqual([]);
+      // the session's own deck reaches the handler (which refuses here with a 500)
+      expect(await toolErrorOf(bound, tool, { id: 'alpha', ...rest }), tool).toMatchObject({
+        status: 500,
+        message: 'reached the handler',
+      });
+      expect(reached, tool).toEqual([action]);
+      reached.length = 0;
+      // no id passes the gate to the action's schema, which requires one
+      expect(await toolErrorOf(bound, tool, { ...rest }), tool).toMatchObject({
+        status: 400,
+        pointer: '/id',
+      });
+      expect(reached, tool).toEqual([]);
+    }
+    // the session on beta runs the same tool on beta
+    const other = await session('beta', secrets.aliceShare);
+    reached.length = 0;
+    expect(
+      await toolErrorOf(other, toolOf('deck.publish'), { id: 'beta', baseRevision: 0 }),
+    ).toMatchObject({ status: 500, message: 'reached the handler' });
+    expect(reached).toEqual(['deck.publish']);
   });
 });
 

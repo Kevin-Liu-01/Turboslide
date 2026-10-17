@@ -19,7 +19,7 @@ A hosted studio answers MCP at `/mcp` with the streamable HTTP transport.
 
 <Steps>
   <Step title="Initialize">
-    `POST /mcp` with the JSON-RPC `initialize` request. Name the presentation with `?deck=<id>`; a session that names none reads the example deck, and its write tools are refused. On a hosted studio, send `Authorization: Bearer <key>`; the key's owner is the author of every write, and the `x-turboslide-author` header only labels the run.
+    `POST /mcp` with the JSON-RPC `initialize` request. Name the presentation with `?deck=<id>`; a session that names none reads the example deck, and its write tools are refused. A share or publish tool acts on the session's presentation, and one whose `id` names another is refused with 400. On a hosted studio, send `Authorization: Bearer <key>`; the key's owner is the author of every write, and the `x-turboslide-author` header only labels the run.
   </Step>
   <Step title="Keep the session">
     The answer carries an `mcp-session-id` header. Send it on every request after.

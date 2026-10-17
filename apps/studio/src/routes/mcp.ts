@@ -32,7 +32,9 @@ import { refuseForeignOrigin } from '../server/headers';
 // opens it (a deck the key cannot see answers the not found of a missing deck), every tool call
 // and resource read is decided again for the action's capability and the decks its input names,
 // with the key's scopes, the read only switch and the write quota, and a session is bound to the
-// key that opened it, so another key or bearer never rides it.
+// key that opened it, so another key or bearer never rides it. A share or publish tool acts on the
+// session's deck, so one whose input `id` names another deck is refused with 400, naming both
+// (server/agent-gate.ts requireBoundDeckId).
 
 const HANDLER = Symbol.for('turboslide.studio.mcp');
 

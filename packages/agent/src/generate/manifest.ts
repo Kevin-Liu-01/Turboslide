@@ -68,7 +68,7 @@ export const EXECUTION_RULES: ExecutionRules = {
       'MCP streamable HTTP: POST JSON-RPC to /mcp (initialize first), GET for the notification stream, DELETE to end the session; the mcp-session-id header carries the session.',
     session:
       'One MCP session is bound to one deck and one caller at initialize; tools are deck_<action> for every implemented action on the mcp transport.',
-    deck: '?deck=<slug> on the initialize request. A session without it reads the instance default (gt-brand), and its write tools are refused with 400 until a session names the deck.',
+    deck: '?deck=<slug> on the initialize request. A session without it reads the instance default (gt-brand), and its write tools are refused with 400 until a session names the deck. A share or publish tool acts on the session deck: one whose input id names another deck is refused with 400.',
     author:
       "The key's owner is the author of every write; x-turboslide-author or ?author= on the initialize request only labels the run (agent:mcp-http without one).",
     viewTools:

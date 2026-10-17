@@ -7,7 +7,9 @@
 // named its deck either way: a write that did not is refused before any deck opens
 // (agent-gate.ts writesBoundDeck), and only a read runs on the default. An `id` that is not a slug
 // is refused here with the schema's own words at `/id`, so a malformed deck id answers
-// `invalid_input` and not `deck_required`.
+// `invalid_input` and not `deck_required`. An /mcp session's deck is fixed at initialize, so a
+// tool call there whose `id` names another deck is refused (agent-gate.ts requireBoundDeckId);
+// before, a session opened with ?deck=y shared or published y when the input named x.
 import { ACTIONS } from '@turboslide/schema/actions';
 import type { ActionId } from '@turboslide/schema/actions';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
@@ -18,6 +20,39 @@ export const DECK_ID_ACTIONS: ReadonlySet<string> = new Set(
     .filter((spec) => spec.group === 'share' || spec.id === 'admin.assignOwner')
     .map((spec) => spec.id),
 );
+
+/** The `id` a DECK_ID_ACTIONS input carries as sent: undefined for any other action, or without one. */
+function inputId(action: string, input: unknown): unknown {
+  if (!DECK_ID_ACTIONS.has(action) || typeof input !== 'object' || input === null) return undefined;
+  return (input as Record<string, unknown>).id;
+}
+
+const isDeckSlug = (id: unknown): id is string => typeof id === 'string' && SLUG_PATTERN.test(id);
+
+/**
+ * The deck a DECK_ID_ACTIONS input names in `id`: undefined for any other action, for an input
+ * without one, and for an `id` that is not a slug, which the action's schema refuses.
+ */
+export function inputDeckId(action: string, input: unknown): string | undefined {
+  const id = inputId(action, input);
+  return isDeckSlug(id) ? id : undefined;
+}
+
+/**
+ * The refusal of a call whose input names deck `named` while its transport is bound to `bound`:
+ * `?deck=` on /api/actions, the deck an /mcp session was opened on (agent-gate.ts
+ * requireBoundDeckId), whose tools act on that deck alone.
+ */
+export function deckMismatch(
+  action: string,
+  named: string,
+  bound: string,
+  transport: 'http' | 'mcp',
+): string {
+  return transport === 'mcp'
+    ? `${action} names deck "${named}" in its input and this session is bound to deck "${bound}": open a session with ?deck=${named} on the /mcp initialize request to act on "${named}"`
+    : `${action} names deck "${named}" in its input and "${bound}" in ?deck=; name one deck`;
+}
 
 type ActionDeck =
   { ok: true; deckId: string; named: boolean } | { ok: false; message: string; pointer?: string };
@@ -39,11 +74,9 @@ export function actionDeck(
     deckId: queried ?? fallback,
     named: queried !== undefined,
   });
-  if (!DECK_ID_ACTIONS.has(action)) return byQuery();
-  const id =
-    typeof input === 'object' && input !== null ? (input as Record<string, unknown>).id : undefined;
+  const id = inputId(action, input);
   if (id === undefined) return byQuery();
-  if (typeof id !== 'string' || !SLUG_PATTERN.test(id)) {
+  if (!isDeckSlug(id)) {
     const parsed = ACTIONS[action as ActionId].input.safeParse(input);
     const issue = parsed.success ? undefined : parsed.error.issues.find((i) => i.path[0] === 'id');
     return {
@@ -53,9 +86,6 @@ export function actionDeck(
     };
   }
   if (queried !== undefined && queried !== id)
-    return {
-      ok: false,
-      message: `${action} names deck "${id}" in its input and "${queried}" in ?deck=; name one deck`,
-    };
+    return { ok: false, message: deckMismatch(action, id, queried, 'http') };
   return { ok: true, deckId: id, named: true };
 }

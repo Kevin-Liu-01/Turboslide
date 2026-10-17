@@ -745,11 +745,11 @@ once roles exist (SPEC-3 6) a viewer link must not be a way to read `deck.json` 
 by address (research 04 F8). Layout v2 keeps the twins on the public store, because a browser
 `<img>` needs a URL, and moves every document to a private store of each environment:
 
-| Store                                                   | Access  | Holds                                                                                                                                                                           |
-| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`; the `exports/` and `bundles/` written before HR-K1#5b            |
-| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`; the produced files `exports/` and `bundles/` (HR-K1#5b) |
-| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                                                                       |
+| Store                                                   | Access  | Holds                                                                                                                                                                                        |
+| ------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`; the `exports/` and `bundles/` written before HR-K1#5b, until `sweep-produced` |
+| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`; the produced files `exports/` and `bundles/` (HR-K1#5b)              |
+| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                                                                                    |
 
 The public store is shared: production, every preview and a development checkout with
 `BLOB_READ_WRITE_TOKEN` read the same objects. `sharesPublicStore(env)` (`packages/store/src/select.ts`)
@@ -777,8 +777,9 @@ private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_R
   never read. `plan`, `copy`, `verify`, `rollback` and `delete` neither list nor count them on
   either store. An export queued in the minute of the HR-K1#5b deploy has its record and parts on
   the public store, which the new deployment no longer reads, so it answers `failed` and the person
-  exports again. A deployment without the private store is unchanged: everything, the produced
-  files included, stays on the public store.
+  exports again. Production without the private store would be unchanged: everything, the
+  produced files included, stays on the public store; a deployment that shares the public store
+  and has no private store refuses them (`sharedPublicClient`, HR-K1#6; 10.4).
 - The layout record is `meta.json` on the private store: `state` (`v1`, `dual` or `v2`), `frozen`
   (`since`, `settlesAt`, `expiresAt`) and `opensAt`. A document is read and written on the public
   store in `v1` and on the private store in `v2`. `dual` is the record the preview wrote on
@@ -1026,12 +1027,29 @@ Never in this runbook: a step against a deployment built before this code; `roll
 `sweep-produced` or `avatar-sweep` against a preview (each refuses); a removal by hand on either
 store. After production's `delete`, HR-K1#5b and HR-K1#6 follow.
 
-The check that `delete` finished, before those pushes, is one passive read of the public store:
-`decks/gt-brand/deck.json` on the host the policy's `img-src` names answers 404. From HR-K1#6 the
-guard's smoke requires that answer (`private document 403`), the scratch deck's picture under its
-key alone (`twin URL not derivable`) and no `users/<id>/decks.json` of the caller
-(`principal index private`) on every deployment it checks, preview and production alike, since
-they share the public store (`docs/security.md` section 17 has the rows and their readings).
+The gate for the HR-K1#5b and HR-K1#6 pushes is `delete`'s own answer and the verify after it:
+the last `delete` call answers `done true`, and a `verify` on `v2` after it counts the public
+documents left (`processed`) and names each one that differs from the plan as a row (`rowCount`,
+the documents `delete` kept); `processed` minus `rowCount` is 0. `delete` removes in path order, so
+a single object proves nothing about the rest: `decks/gt-brand/deck.json` answers 404 halfway
+through a `delete` while `index/`, `links/`, `system/`, `templates/`, `users/` and `vitals/` are
+still public. A read of `decks/gt-brand/deck.json` on the host the policy's `img-src` names is a
+spot check of the CDN's copy alone.
+
+From HR-K1#6 the guard's smoke requires, on every deployment it checks, preview and production
+alike since they share the public store, that its own restricted scratch deck has neither
+`deck.json` nor `access.json` on the public store (`private document 403`), that the deck's asset
+key is not the one its id derives and its picture answers under that key alone (`twin URL not
+derivable`), and that a stored export link reads back as a PDF through the deployment
+(`export URL signed`). `principal index private` reads a `users/<id>/decks.json` only after
+`account.decks` proved that index exists, and is listed as skipped by name otherwise; the guard's
+static bearer has no index (`docs/security.md` section 17 has the rows).
+
+From HR-K1#6 no client without the private store's token runs on the blob tier where the public
+store is shared: `layoutBlobClient` opens the public store alone for such a deployment and refuses
+every put and removal of a document or a produced file there (`sharedPublicClient`, 503 with the
+shared store's sentence), so a preview built before its private store existed, or a checkout or
+`vercel dev` with `BLOB_READ_WRITE_TOKEN` alone, serves reads and answers 503 to every save.
 
 ## 11. The runbook of the round three services
 

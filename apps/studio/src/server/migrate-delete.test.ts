@@ -96,6 +96,14 @@ describe('delete on a shared public store (HR-K1#4b)', () => {
     );
     // a rehearsal on a checkout without the token runs on a store of its own
     expect(sharesPublicStore({})).toBe(false);
+    // a Vercel deployment on the blob tier without the private token, production included (the
+    // personal project `turboslide`, HR-K1#6); turboslide-gt's production holds that token
+    const vercel = { VERCEL: '1', VERCEL_ENV: 'production', BLOB_READ_WRITE_TOKEN: TOKEN };
+    expect(sharesPublicStore(vercel)).toBe(true);
+    expect(sharesPublicStore({ ...vercel, TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN: TOKEN })).toBe(
+      false,
+    );
+    expect(sharesPublicStore({ ...vercel, TURBOSLIDE_BLOB_PRIVATE_TOKEN: TOKEN })).toBe(false);
   });
 
   it('runs the steps through the action, and refuses delete on a preview before any store call', async () => {

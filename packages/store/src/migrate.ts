@@ -681,12 +681,14 @@ export function splitBlobClient(
 
 /**
  * The public store alone, on a deployment that shares it and has no private store (HR-K1#6; the
- * review of 2026-10-17, finding 4). Reads go on. A put or a removal of any path that is not public
- * (a document, a produced file, a migration record) throws StorageFrozenError with the shared
- * store's sentence, as the split client refuses a shared store's document writes in `v1`. Before
- * it such a deployment (a preview built before its private store existed, a checkout or `vercel
- * dev` with the public token alone) wrote documents to the public store, and its seed put
- * `decks/gt-brand/` back there after production's `delete`.
+ * review of 2026-10-17, finding 4). Reads go on. A put of any path that is not public (a document,
+ * a produced file, a migration record) and every removal, of a twin or an avatar too, throw
+ * StorageFrozenError with the shared store's sentence, as the split client refuses a shared
+ * store's document writes in `v1`: every object of that store is production's as well. Before it
+ * such a deployment (a preview built before its private store existed, a checkout or `vercel dev`
+ * with the public token alone, a Vercel project with no private store, select.ts
+ * `sharesPublicStore`) wrote documents to the public store, its seed put `decks/gt-brand/` back
+ * there after production's `delete`, and it could remove production's twins by name.
  */
 export function sharedPublicClient(legacy: BlobClient): BlobClient {
   const refused = () => new StorageFrozenError(SHARED_SENTENCE);
@@ -701,10 +703,9 @@ export function sharedPublicClient(legacy: BlobClient): BlobClient {
       if (!isPublicPath(pathname)) throw refused();
       return legacy.put(pathname, bytes, options);
     },
-    async del(pathnames, options) {
-      // a removal that names one path not public is refused whole, before any of it happens
-      if (pathnames.some((pathname) => !isPublicPath(pathname))) throw refused();
-      return legacy.del(pathnames, options);
+    async del(pathnames) {
+      // nothing on this store is the deployment's own to remove
+      if (pathnames.length > 0) throw refused();
     },
   };
 }

@@ -33,7 +33,7 @@ import {
   twinKeyResolver,
 } from './migrate.ts';
 import type { Env } from './select.ts';
-import { BLOB_TOKEN_VARIABLE, sharesPublicStore } from './select.ts';
+import { BLOB_TOKEN_VARIABLE, PRIVATE_TOKEN_VARIABLES, sharesPublicStore } from './select.ts';
 
 /** The store's access level; `public` is what the twins need. TURBOSLIDE_BLOB_ACCESS overrides. */
 export const BLOB_ACCESS_VARIABLE = 'TURBOSLIDE_BLOB_ACCESS';
@@ -133,12 +133,10 @@ export const DOCUMENTS_TOKEN_VARIABLE = 'TURBOSLIDE_BLOB_PRIVATE_TOKEN';
 /**
  * The names the token is read under, in order (hardening K1#4): the variable docs/hosting.md
  * names, then the one the Vercel dashboard makes when the store is connected to the project with
- * the prefix `TURBOSLIDE_BLOB_PRIVATE` (`<prefix>_READ_WRITE_TOKEN`).
+ * the prefix `TURBOSLIDE_BLOB_PRIVATE` (`<prefix>_READ_WRITE_TOKEN`). The list lives in select.ts,
+ * which `sharesPublicStore` reads without the Vercel SDK.
  */
-export const DOCUMENTS_TOKEN_VARIABLES = [
-  DOCUMENTS_TOKEN_VARIABLE,
-  'TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN',
-] as const;
+export const DOCUMENTS_TOKEN_VARIABLES = PRIVATE_TOKEN_VARIABLES;
 
 /** The variable that holds the private store's token in this environment, or null. */
 export function documentsTokenVariable(env: Env = process.env): string | null {

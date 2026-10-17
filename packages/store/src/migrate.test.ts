@@ -303,7 +303,7 @@ describe('the split client', () => {
     expect(sharesPublicStore({})).toBe(false);
   });
 
-  it('refuses every write but a public path on a shared store without a private one (HR-K1#6)', async () => {
+  it('refuses every removal and every put but a public path on a shared store without a private one (HR-K1#6)', async () => {
     const w = world();
     await w.seed();
     const client = sharedPublicClient(w.legacy);
@@ -328,9 +328,13 @@ describe('the split client', () => {
     expect(await client.folders('')).toEqual(await w.legacy.folders(''));
     expect((await client.files?.(''))?.map((e) => e.pathname)).toEqual(['top.json']);
     await client.put('d/q4/Key/assets/new.png', body('png'), { overwrite: false });
-    await client.del(['u/AvatarKey/a-64.webp']);
     expect(w.legacy.blobs.has('d/q4/Key/assets/new.png')).toBe(true);
-    expect(w.legacy.blobs.has('u/AvatarKey/a-64.webp')).toBe(false);
+    // every removal is refused, of a twin and an avatar too: they are production's objects
+    for (const paths of [['u/AvatarKey/a-64.webp'], ['decks/q4/assets/photo.cd34.webp']])
+      await expect(client.del(paths)).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    await client.del([]);
+    expect(w.legacy.blobs.has('u/AvatarKey/a-64.webp')).toBe(true);
+    expect(w.legacy.calls.filter((c) => c.op === 'del')).toEqual([]);
   });
 
   it('writes the record so that deployments from before HR-K1#4b read v2 on a shared store', async () => {

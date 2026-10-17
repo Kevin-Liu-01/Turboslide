@@ -25,6 +25,7 @@ import {
   vercelBlobClient,
   vercelDocumentsClient,
 } from './blob-vercel.ts';
+import { sharesPublicStore } from './select.ts';
 
 /** A read write token of the SDK's shape; the store id is its fourth segment. */
 const TOKEN = 'vercel_blob_rw_teststore_secret';
@@ -301,7 +302,10 @@ describe('a shared deployment without the private store (HR-K1#6)', () => {
       { BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL_ENV: 'preview' },
       { BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL_ENV: 'development' },
       { BLOB_READ_WRITE_TOKEN: TOKEN },
+      // a Vercel project with no private store (the personal project `turboslide`), production too
+      { BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL: '1', VERCEL_ENV: 'production' },
     ]) {
+      expect(sharesPublicStore(shared)).toBe(true);
       seen.length = 0;
       const client = layoutBlobClient(shared);
       for (const path of ['decks/gt-brand/deck.json', 'users/u1/decks.json', 'exports/x/j/x.pdf'])
@@ -311,9 +315,9 @@ describe('a shared deployment without the private store (HR-K1#6)', () => {
             /^This deployment shares the public store with production/,
           ),
         });
-      await expect(
-        client.del(['u/key/a-64.webp', 'decks/gt-brand/deck.json']),
-      ).rejects.toMatchObject(frozen);
+      // every removal, of a public path too: the store's objects are production's
+      for (const paths of [['u/key/a-64.webp', 'decks/gt-brand/deck.json'], ['u/key/a-64.webp']])
+        await expect(client.del(paths)).rejects.toMatchObject(frozen);
       expect(seen).toEqual([]);
       // a public path still goes to the store
       await client.put('u/key/a-64.webp', body, { overwrite: false });
@@ -321,7 +325,12 @@ describe('a shared deployment without the private store (HR-K1#6)', () => {
     }
   });
 
-  it('leaves production without the private store as it was: documents on the public store', async () => {
+  it("leaves turboslide-gt's production and preview as they were, and production off Vercel", async () => {
+    // production and the preview of turboslide-gt hold the private store's token
+    const gt = { BLOB_READ_WRITE_TOKEN: TOKEN, TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN: TOKEN };
+    expect(sharesPublicStore({ ...gt, VERCEL: '1', VERCEL_ENV: 'production' })).toBe(false);
+    expect(sharesPublicStore({ ...gt, VERCEL: '1', VERCEL_ENV: 'preview' })).toBe(true);
+    expect(sharesPublicStore({ VERCEL: '1', VERCEL_ENV: 'production' })).toBe(false);
     seen.length = 0;
     const client = layoutBlobClient({ BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL_ENV: 'production' });
     await client.put('decks/q4/deck.json', body, { overwrite: true });

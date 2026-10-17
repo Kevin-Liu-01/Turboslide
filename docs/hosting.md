@@ -777,9 +777,10 @@ private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_R
   never read. `plan`, `copy`, `verify`, `rollback` and `delete` neither list nor count them on
   either store. An export queued in the minute of the HR-K1#5b deploy has its record and parts on
   the public store, which the new deployment no longer reads, so it answers `failed` and the person
-  exports again. Production without the private store would be unchanged: everything, the
-  produced files included, stays on the public store; a deployment that shares the public store
-  and has no private store refuses them (`sharedPublicClient`, HR-K1#6; 10.4).
+  exports again. A deployment without the private store keeps one store: off Vercel with a store
+  of its own (a checkout's rehearsal) everything, the produced files included, stays there; one
+  that shares the public store, any Vercel deployment on the blob tier among them since HR-K1#6,
+  refuses documents and produced files there (`sharedPublicClient`; 10.4).
 - The layout record is `meta.json` on the private store: `state` (`v1`, `dual` or `v2`), `frozen`
   (`since`, `settlesAt`, `expiresAt`) and `opensAt`. A document is read and written on the public
   store in `v1` and on the private store in `v2`. `dual` is the record the preview wrote on
@@ -1045,11 +1046,20 @@ derivable`), and that a stored export link reads back as a PDF through the deplo
 `account.decks` proved that index exists, and is listed as skipped by name otherwise; the guard's
 static bearer has no index (`docs/security.md` section 17 has the rows).
 
-From HR-K1#6 no client without the private store's token runs on the blob tier where the public
-store is shared: `layoutBlobClient` opens the public store alone for such a deployment and refuses
-every put and removal of a document or a produced file there (`sharedPublicClient`, 503 with the
-shared store's sentence), so a preview built before its private store existed, or a checkout or
-`vercel dev` with `BLOB_READ_WRITE_TOKEN` alone, serves reads and answers 503 to every save.
+From HR-K1#6 no client without the private store's token writes to the public store where it is
+shared. `sharesPublicStore` is true for a preview, for anything but production that holds
+`BLOB_READ_WRITE_TOKEN`, and for any Vercel deployment on the blob tier without the private store's
+token whatever its `VERCEL_ENV`: the personal project `turboslide` builds main and runs the blob tier
+over the same public store with no private store, and its production read layout v1 until then
+(its domain redirects to www.turboslide.com, so it serves little). `turboslide-gt`'s production and
+preview hold the private token and are unchanged. For such a deployment `layoutBlobClient` opens the
+public store alone (`sharedPublicClient`): a put of a document or a produced file, and every
+removal, a twin's or an avatar's too, answer 503 with the shared store's sentence. The seed is
+skipped there with one warning line (`blob: warning: the seed of gt-brand is skipped, the store
+refuses it: ...`; blob-store.ts `seedOnce`), so the deployment serves the decks the public store
+still holds and every read, without the seed deck once `delete` removed it, and answers 503 to every
+save. A preview built before its private store existed, or a checkout or `vercel dev` with
+`BLOB_READ_WRITE_TOKEN` alone, behaves the same way.
 
 ## 11. The runbook of the round three services
 

@@ -58,16 +58,37 @@ export function hasBlobToken(env: Env = process.env): boolean {
 }
 
 /**
+ * The names the private store's token is read under (HR-K1#4): the variable docs/hosting.md names,
+ * then the one the Vercel dashboard makes when the store is connected with the prefix
+ * `TURBOSLIDE_BLOB_PRIVATE`. blob-vercel.ts `DOCUMENTS_TOKEN_VARIABLES` is this list.
+ */
+export const PRIVATE_TOKEN_VARIABLES = [
+  'TURBOSLIDE_BLOB_PRIVATE_TOKEN',
+  'TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN',
+] as const;
+
+/** True when the environment holds the private store's token under one of its names. */
+export function hasPrivateToken(env: Env = process.env): boolean {
+  return PRIVATE_TOKEN_VARIABLES.some((name) => isSet(env[name]));
+}
+
+/**
  * True on a deployment whose public Blob store another environment also reads (docs/hosting.md
- * 10.1): every preview of `turboslide-gt`, and a checkout or development deployment that holds the
- * public store's token. With a private store of its own (the split client) such a deployment writes
- * no document before its own cutover; without one it runs layout v1 on the public store in every
- * state. The storage migration's `delete`, `verify` and rollback of a cutover refuse there
- * (HR-K1#4b), and so does the avatar sweep, since the public objects are production's too.
+ * 10.1): every preview of `turboslide-gt`, a checkout or development deployment that holds the
+ * public store's token, and any Vercel deployment on the blob tier without the private store's
+ * token whatever its VERCEL_ENV (HR-K1#6): a Vercel project with no private store of its own, such
+ * as the personal project `turboslide`, which builds main over the same public store. With a
+ * private store of its own (the split client) such a deployment writes no document before its own
+ * cutover; without one it opens the public store read only for documents and produced files
+ * (blob-vercel.ts `layoutBlobClient`). The storage migration's `delete`, `verify` and rollback of a
+ * cutover refuse there (HR-K1#4b), and so does the avatar sweep, since the public objects are
+ * production's too. `turboslide-gt`'s production holds the private token and is not one.
  */
 export function sharesPublicStore(env: Env = process.env): boolean {
   if (env.VERCEL_ENV === 'preview') return true;
-  return env.VERCEL_ENV !== 'production' && hasBlobToken(env);
+  if (!hasBlobToken(env)) return false;
+  if (isVercel(env) && !hasPrivateToken(env)) return true;
+  return env.VERCEL_ENV !== 'production';
 }
 
 /** True inside a Vercel build or function (Vercel sets VERCEL=1 in both). */

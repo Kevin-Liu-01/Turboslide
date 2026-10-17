@@ -84,16 +84,19 @@
 // no-store` on its thumbnail (`restricted thumbnail private`), and removes it forever at the end
 // of the run (`scratch deck removed`). HR-K1#6 (DATA-2, DATA-V2; required since production's
 // cutover and its `delete`): on the public store, whose host the deployment names in its policy's
-// `img-src` (TURBOSLIDE_PUBLIC_STORE_HOST), `private document 403` requires 403 or 404 for the open
-// deck's `deck.json` and the scratch deck's, `twin URL not derivable` requires the scratch deck's
-// picture under its asset key alone, and `principal index private` requires 403 or 404 for the
-// caller's own `users/<id>/decks.json`. The row `document cache 60 s` (HR-K1#1) left with them
-// (CRIT-M15): no document is on the public store to carry a max age. HR-SD#6
+// `img-src` (TURBOSLIDE_PUBLIC_STORE_HOST), `private document 403` requires 403 or 404 for the
+// scratch deck's `deck.json` and `access.json`, `twin URL not derivable` requires an asset key not
+// derived from the deck id and the scratch deck's picture under that key alone, and `principal
+// index private` requires 403 or 404 for a `users/<id>/decks.json` that `account.decks` proved to
+// exist (the bearer's, or the account key's `--index-token-env <VAR>` names; skipped by name
+// otherwise). The row `document cache 60 s` (HR-K1#1) left with them (CRIT-M15): no document is on
+// the public store to carry a max age. HR-SD#6
 // (CRIT-M3): `asset by name 404` adds a picture to the scratch deck and requires 404 for it by its
 // file name with no identity, and the picture by its asset key (a deployment alone: a local tmp
 // store keeps names). HR-K1#5a (CRIT-M4, DATA-3): `export URL signed` exports the scratch deck as
 // a one theme PDF through the sync export's JSON variant and requires every file's link to name
-// `/api/download/` and no store host. HR-W#3a (SPEC-1, WEB-4): `static headers /home`, `/home/`
+// `/api/download/` and no store host, and the first stored link to read back with the bearer as a
+// PDF with bytes (HR-K1#6). HR-W#3a (SPEC-1, WEB-4): `static headers /home`, `/home/`
 // and `/docs` read the answers the CDN gives before the function runs, whose headers come from the
 // route rules of apps/studio/vite.deploy.config.ts: nosniff, `x-frame-options: DENY`, COOP, the
 // referrer and permissions policies, and on https the long HSTS value. HR-W#3b (SPEC-1, CRIT-W5):
@@ -117,6 +120,7 @@ function parseArgs(argv) {
     asset: null,
     timeoutMs: 30_000,
     tokenEnv: null,
+    indexTokenEnv: null,
     exportBatch: false,
     slides: null,
     restricted: null,
@@ -133,6 +137,7 @@ function parseArgs(argv) {
     else if (arg === '--base' || arg === '--url') out.url = argv[++i] ?? null;
     else if (arg === '--timeout') out.timeoutMs = Number(argv[++i] ?? out.timeoutMs);
     else if (arg === '--token-env') out.tokenEnv = argv[++i] ?? null;
+    else if (arg === '--index-token-env') out.indexTokenEnv = argv[++i] ?? null;
     else if (arg === '--export-batch') out.exportBatch = true;
     else if (arg === '--slides') out.slides = Number(argv[++i] ?? 0) || null;
     else if (arg === '--restricted') out.restricted = argv[++i] ?? null;
@@ -1202,6 +1207,12 @@ const noPublicCopy = (r) => r.error === undefined && (r.status === 403 || r.stat
 /** The store folder of a principal id (`principalFolder`, packages/store/src/access-store.ts). */
 const principalFolder = (id) => id.replace(/[^A-Za-z0-9_-]/g, '_');
 
+/** The key derived from a deck id (`legacyAssetKey`, packages/schema/src/access.ts). */
+function legacyAssetKey(deckId) {
+  const base = deckId.replace(/[^A-Za-z0-9_-]/g, '-');
+  return `${base}${'0'.repeat(22)}`.slice(0, 22);
+}
+
 const PRIVATE_STORE_ROWS = [
   'private document 403',
   'twin URL not derivable',
@@ -1213,20 +1224,25 @@ const PRIVATE_STORE_ROWS = [
  * production's cutover and its `delete` (docs/hosting.md 10.4). Each reads the public store's host,
  * which the deployment names in its policy's `img-src`, through `storeProbe`:
  *
- * - `private document 403`: the open deck's `deck.json`, a public document before the cutover that
- *   `delete` removed, and the scratch deck's, written since to the private store alone.
- * - `twin URL not derivable`: the picture `asset by name 404` added to the scratch deck answers 200
- *   at `d/<id>/<assetKey>/assets/<file>` and 403 or 404 at `decks/<id>/assets/<file>`, the address
- *   its deck id and file name make. A deck with no access record, such as the open seed deck,
- *   keeps its twins public by name (docs/security.md section 17), so the row reads the scratch deck.
- * - `principal index private`: `users/<id>/decks.json` for the caller's own principal, the id
- *   `account.me` answers to the bearer.
+ * - `private document 403`: the smoke's own scratch deck, restricted to its creator, has its
+ *   `deck.json` and its `access.json` (which holds the asset key) on the deployment's store and
+ *   neither on the public host. The open seed deck is not read: a stray client that shares the
+ *   public store could put it back, and it leaks nothing.
+ * - `twin URL not derivable`: the scratch deck's asset key is not the one its id derives
+ *   (`legacyAssetKey`), and the picture `asset by name 404` added answers 200 at
+ *   `d/<id>/<assetKey>/assets/<file>` and 403 or 404 both at `decks/<id>/assets/<file>` and under
+ *   the derived key, the two addresses its deck id and file name make.
+ * - `principal index private`: a principal whose `users/<id>/decks.json` exists answers 403 or 404
+ *   there. The row first proves the index exists through the deployment: `account.decks` with
+ *   `view: 'shared'` reads that index alone, so a row in its answer is an index. The principal is
+ *   the bearer's, or the account key's `--index-token-env` names; the static bearer
+ *   (`agent:bootstrap`) has no index, and with no index proven the row is skipped by name.
  *
  * Neither the asset key nor the principal id is printed. A local server's tmp store has no public
  * store, so off https the rows are skipped by name; on https a deployment that names no public
  * store fails them.
  */
-async function privateStoreRows(base, deck, scratch, picture, headers, timeoutMs) {
+async function privateStoreRows(base, scratch, picture, index, timeoutMs) {
   if (!base.startsWith('https:')) {
     return {
       skip: PRIVATE_STORE_ROWS.map(
@@ -1253,19 +1269,19 @@ async function privateStoreRows(base, deck, scratch, picture, headers, timeoutMs
     };
   }
   const id = encodeURIComponent(scratch.id);
-  const [open, made] = await Promise.all([
-    storeProbe(host, `decks/${encodeURIComponent(deck)}/deck.json`, timeoutMs),
+  const [manifest, record] = await Promise.all([
     storeProbe(host, `decks/${id}/deck.json`, timeoutMs),
+    storeProbe(host, `decks/${id}/access.json`, timeoutMs),
   ]);
   const documents = {
     row: {
       name: 'private document 403',
-      expect: `${deck}'s deck.json and the scratch deck's on the public store 403 or 404`,
+      expect: "the scratch deck's deck.json and access.json on the public store 403 or 404",
       detail: () =>
-        `${deck} deck.json ${open.error ?? open.status}; scratch deck.json ${made.error ?? made.status}`,
+        `scratch deck.json ${manifest.error ?? manifest.status}; access.json ${record.error ?? record.status}`,
     },
-    r: noPublicCopy(open) ? made : open,
-    ok: noPublicCopy(open) && noPublicCopy(made),
+    r: noPublicCopy(manifest) ? record : manifest,
+    ok: noPublicCopy(manifest) && noPublicCopy(record),
   };
 
   let twin;
@@ -1277,46 +1293,110 @@ async function privateStoreRows(base, deck, scratch, picture, headers, timeoutMs
     );
   } else {
     const file = picture.file.split('/').map(encodeURIComponent).join('/');
-    const [byKey, byName] = await Promise.all([
+    const derived = legacyAssetKey(scratch.id);
+    const ownKey = picture.key !== derived;
+    const [byKey, byName, byDerived] = await Promise.all([
       storeProbe(host, `d/${id}/${encodeURIComponent(picture.key)}/assets/${file}`, timeoutMs),
       storeProbe(host, `decks/${id}/assets/${file}`, timeoutMs),
+      storeProbe(host, `d/${id}/${encodeURIComponent(derived)}/assets/${file}`, timeoutMs),
     ]);
     twin = {
       row: {
         name: 'twin URL not derivable',
         expect:
-          "the scratch deck's picture on the public store: under its asset key a 200 image, at decks/<id>/assets/<file> 403 or 404",
+          "the scratch deck's asset key not the one its id derives; its picture on the public store under the key a 200 image, at decks/<id>/assets/<file> and under the derived key 403 or 404",
+        // pass or fail for the key comparison, never the key
         detail: () =>
-          `by key ${byKey.error ?? `${byKey.status} ${byKey.type}`}; by name ${byName.error ?? byName.status}`,
+          `own key ${ownKey ? 'pass' : 'FAIL'}; by key ${byKey.error ?? `${byKey.status} ${byKey.type}`}; by name ${byName.error ?? byName.status}; by derived key ${byDerived.error ?? byDerived.status}`,
       },
-      r: byName,
+      r: noPublicCopy(byName) ? byDerived : byName,
       ok:
+        ownKey &&
         byKey.error === undefined &&
         byKey.status === 200 &&
         byKey.type.startsWith('image/') &&
-        noPublicCopy(byName),
+        noPublicCopy(byName) &&
+        noPublicCopy(byDerived),
     };
   }
 
-  const me = await postJson(base, '/api/actions/account.me', {}, headers, 60_000);
-  const principal = me.json?.principal ?? me.json?.output?.principal ?? null;
-  const index =
-    typeof principal?.id === 'string'
-      ? await storeProbe(host, `users/${principalFolder(principal.id)}/decks.json`, timeoutMs)
-      : null;
-  const ownIndex = {
-    row: {
-      name: 'principal index private',
-      expect: "the caller's users/<id>/decks.json on the public store 403 or 404",
-      detail: () =>
-        index === null
-          ? `account.me ${me.status}: no principal id`
-          : `${principal.kind ?? 'principal'} users/<id>/decks.json ${index.error ?? index.status}`,
-    },
-    r: index ?? { status: me.status, ms: me.ms },
-    ok: index !== null && noPublicCopy(index),
+  const own = await principalIndexRow(base, host, index, timeoutMs);
+  return {
+    rows: [documents, twin, ...(own.skip === undefined ? [own] : [])],
+    skip: own.skip === undefined ? [] : [own.skip],
   };
-  return { rows: [documents, twin, ownIndex] };
+}
+
+/**
+ * `principal index private` (see `privateStoreRows`): skipped by name unless `account.decks`
+ * proves the caller's index exists; then its public address answers 403 or 404. Never passes on an
+ * index nobody wrote.
+ */
+async function principalIndexRow(base, host, index, timeoutMs) {
+  const name = 'principal index private';
+  if (index.headers === undefined) return { skip: `${name}: ${index.unset} is not set` };
+  const indexHeaders = index.headers;
+  const me = await postJson(base, '/api/actions/account.me', {}, indexHeaders, 60_000);
+  const principal = me.json?.principal ?? me.json?.output?.principal ?? null;
+  if (me.status !== 200 || typeof principal?.id !== 'string') {
+    return {
+      row: {
+        name,
+        expect: 'account.me names a principal',
+        detail: () => `account.me ${me.status}`,
+      },
+      r: { status: me.status, ms: me.ms },
+      ok: false,
+    };
+  }
+  // `account.decks` reads the index of the request's principal id, which a static agent lacks
+  if (principal.id.startsWith('agent:'))
+    return {
+      skip: `${name}: the bearer is a static agent with no principal index; pass --index-token-env <VAR> with an account key whose index holds a link grant`,
+    };
+  const shared = await postJson(
+    base,
+    '/api/actions/account.decks',
+    { view: 'shared' },
+    indexHeaders,
+    60_000,
+  );
+  const heads = Array.isArray(shared.json)
+    ? shared.json
+    : Array.isArray(shared.json?.output)
+      ? shared.json.output
+      : null;
+  if (shared.status !== 200 || heads === null) {
+    return {
+      row: {
+        name,
+        expect: 'account.decks answers the shared view',
+        detail: () => `account.decks ${shared.status}`,
+      },
+      r: { status: shared.status, ms: shared.ms },
+      ok: false,
+    };
+  }
+  if (heads.length === 0)
+    return {
+      skip: `${name}: no principal index proven (account.decks shared answered 0 rows for the ${principal.kind ?? 'principal'}); pass --index-token-env <VAR> with an account key whose index holds a link grant`,
+    };
+  const probed = await storeProbe(
+    host,
+    `users/${principalFolder(principal.id)}/decks.json`,
+    timeoutMs,
+  );
+  return {
+    row: {
+      name,
+      expect:
+        'a principal index the deployment reads (account.decks shared answers a row); its users/<id>/decks.json on the public store 403 or 404',
+      detail: () =>
+        `${principal.kind ?? 'principal'} index with ${heads.length} shared decks; users/<id>/decks.json ${probed.error ?? probed.status}`,
+    },
+    r: probed,
+    ok: noPublicCopy(probed),
+  };
 }
 
 /**
@@ -1324,8 +1404,11 @@ async function privateStoreRows(base, deck, scratch, picture, headers, timeoutMs
  * theme PDF through `/api/export/<deck>?sync=1&format=json` with the bearer. On a deployment the
  * file is stored and its link is the download route's, `/api/download/s.<token>`, never the
  * store's address; on a server without stored copies the link is the instance's own export route.
- * Either way no answer names a store host. (The web page build's link is a server function's
- * answer, which the smoke does not call; stored-files.test.ts pins it.)
+ * Either way no answer names a store host. The first stored link (else the instance's) is read
+ * back with the bearer and answers 200 `application/pdf` with bytes (HR-K1#6, the review's
+ * finding 7): on layout v2 that read comes from the private store, so a deployment that cannot
+ * read its own store fails here. (The web page build's link is a server function's answer, which
+ * the smoke does not call; stored-files.test.ts pins it.)
  */
 async function exportLinkRow(base, scratch, headers) {
   const name = 'export URL signed';
@@ -1351,25 +1434,44 @@ async function exportLinkRow(base, scratch, headers) {
     (link.stored
       ? link.url.startsWith('/api/download/')
       : /^\/api\/(download|export)\//.test(link.url));
+  // the first stored file read back through its link with the bearer (the token is minted for the
+  // same principal), so the row reads a stored file from the deployment's store, the private one
+  // on layout v2; a server without stored copies serves the instance's link. The link's token is
+  // never printed
+  const first =
+    links.find((link) => link.stored && routed(link)) ?? links.find((link) => routed(link)) ?? null;
+  const fetched =
+    first === null ? null : await probe(base, first.url, EXPORT_TIMEOUT_MS, { headers });
+  const readBack =
+    fetched !== null &&
+    fetched.error === undefined &&
+    fetched.status === 200 &&
+    fetched.type.startsWith('application/pdf') &&
+    fetched.bytes > 0;
+  const redact = (url) =>
+    String(url)
+      .replace(/s\.[A-Za-z0-9_-]+\.[0-9a-f]+$/, 's.<token>')
+      .slice(0, 80);
   return {
     row: {
       name,
       expect:
-        "the scratch deck's export answer: every file's link names /api/download/ (a stored copy) or the instance's export route, and no store host",
+        "the scratch deck's export answer: every file's link names /api/download/ (a stored copy) or the instance's export route, and no store host; the first stored link read with the bearer 200 application/pdf with bytes",
       detail: () =>
         answer.status !== 200
           ? `${answer.status}: ${answer.text.slice(0, 160)}`
-          : links
-              .map(
-                (link) =>
-                  `${link.stored ? 'stored' : 'instance'} ${String(link.url)
-                    .replace(/s\.[A-Za-z0-9_-]+\.[0-9a-f]+$/, 's.<token>')
-                    .slice(0, 80)}`,
-              )
-              .join('; ') || 'no files',
+          : `${
+              links
+                .map((link) => `${link.stored ? 'stored' : 'instance'} ${redact(link.url)}`)
+                .join('; ') || 'no files'
+            }; ${
+              fetched === null
+                ? 'no link to read'
+                : `read ${first?.stored ? 'stored' : 'instance'} ${fetched.error ?? `${fetched.status} ${fetched.type} ${fetched.bytes} bytes`}`
+            }`,
     },
-    r: { status: answer.status, ms: answer.ms },
-    ok: answer.status === 200 && links.length > 0 && links.every(routed),
+    r: fetched ?? { status: answer.status, ms: answer.ms },
+    ok: answer.status === 200 && links.length > 0 && links.every(routed) && readBack,
   };
 }
 
@@ -1785,7 +1887,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || args.url === null) {
     console.log(
-      'usage: node scripts/hosted-smoke.mjs <url> [--deck gt-brand] [--asset <file>] [--timeout <ms>] [--sha <commit>] [--token-env <VAR>]',
+      'usage: node scripts/hosted-smoke.mjs <url> [--deck gt-brand] [--asset <file>] [--timeout <ms>] [--sha <commit>] [--token-env <VAR>] [--index-token-env <VAR>]',
     );
     process.exit(args.help ? 0 : 2);
   }
@@ -1846,12 +1948,16 @@ async function main() {
       if (byName.skip !== undefined) console.log(`skip  ${byName.skip}`);
       else results.push(byName);
       // the private store rows (HR-K1#6), before the scratch deck leaves
+      // `principal index private` reads as the account key --index-token-env names, else the bearer
+      const indexHeaders =
+        args.indexTokenEnv === null ? headers : bearerHeaders(args.indexTokenEnv);
       const privateStore = await privateStoreRows(
         base,
-        args.deck,
         scratch,
         byName.picture ?? null,
-        headers,
+        indexHeaders.authorization === undefined
+          ? { unset: args.indexTokenEnv }
+          : { headers: indexHeaders },
         args.timeoutMs,
       );
       for (const line of privateStore.skip ?? []) console.log(`skip  ${line}`);

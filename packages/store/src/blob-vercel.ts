@@ -26,7 +26,12 @@ import {
 /** How often a body read asks the CDN again while its copy lags the version the caller named. */
 const CDN_LAG_STEP_MS = 250;
 import { blobAccessStore } from './access-store.ts';
-import { keyedTwinsClient, splitBlobClient, twinKeyResolver } from './migrate.ts';
+import {
+  keyedTwinsClient,
+  sharedPublicClient,
+  splitBlobClient,
+  twinKeyResolver,
+} from './migrate.ts';
 import type { Env } from './select.ts';
 import { BLOB_TOKEN_VARIABLE, sharesPublicStore } from './select.ts';
 
@@ -333,13 +338,16 @@ export function vercelBlobClient(
 /**
  * The client a deployment opens (gslides-parity SPEC-3 2.2, 11.5): with the private store's token
  * set, one client over both stores that routes documents by the layout record (`splitBlobClient`);
- * without it, the public store alone (layout v1). The studio's hosting plugin registers the result
- * as `HostingProviders.blob`.
+ * without it, the public store alone (layout v1). On a deployment that shares the public store and
+ * has no private store's token, that public store refuses every put and removal of a path that is
+ * not public (`sharedPublicClient`, HR-K1#6), so no such client writes a document or a produced
+ * file where production's are read, or puts back the documents production's `delete` removed. The
+ * studio's hosting plugin registers the result as `HostingProviders.blob`.
  */
 export function layoutBlobClient(env: Env = process.env): BlobClient {
   const legacy = vercelBlobClient(env);
-  if (!hasDocumentsToken(env)) return keyedClient(legacy);
   const shared = sharesPublicStore(env);
+  if (!hasDocumentsToken(env)) return keyedClient(shared ? sharedPublicClient(legacy) : legacy);
   const documents = vercelDocumentsClient(env);
   const base = splitBlobClient({ legacy, documents }, { sharedPublicStore: shared });
   return keyedClient(base, shared ? legacy : null);

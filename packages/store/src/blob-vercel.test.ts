@@ -20,6 +20,7 @@ import {
   TWIN_MAX_AGE_S,
   documentsTokenVariable,
   hasDocumentsToken,
+  layoutBlobClient,
   publicMaxAge,
   vercelBlobClient,
   vercelDocumentsClient,
@@ -246,5 +247,84 @@ describe('the private store token names (hardening K1#4)', () => {
       vercelDocumentsClient({ TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN: TOKEN }),
     ).not.toThrow();
     expect(() => vercelDocumentsClient({})).toThrow(/TURBOSLIDE_BLOB_PRIVATE_TOKEN is not set/);
+  });
+});
+
+// HR-K1#6 (the review of 2026-10-17, finding 4): a deployment that shares the public store and has
+// no private store's token opens the public store alone, and that store refuses every put and
+// removal of a path that is not public before any request leaves, so a preview built before its
+// private store existed, or a checkout with the public token alone, cannot put a document back
+// where production's are read. Production without the private token is unchanged. Only API calls
+// are made here (a put, a removal); no get, which on a public store reads the blob URL.
+describe('a shared deployment without the private store (HR-K1#6)', () => {
+  let server: Server;
+  const seen: string[] = [];
+  const env: Record<string, string | undefined> = {};
+
+  beforeAll(async () => {
+    server = createServer((request, response) => {
+      const url = new URL(request.url ?? '/', 'http://localhost');
+      const pathname = url.searchParams.get('pathname') ?? url.pathname;
+      seen.push(`${request.method} ${pathname}`);
+      request.resume();
+      request.on('end', () => {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(
+          JSON.stringify({
+            url: `https://teststore.public.blob.vercel-storage.com/${pathname}`,
+            downloadUrl: `https://teststore.public.blob.vercel-storage.com/${pathname}?download=1`,
+            pathname,
+            contentType: 'application/octet-stream',
+            contentDisposition: 'inline',
+            etag: '"abc"',
+          }),
+        );
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as AddressInfo;
+    env.VERCEL_BLOB_API_URL = process.env.VERCEL_BLOB_API_URL;
+    process.env.VERCEL_BLOB_API_URL = `http://127.0.0.1:${port}`;
+  });
+
+  afterAll(async () => {
+    if (env.VERCEL_BLOB_API_URL === undefined) delete process.env.VERCEL_BLOB_API_URL;
+    else process.env.VERCEL_BLOB_API_URL = env.VERCEL_BLOB_API_URL;
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  });
+
+  const body = new Uint8Array([123, 125]);
+  const frozen = { name: 'StorageFrozenError', status: 503, retryAfter: 30 };
+
+  it('refuses a document, a produced file and a removal of either before any request', async () => {
+    for (const shared of [
+      { BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL_ENV: 'preview' },
+      { BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL_ENV: 'development' },
+      { BLOB_READ_WRITE_TOKEN: TOKEN },
+    ]) {
+      seen.length = 0;
+      const client = layoutBlobClient(shared);
+      for (const path of ['decks/gt-brand/deck.json', 'users/u1/decks.json', 'exports/x/j/x.pdf'])
+        await expect(client.put(path, body, { overwrite: true }), path).rejects.toMatchObject({
+          ...frozen,
+          message: expect.stringMatching(
+            /^This deployment shares the public store with production/,
+          ),
+        });
+      await expect(
+        client.del(['u/key/a-64.webp', 'decks/gt-brand/deck.json']),
+      ).rejects.toMatchObject(frozen);
+      expect(seen).toEqual([]);
+      // a public path still goes to the store
+      await client.put('u/key/a-64.webp', body, { overwrite: false });
+      expect(seen).toEqual(['PUT u/key/a-64.webp']);
+    }
+  });
+
+  it('leaves production without the private store as it was: documents on the public store', async () => {
+    seen.length = 0;
+    const client = layoutBlobClient({ BLOB_READ_WRITE_TOKEN: TOKEN, VERCEL_ENV: 'production' });
+    await client.put('decks/q4/deck.json', body, { overwrite: true });
+    expect(seen).toEqual(['PUT decks/q4/deck.json']);
   });
 });

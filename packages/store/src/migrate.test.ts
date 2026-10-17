@@ -34,6 +34,7 @@ import {
   publicDocuments,
   putLayoutRecord,
   runMigrationStep,
+  sharedPublicClient,
   splitBlobClient,
   twinKeyResolver,
 } from './migrate.ts';
@@ -300,6 +301,36 @@ describe('the split client', () => {
     expect(sharesPublicStore({ VERCEL_ENV: 'production', BLOB_READ_WRITE_TOKEN: 't' })).toBe(false);
     expect(sharesPublicStore({ BLOB_READ_WRITE_TOKEN: 't' })).toBe(true);
     expect(sharesPublicStore({})).toBe(false);
+  });
+
+  it('refuses every write but a public path on a shared store without a private one (HR-K1#6)', async () => {
+    const w = world();
+    await w.seed();
+    const client = sharedPublicClient(w.legacy);
+    for (const path of [
+      'decks/gt-brand/deck.json',
+      'links/x.json',
+      'exports/q4/j/x.pdf',
+      'top.json',
+    ])
+      await expect(client.put(path, body('x'), { overwrite: true }), path).rejects.toMatchObject({
+        name: 'StorageFrozenError',
+        status: 503,
+        retryAfter: 30,
+      });
+    await expect(
+      client.del(['decks/q4/assets/photo.cd34.webp', 'decks/q4/deck.json']),
+    ).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    expect(w.legacy.calls.filter((c) => c.op === 'put' || c.op === 'del')).toEqual([]);
+    // reads, listings and the public paths go on
+    expect(text(await client.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
+    expect((await client.list('links/')).map((e) => e.pathname)).toEqual(['links/abc.json']);
+    expect(await client.folders('')).toEqual(await w.legacy.folders(''));
+    expect((await client.files?.(''))?.map((e) => e.pathname)).toEqual(['top.json']);
+    await client.put('d/q4/Key/assets/new.png', body('png'), { overwrite: false });
+    await client.del(['u/AvatarKey/a-64.webp']);
+    expect(w.legacy.blobs.has('d/q4/Key/assets/new.png')).toBe(true);
+    expect(w.legacy.blobs.has('u/AvatarKey/a-64.webp')).toBe(false);
   });
 
   it('writes the record so that deployments from before HR-K1#4b read v2 on a shared store', async () => {

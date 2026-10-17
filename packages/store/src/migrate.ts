@@ -679,6 +679,36 @@ export function splitBlobClient(
   };
 }
 
+/**
+ * The public store alone, on a deployment that shares it and has no private store (HR-K1#6; the
+ * review of 2026-10-17, finding 4). Reads go on. A put or a removal of any path that is not public
+ * (a document, a produced file, a migration record) throws StorageFrozenError with the shared
+ * store's sentence, as the split client refuses a shared store's document writes in `v1`. Before
+ * it such a deployment (a preview built before its private store existed, a checkout or `vercel
+ * dev` with the public token alone) wrote documents to the public store, and its seed put
+ * `decks/gt-brand/` back there after production's `delete`.
+ */
+export function sharedPublicClient(legacy: BlobClient): BlobClient {
+  const refused = () => new StorageFrozenError(SHARED_SENTENCE);
+  const files = legacy.files?.bind(legacy);
+  return {
+    head: (pathname, options) => legacy.head(pathname, options),
+    get: (pathname, options) => legacy.get(pathname, options),
+    list: (prefix, options) => legacy.list(prefix, options),
+    folders: (prefix, options) => legacy.folders(prefix, options),
+    ...(files === undefined ? {} : { files }),
+    async put(pathname, bytes, options) {
+      if (!isPublicPath(pathname)) throw refused();
+      return legacy.put(pathname, bytes, options);
+    },
+    async del(pathnames, options) {
+      // a removal that names one path not public is refused whole, before any of it happens
+      if (pathnames.some((pathname) => !isPublicPath(pathname))) throw refused();
+      return legacy.del(pathnames, options);
+    },
+  };
+}
+
 // ---------------------------------------------------------------------------------------------
 // The run's records
 

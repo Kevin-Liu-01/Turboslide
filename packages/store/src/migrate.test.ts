@@ -13,8 +13,11 @@ import type { BlobClient } from './blob-store.ts';
 import { memoryBlobClient } from './blob-fake.ts';
 import {
   DELETE_AFTER_SWITCH_MS,
+  DELETE_BATCH,
+  DELETE_IN_FLIGHT,
   FREEZE_HOLD_MS,
   FREEZE_LIMIT_MS,
+  LANDING_MS,
   LIST_LAG_MS,
   MIGRATION_META,
   MIGRATION_PLAN,
@@ -24,11 +27,14 @@ import {
   OPEN_AFTER_MS,
   REKEY_SETTLE_MS,
   StorageLayoutError,
+  isDocumentPath,
+  isProducedPath,
   isPublicPath,
   keyedTwinsClient,
   publicDocuments,
   putLayoutRecord,
   runMigrationStep,
+  sharedPublicClient,
   splitBlobClient,
   twinKeyResolver,
 } from './migrate.ts';
@@ -61,12 +67,13 @@ const SEED: Record<string, string> = {
   'builds/b1/page.html': '<p>',
   'vitals/v.json': '{}',
   'top.json': '{"top":true}',
+  // produced files written to the public store before HR-K1#5b
   'exports/q4/job/deck.pdf': '%PDF',
   'bundles/q4.zip': 'PK',
   'u/AvatarKey/a-64.webp': 'avatar',
   'd/q4/PublicKey0000000000000/assets/photo.cd34.webp': 'webp-photo',
 };
-const DOCUMENTS = Object.keys(SEED).filter((path) => !isPublicPath(path));
+const DOCUMENTS = Object.keys(SEED).filter(isDocumentPath);
 
 function world(options: { shared?: boolean; seed?: boolean } = {}) {
   const t = { now: T0 };
@@ -145,14 +152,33 @@ const opens = (w: World, switched: MigrationResult) => {
 };
 
 describe('the paths and the plan', () => {
-  it('routes twins, keyed twins, avatars, exports and bundles public, and every other path is a document', () => {
+  it('routes twins, keyed twins and avatars public, exports and bundles as produced files, and every other path is a document', () => {
     expect(isPublicPath('decks/q4/assets/a.png')).toBe(true);
     expect(isPublicPath('d/q4/key/assets/a.png')).toBe(true);
     expect(isPublicPath('u/AbCd/a-64.webp')).toBe(true);
-    expect(isPublicPath('exports/q4/job/deck.pptx')).toBe(true);
-    expect(isPublicPath('bundles/q4.zip')).toBe(true);
-    for (const path of ['decks/q4/deck.json', 'users/u/decks.json', 'links/a.json', 'top.json'])
-      expect(isPublicPath(path)).toBe(false);
+    for (const path of [
+      'exports/q4/job/deck.pptx',
+      'exports/.jobs/job.json',
+      'exports/.jobs/.turboslide/copies/a.json',
+      'bundles/q4/stamp-ab/q4.zip',
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+      expect(isProducedPath(path), path).toBe(true);
+      expect(isDocumentPath(path), path).toBe(false);
+    }
+    for (const path of [
+      'decks/q4/deck.json',
+      'users/u/decks.json',
+      'links/a.json',
+      'top.json',
+      'builds/q4/x/page.html',
+      'decks/q4/exports/x.json',
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+      expect(isProducedPath(path), path).toBe(false);
+      expect(isDocumentPath(path), path).toBe(true);
+    }
+    expect(isDocumentPath(MIGRATION_META)).toBe(false);
     expect([...MIGRATION_STEPS]).toEqual([...SCHEMA_MIGRATION_STEPS]);
   });
 
@@ -265,15 +291,50 @@ describe('the split client', () => {
     await expect(
       preview.del(['decks/q4/deck.json', 'decks/q4/assets/photo.cd34.webp']),
     ).rejects.toMatchObject({ name: 'StorageFrozenError' });
-    // reads and the public paths go on
+    // reads and the public paths go on, and a produced file goes to the preview's private store
     expect(text(await preview.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
     await preview.put('exports/q4/job/new.pdf', body('%PDF'), { overwrite: true });
-    expect(w.legacy.blobs.has('exports/q4/job/new.pdf')).toBe(true);
+    expect(w.legacy.blobs.has('exports/q4/job/new.pdf')).toBe(false);
+    expect(w.documents.blobs.has('exports/q4/job/new.pdf')).toBe(true);
     expect(w.publicWrites()).toEqual([]);
     expect(sharesPublicStore({ VERCEL_ENV: 'preview' })).toBe(true);
     expect(sharesPublicStore({ VERCEL_ENV: 'production', BLOB_READ_WRITE_TOKEN: 't' })).toBe(false);
     expect(sharesPublicStore({ BLOB_READ_WRITE_TOKEN: 't' })).toBe(true);
     expect(sharesPublicStore({})).toBe(false);
+  });
+
+  it('refuses every removal and every put but a public path on a shared store without a private one (HR-K1#6)', async () => {
+    const w = world();
+    await w.seed();
+    const client = sharedPublicClient(w.legacy);
+    for (const path of [
+      'decks/gt-brand/deck.json',
+      'links/x.json',
+      'exports/q4/j/x.pdf',
+      'top.json',
+    ])
+      await expect(client.put(path, body('x'), { overwrite: true }), path).rejects.toMatchObject({
+        name: 'StorageFrozenError',
+        status: 503,
+        retryAfter: 30,
+      });
+    await expect(
+      client.del(['decks/q4/assets/photo.cd34.webp', 'decks/q4/deck.json']),
+    ).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    expect(w.legacy.calls.filter((c) => c.op === 'put' || c.op === 'del')).toEqual([]);
+    // reads, listings and the public paths go on
+    expect(text(await client.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
+    expect((await client.list('links/')).map((e) => e.pathname)).toEqual(['links/abc.json']);
+    expect(await client.folders('')).toEqual(await w.legacy.folders(''));
+    expect((await client.files?.(''))?.map((e) => e.pathname)).toEqual(['top.json']);
+    await client.put('d/q4/Key/assets/new.png', body('png'), { overwrite: false });
+    expect(w.legacy.blobs.has('d/q4/Key/assets/new.png')).toBe(true);
+    // every removal is refused, of a twin and an avatar too: they are production's objects
+    for (const paths of [['u/AvatarKey/a-64.webp'], ['decks/q4/assets/photo.cd34.webp']])
+      await expect(client.del(paths)).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    await client.del([]);
+    expect(w.legacy.blobs.has('u/AvatarKey/a-64.webp')).toBe(true);
+    expect(w.legacy.calls.filter((c) => c.op === 'del')).toEqual([]);
   });
 
   it('writes the record so that deployments from before HR-K1#4b read v2 on a shared store', async () => {
@@ -289,6 +350,196 @@ describe('the split client', () => {
         failed: [OLDER_DEPLOYMENT_ROW],
       });
     }
+  });
+});
+
+describe('the produced files (HR-K1#5b)', () => {
+  const STATES = ['unplanned', 'v1', 'dual', 'v2'] as const;
+  type State = (typeof STATES)[number];
+
+  /** A store in `state`, the produced files of before HR-K1#5b on its public store. */
+  async function at(state: State, options: { shared?: boolean } = {}) {
+    const w = world(options);
+    await w.seed();
+    if (state !== 'unplanned') await putLayoutRecord(w.documents, { state }, options.shared);
+    await w.documents.put('exports/q4/new/deck.pdf', body('%PDF new'), { overwrite: true });
+    await w.documents.put('exports/.jobs/j1.json', body('{"job":1}'), { overwrite: true });
+    w.documents.calls.length = 0;
+    w.legacy.calls.length = 0;
+    return w;
+  }
+  const layoutReads = (w: World) =>
+    w.documents.calls.filter((c) => c.pathname === MIGRATION_META || c.op === 'files');
+
+  it('reads, lists, writes and removes them on the private store in every state, never asking the layout', async () => {
+    for (const state of STATES) {
+      const w = await at(state);
+      const app = w.instance();
+      await app.put('bundles/q4/stamp/q4.zip', body('PK new'), { overwrite: false });
+      await app.put('exports/.jobs/j2.json', body('{"job":2}'), { overwrite: false });
+      expect(text(await app.get('exports/q4/new/deck.pdf')), state).toBe('%PDF new');
+      expect((await app.head('bundles/q4/stamp/q4.zip'))?.url, state).toBe(
+        'https://private.local/bundles/q4/stamp/q4.zip',
+      );
+      // the copies left on the public store are never read through the client
+      expect(await app.get('exports/q4/job/deck.pdf'), state).toBeNull();
+      expect(await app.head('bundles/q4.zip'), state).toBeNull();
+      expect(
+        (await app.list('exports/')).map((e) => e.pathname),
+        state,
+      ).toEqual(['exports/.jobs/j1.json', 'exports/.jobs/j2.json', 'exports/q4/new/deck.pdf']);
+      expect(await app.folders('exports/'), state).toEqual(['exports/.jobs/', 'exports/q4/']);
+      await app.del(['exports/q4/new/deck.pdf', 'exports/.jobs/j1.json']);
+      expect(w.documents.blobs.has('exports/q4/new/deck.pdf'), state).toBe(false);
+      expect(layoutReads(w), state).toEqual([]);
+      expect(w.legacy.calls, state).toEqual([]);
+    }
+  });
+
+  it('goes on while the layout read fails, while a freeze holds and on a shared store before its switch', async () => {
+    // bytes that are no layout record: every document call fails with 503
+    const broken = await at('v1');
+    await broken.documents.put(MIGRATION_META, body('[1]'), { overwrite: true });
+    const app = broken.instance();
+    await expect(app.get('links/abc.json')).rejects.toBeInstanceOf(StorageLayoutError);
+    await app.put('exports/q4/b/deck.pdf', body('%PDF'), { overwrite: true });
+    expect(text(await app.get('exports/q4/b/deck.pdf'))).toBe('%PDF');
+    // a freeze refuses the documents and admits the produced files
+    const frozen = await at('v1');
+    await frozen.run('freeze');
+    const during = frozen.instance();
+    await expect(
+      during.put('decks/q4/deck.json', body('x'), { overwrite: true }),
+    ).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    await during.put('exports/q4/c/deck.pdf', body('%PDF'), { overwrite: true });
+    await during.del(['exports/.jobs/j1.json']);
+    expect(frozen.documents.blobs.has('exports/q4/c/deck.pdf')).toBe(true);
+    expect(frozen.documents.blobs.has('exports/.jobs/j1.json')).toBe(false);
+    // a removal of documents and produced files together is refused whole while frozen
+    await expect(during.del(['decks/q4/deck.json', 'exports/q4/c/deck.pdf'])).rejects.toMatchObject(
+      { name: 'StorageFrozenError' },
+    );
+    expect(frozen.documents.blobs.has('exports/q4/c/deck.pdf')).toBe(true);
+    // a preview before its switch: its own private store, and no write of the public one
+    const preview = await at('v1', { shared: true });
+    const client = preview.instance();
+    await expect(client.put('links/x.json', body('x'), { overwrite: true })).rejects.toMatchObject({
+      name: 'StorageFrozenError',
+    });
+    await client.put('bundles/q4/s/q4.zip', body('PK'), { overwrite: true });
+    expect(preview.documents.blobs.has('bundles/q4/s/q4.zip')).toBe(true);
+    expect(preview.publicWrites()).toEqual([]);
+  });
+
+  it("carries the caller's deadline alone, never the document write cap", async () => {
+    const w = await at('v2');
+    const signals = new Map<string, AbortSignal | undefined>();
+    const put = w.documents.put.bind(w.documents);
+    w.documents.put = async (path, bytes, options) => {
+      signals.set(path, options.signal);
+      return put(path, bytes, options);
+    };
+    const del = w.documents.del.bind(w.documents);
+    const removals = new Map<string, AbortSignal | undefined>();
+    w.documents.del = async (paths, options) => {
+      for (const path of paths) removals.set(path, options?.signal);
+      return del(paths, options);
+    };
+    const app = w.instance();
+    const mine = new AbortController().signal;
+    await app.put('bundles/q4/s/big.zip', body('PK'), { overwrite: true, signal: mine });
+    await app.put('exports/q4/d/deck.pdf', body('%PDF'), { overwrite: true });
+    await app.put('decks/q4/deck.json', body('{}'), { overwrite: true });
+    await app.del(['exports/q4/d/deck.pdf', 'decks/q4/deck.json'], { signal: mine });
+    expect(signals.get('bundles/q4/s/big.zip')).toBe(mine);
+    expect(signals.get('exports/q4/d/deck.pdf')).toBeUndefined();
+    expect(removals.get('exports/q4/d/deck.pdf')).toBe(mine);
+    // a document's carries DOCUMENT_WRITE_CAP_MS beside the caller's
+    expect(signals.get('decks/q4/deck.json')).toBeInstanceOf(AbortSignal);
+    expect(removals.get('decks/q4/deck.json')).not.toBe(mine);
+  });
+
+  it('merges a listing that reaches both: documents from the state, public paths from the public store, produced files from the private store', async () => {
+    for (const state of STATES) {
+      const w = await at(state);
+      await w.documents.put('links/private.json', body('mine'), { overwrite: true });
+      const app = w.instance();
+      const listed = (await app.list('')).map((e) => e.pathname);
+      const readsPublic = state !== 'v2';
+      const readsPrivate = state === 'dual' || state === 'v2';
+      expect(listed.includes('links/abc.json'), state).toBe(readsPublic);
+      expect(listed.includes('links/private.json'), state).toBe(readsPrivate);
+      expect(listed.includes('decks/q4/assets/photo.cd34.webp'), state).toBe(true);
+      expect(listed.includes('exports/q4/new/deck.pdf'), state).toBe(true);
+      expect(listed.includes('exports/.jobs/j1.json'), state).toBe(true);
+      expect(listed.includes('exports/q4/job/deck.pdf'), state).toBe(false);
+      expect(listed.includes('bundles/q4.zip'), state).toBe(false);
+      expect(listed.some((path) => path.startsWith('migration') || path === MIGRATION_META)).toBe(
+        false,
+      );
+      expect(listed, state).toEqual([...listed].sort());
+      // a prefix that reaches the produced folders and nothing else
+      expect(
+        (await app.list('e')).map((e) => e.pathname),
+        state,
+      ).toEqual(['exports/.jobs/j1.json', 'exports/q4/new/deck.pdf']);
+      // `b` reaches builds/, a document, and bundles/, whose one object is the public store's
+      expect(
+        (await app.list('b')).map((e) => e.pathname),
+        state,
+      ).toEqual(readsPublic ? ['builds/b1/page.html'] : []);
+      // the top folders: bundles/ only the public store holds is not one
+      const folders = await app.folders('');
+      expect(folders.includes('exports/'), state).toBe(true);
+      expect(folders.includes('bundles/'), state).toBe(false);
+      expect(folders.includes('d/') && folders.includes('decks/'), state).toBe(true);
+      // a listing of documents alone never asks the private store for produced files
+      w.documents.calls.length = 0;
+      await app.list('decks/q4/');
+      expect(
+        w.documents.calls.filter((c) => c.op === 'list'),
+        state,
+      ).toEqual(readsPrivate ? [{ op: 'list', pathname: 'decks/q4/' }] : []);
+    }
+  });
+
+  it('is never planned, copied, verified, rolled back or removed by the migration', async () => {
+    const w = world();
+    await w.seed();
+    await w.documents.put('exports/q4/early/deck.pdf', body('%PDF early'), { overwrite: true });
+    const listings: string[] = [];
+    for (const client of [w.legacy, w.documents]) {
+      const list = client.list.bind(client);
+      client.list = async (prefix, options) => {
+        listings.push(prefix);
+        return list(prefix, options);
+      };
+    }
+    const { counts, plan, verify, switched } = await window(w);
+    expect(counts.processed).toBe(DOCUMENTS.length);
+    expect(plan.note).toMatch(
+      new RegExp(`^the plan of record: ${DOCUMENTS.length} public documents`),
+    );
+    expect(verify).toMatchObject({ clean: true, rowCount: 0 });
+    // the first copy removed no produced file from the private store, and copied none to it
+    expect(text(await w.documents.get('exports/q4/early/deck.pdf'))).toBe('%PDF early');
+    expect(w.documents.blobs.has('exports/q4/job/deck.pdf')).toBe(false);
+    expect(w.documents.blobs.has('bundles/q4.zip')).toBe(false);
+    expect(listings.filter((prefix) => isProducedPath(prefix) || prefix === '')).toEqual([]);
+    opens(w, switched);
+    // on v2 an export lands on the private store, and verify names no produced file
+    await w.instance().put('exports/q4/late/deck.pdf', body('%PDF late'), { overwrite: false });
+    expect(await w.run('verify')).toMatchObject({ rowCount: 0 });
+    // a rollback copies no produced file back and removes none from either store
+    await w.run('rollback');
+    w.later(5 * 60_000);
+    const back = await w.run('rollback');
+    expect(back).toMatchObject({ state: 'v1', done: true });
+    expect(w.legacy.blobs.has('exports/q4/late/deck.pdf')).toBe(false);
+    expect(w.legacy.blobs.has('exports/q4/job/deck.pdf')).toBe(true);
+    expect(text(await w.documents.get('exports/q4/late/deck.pdf'))).toBe('%PDF late');
+    // and on v1 after the rollback the client still reads the private copy
+    expect(text(await w.instance().get('exports/q4/late/deck.pdf'))).toBe('%PDF late');
   });
 });
 
@@ -346,8 +597,8 @@ describe('the window', () => {
       expect(w.documents.blobs.get(path)?.version, path).toBe(w.legacy.blobs.get(path)?.version);
       expect(text(await app.get(path)), path).toBe(SEED[path]);
     }
-    for (const path of Object.keys(SEED).filter(isPublicPath))
-      expect(w.documents.blobs.has(path)).toBe(false);
+    for (const path of Object.keys(SEED).filter((path) => !isDocumentPath(path)))
+      expect(w.documents.blobs.has(path), path).toBe(false);
     // writes open OPEN_AFTER_MS after the switch, on the private store
     await expect(
       app.put('decks/q4/deck.json', body('v2'), { overwrite: true }),
@@ -693,8 +944,9 @@ describe('delete', () => {
     expect(text(await w.legacy.get('d/gt-brand/GtBrandKey000000000000/assets/mark.ab12.png'))).toBe(
       'png-mark',
     );
+    // the produced files are no documents: delete leaves them where they are
     for (const path of Object.keys(SEED)) {
-      const kept = isPublicPath(path) && path !== 'decks/gt-brand/assets/mark.ab12.png';
+      const kept = !isDocumentPath(path) && path !== 'decks/gt-brand/assets/mark.ab12.png';
       expect(w.legacy.blobs.has(path), path).toBe(kept || path === 'links/abc.json');
     }
     // every document still reads from the private store
@@ -752,6 +1004,304 @@ describe('delete', () => {
     );
     expect(w.legacy.blobs.has(late)).toBe(false);
     expect(w.legacy.blobs.has('decks/gt-brand/assets/mark.ab12.png')).toBe(false);
+  });
+
+  /** A store of `extra` more documents through the window, rekey and verify, 3 hours after its switch. */
+  async function readyToDelete(extra: number) {
+    const w = world();
+    await w.seed();
+    for (let i = 0; i < extra; i += 1)
+      await w.legacy.put(`decks/big/versions/${String(i).padStart(4, '0')}.json`, body(`${i}`), {
+        overwrite: true,
+      });
+    const { switched } = await window(w);
+    const switchedAt = Date.parse(switched.switchedAt ?? '');
+    opens(w, switched);
+    expect(await w.run('rekey')).toMatchObject({ done: true, rekeyAfter: null });
+    expect(await w.run('verify')).toMatchObject({ rowCount: 0 });
+    w.t.now = switchedAt + DELETE_AFTER_SWITCH_MS;
+    const planned = [...(await publicDocuments(w.legacy)).map((e) => e.pathname)];
+    return { w, planned, backup: new Date(switchedAt + 3_600_000).toISOString() };
+  }
+
+  it('answers done false with the count left when its budget ends inside the removals, never a 500', async () => {
+    const { w, planned, backup } = await readyToDelete(1_000);
+    expect(planned.length).toBeGreaterThan(20 * DELETE_BATCH);
+    // each removal batch takes 20 s, and the call's signal aborts at the end of its budget, as
+    // AbortSignal.timeout does on production
+    const budgets: { controller: AbortController; at: number }[] = [];
+    const abortAfter = (ms: number) => {
+      const controller = new AbortController();
+      budgets.push({ controller, at: w.t.now + ms });
+      return controller.signal;
+    };
+    const legacy = w.clients.legacy;
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        w.t.now += 20_000;
+        for (const budget of budgets)
+          if (w.t.now >= budget.at)
+            budget.controller.abort(new DOMException('The budget ended', 'TimeoutError'));
+        options?.signal?.throwIfAborted();
+        await legacy.del(paths, options);
+      },
+    };
+    const first = await w.run('delete', { backupAt: backup, abortAfter });
+    expect(first).toMatchObject({ done: false, rowCount: 0 });
+    expect(first.processed).toBeGreaterThan(0);
+    expect(first.processed + first.remaining).toBe(planned.length);
+    expect(first.note).toMatch(/^\d+ of \d+ public documents of the plan are left; the next call/);
+    expect(planned.filter((path) => w.legacy.blobs.has(path))).toHaveLength(first.remaining);
+    // the batch the abort cut may still land: the lease holds LANDING_MS longer
+    await expect(w.run('delete', { backupAt: backup, abortAfter })).rejects.toThrow(
+      /another call holds the migration/,
+    );
+    const answers = [first];
+    while (!answers.at(-1)?.done && answers.length < 10) {
+      w.later(LANDING_MS);
+      answers.push(await w.run('delete', { backupAt: backup, abortAfter }));
+    }
+    expect(answers.at(-1)).toMatchObject({ done: true, remaining: 0, rowCount: 0 });
+    expect(planned.filter((path) => w.legacy.blobs.has(path))).toEqual([]);
+  });
+
+  it('keeps four removal batches in flight, and tries a batch the store refused with a 429 again', async () => {
+    const { w, planned, backup } = await readyToDelete(1_000);
+    const legacy = w.clients.legacy;
+    let inFlight = 0;
+    let most = 0;
+    let batches = 0;
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        inFlight += 1;
+        batches += 1;
+        most = Math.max(most, inFlight);
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          if (inFlight > DELETE_IN_FLIGHT || batches % 10 === 0)
+            throw Object.assign(
+              new Error('Vercel Blob: Too many requests, try again in 1 seconds'),
+              {
+                retryAfter: 1,
+              },
+            );
+          await legacy.del(paths, options);
+        } finally {
+          inFlight -= 1;
+        }
+      },
+    };
+    const gone = await w.run('delete', { backupAt: backup });
+    expect(gone).toMatchObject({
+      done: true,
+      remaining: 0,
+      rowCount: 0,
+      processed: planned.length,
+    });
+    expect(gone.retries).toBeGreaterThan(0);
+    expect(most).toBe(DELETE_IN_FLIGHT);
+    expect(planned.filter((path) => w.legacy.blobs.has(path))).toEqual([]);
+  });
+
+  it('answers done false before the plan and the listing when the twins used the budget', async () => {
+    const { w, backup } = await readyToDelete(0);
+    const budgets: { controller: AbortController; at: number }[] = [];
+    const abortAfter = (ms: number) => {
+      const controller = new AbortController();
+      budgets.push({ controller, at: w.t.now + ms });
+      return controller.signal;
+    };
+    const documents = w.clients.documents;
+    const legacy = w.clients.legacy;
+    // each deck's record read takes 120 s, so the two decks with twins at the old place use the
+    // budget; a listing on the aborted signal throws, as the SDK does
+    w.clients.documents = {
+      ...documents,
+      get: async (path, options) => {
+        if (path.endsWith('/access.json')) {
+          w.t.now += 120_000;
+          for (const budget of budgets)
+            if (w.t.now >= budget.at)
+              budget.controller.abort(new DOMException('The budget ended', 'TimeoutError'));
+        }
+        return documents.get(path, options);
+      },
+    };
+    w.clients.legacy = {
+      ...legacy,
+      folders: async (prefix, options) => {
+        options?.signal?.throwIfAborted();
+        return legacy.folders(prefix, options);
+      },
+    };
+    const held = await w.run('delete', { backupAt: backup, abortAfter });
+    expect(held).toMatchObject({
+      done: false,
+      rowCount: 0,
+      note: "the twins used the call's budget; the next call lists the public documents",
+    });
+    expect(w.legacy.blobs.has('decks/q4/deck.json')).toBe(true);
+    w.clients.documents = documents;
+    w.clients.legacy = legacy;
+    expect(await w.run('delete', { backupAt: backup })).toMatchObject({ done: true, rowCount: 0 });
+    expect(w.legacy.blobs.has('decks/q4/deck.json')).toBe(false);
+  });
+
+  it('writes no row for a batch whose 429 asks to wait past the budget, and counts it as left', async () => {
+    const { w, planned, backup } = await readyToDelete(200);
+    const legacy = w.clients.legacy;
+    const busy = planned[DELETE_BATCH] ?? '';
+    const start = w.t.now;
+    // the busy batch is refused 40 s before the end of the 240 s budget, outside the last 10 s in
+    // which no batch starts, with the 60 s wait Vercel Blob asks for
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        if (paths.includes(busy)) {
+          w.t.now = Math.max(w.t.now, start + 200_000);
+          throw Object.assign(
+            new Error(
+              'Vercel Blob: Too many requests please lower the number of concurrent requests - try again in 60 seconds',
+            ),
+            { retryAfter: 60 },
+          );
+        }
+        await legacy.del(paths, options);
+      },
+    };
+    const held = await w.run('delete', { backupAt: backup });
+    expect(held).toMatchObject({ done: false, remaining: DELETE_BATCH, rowCount: 0, retries: 0 });
+    expect(held.processed).toBe(planned.length - DELETE_BATCH);
+    expect(w.legacy.blobs.has(busy)).toBe(true);
+    w.clients.legacy = legacy;
+    expect(await w.run('delete', { backupAt: backup })).toMatchObject({
+      done: true,
+      processed: DELETE_BATCH,
+    });
+  });
+
+  it('names a batch that failed every try as a row and leaves it for the next call', async () => {
+    const { w, planned, backup } = await readyToDelete(200);
+    const legacy = w.clients.legacy;
+    const refused = planned[DELETE_BATCH] ?? '';
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        if (paths.includes(refused)) throw new Error('Vercel Blob: Access denied');
+        await legacy.del(paths, options);
+      },
+    };
+    const held = await w.run('delete', { backupAt: backup });
+    expect(held).toMatchObject({
+      done: false,
+      remaining: DELETE_BATCH,
+      rows: [`${refused} and ${DELETE_BATCH - 1} more: not removed: Vercel Blob: Access denied`],
+    });
+    expect(w.progress().busyUntil).toBeUndefined();
+    w.clients.legacy = legacy;
+    expect(await w.run('delete', { backupAt: backup })).toMatchObject({
+      done: true,
+      processed: DELETE_BATCH,
+    });
+  });
+});
+
+describe('sweep-produced (HR-K1#5b)', () => {
+  const LEFT = [
+    'exports/.jobs/old.json',
+    'exports/q4/job2/deck.pptx',
+    'bundles/q4/stamp-ab/q4.zip',
+  ];
+
+  it('removes the produced files left on the public store, on v2 after the switch alone', async () => {
+    const w = world();
+    await w.seed();
+    for (const path of LEFT) await w.legacy.put(path, body(path), { overwrite: true });
+    await expect(w.run('sweep-produced')).rejects.toThrow(
+      'sweep-produced runs on layout v2 after a recorded switch',
+    );
+    const { switched } = await window(w);
+    opens(w, switched);
+    // an export of the v2 deployment, on the private store
+    await w.instance().put('exports/q4/new/deck.pdf', body('%PDF new'), { overwrite: false });
+    const before = new Map(w.documents.blobs);
+    const left = [...w.legacy.blobs.keys()].filter(isProducedPath).sort();
+    expect(left).toHaveLength(LEFT.length + 2);
+    const swept = await w.run('sweep-produced');
+    expect(swept).toMatchObject({
+      step: 'sweep-produced',
+      state: 'v2',
+      done: true,
+      processed: left.length,
+      remaining: 0,
+      rowCount: 0,
+    });
+    expect(swept.note).toMatch(
+      new RegExp(
+        `^${left.length} produced files of \\d+ bytes listed on the public store; ${left.length} removed, 0 left$`,
+      ),
+    );
+    // the public store keeps its twins, avatars and documents; the private store is untouched
+    expect([...w.legacy.blobs.keys()].filter(isProducedPath)).toEqual([]);
+    for (const path of Object.keys(SEED).filter((path) => !isProducedPath(path)))
+      expect(w.legacy.blobs.has(path), path).toBe(true);
+    expect([...w.documents.blobs.keys()].sort()).toEqual([...before.keys()].sort());
+    expect(text(await w.instance().get('exports/q4/new/deck.pdf'))).toBe('%PDF new');
+    expect(
+      w.legacy.calls
+        .filter((c) => c.op === 'del')
+        .map((c) => c.pathname)
+        .sort(),
+    ).toEqual(left);
+    // the lease is given back, and a second call finds nothing
+    expect(w.progress().busyUntil).toBeUndefined();
+    expect(await w.run('sweep-produced')).toMatchObject({ done: true, processed: 0 });
+  });
+
+  it('refuses on a deployment that shares the public store, before any removal', async () => {
+    const w = world({ shared: true });
+    await w.seed();
+    const { switched } = await window(w);
+    opens(w, switched);
+    w.legacy.calls.length = 0;
+    await expect(w.run('sweep-produced')).rejects.toThrow(
+      "sweep-produced runs on production alone: this deployment shares the public store, whose produced files are production's",
+    );
+    expect(w.legacy.calls).toEqual([]);
+    expect(w.legacy.blobs.has('exports/q4/job/deck.pdf')).toBe(true);
+  });
+
+  it('answers done false with the count left when its budget ends, and the next calls finish', async () => {
+    const w = world();
+    await w.seed();
+    for (let i = 0; i < 2_000; i += 1)
+      await w.legacy.put(`exports/d${i % 40}/job${i}/deck.pdf`, body('%PDF'), { overwrite: true });
+    const { switched } = await window(w);
+    opens(w, switched);
+    const legacy = w.clients.legacy;
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        w.t.now += 20_000;
+        await legacy.del(paths, options);
+      },
+    };
+    const answers: MigrationResult[] = [];
+    do answers.push(await w.run('sweep-produced'));
+    while (!answers.at(-1)?.done && answers.length < 10);
+    expect(answers[0]).toMatchObject({ done: false, rowCount: 0 });
+    expect(answers[0]?.processed).toBeGreaterThan(0);
+    expect((answers[0]?.processed ?? 0) + (answers[0]?.remaining ?? 0)).toBe(2_002);
+    expect(answers[0]?.note).toMatch(
+      /^2002 produced files of \d+ bytes listed on the public store; \d+ removed, \d+ left$/,
+    );
+    expect(answers.at(-1)).toMatchObject({ done: true, remaining: 0 });
+    expect(answers.reduce((sum, a) => sum + a.processed, 0)).toBe(2_002);
+    expect([...w.legacy.blobs.keys()].filter(isProducedPath)).toEqual([]);
   });
 });
 

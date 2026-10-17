@@ -2957,9 +2957,15 @@ export function blobDecks(options: HostedOptions): HostedDecks {
   /**
    * The seed decks go up once: the first instance that finds no manifest uploads them. The twins
    * come from the bundle where it carries them and from the static source otherwise (SPEC-4 0.35).
+   * A store that refuses the documents (StorageFrozenError: a deployment that shares the public
+   * store with no private store of its own, `sharedPublicClient` in migrate.ts, or a freeze) skips
+   * the seed with one log line and serves what it holds, instead of failing `ready()` and with it
+   * every request, reads included (HR-K1#6).
    */
   const seedOnce = async (): Promise<void> => {
     const c = await client();
+    const refused: string[] = [];
+    let why = '';
     for (const deckId of await overlay.seedDecks()) {
       if ((await c.head(`${deckPrefix(deckId)}deck.json`)) !== null) continue;
       await overlay.ensureAssets(deckId);
@@ -2967,12 +2973,22 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       try {
         await pushDeckDir(c, deckId, join(decksDir, deckId), { overwrite: false, log });
       } catch (error) {
+        // the name, not the class: migrate.ts imports this module (isStorageFrozenError there)
+        if (error instanceof Error && error.name === 'StorageFrozenError') {
+          refused.push(deckId);
+          why = error.message;
+          continue;
+        }
         // another instance seeded the deck between the head and the push, or the store still
         // holds the deck's files from an earlier life: the deck is there, which is what was wanted
         if (!isBlobExistsError(error)) throw error;
         log(`blob: seed of ${deckId} found its files in the store already`);
       }
     }
+    if (refused.length > 0)
+      log(
+        `blob: warning: the seed of ${refused.join(', ')} is skipped, the store refuses it: ${why}`,
+      );
   };
 
   const ready = (): Promise<void> => {

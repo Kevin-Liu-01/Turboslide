@@ -26,9 +26,14 @@ import {
 /** How often a body read asks the CDN again while its copy lags the version the caller named. */
 const CDN_LAG_STEP_MS = 250;
 import { blobAccessStore } from './access-store.ts';
-import { keyedTwinsClient, splitBlobClient, twinKeyResolver } from './migrate.ts';
+import {
+  keyedTwinsClient,
+  sharedPublicClient,
+  splitBlobClient,
+  twinKeyResolver,
+} from './migrate.ts';
 import type { Env } from './select.ts';
-import { BLOB_TOKEN_VARIABLE, sharesPublicStore } from './select.ts';
+import { BLOB_TOKEN_VARIABLE, PRIVATE_TOKEN_VARIABLES, sharesPublicStore } from './select.ts';
 
 /** The store's access level; `public` is what the twins need. TURBOSLIDE_BLOB_ACCESS overrides. */
 export const BLOB_ACCESS_VARIABLE = 'TURBOSLIDE_BLOB_ACCESS';
@@ -128,12 +133,10 @@ export const DOCUMENTS_TOKEN_VARIABLE = 'TURBOSLIDE_BLOB_PRIVATE_TOKEN';
 /**
  * The names the token is read under, in order (hardening K1#4): the variable docs/hosting.md
  * names, then the one the Vercel dashboard makes when the store is connected to the project with
- * the prefix `TURBOSLIDE_BLOB_PRIVATE` (`<prefix>_READ_WRITE_TOKEN`).
+ * the prefix `TURBOSLIDE_BLOB_PRIVATE` (`<prefix>_READ_WRITE_TOKEN`). The list lives in select.ts,
+ * which `sharesPublicStore` reads without the Vercel SDK.
  */
-export const DOCUMENTS_TOKEN_VARIABLES = [
-  DOCUMENTS_TOKEN_VARIABLE,
-  'TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN',
-] as const;
+export const DOCUMENTS_TOKEN_VARIABLES = PRIVATE_TOKEN_VARIABLES;
 
 /** The variable that holds the private store's token in this environment, or null. */
 export function documentsTokenVariable(env: Env = process.env): string | null {
@@ -333,13 +336,16 @@ export function vercelBlobClient(
 /**
  * The client a deployment opens (gslides-parity SPEC-3 2.2, 11.5): with the private store's token
  * set, one client over both stores that routes documents by the layout record (`splitBlobClient`);
- * without it, the public store alone (layout v1). The studio's hosting plugin registers the result
- * as `HostingProviders.blob`.
+ * without it, the public store alone (layout v1). On a deployment that shares the public store and
+ * has no private store's token, that public store refuses every put and removal of a path that is
+ * not public (`sharedPublicClient`, HR-K1#6), so no such client writes a document or a produced
+ * file where production's are read, or puts back the documents production's `delete` removed. The
+ * studio's hosting plugin registers the result as `HostingProviders.blob`.
  */
 export function layoutBlobClient(env: Env = process.env): BlobClient {
   const legacy = vercelBlobClient(env);
-  if (!hasDocumentsToken(env)) return keyedClient(legacy);
   const shared = sharesPublicStore(env);
+  if (!hasDocumentsToken(env)) return keyedClient(shared ? sharedPublicClient(legacy) : legacy);
   const documents = vercelDocumentsClient(env);
   const base = splitBlobClient({ legacy, documents }, { sharedPublicStore: shared });
   return keyedClient(base, shared ? legacy : null);

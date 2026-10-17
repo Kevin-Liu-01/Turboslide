@@ -67,14 +67,14 @@ description: The actions of the admin group, with their input fields and their n
 
 ## admin.migrateStorage [#admin.migrateStorage]
 
-**Migrate storage.** Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.
+**Migrate storage.** Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), or sweep-produced, which removes the exports and bundles left on the public store before HR-K1#5b, inside a budget; docs/hosting.md section 10.
 
-| Field         | Type            | Required | Description                                                                                                   |
-| ------------- | --------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `step`        | one of 9 values | yes      |                                                                                                               |
-| `budgetMs`    | integer         | no       | How long the call works before it answers; 240 s by default                                                   |
-| `concurrency` | integer         | no       | copy and rollback: the store requests in flight; 32 by default                                                |
-| `backupAt`    | string          | no       | delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one |
+| Field         | Type             | Required | Description                                                                                                   |
+| ------------- | ---------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `step`        | one of 10 values | yes      |                                                                                                               |
+| `budgetMs`    | integer          | no       | How long the call works before it answers; 240 s by default                                                   |
+| `concurrency` | integer          | no       | copy and rollback: the store requests in flight; 32 by default                                                |
+| `backupAt`    | string           | no       | delete only: the ISO time the backup of the private store began, after the switch; delete refuses without one |
 
 - Command line: `turboslide admin migrate-storage <step> --to <to> --budget <budget> --concurrency <concurrency> --i-have-a-backup <backupAt>`
 - MCP tool: No MCP tool.

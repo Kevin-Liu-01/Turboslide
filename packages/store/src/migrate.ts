@@ -1,7 +1,9 @@
 // Storage layout v2 and its migration in one maintenance window (gslides-parity SPEC-3 11.5, 2.2;
 // HR-K1#4b, docs/hosting.md section 10). Layout v1 keeps every object on one public Blob store.
-// Layout v2 keeps the twins, keyed twins, avatars, exports and bundles there (`isPublicPath`) and
-// every other path, a document, on a private store, so a record is never readable by URL.
+// Layout v2 keeps the twins, keyed twins and avatars there (`isPublicPath`) and every other path, a
+// document, on a private store, so a record is never readable by URL. The produced files, exports
+// and bundles (`isProducedPath`, HR-K1#5b), live on the private store in every state, outside the
+// migration.
 //
 // Every deployment with a private store reads `meta.json` there through `splitBlobClient`, at most
 // LAYOUT_TTL_MS old, and fails the request when the read fails. The record names the store that
@@ -16,7 +18,8 @@
 // when `verify` finds a difference, or by the freeze's own end. After the switch: `rekey` gives each
 // deck a key of the environment's own, `verify` names the public documents a v1 writer changed,
 // `rollback` copies back every document written on v2, and `delete`, 3 hours later and after a
-// backup, removes the public documents. The keyed twins (K1#3, K1#4) are at the end of the file.
+// backup, removes the public documents. `sweep-produced` removes the produced files HR-K1#5b left
+// on the public store. The keyed twins (K1#3, K1#4) are at the end of the file.
 import { hasOwnAssetKey, keyedTwinPrefix, newAssetKey } from '@turboslide/schema/access';
 
 import { blobAccessStore, parseAccessRecord } from './access-store.ts';
@@ -46,6 +49,7 @@ export const MIGRATION_STEPS = [
   'rekey',
   'rollback',
   'delete',
+  'sweep-produced',
 ] as const;
 export type MigrationStep = (typeof MIGRATION_STEPS)[number];
 /**
@@ -114,13 +118,19 @@ export const MAX_CONCURRENCY = 128;
 export const TRIES = 5;
 /** The public documents and the old twins leave in batches of this many paths (11.5). */
 export const DELETE_BATCH = 50;
+/**
+ * The removal batches of one call in flight at a time, each tried on its own (`tried`), so a 429
+ * holds back only its own batch. migrate.test.ts removes through a store that refuses every batch
+ * over four in flight and every tenth batch with a 429 that asks for a second.
+ */
+export const DELETE_IN_FLIGHT = 4;
 /** The rows an answer lists; `rowCount` counts them all. */
 export const ROWS_LISTED = 200;
 
 export type MigrationClients = {
-  /** the public store: documents on layout v1, twins and produced files always */
+  /** the public store: documents on layout v1, twins and avatars always */
   legacy: BlobClient;
-  /** the private store: documents on layout v2, and the migration's records */
+  /** the private store: documents on layout v2, produced files always, and the migration's records */
   documents: BlobClient;
 };
 
@@ -176,15 +186,16 @@ export type MigrationResult = {
 };
 
 /**
- * The top level folders of the public store whose every object stays public: the keyed twins, the
- * picture avatars, the produced exports and bundles.
+ * The top level folders of the public store whose every object stays public: the keyed twins and
+ * the picture avatars.
  */
-export const PUBLIC_PREFIXES = ['d/', 'u/', 'exports/', 'bundles/'] as const;
+export const PUBLIC_PREFIXES = ['d/', 'u/'] as const;
 
 /**
  * True for the paths that stay on the public store: PUBLIC_PREFIXES and the twins under a deck
- * (`decks/<id>/assets/`), which an `<img>` loads by URL. Every other path is a document, deck
- * folder or not, so a new prefix is a document unless PUBLIC_PREFIXES names it.
+ * (`decks/<id>/assets/`), which an `<img>` loads by URL. A produced file is not one
+ * (`isProducedPath`). Every other path is a document, deck folder or not, so a new prefix is a
+ * document unless PUBLIC_PREFIXES or PRODUCED_PREFIXES names it.
  */
 export function isPublicPath(pathname: string): boolean {
   if (isPublicFolder(pathname)) return true;
@@ -194,6 +205,28 @@ export function isPublicPath(pathname: string): boolean {
 
 export function isPublicFolder(prefix: string): boolean {
   return PUBLIC_PREFIXES.some((folder) => prefix.startsWith(folder));
+}
+
+/**
+ * The top level folders of the produced files (HR-K1#5b; DATA-3): an export and its parts under
+ * `exports/<id>/<job>/`, a queued export's record under `exports/.jobs/`, and a bundle over the
+ * body cap under `bundles/<id>/`. They are copies a deployment makes and reads back through the
+ * download route (HR-K1#5a), never a deck's record, so the migration does not move them. A web page
+ * build under `builds/` stays a document, as it was before HR-K1#5b.
+ */
+export const PRODUCED_PREFIXES = ['exports/', 'bundles/'] as const;
+
+/**
+ * True for a produced file. On a deployment with a private store the split client keeps them
+ * there in every layout state, and no step of the migration lists them on either store.
+ */
+export function isProducedPath(pathname: string): boolean {
+  return PRODUCED_PREFIXES.some((folder) => pathname.startsWith(folder));
+}
+
+/** True when a listing of `prefix` can reach a produced file (`''`, `'e'`, `'bundles/q4/'`). */
+function reachesProduced(prefix: string): boolean {
+  return PRODUCED_PREFIXES.some((folder) => folder.startsWith(prefix) || prefix.startsWith(folder));
 }
 
 /** The migration's own records, which no listing of documents counts. */
@@ -210,36 +243,56 @@ export function byPath(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
+/** True for a document: neither public, nor produced, nor one of the migration's records. */
+export function isDocumentPath(pathname: string): boolean {
+  return !isPublicPath(pathname) && !isProducedPath(pathname) && !isMigrationPath(pathname);
+}
+
 function documentsOnly(entries: BlobEntry[]): BlobEntry[] {
   return entries
-    .filter((entry) => !isPublicPath(entry.pathname) && !isMigrationPath(entry.pathname))
+    .filter((entry) => isDocumentPath(entry.pathname))
     .sort((a, b) => byPath(a.pathname, b.pathname));
+}
+
+/** A store's files at the top and a listing of each top level folder `skip` does not name. */
+async function listedBut(
+  client: BlobClient,
+  skip: (folder: string) => boolean,
+  options?: BlobCallOptions,
+): Promise<BlobEntry[]> {
+  const folders = (await client.folders('', options)).filter((folder) => !skip(folder));
+  const top =
+    client.files !== undefined
+      ? client.files('', options)
+      : client.list('', options).then((all) => all.filter((e) => !e.pathname.includes('/')));
+  const listed = await Promise.all([top, ...folders.map((folder) => client.list(folder, options))]);
+  return listed.flat();
 }
 
 /**
  * Every document of the public store in path order: the files at the top and a listing of each top
- * level folder but the public ones, so the root units (`users/`, `links/`, `templates/`,
- * `system/`, `index/`, `builds/`, `vitals/`, `decks/index.json`) move with the deck folders.
+ * level folder but the public and the produced ones, so the root units (`users/`, `links/`,
+ * `templates/`, `system/`, `index/`, `builds/`, `vitals/`, `decks/index.json`) move with the deck
+ * folders.
  */
 export async function publicDocuments(
   legacy: BlobClient,
   options?: BlobCallOptions,
 ): Promise<BlobEntry[]> {
-  const folders = (await legacy.folders('', options)).filter((folder) => !isPublicFolder(folder));
-  const top =
-    legacy.files !== undefined
-      ? legacy.files('', options)
-      : legacy.list('', options).then((all) => all.filter((e) => !e.pathname.includes('/')));
-  const listed = await Promise.all([top, ...folders.map((folder) => legacy.list(folder, options))]);
-  return documentsOnly(listed.flat());
+  const skip = (folder: string) => isPublicFolder(folder) || isProducedPath(folder);
+  return documentsOnly(await listedBut(legacy, skip, options));
 }
 
-/** Every document of the private store in path order: the whole store but the migration's records. */
+/**
+ * Every document of the private store in path order: the whole store but the produced files and
+ * the migration's records, neither of which is listed.
+ */
 export async function privateDocuments(
   documents: BlobClient,
   options?: BlobCallOptions,
 ): Promise<BlobEntry[]> {
-  return documentsOnly(await documents.list('', options));
+  const skip = (folder: string) => isProducedPath(folder) || isMigrationPath(folder);
+  return documentsOnly(await listedBut(documents, skip, options));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -522,6 +575,14 @@ export function layoutReader(
  * in `v1` is refused too, so such a deployment never writes or removes a public document. Every
  * document put and removal carries DOCUMENT_WRITE_CAP_MS, so the last write admitted before a
  * freeze lands within FREEZE_SETTLE_MS.
+ *
+ * A produced file (`isProducedPath`, HR-K1#5b) is read, listed, written and removed on the private
+ * store in every state. It never asks the layout, a freeze and the shared store's rule never refuse
+ * it, and its calls carry the caller's deadline alone: a bundle of up to 200 MB is no document, and
+ * the settle of a freeze does not wait for it. A listing that reaches both classes (`''`) takes the
+ * documents from the stores the state reads, the public paths from the public store and the
+ * produced files from the private store, so a produced file left on the public store before
+ * HR-K1#5b is never read through this client (`sweep-produced` removes those).
  */
 export function splitBlobClient(
   clients: MigrationClients,
@@ -545,46 +606,106 @@ export function splitBlobClient(
     AbortSignal.any([AbortSignal.timeout(DOCUMENT_WRITE_CAP_MS), ...(signal ? [signal] : [])]);
   const first = async <T>(pathname: string, read: (client: BlobClient) => Promise<T | null>) => {
     if (isPublicPath(pathname)) return read(legacy);
+    if (isProducedPath(pathname)) return read(documents);
     for (const client of await readers()) {
       const found = await read(client);
       if (found !== null) return found;
     }
     return null;
   };
+  /** The stores a listing of `prefix` asks: those the state reads, the public one, and the private one for produced files. */
+  const listed = async (prefix: string) => {
+    const from = await readers();
+    const stores = [...new Set([...from, legacy, ...(reachesProduced(prefix) ? [documents] : [])])];
+    /** Whether `client`'s entry or folder at `pathname` is the one this client answers. */
+    const answers = (client: BlobClient, pathname: string): boolean =>
+      isProducedPath(pathname)
+        ? client === documents
+        : !isMigrationPath(pathname) && (client === legacy || from.includes(client));
+    return { from, stores, answers };
+  };
   return {
     head: (pathname, options) => first(pathname, (client) => client.head(pathname, options)),
     get: (pathname, options) => first(pathname, (client) => client.get(pathname, options)),
     async list(prefix, options) {
-      const from = await readers();
-      if (from[0] === legacy) return legacy.list(prefix, options);
-      const lists = await Promise.all([...from, legacy].map((c) => c.list(prefix, options)));
+      // inside a produced folder: the private store alone, with no read of the layout
+      if (isProducedPath(prefix)) return documents.list(prefix, options);
+      const { from, stores } = await listed(prefix);
+      if (stores.length === 1) return legacy.list(prefix, options);
+      const lists = new Map(
+        await Promise.all(stores.map(async (c) => [c, await c.list(prefix, options)] as const)),
+      );
       const seen = new Map<string, BlobEntry>();
-      // documents from the document stores, the first that holds one; public paths from the public store
-      for (const entries of lists.slice(0, from.length))
-        for (const entry of entries)
-          if (!isPublicPath(entry.pathname) && !isMigrationPath(entry.pathname))
-            if (!seen.has(entry.pathname)) seen.set(entry.pathname, entry);
-      for (const entry of lists[from.length] ?? [])
+      // documents from the document stores, the first that holds one
+      for (const client of from)
+        for (const entry of lists.get(client) ?? [])
+          if (isDocumentPath(entry.pathname) && !seen.has(entry.pathname))
+            seen.set(entry.pathname, entry);
+      // public paths from the public store, produced files from the private store
+      for (const entry of lists.get(legacy) ?? [])
         if (isPublicPath(entry.pathname)) seen.set(entry.pathname, entry);
+      for (const entry of lists.get(documents) ?? [])
+        if (isProducedPath(entry.pathname)) seen.set(entry.pathname, entry);
       return [...seen.values()].sort((a, b) => byPath(a.pathname, b.pathname));
     },
     async folders(prefix, options) {
-      const from = new Set([...(await readers()), legacy]);
-      const lists = await Promise.all([...from].map((client) => client.folders(prefix, options)));
-      return [...new Set(lists.flat())].filter((folder) => !isMigrationPath(folder)).sort();
+      if (isProducedPath(prefix)) return documents.folders(prefix, options);
+      const { stores, answers } = await listed(prefix);
+      const lists = await Promise.all(stores.map((client) => client.folders(prefix, options)));
+      const out = new Set<string>();
+      stores.forEach((client, i) => {
+        for (const folder of lists[i] ?? []) if (answers(client, folder)) out.add(folder);
+      });
+      return [...out].sort();
     },
     async put(pathname, bytes, putOptions: BlobPutOptions) {
       if (isPublicPath(pathname)) return legacy.put(pathname, bytes, putOptions);
+      if (isProducedPath(pathname)) return documents.put(pathname, bytes, putOptions);
       const store = await writes();
       return store.put(pathname, bytes, { ...putOptions, signal: capped(putOptions.signal) });
     },
     async del(pathnames, options) {
-      const own = pathnames.filter((pathname) => !isPublicPath(pathname));
+      const own = pathnames.filter(
+        (pathname) => !isPublicPath(pathname) && !isProducedPath(pathname),
+      );
       // a closed store refuses the whole removal before any of it happens
       const store = own.length > 0 ? await writes() : null;
       const published = pathnames.filter(isPublicPath);
+      const produced = pathnames.filter(isProducedPath);
       if (published.length > 0) await legacy.del(published, options);
+      if (produced.length > 0) await documents.del(produced, options);
       if (store !== null) await store.del(own, { ...options, signal: capped(options?.signal) });
+    },
+  };
+}
+
+/**
+ * The public store alone, on a deployment that shares it and has no private store (HR-K1#6; the
+ * review of 2026-10-17, finding 4). Reads go on. A put of any path that is not public (a document,
+ * a produced file, a migration record) and every removal, of a twin or an avatar too, throw
+ * StorageFrozenError with the shared store's sentence, as the split client refuses a shared
+ * store's document writes in `v1`: every object of that store is production's as well. Before it
+ * such a deployment (a preview built before its private store existed, a checkout or `vercel dev`
+ * with the public token alone, a Vercel project with no private store, select.ts
+ * `sharesPublicStore`) wrote documents to the public store, its seed put `decks/gt-brand/` back
+ * there after production's `delete`, and it could remove production's twins by name.
+ */
+export function sharedPublicClient(legacy: BlobClient): BlobClient {
+  const refused = () => new StorageFrozenError(SHARED_SENTENCE);
+  const files = legacy.files?.bind(legacy);
+  return {
+    head: (pathname, options) => legacy.head(pathname, options),
+    get: (pathname, options) => legacy.get(pathname, options),
+    list: (prefix, options) => legacy.list(prefix, options),
+    folders: (prefix, options) => legacy.folders(prefix, options),
+    ...(files === undefined ? {} : { files }),
+    async put(pathname, bytes, options) {
+      if (!isPublicPath(pathname)) throw refused();
+      return legacy.put(pathname, bytes, options);
+    },
+    async del(pathnames) {
+      // nothing on this store is the deployment's own to remove
+      if (pathnames.length > 0) throw refused();
     },
   };
 }
@@ -825,12 +946,46 @@ function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
   return true;
 }
 
-/** Removes paths in batches of DELETE_BATCH, each batch tried as one store call. */
-async function removeAll(call: Call, client: BlobClient, paths: string[]): Promise<void> {
-  for (let i = 0; i < paths.length; i += DELETE_BATCH) {
-    const batch = paths.slice(i, i + DELETE_BATCH);
-    await tried(call, batch[0] ?? '', () => client.del(batch, { signal: call.signal }));
-  }
+/** What one call of `removeAll` removed, and how many of its paths are left for the next call. */
+type Removal = { removed: number; left: number };
+
+/**
+ * Removes paths in batches of DELETE_BATCH, `inFlight` batches at a time, each tried as one store
+ * call. No batch starts once the call's budget is out (`outOfBudget`). A batch the budget cut or
+ * the store kept refusing with a 429 or a 5xx stays with no row, and one that failed otherwise
+ * stays with a row; the answer counts both as left, and each step lists again on its next call.
+ * Before HR-K1#4b's fix the batches ran one after another with no budget check, so a removal
+ * longer than the budget met the call's abort and the route answered 500 (production's `delete`,
+ * calls 2 to 6 on 2026-10-17).
+ */
+async function removeAll(
+  call: Call,
+  client: BlobClient,
+  paths: string[],
+  inFlight = DELETE_IN_FLIGHT,
+): Promise<Removal> {
+  const batches: string[][] = [];
+  for (let i = 0; i < paths.length; i += DELETE_BATCH)
+    batches.push(paths.slice(i, i + DELETE_BATCH));
+  const stop = outOfBudget(call);
+  let removed = 0;
+  await pool(
+    batches,
+    inFlight,
+    async (batch) => {
+      try {
+        await tried(call, batch[0] ?? '', () => client.del(batch, { signal: call.signal }));
+        removed += batch.length;
+      } catch (error) {
+        // a batch the budget ended, or one the store asked to wait for past it (a 429, a 5xx), is
+        // no fault of its own: it counts as left and the next call removes it, with no row
+        if (!call.signal.aborted && !stop() && !retryable(error))
+          row(call, `${batch[0]} and ${batch.length - 1} more: not removed: ${messageOf(error)}`);
+      }
+    },
+    stop,
+  );
+  return { removed, left: paths.length - removed };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -963,7 +1118,15 @@ async function copyStep(call: Call): Promise<MigrationResult> {
     const extra = (await privateDocuments(call.documents, { signal: call.signal }))
       .map((entry) => entry.pathname)
       .filter((path) => !planned.has(path));
-    await removeAll(call, call.documents, extra);
+    const { left } = await removeAll(call, call.documents, extra);
+    // the cursor stays at 0, so the next call lists the private store and removes them first
+    if (left > 0)
+      return answer(call, {
+        done: false,
+        processed: 0,
+        remaining: plan.entries.length,
+        note: `${left} private documents the plan does not name are left to remove; the next call removes them before it copies`,
+      });
   }
   const version = new Map(plan.entries.map(([path, etag]) => [path, etag]));
   const retry = progress.failed ?? [];
@@ -1066,7 +1229,10 @@ async function verifyStep(call: Call): Promise<MigrationResult> {
   return answer(call, { done: call.rowCount === 0, processed: planned.size, listMs, note });
 }
 
-/** `verify` on v2: the public documents that differ from the plan of the switch. */
+/**
+ * `verify` on v2: the public documents that differ from the plan of the switch, each with when it
+ * was written by the store's upload time. The produced files are no documents and are not listed.
+ */
 async function verifyAfterSwitch(call: Call): Promise<MigrationResult> {
   const switchedAt = afterSwitch(call, 'verify');
   const plan = await readPlan(call);
@@ -1075,8 +1241,12 @@ async function verifyAfterSwitch(call: Call): Promise<MigrationResult> {
   const published = await publicDocuments(call.legacy, { signal: call.signal });
   for (const entry of published) {
     const line = differs(entry.pathname, planned.get(entry.pathname), entry);
-    if (line !== null)
-      row(call, `${line}; written on the public store since the switch at ${switchedAt}`);
+    if (line === null) continue;
+    const since = Date.parse(entry.uploadedAt ?? '') >= Date.parse(switchedAt);
+    row(
+      call,
+      `${line}; written on the public store ${since ? 'since' : 'before'} the switch at ${switchedAt}`,
+    );
   }
   call.progress.verifiedAt = iso(call.clock());
   return answer(call, { done: true, processed: published.length, listMs: call.clock() - began });
@@ -1196,8 +1366,11 @@ async function rollbackStep(call: Call): Promise<MigrationResult> {
     },
     outOfBudget(call),
   );
-  if (left === 0 && failures === 0) await removeAll(call, call.legacy, removals);
-  const done = left === 0 && failures === 0;
+  // v1 is written only once every removal landed: a planned document left on the public store
+  // would read again there as the document v2 removed
+  const removal =
+    left === 0 && failures === 0 ? await removeAll(call, call.legacy, removals) : null;
+  const done = removal !== null && removal.left === 0;
   if (done) {
     call.progress.rolledBackAt = iso(call.clock());
     await writeLayout(call, { state: 'v1', frozen: null, opensAt: call.clock() + OPEN_AFTER_MS });
@@ -1205,8 +1378,8 @@ async function rollbackStep(call: Call): Promise<MigrationResult> {
   const seconds = Math.max(1, call.clock() - began) / 1000;
   return answer(call, {
     done,
-    processed: copied + (done ? removals.length : 0),
-    remaining: left + failures + (done ? 0 : removals.length),
+    processed: copied + (removal?.removed ?? 0),
+    remaining: left + failures + (removal?.left ?? removals.length),
     listMs,
     perSecond: Math.round(copied / seconds),
   });
@@ -1254,7 +1427,9 @@ export function deleteRefusal(
  * (not the public record's), the twins at the old place `decks/<id>/assets/` that the key lacks are
  * copied under it, then the old place leaves once the key holds every one of its names (else the
  * deck is a row and keeps them); then each public document whose etag is the plan's
- * leaves in batches, and any other stays with a row. Each call lists again, so it resumes anywhere.
+ * leaves in batches (`removeAll`, inside the call's budget), and any other stays with a row. A call
+ * whose budget ends first answers `done: false` with the count left. Each call lists again, so it
+ * resumes anywhere.
  */
 async function deleteStep(call: Call): Promise<MigrationResult> {
   const refusal = deleteRefusal(call.progress, call.layout, {
@@ -1275,6 +1450,7 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
   }
   let processed = 0;
   let failures = 0;
+  let unfinished = 0;
   const left = await pool(
     [...old.keys()],
     Math.min(call.concurrency, 8),
@@ -1293,8 +1469,10 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
           throw new Error(
             `${lacking.length} not under the key yet (${lacking.slice(0, 3).join(', ')}); the next call tries again`,
           );
-        await removeAll(call, call.legacy, paths);
-        processed += paths.length;
+        // one batch at a time per deck: eight decks in flight are already eight removals
+        const removal = await removeAll(call, call.legacy, paths, 1);
+        processed += removal.removed;
+        if (removal.left > 0) unfinished += 1;
       } catch (error) {
         failures += 1;
         row(call, `${deckId}: its old twins stay: ${messageOf(error)}`);
@@ -1302,8 +1480,17 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
     },
     outOfBudget(call),
   );
-  if (left > 0 || failures > 0)
-    return answer(call, { done: false, processed, remaining: left + failures });
+  if (left > 0 || failures > 0 || unfinished > 0)
+    return answer(call, { done: false, processed, remaining: left + failures + unfinished });
+  // the plan's read and the listing of the public store run on the call's signal: a call whose
+  // budget the twins used up answers now, and the next call lists from the start
+  if (outOfBudget(call)())
+    return answer(call, {
+      done: false,
+      processed,
+      remaining: 0,
+      note: "the twins used the call's budget; the next call lists the public documents",
+    });
   const plan = await readPlan(call);
   const planned = new Map(plan.entries.map(([path, etag]) => [path, etag]));
   const removable: string[] = [];
@@ -1312,8 +1499,58 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
     if (line === null) removable.push(entry.pathname);
     else row(call, `${line}; delete kept it`);
   }
-  await removeAll(call, call.legacy, removable);
-  return answer(call, { done: true, processed: processed + removable.length });
+  const removal = await removeAll(call, call.legacy, removable);
+  return answer(call, {
+    done: removal.left === 0,
+    processed: processed + removal.removed,
+    remaining: removal.left,
+    note:
+      removal.left === 0
+        ? null
+        : `${removal.left} of ${removable.length} public documents of the plan are left; the next call lists them again`,
+  });
+}
+
+/**
+ * `sweep-produced` (HR-K1#5b; DATA-3): removes the produced files (`exports/`, `exports/.jobs/`
+ * included, and `bundles/`) left on the public store, written there before HR-K1#5b kept them on
+ * the private store. No deployment with a private store reads them: a download link lasts ten
+ * minutes and a job record a day, and the split client reads produced files on the private store
+ * alone. It runs on layout v2 after a recorded switch, on a store of its own: a deployment that
+ * shares the public store refuses, since the files are production's too. Each call lists the two
+ * folders of the public store again and removes them in batches inside its budget (`removeAll`); a
+ * call whose budget ends first answers `done: false` with the count left. The removal is final, so
+ * nothing runs the step but an operator's call.
+ */
+async function sweepProducedStep(call: Call): Promise<MigrationResult> {
+  if (call.shared)
+    refuse(
+      "sweep-produced runs on production alone: this deployment shares the public store, whose produced files are production's",
+    );
+  afterSwitch(call, 'sweep-produced');
+  const began = call.clock();
+  const listed = (
+    await Promise.all(
+      PRODUCED_PREFIXES.map((folder) => call.legacy.list(folder, { signal: call.signal })),
+    )
+  )
+    .flat()
+    .filter((entry) => isProducedPath(entry.pathname))
+    .sort((a, b) => byPath(a.pathname, b.pathname));
+  const listMs = call.clock() - began;
+  const bytes = listed.reduce((sum, entry) => sum + entry.size, 0);
+  const removal = await removeAll(
+    call,
+    call.legacy,
+    listed.map((entry) => entry.pathname),
+  );
+  return answer(call, {
+    done: removal.left === 0,
+    processed: removal.removed,
+    remaining: removal.left,
+    listMs,
+    note: `${listed.length} produced files of ${bytes} bytes listed on the public store; ${removal.removed} removed, ${removal.left} left`,
+  });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1495,6 +1732,7 @@ const STEPS: Record<MigrationStep, (call: Call) => Promise<MigrationResult>> = {
   rekey: rekeyStep,
   rollback: rollbackStep,
   delete: deleteStep,
+  'sweep-produced': sweepProducedStep,
 };
 
 /**

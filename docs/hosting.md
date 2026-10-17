@@ -745,11 +745,11 @@ once roles exist (SPEC-3 6) a viewer link must not be a way to read `deck.json` 
 by address (research 04 F8). Layout v2 keeps the twins on the public store, because a browser
 `<img>` needs a URL, and moves every document to a private store of each environment:
 
-| Store                                                   | Access  | Holds                                                                                                                                 |
-| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`, `exports/`, `bundles/` |
-| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`                |
-| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                             |
+| Store                                                   | Access  | Holds                                                                                                                                                                                        |
+| ------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`; the `exports/` and `bundles/` written before HR-K1#5b, until `sweep-produced` |
+| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`; the produced files `exports/` and `bundles/` (HR-K1#5b)              |
+| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                                                                                    |
 
 The public store is shared: production, every preview and a development checkout with
 `BLOB_READ_WRITE_TOKEN` read the same objects. `sharesPublicStore(env)` (`packages/store/src/select.ts`)
@@ -761,10 +761,26 @@ that shares the public store never writes or removes a public document.
 `packages/store/src/migrate.ts` holds the layout and the migration; `blob-vercel.ts` opens the
 private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`.
 
-- `splitBlobClient({ legacy, documents })` routes by path. `isPublicPath` (the twins under
-  `decks/<id>/assets/` and the folders `d/`, `u/`, `exports/`, `bundles/`) always goes to the public
-  store. Every other path is a document, deck folder or not, so the root units (`users/`, `links/`,
-  `templates/`, `system/`, `index/`, `builds/`, `vitals/`, `decks/index.json`) move with the decks.
+- `splitBlobClient({ legacy, documents })` routes by path, in three classes. `isPublicPath` (the
+  twins under `decks/<id>/assets/` and the folders `d/` and `u/`) always goes to the public store.
+  `isProducedPath` (`exports/`, the queued exports' records under `exports/.jobs/` included, and
+  `bundles/`; HR-K1#5b) always goes to the private store. Every other path is a document, deck
+  folder or not, so the root units (`users/`, `links/`, `templates/`, `system/`, `index/`, `builds/`,
+  `vitals/`, `decks/index.json`) move with the decks; a web page build under `builds/` stays a
+  document.
+- The produced files are copies a deployment makes and reads back through the download route
+  (HR-K1#5a), not records. They never ask the layout record, a freeze or the shared store's rule
+  never refuses them, and they carry the caller's deadline alone, not the documents' 90 s cap: a
+  bundle reaches 200 MB, and a freeze's settle does not wait for a produced file. A listing that
+  reaches both classes takes the documents from the store the state reads and the produced files
+  from the private store alone, so a produced file left on the public store before HR-K1#5b is
+  never read. `plan`, `copy`, `verify`, `rollback` and `delete` neither list nor count them on
+  either store. An export queued in the minute of the HR-K1#5b deploy has its record and parts on
+  the public store, which the new deployment no longer reads, so it answers `failed` and the person
+  exports again. A deployment without the private store keeps one store: off Vercel with a store
+  of its own (a checkout's rehearsal) everything, the produced files included, stays there; one
+  that shares the public store, any Vercel deployment on the blob tier among them since HR-K1#6,
+  refuses documents and produced files there (`sharedPublicClient`; 10.4).
 - The layout record is `meta.json` on the private store: `state` (`v1`, `dual` or `v2`), `frozen`
   (`since`, `settlesAt`, `expiresAt`) and `opensAt`. A document is read and written on the public
   store in `v1` and on the private store in `v2`. `dual` is the record the preview wrote on
@@ -818,18 +834,19 @@ A migration is one run on one environment, `turboslide admin migrate-storage <st
 `migration.json`, so one call runs at a time. A call works for `--budget` seconds (120 to 240, 240
 by default, under the function's 300 s) and answers.
 
-| Step               | What it does                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plan`             | Outside a freeze: the counts (public documents, bytes, the listing's time, the private store's count). Inside a settled freeze: the plan of record, every public document with its etag, in `migration/plan.json`.                                                                                                                                                                                                        |
-| `freeze`           | Writes the record frozen with its state kept. `settlesAt` is 4 min 20 s out: the record's write (20 s), the layout cache (5 s), a write admitted just before (90 s), a write landing late (30 s), the listing lag (60 s) and 55 s of margin. `expiresAt` is 10 minutes after the settle.                                                                                                                                  |
-| `copy`             | Every planned document, 32 requests in flight by default (`--concurrency`, 1 to 128), each a get of the planned etag and a put with `overwrite`, checked by the etag the private store answers. Tried 5 times on a 429, a 5xx or a network error. Resumes from its cursor.                                                                                                                                                |
-| `verify`           | From 60 s after the copy's last put: every planned document has a private copy with the planned etag, the public store still holds the plan, and the private store holds nothing else. A verify with rows ends the freeze by itself.                                                                                                                                                                                      |
-| `switch`           | One record write: `v2`, not frozen, document writes open 30 s later (`opensAt`), so no instance writes the private store while another still reads the public one.                                                                                                                                                                                                                                                        |
-| `unfreeze`         | Ends a freeze and keeps the state. Takes no lease.                                                                                                                                                                                                                                                                                                                                                                        |
-| `rekey`            | On `v2`, open: each deck whose private record holds no key of the environment's own gets one, its twins copied under it, then the key written. A pass clean from 12 minutes after the last key it wrote closes it; the answer's `rekeyAfter` says when to run the next pass.                                                                                                                                              |
-| `verify` (on `v2`) | Names each public document a `v1` writer changed or added since the switch; `delete` keeps them.                                                                                                                                                                                                                                                                                                                          |
-| `rollback`         | Production only, after the switch and before `delete`, refused while a `rekey` pass is due: freezes `v2`, then after the settle copies back to the public store every private document whose etag it lacks, and writes `v1` with writes open 30 s later.                                                                                                                                                                  |
-| `delete`           | Production only, on `v2` not frozen, 3 hours after the switch, after a `verify` on `v2` and a closed `rekey`, with `--i-have-a-backup <ISO>`, the time a backup of the private store began after the switch. Moves the old twins of keyed decks under their keys (a deck keeps its old twins, with a row, until the key holds every one of them), then removes the public documents whose etag is the plan's, 50 a batch. |
+| Step               | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plan`             | Outside a freeze: the counts (public documents, bytes, the listing's time, the private store's count). Inside a settled freeze: the plan of record, every public document with its etag, in `migration/plan.json`.                                                                                                                                                                                                                                                                                                                            |
+| `freeze`           | Writes the record frozen with its state kept. `settlesAt` is 4 min 20 s out: the record's write (20 s), the layout cache (5 s), a write admitted just before (90 s), a write landing late (30 s), the listing lag (60 s) and 55 s of margin. `expiresAt` is 10 minutes after the settle.                                                                                                                                                                                                                                                      |
+| `copy`             | Every planned document, 32 requests in flight by default (`--concurrency`, 1 to 128), each a get of the planned etag and a put with `overwrite`, checked by the etag the private store answers. Tried 5 times on a 429, a 5xx or a network error. Resumes from its cursor.                                                                                                                                                                                                                                                                    |
+| `verify`           | From 60 s after the copy's last put: every planned document has a private copy with the planned etag, the public store still holds the plan, and the private store holds nothing else. A verify with rows ends the freeze by itself.                                                                                                                                                                                                                                                                                                          |
+| `switch`           | One record write: `v2`, not frozen, document writes open 30 s later (`opensAt`), so no instance writes the private store while another still reads the public one.                                                                                                                                                                                                                                                                                                                                                                            |
+| `unfreeze`         | Ends a freeze and keeps the state. Takes no lease.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `rekey`            | On `v2`, open: each deck whose private record holds no key of the environment's own gets one, its twins copied under it, then the key written. A pass clean from 12 minutes after the last key it wrote closes it; the answer's `rekeyAfter` says when to run the next pass.                                                                                                                                                                                                                                                                  |
+| `verify` (on `v2`) | Names each public document a `v1` writer changed or added since the switch; `delete` keeps them.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `rollback`         | Production only, after the switch and before `delete`, refused while a `rekey` pass is due: freezes `v2`, then after the settle copies back to the public store every private document whose etag it lacks, and writes `v1` with writes open 30 s later.                                                                                                                                                                                                                                                                                      |
+| `delete`           | Production only, on `v2` not frozen, 3 hours after the switch, after a `verify` on `v2` and a closed `rekey`, with `--i-have-a-backup <ISO>`, the time a backup of the private store began after the switch. Moves the old twins of keyed decks under their keys (a deck keeps its old twins, with a row, until the key holds every one of them), then removes the public documents whose etag is the plan's, 50 a batch and 4 batches in flight, inside the budget: a call whose budget ends first answers `done false` with the count left. |
+| `sweep-produced`   | Production only, on `v2` after a recorded switch (HR-K1#5b): lists `exports/` (with `exports/.jobs/`) and `bundles/` on the public store, the produced files written there before HR-K1#5b, and removes them, 50 a batch and 4 batches in flight, inside the budget; a call whose budget ends first answers `done false` with the count left. Final, and run by Kevin alone.                                                                                                                                                                  |
 
 Every call inside the freeze checks that the freeze is this run's, that it settled and that more
 than 90 s of it is left, and moves `expiresAt` to 10 minutes after the call, never past 45 minutes
@@ -977,9 +994,13 @@ until Kevin cut it on 2026-10-16: production had no real saves for days, and the
 guard's full walk and specs on the preview since the rehearsal. Kevin takes a full backup of the
 private store after the switch, every prefix and not only what the nightly copy of section 14
 holds, and checks it, then calls `delete` until it answers `done true`. A call that moves twins
-answers `done false`. A refusal answers JSON with `error` and no `done`: stop. A call whose budget
-ends inside the removals answers a 500 abort, which the CLI prints on stderr with nothing on
-stdout: wait out its 30 s lease and call again.
+answers `done false`. A call whose budget ends inside the removals answers `done false` with the
+paths left in `remaining`: no batch starts in the last 10 s of the budget, four batches of 50 are
+in flight, and a batch the budget cut or that failed five tries (a row) is listed again by the
+next call. A refusal answers JSON with `error` and no `done`: stop. Until HR-K1#4b's fix of
+2026-10-17 the removals never checked the budget, so such a call met its 240 s abort and answered
+a 500 with nothing on stdout (production's calls 2 to 6 that night); the loop still waits out a
+30 s lease after an empty answer.
 
 ```sh
 while :; do
@@ -990,9 +1011,55 @@ while :; do
 done
 ```
 
-Never in this runbook: a step against a deployment built before this code; `rollback`, `delete` or
-`avatar-sweep` against a preview (each refuses); a removal by hand on either store. After
-production's `delete`, HR-K1#5b and HR-K1#6 follow.
+`sweep-produced`, on production alone, once the HR-K1#5b deployment serves production. The produced
+files on the public store (about 2,114 exports of 650 MiB and 4 bundles of 73 MiB at the audit of
+2026-09-20, renders of restricted decks among them) are copies no deployment with the private
+store reads: a download link lasts 10 minutes and a job record a day. A deployment built before
+HR-K1#5b still writes exports there, so the step runs after the guard has deployed HR-K1#5b and
+its smoke passed; an export such a deployment wrote after the sweep stays until the next call. The
+removal is final and nothing runs it automatically; Kevin calls it with the `until_done` loop
+above until it answers `done true`:
+
+```sh
+until_done sweep-produced    # each answer's note: produced files listed, removed and left
+```
+
+Never in this runbook: a step against a deployment built before this code; `rollback`, `delete`,
+`sweep-produced` or `avatar-sweep` against a preview (each refuses); a removal by hand on either
+store. After production's `delete`, HR-K1#5b and HR-K1#6 follow.
+
+The gate for the HR-K1#5b and HR-K1#6 pushes is `delete`'s own answer and the verify after it:
+the last `delete` call answers `done true`, and a `verify` on `v2` after it counts the public
+documents left (`processed`) and names each one that differs from the plan as a row (`rowCount`,
+the documents `delete` kept); `processed` minus `rowCount` is 0. `delete` removes in path order, so
+a single object proves nothing about the rest: `decks/gt-brand/deck.json` answers 404 halfway
+through a `delete` while `index/`, `links/`, `system/`, `templates/`, `users/` and `vitals/` are
+still public. A read of `decks/gt-brand/deck.json` on the host the policy's `img-src` names is a
+spot check of the CDN's copy alone.
+
+From HR-K1#6 the guard's smoke requires, on every deployment it checks, preview and production
+alike since they share the public store, that its own restricted scratch deck has neither
+`deck.json` nor `access.json` on the public store (`private document 403`), that the deck's asset
+key is not the one its id derives and its picture answers under that key alone (`twin URL not
+derivable`), and that a stored export link reads back as a PDF through the deployment
+(`export URL signed`). `principal index private` reads a `users/<id>/decks.json` only after
+`account.decks` proved that index exists, and is listed as skipped by name otherwise; the guard's
+static bearer has no index (`docs/security.md` section 17 has the rows).
+
+From HR-K1#6 no client without the private store's token writes to the public store where it is
+shared. `sharesPublicStore` is true for a preview, for anything but production that holds
+`BLOB_READ_WRITE_TOKEN`, and for any Vercel deployment on the blob tier without the private store's
+token whatever its `VERCEL_ENV`: the personal project `turboslide` builds main and runs the blob tier
+over the same public store with no private store, and its production read layout v1 until then
+(its domain redirects to www.turboslide.com, so it serves little). `turboslide-gt`'s production and
+preview hold the private token and are unchanged. For such a deployment `layoutBlobClient` opens the
+public store alone (`sharedPublicClient`): a put of a document or a produced file, and every
+removal, a twin's or an avatar's too, answer 503 with the shared store's sentence. The seed is
+skipped there with one warning line (`blob: warning: the seed of gt-brand is skipped, the store
+refuses it: ...`; blob-store.ts `seedOnce`), so the deployment serves the decks the public store
+still holds and every read, without the seed deck once `delete` removed it, and answers 503 to every
+save. A preview built before its private store existed, or a checkout or `vercel dev` with
+`BLOB_READ_WRITE_TOKEN` alone, behaves the same way.
 
 ## 11. The runbook of the round three services
 

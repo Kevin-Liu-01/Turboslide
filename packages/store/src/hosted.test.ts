@@ -58,6 +58,7 @@ import type { BlobClient, BlobStore, BlobStoreOptions } from './blob-store.ts';
 import { digestAssetName, loadDeckDir, openFileStore } from './file-store.ts';
 import { packDeckDir } from './pack.ts';
 import { openHostedDecks } from './hosted.ts';
+import { isPublicPath, sharedPublicClient } from './migrate.ts';
 import type { HostedDecks } from './hosted.ts';
 import { POLL_CALLS_PER_MINUTE_MAX, pulsePath } from './pulse.ts';
 import { directorySeed, materializeSeed } from './seed.ts';
@@ -1067,6 +1068,53 @@ describe('hosted stores', () => {
         existsSync(join(decks.decksDir, 'from-template', 'assets', 'mood-earth-light.png')),
       ).toBe(true);
     });
+  });
+
+  it('skips the seed on a shared store with no private store, and serves the decks it holds (HR-K1#6)', async () => {
+    // a deck made through an open client, then production's delete removed the seed deck's
+    // documents from the public store
+    const fake = memoryBlobClient(undefined, { now });
+    const open = openHostedDecks({
+      selection: selectStore({ TURBOSLIDE_STORE: 'blob', BLOB_READ_WRITE_TOKEN: 'test' }),
+      workspaceDecksDir: null,
+      overlayRoot: join(root, 'overlay-open'),
+      seed: directorySeed(seedRoot),
+      blob: fake,
+      now,
+    });
+    clock = '2026-09-14T11:00:00.000Z';
+    const kept = await open.create({ name: 'Kept deck', from: 'blank' });
+    await fake.del([...fake.blobs.keys()].filter((key) => key.startsWith('decks/gt-brand/')));
+    fake.calls.length = 0;
+    // a preview or a checkout with the public token alone (blob-vercel.ts layoutBlobClient)
+    const lines: string[] = [];
+    const shared = openHostedDecks({
+      selection: selectStore({ TURBOSLIDE_STORE: 'blob', BLOB_READ_WRITE_TOKEN: 'test' }),
+      workspaceDecksDir: null,
+      overlayRoot: join(root, 'overlay-shared'),
+      seed: directorySeed(seedRoot),
+      blob: sharedPublicClient(fake),
+      now,
+      log: (line) => lines.push(line),
+    });
+    await shared.ready();
+    expect(lines.filter((line) => line.includes('warning'))).toEqual([
+      expect.stringMatching(
+        /^blob: warning: the seed of gt-brand is skipped, the store refuses it: This deployment shares the public store/,
+      ),
+    ]);
+    expect((await shared.list()).map((head) => head.id)).toEqual([kept.deckId]);
+    expect((await (await shared.open(kept.deckId)).read()).document.deck.title).toBe('Kept deck');
+    expect(await shared.has('gt-brand')).toBe(false);
+    // a second ready() does not seed again, and no document reached the store
+    await shared.ready();
+    expect(lines.filter((line) => line.includes('warning'))).toHaveLength(1);
+    expect(
+      fake.calls.filter((c) => (c.op === 'put' || c.op === 'del') && !isPublicPath(c.pathname)),
+    ).toEqual([]);
+    expect(
+      [...fake.blobs.keys()].some((key) => key.startsWith('decks/gt-brand/') && !isPublicPath(key)),
+    ).toBe(false);
   });
 
   // -------------------------------------------------------------------------------------------

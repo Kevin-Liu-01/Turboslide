@@ -951,11 +951,12 @@ type Removal = { removed: number; left: number };
 
 /**
  * Removes paths in batches of DELETE_BATCH, `inFlight` batches at a time, each tried as one store
- * call. No batch starts once the call's budget is out (`outOfBudget`). A batch the budget cut, or
- * one that failed TRIES times (a row), stays, and the answer counts it as left: each step lists
- * again on its next call. Before HR-K1#4b's fix the batches ran one after another with no budget
- * check, so a removal longer than the budget met the call's abort and the route answered 500
- * (production's `delete`, calls 2 to 6 on 2026-10-17).
+ * call. No batch starts once the call's budget is out (`outOfBudget`). A batch the budget cut or
+ * the store kept refusing with a 429 or a 5xx stays with no row, and one that failed otherwise
+ * stays with a row; the answer counts both as left, and each step lists again on its next call.
+ * Before HR-K1#4b's fix the batches ran one after another with no budget check, so a removal
+ * longer than the budget met the call's abort and the route answered 500 (production's `delete`,
+ * calls 2 to 6 on 2026-10-17).
  */
 async function removeAll(
   call: Call,
@@ -976,8 +977,9 @@ async function removeAll(
         await tried(call, batch[0] ?? '', () => client.del(batch, { signal: call.signal }));
         removed += batch.length;
       } catch (error) {
-        // a batch the budget ended is no fault of the store's: the next call removes it
-        if (!call.signal.aborted && !stop())
+        // a batch the budget ended, or one the store asked to wait for past it (a 429, a 5xx), is
+        // no fault of its own: it counts as left and the next call removes it, with no row
+        if (!call.signal.aborted && !stop() && !retryable(error))
           row(call, `${batch[0]} and ${batch.length - 1} more: not removed: ${messageOf(error)}`);
       }
     },
@@ -1480,6 +1482,15 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
   );
   if (left > 0 || failures > 0 || unfinished > 0)
     return answer(call, { done: false, processed, remaining: left + failures + unfinished });
+  // the plan's read and the listing of the public store run on the call's signal: a call whose
+  // budget the twins used up answers now, and the next call lists from the start
+  if (outOfBudget(call)())
+    return answer(call, {
+      done: false,
+      processed,
+      remaining: 0,
+      note: "the twins used the call's budget; the next call lists the public documents",
+    });
   const plan = await readPlan(call);
   const planned = new Map(plan.entries.map(([path, etag]) => [path, etag]));
   const removable: string[] = [];

@@ -1106,6 +1106,83 @@ describe('delete', () => {
     expect(planned.filter((path) => w.legacy.blobs.has(path))).toEqual([]);
   });
 
+  it('answers done false before the plan and the listing when the twins used the budget', async () => {
+    const { w, backup } = await readyToDelete(0);
+    const budgets: { controller: AbortController; at: number }[] = [];
+    const abortAfter = (ms: number) => {
+      const controller = new AbortController();
+      budgets.push({ controller, at: w.t.now + ms });
+      return controller.signal;
+    };
+    const documents = w.clients.documents;
+    const legacy = w.clients.legacy;
+    // each deck's record read takes 120 s, so the two decks with twins at the old place use the
+    // budget; a listing on the aborted signal throws, as the SDK does
+    w.clients.documents = {
+      ...documents,
+      get: async (path, options) => {
+        if (path.endsWith('/access.json')) {
+          w.t.now += 120_000;
+          for (const budget of budgets)
+            if (w.t.now >= budget.at)
+              budget.controller.abort(new DOMException('The budget ended', 'TimeoutError'));
+        }
+        return documents.get(path, options);
+      },
+    };
+    w.clients.legacy = {
+      ...legacy,
+      folders: async (prefix, options) => {
+        options?.signal?.throwIfAborted();
+        return legacy.folders(prefix, options);
+      },
+    };
+    const held = await w.run('delete', { backupAt: backup, abortAfter });
+    expect(held).toMatchObject({
+      done: false,
+      rowCount: 0,
+      note: "the twins used the call's budget; the next call lists the public documents",
+    });
+    expect(w.legacy.blobs.has('decks/q4/deck.json')).toBe(true);
+    w.clients.documents = documents;
+    w.clients.legacy = legacy;
+    expect(await w.run('delete', { backupAt: backup })).toMatchObject({ done: true, rowCount: 0 });
+    expect(w.legacy.blobs.has('decks/q4/deck.json')).toBe(false);
+  });
+
+  it('writes no row for a batch whose 429 asks to wait past the budget, and counts it as left', async () => {
+    const { w, planned, backup } = await readyToDelete(200);
+    const legacy = w.clients.legacy;
+    const busy = planned[DELETE_BATCH] ?? '';
+    const start = w.t.now;
+    // the busy batch is refused 40 s before the end of the 240 s budget, outside the last 10 s in
+    // which no batch starts, with the 60 s wait Vercel Blob asks for
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        if (paths.includes(busy)) {
+          w.t.now = Math.max(w.t.now, start + 200_000);
+          throw Object.assign(
+            new Error(
+              'Vercel Blob: Too many requests please lower the number of concurrent requests - try again in 60 seconds',
+            ),
+            { retryAfter: 60 },
+          );
+        }
+        await legacy.del(paths, options);
+      },
+    };
+    const held = await w.run('delete', { backupAt: backup });
+    expect(held).toMatchObject({ done: false, remaining: DELETE_BATCH, rowCount: 0, retries: 0 });
+    expect(held.processed).toBe(planned.length - DELETE_BATCH);
+    expect(w.legacy.blobs.has(busy)).toBe(true);
+    w.clients.legacy = legacy;
+    expect(await w.run('delete', { backupAt: backup })).toMatchObject({
+      done: true,
+      processed: DELETE_BATCH,
+    });
+  });
+
   it('names a batch that failed every try as a row and leaves it for the next call', async () => {
     const { w, planned, backup } = await readyToDelete(200);
     const legacy = w.clients.legacy;

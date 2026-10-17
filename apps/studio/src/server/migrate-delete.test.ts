@@ -25,14 +25,27 @@ import {
 } from '@turboslide/store/hosted';
 import { sharesPublicStore } from '@turboslide/store/select';
 
-const deployment = vi.hoisted((): { client: unknown } => ({ client: null }));
+const deployment = vi.hoisted((): { client: unknown; byToken: unknown } => ({
+  client: null,
+  byToken: null,
+}));
 
 vi.mock('./root', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   exportBlobClient: () => Promise.resolve(deployment.client),
 }));
 
-const { runMigrateStorage } = await import('./migrate');
+// the public store opened by its own token: a fake here, so no request leaves the machine
+vi.mock('@turboslide/store/blob-vercel', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@turboslide/store/blob-vercel')>();
+  return {
+    ...actual,
+    vercelBlobClient: (...args: Parameters<typeof actual.vercelBlobClient>) =>
+      deployment.byToken ?? actual.vercelBlobClient(...args),
+  };
+});
+
+const { SWEEP_NEEDS_PUBLIC_TOKEN, runMigrateStorage } = await import('./migrate');
 
 const TOKEN = 'vercel_blob_rw_teststore_secret';
 const output = ACTIONS['admin.migrateStorage'].output;
@@ -193,7 +206,7 @@ describe('delete inside its budget (HR-K1#4b fix)', () => {
 });
 
 describe('sweep-produced (HR-K1#5b)', () => {
-  it('refuses on a preview before any store call, and removes only the produced files on v2', async () => {
+  it('refuses on a preview and without the public token before any store call, and removes only the produced files on v2', async () => {
     const legacy = memoryBlobClient('https://public.local');
     const produced = [
       'bundles/q4/stamp-ab/q4.zip',
@@ -210,13 +223,26 @@ describe('sweep-produced (HR-K1#5b)', () => {
     await switchedRehearsal(legacy);
     for (const path of produced) await legacy.put(path, encoder.encode(path), { overwrite: false });
     deployment.client = legacy;
-    const rehearsal = { TURBOSLIDE_BLOB_PRIVATE_DIR: dir };
+    deployment.byToken = legacy;
+    // production's public store by its own token, the private store a folder
+    const production = {
+      BLOB_READ_WRITE_TOKEN: TOKEN,
+      VERCEL_ENV: 'production',
+      TURBOSLIDE_BLOB_PRIVATE_DIR: dir,
+    };
     legacy.calls.length = 0;
     await expect(
-      runMigrateStorage({ step: 'sweep-produced' }, { ...rehearsal, VERCEL_ENV: 'preview' }),
+      runMigrateStorage({ step: 'sweep-produced' }, { ...production, VERCEL_ENV: 'preview' }),
     ).rejects.toThrow(/production alone/);
+    // a rehearsal's public client is the deployment's: refused by name, with a 409
+    await expect(
+      runMigrateStorage({ step: 'sweep-produced' }, { TURBOSLIDE_BLOB_PRIVATE_DIR: dir }),
+    ).rejects.toMatchObject({ status: 409, message: SWEEP_NEEDS_PUBLIC_TOKEN });
     expect(legacy.calls).toEqual([]);
-    const swept = await runMigrateStorage({ step: 'sweep-produced', budgetMs: 120_000 }, rehearsal);
+    const swept = await runMigrateStorage(
+      { step: 'sweep-produced', budgetMs: 120_000 },
+      production,
+    );
     expect(output.safeParse(swept).success).toBe(true);
     expect(swept).toMatchObject({
       step: 'sweep-produced',
@@ -226,5 +252,6 @@ describe('sweep-produced (HR-K1#5b)', () => {
       remaining: 0,
     });
     expect([...legacy.blobs.keys()].sort()).toEqual(kept);
+    deployment.byToken = null;
   }, 60_000);
 });

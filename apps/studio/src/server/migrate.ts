@@ -15,7 +15,7 @@ import {
   vercelBlobClient,
   vercelDocumentsClient,
 } from '@turboslide/store/blob-vercel';
-import { MIGRATION_STEPS, runMigrationStep } from '@turboslide/store/hosted';
+import { MIGRATION_STEPS, MigrationRefusal, runMigrationStep } from '@turboslide/store/hosted';
 import type { MigrationClients, MigrationResult, MigrationStep } from '@turboslide/store/hosted';
 import { hasBlobToken, sharesPublicStore } from '@turboslide/store/select';
 
@@ -71,6 +71,14 @@ export function isMigrationStep(value: unknown): value is MigrationStep {
 }
 
 /**
+ * `sweep-produced` without the public store's own token, before any store call (HR-K1#5b): the
+ * step removes what it lists, and without the token the public client is the deployment's, which
+ * on a deployment with a private store lists the produced files there.
+ */
+export const SWEEP_NEEDS_PUBLIC_TOKEN =
+  "sweep-produced runs only on the public store opened by its own token (BLOB_READ_WRITE_TOKEN); without it the step would list the deployment's client";
+
+/**
  * One call of a step; the action's output. Whether the deployment shares the public store with
  * production (a preview, or anything but production that holds the public token) is read from its
  * environment, never from the input.
@@ -81,6 +89,8 @@ export async function runMigrateStorage(
 ): Promise<MigrationResult> {
   if (!isMigrationStep(input.step))
     throw new TypeError(`step must be one of ${MIGRATION_STEPS.join(', ')}`);
+  if (input.step === 'sweep-produced' && !hasBlobToken(env))
+    throw new MigrationRefusal(SWEEP_NEEDS_PUBLIC_TOKEN);
   const { budgetMs, concurrency, backupAt } = input;
   return runMigrationStep(await migrationClients(env), input.step, {
     ...(budgetMs === undefined ? {} : { budgetMs }),

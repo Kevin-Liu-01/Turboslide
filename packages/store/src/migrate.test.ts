@@ -667,8 +667,14 @@ describe('delete', () => {
     await expect(w.run('delete', { backupAt: backup })).rejects.toThrow(/run rekey until a pass/);
     w.t.now = Date.parse(rekey.rekeyAfter ?? '');
     expect(await w.run('rekey')).toMatchObject({ rekeyAfter: null });
+    // the wait is 3 hours (Kevin, 2026-10-16), and a backup may begin inside it
+    expect(DELETE_AFTER_SWITCH_MS).toBe(3 * 3_600_000);
     await expect(w.run('delete', { backupAt: backup })).rejects.toThrow(
-      /waits a day after the switch/,
+      /waits 3 hours after the switch/,
+    );
+    w.t.now = switchedAt + DELETE_AFTER_SWITCH_MS - 1;
+    await expect(w.run('delete', { backupAt: backup })).rejects.toThrow(
+      `delete waits 3 hours after the switch at ${switched.switchedAt}: from ${new Date(switchedAt + DELETE_AFTER_SWITCH_MS).toISOString()}`,
     );
     w.t.now = switchedAt + DELETE_AFTER_SWITCH_MS;
     await expect(w.run('delete')).rejects.toThrow(/--i-have-a-backup/);

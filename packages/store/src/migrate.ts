@@ -15,7 +15,7 @@
 // record write to v2. A run that fails before the switch ends its freeze with `unfreeze`, by itself
 // when `verify` finds a difference, or by the freeze's own end. After the switch: `rekey` gives each
 // deck a key of the environment's own, `verify` names the public documents a v1 writer changed,
-// `rollback` copies back every document written on v2, and `delete`, a day later and after a
+// `rollback` copies back every document written on v2, and `delete`, 3 hours later and after a
 // backup, removes the public documents. The keyed twins (K1#3, K1#4) are at the end of the file.
 import { hasOwnAssetKey, keyedTwinPrefix, newAssetKey } from '@turboslide/schema/access';
 
@@ -93,8 +93,14 @@ export const DEFAULT_BUDGET_MS = 240_000;
 const ITEM_RESERVE_MS = 10_000;
 /** How long a lease holds past the call's budget, for a write the store applies late. */
 export const LEASE_MARGIN_MS = 60_000;
-/** How long after the switch `delete` waits: a day of guard passes on layout v2. */
-export const DELETE_AFTER_SWITCH_MS = 24 * 3_600_000;
+/**
+ * How long after the switch `delete` waits: 3 hours of guard passes on layout v2, during which
+ * `rollback` stays possible. It was a day until Kevin cut it on 2026-10-16: production had no real
+ * saves for days, and the v2 code ran the guard's full walk and specs on the preview since the
+ * rehearsal. After `delete`, a full backup of the private store taken after the switch is the way
+ * back.
+ */
+export const DELETE_AFTER_SWITCH_MS = 3 * 3_600_000;
 /** The `retry-after` of a refused document write, in seconds. */
 export const FROZEN_RETRY_AFTER_S = 30;
 /**
@@ -1211,7 +1217,7 @@ const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?(Z|[+-]\d{2
 /**
  * Why `delete` may not run now, or null (docs/hosting.md 10): after it the private store and the
  * backup hold the only copies, so it runs on a store of its own, on v2 not frozen, after a verify
- * on v2 and a clean rekey, a day after the switch, with the time a backup of the private store
+ * on v2 and a clean rekey, 3 hours after the switch, with the time a backup of the private store
  * began after the switch.
  */
 export function deleteRefusal(
@@ -1230,7 +1236,7 @@ export function deleteRefusal(
     return 'run rekey until a pass is clean after its settle: delete removes the old twins of keyed decks';
   const switched = Date.parse(switchedAt);
   if (options.now < switched + DELETE_AFTER_SWITCH_MS)
-    return `delete waits a day after the switch at ${switchedAt}: from ${iso(switched + DELETE_AFTER_SWITCH_MS)}`;
+    return `delete waits ${DELETE_AFTER_SWITCH_MS / 3_600_000} hours after the switch at ${switchedAt}: from ${iso(switched + DELETE_AFTER_SWITCH_MS)}`;
   const { backupAt } = options;
   if (backupAt === undefined)
     return 'pass --i-have-a-backup <ISO time>, the time the backup of the private store began, after the switch';

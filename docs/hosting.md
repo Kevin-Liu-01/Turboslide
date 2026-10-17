@@ -870,10 +870,10 @@ In the fake, 32 copies twice as fast as 16 with few refusals, and 64 spends most
 429s. 32 is the code's default. Vercel Blob refuses sooner than the fake. The preview's window of
 2026-10-16 (93,357 documents of record, 545 MB) measured the real store:
 
-| In flight | Calls | Copied | Per second                         | Rows (failed after 5 tries) |
-| --------- | ----- | ------ | ---------------------------------- | --------------------------- |
-| 32        | 3     | 62,910 | 86 to 90                           | 10,678, every one a 429     |
-| 16        | 2     | 30,447 | 79 (72 on the last call, draining) | 0, with 16 retries          |
+| In flight | Calls | Copied | Per second                                           | Rows (failed after 5 tries) |
+| --------- | ----- | ------ | ---------------------------------------------------- | --------------------------- |
+| 32        | 3     | 62,910 | 86 to 90                                             | 10,678, every one a 429     |
+| 16        | 2     | 30,447 | 79 and 70 by wall clock (the answers read 81 and 72) | 0, with 29 retries          |
 
 At 32 Blob answered "Too many requests please lower the number of concurrent requests - try again
 in 60 seconds", and 10,678 documents failed five tries; each later call copied the documents an

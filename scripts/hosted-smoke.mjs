@@ -1255,17 +1255,22 @@ async function privateStoreRows(base, scratch, picture, index, timeoutMs) {
     r: { status: '-', ms: 0 },
     ok: false,
   });
+  // the two rows that read the scratch deck fail without it or the store; the index row proves
+  // nothing then, so it is skipped by name, never failed or passed
+  const [documentsRow, twinRow, indexRow] = PRIVATE_STORE_ROWS;
   const host = await publicStoreHostOf(base, timeoutMs);
   if (host === null) {
     return {
-      rows: PRIVATE_STORE_ROWS.map((name) =>
+      rows: [documentsRow, twinRow].map((name) =>
         failed(name, "a public store in the policy's img-src", 'no public store named'),
       ),
+      skip: [`${indexRow}: the deployment names no public store in its policy's img-src`],
     };
   }
   if (scratch.id === null) {
     return {
-      rows: PRIVATE_STORE_ROWS.map((name) => failed(name, 'a scratch deck', scratch.detail)),
+      rows: [documentsRow, twinRow].map((name) => failed(name, 'a scratch deck', scratch.detail)),
+      skip: [`${indexRow}: no scratch deck, so the private store rows did not run`],
     };
   }
   const id = encodeURIComponent(scratch.id);

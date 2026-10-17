@@ -32,6 +32,7 @@ import {
   closedAt,
   isDocumentPath,
   isMigrationPath,
+  isPublicPath,
   readLayout,
   runMigrationStep,
   splitBlobClient,
@@ -486,11 +487,12 @@ async function simulateOne(seed: number, started: number): Promise<SimReport> {
         );
     }
   }
+  // a produced file on the public store counts too: the preview writes only twins there
   const previewPublic = landed.find(
     (l) =>
       (l.who === 'preview' || l.who === 'op-preview') &&
       l.store === 'public' &&
-      isDocumentPath(l.path),
+      !isPublicPath(l.path),
   );
   if (previewPublic !== undefined)
     fail(
@@ -525,7 +527,7 @@ async function simulateOne(seed: number, started: number): Promise<SimReport> {
       (l) =>
         l.who === 'prod' &&
         l.store === 'public' &&
-        isDocumentPath(l.path) &&
+        !isPublicPath(l.path) &&
         l.at > switched &&
         l.at < back,
     );

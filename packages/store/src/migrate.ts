@@ -1252,7 +1252,8 @@ export function deleteRefusal(
 /**
  * `delete`: first, per deck folder of the public store whose private record holds a key of its own
  * (not the public record's), the twins at the old place `decks/<id>/assets/` that the key lacks are
- * copied under it, then the old place leaves; then each public document whose etag is the plan's
+ * copied under it, then the old place leaves once the key holds every one of its names (else the
+ * deck is a row and keeps them); then each public document whose etag is the plan's
  * leaves in batches, and any other stays with a row. Each call lists again, so it resumes anywhere.
  */
 async function deleteStep(call: Call): Promise<MigrationResult> {
@@ -1283,9 +1284,17 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
         if (stored === null || !hasOwnAssetKey(stored.record)) return;
         const key = stored.record.assetKey;
         if (key === (await publishedKey(call.legacy, deckId))) return;
-        await copyTwins(call, deckId, key, [`${deckPrefix(deckId)}assets/`]);
-        await removeAll(call, call.legacy, old.get(deckId) ?? []);
-        processed += old.get(deckId)?.length ?? 0;
+        const held = await copyTwins(call, deckId, key, [`${deckPrefix(deckId)}assets/`]);
+        // an old twin leaves only once its name is under the key: copyTwins skips a twin whose
+        // public read answered nothing (the CDN can cache a miss), and no backup holds the twins
+        const paths = old.get(deckId) ?? [];
+        const lacking = paths.filter((path) => !held.has(path.slice(deckPrefix(deckId).length)));
+        if (lacking.length > 0)
+          throw new Error(
+            `${lacking.length} not under the key yet (${lacking.slice(0, 3).join(', ')}); the next call tries again`,
+          );
+        await removeAll(call, call.legacy, paths);
+        processed += paths.length;
       } catch (error) {
         failures += 1;
         row(call, `${deckId}: its old twins stay: ${messageOf(error)}`);
@@ -1333,8 +1342,15 @@ async function publishedKey(legacy: BlobClient, deckId: string): Promise<string 
 /**
  * Copies under `d/<id>/<key>/` each twin the source prefixes hold that the key lacks, with
  * `overwrite: false`: a twin's name carries its digest, so the same name is the same bytes.
+ * Answers the names the key holds after it (`assets/<name>` for the old place); a twin whose read
+ * answered nothing is not among them.
  */
-async function copyTwins(call: Call, deckId: string, key: string, sources: string[]) {
+async function copyTwins(
+  call: Call,
+  deckId: string,
+  key: string,
+  sources: string[],
+): Promise<Set<string>> {
   const target = keyedTwinPrefix(deckId, key);
   const signal = call.signal;
   const held = new Set(
@@ -1363,6 +1379,7 @@ async function copyTwins(call: Call, deckId: string, key: string, sources: strin
       held.add(name);
     }
   }
+  return held;
 }
 
 /**

@@ -707,6 +707,52 @@ describe('delete', () => {
       /runs on production alone/,
     );
   });
+
+  it('keeps the old twins of a deck while one of them reads as nothing, and moves them on a later call', async () => {
+    const w = world();
+    await w.seed();
+    await blobAccessStore(w.legacy).write(
+      'gt-brand',
+      newDeckRecord('gt-brand', 'usr_o', legacyAssetKey('gt-brand'), NOW),
+    );
+    const { switched } = await window(w);
+    const switchedAt = Date.parse(switched.switchedAt ?? '');
+    opens(w, switched);
+    const rekey = await w.run('rekey', { newKey: () => 'GtBrandKey000000000000' });
+    w.t.now = Date.parse(rekey.rekeyAfter ?? '');
+    expect(await w.run('rekey')).toMatchObject({ rekeyAfter: null });
+    await w.run('verify');
+    w.t.now = Math.max(w.t.now, switchedAt + DELETE_AFTER_SWITCH_MS);
+    // a twin written at the old place after rekey closed, whose public read is a cached miss
+    const late = 'decks/gt-brand/assets/late.9a9a.png';
+    await w.legacy.put(late, body('late'), { overwrite: false });
+    const legacy = w.clients.legacy;
+    w.clients.legacy = {
+      ...legacy,
+      get: async (path, options) => (path === late ? null : legacy.get(path, options)),
+    };
+    const backup = new Date(switchedAt + 3_600_000).toISOString();
+    const held = await w.run('delete', { backupAt: backup });
+    expect(held).toMatchObject({
+      done: false,
+      rows: [
+        expect.stringMatching(
+          /^gt-brand: its old twins stay: 1 not under the key yet \(decks\/gt-brand\/assets\/late\.9a9a\.png\)/,
+        ),
+      ],
+    });
+    expect(w.legacy.blobs.has(late)).toBe(true);
+    expect(w.legacy.blobs.has('decks/gt-brand/assets/mark.ab12.png')).toBe(true);
+    expect(w.legacy.blobs.has('decks/gt-brand/deck.json')).toBe(true);
+    w.clients.legacy = legacy;
+    const gone = await w.run('delete', { backupAt: backup });
+    expect(gone).toMatchObject({ done: true, rowCount: 0 });
+    expect(text(await w.legacy.get('d/gt-brand/GtBrandKey000000000000/assets/late.9a9a.png'))).toBe(
+      'late',
+    );
+    expect(w.legacy.blobs.has(late)).toBe(false);
+    expect(w.legacy.blobs.has('decks/gt-brand/assets/mark.ab12.png')).toBe(false);
+  });
 });
 
 describe("a preview's window on the shared public store", () => {

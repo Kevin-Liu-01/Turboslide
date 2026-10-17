@@ -1753,27 +1753,22 @@ export function Thumb({
 }
 
 /**
- * The GT brand deck card's cover (`GT_BRAND_COVER`): the example deck's first slide, with the GT
- * mark on the template's ink plate under it from the first paint, so a deployment whose store
- * holds no example deck or no capture yet still draws the template's own mark. The GT mark is the
- * template's content here (docs/brand.md 134 to 139), never the product's.
+ * The GT brand deck card's cover (`GT_BRAND_COVER`): the example deck's first slide over the GT
+ * mark on the template's ink plate, which shows until the picture paints. The GT mark is the
+ * template's content here (docs/brand.md 134 to 139), never the product's. The `img` keeps no
+ * load state: a cached file can finish loading before hydration, before any load handler exists.
  */
 function GtBrandCover() {
-  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>('loading');
   return (
-    <span className="ts-template-cover" data-cover={state}>
+    <span className="ts-template-cover">
       <GtMark width={56} height={36} />
-      {state === 'failed' ? null : (
-        <img
-          src={GT_BRAND_COVER}
-          width={320}
-          height={180}
-          alt=""
-          decoding="async"
-          onLoad={() => setState('loaded')}
-          onError={() => setState('failed')}
-        />
-      )}
+      <img
+        src={GT_BRAND_COVER}
+        width={GT_COVER.width}
+        height={GT_COVER.height}
+        alt=""
+        decoding="async"
+      />
     </span>
   );
 }

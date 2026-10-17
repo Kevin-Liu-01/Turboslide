@@ -345,7 +345,7 @@ html:has(.ts-home-page) {
 }
 
 /* the GT template's cover (decks.index.tsx GtBrandCover): the example deck's first slide over the
-   template's mark, which shows while the capture loads and when it fails */
+   template's mark, which shows until the picture paints */
 .ts-template-cover {
   position: relative;
   display: grid;
@@ -362,10 +362,6 @@ html:has(.ts-home-page) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.ts-template-cover[data-cover='loading'] img {
-  opacity: 0;
 }
 
 .ts-template:hover .ts-template-plate,

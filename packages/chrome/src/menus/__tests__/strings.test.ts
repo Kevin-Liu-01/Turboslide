@@ -59,8 +59,8 @@ describe('the refusals of SPEC-3 6.8', () => {
     expect(REFUSALS.signInToUpload).toBe('Sign in to upload a picture');
     /* the third name sentence of identity's NAME_REFUSALS (build-3/b3.md request 5) */
     expect(REFUSALS.nameInvalid).toBe('Use 1 to 40 letters or digits in one script');
-    /* the sixteen sentences of 6.8 (two of them with a variable), plus the persisted queue's Apply and Discard, the View only button's second sentence and the name shape rule, and the old queue's sentence and Copy Text (HR-RC#5c) */
-    expect(Object.keys(REFUSALS)).toHaveLength(22);
+    /* the fifteen sentences of 6.8 left after HR-C#8 removed presenceNeedsRedis (two of them with a variable), plus the persisted queue's Apply and Discard, the View only button's second sentence and the name shape rule, and the old queue's sentence and Copy Text (HR-RC#5c) */
+    expect(Object.keys(REFUSALS)).toHaveLength(21);
   });
 
   it('name no role the person lacks, no internal noun and no other account or presentation', () => {

@@ -351,7 +351,7 @@ export type EditorPresence = {
   /** the collaborator announcements of 4.9 */
   announce?: boolean;
   /** the room's tier, for the admin's sentence of 6.8 on the blob tier (`do` since docs/CLOUDFLARE.md 3.6.1) */
-  tier?: 'redis' | 'memory' | 'blob' | 'do';
+  tier?: 'memory' | 'blob' | 'do';
   onFollow?: (clientId: string) => void;
   onUnfollow?: () => void;
   onGoTo?: (clientId: string) => void;
@@ -568,10 +568,8 @@ export type TokenView = {
 export type EditorAccount = {
   principal: IdentityView;
   signedIn: boolean;
-  /** `DATABASE_URL` is set: the Sign in row exists (7.3) */
+  /** the deployment has an accounts database: the Sign in row exists (7.3) */
   signInAvailable: boolean;
-  /** the passkey plugin is on: the production domain is fixed (7.3) */
-  passkeysAvailable?: boolean;
   githubAvailable?: boolean;
   /** the Google client is configured: Continue with Google, first in the dialog (docs/REALTIME.md 4.1) */
   googleAvailable?: boolean;
@@ -592,7 +590,6 @@ export type EditorAccount = {
   /** one mail with a magic link and a six digit code; the same answer whether or not the address exists */
   requestCode?: (email: string) => Promise<unknown>;
   verifyCode?: (email: string, code: string) => Promise<unknown>;
-  passkey?: () => Promise<unknown>;
   github?: () => void;
   google?: () => void;
   /** the profile's agent key rows (7.7) */
@@ -640,7 +637,7 @@ export type EditorSync = {
   revision: number;
   pending: number;
   retained: number;
-  tier: 'redis' | 'memory' | 'blob' | 'do';
+  tier: 'memory' | 'blob' | 'do';
   /** the wire's kind: `ws` on the `do` tier's socket (docs/CLOUDFLARE.md 3.6.3), `sse` on the stream route */
   transport: 'sse' | 'ws' | 'poll' | 'none';
   connected: boolean;

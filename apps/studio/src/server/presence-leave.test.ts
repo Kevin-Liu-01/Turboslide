@@ -1,7 +1,7 @@
 // The leave with the beacon's clock (b4.md C3T-R2; the return round's B7): the presence route's
 // `?leave=1` hands the post's clock to the blob tier's shared roster, whose tombstone keeps it so
-// a set of the same tab that lands after the leave never brings the row back; the memory and
-// redis tiers, and the clockless leaves of the stream's close and `retireClients`, take the
+// a set of the same tab that lands after the leave never brings the row back; the memory tier,
+// and the clockless leaves of the stream's close and `retireClients`, take the
 // channel's own `leave`.
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -63,7 +63,7 @@ describe('leavePresence', () => {
     expect(sharedCalls).toHaveLength(1);
     expect(await channel.presence.roster(DECK)).toEqual([]);
 
-    // the memory and redis tiers: no shared roster, the channel's leave whatever the clock
+    // the memory tier: no shared roster, the channel's leave whatever the clock
     await channel.presence.set(DECK, C1, row(C1, 5), 120_000);
     await leavePresence(room, C1, 6, null);
     expect(sharedCalls).toHaveLength(1);

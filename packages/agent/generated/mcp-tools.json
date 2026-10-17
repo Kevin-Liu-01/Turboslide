@@ -697,7 +697,6 @@
         "source": {
           "type": "string",
           "enum": [
-            "redis",
             "file",
             "default"
           ]
@@ -50095,7 +50094,6 @@
           "type": "string",
           "enum": [
             "memory",
-            "redis",
             "blob",
             "do"
           ]
@@ -73532,7 +73530,6 @@
             "type": "string",
             "enum": [
               "memory",
-              "redis",
               "blob",
               "do"
             ]
@@ -95338,7 +95335,6 @@
           "source": {
             "type": "string",
             "enum": [
-              "redis",
               "file",
               "default"
             ]

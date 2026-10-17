@@ -204,9 +204,9 @@ async function serve(request: Request, deckId: string): Promise<Response> {
         await retireClients(room, url.searchParams.get('retire'), identity, clientId);
         const recheck = async (fresh = false): Promise<void> => {
           // an access event names a share write: drop this instance's cached record first so the
-          // recheck reads the record that write produced, on the redis tier at once when another
-          // instance wrote it (VERIFICATION-3 finding 34; hotfix B request R3). On the blob tier
-          // the event is process local and the drop repeats what the writer's hooks did.
+          // recheck reads the record that write produced (VERIFICATION-3 finding 34; hotfix B
+          // request R3). The event is process local and the drop repeats what the writer's hooks
+          // did.
           if (fresh) (await accessStore()).drop(deckId);
           const again = await decideFor(identity, deckId, 'read', 'stream');
           if (!again.ok) {
@@ -322,7 +322,7 @@ async function serve(request: Request, deckId: string): Promise<Response> {
             return;
           }
           write(sseComment());
-          // the redis tier's hand off and hand back (room.ts ensureRealtimeTier; docs/REALTIME.md
+          // the do tier's hand off and hand back (room.ts ensureRealtimeTier; docs/CLOUDFLARE.md
           // 3.8) are read here too, so an instance whose tabs are idle notices within a heartbeat
           void ensureRealtimeTier().catch(() => undefined);
         }, STREAM_HEARTBEAT_MS);

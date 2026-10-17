@@ -678,32 +678,28 @@ Every route below runs on the file, tmp and Blob backends through the same serve
   itself stays consistent on the next sync.
 - The per-route function copies triple the upload; Nitro offers no shared directory for rules.
 
-## 9. Redis, the realtime tier (Google Slides parity round three)
+## 9. The realtime tiers
 
-The multiplayer room of `docs/archive/gslides-parity/SPEC-3.md` section 2.3 needs a store that every
-function instance shares and that can fan out: Vercel Blob allows about 15 one slide commits per
-second across a deployment and cannot push a change to another instance, so the room runs on Redis
-over the Redis protocol (`ioredis`; the REST API cannot block on `XREAD`). `@turboslide/realtime/select`
-`selectRealtime(env)` picks the tier once per process, like `selectStore`:
+The multiplayer room of `docs/archive/gslides-parity/SPEC-3.md` section 2.3 needs a channel that
+every function instance shares and that can fan out: Vercel Blob allows about 15 one slide commits
+per second across a deployment and cannot push a change to another instance.
+`@turboslide/realtime/select` `selectRealtime(env)` picks the tier once per process, like
+`selectStore`:
 
-| Environment                               | Tier     | Change feed                                                       | Presence                                 |
-| ----------------------------------------- | -------- | ----------------------------------------------------------------- | ---------------------------------------- |
-| a checkout, the tests                     | `memory` | in process; CLI writes beside the dev server arrive by `fs.watch` | in process                               |
-| `REDIS_URL` set                           | `redis`  | a Redis stream per deck, pub/sub, one Lua compare and append      | a Redis hash and sorted set              |
-| hosted without `REDIS_URL`                | `blob`   | every batch is a `BlobStore.write`; `head('deck.json')` polled    | per instance only; the title row says so |
-| `TURBOSLIDE_REALTIME=memory\|redis\|blob` | forced   | as above                                                          | as above                                 |
+| Environment                                                 | Tier     | Change feed                                                       | Presence                                                |
+| ----------------------------------------------------------- | -------- | ----------------------------------------------------------------- | ------------------------------------------------------- |
+| a checkout, the tests                                       | `memory` | in process; CLI writes beside the dev server arrive by `fs.watch` | in process                                              |
+| `TURBOSLIDE_ROOM_HOST` set, with the room secret and bearer | `do`     | the deck's Durable Object on the realtime Worker (section 13)     | the object                                              |
+| hosted without the Worker                                   | `blob`   | every batch is a `BlobStore.write`; `head('deck.json')` polled    | the store's shared roster record; the title row says so |
+| `TURBOSLIDE_REALTIME=memory\|blob\|do`                      | forced   | as above                                                          | as above                                                |
 
-What Redis holds, all of it derived or short lived (a flush loses nothing a store does not have;
-the room reloads the document from the store and the tabs resync): the operation stream of each
-deck (`deck:<id>:ops`, trimmed to 10,000 entries after a checkpoint), its head, the checkpointer
-lock (`deck:<id>:ckpt`, `SET NX PX 5000`, a 1 s heartbeat, broken after 3 s of silence), the
-follow lock, the presence hash and roster (120 s expiry), the client bindings (report 10 F26), the
-per client and per identity budgets (fixed windows), the access record cache (60 s, dropped by a
-`PUBLISH` on every write), the deck head cache (`head:<deckId>`, a day, refreshed by the commit
-path), the anonymous principal records, the anonymous inboxes (`inbox:<principalId>`, 30 days),
-the studio session directory (`sessions:studio`), the kill switch flags and the spent download
-tokens. The key builder is `packages/realtime/src/keys.ts`; every key starts with the slug
-validated deck id or one of the fixed prefixes, so a key never carries user text.
+The redis tier of round three (a Redis stream per deck, pub/sub and one Lua compare and append
+over `ioredis`, with the principal records, the inboxes, the session directory, better-auth's
+secondary storage and the counters in the same database) was built and tested, never deployed
+(`docs/CLOUDFLARE.md` 5.1: `REDIS_URL` was never set on either project), and left the tree in
+hardening HR-C#8 (CLEANUP-6). `REDIS_URL` selects nothing since, and `TURBOSLIDE_REALTIME=redis`
+is a TypeError at the first request. Its design and its runbook are `docs/REALTIME.md` and this
+file's history before HR-C#8.
 
 The stream protocol (SPEC-3 3.3): `GET /api/decks/:id/stream` is Server-Sent Events with `hello`,
 `ops`, `op`, `checkpoint`, `presence`, `leave`, `reject`, `inbox`, `access` and `resync`, a comment
@@ -711,63 +707,26 @@ line every 15 s, `Last-Event-ID` (or `?since=`) to resume, a server close at a r
 240 and 290 s with `retry` between 1,000 and 4,000 ms so tabs never reconnect together; `POST
 /api/decks/:id/ops` admits a batch of operations against `base.seq` (64 entries and 256 kB at
 most, a 500 entry window behind the head, transform against what landed, the reducer and the
-validator, one Lua compare and append); `POST /api/decks/:id/presence` posts one presence state
+validator, one compare and append); `POST /api/decks/:id/presence` posts one presence state
 (15 a second per client, coalesced). Both POST routes and the stream sit behind the CSRF filter of
 `apps/studio/src/start.ts`: a browser passes with `Sec-Fetch-Site: same-origin`; `curl` needs the
 header set by hand.
 
 The checkpointer (`apps/studio/src/server/checkpoint.ts`) turns the stream into version records:
 one record per author and contiguous run (SPEC-3 0.51), after 2 s idle, 10 s at most, 2,000
-entries or 1 MB, at once for an agent's write and a named version, under the lock above; the
+entries or 1 MB, at once for an agent's write and a named version, under the channel's checkpoint
+lock; the
 record carries `ops: { fromSeq, toSeq }` so a cold instance loads the document at the last
 checkpoint and applies the entries after it (0.53). Comment entries ride the same run into the
-sidecar (section 10) on the memory and redis tiers; on the blob tier the version log carries no
+sidecar (section 10) on the memory tier; on the blob tier the version log carries no
 comment entries for the checkpointer to fold, so the channel writes them to the sidecar itself in
 the same append (`room.ts` attaches the comments store as the channel's `applyComments`; without
 it every comment write answered 400 on the previews, VERIFICATION-3 finding 6). Measured on the
 dev server with the memory tier: the numbers of `docs/gslides-parity/build-3/b2.md`.
 
-When Redis is unreachable the channel logs `redis.unavailable`, the kill switch `realtime` reads
-as off and the tabs fall to the `blob` tier's behaviour until the connection returns; nothing is
-lost, because every admitted entry reaches the store within the checkpoint interval. Redis must
-never hold the only copy of anything: that is the test of whether a value belongs there.
+The realtime round (2026-10-01; `docs/REALTIME.md`) left these transport independent rules, which
+the `do` tier builds on:
 
-### 9.1 The realtime round (2026-10-01)
-
-Superseded on production by section 13 (the Cloudflare phase of the same round, `docs/CLOUDFLARE.md`,
-Kevin's "we should use cloudflare instead of vercel stuff for free" of 2026-10-01): the redis tier
-described here stays in the tree as code, runs on a checkout's Docker Redis and the two process
-run, and is never deployed (CLOUDFLARE.md 5.1); `REDIS_URL` is never set on either project (4.4).
-Its transport independent hunks (the agent author, `serverClientId`, `replayFor`'s resync rule,
-`yieldConcurrentConversion`, the checkpointer's `covered` from events, the two presence fields'
-server half) are what the `do` tier builds on. Sections 9.1 to 9.5 describe the tier as built; the
-runbook of production is section 13.
-
-The redis tier leaves the in process fake for the first time in the realtime round
-(`docs/REALTIME.md`; the research under `docs/gslides-parity/realtime/`). The round's lanes (R1
-the channel and the server, R2 the client, R3 the presence surfaces, R4 Google sign in, R5 the
-matrix, R6 these pages) change this section's design in six places; each lane's note under
-`docs/gslides-parity/realtime/build/` names its hunks.
-
-- The presence write is one `EVALSHA` of `PRESENCE_SET` (`packages/realtime/src/lua.ts`): the
-  clock check, the two `HSET`s (the body and its meta field `<clientId>:m` carrying
-  `<clock>:<durable>`), `ZADD`, the two `PEXPIRE`s and the `PUBLISH`, in place of the seven
-  commands of `redis.ts` `presence.set`. A frame whose durable projection (the entry without
-  `pointer`, `drag` and `clock`) equals the stored one is volatile: its body is not stored, its
-  meta clock and the expiry are refreshed, and it is published, so a pointer frame costs one
-  command and a joiner reads the pointer at the next frame; the editor hour falls from about
-  10,000 Redis commands to about 4,300 (REALTIME.md 3.4; `research-hosting.md` 2.1; R1's
-  `build/r1.md`). The state gains `caret.seq` (the tab's stream position, so a receiver transforms
-  a remote caret past later entries) and `drag` (the moving block's box while the pointer is
-  down); on the blob tier `drag` joins `PRESENCE_OMITTED_FIELDS` and nothing else changes there.
-- The drop bus (`packages/realtime/src/bus.ts`): `PUBLISH bus:<topic>` with the id as the
-  message, one subscription per topic per instance; the topics are `access` (the access record
-  cache, `cachedAccessStore`), `link` (the deck index row of `indexFactsFor`: the link grants, the
-  typed name, the avatar choice), `identity` (the room's resolved identity cache and its email
-  memory) and `principal` (declared; the kv principal store has no per instance cache to drop on
-  this tree). The memory tier runs the same bus in process; the blob tier has none and keeps its
-  5 s TTLs (REALTIME.md 3.6). The principal records live in Redis on this tier through the `kv`
-  of `auth/identity.ts` `selectPrincipalStore`.
 - A bearer's write over `POST /api/actions/<action>?deck=<id>` enters the deck's stream like a
   tab's POST (every tier but `blob`; every mutation but `version.restore`) with `author.kind:
 'agent'`, the token's label as the name, the `x-turboslide-author` run id when present and the
@@ -778,145 +737,6 @@ matrix, R6 these pages) change this section's design in six places; each lane's 
   with a gap and never a hang, on every tier (a blob tier revision above the new head at the flip
   and the same case backwards at a rollback are the two hosted cases); the tab reloads once at the
   head and its pending ops replay from the pending store (REALTIME.md 3.7).
-- The hand off between the tiers: on the redis tier every `roomFor` and every stream heartbeat
-  reads the `realtime` flag through the channel (cached 5 s). When it reads off (a hand
-  `SET flag:realtime off` on the database, or Redis unreachable, which the channel reads as off
-  and logs `redis.unavailable`) the instance closes its rooms, writes `resync` to every open
-  stream and closes them, and serves the next requests over the blob channel built on demand;
-  when the flag reads on again the instance hands back the same way. The tabs reload once each
-  way; nothing is lost because every admitted entry reached the store within the checkpoint
-  interval and the blob tier commits every append (9.3 item 1 is the command).
-- The per deck objects above gain the bus channels; the stream keeps 10,000 entries behind the
-  last checkpoint (`apps/studio/src/server/checkpoint.ts` `STREAM_RETAIN_ENTRIES`); the rule that
-  Redis never holds the only copy of anything stands.
-- Follow returns to the default view for every editor and owner, by link and anonymous included
-  and never for an agent: the `follow` cell of the capability matrix (`packages/identity/src/access.ts`)
-  leaves `NOT_BY_LINK` for editor links and `title.presence.follow` loses `advanced: true`
-  (REALTIME.md 7.5; R3's `build/r3.md`). Nothing here changes an authorization decision on the
-  server: a viewer's stream carries the ops with the notes stripped and the presence frames, and
-  the pointer is published by editors and owners alone (REALTIME.md 3.5).
-- Google sign in rides the same install: `DATABASE_URL` for the accounts, `REDIS_URL` for the
-  sessions' secondary storage and the principal store, the two Google variables and
-  `TURBOSLIDE_ADMIN_EMAILS` (REALTIME.md section 4; `docs/security.md` section 12).
-
-Measured against a real Redis for the first time in this round: the local two process run
-(two node servers over one tmp store with `REDIS_URL=redis://127.0.0.1:6379/<n>`) and the redis
-preview gate. [The ship step writes the numbers here from `build/r1.md` and the ledgers: the
-keystroke, the caret, the chip, the Redis commands per editor hour against the 12,000 ceiling.]
-
-### 9.2 The runbook: turning the tier on (REALTIME.md 3.7 and 4.5)
-
-(The redis runbook, kept as written for the tier that exists in code; production's runbook is 13.2,
-and `realtime-env.mjs redis` is retired with the reason in `scripts/hosting/README.md`.)
-
-The order never breaks a deployment, because `select.ts` reads `REDIS_URL` only when nothing is
-forced (79) and `redis` forced without it is a TypeError at the first request (67 to 71).
-Production forces `blob` today (`vercel env ls production --scope general-translation` on
-2026-10-01, names only: `TURBOSLIDE_REALTIME` present, `REDIS_URL` absent, on both projects).
-Every step that touches the project's environment runs through
-`node scripts/hosting/realtime-env.mjs <subcommand>` from a root linked to `turboslide-gt`
-(`scripts/hosting/README.md`): values from 600 files under `~/.config/turboslide/`, names only in
-the output, `--dry-run` to see the plan first. The Marketplace installs and the Google console are
-Kevin's (section 11's account boundary; REALTIME.md 4.5).
-
-1. Kevin installs Upstash Redis from the project's Storage tab (Fixed 250 MB, `us-east-1`,
-   connected to production and preview); `REDIS_URL` appears in both environments.
-   `realtime-env.mjs redis` confirms it and sets nothing. The next main deploy reads the URL and
-   stays on `blob`, because the forced row stands.
-2. Kevin installs Neon Postgres the same way (`DATABASE_URL`); `realtime-env.mjs database` mints
-   `BETTER_AUTH_SECRET` per environment with `openssl rand -hex 32` into
-   `~/.config/turboslide/better-auth.env` and sets it.
-3. Kevin creates the Google Cloud project `Turboslide` and the Web application client (REALTIME.md
-   4.5 step 3; `design-google-login.md` section 8) and writes the two values into
-   `~/.config/turboslide/google-oauth.env` (600); `realtime-env.mjs google` sets them with
-   `TURBOSLIDE_ADMIN_EMAILS`.
-4. `realtime-env.mjs mail` sets Resend's pair when Kevin provides `mail.env`; without it
-   `TURBOSLIDE_MAIL` stays `off`, the email field hides and Google is the one method (default 7.7).
-5. The redis preview gate (REALTIME.md 5.4 item 2): one deployment of the merged tree with
-   `-e TURBOSLIDE_REALTIME=redis`, `REDIS_URL` from the preview environment, the whole matrix once,
-   detached; `cost.redis.commands` over its ceiling holds the flip.
-6. `realtime-env.mjs flip`: requires `REDIS_URL` on both environments, removes the forced
-   `TURBOSLIDE_REALTIME` row on both (the removal and not a forced `redis`, default 7.9) and
-   writes `scripts/hosting/production.json` to `redis`; the ship step commits the file and pushes;
-   the guard (`scripts/hosting/README.md` "The guard patch") checks `REDIS_URL` before the
-   production deploy and runs the three realtime rows on the seller path; the next production
-   deployment selects `redis` (`select.ts` 79). Every open tab reloads once (REALTIME.md 3.7).
-7. The function log is read for the base URL warning, Kevin signs in once on
-   `www.turboslide.com`, the badge is read on a second browser, the scratch deck is removed by id
-   (`accounts.google-roundtrip`).
-
-Two deployments serve one deck during the alias switch (a blob instance writes records to the
-store while a redis instance appends to the stream): the redis room's follower reads the records
-above what it knows, announces an external checkpoint and the tabs reload at its revision; the
-window is the seconds of the switch (REALTIME.md 3.7; the ship note records what it saw).
-
-### 9.3 The rollback switch (REALTIME.md 3.8)
-
-`TURBOSLIDE_REALTIME` with the values `memory`, `redis` and `blob`. Production after the flip has
-no forced row and selects `redis` from `REDIS_URL`. Three ways back, from the fastest:
-
-1. No deploy: the `realtime` flag off. The command is
-   `redis-cli -u "$REDIS_URL" SET flag:realtime off` against the database (on Upstash, the
-   console's CLI; `REDIS_URL` read into the shell from the environment, never typed), or
-   `turboslide admin flag realtime off --to https://www.turboslide.com` against the deployment
-   through the agent bearer (`~/.config/turboslide/hosts.json`, never printed). The flag lives at
-   `flag:realtime` and is read with a 5 s cache on every instance (`apps/studio/src/server/flags.ts`
-   `FLAG_CACHE_MS`; `redis.ts` `flag`), so within 5 s every instance hands its rooms to the blob
-   channel the way `redis.unavailable` does (9.1); `SET flag:realtime on` or `DEL flag:realtime`
-   hands back. The tabs reload once each way. [R1 verifies on the preview that the hand set `off`
-   takes that path; the ship step writes the reading here.]
-2. A redeploy with the forced row: `node scripts/hosting/realtime-env.mjs rollback` sets
-   `TURBOSLIDE_REALTIME=blob` on production and preview (`--force`) and writes `production.json`
-   to `blob`; the guard's next pass, or `vercel deploy --prod` from the guard's worktree, builds
-   with it. The tabs reload once.
-3. Vercel's Instant Rollback (`vercel rollback --scope general-translation --yes`, or
-   `vercel promote <previous production url>`) to the guard's previous production deployment,
-   built with the forced `blob` row and running with it; `~/.config/turboslide/README.md` "Rolling
-   back by hand" has the steps and the hold that stops the loop redeploying the sha.
-
-A tab's stream position on the redis tier is not a store revision, so after any of the three the
-blob tier's replay answers `resync` and the tab reloads once (REALTIME.md 3.7); its pending ops
-survive in the pending store and replay against the current document.
-
-### 9.4 The failure modes (REALTIME.md 3.8)
-
-| Failure                                        | What happens                                                                                                                                                                                                                                                                       | Where                                                                                             |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Redis unreachable from an instance             | `redis.unavailable` is logged, the `realtime` flag reads off and the tabs fall to the blob tier's behaviour; nothing is lost, every admitted entry reaches the store within the checkpoint interval                                                                                | `redis.ts` `flag`; the paragraph above 9.1; 9.3 item 1 is the same path set by hand               |
-| A pub/sub message dropped                      | The subscriber's gap is filled from the stream by `XRANGE`; the client's 8 s gap watch reopens the stream if the fill is late                                                                                                                                                      | `redis.ts` `handle`, `redis.test.ts` (the dropped message test); `room-client.ts` the gap watch   |
-| The subscriber connection dropped              | ioredis reconnects; the instance's streams miss events until the client's gap watch reopens them; the hello's replay fills the gap                                                                                                                                                 | `room.ts` (`maxRetriesPerRequest: 3`)                                                             |
-| Upstash's connection limit                     | Every instance holds two connections; the limit is unpublished and the error exists (9.5). Kevin asks Upstash before the flip; the preview gate reads the connection count in the console                                                                                          | `research-options.md` 5a; `research-hosting.md` section 4 item 5 (1,024 descriptors per instance) |
-| The checkpointer's lock holder dies            | A waiter breaks a lock whose heartbeat is older than 3 s and writes the run                                                                                                                                                                                                        | `checkpoint.ts` (the lock, the heartbeat, the break)                                              |
-| A reload between the append and the checkpoint | The document at the store plus the stream's tail; the replay fills the rest                                                                                                                                                                                                        | `room.ts` `syncLive`; R1's two instance test on the blob store under the redis channel            |
-| Two instances checkpoint one run               | The checkpointer re-reads the records' `covered` under its lock on every run (a mirror syncs first), so two instances never commit one stream entry twice; the memory tier's single process hid a stale `covered` a second instance's checkpoint would have made before this round | `checkpoint.ts`; R1's finding on the two process run (`build/r1.md`)                              |
-| Blob's rate limit on the write path            | Fewer writes than today (one record per run); a 429 backs the checkpointer off and the stream keeps the entries up to 10,000                                                                                                                                                       | `research-hosting.md` section 4 item 7                                                            |
-| A presence flood                               | The per client budget drops frames past 15 a second; the `volatile` frames cost one command                                                                                                                                                                                        | `decks.$deckId.presence.ts` (`presenceBudget`); 9.1                                               |
-| The function's maximum duration                | The stream closes at 240 to 290 s with a `retry`, as today                                                                                                                                                                                                                         | `packages/realtime/src/protocol.ts`                                                               |
-
-### 9.5 Upstash's connection limit, read on 2026-10-01
-
-Every instance holds two connections (the command client and its pub/sub duplicate, `redis.ts`
-57 to 95, built with `lazyConnect: false` at module load, `room.ts` 156), nothing closes them
-when an instance is paused, and fluid compute runs many instances, so the number of connections
-a plan allows decides whether the tier holds under a gate's hundreds of tabs. The number is not
-published. Read as data on 2026-10-01: Upstash's troubleshooting page
-`https://upstash.com/docs/redis/troubleshooting/max_concurrent_connections` names the error
-`ERR max concurrent connections exceeded`, one cause ("You have reached the concurrent
-connection limit") and three answers (open and close the client inside a serverless function, at
-about 4 ms of latency per call; the REST client `@upstash/redis`, which "does not have any
-connection related problems" and which this tier cannot use because `SUBSCRIBE` needs the Redis
-protocol; or support@upstash.com); the pricing page `https://upstash.com/pricing/redis` and the
-pricing document `https://upstash.com/docs/redis/overall/pricing` carry rows for commands a
-second (10,000 on the fixed plans), request size, record size, data size and bandwidth and no row
-for connections, and the pricing document says nothing about how `redis.call` inside a script or
-a delivered pub/sub message is counted (operational commands such as `AUTH`, `HELLO`, `PING` and
-`QUIT` are not charged; replications to read regions are); the global database page
-`https://upstash.com/docs/redis/features/globaldatabase` states the latencies (read under 1 ms
-and write under 5 ms from the same region at the 99th percentile) and nothing about connections.
-The question Kevin sends to support@upstash.com before the flip: the concurrent connection limit
-of the Fixed 250 MB plan in `us-east-1`, for a client that holds one command connection and one
-subscriber per serverless instance. [The ship step writes the answer here, and the connection
-count the Upstash console showed during the preview gate.]
 
 ## 10. The private store and storage layout v2
 
@@ -1144,15 +964,11 @@ The account boundary of MILESTONES-3: no agent installs a Vercel Marketplace pro
 resource, changes DNS, registers a sending domain or signs up for a service. Every tier below is
 built behind an environment switch with a fake in the tests and turns on when the variable is set.
 
-- Redis (Upstash, Marketplace, the fixed 250 MB plan): install from the project's Storage tab,
-  which sets `REDIS_URL` (the Redis protocol URL, `rediss://`); redeploy; `turboslide sync status
---from <studio>` answers `tier: redis`. To turn it off, unset the variable: the deployment falls
-  to the `blob` tier with the title row's notice.
-- Postgres (Neon, Marketplace, free tier): sets `DATABASE_URL`; better-auth's Kysely adapter runs
-  the migrations at the first request (B3's `apps/studio/src/server/auth/better-auth.ts`); without
-  it the deployment has anonymous principals only.
+- The realtime channel and the accounts database: the realtime Worker on Cloudflare (section 13).
+  The Redis tier, the Upstash limiter and the Postgres accounts dialect (`DATABASE_URL`) left in
+  hardening HR-C#8 (section 9).
 - Resend: `RESEND_API_KEY` and `TURBOSLIDE_MAIL_FROM` after Kevin registers the sending domain;
-  `TURBOSLIDE_MAIL=capture` on every preview writes outgoing mail to a Redis list that
+  `TURBOSLIDE_MAIL=capture` on every preview writes outgoing mail to the capture store that
   `admin.mail.list` reads instead of sending.
 - The private store: section 10.
 - The WAF rules file (`firewall/rules.json`, B4): log mode from the ship step; enforce is Kevin's
@@ -1168,43 +984,39 @@ request derives its author from the sealed cookie, and the tmp store's export to
 `TURBOSLIDE_DOWNLOAD_SECRET` beside it); an obviously fake value is fine on a checkout.
 
 Environment variables the round adds (every secret differs between preview and production). The
-realtime round of 2026-10-01 and its Cloudflare phase (sections 9.2 and 13.2) set the rows they name through
+realtime round of 2026-10-01 and its Cloudflare phase (section 13.2) set the rows they name through
 `scripts/hosting/realtime-env.mjs`, from 600 files under `~/.config/turboslide/`, names only in
 its output:
 
-| Variable                                             | Set by                                                                                                                                                                                                 | Effect                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REDIS_URL`                                          | never set on either project (CLOUDFLARE.md 4.4; the redis tier stays code, section 9)                                                                                                                  | a value here would select `redis` at the next deploy (`select.ts`) when nothing is forced, which the Cloudflare phase never does; `realtime-env.mjs status` reports it under the names that must be absent                                                                                     |
-| `TURBOSLIDE_REALTIME`                                | you; `realtime-env.mjs flip --tier do` removes it, `rollback` sets `blob`                                                                                                                              | forces `memory`, `redis`, `blob` or `do`; production forced `blob` until the Cloudflare phase's flip removed the row (13.2); the rollback switch (13.3); `redis` without `REDIS_URL` and `do` without the three room variables are a TypeError at the first request                            |
-| `TURBOSLIDE_ROOM_HOST`                               | `realtime-env.mjs do`, plain, from `~/.config/turboslide/cloudflare.env` (`turboslide-realtime.kk23907751.workers.dev` on production, `turboslide-realtime-preview.kk23907751.workers.dev` on preview) | selects the `do` tier when nothing is forced (`select.ts`; CLOUDFLARE.md 3.6.1): the deck's Durable Object on the Worker is the channel and the presence; the CSP `connect-src` gains its `https://` and `wss://`; on a checkout `127.0.0.1:87<lane>` with `TURBOSLIDE_ROOM_INSECURE=1` (13.7) |
-| `TURBOSLIDE_ROOM_SECRET`                             | `realtime-env.mjs do`, sensitive, from `room.env` (600, `openssl rand -hex 32`); the same value on the Worker's secrets (`worker-secrets`)                                                             | the HMAC key of the room ticket the editor loader mints and the Worker verifies before a socket reaches an object (CLOUDFLARE.md 3.3)                                                                                                                                                          |
-| `TURBOSLIDE_ROOM_BEARER`                             | the same, from `room.env`; the same value on the Worker's secrets                                                                                                                                      | the bearer of the function's calls to the Worker and of the object's calls to the function (the checkpoint and seed routes); `docs/security.md` section 12 has its reach and rotation                                                                                                          |
-| `TURBOSLIDE_ACCOUNTS`                                | `realtime-env.mjs database`, plain: `d1`                                                                                                                                                               | the accounts database is D1 behind the Worker's bearer routes (CLOUDFLARE.md 4.2; `auth/db.ts`); needs the host and the bearer; without it the Sign in row is absent (`NO_DATABASE_NOTICE`)                                                                                                    |
-| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                      | the private store; the dashboard's connection names it `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, which the studio reads too                                                                          | layout v2: documents in the private store through `layoutBlobClient` (section 10)                                                                                                                                                                                                              |
-| `TURBOSLIDE_BLOB_PRIVATE_DIR`                        | you, a checkout                                                                                                                                                                                        | a folder as the private store for a migration rehearsal                                                                                                                                                                                                                                        |
-| `DATABASE_URL`                                       | never set on either project (CLOUDFLARE.md 4.4)                                                                                                                                                        | a self hosted Postgres keeps the `postgres` kind of `auth/db.ts`; production's accounts are D1                                                                                                                                                                                                 |
-| `BETTER_AUTH_SECRET`                                 | `realtime-env.mjs database` mints and sets it, one value per environment, into `~/.config/turboslide/better-auth.env`                                                                                  | the account sessions (B3)                                                                                                                                                                                                                                                                      |
-| `TURBOSLIDE_SESSION_SECRET`                          | you                                                                                                                                                                                                    | seals the anonymous principal cookie; 32 characters or more, `openssl rand -hex 32`                                                                                                                                                                                                            |
-| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`             | you, after the domain; `realtime-env.mjs mail` from `mail.env`                                                                                                                                         | the mail sender (B3)                                                                                                                                                                                                                                                                           |
-| `TURBOSLIDE_MAIL`                                    | you; `realtime-env.mjs mail`                                                                                                                                                                           | `capture` on previews; `off` on production until the Resend pair exists, which hides the email field so Google may be the one method (REALTIME.md 4.1, default 7.7)                                                                                                                            |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`           | you                                                                                                                                                                                                    | the GitHub sign in (B3)                                                                                                                                                                                                                                                                        |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`           | `realtime-env.mjs google` from `~/.config/turboslide/google-oauth.env` (Kevin writes it, 4.5 steps 3 and 4)                                                                                            | the Google sign in (the realtime round, REALTIME.md 4.1; R4's `auth/better-auth.ts`): the redirect URI `<origin>/api/auth/callback/google`, the scopes `openid email profile`, `prompt=select_account`, no offline access                                                                      |
-| `TURBOSLIDE_AUTH_HOSTS`                              | you, when a deployment owns a host off the default list                                                                                                                                                | the Host names better-auth's `baseURL.allowedHosts` accepts; the default list is `www.turboslide.com`, `turboslide.com`, `turboslide.vercel.app`, `localhost:*`, `127.0.0.1:*` (REALTIME.md 4.1; R4)                                                                                           |
-| `TURBOSLIDE_ADMIN_EMAILS`                            | `realtime-env.mjs google` (`kevin@generaltranslation.com` by default)                                                                                                                                  | the deployment admins; the first sign in with a listed address is the admin (`auth/profile.ts` `adminEmails`)                                                                                                                                                                                  |
-| `TURBOSLIDE_BUILD_COMMIT`                            | the guard, per deployment (`-e` and `--build-env`)                                                                                                                                                     | the commit a CLI deployment serves, read by `/api/agent` (`server/build-commit.ts`); a CLI deployment carries no `VERCEL_GIT_COMMIT_SHA`                                                                                                                                                       |
-| `TURBOSLIDE_DOWNLOAD_SECRET`                         | you                                                                                                                                                                                                    | required on every hosted environment, 16 bytes or more (section 5's table)                                                                                                                                                                                                                     |
-| `TURBOSLIDE_AUTH_DB`                                 | you, a checkout                                                                                                                                                                                        | `node:sqlite` accounts on a checkout                                                                                                                                                                                                                                                           |
-| `TURBOSLIDE_AUTHORIZE`                               | nobody: ignored since security hotfix H3                                                                                                                                                               | every deployment refuses every denial; a value other than `enforce` (production carries `shadow`) is logged once as ignored (`docs/security.md` section 2)                                                                                                                                     |
-| `TURBOSLIDE_MISSING_RECORD`                          | you, a checkout                                                                                                                                                                                        | what a deck without `access.json` means on a checkout's file store (`open`, the default, or `notFound`); a hosted store ignores it and gives such a deck the seed, creator or closed record (`docs/security.md` section 2, H3)                                                                 |
-| `TURBOSLIDE_TRUST_PROXY`                             | you                                                                                                                                                                                                    | trusts the platform's client address header (B4)                                                                                                                                                                                                                                               |
-| `TURBOSLIDE_LOCAL_OPEN`                              | a checkout's tests                                                                                                                                                                                     | the localhost open rule for the test runs only                                                                                                                                                                                                                                                 |
-| `TURBOSLIDE_LOCAL_TOKEN`                             | you, a checkout                                                                                                                                                                                        | `require` makes the localhost agent surface take the token of `.turboslide/token` (B3)                                                                                                                                                                                                         |
-| `TURBOSLIDE_AUTH_RATE_LIMIT`                         | a checkout's tests                                                                                                                                                                                     | `off` turns the library's sign in limiter off for a spec run; ignored hosted                                                                                                                                                                                                                   |
-| `TURBOSLIDE_PASSKEY_RPID`                            | reserved                                                                                                                                                                                               | the production host once final; the passkey plugin reads it when installed                                                                                                                                                                                                                     |
-| `TURBOSLIDE_CSP`                                     | you                                                                                                                                                                                                    | `report` (default) sends the nonce CSP as report only; `enforce` after the report weeks; `off`                                                                                                                                                                                                 |
-| `TURBOSLIDE_EGRESS`, `TURBOSLIDE_WEB_SECURITY`       | you                                                                                                                                                                                                    | the capture browser's egress denial and `strict` web security (B4, docs/security.md)                                                                                                                                                                                                           |
-| `TURBOSLIDE_PUBLIC_STORE_HOST`                       | you, hosted                                                                                                                                                                                            | the public store's host for the CSP's `img-src` (B4)                                                                                                                                                                                                                                           |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | never set in the Cloudflare phase (CLOUDFLARE.md 4.4)                                                                                                                                                  | the Upstash rate limiter would replace the memory one when both are set (B4); the memory limiter per instance stays under the WAF rule R8                                                                                                                                                      |
+| Variable                                       | Set by                                                                                                                                                                                                 | Effect                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TURBOSLIDE_REALTIME`                          | you; `realtime-env.mjs flip --tier do` removes it, `rollback` sets `blob`                                                                                                                              | forces `memory`, `blob` or `do`; production forced `blob` until the Cloudflare phase's flip removed the row (13.2); the rollback switch (13.3); `redis` (removed in HR-C#8) and `do` without the three room variables are a TypeError at the first request                                     |
+| `TURBOSLIDE_ROOM_HOST`                         | `realtime-env.mjs do`, plain, from `~/.config/turboslide/cloudflare.env` (`turboslide-realtime.kk23907751.workers.dev` on production, `turboslide-realtime-preview.kk23907751.workers.dev` on preview) | selects the `do` tier when nothing is forced (`select.ts`; CLOUDFLARE.md 3.6.1): the deck's Durable Object on the Worker is the channel and the presence; the CSP `connect-src` gains its `https://` and `wss://`; on a checkout `127.0.0.1:87<lane>` with `TURBOSLIDE_ROOM_INSECURE=1` (13.7) |
+| `TURBOSLIDE_ROOM_SECRET`                       | `realtime-env.mjs do`, sensitive, from `room.env` (600, `openssl rand -hex 32`); the same value on the Worker's secrets (`worker-secrets`)                                                             | the HMAC key of the room ticket the editor loader mints and the Worker verifies before a socket reaches an object (CLOUDFLARE.md 3.3)                                                                                                                                                          |
+| `TURBOSLIDE_ROOM_BEARER`                       | the same, from `room.env`; the same value on the Worker's secrets                                                                                                                                      | the bearer of the function's calls to the Worker and of the object's calls to the function (the checkpoint and seed routes); `docs/security.md` section 12 has its reach and rotation                                                                                                          |
+| `TURBOSLIDE_ACCOUNTS`                          | `realtime-env.mjs database`, plain: `d1`                                                                                                                                                               | the accounts database is D1 behind the Worker's bearer routes (CLOUDFLARE.md 4.2; `auth/db.ts`); needs the host and the bearer; without it the Sign in row is absent (`NO_DATABASE_NOTICE`)                                                                                                    |
+| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                | the private store; the dashboard's connection names it `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`, which the studio reads too                                                                          | layout v2: documents in the private store through `layoutBlobClient` (section 10)                                                                                                                                                                                                              |
+| `TURBOSLIDE_BLOB_PRIVATE_DIR`                  | you, a checkout                                                                                                                                                                                        | a folder as the private store for a migration rehearsal                                                                                                                                                                                                                                        |
+| `BETTER_AUTH_SECRET`                           | `realtime-env.mjs database` mints and sets it, one value per environment, into `~/.config/turboslide/better-auth.env`                                                                                  | the account sessions (B3)                                                                                                                                                                                                                                                                      |
+| `TURBOSLIDE_SESSION_SECRET`                    | you                                                                                                                                                                                                    | seals the anonymous principal cookie; 32 characters or more, `openssl rand -hex 32`                                                                                                                                                                                                            |
+| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`       | you, after the domain; `realtime-env.mjs mail` from `mail.env`                                                                                                                                         | the mail sender (B3)                                                                                                                                                                                                                                                                           |
+| `TURBOSLIDE_MAIL`                              | you; `realtime-env.mjs mail`                                                                                                                                                                           | `capture` on previews; `off` on production until the Resend pair exists, which hides the email field so Google may be the one method (REALTIME.md 4.1, default 7.7)                                                                                                                            |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`     | you                                                                                                                                                                                                    | the GitHub sign in (B3)                                                                                                                                                                                                                                                                        |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`     | `realtime-env.mjs google` from `~/.config/turboslide/google-oauth.env` (Kevin writes it, 4.5 steps 3 and 4)                                                                                            | the Google sign in (the realtime round, REALTIME.md 4.1; R4's `auth/better-auth.ts`): the redirect URI `<origin>/api/auth/callback/google`, the scopes `openid email profile`, `prompt=select_account`, no offline access                                                                      |
+| `TURBOSLIDE_AUTH_HOSTS`                        | you, when a deployment owns a host off the default list                                                                                                                                                | the Host names better-auth's `baseURL.allowedHosts` accepts; the default list is `www.turboslide.com`, `turboslide.com`, `turboslide.vercel.app`, `localhost:*`, `127.0.0.1:*` (REALTIME.md 4.1; R4)                                                                                           |
+| `TURBOSLIDE_ADMIN_EMAILS`                      | `realtime-env.mjs google` (`kevin@generaltranslation.com` by default)                                                                                                                                  | the deployment admins; the first sign in with a listed address is the admin (`auth/profile.ts` `adminEmails`)                                                                                                                                                                                  |
+| `TURBOSLIDE_BUILD_COMMIT`                      | the guard, per deployment (`-e` and `--build-env`)                                                                                                                                                     | the commit a CLI deployment serves, read by `/api/agent` (`server/build-commit.ts`); a CLI deployment carries no `VERCEL_GIT_COMMIT_SHA`                                                                                                                                                       |
+| `TURBOSLIDE_DOWNLOAD_SECRET`                   | you                                                                                                                                                                                                    | required on every hosted environment, 16 bytes or more (section 5's table)                                                                                                                                                                                                                     |
+| `TURBOSLIDE_AUTH_DB`                           | you, a checkout                                                                                                                                                                                        | `node:sqlite` accounts on a checkout                                                                                                                                                                                                                                                           |
+| `TURBOSLIDE_AUTHORIZE`                         | nobody: ignored since security hotfix H3                                                                                                                                                               | every deployment refuses every denial; a value other than `enforce` (production carries `shadow`) is logged once as ignored (`docs/security.md` section 2)                                                                                                                                     |
+| `TURBOSLIDE_MISSING_RECORD`                    | you, a checkout                                                                                                                                                                                        | what a deck without `access.json` means on a checkout's file store (`open`, the default, or `notFound`); a hosted store ignores it and gives such a deck the seed, creator or closed record (`docs/security.md` section 2, H3)                                                                 |
+| `TURBOSLIDE_TRUST_PROXY`                       | you                                                                                                                                                                                                    | trusts the platform's client address header (B4)                                                                                                                                                                                                                                               |
+| `TURBOSLIDE_LOCAL_OPEN`                        | a checkout's tests                                                                                                                                                                                     | the localhost open rule for the test runs only                                                                                                                                                                                                                                                 |
+| `TURBOSLIDE_LOCAL_TOKEN`                       | you, a checkout                                                                                                                                                                                        | `require` makes the localhost agent surface take the token of `.turboslide/token` (B3)                                                                                                                                                                                                         |
+| `TURBOSLIDE_AUTH_RATE_LIMIT`                   | a checkout's tests                                                                                                                                                                                     | `off` turns the library's sign in limiter off for a spec run; ignored hosted                                                                                                                                                                                                                   |
+| `TURBOSLIDE_CSP`                               | you                                                                                                                                                                                                    | `report` (default) sends the nonce CSP as report only; `enforce` after the report weeks; `off`                                                                                                                                                                                                 |
+| `TURBOSLIDE_EGRESS`, `TURBOSLIDE_WEB_SECURITY` | you                                                                                                                                                                                                    | the capture browser's egress denial and `strict` web security (B4, docs/security.md)                                                                                                                                                                                                           |
+| `TURBOSLIDE_PUBLIC_STORE_HOST`                 | you, hosted                                                                                                                                                                                            | the public store's host for the CSP's `img-src` (B4)                                                                                                                                                                                                                                           |
 
 ## 12. Round four: the CDN rules, the thumbnail cache, the seed twins and the native addon
 
@@ -1321,7 +1133,7 @@ hibernating WebSockets; the accounts database is D1 (`turboslide-accounts`, boun
 the same Worker, reached from the Vercel function through the Worker's bearer routes `POST
 /db/query` and `POST /db/batch`; the app, the store and the version log stay on Vercel and Vercel
 Blob. No Upstash, no Neon, no `REDIS_URL`, no `DATABASE_URL`, ever (CLOUDFLARE.md 4.4); the redis
-tier of section 9 stays in the tree as code and is never deployed (5.1). The preview Worker is
+tier of section 9 was never deployed (5.1) and left the tree in hardening HR-C#8. The preview Worker is
 `turboslide-realtime-preview` on `turboslide-realtime-preview.kk23907751.workers.dev`, the second
 Worker the preview environment of the same `apps/realtime-worker/wrangler.jsonc` makes, with its
 own object namespace and its own D1 (`turboslide-accounts-preview`). The account is Kevin's own,
@@ -1331,17 +1143,16 @@ one, never changed), the two D1 ids and the two hosts are in `~/.config/turbosli
 
 ### 13.1 The selection and what the object holds
 
-`selectRealtime(env)` (`packages/realtime/src/select.ts`, R1) gains the fourth tier:
+`selectRealtime(env)` (`packages/realtime/src/select.ts`, R1) gains the `do` tier:
 
 | Environment                                                                            | Tier     | Change feed                                                                                                                                                                                                                                                                                                                  | Presence                                                                                                                              |
 | -------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | a checkout, the tests                                                                  | `memory` | in process                                                                                                                                                                                                                                                                                                                   | in process                                                                                                                            |
 | `TURBOSLIDE_ROOM_HOST` set, with `TURBOSLIDE_ROOM_SECRET` and `TURBOSLIDE_ROOM_BEARER` | `do`     | one WebSocket per tab to the deck's object; the object assigns the seq, transforms each entry past what landed, writes it to its SQLite before the ack and fans it out per reader; its alarm posts the uncommitted entries to `POST /api/decks/:id/checkpoint` on the app, which writes the version records to Blob as today | the object's roster, in memory while awake and in each socket's attachment while hibernated; volatile frames published and not stored |
-| `REDIS_URL` set, nothing forced                                                        | `redis`  | section 9; in the tree, never deployed                                                                                                                                                                                                                                                                                       | section 9                                                                                                                             |
 | hosted without a channel                                                               | `blob`   | section 4; the fallback of a deployment without the host, of the `realtime` flag set off and of a Cloudflare incident                                                                                                                                                                                                        | per instance only; the title row says so                                                                                              |
-| `TURBOSLIDE_REALTIME=memory\|redis\|blob\|do`                                          | forced   | as above; `do` forced without the three variables is a TypeError at the first request, like `redis` without `REDIS_URL`                                                                                                                                                                                                      | as above                                                                                                                              |
+| `TURBOSLIDE_REALTIME=memory\|blob\|do`                                                 | forced   | as above; `do` forced without the three variables is a TypeError at the first request, like `redis` since HR-C#8                                                                                                                                                                                                             | as above                                                                                                                              |
 
-Unforced, `TURBOSLIDE_ROOM_HOST` selects `do` before the `REDIS_URL` check, so a server that wants
+Unforced, `TURBOSLIDE_ROOM_HOST` selects `do`, so a server that wants
 the Worker's database with a local channel forces `TURBOSLIDE_REALTIME=memory` (CLOUDFLARE.md 2.1's
 hand row). `TURBOSLIDE_ACCOUNTS=d1` selects the accounts kind (`auth/db.ts`), needs the host and
 the bearer, and says nothing about the channel's tier.
@@ -1479,7 +1290,7 @@ saw.]
 
 ### 13.3 The rollback switch (CLOUDFLARE.md 3.8)
 
-`TURBOSLIDE_REALTIME` keeps its meaning with the values `memory`, `redis`, `blob` and `do`.
+`TURBOSLIDE_REALTIME` keeps its meaning with the values `memory`, `blob` and `do`.
 Production after the flip has no forced row and selects `do` from `TURBOSLIDE_ROOM_HOST`. Four ways
 back, from the fastest:
 
@@ -1508,7 +1319,7 @@ promote <previous production url>`) to the guard's previous production deploymen
    guard itself redeploys the previous sha's Worker beside its promote back (13.6).
 4. The Worker unreachable (a Cloudflare incident): each instance's `GET /health` probe (60 s cache)
    reads off, or fails three times, and hands the instance's rooms to the blob channel built on
-   demand, as the redis tier's hand off does; the ticket route answers `blob`; a tab's transport
+   demand (room.ts `ensureRealtimeTier`); the ticket route answers `blob`; a tab's transport
    falls to SSE after 30 s of failed opens and resyncs once; the object's tail commits on its next
    alarm whether or not it can reach Vercel at that moment (alarms are at least once, with
    exponential backoff from 2 s up to 6 times); when the Worker returns the next hello says `do`,

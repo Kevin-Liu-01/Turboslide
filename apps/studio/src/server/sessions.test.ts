@@ -1,7 +1,6 @@
 // The session directory (gslides-parity SPEC-3 11.3; MILESTONES-3 B2 day 5 "sessions.test.ts
 // caps"): bindings carry the identity, one identity attaches at most 20 pages and one deck at
-// most 200, a binding not polled for 90 s is gone, and the Redis backend over a fake answers the
-// same as memory.
+// most 200, and a binding not polled for 90 s is gone.
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -9,7 +8,6 @@ import {
   SESSIONS_PER_IDENTITY_MAX,
   SESSION_BINDING_TTL_MS,
   memorySessionDirectory,
-  redisSessionDirectory,
 } from './sessions';
 import type { SessionBinding, SessionDirectory } from './sessions';
 import { viewScopeOf, visibleSessions } from './sessions.server';
@@ -30,20 +28,6 @@ function binding(id: string, identity: string, deckId = 'q4-review', now = at(0)
     kind: 'anonymous',
     attachedAt: now,
     lastSeenAt: now,
-  };
-}
-
-function fakeKv(): { call: (command: string, ...args: (string | number)[]) => Promise<unknown> } {
-  const store = new Map<string, string>();
-  return {
-    async call(command, ...args) {
-      if (command === 'GET') return store.get(String(args[0])) ?? null;
-      if (command === 'SET') {
-        store.set(String(args[0]), String(args[1]));
-        return 'OK';
-      }
-      throw new Error(`unexpected ${command}`);
-    },
   };
 }
 
@@ -85,10 +69,6 @@ async function exercise(directory: SessionDirectory): Promise<void> {
 describe('the session directory', () => {
   it('caps pages per identity and per deck, expires silent bindings, in memory', async () => {
     await exercise(memorySessionDirectory());
-  });
-
-  it('answers the same over Redis (a fake of GET and SET PX)', async () => {
-    await exercise(redisSessionDirectory(fakeKv()));
   });
 });
 

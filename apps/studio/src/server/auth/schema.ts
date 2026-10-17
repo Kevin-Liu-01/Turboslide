@@ -2,7 +2,7 @@
 // research 03 D2, E2, F): better-auth's core tables (`user`, `session`, `account`,
 // `verification`) and its device authorization table, which the library migrates itself
 // (db.ts runs `getMigrations`), and Turboslide's own tables, migrated here with Kysely's schema
-// builder so one statement set serves SQLite and Postgres:
+// builder so one statement set serves SQLite and D1:
 //
 //   ts_alias       anonymousId -> userId, the link written when a signed in session first arrives
 //                  in a browser that carried an anonymous cookie (7.4); history is never rewritten
@@ -18,8 +18,8 @@
 //   ts_principal   the principal records on the D1 engine (docs/CLOUDFLARE.md 4.2; the row
 //                  `realtime.departed-guest.name-stable`): one row per principal with the record
 //                  as JSON, `last_seen_at` and `expires_at` in epoch milliseconds, so every
-//                  instance reads one name for one person; the file store and the Redis store
-//                  keep their own copies on the other engines (principal.ts)
+//                  instance reads one name for one person; the file store keeps its own
+//                  copy on the other engines (principal.ts)
 //   ts_schema      one row `turboslide` carrying the schema version a boot wrote after it migrated
 //                  (CLOUDFLARE.md 4.2): a cold instance on the D1 engine reads it once and skips
 //                  the few dozen statements of the two migration sets when it matches
@@ -156,7 +156,7 @@ export type LimitsTable = {
   /** The SHA-256 hex of the counted key (limits.ts), never the key itself. */
   key: string;
   count: number;
-  /** When the window ends, in epoch milliseconds (a string from Postgres' bigint). */
+  /** When the window ends, in epoch milliseconds (a string when a driver answers a bigint). */
   reset_at: number | string;
 };
 

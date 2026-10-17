@@ -31,12 +31,11 @@ async function db(): Promise<AuthDb> {
 }
 
 describe('selectAuthDb', () => {
-  test('postgres behind DATABASE_URL, sqlite behind TURBOSLIDE_AUTH_DB, none otherwise', () => {
+  test('sqlite behind TURBOSLIDE_AUTH_DB, none otherwise, and DATABASE_URL selects nothing', () => {
     expect(selectAuthDb({}, '/repo')).toEqual({ kind: 'none', reason: expect.any(String) });
-    expect(selectAuthDb({ DATABASE_URL: 'postgres://fake:fake@localhost/fake' }, '/repo')).toEqual({
-      kind: 'postgres',
-      reason: 'DATABASE_URL is set',
-    });
+    expect(
+      selectAuthDb({ DATABASE_URL: 'postgres://fake:fake@localhost/fake' }, '/repo').kind,
+    ).toBe('none');
     const sqlite = selectAuthDb({ [AUTH_DB_VARIABLE]: '.turboslide/auth-b3.sqlite' }, '/repo');
     expect(sqlite).toEqual({
       kind: 'sqlite',
@@ -119,7 +118,7 @@ describe('selectAuthDb', () => {
 
   test('a hosted process may not name a sqlite file, and the reason never carries a URL', () => {
     expect(() => selectAuthDb({ VERCEL: '1', [AUTH_DB_VARIABLE]: 'x.sqlite' }, '/repo')).toThrow(
-      TypeError,
+      /TURBOSLIDE_ACCOUNTS=d1 instead/,
     );
     const selection = selectAuthDb({ DATABASE_URL: 'postgres://user:secretpw@host/db' }, '/repo');
     expect(JSON.stringify(selection)).not.toContain('secretpw');

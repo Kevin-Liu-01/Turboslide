@@ -4,12 +4,11 @@ import type { StudioSession } from '@turboslide/agent/http/sessions';
 
 import type { RequestIdentity } from './auth/identity';
 import type { SessionBinding, SessionDirectory } from './sessions';
-import { memorySessionDirectory, redisSessionDirectory } from './sessions';
+import { memorySessionDirectory } from './sessions';
 
 /**
  * The server only half of the attached pages (the integrator at merge 2; SPEC-3 3.11, 7.4): the
- * process wide session directory over the room's Redis commands and the identity of the request a
- * server function runs in. Kept out of sessions.ts because that module is in the client's graph
+ * process wide session directory and the identity of the request a server function runs in. Kept out of sessions.ts because that module is in the client's graph
  * (components/useStudioSession.ts imports its server function wrappers) and the production
  * build's import protection refuses `@tanstack/react-start/server` and the room there; the `.server`
  * suffix makes an accidental client import fail at build time.
@@ -17,14 +16,10 @@ import { memorySessionDirectory, redisSessionDirectory } from './sessions';
 
 const DIRECTORY = Symbol.for('turboslide.studio.sessions.directory');
 
-/** The process wide directory: Redis on the redis tier, memory elsewhere. */
+/** The process wide directory, in memory. */
 export async function sessionDirectory(): Promise<SessionDirectory> {
   const holder = globalThis as unknown as Record<symbol, SessionDirectory | undefined>;
-  if (holder[DIRECTORY] === undefined) {
-    const room = await import('./room');
-    const kv = room.redisCommands();
-    holder[DIRECTORY] = kv === null ? memorySessionDirectory() : redisSessionDirectory(kv);
-  }
+  holder[DIRECTORY] ??= memorySessionDirectory();
   return holder[DIRECTORY];
 }
 

@@ -1,5 +1,5 @@
-// The principal record (gslides-parity SPEC-3 7.1): `principal:<id>` in Redis hosted, a JSON
-// file under `.turboslide/principals/` on a checkout, holding what an anonymous or signed in
+// The principal record (gslides-parity SPEC-3 7.1): a `ts_principal` row in the accounts database
+// hosted, a JSON file under `.turboslide/principals/` on a checkout, holding what an anonymous or signed in
 // principal chose (name, avatar), was granted by link (the exchanged share links), and set
 // (notification level, live pointers), with a 90 day sliding TTL: every request that reads the
 // record re-arms it, so a person who returns within 90 days keeps their name and links and one
@@ -7,10 +7,10 @@
 // `localStorage` for instant paint and never as the truth (SPEC-3 0.17).
 //
 // This module is browser safe and holds the record's shape, its validation, the TTL arithmetic
-// and the store contract with two backends that need no I/O of their own: one over a key value
-// client shaped like ioredis (`get`, `set` with a millisecond TTL, `del`, `pexpire`) and one in
-// memory for tests and the `memory` tier. The file backend lives in
-// apps/studio/src/server/auth/principal.ts because it reads the disk.
+// and the store contract with a backend that needs no I/O of its own: one over a key value
+// client (`get`, `set` with a millisecond TTL, `del`), which `memoryPrincipalStore` runs in
+// memory for tests. The file and D1 backends live in apps/studio/src/server/auth/principal.ts
+// because they read the disk or the database.
 import type { LinkGrant } from './access.ts';
 import { isPrincipalId } from './ids.ts';
 import { labelFor } from './labels.ts';
@@ -186,14 +186,14 @@ export type PrincipalStore = {
   delete(principalId: string): Promise<void>;
 };
 
-/** The subset of ioredis this store uses; `set` takes a millisecond TTL. */
+/** The key value client this store uses; `set` takes a millisecond TTL. */
 export type KvClient = {
   get(key: string): Promise<string | null>;
   set(key: string, value: string, ttlMs: number): Promise<void>;
   del(key: string): Promise<void>;
 };
 
-/** The Redis (or any key value) backend: the TTL is the store's, `lastSeenAt` the record's. */
+/** The key value backend: the TTL is the store's, `lastSeenAt` the record's. */
 export function kvPrincipalStore(kv: KvClient): PrincipalStore {
   const store: PrincipalStore = {
     async get(principalId, now = new Date()) {
@@ -228,7 +228,7 @@ export function kvPrincipalStore(kv: KvClient): PrincipalStore {
   return store;
 }
 
-/** An in memory key value client with expiry, for tests and the `memory` tier. */
+/** An in memory key value client with expiry, for tests. */
 export function memoryKv(clock: () => number = () => Date.now()): KvClient & { size(): number } {
   const entries = new Map<string, { value: string; expiresAt: number }>();
   const sweep = (key: string): void => {

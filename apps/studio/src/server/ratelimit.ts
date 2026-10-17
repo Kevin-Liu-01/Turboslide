@@ -11,31 +11,26 @@ import { logSecurityEvent } from './log';
  *
  * Backends behind one `RateLimiter` interface: `dbLimiter` (HR-SA#3, AUTH-8: the one limiter of a
  * hosted deployment, a fixed window per key in the accounts database's `ts_limits` table through
- * auth/limits.ts, bound by start.ts when the accounts engine is D1 or Postgres; better-auth's sign
- * in limits and the spent download tokens of tokens.ts count in it too, so every instance of a
- * deployment reads one count), `memoryLimiter` (a fixed window counter per key in
- * this process: the checkout, the `tmp` store, and the fallback), `kvLimiter` over a key value
- * client (B3's `KvClient` shape; `start.ts` binds it over the room's ioredis client on the redis
- * tier, so `REDIS_URL` gives every instance the same counters), and `upstashLimiter` over the
- * `limit()` method of `@upstash/ratelimit`'s `Ratelimit`, typed structurally so the tests drive
- * it against a fake and the account boundary of the round never needs an Upstash database
- * (docs/hosting.md names the variables that turn it on). The limiter is bound once per process
- * (`bindRateLimiter`); the default is memory. Server only.
+ * auth/limits.ts, bound by start.ts when the accounts engine is D1; better-auth's sign in limits
+ * and the spent download tokens of tokens.ts count in it too, so every instance of a deployment
+ * reads one count) and `memoryLimiter` (a fixed window counter per key in this process: the
+ * checkout, the `tmp` store, and the fallback). The Redis and Upstash limiters left in HR-C#8
+ * (CLEANUP-6). The limiter is bound once per process (`bindRateLimiter`); the default is memory.
+ * Server only.
  *
  * What holds where (VERIFICATION-3 finding 17): a windowed quota counts in the bound backend
- * only. Hosted without `REDIS_URL` and without the Upstash pair (the blob tier, the degraded tier
- * of the round) the backend is memory, every function instance keeps its own counters and Fluid
- * compute spreads one caller's requests across instances, so no windowed quota reaches its limit
- * (measured: 430 anonymous thumbnail renders against the 400 per hour row all answered 200). On
- * that tier the WAF rules of `firewall/rules.json` are the only limits that count across
- * instances, and they limit only after the flip from log mode to their action. The rows that
- * need no counter hold on every tier: a tier limit of 0 (an anonymous invitation or avatar
- * upload) refuses at once, `largestPictureBytes` compares a size, and `DECK_CAPS` are checked
- * against the document. No counter runs over the Blob store on purpose: a `BlobStore.write` per
- * counted request would cost more than the request it counts and Blob commits are about 15 a
- * second across a deployment (docs/hosting.md section 9). `warnPerInstanceQuotas` logs the
- * degraded state once per platform process as `config.degraded` so the log says which variable
- * turns the shared counter on.
+ * only. Hosted without a shared accounts database the backend is memory, every function instance
+ * keeps its own counters and Fluid compute spreads one caller's requests across instances, so no
+ * windowed quota reaches its limit (measured: 430 anonymous thumbnail renders against the 400 per
+ * hour row all answered 200). There the WAF rules of `firewall/rules.json` are the only limits
+ * that count across instances, and they limit only after the flip from log mode to their action.
+ * The rows that need no counter hold on every tier: a tier limit of 0 (an anonymous invitation or
+ * avatar upload) refuses at once, `largestPictureBytes` compares a size, and `DECK_CAPS` are
+ * checked against the document. No counter runs over the Blob store on purpose: a
+ * `BlobStore.write` per counted request would cost more than the request it counts and Blob
+ * commits are about 15 a second across a deployment (docs/hosting.md section 9).
+ * `warnPerInstanceQuotas` logs the degraded state once per platform process as `config.degraded`
+ * so the log says which variable turns the shared counter on.
  */
 
 export type Tier = 'anonymous' | 'account' | 'agent';
@@ -67,7 +62,6 @@ export type QuotaName =
   | 'accessRequestsPerDay'
   | 'linkCreatesPerDeckPerDay'
   | 'mentionMailsPerDay'
-  | 'redisCommandsPerDay'
   | 'assistCallsPerMinutePerDeck'
   | 'assistCallsPerDay';
 
@@ -257,12 +251,6 @@ export const QUOTAS: Readonly<Record<QuotaName, Quota>> = {
     limits: { anonymous: 0, account: 20, agent: 20 },
     sentence: 'You have reached today’s limit for mention emails',
   },
-  redisCommandsPerDay: {
-    name: 'redisCommandsPerDay',
-    windowMs: DAY,
-    limits: { anonymous: 500_000, account: 2_000_000, agent: 2_000_000 },
-    sentence: TOO_MANY,
-  },
   /* The assist's two rows (docs/archive/rounds/PRODUCT.md 6.3; audit-assist 5): a model call is the costliest
      request the product makes, so it is counted per deck per minute and per identity per day.
      On a deployment with anonymous principals every seller is anonymous, so the caps that apply
@@ -341,7 +329,7 @@ export type LimitResult = {
 };
 
 export type RateLimiter = {
-  kind: 'memory' | 'kv' | 'upstash' | 'db';
+  kind: 'memory' | 'db';
   /** Counts `cost` against the key's window; `ok: false` when the count passes the limit. */
   limit: (key: string, limit: number, windowMs: number, cost?: number) => Promise<LimitResult>;
   /** Releases a concurrency slot taken with a window of 0. */
@@ -446,95 +434,11 @@ export function dbLimiter(
   };
 }
 
-/** The key value client shape the kv limiter needs: B3's `KvClient` (get, set with a TTL, del). */
-export type LimiterKv = {
-  get(key: string): Promise<string | null>;
-  set(key: string, value: string, ttlMs: number): Promise<void>;
-  del(key: string): Promise<void>;
-};
-
 /**
- * A fixed window counter over a key value client, bound on the redis tier over the room's ioredis
- * client (`start.ts`), so every instance of a deployment counts in the same window. Read then
- * write, so two instances racing can admit one extra request per window; the redis tier accepts
- * that, and a deployment with the Upstash pair takes `upstashLimiter` instead. The blob tier
- * binds no kv limiter (the module header says why) and stays on memory.
+ * The variable whose accounts database holds the one limiter (auth/db.ts `ACCOUNTS_VARIABLE`),
+ * named in the degraded line; spelled here so this module does not load the database module.
  */
-export function kvLimiter(kv: LimiterKv, now: () => number = () => Date.now()): RateLimiter {
-  return {
-    kind: 'kv',
-    async limit(key, limit, windowMs, cost = 1) {
-      const t = now();
-      const raw = await kv.get(`q:${key}`);
-      let row: { count: number; resetAt: number } | null = null;
-      if (raw !== null) {
-        try {
-          row = JSON.parse(raw) as { count: number; resetAt: number };
-        } catch {
-          row = null;
-        }
-      }
-      if (row === null || (windowMs > 0 && row.resetAt <= t)) {
-        row = { count: 0, resetAt: windowMs > 0 ? t + windowMs : t + 60 * MINUTE };
-      }
-      if (row.count + cost > limit) return { ok: false, remaining: 0, resetAt: row.resetAt };
-      row.count += cost;
-      await kv.set(`q:${key}`, JSON.stringify(row), Math.max(1, row.resetAt - t));
-      return { ok: true, remaining: Math.max(0, limit - row.count), resetAt: row.resetAt };
-    },
-    async release(key, cost = 1) {
-      const raw = await kv.get(`q:${key}`);
-      if (raw === null) return;
-      try {
-        const row = JSON.parse(raw) as { count: number; resetAt: number };
-        row.count = Math.max(0, row.count - cost);
-        await kv.set(`q:${key}`, JSON.stringify(row), Math.max(1, row.resetAt - now()));
-      } catch {
-        await kv.del(`q:${key}`);
-      }
-    },
-  };
-}
-
-/**
- * The `limit()` method of `@upstash/ratelimit`'s `Ratelimit` as this module reads it (the
- * package answers `{ success, limit, remaining, reset, pending }`), typed structurally so a fake
- * drives the tests and the real one binds with no adapter.
- */
-export type UpstashRatelimitLike = {
-  limit: (
-    identifier: string,
-    options?: { rate?: number },
-  ) => Promise<{ success: boolean; remaining: number; reset: number }>;
-};
-
-/**
- * `@upstash/ratelimit` behind the interface. One `Ratelimit` instance carries one limit and one
- * window, so the binder passes a factory keyed by quota and the limiter caches an instance per
- * `(limit, windowMs)`; `windowMs` 0 (a concurrency slot) falls to the memory limiter, which the
- * fixed plan cannot express.
- */
-export function upstashLimiter(
-  factory: (limit: number, windowMs: number) => UpstashRatelimitLike,
-  fallback: RateLimiter = memoryLimiter(),
-): RateLimiter {
-  const instances = new Map<string, UpstashRatelimitLike>();
-  return {
-    kind: 'upstash',
-    async limit(key, limit, windowMs, cost = 1) {
-      if (windowMs === 0) return fallback.limit(key, limit, windowMs, cost);
-      const id = `${limit}:${windowMs}`;
-      let instance = instances.get(id);
-      if (instance === undefined) {
-        instance = factory(limit, windowMs);
-        instances.set(id, instance);
-      }
-      const answer = await instance.limit(key, cost === 1 ? undefined : { rate: cost });
-      return { ok: answer.success, remaining: answer.remaining, resetAt: answer.reset };
-    },
-    release: (key, cost) => fallback.release?.(key, cost) ?? Promise.resolve(),
-  };
-}
+const ACCOUNTS_ENV = 'TURBOSLIDE_ACCOUNTS';
 
 const LIMITER: unique symbol = Symbol.for('turboslide.studio.rateLimiter');
 const WARNED: unique symbol = Symbol.for('turboslide.studio.rateLimiter.warned');
@@ -552,7 +456,7 @@ export function rateLimiter(): RateLimiter {
 }
 
 /**
- * Binds the deployment's limiter (B2's channel or ioredis client, or Upstash); returns the
+ * Binds the deployment's limiter (the one limiter over the accounts database); returns the
  * previous one. A new binding is a new decision, so it re-arms `warnPerInstanceQuotas`.
  */
 export function bindRateLimiter(next: RateLimiter | undefined): RateLimiter | undefined {
@@ -581,25 +485,9 @@ export function warnPerInstanceQuotas(multiInstance: boolean): boolean {
   store()[WARNED] = true;
   logSecurityEvent({
     event: 'config.degraded',
-    reason: `${REDIS_URL_ENV} and ${UPSTASH_URL_ENV} unset: the application quotas count per instance and do not hold across instances; the WAF rules of firewall/rules.json carry the limits`,
+    reason: `no shared accounts database (${ACCOUNTS_ENV}=d1): the application quotas count per instance and do not hold across instances; the WAF rules of firewall/rules.json carry the limits`,
   });
   return true;
-}
-
-/**
- * The environment that turns Upstash on (SPEC-3 8.3, docs/hosting.md): both variables set. This
- * module never imports the package; `bindUpstashFromEnv` in the ship step does, so a checkout and
- * the account boundary of this round never load it.
- */
-export const UPSTASH_URL_ENV = 'UPSTASH_REDIS_REST_URL';
-export const UPSTASH_TOKEN_ENV = 'UPSTASH_REDIS_REST_TOKEN';
-/** The variable of the redis tier; with it `start.ts` binds the kv limiter over the room's client. */
-export const REDIS_URL_ENV = 'REDIS_URL';
-
-export function hasUpstash(
-  env: Readonly<Record<string, string | undefined>> = process.env,
-): boolean {
-  return Boolean(env[UPSTASH_URL_ENV]) && Boolean(env[UPSTASH_TOKEN_ENV]);
 }
 
 /** The key a quota counts under: the identity, the quota, and the deck when the row is per deck. */

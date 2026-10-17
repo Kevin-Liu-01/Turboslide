@@ -9,7 +9,6 @@ import {
   DEFAULT_AUTH_HOSTS,
   GOOGLE_ID_VARIABLE,
   GOOGLE_SECRET_VARIABLE,
-  PASSKEYS_LATER,
   authHosts,
   signInMethods,
 } from './better-auth.ts';
@@ -102,8 +101,6 @@ describe('signInMethods (REALTIME.md 4.1)', () => {
     expect(signInMethods(GOOGLE_ENV, true, 'capture')).toEqual({
       available: true,
       email: true,
-      passkeys: false,
-      passkeysNotice: PASSKEYS_LATER,
       github: false,
       google: true,
     });
@@ -118,8 +115,6 @@ describe('signInMethods (REALTIME.md 4.1)', () => {
     expect(signInMethods(GOOGLE_ENV, true, 'off')).toEqual({
       available: true,
       email: false,
-      passkeys: false,
-      passkeysNotice: PASSKEYS_LATER,
       github: false,
       google: true,
     });
@@ -127,8 +122,6 @@ describe('signInMethods (REALTIME.md 4.1)', () => {
     expect(signInMethods(GOOGLE_ENV, false, 'capture')).toEqual({
       available: false,
       email: false,
-      passkeys: false,
-      passkeysNotice: null,
       github: false,
       google: false,
     });

@@ -39,9 +39,6 @@ describe('the refusals of SPEC-3 6.8', () => {
     expect(REFUSALS.requested).toBe('If this presentation exists, its owner has been asked.');
     expect(REFUSALS.tooManyChanges).toBe('Too many changes at once. Try again in a minute');
     expect(REFUSALS.exportLimit).toBe("You have reached today's export limit");
-    expect(REFUSALS.presenceNeedsRedis).toBe(
-      'Presence and live cursors need a Redis store on this deployment',
-    );
     expect(REFUSALS.leaveAnyway).toBe('Changes are still saving. Leave anyway?');
     expect(REFUSALS.unsavedChanges(3)).toBe('3 unsaved changes from this browser');
     expect(REFUSALS.unsavedChanges(1)).toBe('1 unsaved change from this browser');

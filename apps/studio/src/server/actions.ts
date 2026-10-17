@@ -123,7 +123,6 @@ import {
   purgeRoom,
   realtimeChannel,
   realtimeTier,
-  redisCommands,
   requestIdentity as roomIdentity,
   roomBackedStore,
 } from './room';
@@ -878,7 +877,6 @@ function registerNotificationHandlers(
       principalId: identity.principalId ?? identity.identity,
       deckId,
       settingsCapability: owner.ok,
-      redis: redisCommands(),
       // the actors of a deck the caller may not share are its stand-ins (HR-SD#1)
       actorsOf: inboxActorsFor(identity),
     };
@@ -1319,11 +1317,7 @@ function registerAdminActions(dispatcher: Dispatcher): void {
     const { name, on } = input as { name: FlagName; on?: boolean };
     if (on !== undefined) await setFlag(name, on);
     const value = await flagOn(name);
-    const source: 'redis' | 'file' | 'default' =
-      storeSelection().kind === 'file' || process.env.TURBOSLIDE_REALTIME !== 'redis'
-        ? 'file'
-        : 'redis';
-    return { name, on: value, default: FLAG_DEFAULTS[name], source };
+    return { name, on: value, default: FLAG_DEFAULTS[name], source: 'file' as const };
   });
 }
 
@@ -1392,7 +1386,7 @@ export async function deckDispatcher(
   // readers and writers of this dispatcher go through the room, so an agent's write enters the
   // object's order (admitServerWrite's do branch, the op fan out, the checkpoint at once) and an
   // agent's read answers the object's live document instead of the store at the last checkpoint;
-  // on the memory, redis and blob tiers the plain store keeps today's path (the follower turns a
+  // on the memory and blob tiers the plain store keeps today's path (the follower turns a
   // write into stream entries there). The asset handlers take the same store (the realtime round's
   // fix round 2, build/r1.md R1-INTh): `asset.add` records the asset with a document write at the
   // head, and on the plain store that write moved the store's revision outside the object, so the

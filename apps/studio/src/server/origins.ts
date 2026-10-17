@@ -32,7 +32,7 @@ export type RecordOrigin = { seq: number; n: number; clientId: string; opIds: st
  * CLI, an agent's strict write, a record from before the round) names nothing and is skipped. Each
  * names its place in the tab's position space: the revision on the blob tier, where a tab's seq is the
  * revision, and the last stream seq the record folded (`ops.toSeq`) on the stream tiers (memory,
- * redis, do), where a tab's seq is the stream's. Before this every tier read the revision, so on
+ * do), where a tab's seq is the stream's. Before this every tier read the revision, so on
  * the stream tiers, whose seqs run far ahead of the revisions, no record was above the old
  * position and the answer named no origin.
  *

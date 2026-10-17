@@ -1392,7 +1392,7 @@ describe('the role predicates of SPEC-3 13.4', () => {
         settings: DEFAULT_MENU_CONTEXT.settings,
       }),
     ).toBe(true);
-    /* without DATABASE_URL the Sign in row is absent (7.3) */
+    /* without an accounts database the Sign in row is absent (7.3) */
     const noSignIn = {
       ...DEFAULT_MENU_CONTEXT,
       settings: on,

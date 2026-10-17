@@ -38,7 +38,7 @@ export type HealthReading = {
   checkedAt: string;
   checks: {
     store: HealthCheck & { canary: string };
-    accounts: HealthCheck & { engine: 'd1' | 'sqlite' | 'postgres' | 'none' | 'unknown' };
+    accounts: HealthCheck & { engine: 'd1' | 'sqlite' | 'none' | 'unknown' };
   };
   /** the night's backup by its UTC day; null on a deployment without the backup store */
   backup: { day: string; done: boolean; failed: number; reason?: string } | null;
@@ -52,7 +52,7 @@ export type HealthDeps = {
   /** heads the canary deck's manifest: true when it is there */
   hasDeck: (deckId: string) => Promise<boolean>;
   /** reads the schema version row; null when the deployment has no accounts database */
-  accounts: () => Promise<{ engine: 'd1' | 'sqlite' | 'postgres' } | null>;
+  accounts: () => Promise<{ engine: 'd1' | 'sqlite' } | null>;
   /** reads one JSON document of the backup store; null without the store */
   backupJson: ((pathname: string) => Promise<unknown>) | null;
   /** each check's deadline; CHECK_MS when absent */

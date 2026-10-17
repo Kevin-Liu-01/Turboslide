@@ -1,12 +1,11 @@
 // The realtime channel (gslides-parity SPEC-3 2.3, 3.2): the room of one deck, the operation
 // stream in front of the revision log, the presence roster, the client bindings, the checkpoint
 // lock, the budgets and the kill switch flags, behind one framework free interface with three
-// implementations: `memory` (a checkout, the tests, one process), `redis` (hosted, the Redis
-// protocol, one Lua compare and append), `blob` (hosted without Redis, every append a commit) and,
-// since the Cloudflare move (docs/CLOUDFLARE.md 3.1, 3.6.1), `do`: one Durable Object per deck on
-// the realtime Worker orders the deck over hibernating WebSockets and the function reaches it
-// through do.ts. Nothing here reaches `node:`; the Redis adapter of redis.ts is the one file that
-// may.
+// implementations: `memory` (a checkout, the tests, one process), `blob` (hosted without the
+// Worker, every append a commit) and, since the Cloudflare move (docs/CLOUDFLARE.md 3.1, 3.6.1),
+// `do`: one Durable Object per deck on the realtime Worker orders the deck over hibernating
+// WebSockets and the function reaches it through do.ts. The Redis tier left in hardening HR-C#8
+// (CLEANUP-6). Nothing here reaches `node:`.
 import type { CommentOp as SchemaCommentOp } from '@turboslide/schema/comments';
 import type { Author, MarkMutation, Mutation, SpliceMutation } from '@turboslide/schema/mutations';
 import type { Side } from '@turboslide/schema/transform';
@@ -14,10 +13,10 @@ import type { Side } from '@turboslide/schema/transform';
 import type { DropBus } from './bus.ts';
 
 /**
- * The four tiers (docs/CLOUDFLARE.md 3.6.1): the word `do` rides `hello.tier` (protocol.ts reads
+ * The three tiers (docs/CLOUDFLARE.md 3.6.1): the word `do` rides `hello.tier` (protocol.ts reads
  * this list), so a client that knows it deploys before any hello says it (3.7 item 1).
  */
-export const REALTIME_TIERS = ['memory', 'redis', 'blob', 'do'] as const;
+export const REALTIME_TIERS = ['memory', 'blob', 'do'] as const;
 export type RealtimeTier = (typeof REALTIME_TIERS)[number];
 
 export type EntryKind = 'edit' | 'comment';
@@ -89,7 +88,7 @@ export type Entry = {
    * echo, the replay and the answer's `between`, and undo skips the own echo by `clientId`. A
    * resent POST is answered with one synthesized entry per covered op id at the record's seq
    * (apps/studio room.ts `admitOnBlob`), the first carrying the record's mutations and the rest
-   * none, so a client applies the fold once. Absent on the memory and redis tiers and on a
+   * none, so a client applies the fold once. Absent on the memory tier and on a
    * record written before the round.
    */
   covers?: string[];
@@ -178,9 +177,8 @@ export type PointerState = { x: number; y: number };
 
 /**
  * The box of a block the tab is moving or resizing, in sheet units, present only while the
- * pointer is down (docs/REALTIME.md 3.4; row `realtime.block.drag-live`): a volatile presence
- * frame on the redis tier (published, not stored; redis.ts `PRESENCE_VOLATILE_KEYS`), never
- * pushed to the blob tier's shared record (store/presence-store.ts `PRESENCE_OMITTED_FIELDS`).
+ * pointer is down (docs/REALTIME.md 3.4; row `realtime.block.drag-live`): never pushed to the
+ * blob tier's shared record (store/presence-store.ts `PRESENCE_OMITTED_FIELDS`).
  */
 export type DragState = { blockId: string; x: number; y: number; w: number; h: number };
 
@@ -321,7 +319,7 @@ export type BudgetResult = { ok: boolean; retryAfterMs: number };
 export type TrimOptions = {
   /** drop every entry with a seq below this one */
   minSeq?: number;
-  /** keep at most this many entries (an approximate bound on Redis) */
+  /** keep at most this many entries */
   maxEntries?: number;
 };
 
@@ -334,7 +332,7 @@ export type PresenceChannel = {
    * removes a client's entry and announces `leave`; `clock` is the leave beacon's clock (room-client
    * `stop`, above every set of that tab), which the blob tier keeps in the tombstone so a set of
    * the same tab landing after the leave never brings the row back (return/build/b7.md B7-R3);
-   * the memory and redis tiers ignore it
+   * the memory tier ignores it
    */
   leave: (deckId: string, clientId: string, clock?: number) => Promise<void>;
   /** binds a server issued client id to the session that opened the stream (report 10 F26) */
@@ -365,15 +363,13 @@ export type RealtimeChannel = {
    * seqs the deck's records already cover (the room's open, room.ts `createRoom`). The memory
    * stream starts empty in every new process while the records keep the previous process's ops
    * ranges: without the floor a tab's entries after a restart took seqs at or below the covered
-   * one and were never applied or checkpointed (the wave 3b verify's finding 6). The redis stream
-   * outlives a restart of the app and the blob and do tiers number by their own store, so only
-   * the memory channel has it.
+   * one and were never applied or checkpointed (the wave 3b verify's finding 6). The blob and do
+   * tiers number by their own store, so only the memory channel has it.
    */
   floor?: (deckId: string, seq: number) => Promise<void>;
   /**
    * Delivers every admitted `op`, every presence change and every published event of the deck
-   * to the listener, in stream order; the return value unsubscribes. One subscription per
-   * instance per deck on Redis, however many listeners (report 10 F24). A `passive` listener
+   * to the listener, in stream order; the return value unsubscribes. A `passive` listener
    * (the room's own, for its live document) holds no poll of the store on the blob tier: the
    * store is polled while a client stream of the deck is open on the instance and never
    * otherwise (the focus round, cycle 3 fix round, the blob tier budget); the other tiers
@@ -396,13 +392,13 @@ export type RealtimeChannel = {
    * keys.ts `budgetKey`); over `limit` the answer is not ok with the time until the window ends.
    */
   budget: (key: string, cost: number, limit: number, windowMs: number) => Promise<BudgetResult>;
-  /** a kill switch (SPEC-3 0.33); on by default, `realtime` reads as off when Redis is unreachable */
+  /** a kill switch (SPEC-3 0.33); on by default */
   flag: (name: string) => Promise<boolean>;
   /**
    * The drop bus of the deployment (the realtime round, docs/REALTIME.md 3.6; bus.ts): the
    * message that makes every instance forget one cached row (an access record, a deck index row,
-   * a resolved identity). In process on the memory tier, Redis pub/sub on the redis tier; absent
-   * on the blob tier, which keeps its 5 s TTLs instead.
+   * a resolved identity). In process on the memory tier; absent on the blob tier, which keeps its
+   * 5 s TTLs instead.
    */
   bus?: DropBus;
   /** closes subscriptions and connections */

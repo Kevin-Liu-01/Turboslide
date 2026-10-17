@@ -1,6 +1,6 @@
 // The inbox (gslides-parity SPEC-3 5.5; research 08 5.2; MILESTONES-3 B2 day 5): coalescing per
 // thread inside 15 minutes, the actor never notifying itself, the per deck level, the 500 unread
-// and 5,000 total caps, and three backends answering the same rows for the same events.
+// and 5,000 total caps, and two backends answering the same rows for the same events.
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -17,7 +17,6 @@ import {
   inboxFileName,
   memoryInbox,
   pushInto,
-  redisInbox,
   trimInbox,
 } from './inbox.ts';
 import type { Inbox, InboxFile, NotificationEvent } from './inbox.ts';
@@ -39,25 +38,6 @@ function reply(actor: string, offsetMs: number, threadId = 'thread-1'): Notifica
     slideId: 'pricing',
     actor,
     at: at(offsetMs),
-  };
-}
-
-/** A fake of the one Redis command shape the backend uses. */
-function fakeRedis(): {
-  call: (command: string, ...args: (string | number)[]) => Promise<unknown>;
-  store: Map<string, { value: string; px: number }>;
-} {
-  const store = new Map<string, { value: string; px: number }>();
-  return {
-    store,
-    async call(command, ...args) {
-      if (command === 'GET') return store.get(String(args[0]))?.value ?? null;
-      if (command === 'SET') {
-        store.set(String(args[0]), { value: String(args[1]), px: Number(args[3]) });
-        return 'OK';
-      }
-      throw new Error(`unexpected ${command}`);
-    },
   };
 }
 
@@ -136,7 +116,7 @@ describe('pushInto', () => {
   });
 });
 
-describe('the three backends', () => {
+describe('the two backends', () => {
   let root: string;
   beforeEach(async () => {
     n = 0;
@@ -176,10 +156,8 @@ describe('the three backends', () => {
   it('answer the same rows for the same events', async () => {
     const memory = memoryInbox();
     const file = fileInbox(join(root, '.turboslide'));
-    const redis = redisInbox(fakeRedis());
     const rows = await drive(memory);
     expect(await drive(file)).toEqual(rows);
-    expect(await drive(redis)).toEqual(rows);
     expect(rows).toMatchObject({
       unread: 2,
       records: [
@@ -203,18 +181,5 @@ describe('the three backends', () => {
     expect(await memory.list(ME, { unread: true })).toMatchObject({ unread: 2 });
     expect((await memory.list(ME, { unread: true })).records).toHaveLength(2);
     expect(await memory.markRead(ME, 'all', at(70_000))).toBe(0);
-  });
-
-  it('refreshes the Redis TTL on every write', async () => {
-    const kv = fakeRedis();
-    const inbox = redisInbox(kv);
-    await inbox.push(ME, reply(MAYA, 0), nextId);
-    const key = `inbox:${ME}`;
-    expect(kv.store.get(key)?.px).toBe(30 * 24 * 60 * 60_000);
-    await inbox.markRead(ME, 'all');
-    expect(JSON.parse(kv.store.get(key)?.value ?? '{}')).toMatchObject({
-      version: 1,
-      principalId: ME,
-    });
   });
 });

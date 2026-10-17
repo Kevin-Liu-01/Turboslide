@@ -542,7 +542,7 @@ export function createCheckpointer(deps: CheckpointerDeps): Checkpointer {
    * moved by this instance's own runs alone, so the instance that took the lock second started
    * from where its own last run ended and committed the other instance's run again (the same
    * mutations applied twice in the store, a doubled word). The records are the truth: a mirror
-   * syncs first when the store has one (the redis tier over the Blob store), then the newest
+   * syncs first when the store has one (a stream tier over the Blob store), then the newest
    * `ops.toSeq` is taken, never below what this instance already knows (`covered()` moves it on
    * another instance's checkpoint event too). One records read per run, under the lock: the
    * newest records down to one with `ops` where the store reads them so (`newestRecords`, a Blob

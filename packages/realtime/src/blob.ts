@@ -1,5 +1,6 @@
 // The blob channel (gslides-parity SPEC-3 2.5, 3.7 e; report 02 7.7): the reduced tier for a
-// deployment without Redis and the automatic fallback while Redis is unreachable. There is no
+// deployment without the realtime Worker and the automatic fallback while the Worker's `realtime`
+// flag reads off (docs/CLOUDFLARE.md 3.8). There is no
 // stream: every append is one commit through the deck's store (`BlobStore.write` hosted, a
 // `FileStore` on a checkout), so the seq of an entry is the revision its record made, `since`
 // reads the version log, `head` is the revision, and `subscribe` follows the store's watch

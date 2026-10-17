@@ -54,15 +54,15 @@ async function serverRequestMiddleware(): Promise<AnyRequestMiddleware[]> {
  * The seams bound once per server process (the integrator at merge 2; gslides-parity SPEC-3 6.2,
  * 6.4, 6.7, 8.3, 8.13): `authorize()` reads the access record through B2's access store
  * (b2.md R13), the identity runtime finds a share link and lists a caller's decks through the
- * store (b3.md R14a), and on the redis tier the rate limiter, the kill switches' reader and the
- * download nonce set ride the same Redis client (b4.md 2.4.3e, 2.4.7); with Upstash REST
- * variables the limiter is the Upstash one; an accounts database many instances share (D1,
- * Postgres) binds the one limiter over its `ts_limits` table for both, last, so it wins (HR-SA#3);
- * hosted with none, the limiter stays in memory per instance and the process logs that once
- * (b4.md section 3). Idempotent: binding twice rebinds the same seams.
+ * store (b3.md R14a), and an accounts database many instances share (D1) binds the one limiter
+ * over its `ts_limits` table for the quotas and the download nonce set (HR-SA#3); hosted without
+ * one, the limiter stays in memory per instance and the process logs that once (b4.md section 3).
+ * The Redis and Upstash binds left in HR-C#8. Idempotent: binding twice rebinds the same seams.
  */
 async function bindServerSeams(): Promise<void> {
-  const [authorize, access, identity, root, room, ratelimit, tokens, index] = await Promise.all([
+  // the room module is loaded here for its side effect, the pulse rule of every commit of the
+  // process (room.ts `setPulseRule`, HR-PS#3), before a request reaches a store
+  const [authorize, access, identity, root, , ratelimit, tokens, index] = await Promise.all([
     import('./server/authorize'),
     import('./server/access'),
     import('./server/auth/identity'),
@@ -83,48 +83,11 @@ async function bindServerSeams(): Promise<void> {
     // deck index and its picture files go (HR-SD#2); one function, so it is bound once
     beforeDelete: (await import('./server/auth/account-delete')).beforeAccountDelete,
   });
-  const redis = room.redisCommands();
-  if (redis !== null) {
-    const kv = {
-      get: async (key: string) => {
-        const reply = await redis.call('GET', key);
-        return typeof reply === 'string' ? reply : null;
-      },
-      set: async (key: string, value: string, ttlMs: number) => {
-        await redis.call('SET', key, value, 'PX', Math.max(1, Math.round(ttlMs)));
-      },
-      del: async (key: string) => {
-        await redis.call('DEL', key);
-      },
-    };
-    ratelimit.bindRateLimiter(ratelimit.kvLimiter(kv));
-    tokens.bindSpentSet(tokens.kvSpentSet(kv));
-  }
-  if (ratelimit.hasUpstash()) {
-    const [{ Ratelimit }, { Redis }] = await Promise.all([
-      import('@upstash/ratelimit'),
-      import('@upstash/redis'),
-    ]);
-    const client = Redis.fromEnv();
-    ratelimit.bindRateLimiter(
-      ratelimit.upstashLimiter(
-        (limit, windowMs) =>
-          new Ratelimit({
-            redis: client,
-            limiter: Ratelimit.slidingWindow(
-              limit,
-              `${Math.max(1, Math.round(windowMs / 1000))} s`,
-            ),
-            prefix: 'turboslide:q',
-          }),
-      ),
-    );
-  }
   // The one limiter (HR-SA#3, AUTH-8): when the accounts engine is one many instances share (D1
   // on both Vercel projects), the quotas and the download tokens' spent set count in its
   // `ts_limits` table, as better-auth's sign in limits do (identity.ts builds it with the runtime).
   // A runtime that cannot be built (a SQLite file named on a hosted process, a half set D1 pair)
-  // is the identity paths' to report, as before, and the limiter stays as the lines above left it
+  // is the identity paths' to report, as before, and the limiter stays in memory
   let limits: ReturnType<typeof identity.identityRuntime>['limits'] = null;
   try {
     limits = identity.identityRuntime().limits;

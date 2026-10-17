@@ -2,11 +2,10 @@
 // kind (`mention`, `reply`, `assigned`, `resolved`, `reopened`, `reaction`, `accessRequest`,
 // `granted`, `versionNamed`, `comment`), coalesced per thread inside a 15 minute window, at most
 // 500 unread and 5,000 in all per principal, with the per deck notification level (All comments,
-// Comments for you, None). Three backends behind one interface: a JSON file per principal under
+// Comments for you, None). Two backends behind one interface: a JSON file per principal under
 // `.turboslide/inbox/` on a checkout (the file the CLI's records write, apps/cli/src/records/
-// inbox.ts, same path and bytes), a Redis sorted set with a 30 day TTL for anonymous principals
-// hosted (over the two command shape the realtime channel's client offers), and memory for the
-// tests and the tmp overlay. The coalescing and the caps are one pure function so every backend
+// inbox.ts, same path and bytes), and memory hosted and in the tests. The Redis backend left in
+// hardening HR-C#8. The coalescing and the caps are one pure function so every backend
 // answers the same rows. Framework free.
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,8 +18,6 @@ export const INBOX_DIR = 'inbox';
 export const COALESCE_WINDOW_MS = 15 * 60_000;
 export const MAX_UNREAD = 500;
 export const MAX_RECORDS = 5_000;
-/** An anonymous principal's inbox lives this long in Redis (08 5.2). */
-export const INBOX_TTL_MS = 30 * 24 * 60 * 60_000;
 export const DEFAULT_LEVEL: NotificationLevel = 'forYou';
 
 export type Notification = {
@@ -64,7 +61,7 @@ export type NotificationEvent = {
 export type ListOptions = { unread?: boolean; since?: string; limit?: number };
 
 export type Inbox = {
-  readonly kind: 'memory' | 'file' | 'redis';
+  readonly kind: 'memory' | 'file';
   /** adds one event; null when the level drops it or the actor is the principal */
   push: (
     principalId: string,
@@ -292,37 +289,6 @@ export function fileInbox(stateDir: string): Inbox {
       const partial = `${path}.${process.pid}.part`;
       writeFileSync(partial, `${JSON.stringify(file, null, 2)}\n`);
       renameSync(partial, path);
-    },
-  );
-}
-
-/** The one command the Redis backend needs, the shape of the realtime channel's `RedisCommands.call`. */
-export type InboxRedis = {
-  call: (command: string, ...args: (string | number)[]) => Promise<unknown>;
-};
-
-/**
- * `inbox:<principalId>` as one JSON value with a 30 day TTL refreshed on every write (08 5.2 names
- * a sorted set; one value keeps the coalescing and the caps in the pure function above and costs
- * one command per read and one per write, which the budgets of 3.9 count).
- */
-export function redisInbox(
-  redis: InboxRedis,
-  keyOf: (principalId: string) => string = (id) => `inbox:${id}`,
-): Inbox {
-  return inboxOver(
-    'redis',
-    async (principalId) => {
-      const raw = await redis.call('GET', keyOf(principalId));
-      if (typeof raw !== 'string') return emptyInbox(principalId);
-      try {
-        return parseInboxFile(JSON.parse(raw), principalId);
-      } catch {
-        return emptyInbox(principalId);
-      }
-    },
-    async (file) => {
-      await redis.call('SET', keyOf(file.principalId), JSON.stringify(file), 'PX', INBOX_TTL_MS);
     },
   );
 }

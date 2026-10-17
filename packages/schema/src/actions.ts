@@ -909,7 +909,7 @@ export const presenceListResultSchema = z.strictObject({
  * Cloudflare phase (docs/CLOUDFLARE.md 3.6.1; build/r1.md R1-INTd) and `ws` the socket a tab holds
  * to its deck's object there (3.6.3; build/r2.md R2-C10).
  */
-export const SYNC_TIERS = ['memory', 'redis', 'blob', 'do'] as const;
+export const SYNC_TIERS = ['memory', 'blob', 'do'] as const;
 export const SYNC_TRANSPORTS = ['sse', 'poll', 'file', 'ws'] as const;
 export type SyncTier = (typeof SYNC_TIERS)[number];
 export type SyncTransport = (typeof SYNC_TRANSPORTS)[number];
@@ -5823,7 +5823,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       name: z.enum(FLAG_NAMES),
       on: z.boolean(),
       default: z.boolean().describe('What the flag reads when the store is unreachable'),
-      source: z.enum(['redis', 'file', 'default']),
+      source: z.enum(['file', 'default']),
     }),
     cli: { usage: 'turboslide admin flag <name> --on <on>' },
     mcp: 'deck_admin_flag',

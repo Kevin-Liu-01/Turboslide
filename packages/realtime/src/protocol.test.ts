@@ -353,7 +353,7 @@ describe('entries and events', () => {
         role: 'editor',
         clients: [roster],
         editing: 2,
-        tier: 'redis',
+        tier: 'do',
       },
       { type: 'ops', entries: [entry] },
       { type: 'op', entry },

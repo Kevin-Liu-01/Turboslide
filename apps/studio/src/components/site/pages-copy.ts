@@ -447,7 +447,7 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
       {
         name: 'Accounts',
         sentence:
-          'Turn on sign in with Google, GitHub or email, with the accounts in Postgres or SQLite.',
+          'Turn on sign in with Google, GitHub or email, with the accounts in Cloudflare D1 or SQLite.',
         href: '/docs/self-hosting#sign-in-and-accounts',
       },
       {

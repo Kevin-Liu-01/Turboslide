@@ -61,16 +61,15 @@ Keep every token and secret out of the repository.
 
 ## Sign in and accounts
 
-| Variable                                   | What it sets                                                                                                                                                        |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google. The redirect address is `<origin>/api/auth/callback/google`. `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` add GitHub the same way.            |
-| `DATABASE_URL`                             | A Postgres database for accounts. A checkout can use a SQLite file named by `TURBOSLIDE_AUTH_DB` instead. Without a database the studio offers no sign in.          |
-| `TURBOSLIDE_ACCOUNTS`                      | `d1` keeps accounts in the realtime Worker's D1 database. It needs `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`.                                               |
-| `TURBOSLIDE_AUTH_HOSTS`                    | The host names sign in accepts, as a list. The default is turboslide.com's hosts and localhost; a request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`. |
-| `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses whose account is the studio's admin from its first sign in.                                                                                               |
-| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field, and the sign in mail's routes answer 404. `capture` keeps outgoing mail in the studio for tests.        |
-| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in mail through Resend. Both are needed; with only the key, mail stays off.                                                                               |
-| `TURBOSLIDE_LOCAL_TOKEN`                   | `require` makes the agent surface on localhost ask for the checkout's own token in `.turboslide/token`.                                                             |
+| Variable                                   | What it sets                                                                                                                                                                                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google. The redirect address is `<origin>/api/auth/callback/google`. `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` add GitHub the same way.                                                                                       |
+| `TURBOSLIDE_ACCOUNTS`                      | `d1` keeps accounts in the realtime Worker's D1 database. It needs `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`. A checkout can use a SQLite file named by `TURBOSLIDE_AUTH_DB` instead. Without a database the studio offers no sign in. |
+| `TURBOSLIDE_AUTH_HOSTS`                    | The host names sign in accepts, as a list. The default is turboslide.com's hosts and localhost; a request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`.                                                                            |
+| `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses whose account is the studio's admin from its first sign in.                                                                                                                                                                          |
+| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field, and the sign in mail's routes answer 404. `capture` keeps outgoing mail in the studio for tests.                                                                                   |
+| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in mail through Resend. Both are needed; with only the key, mail stays off.                                                                                                                                                          |
+| `TURBOSLIDE_LOCAL_TOKEN`                   | `require` makes the agent surface on localhost ask for the checkout's own token in `.turboslide/token`.                                                                                                                                        |
 
 A sign in mail's link and its six digit code sign in only the browser that asked for them. A link opened in another browser asks for the eight character code the first browser shows.
 
@@ -78,15 +77,13 @@ A sign in mail's link and its six digit code sign in only the browser that asked
 
 | Variable                                                                   | What it sets                                                                                                                         |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `redis`, `blob` or `do`. Unset, the studio picks from the variables below.                |
+| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `blob` or `do`. Unset, the studio picks from the variables below.                         |
 | `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` | The realtime Worker on Cloudflare (the `do` tier): its host, the key of its room tickets and the bearer of the studio's calls to it. |
 | `TURBOSLIDE_DB_BEARER`                                                     | The bearer of the Worker's database routes, for `TURBOSLIDE_ACCOUNTS=d1`.                                                            |
-| `REDIS_URL`                                                                | A Redis server for the `redis` tier. It also makes the limits below count across instances.                                          |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                       | Upstash Redis for the limits.                                                                                                        |
 
 ## Limits and switches
 
-Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". Without `REDIS_URL` or the Upstash pair each server instance counts on its own, so a quota holds only on a single process.
+Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". The quotas count across instances when the accounts database is the realtime Worker's (`TURBOSLIDE_ACCOUNTS=d1`); without it each server instance counts on its own, so a quota holds only on a single process.
 
 The admin can turn a feature off without a deploy:
 

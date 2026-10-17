@@ -250,8 +250,6 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
       auth: {
         signIn: false,
         email: false,
-        passkeys: false,
-        passkeysNotice: null,
         github: false,
         google: false,
         mail: 'off',

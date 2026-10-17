@@ -76,10 +76,10 @@ import type { StandIns } from './stand-ins';
  *
  * The cache and the instances (VERIFICATION-3 finding 34; the realtime round, docs/REALTIME.md
  * 3.6). The drop bus is the realtime channel's (`RealtimeChannel.bus`, packages/realtime bus.ts):
- * in process on the memory tier, Redis pub/sub on the redis tier, so a share write or a link
- * exchange on one instance drops the record's row (`access`) and the person's deck index row
- * (`link`: the link grants, the typed name, the avatar choice) on every instance at once; the blob
- * tier has no bus and another instance's write never drops this instance's entry there. Three
+ * in process on the memory tier, so a share write or a link exchange drops the record's row
+ * (`access`) and the person's deck index row (`link`: the link grants, the typed name, the avatar
+ * choice) at once; the blob and do tiers have no bus and another instance's write never drops
+ * this instance's entry there. Three
  * rules bound the stale window where the bus is absent or a message is lost: the blob tier trusts
  * an entry for `BLOB_ACCESS_TTL_MS` (5 s) instead of 60 s; every share write and every link
  * exchange reads past the cache (`readStoredAccessFresh`, the F1 "drop before the fresh read"),
@@ -119,8 +119,7 @@ function warn(line: string): void {
 
 /**
  * The realtime channel's drop bus (docs/REALTIME.md 3.6), loaded late because room.ts imports
- * this module: the memory tier's in process bus, the redis tier's pub/sub, nothing on the blob
- * tier. A channel that cannot be built answers nothing and the caches keep their TTLs.
+ * this module: the memory tier's in process bus, nothing on the blob and do tiers. A channel that cannot be built answers nothing and the caches keep their TTLs.
  */
 async function channelDropBus(): Promise<DropBus | undefined> {
   try {
@@ -136,9 +135,9 @@ async function channelDropBus(): Promise<DropBus | undefined> {
 
 /**
  * The access record cache's bus over the drop bus's `access` topic, so a write on any instance
- * drops the record on every instance (SPEC-3 6.1's `PUBLISH` drop, landed with the bus). A publish
- * that fails (Redis unreachable) is logged and never fails the write that made it; the TTL then
- * bounds the stale read as before.
+ * drops the record on every instance the bus reaches (SPEC-3 6.1's drop, landed with the bus). A
+ * publish that fails is logged and never fails the write that made it; the TTL then bounds the
+ * stale read as before.
  */
 function accessBusOver(drops: DropBus): AccessBus {
   return {
@@ -196,8 +195,7 @@ async function build(): Promise<NonNullable<Shared['__turboslideAccess']>> {
       return {
         // without a bus (the blob tier) another instance's write never drops this instance's
         // entry: a short trust window bounds the stale read (VERIFICATION-3 finding 34: a link
-        // minted or revoked on one instance took up to a minute to land on another); with one
-        // (the redis tier) the drop lands at once and the window is the safety net
+        // minted or revoked on one instance took up to a minute to land on another)
         access: cachedAccessStore(blobAccessStore(client), { bus, ttlMs: BLOB_ACCESS_TTL_MS }),
         index: blobIndexStore(client),
         heads: memoryHeadCache(),
@@ -277,7 +275,7 @@ const grantCache = new Map<string, IndexFacts & { at: number }>();
  * Records a link grant on the principal's deck index (`users/<principalId>/decks.json`, a `shared`
  * row with `via: 'link'` and the link's id), beside the principal record the exchange writes. The
  * principal store of the blob tier is a file store under the instance's state folder
- * (`selectPrincipalStore` without Redis), so a grant written by the exchange on one instance was
+ * (`selectPrincipalStore` without D1), so a grant written by the exchange on one instance was
  * unknown to the next: the visitor a link admitted met You need access when the landing or a
  * server function ran on another instance. The index lives on the Blob store every instance
  * reads, so `linkGrantsFromIndex` finds the grant wherever the request lands.

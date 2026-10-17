@@ -106,8 +106,8 @@ export const ACCESS_RECORD_FILE = join('.turboslide', 'access.json');
 
 /**
  * The interim record loader: the checkout's `decks/<id>/.turboslide/access.json`, validated by
- * the schema package, or null when the deck has none. B2's access store (`ifMatch`, the Redis
- * cache, pub/sub) replaces it through `bindAuthorize({ loadRecord })` on day five; a file that
+ * the schema package, or null when the deck has none. B2's access store (`ifMatch`, the cache,
+ * the drop bus) replaces it through `bindAuthorize({ loadRecord })` on day five; a file that
  * does not validate is a loader failure, which `authorize()` treats as a denial.
  */
 export const fileRecordLoader: LoadRecordFn = (deckId) => {

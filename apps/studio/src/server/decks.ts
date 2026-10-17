@@ -962,7 +962,7 @@ type ShapedLoad = {
  * instance holds the deck's room: whenever the live document is not behind the store (the focus
  * round, cycle 3 fix; b3 C3-R2, VERIFICATION C2-F21). The live document is the last checkpoint
  * plus every stream entry since, and its `deck.revision` is the checkpoint's: `applyStreamEntries`
- * moves no revision (checkpoint.ts), so on the memory and redis tiers the two revisions read equal
+ * moves no revision (checkpoint.ts), so on the memory tier the two revisions read equal
  * between checkpoints while the live document carries the ops the store does not yet. The cycle 2
  * rule took the live document only when its revision was strictly above the store's, which never
  * held between checkpoints, so `/deck` and `/print` opened up to 2 s after a fill write or a skip

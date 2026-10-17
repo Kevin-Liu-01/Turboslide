@@ -71,7 +71,6 @@ describe('admission', () => {
       opsPerMinute: 2400,
       bytesPerMinute: 2 * 1024 * 1024,
       streams: 4,
-      redisCommandsPerDay: 500_000,
     });
     expect(budgetsFor('signedIn').opsPerMinute).toBe(4800);
     expect(budgetsFor('agent').streams).toBe(4);

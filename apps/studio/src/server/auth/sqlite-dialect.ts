@@ -5,8 +5,7 @@
 // carry a `reader` flag `node:sqlite` does not, so this file is the small driver Kysely needs:
 // one connection, one statement at a time (SQLite is single writer), the statement kind read
 // from the SQL, booleans bound as integers and dates as ISO strings because `node:sqlite` binds
-// neither. Postgres (behind `DATABASE_URL`) uses Kysely's own dialect over `pg` (db.ts). Every
-// statement passes token-at-rest.ts, so a checkout's session table holds token digests as D1 does.
+// neither. Every statement passes token-at-rest.ts, so a checkout's session table holds token digests as D1 does.
 import { DatabaseSync } from 'node:sqlite';
 
 import { CompiledQuery, SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler } from 'kysely';

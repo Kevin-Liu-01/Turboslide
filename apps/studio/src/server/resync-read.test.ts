@@ -6,7 +6,7 @@ import { RESYNC_ORIGINS_MAX, resyncReadSince } from './origins';
 
 // The resync read on every tier (RELIABILITY-17; hardening HR-RT#15): the editor loader's answer
 // to a resync carries the origins of the records above the tab's old position and `bounded` when
-// those records do not reach it. On the stream tiers (memory, redis, do) a tab's position is a
+// those records do not reach it. On the stream tiers (memory, do) a tab's position is a
 // stream seq and a record's place is the last seq it folded (`ops.toSeq`); on the blob tier both
 // are the revision. Before this the read compared every tier's position with the revision, so on
 // the do tier, whose seqs run far ahead of the revisions, it named no origin, and it never said
@@ -80,7 +80,7 @@ describe('the resync read (HR-RT#15)', () => {
 
   it('leaves the uncommitted tail alone: a position past every record is not bounded', () => {
     expect(resyncReadSince(doLog, 3100, 'do')).toEqual({ origins: [], bounded: false });
-    expect(resyncReadSince(doLog, 5000, 'redis')).toEqual({ origins: [], bounded: false });
+    expect(resyncReadSince(doLog, 5000, 'memory')).toEqual({ origins: [], bounded: false });
   });
 
   it('reads the revision on the blob tier, as the room client did, and says bounded there too', () => {

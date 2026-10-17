@@ -370,7 +370,7 @@ export const ALERTS: readonly AlertRule[] = [
 
 // ---------------------------------------------------------------------------------------------
 // Retention per class (SPEC-3 8.11; report 10 6.3) as data. The mechanisms live where the class
-// lives: Redis TTLs in packages/realtime, the store's prune, the daily sweeps of root.ts and
+// lives: the channel's TTLs in packages/realtime, the store's prune, the daily sweeps of root.ts and
 // upload.ts, the Drain's own store. `retentionSweep` in upload.ts runs the sweeps this app owns.
 
 export type RetentionClass = {

@@ -1,7 +1,5 @@
 import { createHmac } from 'node:crypto';
 
-import { Redis } from 'ioredis';
-
 import { authorize as bearerAuthorize, requestRunId } from '@turboslide/agent/http/auth';
 import type { AuthContext, Principal, Role } from '@turboslide/identity/access';
 import { isPrincipalId, parsePrincipalId } from '@turboslide/identity/ids';
@@ -32,8 +30,6 @@ import type {
 import { commentThreadId } from '@turboslide/realtime/channel';
 import { deckKeys } from '@turboslide/realtime/keys';
 import { memoryChannel } from '@turboslide/realtime/memory';
-import { ioredisCommands, redisChannel } from '@turboslide/realtime/redis';
-import type { RedisCommands } from '@turboslide/realtime/redis';
 import {
   BASE_SEQ_WINDOW,
   CLIENT_BINDING_TTL_MS,
@@ -126,16 +122,13 @@ import {
 import type { Capability, Decision } from './authorize';
 import {
   accountSession,
-  bindIdentityRedis,
   forgetAccountFacts,
   identityRuntime,
-  principalKvOf,
   requestAliases,
   resolveIdentity as resolveThroughRuntime,
 } from './auth/identity';
 import { studioSessionSecret } from './auth/middleware';
 import { selectPrincipalStore } from './auth/principal';
-import type { RedisKvLike } from './auth/secondary-storage';
 import { boundPrincipal, ensurePrincipal, readPrincipal } from './auth/session';
 import { applyStreamEntries, createCheckpointer, coveredSeq } from './checkpoint';
 import { roomHost, roomInsecure } from './room-ticket';
@@ -156,8 +149,8 @@ import {
 
 /**
  * The room (gslides-parity SPEC-3 2.3, 3.2 to 3.8; MILESTONES-3 B2 day 3): one process wide
- * realtime channel selected from the environment (`memory` on a checkout, `redis` over ioredis,
- * `blob` over the deck store), and per deck the live document (the last checkpoint plus every
+ * realtime channel selected from the environment (`memory` on a checkout, `blob` over the deck
+ * store, `do` over the realtime Worker), and per deck the live document (the last checkpoint plus every
  * stream entry since), the admission of an ops POST (the caps, the base window, the transform
  * against what landed, the reducer and the validator, the compare and append), the presence
  * roster with the identity fields written from the session, the stream's hello with the roster
@@ -177,17 +170,13 @@ type Shared = typeof globalThis & {
     rooms: Map<string, Promise<Room>>;
     principals: PrincipalStore;
     streams: StreamCounters;
-    /** the raw Redis commands on the redis tier (the inbox, the session directory), null elsewhere */
-    redis: RedisCommands | null;
     /** the blob tier's shared roster (store/presence-store.ts), for the leave that carries the beacon's clock (`leavePresence`); absent elsewhere */
     presence?: SharedPresence<RosterEntry>;
     /** the selection the environment made, kept for the hand back */
     selected: RealtimeSelection;
-    /** the redis channel on the redis tier, null elsewhere; the hand off reads its `realtime` flag */
-    redisChannel: RealtimeChannel | null;
     /** the Worker's channel on the do tier (docs/CLOUDFLARE.md 3.6.1), null elsewhere; the hand off of 3.8 reads its `/health` */
     doChannel: DoChannel | null;
-    /** the blob channel the redis tier falls to, built on the first hand off */
+    /** the blob channel the do tier falls to, built on the first hand off */
     fallback?: { channel: RealtimeChannel; presence?: SharedPresence<RosterEntry> };
   };
 };
@@ -211,46 +200,13 @@ function log(line: string): void {
   console.error(`turboslide room: ${line}`);
 }
 
-/** `redis.unavailable` once a minute while the flag read keeps failing (docs/REALTIME.md 3.8). */
-let unavailableLoggedAt = 0;
-function noteRedisUnavailable(name: string, error: unknown): void {
-  const now = Date.now();
-  if (now - unavailableLoggedAt < 60_000) return;
-  unavailableLoggedAt = now;
-  logSecurityEvent({
-    event: 'redis.unavailable',
-    killSwitch: name,
-    reason: error instanceof Error ? error.message : String(error),
-  });
-}
-
 function buildChannel(selection: RealtimeSelection): {
   channel: RealtimeChannel;
-  redis: RedisCommands | null;
   presence?: SharedPresence<RosterEntry>;
-  /** the ioredis client of the redis tier, for the principal records and the identity runtime */
-  kv?: RedisKvLike;
 } {
   switch (selection.tier) {
     case 'memory':
-      return { channel: memoryChannel(), redis: null };
-    case 'redis': {
-      const url = process.env.REDIS_URL ?? '';
-      const client = new Redis(url, { lazyConnect: false, maxRetriesPerRequest: 3 });
-      client.on('error', (error: unknown) =>
-        log(`redis: ${error instanceof Error ? error.message : String(error)}`),
-      );
-      const redis = ioredisCommands(client);
-      return {
-        channel: redisChannel(redis, {
-          onError: (error, context) =>
-            log(`${context}: ${error instanceof Error ? error.message : String(error)}`),
-          onUnavailable: noteRedisUnavailable,
-        }),
-        redis,
-        kv: client as unknown as RedisKvLike,
-      };
-    }
+      return { channel: memoryChannel() };
     case 'do': {
       // the Worker's channel (docs/CLOUDFLARE.md 3.6.1): the object orders the deck, the function
       // publishes, reads the roster and the document, flushes and forwards writes under the bearer
@@ -267,7 +223,6 @@ function buildChannel(selection: RealtimeSelection): {
           onError: (error, context) =>
             log(`worker ${context}: ${error instanceof Error ? error.message : String(error)}`),
         }),
-        redis: null,
       };
     }
     case 'blob': {
@@ -342,7 +297,7 @@ function buildChannel(selection: RealtimeSelection): {
         },
         onError,
       });
-      return { channel, redis: null, presence };
+      return { channel, presence };
     }
   }
 }
@@ -350,15 +305,8 @@ function buildChannel(selection: RealtimeSelection): {
 function state(): NonNullable<Shared['__turboslideRoom']> {
   if (shared.__turboslideRoom === undefined) {
     const selection = selectRealtime(process.env);
-    const { channel, redis, presence, kv } = buildChannel(selection);
-    /* the principal records live in Redis on the redis tier (docs/REALTIME.md 3.6; docs/hosting.md
-       section 9), here and in the identity runtime, which reads the binding at every call
-       (auth/identity.ts bindIdentityRedis): a name typed on one instance is the name on the next */
-    bindIdentityRedis(kv);
-    const principals = selectPrincipalStore({
-      ...(kv === undefined ? {} : { kv: principalKvOf(kv) }),
-      stateDir: stateDir(),
-    }).store;
+    const { channel, presence } = buildChannel(selection);
+    const principals = selectPrincipalStore({ stateDir: stateDir() }).store;
     log(`realtime tier ${selection.tier} (${selection.reason})`);
     shared.__turboslideRoom = {
       selection,
@@ -366,10 +314,8 @@ function state(): NonNullable<Shared['__turboslideRoom']> {
       rooms: new Map(),
       principals,
       streams: createStreamCounters(),
-      redis,
       ...(presence === undefined ? {} : { presence }),
       selected: selection,
-      redisChannel: selection.tier === 'redis' ? channel : null,
       doChannel: selection.tier === 'do' && isDoChannel(channel) ? channel : null,
     };
     // the resolved identity cache leaves on the other instances' word (3.6): a rename or an
@@ -386,22 +332,18 @@ function state(): NonNullable<Shared['__turboslideRoom']> {
 let switchingTier: Promise<void> | null = null;
 
 /**
- * The redis tier's hand off and hand back (docs/REALTIME.md 3.8). The `realtime` flag is read
- * through the redis channel (cached 5 s; it reads off when Redis is unreachable, which
- * `noteRedisUnavailable` logs, or when a hand set it off: `SET flag:realtime off`). Off while the
- * instance serves the redis tier: the blob channel is built once over the deck store, the
- * instance's selection, channel and shared roster move to it, every open room is superseded (its
- * streams write `resync` and close, so each tab reloads once and reopens on the blob tier) and
- * closed, and the next `roomFor` opens a blob room. On again: the same in reverse. Nothing is
- * lost: every admitted entry of the redis tier reached the store within the checkpoint interval
- * and the blob tier commits every append. Called by `roomFor` on every request and by the stream
- * route's heartbeat, so an idle instance notices within 15 s. Nothing on the other tiers.
+ * The do tier's hand off and hand back (docs/CLOUDFLARE.md 3.8 item 4; docs/REALTIME.md 3.8). The
+ * `realtime` flag is read through the Worker's channel (its `/health`, cached 60 s; off when it
+ * says so or after three failed reads). Off while the instance serves the do tier: the blob
+ * channel is built once over the deck store, the instance's selection, channel and shared roster
+ * move to it, every open room is superseded (its streams write `resync` and close, so each tab
+ * reloads once and reopens on the blob tier) and closed, and the next `roomFor` opens a blob room.
+ * On again: the same in reverse. Called by `roomFor` on every request and by the stream route's
+ * heartbeat, so an idle instance notices within 15 s. Nothing on the other tiers.
  */
 export async function ensureRealtimeTier(): Promise<void> {
   const s = state();
-  // the tier with a flag driven hand off: redis (docs/REALTIME.md 3.8), or do (docs/CLOUDFLARE.md
-  // 3.8 item 4: the Worker's `/health`, cached 60 s, off or three failed reads)
-  const primary = s.redisChannel ?? s.doChannel;
+  const primary = s.doChannel;
   if (primary === null) return;
   if (switchingTier !== null) return switchingTier;
   const on = await primary.flag('realtime');
@@ -414,7 +356,6 @@ export async function ensureRealtimeTier(): Promise<void> {
       s.fallback ??= buildChannel({
         tier: 'blob',
         reason,
-        redis: s.selected.redis,
         room: s.selected.room,
         notice: BLOB_TIER_NOTICE,
       });
@@ -422,7 +363,6 @@ export async function ensureRealtimeTier(): Promise<void> {
       s.selection = {
         tier: 'blob',
         reason,
-        redis: s.selected.redis,
         room: s.selected.room,
         notice: BLOB_TIER_NOTICE,
       };
@@ -458,7 +398,7 @@ async function supersedeRooms(): Promise<void> {
   }
 }
 
-/** The blob tier's shared roster, undefined on the memory and redis tiers. */
+/** The blob tier's shared roster, undefined on the memory and do tiers. */
 export function sharedRoster(): SharedPresence<RosterEntry> | undefined {
   return state().presence;
 }
@@ -468,7 +408,7 @@ export function sharedRoster(): SharedPresence<RosterEntry> | undefined {
  * above every set of that tab). On the blob tier the shared roster keeps the clock in the
  * tombstone, so a set of the same tab that reaches this or another instance after the leave (the
  * presence route awaits the roster read before its set; b4.md C3T-R2) never lands; the channel's
- * own `leave` (the memory and redis tiers, and the clockless leaves of the stream's close and
+ * own `leave` (the memory and do tiers, and the clockless leaves of the stream's close and
  * `retireClients`) is the path otherwise. `shared` is the roster to write; the tests pass one.
  */
 export async function leavePresence(
@@ -479,7 +419,7 @@ export async function leavePresence(
 ): Promise<void> {
   if (shared !== null && clock !== undefined) await shared.leave(room.deckId, clientId, clock);
   /* the channel carries the clock too since B7-R3 (realtime/channel.ts `leave`; the blob channel
-     hands it to the shared roster, the memory and redis channels ignore it) */
+     hands it to the shared roster, the memory channel ignores it) */
   else await room.channel.presence.leave(room.deckId, clientId, clock);
 }
 
@@ -499,8 +439,8 @@ export const JOIN_ROW_CLOCK = 0;
  * this one read the row at its next pulse tick, 2 s after the stream's wake or up to 10 s when
  * the tab here was alone and quiet, and the joiner's chip came 3.7 to 11 s after the navigation
  * against the 3.5 s of `collab.presence.join-within-2s`. The row carries no slide, selection or
- * pointer; the tab's first POST replaces it. The memory and redis tiers have no shared roster
- * and announce every set to every stream already: nothing to do there. `open` is the stream's,
+ * pointer; the tab's first POST replaces it. The memory and do tiers have no shared roster on
+ * this instance: nothing to do there. `open` is the stream's,
  * read after the entry is built so a stream closed meanwhile announces nothing.
  */
 export async function announceJoin(
@@ -519,11 +459,6 @@ export async function announceJoin(
   return shared.join(room.deckId, clientId, entry, PRESENCE_EXPIRY_MS);
 }
 
-/** The raw Redis commands of the redis tier (B3 R6: `get`, `set ... PX`, `del` ride `call`), null on the other tiers. */
-export function redisCommands(): RedisCommands | null {
-  return state().redis;
-}
-
 /** The process wide channel (SPEC-3 2.5). */
 export function realtimeChannel(): RealtimeChannel {
   return state().channel;
@@ -537,7 +472,7 @@ export function realtimeTier(): RealtimeTier {
   return state().selection.tier;
 }
 
-/** The principal records (the name, the avatar, the link grants), file or Redis backed. */
+/** The principal records (the name, the avatar, the link grants), file or D1 backed. */
 export function principalStore(): PrincipalStore {
   return state().principals;
 }
@@ -1125,7 +1060,7 @@ async function createRoom(deckId: string): Promise<Room> {
     }
     const head = await channel.head(deckId);
     if (head < live.seq) {
-      // the stream was reset under this instance (a Redis flush, a test): the store is the truth
+      // the stream was reset under this instance (a test): the store is the truth
       const current = await store.read();
       live.document = current.document;
       live.seq = coveredSeq(await store.records());
@@ -1463,7 +1398,7 @@ function doCheckpointer(channel: DoChannel, deckId: string): Checkpointer {
 
 /** The room of a deck on this instance; a RangeError when the deck is missing. */
 export async function roomFor(deckId: string): Promise<Room> {
-  // the redis tier's hand off and hand back run here, on every request (docs/REALTIME.md 3.8)
+  // the do tier's hand off and hand back run here, on every request (docs/CLOUDFLARE.md 3.8)
   await ensureRealtimeTier().catch((error: unknown) =>
     log(`the tier check failed: ${error instanceof Error ? error.message : String(error)}`),
   );
@@ -1507,7 +1442,7 @@ export const FLUSH_ROOM_PAUSE_MS = 100;
 /**
  * Commits what the room admitted and the store does not hold yet, before an agent reads the
  * deck (the product round fix round; VERIFICATION.md "Product round, pass 1" finding 12). On the
- * memory and redis tiers a tab's edits sit in the stream until the checkpointer's idle timer
+ * memory tier a tab's edits sit in the stream until the checkpointer's idle timer
  * (2 s, 10 s under a burst) writes them, while the HTTP, MCP and window dispatchers read the
  * store: `deck.tailor` over HTTP right after the editor typed five Acme found none and answered
  * `replacements: 0`, where the blob tier, whose every append is a commit, answered 3 of 3. One
@@ -1643,7 +1578,7 @@ export async function closeRoom(deckId: string): Promise<void> {
 }
 
 /**
- * Commits the tail of every room this instance holds on the memory and redis tiers, then closes
+ * Commits the tail of every room this instance holds on the memory tier, then closes
  * every room (hardening HR-O#8, PERF-18): the node-server build's SIGTERM path, so the entries the
  * memory channel holds in this process reach the store before it exits. The do tier's object
  * keeps its own tail (its checkpoint would post back to this process's closed listener), and the
@@ -1657,7 +1592,7 @@ export async function flushRooms(): Promise<void> {
       (room) => room.tier,
       () => null,
     );
-    if (tier === 'memory' || tier === 'redis') await flushRoom(deckId);
+    if (tier === 'memory') await flushRoom(deckId);
   }
   await closeRooms();
 }
@@ -1741,7 +1676,7 @@ export const COMMENT_CALLER_SLOW_MS = 1000;
 /**
  * The caller of a comment action on a request: the identity, `authorize()` for the capability the
  * action needs (a denial is the body of 6.2), the capabilities of the role on the record, the
- * author the server derives, and the inbox's Redis handle. `known` is an identity the transport
+ * author the server derives. `known` is an identity the transport
  * already resolved, an API key's (`keyRoomIdentity`), in place of the request's.
  */
 export async function commentCallerFor(
@@ -1798,7 +1733,6 @@ export async function commentCallerFor(
     capabilities,
     principalId: identity.principalId ?? identity.identity,
     origin: new URL(request.url).origin,
-    redis: state().redis,
     // a caller who may not share reads and writes other people as stand-ins (HR-SD#1)
     ...(capabilities.has('share') ? {} : { standIns: callerStandIns(room, record, identity) }),
   };
@@ -3133,7 +3067,7 @@ export async function replayFor(
     if (page.length === 0) break;
     /* a since the stream does not hold (docs/REALTIME.md 3.7): the first entry after the
        position is not the next seq, so the entries below it are gone (the stream trimmed behind
-       a checkpoint, a Redis reset, a position from the other tier after a hand off or a
+       a checkpoint, a position from the other tier after a hand off or a
        rollback, a hole in the blob tier's log) and a replay from here would apply entries over a
        base the tab never saw; the tab reloads at the head instead, once, never a hang */
     const first = page[0];

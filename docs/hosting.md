@@ -771,9 +771,9 @@ private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_R
   2026-10-11 under the migration before this one: reads go to the private store first and to the
   public store when absent there, writes go to the private store.
 - The read fails closed. A failed or late read of `meta.json` (5 s deadline) fails the request with
-  503 (`StorageLayoutError`) and is not cached. Only a confirmed absence on a private store that
-  lists neither `meta.json` nor `migration.json` reads as `v1`; a process that once read a record
-  never reads an absence as `v1`.
+  503 (`StorageLayoutError`) and `retry-after` 5 s, the layout cache's lifetime, and is not cached.
+  Only a confirmed absence on a private store that lists neither `meta.json` nor `migration.json`
+  reads as `v1`; a process that once read a record never reads an absence as `v1`.
 - The only layout cache is the 5 s one of each process (`LAYOUT_TTL_MS`). Twin keys are cached for
   10 minutes (`TWIN_KEY_TTL_MS`), which only `rekey` waits for.
 - While the record is frozen, and until `opensAt`, every document put and removal throws

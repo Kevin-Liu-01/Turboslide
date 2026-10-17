@@ -80,7 +80,7 @@ export const DEFAULT_THUMB_WIDTH: ThumbWidth = 320;
  */
 export const CARD_THUMB_WIDTH = DECK_CARD_SIZE.width;
 /** Every width this module renders and stores: the thumbnails' and the card's. */
-export type ThumbRenderWidth = ThumbWidth | typeof CARD_THUMB_WIDTH;
+type ThumbRenderWidth = ThumbWidth | typeof CARD_THUMB_WIDTH;
 
 /** The sheet's aspect, so a thumbnail is width by width times 9/16 (SPEC 2.1). */
 const SHEET = { width: 1600, height: 900 } as const;

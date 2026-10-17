@@ -23,7 +23,7 @@ function ratio(shot: Shot): number {
  * A command line in parts: the words, then each flag with its value as one part, so the panel
  * breaks a long line between parts and never inside a flag and its value (run.ts commandParts).
  */
-export function lineParts(line: string): string[] {
+function lineParts(line: string): string[] {
   const words = line.split(' ');
   const parts: string[] = [];
   for (let i = 0; i < words.length; i += 1) {

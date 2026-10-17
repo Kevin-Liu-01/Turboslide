@@ -131,7 +131,7 @@ export function keyExpiry(record: Pick<ApiKeyRecord, 'name' | 'expiresAt'>): str
 }
 
 /** Whether a key is past its expiry (keyExpiry); a revoked key is refused for that first. */
-export function isKeyExpired(record: ApiKeyRecord, now: Date = new Date()): boolean {
+function isKeyExpired(record: ApiKeyRecord, now: Date = new Date()): boolean {
   const expiry = keyExpiry(record);
   return expiry !== null && Date.parse(expiry) <= now.getTime();
 }

@@ -6,7 +6,7 @@
  * under (BRAND_NARROW_MAX_PX). The two have the same alt text; the hidden one is out of the
  * accessibility tree.
  */
-export type PictureFiles = { wide: string; phone: string };
+type PictureFiles = { wide: string; phone: string };
 
 export type ThemePictureProps = {
   light: PictureFiles;

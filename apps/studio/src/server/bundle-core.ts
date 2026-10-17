@@ -173,7 +173,7 @@ export type BundleRouteAdmission =
  * export and render routes). Returns the 401 Response to send, or how the request was admitted,
  * so the route can run `authorize()` for the ticket's identity (SPEC-3 6.3, 8.2).
  */
-export function bundleRouteAdmission(
+function bundleRouteAdmission(
   request: Request,
   purpose: string,
   subject: string,

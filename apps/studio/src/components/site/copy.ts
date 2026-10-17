@@ -10,7 +10,7 @@ import { HOME_LEAD } from './meta';
  * from run.ts; nothing here types a number the tree holds.
  */
 
-export const REPOSITORY = SITE.repository;
+const REPOSITORY = SITE.repository;
 const GITHUB_FILE = `${REPOSITORY}/blob/main`;
 /** General Translation, the maker the footer names. */
 const MAKER = 'https://generaltranslation.com';

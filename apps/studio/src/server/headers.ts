@@ -179,7 +179,7 @@ export function isEmbedPath(pathname: string): boolean {
  * answers `X-Frame-Options: SAMEORIGIN` and `frame-ancestors 'self'` where every other page but
  * the embed answers DENY and 'none'.
  */
-export function isSameOriginFramePath(pathname: string): boolean {
+function isSameOriginFramePath(pathname: string): boolean {
   return routePath(pathname) === '/try';
 }
 
@@ -215,7 +215,7 @@ export function mintNonce(): string {
 const NONCE_SHAPE = /^[A-Za-z0-9+/]{22}==$/;
 
 /** The variable that carries the build's one nonce to the prerender (hardening HR-W#3b). */
-export const PRERENDER_NONCE_ENV = 'TURBOSLIDE_PRERENDER_NONCE';
+const PRERENDER_NONCE_ENV = 'TURBOSLIDE_PRERENDER_NONCE';
 
 /**
  * The build's one nonce for the prerendered pages (hardening HR-W#3b, SPEC-1, CRIT-W5).
@@ -339,7 +339,7 @@ export function isDocumentPath(pathname: string): boolean {
  * the function answers them (a node server, a docs address with no page) the middleware enforces
  * the same policy with the request's nonce.
  */
-export const STATIC_PAGE_ROUTES: ReadonlyArray<string> = ['/home', '/docs'];
+const STATIC_PAGE_ROUTES: ReadonlyArray<string> = ['/home', '/docs'];
 
 export function isStaticPagePath(pathname: string): boolean {
   const path = routePath(pathname);
@@ -368,7 +368,7 @@ export const CSP_REPORT_PATH = '/api/x/csp/report';
  * tag host (a nonced script loads it, so `'strict-dynamic'` already admits it; the host is for a
  * browser without `'strict-dynamic'`), its collect requests and its pixel fallback.
  */
-export const ANALYTICS_SOURCES = {
+const ANALYTICS_SOURCES = {
   script: ' https://www.googletagmanager.com',
   connect:
     ' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com',

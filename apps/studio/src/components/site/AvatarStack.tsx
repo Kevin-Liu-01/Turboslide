@@ -12,7 +12,7 @@ import type { TryPressed } from './try-frame';
 export type OnPress = (who: TryPressed) => void;
 
 /** How long a pressed avatar's ring pulses. */
-export const PRESSED_MS = 1200;
+const PRESSED_MS = 1200;
 
 /**
  * One stack of the title (docs/SITE.md B): the avatars fan along a circular arc that rises from

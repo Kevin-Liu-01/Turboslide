@@ -8,7 +8,7 @@ import type { ClockEntry, SlideClock } from '@turboslide/viewer/slide-clock';
 import { useMountEffect } from './useMountEffect';
 
 /** The step facts of the slide shown: its id, the step shown and its click steps. */
-export type ClockSteps = { slideId: string; step: number; steps: number };
+type ClockSteps = { slideId: string; step: number; steps: number };
 
 export type SlideClockHandle = {
   /** the clock of the slide shown, or null when it has no motion */

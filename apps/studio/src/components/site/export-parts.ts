@@ -7,7 +7,7 @@
  * 06 draws the slide once from the Editable text file's parts and outlines each file's parts on
  * its side of the seam, so the counts the page states are these lists' (`countParts`).
  */
-export type PartKind = 'text' | 'rect' | 'line' | 'picture';
+type PartKind = 'text' | 'rect' | 'line' | 'picture';
 
 export type ExportPart = {
   id: string;

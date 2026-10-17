@@ -23,14 +23,14 @@ import { hasStoredDeck } from './root';
 
 type Env = Readonly<Record<string, string | undefined>>;
 
-export const CANARY_DECK_VARIABLE = 'TURBOSLIDE_CANARY_DECK';
+const CANARY_DECK_VARIABLE = 'TURBOSLIDE_CANARY_DECK';
 export const DEFAULT_CANARY_DECK = 'gt-brand';
 /** How long one reading is kept per instance. */
 export const HEALTH_CACHE_MS = 30_000;
 /** How long one check waits before it fails with `TimeoutError`. */
-export const CHECK_MS = 8_000;
+const CHECK_MS = 8_000;
 
-export type HealthCheck = { ok: boolean; ms: number; reason?: string };
+type HealthCheck = { ok: boolean; ms: number; reason?: string };
 
 export type HealthReading = {
   ok: boolean;
@@ -147,7 +147,7 @@ export async function readHealth(deps: HealthDeps): Promise<HealthReading> {
 }
 
 /** The deployment's own checks: the store, the identity runtime's database, the backup store. */
-export function deploymentHealthDeps(env: Env = process.env): HealthDeps {
+function deploymentHealthDeps(env: Env = process.env): HealthDeps {
   const backup = backupBlobClient(env);
   return {
     env,

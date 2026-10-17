@@ -44,7 +44,7 @@ export function preloadDialogs(dialogs: ReadonlyArray<{ preload: () => Promise<v
 export const IDLE_PRELOAD_DELAY_MS = 1200;
 
 /** The longest an idle preload waits for an idle period before it loads anyway. */
-export const IDLE_PRELOAD_TIMEOUT_MS = 4000;
+const IDLE_PRELOAD_TIMEOUT_MS = 4000;
 
 /** True when the browser asks pages to save data (the Save-Data setting, `navigator.connection.saveData`). */
 export function savesData(): boolean {

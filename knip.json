@@ -34,7 +34,8 @@
         "e2e/**/*.{ts,mts}",
         "src/**/*.test.{ts,tsx}"
       ],
-      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.{ts,mts}", "*.config.ts"]
+      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.{ts,mts}", "*.config.ts"],
+      "ignoreDependencies": ["@paper-design/shaders"]
     },
     "apps/cli": {
       "entry": [

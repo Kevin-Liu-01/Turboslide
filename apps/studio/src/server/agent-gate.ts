@@ -186,7 +186,7 @@ export function requireNamedDeck(call: {
 }
 
 /** A share or publish call whose input `id` names a deck other than the bound one: 400, `invalid_input`. */
-export class DeckMismatchError extends TypeError {
+class DeckMismatchError extends TypeError {
   readonly status = 400;
   readonly code = 'invalid_input';
 

@@ -20,7 +20,7 @@ export const DEVICE_TOKEN_PATH = '/api/auth/device/token';
 /** The key's name in Profile's list of keys. */
 export const DEVICE_KEY_NAME = 'turboslide login';
 /** How long a device key lives (HR-SA#5; HARDENING.md question 27). */
-export const DEVICE_KEY_DAYS = 90;
+const DEVICE_KEY_DAYS = 90;
 export const DEVICE_KEY_LIFETIME_MS = DEVICE_KEY_DAYS * 24 * 60 * 60 * 1000;
 /**
  * The expiry of a device key minted before HR-SA#5 with none: 90 days after the round

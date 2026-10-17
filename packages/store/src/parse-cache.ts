@@ -10,9 +10,9 @@ import { statSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 
 /** How many deck folders' validated documents the cache keeps. */
-export const CACHED_DOCUMENTS_MAX = 16;
+const CACHED_DOCUMENTS_MAX = 16;
 /** How many parsed version records the cache keeps, across every folder. */
-export const CACHED_RECORDS_MAX = 10_000;
+const CACHED_RECORDS_MAX = 10_000;
 
 /**
  * A file's identity on disk: its inode, size, and modification and change times in nanoseconds;

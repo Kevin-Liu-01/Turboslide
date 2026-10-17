@@ -9,11 +9,11 @@
 
 /** The hair cuts, in the order the hash picks them. */
 export const HAIR = ['crop', 'bob', 'bun', 'long', 'curls'] as const;
-export type Hair = (typeof HAIR)[number];
+type Hair = (typeof HAIR)[number];
 
 /** The collars of the garment. */
-export const COLLARS = ['crew', 'vee', 'shirt'] as const;
-export type Collar = (typeof COLLARS)[number];
+const COLLARS = ['crew', 'vee', 'shirt'] as const;
+type Collar = (typeof COLLARS)[number];
 
 export type PortraitSpec = { hair: Hair; collar: Collar; glasses: boolean };
 

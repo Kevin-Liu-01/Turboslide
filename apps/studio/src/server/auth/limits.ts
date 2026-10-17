@@ -19,7 +19,7 @@ import { sha256Hex } from '@turboslide/identity/sha256';
 
 import type { AuthDatabase } from './schema.ts';
 
-export type LimitTake = {
+type LimitTake = {
   /** True when the cost was counted; false when it would pass the limit and nothing was written. */
   ok: boolean;
   count: number;

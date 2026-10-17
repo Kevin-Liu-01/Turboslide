@@ -43,7 +43,7 @@ export { EXPORT_POLL_MS, batchedProgressLabel } from '../server/download';
 export { DECK_CREATED_EVENT } from '../server/write';
 
 /** The deck's asset folder on the server (the store's route, decks.$deckId.assets.$.ts). */
-export const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
+const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
 
 /** The pending queue mirror: IndexedDB in a browser, memory where it is missing (SPEC-3 0.7). */
 function pendingStoreFor(): PendingStore {
@@ -64,7 +64,7 @@ function sessionIds(): Storage | null {
  * grant from `POST /api/x/upload/picture`, the `PUT` of the bytes to the grant's address, and the
  * key the write names. A non 2xx answer at either step throws with the server's sentence.
  */
-export async function presignUpload(
+async function presignUpload(
   deckId: string,
   contentType: string,
   bytes: Uint8Array,

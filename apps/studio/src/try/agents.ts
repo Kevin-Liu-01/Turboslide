@@ -97,7 +97,7 @@ export type WriteRecord = {
   at: number;
 };
 
-export type RunnerState = {
+type RunnerState = {
   loop: number;
   tasks: Record<AgentKey, string>;
   writes: number;
@@ -146,13 +146,13 @@ const BLOCKED = Symbol('blocked');
 /** The presence batch rate (PRESENCE_BATCH_MS of @turboslide/realtime/protocol). */
 export const FRAME_MS = 80;
 /** How long a write waits on the visitor before its task ends and the agent does other work. */
-export const BLOCKED_MS = 1500;
+const BLOCKED_MS = 1500;
 /** How long a `wait` step or a task's `after` waits for the other agent. */
-export const WAIT_MS = 15_000;
+const WAIT_MS = 15_000;
 /** The director's floor between two moves of the visitor's stage. */
-export const DIRECTOR_MS = 1500;
+const DIRECTOR_MS = 1500;
 /** How long the director follows one agent before it turns to the other. */
-export const FOCUS_MS = 9000;
+const FOCUS_MS = 9000;
 /** The most slides the agents add and keep (a slide the visitor wrote on stays). */
 export const AGENT_SLIDES_MAX = 6;
 /** The shortest work a step shows, in ms: the rest before a write, a selection's hold. */
@@ -162,9 +162,9 @@ export const STEP_MS = 600;
  * once, while its answer comes with the tab room's next checkpoint, two to ten seconds later
  * (tab-backend.ts); a refusal comes before this, and a later one is logged.
  */
-export const ANSWER_MS = 250;
+const ANSWER_MS = 250;
 /** How long after a press the visitor counts as watching the agent, not editing. */
-export const WATCH_MS = 8000;
+const WATCH_MS = 8000;
 
 /** A seeded generator (mulberry32), so a run repeats. */
 export function seeded(seed: number): () => number {
@@ -213,12 +213,7 @@ function blockOf(slide: Slide | undefined, blockId: string) {
 }
 
 /** The plain text of a block's Text at a JSON pointer (`/text`, `/rows/1/cells/2`), or ''. */
-export function textAt(
-  document: DeckDocument,
-  slideId: string,
-  blockId: string,
-  path: string,
-): string {
+function textAt(document: DeckDocument, slideId: string, blockId: string, path: string): string {
   let value: unknown = blockOf(document.slides[slideId], blockId);
   for (const key of path.split('/').slice(1)) {
     if (typeof value !== 'object' || value === null) return '';
@@ -237,7 +232,7 @@ export function sharedStart(a: string, b: string): number {
 }
 
 /** Whether `slide` or `slide#block` exists in the document. */
-export function exists(document: DeckDocument, need: string): boolean {
+function exists(document: DeckDocument, need: string): boolean {
   const [slideId = '', blockId] = need.split('#');
   const slide = document.slides[slideId];
   if (slide === undefined) return false;
@@ -250,7 +245,7 @@ export function exists(document: DeckDocument, need: string): boolean {
  * the manifest field `deck.set` names. A write on another block of a slide the visitor wrote on
  * goes through; one on the visitor's own block, slide or field never does.
  */
-export function targetsOf(
+function targetsOf(
   action: string,
   slideId: string,
   blockId: string | undefined,

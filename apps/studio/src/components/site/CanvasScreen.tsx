@@ -211,7 +211,7 @@ export function CanvasScreen() {
  * The frame the example theme draws on every slide: two rails and two rules 56 slide px in, with
  * an 11 px cross where they meet (packages/theme/src/gt-ink-paper/sheet.css).
  */
-export function SheetFrame() {
+function SheetFrame() {
   return (
     <>
       <i className="site-sheet-rule is-l" />

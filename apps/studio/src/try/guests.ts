@@ -26,7 +26,7 @@ export type GuestHandle = {
   leave: () => void;
 };
 
-export type GuestPlan = {
+type GuestPlan = {
   /** the guest's principal id */
   key: string;
   kind: 'person' | 'agent';

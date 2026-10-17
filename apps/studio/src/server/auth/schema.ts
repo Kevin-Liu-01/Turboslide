@@ -152,7 +152,7 @@ export type SchemaTable = {
   v: string;
 };
 
-export type LimitsTable = {
+type LimitsTable = {
   /** The SHA-256 hex of the counted key (limits.ts), never the key itself. */
   key: string;
   count: number;

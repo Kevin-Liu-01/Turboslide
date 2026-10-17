@@ -27,20 +27,20 @@ import { callbacksState, readFlags } from './control.ts';
 export type WatchKind = 'health' | 'backup' | 'drill';
 
 /** The consecutive failing reads: `<count>:<first failing ms>`. */
-export const WATCH_HEALTH_ROW = 'watch.health';
+const WATCH_HEALTH_ROW = 'watch.health';
 /** `alert.<kind>`: `<open|pending|closed>:<incident>:<last mail ms>`. */
-export const ALERT_ROW_PREFIX = 'alert.';
+const ALERT_ROW_PREFIX = 'alert.';
 /** Failing reads in a row that open a health incident. */
-export const FAILS_TO_ALERT = 2;
+const FAILS_TO_ALERT = 2;
 /** The least time between two mails of one kind. */
 export const ALERT_FLOOR_MS = 3_600_000;
 /** The hour (UTC) by which the night's backup is done (its cron runs 03:00 to 05:59). */
-export const BACKUP_DUE_HOUR_UTC = 6;
+const BACKUP_DUE_HOUR_UTC = 6;
 /** How long the read of the app's health waits. */
-export const HEALTH_READ_MS = 10_000;
+const HEALTH_READ_MS = 10_000;
 
 /** The parts of the app's `/api/health` answer the check reads. */
-export type AppHealth = {
+type AppHealth = {
   ok: boolean;
   checks?: Record<string, { ok: boolean; reason?: string }>;
   backup?: { day: string; done: boolean; failed: number } | null;
@@ -68,7 +68,7 @@ export type WatchDeps = {
 };
 
 /** What one check decided per kind: nothing, a mail, a wait, an incident closed. */
-export type WatchOutcome =
+type WatchOutcome =
   'ok' | 'counting' | 'sent' | 'held' | 'waiting' | 'failed' | 'unsent' | 'closed' | 'unknown';
 
 export type WatchResult = {
@@ -328,7 +328,7 @@ export async function watchOnce(
 }
 
 /** The kinds with an open or waiting incident. */
-export async function openAlerts(db: D1Database): Promise<WatchKind[]> {
+async function openAlerts(db: D1Database): Promise<WatchKind[]> {
   const rows = (await readFlags(db)) ?? {};
   const open: WatchKind[] = [];
   for (const kind of ['health', 'backup', 'drill'] as const) {

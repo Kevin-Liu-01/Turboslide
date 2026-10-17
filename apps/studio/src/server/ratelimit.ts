@@ -369,7 +369,7 @@ export function memoryLimiter(now: () => number = () => Date.now()): RateLimiter
  * A concurrency slot (a window of 0) is held this long in the shared store, so a slot an instance
  * never released frees itself.
  */
-export const DB_SLOT_MS = 60 * MINUTE;
+const DB_SLOT_MS = 60 * MINUTE;
 /** How often one process deletes the rows whose window ended. */
 export const DB_PRUNE_EVERY_MS = 10 * MINUTE;
 /** The least gap between two fallback lines of one process. */

@@ -102,7 +102,7 @@ function resolvedOf(person: TabPerson): ResolvedIdentity {
 }
 
 /** The roster's mark of a person: the identity package's spec, with the brand an agent carries. */
-export function tabMarkOf(person: TabPerson, self = false): Record<string, unknown> {
+function tabMarkOf(person: TabPerson, self = false): Record<string, unknown> {
   return {
     ...markSpec(resolvedOf(person), { hueSlot: person.hue, self }),
     ...(person.brand === undefined ? {} : { brand: person.brand }),

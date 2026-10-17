@@ -47,8 +47,8 @@ export type Orbit = {
 };
 
 /** The step between two avatars at rest and with the fan open, in avatar diameters along the arc. */
-export const STEP_REST = 0.62;
-export const STEP_OPEN = 0.95;
+const STEP_REST = 0.62;
+const STEP_OPEN = 0.95;
 /** The smallest step that still shows each face; under it the orbit grows instead. */
 export const STEP_MIN = 0.5;
 
@@ -179,18 +179,18 @@ export function fanBox(orbit: Orbit, n: number, s: number): Box {
 }
 
 /** The lift of the avatar under the pointer or the focus (site.css `--up` and `scale`). */
-export const LIFT = 0.12;
-export const LIFT_SCALE = 1.1;
+const LIFT = 0.12;
+const LIFT_SCALE = 1.1;
 /** The gap between an avatar's ring and its name label, in px (site.css `.site-av::after`). */
-export const LABEL_GAP = 6;
+const LABEL_GAP = 6;
 /** The focus ring outside an avatar: a 2 px outline 3 px off it (site.css `.site-av:focus-visible`). */
-export const FOCUS_RING = 5;
+const FOCUS_RING = 5;
 
 /**
  * The room a lifted avatar and its focus ring take past its place on the orbit, in px: kept free
  * under the bar, so the crest of an open fan never reaches the sticky bar's rule.
  */
-export function liftRoom(s: number): number {
+function liftRoom(s: number): number {
   return s * (LIFT + (LIFT_SCALE - 1) / 2) + FOCUS_RING;
 }
 
@@ -304,10 +304,10 @@ export function labelAngles(
  * The angle each stack's fan centres on when site.css names none (its `--prefer`, in degrees):
  * over the right shoulder of its letter.
  */
-export const PREFER: Readonly<Record<'people' | 'agents', number>> = { people: 70, agents: 50 };
+const PREFER: Readonly<Record<'people' | 'agents', number>> = { people: 70, agents: 50 };
 
 /** The ink boxes of the h1's glyphs, measured: a Range per character, the canvas for the ink. */
-export function measureGlyphs(h1: HTMLElement): { box: Box; node: Text; at: number }[] {
+function measureGlyphs(h1: HTMLElement): { box: Box; node: Text; at: number }[] {
   const style = getComputedStyle(h1);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');

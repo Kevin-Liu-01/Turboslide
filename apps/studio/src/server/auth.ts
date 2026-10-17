@@ -41,7 +41,7 @@ export const BOOTSTRAP_ONLY_MESSAGE =
   'the static bearer is the bootstrap token once an API key exists; sign in with turboslide login and use the key';
 export const UNKNOWN_KEY_MESSAGE = 'unknown or revoked API key';
 /** A key past its expiry (HR-SA#5); the code `key_expired` is what the CLI reads. */
-export const KEY_EXPIRED_MESSAGE = 'the API key expired; run turboslide login for a new one';
+const KEY_EXPIRED_MESSAGE = 'the API key expired; run turboslide login for a new one';
 export const LOCAL_TOKEN_MESSAGE =
   'the agent surface of this checkout takes the token in .turboslide/token as its bearer (TURBOSLIDE_LOCAL_TOKEN=require)';
 

@@ -170,7 +170,7 @@ export type SimReport = {
   ms: number;
 };
 
-export async function simulate(seed: number): Promise<SimReport> {
+async function simulate(seed: number): Promise<SimReport> {
   const started = Date.now();
   // thousands of refusals a seed: their stacks are most of the time otherwise
   const stackTraceLimit = Error.stackTraceLimit;

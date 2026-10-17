@@ -14,9 +14,9 @@ import heroDark from './pictures/hero-1280-dark.webp?url';
 import heroLight from './pictures/hero-1280-light.webp?url';
 
 /** The longest the frame waits for an idle moment after `load` (the old landing's live import rule). */
-export const IDLE_CAP_MS = 1500;
+const IDLE_CAP_MS = 1500;
 /** The frame's fade in; the poster leaves after it. */
-export const FADE_MS = 150;
+const FADE_MS = 150;
 
 /**
  * The hero's box (docs/SITE.md A.3, C.11): the poster first, a capture of the live editor painted

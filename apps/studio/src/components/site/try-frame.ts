@@ -19,8 +19,8 @@ export type TryReady = { type: typeof TRY_READY };
 export type TryVisible = { type: typeof TRY_VISIBLE; visible: boolean };
 
 /** The agents of the title's second stack, by their brand ids (agent-marks.tsx). */
-export const TRY_AGENT_BRANDS = ['claude-code', 'codex', 'openclaw', 'hermes'] as const;
-export type TryAgentBrand = (typeof TRY_AGENT_BRANDS)[number];
+const TRY_AGENT_BRANDS = ['claude-code', 'codex', 'openclaw', 'hermes'] as const;
+type TryAgentBrand = (typeof TRY_AGENT_BRANDS)[number];
 
 /** Who a press names: an agent by its brand, or a person of the first stack by name and hue. */
 export type TryPressed =

@@ -40,7 +40,7 @@ export function strangerContext(publishToken?: string): AuthContext {
 }
 
 /** The standing a decision gives the card: `open` or `publish`, else null. */
-export function cardStandingOf(decision: Decision): DeckCardStanding | null {
+function cardStandingOf(decision: Decision): DeckCardStanding | null {
   if (!decision.ok) return null;
   return decision.via === 'open' || decision.via === 'publish' ? decision.via : null;
 }

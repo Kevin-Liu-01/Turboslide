@@ -19,10 +19,10 @@ export type TryVisitor = VisitorView & {
 };
 
 /** How long after a key the visitor counts as typing. */
-export const TYPING_MS = 1500;
+const TYPING_MS = 1500;
 
 /** The keys `VisitorView.touched` names for one mutation. */
-export function touchedKeys(mutation: Mutation): string[] {
+function touchedKeys(mutation: Mutation): string[] {
   const row = mutation as {
     op: string;
     slideId?: unknown;

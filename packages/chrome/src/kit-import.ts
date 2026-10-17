@@ -16,7 +16,7 @@ import { APPEARANCES } from '@turboslide/schema/deck';
 import { toHex } from '@turboslide/theme/contrast';
 
 /** Glyphfield's semantic roles and the kit roles each one writes. */
-export const KIT_IMPORT_ROLES: Readonly<Record<string, readonly KitColor[]>> = {
+const KIT_IMPORT_ROLES: Readonly<Record<string, readonly KitColor[]>> = {
   background: ['background'],
   foreground: ['text'],
   'foreground-muted': ['caption', 'hint'],
@@ -24,7 +24,7 @@ export const KIT_IMPORT_ROLES: Readonly<Record<string, readonly KitColor[]>> = {
 };
 
 /** The largest kit file read, ZIP or JSON: a kit is tokens, logos and a few font files. */
-export const KIT_IMPORT_MAX_BYTES = 32 * 1024 * 1024;
+const KIT_IMPORT_MAX_BYTES = 32 * 1024 * 1024;
 
 export type KitImport = {
   /** the kit writes, `/colors/<appearance>/<role>`, in appearance then role order */

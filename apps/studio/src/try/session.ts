@@ -30,7 +30,7 @@ import type { TryVisitor } from './visitor';
  */
 
 /** The dialogs that need the server (docs/SITE.md D10): opening one says the tab's sentence. */
-export const TAB_ONLY_DIALOGS: readonly DialogId[] = [
+const TAB_ONLY_DIALOGS: readonly DialogId[] = [
   'open',
   'importSlides',
   'makeCopy',
@@ -71,7 +71,7 @@ function randomHex(bytes: number): string {
 }
 
 /** The agents of the hero, with the hues of the title's agents stack (components/site/copy.ts). */
-export const TRY_AGENTS: Readonly<Record<AgentKey, TabPerson>> = {
+const TRY_AGENTS: Readonly<Record<AgentKey, TabPerson>> = {
   claude: {
     author: { kind: 'agent', name: 'Claude Code', principalId: 'agent:claude-code' },
     role: 'editor',
@@ -93,9 +93,7 @@ export const TRY_AGENTS: Readonly<Record<AgentKey, TabPerson>> = {
  * visit and leaves a comment on the slide the visitor is looking at (guests.ts), in the hue of
  * its avatar in the title.
  */
-export const GUEST_AGENTS: Readonly<
-  Record<'openclaw' | 'hermes', TabPerson & { comment: string }>
-> = {
+const GUEST_AGENTS: Readonly<Record<'openclaw' | 'hermes', TabPerson & { comment: string }>> = {
   openclaw: {
     author: { kind: 'agent', name: 'OpenClaw', principalId: 'agent:openclaw' },
     role: 'editor',
@@ -115,11 +113,11 @@ export const GUEST_AGENTS: Readonly<
 };
 
 /** The principal id of a person of the title's people stack, from their generated name. */
-export function guestPrincipal(name: string): string {
+function guestPrincipal(name: string): string {
   return `guest:${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 }
 
-export function createTrySession(options: { win: Window; still: boolean }): TrySession {
+function createTrySession(options: { win: Window; still: boolean }): TrySession {
   const { win } = options;
   const deckId = `try-${randomHex(6)}`;
   const principalId = `anon_${globalThis.crypto.randomUUID()}`;

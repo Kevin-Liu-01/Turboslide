@@ -87,10 +87,10 @@ export type Task = {
 export type AgentScript = Readonly<Record<AgentKey, readonly Task[]>>;
 
 /** The slides the agents add each loop, and the shapes Codex draws. */
-export const NEXT_STEPS = 'next-steps-{loop}';
-export const WAREHOUSE = 'warehouse-{loop}';
-export const REGIONS = 'regions-{loop}';
-export const ORDER_FLOW = 'order-flow-{loop}';
+const NEXT_STEPS = 'next-steps-{loop}';
+const WAREHOUSE = 'warehouse-{loop}';
+const REGIONS = 'regions-{loop}';
+const ORDER_FLOW = 'order-flow-{loop}';
 
 /** The id prefixes of the slides the agents add; the runner's cap counts them (agents.ts). */
 const AGENT_SLIDE_PREFIXES = ['next-steps-', 'warehouse-', 'regions-', 'order-flow-'];
@@ -103,7 +103,7 @@ export function isAgentSlide(slideId: string): boolean {
 const { agenda, numbers, plan, shipped } = HERO_SLIDES;
 
 /** The slide Claude Code adds first, whole: a heading, a sentence it then writes on, two rows. */
-export const NEXT_STEPS_SLIDE = {
+const NEXT_STEPS_SLIDE = {
   schemaVersion: 1,
   id: NEXT_STEPS,
   kind: 'content',

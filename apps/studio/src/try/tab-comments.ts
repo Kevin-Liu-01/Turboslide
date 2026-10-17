@@ -36,7 +36,7 @@ export type TabComments = {
 const ULID_ALPHABET = '0123456789abcdefghjkmnpqrstvwxyz';
 
 /** A 26 character lower case ULID (comments.ts ULID_PATTERN): ten time characters, sixteen random. */
-export function tabUlid(now: number = Date.now()): string {
+function tabUlid(now: number = Date.now()): string {
   let time = now;
   let head = '';
   for (let i = 0; i < 10; i += 1) {

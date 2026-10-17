@@ -69,7 +69,7 @@ const TITLE_KEYS: Readonly<Record<string, readonly string[]>> = {
 const GENERATED_FILES = /^(?:reference\/|shortcuts\.mdx$|agents\/grammar\.mdx$)/;
 
 /** The page tools' words: Copy Page is a button (Title Case), the others are links. */
-export const TOOL_WORDS = {
+const TOOL_WORDS = {
   group: 'Page tools',
   markdown: 'View as Markdown',
   edit: 'Edit this page',

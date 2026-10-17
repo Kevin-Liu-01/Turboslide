@@ -15,7 +15,7 @@ import { encodeReportLine, reportKey, reportLine } from '@turboslide/report/line
 import type { ReportKind } from '@turboslide/report/line';
 
 /** The route the lines are posted to. */
-export const REPORT_PATH = '/api/x/errors';
+const REPORT_PATH = '/api/x/errors';
 /** The most lines one page sends. */
 export const REPORTS_PER_PAGE = 10;
 

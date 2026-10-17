@@ -26,7 +26,7 @@ export function Keyed({ text, keys = [] }: { text: string; keys?: readonly strin
 export type KeyRun = { text: string; key: boolean };
 
 /** `text` in runs, each key word (a whole word or phrase, longest first) a run of its own. */
-export function keyRuns(text: string, keys: readonly string[]): KeyRun[] {
+function keyRuns(text: string, keys: readonly string[]): KeyRun[] {
   const words = [...keys].filter((key) => key !== '').sort((a, b) => b.length - a.length);
   if (words.length === 0) return [{ text, key: false }];
   const escaped = words.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));

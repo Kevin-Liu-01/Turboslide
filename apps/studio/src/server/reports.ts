@@ -24,21 +24,21 @@ import type { AuthDb } from './auth/db';
 import type { AuthDatabase } from './auth/schema';
 
 /** The kinds a count is kept under: the reporter's three and the CSP reports. */
-export type ReportCountKind = 'error' | 'rejection' | 'route' | 'csp';
+type ReportCountKind = 'error' | 'rejection' | 'route' | 'csp';
 
 export type ReportCount = { kind: ReportCountKind; route: string; key: string };
 
 /** The most rows one day holds (0006_reports.sql). */
 export const REPORT_ROWS_PER_DAY = 500;
 /** The days a count is kept. */
-export const REPORT_KEEP_DAYS = 30;
+const REPORT_KEEP_DAYS = 30;
 /** The longest route and key stored, in characters. */
-export const REPORT_FIELD_MAX = 80;
+const REPORT_FIELD_MAX = 80;
 
 const DAY_MS = 86_400_000;
 
 /** The UTC day of a clock time, `yyyy-mm-dd`. */
-export function reportDay(at: number): string {
+function reportDay(at: number): string {
   return new Date(at).toISOString().slice(0, 10);
 }
 

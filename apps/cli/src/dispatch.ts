@@ -124,7 +124,7 @@ export async function runDeckAction<T = unknown>(
  * hosted write is the studio's 400 `deck_required` and not a write to the deck findDeckDir falls
  * back to in a checkout (decks/gt-brand, the studio's seed).
  */
-export function hostedDeckId(ctx: CommandContext): string | undefined {
+function hostedDeckId(ctx: CommandContext): string | undefined {
   const named = flagString(ctx.args, 'deck') || ctx.env.TURBOSLIDE_DECK || undefined;
   if (named !== undefined) {
     try {

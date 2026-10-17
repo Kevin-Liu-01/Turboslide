@@ -23,7 +23,7 @@ export const SCREEN: Float32Array = (() => {
 export type Rgb = readonly [number, number, number];
 
 /** A CSS colour as bytes, read through a 1 by 1 canvas, so any colour syntax reads. */
-export function rgbOf(color: string): Rgb {
+function rgbOf(color: string): Rgb {
   const probe = document.createElement('canvas');
   probe.width = 1;
   probe.height = 1;

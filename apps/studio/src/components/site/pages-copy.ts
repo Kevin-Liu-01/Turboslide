@@ -18,7 +18,7 @@ const GITHUB_FILE = `${REPOSITORY}/blob/main`;
 const F = SITE_FACTS;
 
 /** A button of a page's head: Title Case words, a solid icon, and its `data-control` id. */
-export type PageAction = {
+type PageAction = {
   id: string;
   label: string;
   href: string;
@@ -55,10 +55,10 @@ export type Shot = {
 } & ({ kind: 'crop'; name: string; alt: string } | { kind: 'code'; lines: readonly string[] });
 
 /** One feature: its name, one sentence, and its chapter of the documentation. */
-export type Feature = { name: string; sentence: string; href: string };
+type Feature = { name: string; sentence: string; href: string };
 
 /** A figure of a group: a crop of the product (public/docs/figures) or a code panel. */
-export type GroupFigure =
+type GroupFigure =
   | { kind: 'crop'; name: string; alt: string; caption: string }
   | { kind: 'code'; label: string; lines: readonly string[]; caption: string };
 

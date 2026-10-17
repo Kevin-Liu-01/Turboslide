@@ -20,7 +20,7 @@ import { contrastRatio, parseColor } from '@turboslide/theme/contrast';
 import type { TokenName } from '@turboslide/theme/tokens';
 
 /** Each role the check reads against Background, with the ratio it needs. */
-export const KIT_CHECK_PAIRS: ReadonlyArray<{
+const KIT_CHECK_PAIRS: ReadonlyArray<{
   role: Exclude<KitColor, 'background'>;
   ratio: number;
 }> = [
@@ -32,7 +32,7 @@ export const KIT_CHECK_PAIRS: ReadonlyArray<{
 ];
 
 /** The ratio a logo needs on Background: a graphic (WCAG 2.2 SC 1.4.11). */
-export const KIT_CHECK_LOGO_RATIO = 3;
+const KIT_CHECK_LOGO_RATIO = 3;
 
 export type KitFinding = {
   /** `contrast.<appearance>.<role>` or `logo.<appearance>` */

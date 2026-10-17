@@ -71,8 +71,6 @@ const SITE_GLYPHS = {
 
 export type SiteIconName = keyof typeof SITE_GLYPHS;
 
-export const SITE_ICON_NAMES = Object.keys(SITE_GLYPHS) as SiteIconName[];
-
 export function SiteIcon({ name, size = 16 }: { name: SiteIconName; size?: 16 | 20 }) {
   return <Glyph paths={SITE_GLYPHS[name]} size={size} />;
 }

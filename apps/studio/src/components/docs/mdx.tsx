@@ -213,7 +213,7 @@ export function Cards({ children }: { children?: ReactNode }) {
  * capture names one; and "Figure N" (a CSS counter) before the caption. Its markdown form is the
  * light picture and the caption (src/docs/markdown.ts).
  */
-export function Figure({ name, alt, caption }: { name: string; alt: string; caption: string }) {
+function Figure({ name, alt, caption }: { name: string; alt: string; caption: string }) {
   const size = FIGURE_SIZES[name];
   if (size === undefined) return null;
   const vars = {

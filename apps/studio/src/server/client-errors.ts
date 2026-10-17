@@ -32,7 +32,7 @@ export const SAMPLE_PAST_BUDGET = 10;
 const MINUTE_MS = 60_000;
 
 /** The JSON line the log receives for one report. */
-export type ReportLogLine = ReportLine & {
+type ReportLogLine = ReportLine & {
   t: string;
   source: 'client';
   event: 'client.error';

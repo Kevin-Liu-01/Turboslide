@@ -385,7 +385,7 @@ export class AppCallError extends Error {
 }
 
 /** A call `withDeadline` gave up on: no answer within its time. */
-export class DeadlineError extends Error {
+class DeadlineError extends Error {
   constructor(ms: number) {
     super(`no answer within ${ms} ms`);
     this.name = 'DeadlineError';

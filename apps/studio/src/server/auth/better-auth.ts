@@ -167,7 +167,7 @@ export function betterAuthSecret(env: Env, sessionSecret: string): string {
  * the library's secret, so `ts_limits` holds no address. The library's own memory store answers
  * the same two fields.
  */
-export function authLimitStorage(
+function authLimitStorage(
   limits: Pick<RateLimiter, 'limit'>,
   secret: string,
   now: () => number = () => Date.now(),

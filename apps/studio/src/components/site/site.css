@@ -3868,10 +3868,12 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
 /* ---- a narrow phone (under 390 px): the bar's lockup draws its T alone ---- */
 
 /* The phone bar's row is 341 px wide: the lockup (110), the 24 px gap, the theme button (32), 8 px
-   and New Presentation (167). The column is the window less two 16 px sides, so under 390 px it
-   is narrower than the row, and at 320 /faq, /home, /features and /about scrolled sideways by
-   37 px. The lockup keeps its T in a box and its link's name, and drops the word. The docs' bar
-   draws no New Presentation on a phone (docs.css) and keeps the word. */
+   and New Presentation (167). The column is the window less two 16 px sides, so the row overflows
+   under 373 px, and at 320 /faq, /home, /features and /about scrolled sideways by 37 px. The rule
+   starts at 389 px on purpose, 16 px above the overflow, as a margin for a fallback face wider
+   than Inter; from 373 to 389 px the word is hidden though it would fit. The lockup keeps its T
+   in a box and its link's name, and drops the word. The docs' bar draws no New Presentation on a
+   phone (docs.css) and keeps the word. */
 @media (max-width: 389px) {
   .ts-site:not(.ts-docs) .site-lockup > span {
     display: none;

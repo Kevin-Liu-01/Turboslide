@@ -22,7 +22,7 @@ The Workbench direction Kevin picked on 2026-10-14 for the landing and the docs,
 
 - One face, the product's InterVariable 4.1, weights 400 and 500, `font-optical-sizing: auto`, `font-synthesis: none`.
 - Display 72/72 (500, -0.032em); Title 40/48 (400); Head 24/32 (500, opsz 32); Lead 20/28; Read 17/28; Small 14/20; Label 12/16 capitals (500, +0.06em, `case`, tabular figures); code in the platform monospace on the `#101010` panel.
-- The column is 1280 px with 32 px gutters (16 px at 720 px and under); one layout breakpoint at 1023 px; the bar is 56 px. Under 390 px the site pages' bar draws the lockup's T without the word, since the lockup, the theme button and New Presentation need 341 px (row `home.bar.narrow`).
+- The column is 1280 px with 32 px gutters (16 px at 720 px and under); one layout breakpoint at 1023 px; the bar is 56 px. Under 390 px the site pages' bar draws the lockup's T without the word. The lockup, the theme button and New Presentation need 341 px, which overflows the column under 373 px; the rule starts 16 px higher as a margin (row `home.bar.narrow`).
 - Colours are the generated `--pt-` tokens, so both appearances follow `html[data-theme]`. Corners: 0 for frames and slides, 4 px key chips, 6 px buttons, round avatars.
 
 ## 4. The title and the hero

@@ -510,9 +510,9 @@ against the production preview; step 28 is the audit (`--audit` runs it alone).
 `node scripts/hosted-smoke.mjs <url>` carries the security rows: the headers on four routes with
 the `worker-src` assertion and the `/embed` exception, the json asset as an attachment, the cross
 site `text/plain` POST refused, the unsigned thumbnail (403 or 401; a 200 or a 302 fails the row
-since H3), the CSP report endpoint; the `/s/` exchange, the 410 after unpublish, the private
-document 403 and the twin URL derivability rows are listed as skipped until their flags and stores
-exist, never as passed.
+since H3), the CSP report endpoint; the `/s/` exchange and the 410 after unpublish are listed as
+skipped until their flags are given, never as passed. The private store rows of section 17
+(HR-K1#6) are required on every deployment the guard checks.
 
 ## 14. What this round leaves
 
@@ -561,7 +561,7 @@ Sessions ended elsewhere (HR-SA#7, AUTH-6). The library's cookie cache and an in
 
 Until the production cutover of `docs/hosting.md` section 10, every document of every production deck is on the public store and readable by anyone who has or guesses its id (DATA-2). The lane's pushes close it in steps, and Kevin's migration closes the rest.
 
-The cache of a public document (HR-K1#1). A document put on the public store carries `cacheControlMaxAge: 60` when the caller names none (`packages/store/src/blob-vercel.ts` `publicMaxAge`), a twin a year (its name carries its digest and is never overwritten), so a copy a browser or the CDN took before the cutover expires within a minute instead of a month. The hosted smoke row `document cache 60 s` reads the scratch deck's `deck.json` on the public store.
+The cache of a public document (HR-K1#1). A document put on the public store carries `cacheControlMaxAge: 60` when the caller names none (`packages/store/src/blob-vercel.ts` `publicMaxAge`), a twin a year (its name carries its digest and is never overwritten), so a copy a browser or the CDN took before the cutover expires within a minute instead of a month. The hosted smoke row `document cache 60 s` read the scratch deck's `deck.json` on the public store until HR-K1#6 retired it (CRIT-M15): after the cutover no document is on the public store to carry a max age.
 
 The thumbnails (HR-K1#2). A stored thumbnail on the private store is streamed by `/api/render/<slide>?w=`; one on the public store keeps its 302. The route decides per object (`storedThumbIsPublic`), not from the environment, so the migration's window, when one slide's thumbnail can be on either store, answers both.
 
@@ -569,7 +569,11 @@ The asset keys (HR-K1#3, HR-K1#4). Every record written since HR-K1#3 carries a 
 
 The produced files (HR-K1#5a; CRIT-M4, DATA-3). An export, a bundle over the body cap and a web page build reach the browser as `/api/download/s.<token>` (`apps/studio/src/server/stored-files.ts`), never as the store's address. The token is an HMAC under `TURBOSLIDE_DOWNLOAD_SECRET` with its own purpose, naming the store path (an `exports/`, `bundles/` or `builds/` path of that deck alone), the deck, the principal it was minted for and an expiry ten minutes out. The route answers it only to that principal, one of its aliases or the agent key's owner (403 otherwise, logged as `http.403`), 410 once expired, 404 for a forged token or a file the store no longer holds, and streams the file through the deployment's client, so the link works on either store. A job record keeps the stored path, never a URL; each answer links it for its own caller. The token is not spent on use: the principal is the capability. Before HR-K1#5a a web page build answered the stored copy's address, public before the cutover and unreadable after it, and an export's job record kept the public address for as long as the record lived. The hosted smoke row `export URL signed` reads the scratch deck's export answer.
 
-Still open until Kevin's steps: the documents leave the public store at the cutover (`docs/hosting.md` section 10, run order there); HR-K1#5b then writes `exports/` and `bundles/` to the private store too, and HR-K1#6 makes the hosted rows `private document 403`, `twin URL not derivable` and `principal index private` required and records the cutover's readings here.
+The produced files on the private store (HR-K1#5b; DATA-3). After production's cutover and `delete`, `isPublicPath` is true for `d/`, `u/` and `decks/<id>/assets/` alone, so an export, its job record under `exports/.jobs/`, a bundle and a web page build are written to the private store and reach the browser only through the download route. The copies stored on the public store before HR-K1#5b stay there, unread by the deployments, until HR-SD#3's sweep removes them.
+
+The hosted rows (HR-K1#6; DATA-2, DATA-V2). `scripts/hosted-smoke.mjs` reads the public store's host, which the deployment names in its policy's `img-src`, with none of the deployment's headers, on every deployment the guard checks: `private document 403` requires 403 or 404 for the open deck's `deck.json`, which `delete` removed, and for the scratch deck's, written to the private store alone; `twin URL not derivable` requires the scratch deck's picture to answer 200 under `d/<id>/<assetKey>/assets/` and 403 or 404 at `decks/<id>/assets/<file>`; `principal index private` requires 403 or 404 for the caller's own `users/<id>/decks.json`, the id `account.me` answers. The rows print neither the asset key nor the principal id. A local server's tmp store has no public store, so off https the rows are skipped by name; on https a deployment that names no public store fails them. The guard's static bearer is `agent:bootstrap`, and no action writes that principal's index, so `principal index private` reads 404 before the cutover as well; it fails only if that index is ever written to the public store.
+
+The readings before the cutover, with this push's smoke: production (www.turboslide.com, layout v1) at 2026-10-16T23:58:53Z, `private document 403` failed with gt-brand `deck.json` 200 and the scratch deck's 200, `twin URL not derivable` passed (by key 200 `image/png`, by name 404) and `principal index private` passed (404); the preview `turboslide-37ue5w481` (layout v2, after its switch) at 2026-10-17T00:00:38Z, `private document 403` failed with gt-brand `deck.json` 200 (production's public copy) and the scratch deck's 404, and the two other rows passed. Vercel Blob answers 404 for a missing object on the public store.
 
 ## 18. The web surface and the dependencies (hardening lane W)
 

@@ -1026,6 +1026,13 @@ Never in this runbook: a step against a deployment built before this code; `roll
 `sweep-produced` or `avatar-sweep` against a preview (each refuses); a removal by hand on either
 store. After production's `delete`, HR-K1#5b and HR-K1#6 follow.
 
+The check that `delete` finished, before those pushes, is one passive read of the public store:
+`decks/gt-brand/deck.json` on the host the policy's `img-src` names answers 404. From HR-K1#6 the
+guard's smoke requires that answer (`private document 403`), the scratch deck's picture under its
+key alone (`twin URL not derivable`) and no `users/<id>/decks.json` of the caller
+(`principal index private`) on every deployment it checks, preview and production alike, since
+they share the public store (`docs/security.md` section 17 has the rows and their readings).
+
 ## 11. The runbook of the round three services
 
 The account boundary of MILESTONES-3: no agent installs a Vercel Marketplace product, creates a paid

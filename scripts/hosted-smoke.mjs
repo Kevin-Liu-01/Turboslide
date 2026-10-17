@@ -40,10 +40,9 @@
 // `/api/actions/slide.remove` is refused; a thumbnail request without its grant is 403 (401 with
 // no identity), and since security hotfix H3 the shadow answers (200, a 302 to the stored object)
 // fail the row, because no deployment serves a denied request any more; the CSP report endpoint
-// answers 204 to a report and 400 to garbage. The `/s/` exchange, the 410 after unpublish, the private document
-// 403 and the twin URL derivability rows need B2's and B3's routes and the private store; they run
-// when `--share-token <token>` and `--publish-token <token>` are given and are otherwise listed
-// as skipped, never as passed.
+// answers 204 to a report and 400 to garbage. The `/s/` exchange and the 410 after unpublish need
+// B2's and B3's routes; they run when `--share-token <token>` and `--publish-token <token>` are
+// given and are otherwise listed as skipped, never as passed.
 //
 // Round four (gslides-parity SPEC-4 2.6, 4.1, 0.31, 0.38; MILESTONES-4 "Integrator"; build-4/b1.md
 // R12, b2.md R4, b4.md R11): `/home` is a 200 product page (the `.ts-site` root, the hero
@@ -83,10 +82,13 @@
 // answer mints, which the thumbnail rows send. With the bearer, the smoke makes one scratch deck
 // with `deck.create` (restricted to its creator, as every new deck is), requires `private,
 // no-store` on its thumbnail (`restricted thumbnail private`), and removes it forever at the end
-// of the run (`scratch deck removed`). HR-K1#1 (DATA-2): `document cache 60 s` reads the scratch
-// deck's `deck.json` on the public store, whose host the deployment names in its policy's
-// `img-src` (TURBOSLIDE_PUBLIC_STORE_HOST), and requires `max-age=60`, so a copy a browser or the
-// CDN took before the documents move to the private store expires within a minute. HR-SD#6
+// of the run (`scratch deck removed`). HR-K1#6 (DATA-2, DATA-V2; required since production's
+// cutover and its `delete`): on the public store, whose host the deployment names in its policy's
+// `img-src` (TURBOSLIDE_PUBLIC_STORE_HOST), `private document 403` requires 403 or 404 for the open
+// deck's `deck.json` and the scratch deck's, `twin URL not derivable` requires the scratch deck's
+// picture under its asset key alone, and `principal index private` requires 403 or 404 for the
+// caller's own `users/<id>/decks.json`. The row `document cache 60 s` (HR-K1#1) left with them
+// (CRIT-M15): no document is on the public store to carry a max age. HR-SD#6
 // (CRIT-M3): `asset by name 404` adds a picture to the scratch deck and requires 404 for it by its
 // file name with no identity, and the picture by its asset key (a deployment alone: a local tmp
 // store keeps names). HR-K1#5a (CRIT-M4, DATA-3): `export URL signed` exports the scratch deck as
@@ -1167,43 +1169,154 @@ async function publicStoreHostOf(base, timeoutMs) {
 }
 
 /**
- * `document cache 60 s` (hardening HR-K1#1, DATA-2; retired by HR-K1#6): the scratch deck's
- * `deck.json`, written by its creation, carries `max-age=60` on the public store, where it was a
- * month before K1#1. Once the private store holds the documents, the public store has no copy
- * (403 or 404), which passes too: there is nothing left to cache. A deployment that names no
- * public store (a tmp or file store) skips the row.
+ * One object on the public store's host, read with none of the deployment's headers, so the
+ * protection token never goes to the store. The status, the type and the time; the body is left
+ * unread.
  */
-async function documentCacheRow(base, scratch, timeoutMs) {
-  const name = 'document cache 60 s';
-  if (scratch.id === null) {
+async function storeProbe(host, pathname, timeoutMs) {
+  const started = performance.now();
+  try {
+    const response = await fetch(`https://${host}/${pathname}`, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    await response.body?.cancel();
     return {
-      row: { name, expect: 'a scratch deck', detail: () => scratch.detail },
-      r: { status: '-', ms: 0 },
-      ok: false,
+      status: response.status,
+      type: response.headers.get('content-type') ?? '',
+      ms: Math.round(performance.now() - started),
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      type: '',
+      ms: Math.round(performance.now() - started),
+      error: error instanceof Error ? error.message : String(error),
     };
   }
+}
+
+/** No object at the path: 404, Vercel Blob's answer for a missing object, or 403. */
+const noPublicCopy = (r) => r.error === undefined && (r.status === 403 || r.status === 404);
+
+/** The store folder of a principal id (`principalFolder`, packages/store/src/access-store.ts). */
+const principalFolder = (id) => id.replace(/[^A-Za-z0-9_-]/g, '_');
+
+const PRIVATE_STORE_ROWS = [
+  'private document 403',
+  'twin URL not derivable',
+  'principal index private',
+];
+
+/**
+ * The private store rows (hardening HR-K1#6; DATA-2, DATA-V2, CRIT-M15), required since
+ * production's cutover and its `delete` (docs/hosting.md 10.4). Each reads the public store's host,
+ * which the deployment names in its policy's `img-src`, through `storeProbe`:
+ *
+ * - `private document 403`: the open deck's `deck.json`, a public document before the cutover that
+ *   `delete` removed, and the scratch deck's, written since to the private store alone.
+ * - `twin URL not derivable`: the picture `asset by name 404` added to the scratch deck answers 200
+ *   at `d/<id>/<assetKey>/assets/<file>` and 403 or 404 at `decks/<id>/assets/<file>`, the address
+ *   its deck id and file name make. A deck with no access record, such as the open seed deck,
+ *   keeps its twins public by name (docs/security.md section 17), so the row reads the scratch deck.
+ * - `principal index private`: `users/<id>/decks.json` for the caller's own principal, the id
+ *   `account.me` answers to the bearer.
+ *
+ * Neither the asset key nor the principal id is printed. A local server's tmp store has no public
+ * store, so off https the rows are skipped by name; on https a deployment that names no public
+ * store fails them.
+ */
+async function privateStoreRows(base, deck, scratch, picture, headers, timeoutMs) {
+  if (!base.startsWith('https:')) {
+    return {
+      skip: PRIVATE_STORE_ROWS.map(
+        (name) => `${name}: the public store is the blob store's; a local tmp store has none`,
+      ),
+    };
+  }
+  const failed = (name, expect, detail) => ({
+    row: { name, expect, detail: () => detail },
+    r: { status: '-', ms: 0 },
+    ok: false,
+  });
   const host = await publicStoreHostOf(base, timeoutMs);
-  if (host === null) return { skip: `${name}: no public store named in the policy's img-src` };
-  const r = await probe(
-    `https://${host}/`,
-    `decks/${encodeURIComponent(scratch.id)}/deck.json`,
-    timeoutMs,
-  );
-  const cache = r.headers['cache-control'] ?? '';
-  const absent = r.status === 403 || r.status === 404;
-  return {
+  if (host === null) {
+    return {
+      rows: PRIVATE_STORE_ROWS.map((name) =>
+        failed(name, "a public store in the policy's img-src", 'no public store named'),
+      ),
+    };
+  }
+  if (scratch.id === null) {
+    return {
+      rows: PRIVATE_STORE_ROWS.map((name) => failed(name, 'a scratch deck', scratch.detail)),
+    };
+  }
+  const id = encodeURIComponent(scratch.id);
+  const [open, made] = await Promise.all([
+    storeProbe(host, `decks/${encodeURIComponent(deck)}/deck.json`, timeoutMs),
+    storeProbe(host, `decks/${id}/deck.json`, timeoutMs),
+  ]);
+  const documents = {
     row: {
-      name,
-      expect:
-        "the scratch deck's deck.json on the public store with max-age=60, or no public copy (403 or 404)",
+      name: 'private document 403',
+      expect: `${deck}'s deck.json and the scratch deck's on the public store 403 or 404`,
       detail: () =>
-        absent
-          ? `${r.status}: no public copy (the private store holds the documents)`
-          : `${r.status}; ${cache === '' ? 'no cache-control' : cache}`,
+        `${deck} deck.json ${open.error ?? open.status}; scratch deck.json ${made.error ?? made.status}`,
     },
-    r,
-    ok: r.error === undefined && (absent || (r.status === 200 && /\bmax-age=60\b/.test(cache))),
+    r: noPublicCopy(open) ? made : open,
+    ok: noPublicCopy(open) && noPublicCopy(made),
   };
+
+  let twin;
+  if (picture === null) {
+    twin = failed(
+      'twin URL not derivable',
+      "the scratch deck's picture",
+      'no picture: asset by name 404 added none',
+    );
+  } else {
+    const file = picture.file.split('/').map(encodeURIComponent).join('/');
+    const [byKey, byName] = await Promise.all([
+      storeProbe(host, `d/${id}/${encodeURIComponent(picture.key)}/assets/${file}`, timeoutMs),
+      storeProbe(host, `decks/${id}/assets/${file}`, timeoutMs),
+    ]);
+    twin = {
+      row: {
+        name: 'twin URL not derivable',
+        expect:
+          "the scratch deck's picture on the public store: under its asset key a 200 image, at decks/<id>/assets/<file> 403 or 404",
+        detail: () =>
+          `by key ${byKey.error ?? `${byKey.status} ${byKey.type}`}; by name ${byName.error ?? byName.status}`,
+      },
+      r: byName,
+      ok:
+        byKey.error === undefined &&
+        byKey.status === 200 &&
+        byKey.type.startsWith('image/') &&
+        noPublicCopy(byName),
+    };
+  }
+
+  const me = await postJson(base, '/api/actions/account.me', {}, headers, 60_000);
+  const principal = me.json?.principal ?? me.json?.output?.principal ?? null;
+  const index =
+    typeof principal?.id === 'string'
+      ? await storeProbe(host, `users/${principalFolder(principal.id)}/decks.json`, timeoutMs)
+      : null;
+  const ownIndex = {
+    row: {
+      name: 'principal index private',
+      expect: "the caller's users/<id>/decks.json on the public store 403 or 404",
+      detail: () =>
+        index === null
+          ? `account.me ${me.status}: no principal id`
+          : `${principal.kind ?? 'principal'} users/<id>/decks.json ${index.error ?? index.status}`,
+    },
+    r: index ?? { status: me.status, ms: me.ms },
+    ok: index !== null && noPublicCopy(index),
+  };
+  return { rows: [documents, twin, ownIndex] };
 }
 
 /**
@@ -1325,7 +1438,8 @@ const SMOKE_PNG =
  * under the deck's own asset key on the blob store, so the assets route answers 404 to a request
  * by its file name with no identity, and the picture, or a 302 to the keyed store path, to a
  * request by `/decks/<id>/assets/<assetKey>/<file>`. A local server's tmp store keeps names, so
- * the row runs against a deployment alone. The key is never printed.
+ * the row runs against a deployment alone. The key is never printed. The answer carries the
+ * picture's file name and key for `twin URL not derivable`.
  */
 async function assetByNameRow(base, scratch, headers, timeoutMs) {
   const name = 'asset by name 404';
@@ -1381,6 +1495,8 @@ async function assetByNameRow(base, scratch, headers, timeoutMs) {
     },
     r: byName,
     ok: byName.error === undefined && byName.status === 404 && byName.location === '' && served,
+    // the picture `twin URL not derivable` reads on the public store (HR-K1#6); never printed
+    picture: { file, key },
   };
 }
 
@@ -1642,7 +1758,7 @@ async function templateCopyRow(base, headers) {
   };
 }
 
-/** The rows that need B2's and B3's routes: listed as skipped with the flag that turns them on. */
+/** The rows that need a flag: listed as skipped with the flag that turns them on. */
 function skippedSecurityRows(args) {
   const out = [];
   if (!args.shareToken)
@@ -1655,14 +1771,6 @@ function skippedSecurityRows(args) {
       name: '410 after unpublish',
       why: 'pass --publish-token <token> (SPEC-3 6.4; B2 route)',
     });
-  out.push({
-    name: 'private document 403',
-    why: 'the private store of SPEC-3 11.5 R2 is not connected this round',
-  });
-  out.push({
-    name: 'twin URL not derivable',
-    why: 'the storage layout v2 (d/<id>/<assetKey>/) lands with the migration',
-  });
   if (!args.restricted)
     out.push({ name: 'restricted 404', why: 'pass --restricted <deck id> with an access record' });
   return out;
@@ -1719,6 +1827,8 @@ async function main() {
     console.log(
       'skip  restricted thumbnail private: pass --token-env <VAR> (the row makes a scratch deck and removes it)',
     );
+    for (const name of PRIVATE_STORE_ROWS)
+      console.log(`skip  ${name}: pass --token-env <VAR> (the row reads the scratch deck)`);
   }
   if (args.tokenEnv !== null) {
     if (headers.authorization === undefined) {
@@ -1732,12 +1842,20 @@ async function main() {
       // the scratch deck's rows (hardening HR-SD#5), the deck removed before the table prints
       const scratch = await createScratchDeck(base, headers);
       results.push(await restrictedThumbnailRow(base, scratch, headers, args.timeoutMs));
-      const documentCache = await documentCacheRow(base, scratch, args.timeoutMs);
-      if (documentCache.skip !== undefined) console.log(`skip  ${documentCache.skip}`);
-      else results.push(documentCache);
       const byName = await assetByNameRow(base, scratch, headers, args.timeoutMs);
       if (byName.skip !== undefined) console.log(`skip  ${byName.skip}`);
       else results.push(byName);
+      // the private store rows (HR-K1#6), before the scratch deck leaves
+      const privateStore = await privateStoreRows(
+        base,
+        args.deck,
+        scratch,
+        byName.picture ?? null,
+        headers,
+        args.timeoutMs,
+      );
+      for (const line of privateStore.skip ?? []) console.log(`skip  ${line}`);
+      results.push(...(privateStore.rows ?? []));
       results.push(await exportLinkRow(base, scratch, headers));
       if (scratch.id !== null) results.push(await removeScratchDeck(base, scratch, headers));
       if (args.templateCopy) {

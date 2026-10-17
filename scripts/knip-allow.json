@@ -230,7 +230,6 @@
     "exports apps/studio/src/server/auth/d1-proxy-dialect.ts D1_QUERY_PATH",
     "exports apps/studio/src/server/auth/d1-proxy-dialect.ts D1_QUERY_TIMEOUT_MS",
     "exports apps/studio/src/server/auth/db.ts ACCOUNTS_D1",
-    "exports apps/studio/src/server/auth/db.ts DATABASE_URL_VARIABLE",
     "exports apps/studio/src/server/auth/db.ts dbBearerOf",
     "exports apps/studio/src/server/auth/digest.ts MAILED_KINDS",
     "exports apps/studio/src/server/auth/digest.ts MENTION_MAILS_PER_IDENTITY_PER_DAY",

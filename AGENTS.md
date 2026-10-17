@@ -370,7 +370,7 @@ shared across instances through records on the store since the focus round's thi
 live cursors stay per instance, and the title row says so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
 under `TURBOSLIDE_SESSION_SECRET`; a hosted deployment without it derives the secret from
 `TURBOSLIDE_TOKEN` and warns once. Accounts are better-auth over `node:sqlite` when
-`TURBOSLIDE_AUTH_DB` is set and Postgres when `DATABASE_URL` is set, else anonymous only; mail is
+`TURBOSLIDE_AUTH_DB` is set and D1 when `TURBOSLIDE_ACCOUNTS=d1` is set, else anonymous only; mail is
 captured with `TURBOSLIDE_MAIL=capture` on every preview. Documents move to a private Blob store
 (`turboslide-private`) while assets stay on the public one (`turboslide-decks`), through
 `turboslide admin migrate-storage`, one maintenance window per environment: a write freeze, a
@@ -416,8 +416,7 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
 
 - Round three catalog entries (SPEC-3 0.20, 0.23, 0.25, 0.27, 2.5, 8.10; merge 1): `better-auth`
   1.7.4, `kysely` 0.29.5, `dompurify` 3.4.15 (with the pinned `jsdom` and
-  `@types/jsdom` 30.0.0), `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `pg`
-  8.23.0 with `@types/pg` 8.23.1, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
+  `@types/jsdom` 30.0.0), `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
   builder names a package and its version in `docs/gslides-parity/build-3/<key>.md`; the
   integrator adds it to the catalog and to the consuming package's `package.json` and installs
   once. `ulid` is in the catalog and attached to no package yet.

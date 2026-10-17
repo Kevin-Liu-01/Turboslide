@@ -8,7 +8,7 @@ import { identityRuntime } from '../../server/auth/identity';
 // /api/auth/$ (gslides-parity SPEC-3 7.3, 11.3): better-auth's handler, mounted on the catch
 // all the official TanStack Start integration names (server/auth/better-auth.ts builds the
 // instance with the magic link, the email OTP, the device authorization flow and the cookie
-// plugin). Without a database (no DATABASE_URL, no TURBOSLIDE_AUTH_DB) the studio runs anonymous
+// plugin). Without a database (no TURBOSLIDE_ACCOUNTS, no TURBOSLIDE_AUTH_DB) the studio runs anonymous
 // only, the Sign in row is absent, and every request here answers 404 with the sentence so a
 // client that guessed the path learns nothing else. The library sets and reads its own cookies
 // (`ts.session_token` and its companions) and runs its own CSRF and rate limit checks; the

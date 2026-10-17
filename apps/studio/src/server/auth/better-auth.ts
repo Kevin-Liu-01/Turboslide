@@ -356,7 +356,7 @@ function buildAuth(deps: AuthDeps): Auth {
     database:
       deps.db.kind === 'd1' && deps.db.d1 !== undefined
         ? (deps.db.d1 as unknown as NonNullable<BetterAuthOptions['database']>)
-        : { db: deps.db.db, type: deps.db.kind === 'postgres' ? 'postgres' : 'sqlite' },
+        : { db: deps.db.db, type: 'sqlite' },
     // the origin of the request itself: the dev server's port varies per builder and the hosted
     // name is the deployment's own; a cross site page's Origin header never matches it
     trustedOrigins: (request) => {

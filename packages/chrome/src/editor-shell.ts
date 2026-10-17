@@ -568,7 +568,7 @@ export type TokenView = {
 export type EditorAccount = {
   principal: IdentityView;
   signedIn: boolean;
-  /** `DATABASE_URL` is set: the Sign in row exists (7.3) */
+  /** the deployment has an accounts database: the Sign in row exists (7.3) */
   signInAvailable: boolean;
   /** the passkey plugin is on: the production domain is fixed (7.3) */
   passkeysAvailable?: boolean;

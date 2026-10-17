@@ -24,7 +24,7 @@
 // question 29), and the session table answers those rows to nobody: a read of the table drops a
 // row whose token is not a digest, so the sessions list shows live sessions alone. They leave with
 // their user's sign out everywhere or deletion, or with the one time delete of docs/security.md
-// section 12. The Postgres dialect of db.ts (never set on either Vercel project) is left as it is.
+// section 12.
 import { sha256Hex } from '@turboslide/identity/sha256';
 
 /** The prefix of a stored session token: version 1, SHA-256 hex. */

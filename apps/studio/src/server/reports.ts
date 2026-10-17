@@ -7,8 +7,8 @@
 //
 // On D1 the table comes from apps/realtime-worker/migrations/0006_reports.sql and the two
 // statements below are in the Worker's allowlist (apps/realtime-worker/src/db-statements.json,
-// recorded by auth/record-statements.test.ts). On SQLite and Postgres (a checkout, a self hosted
-// deployment) this module makes the table on first use. No address, token or deck text is stored:
+// recorded by auth/record-statements.test.ts). On SQLite (a checkout) this module makes the table
+// on first use. No address, token or deck text is stored:
 // the route is scrubbed (`@turboslide/report/scrub`), the key is a scrubbed message or a CSP
 // directive with a host. A day holds at most REPORT_ROWS_PER_DAY rows: past it a known row still
 // counts and a new key is in the log line alone. A count that fails is one log line and never
@@ -50,7 +50,7 @@ export type ReportCounter = {
   prune: (beforeDay: string) => Promise<void>;
 };
 
-/** The table on the engines that make their own (SQLite, Postgres); the D1 migration is the same. */
+/** The table on the engine that makes its own (SQLite); the D1 migration is the same. */
 async function ensureTable(db: Kysely<AuthDatabase>): Promise<void> {
   await sql`create table if not exists "ts_reports" ("day" text not null, "kind" text not null, "route" text not null, "key" text not null, "count" integer not null default 0, primary key ("day", "kind", "route", "key"))`.execute(
     db,

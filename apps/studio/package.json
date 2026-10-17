@@ -45,7 +45,6 @@
     "fumadocs-core": "catalog:",
     "fumadocs-mdx": "catalog:",
     "kysely": "catalog:",
-    "pg": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "resend": "catalog:"
@@ -58,7 +57,6 @@
     "@tanstack/react-devtools": "catalog:",
     "@tanstack/router-cli": "catalog:",
     "@types/node": "catalog:",
-    "@types/pg": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",

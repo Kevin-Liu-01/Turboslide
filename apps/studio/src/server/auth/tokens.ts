@@ -7,8 +7,8 @@
 // resolves the bearer to its record and its owner.
 //
 // The resolver is synchronous on purpose: `requireAgentAuth(request)` (server/auth.ts) is called
-// without an await by the routes that exist, and `node:sqlite` reads synchronously. Postgres and
-// the D1 proxy have no synchronous read, so their store answers from what this instance read
+// without an await by the routes that exist, and `node:sqlite` reads synchronously. The D1 proxy
+// has no synchronous read, so its store answers from what this instance read
 // (docs/CLOUDFLARE.md 4.2: any engine with no synchronous read takes the cache path). Since
 // HR-SA#6 (AUTH-5) every request with a bearer is primed first (`prime`, awaited by the request
 // middleware and by `requestIdentity`): a key this instance has not read, or read more than
@@ -40,7 +40,7 @@ export const TOKEN_PREFIX = 'ts_';
 export const TOKEN_BYTES = 32;
 export const KEY_NAME_MAX = 80;
 export const KEY_ID_BYTES = 12;
-/** How often the Postgres store re-reads its keys, and the least gap between two lastUsedAt writes. */
+/** How often the D1 store re-reads its keys, and the least gap between two lastUsedAt writes. */
 export const KEY_CACHE_MS = 5_000;
 export const LAST_USED_MIN_GAP_MS = 60_000;
 
@@ -213,7 +213,7 @@ async function insertKey(
 
 /**
  * The store over the identity database. SQLite reads the key synchronously through the raw
- * handle; Postgres and the D1 proxy keep a cache of every live key, refreshed every KEY_CACHE_MS
+ * handle; the D1 proxy keeps a cache of every live key, refreshed every KEY_CACHE_MS
  * and after each write here.
  */
 export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()): ApiKeyStore {
@@ -236,7 +236,7 @@ export function dbApiKeyStore(auth: AuthDb, now: () => Date = () => new Date()):
     });
     return refreshing;
   };
-  /* the cache path: every engine without the raw synchronous handle (Postgres, the D1 proxy) */
+  /* the cache path: every engine without the raw synchronous handle (the D1 proxy) */
   const cached = auth.sqlite === undefined;
   /* the keys `prime` read by hash, each with its time (HR-SA#6); a full refresh is newer than all */
   const points = new Map<string, { record: ApiKeyRecord | null; at: number }>();

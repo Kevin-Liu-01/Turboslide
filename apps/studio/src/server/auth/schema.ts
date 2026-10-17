@@ -2,7 +2,7 @@
 // research 03 D2, E2, F): better-auth's core tables (`user`, `session`, `account`,
 // `verification`) and its device authorization table, which the library migrates itself
 // (db.ts runs `getMigrations`), and Turboslide's own tables, migrated here with Kysely's schema
-// builder so one statement set serves SQLite and Postgres:
+// builder so one statement set serves SQLite and D1:
 //
 //   ts_alias       anonymousId -> userId, the link written when a signed in session first arrives
 //                  in a browser that carried an anonymous cookie (7.4); history is never rewritten
@@ -156,7 +156,7 @@ export type LimitsTable = {
   /** The SHA-256 hex of the counted key (limits.ts), never the key itself. */
   key: string;
   count: number;
-  /** When the window ends, in epoch milliseconds (a string from Postgres' bigint). */
+  /** When the window ends, in epoch milliseconds (a string when a driver answers a bigint). */
   reset_at: number | string;
 };
 

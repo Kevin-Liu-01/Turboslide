@@ -135,7 +135,11 @@ async function serve(request: Request, action: string): Promise<Response> {
     named = read.ok ? read.value : undefined;
   }
   const deck = actionDeck(action, url.searchParams.get('deck'), named, DEFAULT_DECK);
-  if (!deck.ok) return refuse(400, 'invalid_input', deck.message, { action });
+  if (!deck.ok)
+    return refuse(400, 'invalid_input', deck.message, {
+      action,
+      ...(deck.pointer === undefined ? {} : { pointer: deck.pointer }),
+    });
   const deckId = deck.deckId;
   const keyed = requestIdempotencyKey(request);
   if (!keyed.ok) return keyed.response;
@@ -213,13 +217,7 @@ async function serve(request: Request, action: string): Promise<Response> {
       input = read.ok ? read.value : undefined;
     }
     try {
-      await gateAgentAction(caller, {
-        action,
-        deckId,
-        deckNamed: deck.named,
-        input,
-        transport: 'http',
-      });
+      await gateAgentAction(caller, { action, deckId, input, transport: 'http' });
     } catch (error) {
       return gateRefusal(error, action);
     }

@@ -56,19 +56,20 @@ vi.mock('./room', () => ({ flushRoom: () => Promise.resolve() }));
 const { Route } = await import('../routes/api/actions.$action');
 
 type Handler = (ctx: { params: { action: string }; request: Request }) => Promise<Response>;
-const post = (Route.options as unknown as { server: { handlers: { POST: Handler } } }).server
-  .handlers.POST;
+const handlers = (
+  Route.options as unknown as { server: { handlers: Record<'POST' | 'PUT', Handler> } }
+).server.handlers;
 
-async function call(action: string, query: string, input: object) {
+async function call(action: string, query: string, input: object, method: 'POST' | 'PUT' = 'POST') {
   opened.length = 0;
   gated.length = 0;
   ran.length = 0;
   const request = new Request(`https://studio.test/api/actions/${action}${query}`, {
-    method: 'POST',
+    method,
     headers: { authorization: 'Bearer test', 'content-type': 'application/json' },
     body: JSON.stringify(input),
   });
-  const response = await post({ params: { action }, request });
+  const response = await handlers[method]({ params: { action }, request });
   return { status: response.status, body: (await response.json()) as Record<string, unknown> };
 }
 
@@ -118,11 +119,14 @@ describe('the deck of a share or publish call (server/action-deck.ts)', () => {
       deckId: 'gt-brand',
       named: false,
     });
-    expect(actionDeck('share.createLink', null, { id: '../x' }, 'gt-brand')).toEqual({
-      ok: true,
-      deckId: 'gt-brand',
-      named: false,
-    });
+    // an id that is not a slug: the schema's own words at /id, whatever ?deck= says
+    for (const query of [null, 'q4'])
+      expect(actionDeck('share.createLink', query, { id: '../x' }, 'gt-brand')).toEqual({
+        ok: false,
+        message:
+          'share.createLink: invalid input at /id: a slug: lower-case letters and digits joined by single hyphens',
+        pointer: '/id',
+      });
   });
 
   it('refuses a write that names no deck with 400 deck_required before it opens one', async () => {
@@ -138,6 +142,23 @@ describe('the deck of a share or publish call (server/action-deck.ts)', () => {
       expect(opened).toEqual([]);
       expect(ran).toEqual([]);
     }
+  });
+
+  it('leaves a write the route does not take to its own refusal: off http 404, a PUT 405, a bad id invalid_input', async () => {
+    const unpack = await call('deck.unpack', '', { file: 'x.zip' });
+    expect(unpack).toMatchObject({ status: 404, body: { error: { code: 'not_on_http' } } });
+    const source = await call('source.apply', '', {});
+    expect(source).toMatchObject({ status: 404, body: { error: { code: 'not_on_http' } } });
+    const put = await call('slide.update', '', { slideId: 'thesis', mutations: [] }, 'PUT');
+    expect(put).toMatchObject({ status: 405, body: { error: { code: 'method_not_allowed' } } });
+    const bad = await call('share.createLink', '', { id: '../x', role: 'editor', baseRevision: 0 });
+    expect(bad).toMatchObject({
+      status: 400,
+      body: { error: { code: 'invalid_input', pointer: '/id', action: 'share.createLink' } },
+    });
+    expect(gated).toEqual([]);
+    expect(opened).toEqual([]);
+    expect(ran).toEqual([]);
   });
 
   it('runs a read that names no deck on the default deck', async () => {

@@ -11,7 +11,14 @@ import { accountPrincipalId } from '@turboslide/identity/ids';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { ACTIONS, actionsOn } from '@turboslide/schema/actions';
 
-import { INPUT_DECKS, gateAgentAction, gateInputDecks, writesBoundDeck } from './agent-gate';
+import {
+  INPUT_DECKS,
+  gateAgentAction,
+  gateInputDecks,
+  gatedDispatcher,
+  requireNamedDeck,
+  writesBoundDeck,
+} from './agent-gate';
 import type { AgentCaller } from './agent-gate';
 import { ensureUserByEmail } from './auth/actions';
 import { buildIdentityRuntime, setIdentityRuntime } from './auth/identity';
@@ -152,6 +159,7 @@ afterEach(() => {
 });
 
 const MCP_ACTIONS = actionsOn('mcp').map((spec) => spec.id);
+const AUTHOR = { kind: 'agent' as const, name: 'agent', runId: 'gate-test' };
 
 describe('the gate (server/agent-gate.ts) in shadow mode', () => {
   const alice = keyCaller('usr_alice', ['read', 'write', 'comment', 'export', 'share']);
@@ -173,7 +181,6 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
           gateAgentAction(caller, {
             action,
             deckId: other,
-            deckNamed: true,
             input: inputNaming(action, other),
             transport: 'mcp',
           }),
@@ -190,7 +197,6 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
           gateAgentAction(caller, {
             action,
             deckId: own,
-            deckNamed: true,
             input: inputNaming(action, other),
             transport: 'mcp',
           }),
@@ -203,7 +209,6 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
           gateAgentAction(caller, {
             action,
             deckId: own,
-            deckNamed: true,
             input: inputNaming(action, 'gone'),
             transport: 'mcp',
           }),
@@ -223,7 +228,6 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
       const call = {
         action,
         deckId: 'alpha',
-        deckNamed: true,
         input: inputNaming(action, 'alpha'),
         transport: 'mcp' as const,
       };
@@ -242,13 +246,7 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
 
   it('applies a key’s scopes to an admin account’s key, and keeps admin.* to the deployment admin', async () => {
     const adminRead = keyCaller('usr_root', ['read'], true);
-    const call = {
-      action: 'deck.set',
-      deckId: 'alpha',
-      deckNamed: true,
-      input: {},
-      transport: 'mcp' as const,
-    };
+    const call = { action: 'deck.set', deckId: 'alpha', input: {}, transport: 'mcp' as const };
     expect((await refusalOf(gateAgentAction(adminRead, call)))?.status).toBe(403);
     expect(
       await refusalOf(gateAgentAction(adminRead, { ...call, action: 'deck.info' })),
@@ -256,7 +254,6 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
     const flag = {
       action: 'admin.flag',
       deckId: 'alpha',
-      deckNamed: true,
       input: { name: 'readOnly' },
       transport: 'mcp' as const,
     };
@@ -267,13 +264,7 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
   });
 
   it('applies the read only switch and the writes per minute per deck quota to a key’s writes', async () => {
-    const write = {
-      action: 'deck.set',
-      deckId: 'alpha',
-      deckNamed: true,
-      input: {},
-      transport: 'mcp' as const,
-    };
+    const write = { action: 'deck.set', deckId: 'alpha', input: {}, transport: 'mcp' as const };
     const read = { ...write, action: 'deck.info' };
     flagsOn = (name) => name !== 'readOnly';
     expect(await refusalOf(gateAgentAction(alice, write))).toMatchObject({ status: 503 });
@@ -294,62 +285,77 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
     expect(keys).toEqual(['agent:tok_usr_alice:writesPerMinutePerDeck:alpha']);
   });
 
-  it('names the writes that land on no bound deck, and no read', () => {
-    const agentSurface = Object.values(ACTIONS).filter(
-      (spec) => spec.transports.includes('http') || spec.transports.includes('mcp'),
-    );
-    for (const spec of agentSurface)
-      if (!spec.mutates) expect(writesBoundDeck(spec.id), spec.id).toBe(false);
-    const unbound = agentSurface
-      .filter((spec) => spec.mutates && !writesBoundDeck(spec.id))
-      .map((spec) => spec.id)
-      .sort();
+  it('names the writes that land on no bound deck, no read, and no action off the transport', () => {
     // a new write lands on the bound deck unless it is added here and to the rule on purpose
-    expect(unbound).toEqual(
-      [
-        'account.setAvatar',
-        'account.setName',
-        'account.signOut',
-        'account.tokens.create',
-        'account.tokens.revoke',
-        'admin.avatar.sweep',
-        'admin.bootstrap',
-        'admin.flag',
-        'admin.migrateStorage',
-        'deck.copy',
-        'deck.create',
-        'deck.remove',
-        'deck.restore',
-        'deck.trash',
-        'notification.markRead',
-        'notification.settings',
-        'template.create',
-        'template.delete',
-        'template.rename',
-        'template.setDefault',
-        'template.update',
-      ].sort(),
-    );
-    expect(writesBoundDeck('admin.assignOwner')).toBe(true);
-    expect(writesBoundDeck('share.createLink')).toBe(true);
-    expect(writesBoundDeck('no.such.action')).toBe(false);
+    const unbound = [
+      'account.setAvatar',
+      'account.setName',
+      'account.signOut',
+      'account.tokens.create',
+      'account.tokens.revoke',
+      'admin.avatar.sweep',
+      'admin.bootstrap',
+      'admin.flag',
+      'admin.migrateStorage',
+      'deck.copy',
+      'deck.create',
+      'deck.remove',
+      'deck.restore',
+      'deck.trash',
+      'notification.markRead',
+      'notification.settings',
+      'template.create',
+      'template.delete',
+      'template.rename',
+      'template.setDefault',
+      'template.update',
+    ];
+    for (const transport of ['http', 'mcp'] as const) {
+      const offered = Object.values(ACTIONS).filter((spec) => spec.transports.includes(transport));
+      for (const spec of Object.values(ACTIONS))
+        if (!spec.mutates || !spec.transports.includes(transport))
+          expect(writesBoundDeck(spec.id, transport), `${spec.id} on ${transport}`).toBe(false);
+      expect(
+        offered
+          .filter((spec) => spec.mutates && !writesBoundDeck(spec.id, transport))
+          .map((spec) => spec.id)
+          .sort(),
+        transport,
+      ).toEqual(unbound.filter((id) => offered.some((spec) => spec.id === id)).sort());
+    }
+    expect(writesBoundDeck('admin.assignOwner', 'http')).toBe(true);
+    expect(writesBoundDeck('share.createLink', 'mcp')).toBe(true);
+    // a CLI only and a window only write: the transport's own refusal answers them
+    expect(writesBoundDeck('deck.unpack', 'http')).toBe(false);
+    expect(writesBoundDeck('source.apply', 'mcp')).toBe(false);
+    expect(writesBoundDeck('no.such.action', 'http')).toBe(false);
   });
 
-  it('refuses every write on the bound deck that names no deck with 400, before any decision', async () => {
+  it('refuses every write on the bound deck through an MCP session that names no deck, before the gate decides', async () => {
+    const recorder = createDispatcher();
+    for (const action of MCP_ACTIONS)
+      recorder.register(action, () => {
+        reached.push(action);
+        return Promise.resolve({});
+      });
+    // a key that cannot read alpha: the gate's answer would be 404, the deck rule's comes first
     const outsider = keyCaller('usr_carol', ['read', 'write']);
+    const unnamed = gatedDispatcher(recorder, outsider, {
+      deckId: 'alpha',
+      deckNamed: false,
+      transport: 'mcp',
+    });
     for (const action of MCP_ACTIONS) {
-      const call = {
-        action,
-        deckId: 'alpha',
-        deckNamed: false,
-        input: inputNaming(action, 'alpha'),
-        transport: 'mcp' as const,
-      };
-      const refused = await refusalOf(gateAgentAction(outsider, call));
-      if (writesBoundDeck(action)) {
+      const refused = await refusalOf(
+        unnamed
+          .dispatch(action, inputNaming(action, 'alpha'), { author: AUTHOR })
+          .then(() => undefined),
+      );
+      if (writesBoundDeck(action, 'mcp')) {
         expect(refused?.status, action).toBe(400);
         expect(refused?.message, action).toContain('?deck=<id> on the /mcp initialize request');
       } else expect(refused?.status, action).not.toBe(400);
+      expect(() => requireNamedDeck({ action, deckNamed: true, transport: 'mcp' })).not.toThrow();
     }
     expect(reached).toEqual([]);
   });
@@ -560,9 +566,9 @@ describe('the agent routes through the gate', () => {
         expect(await statusOf(mine, tool, inputNaming(actionOf(tool), deckId)), tool).toBe(404);
       expect(reached).toEqual([]);
     }
-    // every listed tool over four sessions: 7 s at a load average of 100 on the shared machine,
-    // over the 5 s default (2026-10-17, on the base commit too)
-  }, 60_000);
+    // every listed tool over four sessions: 7 s at a load average of 100 and 75 s at 230 on the
+    // shared machine, over the 5 s default (2026-10-17, on the base commit too)
+  }, 180_000);
 
   it('refuses a read key every write tool, and a revoked key everything', async () => {
     restrictedDeck('beta', users.bob);
@@ -576,7 +582,7 @@ describe('the agent routes through the gate', () => {
     await runtime.keys.revoke(bobReadId);
     expect(await statusOf(readOnly, 'deck_get_info')).toBe(401);
     expect(await open('beta', secrets.bobRead)).toMatchObject({ status: 401 });
-  });
+  }, 180_000);
 
   it('holds the read only switch and the write quota on MCP', async () => {
     restrictedDeck('alpha', users.alice);

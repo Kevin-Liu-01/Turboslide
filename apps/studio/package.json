@@ -40,8 +40,6 @@
     "@turboslide/store": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "@turboslide/viewer": "workspace:*",
-    "@upstash/ratelimit": "catalog:",
-    "@upstash/redis": "catalog:",
     "@vercel/functions": "catalog:",
     "better-auth": "catalog:",
     "fumadocs-core": "catalog:",

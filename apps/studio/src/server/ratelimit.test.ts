@@ -12,8 +12,6 @@ import {
   bindRateLimiter,
   checkAssistQuotas,
   checkQuota,
-  hasUpstash,
-  kvLimiter,
   largestPictureBytes,
   memoryLimiter,
   quotaKey,
@@ -21,14 +19,13 @@ import {
   rateLimitedResponse,
   releaseQuota,
   tierOf,
-  upstashLimiter,
   warnPerInstanceQuotas,
 } from './ratelimit';
-import type { LimiterKv, QuotaContext, UpstashRatelimitLike } from './ratelimit';
+import type { QuotaContext } from './ratelimit';
 
-// The application quotas of gslides-parity SPEC-3 8.3: the table with its three tiers, the
-// memory, kv and Upstash (behind a fake) backends, the 429 with Retry-After and the sentence, and
-// the concurrency slots.
+// The application quotas of gslides-parity SPEC-3 8.3: the table with its three tiers, the memory
+// backend, the 429 with Retry-After and the sentence, and the concurrency slots. The one limiter
+// over the accounts database is auth/limits.test.ts's.
 
 const lines: SecurityLine[] = [];
 setSecurityLogSink((line) => lines.push(line));
@@ -91,69 +88,6 @@ describe('the memory limiter', () => {
   });
 });
 
-describe('the kv limiter', () => {
-  it('keeps the window in the store with the TTL and counts bytes as cost', async () => {
-    const rows = new Map<string, { value: string; ttl: number }>();
-    const kv: LimiterKv = {
-      get: (key) => Promise.resolve(rows.get(key)?.value ?? null),
-      set: (key, value, ttlMs) => {
-        rows.set(key, { value, ttl: ttlMs });
-        return Promise.resolve();
-      },
-      del: (key) => {
-        rows.delete(key);
-        return Promise.resolve();
-      },
-    };
-    let t = 10_000;
-    const limiter = kvLimiter(kv, () => t);
-    expect((await limiter.limit('bytes', 100, 60_000, 60)).ok).toBe(true);
-    expect((await limiter.limit('bytes', 100, 60_000, 50)).ok).toBe(false);
-    expect(rows.get('q:bytes')?.ttl).toBe(60_000);
-    t += 60_000;
-    expect((await limiter.limit('bytes', 100, 60_000, 50)).ok).toBe(true);
-    await limiter.release?.('bytes', 50);
-    expect((await limiter.limit('bytes', 100, 60_000, 100)).ok).toBe(true);
-  });
-});
-
-describe('the Upstash limiter behind a fake', () => {
-  it('asks one instance per limit and window and falls to memory for a concurrency slot', async () => {
-    const made: string[] = [];
-    const calls: { id: string; rate?: number }[] = [];
-    const factory = (limit: number, windowMs: number): UpstashRatelimitLike => {
-      made.push(`${limit}:${windowMs}`);
-      const counts = new Map<string, number>();
-      return {
-        limit: (id, options) => {
-          calls.push({ id, ...(options?.rate !== undefined ? { rate: options.rate } : {}) });
-          const count = (counts.get(id) ?? 0) + (options?.rate ?? 1);
-          counts.set(id, count);
-          return Promise.resolve({
-            success: count <= limit,
-            remaining: Math.max(0, limit - count),
-            reset: 99,
-          });
-        },
-      };
-    };
-    const limiter = upstashLimiter(factory);
-    expect((await limiter.limit('a', 2, 60_000)).ok).toBe(true);
-    expect((await limiter.limit('a', 2, 60_000)).ok).toBe(true);
-    expect(await limiter.limit('a', 2, 60_000)).toEqual({ ok: false, remaining: 0, resetAt: 99 });
-    expect((await limiter.limit('b', 2, 60_000, 2)).ok).toBe(true);
-    expect(made).toEqual(['2:60000']);
-    expect(calls.at(-1)).toEqual({ id: 'b', rate: 2 });
-    expect((await limiter.limit('slot', 1, 0)).ok).toBe(true);
-    expect((await limiter.limit('slot', 1, 0)).ok).toBe(false);
-    expect(made).toHaveLength(1);
-    expect(hasUpstash({})).toBe(false);
-    expect(
-      hasUpstash({ UPSTASH_REDIS_REST_URL: 'https://x', UPSTASH_REDIS_REST_TOKEN: 'fake-t' }),
-    ).toBe(true);
-  });
-});
-
 describe('checkQuota', () => {
   it('admits under the limit, refuses over it with 429, Retry-After and one log line, and refuses a zero tier at once', async () => {
     let t = 0;
@@ -209,27 +143,15 @@ describe('the hosted degraded tier (VERIFICATION-3 finding 17)', () => {
     expect(warnPerInstanceQuotas(true)).toBe(false);
     expect(lines).toHaveLength(1);
     expect(lines[0]).toMatchObject({ event: 'config.degraded' });
-    expect(lines[0]?.reason).toContain('REDIS_URL');
-    expect(lines[0]?.reason).toContain('UPSTASH_REDIS_REST_URL');
+    expect(lines[0]?.reason).toContain('TURBOSLIDE_ACCOUNTS=d1');
     expect(lines[0]?.reason).toContain('per instance');
     expect(lines[0]?.reason).toContain('firewall/rules.json');
     // a new binding is a new decision: memory again re-arms, a shared backend stays quiet
     bindRateLimiter(memoryLimiter());
     expect(warnPerInstanceQuotas(true)).toBe(true);
     expect(lines).toHaveLength(2);
-    const rows = new Map<string, string>();
-    const kv: LimiterKv = {
-      get: (key) => Promise.resolve(rows.get(key) ?? null),
-      set: (key, value) => {
-        rows.set(key, value);
-        return Promise.resolve();
-      },
-      del: (key) => {
-        rows.delete(key);
-        return Promise.resolve();
-      },
-    };
-    bindRateLimiter(kvLimiter(kv));
+    // a shared backend (the one limiter's kind) stands in over a memory count
+    bindRateLimiter({ ...memoryLimiter(), kind: 'db' });
     expect(quotasShared()).toBe(true);
     expect(warnPerInstanceQuotas(true)).toBe(false);
     expect(lines).toHaveLength(2);

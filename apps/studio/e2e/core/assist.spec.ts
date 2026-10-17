@@ -356,10 +356,10 @@ test(title('assist.quota.429'), async () => {
     description:
       backend ?? 'the manifest names no rate limit backend, or answered without the bearer',
   });
-  if (backend === null || !/upstash/i.test(backend))
+  if (backend === null || !/\bdb\b/i.test(backend))
     test.skip(
       true,
-      `not driven: the quota counts across instances only with Upstash and this base ${backend === null ? 'does not say which limiter it runs (GET /api/agent instance facts)' : `runs ${backend}`}; the unit test apps/studio/src/server/ratelimit.test.ts covers the rows (PRODUCT.md 8.2)`,
+      `not driven: the quota counts across instances only with the one limiter over the accounts database (HR-SA#3) and this base ${backend === null ? 'does not say which limiter it runs (GET /api/agent instance facts)' : `runs ${backend}`}; the unit test apps/studio/src/server/ratelimit.test.ts covers the rows (PRODUCT.md 8.2)`,
     );
   let refused: string | null = null;
   for (let i = 0; i < 7; i += 1) {

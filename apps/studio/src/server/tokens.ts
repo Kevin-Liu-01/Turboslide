@@ -26,11 +26,10 @@ import type { RateLimiter } from './ratelimit';
  *
  * Round three (gslides-parity SPEC-3 8.10, 8.13, 11.4, 11.5 R0; report 04 F6, F9, F19): the
  * secret is required on a hosted store (a token minted on one instance must verify on another);
- * the spent set moves behind `SpentSet` with a memory default and `kvSpentSet` over the key value
- * client of the redis tier (`dl:spent:<nonce>`, B2's channel binds it through `bindSpentSet`), so
- * a token spent on one instance is spent on every instance (since HR-SA#3 a hosted deployment
- * binds `limiterSpentSet` over the one limiter in the accounts database, whose spend is one
- * statement, so two instances never both serve a token); the export cancel token (an HMAC over
+ * the spent set moves behind `SpentSet` with a memory default, and since HR-SA#3 a hosted
+ * deployment binds `limiterSpentSet` over the one limiter in the accounts database through
+ * `bindSpentSet` (`dl:spent:<nonce>`, one statement per spend), so a token spent on one instance is
+ * spent on every instance and two instances never both serve it; the export cancel token (an HMAC over
  * the job id, `cancelTokenFor`) replaces the bare job id as the cancel capability; and the
  * thumbnail grant (`signThumbGrant`, an HMAC over deck id, role and an expiry of 10 minutes,
  * handed to the page by the `thumbGrant` server function) gates the `?w=` variant of the render
@@ -127,17 +126,12 @@ type Payload = DownloadTarget & { exp: number; nonce: string };
 export const TOKEN_TTL_MS = 15 * 60 * 1000;
 
 // ---------------------------------------------------------------------------------------------
-// The spent set (SPEC-3 8.10): per instance in memory, or the key value client of the redis tier
+// The spent set (SPEC-3 8.10): per instance in memory, or the one limiter in the accounts database
 
 export type SpentSet = {
-  kind: 'memory' | 'kv' | 'limiter';
+  kind: 'memory' | 'limiter';
   /** Spends the nonce until `expiresAt`: true for the first spend, false when it was spent before. */
   spend: (nonce: string, expiresAt: number) => Promise<boolean>;
-};
-
-export type SpentKv = {
-  get(key: string): Promise<string | null>;
-  set(key: string, value: string, ttlMs: number): Promise<void>;
 };
 
 export function memorySpentSet(now: () => number = () => Date.now()): SpentSet {
@@ -149,18 +143,6 @@ export function memorySpentSet(now: () => number = () => Date.now()): SpentSet {
       for (const [key, exp] of used) if (exp < t) used.delete(key);
       if (used.has(nonce)) return false;
       used.set(nonce, expiresAt);
-      return true;
-    },
-  };
-}
-
-/** `dl:spent:<nonce>` with the token's own TTL, so the set forgets what has expired anyway. */
-export function kvSpentSet(kv: SpentKv, now: () => number = () => Date.now()): SpentSet {
-  return {
-    kind: 'kv',
-    async spend(nonce, expiresAt) {
-      if ((await kv.get(downloadSpentKey(nonce))) !== null) return false;
-      await kv.set(downloadSpentKey(nonce), '1', Math.max(1000, expiresAt - now()));
       return true;
     },
   };
@@ -200,7 +182,7 @@ function state(): Required<Shared> {
   return s as Required<Shared>;
 }
 
-/** Binds the spent set of the deployment (the redis tier's client); returns the previous one. */
+/** Binds the spent set of the deployment (the one limiter's); returns the previous one. */
 export function bindSpentSet(next: SpentSet | undefined): SpentSet {
   const previous = state().spent;
   shared.__turboslideDownloads!.spent = next ?? memorySpentSet();

@@ -417,8 +417,7 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
 
 - Round three catalog entries (SPEC-3 0.20, 0.23, 0.25, 0.27, 2.5, 8.10; merge 1): `better-auth`
   1.7.4, `kysely` 0.29.5, `ioredis` 6.0.0, `dompurify` 3.4.15 (with the pinned `jsdom` and
-  `@types/jsdom` 30.0.0), `@upstash/ratelimit` 2.0.8 with its peer `@upstash/redis` 1.38.4,
-  `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `pg`
+  `@types/jsdom` 30.0.0), `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `pg`
   8.23.0 with `@types/pg` 8.23.1, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
   builder names a package and its version in `docs/gslides-parity/build-3/<key>.md`; the
   integrator adds it to the catalog and to the consuming package's `package.json` and installs
@@ -773,7 +772,7 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
     `callerFactsFor`, `server/room.ts` `requestIdentity`), so a walk sees one caller. The access
     record lives at `decks/<id>/.turboslide/access.json` on a checkout (the CLI, the access store
     and `authorize()` agree) and in the access store hosted; `bindAuthorize({ loadRecord })`,
-    `bindIdentityHooks({ findShareLink, deckIndex })` and the Redis and Upstash binds run once per
+    `bindIdentityHooks({ findShareLink, deckIndex })` and the one limiter's bind run once per
     server process from `apps/studio/src/start.ts` (`bindServerSeams`). `/api/share/<id>/<action>`
     dispatches the same handlers. The CSRF filter passes a bearer on the three room routes and GET
     on `/device` and `/api/auth/magic-link/verify`; `playwright.config.ts` and `scripts/check.mjs`

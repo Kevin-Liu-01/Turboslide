@@ -128,9 +128,9 @@ the rows).
 firewall API's `rules.insert` takes, every applied action `log`, and the `enforce` object per rule
 holding the action of the R8 flip (429, deny 15 minutes or 1 hour, challenge). Counters are per IP
 and per region, so each number sits about a third under the intended global one and is counted
-again in the application. On a deployment without Redis the application count is per instance
-and never reaches a limit (section 4), so these rules are the only limits that hold across
-instances until Upstash is installed; a rate limit rule whose action is 429 (R1, R2, R5, R6, R10,
+again in the application. On a deployment without the one limiter of section 4 (the accounts
+database on D1) the application count is per instance and never reaches a limit, so these rules
+are the only limits that hold across instances there; a rate limit rule whose action is 429 (R1, R2, R5, R6, R10,
 R12 to R15, R16b, R17, R18, R20) is recoverable for a browser and a CLI alike, so Kevin may flip
 those before the deny and challenge rules finish their log week. The file is applied by the
 integrator in the ship step through the API in log mode, if the plan accepts it; a refusal is
@@ -156,12 +156,10 @@ write, 40 named versions, 600 grant holders, 50 live links and the rest of 8.3),
 Backends behind one interface, bound once per process (`bindRateLimiter` in `start.ts`'s
 `bindServerSeams`):
 
-| Backend   | When                                                                                   | How                                                                                                                         |
-| --------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `memory`  | the default: a checkout, the `tmp` store, the `blob` tier without Redis, the fallback  | a fixed window counter per key in this process                                                                              |
-| `kv`      | `REDIS_URL` set (the `redis` tier): the room's ioredis client with `get`, `set`, `del` | a fixed window counter as JSON with the window's TTL; two instances racing admit one extra request per window               |
-| `upstash` | `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` set                            | `@upstash/ratelimit` (sliding window, one instance per limit and window); a concurrency slot falls to the memory limiter    |
-| `db`      | the accounts engine is D1 (both Vercel projects) or Postgres; bound last, so it wins   | the one limiter of HR-SA#3: a fixed window per key in `ts_limits`, one upsert per take; a store that fails counts in memory |
+| Backend  | When                                                                            | How                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `memory` | the default: a checkout, the `tmp` store, a deployment without D1, the fallback | a fixed window counter per key in this process                                                                              |
+| `db`     | the accounts engine is D1 (both Vercel projects)                                | the one limiter of HR-SA#3: a fixed window per key in `ts_limits`, one upsert per take; a store that fails counts in memory |
 
 Since HR-SA#3 (AUTH-8) a hosted deployment counts in the accounts database: `ts_limits`
 (`apps/realtime-worker/migrations/0005_limits.sql` on D1, `auth/schema.ts` on the other engines),
@@ -178,38 +176,30 @@ a minute and the take counts in that instance's memory, as before, so no request
 the counter could not be read. A checkout on SQLite keeps the memory limiter: one process, and a
 counter that outlived the dev server would carry the check chain's day quotas across runs.
 
-Before HR-SA#3 the quotas held hosted only with Redis. Without `REDIS_URL` and without the Upstash
-pair (the degraded tier previews and production ran on) the backend was `memory`, every function
-instance keeps its own counters and Fluid compute spreads one caller's requests across instances,
+Before HR-SA#3 the backend of previews and production was `memory`: every function instance
+keeps its own counters and Fluid compute spreads one caller's requests across instances,
 so no windowed quota reaches its limit: the verifier sent 430 anonymous thumbnail renders against
 the 400 per hour row in 79 s and every one answered 200 (VERIFICATION-3 finding 17). On that tier
 the WAF rules of section 3 are the only limits that count across instances, and they limit only
-after their flip from log mode to their action; until Kevin installs Upstash, that flip is the
-rate limit of the deployment. What does hold on every tier: a row whose tier limit is 0 (an
+after their flip from log mode to their action. What does hold on every tier: a row whose tier limit is 0 (an
 anonymous invitation, an anonymous avatar upload) refuses at once, the largest picture is a size
 compared per request, and the deck caps are checked against the document. A platform process
-(`VERCEL` set) on the memory backend logs one `config.degraded` line at start naming the two
-variables (`warnPerInstanceQuotas`); the `config-degraded` alert notifies and never pages, because
+(`VERCEL` set) on the memory backend logs one `config.degraded` line at start naming
+`TURBOSLIDE_ACCOUNTS=d1` (`warnPerInstanceQuotas`); the `config-degraded` alert notifies and never pages, because
 the degraded tier is a known state and one line per instance start is the instance count. A
 checkout is quiet, tmp store or not: one process, so its counter holds. No counter runs over the
 Blob store on purpose: a `BlobStore.write` per counted request would cost more than the request
 it counts, and Blob commits are about 15 a second across a deployment (docs/hosting.md section 9).
 
-The Upstash binding is written against the package's `limit()` shape and tested against a fake;
-the account boundary of this round creates no Upstash database. To turn the shared counter on:
-install Upstash Redis from the project's Storage tab (the fixed plan, 8.3: Upstash bills outside
-Vercel's spend cap), which sets `REDIS_URL` (the `kv` backend binds over the room's client on the
-next deploy) and, for the `upstash` backend, set `UPSTASH_REDIS_REST_URL` and
-`UPSTASH_REDIS_REST_TOKEN` from the same database; redeploy; the `config.degraded` line stops, and
-the 401st anonymous render of an hour answers 429 with `Retry-After` and "Too many slide renders
-this hour. Try again later" from any instance.
+The Redis (`kv`) and Upstash backends left in HR-C#8 (CLEANUP-6): nothing deployed bound them,
+and the `db` backend counts across instances without another service.
 
 The assistant's two rows (docs/archive/rounds/PRODUCT.md 6.3): `assistCallsPerMinutePerDeck` (anonymous 6,
 account 20, agent 60, per deck) and `assistCallsPerDay` (anonymous `TURBOSLIDE_ASSIST_DAY_CAP`,
 default 20; account 300; agent 1000), refused with 429, `Retry-After` and "Too many assistant
 requests. Try again in a minute" or "You have reached today's limit for the assistant"; counted on
 a propose alone, on `/api/assist` and on the agent path. On the memory backend they count per
-instance like every row above, so R22 is the limit that holds across instances until Upstash.
+instance like every row above, so R22 is the limit that holds across instances there.
 
 Where the quotas are counted: writes per minute per deck on every mutating window and HTTP
 action; renders per hour on `render.slide` and `/api/x/render`; exports per day, the export
@@ -463,7 +453,6 @@ runtime logs alone are one day.
 | `TURBOSLIDE_EGRESS`                                                                                                                                                | unset                                                                                                                                                                                                 | `open` only for a measurement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `TURBOSLIDE_WEB_SECURITY`                                                                                                                                          | `strict` once the fixture renders                                                                                                                                                                     | section 7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `TURBOSLIDE_PUBLIC_STORE_HOST`, `TURBOSLIDE_PRESIGN_HOST`, `TURBOSLIDE_EMBED_ANCESTORS`                                                                            | when the stores and the customers exist                                                                                                                                                               | section 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                                                                               | never set in the Cloudflare phase (docs/CLOUDFLARE.md 4.4)                                                                                                                                            | section 4; the memory limiter per instance stays under the WAF rule R8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `TURBOSLIDE_ASSIST`                                                                                                                                                | `fixture` on the enforce preview; unset in production                                                                                                                                                 | docs/archive/rounds/PRODUCT.md 6.3: `fixture` answers every propose with a canned card, `off` refuses, unset runs the model when the key is set                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `RAMP_ROUTER_API_KEY`                                                                                                                                              | production on both projects (2026-09-29)                                                                                                                                                              | the assistant's model key for the router (docs.router.com; `ASSIST_ROUTER_KEY_ENV`); never on a preview, never printed; wins over the Anthropic key                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `TURBOSLIDE_ASSIST_MODEL`                                                                                                                                          | unset (the code names `gpt-6-luna`)                                                                                                                                                                   | the router model, an id from the router's GET /v1/models; docs/gslides-parity/product/assist-router.md is the benchmark behind the default                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -530,8 +519,7 @@ exist, never as passed.
 
 Chromium in a function or worker without `BLOB_READ_WRITE_TOKEN` and the bearer (8.10, round
 four's first item); the WebSocket transport and R19; the private store and the storage layout v2
-(the migration of 11.5 runs on the preview store first); the Upstash limiter and the Redis kill
-switch reader bound to a live database; the CSP nonce wiring in `router.tsx` and `__root.tsx`; the
+(the migration of 11.5 runs on the preview store first); the CSP nonce wiring in `router.tsx` and `__root.tsx`; the
 `html` block frame in the edit route, the render worker and the standalone build; the nonce guard
 set on the editor's adapter; the `sanitizer.rewrite` line from `applyWrite`. Each is named with
 its owner in `docs/gslides-parity/build-3/b4.md`.

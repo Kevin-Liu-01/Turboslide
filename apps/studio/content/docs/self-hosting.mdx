@@ -81,12 +81,11 @@ A sign in mail's link and its six digit code sign in only the browser that asked
 | `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `redis`, `blob` or `do`. Unset, the studio picks from the variables below.                |
 | `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` | The realtime Worker on Cloudflare (the `do` tier): its host, the key of its room tickets and the bearer of the studio's calls to it. |
 | `TURBOSLIDE_DB_BEARER`                                                     | The bearer of the Worker's database routes, for `TURBOSLIDE_ACCOUNTS=d1`.                                                            |
-| `REDIS_URL`                                                                | A Redis server for the `redis` tier. It also makes the limits below count across instances.                                          |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                       | Upstash Redis for the limits.                                                                                                        |
+| `REDIS_URL`                                                                | A Redis server for the `redis` tier.                                                                                                 |
 
 ## Limits and switches
 
-Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". Without `REDIS_URL` or the Upstash pair each server instance counts on its own, so a quota holds only on a single process.
+Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". The quotas count across instances when the accounts database is the realtime Worker's (`TURBOSLIDE_ACCOUNTS=d1`); without it each server instance counts on its own, so a quota holds only on a single process.
 
 The admin can turn a feature off without a deploy:
 

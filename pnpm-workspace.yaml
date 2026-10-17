@@ -48,8 +48,6 @@ catalog:
   '@types/pngjs': 6.0.5
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
-  '@upstash/ratelimit': 2.0.8
-  '@upstash/redis': 1.38.4
   '@vercel/blob': 2.8.0
   # gslides-parity SPEC-4 0.31: waitUntil for the thumbnail refresh and the retention prune (the
   # integrator, round four day 0); SPEC-4 names no version, so the newest release on the registry

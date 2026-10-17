@@ -11,8 +11,9 @@ export const APPEARANCES: readonly Appearance[] = ['light', 'dark'];
 
 /**
  * The brand's seeds (DESIGN.md 5.2): paper, ink, the second ink, titanium and five hues, and the
- * site's accent (Kevin, 2026-10-16), an orange apart from the selection blue, the status hues
- * and the six live hues of packages/identity/src/hues.ts.
+ * site's accent. The accent was an orange (#ff6a13, Kevin, 2026-10-16) and is the selection blue
+ * since 2026-10-17 (Kevin: "make our accent/highlight color this blue"), so the landing's words,
+ * pointers and links match its outlines and underlines.
  */
 export type SeedName =
   'paper' | 'ink' | 'ink2' | 'titanium' | 'blue' | 'green' | 'amber' | 'red' | 'guide' | 'accent';
@@ -28,7 +29,7 @@ export const SEEDS: Readonly<Record<Appearance, Readonly<Record<SeedName, string
     amber: '#f0a020',
     red: '#e5484d',
     guide: '#d6336c',
-    accent: '#ff6a13',
+    accent: '#2f5ce0',
   },
   dark: {
     paper: '#070707',
@@ -40,7 +41,7 @@ export const SEEDS: Readonly<Record<Appearance, Readonly<Record<SeedName, string
     amber: '#f0a020',
     red: '#e5484d',
     guide: '#d6336c',
-    accent: '#ff6a13',
+    accent: '#2f5ce0',
   },
 };
 
@@ -283,7 +284,7 @@ export const CHROME_TOKENS: readonly ChromeToken[] = [
   {
     name: '--pt-accent',
     role: 'text',
-    note: 'The site accent (Kevin, 2026-10-16): the words people and agents of the landing title, a key word of a heading, the current item and a link under the pointer on /home, /features, /faq, /about and /docs, and the pointers, carets and flags of the agents in the hero. Orange solved to 4.5:1 on the paper of each appearance. Text, glyphs and fills only, never a border or a ring.',
+    note: 'The site accent (Kevin, 2026-10-16): the words people and agents of the landing title, a key word of a heading, the current item and a link under the pointer on /home, /features, /faq, /about and /docs, and the pointers, carets and flags of the agents in the hero. The selection blue (since 2026-10-17; an orange before) solved to 4.5:1 on the paper of each appearance. Text, glyphs and fills only, never a border or a ring.',
     light: {
       kind: 'solve',
       seed: 'accent',

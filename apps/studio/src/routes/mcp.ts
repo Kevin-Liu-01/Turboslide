@@ -19,7 +19,8 @@ import { refuseForeignOrigin } from '../server/headers';
 // /mcp (SPEC 7.3 "streamable HTTP at /mcp in the studio (M4) for hosted clients"; MILESTONES M4
 // item 1): the same MCP server `turboslide mcp` serves over stdio, over the SDK's web-standard
 // streamable HTTP transport (packages/mcp/src/http.ts). One MCP session is bound at initialize to
-// the deck named by ?deck= (the instance default otherwise) and to the author of
+// the deck named by ?deck= (the instance default otherwise, for reads alone: a write tool on a
+// session that named no deck is refused, server/agent-gate.ts writesBoundDeck) and to the author of
 // x-turboslide-author or ?author=; its tool list is the studio dispatcher's implemented actions
 // on the mcp transport, plus deck_goto_slide while a studio page is attached to that deck
 // (server/sessions.ts), and it runs in that page. The bearer token rule applies before the
@@ -31,7 +32,9 @@ import { refuseForeignOrigin } from '../server/headers';
 // opens it (a deck the key cannot see answers the not found of a missing deck), every tool call
 // and resource read is decided again for the action's capability and the decks its input names,
 // with the key's scopes, the read only switch and the write quota, and a session is bound to the
-// key that opened it, so another key or bearer never rides it.
+// key that opened it, so another key or bearer never rides it. A share or publish tool acts on the
+// session's deck, so one whose input `id` names another deck is refused with 400, naming both
+// (server/agent-gate.ts requireBoundDeckId).
 
 const HANDLER = Symbol.for('turboslide.studio.mcp');
 
@@ -41,7 +44,8 @@ function handler(): McpHttpHandler {
     authorize: (request) => requireAgentAuth(request) ?? refuseForeignOrigin(request) ?? undefined,
     resolveKey: (request) => keyBindingOf(request),
     createServer: async (request, sessionId) => {
-      const deckId = requestDeckId(request, DEFAULT_DECK) ?? DEFAULT_DECK;
+      const named = requestDeckId(request);
+      const deckId = named ?? DEFAULT_DECK;
       const author = agentAuthor(request, MCP_DEFAULT_AUTHOR);
       const caller = await agentCaller(request);
       await gateDeckRead(caller, deckId, 'mcp');
@@ -53,7 +57,11 @@ function handler(): McpHttpHandler {
         throw error;
       }
       const created = createMcpServer({
-        dispatcher: gatedDispatcher(deck.dispatcher, caller, { deckId, transport: 'mcp' }),
+        dispatcher: gatedDispatcher(deck.dispatcher, caller, {
+          deckId,
+          deckNamed: named !== undefined,
+          transport: 'mcp',
+        }),
         source: gatedSource(deck.source, () =>
           gateDeckRead(caller, deckId, 'mcp', 'resource.read'),
         ),

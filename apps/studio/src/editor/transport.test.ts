@@ -2,20 +2,23 @@
 // Cloudflare phase) against the socket shaped fake, a scripted fetch and a fake clock: the
 // upgrade's URL and subprotocols, the frames up and down, the ack settle by `req`, the HTTP belt
 // while the socket is down, the literal `ping`, the leave, the ticket refresh and the `reauth`,
-// the close code map, the join fallback, the offline event, and the wrapper's switch between the
-// socket and the stream route.
+// the close code map, the join fallback, the offline event, the open deadline, and the wrapper's
+// switch between the socket and the stream route.
 import { describe, expect, test } from 'vitest';
 
 import type { RoomEvent } from '@turboslide/realtime/channel';
 import { fakeSocketHub } from '@turboslide/realtime/client/fake-transport';
 import type { FakeSocket } from '@turboslide/realtime/client/fake-transport';
-import { REOPEN_WAIT_MAX_MS } from '@turboslide/realtime/client/room-client';
+import { REOPEN_WAIT_MAX_MS, createRoomClient } from '@turboslide/realtime/client/room-client';
 import type { OpsResponse, StreamFailure } from '@turboslide/realtime/client/room-client';
+import { workedDocument } from '@turboslide/schema/fixtures';
+import { validateDocument } from '@turboslide/schema/validate';
 import { CLOSE_CODES, HEARTBEAT_REQUEST, ackOf } from '@turboslide/realtime/frames';
 import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 
 import {
   BUSY_RETRY_FALLBACK_MS,
+  SOCKET_OPEN_DEADLINE_MS,
   TICKET_REFRESH_LEAD_MS,
   TIER_RETRY_FALLBACK_MS,
   TRANSPORT_FALLBACK_AFTER_MS,
@@ -629,6 +632,97 @@ describe('wsTransport: the socket', () => {
     expect(socket.closedByClient).not.toBeNull();
     expect(h.errors).toEqual([{ message: 'the browser went offline' }]);
     expect(listeners.get('offline')?.size).toBe(0);
+  });
+});
+
+describe('wsTransport: the open deadline (SOCKET_OPEN_DEADLINE_MS)', () => {
+  const deadlineFailure = {
+    code: 'open_deadline',
+    message: `the room said no hello within ${SOCKET_OPEN_DEADLINE_MS} ms of the socket's open`,
+  };
+
+  test('an upgrade nobody answers is closed and reported once at the deadline, without a status, and the carriage stays', async () => {
+    const h = harness();
+    const transport = wsTransport(DECK, TAB, facts(), h.deps);
+    h.open(transport);
+    await h.clock.flush();
+    const socket = h.hub.last();
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS - 1);
+    expect(h.errors).toEqual([]);
+    expect(socket.closedByClient).toBeNull();
+    await h.clock.advance(1);
+    expect(socket.closedByClient).toEqual({ code: 1000, reason: 'open deadline' });
+    // the close the deadline made arrived after the report and added nothing
+    expect(h.errors).toEqual([deadlineFailure]);
+    expect(h.errors[0]?.status).toBeUndefined();
+    expect(transport.joinFallback()).toBe(false);
+    // the next open makes a new socket, and its hello clears its own deadline
+    h.open(transport);
+    await accept(h);
+    expect(h.hub.opens()).toBe(2);
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS * 2);
+    expect(h.errors).toEqual([deadlineFailure]);
+    expect(h.hub.last().closedByClient).toBeNull();
+  });
+
+  test('a hello after the Worker’s slowest seed (the seed route and the snapshot fetch, 25 s each) still lands', async () => {
+    const h = harness();
+    const transport = wsTransport(DECK, TAB, facts(), h.deps);
+    h.open(transport);
+    await h.clock.flush();
+    await h.clock.advance(50_000);
+    const socket = await accept(h);
+    expect(h.events).toEqual([hello()]);
+    expect(h.errors).toEqual([]);
+    expect(socket.closedByClient).toBeNull();
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS);
+    expect(h.errors).toEqual([]);
+  });
+
+  test('an upgrade that opens and says no hello is ended at the deadline too; a close by the tab disarms it', async () => {
+    const h = harness();
+    const transport = wsTransport(DECK, TAB, facts(), h.deps);
+    h.open(transport);
+    await h.clock.flush();
+    h.hub.last().accept('turboslide.v1');
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS);
+    expect(h.errors).toEqual([deadlineFailure]);
+    const handle = h.open(transport);
+    await h.clock.flush();
+    handle.close();
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS);
+    expect(h.errors).toEqual([deadlineFailure]);
+    expect(h.hub.last().closedByClient).toEqual({ code: 1000, reason: 'closed by the tab' });
+  });
+
+  test('the room client reopens on its ladder once a socket that never answered passes the deadline', async () => {
+    const h = harness();
+    const validated = validateDocument(workedDocument());
+    if (!validated.ok || validated.deck === null) throw new Error('fixture');
+    const room = createRoomClient({
+      deckId: DECK,
+      transport: wsTransport(DECK, TAB, facts(), h.deps),
+      document: { deck: validated.deck, slides: validated.slides },
+      seq: 0,
+      now: h.clock.now,
+      timers: h.clock.timers,
+      onChange: () => undefined,
+    });
+    room.start();
+    await h.clock.flush();
+    expect(h.hub.opens()).toBe(1);
+    // before this the client waited on the open's report with nothing scheduled
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS - 1);
+    expect(h.hub.opens()).toBe(1);
+    expect(room.status().connected).toBe(false);
+    // the deadline, then the ladder's first step (500 ms)
+    await h.clock.advance(1);
+    expect(h.hub.sockets[0]?.closedByClient).toEqual({ code: 1000, reason: 'open deadline' });
+    await h.clock.advance(500);
+    expect(h.hub.opens()).toBe(2);
+    await accept(h);
+    expect(room.status().connected).toBe(true);
+    room.stop();
   });
 });
 

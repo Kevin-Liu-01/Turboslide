@@ -6,9 +6,9 @@
 // realtime Worker, the room ticket the editor loader minted as the second subprotocol, the frames
 // of `packages/realtime/src/frames.ts` (R1's; `parseDownFrame` reads every frame down, the up
 // frames are written here in its shapes), the literal `ping` heartbeat the runtime answers without
-// waking the object, the
-// ticket refresh at `exp` minus 120 s and at once on a `reauth` frame, the close code map onto
-// the room client's `StreamFailure`, and the HTTP belt (`POST /rooms/:id/ops` and `/presence`
+// waking the object, the ticket refresh at `exp` minus 120 s and at once on a `reauth` frame, the
+// close code map onto the room client's `StreamFailure`, the open deadline
+// (SOCKET_OPEN_DEADLINE_MS to the hello), and the HTTP belt (`POST /rooms/:id/ops` and `/presence`
 // under `Authorization: Ticket`) while the socket is down. `roomTransport` picks one by the
 // payload's tier word and holds the switch between them (3.8): the ticket route names the tier
 // when the socket is refused for it, the stream route's 503 `tier` names the socket. The room
@@ -81,6 +81,22 @@ export const BUSY_RETRY_FALLBACK_MS = 5000;
 export const TIER_RETRY_FALLBACK_MS = 30_000;
 /** The wait when the ticket route answered but named no socket URL (R2-C3 until it lands). */
 export const NO_ROOM_URL_WAIT_MS = 8000;
+/**
+ * How long a socket may take from its construction to the room's hello. A WebSocket whose upgrade
+ * is never answered (a proxy or a network that holds the request, a Worker that never accepts
+ * it) stays CONNECTING with no close event until the browser's own network timeout, if one fires
+ * at all, and the room client opens nothing new until the open reports, so the tab waited with no
+ * reopen scheduled. Past this the transport closes the socket and reports a failure without a
+ * status, and the client's reopen ladder (500 ms doubling to 8 s) runs.
+ *
+ * The number sits above the realtime Worker's own slowest answer. The first open of a deck the
+ * object has never loaded awaits `seed()` before it answers the upgrade
+ * (apps/realtime-worker/src/deck-room.ts, the upgrade handler): the app's seed route under
+ * SEED_TIMEOUT_MS (25 s), then the snapshot fetch of `seedDocument` under the same 25 s, so 50 s
+ * at worst, and 10 s of margin for the network on top. A shorter deadline abandoned a slow seed,
+ * and a load that always took longer than the deadline never reached a hello.
+ */
+export const SOCKET_OPEN_DEADLINE_MS = 60_000;
 
 const SOCKET_OPEN = 1;
 
@@ -896,6 +912,12 @@ export function wsTransport(
       let done = false;
       let opened = false;
       let socket: SocketLike | null = null;
+      /** SOCKET_OPEN_DEADLINE_MS from the socket's construction, cleared by the hello */
+      let openDeadline: unknown;
+      const clearOpenDeadline = (): void => {
+        if (openDeadline !== undefined) timers.clearTimeout(openDeadline);
+        openDeadline = undefined;
+      };
       const listening = listenerWindow !== null && listenerWindow !== undefined;
       const onOffline = (): void => {
         socket?.close(1000, 'offline');
@@ -904,6 +926,7 @@ export function wsTransport(
       if (listening) listenerWindow.addEventListener('offline', onOffline);
       const end = (failure: TransportFailure): void => {
         if (listening) listenerWindow.removeEventListener('offline', onOffline);
+        clearOpenDeadline();
         if (done) return;
         done = true;
         if (socket !== null) {
@@ -979,6 +1002,17 @@ export function wsTransport(
         current = ws;
         lastPresenceKey = null;
         armRefresh();
+        openDeadline = timers.setTimeout(() => {
+          openDeadline = undefined;
+          if (done) return;
+          // the close comes after `end` and finds the open done, so the carriage of the ticket
+          // stays as it was: a silent upgrade says nothing about the subprotocol
+          ws.close(1000, 'open deadline');
+          end({
+            code: 'open_deadline',
+            message: `the room said no hello within ${SOCKET_OPEN_DEADLINE_MS} ms of the socket's open`,
+          });
+        }, SOCKET_OPEN_DEADLINE_MS);
         ws.onopen = () => {
           opened = true;
           // the fallback carrier (3.3): the ticket as the first frame within 5 s of the upgrade
@@ -1007,7 +1041,10 @@ export function wsTransport(
                 onSession?.(nudged);
                 return;
               }
-              if (frame.event.type === 'hello') clientId = frame.event.clientId;
+              if (frame.event.type === 'hello') {
+                clientId = frame.event.clientId;
+                clearOpenDeadline();
+              }
               onEvent(frame.event);
               return;
             }
@@ -1065,6 +1102,7 @@ export function wsTransport(
       return {
         close() {
           if (listening) listenerWindow.removeEventListener('offline', onOffline);
+          clearOpenDeadline();
           done = true;
           if (socket === null) return;
           rejectAcks(socket, 'the stream was closed by the tab');

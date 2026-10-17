@@ -14,13 +14,13 @@ curl -X POST "https://www.turboslide.com/api/actions/slide.list?deck=<id>" \
 
 ## The request
 
-| Part         | What to send                                                                                                                                                          |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Presentation | `?deck=<id>` names the presentation.                                                                                                                                  |
-| Token        | `Authorization: Bearer <key>` on a hosted studio, with an API key from `turboslide login`. On localhost the routes answer without one.                                |
-| Author       | Every write is recorded under the key's owner as `agent:<tokenId>`. The `x-turboslide-author` header and `?author=` only label the run; they never change the author. |
-| Force        | `?force=1` writes to a slide another author has leased. Without it, that write is refused with 409 and the holder.                                                    |
-| Size         | At most 1 MB per request body.                                                                                                                                        |
+| Part         | What to send                                                                                                                                                                       |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Presentation | `?deck=<id>` names the presentation. A write that changes a presentation and names none is refused with 400 and `code: "deck_required"`; a read without it reads the example deck. |
+| Token        | `Authorization: Bearer <key>` on a hosted studio, with an API key from `turboslide login`. On localhost the routes answer without one.                                             |
+| Author       | Every write is recorded under the key's owner as `agent:<tokenId>`. The `x-turboslide-author` header and `?author=` only label the run; they never change the author.              |
+| Force        | `?force=1` writes to a slide another author has leased. Without it, that write is refused with 409 and the holder.                                                                 |
+| Size         | At most 1 MB per request body.                                                                                                                                                     |
 
 A key's scopes limit what it may do: `read`, `comment`, `write`, `export`, `share` and `admin`. A key without the `share` scope reads other people's ids as stand-ins (`ref_` and 22 characters). The [account reference](/docs/reference/account) lists the key actions.
 

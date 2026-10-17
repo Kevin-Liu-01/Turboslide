@@ -14,6 +14,16 @@
 //   deployment admin's key); a write needs a writing scope; `admin.*` is the deployment admin's;
 //   a mutating call meets the read only switch and the writes per minute per deck quota (SPEC-3
 //   8.3, 8.12), as the HTTP route applied them before.
+// - A write that lands on the bound deck must name it (`writesBoundDeck`): a request or an MCP
+//   session that names no deck is bound to the instance default (actions.ts DEFAULT_DECK) for its
+//   reads, and its writes are refused with 400 `deck_required` (`requireNamedDeck`, which the
+//   /api/actions route runs on a POST before any deck opens and `gatedDispatcher` runs on every
+//   MCP tool call). Before this, a write that forgot `?deck=` changed or shared gt-brand, the open
+//   seed deck (an editor link minted there on 2026-10-16 at 23:50Z).
+// - A share or publish tool runs on its session's deck only (`requireBoundDeckId`, which
+//   `gatedDispatcher` runs after `requireNamedDeck`): its handler acts on the bound deck whatever
+//   its input's `id` says, so an `id` naming another deck is 400. An /mcp session opened with
+//   ?deck=y ran a share or publish tool on y when its `id` named x.
 //
 // Every decision here enforces whatever `TURBOSLIDE_AUTHORIZE` says: the callers of this surface
 // are the admin or a key, and a key's reach must not wait for the enforce flip.
@@ -28,6 +38,7 @@ import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { ForbiddenError, GoneError } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { DECK_ID_ACTIONS, deckMismatch, inputDeckId } from './action-deck';
 import { agentAuth } from './auth';
 import { ADMIN_ONLY } from './auth/actions';
 import { identityRuntime, requestIdentity } from './auth/identity';
@@ -114,6 +125,90 @@ export const INPUT_DECKS: ReadonlyMap<
 
 /** The deckless families: no deck capability, no read only switch, no per deck quota. */
 const DECKLESS = ['account.', 'notification.', 'admin.'];
+
+/**
+ * The writes outside the deckless families that land on no deck: `deck.create` makes one, and the
+ * three template writes change the collection's index (actions.ts registerTemplateActions).
+ */
+const UNBOUND_WRITES: ReadonlySet<string> = new Set([
+  'deck.create',
+  'template.rename',
+  'template.delete',
+  'template.setDefault',
+]);
+
+/**
+ * Whether an action writes the deck its request is bound to, so the request must name that deck:
+ * `?deck=` on /api/actions (or the input's `id` for DECK_ID_ACTIONS), `?deck=` on the /mcp
+ * initialize request. `mutates` of the action table tells a write from a read, and a read may run
+ * on the instance default. An action the transport does not offer is false, so the transport's
+ * own refusal answers it (404 `not_on_http` for deck.unpack or source.apply on /api/actions). A
+ * write is unbound when its family is deckless (`admin.assignOwner` aside, which acts on the deck
+ * its `id` names), when it is one of UNBOUND_WRITES, or when it acts on the deck its input names
+ * in place of the bound one (INPUT_DECKS with `replaces`).
+ */
+export function writesBoundDeck(action: string, transport: AgentTransport): boolean {
+  if (!isActionId(action)) return false;
+  const spec = ACTIONS[action];
+  if (!spec.mutates || !spec.transports.includes(transport)) return false;
+  if (UNBOUND_WRITES.has(action) || INPUT_DECKS.get(action)?.replaces === true) return false;
+  if (DECKLESS.some((prefix) => action.startsWith(prefix))) return DECK_ID_ACTIONS.has(action);
+  return true;
+}
+
+/** A write that names no deck (`writesBoundDeck`): 400, and on /api/actions code `deck_required`. */
+export class DeckRequiredError extends TypeError {
+  readonly status = 400;
+  readonly code = 'deck_required';
+
+  constructor(action: string, transport: AgentTransport) {
+    super(
+      transport === 'mcp'
+        ? `${action} writes to a deck and this session names none: open the session with ?deck=<id> on the /mcp initialize request. A write never runs on the default deck`
+        : `${action} writes to a deck and this request names none: add ?deck=<id> to the URL. A write never runs on the default deck`,
+    );
+    this.name = 'TypeError';
+  }
+}
+
+/**
+ * Refuses a write that lands on the bound deck when the request did not name it. The /api/actions
+ * route calls it for a POST alone (a GET reads the contract, and a PUT or a DELETE is the
+ * handler's 405), and `gatedDispatcher` for every MCP tool call.
+ */
+export function requireNamedDeck(call: {
+  action: string;
+  deckNamed: boolean;
+  transport: AgentTransport;
+}): void {
+  if (!call.deckNamed && writesBoundDeck(call.action, call.transport))
+    throw new DeckRequiredError(call.action, call.transport);
+}
+
+/** A share or publish call whose input `id` names a deck other than the bound one: 400, `invalid_input`. */
+export class DeckMismatchError extends TypeError {
+  readonly status = 400;
+  readonly code = 'invalid_input';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'TypeError';
+  }
+}
+
+/**
+ * Refuses a DECK_ID_ACTIONS call (the share and publish actions, `admin.assignOwner`) whose input
+ * `id` names a deck other than the bound one, since its handler acts on the bound deck.
+ * `gatedDispatcher` runs it on every MCP tool call: a session is bound at initialize, to `?deck=`
+ * or the instance default, and a tool call cannot move it. /api/actions takes the bound deck from
+ * `id` when `?deck=` is absent and refuses the two when they differ (action-deck.ts actionDeck),
+ * so the rule holds there by construction. An `id` that is not a slug is left to the schema.
+ */
+export function requireBoundDeckId(call: GateCall): void {
+  const named = inputDeckId(call.action, call.input);
+  if (named !== undefined && named !== call.deckId)
+    throw new DeckMismatchError(deckMismatch(call.action, named, call.deckId, call.transport));
+}
 
 /** The scopes that let a key write; a capability whose own scopes are read or export ones needs `write` to mutate. */
 const WRITING_SCOPES: readonly Scope[] = ['write', 'comment', 'share', 'admin'];
@@ -258,21 +353,24 @@ export async function gateAgentAction(caller: AgentCaller, call: GateCall): Prom
   if (refused !== null) throw refused;
 }
 
-/** The dispatcher of an MCP session: every call through the gate first, for the session's caller and deck. */
+/**
+ * The dispatcher of an MCP session: every call through the gate first, for the session's caller
+ * and deck, after the deck rules (`requireNamedDeck`: a write on a session that named no deck is
+ * refused before any decision; `requireBoundDeckId`: a share or publish tool whose `id` names
+ * another deck is refused).
+ */
 export function gatedDispatcher(
   dispatcher: Dispatcher,
   caller: AgentCaller,
-  bound: { deckId: string; transport: AgentTransport },
+  bound: { deckId: string; deckNamed: boolean; transport: AgentTransport },
 ): Dispatcher {
   return {
     ...dispatcher,
     dispatch: async (id, input, context) => {
-      await gateAgentAction(caller, {
-        action: id,
-        deckId: bound.deckId,
-        input,
-        transport: bound.transport,
-      });
+      requireNamedDeck({ action: id, deckNamed: bound.deckNamed, transport: bound.transport });
+      const call = { action: id, deckId: bound.deckId, input, transport: bound.transport };
+      requireBoundDeckId(call);
+      await gateAgentAction(caller, call);
       return dispatcher.dispatch(id, input, context);
     },
   };

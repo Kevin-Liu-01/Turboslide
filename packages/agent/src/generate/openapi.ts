@@ -75,7 +75,8 @@ const deckParameter = {
   in: 'query',
   required: false,
   schema: { type: 'string', pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$' },
-  description: 'The deck id under decks/; the instance default (gt-brand) when absent',
+  description:
+    'The deck id under decks/. A read without it reads the instance default (gt-brand); a write that lands on a deck and names none is refused with 400 deck_required',
 };
 
 const authorParameter = {

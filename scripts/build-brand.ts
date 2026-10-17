@@ -18,7 +18,8 @@
 //   node scripts/build-brand.ts --cover     brand/cover/gt-brand-dark-<hash>.png (hardening
 //                                           HR-PS#10): the GT deck's first slide through the CLI's
 //                                           render command and the render route's downsample,
-//                                           named by content, with site.ts GT_COVER.path rewritten
+//                                           named by content, with site.ts GT_COVER.path and
+//                                           GT_COVER.inputs rewritten
 //   node scripts/build-brand.ts --facts     packages/theme/brand/facts.json (0.25) from the tree
 //   node scripts/build-brand.ts --check     step 29: the mark's committed paths against a rebuild
 //                                           from its rectangles and rows and their sha256, the
@@ -26,7 +27,8 @@
 //                                           (pixels for rasters and the ICO's decoded entries,
 //                                           bytes for text), the file facts, the twins' palette and
 //                                           ink sums, the card's pixels when the local browser is
-//                                           chromium-1217, the cover's name against its sha256,
+//                                           chromium-1217, the cover's name against its sha256
+//                                           and its recorded inputs against the seed deck,
 //                                           facts.json against the tree
 //
 // The set (SPEC-4 0.13; R02 section 3): favicon.ico (16, 32 and 48 px BMP entries on the paper
@@ -122,6 +124,8 @@ import {
   tileMarkPath,
 } from '../packages/theme/src/brand.ts';
 import type { Quad, TileGeometry } from '../packages/theme/src/brand.ts';
+
+import { COVER_INPUTS_DIGITS, coverInputs } from './lib/cover-inputs.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = 'apps/studio/public';
@@ -1152,12 +1156,22 @@ async function renderCard(
 // PNG writer (server/thumbs.ts writeThumb), so on the same browser the file holds the bytes the
 // route answered. The name carries the first 8 hex digits of the file's sha256 and the run removes
 // every other file in the folder, so the year that the `/brand/cover/**` route rule grants never
-// keeps old pixels.
+// keeps old pixels. GT_COVER.inputs records the seed deck's inputs the file was rendered from
+// (scripts/lib/cover-inputs.mjs), and the check refuses a cover whose deck has moved on: before
+// it, an edit to the GT deck's first slide, its picture or the deck's settings passed every check
+// while /decks went on showing the old cover for a year.
 
 const COVER_DIR = `${PUBLIC_DIR}/brand/cover`;
 const COVER_HASH_DIGITS = 8;
 /** GT_COVER.path in site.ts, the one string the cover run rewrites there. */
 const COVER_PATH_PATTERN = /\/brand\/cover\/[a-z0-9-]+-[0-9a-f]{8}\.png/g;
+/** GT_COVER.inputs in site.ts, rewritten by the cover run beside the path. */
+const COVER_INPUTS_PATTERN = new RegExp(`inputs: '[0-9a-f]{${COVER_INPUTS_DIGITS}}'`, 'g');
+
+/** The digest of the seed deck's inputs the cover pictures (scripts/lib/cover-inputs.mjs). */
+function seedCoverInputs(): string {
+  return coverInputs(resolve(ROOT, 'decks', GT_COVER.deck), GT_COVER.slide);
+}
 
 function coverPath(bytes: Uint8Array): string {
   const digest = sha256(bytes).slice(0, COVER_HASH_DIGITS);
@@ -1206,6 +1220,7 @@ async function renderCover(): Promise<Uint8Array> {
 
 /** Renders the cover, writes it under its content name, removes the old file, rewrites site.ts. */
 async function writeCover(base: string): Promise<Output> {
+  const inputs = seedCoverInputs();
   const bytes = await renderCover();
   const path = coverPath(bytes);
   const dir = resolve(base, COVER_DIR);
@@ -1218,17 +1233,30 @@ async function writeCover(base: string): Promise<Output> {
   const site = readFileSync(resolve(ROOT, SITE_PATH), 'utf8');
   if ((site.match(COVER_PATH_PATTERN) ?? []).length !== 1)
     fail(`${SITE_PATH} must hold one GT_COVER path to rewrite`);
+  if ((site.match(COVER_INPUTS_PATTERN) ?? []).length !== 1)
+    fail(`${SITE_PATH} must hold one GT_COVER inputs digest to rewrite`);
   mkdirSync(dirname(siteFile), { recursive: true });
-  writeFileSync(siteFile, site.replace(COVER_PATH_PATTERN, path));
-  note(`cover ${path}: ${bytes.length} bytes`);
+  writeFileSync(
+    siteFile,
+    site.replace(COVER_PATH_PATTERN, path).replace(COVER_INPUTS_PATTERN, `inputs: '${inputs}'`),
+  );
+  note(`cover ${path}: ${bytes.length} bytes, inputs ${inputs}`);
   return output;
 }
 
-/** The committed cover: named by its own sha256, the size GT_COVER states, alone in its folder. */
+/**
+ * The committed cover: named by its own sha256, the size GT_COVER states, alone in its folder, and
+ * rendered from the seed deck as it is now (GT_COVER.inputs against scripts/lib/cover-inputs.mjs).
+ */
 async function checkCover(): Promise<void> {
   const file = resolve(ROOT, `${PUBLIC_DIR}${GT_COVER.path}`);
   if (!existsSync(file))
     fail(`${GT_COVER.path} is missing; run node scripts/build-brand.ts --cover`);
+  const inputs = seedCoverInputs();
+  if (inputs !== GT_COVER.inputs)
+    fail(
+      `${GT_COVER.path} was rendered from inputs ${GT_COVER.inputs} and decks/${GT_COVER.deck} now hashes to ${inputs}: the slide ${GT_COVER.slide}, its pictures or the deck's settings changed; run node scripts/build-brand.ts --cover`,
+    );
   const bytes = new Uint8Array(readFileSync(file));
   if (coverPath(bytes) !== GT_COVER.path)
     fail(`${GT_COVER.path}: the name does not carry the file's sha256 (${coverPath(bytes)})`);
@@ -2010,7 +2038,8 @@ async function check(): Promise<void> {
       fail(`${CARD_PATH}: the card rendered by ${launched.renderer} differs in its pixels`);
   });
 
-  /* 5b. the GT cover: its name against its sha256, its size, no stale file beside it */
+  /* 5b. the GT cover: its name against its sha256, its inputs against the seed deck, its size, no
+     stale file beside it */
   await checkCover();
 
   /* 6. mark-geometry.json against the files read back */

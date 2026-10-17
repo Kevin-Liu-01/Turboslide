@@ -219,7 +219,8 @@ Collaboration (every command takes --to <studio> to run on a hosted deck)
 
 Global flags
   --version       the banner: the mark, the version, the hosted address, the action count and the effects backend
-  --deck <dir>    the deck directory (default: TURBOSLIDE_DECK, the nearest deck.json, or decks/gt-brand)
+  --deck <dir>    the deck directory (default: TURBOSLIDE_DECK, the nearest deck.json, or decks/gt-brand);
+                  with --to, a deck folder or the id of a deck on the studio, and never decks/gt-brand by default
   --json          machine output on stdout, human output on stderr
   --author <name> the author of writes (default $USER; agents pass agent:<runId>; TURBOSLIDE_AUTHOR)
   --base-revision <n>  for writes: the revision you read; stale is rejected with the current document, exit 1

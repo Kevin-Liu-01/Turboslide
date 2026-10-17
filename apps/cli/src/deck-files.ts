@@ -50,6 +50,7 @@ export function findDeckDir(
   cwd: string,
   flag?: string,
   env: NodeJS.ProcessEnv = process.env,
+  options: { decksFallback?: boolean } = {},
 ): string {
   const candidates: string[] = [];
   if (flag) candidates.push(resolve(cwd, flag));
@@ -62,8 +63,9 @@ export function findDeckDir(
       if (parent === dir) break;
       dir = parent;
     }
+    // `decksFallback: false` keeps a deck the command did not name out (dispatch.ts hostedDeckId)
     const decks = join(cwd, 'decks');
-    if (existsSync(decks) && statSync(decks).isDirectory()) {
+    if (options.decksFallback !== false && existsSync(decks) && statSync(decks).isDirectory()) {
       const entries = readdirSync(decks).filter((d) => existsSync(join(decks, d, 'deck.json')));
       if (entries.includes('gt-brand')) candidates.push(join(decks, 'gt-brand'));
       else if (entries.length === 1) candidates.push(join(decks, entries[0] ?? ''));

@@ -166,7 +166,10 @@ import { SVG_UPLOAD_MAX_BYTES, SVG_UPLOAD_WORDS, deleteUpload, readUpload } from
  * the client bundle does.
  */
 
-/** The deck a request without ?deck= addresses. */
+/**
+ * The deck a read without ?deck= addresses. A write that lands on a deck and names none is refused
+ * before this deck opens (agent-gate.ts writesBoundDeck), so no write falls back to the seed deck.
+ */
 export const DEFAULT_DECK = 'gt-brand';
 
 /** What the latest sheet of a deck and theme is, for deck://sheet/<theme>; per process. */

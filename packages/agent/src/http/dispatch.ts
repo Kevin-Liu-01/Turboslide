@@ -219,7 +219,11 @@ export type DispatchEvent = {
 export type ActionRequestOptions = {
   dispatcher: Dispatcher;
   env?: Env;
-  /** The deck a request without ?deck= addresses. */
+  /**
+   * The deck a request without ?deck= addresses. The studio passes the deck it resolved for the
+   * call, after refusing a write that names none (apps/studio/src/server/agent-gate.ts
+   * writesBoundDeck), so only a read ever runs on its instance default.
+   */
   defaultDeck?: string;
   /** Resolves a deck id to the deck directory the handlers read; RangeError for an unknown deck. */
   deckDir?: (deckId: string) => string;

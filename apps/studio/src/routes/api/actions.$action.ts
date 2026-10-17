@@ -17,11 +17,13 @@ import { ForbiddenError } from '@turboslide/schema/errors';
 import { DECK_ID_ACTIONS, actionDeck } from '../../server/action-deck';
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
 import {
+  DeckRequiredError,
   INPUT_DECKS,
   agentCaller,
   deckNotFound,
   gateAgentAction,
   gateDeckRead,
+  requireNamedDeck,
 } from '../../server/agent-gate';
 import type { AgentCaller } from '../../server/agent-gate';
 import { agentAuth, HTTP_DEFAULT_AUTHOR, requireAgentAuth } from '../../server/auth';
@@ -46,7 +48,9 @@ import { deckDir } from '../../server/root';
 // x-turboslide-author, ?deck= for the deck, ?force=1 to write past another author's lease, and
 // the one error body with the status of the error class (409 with the current document and the
 // holder). The share and publish actions take their deck from the input's `id` when ?deck= is
-// absent and refuse a call whose two differ (server/action-deck.ts). The dispatcher is built per
+// absent and refuse a call whose two differ (server/action-deck.ts). A write that lands on a deck
+// and names none is 400 `deck_required` before any deck opens; a read without ?deck= runs on the
+// instance default (server/agent-gate.ts writesBoundDeck). The dispatcher is built per
 // request over the deck named, so a deck created a moment ago is served and a removed one is a
 // 404; the store, the worker client and the session registry behind it are per process.
 //
@@ -87,6 +91,7 @@ export const Route = createFileRoute('/api/actions/$action')({
 
 /** The answer for a refusal of the gate: the 503 and 429 bodies the route always gave, else the error body. */
 function gateRefusal(error: unknown, action: string): Response {
+  if (error instanceof DeckRequiredError) return refuse(400, error.code, error.message, { action });
   if (error instanceof FlagOffError)
     return jsonResponse({ error: 'unavailable', message: error.message }, 503, {
       'retry-after': '60',
@@ -136,6 +141,9 @@ async function serve(request: Request, action: string): Promise<Response> {
   if (!keyed.ok) return keyed.response;
   let caller: AgentCaller;
   try {
+    // a write that names no deck is refused before the default deck is read or opened
+    if (request.method === 'POST')
+      requireNamedDeck({ action, deckNamed: deck.named, transport: 'http' });
     caller = await agentCaller(request);
     await gateDeckRead(caller, deckId, 'http', action);
   } catch (error) {
@@ -205,7 +213,13 @@ async function serve(request: Request, action: string): Promise<Response> {
       input = read.ok ? read.value : undefined;
     }
     try {
-      await gateAgentAction(caller, { action, deckId, input, transport: 'http' });
+      await gateAgentAction(caller, {
+        action,
+        deckId,
+        deckNamed: deck.named,
+        input,
+        transport: 'http',
+      });
     } catch (error) {
       return gateRefusal(error, action);
     }

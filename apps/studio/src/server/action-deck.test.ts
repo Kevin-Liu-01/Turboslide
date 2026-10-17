@@ -9,7 +9,9 @@ import { DECK_ID_ACTIONS, actionDeck } from './action-deck';
 // The share and publish actions name their deck in `id` and act on the dispatcher's deck. A call
 // to /api/actions/share.createLink with `id` and no ?deck= opened gt-brand, the default deck, and
 // minted an editor link there on production. The route now takes the deck from `id`, and refuses
-// a call whose ?deck= and `id` differ before it opens any deck.
+// a call whose ?deck= and `id` differ before it opens any deck. A write that names its deck
+// neither way is 400 `deck_required` before any deck opens (agent-gate.ts writesBoundDeck); a
+// read without ?deck= still runs on the default.
 
 const opened: string[] = [];
 const gated: string[] = [];
@@ -21,7 +23,9 @@ vi.mock('./auth', () => ({
   requireAgentAuth: () => undefined,
 }));
 
-vi.mock('./agent-gate', () => ({
+vi.mock('./agent-gate', async (importOriginal) => ({
+  // the deck rule (requireNamedDeck, DeckRequiredError) is the real one
+  ...(await importOriginal<Record<string, unknown>>()),
   INPUT_DECKS: new Map(),
   agentCaller: () => Promise.resolve({ kind: 'admin' }),
   deckNotFound: (deckId: string) => `No deck ${deckId}`,
@@ -90,25 +94,57 @@ describe('the deck of a share or publish call (server/action-deck.ts)', () => {
     expect(actionDeck('share.createLink', null, { id: 'q4' }, 'gt-brand')).toEqual({
       ok: true,
       deckId: 'q4',
+      named: true,
     });
     expect(actionDeck('share.createLink', 'q4', { id: 'q4' }, 'gt-brand')).toEqual({
       ok: true,
       deckId: 'q4',
+      named: true,
     });
     expect(actionDeck('share.createLink', 'gt-brand', { id: 'q4' }, 'gt-brand').ok).toBe(false);
     expect(actionDeck('deck.info', null, { id: 'q4' }, 'gt-brand')).toEqual({
       ok: true,
       deckId: 'gt-brand',
+      named: false,
     });
-    // no id, or an id that is not a slug: the action's schema refuses it before a handler runs
+    expect(actionDeck('deck.info', 'q4', {}, 'gt-brand')).toEqual({
+      ok: true,
+      deckId: 'q4',
+      named: true,
+    });
+    // no id, or an id that is not a slug: the default, not named, which a write may not run on
     expect(actionDeck('share.createLink', null, {}, 'gt-brand')).toEqual({
       ok: true,
       deckId: 'gt-brand',
+      named: false,
     });
     expect(actionDeck('share.createLink', null, { id: '../x' }, 'gt-brand')).toEqual({
       ok: true,
       deckId: 'gt-brand',
+      named: false,
     });
+  });
+
+  it('refuses a write that names no deck with 400 deck_required before it opens one', async () => {
+    for (const [action, input] of [
+      ['share.createLink', { role: 'editor', baseRevision: 0 }],
+      ['slide.update', { slideId: 'thesis', mutations: [], baseRevision: 0 }],
+    ] as const) {
+      const result = await call(action, '', input);
+      expect(result.status, action).toBe(400);
+      expect(result.body, action).toMatchObject({ error: { code: 'deck_required', action } });
+      expect(String((result.body.error as { message: string }).message)).toContain('?deck=<id>');
+      expect(gated).toEqual([]);
+      expect(opened).toEqual([]);
+      expect(ran).toEqual([]);
+    }
+  });
+
+  it('runs a read that names no deck on the default deck', async () => {
+    const result = await call('deck.info', '', {});
+    expect(result.status).not.toBe(400);
+    expect(gated).toEqual(['gt-brand']);
+    expect(opened).toEqual(['gt-brand']);
   });
 
   it('runs share.createLink with id x and no ?deck= on deck x, never on gt-brand', async () => {

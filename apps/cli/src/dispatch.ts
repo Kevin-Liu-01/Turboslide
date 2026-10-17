@@ -3,17 +3,23 @@
 // schema, the output by its output schema, and the store, record and deck actions are the one
 // implementation of every transport. With `--to <studio>` the action runs on the hosted studio
 // over `POST /api/actions/<id>` with the saved credential (remote.ts) instead; the deck less
-// account and admin actions run hosted only, and a call without `--to` says so.
+// account and admin actions run hosted only, and a call without `--to` says so. A hosted call names
+// the deck the command names (`hostedDeckId`), never the checkout's decks/gt-brand fallback: the
+// studio refuses a write that names no deck (400 `deck_required`) rather than run it on its seed.
+import { basename } from 'node:path';
+
 import { createDispatcher } from '@turboslide/agent/dispatch';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { ActionId } from '@turboslide/schema/actions';
 import { NotImplementedError } from '@turboslide/schema/errors';
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { registerAssetActions } from '@turboslide/materials/actions';
 import type { FileStore } from '@turboslide/store/file-store';
 
 import { flagBoolean, flagString } from './args.ts';
 import { registerDeckActions } from './commands/deck.ts';
 import type { CommandContext } from './context.ts';
+import { findDeckDir } from './deck-files.ts';
 import { UsageError } from './exit.ts';
 import { registerRecordActions } from './record-actions.ts';
 import { remoteAction } from './remote.ts';
@@ -64,7 +70,7 @@ export function actionContext(ctx: CommandContext, store?: FileStore): ActionCon
 }
 
 export type RunOptions = {
-  /** The deck id the hosted call names; the resolved deck's by default. */
+  /** The deck id the hosted call names; the deck the command names by default (`hostedDeckId`). */
   deck?: string;
   /** True for the account and admin actions that exist hosted only. */
   hostedOnly?: boolean;
@@ -82,7 +88,7 @@ export async function runDeckAction<T = unknown>(
 ): Promise<T> {
   const to = remoteOf(ctx);
   if (to !== undefined) {
-    const deck = options.deck ?? (options.hostedOnly === true ? undefined : safeDeckId(ctx));
+    const deck = options.deck ?? (options.hostedOnly === true ? undefined : hostedDeckId(ctx));
     return runAction(ctx, () =>
       remoteAction<T>(ctx, to, id, input, {
         ...(deck !== undefined ? { deck } : {}),
@@ -111,9 +117,25 @@ export async function runDeckAction<T = unknown>(
   });
 }
 
-function safeDeckId(ctx: CommandContext): string | undefined {
+/**
+ * The deck a hosted call names: `--deck` or TURBOSLIDE_DECK as a deck folder here (the folder's
+ * name is the deck id, as the store reads it) or, with no such folder, as the id of a deck on the
+ * studio; else the deck folder the command runs in. Undefined when the command names none, so a
+ * hosted write is the studio's 400 `deck_required` and not a write to the deck findDeckDir falls
+ * back to in a checkout (decks/gt-brand, the studio's seed).
+ */
+export function hostedDeckId(ctx: CommandContext): string | undefined {
+  const named = flagString(ctx.args, 'deck') || ctx.env.TURBOSLIDE_DECK || undefined;
+  if (named !== undefined) {
+    try {
+      return basename(findDeckDir(ctx.cwd, named, ctx.env));
+    } catch {
+      if (SLUG_PATTERN.test(named)) return named;
+      throw new UsageError(`--deck ${named} is neither a deck folder here nor a deck id`);
+    }
+  }
   try {
-    return openStore(ctx).id;
+    return basename(findDeckDir(ctx.cwd, undefined, ctx.env, { decksFallback: false }));
   } catch {
     return undefined;
   }

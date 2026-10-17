@@ -149,6 +149,11 @@ export async function remoteAction<T = unknown>(
     case 501:
       throw new NotImplementedError(actionId, body?.milestone ?? 'a later milestone');
     case 400:
+      // a write that names no deck: the studio's `?deck=` is the CLI's --deck
+      if (body?.code === 'deck_required')
+        throw new UsageError(
+          `${actionId} writes to a deck and the command names none: pass --deck <id> with --to ${origin}`,
+        );
       throw new TypeError(message);
     case 404:
       throw new RangeError(message);

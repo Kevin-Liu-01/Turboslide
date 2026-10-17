@@ -26,6 +26,8 @@ export type HttpErrorCode =
   | 'method_not_allowed'
   | 'no_session'
   | 'unknown_deck'
+  /** a write that lands on a deck and names none (`?deck=`); a read may run on the default deck */
+  | 'deck_required'
   /** an Idempotency-Key that is not 1 to 255 visible ASCII characters (hardening HR-O#6) */
   | 'invalid_idempotency_key'
   /** an Idempotency-Key on a writing action that does not take one (dispatch.ts takesIdempotencyKey) */

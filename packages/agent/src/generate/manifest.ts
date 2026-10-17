@@ -46,7 +46,7 @@ export const EXECUTION_RULES: ExecutionRules = {
     describe:
       'GET /api/actions/<id> returns the action contract: input and output JSON Schema, transports, milestone and whether this instance implements it.',
     body: 'One JSON object, the action input exactly as the input schema states it; unknown fields are refused with 400 and code unknown_field plus a JSON pointer.',
-    deck: '?deck=<slug> names the deck; without it the instance default (gt-brand) is used.',
+    deck: '?deck=<slug> names the deck. A read without it reads the instance default (gt-brand); a write that lands on a deck and names none is refused with 400 and code deck_required (the share and publish actions may name their deck in the input id instead).',
     author:
       "Every write is recorded under the caller's identity: an API key's owner as agent:<tokenId>. x-turboslide-author: agent:<runId> (or ?author=) only labels the run; without a key, a request that names no author writes as agent:http.",
     force:
@@ -68,7 +68,7 @@ export const EXECUTION_RULES: ExecutionRules = {
       'MCP streamable HTTP: POST JSON-RPC to /mcp (initialize first), GET for the notification stream, DELETE to end the session; the mcp-session-id header carries the session.',
     session:
       'One MCP session is bound to one deck and one caller at initialize; tools are deck_<action> for every implemented action on the mcp transport.',
-    deck: '?deck=<slug> on the initialize request; the instance default otherwise.',
+    deck: '?deck=<slug> on the initialize request. A session without it reads the instance default (gt-brand), and its write tools are refused with 400 until a session names the deck.',
     author:
       "The key's owner is the author of every write; x-turboslide-author or ?author= on the initialize request only labels the run (agent:mcp-http without one).",
     viewTools:

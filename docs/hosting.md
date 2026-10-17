@@ -1046,14 +1046,31 @@ a 429, 0.5 percent with a 5xx and every put over 48 in flight with a 429, in vir
 | 32        | 333 s     | 2     | 120        | 575 (390)      | 0    | clean  |
 | 64        | 218 s     | 2     | 183        | 3,269 (3,063)  | 13   | clean  |
 
-32 is the default: twice the rate of 16 with few refusals, and 64 spends most of its calls on
-429s. The window's refused writes last the settle (4 min 20 s), the plan of record's listing, the
-copy (documents over the copy's rate), the listing lag (60 s), verify's listing and the 30 s after
-the switch. At about 92,000 documents (the shared public store's count in the k1/ship runbook of
-2026-10-13) and 120 a second that is about 19 minutes plus the two listings, which `plan`
-measures, inside the 45 minute limit. The preview's
-run reads the real rate in each copy answer (`perSecond`) and the real listing time (`listMs`);
-production's `--concurrency` is set from it.
+In the fake, 32 copies twice as fast as 16 with few refusals, and 64 spends most of its calls on
+429s. 32 is the code's default. Vercel Blob refuses sooner than the fake. The preview's window of
+2026-10-16 (93,357 documents of record, 545 MB) measured the real store:
+
+| In flight | Calls | Copied | Per second                         | Rows (failed after 5 tries) |
+| --------- | ----- | ------ | ---------------------------------- | --------------------------- |
+| 32        | 3     | 62,910 | 86 to 90                           | 10,678, every one a 429     |
+| 16        | 2     | 30,447 | 79 (72 on the last call, draining) | 0, with 16 retries          |
+
+At 32 Blob answered "Too many requests please lower the number of concurrent requests - try again
+in 60 seconds", and 10,678 documents failed five tries; each later call copied the documents an
+earlier call had failed, and the calls at 16 failed none. The store's rate, about 80 to 90
+documents a second, is the limit, not the concurrency, so production's window copies with
+`--concurrency 16`.
+
+The window's refused writes last the settle (4 min 20 s), the plan of record's listing, the copy
+(documents over the copy's rate, plus 30 s between calls, section 10.4), the listing lag (60 s),
+verify's listing and the 30 s after the switch. On the preview they lasted 28 min 2 s, from the
+freeze at 19:28:06.6Z to the writes opening at 19:56:08.7Z, with three calls at 32, one lease
+refusal and two calls at 16. For production at 93,359 documents and 16 in flight: the settle
+260 s, the plan of record 26 s, the copy 93,359 / 79 = 1,182 s plus four 30 s waits (about
+1,300 s), the listing lag 60 s, verify 25 s, the switch 3 s and the 30 s before writes open, about
+1,704 s or 28.4 minutes. Plan for 30 minutes of refused saves; the 45 minute freeze limit leaves
+about 15 minutes. Each copy answer gives the call's rate (`perSecond`) and `plan` gives the
+listing's time (`listMs`).
 
 The race simulation (`packages/store/src/migrate-sim.ts`, `migrate-sim.test.ts` runs 200 seeds; the
 reading of record runs `node packages/store/src/migrate-sim.ts <from> <to>` in four processes of
@@ -1090,12 +1107,26 @@ Before the window: this code serves `$URL`; on production the guard's loop is st
 window, so no deploy and no rollback to an older deployment happens during it; on the preview the
 preview Worker's `/health` names `$URL` as its `appOrigin`.
 
+A call that answers `done: false` used its budget, and a call whose budget cut a write holds the
+lease 30 s longer (`LANDING_MS`); a call inside those 30 s is refused with "another call holds the
+migration until <time>" (the preview's window, 2026-10-16). So each loop waits 30 s between calls
+and stops on `done` or on any other answer, which it leaves in `step.json`:
+
+```sh
+until_done() {
+  until m "$@" --json > step.json && jq -e '.done' step.json > /dev/null; do
+    jq -e '.done == false' step.json > /dev/null 2>&1 || return 1   # a refusal: read step.json
+    sleep 30
+  done
+}
+```
+
 ```sh
 m plan                       # the counts; listMs and the document count give the window's length
 m freeze                     # note settlesAt and expiresAt
 m plan                       # after settlesAt: the plan of record
-while m copy --json | jq -e '.done | not' > /dev/null; do :; done
-                             # each call 240 s; the loop stops on done or on a refusal
+until_done copy --concurrency 16
+                             # each call 240 s, then 30 s; 16 in flight (section 10.3)
 m verify                     # 60 s after the last copy; done and clean, or rows and the freeze ended
 m switch                     # v2; writes open 30 s later
 ```
@@ -1104,22 +1135,27 @@ Then on `$URL`: `/decks`, an existing deck in the editor and the viewer, a share
 and an export, which now read the private store.
 
 ```sh
-while m rekey --json | jq -e '.done | not' > /dev/null; do :; done
-                             # one pass; run another pass from the answer's rekeyAfter until it reads null
+until_done rekey             # one pass; another from the answer's rekeyAfter until it reads null
 m verify                     # production: the public documents a v1 writer changed since the switch
 ```
 
 The way out before the switch, at any step from `freeze` to `verify`: `m unfreeze`. If the operator
 stops, the freeze ends at its `expiresAt`, at most 10 minutes after the last call. After the switch
-on production, before `delete`: `m rollback` freezes `v2`, and after its `settlesAt`
-`while m rollback --json | jq -e '.state != "v1"' > /dev/null; do :; done` copies back and writes
-`v1`.
+on production, before `delete`: `m rollback` freezes `v2`, and after its `settlesAt` this loop
+copies back and writes `v1`, 30 s between calls, and stops on any answer without a state:
+
+```sh
+until m rollback --json > step.json && jq -e '.state == "v1"' step.json > /dev/null; do
+  jq -e '.state' step.json > /dev/null 2>&1 || break   # a refusal: read step.json
+  sleep 30
+done
+```
 
 `delete`, on production alone, a day or more after the switch: Kevin takes the backup of the
 private store into `turboslide-backup` (section 14), then:
 
 ```sh
-while m delete --i-have-a-backup <backup start ISO> --json | jq -e '.done | not' > /dev/null; do :; done
+until_done delete --i-have-a-backup <backup start ISO>
 ```
 
 Never in this runbook: a step against a deployment built before this code; `rollback`, `delete` or

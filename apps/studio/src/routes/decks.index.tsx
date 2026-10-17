@@ -29,6 +29,7 @@ import { HOME } from '@turboslide/chrome/menus/page-words';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
+import { GT_COVER } from '@turboslide/theme/brand/site';
 
 import { MoodFigure } from '../components/home/MoodFigure';
 import { SignInButton, offersSignIn, readSignInFacts } from '../components/home/sign-in';
@@ -350,11 +351,12 @@ export function cardThumbUrl(
 
 /**
  * The GT brand deck card's cover (docs/NEXT.md 4.1.3 item 10; brand-a 105): the first slide of the
- * example deck the store seeds, through the render route's unstamped thumbnail, which answers the
- * newest stored capture with `s-maxage=60` and renders the current one after the response, so the
- * page reads no deck for it. The GT template and the seeded deck open on the same slide.
+ * example deck the store seeds, as the static file scripts/build-brand.ts --cover writes under
+ * /brand/cover (hardening HR-PS#10, PERF-15). The file is named by its content and kept a year, so
+ * a visit asks for it once and the render function never runs for it. The GT template and the
+ * seeded deck open on the same slide.
  */
-export const GT_BRAND_COVER = '/api/render/opener-brand?deck=gt-brand&theme=dark&w=320';
+export const GT_BRAND_COVER = GT_COVER.path;
 
 /** The facts the Recent record keeps of a card (./-recent.ts). */
 export function openFactsOf(card: DeckCard): DeckOpenFacts {
@@ -1751,27 +1753,22 @@ export function Thumb({
 }
 
 /**
- * The GT brand deck card's cover (`GT_BRAND_COVER`): the example deck's first slide, with the GT
- * mark on the template's ink plate under it from the first paint, so a deployment whose store
- * holds no example deck or no capture yet still draws the template's own mark. The GT mark is the
- * template's content here (docs/brand.md 134 to 139), never the product's.
+ * The GT brand deck card's cover (`GT_BRAND_COVER`): the example deck's first slide over the GT
+ * mark on the template's ink plate, which shows until the picture paints. The GT mark is the
+ * template's content here (docs/brand.md 134 to 139), never the product's. The `img` keeps no
+ * load state: a cached file can finish loading before hydration, before any load handler exists.
  */
 function GtBrandCover() {
-  const [state, setState] = useState<'loading' | 'loaded' | 'failed'>('loading');
   return (
-    <span className="ts-template-cover" data-cover={state}>
+    <span className="ts-template-cover">
       <GtMark width={56} height={36} />
-      {state === 'failed' ? null : (
-        <img
-          src={GT_BRAND_COVER}
-          width={320}
-          height={180}
-          alt=""
-          decoding="async"
-          onLoad={() => setState('loaded')}
-          onError={() => setState('failed')}
-        />
-      )}
+      <img
+        src={GT_BRAND_COVER}
+        width={GT_COVER.width}
+        height={GT_COVER.height}
+        alt=""
+        decoding="async"
+      />
     </span>
   );
 }

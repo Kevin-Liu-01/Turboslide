@@ -6,6 +6,11 @@
       "sha256": "1f4ab3a4a95c861c21a16fbffdbe60509d0d294ac687565d07d1af0e3a83f9c5",
       "kind": "built"
     },
+    "apps/studio/public/brand/cover/gt-brand-dark-9fd3b23c.png": {
+      "bytes": 19469,
+      "sha256": "9fd3b23cfd31dd1f822df94d7e9fd36d1026d660f23de1371bba0840e2778196",
+      "kind": "rendered"
+    },
     "apps/studio/public/brand/figure-dark.png": {
       "bytes": 13873,
       "sha256": "3227dea7cf9b4a1de6763c02c9f84d68a961090303f692d6e39871241779e553",

@@ -15,6 +15,10 @@
 //                                           anchor scan, the frames cut through the pipeline with
 //                                           the theme palette, hero.recipe.json
 //   node scripts/build-brand.ts --readme    docs/readme/brand/lockup-{dark,light}.png at 2x
+//   node scripts/build-brand.ts --cover     brand/cover/gt-brand-dark-<hash>.png (hardening
+//                                           HR-PS#10): the GT deck's first slide through the CLI's
+//                                           render command and the render route's downsample,
+//                                           named by content, with site.ts GT_COVER.path rewritten
 //   node scripts/build-brand.ts --facts     packages/theme/brand/facts.json (0.25) from the tree
 //   node scripts/build-brand.ts --check     step 29: the mark's committed paths against a rebuild
 //                                           from its rectangles and rows and their sha256, the
@@ -22,7 +26,8 @@
 //                                           (pixels for rasters and the ICO's decoded entries,
 //                                           bytes for text), the file facts, the twins' palette and
 //                                           ink sums, the card's pixels when the local browser is
-//                                           chromium-1217, facts.json against the tree
+//                                           chromium-1217, the cover's name against its sha256,
+//                                           facts.json against the tree
 //
 // The set (SPEC-4 0.13; R02 section 3): favicon.ico (16, 32 and 48 px BMP entries on the paper
 // tile: the 16 px rows, then the vector at a 16 and a 24 px cap), icon.svg (the 16 px tile with the
@@ -34,6 +39,7 @@
 // (start_url /home, the paper colours), robots.txt, og/turboslide.png (the card),
 // brand/mood-earth-{dark,light}.jpg (the mood picture of site.ts MOOD_PICTURES, from the GT deck),
 // brand/{hero,figure,notfound}-{dark,light}.png and brand/og-screen-{dark,light}.png (the twins),
+// brand/cover/gt-brand-dark-<hash>.png (the GT template card's cover on /decks),
 // brand-manifest.json; and under packages/theme/brand the SVG sources (mark.svg, the master
 // drawing; mark-small.svg, the 16 px rows; mark-24.svg, the 24 px placement; icon-tile.svg;
 // wordmark.svg, the lockup with the word as live text), og-template.html, hero.recipe.json,
@@ -71,11 +77,11 @@ import sharp from 'sharp';
 import { ditherGray } from '../packages/effects/src/bayer.ts';
 import type { BitImage, GrayImage, RgbaImage } from '../packages/effects/src/image.ts';
 import { invertBits, litFraction } from '../packages/effects/src/image.ts';
-import { decodeImage } from '../packages/effects/src/io.ts';
+import { decodeImage, encodePngRgba } from '../packages/effects/src/io.ts';
 import { PLATE_BOXES } from '../packages/effects/src/metrics.ts';
 import type { PlateClear } from '../packages/effects/src/metrics.ts';
 import { encodePng1 } from '../packages/effects/src/png1.ts';
-import { fitCover, scaleNearest } from '../packages/effects/src/resample.ts';
+import { downsample, fitCover, scaleNearest } from '../packages/effects/src/resample.ts';
 import { autocontrast, toGray, tone } from '../packages/effects/src/tone.ts';
 import { twoTone } from '../packages/effects/src/two-tone.ts';
 import type { TwoToneParams } from '../packages/effects/src/two-tone.ts';
@@ -89,6 +95,7 @@ import { LAYOUTS } from '../packages/schema/src/layouts.ts';
 import { SHAPE_PRESETS } from '../packages/schema/src/shapes.ts';
 import {
   CARD_MOOD,
+  GT_COVER,
   ICON_PATHS,
   MOOD_PICTURES,
   SITE,
@@ -125,6 +132,7 @@ const GEOMETRY_PATH = `${BRAND_DIR}/mark-geometry.json`;
 const RECIPE_PATH = `${BRAND_DIR}/hero.recipe.json`;
 const FACTS_PATH = `${BRAND_DIR}/facts.json`;
 const OG_TEMPLATE_PATH = `${BRAND_DIR}/og-template.html`;
+const SITE_PATH = `${BRAND_DIR}/site.ts`;
 const CARD_PATH = `${PUBLIC_DIR}${ICON_PATHS.card}`;
 /** The origin the card and the README lockups are served from, in memory (the capture job's pattern). */
 const BRAND_ORIGIN = 'http://turboslide.brand';
@@ -892,6 +900,7 @@ function knownPaths(): { path: string; kind: Kind }[] {
       out.push({ path: `${PUBLIC_DIR}${path}`, kind: 'captured' });
   out.push({ path: RECIPE_PATH, kind: 'captured' });
   out.push({ path: CARD_PATH, kind: 'rendered' });
+  out.push({ path: `${PUBLIC_DIR}${GT_COVER.path}`, kind: 'rendered' });
   out.push({ path: FACTS_PATH, kind: 'facts' });
   return out;
 }
@@ -1133,6 +1142,104 @@ async function renderCard(
       `${CARD_PATH} is ${png.bytes.length} bytes, over the ${CARD_MAX_BYTES} byte ceiling of SPEC-4 1.5`,
     );
   return png;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The GT cover (hardening HR-PS#10, PERF-15; site.ts GT_COVER): the GT template card's cover on
+// /decks, a static file in place of the render route's thumbnail. The slide is rendered at 1x by
+// the CLI's render command (the command the render job runs,
+// apps/render-worker/src/jobs/render.ts), downsized by the route's area average and encoded by its
+// PNG writer (server/thumbs.ts writeThumb), so on the same browser the file holds the bytes the
+// route answered. The name carries the first 8 hex digits of the file's sha256 and the run removes
+// every other file in the folder, so the year that the `/brand/cover/**` route rule grants never
+// keeps old pixels.
+
+const COVER_DIR = `${PUBLIC_DIR}/brand/cover`;
+const COVER_HASH_DIGITS = 8;
+/** GT_COVER.path in site.ts, the one string the cover run rewrites there. */
+const COVER_PATH_PATTERN = /\/brand\/cover\/[a-z0-9-]+-[0-9a-f]{8}\.png/g;
+
+function coverPath(bytes: Uint8Array): string {
+  const digest = sha256(bytes).slice(0, COVER_HASH_DIGITS);
+  return `/brand/cover/${GT_COVER.deck}-${GT_COVER.theme}-${digest}.png`;
+}
+
+async function renderCover(): Promise<Uint8Array> {
+  const out = mkdtempSync(join(tmpdir(), 'turboslide-cover-'));
+  try {
+    const run = spawnSync(
+      process.execPath,
+      [
+        resolve(ROOT, 'apps/cli/bin/turboslide.mjs'),
+        'render',
+        GT_COVER.slide,
+        '--deck',
+        resolve(ROOT, 'decks', GT_COVER.deck),
+        '--theme',
+        GT_COVER.theme,
+        '--scale',
+        '1',
+        '--out',
+        out,
+      ],
+      { cwd: ROOT, encoding: 'utf8' },
+    );
+    if (run.status !== 0)
+      fail(`the cover render exited with ${run.status}: ${(run.stderr || run.stdout).trim()}`);
+    const shot = readdirSync(out).find((name) =>
+      name.endsWith(`-${GT_COVER.slide}-${GT_COVER.theme}.png`),
+    );
+    if (shot === undefined) fail(`the cover render wrote no picture of ${GT_COVER.slide}`);
+    const small = downsample(
+      await decodeImage(new Uint8Array(readFileSync(join(out, shot)))),
+      GT_COVER.width,
+    );
+    if (small.height !== GT_COVER.height)
+      fail(
+        `the cover is ${small.width} by ${small.height}, expected ${GT_COVER.width} by ${GT_COVER.height}`,
+      );
+    return new Uint8Array(await encodePngRgba(small));
+  } finally {
+    rmSync(out, { recursive: true, force: true });
+  }
+}
+
+/** Renders the cover, writes it under its content name, removes the old file, rewrites site.ts. */
+async function writeCover(base: string): Promise<Output> {
+  const bytes = await renderCover();
+  const path = coverPath(bytes);
+  const dir = resolve(base, COVER_DIR);
+  if (existsSync(dir))
+    for (const name of readdirSync(dir))
+      if (`/brand/cover/${name}` !== path) rmSync(join(dir, name), { force: true });
+  const output: Output = { path: `${PUBLIC_DIR}${path}`, bytes, kind: 'rendered' };
+  writeOutputs(base, [output]);
+  const siteFile = resolve(base, SITE_PATH);
+  const site = readFileSync(resolve(ROOT, SITE_PATH), 'utf8');
+  if ((site.match(COVER_PATH_PATTERN) ?? []).length !== 1)
+    fail(`${SITE_PATH} must hold one GT_COVER path to rewrite`);
+  mkdirSync(dirname(siteFile), { recursive: true });
+  writeFileSync(siteFile, site.replace(COVER_PATH_PATTERN, path));
+  note(`cover ${path}: ${bytes.length} bytes`);
+  return output;
+}
+
+/** The committed cover: named by its own sha256, the size GT_COVER states, alone in its folder. */
+async function checkCover(): Promise<void> {
+  const file = resolve(ROOT, `${PUBLIC_DIR}${GT_COVER.path}`);
+  if (!existsSync(file))
+    fail(`${GT_COVER.path} is missing; run node scripts/build-brand.ts --cover`);
+  const bytes = new Uint8Array(readFileSync(file));
+  if (coverPath(bytes) !== GT_COVER.path)
+    fail(`${GT_COVER.path}: the name does not carry the file's sha256 (${coverPath(bytes)})`);
+  const image = await decodePng(bytes);
+  if (image.width !== GT_COVER.width || image.height !== GT_COVER.height)
+    fail(`${GT_COVER.path} is ${image.width} by ${image.height}`);
+  const others = readdirSync(resolve(ROOT, COVER_DIR)).filter(
+    (name) => `/brand/cover/${name}` !== GT_COVER.path,
+  );
+  if (others.length > 0)
+    fail(`${COVER_DIR} holds files GT_COVER does not name: ${others.join(', ')}`);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1903,6 +2010,9 @@ async function check(): Promise<void> {
       fail(`${CARD_PATH}: the card rendered by ${launched.renderer} differs in its pixels`);
   });
 
+  /* 5b. the GT cover: its name against its sha256, its size, no stale file beside it */
+  await checkCover();
+
   /* 6. mark-geometry.json against the files read back */
   const geometryFile = resolve(ROOT, GEOMETRY_PATH);
   if (!existsSync(geometryFile)) fail(`${GEOMETRY_PATH} is missing`);
@@ -1959,7 +2069,15 @@ async function writeManifest(base: string, built: Output[]): Promise<BrandManife
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
-  const known = new Set(['--check', '--capture', '--readme', '--facts', '--out', '--no-card']);
+  const known = new Set([
+    '--check',
+    '--capture',
+    '--readme',
+    '--facts',
+    '--cover',
+    '--out',
+    '--no-card',
+  ]);
   for (const [i, flag] of argv.entries())
     if (flag.startsWith('--') && !known.has(flag) && argv[i - 1] !== '--out')
       fail(`unknown flag ${flag}`);
@@ -1970,9 +2088,10 @@ async function main(): Promise<void> {
   checkMarkData();
   const outIndex = argv.indexOf('--out');
   const base = outIndex >= 0 ? resolve(ROOT, argv[outIndex + 1] ?? '') : ROOT;
-  const only = argv.filter((a) => ['--capture', '--readme', '--facts'].includes(a));
+  const only = argv.filter((a) => ['--capture', '--readme', '--facts', '--cover'].includes(a));
 
   if (argv.includes('--capture')) await captureTwins();
+  const cover = argv.includes('--cover') ? await writeCover(base) : null;
   if (argv.includes('--facts')) {
     const facts = computeFacts();
     writeOutputs(base, [
@@ -1996,7 +2115,8 @@ async function main(): Promise<void> {
       },
     ];
     writeOutputs(base, built);
-    await writeManifest(base, built);
+    /* the new cover joins the manifest by its new name (GT_COVER still holds the old one here) */
+    await writeManifest(base, cover === null ? built : [...built, cover]);
     return;
   }
 

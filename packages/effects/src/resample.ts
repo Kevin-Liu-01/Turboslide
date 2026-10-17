@@ -1,5 +1,6 @@
 // Resampling for the two-tone pipeline (SPEC 5.4, 10): the padded crop, the cover fit to 800 by
-// 450 and the nearest-neighbour upscale.
+// 450 and the nearest-neighbour upscale; and the area average that sizes a slide's 1x capture
+// down to a thumbnail.
 //
 // The pinned Lanczos3 is Pillow's resampler, reproduced step for step (libImaging/Resample.c):
 // the kernel sinc(x) sinc(x / 3) on |x| < 3, support scaled by the downscale factor, taps
@@ -9,7 +10,7 @@
 // implementations measured in the slides experiment disagreed on about 120 cells of 1.44 million
 // (slides report section 3.4); pinning Pillow's arithmetic makes the twins the rounds approved
 // reproducible, and gives the Rust crate one integer specification to match.
-import type { Box4, BitImage, GrayImage } from './image.ts';
+import type { Box4, BitImage, GrayImage, RgbaImage } from './image.ts';
 
 const SUPPORT = 3;
 const PRECISION_BITS = 32 - 8 - 2;
@@ -242,6 +243,62 @@ export function scaleNearestGray(gray: GrayImage, k: number): GrayImage {
     const srcRow = Math.floor(y / f) * gray.width;
     const outRow = y * width;
     for (let x = 0; x < width; x += 1) out[outRow + x] = gray.data[srcRow + Math.floor(x / f)] ?? 0;
+  }
+  return { width, height, data: out };
+}
+
+/**
+ * Area-averaging downsample of an RGBA image to a width, keeping the aspect: every destination
+ * pixel is the mean of the source box it covers, with fractional coverage at the box edges, so
+ * 1600 to 640 (2.5 source pixels per destination pixel) is as exact as 1600 to 320 (5). The
+ * render route's thumbnails (apps/studio/src/server/thumbs.ts) and the GT cover of
+ * scripts/build-brand.ts --cover both go through it, so the two give the same bytes.
+ */
+export function downsample(image: RgbaImage, width: number): RgbaImage {
+  const height = Math.max(1, Math.round((image.height * width) / image.width));
+  if (width >= image.width) return image;
+  const sx = image.width / width;
+  const sy = image.height / height;
+  const out = new Uint8Array(width * height * 4);
+  const src = image.data;
+  for (let dy = 0; dy < height; dy += 1) {
+    const y0 = dy * sy;
+    const y1 = Math.min(image.height, (dy + 1) * sy);
+    const yStart = Math.floor(y0);
+    const yEnd = Math.ceil(y1);
+    for (let dx = 0; dx < width; dx += 1) {
+      const x0 = dx * sx;
+      const x1 = Math.min(image.width, (dx + 1) * sx);
+      const xStart = Math.floor(x0);
+      const xEnd = Math.ceil(x1);
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let a = 0;
+      let weight = 0;
+      for (let y = yStart; y < yEnd; y += 1) {
+        const wy = Math.min(y + 1, y1) - Math.max(y, y0);
+        if (wy <= 0) continue;
+        for (let x = xStart; x < xEnd; x += 1) {
+          const wx = Math.min(x + 1, x1) - Math.max(x, x0);
+          if (wx <= 0) continue;
+          const w = wx * wy;
+          const i = (y * image.width + x) * 4;
+          r += (src[i] ?? 0) * w;
+          g += (src[i + 1] ?? 0) * w;
+          b += (src[i + 2] ?? 0) * w;
+          a += (src[i + 3] ?? 255) * w;
+          weight += w;
+        }
+      }
+      const o = (dy * width + dx) * 4;
+      if (weight > 0) {
+        out[o] = Math.round(r / weight);
+        out[o + 1] = Math.round(g / weight);
+        out[o + 2] = Math.round(b / weight);
+        out[o + 3] = Math.round(a / weight);
+      }
+    }
   }
   return { width, height, data: out };
 }

@@ -3,13 +3,14 @@
 // twin or card fails `pnpm test` before the build check (step 29, `build-brand.ts --check`) runs.
 // The manifest is the build's record (path, bytes, sha256 and kind per output); the paths every
 // consumer reads come from packages/theme/brand/site.ts, so the two are compared here.
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { CARD_SIZE, ICON_PATHS, SITE, TWIN_PATHS } from '@turboslide/theme/brand/site';
+import { CARD_SIZE, GT_COVER, ICON_PATHS, SITE, TWIN_PATHS } from '@turboslide/theme/brand/site';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
 const PUBLIC_DIR = 'apps/studio/public';
@@ -56,6 +57,20 @@ describe('the brand files (SPEC-4 0.13, 6.4)', () => {
     for (const pair of Object.values(TWIN_PATHS))
       for (const path of [pair.dark, pair.light])
         expect(manifest.files[`${PUBLIC_DIR}${path}`]?.kind, path).toBe('captured');
+  });
+
+  it('carries the GT cover as a rendered file named by its sha256, alone in its folder', () => {
+    // hardening HR-PS#10: the `/brand/cover/**` route rule keeps the file a year, so its name
+    // must change with its bytes (scripts/build-brand.ts --cover)
+    const path = `${PUBLIC_DIR}${GT_COVER.path}`;
+    expect(manifest.files[path]?.kind, GT_COVER.path).toBe('rendered');
+    const digest = createHash('sha256')
+      .update(readFileSync(resolve(ROOT, path)))
+      .digest('hex');
+    expect(GT_COVER.path).toBe(
+      `/brand/cover/${GT_COVER.deck}-${GT_COVER.theme}-${digest.slice(0, 8)}.png`,
+    );
+    expect(filesUnder(`${PUBLIC_DIR}/brand/cover`)).toEqual([path]);
   });
 
   it('has no stray file in the icon, brand or card folders and at the root of the set', () => {

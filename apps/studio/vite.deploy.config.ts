@@ -269,8 +269,11 @@ const DOCS_TWIN_RULES = Object.fromEntries(
 // `x-robots-tag` header, so the redirect never wakes the function (routes/index.tsx keeps its
 // `beforeLoad` for a client side visit). The /brand/** twins are named without a content hash
 // (site.ts TWIN_PATHS: hero-dark.png and the rest), so they take the icon set's day and week
-// rather than 1.6's immutable year until their names carry a hash. On the node-server build the
-// same rules run in h3, so the local check sees the redirect and the headers too.
+// rather than 1.6's immutable year until their names carry a hash. The GT cover under
+// /brand/cover/ is named by its sha256 (site.ts GT_COVER, hardening HR-PS#10), so it takes the
+// immutable year; Nitro writes the rules with more path segments first, so Vercel matches
+// `/brand/cover/**` before `/brand/**`. On the node-server build the same rules run in h3, so the
+// local check sees the redirect and the headers too.
 // The answers the CDN gives before the function runs carry the app's security headers
 // (`STATIC_HEADERS`, hardening HR-W#3a, SPEC-1): the root redirect, the prerendered pages, the docs'
 // twins, the icon and robots.txt. Nitro compiles a header rule into a route without `continue`, and
@@ -308,6 +311,7 @@ const ROUTE_RULES = {
   '/manifest.webmanifest': { headers: { 'cache-control': 'public, max-age=86400' } },
   '/icons/**': { headers: { 'cache-control': WEEK } },
   '/brand/**': { headers: { 'cache-control': DAY } },
+  '/brand/cover/**': { headers: { 'cache-control': IMMUTABLE } },
   '/home/**': { headers: { 'cache-control': IMMUTABLE } },
   '/decks/gt-brand/assets/**': {
     headers: {

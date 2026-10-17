@@ -38,7 +38,12 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** SPEC-4 1.6: the header rules, each with a sample path the compiled route must match. */
+/**
+ * SPEC-4 1.6: the header rules, each with a sample path the compiled route must match; `cache`,
+ * when set, is what the first matching route's cache-control must read (Vercel applies that route
+ * alone): the content named GT cover under /brand/cover/ is immutable, not the /brand/** day
+ * (hardening HR-PS#10).
+ */
 const HEADER_RULES = [
   { rule: '/favicon.ico', sample: '/favicon.ico' },
   { rule: '/icon.svg', sample: '/icon.svg' },
@@ -47,6 +52,11 @@ const HEADER_RULES = [
   { rule: '/manifest.webmanifest', sample: '/manifest.webmanifest' },
   { rule: '/icons/**', sample: '/icons/icon-512.png' },
   { rule: '/brand/**', sample: '/brand/hero-dark.png' },
+  {
+    rule: '/brand/cover/**',
+    sample: '/brand/cover/gt-brand-dark-0123abcd.png',
+    cache: /^public, max-age=31536000, immutable$/,
+  },
   { rule: '/home/**', sample: '/home/01-editor-0123abcd.jpg' },
   { rule: '/decks/gt-brand/assets/**', sample: '/decks/gt-brand/assets/opener.png' },
 ];
@@ -72,11 +82,12 @@ const STATIC_FILES = [
 /**
  * The generated pictures beside the icon set (round four merge 2; build-4/b1.md R12, b2.md): every
  * file under these public folders must be under static/ too. The twins keep fixed names
- * (`/brand/*.png`, SITE.twins), so the list is read from the tree rather than written here. The
+ * (`/brand/*.png`, SITE.twins) and the GT cover's name follows its content (`/brand/cover/`,
+ * site.ts GT_COVER), so the list is read from the tree rather than written here. The
  * site build (docs/SITE.md) retired public/home: the landing's pictures are imported with `?url`
  * and named by content under /assets.
  */
-const STATIC_FOLDERS = ['brand'];
+const STATIC_FOLDERS = ['brand', 'brand/cover'];
 /** SPEC-4 0.43: /home and the site pages are prerendered; the start plugin writes either shape. */
 const PRERENDERED = ['home', 'features', 'faq', 'about'].map((page) => ({
   route: `/${page}`,
@@ -210,16 +221,17 @@ const matches = (route, sample) => {
 };
 
 // SPEC-4 1.6: one route per header rule, carrying a cache-control header
-for (const { rule, sample } of HEADER_RULES) {
+for (const { rule, sample, cache } of HEADER_RULES) {
   const hit = beforeFilesystem.find(
     (route) => matches(route, sample) && headerOf(route, 'cache-control') !== undefined,
   );
+  const value = hit ? headerOf(hit, 'cache-control') : undefined;
   row(
     'routes',
     `header rule ${rule}`,
-    hit !== undefined,
+    hit !== undefined && (cache === undefined || cache.test(value)),
     hit
-      ? `src ${hit.src}; cache-control: ${headerOf(hit, 'cache-control')}`
+      ? `src ${hit.src}; cache-control: ${value}`
       : `no route with a cache-control header matches ${sample}`,
   );
 }

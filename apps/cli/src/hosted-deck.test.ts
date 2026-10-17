@@ -4,6 +4,9 @@
 // findDeckDir, which before this sent every hosted write from the repository root to the studio's
 // seed deck. A write that names no deck is the studio's 400 `deck_required`, which the CLI reads
 // as the --deck flag it lacks. The action is comment.add over a local fake of POST /api/actions.
+// The first runCli loads the command modules cold, which took past the 5 s default on the shared
+// machine and let that test's late request land in the next one's `seen`: beforeAll runs one
+// command first, and every test has TEST_MS.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -16,6 +19,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest'
 import { runCli } from './cli.ts';
 
 const FAKE_TOKEN = 'fake-bearer-for-the-hosted-deck-test';
+/** Each test's timeout: a command spawns nothing, but the machine it runs on is shared. */
+const TEST_MS = 60_000;
 
 let root: string;
 let server: Server;
@@ -83,7 +88,9 @@ beforeAll(async () => {
   const address = server.address();
   if (address === null || typeof address === 'string') throw new Error('no address');
   origin = `http://127.0.0.1:${address.port}`;
-});
+  // the cold load of the CLI's command modules, before any test reads `seen`
+  await run(['comment', 'add', 'slide:thesis', '-m', 'warm up', '--deck', 'warm-up']);
+}, 120_000);
 
 afterAll(async () => {
   await new Promise<void>((resolve) => server.close(() => resolve()));
@@ -95,47 +102,59 @@ beforeEach(() => {
 });
 
 describe('the deck a hosted command sends (dispatch.ts hostedDeckId)', () => {
-  test('sends no deck from the checkout root, and reads deck_required as the missing --deck', async () => {
-    const result = await run(['comment', 'add', 'slide:thesis', '-m', 'hi']);
-    expect(seen).toEqual(['/api/actions/comment.add']);
-    expect(result.code).not.toBe(0);
-    expect(result.stderr).toContain('comment.add writes to a deck and the command names none');
-    expect(result.stderr).toContain(`pass --deck <id> with --to ${origin}`);
-  });
+  test(
+    'sends no deck from the checkout root, and reads deck_required as the missing --deck',
+    async () => {
+      const result = await run(['comment', 'add', 'slide:thesis', '-m', 'hi']);
+      expect(seen).toEqual(['/api/actions/comment.add']);
+      expect(result.code).not.toBe(0);
+      expect(result.stderr).toContain('comment.add writes to a deck and the command names none');
+      expect(result.stderr).toContain(`pass --deck <id> with --to ${origin}`);
+    },
+    TEST_MS,
+  );
 
-  test('sends the deck --deck names: a deck on the studio by id, a folder by its name', async () => {
-    expect(
-      (await run(['comment', 'add', 'slide:thesis', '-m', 'hi', '--deck', 'hosted-only'])).code,
-    ).toBe(0);
-    expect(
-      (await run(['comment', 'add', 'slide:thesis', '-m', 'hi', '--deck', 'decks/worked'])).code,
-    ).toBe(0);
-    expect(seen).toEqual([
-      '/api/actions/comment.add?deck=hosted-only',
-      '/api/actions/comment.add?deck=worked',
-    ]);
-  });
+  test(
+    'sends the deck --deck names: a deck on the studio by id, a folder by its name',
+    async () => {
+      expect(
+        (await run(['comment', 'add', 'slide:thesis', '-m', 'hi', '--deck', 'hosted-only'])).code,
+      ).toBe(0);
+      expect(
+        (await run(['comment', 'add', 'slide:thesis', '-m', 'hi', '--deck', 'decks/worked'])).code,
+      ).toBe(0);
+      expect(seen).toEqual([
+        '/api/actions/comment.add?deck=hosted-only',
+        '/api/actions/comment.add?deck=worked',
+      ]);
+    },
+    TEST_MS,
+  );
 
-  test('sends the deck folder the command runs in, and refuses a --deck that is neither', async () => {
-    expect(
-      (await run(['comment', 'add', 'slide:thesis', '-m', 'hi'], join(root, 'decks', 'worked')))
-        .code,
-    ).toBe(0);
-    expect(seen).toEqual(['/api/actions/comment.add?deck=worked']);
-    seen.length = 0;
-    const refused = await run([
-      'comment',
-      'add',
-      'slide:thesis',
-      '-m',
-      'hi',
-      '--deck',
-      'no/such/Folder',
-    ]);
-    expect(refused.code).not.toBe(0);
-    expect(refused.stderr).toContain(
-      '--deck no/such/Folder is neither a deck folder here nor a deck id',
-    );
-    expect(seen).toEqual([]);
-  });
+  test(
+    'sends the deck folder the command runs in, and refuses a --deck that is neither',
+    async () => {
+      expect(
+        (await run(['comment', 'add', 'slide:thesis', '-m', 'hi'], join(root, 'decks', 'worked')))
+          .code,
+      ).toBe(0);
+      expect(seen).toEqual(['/api/actions/comment.add?deck=worked']);
+      seen.length = 0;
+      const refused = await run([
+        'comment',
+        'add',
+        'slide:thesis',
+        '-m',
+        'hi',
+        '--deck',
+        'no/such/Folder',
+      ]);
+      expect(refused.code).not.toBe(0);
+      expect(refused.stderr).toContain(
+        '--deck no/such/Folder is neither a deck folder here nor a deck id',
+      );
+      expect(seen).toEqual([]);
+    },
+    TEST_MS,
+  );
 });

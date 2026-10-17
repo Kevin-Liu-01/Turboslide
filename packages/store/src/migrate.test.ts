@@ -1097,6 +1097,102 @@ describe('delete', () => {
   });
 });
 
+describe('sweep-produced (HR-K1#5b)', () => {
+  const LEFT = [
+    'exports/.jobs/old.json',
+    'exports/q4/job2/deck.pptx',
+    'bundles/q4/stamp-ab/q4.zip',
+  ];
+
+  it('removes the produced files left on the public store, on v2 after the switch alone', async () => {
+    const w = world();
+    await w.seed();
+    for (const path of LEFT) await w.legacy.put(path, body(path), { overwrite: true });
+    await expect(w.run('sweep-produced')).rejects.toThrow(
+      'sweep-produced runs on layout v2 after a recorded switch',
+    );
+    const { switched } = await window(w);
+    opens(w, switched);
+    // an export of the v2 deployment, on the private store
+    await w.instance().put('exports/q4/new/deck.pdf', body('%PDF new'), { overwrite: false });
+    const before = new Map(w.documents.blobs);
+    const left = [...w.legacy.blobs.keys()].filter(isProducedPath).sort();
+    expect(left).toHaveLength(LEFT.length + 2);
+    const swept = await w.run('sweep-produced');
+    expect(swept).toMatchObject({
+      step: 'sweep-produced',
+      state: 'v2',
+      done: true,
+      processed: left.length,
+      remaining: 0,
+      rowCount: 0,
+    });
+    expect(swept.note).toMatch(
+      new RegExp(
+        `^${left.length} produced files of \\d+ bytes listed on the public store; ${left.length} removed, 0 left$`,
+      ),
+    );
+    // the public store keeps its twins, avatars and documents; the private store is untouched
+    expect([...w.legacy.blobs.keys()].filter(isProducedPath)).toEqual([]);
+    for (const path of Object.keys(SEED).filter((path) => !isProducedPath(path)))
+      expect(w.legacy.blobs.has(path), path).toBe(true);
+    expect([...w.documents.blobs.keys()].sort()).toEqual([...before.keys()].sort());
+    expect(text(await w.instance().get('exports/q4/new/deck.pdf'))).toBe('%PDF new');
+    expect(
+      w.legacy.calls
+        .filter((c) => c.op === 'del')
+        .map((c) => c.pathname)
+        .sort(),
+    ).toEqual(left);
+    // the lease is given back, and a second call finds nothing
+    expect(w.progress().busyUntil).toBeUndefined();
+    expect(await w.run('sweep-produced')).toMatchObject({ done: true, processed: 0 });
+  });
+
+  it('refuses on a deployment that shares the public store, before any removal', async () => {
+    const w = world({ shared: true });
+    await w.seed();
+    const { switched } = await window(w);
+    opens(w, switched);
+    w.legacy.calls.length = 0;
+    await expect(w.run('sweep-produced')).rejects.toThrow(
+      "sweep-produced runs on production alone: this deployment shares the public store, whose produced files are production's",
+    );
+    expect(w.legacy.calls).toEqual([]);
+    expect(w.legacy.blobs.has('exports/q4/job/deck.pdf')).toBe(true);
+  });
+
+  it('answers done false with the count left when its budget ends, and the next calls finish', async () => {
+    const w = world();
+    await w.seed();
+    for (let i = 0; i < 2_000; i += 1)
+      await w.legacy.put(`exports/d${i % 40}/job${i}/deck.pdf`, body('%PDF'), { overwrite: true });
+    const { switched } = await window(w);
+    opens(w, switched);
+    const legacy = w.clients.legacy;
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        w.t.now += 20_000;
+        await legacy.del(paths, options);
+      },
+    };
+    const answers: MigrationResult[] = [];
+    do answers.push(await w.run('sweep-produced'));
+    while (!answers.at(-1)?.done && answers.length < 10);
+    expect(answers[0]).toMatchObject({ done: false, rowCount: 0 });
+    expect(answers[0]?.processed).toBeGreaterThan(0);
+    expect((answers[0]?.processed ?? 0) + (answers[0]?.remaining ?? 0)).toBe(2_002);
+    expect(answers[0]?.note).toMatch(
+      /^2002 produced files of \d+ bytes listed on the public store; \d+ removed, \d+ left$/,
+    );
+    expect(answers.at(-1)).toMatchObject({ done: true, remaining: 0 });
+    expect(answers.reduce((sum, a) => sum + a.processed, 0)).toBe(2_002);
+    expect([...w.legacy.blobs.keys()].filter(isProducedPath)).toEqual([]);
+  });
+});
+
 describe("a preview's window on the shared public store", () => {
   it('snapshots the public documents from the dual read record, never writing the public store', async () => {
     const w = world({ shared: true });

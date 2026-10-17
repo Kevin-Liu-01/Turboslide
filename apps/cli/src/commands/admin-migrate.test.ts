@@ -150,6 +150,30 @@ describe('turboslide admin migrate-storage (HR-K1#4b)', () => {
     expect(bodies.at(-1)).not.toHaveProperty('backupAt');
   });
 
+  test('sends sweep-produced with its budget, and prints its counts', async () => {
+    answer = {
+      ...answer,
+      step: 'sweep-produced',
+      state: 'v2',
+      frozen: false,
+      done: false,
+      processed: 1_200,
+      remaining: 918,
+      rows: [],
+      rowCount: 0,
+      settlesAt: null,
+      expiresAt: null,
+      perSecond: null,
+      note: '2118 produced files of 757080064 bytes listed on the public store; 1200 removed, 918 left',
+    };
+    const swept = await run(['admin', 'migrate-storage', 'sweep-produced', '--to', origin], false);
+    expect(swept.code, swept.stderr).toBe(0);
+    expect(bodies.at(-1)).toEqual({ step: 'sweep-produced', budgetMs: 240_000 });
+    expect(swept.stdout + swept.stderr).toMatch(
+      /sweep-produced: v2, not done; 1200 processed, 918 remaining, 0 rows\n {2}2118 produced files of 757080064 bytes listed on the public store; 1200 removed, 918 left/,
+    );
+  });
+
   test('refuses a step the migration lost and a budget outside 120 to 240 s, before any request', async () => {
     for (const budget of ['1', '119', '241', 'soon']) {
       const result = await run([

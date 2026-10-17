@@ -21,12 +21,14 @@ export const ADMIN_USAGE = `usage: turboslide admin <flag|assign-owner|bootstrap
                                     set a deck's owner (admin.assignOwner)
   admin bootstrap --to <url> --email <a@x>
                                     the static bearer gives an email the admin role and mints the first key (admin.bootstrap)
-  admin migrate-storage <plan|freeze|copy|verify|switch|unfreeze|rekey|rollback|delete> --to <url>
+  admin migrate-storage <plan|freeze|copy|verify|switch|unfreeze|rekey|rollback|delete|sweep-produced> --to <url>
                        [--budget <s>] [--concurrency <n>] [--i-have-a-backup <iso>]
                                     one call of a step of the storage layout v2 migration in one
                                     window (admin.migrateStorage; docs/hosting.md 10): the call
                                     answers after --budget seconds (120 to 240, 240 by default);
-                                    delete names the time the backup of the private store began
+                                    delete names the time the backup of the private store began;
+                                    sweep-produced removes the exports and bundles HR-K1#5b left
+                                    on the public store (production, on v2, final)
   admin mail --to <url> [--since <iso>] [--limit <n>]
                                     the mail captured under TURBOSLIDE_MAIL=capture (admin.mail.list)
   admin avatar-sweep --to <url> [--dry-run]

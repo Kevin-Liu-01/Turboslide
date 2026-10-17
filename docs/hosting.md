@@ -844,6 +844,7 @@ by default, under the function's 300 s) and answers.
 | `verify` (on `v2`) | Names each public document a `v1` writer changed or added since the switch; `delete` keeps them.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `rollback`         | Production only, after the switch and before `delete`, refused while a `rekey` pass is due: freezes `v2`, then after the settle copies back to the public store every private document whose etag it lacks, and writes `v1` with writes open 30 s later.                                                                                                                                                                                                                                                                                      |
 | `delete`           | Production only, on `v2` not frozen, 3 hours after the switch, after a `verify` on `v2` and a closed `rekey`, with `--i-have-a-backup <ISO>`, the time a backup of the private store began after the switch. Moves the old twins of keyed decks under their keys (a deck keeps its old twins, with a row, until the key holds every one of them), then removes the public documents whose etag is the plan's, 50 a batch and 4 batches in flight, inside the budget: a call whose budget ends first answers `done false` with the count left. |
+| `sweep-produced`   | Production only, on `v2` after a recorded switch (HR-K1#5b): lists `exports/` (with `exports/.jobs/`) and `bundles/` on the public store, the produced files written there before HR-K1#5b, and removes them, 50 a batch and 4 batches in flight, inside the budget; a call whose budget ends first answers `done false` with the count left. Final, and run by Kevin alone.                                                                                                                                                                  |
 
 Every call inside the freeze checks that the freeze is this run's, that it settled and that more
 than 90 s of it is left, and moves `expiresAt` to 10 minutes after the call, never past 45 minutes
@@ -1008,9 +1009,22 @@ while :; do
 done
 ```
 
-Never in this runbook: a step against a deployment built before this code; `rollback`, `delete` or
-`avatar-sweep` against a preview (each refuses); a removal by hand on either store. After
-production's `delete`, HR-K1#5b and HR-K1#6 follow.
+`sweep-produced`, on production alone, once the HR-K1#5b deployment serves production. The produced
+files on the public store (about 2,114 exports of 650 MiB and 4 bundles of 73 MiB at the audit of
+2026-09-20, renders of restricted decks among them) are copies no deployment with the private
+store reads: a download link lasts 10 minutes and a job record a day. A deployment built before
+HR-K1#5b still writes exports there, so the step runs after the guard has deployed HR-K1#5b and
+its smoke passed; an export such a deployment wrote after the sweep stays until the next call. The
+removal is final and nothing runs it automatically; Kevin calls it with the `until_done` loop
+above until it answers `done true`:
+
+```sh
+until_done sweep-produced    # each answer's note: produced files listed, removed and left
+```
+
+Never in this runbook: a step against a deployment built before this code; `rollback`, `delete`,
+`sweep-produced` or `avatar-sweep` against a preview (each refuses); a removal by hand on either
+store. After production's `delete`, HR-K1#5b and HR-K1#6 follow.
 
 ## 11. The runbook of the round three services
 

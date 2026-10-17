@@ -1037,7 +1037,7 @@ export const tokenRecordSchema = z.strictObject({
   lastUsedAt: z.string().nullable(),
 });
 
-/** The storage migration steps (SPEC-3 11.5; hardening K1#4 and HR-K1#4b). packages/store migrate.ts holds the same list. */
+/** The storage migration steps (SPEC-3 11.5; hardening K1#4, HR-K1#4b and HR-K1#5b). packages/store migrate.ts holds the same list. */
 export const MIGRATION_STEPS = [
   'plan',
   'freeze',
@@ -1048,6 +1048,7 @@ export const MIGRATION_STEPS = [
   'rekey',
   'rollback',
   'delete',
+  'sweep-produced',
 ] as const;
 
 /** Where documents live (HR-K1#4b). packages/store migrate.ts holds the same list. */
@@ -5832,7 +5833,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'admin.migrateStorage': action({
     id: 'admin.migrateStorage',
     label: 'Migrate storage',
-    doc: 'Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), inside a budget; docs/hosting.md section 10.',
+    doc: 'Runs one call of a step of the storage layout v2 migration, one maintenance window per environment (plan, freeze, copy, verify, switch, unfreeze, rekey, rollback or delete), or sweep-produced, which removes the exports and bundles left on the public store before HR-K1#5b, inside a budget; docs/hosting.md section 10.',
     group: 'admin',
     mutates: true,
     transports: ['cli', 'http'],

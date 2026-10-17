@@ -18,7 +18,8 @@
 // when `verify` finds a difference, or by the freeze's own end. After the switch: `rekey` gives each
 // deck a key of the environment's own, `verify` names the public documents a v1 writer changed,
 // `rollback` copies back every document written on v2, and `delete`, 3 hours later and after a
-// backup, removes the public documents. The keyed twins (K1#3, K1#4) are at the end of the file.
+// backup, removes the public documents. `sweep-produced` removes the produced files HR-K1#5b left
+// on the public store. The keyed twins (K1#3, K1#4) are at the end of the file.
 import { hasOwnAssetKey, keyedTwinPrefix, newAssetKey } from '@turboslide/schema/access';
 
 import { blobAccessStore, parseAccessRecord } from './access-store.ts';
@@ -48,6 +49,7 @@ export const MIGRATION_STEPS = [
   'rekey',
   'rollback',
   'delete',
+  'sweep-produced',
 ] as const;
 export type MigrationStep = (typeof MIGRATION_STEPS)[number];
 /**
@@ -580,7 +582,7 @@ export function layoutReader(
  * the settle of a freeze does not wait for it. A listing that reaches both classes (`''`) takes the
  * documents from the stores the state reads, the public paths from the public store and the
  * produced files from the private store, so a produced file left on the public store before
- * HR-K1#5b is never read through this client.
+ * HR-K1#5b is never read through this client (`sweep-produced` removes those).
  */
 export function splitBlobClient(
   clients: MigrationClients,
@@ -1467,6 +1469,48 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
   });
 }
 
+/**
+ * `sweep-produced` (HR-K1#5b; DATA-3): removes the produced files (`exports/`, `exports/.jobs/`
+ * included, and `bundles/`) left on the public store, written there before HR-K1#5b kept them on
+ * the private store. No deployment with a private store reads them: a download link lasts ten
+ * minutes and a job record a day, and the split client reads produced files on the private store
+ * alone. It runs on layout v2 after a recorded switch, on a store of its own: a deployment that
+ * shares the public store refuses, since the files are production's too. Each call lists the two
+ * folders of the public store again and removes them in batches inside its budget (`removeAll`); a
+ * call whose budget ends first answers `done: false` with the count left. The removal is final, so
+ * nothing runs the step but an operator's call.
+ */
+async function sweepProducedStep(call: Call): Promise<MigrationResult> {
+  if (call.shared)
+    refuse(
+      "sweep-produced runs on production alone: this deployment shares the public store, whose produced files are production's",
+    );
+  afterSwitch(call, 'sweep-produced');
+  const began = call.clock();
+  const listed = (
+    await Promise.all(
+      PRODUCED_PREFIXES.map((folder) => call.legacy.list(folder, { signal: call.signal })),
+    )
+  )
+    .flat()
+    .filter((entry) => isProducedPath(entry.pathname))
+    .sort((a, b) => byPath(a.pathname, b.pathname));
+  const listMs = call.clock() - began;
+  const bytes = listed.reduce((sum, entry) => sum + entry.size, 0);
+  const removal = await removeAll(
+    call,
+    call.legacy,
+    listed.map((entry) => entry.pathname),
+  );
+  return answer(call, {
+    done: removal.left === 0,
+    processed: removal.removed,
+    remaining: removal.left,
+    listMs,
+    note: `${listed.length} produced files of ${bytes} bytes listed on the public store; ${removal.removed} removed, ${removal.left} left`,
+  });
+}
+
 // ---------------------------------------------------------------------------------------------
 // rekey (K1#4): a key of the environment's own for every deck
 
@@ -1646,6 +1690,7 @@ const STEPS: Record<MigrationStep, (call: Call) => Promise<MigrationResult>> = {
   rekey: rekeyStep,
   rollback: rollbackStep,
   delete: deleteStep,
+  'sweep-produced': sweepProducedStep,
 };
 
 /**

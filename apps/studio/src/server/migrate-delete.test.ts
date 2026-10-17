@@ -4,7 +4,8 @@
 // with the public store's token. The steps run here through the action on the fake public store
 // and a folder as the private store (`TURBOSLIDE_BLOB_PRIVATE_DIR`), never on a real store, and
 // every answer matches the action's output schema. A delete whose removals do not all land answers
-// `done: false` with the count left, never a 500 (HR-K1#4b's fix of 2026-10-17).
+// `done: false` with the count left, never a 500 (HR-K1#4b's fix of 2026-10-17). `sweep-produced`
+// (HR-K1#5b) refuses on a preview and before the switch, and removes the produced files alone.
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -180,5 +181,42 @@ describe('delete inside its budget (HR-K1#4b fix)', () => {
     expect(output.safeParse(gone).success).toBe(true);
     expect(gone).toMatchObject({ done: true, rowCount: 0, remaining: 0 });
     expect(legacy.blobs.size).toBe(0);
+  }, 60_000);
+});
+
+describe('sweep-produced (HR-K1#5b)', () => {
+  it('refuses on a preview before any store call, and removes only the produced files on v2', async () => {
+    const legacy = memoryBlobClient('https://public.local');
+    const produced = [
+      'bundles/q4/stamp-ab/q4.zip',
+      'exports/.jobs/j1.json',
+      'exports/q4/job/deck.pdf',
+    ];
+    const kept = [
+      'd/q4/AbCdEfGhIjKlMnOpQrStUv/assets/a.png',
+      'decks/q4/deck.json',
+      'u/Key/a-64.webp',
+    ];
+    for (const path of kept) await legacy.put(path, encoder.encode(path), { overwrite: false });
+    // the plan names the documents alone, as the plan of record does
+    await switchedRehearsal(legacy);
+    for (const path of produced) await legacy.put(path, encoder.encode(path), { overwrite: false });
+    deployment.client = legacy;
+    const rehearsal = { TURBOSLIDE_BLOB_PRIVATE_DIR: dir };
+    legacy.calls.length = 0;
+    await expect(
+      runMigrateStorage({ step: 'sweep-produced' }, { ...rehearsal, VERCEL_ENV: 'preview' }),
+    ).rejects.toThrow(/production alone/);
+    expect(legacy.calls).toEqual([]);
+    const swept = await runMigrateStorage({ step: 'sweep-produced', budgetMs: 120_000 }, rehearsal);
+    expect(output.safeParse(swept).success).toBe(true);
+    expect(swept).toMatchObject({
+      step: 'sweep-produced',
+      state: 'v2',
+      done: true,
+      processed: produced.length,
+      remaining: 0,
+    });
+    expect([...legacy.blobs.keys()].sort()).toEqual(kept);
   }, 60_000);
 });

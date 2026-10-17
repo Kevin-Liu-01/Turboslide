@@ -97,6 +97,22 @@ export const MOOD_PICTURES = {
 /** The mood picture the card carries (docs/NEXT.md 4.1.3 item 4). */
 export const CARD_MOOD: MoodPicture = MOOD_PICTURES.earth;
 
+/**
+ * The GT template card's cover on /decks (hardening HR-PS#10, PERF-15): the first slide of the GT
+ * deck the store seeds, in the dark theme, at the render route's 320 px thumbnail width. It is a
+ * static file of the deployment, so a /decks visit asks for it once and never wakes the render
+ * function. scripts/build-brand.ts --cover renders it, names it by the first 8 hex digits of its
+ * sha256 and rewrites `path` here, so the `/brand/cover/**` route rule can keep it for a year.
+ */
+export const GT_COVER = {
+  deck: 'gt-brand',
+  slide: 'opener-brand',
+  theme: 'dark',
+  width: 320,
+  height: 180,
+  path: '/brand/cover/gt-brand-dark-9fd3b23c.png',
+} as const;
+
 /** A twin's size: 1600 by 900 at 2 px cells, shown at that size and cropped, never scaled. */
 export const TWIN_SIZE = { width: 1600, height: 900 } as const;
 

@@ -30,8 +30,8 @@ import {
   MIGRATION_META,
   OPEN_AFTER_MS,
   closedAt,
+  isDocumentPath,
   isMigrationPath,
-  isPublicPath,
   readLayout,
   runMigrationStep,
   splitBlobClient,
@@ -263,7 +263,7 @@ async function simulateOne(seed: number, started: number): Promise<SimReport> {
       async put(path, bytes, options): Promise<BlobEntry> {
         const op = ctx.op;
         const ms = lag('write');
-        if (instance && !isPublicPath(path) && rng() < 0.01) {
+        if (instance && isDocumentPath(path) && rng() < 0.01) {
           // the client gives up at its deadline; the store applies the request it got later
           const lands = DOCUMENT_WRITE_CAP_MS + between(1, LANDING_MS);
           void vt.sleep(lands).then(() => apply(path, bytes, options, op).catch(() => undefined));
@@ -490,7 +490,7 @@ async function simulateOne(seed: number, started: number): Promise<SimReport> {
     (l) =>
       (l.who === 'preview' || l.who === 'op-preview') &&
       l.store === 'public' &&
-      !isPublicPath(l.path),
+      isDocumentPath(l.path),
   );
   if (previewPublic !== undefined)
     fail(
@@ -509,7 +509,7 @@ async function simulateOne(seed: number, started: number): Promise<SimReport> {
         ? Math.min(next, Date.parse(frozen.expiresAt) - 3_000)
         : Math.min(next, opensAt ?? record.at);
       const inside = landed.find(
-        (l) => l.who === env && l.at > from && l.at < to && !isPublicPath(l.path),
+        (l) => l.who === env && l.at > from && l.at < to && isDocumentPath(l.path),
       );
       if (inside !== undefined)
         fail(
@@ -525,7 +525,7 @@ async function simulateOne(seed: number, started: number): Promise<SimReport> {
       (l) =>
         l.who === 'prod' &&
         l.store === 'public' &&
-        !isPublicPath(l.path) &&
+        isDocumentPath(l.path) &&
         l.at > switched &&
         l.at < back,
     );

@@ -745,11 +745,11 @@ once roles exist (SPEC-3 6) a viewer link must not be a way to read `deck.json` 
 by address (research 04 F8). Layout v2 keeps the twins on the public store, because a browser
 `<img>` needs a URL, and moves every document to a private store of each environment:
 
-| Store                                                   | Access  | Holds                                                                                                                                 |
-| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`, `exports/`, `bundles/` |
-| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`                |
-| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                             |
+| Store                                                   | Access  | Holds                                                                                                                                                                           |
+| ------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `turboslide-decks` (one store for every environment)    | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `d/<id>/<assetKey>/*`, `u/<avatarKey>/*`; the `exports/` and `bundles/` written before HR-K1#5b            |
+| `turboslide-private` (production)                       | private | every other path: the deck folders' documents and the root units, `meta.json`, `migration.json`, `migration/plan.json`; the produced files `exports/` and `bundles/` (HR-K1#5b) |
+| `turboslide-private-preview` (every preview deployment) | private | the same, for the preview                                                                                                                                                       |
 
 The public store is shared: production, every preview and a development checkout with
 `BLOB_READ_WRITE_TOKEN` read the same objects. `sharesPublicStore(env)` (`packages/store/src/select.ts`)
@@ -761,10 +761,24 @@ that shares the public store never writes or removes a public document.
 `packages/store/src/migrate.ts` holds the layout and the migration; `blob-vercel.ts` opens the
 private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` or `TURBOSLIDE_BLOB_PRIVATE_READ_WRITE_TOKEN`.
 
-- `splitBlobClient({ legacy, documents })` routes by path. `isPublicPath` (the twins under
-  `decks/<id>/assets/` and the folders `d/`, `u/`, `exports/`, `bundles/`) always goes to the public
-  store. Every other path is a document, deck folder or not, so the root units (`users/`, `links/`,
-  `templates/`, `system/`, `index/`, `builds/`, `vitals/`, `decks/index.json`) move with the decks.
+- `splitBlobClient({ legacy, documents })` routes by path, in three classes. `isPublicPath` (the
+  twins under `decks/<id>/assets/` and the folders `d/` and `u/`) always goes to the public store.
+  `isProducedPath` (`exports/`, the queued exports' records under `exports/.jobs/` included, and
+  `bundles/`; HR-K1#5b) always goes to the private store. Every other path is a document, deck
+  folder or not, so the root units (`users/`, `links/`, `templates/`, `system/`, `index/`, `builds/`,
+  `vitals/`, `decks/index.json`) move with the decks; a web page build under `builds/` stays a
+  document.
+- The produced files are copies a deployment makes and reads back through the download route
+  (HR-K1#5a), not records. They never ask the layout record, a freeze or the shared store's rule
+  never refuses them, and they carry the caller's deadline alone, not the documents' 90 s cap: a
+  bundle reaches 200 MB, and a freeze's settle does not wait for a produced file. A listing that
+  reaches both classes takes the documents from the store the state reads and the produced files
+  from the private store alone, so a produced file left on the public store before HR-K1#5b is
+  never read. `plan`, `copy`, `verify`, `rollback` and `delete` neither list nor count them on
+  either store. An export queued in the minute of the HR-K1#5b deploy has its record and parts on
+  the public store, which the new deployment no longer reads, so it answers `failed` and the person
+  exports again. A deployment without the private store is unchanged: everything, the produced
+  files included, stays on the public store.
 - The layout record is `meta.json` on the private store: `state` (`v1`, `dual` or `v2`), `frozen`
   (`since`, `settlesAt`, `expiresAt`) and `opensAt`. A document is read and written on the public
   store in `v1` and on the private store in `v2`. `dual` is the record the preview wrote on

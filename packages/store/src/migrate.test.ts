@@ -27,6 +27,8 @@ import {
   OPEN_AFTER_MS,
   REKEY_SETTLE_MS,
   StorageLayoutError,
+  isDocumentPath,
+  isProducedPath,
   isPublicPath,
   keyedTwinsClient,
   publicDocuments,
@@ -64,12 +66,13 @@ const SEED: Record<string, string> = {
   'builds/b1/page.html': '<p>',
   'vitals/v.json': '{}',
   'top.json': '{"top":true}',
+  // produced files written to the public store before HR-K1#5b
   'exports/q4/job/deck.pdf': '%PDF',
   'bundles/q4.zip': 'PK',
   'u/AvatarKey/a-64.webp': 'avatar',
   'd/q4/PublicKey0000000000000/assets/photo.cd34.webp': 'webp-photo',
 };
-const DOCUMENTS = Object.keys(SEED).filter((path) => !isPublicPath(path));
+const DOCUMENTS = Object.keys(SEED).filter(isDocumentPath);
 
 function world(options: { shared?: boolean; seed?: boolean } = {}) {
   const t = { now: T0 };
@@ -148,14 +151,33 @@ const opens = (w: World, switched: MigrationResult) => {
 };
 
 describe('the paths and the plan', () => {
-  it('routes twins, keyed twins, avatars, exports and bundles public, and every other path is a document', () => {
+  it('routes twins, keyed twins and avatars public, exports and bundles as produced files, and every other path is a document', () => {
     expect(isPublicPath('decks/q4/assets/a.png')).toBe(true);
     expect(isPublicPath('d/q4/key/assets/a.png')).toBe(true);
     expect(isPublicPath('u/AbCd/a-64.webp')).toBe(true);
-    expect(isPublicPath('exports/q4/job/deck.pptx')).toBe(true);
-    expect(isPublicPath('bundles/q4.zip')).toBe(true);
-    for (const path of ['decks/q4/deck.json', 'users/u/decks.json', 'links/a.json', 'top.json'])
-      expect(isPublicPath(path)).toBe(false);
+    for (const path of [
+      'exports/q4/job/deck.pptx',
+      'exports/.jobs/job.json',
+      'exports/.jobs/.turboslide/copies/a.json',
+      'bundles/q4/stamp-ab/q4.zip',
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+      expect(isProducedPath(path), path).toBe(true);
+      expect(isDocumentPath(path), path).toBe(false);
+    }
+    for (const path of [
+      'decks/q4/deck.json',
+      'users/u/decks.json',
+      'links/a.json',
+      'top.json',
+      'builds/q4/x/page.html',
+      'decks/q4/exports/x.json',
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+      expect(isProducedPath(path), path).toBe(false);
+      expect(isDocumentPath(path), path).toBe(true);
+    }
+    expect(isDocumentPath(MIGRATION_META)).toBe(false);
     expect([...MIGRATION_STEPS]).toEqual([...SCHEMA_MIGRATION_STEPS]);
   });
 
@@ -268,10 +290,11 @@ describe('the split client', () => {
     await expect(
       preview.del(['decks/q4/deck.json', 'decks/q4/assets/photo.cd34.webp']),
     ).rejects.toMatchObject({ name: 'StorageFrozenError' });
-    // reads and the public paths go on
+    // reads and the public paths go on, and a produced file goes to the preview's private store
     expect(text(await preview.get('decks/q4/deck.json'))).toBe(SEED['decks/q4/deck.json']);
     await preview.put('exports/q4/job/new.pdf', body('%PDF'), { overwrite: true });
-    expect(w.legacy.blobs.has('exports/q4/job/new.pdf')).toBe(true);
+    expect(w.legacy.blobs.has('exports/q4/job/new.pdf')).toBe(false);
+    expect(w.documents.blobs.has('exports/q4/job/new.pdf')).toBe(true);
     expect(w.publicWrites()).toEqual([]);
     expect(sharesPublicStore({ VERCEL_ENV: 'preview' })).toBe(true);
     expect(sharesPublicStore({ VERCEL_ENV: 'production', BLOB_READ_WRITE_TOKEN: 't' })).toBe(false);
@@ -292,6 +315,196 @@ describe('the split client', () => {
         failed: [OLDER_DEPLOYMENT_ROW],
       });
     }
+  });
+});
+
+describe('the produced files (HR-K1#5b)', () => {
+  const STATES = ['unplanned', 'v1', 'dual', 'v2'] as const;
+  type State = (typeof STATES)[number];
+
+  /** A store in `state`, the produced files of before HR-K1#5b on its public store. */
+  async function at(state: State, options: { shared?: boolean } = {}) {
+    const w = world(options);
+    await w.seed();
+    if (state !== 'unplanned') await putLayoutRecord(w.documents, { state }, options.shared);
+    await w.documents.put('exports/q4/new/deck.pdf', body('%PDF new'), { overwrite: true });
+    await w.documents.put('exports/.jobs/j1.json', body('{"job":1}'), { overwrite: true });
+    w.documents.calls.length = 0;
+    w.legacy.calls.length = 0;
+    return w;
+  }
+  const layoutReads = (w: World) =>
+    w.documents.calls.filter((c) => c.pathname === MIGRATION_META || c.op === 'files');
+
+  it('reads, lists, writes and removes them on the private store in every state, never asking the layout', async () => {
+    for (const state of STATES) {
+      const w = await at(state);
+      const app = w.instance();
+      await app.put('bundles/q4/stamp/q4.zip', body('PK new'), { overwrite: false });
+      await app.put('exports/.jobs/j2.json', body('{"job":2}'), { overwrite: false });
+      expect(text(await app.get('exports/q4/new/deck.pdf')), state).toBe('%PDF new');
+      expect((await app.head('bundles/q4/stamp/q4.zip'))?.url, state).toBe(
+        'https://private.local/bundles/q4/stamp/q4.zip',
+      );
+      // the copies left on the public store are never read through the client
+      expect(await app.get('exports/q4/job/deck.pdf'), state).toBeNull();
+      expect(await app.head('bundles/q4.zip'), state).toBeNull();
+      expect(
+        (await app.list('exports/')).map((e) => e.pathname),
+        state,
+      ).toEqual(['exports/.jobs/j1.json', 'exports/.jobs/j2.json', 'exports/q4/new/deck.pdf']);
+      expect(await app.folders('exports/'), state).toEqual(['exports/.jobs/', 'exports/q4/']);
+      await app.del(['exports/q4/new/deck.pdf', 'exports/.jobs/j1.json']);
+      expect(w.documents.blobs.has('exports/q4/new/deck.pdf'), state).toBe(false);
+      expect(layoutReads(w), state).toEqual([]);
+      expect(w.legacy.calls, state).toEqual([]);
+    }
+  });
+
+  it('goes on while the layout read fails, while a freeze holds and on a shared store before its switch', async () => {
+    // bytes that are no layout record: every document call fails with 503
+    const broken = await at('v1');
+    await broken.documents.put(MIGRATION_META, body('[1]'), { overwrite: true });
+    const app = broken.instance();
+    await expect(app.get('links/abc.json')).rejects.toBeInstanceOf(StorageLayoutError);
+    await app.put('exports/q4/b/deck.pdf', body('%PDF'), { overwrite: true });
+    expect(text(await app.get('exports/q4/b/deck.pdf'))).toBe('%PDF');
+    // a freeze refuses the documents and admits the produced files
+    const frozen = await at('v1');
+    await frozen.run('freeze');
+    const during = frozen.instance();
+    await expect(
+      during.put('decks/q4/deck.json', body('x'), { overwrite: true }),
+    ).rejects.toMatchObject({ name: 'StorageFrozenError' });
+    await during.put('exports/q4/c/deck.pdf', body('%PDF'), { overwrite: true });
+    await during.del(['exports/.jobs/j1.json']);
+    expect(frozen.documents.blobs.has('exports/q4/c/deck.pdf')).toBe(true);
+    expect(frozen.documents.blobs.has('exports/.jobs/j1.json')).toBe(false);
+    // a removal of documents and produced files together is refused whole while frozen
+    await expect(during.del(['decks/q4/deck.json', 'exports/q4/c/deck.pdf'])).rejects.toMatchObject(
+      { name: 'StorageFrozenError' },
+    );
+    expect(frozen.documents.blobs.has('exports/q4/c/deck.pdf')).toBe(true);
+    // a preview before its switch: its own private store, and no write of the public one
+    const preview = await at('v1', { shared: true });
+    const client = preview.instance();
+    await expect(client.put('links/x.json', body('x'), { overwrite: true })).rejects.toMatchObject({
+      name: 'StorageFrozenError',
+    });
+    await client.put('bundles/q4/s/q4.zip', body('PK'), { overwrite: true });
+    expect(preview.documents.blobs.has('bundles/q4/s/q4.zip')).toBe(true);
+    expect(preview.publicWrites()).toEqual([]);
+  });
+
+  it("carries the caller's deadline alone, never the document write cap", async () => {
+    const w = await at('v2');
+    const signals = new Map<string, AbortSignal | undefined>();
+    const put = w.documents.put.bind(w.documents);
+    w.documents.put = async (path, bytes, options) => {
+      signals.set(path, options.signal);
+      return put(path, bytes, options);
+    };
+    const del = w.documents.del.bind(w.documents);
+    const removals = new Map<string, AbortSignal | undefined>();
+    w.documents.del = async (paths, options) => {
+      for (const path of paths) removals.set(path, options?.signal);
+      return del(paths, options);
+    };
+    const app = w.instance();
+    const mine = new AbortController().signal;
+    await app.put('bundles/q4/s/big.zip', body('PK'), { overwrite: true, signal: mine });
+    await app.put('exports/q4/d/deck.pdf', body('%PDF'), { overwrite: true });
+    await app.put('decks/q4/deck.json', body('{}'), { overwrite: true });
+    await app.del(['exports/q4/d/deck.pdf', 'decks/q4/deck.json'], { signal: mine });
+    expect(signals.get('bundles/q4/s/big.zip')).toBe(mine);
+    expect(signals.get('exports/q4/d/deck.pdf')).toBeUndefined();
+    expect(removals.get('exports/q4/d/deck.pdf')).toBe(mine);
+    // a document's carries DOCUMENT_WRITE_CAP_MS beside the caller's
+    expect(signals.get('decks/q4/deck.json')).toBeInstanceOf(AbortSignal);
+    expect(removals.get('decks/q4/deck.json')).not.toBe(mine);
+  });
+
+  it('merges a listing that reaches both: documents from the state, public paths from the public store, produced files from the private store', async () => {
+    for (const state of STATES) {
+      const w = await at(state);
+      await w.documents.put('links/private.json', body('mine'), { overwrite: true });
+      const app = w.instance();
+      const listed = (await app.list('')).map((e) => e.pathname);
+      const readsPublic = state !== 'v2';
+      const readsPrivate = state === 'dual' || state === 'v2';
+      expect(listed.includes('links/abc.json'), state).toBe(readsPublic);
+      expect(listed.includes('links/private.json'), state).toBe(readsPrivate);
+      expect(listed.includes('decks/q4/assets/photo.cd34.webp'), state).toBe(true);
+      expect(listed.includes('exports/q4/new/deck.pdf'), state).toBe(true);
+      expect(listed.includes('exports/.jobs/j1.json'), state).toBe(true);
+      expect(listed.includes('exports/q4/job/deck.pdf'), state).toBe(false);
+      expect(listed.includes('bundles/q4.zip'), state).toBe(false);
+      expect(listed.some((path) => path.startsWith('migration') || path === MIGRATION_META)).toBe(
+        false,
+      );
+      expect(listed, state).toEqual([...listed].sort());
+      // a prefix that reaches the produced folders and nothing else
+      expect(
+        (await app.list('e')).map((e) => e.pathname),
+        state,
+      ).toEqual(['exports/.jobs/j1.json', 'exports/q4/new/deck.pdf']);
+      // `b` reaches builds/, a document, and bundles/, whose one object is the public store's
+      expect(
+        (await app.list('b')).map((e) => e.pathname),
+        state,
+      ).toEqual(readsPublic ? ['builds/b1/page.html'] : []);
+      // the top folders: bundles/ only the public store holds is not one
+      const folders = await app.folders('');
+      expect(folders.includes('exports/'), state).toBe(true);
+      expect(folders.includes('bundles/'), state).toBe(false);
+      expect(folders.includes('d/') && folders.includes('decks/'), state).toBe(true);
+      // a listing of documents alone never asks the private store for produced files
+      w.documents.calls.length = 0;
+      await app.list('decks/q4/');
+      expect(
+        w.documents.calls.filter((c) => c.op === 'list'),
+        state,
+      ).toEqual(readsPrivate ? [{ op: 'list', pathname: 'decks/q4/' }] : []);
+    }
+  });
+
+  it('is never planned, copied, verified, rolled back or removed by the migration', async () => {
+    const w = world();
+    await w.seed();
+    await w.documents.put('exports/q4/early/deck.pdf', body('%PDF early'), { overwrite: true });
+    const listings: string[] = [];
+    for (const client of [w.legacy, w.documents]) {
+      const list = client.list.bind(client);
+      client.list = async (prefix, options) => {
+        listings.push(prefix);
+        return list(prefix, options);
+      };
+    }
+    const { counts, plan, verify, switched } = await window(w);
+    expect(counts.processed).toBe(DOCUMENTS.length);
+    expect(plan.note).toMatch(
+      new RegExp(`^the plan of record: ${DOCUMENTS.length} public documents`),
+    );
+    expect(verify).toMatchObject({ clean: true, rowCount: 0 });
+    // the first copy removed no produced file from the private store, and copied none to it
+    expect(text(await w.documents.get('exports/q4/early/deck.pdf'))).toBe('%PDF early');
+    expect(w.documents.blobs.has('exports/q4/job/deck.pdf')).toBe(false);
+    expect(w.documents.blobs.has('bundles/q4.zip')).toBe(false);
+    expect(listings.filter((prefix) => isProducedPath(prefix) || prefix === '')).toEqual([]);
+    opens(w, switched);
+    // on v2 an export lands on the private store, and verify names no produced file
+    await w.instance().put('exports/q4/late/deck.pdf', body('%PDF late'), { overwrite: false });
+    expect(await w.run('verify')).toMatchObject({ rowCount: 0 });
+    // a rollback copies no produced file back and removes none from either store
+    await w.run('rollback');
+    w.later(5 * 60_000);
+    const back = await w.run('rollback');
+    expect(back).toMatchObject({ state: 'v1', done: true });
+    expect(w.legacy.blobs.has('exports/q4/late/deck.pdf')).toBe(false);
+    expect(w.legacy.blobs.has('exports/q4/job/deck.pdf')).toBe(true);
+    expect(text(await w.documents.get('exports/q4/late/deck.pdf'))).toBe('%PDF late');
+    // and on v1 after the rollback the client still reads the private copy
+    expect(text(await w.instance().get('exports/q4/late/deck.pdf'))).toBe('%PDF late');
   });
 });
 
@@ -349,8 +562,8 @@ describe('the window', () => {
       expect(w.documents.blobs.get(path)?.version, path).toBe(w.legacy.blobs.get(path)?.version);
       expect(text(await app.get(path)), path).toBe(SEED[path]);
     }
-    for (const path of Object.keys(SEED).filter(isPublicPath))
-      expect(w.documents.blobs.has(path)).toBe(false);
+    for (const path of Object.keys(SEED).filter((path) => !isDocumentPath(path)))
+      expect(w.documents.blobs.has(path), path).toBe(false);
     // writes open OPEN_AFTER_MS after the switch, on the private store
     await expect(
       app.put('decks/q4/deck.json', body('v2'), { overwrite: true }),
@@ -696,8 +909,9 @@ describe('delete', () => {
     expect(text(await w.legacy.get('d/gt-brand/GtBrandKey000000000000/assets/mark.ab12.png'))).toBe(
       'png-mark',
     );
+    // the produced files are no documents: delete leaves them where they are
     for (const path of Object.keys(SEED)) {
-      const kept = isPublicPath(path) && path !== 'decks/gt-brand/assets/mark.ab12.png';
+      const kept = !isDocumentPath(path) && path !== 'decks/gt-brand/assets/mark.ab12.png';
       expect(w.legacy.blobs.has(path), path).toBe(kept || path === 'links/abc.json');
     }
     // every document still reads from the private store

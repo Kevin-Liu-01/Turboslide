@@ -228,6 +228,19 @@ export function readVersionsCached(dir: string): VersionRecord[] {
   });
 }
 
+/**
+ * Keeps the record a commit just wrote as its file's cached read (hardening PS#2), so the log read
+ * after a commit parses nothing and a commit parses its own record once, in `versionRecordText`.
+ * `text` is the file's bytes as `versionRecordText` made them: the parse that proved the record
+ * emits canonical JSON, which a second parse answers unchanged, so the text's own JSON is the
+ * record `readVersionsCached` would parse from the file. Stamped after the write, as the folder's
+ * document is (`rememberDeckDir`); the store holds its write lock around both.
+ */
+export function rememberVersion(path: string, text: string): void {
+  const stamp = fileStamp(path);
+  if (stamp !== null) cachedRecords.set(path, { stamp, value: JSON.parse(text) as unknown });
+}
+
 function readVersionsWith(dir: string, read: (file: string) => VersionRecord): VersionRecord[] {
   const folder = join(dir, VERSIONS_DIR);
   if (!existsSync(folder)) return [];

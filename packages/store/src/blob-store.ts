@@ -2240,41 +2240,50 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
             };
           }
         }
+        // the snapshot this commit stores, decided where the record's fields are named below
+        const snapshot: { key: string; body: Uint8Array; stored: boolean } = {
+          key: '',
+          body: new Uint8Array(0),
+          stored: false,
+        };
         // a local apply that throws (a record this release cannot write, a disk fault) may leave
         // the mirror part way into the write: it is discarded, as after a failed commit below, so
         // this instance's next write starts from the store's bodies and never pushes a slide the
         // store has no record of (the wave 3b verify's finding 1)
-        const outcome = await file.write(write, writeOptions).catch((error: unknown) => {
-          discard();
-          throw error;
-        });
+        const outcome = await file
+          .write(write, {
+            ...writeOptions,
+            // the snapshot key (SPEC-2 8.2, 0.40): the md5 of the deck.json bytes about to be
+            // pushed (the file store writes the manifest's canonical JSON), which is the etag the
+            // store will answer for them. The commit stores the snapshot on every
+            // SNAPSHOT_EVERY_RECORDS records, and on every commit of a deck whose snapshot is over
+            // SNAPSHOT_EVERY_COMMIT_BYTES (the seed route answers the object with its URL), and
+            // the record names the key then alone (hardening PS#4): a reader replays the records
+            // above its own mirror or above the newest stored snapshot (pull, step 2). The write's
+            // origin joins the record once the deployment writes it (RECORD_ORIGIN_WRITES). Both
+            // join the record before its one parse and its one write (hardening PS#2)
+            recordFields: (proposed, document) => {
+              snapshot.key = snapshotKey(canonicalJson(document.deck));
+              snapshot.body = snapshotBody(document);
+              // a restore stores its snapshot too: its replay needs the version it restores,
+              // which a mirror with a log floor may hold no record of
+              snapshot.stored =
+                snapshotDue(proposed.n, options.snapshotEvery) ||
+                snapshot.body.byteLength > SNAPSHOT_EVERY_COMMIT_BYTES ||
+                write.mutations.some((mutation) => mutation.op === 'version.restore');
+              return {
+                ...(snapshot.stored ? { snapshot: snapshot.key } : {}),
+                ...(writeOrigin && write.origin !== undefined ? { origin: write.origin } : {}),
+              };
+            },
+          })
+          .catch((error: unknown) => {
+            discard();
+            throw error;
+          });
         if (!outcome.ok) return outcome;
-        // the snapshot key (SPEC-2 8.2, 0.40): the md5 of the deck.json bytes about to be pushed,
-        // which is the etag the store will answer for them. The commit stores the snapshot on
-        // every SNAPSHOT_EVERY_RECORDS records, and on every commit of a deck whose snapshot is
-        // over SNAPSHOT_EVERY_COMMIT_BYTES (the seed route answers the object with its URL), and
-        // the record names the key then alone (hardening PS#4): a reader replays the records
-        // above its own mirror or above the newest stored snapshot (pull, step 2). The write's
-        // origin joins the record once the deployment writes it (RECORD_ORIGIN_WRITES)
-        const key = snapshotKey(new Uint8Array(readFileSync(pathOf('deck.json'))));
-        const body = snapshotBody(outcome.document);
-        // a restore stores its snapshot too: its replay needs the version it restores, which
-        // a mirror with a log floor may hold no record of
-        const storesSnapshot =
-          snapshotDue(outcome.entry.n, options.snapshotEvery) ||
-          body.byteLength > SNAPSHOT_EVERY_COMMIT_BYTES ||
-          write.mutations.some((mutation) => mutation.op === 'version.restore');
-        const entry: VersionRecord = {
-          ...outcome.entry,
-          ...(storesSnapshot ? { snapshot: key } : {}),
-          ...(writeOrigin && write.origin !== undefined ? { origin: write.origin } : {}),
-        };
-        try {
-          writeVersion(dir, entry);
-        } catch (error) {
-          discard();
-          throw error;
-        }
+        const { key, body, stored: storesSnapshot } = snapshot;
+        const entry = outcome.entry;
         const record = `versions/${entry.n}.json`;
         let claimed = false;
         /** A claim this write stored and cannot commit leaves the store (best effort). */

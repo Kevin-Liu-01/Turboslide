@@ -61,6 +61,7 @@ import {
   recordAtRevision,
   recordMinor,
   recordNamingOps,
+  rememberVersion,
   toVersion,
   versionRecordText,
   writeVersion,
@@ -106,7 +107,24 @@ export type FileStoreOptions = {
   cache?: boolean;
 };
 
-export type FileStore = DeckStore & { readonly dir: string; readonly leaseFile: string };
+/**
+ * A FileStore write's options: the store's own, and `recordFields`, the fields a Blob mirror's
+ * commit adds to the record (its snapshot key and its origin), named from the record the write
+ * proposes and the document it makes, so the record is parsed and written once per commit
+ * (hardening PS#2, PERF-2). It runs inside the write lock before any file changes.
+ */
+export type FileWriteOptions = WriteOptions & {
+  recordFields?: (
+    proposed: VersionRecord,
+    document: DeckDocument,
+  ) => Pick<VersionRecord, 'snapshot' | 'origin'>;
+};
+
+export type FileStore = Omit<DeckStore, 'write'> & {
+  readonly dir: string;
+  readonly leaseFile: string;
+  write: (write: StoreWrite, options?: FileWriteOptions) => Promise<WriteOutcome>;
+};
 
 /** A lock older than this is treated as left behind by a crashed process. */
 export const STALE_LOCK_MS = 30_000;
@@ -424,7 +442,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
       return cached ? deckDirRevisionCached(dir) : loadDeckDir(dir).document.deck.revision;
     },
 
-    write(write: StoreWrite, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
+    write(write: StoreWrite, writeOptions: FileWriteOptions = {}): Promise<WriteOutcome> {
       return locked(async () => {
         const loaded = load(dir);
         const current = loaded.document;
@@ -473,7 +491,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
         });
         if (!result.ok) return result;
         const minor = recordMinor(current, result.document);
-        const entry: VersionRecord = {
+        const proposed: VersionRecord = {
           n: nextVersionNumber(records),
           revision: result.document.deck.revision,
           baseRevision: write.baseRevision,
@@ -486,12 +504,20 @@ export function openFileStore(options: FileStoreOptions): FileStore {
           ...(origin !== undefined ? { origin } : {}),
           ...(minor !== undefined ? { schemaMinor: minor } : {}),
         };
+        // the fields a Blob mirror's commit adds (its snapshot key and its origin) join the record
+        // before its one parse and its one write (hardening PS#2)
+        const entry: VersionRecord =
+          writeOptions.recordFields === undefined
+            ? proposed
+            : { ...proposed, ...writeOptions.recordFields(proposed, result.document) };
         // the record's text before any file changes: a record that cannot be written refuses the
         // write whole, so the slide files never move without the record and the manifest (the
         // wave 3b verify's finding 1: a refused record left a slide file one write ahead)
         const recordText = versionRecordText(entry);
         const changed = writeSlideFiles(dir, current, result.document);
-        writeVersion(dir, entry, recordText);
+        const recordPath = writeVersion(dir, entry, recordText);
+        // the record the text proved is the log's next read, parsed no second time (PS#2)
+        if (cached) rememberVersion(recordPath, recordText);
         writeManifest(dir, result.document.deck);
         // the document the reducer just validated is the folder's next read (hardening PS#2)
         if (cached) rememberDeckDir(dir, result.document, result.issues);

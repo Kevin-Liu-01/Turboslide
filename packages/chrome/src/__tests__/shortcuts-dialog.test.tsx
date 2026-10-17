@@ -4,7 +4,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_MENU_CONTEXT } from '../menus/model';
 import type { MenuContext } from '../menus/model';
-import { GROUP_ORDER, SAVE_TAB_ONLY_LABEL, ShortcutsDialog, shortcutRows } from '../ShortcutsDialog';
+import {
+  GROUP_ORDER,
+  SAVE_TAB_ONLY_LABEL,
+  ShortcutsDialog,
+  shortcutRows,
+} from '../ShortcutsDialog';
 import { hideTooltip } from '../Tooltip';
 
 /** The shell's context with the switch off, and with it on (docs/FOCUS.md 3.1). */

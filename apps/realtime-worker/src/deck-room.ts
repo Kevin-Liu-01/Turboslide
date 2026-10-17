@@ -520,6 +520,20 @@ export class DeckRoom extends DurableObject<Env> {
         ...(attachment.claims === null ? {} : { restored: true as const }),
         ...(typeof attachment.hueSlot === 'number' ? { keptHueSlot: attachment.hueSlot } : {}),
       };
+      // two sockets of one client id: a reconnect whose older socket the runtime still holds
+      // (its edge connection dropped without a close this object read, and the retire's close
+      // got no answer). The newer one keeps the place and the older one closes as superseded.
+      // Before this the map kept whichever came last and the older socket's late close dropped
+      // the member both shared, so the tab heard nothing while its socket stayed open
+      const held = this.members.get(member.cid);
+      if (held !== undefined && held.ws !== null) {
+        const keepHeld = held.joinedAt > member.joinedAt;
+        const older = keepHeld ? ws : held.ws;
+        this.byWs.delete(older);
+        this.closedHere.add(older);
+        this.closeWs(older, CLOSE_CODES.superseded, 'newer socket');
+        if (keepHeld) continue;
+      }
       this.members.set(member.cid, member);
       this.byWs.set(ws, member.cid);
       if (this.deckId === null && typeof attachment.claims?.deck === 'string')
@@ -1526,9 +1540,11 @@ export class DeckRoom extends DurableObject<Env> {
   // -------------------------------------------------------------------------------------------
   // Members and sockets
 
+  /** The member whose socket this is; a socket a newer one of the same client replaced has none. */
   private memberOf(ws: WebSocket): Member | undefined {
     const cid = this.byWs.get(ws);
-    return cid === undefined ? undefined : this.members.get(cid);
+    const member = cid === undefined ? undefined : this.members.get(cid);
+    return member?.ws === ws ? member : undefined;
   }
 
   private writeAttachment(member: Member): void {

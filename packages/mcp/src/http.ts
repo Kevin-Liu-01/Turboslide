@@ -20,6 +20,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
+import { retryAfterOf } from '@turboslide/schema/errors';
 
 export const SESSION_HEADER = 'mcp-session-id';
 
@@ -172,6 +173,14 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
       const status = (error as { status?: unknown } | null)?.status;
       if (typeof status === 'number' && status >= 400 && status < 500)
         return rpcError(status, -32000, message);
+      // a store refusal that names its wait (the write freeze, the layout read; docs/hosting.md
+      // 10) is its own 503 with `retry-after`, never a 500
+      const wait = retryAfterOf(error);
+      if (wait !== undefined) {
+        const response = rpcError(503, -32000, message);
+        response.headers.set('retry-after', String(wait));
+        return response;
+      }
       log(`mcp http: createServer failed: ${message}`);
       return rpcError(500, -32603, message);
     }

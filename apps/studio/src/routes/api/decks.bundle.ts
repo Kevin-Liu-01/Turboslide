@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { refuse } from '@turboslide/agent/http/errors';
+import { errorResponse, refuse } from '@turboslide/agent/http/errors';
+import { retryAfterOf } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES } from '@turboslide/store/bundle';
 
@@ -246,6 +247,9 @@ export const Route = createFileRoute('/api/decks/bundle')({
           const message = error instanceof Error ? error.message : String(error);
           if (error instanceof TypeError) return badRequest(message);
           if (error instanceof RangeError) return refuse(404, 'unknown_deck', message);
+          // the store's write freeze (StorageFrozenError, docs/hosting.md 10) and the layout read
+          // answer 503 with `retry-after`, so the caller sends the bundle again after the wait
+          if (retryAfterOf(error) !== undefined) return errorResponse(error, 'deck.unpack');
           return Response.json({ error: { name: 'Error', message, status: 500 } }, { status: 500 });
         }
       },

@@ -255,6 +255,19 @@ describe('tool results', () => {
       milestone: 'M2',
     });
     expect(toolErrorBody('render.slide', 'boom')).toMatchObject({ name: 'Error', status: 500 });
+    expect(toolErrorBody('render.slide', 'boom').retryAfter).toBeUndefined();
+    /* the store's write freeze (StorageFrozenError, docs/hosting.md 10): the tool result rides a
+       200 JSON-RPC answer, so the wait is in the body */
+    const frozen = Object.assign(new Error('Saving is paused'), {
+      name: 'StorageFrozenError',
+      status: 503,
+      retryAfter: 30,
+    });
+    expect(toolErrorBody('block.set', frozen)).toMatchObject({
+      name: 'StorageFrozenError',
+      status: 503,
+      retryAfter: 30,
+    });
 
     const result = toolError('block.set', new RangeError('No block "list"'));
     expect(result.isError).toBe(true);

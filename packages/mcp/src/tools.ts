@@ -9,7 +9,12 @@ import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import { InvalidInputError } from '@turboslide/agent/dispatch';
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { actionsOn } from '@turboslide/schema/actions';
-import { ConflictError, NotImplementedError, errorStatus } from '@turboslide/schema/errors';
+import {
+  ConflictError,
+  NotImplementedError,
+  errorStatus,
+  retryAfterOf,
+} from '@turboslide/schema/errors';
 import { z } from 'zod';
 
 export type JsonSchema = Record<string, unknown>;
@@ -396,6 +401,11 @@ export type ToolErrorBody = {
   current?: unknown;
   holder?: unknown;
   milestone?: string;
+  /**
+   * The seconds a 503 asks the caller to wait (the store's write freeze, 30). A tool result rides
+   * a JSON-RPC answer whose HTTP status is 200, so the wait travels in the body alone.
+   */
+  retryAfter?: number;
 };
 
 /** The error body for a failed dispatch, following the error classes of SPEC 7.1. */
@@ -413,6 +423,8 @@ export function toolErrorBody(action: ActionId, error: unknown): ToolErrorBody {
     if (error.holder !== undefined) body.holder = error.holder;
   }
   if (error instanceof NotImplementedError) body.milestone = error.milestone;
+  const wait = retryAfterOf(error);
+  if (wait !== undefined) body.retryAfter = wait;
   return body;
 }
 

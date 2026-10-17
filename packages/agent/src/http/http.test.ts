@@ -28,7 +28,7 @@ import {
   takesIdempotencyKey,
   trustsProxy,
 } from './dispatch.ts';
-import { errorBodyOf } from './errors.ts';
+import { errorBodyOf, errorResponse } from './errors.ts';
 import { runtimeManifest } from './manifest.ts';
 
 const LOCAL = 'http://localhost:4321';
@@ -171,6 +171,46 @@ describe('the error body', () => {
       current: { deck: {} },
       holder: { kind: 'human', name: 'kevin' },
     });
+  });
+});
+
+/* the store's write freeze as packages/store/src/migrate.ts throws it (StorageFrozenError); the
+   agent package does not depend on the store, so the test carries the same three fields */
+class FrozenStore extends Error {
+  readonly status = 503;
+  readonly retryAfter = 30;
+  constructor() {
+    super('Saving is paused while the documents move between stores');
+    this.name = 'StorageFrozenError';
+  }
+}
+
+describe('a refusal that names its wait (docs/hosting.md 10)', () => {
+  it('answers 503 with Retry-After and retryAfter in the body, and no wait for other errors', async () => {
+    const frozen = createDispatcher();
+    frozen.register('deck.info', () => {
+      throw new FrozenStore();
+    });
+    const answer = await handleActionRequest(post('/api/actions/deck.info', {}), 'deck.info', {
+      dispatcher: frozen,
+      env: {},
+      defaultDeck: 'fixture',
+    });
+    expect(answer.status).toBe(503);
+    expect(answer.headers.get('retry-after')).toBe('30');
+    expect(await answer.json()).toEqual({
+      error: {
+        name: 'StorageFrozenError',
+        status: 503,
+        message: 'Saving is paused while the documents move between stores',
+        action: 'deck.info',
+        retryAfter: 30,
+      },
+    });
+    const plain = errorResponse(new Error('a bug'), 'deck.info');
+    expect(plain.status).toBe(500);
+    expect(plain.headers.get('retry-after')).toBeNull();
+    expect(errorBodyOf(new Error('a bug')).error.retryAfter).toBeUndefined();
   });
 });
 

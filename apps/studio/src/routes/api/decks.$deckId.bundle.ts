@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { refuse } from '@turboslide/agent/http/errors';
+import { errorResponse, refuse } from '@turboslide/agent/http/errors';
+import { retryAfterOf } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MEDIA_TYPE } from '@turboslide/store/bundle';
 
@@ -70,6 +71,9 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
           const message = error instanceof Error ? error.message : String(error);
           if (error instanceof RangeError) return refuse(404, 'unknown_deck', message);
           if (error instanceof TypeError) return refuse(400, 'invalid_input', message);
+          // a store refusal that names its wait (the layout read; docs/hosting.md 10): 503 with
+          // `retry-after`
+          if (retryAfterOf(error) !== undefined) return errorResponse(error, 'deck.pack');
           return Response.json({ error: { name: 'Error', message, status: 500 } }, { status: 500 });
         }
         const summary = {

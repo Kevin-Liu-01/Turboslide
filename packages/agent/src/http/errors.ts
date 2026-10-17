@@ -3,7 +3,12 @@
 // MCP tool error carries (packages/mcp/src/tools.ts toolErrorBody) so a client parses one form.
 // A ConflictError carries the current document and the lease holder (409), malformed input the
 // code and a JSON pointer (400), a declared but unimplemented action its milestone (501).
-import { ConflictError, NotImplementedError, errorStatus } from '@turboslide/schema/errors';
+import {
+  ConflictError,
+  NotImplementedError,
+  errorStatus,
+  retryAfterOf,
+} from '@turboslide/schema/errors';
 
 import { InvalidInputError } from '../dispatch.ts';
 
@@ -41,6 +46,8 @@ export type HttpError = {
   current?: unknown;
   holder?: unknown;
   milestone?: string;
+  /** The seconds a 503 asks the caller to wait (the write freeze's 30), also sent as `Retry-After`. */
+  retryAfter?: number;
 };
 
 export type HttpErrorBody = { error: HttpError };
@@ -66,6 +73,8 @@ export function errorBodyOf(error: unknown, action?: string): HttpErrorBody {
     if (error.holder !== undefined) body.holder = error.holder;
   }
   if (error instanceof NotImplementedError) body.milestone = error.milestone;
+  const wait = retryAfterOf(error);
+  if (wait !== undefined) body.retryAfter = wait;
   return { error: body };
 }
 
@@ -77,10 +86,18 @@ export function jsonResponse(
   return new Response(JSON.stringify(value), { status, headers: { ...JSON_HEADERS, ...headers } });
 }
 
-/** A Response for a thrown error. */
+/**
+ * A Response for a thrown error. A 503 that names its wait (the store's write freeze, docs/hosting.md
+ * 10) carries it as `Retry-After` and in the body's `retryAfter`.
+ */
 export function errorResponse(error: unknown, action?: string): Response {
   const body = errorBodyOf(error, action);
-  return jsonResponse(body, body.error.status);
+  const wait = body.error.retryAfter;
+  return jsonResponse(
+    body,
+    body.error.status,
+    wait === undefined ? {} : { 'retry-after': String(wait) },
+  );
 }
 
 /** A refusal the transport itself makes, before or instead of a dispatch. */

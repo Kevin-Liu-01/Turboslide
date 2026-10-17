@@ -3,8 +3,8 @@ import { join } from 'node:path';
 
 import { waitUntil } from '@vercel/functions';
 
-import type { RgbaImage } from '@turboslide/effects/image';
 import { decodeImage, encodePngRgba } from '@turboslide/effects/io';
+import { downsample } from '@turboslide/effects/resample';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import type { RenderJobResult } from '@turboslide/render-worker/jobs/render';
@@ -36,11 +36,12 @@ import {
 /**
  * Static thumbnails for the grid, the home cards and the viewer's sidebar (SPEC 5.5, 6.2;
  * MILESTONES M3 item 5). A thumbnail is the render worker's 1x screenshot of a slide
- * (`/api/render/:slideId`, the facade of M2), downsized here by area averaging to one of three
- * widths and named by a stamp: the slide's own content stamp (`slideStamp`, FNV-1a over its
- * canonical JSON, the stamp the editor computes for the same slide) or the name the URL carries as
- * `r` (the deck revision on the home cards). The editor's filmstrip asks for none of this since
- * round four: its cards are live clones (gslides-parity SPEC-4 0.30).
+ * (`/api/render/:slideId`, the facade of M2), downsized by area averaging (`downsample` of
+ * @turboslide/effects/resample) to one of three widths and named by a stamp: the slide's own
+ * content stamp (`slideStamp`, FNV-1a over its canonical JSON, the stamp the editor computes for
+ * the same slide) or the name the URL carries as `r` (the deck revision on the home cards). The
+ * editor's filmstrip asks for none of this since round four: its cards are live clones
+ * (gslides-parity SPEC-4 0.30).
  *
  * Two caches (SPEC-4 0.31, 3.2):
  *
@@ -259,60 +260,6 @@ export function thumbShot(
     light: thumbUrl(deckId, slideId, 'light', width, revision, grant),
     dark: thumbUrl(deckId, slideId, 'dark', width, revision, grant),
   };
-}
-
-/**
- * Area-averaging downsample of an RGBA image to a width, keeping the aspect: every destination
- * pixel is the mean of the source box it covers, with fractional coverage at the box edges, so
- * 1600 to 640 (2.5 source pixels per destination pixel) is as exact as 1600 to 320 (5).
- */
-export function downsample(image: RgbaImage, width: number): RgbaImage {
-  const height = Math.max(1, Math.round((image.height * width) / image.width));
-  if (width >= image.width) return image;
-  const sx = image.width / width;
-  const sy = image.height / height;
-  const out = new Uint8Array(width * height * 4);
-  const src = image.data;
-  for (let dy = 0; dy < height; dy += 1) {
-    const y0 = dy * sy;
-    const y1 = Math.min(image.height, (dy + 1) * sy);
-    const yStart = Math.floor(y0);
-    const yEnd = Math.ceil(y1);
-    for (let dx = 0; dx < width; dx += 1) {
-      const x0 = dx * sx;
-      const x1 = Math.min(image.width, (dx + 1) * sx);
-      const xStart = Math.floor(x0);
-      const xEnd = Math.ceil(x1);
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      let a = 0;
-      let weight = 0;
-      for (let y = yStart; y < yEnd; y += 1) {
-        const wy = Math.min(y + 1, y1) - Math.max(y, y0);
-        if (wy <= 0) continue;
-        for (let x = xStart; x < xEnd; x += 1) {
-          const wx = Math.min(x + 1, x1) - Math.max(x, x0);
-          if (wx <= 0) continue;
-          const w = wx * wy;
-          const i = (y * image.width + x) * 4;
-          r += (src[i] ?? 0) * w;
-          g += (src[i + 1] ?? 0) * w;
-          b += (src[i + 2] ?? 0) * w;
-          a += (src[i + 3] ?? 255) * w;
-          weight += w;
-        }
-      }
-      const o = (dy * width + dx) * 4;
-      if (weight > 0) {
-        out[o] = Math.round(r / weight);
-        out[o + 1] = Math.round(g / weight);
-        out[o + 2] = Math.round(b / weight);
-        out[o + 3] = Math.round(a / weight);
-      }
-    }
-  }
-  return { width, height, data: out };
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -212,6 +212,11 @@ type Member = {
   reauthAt: number | null;
   /** a socket without a ticket must send `join` by this time */
   joinBy: number | null;
+  /**
+   * The `since` the upgrade of a socket without a ticket named: its join's hello replays the
+   * entries above it (3.2 "A join"). Absent once the join verified, and for an upgrade without one.
+   */
+  joinSince?: number;
   /** the presence budget's fixed window */
   presenceWindow: { second: number; count: number };
   /**
@@ -236,6 +241,8 @@ type Attachment = {
   slideId?: string;
   hueSlot?: number;
   joinBy?: number | null;
+  /** the upgrade's `since` until the join verifies, so a wake before the join keeps the replay */
+  joinSince?: number;
   /**
    * when the object asked for a fresh ticket (3.3's reauth), so the 10 s grace survives a
    * hibernation wake: before this the deadline lived in memory alone, a revoked viewer's object
@@ -516,10 +523,25 @@ export class DeckRoom extends DurableObject<Env> {
         lastMessageAt: ctx.getWebSocketAutoResponseTimestamp(ws)?.getTime() ?? attachment.joinedAt,
         reauthAt: attachment.reauthAt ?? null,
         joinBy: attachment.joinBy ?? null,
+        ...(typeof attachment.joinSince === 'number' ? { joinSince: attachment.joinSince } : {}),
         presenceWindow: { second: 0, count: 0 },
         ...(attachment.claims === null ? {} : { restored: true as const }),
         ...(typeof attachment.hueSlot === 'number' ? { keptHueSlot: attachment.hueSlot } : {}),
       };
+      // two sockets of one client id: a reconnect whose older socket the runtime still holds
+      // (its edge connection dropped without a close this object read, and the retire's close
+      // got no answer). The newer one keeps the place and the older one closes as superseded.
+      // Before this the map kept whichever came last and the older socket's late close dropped
+      // the member both shared, so the tab heard nothing while its socket stayed open
+      const held = this.members.get(member.cid);
+      if (held !== undefined && held.ws !== null) {
+        const keepHeld = held.joinedAt > member.joinedAt;
+        const older = keepHeld ? ws : held.ws;
+        this.byWs.delete(older);
+        this.closedHere.add(older);
+        this.closeWs(older, CLOSE_CODES.superseded, 'newer socket');
+        if (keepHeld) continue;
+      }
       this.members.set(member.cid, member);
       this.byWs.set(ws, member.cid);
       if (this.deckId === null && typeof attachment.claims?.deck === 'string')
@@ -886,6 +908,7 @@ export class DeckRoom extends DurableObject<Env> {
       lastMessageAt: now,
       reauthAt: null,
       joinBy: claims === null ? now + JOIN_WINDOW_MS : null,
+      ...(claims === null && Number.isFinite(since) ? { joinSince: since } : {}),
       presenceWindow: { second: 0, count: 0 },
     };
     this.members.set(cid, member);
@@ -1013,6 +1036,11 @@ export class DeckRoom extends DurableObject<Env> {
     member.cid = verdict.claims.cid;
     member.claims = verdict.claims;
     member.joinBy = null;
+    // the replay starts after the position the upgrade named, as for a ticket in the subprotocol
+    // (3.2); before this the join's hello replayed from the head, so a tab that reopened behind
+    // the head never received the entries under it
+    const since = member.joinSince;
+    delete member.joinSince;
     this.members.set(member.cid, member);
     if (member.ws !== null) this.byWs.set(member.ws, member.cid);
     this.writeAttachment(member);
@@ -1029,7 +1057,7 @@ export class DeckRoom extends DurableObject<Env> {
       }
     }
     if (this.verifiedSockets() === 1) this.ctx.waitUntil(this.noteOpenRow(now));
-    this.sayHello(member, verdict.claims, this.meta?.head ?? 0);
+    this.sayHello(member, verdict.claims, since ?? this.meta?.head ?? 0);
   }
 
   /** The open sockets whose ticket verified (a join socket counts once its join did). */
@@ -1526,9 +1554,11 @@ export class DeckRoom extends DurableObject<Env> {
   // -------------------------------------------------------------------------------------------
   // Members and sockets
 
+  /** The member whose socket this is; a socket a newer one of the same client replaced has none. */
   private memberOf(ws: WebSocket): Member | undefined {
     const cid = this.byWs.get(ws);
-    return cid === undefined ? undefined : this.members.get(cid);
+    const member = cid === undefined ? undefined : this.members.get(cid);
+    return member?.ws === ws ? member : undefined;
   }
 
   private writeAttachment(member: Member): void {
@@ -1543,6 +1573,7 @@ export class DeckRoom extends DurableObject<Env> {
       ...(member.entry?.slideId === undefined ? {} : { slideId: member.entry.slideId }),
       ...(member.entry === null ? {} : { hueSlot: member.entry.hueSlot }),
       joinBy: member.joinBy,
+      ...(member.joinSince === undefined ? {} : { joinSince: member.joinSince }),
       ...(member.reauthAt === null ? {} : { reauthAt: member.reauthAt }),
     };
     try {

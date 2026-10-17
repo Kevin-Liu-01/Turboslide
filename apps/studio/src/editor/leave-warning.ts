@@ -2,19 +2,23 @@
 // unit tested (leave-warning.test.ts); EditorRoot registers the listener on `beforeunload`.
 
 import { REFUSALS } from '@turboslide/chrome/menus/strings';
+import { heldBursts } from '@turboslide/viewer/InlineText';
 
 import type { EditorBackend } from './backend';
 import type { EditorSnapshot } from './controller';
 
 /**
  * The writes of this tab the server has not acknowledged: the room client's pending operations
- * (the controller's own count before the room attaches) and the deck writes that run on the
- * server, such as a picture upload, which the room counts only once they come back.
+ * (the controller's own count before the room attaches), the deck writes that run on the server,
+ * such as a picture upload, which the room counts only once they come back, and the text sessions
+ * holding typed keys their burst has not written yet (`held`, InlineText heldBursts; the burst
+ * waits TEXT_BURST_MS after the last key).
  */
 export function unsavedWrites(
   snapshot: Pick<EditorSnapshot, 'sync' | 'pending' | 'serverWrites'>,
+  held: number = heldBursts(),
 ): number {
-  return (snapshot.sync?.pending ?? snapshot.pending) + snapshot.serverWrites;
+  return (snapshot.sync?.pending ?? snapshot.pending) + snapshot.serverWrites + held;
 }
 
 /**

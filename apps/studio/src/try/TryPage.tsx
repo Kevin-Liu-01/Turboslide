@@ -34,8 +34,10 @@ declare global {
  * render, before the editor reads its backend. A navigation away from /try loads a new document in
  * the window around the frame (or in this one, standing alone), so the lockup, File > Open and New
  * Presentation never load a page inside the hero or carry the tab backend into another editor, and
- * a leave never asks for the browser's leave prompt (frame.ts `tryBlocker`). `still`
- * holds the agents at their first pose (the poster's capture).
+ * a leave never asks for the browser's leave prompt (frame.ts `tryBlocker`). The blocker's
+ * options are made once with the session: useBlocker registers again whenever its
+ * `shouldBlockFn` changes, so a new object on each render registered the blocker on each render.
+ * `still` holds the agents at their first pose (the poster's capture).
  */
 export function TryPage({
   search,
@@ -47,7 +49,8 @@ export function TryPage({
   onSearch: (patch: Partial<EditSearch>) => void;
 }) {
   const [session] = useState(() => trySession({ win: window, still }));
-  useBlocker(tryBlocker(window));
+  const [blocker] = useState(() => tryBlocker(window));
+  useBlocker(blocker);
   useMountEffect(() => {
     const stop = session.start();
     window.turboslideTry = {

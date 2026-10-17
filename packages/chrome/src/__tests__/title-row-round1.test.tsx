@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -303,6 +303,17 @@ describe('a presentation that lives in the tab alone (docs/SITE.md D10)', () => 
     }
     const { container } = render(<Harness input={input({ save: { state: 'unsaved' } })} />);
     expect(cell(container)?.textContent).toContain(TITLE_ROW.saving);
+  });
+
+  /* the shortcuts list (Cmd+/) printed the server's "Save (every change is saved automatically)"
+     on the hero too, whose Cmd+S says TAB_ONLY.doc */
+  it('names where the changes stay on the Save row of the shortcuts list', async () => {
+    render(<Harness input={input({ tabOnly, save: { state: 'saved' } })} />);
+    fireEvent.keyDown(document.body, { key: '/', code: 'Slash', metaKey: true });
+    const dialog = await screen.findByRole('dialog', { name: 'Keyboard shortcuts' });
+    const save = dialog.querySelector('tr[data-binding="key.save"]')?.textContent ?? '';
+    expect(save).toContain('changes stay in this browser tab and are gone when it closes');
+    expect(save).not.toContain('saved automatically');
   });
 
   it('keeps the autosave sentence on a presentation the server saves', () => {

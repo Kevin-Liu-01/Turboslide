@@ -18,6 +18,7 @@ export const ROWS: readonly string[] = [
   'home.title.press',
   'home.hero.poster-first',
   'home.budget.first-script',
+  'home.bar.narrow',
 ];
 
 type Theme = 'light' | 'dark';
@@ -27,6 +28,11 @@ const CELLS: readonly { width: number; height: number; theme: Theme }[] = [
   { width: 390, height: 844, theme: 'light' },
   { width: 390, height: 844, theme: 'dark' },
 ];
+
+/* the bar at a phone's narrow widths (2026-10-16: at 320 the bar's New Presentation scrolled /faq,
+   /home, /features and /about sideways by 37 px; under 390 site.css draws the lockup's T alone) */
+const NARROW_WIDTHS: readonly number[] = [320, 360, 390];
+const BAR_PAGES: readonly string[] = ['/home', '/features', '/about', '/faq', '/docs'];
 
 async function open(
   browser: Browser,
@@ -80,6 +86,43 @@ async function titleLines(
 }
 
 export function rows(): void {
+  test(title('home.bar.narrow'), async ({ browser }) => {
+    test.setTimeout(240_000);
+    const notes: string[] = [];
+    for (const width of NARROW_WIDTHS) {
+      const context = await browser.newContext({
+        extraHTTPHeaders,
+        viewport: { width, height: 800 },
+      });
+      try {
+        const page = await context.newPage();
+        for (const path of BAR_PAGES) {
+          const label = `${width} ${path}`;
+          expect((await page.goto(path))?.status(), `${label} answers 200`).toBe(200);
+          await page.locator('.ts-site[data-hydrated]').waitFor({ timeout: 60_000 });
+          await page.evaluate(() => document.fonts.ready);
+          const facts = await page.evaluate(() => ({
+            wide: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            window: document.documentElement.clientWidth,
+            bar: Math.max(
+              ...[...document.querySelectorAll('.site-bar-row > *')].map(
+                (el) => el.getBoundingClientRect().right,
+              ),
+            ),
+          }));
+          notes.push(`${label}: overflow ${facts.wide}, bar to ${Math.round(facts.bar)}`);
+          expect(facts.wide, `${label}: nothing wider than the viewport`).toBeLessThanOrEqual(0);
+          expect(facts.bar, `${label}: the bar ends inside the 16 px side`).toBeLessThanOrEqual(
+            facts.window - 16 + 0.5,
+          );
+        }
+      } finally {
+        await context.close();
+      }
+    }
+    test.info().annotations.push({ type: 'bar', description: notes.join(' | ') });
+  });
+
   test(title('home.page.layout'), async ({ browser }) => {
     test.setTimeout(240_000);
     const notes: string[] = [];

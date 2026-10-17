@@ -106,3 +106,16 @@ export function errorStatus(error: unknown): number {
   if (error instanceof RangeError) return 404;
   return 500;
 }
+
+/**
+ * The seconds a 503 refusal asks its caller to wait, from the `retryAfter` it carries: the store's
+ * StorageFrozenError (30 s, the write freeze of docs/hosting.md 10) and StorageLayoutError (5 s,
+ * the layout read). Undefined for any other error, so a route sends `Retry-After` only with a
+ * wait the refusal named.
+ */
+export function retryAfterOf(error: unknown): number | undefined {
+  if (errorStatus(error) !== 503) return undefined;
+  const wait = (error as { retryAfter?: unknown } | null)?.retryAfter;
+  if (typeof wait !== 'number' || !Number.isFinite(wait) || wait <= 0) return undefined;
+  return Math.ceil(wait);
+}

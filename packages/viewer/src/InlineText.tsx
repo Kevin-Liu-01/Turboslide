@@ -785,6 +785,23 @@ function sessionCaret(key: string): number | undefined {
   return sessionCarets.get(key)?.() ?? undefined;
 }
 
+/* the sessions holding keystrokes their burst timer has not written yet (TEXT_BURST_MS), each with
+   the flush that writes them now. A session joins on a keystroke and leaves when its burst is
+   written or it ends. The page reads the count for its leave warning and flushes them before it
+   stops the room on `pagehide` and when the tab is hidden (EditorRoot), so a leave inside the
+   100 ms after the last keystroke drops nothing */
+const heldBurstFlushes = new Set<() => void>();
+
+/** How many sessions hold typed keys their burst has not written yet. */
+export function heldBursts(): number {
+  return heldBurstFlushes.size;
+}
+
+/** Writes every held burst now, through each session's own burst write (onBurst). */
+export function flushHeldBursts(): void {
+  for (const flush of [...heldBurstFlushes]) flush();
+}
+
 /**
  * An offset of an editable's text with the white space at the paragraph ends kept (`raw`, the
  * burst's raw form) carried into the same text with those ends trimmed (`trimmed`, what a write
@@ -1881,6 +1898,8 @@ export function InlineText({
   const lastBurst = useRef('');
   const done = useRef(false);
   const burstTimer = useRef(0);
+  /* this session's entry in heldBurstFlushes while its burst timer runs */
+  const heldFlush = useRef<(() => void) | null>(null);
   const popover = useRef<HTMLDivElement>(null);
   const chip = useRef<HTMLDivElement>(null);
   /* the drawn size of the popover or the chip and the box of their offset parent, read once drawn
@@ -2046,9 +2065,16 @@ export function InlineText({
     if (range !== null) restoreSelection(element, options.current.multiline, range);
   };
 
-  const flushBurst = () => {
+  /** Ends the burst timer and leaves the held set. */
+  const releaseBurst = () => {
     window.clearTimeout(burstTimer.current);
     burstTimer.current = 0;
+    if (heldFlush.current !== null) heldBurstFlushes.delete(heldFlush.current);
+    heldFlush.current = null;
+  };
+
+  const flushBurst = () => {
+    releaseBurst();
     if (done.current) return;
     const text = readText();
     const raw = options.current.multiline
@@ -2150,7 +2176,9 @@ export function InlineText({
   };
 
   const scheduleBurst = () => {
-    window.clearTimeout(burstTimer.current);
+    releaseBurst();
+    heldFlush.current = flushBurst;
+    heldBurstFlushes.add(flushBurst);
     burstTimer.current = window.setTimeout(flushBurst, TEXT_BURST_MS);
   };
 
@@ -2217,8 +2245,8 @@ export function InlineText({
   const finish = (reason: InlineTextEndReason) => {
     if (done.current) return;
     done.current = true;
-    window.clearTimeout(burstTimer.current);
-    burstTimer.current = 0;
+    /* the final write below carries the held keystrokes */
+    releaseBurst();
     const text = readText();
     /* the final write diffs like a burst: the caret it ends at, read while the run is editable */
     endCaret.current = liveCaret();

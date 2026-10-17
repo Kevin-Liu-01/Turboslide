@@ -14,7 +14,8 @@ import { SiteLink } from './SiteLink';
  * /home; then `slot` (the docs put their search there); then Features, Documentation, About, FAQ
  * and GitHub (About, FAQ and GitHub leave under 1024 px), one hairline, the
  * product's own theme button, Sign In and New Presentation with its solid plus. At 720 px and
- * under the row keeps the lockup, the slot, the theme button and New Presentation (site.css).
+ * under the row keeps the lockup, the slot, the theme button and New Presentation (site.css);
+ * under 390 px the lockup keeps its T and drops the word, so the row fits the column.
  *
  * Sign In appears after hydration, once the deployment answers that it offers a method
  * (home/sign-in.tsx); its slot is drawn at its width from the first paint, so its arrival moves

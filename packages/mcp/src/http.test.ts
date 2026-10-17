@@ -298,6 +298,44 @@ describe('createMcpHttpHandler', () => {
     expect(handler.sessions()).toHaveLength(0);
   });
 
+  /* the store's write freeze and its layout read carry `status` 503 and `retryAfter`
+     (packages/store/src/migrate.ts; docs/hosting.md 10): a session the store cannot open now is a
+     503 with Retry-After, never a 500 */
+  it('answers a store refusal the factory throws with 503 and its Retry-After', async () => {
+    const handler = createMcpHttpHandler({
+      createServer: () => {
+        throw Object.assign(new Error('Saving is paused while the documents move between stores'), {
+          name: 'StorageFrozenError',
+          status: 503,
+          retryAfter: 30,
+        });
+      },
+    });
+    closers.push(() => handler.close());
+    const answer = await handler.handle(
+      new Request('http://localhost:4321/mcp', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json, text/event-stream',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'initialize',
+          params: {
+            protocolVersion: '2025-06-18',
+            capabilities: {},
+            clientInfo: { name: 'x', version: '0' },
+          },
+        }),
+      }),
+    );
+    expect(answer.status).toBe(503);
+    expect(answer.headers.get('retry-after')).toBe('30');
+    expect(handler.sessions()).toHaveLength(0);
+  });
+
   describe('the key binding of round three (SPEC-3 3.10, 7.7)', () => {
     const keys: Record<string, KeyBinding> = {
       'Bearer ts_one': {

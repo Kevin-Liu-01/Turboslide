@@ -6,6 +6,7 @@ import { safeEqual } from '@turboslide/identity/safe-equal';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { ACTIONS } from '@turboslide/schema/actions';
+import { retryAfterOf } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import {
@@ -155,6 +156,8 @@ async function jobFile(
       },
     });
   } catch (error) {
+    const waited = storeWait(error);
+    if (waited !== null) return waited;
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof RangeError ? 404 : 502;
     return pathlessJson(
@@ -181,6 +184,22 @@ function pathlessJson(value: unknown, init?: ResponseInit): Response {
   return Response.json(withoutServerPaths(value), init);
 }
 
+/**
+ * A store refusal that names its wait (the write freeze's StorageFrozenError, 30 s, and the
+ * layout read's StorageLayoutError; docs/hosting.md 10): 503 with `retry-after` and the wait in
+ * the body, so the caller exports again after it. Null for any other error, which keeps the
+ * route's own status.
+ */
+function storeWait(error: unknown, headers: Record<string, string> = {}): Response | null {
+  const wait = retryAfterOf(error);
+  if (wait === undefined) return null;
+  const message = error instanceof Error ? error.message : String(error);
+  return pathlessJson(
+    { error: { message, status: 503, retryAfter: wait } },
+    { status: 503, headers: { ...headers, 'retry-after': String(wait) } },
+  );
+}
+
 /** True when the worker's job was submitted for this deck. */
 async function jobOfDeck(jobId: string, deckId: string): Promise<boolean> {
   const job = await worker()
@@ -202,8 +221,10 @@ function badRequest(message: string): Response {
   return pathlessJson({ error: { message, status: 400 } }, { status: 400 });
 }
 
-/** A batch step's error as the route answers it: 404 for a missing deck or job, 400 for a bad input, 502 otherwise. */
+/** A batch step's error as the route answers it: a store refusal's 503 (storeWait), 404 for a missing deck or job, 400 for a bad input, 502 otherwise. */
 function batchError(error: unknown): Response {
+  const waited = storeWait(error);
+  if (waited !== null) return waited;
   const message = error instanceof Error ? error.message : String(error);
   const status = error instanceof RangeError ? 404 : error instanceof TypeError ? 400 : 502;
   return pathlessJson({ error: { message, status } }, { status });
@@ -325,6 +346,8 @@ async function syncExport(
       link: (target) => storedFileLink(target, ctx),
     });
   } catch (error) {
+    const waited = storeWait(error, { 'x-turboslide-sync': mode });
+    if (waited !== null) return waited;
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof RangeError ? 404 : 502;
     return pathlessJson(
@@ -490,6 +513,8 @@ export const Route = createFileRoute('/api/export/$deckId')({
             { status: 202, headers: { location } },
           );
         } catch (error) {
+          const waited = storeWait(error);
+          if (waited !== null) return waited;
           const message = error instanceof Error ? error.message : String(error);
           return pathlessJson({ error: { message, status: 502 } }, { status: 502 });
         }
@@ -529,6 +554,8 @@ export const Route = createFileRoute('/api/export/$deckId')({
           );
           return pathlessJson({ deckId: params.deckId, jobs, worker: worker().mode });
         } catch (error) {
+          const waited = storeWait(error);
+          if (waited !== null) return waited;
           const message = error instanceof Error ? error.message : String(error);
           return pathlessJson({ error: { message, status: 502 } }, { status: 502 });
         }

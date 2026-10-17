@@ -2455,6 +2455,7 @@ export function EditorShell({
           <ShortcutsDialog.Component
             platform={platform}
             context={menuContext}
+            tabOnly={input.tabOnly !== undefined}
             onClose={closeDialog}
           />
         );

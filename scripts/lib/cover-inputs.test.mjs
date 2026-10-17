@@ -1,4 +1,4 @@
-// The GT cover's inputs (scripts/lib/cover-inputs.ts; hardening HR-PS#10): the committed cover was
+// The GT cover's inputs (scripts/lib/cover-inputs.mjs; hardening HR-PS#10): the committed cover was
 // rendered from the seed deck as it is now, so an edit to the slide it pictures, that slide's
 // picture or the deck's settings fails `pnpm test` until `node scripts/build-brand.ts --cover`
 // renders the cover again; step 29 (`build-brand.ts --check`) refuses the same. On a copy of the
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { GT_COVER } from '../../packages/theme/brand/site.ts';
-import { coverInputs } from './cover-inputs.ts';
+import { coverInputs } from './cover-inputs.mjs';
 
 const SEED = fileURLToPath(new URL(`../../decks/${GT_COVER.deck}`, import.meta.url));
 const SLIDE = `slides/${GT_COVER.slide}.json`;
@@ -99,6 +99,23 @@ describe('what the digest reads (coverInputs)', () => {
     write('deck.json', deck);
     expect(digest()).toBe(before);
     expect(seen.size).toBe(5);
+  });
+
+  it('moves with the deck’s sections, the cover slide unchanged: a section renamed, a slide moved', () => {
+    const before = digest();
+    const deck = json('deck.json');
+    const [first, ...rest] = deck.sections;
+    write('deck.json', {
+      ...deck,
+      sections: [{ ...first, name: `${first.name} renamed` }, ...rest],
+    });
+    const renamed = digest();
+    const [a, b, ...others] = first.slideIds;
+    write('deck.json', { ...deck, sections: [{ ...first, slideIds: [b, a, ...others] }, ...rest] });
+    const moved = digest();
+    write('deck.json', deck);
+    expect(new Set([before, renamed, moved]).size).toBe(3);
+    expect(digest()).toBe(before);
   });
 
   it('refuses a missing input by its path', () => {

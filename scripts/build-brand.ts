@@ -125,7 +125,7 @@ import {
 } from '../packages/theme/src/brand.ts';
 import type { Quad, TileGeometry } from '../packages/theme/src/brand.ts';
 
-import { COVER_INPUTS_DIGITS, coverInputs } from './lib/cover-inputs.ts';
+import { COVER_INPUTS_DIGITS, coverInputs } from './lib/cover-inputs.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC_DIR = 'apps/studio/public';
@@ -1157,7 +1157,7 @@ async function renderCard(
 // route answered. The name carries the first 8 hex digits of the file's sha256 and the run removes
 // every other file in the folder, so the year that the `/brand/cover/**` route rule grants never
 // keeps old pixels. GT_COVER.inputs records the seed deck's inputs the file was rendered from
-// (scripts/lib/cover-inputs.ts), and the check refuses a cover whose deck has moved on: before
+// (scripts/lib/cover-inputs.mjs), and the check refuses a cover whose deck has moved on: before
 // it, an edit to the GT deck's first slide, its picture or the deck's settings passed every check
 // while /decks went on showing the old cover for a year.
 
@@ -1168,7 +1168,7 @@ const COVER_PATH_PATTERN = /\/brand\/cover\/[a-z0-9-]+-[0-9a-f]{8}\.png/g;
 /** GT_COVER.inputs in site.ts, rewritten by the cover run beside the path. */
 const COVER_INPUTS_PATTERN = new RegExp(`inputs: '[0-9a-f]{${COVER_INPUTS_DIGITS}}'`, 'g');
 
-/** The digest of the seed deck's inputs the cover pictures (scripts/lib/cover-inputs.ts). */
+/** The digest of the seed deck's inputs the cover pictures (scripts/lib/cover-inputs.mjs). */
 function seedCoverInputs(): string {
   return coverInputs(resolve(ROOT, 'decks', GT_COVER.deck), GT_COVER.slide);
 }
@@ -1246,7 +1246,7 @@ async function writeCover(base: string): Promise<Output> {
 
 /**
  * The committed cover: named by its own sha256, the size GT_COVER states, alone in its folder, and
- * rendered from the seed deck as it is now (GT_COVER.inputs against scripts/lib/cover-inputs.ts).
+ * rendered from the seed deck as it is now (GT_COVER.inputs against scripts/lib/cover-inputs.mjs).
  */
 async function checkCover(): Promise<void> {
   const file = resolve(ROOT, `${PUBLIC_DIR}${GT_COVER.path}`);

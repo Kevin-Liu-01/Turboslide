@@ -114,6 +114,12 @@ export const MAX_CONCURRENCY = 128;
 export const TRIES = 5;
 /** The public documents and the old twins leave in batches of this many paths (11.5). */
 export const DELETE_BATCH = 50;
+/**
+ * The removal batches of one call in flight at a time, each tried on its own (`tried`), so a 429
+ * holds back only its own batch. migrate.test.ts removes through a store that refuses every batch
+ * over four in flight and every tenth batch with a 429 that asks for a second.
+ */
+export const DELETE_IN_FLIGHT = 4;
 /** The rows an answer lists; `rowCount` counts them all. */
 export const ROWS_LISTED = 200;
 
@@ -825,12 +831,44 @@ function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
   return true;
 }
 
-/** Removes paths in batches of DELETE_BATCH, each batch tried as one store call. */
-async function removeAll(call: Call, client: BlobClient, paths: string[]): Promise<void> {
-  for (let i = 0; i < paths.length; i += DELETE_BATCH) {
-    const batch = paths.slice(i, i + DELETE_BATCH);
-    await tried(call, batch[0] ?? '', () => client.del(batch, { signal: call.signal }));
-  }
+/** What one call of `removeAll` removed, and how many of its paths are left for the next call. */
+type Removal = { removed: number; left: number };
+
+/**
+ * Removes paths in batches of DELETE_BATCH, `inFlight` batches at a time, each tried as one store
+ * call. No batch starts once the call's budget is out (`outOfBudget`). A batch the budget cut, or
+ * one that failed TRIES times (a row), stays, and the answer counts it as left: each step lists
+ * again on its next call. Before HR-K1#4b's fix the batches ran one after another with no budget
+ * check, so a removal longer than the budget met the call's abort and the route answered 500
+ * (production's `delete`, calls 2 to 6 on 2026-10-17).
+ */
+async function removeAll(
+  call: Call,
+  client: BlobClient,
+  paths: string[],
+  inFlight = DELETE_IN_FLIGHT,
+): Promise<Removal> {
+  const batches: string[][] = [];
+  for (let i = 0; i < paths.length; i += DELETE_BATCH)
+    batches.push(paths.slice(i, i + DELETE_BATCH));
+  const stop = outOfBudget(call);
+  let removed = 0;
+  await pool(
+    batches,
+    inFlight,
+    async (batch) => {
+      try {
+        await tried(call, batch[0] ?? '', () => client.del(batch, { signal: call.signal }));
+        removed += batch.length;
+      } catch (error) {
+        // a batch the budget ended is no fault of the store's: the next call removes it
+        if (!call.signal.aborted && !stop())
+          row(call, `${batch[0]} and ${batch.length - 1} more: not removed: ${messageOf(error)}`);
+      }
+    },
+    stop,
+  );
+  return { removed, left: paths.length - removed };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -963,7 +1001,15 @@ async function copyStep(call: Call): Promise<MigrationResult> {
     const extra = (await privateDocuments(call.documents, { signal: call.signal }))
       .map((entry) => entry.pathname)
       .filter((path) => !planned.has(path));
-    await removeAll(call, call.documents, extra);
+    const { left } = await removeAll(call, call.documents, extra);
+    // the cursor stays at 0, so the next call lists the private store and removes them first
+    if (left > 0)
+      return answer(call, {
+        done: false,
+        processed: 0,
+        remaining: plan.entries.length,
+        note: `${left} private documents the plan does not name are left to remove; the next call removes them before it copies`,
+      });
   }
   const version = new Map(plan.entries.map(([path, etag]) => [path, etag]));
   const retry = progress.failed ?? [];
@@ -1196,8 +1242,11 @@ async function rollbackStep(call: Call): Promise<MigrationResult> {
     },
     outOfBudget(call),
   );
-  if (left === 0 && failures === 0) await removeAll(call, call.legacy, removals);
-  const done = left === 0 && failures === 0;
+  // v1 is written only once every removal landed: a planned document left on the public store
+  // would read again there as the document v2 removed
+  const removal =
+    left === 0 && failures === 0 ? await removeAll(call, call.legacy, removals) : null;
+  const done = removal !== null && removal.left === 0;
   if (done) {
     call.progress.rolledBackAt = iso(call.clock());
     await writeLayout(call, { state: 'v1', frozen: null, opensAt: call.clock() + OPEN_AFTER_MS });
@@ -1205,8 +1254,8 @@ async function rollbackStep(call: Call): Promise<MigrationResult> {
   const seconds = Math.max(1, call.clock() - began) / 1000;
   return answer(call, {
     done,
-    processed: copied + (done ? removals.length : 0),
-    remaining: left + failures + (done ? 0 : removals.length),
+    processed: copied + (removal?.removed ?? 0),
+    remaining: left + failures + (removal?.left ?? removals.length),
     listMs,
     perSecond: Math.round(copied / seconds),
   });
@@ -1254,7 +1303,9 @@ export function deleteRefusal(
  * (not the public record's), the twins at the old place `decks/<id>/assets/` that the key lacks are
  * copied under it, then the old place leaves once the key holds every one of its names (else the
  * deck is a row and keeps them); then each public document whose etag is the plan's
- * leaves in batches, and any other stays with a row. Each call lists again, so it resumes anywhere.
+ * leaves in batches (`removeAll`, inside the call's budget), and any other stays with a row. A call
+ * whose budget ends first answers `done: false` with the count left. Each call lists again, so it
+ * resumes anywhere.
  */
 async function deleteStep(call: Call): Promise<MigrationResult> {
   const refusal = deleteRefusal(call.progress, call.layout, {
@@ -1275,6 +1326,7 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
   }
   let processed = 0;
   let failures = 0;
+  let unfinished = 0;
   const left = await pool(
     [...old.keys()],
     Math.min(call.concurrency, 8),
@@ -1293,8 +1345,10 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
           throw new Error(
             `${lacking.length} not under the key yet (${lacking.slice(0, 3).join(', ')}); the next call tries again`,
           );
-        await removeAll(call, call.legacy, paths);
-        processed += paths.length;
+        // one batch at a time per deck: eight decks in flight are already eight removals
+        const removal = await removeAll(call, call.legacy, paths, 1);
+        processed += removal.removed;
+        if (removal.left > 0) unfinished += 1;
       } catch (error) {
         failures += 1;
         row(call, `${deckId}: its old twins stay: ${messageOf(error)}`);
@@ -1302,8 +1356,8 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
     },
     outOfBudget(call),
   );
-  if (left > 0 || failures > 0)
-    return answer(call, { done: false, processed, remaining: left + failures });
+  if (left > 0 || failures > 0 || unfinished > 0)
+    return answer(call, { done: false, processed, remaining: left + failures + unfinished });
   const plan = await readPlan(call);
   const planned = new Map(plan.entries.map(([path, etag]) => [path, etag]));
   const removable: string[] = [];
@@ -1312,8 +1366,16 @@ async function deleteStep(call: Call): Promise<MigrationResult> {
     if (line === null) removable.push(entry.pathname);
     else row(call, `${line}; delete kept it`);
   }
-  await removeAll(call, call.legacy, removable);
-  return answer(call, { done: true, processed: processed + removable.length });
+  const removal = await removeAll(call, call.legacy, removable);
+  return answer(call, {
+    done: removal.left === 0,
+    processed: processed + removal.removed,
+    remaining: removal.left,
+    note:
+      removal.left === 0
+        ? null
+        : `${removal.left} of ${removable.length} public documents of the plan are left; the next call lists them again`,
+  });
 }
 
 // ---------------------------------------------------------------------------------------------

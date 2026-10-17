@@ -13,8 +13,11 @@ import type { BlobClient } from './blob-store.ts';
 import { memoryBlobClient } from './blob-fake.ts';
 import {
   DELETE_AFTER_SWITCH_MS,
+  DELETE_BATCH,
+  DELETE_IN_FLIGHT,
   FREEZE_HOLD_MS,
   FREEZE_LIMIT_MS,
+  LANDING_MS,
   LIST_LAG_MS,
   MIGRATION_META,
   MIGRATION_PLAN,
@@ -752,6 +755,131 @@ describe('delete', () => {
     );
     expect(w.legacy.blobs.has(late)).toBe(false);
     expect(w.legacy.blobs.has('decks/gt-brand/assets/mark.ab12.png')).toBe(false);
+  });
+
+  /** A store of `extra` more documents through the window, rekey and verify, 3 hours after its switch. */
+  async function readyToDelete(extra: number) {
+    const w = world();
+    await w.seed();
+    for (let i = 0; i < extra; i += 1)
+      await w.legacy.put(`decks/big/versions/${String(i).padStart(4, '0')}.json`, body(`${i}`), {
+        overwrite: true,
+      });
+    const { switched } = await window(w);
+    const switchedAt = Date.parse(switched.switchedAt ?? '');
+    opens(w, switched);
+    expect(await w.run('rekey')).toMatchObject({ done: true, rekeyAfter: null });
+    expect(await w.run('verify')).toMatchObject({ rowCount: 0 });
+    w.t.now = switchedAt + DELETE_AFTER_SWITCH_MS;
+    const planned = [...(await publicDocuments(w.legacy)).map((e) => e.pathname)];
+    return { w, planned, backup: new Date(switchedAt + 3_600_000).toISOString() };
+  }
+
+  it('answers done false with the count left when its budget ends inside the removals, never a 500', async () => {
+    const { w, planned, backup } = await readyToDelete(1_000);
+    expect(planned.length).toBeGreaterThan(20 * DELETE_BATCH);
+    // each removal batch takes 20 s, and the call's signal aborts at the end of its budget, as
+    // AbortSignal.timeout does on production
+    const budgets: { controller: AbortController; at: number }[] = [];
+    const abortAfter = (ms: number) => {
+      const controller = new AbortController();
+      budgets.push({ controller, at: w.t.now + ms });
+      return controller.signal;
+    };
+    const legacy = w.clients.legacy;
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        w.t.now += 20_000;
+        for (const budget of budgets)
+          if (w.t.now >= budget.at)
+            budget.controller.abort(new DOMException('The budget ended', 'TimeoutError'));
+        options?.signal?.throwIfAborted();
+        await legacy.del(paths, options);
+      },
+    };
+    const first = await w.run('delete', { backupAt: backup, abortAfter });
+    expect(first).toMatchObject({ done: false, rowCount: 0 });
+    expect(first.processed).toBeGreaterThan(0);
+    expect(first.processed + first.remaining).toBe(planned.length);
+    expect(first.note).toMatch(/^\d+ of \d+ public documents of the plan are left; the next call/);
+    expect(planned.filter((path) => w.legacy.blobs.has(path))).toHaveLength(first.remaining);
+    // the batch the abort cut may still land: the lease holds LANDING_MS longer
+    await expect(w.run('delete', { backupAt: backup, abortAfter })).rejects.toThrow(
+      /another call holds the migration/,
+    );
+    const answers = [first];
+    while (!answers.at(-1)?.done && answers.length < 10) {
+      w.later(LANDING_MS);
+      answers.push(await w.run('delete', { backupAt: backup, abortAfter }));
+    }
+    expect(answers.at(-1)).toMatchObject({ done: true, remaining: 0, rowCount: 0 });
+    expect(planned.filter((path) => w.legacy.blobs.has(path))).toEqual([]);
+  });
+
+  it('keeps four removal batches in flight, and tries a batch the store refused with a 429 again', async () => {
+    const { w, planned, backup } = await readyToDelete(1_000);
+    const legacy = w.clients.legacy;
+    let inFlight = 0;
+    let most = 0;
+    let batches = 0;
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        inFlight += 1;
+        batches += 1;
+        most = Math.max(most, inFlight);
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          if (inFlight > DELETE_IN_FLIGHT || batches % 10 === 0)
+            throw Object.assign(
+              new Error('Vercel Blob: Too many requests, try again in 1 seconds'),
+              {
+                retryAfter: 1,
+              },
+            );
+          await legacy.del(paths, options);
+        } finally {
+          inFlight -= 1;
+        }
+      },
+    };
+    const gone = await w.run('delete', { backupAt: backup });
+    expect(gone).toMatchObject({
+      done: true,
+      remaining: 0,
+      rowCount: 0,
+      processed: planned.length,
+    });
+    expect(gone.retries).toBeGreaterThan(0);
+    expect(most).toBe(DELETE_IN_FLIGHT);
+    expect(planned.filter((path) => w.legacy.blobs.has(path))).toEqual([]);
+  });
+
+  it('names a batch that failed every try as a row and leaves it for the next call', async () => {
+    const { w, planned, backup } = await readyToDelete(200);
+    const legacy = w.clients.legacy;
+    const refused = planned[DELETE_BATCH] ?? '';
+    w.clients.legacy = {
+      ...legacy,
+      del: async (paths, options) => {
+        if (paths.includes(refused)) throw new Error('Vercel Blob: Access denied');
+        await legacy.del(paths, options);
+      },
+    };
+    const held = await w.run('delete', { backupAt: backup });
+    expect(held).toMatchObject({
+      done: false,
+      remaining: DELETE_BATCH,
+      rows: [`${refused} and ${DELETE_BATCH - 1} more: not removed: Vercel Blob: Access denied`],
+    });
+    expect(w.progress().busyUntil).toBeUndefined();
+    w.clients.legacy = legacy;
+    expect(await w.run('delete', { backupAt: backup })).toMatchObject({
+      done: true,
+      processed: DELETE_BATCH,
+    });
   });
 });
 

@@ -556,6 +556,10 @@ function imageBytes(images, until) {
   };
 }
 
+/** The GT cover's sources (hardening HR-PS#10): the render route before, the static file after. */
+const COVER_RENDER = '/api/render/opener-brand';
+const COVER_STATIC = '/brand/cover/';
+
 // The image entries of the page (SPEC-4 0.28): an <img>, a CSS background or any resource with an
 // image extension or the thumbnail route, with the bytes Resource Timing exposes for same origin
 // answers (a cross origin image without Timing-Allow-Origin reports zero and is counted as such).
@@ -824,6 +828,9 @@ async function routeLoads() {
         }
         const cards =
           route === '/decks' ? await page.locator('[data-control^="home.open."]').count() : null;
+        // the GT template card's cover (hardening HR-PS#10, PERF-15): its requests, by source
+        const coverOf = (prefix) =>
+          route === '/decks' ? res.images.filter((i) => i.name.startsWith(prefix)).length : null;
         const { images, ...rest } = res;
         samples[kind].push({
           ttfb: timing ? timing.responseStart : null,
@@ -842,6 +849,8 @@ async function routeLoads() {
           imagesAfterScrollCount: afterScroll ? afterScroll.count : null,
           images,
           cards,
+          coverRender: coverOf(COVER_RENDER),
+          coverStatic: coverOf(COVER_STATIC),
           lcpOk: lcpIsPlateOrTwin(res.lcpEl, res.lcpUrl),
           finalUrl: page.url(),
         });
@@ -946,6 +955,24 @@ async function routeLoads() {
           b.images,
           'bytes',
         );
+        /* PERF-15: the cover is a static file; no sample may ask the render function for it */
+        if (route === '/decks') {
+          const worst = (key) => Math.max(...list.map((s) => s[key] ?? 0));
+          assert(
+            'routes',
+            label('GT cover requests to the render function'),
+            worst('coverRender'),
+            0,
+            'count',
+          );
+          assert(
+            'routes',
+            label('GT cover requests to /brand/cover'),
+            worst('coverStatic'),
+            1,
+            'count',
+          );
+        }
       } else {
         assert(
           'routes',

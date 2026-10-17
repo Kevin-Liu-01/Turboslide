@@ -31,11 +31,25 @@ async function db(): Promise<AuthDb> {
 }
 
 describe('selectAuthDb', () => {
-  test('sqlite behind TURBOSLIDE_AUTH_DB, none otherwise, and DATABASE_URL selects nothing', () => {
+  test('sqlite behind TURBOSLIDE_AUTH_DB, none otherwise, and DATABASE_URL refused unless d1 is selected', () => {
     expect(selectAuthDb({}, '/repo')).toEqual({ kind: 'none', reason: expect.any(String) });
+    // HR-C#8 retired Postgres: a deployment that still sets DATABASE_URL fails loudly
+    const url = { DATABASE_URL: 'postgres://fake:fake@localhost/fake' };
+    expect(() => selectAuthDb(url, '/repo')).toThrow(/DATABASE_URL is no longer read/);
+    expect(() =>
+      selectAuthDb({ ...url, [AUTH_DB_VARIABLE]: '.turboslide/auth.sqlite' }, '/repo'),
+    ).toThrow(TypeError);
     expect(
-      selectAuthDb({ DATABASE_URL: 'postgres://fake:fake@localhost/fake' }, '/repo').kind,
-    ).toBe('none');
+      selectAuthDb(
+        {
+          ...url,
+          TURBOSLIDE_ACCOUNTS: 'd1',
+          TURBOSLIDE_ROOM_HOST: 'realtime.example.test',
+          TURBOSLIDE_ROOM_BEARER: 'a-test-bearer-value',
+        },
+        '/repo',
+      ).kind,
+    ).toBe('d1');
     const sqlite = selectAuthDb({ [AUTH_DB_VARIABLE]: '.turboslide/auth-b3.sqlite' }, '/repo');
     expect(sqlite).toEqual({
       kind: 'sqlite',
@@ -120,8 +134,14 @@ describe('selectAuthDb', () => {
     expect(() => selectAuthDb({ VERCEL: '1', [AUTH_DB_VARIABLE]: 'x.sqlite' }, '/repo')).toThrow(
       /TURBOSLIDE_ACCOUNTS=d1 instead/,
     );
-    const selection = selectAuthDb({ DATABASE_URL: 'postgres://user:secretpw@host/db' }, '/repo');
-    expect(JSON.stringify(selection)).not.toContain('secretpw');
+    let refusal = '';
+    try {
+      selectAuthDb({ DATABASE_URL: 'postgres://user:secretpw@host/db' }, '/repo');
+    } catch (error) {
+      refusal = String(error);
+    }
+    expect(refusal).toContain('DATABASE_URL');
+    expect(refusal).not.toContain('secretpw');
   });
 });
 

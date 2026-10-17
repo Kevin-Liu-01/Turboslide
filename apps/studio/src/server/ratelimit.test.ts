@@ -20,6 +20,7 @@ import {
   releaseQuota,
   tierOf,
   warnPerInstanceQuotas,
+  warnRetiredVariables,
 } from './ratelimit';
 import type { QuotaContext } from './ratelimit';
 
@@ -159,6 +160,24 @@ describe('the hosted degraded tier (VERIFICATION-3 finding 17)', () => {
     const ctx = { identity: 'anon_2', tier: 'anonymous' as const };
     for (let i = 0; i < 5; i += 1) expect(await checkQuota('exportsPerDay', ctx)).toBeNull();
     expect(await checkQuota('exportsPerDay', ctx)).toBeInstanceOf(RateLimitedError);
+  });
+
+  it('names REDIS_URL and the Upstash pair once when a deployment still sets them, on any platform, never with a value', () => {
+    expect(warnRetiredVariables({})).toBe(false);
+    expect(warnRetiredVariables({ REDIS_URL: ' ' })).toBe(false);
+    expect(lines).toHaveLength(0);
+    const env = {
+      REDIS_URL: 'redis://user:secretpw@host:6379',
+      UPSTASH_REDIS_REST_URL: 'https://example.upstash.io',
+    };
+    expect(warnRetiredVariables(env)).toBe(true);
+    expect(warnRetiredVariables(env)).toBe(false);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ event: 'config.degraded' });
+    expect(lines[0]?.reason).toContain('REDIS_URL, UPSTASH_REDIS_REST_URL are set');
+    expect(lines[0]?.reason).toContain('HR-C#8');
+    expect(JSON.stringify(lines[0])).not.toContain('secretpw');
+    expect(JSON.stringify(lines[0])).not.toContain('upstash.io');
   });
 });
 

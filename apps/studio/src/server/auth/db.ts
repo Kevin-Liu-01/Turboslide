@@ -33,6 +33,8 @@ export const AUTH_DB_VARIABLE = 'TURBOSLIDE_AUTH_DB';
 /** `d1` selects the Worker's D1 through the proxy (docs/CLOUDFLARE.md 4.2); no other value exists. */
 export const ACCOUNTS_VARIABLE = 'TURBOSLIDE_ACCOUNTS';
 export const ACCOUNTS_D1 = 'd1';
+/** The Postgres variable HR-C#8 retired; `selectAuthDb` refuses it unless D1 is selected. */
+const RETIRED_DATABASE_URL = 'DATABASE_URL';
 
 /** The sentence the Sign in row's absence stands on (SPEC-3 7.3), for the facts and the log. */
 export const NO_DATABASE_NOTICE =
@@ -63,8 +65,9 @@ export function dbBearerOf(env: Env): string {
  * root or the overlay), none otherwise. A hosted process may not name a SQLite file: its
  * filesystem does not outlive the instance (03 D1), so the variable is refused there with a
  * TypeError. The explicit `TURBOSLIDE_ACCOUNTS` wins over `TURBOSLIDE_AUTH_DB`, so a checkout
- * keeps its `TURBOSLIDE_AUTH_DB` row while it tries the Worker's D1. `DATABASE_URL` selects
- * nothing since HR-C#8.
+ * keeps its `TURBOSLIDE_AUTH_DB` row while it tries the Worker's D1. `DATABASE_URL` selected
+ * Postgres until HR-C#8; without `TURBOSLIDE_ACCOUNTS=d1` it is refused with a TypeError, so a
+ * deployment that still sets it fails loudly instead of running with no accounts database.
  */
 export function selectAuthDb(
   env: Env = process.env,
@@ -89,6 +92,10 @@ export function selectAuthDb(
       reason: `${ACCOUNTS_VARIABLE}=${ACCOUNTS_D1} over ${ROOM_HOST_VARIABLE}=${host.trim()}`,
     };
   }
+  if (isSet(env[RETIRED_DATABASE_URL]))
+    throw new TypeError(
+      `${RETIRED_DATABASE_URL} is no longer read (HR-C#8): Postgres accounts are gone; set ${ACCOUNTS_VARIABLE}=${ACCOUNTS_D1} instead`,
+    );
   const file = env[AUTH_DB_VARIABLE];
   if (isSet(file)) {
     if (isSet(env.VERCEL))

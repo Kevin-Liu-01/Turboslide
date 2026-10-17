@@ -442,9 +442,10 @@ const ACCOUNTS_ENV = 'TURBOSLIDE_ACCOUNTS';
 
 const LIMITER: unique symbol = Symbol.for('turboslide.studio.rateLimiter');
 const WARNED: unique symbol = Symbol.for('turboslide.studio.rateLimiter.warned');
+const RETIRED_WARNED: unique symbol = Symbol.for('turboslide.studio.retiredVariables.warned');
 
 /** The per process state on `globalThis`, so every module instance of a dev server shares it. */
-type LimiterGlobals = { [LIMITER]?: RateLimiter; [WARNED]?: boolean };
+type LimiterGlobals = { [LIMITER]?: RateLimiter; [WARNED]?: boolean; [RETIRED_WARNED]?: boolean };
 
 function store(): LimiterGlobals {
   return globalThis as unknown as LimiterGlobals;
@@ -486,6 +487,28 @@ export function warnPerInstanceQuotas(multiInstance: boolean): boolean {
   logSecurityEvent({
     event: 'config.degraded',
     reason: `no shared accounts database (${ACCOUNTS_ENV}=d1): the application quotas count per instance and do not hold across instances; the WAF rules of firewall/rules.json carry the limits`,
+  });
+  return true;
+}
+
+/** The variables HR-C#8 stopped reading: the Redis realtime tier and the Upstash limiter. */
+const RETIRED_VARIABLES = ['REDIS_URL', 'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
+
+/**
+ * A deployment that still sets a variable HR-C#8 stopped reading gets one `config.degraded` line
+ * per process naming the variables, never a value, on any platform: until HR-C#8 these variables
+ * made the quotas count across instances, and now nothing reads them. `true` when the line was
+ * written.
+ */
+export function warnRetiredVariables(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  const set = RETIRED_VARIABLES.filter((name) => (env[name] ?? '').trim() !== '');
+  if (set.length === 0 || store()[RETIRED_WARNED] === true) return false;
+  store()[RETIRED_WARNED] = true;
+  logSecurityEvent({
+    event: 'config.degraded',
+    reason: `${set.join(', ')} ${set.length === 1 ? 'is' : 'are'} set, but nothing reads ${set.length === 1 ? 'it' : 'them'} since HR-C#8: Redis no longer counts the quotas or carries the realtime tier; the quotas count in the accounts database (${ACCOUNTS_ENV}=d1), else per instance`,
   });
   return true;
 }

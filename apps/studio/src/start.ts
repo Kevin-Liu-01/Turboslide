@@ -103,6 +103,8 @@ async function bindServerSeams(): Promise<void> {
   // variables, and the WAF rules carry the limits. A checkout is one process, tmp store or not.
   const platform = process.env.VERCEL !== undefined && process.env.VERCEL !== '';
   ratelimit.warnPerInstanceQuotas(root.isHosted() && platform);
+  // on any platform: REDIS_URL or the Upstash pair still set, which nothing reads since HR-C#8
+  ratelimit.warnRetiredVariables();
 }
 
 export const startInstance = createStart(async () => ({

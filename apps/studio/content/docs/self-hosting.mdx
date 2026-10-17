@@ -85,6 +85,8 @@ A sign in mail's link and its six digit code sign in only the browser that asked
 
 Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". The quotas count across instances when the accounts database is the realtime Worker's (`TURBOSLIDE_ACCOUNTS=d1`); without it each server instance counts on its own, so a quota holds only on a single process.
 
+`DATABASE_URL`, `REDIS_URL` and the Upstash pair are no longer read. A studio that sets `DATABASE_URL` without `TURBOSLIDE_ACCOUNTS=d1` fails at its first request with an error that names `TURBOSLIDE_ACCOUNTS=d1`. A studio that sets `REDIS_URL` or the Upstash pair writes one `config.degraded` log line naming them.
+
 The admin can turn a feature off without a deploy:
 
 ```sh

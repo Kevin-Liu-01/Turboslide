@@ -6,7 +6,7 @@ import { buildKeyTable, shortcutLabels } from './menus/keys';
 import type { KeyBinding, ShortcutGroup } from './menus/keys';
 import { advancedToolsOn, findItem, isPresent } from './menus/model';
 import type { MenuContext, Platform } from './menus/model';
-import { DIALOGS, stubClause } from './menus/strings';
+import { DIALOGS, TAB_ONLY, stubClause } from './menus/strings';
 import { tipProps } from './Tooltip';
 
 import './ShortcutsDialog.css';
@@ -29,8 +29,16 @@ export type ShortcutsDialogProps = {
   platform: Platform;
   /** the shell's menu context; without it every binding of the table is listed */
   context?: MenuContext;
+  /** the presentation lives in this tab alone (/try, docs/SITE.md D10): the Save row says so */
+  tabOnly?: boolean;
   onClose: () => void;
 };
+
+/**
+ * The Save row of a presentation that lives in the tab alone: Cmd+S on it says TAB_ONLY.doc
+ * (EditorShell `key.save`), so the row names that sentence and never the server's autosave.
+ */
+export const SAVE_TAB_ONLY_LABEL = `Save (${TAB_ONLY.doc.charAt(0).toLowerCase()}${TAB_ONLY.doc.slice(1)})`;
 
 /** Google's group order on the shortcuts page (R04 Part B). */
 export const GROUP_ORDER: ReadonlyArray<ShortcutGroup> = [
@@ -80,12 +88,13 @@ function orderRows(group: ShortcutGroup, rows: ShortcutRow[]): ShortcutRow[] {
  * The rows of a group for a platform, one per binding, menu access keys included. With a menu
  * context a binding whose menu row exists and is not present (parked or Later with the switch
  * off, docs/FOCUS.md 3.1) is skipped; a binding with no menu row (the filmstrip and canvas keys)
- * is always listed.
+ * is always listed. With `tabOnly` the Save row reads SAVE_TAB_ONLY_LABEL.
  */
 export function shortcutRows(
   platform: Platform,
   table: ReadonlyArray<KeyBinding> = buildKeyTable(),
   context?: MenuContext,
+  tabOnly = false,
 ): Map<ShortcutGroup, ShortcutRow[]> {
   const out = new Map<ShortcutGroup, ShortcutRow[]>();
   /* one row per action and group (rank 31): a second binding of the same id joins the row's keys,
@@ -120,7 +129,7 @@ export function shortcutRows(
     }
     const row: ShortcutRow = {
       id: binding.id,
-      label: binding.label,
+      label: tabOnly && binding.id === 'key.save' ? SAVE_TAB_ONLY_LABEL : binding.label,
       keys: [...keys],
       later: binding.status === 'later',
       ...(binding.reason === undefined ? {} : { reason: binding.reason }),
@@ -133,9 +142,17 @@ export function shortcutRows(
   return out;
 }
 
-export function ShortcutsDialog({ platform, context, onClose }: ShortcutsDialogProps) {
+export function ShortcutsDialog({
+  platform,
+  context,
+  tabOnly = false,
+  onClose,
+}: ShortcutsDialogProps) {
   const [query, setQuery] = useState('');
-  const rows = useMemo(() => shortcutRows(platform, undefined, context), [platform, context]);
+  const rows = useMemo(
+    () => shortcutRows(platform, undefined, context, tabOnly),
+    [platform, context, tabOnly],
+  );
   const needle = query.trim().toLowerCase();
   const groups = GROUP_ORDER.map((group) => ({
     group,

@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { DEFAULT_MENU_CONTEXT } from '../menus/model';
 import type { MenuContext } from '../menus/model';
-import { GROUP_ORDER, ShortcutsDialog, shortcutRows } from '../ShortcutsDialog';
+import { GROUP_ORDER, SAVE_TAB_ONLY_LABEL, ShortcutsDialog, shortcutRows } from '../ShortcutsDialog';
 import { hideTooltip } from '../Tooltip';
 
 /** The shell's context with the switch off, and with it on (docs/FOCUS.md 3.1). */
@@ -97,6 +97,26 @@ describe('ShortcutsDialog', () => {
     expect(rows.length).toBeGreaterThan(0);
     expect(rows.every((row) => /new slide/i.test(row.textContent ?? ''))).toBe(true);
     expect(rows[0]?.querySelector('kbd')?.textContent).toBe('Ctrl+M');
+  });
+
+  /* the hero (/try) saves nothing beyond the tab (docs/SITE.md D10): its Save row says where the
+     changes stay, as its Cmd+S does, and the server editor keeps the autosave words */
+  it('labels Save with the tab sentence on a presentation that lives in the tab alone', () => {
+    const save = (tabOnly: boolean) =>
+      shortcutRows('mac', undefined, undefined, tabOnly)
+        .get('Common actions')
+        ?.find((row) => row.id === 'key.save');
+    expect(SAVE_TAB_ONLY_LABEL).toBe(
+      'Save (changes stay in this browser tab and are gone when it closes)',
+    );
+    expect(save(true)?.label).toBe(SAVE_TAB_ONLY_LABEL);
+    expect(save(true)?.keys).toEqual(['Cmd S']);
+    expect(save(false)?.label).toBe('Save (every change is saved automatically)');
+    render(<ShortcutsDialog platform="mac" tabOnly onClose={() => undefined} />);
+    const dialog = screen.getByRole('dialog', { name: 'Keyboard shortcuts' });
+    const row = dialog.querySelector('tr[data-binding="key.save"]')?.textContent ?? '';
+    expect(row).toContain(SAVE_TAB_ONLY_LABEL);
+    expect(row).not.toContain('saved automatically');
   });
 
   it('builds one row per binding with Windows words on Windows', () => {

@@ -494,7 +494,7 @@ export function grantIsLive(grant: Grant, now: string): boolean {
  */
 export const REQUEST_ACCESS_ANSWER = 'If this presentation exists, its owner has been asked.';
 
-/** The kill switches of SPEC-3 8.12 and their default when Redis is unreachable. */
+/** The kill switches of SPEC-3 8.12 and their default when the flag store is unreachable. */
 export const FLAG_NAMES = [
   'realtime',
   'presence',
@@ -514,7 +514,7 @@ export const FLAG_NAMES = [
 export type FlagName = (typeof FLAG_NAMES)[number];
 export const flagNameSchema = z.enum(FLAG_NAMES);
 
-/** The value a flag reads when Redis is unreachable (8.12): realtime off, every other on. */
+/** The value a flag reads when the flag store is unreachable (8.12): realtime off, every other on. */
 export const FLAG_DEFAULTS: Readonly<Record<FlagName, boolean>> = {
   realtime: false,
   presence: true,

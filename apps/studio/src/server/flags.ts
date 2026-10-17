@@ -332,8 +332,9 @@ function reader(): FlagReader {
 
 /**
  * The value of a flag: the cached read when younger than 5 s, else the reader's answer; the
- * table's default when the reader fails (SPEC-3 8.12, the column "default when Redis is
- * unreachable"), logged once per failure as `redis.unavailable`.
+ * table's default when the reader fails (SPEC-3 8.12, the column "default when the store is
+ * unreachable"), logged once per failure as `redis.unavailable`, the event name the alert rule
+ * keeps.
  */
 export async function flagOn(name: StudioFlagName): Promise<boolean> {
   const s = state();
@@ -342,7 +343,7 @@ export async function flagOn(name: StudioFlagName): Promise<boolean> {
   if (cached !== undefined && t - cached.readAt < FLAG_CACHE_MS) return cached.value;
   let value: boolean;
   try {
-    // a reader that knows the schema's names alone (the memory and redis channels' `flag()`,
+    // a reader that knows the schema's names alone (the memory channel's `flag()`,
     // which refuse another name) answers nothing for the assist until its name lands there;
     // nothing read is the default, never a refusal
     const read: boolean | undefined = await reader()(name);

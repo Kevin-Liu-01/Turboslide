@@ -1,9 +1,8 @@
 // The principal record's backends and the store selection (gslides-parity SPEC-3 7.1;
 // docs/CLOUDFLARE.md 4.2): the `ts_principal` table on D1 when the account database is the
 // Worker's (`TURBOSLIDE_ACCOUNTS=d1`), one database for every instance, so a name typed on one
-// instance is the name on the next (the row `realtime.departed-guest.name-stable`); Redis hosted
-// through the key value store of @turboslide/identity/principal over the client the redis tier
-// hands the server; and a JSON file per principal under `.turboslide/principals/` on a checkout.
+// instance is the name on the next (the row `realtime.departed-guest.name-stable`); and a JSON
+// file per principal under `.turboslide/principals/` on a checkout and on a deployment without D1.
 // Every backend keeps the 90 day sliding TTL. An expired file or row is removed on the read that
 // finds it. Ids are made file safe by replacing every character outside `[A-Za-z0-9_-]`, which
 // touches only the agent form `agent:<tokenId>`; the three prefixes keep the names apart.
@@ -16,10 +15,9 @@ import { join } from 'node:path';
 
 import type { Kysely } from 'kysely';
 
-import type { KvClient, PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
+import type { PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
 import {
   isPrincipalExpired,
-  kvPrincipalStore,
   newPrincipalRecord,
   parsePrincipalRecord,
   principalExpiresAt,
@@ -230,8 +228,8 @@ function d1Holder(): Record<symbol, PrincipalStore | undefined> {
 /**
  * Binds the process's D1 principal store, so every `selectPrincipalStore` caller of the process
  * (the identity runtime, the room's state) reads one table on the `d1` engine. The identity
- * runtime binds it when the process runtime is built (identity.ts `identityRuntime`), in the
- * shape of R1's `bindIdentityRedis`; a store built for a test runtime binds nothing. `undefined`
+ * runtime binds it when the process runtime is built (identity.ts `identityRuntime`); a store
+ * built for a test runtime binds nothing. `undefined`
  * unbinds.
  */
 export function bindPrincipalD1(store: PrincipalStore | undefined): void {
@@ -243,8 +241,6 @@ export function boundPrincipalD1(): PrincipalStore | undefined {
 }
 
 export type PrincipalStoreSelection = {
-  /** A Redis shaped client when the deployment has one (the `redis` tier); else the file store. */
-  kv?: KvClient;
   /** The state folder (`.turboslide/`); the file store lives under `<stateDir>/principals/`. */
   stateDir: string;
   /** The account database when it is D1; else the process binding (`bindPrincipalD1`) is read at the call. */
@@ -252,18 +248,16 @@ export type PrincipalStoreSelection = {
 };
 
 /**
- * D1 when the account database is the Worker's (given, or bound to the process), Redis when a
- * client is given, else the file store under the state folder. The store picks at each call, so
+ * D1 when the account database is the Worker's (given, or bound to the process), else the file
+ * store under the state folder. The store picks at each call, so
  * a store built before the identity runtime bound D1 follows it.
  */
 export function selectPrincipalStore(selection: PrincipalStoreSelection): {
   store: PrincipalStore;
-  kind: 'd1' | 'redis' | 'file';
+  kind: 'd1' | 'file';
 } {
   if (selection.d1) return { store: d1PrincipalStore(selection.d1), kind: 'd1' };
-  const own: PrincipalStore = selection.kv
-    ? kvPrincipalStore(selection.kv)
-    : filePrincipalStore(join(selection.stateDir, PRINCIPALS_DIR));
+  const own = filePrincipalStore(join(selection.stateDir, PRINCIPALS_DIR));
   const pick = (): PrincipalStore => boundPrincipalD1() ?? own;
   const store: PrincipalStore = {
     get: (principalId, now) => pick().get(principalId, now),
@@ -273,6 +267,6 @@ export function selectPrincipalStore(selection: PrincipalStoreSelection): {
   };
   return {
     store,
-    kind: boundPrincipalD1() !== undefined ? 'd1' : selection.kv ? 'redis' : 'file',
+    kind: boundPrincipalD1() !== undefined ? 'd1' : 'file',
   };
 }

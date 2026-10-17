@@ -149,7 +149,7 @@ describe('liveAtLeast', () => {
     expect(stuck.syncs).toEqual([true, true]);
   });
 
-  it('leaves the memory and redis tiers alone: the stream is the live document there', async () => {
+  it('leaves the memory tier alone: the stream is the live document there', async () => {
     const { room, syncs } = roomAt([5, 9], 'memory');
     expect((await liveAtLeast(room, 9)).document.deck.revision).toBe(5);
     expect(syncs).toEqual([]);

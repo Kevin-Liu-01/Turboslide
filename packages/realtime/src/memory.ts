@@ -2,7 +2,7 @@
 // dev server, the tests and `node-server`. Two browsers on localhost are two anonymous principals
 // and this is what carries their operations between them (SPEC-3 3.11). The same maps back the
 // per instance half of the blob tier (blob.ts): presence, locks, budgets and flags that need no
-// other instance. Keys follow keys.ts so a memory dump reads like the Redis one. No `node:`.
+// other instance. Keys follow keys.ts. No `node:`.
 import type {
   AppendResult,
   BudgetResult,
@@ -55,8 +55,8 @@ export function memoryChannel(options: MemoryChannelOptions = {}): MemoryChannel
   const rooms = new Map<string, Room>();
   const locks = new Map<string, Lock>();
   const budgets = new Map<string, Budget>();
-  // the drop bus of one process (docs/REALTIME.md 3.6): the same shape the redis tier carries
-  // over pub/sub, so the readers of access.ts and room.ts run one code path on both tiers
+  // the drop bus of one process (docs/REALTIME.md 3.6), which the readers of access.ts and room.ts
+  // subscribe to
   const bus = memoryDropBus();
 
   const roomOf = (deckId: string): Room => {

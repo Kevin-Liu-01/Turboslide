@@ -7,7 +7,7 @@
 // point; a precondition failure pulls the sidecar, re-applies the ops (every op commutes or has
 // one winner, 5.2) and retries. The anchors of text threads follow the text they name: `shiftOps`
 // computes the `comment.shift` entries a mutation list produces, the room's admission emits them
-// after the text op (the redis tier) and `fileCommentsOnWrite` writes them inside `FileStore.write`
+// after the text op (a stream tier) and `fileCommentsOnWrite` writes them inside `FileStore.write`
 // under the deck's lock (a checkout, the blob tier), so one test asserts identical thread bytes.
 // Across instances the index another instance pushed reaches a tab through `watchSidecarIndex`,
 // which the blob channel polls when the deck's pulse moved; the versions this instance pushed are
@@ -284,7 +284,7 @@ export function shiftOps(
 /**
  * The file store's `onWrite` hook (SPEC-3 0.52): inside `FileStore.write`'s lock, after the
  * documents were written, the anchors the write moved are shifted in the sidecar. The same ops
- * ride the stream as `comment.shift` entries on the redis tier, so both paths write the same
+ * ride the stream as `comment.shift` entries on a stream tier, so both paths write the same
  * bytes (comments-store.test.ts).
  */
 export function fileCommentsOnWrite(

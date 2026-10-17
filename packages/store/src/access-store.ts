@@ -5,8 +5,8 @@
 // writes. Three backends behind one interface: the checkout's `decks/<id>/.turboslide/access.json`
 // (gitignored, absent by default: the folder's holder is the owner), the private Blob store's
 // `decks/<id>/access.json` (the same `ifMatch` protocol `deck.json` uses), and a cache layer with
-// a 60 s TTL, dropped on every write and on the message another instance publishes (the Redis
-// `PUBLISH access:<deckId>` of 6.1; a checkout's memory bus). The etag is the md5 of the bytes in
+// a 60 s TTL, dropped on every write and on the message another instance publishes (a memory bus
+// in one process; the Redis bus of 6.1 left in hardening HR-C#8). The etag is the md5 of the bytes in
 // quotes on every backend, the value Vercel Blob answers, so the same conflict rule holds on a
 // checkout and hosted: a stale `ifMatch` is an AccessPreconditionError the transports map to 409
 // with the current record attached. Beside the record, a link hash index (`links/<hex>` to the
@@ -503,7 +503,7 @@ export function memoryAccessStore(): AccessStore & { readonly records: Map<strin
 // ---------------------------------------------------------------------------------------------
 // The cache (SPEC-3 6.1: 60 s, dropped on every write, with a message to the other instances)
 
-/** What carries the drop message between instances: Redis pub/sub hosted, a memory bus on a checkout. */
+/** What carries the drop message between instances: the channel's drop bus, a memory bus on a checkout. */
 export type AccessBus = {
   publish: (deckId: string) => Promise<void>;
   subscribe: (onDrop: (deckId: string) => void) => () => void;
@@ -1030,42 +1030,6 @@ export type HeadCache = {
   set: (head: DeckHead) => Promise<void>;
   drop: (deckId: string) => Promise<void>;
 };
-
-/** The two ioredis methods the cache needs, structurally, so the store carries no Redis import. */
-export type HeadKv = {
-  get: (key: string) => Promise<string | null>;
-  set: (key: string, value: string, ttlMs: number) => Promise<unknown>;
-  del: (key: string) => Promise<unknown>;
-};
-
-/** Heads live a day in the cache; the commit path refreshes them on every write. */
-export const HEAD_TTL_MS = 24 * 60 * 60_000;
-
-export function kvHeadCache(kv: HeadKv, keyOf: (deckId: string) => string): HeadCache {
-  return {
-    async get(deckIds) {
-      const out = new Map<string, DeckHead>();
-      await Promise.all(
-        deckIds.map(async (deckId) => {
-          const raw = await kv.get(keyOf(deckId));
-          if (raw === null) return;
-          try {
-            out.set(deckId, JSON.parse(raw) as DeckHead);
-          } catch {
-            // a body that does not parse is a miss
-          }
-        }),
-      );
-      return out;
-    },
-    async set(head) {
-      await kv.set(keyOf(head.id), JSON.stringify(head), HEAD_TTL_MS);
-    },
-    async drop(deckId) {
-      await kv.del(keyOf(deckId));
-    },
-  };
-}
 
 export function memoryHeadCache(): HeadCache & { readonly heads: Map<string, DeckHead> } {
   const heads = new Map<string, DeckHead>();

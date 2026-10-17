@@ -250,8 +250,6 @@
     "exports apps/studio/src/server/auth/mail/templates.ts MAIL_PRODUCT",
     "exports apps/studio/src/server/auth/mail/templates.ts MAIL_WORDMARK",
     "exports apps/studio/src/server/auth/profile.ts ADMIN_EMAILS_VARIABLE",
-    "exports apps/studio/src/server/auth/secondary-storage.ts SECONDARY_PREFIX",
-    "exports apps/studio/src/server/auth/secondary-storage.ts memoryRedisKv",
     "exports apps/studio/src/server/auth/secret.ts SESSION_SECRET_MIN_LENGTH",
     "exports apps/studio/src/server/auth/session.ts LINK_GRANT_COOKIE_INSECURE",
     "exports apps/studio/src/server/auth/session.ts LINK_GRANT_COOKIE_MAX_GRANTS",

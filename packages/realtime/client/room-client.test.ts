@@ -2836,9 +2836,9 @@ describe('a hello of another tier reads the position as foreign (build/r1.md R1-
           ...openOptions,
           onEvent: (event) =>
             openOptions.onEvent(
-              // the memory tier to the redis tier: both are stream tiers, so the fake's memory
-              // channel serves the second hello without the blob tier's position rules
-              second && event.type === 'hello' ? { ...event, tier: 'redis' } : event,
+              // the memory tier to the do tier: neither has the blob tier's position rules, so the
+              // fake's memory channel serves the second hello as it is
+              second && event.type === 'hello' ? { ...event, tier: 'do' } : event,
             ),
         });
       },
@@ -2865,7 +2865,7 @@ describe('a hello of another tier reads the position as foreign (build/r1.md R1-
     await until(() => !room.status().connected);
     await until(() => room.status().connected && resyncs.length > 0, 5000);
     expect(resyncs).toEqual([h.server.document().deck.revision]);
-    expect(room.status().tier).toBe('redis');
+    expect(room.status().tier).toBe('do');
     expect(textOf(room.document())).toBe(textOf(h.server.document()));
     // the same tier again: no reload
     h.server.kill();

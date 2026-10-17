@@ -38,8 +38,8 @@
 //   flip --tier do  3.7 item 4: requires the three room variables on each environment, removes the
 //                   forced TURBOSLIDE_REALTIME row (so TURBOSLIDE_ROOM_HOST selects do, select.ts;
 //                   REALTIME.md default 7.9) and writes scripts/hosting/production.json to do.
-//                   `--tier redis` is refused: the redis tier stays in the tree and is never
-//                   deployed (CLOUDFLARE.md 5.1)
+//                   `--tier redis` is refused: the redis tier left the tree in hardening HR-C#8
+//                   and was never deployed (CLOUDFLARE.md 5.1)
 //   rollback        3.8 item 2: sets TURBOSLIDE_REALTIME=blob (--force) and writes the expectation to
 //                   blob; run `drain` first so no acknowledged entry is left in an object
 //   drain           3.8 item 2: GET /control/open on the Worker and POST /rooms/<id>/flush per deck
@@ -137,7 +137,7 @@ export const VERCEL_SUBCOMMANDS = Object.freeze([
 /** Subcommands of the first realtime round that this phase retired, with the reason the output gives. */
 export const RETIRED = Object.freeze({
   redis:
-    'the redis tier stays in the tree and is never deployed (docs/CLOUDFLARE.md 5.1); REDIS_URL and the Upstash pair are never set on either project (4.4). The channel is the Worker: run `do`, then `database`, then `flip --tier do`',
+    'the redis tier left the tree in hardening HR-C#8 and was never deployed (docs/CLOUDFLARE.md 5.1); REDIS_URL and the Upstash pair are never set on either project (4.4). The channel is the Worker: run `do`, then `database`, then `flip --tier do`',
 });
 export const ENVIRONMENTS = Object.freeze(['production', 'preview']);
 /** The realtime tiers the expectation file may name (packages/realtime/src/channel.ts REALTIME_TIERS less memory). */

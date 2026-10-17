@@ -33,7 +33,6 @@ import { signInMail } from './mail/templates.ts';
 import type { MailMode, Mailer } from './mail/mailer.ts';
 import type { RateLimiter } from '../ratelimit.ts';
 import type { QuotaStore } from './quota.ts';
-import type { SecondaryStorage } from './secondary-storage.ts';
 import { PAIR_PATH, notePairCode, signInBinding } from './signin-binding.ts';
 
 export const BETTER_AUTH_SECRET_VARIABLE = 'BETTER_AUTH_SECRET';
@@ -225,8 +224,6 @@ export type AuthDeps = {
    * spread over instances meets one count. Without it the library counts in this process.
    */
   limits?: RateLimiter;
-  /** Redis when the deployment has one; sessions and counters move there. */
-  secondaryStorage?: SecondaryStorage;
   hosted: boolean;
   /** After a session is created: the alias link and the merges run here (identity.ts). */
   onSessionCreated?: (session: SessionFacts, request: Request | undefined) => Promise<void>;
@@ -360,7 +357,6 @@ function buildAuth(deps: AuthDeps): Auth {
       deps.db.kind === 'd1' && deps.db.d1 !== undefined
         ? (deps.db.d1 as unknown as NonNullable<BetterAuthOptions['database']>)
         : { db: deps.db.db, type: deps.db.kind === 'postgres' ? 'postgres' : 'sqlite' },
-    ...(deps.secondaryStorage !== undefined ? { secondaryStorage: deps.secondaryStorage } : {}),
     // the origin of the request itself: the dev server's port varies per builder and the hosted
     // name is the deployment's own; a cross site page's Origin header never matches it
     trustedOrigins: (request) => {
@@ -391,7 +387,7 @@ function buildAuth(deps: AuthDeps): Auth {
       enabled: !(deps.env[AUTH_RATE_LIMIT_VARIABLE] === 'off' && !deps.hosted),
       window: 60,
       max: 100,
-      storage: deps.secondaryStorage !== undefined ? 'secondary-storage' : 'memory',
+      storage: 'memory',
       // the shared limiter wins over both (HR-SA#3): every instance reads one count per address
       ...(deps.limits !== undefined
         ? {

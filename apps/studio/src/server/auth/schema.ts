@@ -18,8 +18,8 @@
 //   ts_principal   the principal records on the D1 engine (docs/CLOUDFLARE.md 4.2; the row
 //                  `realtime.departed-guest.name-stable`): one row per principal with the record
 //                  as JSON, `last_seen_at` and `expires_at` in epoch milliseconds, so every
-//                  instance reads one name for one person; the file store and the Redis store
-//                  keep their own copies on the other engines (principal.ts)
+//                  instance reads one name for one person; the file store keeps its own
+//                  copy on the other engines (principal.ts)
 //   ts_schema      one row `turboslide` carrying the schema version a boot wrote after it migrated
 //                  (CLOUDFLARE.md 4.2): a cold instance on the D1 engine reads it once and skips
 //                  the few dozen statements of the two migration sets when it matches

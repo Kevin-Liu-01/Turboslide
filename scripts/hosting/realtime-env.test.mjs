@@ -284,7 +284,7 @@ describe('the parsers', () => {
   });
 
   it('names the retired redis subcommand with its reason', () => {
-    expect(() => parseArgs(['redis'])).toThrow(/retired: the redis tier stays in the tree/);
+    expect(() => parseArgs(['redis'])).toThrow(/retired: the redis tier left the tree/);
     expect(Object.keys(RETIRED)).toEqual(['redis']);
     expect(SUBCOMMANDS).not.toContain('redis');
   });

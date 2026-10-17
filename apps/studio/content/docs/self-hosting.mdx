@@ -78,10 +78,9 @@ A sign in mail's link and its six digit code sign in only the browser that asked
 
 | Variable                                                                   | What it sets                                                                                                                         |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `redis`, `blob` or `do`. Unset, the studio picks from the variables below.                |
+| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `blob` or `do`. Unset, the studio picks from the variables below.                         |
 | `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` | The realtime Worker on Cloudflare (the `do` tier): its host, the key of its room tickets and the bearer of the studio's calls to it. |
 | `TURBOSLIDE_DB_BEARER`                                                     | The bearer of the Worker's database routes, for `TURBOSLIDE_ACCOUNTS=d1`.                                                            |
-| `REDIS_URL`                                                                | A Redis server for the `redis` tier.                                                                                                 |
 
 ## Limits and switches
 

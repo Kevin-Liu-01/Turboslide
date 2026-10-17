@@ -1,7 +1,7 @@
-// The RealtimeChannel contract as a shared test body (SPEC-3 3.2): memory.test.ts and
-// redis.test.ts run it over their implementation, so the two tiers agree on the stream, the
-// presence roster, the bindings, the locks, the budgets and the flags. Test code only; the
-// package's exports never name it.
+// The RealtimeChannel contract as a shared test body (SPEC-3 3.2): memory.test.ts runs it over
+// the memory channel (the stream, the presence roster, the bindings, the locks, the budgets and
+// the flags), and the other tests take its fixtures. Test code only; the package's exports never
+// name it.
 import { describe, expect, it } from 'vitest';
 
 import type { CommentOp, Thread } from '@turboslide/schema/comments';

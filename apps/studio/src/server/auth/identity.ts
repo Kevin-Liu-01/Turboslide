@@ -35,7 +35,7 @@ import { sha256Hex } from '@turboslide/identity/sha256';
 import type { HueSlot } from '@turboslide/identity/hues';
 import { markSpec } from '@turboslide/identity/marks';
 import type { MarkSpec } from '@turboslide/identity/marks';
-import type { KvClient, PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
+import type { PrincipalRecord, PrincipalStore } from '@turboslide/identity/principal';
 import { newPrincipalRecord } from '@turboslide/identity/principal';
 import { resolvePrincipal, sanitizeRunId, toIdentityView } from '@turboslide/identity/resolve';
 import type {
@@ -80,8 +80,6 @@ import { sessionSecret } from './secret.ts';
 import { dbLimiter } from '../ratelimit.ts';
 import type { RateLimiter } from '../ratelimit.ts';
 import { dbLimitStore } from './limits.ts';
-import { redisSecondaryStorage } from './secondary-storage.ts';
-import type { RedisKvLike } from './secondary-storage.ts';
 import { routePath } from '../headers.ts';
 import { noteTiming } from '../server-timing.ts';
 import { boundPrincipal, ensurePrincipal, parseCookies, readPrincipal } from './session.ts';
@@ -177,8 +175,6 @@ export type BuildRuntimeInput = {
   root: string;
   stateDir: string;
   hosted: boolean;
-  /** The Redis client of the realtime tier, when the deployment has one (B2 binds it). */
-  redis?: RedisKvLike;
   announce?: (line: string) => void;
   log?: (line: string) => void;
   /** Injected so tests never construct Resend's SDK. */
@@ -276,74 +272,6 @@ function emptyHooks(): IdentityHooks {
   };
 }
 
-// ------------------------------------------------------------------------------------------
-// The principal store's tier (the realtime round, docs/REALTIME.md 3.6, the row
-// `realtime.departed-guest.name-stable`; audit-sync.md defect 8)
-
-const REDIS_BINDING = Symbol.for('turboslide.studio.identity.redis');
-
-function redisHolder(): Record<symbol, RedisKvLike | undefined> {
-  return globalThis as unknown as Record<symbol, RedisKvLike | undefined>;
-}
-
-/**
- * Binds the deployment's Redis client for the principal records. The room module constructs the
- * one ioredis client of the redis tier (room.ts `state()`) and the identity runtime is built
- * earlier at boot (start.ts `bindServerSeams` binds the identity hooks before it reads the room's
- * Redis), so the runtime cannot take the client as an input; the principal store reads this
- * binding at every call instead and falls to the file store under the state folder while none
- * is bound (a checkout, the blob tier, the tests). Before this round the hosted principal store
- * was a file per instance on every tier, so a name typed on one instance was a label on the next.
- */
-export function bindIdentityRedis(client: RedisKvLike | undefined): void {
-  redisHolder()[REDIS_BINDING] = client;
-}
-
-function boundIdentityRedis(): RedisKvLike | undefined {
-  return redisHolder()[REDIS_BINDING];
-}
-
-/** The key value shape the principal store takes (`@turboslide/identity/principal` KvClient) over an ioredis shaped client; the TTL arrives in ms and leaves as `EX` seconds. */
-export function principalKvOf(client: RedisKvLike): KvClient {
-  return {
-    get: (key) => client.get(key),
-    set: async (key, value, ttlMs) => {
-      await client.set(key, value, 'EX', Math.max(1, Math.ceil(ttlMs / 1000)));
-    },
-    del: async (key) => {
-      await client.del(key);
-    },
-  };
-}
-
-/**
- * The principal store that follows the deployment's tier at the call: Redis when the runtime was
- * built with a client or one is bound (`bindIdentityRedis`), the file store otherwise. One store
- * object for the runtime's life, so `runtime.principals` keeps its identity.
- */
-function tieredPrincipalStore(
-  input: Pick<BuildRuntimeInput, 'redis' | 'stateDir'>,
-): PrincipalStore {
-  const file = selectPrincipalStore({ stateDir: input.stateDir }).store;
-  let kvStore: PrincipalStore | undefined;
-  let kvClient: RedisKvLike | undefined;
-  const pick = (): PrincipalStore => {
-    const client = input.redis ?? boundIdentityRedis();
-    if (client === undefined) return file;
-    if (kvStore === undefined || kvClient !== client) {
-      kvClient = client;
-      kvStore = selectPrincipalStore({ kv: principalKvOf(client), stateDir: input.stateDir }).store;
-    }
-    return kvStore;
-  };
-  return {
-    get: (principalId, now) => pick().get(principalId, now),
-    put: (record) => pick().put(record),
-    touch: (principalId, now, create) => pick().touch(principalId, now, create),
-    delete: (principalId) => pick().delete(principalId),
-  };
-}
-
 /** Builds a runtime from its inputs; `identityRuntime()` keeps one per process. */
 export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime {
   const log = input.log ?? ((line: string) => console.error(line));
@@ -365,9 +293,12 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
     warn: log,
   });
   /* the principal records follow the account database on the `d1` engine (docs/CLOUDFLARE.md
-     4.2: one `ts_principal` table for every instance); the redis tier's binding and the file
-     store stand for the other engines */
-  const principals = db?.kind === 'd1' ? d1PrincipalStore(db.db) : tieredPrincipalStore(input);
+     4.2: one `ts_principal` table for every instance); the file store stands for the other
+     engines */
+  const principals =
+    db?.kind === 'd1'
+      ? d1PrincipalStore(db.db)
+      : selectPrincipalStore({ stateDir: input.stateDir }).store;
   const hooks = emptyHooks();
   /* the mail mode gates the email method (REALTIME.md 4.1, default 7.7): with TURBOSLIDE_MAIL=off
      the dialog hides the field, so a database with no sender never offers a mail that is dropped */
@@ -414,9 +345,6 @@ export function buildIdentityRuntime(input: BuildRuntimeInput): IdentityRuntime 
       quotas: runtime.quotas,
       ...(limits !== null ? { limits } : {}),
       hosted: input.hosted,
-      ...(input.redis !== undefined
-        ? { secondaryStorage: redisSecondaryStorage(input.redis) }
-        : {}),
       onSessionCreated: (session, request) => onSessionCreated(runtime, session, request),
       beforeUserDelete: async (userId) => {
         for (const hook of hooks.beforeDelete) await hook(userId);
@@ -511,7 +439,7 @@ function bindProcessPrincipals(runtime: IdentityRuntime | undefined): void {
   bindPrincipalD1(runtime?.db?.kind === 'd1' ? runtime.principals : undefined);
 }
 
-/** Replaces the process runtime (tests, or B2 rebinding the Redis client); the previous one is closed. */
+/** Replaces the process runtime (tests); the previous one is closed. */
 export async function setIdentityRuntime(runtime: IdentityRuntime | undefined): Promise<void> {
   const previous = holder()[HOLDER];
   holder()[HOLDER] = runtime;

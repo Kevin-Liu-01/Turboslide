@@ -9,7 +9,7 @@ import { replayFor, serverClientId } from './room';
 
 // The resync for a `since` the stream does not hold (the realtime round, docs/REALTIME.md 3.7):
 // a stream open whose position is above the head, more than 2,000 behind it, or below the first
-// retained entry (the trim behind a checkpoint, a Redis reset, a position from the other tier
+// retained entry (the trim behind a checkpoint, a position from the other tier
 // after a hand off or a rollback) is answered `resync`, never a replay with a gap and never a
 // hang; a position the stream holds is answered the entries after it. The room is a fake over the
 // memory channel, the way presence-leave.test.ts builds one. The second block pins the client id

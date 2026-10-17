@@ -91,7 +91,7 @@ describe('the file store', () => {
     expect(existsSync(path)).toBe(false);
   });
 
-  test('selectPrincipalStore picks D1 when given or bound to the process, Redis when a client exists, else the file store', async () => {
+  test('selectPrincipalStore picks D1 when given or bound to the process, else the file store', async () => {
     const stateDir = join(tmp, 'state-d1');
     const auth = await memoryAuthDb();
     open.push(auth);
@@ -117,31 +117,12 @@ describe('the file store', () => {
     expect(selectPrincipalStore({ stateDir }).kind).toBe('file');
   });
 
-  test('selectPrincipalStore picks Redis when a client exists, else the file store under the state folder', async () => {
+  test('selectPrincipalStore keeps the file store under the state folder without D1', async () => {
     const stateDir = join(tmp, 'state');
     const file = selectPrincipalStore({ stateDir });
     expect(file.kind).toBe('file');
     await file.store.touch(ID, new Date(T0), true);
     expect(existsSync(join(stateDir, PRINCIPALS_DIR, principalFileName(ID)))).toBe(true);
-    const calls: string[] = [];
-    const redis = selectPrincipalStore({
-      stateDir,
-      kv: {
-        async get(key) {
-          calls.push(`get ${key}`);
-          return null;
-        },
-        async set(key) {
-          calls.push(`set ${key}`);
-        },
-        async del(key) {
-          calls.push(`del ${key}`);
-        },
-      },
-    });
-    expect(redis.kind).toBe('redis');
-    await redis.store.touch(ID, new Date(T0), true);
-    expect(calls).toEqual([`get principal:${ID}`, `set principal:${ID}`]);
   });
 });
 

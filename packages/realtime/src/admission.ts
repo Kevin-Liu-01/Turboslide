@@ -37,8 +37,6 @@ export const CAPS = {
   deckMaxBytes: 25 * MB,
   /** open streams per identity, per IP and per instance (report 10 F24) */
   streams: { anonymous: 4, signedIn: 8, agent: 4, ip: 16, instance: 256 } as const,
-  /** Redis commands per day per identity before 429 (report 10 F33) */
-  redisCommandsPerDay: { anonymous: 500_000, signedIn: 2_000_000, agent: 2_000_000 } as const,
 } as const;
 
 export type PostCapsResult =
@@ -103,13 +101,11 @@ export function budgetsFor(kind: IdentityKind): {
   opsPerMinute: number;
   bytesPerMinute: number;
   streams: number;
-  redisCommandsPerDay: number;
 } {
   return {
     opsPerMinute: CAPS.opsPerMinute[kind],
     bytesPerMinute: CAPS.bytesPerMinute[kind],
     streams: CAPS.streams[kind],
-    redisCommandsPerDay: CAPS.redisCommandsPerDay[kind],
   };
 }
 

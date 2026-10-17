@@ -9,7 +9,7 @@
 // `comment.shift` entries a landed edit produces and the admission appends them after the edit
 // (the second stream entry of 0.52; the file store's `onWrite` hook writes the same bytes on the
 // other path). The inbox records of the people an op names are written through the selected
-// `Inbox` (file on a checkout, Redis hosted, memory on the tmp overlay) and announced as `inbox
+// `Inbox` (file on a checkout, memory hosted) and announced as `inbox
 // { unread }` on the principal's own stream connections. The CLI's records
 // (apps/cli/src/records/comments.ts, B1) are the checkout's implementation of the same actions
 // over the same files.
@@ -57,7 +57,6 @@ import {
   memoryInbox,
   pullSidecar,
   readSidecar,
-  redisInbox,
 } from '@turboslide/store/hosted';
 import type { Inbox, Notification, NotificationEvent } from '@turboslide/store/hosted';
 
@@ -253,19 +252,10 @@ export async function shiftEntriesFor(
 type Shared = typeof globalThis & { __turboslideInbox?: Inbox };
 const shared = globalThis as Shared;
 
-/** The principal's inbox: the checkout's file, Redis hosted, memory on the tmp overlay. */
-export function inboxFor(
-  redis: { call: (command: string, ...args: (string | number)[]) => Promise<unknown> } | null,
-): Inbox {
-  if (shared.__turboslideInbox === undefined) {
-    const selection = storeSelection();
-    shared.__turboslideInbox =
-      redis !== null
-        ? redisInbox(redis)
-        : selection.kind === 'file'
-          ? fileInbox(stateDir())
-          : memoryInbox();
-  }
+/** The principal's inbox: the checkout's file, memory per instance hosted. */
+export function inboxFor(): Inbox {
+  shared.__turboslideInbox ??=
+    storeSelection().kind === 'file' ? fileInbox(stateDir()) : memoryInbox();
   return shared.__turboslideInbox;
 }
 
@@ -327,8 +317,6 @@ export type CommentCaller = {
   principalId: string;
   /** the studio's origin for comment.link */
   origin: string;
-  /** the raw Redis commands hosted, null elsewhere */
-  redis: { call: (command: string, ...args: (string | number)[]) => Promise<unknown> } | null;
   now?: () => string;
   id?: () => string;
   /**
@@ -451,7 +439,7 @@ async function landOp(caller: CommentCaller, op: CommentOp): Promise<ThreadResul
       currentRevision: current.document.deck.revision,
     });
   if (room.tier !== 'blob') {
-    // the memory and redis tiers: the checkpointer writes the sidecar from the stream, so the
+    // the memory and do tiers: the checkpointer writes the sidecar from the stream, so the
     // entries are its pending comments until then. On the blob tier the append wrote the sidecar
     // inside the append (room.ts `applyComments`; the version log carries no comment entry for a
     // checkpoint to fold), so a run here would read nothing and the fold would count the op twice
@@ -477,7 +465,7 @@ async function notify(
   recipients: Iterable<string>,
   at: string,
 ): Promise<void> {
-  const inbox = inboxFor(caller.redis);
+  const inbox = inboxFor();
   const slideId = anchorSlideId(thread.anchor);
   for (const principalId of new Set(recipients)) {
     if (principalId === caller.principalId) continue;
@@ -963,7 +951,6 @@ export type NotificationCaller = {
   deckId?: string;
   /** the owner decides whether commenters read the Activity panel */
   settingsCapability: boolean;
-  redis: CommentCaller['redis'];
   now?: () => string;
   /**
    * The people who acted on a row's deck as the reader may read them (hardening HR-SD#1; the fix
@@ -977,7 +964,7 @@ export async function notificationList(
   caller: NotificationCaller,
   input: { unread?: boolean; since?: string; limit?: number },
 ): Promise<{ notifications: Notification[]; unread: number }> {
-  const result = await inboxFor(caller.redis).list(caller.principalId, input);
+  const result = await inboxFor().list(caller.principalId, input);
   const actorsOf = caller.actorsOf;
   if (actorsOf === undefined) return { notifications: result.records, unread: result.unread };
   const notifications = await Promise.all(
@@ -993,7 +980,7 @@ export async function notificationMarkRead(
   caller: NotificationCaller,
   input: { ids?: string[]; all?: true },
 ): Promise<{ unread: number }> {
-  const unread = await inboxFor(caller.redis).markRead(
+  const unread = await inboxFor().markRead(
     caller.principalId,
     input.all === true ? 'all' : (input.ids ?? []),
     caller.now?.(),
@@ -1007,7 +994,7 @@ export async function notificationSettings(
 ): Promise<{ level: 'all' | 'forYou' | 'none'; email: boolean; activityForCommenters: boolean }> {
   if (caller.deckId === undefined)
     throw new TypeError('notification settings are per presentation; name a deck');
-  const inbox = inboxFor(caller.redis);
+  const inbox = inboxFor();
   if (
     input.level === undefined &&
     input.email === undefined &&

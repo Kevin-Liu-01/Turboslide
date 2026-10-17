@@ -364,7 +364,7 @@ environment); `docs/archive/status/HOSTED-STATUS.md` records the round.
 
 Round three adds the tiers of SPEC-3 2.5 behind environment switches. The realtime channel
 (`@turboslide/realtime/select`, `selectRealtime(env)`) is `memory` on a checkout and in the tests,
-`redis` when `TURBOSLIDE_REALTIME=redis` or `REDIS_URL` is set, and `blob` hosted without Redis
+`do` when `TURBOSLIDE_ROOM_HOST` names the realtime Worker, and `blob` hosted without it
 (`BlobStore.write` per batch, a one second head poll, the presence roster and the comments index
 shared across instances through records on the store since the focus round's third cycle while
 live cursors stay per instance, and the title row says so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
@@ -383,11 +383,10 @@ environment table and the runbook.
 
 The account boundary of round three (the orchestrator's rule, above SPEC-3 where they differ):
 no agent installs a Vercel Marketplace product, creates a paid resource, changes DNS, registers a
-sending domain or signs up for any service. The redis channel, the Upstash rate limiter, Neon
-Postgres and Resend are implemented and tested against fakes and local backends (the memory and
-blob channels, the file and blob stores, `node:sqlite`, `TURBOSLIDE_MAIL=capture`, the in memory
-and blob rate limit backends), and `docs/hosting.md` names the exact steps and variables Kevin
-sets to turn each one on. Previews and production run on the degraded tiers this round
+sending domain or signs up for any service. Resend is implemented and tested against fakes and
+local backends (the memory and blob channels, the file and blob stores, `node:sqlite`,
+`TURBOSLIDE_MAIL=capture`, the in memory and blob rate limit backends), and `docs/hosting.md`
+names the exact steps and variables Kevin sets to turn each one on. Previews and production run on the degraded tiers this round
 (multiplayer over the blob channel, anonymous identity with the name prompt, magic link disabled
 with the row saying why) and the verifier measures them as they are. A second Blob store
 (private) may be created through the vercel CLI if SPEC-3 11.4 needs it, because Blob is part of
@@ -416,7 +415,7 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
   and current.
 
 - Round three catalog entries (SPEC-3 0.20, 0.23, 0.25, 0.27, 2.5, 8.10; merge 1): `better-auth`
-  1.7.4, `kysely` 0.29.5, `ioredis` 6.0.0, `dompurify` 3.4.15 (with the pinned `jsdom` and
+  1.7.4, `kysely` 0.29.5, `dompurify` 3.4.15 (with the pinned `jsdom` and
   `@types/jsdom` 30.0.0), `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `pg`
   8.23.0 with `@types/pg` 8.23.1, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
   builder names a package and its version in `docs/gslides-parity/build-3/<key>.md`; the
@@ -719,10 +718,9 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
     GS3 action ids in `ACTION_IDS` (169) with the milestone `GS3` and the six new action groups;
     `transformSplice`, `transformMark`, `transformMutation` and `transformAgainst` throw
     `NotImplementedError` until B1's day 3.
-  - `@turboslide/realtime/{channel,protocol,keys,memory,redis,redis-fake,blob,lua,coalesce,admission,select}`
-    (the `client/*` exports name B2's day 4 files). No `node:` import anywhere in the package; the
-    Redis client is injected (`ioredisCommands(client)`) and `ioredis` is a dependency of
-    `apps/studio` alone.
+  - `@turboslide/realtime/{channel,protocol,keys,memory,blob,coalesce,admission,select}` (the
+    `client/*` exports name B2's day 4 files). No `node:` import anywhere in the package. The
+    redis tier and its `ioredis` client left in hardening HR-C#8.
   - `@turboslide/identity/{ids,labels,hues,names,access,resolve,marks,principal,sha256,index}`,
     browser safe. `decide(record, ctx, capability, options?)` is the matrix of SPEC-3 6.2 with its
     cell by cell test; `readPrincipal(request, secret)` lives in

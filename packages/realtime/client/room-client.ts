@@ -1106,7 +1106,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   /**
    * The tier the last hello named (build/r1.md R1-R2a; docs/REALTIME.md 3.7, 3.8): a hello of
    * another tier means the stream position is a number of the other tier (a stream seq against a
-   * store revision after the hand off from redis to blob, or the reverse on the hand back or a
+   * store revision after the hand off from do to blob, or the reverse on the hand back or a
    * rollback), and a replay against it must not be applied; the tab reloads at the hello's
    * revision instead. Null before the first hello, so the first hello sets the tier and nothing
    * more.

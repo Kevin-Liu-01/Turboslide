@@ -55,7 +55,6 @@ export const REFUSALS = {
   requested: 'If this presentation exists, its owner has been asked.',
   tooManyChanges: 'Too many changes at once. Try again in a minute',
   exportLimit: "You have reached today's export limit",
-  presenceNeedsRedis: 'Presence and live cursors need a Redis store on this deployment',
   leaveAnyway: 'Changes are still saving. Leave anyway?',
   unsavedChanges: (count: number) =>
     `${count} unsaved change${count === 1 ? '' : 's'} from this browser`,

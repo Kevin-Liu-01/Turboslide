@@ -1,7 +1,7 @@
 // The replay floor token (hardening HR-SD#1e): the stream position of the document the editor
 // loader handed a reader without `history`, signed by the function so a later request of the same
 // tab can prove it. The stream route reads it to keep the replay of `?since=` at or above it on
-// the memory, redis and blob tiers, and the ticket route reads it to sign the same position into
+// the memory and blob tiers, and the ticket route reads it to sign the same position into
 // a refreshed room ticket's `fl` on the do tier, where the Worker keeps the socket's replay at or
 // above it. The token is `<seq>.<mac>`: 32 hex of an HMAC-SHA256 under the session secret (the
 // key `clientIdMac` in room.ts signs client ids with) over the deck, the identity the request

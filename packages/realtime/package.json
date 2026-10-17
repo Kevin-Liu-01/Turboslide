@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The room of one deck behind one framework free interface (gslides-parity SPEC-3 3.2): the operation stream in front of the revision log, presence, client bindings, the checkpoint and append locks, budgets and kill switch flags, with the memory, redis (over an injected Redis protocol client, one Lua compare and append) and blob (every append a commit) implementations, the room protocol as zod schemas with the SSE framing, the key builder, the admission caps and the checkpointer's coalescing rules; the room client and the pending store under client/.",
+  "description": "The room of one deck behind one framework free interface (gslides-parity SPEC-3 3.2): the operation stream in front of the revision log, presence, client bindings, the checkpoint and append locks, budgets and kill switch flags, with the memory, blob (every append a commit) and do (the realtime Worker's Durable Object) implementations, the room protocol as zod schemas with the SSE framing, the key builder, the admission caps and the checkpointer's coalescing rules; the room client and the pending store under client/.",
   "scripts": {
     "test": "vitest run"
   },
@@ -13,10 +13,7 @@
     "./protocol": "./src/protocol.ts",
     "./keys": "./src/keys.ts",
     "./memory": "./src/memory.ts",
-    "./redis": "./src/redis.ts",
-    "./redis-fake": "./src/redis-fake.ts",
     "./blob": "./src/blob.ts",
-    "./lua": "./src/lua.ts",
     "./coalesce": "./src/coalesce.ts",
     "./admission": "./src/admission.ts",
     "./deck-cap-fixture": "./src/deck-cap-fixture.ts",

@@ -13,7 +13,6 @@ import {
   decideFor,
   inboxActorsFor,
   readJsonBody,
-  redisCommands,
   refuseCrossSite,
   refuseNonJson,
   requestIdentity,
@@ -89,7 +88,6 @@ async function serve(request: Request, splat: string): Promise<Response> {
     principalId: identity.principalId ?? identity.identity,
     ...(deck === null ? {} : { deckId: deck }),
     settingsCapability,
-    redis: redisCommands(),
     // the actors of a deck the caller may not share are its stand-ins (HR-SD#1)
     actorsOf: inboxActorsFor(identity),
   };

@@ -1,4 +1,4 @@
-// The key builder (gslides-parity SPEC-3 3.2; report 10 F34): every Redis key is built here from
+// The key builder (gslides-parity SPEC-3 3.2; report 10 F34): every channel key is built here from
 // a slug validated deck id, a validated identifier and a fixed suffix list, so no client supplied
 // string reaches a key by another path and a deck id that is a prefix of another (`gt`,
 // `gt-brand`) shares no key. A value outside its grammar is a TypeError. The memory and blob
@@ -19,7 +19,7 @@ const IDENTITY =
 const PRINCIPAL =
   /^(?:anon_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|usr_[A-Za-z0-9_-]{1,64}|agent:[A-Za-z0-9_-]{1,64})$/;
 
-/** A budget name: `ops`, `bytes`, `streams`, `redisCmds`, `materialize`... */
+/** A budget name: `ops`, `bytes`, `streams`, `materialize`... */
 const BUDGET_NAME = /^[a-z][A-Za-z0-9]{0,31}$/;
 
 /** A budget window: a number (the window index) or a date (`2026-09-13`). */

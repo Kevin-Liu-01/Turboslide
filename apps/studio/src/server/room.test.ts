@@ -532,7 +532,7 @@ describe("the joiner's row at the stream's open (hotfix/join-latency)", () => {
       expect((await shared.roster('q4')).map((row) => row.clientId)).toEqual([clientId]);
       expect(client.calls.filter((call) => call.op === 'put')).toEqual([]);
       // a stream closed while the entry was built announces nothing; nor does a tier without a
-      // shared roster (memory, redis: every set reaches every stream there)
+      // shared roster (memory: every set reaches every stream there)
       const other = 'd'.repeat(32);
       expect(await announceJoin(room, minted, 'editor', other, [], () => false, shared)).toBe(
         false,

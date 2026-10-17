@@ -339,7 +339,7 @@ describe('the checkpointer', () => {
   });
 
   it('two instances over one channel and one store never commit an entry twice (the realtime round, docs/REALTIME.md 5.4 item 1)', async () => {
-    // two function instances each hold a checkpointer of the deck: the same channel (one Redis),
+    // two function instances each hold a checkpointer of the deck: the same channel,
     // the same store (one Blob store, here one folder), their own timers. Before this round the
     // covered seq was read from the records once per instance and moved by its own runs alone,
     // so the instance that took the lock second re-committed the first's run

@@ -2,8 +2,8 @@
 // the integrator's seam commit of the realtime round): the transform of an entry past what landed
 // since its base, the placement through the reducer and the validator, the reader's projection of
 // a roster entry and an event, the hue slot grant and the editing ceiling. Everything here was in
-// apps/studio/src/server/room.ts, which imports node:crypto and ioredis and so cannot be bundled
-// into the Worker; this module imports no node: module and nothing of the function's state, so the
+// apps/studio/src/server/room.ts, which imports node:crypto and so cannot be bundled into the
+// Worker; this module imports no node: module and nothing of the function's state, so the
 // Durable Object (apps/realtime-worker) and the function run one admission. room.ts re-exports
 // every name, so its callers and tests did not move. What a function needs from its host (the
 // instance's email memory on the function, the ticket's claim in the object) arrives as `ReaderDeps`.

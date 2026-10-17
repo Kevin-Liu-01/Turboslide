@@ -125,7 +125,6 @@ async function callers(): Promise<{
     capabilities: new Set(['read', 'readComments', 'comment']),
     principalId: READER,
     origin: 'http://localhost:4855',
-    redis: null,
   };
   return {
     reader: { ...base, standIns: callerStandIns(room, record, identity) },
@@ -229,7 +228,7 @@ describe("an inbox row's actors for a reader who may not share the row's deck (H
       standInFor('no-such-deck', EDITOR),
     ]);
     // the list answer runs every row through the caller's mapping
-    const inbox = inboxFor(null);
+    const inbox = inboxFor();
     await inbox.push(
       READER,
       { kind: 'mention', deckId: DECK, threadId: THREAD, actor: OWNER, at: AT },
@@ -240,7 +239,6 @@ describe("an inbox row's actors for a reader who may not share the row's deck (H
         principalId: READER,
         deckId: DECK,
         settingsCapability: false,
-        redis: null,
         actorsOf: inboxActorsFor(identity),
       },
       {},

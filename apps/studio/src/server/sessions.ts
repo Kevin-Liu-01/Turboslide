@@ -34,14 +34,14 @@ export function studioSessions(): SessionRegistry {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The session directory (gslides-parity SPEC-3 11.3 "sessions.ts: the registry moves to Redis
-// and binds to identities"; MILESTONES-3 B2 day 5). The command bus above stays in process: a
+// The session directory (gslides-parity SPEC-3 11.3 "sessions.ts: the registry binds to
+// identities"; MILESTONES-3 B2 day 5). The command bus above stays in process: a
 // long poll is answered by the instance holding it, so a command for a page reaches the instance
 // the page polls. What every instance must agree on is who is attached where: the directory
 // binds every session to the principal (or the agent) that attached it, lists a principal's
 // pages across instances ("Sessions" in the profile dialog, `account.sessions`), and caps the
-// pages one identity and one deck may attach, so a script cannot exhaust the poll pool. Redis
-// on the redis tier through the room's commands, memory elsewhere.
+// pages one identity and one deck may attach, so a script cannot exhaust the poll pool. It is
+// held in memory per instance; the Redis backend left in hardening HR-C#8.
 
 export const SESSIONS_PER_IDENTITY_MAX = 20;
 export const SESSIONS_PER_DECK_MAX = 200;
@@ -67,7 +67,7 @@ export type SessionBinding = {
 export type BindRefusal = { ok: false; reason: 'identity' | 'deck'; cap: number };
 
 export type SessionDirectory = {
-  readonly kind: 'memory' | 'redis';
+  readonly kind: 'memory';
   bind: (binding: SessionBinding) => Promise<{ ok: true } | BindRefusal>;
   touch: (id: string, now: string) => Promise<void>;
   unbind: (id: string) => Promise<void>;
@@ -75,13 +75,11 @@ export type SessionDirectory = {
   forDeck: (deckId: string, now?: string) => Promise<SessionBinding[]>;
 };
 
-type Kv = { call: (command: string, ...args: (string | number)[]) => Promise<unknown> };
-
 const fresh = (row: SessionBinding, now: string): boolean =>
   Date.parse(now) - Date.parse(row.lastSeenAt) <=
   (row.socket === true ? SOCKET_BINDING_TTL_MS : SESSION_BINDING_TTL_MS);
 
-/** One directory over a load and save of the whole table; the two backends differ only there. */
+/** One directory over a load and save of the whole table. */
 function directoryOver(
   kind: SessionDirectory['kind'],
   load: () => Promise<SessionBinding[]>,
@@ -129,26 +127,6 @@ export function memorySessionDirectory(): SessionDirectory {
     async () => rows.map((row) => ({ ...row })),
     async (next) => {
       rows = next;
-    },
-  );
-}
-
-/** `sessions:studio` as one JSON value with the binding TTL; every instance reads the same table. */
-export function redisSessionDirectory(kv: Kv, key = 'sessions:studio'): SessionDirectory {
-  return directoryOver(
-    'redis',
-    async () => {
-      const raw = await kv.call('GET', key);
-      if (typeof raw !== 'string') return [];
-      try {
-        const parsed = JSON.parse(raw) as unknown;
-        return Array.isArray(parsed) ? (parsed as SessionBinding[]) : [];
-      } catch {
-        return [];
-      }
-    },
-    async (rows) => {
-      await kv.call('SET', key, JSON.stringify(rows), 'PX', SESSION_BINDING_TTL_MS * 2);
     },
   );
 }

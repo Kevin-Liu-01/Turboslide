@@ -67,7 +67,6 @@ catalog:
   # Pinned exactly: fumadocs-core shipped 29 releases between 2026-07-27 and 2026-10-05
   fumadocs-core: 16.16.2
   fumadocs-mdx: 15.4.6
-  ioredis: 6.0.0
   jsdom: 30.0.1
   jszip: 3.10.2
   # The hardening round (docs/hardening/HARDENING.md HR-C#3a, CLEANUP-9): unused files, exports,

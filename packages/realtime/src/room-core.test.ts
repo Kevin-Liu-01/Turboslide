@@ -65,7 +65,6 @@ describe('room-core', () => {
     const imports = source.split('\n').filter((line) => /^import\b/.test(line));
     expect(imports.length).toBeGreaterThan(0);
     expect(imports.filter((line) => /from 'node:/.test(line))).toEqual([]);
-    expect(imports.filter((line) => /ioredis/.test(line))).toEqual([]);
   });
 
   it('bounds the answer between a base and the admitted seq', () => {

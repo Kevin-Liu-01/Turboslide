@@ -10568,6 +10568,15 @@
       "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the docs step, 2026-10-14: the Workbench reference of /docs, read on the dev server at 4870 in the step's notes; not yet read on production"
     },
     {
+      "id": "home.bar.narrow",
+      "feature": "decks",
+      "interaction": "At 320, 360 and 390 /home, /features, /about, /faq and /docs scroll no wider than the viewport, and the bar's row (the lockup, the theme button and New Presentation, or the docs' search) ends inside the 16 px side",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "at 320 the bar's New Presentation scrolled /faq, /home, /features and /about sideways by 37 px (read on a checkout, 2026-10-16)",
+      "note": "The site build (docs/SITE.md; the small fixes lane of 2026-10-16): under 390 px the site pages' lockup draws its T alone (site.css)"
+    },
+    {
       "id": "chrome.colors.pairs-at-floor",
       "feature": "chrome",
       "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row and every key chip of the tooltip (on Undo), the search card and the toolbar search pill read from the drawn elements over their composited grounds included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",

@@ -149,12 +149,13 @@ describe('an agent animates a deck through the motion actions', () => {
         effect: { block: 'nope', role: 'enter', motion: { preset: 'fade' } },
       }),
     ).rejects.toThrow(/No block "nope" on slide "content-rule"/);
+    // an icon holds no text; the worked deck's shot carries a caption, which a text preset splits
     await expect(
       write('motion.add', {
-        slideId: 'the-production-site',
-        effect: { block: 'shot', role: 'enter', motion: { preset: 'type-on' } },
+        slideId: 'free',
+        effect: { block: 'ic', role: 'enter', motion: { preset: 'type-on' } },
       }),
-    ).rejects.toThrow(/no text/);
+    ).rejects.toThrow(/Block "ic" is a icon block with no text/);
     await expect(
       write('motion.add', {
         slideId: 'content-rule',

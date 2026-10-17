@@ -182,6 +182,10 @@ describe('hardening PS#2: the mirror parses and validates once per commit (PERF-
     const log = await store.records();
     expect(log).toHaveLength(1010);
     expect(log.at(-1)?.mutations).toEqual([setSize(SIZES[9 % 3] ?? 20)]);
+    // the records a commit kept unparsed are the ones a fresh parse of the mirror's files answers
+    expect(JSON.stringify(log)).toBe(
+      JSON.stringify(readVersions(join(root, 'mirror', 'gt-brand'))),
+    );
   }, 240_000);
 
   it('a read, a revision and the log on an unchanged mirror parse and validate nothing', async () => {
@@ -234,7 +238,7 @@ describe('hardening PS#2: the mirror parses and validates once per commit (PERF-
       if (!outcome.ok) throw new Error(outcome.message);
       const read = await store.read();
       expect(JSON.stringify(read)).toBe(JSON.stringify(fresh()));
-      expect(await store.records()).toEqual(readVersions(dir));
+      expect(JSON.stringify(await store.records())).toBe(JSON.stringify(readVersions(dir)));
     }
   }, 120_000);
 

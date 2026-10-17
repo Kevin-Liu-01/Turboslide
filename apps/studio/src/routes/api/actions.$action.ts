@@ -14,6 +14,7 @@ import { errorResponse, jsonResponse, refuse } from '@turboslide/agent/http/erro
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import { ForbiddenError } from '@turboslide/schema/errors';
 
+import { DECK_ID_ACTIONS, actionDeck } from '../../server/action-deck';
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
 import {
   INPUT_DECKS,
@@ -44,9 +45,10 @@ import { deckDir } from '../../server/root';
 // token off localhost, the 1 MB body cap, one JSON object as the input, the author from
 // x-turboslide-author, ?deck= for the deck, ?force=1 to write past another author's lease, and
 // the one error body with the status of the error class (409 with the current document and the
-// holder). The dispatcher is built per request over the deck named, so a deck created a moment
-// ago is served and a removed one is a 404; the store, the worker client and the session
-// registry behind it are per process.
+// holder). The share and publish actions take their deck from the input's `id` when ?deck= is
+// absent and refuse a call whose two differ (server/action-deck.ts). The dispatcher is built per
+// request over the deck named, so a deck created a moment ago is served and a removed one is a
+// 404; the store, the worker client and the session registry behind it are per process.
 //
 // Round three (gslides-parity SPEC-3 6.2, 8.8, 11.5 R3): the localhost rule holds only when every
 // host the request names is local (TURBOSLIDE_TRUST_PROXY, server/headers.ts), and authorize()
@@ -120,7 +122,16 @@ async function serve(request: Request, action: string): Promise<Response> {
   const foreign = refuseForeignOrigin(request);
   if (foreign !== null) return foreign;
   const url = new URL(request.url);
-  const deckId = url.searchParams.get('deck') || DEFAULT_DECK;
+  // the share and publish actions name their deck in the input's `id` too (server/action-deck.ts);
+  // their body is read from a copy, and one that does not parse is the handler's 400 below
+  let named: unknown;
+  if (request.method === 'POST' && DECK_ID_ACTIONS.has(action)) {
+    const read = await readJsonBody(request.clone(), WRITE_BODY_LIMIT);
+    named = read.ok ? read.value : undefined;
+  }
+  const deck = actionDeck(action, url.searchParams.get('deck'), named, DEFAULT_DECK);
+  if (!deck.ok) return refuse(400, 'invalid_input', deck.message, { action });
+  const deckId = deck.deckId;
   const keyed = requestIdempotencyKey(request);
   if (!keyed.ok) return keyed.response;
   let caller: AgentCaller;

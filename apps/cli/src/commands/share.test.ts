@@ -376,6 +376,24 @@ describe('turboslide share, deck publish and admin over the fixture deck', () =>
     expect(bad.code).toBe(2);
   });
 
+  test('a share or publish write that names another deck in its id is refused and writes nothing', async () => {
+    const before = accessFile();
+    for (const argv of [
+      ['share', 'get', 'other-deck'],
+      ['share', 'access', 'other-deck', '--mode', 'link', '--role', 'editor'],
+      ['share', 'link', 'other-deck', '--role', 'editor'],
+      ['deck', 'publish', 'other-deck'],
+      ['admin', 'assign-owner', 'other-deck', '--principal', 'local:maya'],
+    ]) {
+      const result = await run(argv);
+      expect(result.code, argv.join(' ')).not.toBe(0);
+      expect(result.stderr, argv.join(' ')).toMatch(
+        /runs on deck "gslides" but its input names "other-deck"/,
+      );
+    }
+    expect(accessFile()).toBe(before);
+  });
+
   test('activity lists the share events with the actor and filters by kind', async () => {
     const result = await run(['activity', '--kind', 'share,role']);
     expect(result.code, result.stderr).toBe(0);

@@ -528,6 +528,22 @@ export function registerRecordActions(dispatcher: Dispatcher, deps: RecordDeps):
     return (input, ctx) => run(input as T, ctx);
   };
   const access = () => accessDeps(deps);
+  // The share and publish actions and admin.assignOwner name their deck in `id` and run on
+  // `deps.deckId`. A call whose `id` names another deck is refused before it reads or writes an
+  // access record: the studio's /api/actions opened gt-brand for a share write that named its deck
+  // only in `id`.
+  const onDeck = <T>(
+    run: (input: T, ctx: ActionContext) => Promise<unknown> | unknown,
+  ): ActionHandler => {
+    return (input, ctx) => {
+      const id = (input as { id?: unknown }).id;
+      if (id !== undefined && id !== deps.deckId)
+        throw new TypeError(
+          `This call runs on deck "${deps.deckId}" but its input names "${String(id)}"; name one deck`,
+        );
+      return run(input as T, ctx);
+    };
+  };
 
   // comments (SPEC-3 5.9)
   dispatcher.register(
@@ -631,35 +647,35 @@ export function registerRecordActions(dispatcher: Dispatcher, deps: RecordDeps):
   // sharing and publishing (SPEC-3 6.9)
   dispatcher.register(
     'share.get',
-    on<{ id: string }>(() => shareGet(access())),
+    onDeck<{ id: string }>(() => shareGet(access())),
   );
   dispatcher.register(
     'share.setGeneralAccess',
-    on<{ mode: 'restricted' | 'link'; role?: GrantRole; baseRevision: number }>((i) =>
+    onDeck<{ mode: 'restricted' | 'link'; role?: GrantRole; baseRevision: number }>((i) =>
       shareSetGeneralAccess(access(), i),
     ),
   );
   dispatcher.register(
     'share.createLink',
-    on<{ role: GrantRole; label?: string; expiresAt?: string; baseRevision: number }>((i) =>
+    onDeck<{ role: GrantRole; label?: string; expiresAt?: string; baseRevision: number }>((i) =>
       shareCreateLink(access(), i),
     ),
   );
   dispatcher.register(
     'share.revokeLink',
-    on<{ linkId: string; baseRevision: number }>((i) => shareRevokeLink(access(), i)),
+    onDeck<{ linkId: string; baseRevision: number }>((i) => shareRevokeLink(access(), i)),
   );
   dispatcher.register(
     'share.rotateLink',
-    on<{ linkId: string; baseRevision: number }>((i) => shareRotateLink(access(), i)),
+    onDeck<{ linkId: string; baseRevision: number }>((i) => shareRotateLink(access(), i)),
   );
   dispatcher.register(
     'share.stop',
-    on<{ baseRevision: number }>((i) => shareStop(access(), i)),
+    onDeck<{ baseRevision: number }>((i) => shareStop(access(), i)),
   );
   dispatcher.register(
     'share.invite',
-    on<{
+    onDeck<{
       emails: string[];
       role: GrantRole;
       message?: string;
@@ -669,62 +685,64 @@ export function registerRecordActions(dispatcher: Dispatcher, deps: RecordDeps):
   );
   dispatcher.register(
     'share.setRole',
-    on<{ who: GrantWho; role: GrantRole; baseRevision: number }>((i) => shareSetRole(access(), i)),
+    onDeck<{ who: GrantWho; role: GrantRole; baseRevision: number }>((i) =>
+      shareSetRole(access(), i),
+    ),
   );
   dispatcher.register(
     'share.remove',
-    on<{ who: GrantWho; baseRevision: number }>((i) => shareRemove(access(), i)),
+    onDeck<{ who: GrantWho; baseRevision: number }>((i) => shareRemove(access(), i)),
   );
   dispatcher.register(
     'share.setExpiry',
-    on<{ who: GrantWho; expiresAt: string | null; baseRevision: number }>((i) =>
+    onDeck<{ who: GrantWho; expiresAt: string | null; baseRevision: number }>((i) =>
       shareSetExpiry(access(), i),
     ),
   );
   dispatcher.register(
     'share.settings',
-    on<Parameters<typeof shareSettings>[1]>((i) => shareSettings(access(), i)),
+    onDeck<Parameters<typeof shareSettings>[1]>((i) => shareSettings(access(), i)),
   );
   dispatcher.register(
     'share.requestAccess',
-    on<{ role: GrantRole; message?: string; email?: string }>((i) =>
+    onDeck<{ role: GrantRole; message?: string; email?: string }>((i) =>
       shareRequestAccess(access(), i),
     ),
   );
   dispatcher.register(
     'share.listRequests',
-    on<{ id: string }>(() => shareListRequests(access())),
+    onDeck<{ id: string }>(() => shareListRequests(access())),
   );
   dispatcher.register(
     'share.respond',
-    on<{ requestId: string; grant: GrantRole | null; notify?: boolean; baseRevision: number }>(
+    onDeck<{ requestId: string; grant: GrantRole | null; notify?: boolean; baseRevision: number }>(
       (i) => shareRespond(access(), i),
     ),
   );
   dispatcher.register(
     'share.transferOwnership',
-    on<{ to: GrantWho; baseRevision: number }>((i) => shareTransferOwnership(access(), i)),
+    onDeck<{ to: GrantWho; baseRevision: number }>((i) => shareTransferOwnership(access(), i)),
   );
   dispatcher.register(
     'share.acceptOwnership',
-    on<{ baseRevision: number }>((i) => shareAcceptOwnership(access(), i)),
+    onDeck<{ baseRevision: number }>((i) => shareAcceptOwnership(access(), i)),
   );
   dispatcher.register(
     'share.declineOwnership',
-    on<{ baseRevision: number }>((i) => shareDeclineOwnership(access(), i)),
+    onDeck<{ baseRevision: number }>((i) => shareDeclineOwnership(access(), i)),
   );
   dispatcher.register(
     'share.claim',
-    on<{ baseRevision: number }>((i) => shareClaim(access(), i)),
+    onDeck<{ baseRevision: number }>((i) => shareClaim(access(), i)),
   );
   dispatcher.register('share.emailCollaborators', () => shareEmailCollaborators());
   dispatcher.register(
     'deck.publish',
-    on<{ baseRevision: number }>((i) => deckPublish(access(), i)),
+    onDeck<{ baseRevision: number }>((i) => deckPublish(access(), i)),
   );
   dispatcher.register(
     'deck.unpublish',
-    on<{ baseRevision: number }>((i) => deckUnpublish(access(), i)),
+    onDeck<{ baseRevision: number }>((i) => deckUnpublish(access(), i)),
   );
 
   // accounts and admin on a checkout (SPEC-3 7.9)
@@ -751,7 +769,7 @@ export function registerRecordActions(dispatcher: Dispatcher, deps: RecordDeps):
   );
   dispatcher.register(
     'admin.assignOwner',
-    on<{ to: GrantWho; baseRevision: number }>((i) => adminAssignOwner(access(), i)),
+    onDeck<{ to: GrantWho; baseRevision: number }>((i) => adminAssignOwner(access(), i)),
   );
 
   // presence and sync reads (SPEC-3 3.10, 4.11)

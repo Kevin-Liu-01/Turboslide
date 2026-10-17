@@ -422,8 +422,8 @@ bumped together when the pixel gates allow.
 `console.log`, so the runtime log and a Drain both receive it: `{ t, source, event, requestId,
 identity, ip, deckId, action, revision, bytes, ms, status, reason }` plus the per surface fields of
 report 10 6.1 (`clientId`, `seq`, `opCount`, `streamMs`, `role`, `linkId`, `threadId`, `emailKind`,
-`recipient`, `redisCmds`, `blobOps`, `uploadBytes`, `sniffedType`, `variantKey`, `rule`,
-`killSwitch`). The client address is written as `<yyyymmdd>:<16 hex>`, an HMAC under a salt that
+`recipient`, `blobOps`, `uploadBytes`, `sniffedType`, `variantKey`, `rule`, `killSwitch`;
+`redisCmds` left with the Redis tier in HR-C#8). The client address is written as `<yyyymmdd>:<16 hex>`, an HMAC under a salt that
 rotates daily and is discarded after 48 hours (`ipHash`), so the value is a same day correlation
 key and nothing else once the salt is gone. An email address in any text field is written as
 `[redacted]`; a link is named by its id and never its token; comment bodies never appear;

@@ -64,7 +64,7 @@ describe('deckKeys', () => {
 describe('the other keys', () => {
   it('build budgets, caches, principals, inboxes, flags and spent tokens', () => {
     expect(budgetKey('usr_a', 'ops', 123)).toBe('q:usr_a:ops:123');
-    expect(budgetKey(ANON, 'redisCmds', '2026-09-13')).toBe(`q:${ANON}:redisCmds:2026-09-13`);
+    expect(budgetKey(ANON, 'ops', '2026-09-13')).toBe(`q:${ANON}:ops:2026-09-13`);
     expect(() => budgetKey('usr_a', 'Ops', 1)).toThrow(TypeError);
     expect(() => budgetKey('usr_a', 'ops', 'a b')).toThrow(TypeError);
     expect(() => budgetKey('kevin', 'ops', 1)).toThrow(TypeError);

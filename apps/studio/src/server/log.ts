@@ -123,7 +123,6 @@ export type SecurityEvent = {
   emailKind?: 'magic-link' | 'code' | 'mention' | 'invite' | 'request' | 'digest';
   /** A principal id, or the keyed hash of an address with no account. */
   recipient?: string;
-  redisCmds?: number;
   blobOps?: number;
   uploadBytes?: number;
   sniffedType?: string;

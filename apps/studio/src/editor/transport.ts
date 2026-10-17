@@ -86,11 +86,17 @@ export const NO_ROOM_URL_WAIT_MS = 8000;
  * is never answered (a proxy or a network that holds the request, a Worker that never accepts
  * it) stays CONNECTING with no close event until the browser's own network timeout, if one fires
  * at all, and the room client opens nothing new until the open reports, so the tab waited with no
- * reopen scheduled. A hello on a working room comes well inside this, a cold Worker and an
- * object's wake included; past it the transport closes the socket and reports a failure without a
+ * reopen scheduled. Past this the transport closes the socket and reports a failure without a
  * status, and the client's reopen ladder (500 ms doubling to 8 s) runs.
+ *
+ * The number sits above the realtime Worker's own slowest answer. The first open of a deck the
+ * object has never loaded awaits `seed()` before it answers the upgrade
+ * (apps/realtime-worker/src/deck-room.ts, the upgrade handler): the app's seed route under
+ * SEED_TIMEOUT_MS (25 s), then the snapshot fetch of `seedDocument` under the same 25 s, so 50 s
+ * at worst, and 10 s of margin for the network on top. A shorter deadline abandoned a slow seed,
+ * and a load that always took longer than the deadline never reached a hello.
  */
-export const SOCKET_OPEN_DEADLINE_MS = 10_000;
+export const SOCKET_OPEN_DEADLINE_MS = 60_000;
 
 const SOCKET_OPEN = 1;
 

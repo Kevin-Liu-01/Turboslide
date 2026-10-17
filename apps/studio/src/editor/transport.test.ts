@@ -665,6 +665,20 @@ describe('wsTransport: the open deadline (SOCKET_OPEN_DEADLINE_MS)', () => {
     expect(h.hub.last().closedByClient).toBeNull();
   });
 
+  test('a hello after the Worker’s slowest seed (the seed route and the snapshot fetch, 25 s each) still lands', async () => {
+    const h = harness();
+    const transport = wsTransport(DECK, TAB, facts(), h.deps);
+    h.open(transport);
+    await h.clock.flush();
+    await h.clock.advance(50_000);
+    const socket = await accept(h);
+    expect(h.events).toEqual([hello()]);
+    expect(h.errors).toEqual([]);
+    expect(socket.closedByClient).toBeNull();
+    await h.clock.advance(SOCKET_OPEN_DEADLINE_MS);
+    expect(h.errors).toEqual([]);
+  });
+
   test('an upgrade that opens and says no hello is ended at the deadline too; a close by the tab disarms it', async () => {
     const h = harness();
     const transport = wsTransport(DECK, TAB, facts(), h.deps);

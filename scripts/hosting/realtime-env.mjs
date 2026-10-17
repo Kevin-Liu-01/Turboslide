@@ -140,7 +140,7 @@ export const RETIRED = Object.freeze({
     'the redis tier left the tree in hardening HR-C#8 and was never deployed (docs/CLOUDFLARE.md 5.1); REDIS_URL and the Upstash pair are never set on either project (4.4). The channel is the Worker: run `do`, then `database`, then `flip --tier do`',
 });
 export const ENVIRONMENTS = Object.freeze(['production', 'preview']);
-/** The realtime tiers the expectation file may name (packages/realtime/src/channel.ts REALTIME_TIERS less memory). */
+/** The realtime tiers the guard's expectation file may name: blob and do, plus redis, which the guard's own list still carries though the code left in HR-C#8. */
 export const TIERS = Object.freeze(['blob', 'redis', 'do']);
 export const DEFAULT_PROJECT = 'turboslide-gt';
 export const DEFAULT_SCOPE = 'general-translation';

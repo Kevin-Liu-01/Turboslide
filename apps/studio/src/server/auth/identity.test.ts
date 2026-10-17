@@ -131,8 +131,6 @@ describe('the runtime', () => {
     expect(runtime.methods).toEqual({
       available: true,
       email: true,
-      passkeys: false,
-      passkeysNotice: 'Passkeys arrive once the address is final',
       github: false,
       google: false,
     });
@@ -150,7 +148,7 @@ describe('the runtime', () => {
     });
     expect(bare.auth).toBeNull();
     expect(bare.methods.available).toBe(false);
-    expect(bare.methods.passkeysNotice).toBeNull();
+    expect(bare.methods.email).toBe(false);
     await expect(bare.keys.create({ userId: 'u', name: 'x', scopes: ['read'] })).rejects.toThrow(
       RangeError,
     );

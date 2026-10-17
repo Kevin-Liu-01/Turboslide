@@ -32,7 +32,6 @@ function account(extra: Partial<EditorAccount> = {}): EditorAccount {
     principal: 'anon_11111111-1111-4111-8111-111111111111',
     signedIn: false,
     signInAvailable: true,
-    passkeysAvailable: false,
     githubAvailable: false,
     googleAvailable: true,
     google: vi.fn(),
@@ -78,7 +77,7 @@ function controls(root: ParentNode): string[] {
 
 describe('the methods of the sign in window (docs/NEXT.md 3.2 H4)', () => {
   it('draws Google, the or row, the field and Continue where mail is on, and no passkey row', () => {
-    const { container } = draw({ passkeysAvailable: true, passkey: vi.fn() });
+    const { container } = draw();
     expect(controls(container.ownerDocument)).toEqual([
       'dialog.signIn.google',
       'dialog.signIn.email',

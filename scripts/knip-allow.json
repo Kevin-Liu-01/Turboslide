@@ -2,8 +2,6 @@
   "$comment": "The knip findings of the day check step 34 joined the chain (docs/hardening/HARDENING.md HR-C#3a, CLEANUP-9), one line each: <type> <file> <name>. node scripts/check.mjs --knip fails on a finding this list does not hold and on an entry knip no longer reports. The list only shrinks: HR-C#3b to HR-C#3f, HR-C#4, HR-C#8 and HR-C#9 remove what they clean up, and --knip --prune drops entries without adding any.",
   "findings": [
     "catalog pnpm-workspace.yaml default.ulid",
-    "dependencies apps/studio/package.json @simplewebauthn/browser",
-    "dependencies apps/studio/package.json @simplewebauthn/server",
     "dependencies packages/agent/package.json @turboslide/headless",
     "dependencies packages/agent/package.json @turboslide/render",
     "dependencies packages/effects/package.json pngjs",
@@ -215,7 +213,6 @@
     "exports apps/studio/src/server/auth/better-auth.ts MAILS_PER_ADDRESS_WINDOW_MS",
     "exports apps/studio/src/server/auth/better-auth.ts MAILS_PER_IP_PER_HOUR",
     "exports apps/studio/src/server/auth/better-auth.ts OTP_ATTEMPTS",
-    "exports apps/studio/src/server/auth/better-auth.ts PASSKEY_RPID_VARIABLE",
     "exports apps/studio/src/server/auth/better-auth.ts PUBLIC_ORIGIN_VARIABLE",
     "exports apps/studio/src/server/auth/better-auth.ts SESSION_FRESH_S",
     "exports apps/studio/src/server/auth/better-auth.ts SESSION_IDLE_S",

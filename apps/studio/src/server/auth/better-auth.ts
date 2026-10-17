@@ -7,10 +7,8 @@
 // chooser alone, with no offline access and no consent prompt, since nothing calls a Google API
 // after the sign in (docs/REALTIME.md 4.1). The base URL is dynamic: the request's Host when it
 // is on the deployment's own list (`TURBOSLIDE_AUTH_HOSTS`, else the five defaults), the hosted
-// fallback `TURBOSLIDE_PUBLIC_ORIGIN` otherwise, a refusal when neither. Passkeys wait:
-// `@better-auth/passkey` is
-// not in this checkout and the rpID cannot move once set (03 C1), so `signInMethods` reports them
-// off with the sentence the dialog shows.
+// fallback `TURBOSLIDE_PUBLIC_ORIGIN` otherwise, a refusal when neither. Passkeys were planned
+// and never enabled; their dependencies and plumbing left in hardening HR-C#9 (CLEANUP-8).
 //
 // The session hooks are where the anonymous principal joins the account (the alias table,
 // alias.ts) and where the caller's other stores hear about a sign in or a deletion; they are
@@ -58,8 +56,6 @@ export const DEFAULT_AUTH_HOSTS: readonly string[] = Object.freeze([
 ]);
 /** The social sign in start and Google's callback: 10 per minute per address (REALTIME.md 4.1). */
 export const SOCIAL_PER_MINUTE = 10;
-/** Set to the production host once it is final; the passkey plugin is enabled with it (0.20). */
-export const PASSKEY_RPID_VARIABLE = 'TURBOSLIDE_PASSKEY_RPID';
 
 export const AUTH_BASE_PATH = '/api/auth';
 /** The sign in page, where a callback error with no flow of its own lands (docs/POLISH-2.md C14). */
@@ -84,8 +80,6 @@ export const DEVICE_USER_CODE_LENGTH = 8;
 export const DEVICE_EXPIRES = '30m';
 export const DEVICE_INTERVAL = '5s';
 export const DEVICE_ATTEMPTS = 5;
-/** The sign in dialog's greyed passkey row (SPEC-3 7.3). */
-export const PASSKEYS_LATER = 'Passkeys arrive once the address is final';
 /**
  * The sign in limits (research 03 Part H; report 10 F42): 3 mails per address per 10 minutes in
  * the application (the address hashed under the deployment's secret, never stored as typed), 10
@@ -105,8 +99,6 @@ export type SignInMethods = {
   available: boolean;
   /** the magic link and the code: a database and a mail sender (REALTIME.md 4.1, default 7.7) */
   email: boolean;
-  passkeys: boolean;
-  passkeysNotice: string | null;
   github: boolean;
   /** Continue with Google: the two Google variables and a database (REALTIME.md 4.1) */
   google: boolean;
@@ -128,8 +120,6 @@ export function signInMethods(
   return {
     available: databaseConfigured,
     email: databaseConfigured && mailMode !== 'off',
-    passkeys: false,
-    passkeysNotice: databaseConfigured ? PASSKEYS_LATER : null,
     github: databaseConfigured && github,
     google: databaseConfigured && google,
   };

@@ -1050,7 +1050,6 @@ export function EditorRoot({
     signInAvailable:
       (auth?.signIn ?? false) &&
       (auth?.google === true || auth?.github === true || auth?.email === true),
-    passkeysAvailable: auth?.passkeys ?? false,
     githubAvailable: auth?.github ?? false,
     googleAvailable: auth?.google ?? false,
     ...(avatarChoice !== undefined ? { avatar: avatarChoice } : {}),

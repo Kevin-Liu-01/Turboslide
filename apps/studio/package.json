@@ -16,8 +16,6 @@
   },
   "dependencies": {
     "@paper-design/shaders": "catalog:",
-    "@simplewebauthn/browser": "catalog:",
-    "@simplewebauthn/server": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-router-devtools": "catalog:",
     "@tanstack/react-start": "catalog:",

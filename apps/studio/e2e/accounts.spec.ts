@@ -2158,8 +2158,8 @@ test.describe('the realtime round: the Google sign in rows (docs/REALTIME.md 4.4
     const github = order.indexOf('dialog.signIn.github');
     const passkey = order.indexOf('dialog.signIn.passkey');
     expect(google, 'the Google button is drawn').toBeGreaterThanOrEqual(0);
-    /* no passkey row while the deployment offers no passkeys (docs/NEXT.md 3.2 H4) */
-    expect(passkey, 'no passkey row without TURBOSLIDE_PASSKEY_RPID and the plugin').toBe(-1);
+    /* no passkey row: passkeys left in hardening HR-C#9 (docs/NEXT.md 3.2 H4) */
+    expect(passkey, 'no passkey row').toBe(-1);
     if (github >= 0) expect(github, 'GitHub under Google').toBeGreaterThan(google);
     else
       test.info().annotations.push({

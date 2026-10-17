@@ -416,7 +416,7 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
 
 - Round three catalog entries (SPEC-3 0.20, 0.23, 0.25, 0.27, 2.5, 8.10; merge 1): `better-auth`
   1.7.4, `kysely` 0.29.5, `dompurify` 3.4.15 (with the pinned `jsdom` and
-  `@types/jsdom` 30.0.0), `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
+  `@types/jsdom` 30.0.0), `resend` 6.28.0, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
   builder names a package and its version in `docs/gslides-parity/build-3/<key>.md`; the
   integrator adds it to the catalog and to the consuming package's `package.json` and installs
   once. `ulid` is in the catalog and attached to no package yet.

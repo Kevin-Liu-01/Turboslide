@@ -570,8 +570,6 @@ export type EditorAccount = {
   signedIn: boolean;
   /** the deployment has an accounts database: the Sign in row exists (7.3) */
   signInAvailable: boolean;
-  /** the passkey plugin is on: the production domain is fixed (7.3) */
-  passkeysAvailable?: boolean;
   githubAvailable?: boolean;
   /** the Google client is configured: Continue with Google, first in the dialog (docs/REALTIME.md 4.1) */
   googleAvailable?: boolean;
@@ -592,7 +590,6 @@ export type EditorAccount = {
   /** one mail with a magic link and a six digit code; the same answer whether or not the address exists */
   requestCode?: (email: string) => Promise<unknown>;
   verifyCode?: (email: string, code: string) => Promise<unknown>;
-  passkey?: () => Promise<unknown>;
   github?: () => void;
   google?: () => void;
   /** the profile's agent key rows (7.7) */

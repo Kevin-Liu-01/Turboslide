@@ -88,6 +88,7 @@ import type {
   EditorNotice,
 } from '@turboslide/viewer/Editor';
 import type { EditorTool } from '@turboslide/viewer/Gestures';
+import { flushHeldBursts } from '@turboslide/viewer/InlineText';
 import type { CaretInfo } from '@turboslide/viewer/InlineText';
 import { GRID_DEFAULT_TILE, GridView } from '@turboslide/viewer/GridView';
 import type { GridTileSize } from '@turboslide/viewer/GridView';
@@ -794,20 +795,32 @@ export function EditorRoot({
      leave-warning.ts), and the presence leave on the way out (hotfix 2 cause B1): a reload or a
      navigation fires `pagehide` and nothing else that the room client sees, so the controller
      stops there and the room client posts the leave with keepalive; a page the browser restores
-     from its cache afterwards reloads, since its stream and its client id are gone */
+     from its cache afterwards reloads, since its stream and its client id are gone. The leave
+     warning counts a text session's held burst (the keys of the last 100 ms, InlineText
+     heldBursts), and `pagehide` writes it before the controller stops, so the room client holds
+     it as a pending operation when it persists them; a tab turning hidden writes it too, since a
+     phone may discard a hidden tab with no `pagehide` */
   useEffect(() => {
     const onBeforeUnload = leaveWarning(backend, () => unsavedWrites(controller.getSnapshot()));
-    const onPageHide = () => controller.stop();
+    const onPageHide = () => {
+      flushHeldBursts();
+      controller.stop();
+    };
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) window.location.reload();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flushHeldBursts();
     };
     window.addEventListener('beforeunload', onBeforeUnload);
     window.addEventListener('pagehide', onPageHide);
     window.addEventListener('pageshow', onPageShow);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload);
       window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('pageshow', onPageShow);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [controller, backend]);
   /* the tab's presence (SPEC-3 3.8; docs/REALTIME.md 3.4, 3.5): the slide, the selection and the

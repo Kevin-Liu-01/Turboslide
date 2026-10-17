@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { SyncStatus } from '@turboslide/realtime/client/room-client';
+import { heldBursts } from '@turboslide/viewer/InlineText';
 
 import { heroDocument } from '../try/hero-deck';
 import { createTabBackend } from '../try/tab-backend';
@@ -53,6 +54,23 @@ describe('leaveWarning', () => {
       ).defaultPrevented;
     expect(asks(1)).toBe(true);
     expect(asks(0)).toBe(false);
+  });
+
+  /* InlineText holds the keys of the last 100 ms before its burst writes them (TEXT_BURST_MS);
+     EditorRoot writes them on pagehide, and the warning counts them until then */
+  it('counts a text session holding typed keys its burst has not written', () => {
+    const sync = { pending: 0 } as SyncStatus;
+    const asks = (held: number) =>
+      leave(
+        leaveWarning({ kind: 'server' }, () =>
+          unsavedWrites({ sync, pending: 0, serverWrites: 0 }, held),
+        ),
+      ).defaultPrevented;
+    expect(asks(1)).toBe(true);
+    expect(asks(0)).toBe(false);
+    /* without a count it reads InlineText heldBursts(): no session is open here */
+    expect(heldBursts()).toBe(0);
+    expect(unsavedWrites({ sync, pending: 0, serverWrites: 0 })).toBe(0);
   });
 
   it('asks while a picture uploads on the server backend, and not once the upload answers', async () => {

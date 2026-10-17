@@ -88,7 +88,6 @@ import type {
   EditorNotice,
 } from '@turboslide/viewer/Editor';
 import type { EditorTool } from '@turboslide/viewer/Gestures';
-import { flushHeldBursts } from '@turboslide/viewer/InlineText';
 import type { CaretInfo } from '@turboslide/viewer/InlineText';
 import { GRID_DEFAULT_TILE, GridView } from '@turboslide/viewer/GridView';
 import type { GridTileSize } from '@turboslide/viewer/GridView';
@@ -146,7 +145,7 @@ import type {
 } from './controller';
 import type { EditSearch } from '../routes/-edit-search';
 import { partitionRoster } from './client-ids';
-import { leaveWarning, unsavedWrites } from './leave-warning';
+import { leaveListeners } from './leave-warning';
 import { refusedText } from './refused-write';
 import { SessionBridge, ShellBridge, isPrerendering, whenShown } from './shell-bridge';
 
@@ -791,36 +790,20 @@ export function EditorRoot({
     setChosenMode(mode);
     if (search.edit === 0) onSearch({ edit: undefined });
   };
-  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6; none on the tab backend,
-     leave-warning.ts), and the presence leave on the way out (hotfix 2 cause B1): a reload or a
-     navigation fires `pagehide` and nothing else that the room client sees, so the controller
-     stops there and the room client posts the leave with keepalive; a page the browser restores
-     from its cache afterwards reloads, since its stream and its client id are gone. The leave
-     warning counts a text session's held burst (the keys of the last 100 ms, InlineText
-     heldBursts), and `pagehide` writes it before the controller stops, so the room client holds
-     it as a pending operation when it persists them; a tab turning hidden writes it too, since a
-     phone may discard a hidden tab with no `pagehide` */
+  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6; none on the tab backend),
+     the held bursts written and the presence leave on the way out (hotfix 2 cause B1), and the
+     reload of a page restored from the browser's cache: leave-warning.ts leaveListeners */
   useEffect(() => {
-    const onBeforeUnload = leaveWarning(backend, () => unsavedWrites(controller.getSnapshot()));
-    const onPageHide = () => {
-      flushHeldBursts();
-      controller.stop();
-    };
-    const onPageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) window.location.reload();
-    };
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') flushHeldBursts();
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    window.addEventListener('pagehide', onPageHide);
-    window.addEventListener('pageshow', onPageShow);
-    document.addEventListener('visibilitychange', onVisibility);
+    const listeners = leaveListeners(controller, backend);
+    window.addEventListener('beforeunload', listeners.beforeunload);
+    window.addEventListener('pagehide', listeners.pagehide);
+    window.addEventListener('pageshow', listeners.pageshow);
+    document.addEventListener('visibilitychange', listeners.visibilitychange);
     return () => {
-      window.removeEventListener('beforeunload', onBeforeUnload);
-      window.removeEventListener('pagehide', onPageHide);
-      window.removeEventListener('pageshow', onPageShow);
-      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('beforeunload', listeners.beforeunload);
+      window.removeEventListener('pagehide', listeners.pagehide);
+      window.removeEventListener('pageshow', listeners.pageshow);
+      document.removeEventListener('visibilitychange', listeners.visibilitychange);
     };
   }, [controller, backend]);
   /* the tab's presence (SPEC-3 3.8; docs/REALTIME.md 3.4, 3.5): the slide, the selection and the

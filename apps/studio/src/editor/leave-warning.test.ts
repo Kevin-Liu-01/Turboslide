@@ -8,7 +8,7 @@ import { createTabBackend } from '../try/tab-backend';
 import type { TabPerson } from '../try/tab-backend';
 import type { EditorBackend } from './backend';
 import { createEditorController } from './controller';
-import { leaveWarning, unsavedWrites } from './leave-warning';
+import { leaveListeners, leaveWarning, unsavedWrites } from './leave-warning';
 
 // The leave warning (SPEC-3 0.7, 3.6): on the server backend a leave with operations pending, or
 // with a deck write running on the server (a picture upload), asks for the browser's leave prompt;
@@ -128,5 +128,64 @@ describe('leaveWarning', () => {
     await expect(upload).rejects.toThrow();
     expect(controller.getSnapshot().serverWrites).toBe(0);
     expect(leave(warning).defaultPrevented).toBe(false);
+  });
+});
+
+/* EditorRoot registers these listeners as they are; the order on pagehide is what keeps a burst
+   typed in the last 100 ms: written first, so the room client persists it with the pending
+   operations, then the controller stopped */
+describe('leaveListeners', () => {
+  const snapshot = { sync: { pending: 0 } as SyncStatus, pending: 0, serverWrites: 0 };
+
+  it('writes the held bursts before it stops the controller on pagehide', () => {
+    const calls: string[] = [];
+    const listeners = leaveListeners(
+      { getSnapshot: () => snapshot, stop: () => calls.push('stop') },
+      { kind: 'server' },
+      () => calls.push('flush'),
+      () => 'visible',
+      () => calls.push('reload'),
+    );
+    listeners.pagehide();
+    expect(calls).toEqual(['flush', 'stop']);
+  });
+
+  it('writes the held bursts when the tab turns hidden, and only then', () => {
+    let state: DocumentVisibilityState = 'visible';
+    let flushed = 0;
+    const listeners = leaveListeners(
+      { getSnapshot: () => snapshot, stop: () => undefined },
+      { kind: 'server' },
+      () => (flushed += 1),
+      () => state,
+      () => undefined,
+    );
+    listeners.visibilitychange();
+    expect(flushed).toBe(0);
+    state = 'hidden';
+    listeners.visibilitychange();
+    expect(flushed).toBe(1);
+  });
+
+  it('reloads a page restored from the cache, and asks on beforeunload while writes are pending', () => {
+    let reloads = 0;
+    let pending = 0;
+    const listeners = leaveListeners(
+      {
+        getSnapshot: () => ({ ...snapshot, sync: { pending } as SyncStatus }),
+        stop: () => undefined,
+      },
+      { kind: 'server' },
+      () => undefined,
+      () => 'visible',
+      () => (reloads += 1),
+    );
+    listeners.pageshow({ persisted: false } as PageTransitionEvent);
+    expect(reloads).toBe(0);
+    listeners.pageshow({ persisted: true } as PageTransitionEvent);
+    expect(reloads).toBe(1);
+    expect(leave(listeners.beforeunload).defaultPrevented).toBe(false);
+    pending = 1;
+    expect(leave(listeners.beforeunload).defaultPrevented).toBe(true);
   });
 });

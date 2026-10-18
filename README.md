@@ -8,7 +8,7 @@
 Turboslide is a slides editor in the browser. It has menus and keyboard shortcuts for editing, arranging and presenting. No account is needed.
 
 - Live studio: [https://www.turboslide.com](https://www.turboslide.com), with the product page at [/home](https://www.turboslide.com/home) and the agent guide at [/llms.txt](https://www.turboslide.com/llms.txt)
-- Agents run the same 201 actions over the CLI, MCP and HTTP: [The CLI in brief](#the-cli-in-brief)
+- Agents run the same 203 actions over the CLI, MCP and HTTP: [The CLI in brief](#the-cli-in-brief)
 - What works today and what is held: [What works today](#what-works-today); the default view and why: [docs/FOCUS.md](docs/FOCUS.md); the release notes: [docs/updates.md](docs/updates.md)
 - Documentation: [docs/README.md](docs/README.md) and the index at the end of this page
 - The identity: [docs/brand.md](docs/brand.md); why it is fast: [docs/performance.md](docs/performance.md)

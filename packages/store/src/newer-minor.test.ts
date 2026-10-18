@@ -15,6 +15,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
+import { CURRENT_SCHEMA_MINOR } from '@turboslide/schema/migrations';
 import type { Author } from '@turboslide/schema/mutations';
 import { validateDocument } from '@turboslide/schema/validate';
 
@@ -23,6 +24,9 @@ import { openBlobStore, pushDeckDir } from './blob-store.ts';
 import { openFileStore, slidePath } from './file-store.ts';
 import type { FileStore } from './file-store.ts';
 import { parseVersionRecord, readVersions, versionRecordText } from './versions.ts';
+
+/** The minor of a release after this one (this release writes CURRENT_SCHEMA_MINOR). */
+const NEWER_MINOR = CURRENT_SCHEMA_MINOR + 1;
 
 type Json = Record<string, unknown>;
 const agent: Author = { kind: 'agent', name: 'agent', runId: 'o5' };
@@ -50,9 +54,13 @@ function withAfter(object: Json, after: string, entries: Json): Json {
 
 /** content-rule as a release of minor 1 writes it, with a slide field and a block field it added. */
 function newer(slide: Json): Json {
-  const stamped = withAfter(withAfter(slide, 'schemaVersion', { schemaMinor: 1 }), 'kind', {
-    futureFrame: { inset: 12 },
-  });
+  const stamped = withAfter(
+    withAfter(slide, 'schemaVersion', { schemaMinor: NEWER_MINOR }),
+    'kind',
+    {
+      futureFrame: { inset: 12 },
+    },
+  );
   const slots = stamped.slots as { left: Json[] };
   const heading = slots.left[0];
   if (heading === undefined) throw new Error('fixture');
@@ -121,7 +129,7 @@ describe('a deck a newer minor wrote (RELIABILITY-19)', () => {
     const inverse = record?.inverse[0];
     expect(inverse?.op).toBe('slide.insert');
     expect(inverse?.op === 'slide.insert' && inverse.slide).toMatchObject({
-      schemaMinor: 1,
+      schemaMinor: NEWER_MINOR,
       futureFrame: { inset: 12 },
     });
     // undo is a forward write of the inverse (SPEC 6.7)
@@ -164,7 +172,7 @@ describe('a version record through the documents chain (RELIABILITY-19)', () => 
       ...base,
       mutations: [],
       inverse: [],
-      schemaMinor: 1,
+      schemaMinor: NEWER_MINOR,
       futureCause: 'import',
     });
     const record = parseVersionRecord(text, 'versions/3.json');
@@ -197,7 +205,9 @@ describe('a write whose record carries a kept field (the wave 3b verify, finding
   /** The worked deck with content-rule of minor 1; `manifest` stamps deck.json and its first section. */
   function seed(manifest = false): void {
     const { deck, slides } = normalized();
-    const stamped = manifest ? withAfter(deck, 'schemaVersion', { schemaMinor: 1 }) : deck;
+    const stamped = manifest
+      ? withAfter(deck, 'schemaVersion', { schemaMinor: NEWER_MINOR })
+      : deck;
     if (manifest) {
       const sections = stamped.sections as Json[];
       sections[0] = { ...sections[0], futureSection: 'kept' };
@@ -234,7 +244,7 @@ describe('a write whose record carries a kept field (the wave 3b verify, finding
     ]);
     expect(JSON.parse(readFileSync(join(dir, 'deck.json'), 'utf8')).revision).toBe(413);
     const record = readVersions(dir).at(-1);
-    expect(record?.schemaMinor).toBe(1);
+    expect(record?.schemaMinor).toBe(NEWER_MINOR);
     expect(record?.inverse[0]).toMatchObject({
       op: 'block.insert',
       block: { futureShadow: 'soft' },
@@ -286,7 +296,11 @@ describe('a write whose record carries a kept field (the wave 3b verify, finding
     expect(leftText(read.document.slides['content-rule'], 'p1')).toBe('Latest words');
     const manifest = JSON.parse(readFileSync(join(dir, 'deck.json'), 'utf8')) as Json;
     expect((manifest.sections as Json[])[0]).toMatchObject({ futureSection: 'kept' });
-    expect(readVersions(dir).map((record) => record.schemaMinor)).toEqual([1, 1, 1]);
+    expect(readVersions(dir).map((record) => record.schemaMinor)).toEqual([
+      NEWER_MINOR,
+      NEWER_MINOR,
+      NEWER_MINOR,
+    ]);
   });
 
   it('FileStore: a record that cannot be written changes no file', async () => {
@@ -338,7 +352,7 @@ describe('a write whose record carries a kept field (the wave 3b verify, finding
       expect(peer.deck.revision).toBe(413);
       expect(leftIds(peer.slides['content-rule'])).toEqual(['p1']);
       const records = await b.records();
-      expect(records.map((record) => [record.n, record.schemaMinor])).toEqual([[1, 1]]);
+      expect(records.map((record) => [record.n, record.schemaMinor])).toEqual([[1, NEWER_MINOR]]);
       const undo = await b.write({
         baseRevision: 413,
         author: agent,

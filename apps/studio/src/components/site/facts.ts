@@ -1,6 +1,6 @@
 /**
  * The counts the site pages state (docs/SITE.md A.1): the actions of the action table in all and
- * per transport, the numbers the generated reference prints (HTTP is the 180 actions on HTTP, not
+ * per transport, the numbers the generated reference prints (HTTP is the 182 actions on HTTP, not
  * the HTTP paths of the OpenAPI file), and the layouts, themes and animated patterns /features
  * names. The pages do not import the tables, whose schemas their scripts would carry;
  * facts.test.ts recomputes every number from `packages/schema/src/actions.ts`, the layout and
@@ -30,11 +30,11 @@ export type SiteFacts = {
 };
 
 export const SITE_FACTS: SiteFacts = {
-  actions: 201,
-  cli: 188,
-  mcp: 177,
-  http: 180,
-  page: 185,
+  actions: 203,
+  cli: 190,
+  mcp: 179,
+  http: 182,
+  page: 187,
   layouts: 22,
   themes: 9,
   materials: 38,

@@ -380,6 +380,8 @@ describe('the frame document (SPEC-3 8.4 item 2)', () => {
     expect(source.srcdoc).not.toContain('<b>x</b>');
     expect(
       frameDocument({ html: '<p>x</p>', css: '', scope: 'ts-x-a-b', theme: 'light' }),
-    ).toContain('<div class="ts-sheet ts-x-a-b" data-theme="light"><p>x</p></div>');
+    ).toContain(
+      '<div class="ts-sheet" data-theme="light"><div class="ts-x-a-b"><p>x</p></div></div>',
+    );
   });
 });

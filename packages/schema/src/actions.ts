@@ -67,6 +67,7 @@ import {
   PLATE_SIDES,
   sectionSchema,
   slideBackgroundSchema,
+  htmlLayerSchema,
   slideSchema,
   SLIDE_KINDS,
   SLOT_NAMES,
@@ -199,6 +200,7 @@ export const ACTION_IDS = [
   'deck.restore',
   'deck.remove',
   'deck.setBackground',
+  'deck.setHtml',
   'deck.guides',
   /* the product round's templates (docs/archive/rounds/PRODUCT.md 4.3; B5b): the index reads and the writes of
      Save as template and the gallery's card menu; before the slide group so GS3_ACTION_IDS,
@@ -225,6 +227,7 @@ export const ACTION_IDS = [
   'slide.import',
   'slide.toCanvas',
   'slide.setBackground',
+  'slide.setHtml',
   'text.replaceAll',
   'block.set',
   'block.insert',
@@ -3153,6 +3156,34 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mcp: 'deck_set_background',
     example: { background: { color: 'plate' }, baseRevision: 412 },
   }),
+  'deck.setHtml': action({
+    id: 'deck.setHtml',
+    label: 'Set shared slide HTML',
+    doc: 'Writes the HTML and CSS every slide carries (docs/html-layers.md): CSS scoped to each slide that restyles its blocks, and a markup layer drawn under or over every slide’s blocks. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      html: htmlLayerSchema
+        .nullable()
+        .describe('css, markup and layer (under or over); null removes the shared layer'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      html: htmlLayerSchema.nullable(),
+      revision,
+      droppedCss: z.array(z.string()).describe('the CSS the tokenizer dropped'),
+    }),
+    cli: {
+      usage: 'turboslide deck html [--css <file>] [--markup <file>] [--layer under|over] [--clear]',
+    },
+    mcp: 'deck_set_html',
+    example: {
+      html: { css: '.h1 { letter-spacing: -0.02em; }', markup: '<div class="rule"></div>' },
+      baseRevision: 412,
+    },
+  }),
   'deck.guides': action({
     id: 'deck.guides',
     label: 'Set guides',
@@ -3233,6 +3264,38 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide slide background <slideIds> --color <color>' },
     mcp: 'deck_set_slide_background',
     example: { slideIds: ['content-rule'], background: { color: 'plate' }, baseRevision: 412 },
+  }),
+  'slide.setHtml': action({
+    id: 'slide.setHtml',
+    label: 'Set slide HTML',
+    doc: 'Writes the HTML and CSS of slides in one write (docs/html-layers.md): CSS scoped to the slide that restyles its blocks, and a markup layer under or over them, over the deck’s shared layer. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'P1',
+    input: z.strictObject({
+      slideIds: slideIdList,
+      html: htmlLayerSchema
+        .nullable()
+        .describe('css, markup and layer (under or over); null removes the slide’s layer'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      slides: z.array(slideSchema),
+      revision,
+      findings: z.array(findingSchema),
+      droppedCss: z.array(z.string()).describe('the CSS the tokenizer dropped'),
+    }),
+    cli: {
+      usage:
+        'turboslide slide html <slideIds> [--css <file>] [--markup <file>] [--layer under|over] [--clear]',
+    },
+    mcp: 'deck_set_slide_html',
+    example: {
+      slideIds: ['content-rule'],
+      html: { css: ':scope { background: var(--plate); }', layer: 'under' },
+      baseRevision: 412,
+    },
   }),
   'block.group': action({
     id: 'block.group',

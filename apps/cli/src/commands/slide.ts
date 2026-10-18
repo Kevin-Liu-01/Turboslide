@@ -20,6 +20,7 @@ import { flagAll, flagBoolean, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { UsageError } from '../exit.ts';
 import { slideBackgroundMaterialCommand, slideBackgroundPictureCommand } from './dither.ts';
+import { htmlLayerFlags, htmlLayerLine } from './html-layer.ts';
 import {
   slideApplyLayout,
   slideDuplicate,
@@ -31,6 +32,7 @@ import {
   slideReplace,
   slideSetAdvance,
   slideSetBackground,
+  slideSetHtml,
   slideSetLayout,
   slideSetTransition,
   slideSkip,
@@ -53,7 +55,7 @@ import { measureSlidesHeadless } from '../deps/canvas.ts';
 import { decksDirFor } from './deck.ts';
 import { slideGet } from './slides.ts';
 
-const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background|background-picture|background-material|transition|advance> ...
+const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background|background-picture|background-material|html|transition|advance> ...
   slide background-picture <ids> --asset <assetId>|--file <path>|--url <url> [--alt <text>] [--dither] [--no-replace]
                                     a covering picture at the back of each slide, dithered when asked (slide.setBackgroundPicture)
   slide background-material <ids> <materialId> [--preset <name>] [--anchor <ms>] [--dither]
@@ -80,6 +82,8 @@ const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-lay
                                                (what the hosted studio and the render worker run)
   slide background <id,id,...> --color <color> | --off
                                                the slides' background colour, or the theme default again (slide.setBackground)
+  slide html <id,id,...> [--css <file>] [--markup <file>] [--layer under|over] | --clear
+                                               the slides' own CSS and markup layer (slide.setHtml; docs/html-layers.md)
   slide transition <name> [--ms <ms>] [--from <side>] [--slides <id,id,...>] | --clear [--slides <id,id,...>]
                                                how slides enter in the slideshow, on the named slides or the deck (slide.transition)
   slide advance <seconds>|off [--slides <id,id,...>]
@@ -122,6 +126,8 @@ export async function slide(ctx: CommandContext): Promise<number> {
       return slideMeasureCommand(inner);
     case 'background':
       return slideBackgroundCommand(inner);
+    case 'html':
+      return slideHtmlCommand(inner);
     case 'background-picture':
       return slideBackgroundPictureCommand(inner);
     case 'background-material':
@@ -206,6 +212,24 @@ async function slideBackgroundCommand(ctx: CommandContext): Promise<number> {
   ctx.out.human(
     `${off ? 'reset the background of' : `set the background ${color} on`} ${slideIds.join(', ')}: revision ${result.revision}`,
   );
+  return 0;
+}
+
+async function slideHtmlCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const layer = htmlLayerFlags(ctx, 'slide html', USAGE);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideSetHtml(storeDeps(ctx, store), writeContext(ctx), {
+      slideIds,
+      html: layer,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  const html = result.slides[0]?.html ?? null;
+  ctx.out.human(htmlLayerLine(slideIds.join(', '), html, result.revision));
+  for (const dropped of result.droppedCss) ctx.out.human(`dropped CSS: ${dropped}`);
   return 0;
 }
 

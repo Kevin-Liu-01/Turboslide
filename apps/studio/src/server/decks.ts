@@ -21,6 +21,7 @@ import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind, motionField } from '@turboslide/viewer/model';
 
 import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
+import { htmlLayerFrameFor } from '@turboslide/render/sanitize/frame';
 import { slideCounter } from '@turboslide/render/deck';
 import { bandAssetResolver, frameBandOf } from '@turboslide/render/stage';
 
@@ -208,6 +209,19 @@ function buildViewerDeck(
               policy: options.htmlPolicy,
               publicStoreHost: process.env.TURBOSLIDE_PUBLIC_STORE_HOST ?? null,
             }),
+            // the deck's and the slide's HtmlLayer (docs/html-layers.md 4, 5): the markup in the
+            // same sandboxed frame; under the policy that shows an html block's note, neither the
+            // layer's CSS nor its markup is drawn
+            ...(options.htmlPolicy === 'note'
+              ? { htmlLayersOff: true }
+              : {
+                  htmlLayerFrame: htmlLayerFrameFor({
+                    theme: options.theme,
+                    assetUrl: (path: string) => assetBase + path,
+                    sheetCss: options.sheetCss,
+                    publicStoreHost: process.env.TURBOSLIDE_PUBLIC_STORE_HOST ?? null,
+                  }),
+                }),
           })
         : { html: '' };
       const asset = 'picture' in slide ? deck.assets[slide.picture.asset] : undefined;
@@ -1007,10 +1021,14 @@ async function loadShaped(data: GetDeckInput): Promise<ShapedLoad | null> {
       document: withTrashStamp(live.document, loaded.document.deck.trashedAt),
     };
   }
-  // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4)
-  const holdsHtml = Object.values(loaded.document.slides).some((slide) =>
-    JSON.stringify(slide).includes('"type":"html"'),
-  );
+  // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4) or an
+  // HtmlLayer with markup (docs/html-layers.md 4)
+  const holdsHtml =
+    loaded.document.deck.html?.markup !== undefined ||
+    Object.values(loaded.document.slides).some(
+      (slide) =>
+        slide.html?.markup !== undefined || JSON.stringify(slide).includes('"type":"html"'),
+    );
   if (holdsHtml) {
     const { loadPurifier } = await import('@turboslide/render/blocks/html-escape');
     await loadPurifier().catch(() => undefined);

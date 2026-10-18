@@ -11,7 +11,7 @@ import { SCHEMA_MINOR } from './deck.ts';
 import { CONTENT_RULE, WORKED_DECK, WORKED_SLIDES } from './fixtures.ts';
 import { canonicalJson } from './json.ts';
 import { CURRENT_SCHEMA_MINOR, migrateMutations, readMinor } from './migrations.ts';
-import { applyMutations } from './reduce.ts';
+import { applyMutations, applyWrite } from './reduce.ts';
 import { validateDeck, validateManifest, validateSlide } from './validate.ts';
 
 type Json = Record<string, unknown>;
@@ -33,10 +33,13 @@ function withAfter(object: Json, after: string, entries: Json): Json {
   return out;
 }
 
-/** CONTENT_RULE as a release of minor 1 writes it: the stamp, a slide field and a block field it added. */
+/** The minor of a release after this one. */
+const NEWER_MINOR = CURRENT_SCHEMA_MINOR + 1;
+
+/** CONTENT_RULE as a newer release writes it: the stamp, a slide field and a block field it added. */
 function newerSlide(): Json {
   const base = written(CONTENT_RULE);
-  const slide = withAfter(base, 'schemaVersion', { schemaMinor: 1 });
+  const slide = withAfter(base, 'schemaVersion', { schemaMinor: NEWER_MINOR });
   const stamped = withAfter(slide, 'kind', { futureFrame: { inset: 12, tone: 'warm' } });
   const slots = stamped.slots as { left: Json[] };
   const heading = slots.left[0];
@@ -46,12 +49,35 @@ function newerSlide(): Json {
 }
 
 describe('a file of a newer minor (RELIABILITY-19)', () => {
-  it('this release writes minor 0 and writes no schemaMinor', () => {
-    expect(SCHEMA_MINOR).toBe(0);
-    expect(CURRENT_SCHEMA_MINOR).toBe(0);
+  it('this release is minor 1 and writes no schemaMinor on a file without an HtmlLayer', () => {
+    expect(SCHEMA_MINOR).toBe(1);
+    expect(CURRENT_SCHEMA_MINOR).toBe(1);
     expect(written(CONTENT_RULE)).not.toHaveProperty('schemaMinor');
     const deck = validateDeck({ deck: structuredClone(WORKED_DECK), slides: [...WORKED_SLIDES] });
     expect(deck.deck).not.toHaveProperty('schemaMinor');
+  });
+
+  it('stamps minor 1 on the deck and on each slide a write leaves holding an HtmlLayer', () => {
+    const checked = validateDeck({
+      deck: structuredClone(WORKED_DECK),
+      slides: [...WORKED_SLIDES],
+    });
+    if (checked.deck === null) throw new Error('fixture');
+    const document = { deck: checked.deck, slides: checked.slides };
+    const result = applyWrite(document, {
+      baseRevision: document.deck.revision,
+      author: { kind: 'human', name: 'kevin' },
+      mutations: [
+        { op: 'deck.set', path: '/html', value: { css: '.h1 { color: red; }' } },
+        { op: 'slide.set', slideId: CONTENT_RULE.id, path: '/html', value: { markup: '<b>x</b>' } },
+      ],
+    });
+    if (!result.ok) throw new Error(result.message);
+    expect(result.document.deck.schemaMinor).toBe(1);
+    expect(result.document.slides[CONTENT_RULE.id]?.schemaMinor).toBe(1);
+    const other = WORKED_SLIDES.find((row) => row.id !== CONTENT_RULE.id);
+    if (other === undefined) throw new Error('fixture');
+    expect(result.document.slides[other.id]).not.toHaveProperty('schemaMinor');
   });
 
   it('reads a slide with fields it does not know and round trips it byte equal', () => {
@@ -98,7 +124,7 @@ describe('a file of a newer minor (RELIABILITY-19)', () => {
     const out = JSON.parse(canonicalJson(check.slides[slide.id])) as Json;
     expect(out.futureFrame).toEqual({ inset: 12, tone: 'warm' });
     expect((out.slots as { left: Json[] }).left[0]?.futureShadow).toBe('soft');
-    expect(out.schemaMinor).toBe(1);
+    expect(out.schemaMinor).toBe(NEWER_MINOR);
     // nothing else moved but the text that was written
     const expected = structuredClone(before);
     const p1 = (expected.slots as { left: Json[] }).left[1];

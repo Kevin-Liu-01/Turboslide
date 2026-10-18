@@ -35,6 +35,7 @@ import {
   ditherSourceOf,
   resolveDither,
 } from '@turboslide/render/dither-key';
+import { sanitizeHtmlLayer } from '@turboslide/render/sanitize/html';
 import type { Autofit, Block, Shadow, ShapeBlock } from '@turboslide/schema/blocks';
 import { plainBlockSchema } from '@turboslide/schema/blocks';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
@@ -56,6 +57,7 @@ import type {
   Layout,
   LayoutId,
   Section,
+  HtmlLayer,
   Slide,
   SlideBackground,
 } from '@turboslide/schema/deck';
@@ -2058,6 +2060,8 @@ export type SlideSetBackgroundInput = Rev & {
   background: SlideBackground | null;
 };
 export type DeckSetBackgroundInput = Rev & { background: SlideBackground | null };
+export type DeckSetHtmlInput = Rev & { html: HtmlLayer | null };
+export type SlideSetHtmlInput = Rev & { slideIds: string[]; html: HtmlLayer | null };
 export type BlockGroupInput = Rev & { slideId: string; blockIds: string[]; group?: string };
 export type BlockUngroupInput = Rev & { slideId: string; blockIds?: string[]; group?: string };
 export type BlockRegroupInput = Rev & { slideId: string; blockIds: string[]; group: string };
@@ -2404,6 +2408,61 @@ export async function deckSetBackground(
   return {
     background: committed.document.deck.defaults?.background ?? null,
     revision: committed.revision,
+  };
+}
+
+/**
+ * An HtmlLayer as the two html actions store it (docs/html-layers.md 3): sanitized by the write time
+ * pass, its empty fields left out, and null when it has neither CSS nor markup left to draw.
+ */
+async function storedHtmlLayer(
+  html: HtmlLayer | null,
+): Promise<{ layer: HtmlLayer | null; droppedCss: string[] }> {
+  if (html === null) return { layer: null, droppedCss: [] };
+  const clean = await sanitizeHtmlLayer(html);
+  const css = clean.layer.css ?? '';
+  const markup = clean.layer.markup ?? '';
+  if (css === '' && markup === '') return { layer: null, droppedCss: clean.droppedCss };
+  const layer: HtmlLayer = {
+    ...(css !== '' ? { css } : {}),
+    ...(markup !== '' ? { markup } : {}),
+    ...(clean.layer.layer !== undefined ? { layer: clean.layer.layer } : {}),
+  };
+  return { layer, droppedCss: clean.droppedCss };
+}
+
+export async function deckSetHtml(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: DeckSetHtmlInput,
+): Promise<{ html: HtmlLayer | null; revision: number; droppedCss: string[] }> {
+  const { layer, droppedCss } = await storedHtmlLayer(input.html);
+  const committed = await commit(deps, ctx, input.baseRevision, [
+    { op: 'deck.set', path: '/html', ...(layer !== null ? { value: layer } : {}) },
+  ]);
+  return { html: committed.document.deck.html ?? null, revision: committed.revision, droppedCss };
+}
+
+export async function slideSetHtml(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideSetHtmlInput,
+): Promise<{ slides: Slide[]; revision: number; findings: Finding[]; droppedCss: string[] }> {
+  const current = (await deps.store.read()).document;
+  const slides = slidesInOrder(current, input.slideIds);
+  const { layer, droppedCss } = await storedHtmlLayer(input.html);
+  const mutations: Mutation[] = slides.map((slide) => ({
+    op: 'slide.set',
+    slideId: slide.id,
+    path: '/html',
+    ...(layer !== null ? { value: layer } : {}),
+  }));
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    slides: slides.map((slide) => requireSlide(committed.document, slide.id)),
+    revision: committed.revision,
+    findings: slides.flatMap((slide) => findingsFor(deps, committed.document, slide.id)),
+    droppedCss,
   };
 }
 
@@ -4338,6 +4397,14 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   dispatcher.register(
     'deck.setBackground',
     on<DeckSetBackgroundInput>((i, c) => deckSetBackground(deps, c, i)),
+  );
+  dispatcher.register(
+    'deck.setHtml',
+    on<DeckSetHtmlInput>((i, c) => deckSetHtml(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.setHtml',
+    on<SlideSetHtmlInput>((i, c) => slideSetHtml(deps, c, i)),
   );
   dispatcher.register(
     'block.group',

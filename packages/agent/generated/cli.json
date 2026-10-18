@@ -478,6 +478,35 @@
       "milestone": "GS2"
     },
     {
+      "action": "deck.setHtml",
+      "usage": "turboslide deck html [--css <file>] [--markup <file>] [--layer under|over] [--clear]",
+      "command": [
+        "deck",
+        "html",
+        "[--css"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "html",
+          "flag": "--html",
+          "type": "{ css, markup, layer } | null",
+          "required": true,
+          "description": "css, markup and layer (under or over); null removes the shared layer"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
+    },
+    {
       "action": "deck.guides",
       "usage": "turboslide deck guides --add-vertical <x> --add-horizontal <y> --remove-vertical <x> --remove-horizontal <y> --set <json> --clear",
       "command": [
@@ -1177,6 +1206,36 @@
       ],
       "mutates": true,
       "milestone": "GS2"
+    },
+    {
+      "action": "slide.setHtml",
+      "usage": "turboslide slide html <slideIds> [--css <file>] [--markup <file>] [--layer under|over] [--clear]",
+      "command": [
+        "slide",
+        "html"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "html",
+          "flag": "--html",
+          "type": "{ css, markup, layer } | null",
+          "required": true,
+          "description": "css, markup and layer (under or over); null removes the slide’s layer"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "P1"
     },
     {
       "action": "text.replaceAll",

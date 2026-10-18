@@ -267,8 +267,27 @@ const FORBIDDEN_SLIDE_PATHS = new Set(['', '/id', '/schemaVersion']);
 const FORBIDDEN_BLOCK_PATHS = new Set(['', '/id']);
 /* `brand` is the brand kit record (docs/archive/rounds/PRODUCT.md 4.1): written by the brand.set and brand.reset
    handlers alone, whose pointer writes land at the shallowest missing ancestor so one Undo takes
-   one field back; the `deck.set` action's own pointer regex stays closed to it */
-const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides', 'brand']);
+   one field back; the `deck.set` action's own pointer regex stays closed to it. `html` is the
+   deck's HtmlLayer (docs/html-layers.md), written by the deck.setHtml handler alone, the same way */
+const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides', 'brand', 'html']);
+
+/** The minor of the HtmlLayer field (deck.ts SCHEMA_MINOR): the first field minor 1 added. */
+const HTML_LAYER_MINOR = 1;
+
+/**
+ * Stamps `schemaMinor` on the deck and on each slide that holds an HtmlLayer, so a release of minor
+ * 0 (a rollback past this one, an older CLI) reads the file tolerantly, keeps the field it does
+ * not know and writes it back unchanged (migrations.ts parseTolerant). A file without the field
+ * stays unstamped: minor 0 is never written.
+ */
+function stampMinor(document: DeckDocument): void {
+  const stamp = (node: { html?: unknown; schemaMinor?: number }): void => {
+    if (node.html !== undefined && (node.schemaMinor ?? 0) < HTML_LAYER_MINOR)
+      node.schemaMinor = HTML_LAYER_MINOR;
+  };
+  stamp(document.deck);
+  for (const slide of Object.values(document.slides)) stamp(slide);
+}
 
 /**
  * Applies one mutation in place and returns its inverse. Throws RangeError for an unknown id or
@@ -601,7 +620,7 @@ export function applyMutation(
       }
       if (!DECK_SET_ROOTS.has(root)) {
         throw new TypeError(
-          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes, /defaults/background), guides or brand; sections and assets have their own mutations`,
+          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/play, /defaults/notes, /defaults/background), guides, brand or html; sections and assets have their own mutations`,
         );
       }
       const existed = hasAt(document.deck, mutation.path);
@@ -735,6 +754,7 @@ export function applyWrite(
   const now = options.now ?? new Date().toISOString();
   next.deck.revision = document.deck.revision + 1;
   next.deck.updatedAt = now;
+  stampMinor(next);
   const validation = validateDocument(next);
   if (!validation.ok || validation.deck === null) {
     const first = validation.issues.find((row) => row.severity === 3);

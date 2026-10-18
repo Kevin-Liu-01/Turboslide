@@ -254,6 +254,9 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .table, .ts-sheet .free > .link > .table { height: 100%; align-content: stretch; }
 /* the slide background colour layer (2.6.1): under .in at the sheet box */
 .ts-sheet .slide-bg { position: absolute; inset: -57px; pointer-events: none; }
+/* an HtmlLayer's markup (docs/html-layers.md): the sheet box like .slide-bg, under .in (is-under,
+   before it) or over it (is-over, after it), never taking a pointer; the frame form fills it */
+.ts-sheet .slide-html, .ts-sheet .slide-html.ts-x-host { position: absolute; inset: -57px; overflow: hidden; pointer-events: none; }
 /* a positioned text box with an alignment or a padding fills its box (2.2.18, 2.2.19) */
 .ts-sheet .free > p.text, .ts-sheet .free > .link > p.text { box-sizing: border-box; }
 /* a shape with text: the svg and the .shape-text layer at the preset's text rectangle (2.2.17) */

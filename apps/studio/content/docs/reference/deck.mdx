@@ -4,7 +4,7 @@ title: Presentations
 description: The actions of the deck group, with their input fields and their names on every transport.
 ---
 
-<ActionCounts total="32" cli="32" mcp="26" http="27" window="26" />
+<ActionCounts total="33" cli="33" mcp="27" http="28" window="27" />
 
 ## deck.info [#deck.info]
 
@@ -226,6 +226,21 @@ It takes no input.
 - Command line: `turboslide deck background --color <color>`
 - MCP tool: `deck_set_background`
 - HTTP: `POST /api/actions/deck.setBackground`
+- Runs on: command line, MCP, HTTP, page.
+- Changes the presentation: yes; send the `baseRevision` you read.
+
+## deck.setHtml [#deck.setHtml]
+
+**Set shared slide HTML.** Writes the HTML and CSS every slide carries (docs/html-layers.md): CSS scoped to each slide that restyles its blocks, and a markup layer drawn under or over every slide’s blocks. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.
+
+| Field          | Type                             | Required | Description                                                          |
+| -------------- | -------------------------------- | -------- | -------------------------------------------------------------------- |
+| `html`         | \{ css, markup, layer \} \| null | yes      | css, markup and layer (under or over); null removes the shared layer |
+| `baseRevision` | integer                          | yes      | The revision the caller read; a stale value is rejected with 409     |
+
+- Command line: `turboslide deck html [--css <file>] [--markup <file>] [--layer under|over] [--clear]`
+- MCP tool: `deck_set_html`
+- HTTP: `POST /api/actions/deck.setHtml`
 - Runs on: command line, MCP, HTTP, page.
 - Changes the presentation: yes; send the `baseRevision` you read.
 

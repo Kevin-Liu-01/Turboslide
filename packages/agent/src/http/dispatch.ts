@@ -185,6 +185,7 @@ const KEYED_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>([
   'deck.set',
   'section.set',
   'deck.setBackground',
+  'deck.setHtml',
   'deck.guides',
   'deck.tailor',
   'brand.set',

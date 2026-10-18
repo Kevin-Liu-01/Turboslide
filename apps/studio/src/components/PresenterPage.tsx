@@ -126,8 +126,11 @@ export function PresenterPage({
      HARDENING.md HR-W#6), so a deck that holds one starts the load and renders again after it */
   const [parser, setParser] = useState(() => purifierNow() !== null);
   useMountEffect(() => {
-    if (purifierNow() !== null || !JSON.stringify(document.slides).includes('"type":"html"'))
-      return;
+    const holdsHtml =
+      document.deck.html?.markup !== undefined ||
+      Object.values(document.slides).some((slide) => slide.html?.markup !== undefined) ||
+      JSON.stringify(document.slides).includes('"type":"html"');
+    if (purifierNow() !== null || !holdsHtml) return;
     void loadPurifier()
       .then(() => setParser(true))
       .catch(() => undefined);

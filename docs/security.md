@@ -272,6 +272,21 @@ Policy: in a deck shared beyond its owner, `html` blocks render only under the o
 embedded HTML blocks in this shared presentation" switch; otherwise the block renders as its note
 in a plate (`htmlBlockPolicy`). The `htmlBlocks` kill switch renders every block as its note.
 
+The scope (2026-10-18): `scopeCss` scopes the style rules inside `@media`, `@supports`,
+`@container` and `@layer` at any depth (a media query carried a rule such as `body { display:
+none }` out of the block's scope before), matches a scope class whole (`.ts-x-s1` took
+`.ts-x-s10 p` as already scoped), maps `:scope` to the scope root, and drops a statement or a
+stray brace where rules stand. The frame document nests the scope element inside `.ts-sheet`, as
+the inline escape does, so the block's scoped CSS matches its markup in the frame (it matched
+nothing there before).
+
+HtmlLayers (`docs/html-layers.md`): the deck's shared `html` and a slide's own run the same three
+layers. The CSS passes `safeStyleText` at the schema boundary and the tokenizer, and is scoped to
+the slide's root. The markup is sanitized at write time by `deck.setHtml` and `slide.setHtml` and
+again by every render, and draws in the sandboxed frame on the view, show, embed and print
+payloads. The layer never takes a pointer. Under the policy that shows an html block's note, the
+view payloads draw neither the layer's CSS nor its markup.
+
 ## 7. Server side requests and Chromium's network
 
 `packages/headless/src/capture/shared.ts` (0.30, 8.6). One `safeFetch`: the allowlist (exact

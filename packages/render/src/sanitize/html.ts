@@ -17,6 +17,7 @@
 // survives, `formaction` and `action` never, URI attributes limited to `https:`, `data:image/`,
 // `#` and `assets/`, no unknown protocols. Framework free apart from the two lazy imports.
 import type { BlockOf } from '@turboslide/schema/blocks';
+import type { HtmlLayer } from '@turboslide/schema/deck';
 
 import { sanitizeCss, sanitizeStyleAttribute } from './css.ts';
 
@@ -281,4 +282,36 @@ export async function sanitizeHtmlBlock(block: BlockOf<'html'>): Promise<Sanitiz
     changed,
     droppedCss: css.dropped,
   };
+}
+
+export type SanitizedHtmlLayer = {
+  layer: HtmlLayer;
+  changed: boolean;
+  /** The CSS rules and declarations the tokenizer dropped, for the caller's answer. */
+  droppedCss: string[];
+};
+
+/**
+ * The write time pass of an HtmlLayer (docs/html-layers.md 3), the one `sanitizeHtmlBlock` runs on
+ * an html block: the parser over the markup, the tokenizer over the CSS. The `deck.setHtml` and
+ * `slide.setHtml` handlers store its output; every render sanitizes again (html-layers.ts), so a
+ * layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized.
+ */
+export async function sanitizeHtmlLayer(layer: HtmlLayer): Promise<SanitizedHtmlLayer> {
+  const purifier = await loadPurifier();
+  const out: HtmlLayer = { ...layer };
+  let changed = false;
+  let droppedCss: string[] = [];
+  if (layer.markup !== undefined) {
+    const markup = sanitizeMarkup(layer.markup, purifier);
+    out.markup = markup.html;
+    changed = changed || markup.changed;
+  }
+  if (layer.css !== undefined) {
+    const css = sanitizeCss(layer.css);
+    out.css = css.css;
+    droppedCss = css.dropped;
+    changed = changed || css.dropped.length > 0;
+  }
+  return { layer: out, changed, droppedCss };
 }

@@ -70,6 +70,14 @@ function randomHex(bytes: number): string {
   return Array.from(out, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+/**
+ * How long the frame keeps the title slide, the Earth, on stage with the agents posed on it before
+ * they start (Kevin's choice of 2026-10-17: about 4 s; it was 1.2 s). The agents' first step moves
+ * the visitor's stage at once, so this is the Earth's time on stage. A press on Claude Code or
+ * Codex starts them sooner.
+ */
+const OPENING_HOLD_MS = 4000;
+
 /** The agents of the hero, with the hues of the title's agents stack (components/site/copy.ts). */
 const TRY_AGENTS: Readonly<Record<AgentKey, TabPerson>> = {
   claude: {
@@ -269,10 +277,20 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     }
   };
 
+  /* the opening hold's timer, while the agents wait on the title slide (OPENING_HOLD_MS) */
+  let opening: number | undefined;
+  const begin = (): void => {
+    if (opening !== undefined) win.clearTimeout(opening);
+    opening = undefined;
+    runner.start();
+  };
+
   const press = (who: TryPressed): void => {
     if (who.kind === 'agent') {
       if (who.brand === 'claude-code' || who.brand === 'codex') {
         const key: AgentKey = who.brand === 'codex' ? 'codex' : 'claude';
+        // a press ends the opening hold: the agents start and the pressed one steps now
+        if (opening !== undefined) begin();
         runner.nudge(key);
         pulse(TRY_AGENTS[key].author.principalId);
         return;
@@ -340,11 +358,13 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
         readyTimer = undefined;
         pose();
         parent?.postMessage({ type: TRY_READY }, win.location.origin);
-        if (!options.still) win.setTimeout(() => runner.start(), 1200);
+        if (!options.still) opening = win.setTimeout(begin, OPENING_HOLD_MS);
       }
     }, 100);
     return () => {
       if (readyTimer !== undefined) clearInterval(readyTimer);
+      if (opening !== undefined) win.clearTimeout(opening);
+      opening = undefined;
       runner.stop();
       guests.stop();
       win.removeEventListener('message', onMessage);

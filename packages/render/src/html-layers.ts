@@ -21,7 +21,7 @@ import type { BlockContext, HtmlFrameSource } from './blocks/context.ts';
 import { raster } from './blocks/context.ts';
 import { el } from './html.ts';
 import { sanitizeCss } from './sanitize/css.ts';
-import { inPage, purifierNow, sanitizeMarkup } from './sanitize/html.ts';
+import { inPage, purifierNow, sanitizeMarkup, stripIdentities } from './sanitize/html.ts';
 import { resolveEscapeImages, scopeCss } from './sanitize/scope.ts';
 import { safeStyleText } from '@turboslide/schema/style-text';
 
@@ -135,6 +135,6 @@ function markupLayer(
   // loads the parser when the deck carries a layer and renders again
   const purifier = purifierNow();
   if (purifier === null && inPage()) return '';
-  const clean = sanitizeMarkup(markup, purifier);
-  return el('div', root, resolveEscapeImages(clean.html, ctx));
+  const clean = stripIdentities(sanitizeMarkup(markup, purifier).html);
+  return el('div', root, resolveEscapeImages(clean, ctx));
 }

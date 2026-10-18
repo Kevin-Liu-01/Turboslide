@@ -49,16 +49,35 @@ Three passes, the ones an `html` block gets:
    it renders into.
 2. At write time, `deck.setHtml` and `slide.setHtml` run `sanitizeHtmlLayer`
    (`packages/render/src/sanitize/html.ts`): DOMPurify over the markup with the html block's
-   profile, and the CSS tokenizer (no `@import`, no `@font-face`, no `url()` outside `assets/` and
-   `data:image/`, no `position: fixed` or `sticky`, no `expression`). The answer lists the CSS the
-   tokenizer dropped. A layer with neither CSS nor markup left is removed.
+   profile, the `id` and `name` attributes removed (the layer draws in the editor's own document,
+   where an id could shadow one the editor reads; style the markup by class), and the CSS
+   tokenizer. The answer lists the CSS the tokenizer dropped. A layer with neither CSS nor markup
+   left is removed.
 3. At render time, every surface sanitizes again (`packages/render/src/html-layers.ts`), so a
    layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized. A page
    that has not loaded the parser yet draws no markup until it has.
 
-`scopeCss` scopes the rules inside `@media`, `@supports`, `@container` and `@layer` at any depth,
-matches a scope class whole, and drops a statement or a stray brace where rules stand, so no rule
-leaves the slide's scope. The html block shares these fixes.
+The CSS tokenizer (`packages/render/src/sanitize/css.ts`) reads the text as a browser does
+(comments, strings, unquoted `url()`, escapes, and the braces outside them) and rebuilds it from
+its tokens, so every brace in its output is structural. It keeps style rules and the grouping
+rules `@media`, `@supports`, `@container` and `@layer`, and drops:
+
+- every other at rule (`@import`, `@font-face`, `@keyframes`, `@property`, `@page`,
+  `@starting-style`, a statement such as `@layer a, b;`), each of which fetches or acts on the
+  whole document;
+- a nested style rule (CSS nesting: `&` makes its selector absolute);
+- a selector or declaration with a backslash escape, a string holding a brace, or a malformed
+  string or url, and a selector with `&` or `url()`;
+- a `url()` outside `assets/` and `data:image/`, and `image-set`, `src`, `attr`, `element` and
+  `cross-fade`;
+- `expression`, `behavior`, `-moz-binding`, `position: fixed` and `sticky`, a `position` read from
+  `var()`, and `pointer-events`; `!important` on `z-index` is stripped.
+
+`scopeCss` (`sanitize/scope.ts`) then prefixes every selector with the slide's scope, splitting a
+selector list only on its top level commas. It scopes the rules inside the grouping rules at any
+depth, matches a scope class whole, and refuses a selector that starts with a combinator or puts
+`~` or `+` right after `:scope` (the scope's siblings, the other slides of a page). The html
+block shares all of these rules.
 
 ## 4. Where it renders
 

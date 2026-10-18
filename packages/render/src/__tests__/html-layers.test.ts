@@ -11,6 +11,7 @@ import { renderSlide } from '../slide.ts';
 import type { RenderOptions } from '../slide.ts';
 import { htmlLayerFrameFor } from '../sanitize/frame.ts';
 import { loadPurifier, sanitizeHtmlLayer } from '../sanitize/html.ts';
+import { sanitizeCss, sanitizeStyleAttribute } from '../sanitize/css.ts';
 import { scopeCss } from '../sanitize/scope.ts';
 import { deck as baseDeck } from './fixtures.ts';
 
@@ -79,6 +80,90 @@ describe('scopeCss (the scope the layers and the html block share)', () => {
   });
 });
 
+/** The CSS a slide's style element gets: the tokenizer, then the scope (html-layers.ts). */
+const scoped = (css: string): string => scopeCss(sanitizeCss(css).css, '[data-slide="s1"]');
+
+/** Every selector of a scoped text, for the check that each sits inside the scope. */
+function selectorsOf(css: string): string[] {
+  return [...css.matchAll(/(?:^|[{};])\s*([^{};@]+?)\s*\{/g)].map((m) => (m[1] ?? '').trim());
+}
+
+describe('the CSS tokenizer and scope (the security review of 2026-10-18)', () => {
+  const insideScope = (css: string): void => {
+    const out = scoped(css);
+    for (const selector of selectorsOf(out))
+      for (const part of selector.split(','))
+        expect(part.trim().startsWith('.ts-sheet [data-slide="s1"]'), `${css} -> ${out}`).toBe(
+          true,
+        );
+    expect(out).not.toMatch(/\}\s*body\b/);
+  };
+
+  it('keeps a brace inside a string or a url from closing the rule early', () => {
+    insideScope('p{content:"{"}body{display:none}');
+    insideScope('p{background:url(data:image/png,{)} body{display:none}');
+    insideScope("p{font-family:'}'} html{display:none}");
+    expect(scoped('p{content:"{"}body{display:none}')).toBe(
+      '.ts-sheet [data-slide="s1"] body { display: none; }',
+    );
+  });
+
+  it('drops nested rules, so a nested & selector cannot become absolute', () => {
+    expect(scoped('p{color:red; [a=":"],body:has(&){display:none}}')).toBe(
+      '.ts-sheet [data-slide="s1"] p { color: red; }',
+    );
+    expect(scoped('& body{display:none} p{color:red}')).toBe(
+      '.ts-sheet [data-slide="s1"] p { color: red; }',
+    );
+  });
+
+  it('drops every at rule but the grouping ones', () => {
+    for (const rule of [
+      "@property --pt-ink{syntax:'<length>';inherits:false;initial-value:0px}",
+      '@keyframes spin{from{opacity:0}to{opacity:1}}',
+      '@starting-style{body{display:none}}',
+      '@page{margin:0}',
+      '@counter-style x{system:cyclic}',
+      '@font-face{font-family:x;src:url(assets/x.woff2)}',
+      '@layer a, b;',
+      '@import url(assets/x.css);',
+    ])
+      expect(scoped(rule), rule).toBe('');
+    expect(scoped('@media (min-width: 1px){@supports (display:grid){body{color:red}}}')).toBe(
+      '@media (min-width: 1px) {@supports (display:grid) {.ts-sheet [data-slide="s1"] body { color: red; } } }',
+    );
+  });
+
+  it('refuses a selector that reaches the scope’s siblings', () => {
+    expect(scoped('~ *{color:red} :scope ~ *{color:red} :scope + p{color:red} p{color:blue}')).toBe(
+      '.ts-sheet [data-slide="s1"] p { color: blue; }',
+    );
+    expect(scoped('[data-slide="s1"] ~ .slide{color:red}')).toBe('');
+  });
+
+  it('splits a selector list only on its top level commas', () => {
+    expect(scoped(':is(h1, p) b, q{color:red}')).toBe(
+      '.ts-sheet [data-slide="s1"] :is(h1, p) b, .ts-sheet [data-slide="s1"] q { color: red; }',
+    );
+  });
+
+  it('drops a declaration that hides behind an escape, a var() position or a resource function', () => {
+    for (const declaration of [
+      'position:f\\69xed',
+      'p\\6fsition:fixed',
+      'position:var(--p)',
+      'background:image-set("https://evil.example/a.png" 1x)',
+      'background:u\\72l(https://evil.example/a.png)',
+      'content:attr(data-x url)',
+      'background:-moz-element(#share)',
+      'pointer-events:auto',
+    ])
+      expect(scoped(`p{${declaration}}`), declaration).toBe('');
+    expect(sanitizeStyleAttribute('pointer-events:auto; color:red')).toBe('color: red');
+    expect(sanitizeStyleAttribute('color:red} body{display:none')).toBe('');
+  });
+});
+
 describe('the HtmlLayer render', () => {
   it('renders a slide of a deck with no HtmlLayer as before', () => {
     const out = renderSlide(baseDeck, slide, options);
@@ -104,7 +189,10 @@ describe('the HtmlLayer render', () => {
 
   it('draws the markup sanitized, under the blocks by default and over them on request', () => {
     const { deck, slide: s } = withHtml(
-      { markup: '<div class="band" onclick="alert(1)">Q4</div><script>alert(1)</script>' },
+      {
+        markup:
+          '<div class="band" onclick="alert(1)">Q4</div><b id="share" name="x">!</b><script>alert(1)</script>',
+      },
       { markup: '<p class="stamp">Draft</p>', layer: 'over' },
     );
     const out = renderSlide(deck, s, options);
@@ -115,6 +203,8 @@ describe('the HtmlLayer render', () => {
     expect(under).toBeLessThan(inner);
     expect(over).toBeGreaterThan(inner);
     expect(out.html).toContain('<div class="band">Q4</div>');
+    expect(out.html).not.toContain('id="share"');
+    expect(out.html).not.toContain('name="x"');
     expect(out.html).not.toContain('<script');
     expect(out.html).not.toContain('onclick');
     expect(out.rasters.filter((raster) => raster.kind === 'html')).toEqual([

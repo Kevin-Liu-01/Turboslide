@@ -284,6 +284,16 @@ export async function sanitizeHtmlBlock(block: BlockOf<'html'>): Promise<Sanitiz
   };
 }
 
+/**
+ * Removes the `id` and `name` attributes of sanitized markup (docs/html-layers.md 3). An HtmlLayer
+ * draws in the editor's own document, the size of the sheet, so an id there could shadow one the
+ * editor reads (`document.getElementById`, a named property of `window`); a layer's CSS styles its
+ * markup by class instead. The parser writes every attribute double quoted.
+ */
+export function stripIdentities(html: string): string {
+  return html.replace(/\s(?:id|name)="[^"]*"/gi, '');
+}
+
 export type SanitizedHtmlLayer = {
   layer: HtmlLayer;
   changed: boolean;
@@ -304,8 +314,8 @@ export async function sanitizeHtmlLayer(layer: HtmlLayer): Promise<SanitizedHtml
   let droppedCss: string[] = [];
   if (layer.markup !== undefined) {
     const markup = sanitizeMarkup(layer.markup, purifier);
-    out.markup = markup.html;
-    changed = changed || markup.changed;
+    out.markup = stripIdentities(markup.html);
+    changed = changed || markup.changed || out.markup !== markup.html;
   }
   if (layer.css !== undefined) {
     const css = sanitizeCss(layer.css);

@@ -18,7 +18,7 @@ import { escapeAttr } from '../html.ts';
 import { escapeScopeClass, resolveEscapeImages, scopeCss } from './scope.ts';
 import { sanitizeCss } from './css.ts';
 import type { Purifier } from './html.ts';
-import { purifierNow, sanitizeMarkup } from './html.ts';
+import { purifierNow, sanitizeMarkup, stripIdentities } from './html.ts';
 
 /** The frame's own policy (SPEC-3 8.4 item 2); `publicStoreHost` joins `img-src` when given. */
 export function frameCsp(publicStoreHost?: string | null): string {
@@ -224,7 +224,7 @@ export function htmlLayerFrameFor(
     const title = layer.from === 'deck' ? 'Shared slide HTML' : 'Slide HTML';
     return {
       srcdoc: frameDocument({
-        html: resolveEscapeImages(markup.html, {
+        html: resolveEscapeImages(stripIdentities(markup.html), {
           assetUrl: options.assetUrl,
           theme: options.theme,
         }),

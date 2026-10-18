@@ -272,11 +272,19 @@ Policy: in a deck shared beyond its owner, `html` blocks render only under the o
 embedded HTML blocks in this shared presentation" switch; otherwise the block renders as its note
 in a plate (`htmlBlockPolicy`). The `htmlBlocks` kill switch renders every block as its note.
 
-The scope (2026-10-18): `scopeCss` scopes the style rules inside `@media`, `@supports`,
-`@container` and `@layer` at any depth (a media query carried a rule such as `body { display:
-none }` out of the block's scope before), matches a scope class whole (`.ts-x-s1` took
-`.ts-x-s10 p` as already scoped), maps `:scope` to the scope root, and drops a statement or a
-stray brace where rules stand. The frame document nests the scope element inside `.ts-sheet`, as
+The tokenizer and the scope (2026-10-18, after a security review of the HtmlLayer work): the
+CSS tokenizer reads comments, strings, unquoted `url()` and escapes as a browser does and rebuilds
+the CSS from its tokens, so a brace inside a string or a url can no longer close a rule early and
+leave the next one unscoped. It keeps style rules and `@media`, `@supports`, `@container` and
+`@layer` alone (`@property` re-registered the chrome's own tokens, `@keyframes` redefined its
+animations, `@starting-style` stayed unscoped), drops nested rules (CSS nesting's `&` selector is
+absolute), drops any selector or declaration with an escape (`position:f\69xed` passed), a
+`position` read from `var()`, `image-set`, `src`, `attr`, `element`, `cross-fade` and
+`pointer-events`. `scopeCss` scopes the rules inside the grouping rules at any depth (a media query
+carried `body { display: none }` out of the scope), matches a scope class whole (`.ts-x-s1` took
+`.ts-x-s10 p` as already scoped), splits a selector list on its top level commas only, refuses a
+selector that starts with a combinator or puts `~` or `+` after `:scope` (the other slides of a
+page), maps `:scope` to the scope root, and drops a statement or a stray brace where rules stand. The frame document nests the scope element inside `.ts-sheet`, as
 the inline escape does, so the block's scoped CSS matches its markup in the frame (it matched
 nothing there before).
 

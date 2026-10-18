@@ -27221,6 +27221,104 @@
       ],
       "additionalProperties": false
     },
+    "DeckSetHtmlInput": {
+      "$id": "#/$defs/DeckSetHtmlInput",
+      "type": "object",
+      "properties": {
+        "html": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "css, markup and layer (under or over); null removes the shared layer"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "html",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckSetHtmlOutput": {
+      "$id": "#/$defs/DeckSetHtmlOutput",
+      "type": "object",
+      "properties": {
+        "html": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "droppedCss": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "the CSS the tokenizer dropped"
+        }
+      },
+      "required": [
+        "html",
+        "revision",
+        "droppedCss"
+      ],
+      "additionalProperties": false
+    },
     "DeckSetInput": {
       "$id": "#/$defs/DeckSetInput",
       "type": "object",
@@ -41585,6 +41683,35 @@
               ],
               "additionalProperties": false
             },
+            "html": {
+              "title": "HTML and CSS",
+              "x-inspector": {
+                "label": "HTML and CSS",
+                "control": "json",
+                "group": "Slide",
+                "help": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it."
+              },
+              "description": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it.",
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
             "grammar": {
               "title": "Arranged from",
               "x-inspector": {
@@ -42468,6 +42595,35 @@
               ],
               "additionalProperties": false
             },
+            "html": {
+              "title": "HTML and CSS",
+              "x-inspector": {
+                "label": "HTML and CSS",
+                "control": "json",
+                "group": "Slide",
+                "help": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it."
+              },
+              "description": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it.",
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
             "grammar": {
               "title": "Arranged from",
               "x-inspector": {
@@ -43344,6 +43500,35 @@
               ],
               "additionalProperties": false
             },
+            "html": {
+              "title": "HTML and CSS",
+              "x-inspector": {
+                "label": "HTML and CSS",
+                "control": "json",
+                "group": "Slide",
+                "help": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it."
+              },
+              "description": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it.",
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
             "grammar": {
               "title": "Arranged from",
               "x-inspector": {
@@ -44207,6 +44392,35 @@
               "required": [
                 "color"
               ],
+              "additionalProperties": false
+            },
+            "html": {
+              "title": "HTML and CSS",
+              "x-inspector": {
+                "label": "HTML and CSS",
+                "control": "json",
+                "group": "Slide",
+                "help": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it."
+              },
+              "description": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it.",
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
               "additionalProperties": false
             },
             "grammar": {
@@ -45102,6 +45316,35 @@
               "required": [
                 "color"
               ],
+              "additionalProperties": false
+            },
+            "html": {
+              "title": "HTML and CSS",
+              "x-inspector": {
+                "label": "HTML and CSS",
+                "control": "json",
+                "group": "Slide",
+                "help": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it."
+              },
+              "description": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it.",
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
               "additionalProperties": false
             },
             "grammar": {
@@ -46628,6 +46871,35 @@
               "required": [
                 "color"
               ],
+              "additionalProperties": false
+            },
+            "html": {
+              "title": "HTML and CSS",
+              "x-inspector": {
+                "label": "HTML and CSS",
+                "control": "json",
+                "group": "Slide",
+                "help": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it."
+              },
+              "description": "This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it.",
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
               "additionalProperties": false
             },
             "grammar": {
@@ -49537,6 +49809,99 @@
         "assetId",
         "slides",
         "findings"
+      ],
+      "additionalProperties": false
+    },
+    "SlideSetHtmlInput": {
+      "$id": "#/$defs/SlideSetHtmlInput",
+      "type": "object",
+      "properties": {
+        "slideIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "One or more slide ids"
+        },
+        "html": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "css": {
+                  "type": "string",
+                  "maxLength": 65536
+                },
+                "markup": {
+                  "type": "string",
+                  "maxLength": 262144
+                },
+                "layer": {
+                  "type": "string",
+                  "enum": [
+                    "under",
+                    "over"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "css, markup and layer (under or over); null removes the slide’s layer"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "slideIds",
+        "html",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideSetHtmlOutput": {
+      "$id": "#/$defs/SlideSetHtmlOutput",
+      "type": "object",
+      "properties": {
+        "slides": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Slide"
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          }
+        },
+        "droppedCss": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "the CSS the tokenizer dropped"
+        }
+      },
+      "required": [
+        "slides",
+        "revision",
+        "findings",
+        "droppedCss"
       ],
       "additionalProperties": false
     },
@@ -53778,6 +54143,117 @@
       "returnsImages": false
     },
     {
+      "name": "deck_set_html",
+      "action": "deck.setHtml",
+      "description": "Writes the HTML and CSS every slide carries: CSS scoped to each slide that restyles its blocks, and a markup layer drawn under or over every slide’s blocks. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.",
+      "inputSchema": {
+        "$id": "#/$defs/DeckSetHtmlInput",
+        "type": "object",
+        "properties": {
+          "html": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "css": {
+                    "type": "string",
+                    "maxLength": 65536
+                  },
+                  "markup": {
+                    "type": "string",
+                    "maxLength": 262144
+                  },
+                  "layer": {
+                    "type": "string",
+                    "enum": [
+                      "under",
+                      "over"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "css, markup and layer (under or over); null removes the shared layer"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "html",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DeckSetHtmlOutput",
+        "type": "object",
+        "properties": {
+          "html": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "css": {
+                    "type": "string",
+                    "maxLength": 65536
+                  },
+                  "markup": {
+                    "type": "string",
+                    "maxLength": 262144
+                  },
+                  "layer": {
+                    "type": "string",
+                    "enum": [
+                      "under",
+                      "over"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "droppedCss": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "the CSS the tokenizer dropped"
+          }
+        },
+        "required": [
+          "html",
+          "revision",
+          "droppedCss"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Set shared slide HTML",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "P1",
+      "returnsImages": false
+    },
+    {
       "name": "deck_set_guides",
       "action": "deck.guides",
       "description": "Adds, removes, moves, sets or clears the deck’s guide lines, sheet pixels the same on every slide; the result is sorted and inside the sheet, and an empty result removes the field.",
@@ -56466,6 +56942,112 @@
         "idempotentHint": false
       },
       "milestone": "GS2",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_set_slide_html",
+      "action": "slide.setHtml",
+      "description": "Writes the HTML and CSS of slides in one write: CSS scoped to the slide that restyles its blocks, and a markup layer under or over them, over the deck’s shared layer. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.",
+      "inputSchema": {
+        "$id": "#/$defs/SlideSetHtmlInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "One or more slide ids"
+          },
+          "html": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "css": {
+                    "type": "string",
+                    "maxLength": 65536
+                  },
+                  "markup": {
+                    "type": "string",
+                    "maxLength": 262144
+                  },
+                  "layer": {
+                    "type": "string",
+                    "enum": [
+                      "under",
+                      "over"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "css, markup and layer (under or over); null removes the slide’s layer"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideIds",
+          "html",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/SlideSetHtmlOutput",
+        "type": "object",
+        "properties": {
+          "slides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Slide"
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Finding"
+            }
+          },
+          "droppedCss": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "the CSS the tokenizer dropped"
+          }
+        },
+        "required": [
+          "slides",
+          "revision",
+          "findings",
+          "droppedCss"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Set slide HTML",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "P1",
       "returnsImages": false
     },
     {

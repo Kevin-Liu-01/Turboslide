@@ -67,6 +67,7 @@ import {
   chartSetKind,
   deckGuides,
   deckSetBackground,
+  deckSetHtml,
   deckTailor,
   deckText,
   diagramInsert,
@@ -77,6 +78,7 @@ import {
   slideDuplicate,
   slideNew,
   slideSetBackground,
+  slideSetHtml,
   slideSetLayout,
   slideSkip,
   motionAdd,
@@ -131,6 +133,7 @@ import type {
   ChartSetKindInput,
   DeckGuidesInput,
   DeckSetBackgroundInput,
+  DeckSetHtmlInput,
   DeckTailorInput,
   DiagramInsertInput,
   ExportTextInput,
@@ -141,6 +144,7 @@ import type {
   SlideDuplicateInput,
   SlideNewInput,
   SlideSetBackgroundInput,
+  SlideSetHtmlInput,
   SlideSetLayoutInput,
   SlideSkipInput,
   MotionAddInput,
@@ -4295,6 +4299,13 @@ export function createEditorController(init: {
   on<DeckSetBackgroundInput>('deck.setBackground', (input) =>
     deckSetBackground(storeDeps('deck.setBackground'), context, input),
   );
+  /* the HtmlLayer writes (docs/html-layers.md): the same store actions, sanitized before the commit */
+  on<DeckSetHtmlInput>('deck.setHtml', (input) =>
+    deckSetHtml(storeDeps('deck.setHtml'), context, input),
+  );
+  on<SlideSetHtmlInput>('slide.setHtml', (input) =>
+    slideSetHtml(storeDeps('slide.setHtml'), context, input),
+  );
   /* the brand kit on the window transport (docs/archive/rounds/PRODUCT.md 4.1; build/b5.md R2): the reads over
      the page's document, the writes as one commit with the kit's history label, so Cmd+Z takes
      one field back as the panel's own writes do */
@@ -4991,9 +5002,16 @@ export function createEditorController(init: {
     void loadPurifier()
       .then(() => {
         const current = latest().document;
-        const holding = slideOrder(current).filter((id) =>
-          JSON.stringify(current.slides[id] ?? null).includes('"type":"html"'),
-        );
+        // an HtmlLayer's markup draws nothing until the parser loads either (html-layers.ts)
+        const sharedMarkup = current.deck.html?.markup !== undefined;
+        const holding = slideOrder(current).filter((id) => {
+          const slide = current.slides[id];
+          return (
+            sharedMarkup ||
+            slide?.html?.markup !== undefined ||
+            JSON.stringify(slide ?? null).includes('"type":"html"')
+          );
+        });
         if (holding.length > 0) setDocument(current, holding);
       })
       .catch(() => undefined);

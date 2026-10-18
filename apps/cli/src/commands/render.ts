@@ -15,6 +15,7 @@ import { fileUrl, writeTempDocument } from '@turboslide/headless/document';
 import { launchBrowser } from '@turboslide/headless/launch';
 import { formatOverflow } from '@turboslide/headless/measure';
 import { relativeImageRef, renderImageName, renderSlideRecord } from '@turboslide/headless/record';
+import { loadPurifierFor } from '@turboslide/render/sanitize/html';
 
 import { flagBoolean, flagList, flagNumber, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
@@ -38,6 +39,8 @@ export const READY_SELECTOR = 'html[data-ts-ready="1"]';
 export async function render(ctx: CommandContext): Promise<number> {
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
   const loaded = loadDeck(dir);
+  // DOMPurify, not the regular expressions alone, for a deck that holds markup (docs/html-layers.md 3)
+  await loadPurifierFor(loaded.deck, Object.values(loaded.slides));
   const ids = selectSlides(loaded, ctx.rest);
   const themes = flagList(ctx.args, 'theme', ['light', 'dark']).filter(
     (t): t is 'light' | 'dark' => t === 'light' || t === 'dark',

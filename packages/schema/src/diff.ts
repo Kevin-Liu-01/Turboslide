@@ -200,11 +200,24 @@ export function diffDecks(a: DeckDocument, b: DeckDocument): Mutation[] {
   // Manifest fields other than sections, assets, revision and timestamps. The brand kit record
   // is one of them (docs/archive/rounds/PRODUCT.md 4.1): a restore of an earlier version takes the kit back
   // with it, so Version history's row before a kit change restores the colour (the row
-  // brand.colors.version-history-entry; before this the record stayed as it was).
+  // brand.colors.version-history-entry; before this the record stayed as it was). The deck's
+  // HtmlLayer (docs/html-layers.md) rides with them, so a restore takes the shared CSS back too.
   out.push(
     ...fieldDiffs(
-      { title: a.deck.title, theme: a.deck.theme, defaults: a.deck.defaults, brand: a.deck.brand },
-      { title: b.deck.title, theme: b.deck.theme, defaults: b.deck.defaults, brand: b.deck.brand },
+      {
+        title: a.deck.title,
+        theme: a.deck.theme,
+        defaults: a.deck.defaults,
+        brand: a.deck.brand,
+        html: a.deck.html,
+      },
+      {
+        title: b.deck.title,
+        theme: b.deck.theme,
+        defaults: b.deck.defaults,
+        brand: b.deck.brand,
+        html: b.deck.html,
+      },
       new Set(),
       (path, value, present) => ({ op: 'deck.set', path, ...(present ? { value } : {}) }),
     ),

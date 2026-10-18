@@ -89,6 +89,7 @@
       "deck.restore",
       "deck.remove",
       "deck.setBackground",
+      "deck.setHtml",
       "deck.guides",
       "template.list",
       "template.slides",
@@ -124,6 +125,7 @@
       "slide.import",
       "slide.toCanvas",
       "slide.setBackground",
+      "slide.setHtml",
       "text.replaceAll",
       "diagram.insert",
       "slide.lease",
@@ -308,7 +310,7 @@
       "account.forget"
     ]
   },
-  "actionCount": 201,
+  "actionCount": 203,
   "resources": [
     {
       "uri": "deck://manifest",

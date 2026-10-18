@@ -30,6 +30,8 @@ import type { FontSrc } from './fonts.ts';
 import { deckFontsCss, routeFontSrc } from './fonts.ts';
 import { THEME_CSS_CLASS, THEME_SLIDE_ATTRIBUTE, themeCss } from './theme-css.ts';
 import { counterShownOn, frameBandOf } from './stage.ts';
+import type { HtmlLayerOptions } from './html-layers.ts';
+import { renderHtmlLayers } from './html-layers.ts';
 
 export type RenderOptions = {
   theme: Theme;
@@ -61,6 +63,13 @@ export type RenderOptions = {
    * frame module from the sanitized markup; absent, the block renders as the scoped escape.
    */
   htmlFrame?: (block: BlockOf<'html'>) => HtmlFrameSource | undefined;
+  /**
+   * The sandboxed frame of an HtmlLayer's markup (docs/html-layers.md 4), built by the frame
+   * module (sanitize/frame.ts htmlLayerFrameFor); absent, the markup renders inline, sanitized.
+   */
+  htmlLayerFrame?: HtmlLayerOptions['htmlLayerFrame'];
+  /** Draw no HtmlLayer, CSS or markup: the deck's html policy is off (docs/html-layers.md 5). */
+  htmlLayersOff?: boolean;
   /**
    * Where a catalog face's woff2 comes from (docs/archive/rounds/PRODUCT.md 4.2; fonts.ts): the studio's fonts
    * route when absent, a data URI or a file URL for a self contained document (the export's
@@ -264,11 +273,15 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
   // standalone file and the export capture. Empty for a deck without a record that uses the
   // theme's face alone, so every deck stored before the kit renders byte for byte.
   const kitCss = options.noKitCss === true ? '' : kitStyle(deck, slide, options);
+  // the deck's and the slide's HtmlLayer (html-layers.ts): their scoped CSS after the kit's and
+  // the import residual's, so it restyles both; the markup layers under and over `.in`
+  const layers = renderHtmlLayers(deck, slide, options, ctx);
   const scopedCss =
     kitCss +
     (residual?.css
       ? `<style>${safeStyleText(rewriteSlideScope(residual.css, `.ts-x-${slide.id}`))}</style>`
-      : '');
+      : '') +
+    layers.css;
   // The residual rules are written against `.ts-x-<slideId>`; rewriteSlideScope prefixes `.ts-sheet`
   // so they keep the cascade weight they had in the deck, where the theme's rules had one class less.
   const themeId = themeIdOf(deck.theme);
@@ -338,7 +351,13 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       html = el(
         'section',
         { class: classes('slide', kindClass, scopeClass, active), ...common },
-        scopedCss + img + bg + el('div', { class: 'in' }, plate) + chips,
+        scopedCss +
+          img +
+          bg +
+          layers.under +
+          el('div', { class: 'in' }, plate) +
+          layers.over +
+          chips,
       );
       slots = { plate: plateBox(slide.plate) };
       break;
@@ -386,11 +405,13 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         { class: classes('slide', scopeClass, active), ...common },
         scopedCss +
           bg +
+          layers.under +
           el(
             'div',
             { class: 'in' },
             el('div', { class: 'left-mid', 'data-slot': 'main' }, mark + h1 + lead) + slot.corner,
-          ),
+          ) +
+          layers.over,
       );
       slots = slotBoxesAsRecord({ type: 'left-mid' });
       break;
@@ -416,7 +437,9 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         { class: classes('slide', scopeClass, active), ...common },
         scopedCss +
           bg +
-          el('div', { class: 'in' }, el('div', { class: 'center', 'data-slot': 'main' }, big)),
+          layers.under +
+          el('div', { class: 'in' }, el('div', { class: 'center', 'data-slot': 'main' }, big)) +
+          layers.over,
       );
       slots = slotBoxesAsRecord({ type: 'center' });
       break;
@@ -427,11 +450,13 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         { class: classes('slide', scopeClass, active), ...common },
         scopedCss +
           bg +
+          layers.under +
           el(
             'div',
             { class: 'in' },
             renderLayout(slide, ctx, options.chrome ? chipsHtml(deck, slide, options) : ''),
-          ),
+          ) +
+          layers.over,
       );
       slots = slotBoxesAsRecord(slide.layout);
       break;

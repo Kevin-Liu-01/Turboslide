@@ -17,6 +17,7 @@
         "deck.restore",
         "deck.remove",
         "deck.setBackground",
+        "deck.setHtml",
         "deck.guides",
         "template.list",
         "template.slides",
@@ -40,6 +41,7 @@
         "slide.import",
         "slide.toCanvas",
         "slide.setBackground",
+        "slide.setHtml",
         "text.replaceAll",
         "block.set",
         "block.insert",
@@ -237,6 +239,7 @@
     "deck.restore",
     "deck.remove",
     "deck.setBackground",
+    "deck.setHtml",
     "deck.guides",
     "template.list",
     "template.slides",
@@ -260,6 +263,7 @@
     "slide.import",
     "slide.toCanvas",
     "slide.setBackground",
+    "slide.setHtml",
     "text.replaceAll",
     "block.set",
     "block.insert",
@@ -484,6 +488,13 @@
       "milestone": "GS2",
       "group": "deck"
     },
+    "deck.setHtml": {
+      "label": "Set shared slide HTML",
+      "doc": "Writes the HTML and CSS every slide carries: CSS scoped to each slide that restyles its blocks, and a markup layer drawn under or over every slide’s blocks. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.",
+      "mutates": true,
+      "milestone": "P1",
+      "group": "deck"
+    },
     "deck.guides": {
       "label": "Set guides",
       "doc": "Adds, removes, moves, sets or clears the deck’s guide lines, sheet pixels the same on every slide; the result is sorted and inside the sheet, and an empty result removes the field.",
@@ -643,6 +654,13 @@
       "doc": "Writes the background colour of slides in one write; null removes it and the theme default applies. A background picture is a picture object at the bottom of the stack.",
       "mutates": true,
       "milestone": "GS2",
+      "group": "slide"
+    },
+    "slide.setHtml": {
+      "label": "Set slide HTML",
+      "doc": "Writes the HTML and CSS of slides in one write: CSS scoped to the slide that restyles its blocks, and a markup layer under or over them, over the deck’s shared layer. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.",
+      "mutates": true,
+      "milestone": "P1",
       "group": "slide"
     },
     "text.replaceAll": {

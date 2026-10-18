@@ -11,47 +11,138 @@ export function escapeScopeClass(slideId: SlideId, blockId: string): string {
 }
 
 /**
- * Scopes every rule of a CSS block under a class. A selector that already starts with the scope
- * class (the importer rewrites the source's stale scope class to it) is kept; every other selector
- * is prefixed. `@` rules pass through with their inner rules scoped.
+ * The `@` rules whose bodies hold style rules, which are scoped like top level rules. Every other
+ * `@` body (`@keyframes` steps, `@page`, `@font-face`) is copied as it is: its selectors are not
+ * element selectors.
+ */
+const GROUPING_AT_RULE = /^@(?:media|supports|container|layer|scope|document)\b/i;
+
+/** Splits a selector list on its commas outside parentheses, brackets and strings. */
+function splitSelectorList(head: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let quote: string | null = null;
+  let current = '';
+  for (const ch of head) {
+    if (quote !== null) {
+      current += ch;
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === '(' || ch === '[') depth += 1;
+    else if (ch === ')' || ch === ']') depth = Math.max(0, depth - 1);
+    else if (ch === ',' && depth === 0) {
+      out.push(current);
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  out.push(current);
+  return out;
+}
+
+/**
+ * One selector of a rule under the scope, or null when it would reach past the scope: a selector
+ * that starts with a combinator or puts `~` or `+` right after `:scope` (the scope's siblings, the
+ * other slides of a page), or that holds `&` (CSS nesting's absolute form). The rest is kept when it
+ * already names the scope as its whole first compound (the importer rewrites the source's stale
+ * scope class to it), takes the scope for `:scope`, or is prefixed. The scope must end where the
+ * selector's first compound ends, so `.ts-x-s10 p` is not taken as already scoped by `.ts-x-s1`.
+ */
+function scopeSelectorPart(part: string, scopeSelector: string): string | null {
+  const p = part.trim();
+  if (p.length === 0) return null;
+  if (/^[>+~]/.test(p) || p.includes('&')) return null;
+  if (/^:scope\b/.test(p)) {
+    const rest = p.slice(':scope'.length);
+    if (/^\s*[+~]/.test(rest)) return null;
+    return `.ts-sheet ${scopeSelector}${rest}`;
+  }
+  const next = p.charAt(scopeSelector.length);
+  const named = p.startsWith(scopeSelector) && (next === '' || !/[\w-]/.test(next));
+  if (named && /^\s*[+~]/.test(p.slice(scopeSelector.length))) return null;
+  return `.ts-sheet ${named ? p : `${scopeSelector} ${p}`}`;
+}
+
+/**
+ * Scopes every rule of a CSS block under a selector, `.ts-sheet <scope> <selector>`. Style rules
+ * inside a grouping `@` rule (`@media`, `@supports`, `@container`, `@layer`) are scoped the same
+ * way at any depth, so a media query cannot carry a rule out of the scope; the bodies of other `@`
+ * rules and of nested style rules are copied (sanitizeCss drops both before this runs), and a rule
+ * whose every selector reaches past the scope is dropped. It runs on the text sanitizeCss writes,
+ * which holds no comment and no brace inside a string, so the depth count is exact; a string is
+ * read as text (a `/*` or a `;` in `content: "..."` is not structure).
  */
 export function scopeCss(css: string, scopeSelector: string): string {
-  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   let out = '';
-  let depth = 0;
   let buffer = '';
-  for (const ch of withoutComments) {
+  /** the quote of the string being read: its braces and semicolons are text, never structure */
+  let quote: string | null = null;
+  /** what each open brace holds: style rules to scope, a body to copy, or a body to drop */
+  const stack: ('scope' | 'copy' | 'drop')[] = [];
+  const top = () => stack[stack.length - 1];
+  const scoping = (): boolean => stack.length === 0 || top() === 'scope';
+  const dropping = (): boolean => stack.includes('drop');
+  for (const ch of css) {
+    if (quote !== null) {
+      buffer += ch;
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      buffer += ch;
+      continue;
+    }
     if (ch === '{') {
-      if (depth === 0) {
-        const selector = buffer.trim();
-        buffer = '';
-        out += selector.startsWith('@')
-          ? `${selector} {`
-          : `${selector
-              .split(',')
-              .map((part) => {
-                const p = part.trim();
-                if (p.length === 0) return p;
-                const scoped = p.startsWith(scopeSelector) ? p : `${scopeSelector} ${p}`;
-                return `.ts-sheet ${scoped}`;
-              })
-              .join(', ')} {`;
+      const head = buffer.trim();
+      buffer = '';
+      if (dropping()) {
+        stack.push('drop');
+      } else if (!scoping()) {
+        out += `${head} {`;
+        stack.push('copy');
+      } else if (head.startsWith('@')) {
+        out += `${head} {`;
+        stack.push(GROUPING_AT_RULE.test(head) ? 'scope' : 'copy');
       } else {
-        out += `${buffer}{`;
-        buffer = '';
+        const parts = splitSelectorList(head)
+          .map((part) => scopeSelectorPart(part, scopeSelector))
+          .filter((part): part is string => part !== null);
+        if (parts.length === 0) {
+          stack.push('drop');
+        } else {
+          out += `${parts.join(', ')} {`;
+          stack.push('copy');
+        }
       }
-      depth += 1;
+      continue;
+    }
+    if (ch === ';' && scoping() && !dropping()) {
+      // a statement where rules stand (`@layer a, b;`, a stray declaration) is dropped, so its
+      // text never joins the next rule's selector and leaves that rule unscoped
+      buffer = '';
       continue;
     }
     if (ch === '}') {
-      depth -= 1;
-      out += `${buffer}}`;
+      if (stack.length === 0) {
+        // an unbalanced close brace ends nothing: dropped, so it cannot close the scope early
+        buffer = '';
+        continue;
+      }
+      const closed = stack.pop();
+      if (closed !== 'drop') out += `${buffer}}`;
       buffer = '';
-      if (depth === 0) out += '\n';
+      if (stack.length === 0 && closed !== 'drop') out += '\n';
       continue;
     }
     buffer += ch;
   }
+  // an unclosed rule at the end is closed, so the text after it stays inside its own block
+  const open = stack.filter((each) => each !== 'drop').length;
+  if (open > 0) out += `${dropping() ? '' : buffer}${'}'.repeat(open)}`;
   return out.trim();
 }
 

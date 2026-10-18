@@ -18,7 +18,7 @@ import { escapeAttr } from '../html.ts';
 import { escapeScopeClass, resolveEscapeImages, scopeCss } from './scope.ts';
 import { sanitizeCss } from './css.ts';
 import type { Purifier } from './html.ts';
-import { purifierNow, sanitizeMarkup } from './html.ts';
+import { confineLayerMarkup, purifierNow, sanitizeMarkup } from './html.ts';
 
 /** The frame's own policy (SPEC-3 8.4 item 2); `publicStoreHost` joins `img-src` when given. */
 export function frameCsp(publicStoreHost?: string | null): string {
@@ -90,7 +90,9 @@ export function frameDocument(options: FrameDocumentOptions): string {
     safeStyleText(options.css),
     '</style>',
     '</head>',
-    `<body><div class="ts-sheet ${options.scope}" data-theme="${options.theme}">${options.html}</div></body>`,
+    // the scope element sits inside `.ts-sheet`, as the inline escape does, so the scoped rules
+    // (`.ts-sheet .<scope> <selector>`, scope.ts) match the markup in the frame too
+    `<body><div class="ts-sheet" data-theme="${options.theme}"><div class="${options.scope}">${options.html}</div></div></body>`,
     '</html>',
   ].join('\n');
 }
@@ -204,4 +206,40 @@ export function htmlFrameFor(
   options: Omit<FrameSourceOptions, 'slideId' | 'slotHeight'>,
 ): NonNullable<RenderOptions['htmlFrame']> {
   return (block) => buildFrameSource(block, options);
+}
+
+/**
+ * The `RenderOptions.htmlLayerFrame` callback (docs/html-layers.md 4): the frame document of one
+ * HtmlLayer's markup, built as an html block's is. The markup is sanitized, the deck's and the
+ * slide's CSS pass the tokenizer and the scope of the layer's own root, the images resolve
+ * through `assetUrl`, and the frame carries the theme variables and its CSP. The policy is the
+ * caller's: a surface whose deck refuses embedded HTML passes `htmlLayersOff` and never calls it.
+ */
+export function htmlLayerFrameFor(
+  options: Omit<FrameSourceOptions, 'slideId' | 'slotHeight' | 'policy'>,
+): NonNullable<RenderOptions['htmlLayerFrame']> {
+  return (layer) => {
+    const scope = escapeScopeClass(layer.slideId, `layer-${layer.from}`);
+    const markup = sanitizeMarkup(layer.markup, options.purifier ?? purifierNow());
+    const title = layer.from === 'deck' ? 'Shared slide HTML' : 'Slide HTML';
+    return {
+      srcdoc: frameDocument({
+        html: resolveEscapeImages(confineLayerMarkup(markup.html), {
+          assetUrl: options.assetUrl,
+          theme: options.theme,
+        }),
+        css: scopeCss(sanitizeCss(layer.css).css, `.${scope}`),
+        scope,
+        theme: options.theme,
+        ...(options.sheetCss !== undefined
+          ? { themeCss: frameThemeCss(options.sheetCss, options.theme) }
+          : {}),
+        ...(options.publicStoreHost !== undefined
+          ? { publicStoreHost: options.publicStoreHost }
+          : {}),
+        title,
+      }),
+      title,
+    };
+  };
 }

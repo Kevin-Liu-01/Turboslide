@@ -65,7 +65,8 @@ import { deckFollowCommand, deckWatchCommand } from './follow.ts';
 import { publish } from './share.ts';
 import { themeList } from './theme.ts';
 import { formatBytes } from '../output.ts';
-import { commit, deckGuides, deckSetBackground } from '../store-actions.ts';
+import { commit, deckGuides, deckSetBackground, deckSetHtml } from '../store-actions.ts';
+import { htmlLayerFlags, htmlLayerLine } from './html-layer.ts';
 import type { StoreActionDeps, WriteContext } from '../store-actions.ts';
 import {
   baseRevision,
@@ -76,7 +77,7 @@ import {
   writeContext,
 } from '../write.ts';
 
-const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore|remove|pack|unpack|push|pull|guides|background|publish|unpublish|watch|follow> ...
+const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore|remove|pack|unpack|push|pull|guides|background|html|publish|unpublish|watch|follow> ...
   deck publish <id> | deck unpublish <id>
                                     the published player's token, printed once, and its revocation (deck.publish, deck.unpublish)
   deck watch <id> [--from <studio>] [--since <n>]
@@ -107,7 +108,9 @@ const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore
   deck guides --add-vertical <x> | --add-horizontal <y> | --remove-vertical <x> | --remove-horizontal <y> | --set '<json>' | --clear
                                     the guide lines every slide shows in the editor, sheet px (deck.guides)
   deck background --color <color> | --off
-                                    the background colour every slide without its own takes (deck.setBackground)`;
+                                    the background colour every slide without its own takes (deck.setBackground)
+  deck html [--css <file>] [--markup <file>] [--layer under|over] | --clear
+                                    the CSS and the markup layer every slide carries (deck.setHtml; docs/html-layers.md)`;
 
 export type DeckRenameInput = { name: string; baseRevision: number };
 export type DeckRenameResult = { title: string; revision: number };
@@ -352,6 +355,8 @@ export async function deck(ctx: CommandContext): Promise<number> {
       return guides(inner);
     case 'background':
       return background(inner);
+    case 'html':
+      return html(inner);
     case 'publish':
       return publish(inner, false);
     case 'unpublish':
@@ -509,6 +514,21 @@ async function background(ctx: CommandContext): Promise<number> {
       ? `removed the theme background: revision ${result.revision}`
       : `set the theme background ${result.background.color}: revision ${result.revision}`,
   );
+  return 0;
+}
+
+async function html(ctx: CommandContext): Promise<number> {
+  const layer = htmlLayerFlags(ctx, 'deck html', USAGE);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    deckSetHtml(storeDeps(ctx, store), writeContext(ctx), {
+      html: layer,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(htmlLayerLine('every slide', result.html, result.revision));
+  for (const dropped of result.droppedCss) ctx.out.human(`dropped CSS: ${dropped}`);
   return 0;
 }
 

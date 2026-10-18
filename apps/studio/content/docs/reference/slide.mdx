@@ -4,7 +4,7 @@ title: Slides
 description: The actions of the slide group, with their input fields and their names on every transport.
 ---
 
-<ActionCounts total="27" cli="27" mcp="27" http="27" window="27" />
+<ActionCounts total="28" cli="28" mcp="28" http="28" window="28" />
 
 ## slide.list [#slide.list]
 
@@ -242,6 +242,22 @@ description: The actions of the slide group, with their input fields and their n
 - Command line: `turboslide slide background <slideIds> --color <color>`
 - MCP tool: `deck_set_slide_background`
 - HTTP: `POST /api/actions/slide.setBackground`
+- Runs on: command line, MCP, HTTP, page.
+- Changes the presentation: yes; send the `baseRevision` you read.
+
+## slide.setHtml [#slide.setHtml]
+
+**Set slide HTML.** Writes the HTML and CSS of slides in one write (docs/html-layers.md): CSS scoped to the slide that restyles its blocks, and a markup layer under or over them, over the deck’s shared layer. The markup is sanitized as an html block’s is and the CSS passes the same tokenizer; null removes it.
+
+| Field          | Type                             | Required | Description                                                           |
+| -------------- | -------------------------------- | -------- | --------------------------------------------------------------------- |
+| `slideIds`     | string[]                         | yes      | One or more slide ids                                                 |
+| `html`         | \{ css, markup, layer \} \| null | yes      | css, markup and layer (under or over); null removes the slide’s layer |
+| `baseRevision` | integer                          | yes      | The revision the caller read; a stale value is rejected with 409      |
+
+- Command line: `turboslide slide html <slideIds> [--css <file>] [--markup <file>] [--layer under|over] [--clear]`
+- MCP tool: `deck_set_slide_html`
+- HTTP: `POST /api/actions/slide.setHtml`
 - Runs on: command line, MCP, HTTP, page.
 - Changes the presentation: yes; send the `baseRevision` you read.
 

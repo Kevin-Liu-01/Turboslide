@@ -31,6 +31,7 @@ import type { Typography } from './typography.ts';
 import { typographyObjectSchema } from './typography.ts';
 import type { Advance, Effect, Transition } from './motion.ts';
 import { advanceSchema, effectsSchema, transitionSchema } from './motion.ts';
+import { safeStyleText } from './style-text.ts';
 
 export const SCHEMA_VERSION = 1;
 
@@ -40,9 +41,11 @@ export const SCHEMA_VERSION = 1;
  * minor by keeping the fields it does not know and writing them back unchanged
  * (migrations.ts `parseTolerant`), so a rollback past an additive release still opens and saves
  * every deck. A field that is renamed or removed raises SCHEMA_VERSION instead, with a migration.
- * Minor 0 is never written: a file without the field is minor 0.
+ * Minor 0 is never written: a file without the field is minor 0. Minor 1 is the HtmlLayer field
+ * (`deck.html`, `slide.html`; docs/html-layers.md): applyWrite stamps it on the files that hold
+ * one (reduce.ts stampMinor).
  */
-export const SCHEMA_MINOR = 0;
+export const SCHEMA_MINOR = 1;
 
 /** The appearance a new deck opens in when the deployment's kit is silent (docs/archive/rounds/PRODUCT.md section 1, question 1): one line to flip. */
 export { DEFAULT_APPEARANCE } from './brand.ts';
@@ -152,6 +155,8 @@ export type Deck = {
    * deployment's default kit, so nothing changes on a deck that carries none.
    */
   brand?: BrandKit;
+  /** The HTML and CSS every slide carries (HtmlLayer), written by `deck.setHtml` alone. */
+  html?: HtmlLayer;
   /** increments on every committed write */
   revision: number;
   createdAt: string;
@@ -196,6 +201,8 @@ export type SlideBase = {
    * field: it is a `picture` object at the bottom of the canvas stack (SPEC-2 2.6.4).
    */
   background?: SlideBackground;
+  /** This slide's own HTML and CSS (HtmlLayer) over the deck's, written by `slide.setHtml`. */
+  html?: HtmlLayer;
   /**
    * The conversion record of a canvas slide (gslides-parity SPEC-2 1.2, 0.99): the kind, the
    * layout, the slot membership, the boxes and the kind's fields the slide had before its first
@@ -219,6 +226,21 @@ export type SlideBase = {
 
 /** A slide or deck background: a palette colour (SPEC-2 2.6.1, 0.74). */
 export type SlideBackground = { color: Color };
+
+/**
+ * HTML and CSS under the hood of one slide (`slide.html`) or of every slide (`deck.html`)
+ * (Kevin, 2026-10-18: "shared slide html/css + per slide html and css"; docs/html-layers.md).
+ * Slides already render as HTML; this adds to that render. `css` styles the slide: it is scoped to
+ * every slide of the deck or to the one slide, so it restyles the theme's own blocks and the
+ * markup alike, after the CSS tokenizer of an html block. `markup` is a layer the size of the
+ * sheet, sanitized as an html block's markup is, drawn under the slide's own blocks or over them
+ * (`layer`, under when absent), and it never takes a pointer. An empty object draws nothing.
+ */
+export type HtmlLayer = {
+  css?: string;
+  markup?: string;
+  layer?: 'under' | 'over';
+};
 
 /** The deck's guide lines in sheet pixels (SPEC-2 2.10). */
 export type DeckGuides = { x: number[]; y: number[] };
@@ -365,6 +387,23 @@ const markSizeSchema = z.strictObject({
 export const slideBackgroundSchema = z.strictObject({
   color: colorSchema,
 }) satisfies z.ZodType<SlideBackground>;
+
+/** Where an HtmlLayer's markup draws: under the slide's own blocks or over them. */
+export const HTML_LAYER_PLACES = ['under', 'over'] as const;
+/** The longest `css` and `markup` an HtmlLayer stores, in UTF-16 code units. */
+export const HTML_LAYER_CSS_MAX = 65_536;
+export const HTML_LAYER_MARKUP_MAX = 262_144;
+
+/**
+ * An HtmlLayer as a file stores it. The CSS passes `safeStyleText` at the boundary, as an html
+ * block's does, so no text can close the style element it renders into; the markup is sanitized
+ * by the actions that write it and again by every render (docs/html-layers.md 3).
+ */
+export const htmlLayerSchema = z.strictObject({
+  css: z.string().max(HTML_LAYER_CSS_MAX).overwrite(safeStyleText).optional(),
+  markup: z.string().max(HTML_LAYER_MARKUP_MAX).optional(),
+  layer: z.enum(HTML_LAYER_PLACES).optional(),
+}) satisfies z.ZodType<HtmlLayer>;
 
 /** The sheet the guides lie inside (render.ts SHEET_WIDTH and SHEET_HEIGHT, repeated by value). */
 const GUIDE_MAX = { x: 1600, y: 900 } as const;
@@ -572,6 +611,12 @@ const slideBase = {
     group: 'Slide',
     help: 'The colour behind the slide; the theme default when absent. A background picture is a picture object at the bottom of the stack.',
   }),
+  html: annotate(htmlLayerSchema.optional(), {
+    label: 'HTML and CSS',
+    control: 'json',
+    group: 'Slide',
+    help: 'This slide’s own CSS, scoped to the slide, and its markup layer under or over its blocks; slide.setHtml writes it (docs/html-layers.md).',
+  }),
   grammar: annotate(grammarRecordSchema.optional(), {
     label: 'Arranged from',
     control: 'readonly',
@@ -774,6 +819,12 @@ export const deckSchema = z.strictObject({
     control: 'json',
     group: 'Slide',
     help: 'The colours, faces, logo, footer, slide numbers and frame of this presentation over its theme; the Theme panel and brand.set write it (docs/archive/rounds/PRODUCT.md 4.1). The theme alone when absent.',
+  }),
+  html: annotate(htmlLayerSchema.optional(), {
+    label: 'Shared HTML and CSS',
+    control: 'json',
+    group: 'Slide',
+    help: 'CSS scoped to every slide and a markup layer every slide draws; deck.setHtml writes it (docs/html-layers.md).',
   }),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,

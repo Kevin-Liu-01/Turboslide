@@ -21,6 +21,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
+import type { ActionId } from '@turboslide/schema/actions';
 import type { Author } from '@turboslide/schema/mutations';
 import {
   DECK_ASSIST_PROMPT,
@@ -66,11 +67,19 @@ export type McpServerOptions = {
   readImage?: (path: string) => Promise<Uint8Array>;
   /** Diagnostics, written to stderr by the CLI. */
   log?: (line: string) => void;
+  /**
+   * The tools this caller may never call, decided from what the caller is and not from any deck
+   * (the studio's API key scopes and admin flag, server/agent-gate.ts toolRefusalFor): the error a
+   * call answers, or undefined for a tool it may call. tools/list leaves a refused tool out, and a
+   * call to one answers that error as a tool error, never "Unknown tool". Absent, every
+   * implemented tool is listed (the CLI's stdio server acts for the checkout's holder).
+   */
+  refuse?: (action: ActionId, tool: string) => Error | undefined;
 };
 
 export type CreatedServer = {
   server: Server;
-  /** The tools served, in table order. */
+  /** The tools served on tools/list, in table order: the implemented ones `refuse` lets through. */
   tools: ToolEntry[];
   /** The action context every dispatch receives. */
   context: ActionContext;
@@ -115,8 +124,17 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
   const readImage =
     options.readImage ?? (async (path: string) => new Uint8Array(await readFile(path)));
   const context: ActionContext = { author: options.author, deckDir: options.deckDir };
-  const tools = deriveTools((id) => dispatcher.has(id));
-  const byName = new Map(tools.map((entry) => [entry.name, entry]));
+  // The list is this server's own: deriveTools shares each tool definition across the process
+  // (tools.ts toolEntry), and the filter by the caller runs here, per server, so one caller's list
+  // is never served to another.
+  const implemented = deriveTools((id) => dispatcher.has(id));
+  const refused = new Map<string, Error>();
+  for (const entry of implemented) {
+    const error = options.refuse?.(entry.action, entry.name);
+    if (error !== undefined) refused.set(entry.name, error);
+  }
+  const tools = implemented.filter((entry) => !refused.has(entry.name));
+  const byName = new Map(implemented.map((entry) => [entry.name, entry]));
 
   const server = new Server(
     { name: SERVER_NAME, title: 'Turboslide', version: options.version ?? '0.0.0' },
@@ -190,6 +208,11 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
     const entry = byName.get(request.params.name);
     if (entry === undefined)
       throw new McpError(ErrorCode.InvalidParams, `Unknown tool "${request.params.name}"`);
+    const refusal = refused.get(entry.name);
+    if (refusal !== undefined) {
+      log?.(`mcp: ${entry.action} refused for this caller: ${refusal.message}`);
+      return toolError(entry.action, refusal);
+    }
     const args = request.params.arguments ?? {};
     try {
       const output = await dispatcher.dispatch(entry.action, args, context);

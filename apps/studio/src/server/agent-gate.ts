@@ -297,6 +297,78 @@ export function scopesAllow(
   return true;
 }
 
+/**
+ * What a caller lacks to call an action at all, read from what it is and not from any deck: the
+ * deployment admin's `admin.*`, or the scopes the gate holds a key to on every call. Those are the
+ * scopes of the bound deck's capability and of a named deck's, which `decide()` checks for the key
+ * of an account that is not an admin (`SCOPES_FOR`), and the acting capability's, with `write` for
+ * a write, which `scopesAllow` checks. Each entry of `scopes` is met by any one of its scopes; an
+ * empty entry is a cell no scope opens (transfer, follow). Null when nothing is lacking, and the
+ * call can still be refused for its deck, the read only switch or the quota.
+ */
+type KeyShortfall = { kind: 'admin' } | { kind: 'scopes'; scopes: readonly (readonly Scope[])[] };
+
+function keyShortfall(caller: AgentCaller, action: string): KeyShortfall | null {
+  if (action.startsWith('admin.') && !isDeploymentAdmin(caller)) return { kind: 'admin' };
+  if (caller.kind !== 'agent') return null;
+  const scopes = caller.ctx.agent?.scopes ?? [];
+  const mutates = isActionId(action) && ACTIONS[action].mutates;
+  const capability = capabilityForAction(action);
+  const named = INPUT_DECKS.get(action);
+  const replaces = named?.replaces === true;
+  const needed: (readonly Scope[])[] = [];
+  // decide() answers an admin account's key `via: 'admin'` before it reads the scopes
+  if (caller.ctx.principal?.admin !== true) {
+    needed.push(SCOPES_FOR[capability === null || replaces ? 'read' : capability]);
+    if (named !== undefined) needed.push(SCOPES_FOR[named.capability]);
+  }
+  // scopesAllow lets the admin scope stand for every scope
+  if (!scopes.includes('admin')) {
+    const acting = replaces ? named.capability : capability;
+    const family: readonly Scope[] =
+      acting === null ? (mutates ? ['write'] : ['read']) : SCOPES_FOR[acting];
+    if (family.length === 0) needed.push(['admin']);
+    else {
+      needed.push(family);
+      if (mutates && !family.some((scope) => WRITING_SCOPES.includes(scope)))
+        needed.push(['write']);
+    }
+  }
+  const missing = new Map<string, readonly Scope[]>();
+  for (const entry of needed)
+    if (!entry.some((scope) => scopes.includes(scope))) missing.set(entry.join(' '), entry);
+  return missing.size === 0 ? null : { kind: 'scopes', scopes: [...missing.values()] };
+}
+
+function shortfallMessage(shortfall: KeyShortfall, tool: string): string {
+  if (shortfall.kind === 'admin')
+    return `this key lacks the deployment admin standing that ${tool} needs: the key of an admin account, with the admin scope`;
+  if (shortfall.scopes.some((entry) => entry.length === 0))
+    return `no API key scope allows ${tool}: a person does it in the editor`;
+  const lacking = shortfall.scopes.map((entry) => `the ${entry.join(' or ')} scope`);
+  return `this key lacks ${lacking.join(' and ')} that ${tool} needs`;
+}
+
+/**
+ * The MCP server's `refuse` for a session's caller (packages/mcp/src/server.ts): a tool whose
+ * action the caller's key can never call, whatever the deck (`keyShortfall`), leaves tools/list,
+ * and a call to it answers 403 with the sentence naming what the key lacks, for example "this key
+ * lacks the share scope that deck_set_general_access needs". The admin bearers refuse nothing.
+ */
+export function toolRefusalFor(
+  caller: AgentCaller,
+): (action: string, tool: string) => ForbiddenError | undefined {
+  return (action, tool) => {
+    const shortfall = keyShortfall(caller, action);
+    if (shortfall === null) return undefined;
+    const capability = capabilityForAction(action);
+    return new ForbiddenError(
+      shortfallMessage(shortfall, tool),
+      capability === null ? undefined : capability,
+    );
+  };
+}
+
 /** The bound deck read for the caller before the store opens it: `deckNotFound` when it may not. */
 export async function gateDeckRead(
   caller: AgentCaller,

@@ -58,10 +58,10 @@ const NAMES = [
   'Present',
   /* the figures of screens 02 to 06: the photograph's place and author and its licence, the
      product's menus, panels and settings by name, the example deck and its file names */
-  'Louisbourg',
-  'Nova Scotia',
-  'Ken Heaton',
-  'CC BY-SA',
+  'Cape Hatteras Light',
+  'North Carolina',
+  'Outer Banks',
+  'National Park Service',
   'X',
   'Y',
   'New',

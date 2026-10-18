@@ -84,10 +84,10 @@
     "mood-lighthouse": {
       "id": "mood-lighthouse",
       "role": "mood",
-      "alt": "Louisbourg lighthouse on its headland in a fall storm, rendered as a two-tone dither",
+      "alt": "Cape Hatteras Light's lantern room above the Outer Banks, from a drone, rendered as a two-tone dither",
       "twins": {
-        "light": "assets/mood-lighthouse-light.jpg",
-        "dark": "assets/mood-lighthouse-dark.jpg"
+        "light": "assets/mood-lighthouse-light.png",
+        "dark": "assets/mood-lighthouse-dark.png"
       },
       "size": [
         1600,
@@ -96,40 +96,32 @@
       "scale": 1,
       "source": {
         "kind": "photo",
-        "origin": "File:Louisbourg Lighthouse, waves breaking in a fall storm 1.jpg",
-        "artist": "Ken Heaton",
-        "license": "CC BY-SA 4.0",
-        "shareAlike": true
+        "origin": "File:Cape Hatteras Lighthouse inspection 12-11-2020 - 53553243102.jpg",
+        "artist": "National Park Service",
+        "license": "public domain",
+        "shareAlike": false
       },
       "treatment": {
         "kind": "two-tone",
         "crop": [
-          300,
-          330,
-          1800,
-          1174
+          0,
+          0,
+          4000,
+          2250
         ],
-        "blur": 0.5,
+        "invert": true,
         "autocontrast": 0.5,
-        "black": 0,
-        "white": 212,
-        "gamma": 0.8,
-        "unsharp": {
-          "rows": [
-            150,
-            260
-          ],
-          "amount": 180
-        },
+        "black": 28,
+        "white": 223,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
         "resampler": "lanczos3"
       },
-      "credit": "Photograph: Ken Heaton, CC BY-SA 4.0",
+      "credit": "Photograph: National Park Service, public domain",
       "inline": "two-color",
       "metrics": {
-        "litFraction": 0.4358,
+        "litFraction": 0.4483,
         "plateClear": {
           "plate": [
             851,
@@ -138,8 +130,8 @@
             232
           ],
           "nearestLitPx": 0,
-          "litUnder": 30358,
-          "litInBand": 10684
+          "litUnder": 26460,
+          "litInBand": 9731
         }
       }
     },

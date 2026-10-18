@@ -166,9 +166,9 @@
       "type": "box",
       "pos": {
         "x": 903,
-        "y": 569.734375,
+        "y": 536.734375,
         "w": 560,
-        "h": 201.265625,
+        "h": 234.265625,
         "z": 1,
         "group": "plate"
       }
@@ -178,26 +178,26 @@
       "type": "heading",
       "pos": {
         "x": 929,
-        "y": 591.734375,
+        "y": 558.734375,
         "w": 508,
         "h": 47.515625,
         "z": 2,
         "group": "plate"
       },
-      "text": "Louisbourg lighthouse"
+      "text": "Cape Hatteras Light"
     },
     {
       "id": "p1",
       "type": "paragraph",
       "pos": {
         "x": 929,
-        "y": 651.25,
+        "y": 618.25,
         "w": 508,
-        "h": 66,
+        "h": 99,
         "z": 3,
         "group": "plate"
       },
-      "text": "A lighthouse at Louisbourg, Nova Scotia, printed through an 8 by 8 screen at 2 px cells."
+      "text": "The lantern of Cape Hatteras Light on North Carolina's Outer Banks, printed through an 8 by 8 screen at 2 px cells."
     },
     {
       "id": "credit",
@@ -210,7 +210,7 @@
         "z": 4,
         "group": "plate"
       },
-      "text": "Photograph: Ken Heaton, CC BY-SA 4.0"
+      "text": "Photograph: National Park Service, public domain"
     }
   ],
   "field": [

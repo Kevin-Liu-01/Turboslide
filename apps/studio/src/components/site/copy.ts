@@ -103,13 +103,13 @@ export const CANVAS_SCREEN = {
   figure: {
     label: 'Mood slide',
     note: 'The heading dragged off its plate and turned. The dashed box is where it was.',
-    alt: 'The lighthouse slide, a photograph of the Louisbourg lighthouse printed in a two tone dither. The heading, Louisbourg lighthouse, was dragged from the paper plate in the lower right to the sky in the upper left and turned 6 degrees to the left. The selection ring of the editor is on it.',
+    alt: 'The lighthouse slide, a drone photograph of the lantern room of Cape Hatteras Light printed in a two tone dither. The heading, Cape Hatteras Light, was dragged from the paper plate in the lower right to the sky in the upper left and turned 6 degrees to the left. The selection ring of the editor is on it.',
   },
   slide: {
-    heading: 'Louisbourg lighthouse',
+    heading: 'Cape Hatteras Light',
     paragraph:
-      'A lighthouse at Louisbourg, Nova Scotia, printed through an 8 by 8 screen at 2 px cells.',
-    credit: 'Photograph: Ken Heaton, CC BY-SA 4.0',
+      "The lantern of Cape Hatteras Light on North Carolina's Outer Banks, printed through an 8 by 8 screen at 2 px cells.",
+    credit: 'Photograph: National Park Service, public domain',
     /** the editor's selection chip on the heading: its kind and its id */
     chip: 'heading · h',
   },

@@ -14,18 +14,18 @@
         "id": "h",
         "type": "heading",
         "level": "title",
-        "text": "Louisbourg lighthouse"
+        "text": "Cape Hatteras Light"
       },
       {
         "id": "p1",
         "type": "paragraph",
-        "text": "A lighthouse at Louisbourg, Nova Scotia, printed through an 8 by 8 screen at 2 px cells.",
+        "text": "The lantern of Cape Hatteras Light on North Carolina's Outer Banks, printed through an 8 by 8 screen at 2 px cells.",
         "marginTop": 12
       },
       {
         "id": "credit",
         "type": "credit",
-        "text": "Photograph: Ken Heaton, CC BY-SA 4.0"
+        "text": "Photograph: National Park Service, public domain"
       }
     ]
   },

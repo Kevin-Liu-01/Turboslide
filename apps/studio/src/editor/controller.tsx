@@ -1252,6 +1252,8 @@ export function createEditorController(init: {
         assetBase: backend.assetBase(deckId),
         blockAttrs: true,
         gtWord: true,
+        // the filmstrip's clones offer a picture's 400 px copy (HR-PC#6, viewer small-copies.ts)
+        thumbs: true,
       }).html;
       RENDER_MEMO.set(key, rendered);
       if (RENDER_MEMO.size > RENDER_MEMO_LIMIT) {

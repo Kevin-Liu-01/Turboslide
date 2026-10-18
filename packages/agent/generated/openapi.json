@@ -137,7 +137,7 @@
       "post": {
         "operationId": "mcp.rpc",
         "summary": "MCP over streamable HTTP: JSON-RPC requests (initialize first)",
-        "description": "Tools deck_<action> for every implemented action on the mcp transport, the deck:// resources and the deck_review prompt; the mcp-session-id header carries the session; ?deck= and x-turboslide-author bind the session at initialize; deck_goto_slide is listed while a studio page is attached.",
+        "description": "Tools deck_<action> for every implemented action on the mcp transport that the caller's key may call, the deck:// resources and the deck_review prompt; the mcp-session-id header carries the session; ?deck= and x-turboslide-author bind the session at initialize; deck_goto_slide is listed while a studio page is attached.",
         "tags": [
           "discovery"
         ],
@@ -50655,6 +50655,38 @@
               ],
               "additionalProperties": false
             }
+          },
+          "thumb": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "size": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "file",
+              "size"
+            ],
+            "additionalProperties": false
           },
           "ext": {
             "type": "object",

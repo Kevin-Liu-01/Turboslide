@@ -82,6 +82,8 @@ export function presenterSlides(
         /* the block ids let the previews draw a slide at a step of its clock (LiveClone `hidden`) */
         blockAttrs: true,
         gtWord: true,
+        /* the previews are clones and choose a picture's file by their size (HR-PC#6) */
+        thumbs: true,
       });
       out.push({
         id: slideId,

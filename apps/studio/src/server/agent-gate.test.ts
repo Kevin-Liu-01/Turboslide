@@ -10,6 +10,7 @@ import { synthesizeLegacyRecord } from '@turboslide/identity/access';
 import { accountPrincipalId } from '@turboslide/identity/ids';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { ACTIONS, actionsOn } from '@turboslide/schema/actions';
+import type { ActionSpec } from '@turboslide/schema/actions';
 
 import { DECK_ID_ACTIONS } from './action-deck';
 import {
@@ -19,6 +20,7 @@ import {
   gatedDispatcher,
   requireBoundDeckId,
   requireNamedDeck,
+  toolRefusalFor,
   writesBoundDeck,
 } from './agent-gate';
 import type { AgentCaller } from './agent-gate';
@@ -39,6 +41,9 @@ import type { RateLimiter } from './ratelimit';
 // initialize request) is 400 before it reaches a handler; a read runs on the default deck. A share
 // or publish tool whose input `id` names a deck other than its session's is 400, naming both.
 // Shadow mode throughout: production runs it until the enforce flip, and the gate holds anyway.
+// An MCP session lists only the tools its key may call: a tool the key's scopes or admin standing
+// never reach is left out of tools/list, per session over the process wide tool cache, and a call
+// to it answers 403 naming the scope it lacks.
 
 const existing = new Set<string>();
 vi.mock('./root', async (importOriginal) => ({
@@ -264,6 +269,87 @@ describe('the gate (server/agent-gate.ts) in shadow mode', () => {
     expect(
       await refusalOf(gateAgentAction(keyCaller('usr_root', ['admin'], true), flag)),
     ).toBeNull();
+  });
+
+  it('refuses a key exactly the MCP tools the gate refuses it with 403 on its own deck', async () => {
+    const keys: AgentCaller[] = [
+      keyCaller('usr_alice', ['read']),
+      keyCaller('usr_alice', ['read', 'write']),
+      keyCaller('usr_alice', ['read', 'comment']),
+      keyCaller('usr_alice', ['read', 'export']),
+      keyCaller('usr_alice', ['read', 'write', 'share']),
+      keyCaller('usr_alice', ['read', 'write', 'comment', 'export', 'share']),
+      keyCaller('usr_alice', ['read', 'admin']),
+      keyCaller('usr_root', ['read'], true),
+      keyCaller('usr_root', ['read', 'admin'], true),
+    ].map((caller, n) => ({
+      // one token per key, so the writes per minute quota counts each key's calls alone
+      ...caller,
+      ctx: { ...caller.ctx, agent: { ...caller.ctx.agent!, tokenId: `tok_${n}` } },
+    }));
+    for (const caller of keys) {
+      const refuse = toolRefusalFor(caller);
+      const who = `${caller.ctx.agent?.scopes.join(',')}${caller.ctx.principal?.admin ? ' (admin account)' : ''}`;
+      for (const action of MCP_ACTIONS) {
+        const refused = refuse(action, ACTIONS[action].mcp ?? action);
+        const byGate = await refusalOf(
+          gateAgentAction(caller, {
+            action,
+            deckId: 'alpha',
+            input: inputNaming(action, 'alpha'),
+            transport: 'mcp',
+          }),
+        );
+        if (refused !== undefined) {
+          expect(refused.status, `${action} for ${who}`).toBe(403);
+          expect(byGate?.status, `${action} for ${who}`).toBe(403);
+        } else expect(byGate?.status, `${action} for ${who}`).not.toBe(403);
+      }
+    }
+    // the admin bearers refuse nothing
+    const bootstrap: AgentCaller = {
+      kind: 'admin',
+      ctx: { principal: { id: 'agent:token', kind: 'account', admin: true }, linkGrants: [] },
+    };
+    expect(MCP_ACTIONS.filter((action) => toolRefusalFor(bootstrap)(action, action))).toEqual([]);
+  });
+
+  it('names what a key lacks for a tool it can never call', () => {
+    const message = (caller: AgentCaller, action: string, tool: string) =>
+      toolRefusalFor(caller)(action, tool)?.message;
+    const read = keyCaller('usr_alice', ['read']);
+    const writer = keyCaller('usr_alice', ['read', 'write']);
+    const all = keyCaller('usr_alice', ['read', 'write', 'comment', 'export', 'share']);
+    expect(message(read, 'share.setGeneralAccess', 'deck_set_general_access')).toBe(
+      'this key lacks the share scope that deck_set_general_access needs',
+    );
+    expect(message(read, 'deck.set', 'deck_set')).toBe(
+      'this key lacks the write scope that deck_set needs',
+    );
+    expect(message(writer, 'deck.copy', 'deck_copy')).toBe(
+      'this key lacks the export scope that deck_copy needs',
+    );
+    expect(message(read, 'deck.copy', 'deck_copy')).toBe(
+      'this key lacks the export scope and the write scope that deck_copy needs',
+    );
+    expect(message(keyCaller('usr_alice', ['write']), 'comment.list', 'deck_list_comments')).toBe(
+      'this key lacks the read or comment scope that deck_list_comments needs',
+    );
+    expect(message(all, 'admin.flag', 'deck_admin_flag')).toBe(
+      'this key lacks the deployment admin standing that deck_admin_flag needs: the key of an admin account, with the admin scope',
+    );
+    expect(message(all, 'share.transferOwnership', 'deck_transfer_ownership')).toBe(
+      'no API key scope allows deck_transfer_ownership: a person does it in the editor',
+    );
+    // an admin account's key meets no deck scope, and its admin scope stands for every scope
+    expect(
+      message(keyCaller('usr_root', ['read'], true), 'share.transferOwnership', 'deck_t'),
+    ).toBe('this key lacks the admin scope that deck_t needs');
+    expect(message(all, 'deck.info', 'deck_get_info')).toBeUndefined();
+    expect(toolRefusalFor(read)('share.setGeneralAccess', 'x')).toMatchObject({
+      status: 403,
+      capability: 'share',
+    });
   });
 
   it('applies the read only switch and the writes per minute per deck quota to a key’s writes', async () => {
@@ -644,28 +730,39 @@ describe('the agent routes through the gate', () => {
       expect(reached).toEqual([]);
       // and from its own deck, naming the other's deck in the input
       const mine = await session(ownDeck, secrets[other]);
-      for (const tool of [
-        'deck_copy',
-        'deck_trash',
-        'deck_restore',
-        'deck_import_slides',
-        'deck_create_template',
-      ])
+      for (const tool of ['deck_trash', 'deck_restore', 'deck_import_slides'])
         expect(await statusOf(mine, tool, inputNaming(actionOf(tool), deckId)), tool).toBe(404);
+      // a copy needs the export scope these keys lack: hidden, and 403 before any deck is read,
+      // so the answer says nothing about the other deck
+      for (const tool of ['deck_copy', 'deck_create_template']) {
+        expect(await toolsOf(mine)).not.toContain(tool);
+        expect(await statusOf(mine, tool, inputNaming(actionOf(tool), deckId)), tool).toBe(403);
+        expect(await statusOf(mine, tool, inputNaming(actionOf(tool), 'ghost')), tool).toBe(403);
+      }
       expect(reached).toEqual([]);
     }
     // every listed tool over four sessions: 7 s at a load average of 100 and 75 s at 230 on the
     // shared machine, over the 5 s default (2026-10-17, on the base commit too)
   }, 180_000);
 
-  it('refuses a read key every write tool, and a revoked key everything', async () => {
+  it('lists a read key no write tool and refuses each one by name, and refuses a revoked key everything', async () => {
     restrictedDeck('beta', users.bob);
     const readOnly = await session('beta', secrets.bobRead);
-    for (const tool of await toolsOf(readOnly)) {
-      const action = actionOf(tool);
-      if (!ACTIONS[action as keyof typeof ACTIONS].mutates) continue;
-      expect(await statusOf(readOnly, tool, inputNaming(action, 'beta')), tool).toBe(403);
+    const listed = await toolsOf(readOnly);
+    expect(listed).toContain('deck_get_info');
+    expect(
+      listed.filter((tool) => ACTIONS[actionOf(tool) as keyof typeof ACTIONS].mutates),
+    ).toEqual([]);
+    // each tool name's first action in table order is the one a call dispatches
+    const primary = new Map<string, ActionSpec>();
+    for (const spec of actionsOn('mcp'))
+      if (spec.mcp !== undefined && !primary.has(spec.mcp)) primary.set(spec.mcp, spec);
+    reached.length = 0;
+    for (const [tool, spec] of primary) {
+      if (!spec.mutates) continue;
+      expect(await statusOf(readOnly, tool, inputNaming(spec.id, 'beta')), tool).toBe(403);
     }
+    expect(reached).toEqual([]);
     expect(GATE.has(await statusOf(readOnly, 'deck_get_info'))).toBe(false);
     await runtime.keys.revoke(bobReadId);
     expect(await statusOf(readOnly, 'deck_get_info')).toBe(401);
@@ -776,7 +873,8 @@ describe('the agent routes through the gate', () => {
     // the seed deck as production keeps it: open to everyone as an editor
     existing.add('gt-brand');
     records.set('gt-brand', synthesizeLegacyRecord('gt-brand'));
-    const unnamed = await session('', secrets.alice);
+    // a key with the share scope, so the share tool is listed and the deck rule answers it
+    const unnamed = await session('', secrets.aliceShare);
     reached.length = 0;
     expect(GATE.has(await statusOf(unnamed, 'deck_get_info'))).toBe(false);
     expect(reached).toEqual(['deck.info']);
@@ -788,7 +886,7 @@ describe('the agent routes through the gate', () => {
     ] as const) {
       const answer = await rpc(
         '',
-        secrets.alice,
+        secrets.aliceShare,
         {
           jsonrpc: '2.0',
           id: next++,
@@ -827,6 +925,53 @@ describe('the agent routes through the gate', () => {
     expect(reached).toEqual([]);
     expect((await unnamedPost('deck.create', { name: 'Fresh' })).status).toBe(500);
     expect(reached).toEqual(['deck.create']);
+  });
+
+  it('lists each key only the tools it may call, session by session, and names the missing scope on a call to a hidden one', async () => {
+    restrictedDeck('alpha', users.alice);
+    const plain = await session('alpha', secrets.alice);
+    const sharing = await session('alpha', secrets.aliceShare);
+    const shareTool = actionsOn('mcp').find((spec) => spec.id === 'share.setGeneralAccess')?.mcp;
+    expect(shareTool).toBe('deck_set_general_access');
+    // interleaved twice over one process's tool cache: no session is served another key's list
+    for (let round = 0; round < 2; round += 1) {
+      const plainTools = await toolsOf(plain);
+      const sharingTools = await toolsOf(sharing);
+      expect(plainTools).not.toContain(shareTool);
+      expect(sharingTools).toContain(shareTool);
+      expect(plainTools.filter((tool) => !sharingTools.includes(tool))).toEqual([]);
+      // the share scope adds the share and publish tools and nothing else
+      expect(
+        sharingTools
+          .filter((tool) => !plainTools.includes(tool))
+          .map((tool) => capabilityForAction(actionOf(tool)))
+          .filter((capability) => capability !== 'share' && capability !== 'publish'),
+      ).toEqual([]);
+      // neither key is the deployment admin's
+      expect(sharingTools.filter((tool) => actionOf(tool).startsWith('admin.'))).toEqual([]);
+    }
+    reached.length = 0;
+    expect(
+      await toolErrorOf(plain, 'deck_set_general_access', {
+        id: 'alpha',
+        mode: 'restricted',
+        role: 'viewer',
+        baseRevision: 0,
+      }),
+    ).toMatchObject({
+      status: 403,
+      message: 'this key lacks the share scope that deck_set_general_access needs',
+    });
+    expect(reached).toEqual([]);
+    // the key with the scope reaches the handler (which refuses here with a 500)
+    expect(
+      await statusOf(sharing, 'deck_set_general_access', {
+        id: 'alpha',
+        mode: 'restricted',
+        role: 'viewer',
+        baseRevision: 0,
+      }),
+    ).not.toBe(403);
   });
 
   it('refuses a share or publish tool whose id names a deck other than the session’s, and runs it on the session’s own', async () => {

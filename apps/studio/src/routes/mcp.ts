@@ -12,6 +12,7 @@ import {
   gatedDispatcher,
   gatedSource,
   keyBindingOf,
+  toolRefusalFor,
 } from '../server/agent-gate';
 import { agentAuthor, MCP_DEFAULT_AUTHOR, requireAgentAuth } from '../server/auth';
 import { refuseForeignOrigin } from '../server/headers';
@@ -34,7 +35,9 @@ import { refuseForeignOrigin } from '../server/headers';
 // with the key's scopes, the read only switch and the write quota, and a session is bound to the
 // key that opened it, so another key or bearer never rides it. A share or publish tool acts on the
 // session's deck, so one whose input `id` names another deck is refused with 400, naming both
-// (server/agent-gate.ts requireBoundDeckId).
+// (server/agent-gate.ts requireBoundDeckId). tools/list lists only the tools the key may call: a
+// tool its scopes or its admin standing can never reach is left out, and a call to one answers 403
+// naming the scope it lacks (server/agent-gate.ts toolRefusalFor).
 
 const HANDLER = Symbol.for('turboslide.studio.mcp');
 
@@ -65,6 +68,7 @@ function handler(): McpHttpHandler {
         source: gatedSource(deck.source, () =>
           gateDeckRead(caller, deckId, 'mcp', 'resource.read'),
         ),
+        refuse: toolRefusalFor(caller),
         author,
         deckDir: deck.store.dir,
         version: '0.0.0',

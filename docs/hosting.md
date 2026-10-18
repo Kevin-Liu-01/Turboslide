@@ -1061,6 +1061,17 @@ still holds and every read, without the seed deck once `delete` removed it, and 
 save. A preview built before its private store existed, or a checkout or `vercel dev` with
 `BLOB_READ_WRITE_TOKEN` alone, behaves the same way.
 
+Production's run, as read. The switch to `v2` was at 2026-10-17T01:37:09Z. The last red reading
+before the delete was at 04:48Z: the smoke passed 61 of 62 rows, and `private document 403` failed
+on gt-brand's `deck.json`, which answered 200. The last `delete` call ended at 16:50:28Z with
+`done true`. The delete removed 93,457 public documents, left 0 and kept 0. The `verify` on `v2`
+after it counted 0 public documents left, and 28 of 28 sampled document URLs answer 404. The
+checks after the delete passed: the smoke 61 of 61, its `document cache 60 s` row reading 404
+because no public copy is left; the browser rows 7 of 7; gt-brand's twins. The guard's production
+smoke of 417fd8088 at 18:37Z passed 61 of 61 with the HR-K1#6 rows (`docs/security.md` section 17
+has each row's reading). `sweep-produced` ended at 2026-10-18T04:35:30Z. Its three calls removed
+18,750, 18,555 and 700 produced files, 38,005 in all, and left 0. The smoke after it passed 61 of 61.
+
 ## 11. The runbook of the round three services
 
 The account boundary of MILESTONES-3: no agent installs a Vercel Marketplace product, creates a paid

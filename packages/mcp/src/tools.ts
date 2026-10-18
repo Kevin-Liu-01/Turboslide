@@ -257,6 +257,8 @@ export function outputSchemaFor(spec: ActionSpec): JsonSchema {
  * tool, for each MCP session; converting the inputs and outputs was most of a session's start
  * (the output schemas inline the recursive Block union). The action table is static, so each spec
  * is converted once per process. The entries share the tool definitions, which nothing writes.
+ * The cache holds definitions alone, never a list: which tools a session serves is decided per
+ * server from its own dispatcher and its caller (server.ts `refuse`), so no key's list is cached.
  */
 const derived = new WeakMap<ActionSpec, Omit<ToolEntry, 'alsoServes'>>();
 

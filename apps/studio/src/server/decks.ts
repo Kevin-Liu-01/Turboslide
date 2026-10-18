@@ -201,6 +201,8 @@ function buildViewerDeck(
             assetBase,
             blockAttrs: true,
             gtWord: true,
+            // the sidebar's clones offer a picture's 400 px copy (HR-PC#6, viewer small-copies.ts)
+            thumbs: true,
             // every `html` block lands in the sandboxed frame (SPEC-3 8.4 item 2), or as its note
             htmlFrame: htmlFrameFor({
               theme: options.theme,

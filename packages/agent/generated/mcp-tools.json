@@ -1650,6 +1650,38 @@
             "additionalProperties": false
           }
         },
+        "thumb": {
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string",
+              "minLength": 1
+            },
+            "size": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "file",
+            "size"
+          ],
+          "additionalProperties": false
+        },
         "ext": {
           "type": "object",
           "propertyNames": {
@@ -62895,6 +62927,38 @@
               "additionalProperties": false
             }
           },
+          "thumb": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "size": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "file",
+              "size"
+            ],
+            "additionalProperties": false
+          },
           "ext": {
             "type": "object",
             "propertyNames": {
@@ -64665,6 +64729,38 @@
               ],
               "additionalProperties": false
             }
+          },
+          "thumb": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string",
+                "minLength": 1
+              },
+              "size": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "file",
+              "size"
+            ],
+            "additionalProperties": false
           },
           "ext": {
             "type": "object",

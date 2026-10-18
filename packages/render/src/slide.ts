@@ -1,5 +1,5 @@
 // renderSlide: one string function that emits the deck's own markup for one slide (SPEC 5.2).
-import { isEmptyPicture, markSvg, sizeAttrs, twinAttrs } from './blocks/context.ts';
+import { isEmptyPicture, markSvg, sizeAttrs, thumbAttrs, twinAttrs } from './blocks/context.ts';
 import type { BlockContext, HtmlFrameSource, RasterRef, ResolvedImage } from './blocks/context.ts';
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
 import { pictureRecipeAttr } from './blocks/material.ts';
@@ -87,6 +87,13 @@ export type RenderOptions = {
    * themeCss once for the page (a tile that shows the base theme with `data-theme-base`).
    */
   noKitCss?: boolean;
+  /**
+   * Write `data-thumb` on a picture whose asset has a small copy (hardening HR-PC#6), so the
+   * viewer's scaled clones (the filmstrip) can choose it through `srcset`. The editor, the viewer
+   * page and the presenter set it; a self contained document never does, since it would carry a
+   * second file per picture.
+   */
+  thumbs?: boolean;
 };
 
 export type RenderedSlide = {
@@ -145,7 +152,16 @@ function imageResolver(
   return (id) => {
     const asset = deck.assets[id];
     if (!asset) return undefined;
-    return twins(id, vectorOf(asset) ?? asset.twins, asset.alt, asset.size);
+    const vector = vectorOf(asset);
+    const image = twins(id, vector ?? asset.twins, asset.alt, asset.size);
+    // the small copy is the neutral twin's (HR-PC#6): a toned or vector picture never offers it
+    const thumb = asset.thumb;
+    if (options.thumbs !== true || thumb === undefined || vector !== undefined) return image;
+    if (!('neutral' in asset.twins)) return image;
+    const src = options.assetSrc
+      ? options.assetSrc(id, options.theme, thumb.file)
+      : `${options.assetBase}${thumb.file}`;
+    return { ...image, thumb: { src, width: thumb.size[0] } };
   };
 }
 
@@ -338,7 +354,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       // the stored size as width and height, so the box is reserved before the file decodes and the
       // theme swap moves nothing (SPEC-3 9.2 E12)
       const img = image
-        ? `<img class="${imgClass}" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))}${attrs(sizeAttrs(image.size))}${recipe} alt="${escapeAttr(image.alt)}"${
+        ? `<img class="${imgClass}" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))}${attrs(sizeAttrs(image.size))}${attrs(thumbAttrs(image))}${recipe} alt="${escapeAttr(image.alt)}"${
             slide.picture.position && slide.picture.position !== 'center'
               ? ` style="object-position:${slide.picture.position}"`
               : ''

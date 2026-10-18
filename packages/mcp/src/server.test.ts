@@ -4,10 +4,11 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { ResourceUpdatedNotificationSchema } from '@modelcontextprotocol/sdk/types.js';
 import { createDispatcher } from '@turboslide/agent/dispatch';
-import { ConflictError } from '@turboslide/schema/errors';
+import { ConflictError, ForbiddenError } from '@turboslide/schema/errors';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { DeckSource } from './resources.ts';
 import { createMcpServer } from './server.ts';
+import type { McpServerOptions } from './server.ts';
 
 const author = { kind: 'agent' as const, name: 'agent', runId: 'server-test' };
 
@@ -29,7 +30,7 @@ afterEach(async () => {
   while (closers.length > 0) await closers.pop()?.();
 });
 
-async function connect() {
+async function connect(refuse?: McpServerOptions['refuse']) {
   const dispatcher = createDispatcher();
   dispatcher.register('deck.info', () => ({
     id: 'fixture',
@@ -57,7 +58,13 @@ async function connect() {
       findings: [],
     };
   });
-  const created = createMcpServer({ dispatcher, source: source(), author, version: '0.0.0-test' });
+  const created = createMcpServer({
+    dispatcher,
+    source: source(),
+    author,
+    version: '0.0.0-test',
+    ...(refuse !== undefined ? { refuse } : {}),
+  });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   await created.server.connect(serverTransport);
   const client = new Client({ name: 'test', version: '0.0.0' });
@@ -121,6 +128,65 @@ describe('createMcpServer', () => {
     await expect(client.callTool({ name: 'deck_export', arguments: {} })).rejects.toThrow(
       /Unknown tool/,
     );
+  });
+
+  it('lists only the tools the caller may call, and answers a call to a refused one with its error', async () => {
+    const refuse = (action: string, tool: string) =>
+      action === 'block.set'
+        ? new ForbiddenError(`this key lacks the write scope that ${tool} needs`, 'write')
+        : undefined;
+    const { client, created } = await connect(refuse);
+    expect(created.tools.map((entry) => entry.name)).toEqual([
+      'deck_get_info',
+      'deck_version_list',
+    ]);
+    const listed = await client.listTools();
+    expect(listed.tools.map((tool) => tool.name)).toEqual(['deck_get_info', 'deck_version_list']);
+    const refused = await client.callTool({
+      name: 'deck_update_block',
+      arguments: { slideId: 'thesis', blockId: 'big', path: '/text', value: 'x', baseRevision: 3 },
+    });
+    expect(refused.isError).toBe(true);
+    expect(JSON.parse((refused.content as { text?: string }[])[0]?.text ?? '{}')).toEqual({
+      error: {
+        name: 'ForbiddenError',
+        status: 403,
+        message: 'this key lacks the write scope that deck_update_block needs',
+        action: 'block.set',
+      },
+    });
+    // a tool no dispatcher implements is still unknown, and an allowed one still runs
+    await expect(client.callTool({ name: 'deck_export', arguments: {} })).rejects.toThrow(
+      /Unknown tool/,
+    );
+    const info = await client.callTool({ name: 'deck_get_info', arguments: {} });
+    expect(info.isError).toBeFalsy();
+  });
+
+  it('keeps each server’s list its own over the process wide tool cache', async () => {
+    // the tool definitions are converted once per process (tools.ts toolEntry); the lists are not
+    const readOnly = await connect((action) =>
+      action === 'block.set' ? new ForbiddenError('no write scope') : undefined,
+    );
+    const writer = await connect();
+    const noVersions = await connect((action) =>
+      action === 'version.list' ? new ForbiddenError('no history') : undefined,
+    );
+    const names = async (client: Client) =>
+      (await client.listTools()).tools.map((tool) => tool.name);
+    for (let round = 0; round < 2; round += 1) {
+      expect(await names(readOnly.client)).toEqual(['deck_get_info', 'deck_version_list']);
+      expect(await names(writer.client)).toEqual([
+        'deck_get_info',
+        'deck_update_block',
+        'deck_version_list',
+      ]);
+      expect(await names(noVersions.client)).toEqual(['deck_get_info', 'deck_update_block']);
+    }
+    // the shared definition is the same object in every list that holds it
+    const infoOf = (created: typeof writer.created) =>
+      created.tools.find((entry) => entry.name === 'deck_get_info')?.tool;
+    expect(infoOf(readOnly.created)).toBe(infoOf(writer.created));
   });
 
   it('serves the resources and the prompt', async () => {

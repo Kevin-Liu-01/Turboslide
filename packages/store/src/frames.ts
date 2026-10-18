@@ -38,13 +38,14 @@ export function isFrameAssetId(id: string): boolean {
   return /^frame-[0-9a-f]{16}$/.test(id);
 }
 
-/** The relative paths an asset's record names under `assets/`: the twins, the source and the variants. */
+/** The relative paths an asset's record names under `assets/`: the twins, the source, the small copy and the variants. */
 export function assetFiles(asset: Asset): string[] {
   const out: string[] = [];
   const twins = asset.twins;
   if ('neutral' in twins) out.push(twins.neutral);
   else out.push(twins.light, twins.dark);
   if (asset.sourceFile !== undefined) out.push(asset.sourceFile);
+  if (asset.thumb !== undefined) out.push(asset.thumb.file);
   for (const variant of Object.values(asset.variants ?? {})) {
     if ('neutral' in variant.twins) out.push(variant.twins.neutral);
     else out.push(variant.twins.light, variant.twins.dark);

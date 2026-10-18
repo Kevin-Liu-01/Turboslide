@@ -1,5 +1,9 @@
 // The importer's units (text markup, the css ledger, ids, sections) and its mapping of slide
 // fragments; a smoke test over the real Prototemplate deck runs when the checkout is present.
+// The deck is read at pinned commits of the checkout's repository, never at its working tree: the
+// deck moves on (d0f6c7e9 of 2026-10-05 removed two mood slides) while decks/gt-brand, the seed
+// deck production serves, stays the import of 2026-09-13.
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -20,9 +24,64 @@ import type { ContentSlide, OpenerSlide, Slide } from '@turboslide/schema/deck';
 import { slideTitle } from '@turboslide/schema/deck';
 import { importResidual } from '@turboslide/schema/ext';
 
-const DECK =
+const CHECKOUT =
   process.env.TURBOSLIDE_PROTOTEMPLATE_DECK ?? '/Users/kevinliu/repos/Prototemplate/deck';
-const hasDeck = existsSync(join(DECK, 'parts/head.html'));
+
+/**
+ * The Prototemplate commit decks/gt-brand was imported from: the last commit to touch the deck
+ * before the import of 2026-09-13 (gt-brand/import-report.json `importedAt`). Its import gives
+ * gt-brand's slide ids, sections and import-ids.json exactly; the parent of d0f6c7e9 does not
+ * (95 slides against gt-brand's 85).
+ */
+const GT_BRAND_SOURCE = '9cbc9c88';
+
+/** The deck of 2026-10-01 with the seven speed mark slides: the parent of d0f6c7e9. */
+const SPEED_MARKS_SOURCE = '96903117';
+
+function git(args: string[], cwd = CHECKOUT): string {
+  return execFileSync('git', ['-C', cwd, ...args], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore'],
+  }).trim();
+}
+
+/** True when the checkout is a git repository that holds the commit. */
+function holds(commit: string): boolean {
+  try {
+    git(['cat-file', '-e', `${commit}^{commit}`]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const hasDeck = existsSync(join(CHECKOUT, 'parts/head.html')) && holds(GT_BRAND_SOURCE);
+const hasSpeedMarks = hasDeck && holds(SPEED_MARKS_SOURCE);
+
+/** The folders `deckAt` wrote, by commit: the temporary folder and the deck inside it. */
+const extracted = new Map<string, { dir: string; deck: string }>();
+
+/** The deck folder at a commit, written once per run into a temporary folder by `git archive`. */
+function deckAt(commit: string): string {
+  const known = extracted.get(commit);
+  if (known !== undefined) return known.deck;
+  const top = git(['rev-parse', '--show-toplevel']);
+  const prefix = git(['rev-parse', '--show-prefix']);
+  const dir = mkdtempSync(join(tmpdir(), `turboslide-prototemplate-${commit}-`));
+  const tar = join(dir, 'deck.tar');
+  // from the repository's root, where the deck's path names it
+  git(['archive', '--format=tar', `--output=${tar}`, commit, '--', prefix], top);
+  execFileSync('tar', ['-xf', tar, '-C', dir]);
+  rmSync(tar);
+  const deck = join(dir, prefix);
+  extracted.set(commit, { dir, deck });
+  return deck;
+}
+
+afterAll(() => {
+  for (const { dir } of extracted.values()) rmSync(dir, { recursive: true, force: true });
+  extracted.clear();
+});
 
 function element(html: string, test: (el: { tagName: string }) => boolean = () => true) {
   const fragment = parseHtmlFragment(html);
@@ -165,7 +224,7 @@ describe('ids and sections', () => {
 
 describe('mapSlide', () => {
   const section = { start: 1, name: 'Brand', id: 'brand' };
-  const assets = () => new Assets(hasDeck ? DECK : tmpdir());
+  const assets = () => new Assets(hasDeck ? deckAt(GT_BRAND_SOURCE) : tmpdir());
 
   it('maps a two-column slide with a ruled table', () => {
     const html = `<!-- why -->
@@ -211,7 +270,7 @@ describe('mapSlide', () => {
 
   // the opener is the Prototemplate deck's file, so without that checkout (CI) the case skips
   it.skipIf(!hasDeck)('maps an opener and drops its known style block', () => {
-    const html = readFileSync(join(DECK, 'slides/01-opener-brand.html'), 'utf8');
+    const html = readFileSync(join(deckAt(GT_BRAND_SOURCE), 'slides/01-opener-brand.html'), 'utf8');
     const { slide, row } = mapSlide({
       file: '01-opener-brand.html',
       n: 1,
@@ -505,25 +564,23 @@ const SPEED_MARK_SLIDES = [
   'speed-ascii',
 ];
 
-describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
+describe.skipIf(!hasDeck)('the Prototemplate deck gt-brand came from', () => {
   const out = mkdtempSync(join(tmpdir(), 'turboslide-import-'));
   afterAll(() => rmSync(out, { recursive: true, force: true }));
+  const seed = join(import.meta.dirname, '..', '..', '..', '..', 'decks', 'gt-brand');
 
-  it('imports 95 slides in 8 sections, with the seven speed mark slides as html blocks', () => {
+  it(`imports ${GT_BRAND_SOURCE} as gt-brand: 85 slides in 8 sections with no html block, its ids and sections`, () => {
     const report = importDeck({
-      from: DECK,
+      from: deckAt(GT_BRAND_SOURCE),
       into: 'gt-brand',
       decksDir: out,
       skipAssets: true,
       now: () => '2026-09-10T00:00:00.000Z',
     });
-    expect(report.slides).toBe(95);
+    expect(report.slides).toBe(85);
     expect(report.sections).toBe(8);
-    // M5: the composite block retired the four escapes of M1 (slides 25, 67, 83 and 84). The deck
-    // of 2026-10-01 adds the seven speed mark slides, whose inline <svg> has no typed block yet
-    // (docs/gslides-parity/round1/build/b4.md request 6), so they are the html blocks.
-    expect(report.htmlBlocks).toBe(7);
-    expect(report.rows.filter((r) => r.html).map((r) => r.id)).toEqual(SPEED_MARK_SLIDES);
+    // M5: the composite block retired the four escapes of M1 (slides 25, 67, 83 and 84)
+    expect(report.htmlBlocks).toBe(0);
     expect(report.warnings).toEqual([]);
     // The four former escapes derive their title from their typed h2.
     const titles = Object.fromEntries(
@@ -540,15 +597,22 @@ describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
       'fixed-points': 'Fixed points',
       goals: 'Success criteria',
     });
-    const deck = JSON.parse(readFileSync(join(out, 'gt-brand/deck.json'), 'utf8')) as {
-      sections: { slideIds: string[] }[];
+    type Sections = { sections: { id: string; slideIds: string[] }[] };
+    const deck = JSON.parse(readFileSync(join(out, 'gt-brand/deck.json'), 'utf8')) as Sections & {
       assets: Record<string, unknown>;
     };
-    expect(deck.sections.flatMap((s) => s.slideIds).length).toBe(95);
+    expect(deck.sections.flatMap((s) => s.slideIds).length).toBe(85);
     expect(Object.keys(deck.assets).length).toBeGreaterThan(100);
     expect(existsSync(join(out, 'gt-brand/slides/content-rule.json'))).toBe(true);
-    expect(existsSync(join(out, 'gt-brand/import-ids.json'))).toBe(true);
     expect(existsSync(join(out, 'gt-brand/import-report.json'))).toBe(true);
+    // the committed seed deck is this import: the same slides in the same sections, the same ids
+    const committed = JSON.parse(readFileSync(join(seed, 'deck.json'), 'utf8')) as Sections;
+    expect(deck.sections.map((s) => [s.id, s.slideIds])).toEqual(
+      committed.sections.map((s) => [s.id, s.slideIds]),
+    );
+    expect(readFileSync(join(out, 'gt-brand/import-ids.json'), 'utf8')).toBe(
+      readFileSync(join(seed, 'import-ids.json'), 'utf8'),
+    );
   });
 
   it('keeps ids stable on a second import', () => {
@@ -557,7 +621,7 @@ describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
       string
     >;
     importDeck({
-      from: DECK,
+      from: deckAt(GT_BRAND_SOURCE),
       into: 'gt-brand',
       decksDir: out,
       skipAssets: true,
@@ -567,6 +631,28 @@ describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
       readFileSync(join(out, 'gt-brand/import-ids.json'), 'utf8'),
     ) as Record<string, string>;
     expect(second).toEqual(first);
+  });
+});
+
+describe.skipIf(!hasSpeedMarks)('the Prototemplate deck of 2026-10-01', () => {
+  const out = mkdtempSync(join(tmpdir(), 'turboslide-import-'));
+  afterAll(() => rmSync(out, { recursive: true, force: true }));
+
+  it(`imports ${SPEED_MARKS_SOURCE}: 95 slides with the seven speed mark slides as html blocks`, () => {
+    const report = importDeck({
+      from: deckAt(SPEED_MARKS_SOURCE),
+      into: 'speed-marks',
+      decksDir: out,
+      skipAssets: true,
+      now: () => '2026-10-01T00:00:00.000Z',
+    });
+    expect(report.slides).toBe(95);
+    expect(report.sections).toBe(8);
+    // the speed mark slides' inline <svg> has no typed block yet
+    // (docs/gslides-parity/round1/build/b4.md request 6), so they are the html blocks
+    expect(report.htmlBlocks).toBe(7);
+    expect(report.rows.filter((r) => r.html).map((r) => r.id)).toEqual(SPEED_MARK_SLIDES);
+    expect(report.warnings).toEqual([]);
   });
 });
 

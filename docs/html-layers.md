@@ -50,12 +50,16 @@ Three passes, the ones an `html` block gets:
 2. At write time, `deck.setHtml` and `slide.setHtml` run `sanitizeHtmlLayer`
    (`packages/render/src/sanitize/html.ts`): DOMPurify over the markup with the html block's
    profile, the `id` and `name` attributes removed (the layer draws in the editor's own document,
-   where an id could shadow one the editor reads; style the markup by class), and the CSS
-   tokenizer. The answer lists the CSS the tokenizer dropped. A layer with neither CSS nor markup
+   where an id could shadow one the editor reads; style the markup by class), every `src`,
+   `href`, `poster` or `srcset` that points anywhere but `assets/`, `data:image/` or `#` removed
+   (`confineLayerMarkup`: the standalone file and the export capture carry no CSP, so an `https:`
+   image there would be a fetch the author chose), and the CSS tokenizer. The answer lists the CSS the tokenizer dropped. A layer with neither CSS nor markup
    left is removed.
 3. At render time, every surface sanitizes again (`packages/render/src/html-layers.ts`), so a
    layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized. A page
-   that has not loaded the parser yet draws no markup until it has.
+   that has not loaded the parser yet draws no markup until it has, and the export capture,
+   `turboslide render` and `turboslide build` load it first for a deck that holds markup
+   (`loadPurifierFor`), so they sanitize with DOMPurify and not the regular expressions alone.
 
 The CSS tokenizer (`packages/render/src/sanitize/css.ts`) reads the text as a browser does
 (comments, strings, unquoted `url()`, escapes, and the braces outside them) and rebuilds it from

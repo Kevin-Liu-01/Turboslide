@@ -71,19 +71,31 @@ function scopeSelectorPart(part: string, scopeSelector: string): string | null {
  * inside a grouping `@` rule (`@media`, `@supports`, `@container`, `@layer`) are scoped the same
  * way at any depth, so a media query cannot carry a rule out of the scope; the bodies of other `@`
  * rules and of nested style rules are copied (sanitizeCss drops both before this runs), and a rule
- * whose every selector reaches past the scope is dropped. The brace count is exact on the text
- * sanitizeCss writes, whose only braces are structural.
+ * whose every selector reaches past the scope is dropped. It runs on the text sanitizeCss writes,
+ * which holds no comment and no brace inside a string, so the depth count is exact; a string is
+ * read as text (a `/*` or a `;` in `content: "..."` is not structure).
  */
 export function scopeCss(css: string, scopeSelector: string): string {
-  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   let out = '';
   let buffer = '';
+  /** the quote of the string being read: its braces and semicolons are text, never structure */
+  let quote: string | null = null;
   /** what each open brace holds: style rules to scope, a body to copy, or a body to drop */
   const stack: ('scope' | 'copy' | 'drop')[] = [];
   const top = () => stack[stack.length - 1];
   const scoping = (): boolean => stack.length === 0 || top() === 'scope';
   const dropping = (): boolean => stack.includes('drop');
-  for (const ch of withoutComments) {
+  for (const ch of css) {
+    if (quote !== null) {
+      buffer += ch;
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      buffer += ch;
+      continue;
+    }
     if (ch === '{') {
       const head = buffer.trim();
       buffer = '';

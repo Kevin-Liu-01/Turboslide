@@ -35,6 +35,7 @@ import { NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 import type { ExportMode } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 import { fontFileDataUri } from '@turboslide/fonts/catalog-node';
+import { loadPurifierFor } from '@turboslide/render/sanitize/html';
 import { renderDeck } from '@turboslide/render/deck';
 import { loadThemeBundle } from '@turboslide/render/theme-node';
 import { openSheetPage, SHEET } from '@turboslide/headless/context';
@@ -404,6 +405,9 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
   const wordmark: Partial<Record<Theme, string>> = {};
   const nativeTypes: readonly string[] = options.nativeTypes ?? [...NATIVE_BLOCK_TYPES];
   let renderer = '';
+  // the capture renders outside any page: DOMPurify sanitizes the deck's html blocks and HtmlLayer
+  // markup when the deck holds any (docs/html-layers.md 3), not the regular expressions alone
+  await loadPurifierFor(deck, Object.values(slides));
   try {
     const docs = new Map<Theme, { url: string; n: Map<string, number> }>();
     for (const theme of options.themes) {

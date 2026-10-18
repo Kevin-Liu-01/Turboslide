@@ -4,6 +4,8 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
+import { loadPurifierFor } from '@turboslide/render/sanitize/html';
+
 import { flagNumber, flagString } from '../args.ts';
 import { inlineAssets } from '../assets.ts';
 import type { CommandContext } from '../context.ts';
@@ -15,6 +17,8 @@ import { formatBytes } from '../output.ts';
 export async function build(ctx: CommandContext): Promise<number> {
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
   const loaded = loadDeck(dir);
+  // the standalone file carries no CSP: DOMPurify sanitizes its markup (docs/html-layers.md 3)
+  await loadPurifierFor(loaded.deck, Object.values(loaded.slides));
   const budgetMB = flagNumber(ctx.args, 'budget', 16);
   const out = resolveOut(ctx.cwd, flagString(ctx.args, 'out'), `${loaded.deck.id}.html`);
   const assets = await inlineAssets(dir, loaded.deck.assets);

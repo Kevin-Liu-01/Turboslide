@@ -17,7 +17,7 @@
 // survives, `formaction` and `action` never, URI attributes limited to `https:`, `data:image/`,
 // `#` and `assets/`, no unknown protocols. Framework free apart from the two lazy imports.
 import type { BlockOf } from '@turboslide/schema/blocks';
-import type { HtmlLayer } from '@turboslide/schema/deck';
+import type { Deck, HtmlLayer, Slide } from '@turboslide/schema/deck';
 
 import { sanitizeCss, sanitizeStyleAttribute } from './css.ts';
 
@@ -294,6 +294,52 @@ export function stripIdentities(html: string): string {
   return html.replace(/\s(?:id|name)="[^"]*"/gi, '');
 }
 
+/** The targets an HtmlLayer's markup may load: a deck asset, an inline image, a fragment. */
+const LAYER_URI = /^(?:assets\/|data:image\/|#)/i;
+
+/** One attribute of sanitized markup, double quoted, single quoted or bare. */
+const URI_ATTRIBUTE =
+  /\s(src|href|xlink:href|poster|background|data|action|formaction|srcset|imagesrcset)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+
+/**
+ * An HtmlLayer's sanitized markup confined to the deck (docs/html-layers.md 3): no `id` or `name`
+ * (stripIdentities), and no attribute that loads anything but a deck asset, an inline image or a
+ * fragment. The markup draws in the editor's document and in the standalone file and the export
+ * capture, which carry no CSP, so an `https:` image there would be a fetch an author chose (a
+ * read receipt, a request from the render worker); the html block's frame keeps its `https:`
+ * images under the frame's CSP.
+ */
+export function confineLayerMarkup(html: string): string {
+  return stripIdentities(html).replace(
+    URI_ATTRIBUTE,
+    (whole, name: string, double?: string, single?: string, bare?: string) => {
+      const value = (double ?? single ?? bare ?? '').trim();
+      const candidates = /srcset$/i.test(name)
+        ? value.split(',').map((candidate) => candidate.trim().split(/\s+/)[0] ?? '')
+        : [value];
+      return candidates.every((candidate) => LAYER_URI.test(candidate)) ? whole : '';
+    },
+  );
+}
+
+/** True when a deck holds an html block or an HtmlLayer with markup. */
+export function deckHoldsHtml(deck: Deck, slides: Iterable<Slide>): boolean {
+  if (deck.html?.markup !== undefined) return true;
+  for (const slide of slides)
+    if (slide.html?.markup !== undefined || JSON.stringify(slide).includes('"type":"html"'))
+      return true;
+  return false;
+}
+
+/**
+ * Loads the parser before a render of a deck that holds markup, so a surface outside the page (the
+ * export capture, `turboslide render`, the standalone build) sanitizes with DOMPurify rather than
+ * the regular expressions alone; a deck without markup loads nothing.
+ */
+export async function loadPurifierFor(deck: Deck, slides: Iterable<Slide>): Promise<void> {
+  if (deckHoldsHtml(deck, slides)) await loadPurifier().catch(() => undefined);
+}
+
 export type SanitizedHtmlLayer = {
   layer: HtmlLayer;
   changed: boolean;
@@ -314,7 +360,7 @@ export async function sanitizeHtmlLayer(layer: HtmlLayer): Promise<SanitizedHtml
   let droppedCss: string[] = [];
   if (layer.markup !== undefined) {
     const markup = sanitizeMarkup(layer.markup, purifier);
-    out.markup = stripIdentities(markup.html);
+    out.markup = confineLayerMarkup(markup.html);
     changed = changed || markup.changed || out.markup !== markup.html;
   }
   if (layer.css !== undefined) {

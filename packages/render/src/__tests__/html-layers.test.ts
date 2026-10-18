@@ -10,7 +10,7 @@ import type { ContentSlide, Deck } from '@turboslide/schema/deck';
 import { renderSlide } from '../slide.ts';
 import type { RenderOptions } from '../slide.ts';
 import { htmlLayerFrameFor } from '../sanitize/frame.ts';
-import { loadPurifier, sanitizeHtmlLayer } from '../sanitize/html.ts';
+import { confineLayerMarkup, loadPurifier, sanitizeHtmlLayer } from '../sanitize/html.ts';
 import { sanitizeCss, sanitizeStyleAttribute } from '../sanitize/css.ts';
 import { scopeCss } from '../sanitize/scope.ts';
 import { deck as baseDeck } from './fixtures.ts';
@@ -161,6 +161,29 @@ describe('the CSS tokenizer and scope (the security review of 2026-10-18)', () =
       expect(scoped(`p{${declaration}}`), declaration).toBe('');
     expect(sanitizeStyleAttribute('pointer-events:auto; color:red')).toBe('color: red');
     expect(sanitizeStyleAttribute('color:red} body{display:none')).toBe('');
+  });
+});
+
+describe('the second review of 2026-10-18', () => {
+  it('reads a string as text, so a /* in one string and a */ in another delete nothing', () => {
+    expect(scoped('h1{content:"/*"} .keep{color:red} h2{content:"*/"}')).toBe(
+      [
+        '.ts-sheet [data-slide="s1"] h1 { content: "/*"; }',
+        '.ts-sheet [data-slide="s1"] .keep { color: red; }',
+        '.ts-sheet [data-slide="s1"] h2 { content: "*/"; }',
+      ].join('\n'),
+    );
+    expect(scoped('[data-x=";"] p{color:red}')).toBe(
+      '.ts-sheet [data-slide="s1"] [data-x=";"] p { color: red; }',
+    );
+  });
+
+  it('confines a layer’s markup to deck assets, inline images and fragments', () => {
+    expect(
+      confineLayerMarkup(
+        '<img src="https://evil.example/t.gif"><img src="assets/a-light.jpg"><img srcset="https://evil.example/x 1x"><image href=\'https://evil.example/x\'><a href="#s2">x</a><b id="share">y</b>',
+      ),
+    ).toBe('<img><img src="assets/a-light.jpg"><img><image><a href="#s2">x</a><b>y</b>');
   });
 });
 

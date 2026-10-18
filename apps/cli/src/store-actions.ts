@@ -1450,14 +1450,17 @@ export function slideAssetIds(slide: Slide): string[] {
 /**
  * The files an asset record names under the deck directory, once each: the twins, the vector
  * files (docs/archive/rounds/VECTOR.md 4.1 through `vectorOf`: an svg picture's sanitized source, a tinted logo's
- * two files, a ship one logo's untinted `sourceFile`) and the source file. What slide.import
- * copies; without the vector files an imported svg picture drew its PNG twin.
+ * two files, a ship one logo's untinted `sourceFile`), the source file and the small copy
+ * (HR-PC#6). What slide.import copies; without the vector files an imported svg picture drew its
+ * PNG twin, and without the small copy the filmstrip's clone of an imported picture would ask for
+ * a file the deck lacks.
  */
 export function assetFiles(asset: Asset): string[] {
   const files = new Set(Object.values(asset.twins));
   const vector = vectorOf(asset);
   if (vector !== undefined) for (const file of Object.values(vector)) files.add(file);
   if (asset.sourceFile !== undefined) files.add(asset.sourceFile);
+  if (asset.thumb !== undefined) files.add(asset.thumb.file);
   return [...files];
 }
 

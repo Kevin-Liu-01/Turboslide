@@ -21,6 +21,7 @@ import sharp from 'sharp';
 import { decodeImage } from '@turboslide/effects/io';
 import type { TwoToneMetrics } from '@turboslide/effects/metrics';
 import { twoTone } from '@turboslide/effects/two-tone';
+import { ASSET_THUMB_WIDTH } from '@turboslide/schema/assets';
 import type { Asset, AssetRole, AssetSource } from '@turboslide/schema/assets';
 
 import {
@@ -276,6 +277,33 @@ export async function reencodeContinuous(
   return { bytes: new Uint8Array(out.buffer, out.byteOffset, out.byteLength), ext };
 }
 
+/**
+ * The small copy of a continuous picture (hardening HR-PC#6): `ASSET_THUMB_WIDTH` px wide, from
+ * the stored bytes, as a WebP at quality 80 (alpha kept), for the filmstrip's clones to choose
+ * through `srcset` (viewer LiveClone). Null for a picture no wider than that, which the clones draw
+ * as it is. `rotate()` applies an orientation the stored bytes carry, as the browser does for the
+ * twin.
+ */
+async function smallCopy(
+  bytes: Uint8Array,
+  width: number,
+): Promise<{ bytes: Uint8Array; size: [number, number] } | null> {
+  if (width <= ASSET_THUMB_WIDTH) return null;
+  const out = await sharp(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength), {
+    limitInputPixels: 64_000_000,
+    failOn: 'error',
+    animated: false,
+  })
+    .rotate()
+    .resize({ width: ASSET_THUMB_WIDTH })
+    .webp({ quality: 80 })
+    .toBuffer({ resolveWithObject: true });
+  return {
+    bytes: new Uint8Array(out.data.buffer, out.data.byteOffset, out.data.byteLength),
+    size: [out.info.width, out.info.height],
+  };
+}
+
 /** Writes through the store when the caller gave one, else under the deck directory. */
 async function place(
   options: AssetIntakeOptions,
@@ -450,6 +478,20 @@ export async function addAsset(
     stored.bytes,
   );
   files.push(path);
+  // an svg a checkout keeps as it came draws sharp at any size and needs no small copy
+  const small = info.format === 'svg' ? null : await smallCopy(stored.bytes, info.width);
+  let thumb: Asset['thumb'];
+  if (small !== null) {
+    const file = await place(
+      options,
+      digest
+        ? `assets/${id}.${assetDigest(small.bytes)}-w${ASSET_THUMB_WIDTH}.webp`
+        : `assets/${id}-w${ASSET_THUMB_WIDTH}.webp`,
+      small.bytes,
+    );
+    files.push(file);
+    thumb = { file, size: small.size };
+  }
   const asset: Asset = {
     id,
     role: request.role,
@@ -457,6 +499,7 @@ export async function addAsset(
     twins: { neutral: path },
     size: [info.width, info.height],
     scale: 1,
+    ...(thumb !== undefined ? { thumb } : {}),
     source,
     ...(request.role === 'opener' || request.role === 'mood'
       ? { treatment: { kind: 'continuous' as const, quality: 92 as const } }

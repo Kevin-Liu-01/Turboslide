@@ -177,8 +177,10 @@ export async function ditherAsset(
       }
     }
     warnings.push(...result.metrics.warnings.map((line) => `${asset.id}: ${line}`));
+    // the small copy of the continuous picture (HR-PC#6) shows what the toned twins no longer do
+    const { thumb: _continuous, ...kept } = asset;
     const next: Asset = {
-      ...asset,
+      ...kept,
       twins: paths,
       size: [result.dark.bits.width, result.dark.bits.height],
       scale: 1,

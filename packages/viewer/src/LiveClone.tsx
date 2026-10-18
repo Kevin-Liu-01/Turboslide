@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 
 import { Frame } from './Frame';
 import { SHEET_W } from './model';
+import { chooseSmallCopies } from './small-copies';
 import { applyHidden } from './slide-clock';
 import { applyThemeToTree } from './theme';
 import type { Theme } from './theme';
@@ -53,7 +54,9 @@ export function LiveClone({ html, theme, frame = true, hidden = NONE }: LiveClon
     if (!el) return;
     const fit = () => {
       const w = el.clientWidth;
-      if (w) el.style.setProperty('--k', String(w / SHEET_W));
+      if (!w) return;
+      el.style.setProperty('--k', String(w / SHEET_W));
+      if (body.current) chooseSmallCopies(body.current, w / SHEET_W);
     };
     fit();
     if (typeof ResizeObserver === 'undefined') return;
@@ -61,6 +64,14 @@ export function LiveClone({ html, theme, frame = true, hidden = NONE }: LiveClon
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  /* new html brings new pictures; their srcset is set before the browser selects a file (on the
+     first mount `fit` has set it, and this second pass writes nothing) */
+  useLayoutEffect(() => {
+    const el = root.current;
+    const w = el?.clientWidth ?? 0;
+    if (body.current && w) chooseSmallCopies(body.current, w / SHEET_W);
+  }, [html]);
 
   useLayoutEffect(() => {
     const el = body.current;

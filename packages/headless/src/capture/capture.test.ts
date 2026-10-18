@@ -188,6 +188,59 @@ describe('asset intake', () => {
     expect(verified.report.twinInverseMismatch).toBe(0);
   });
 
+  test('a continuous picture wider than 400 px gets a 400 px WebP copy for the filmstrip (HR-PC#6)', async () => {
+    const jpeg = await sharp({
+      create: { width: 1600, height: 900, channels: 3, background: '#7a4b2f' },
+    })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    const result = await addAsset(
+      { upload: 'uploads/p/1', role: 'mood', alt: 'A brown field' },
+      {
+        deckDir: dir,
+        readUpload: () => Promise.resolve(new Uint8Array(jpeg)),
+        reencode: true,
+        digestNames: true,
+      },
+    );
+    const { asset } = result;
+    expect(assetSchema.safeParse(asset).success).toBe(true);
+    expect(asset.size).toEqual([1600, 900]);
+    expect(asset.thumb?.size).toEqual([400, 225]);
+    expect(asset.thumb?.file).toMatch(/^assets\/[a-z0-9-]+\.[0-9a-f]{8}-w400\.webp$/);
+    expect(result.files).toContain(asset.thumb?.file);
+    const small = await sharp(join(dir, asset.thumb?.file ?? '')).metadata();
+    expect([small.format, small.width, small.height]).toEqual(['webp', 400, 225]);
+    // a picture no wider than 400 px and a two-tone picture keep their twins alone
+    const narrow = await sharp({
+      create: { width: 400, height: 300, channels: 3, background: '#2f5ce0' },
+    })
+      .png()
+      .toBuffer();
+    const kept = await addAsset(
+      {
+        file: `data:image/png;base64,${narrow.toString('base64')}`,
+        id: 'narrow',
+        role: 'detail',
+        alt: 'A blue plate',
+      },
+      { deckDir: dir },
+    );
+    expect(kept.asset.thumb).toBeUndefined();
+    expect(kept.files).toEqual(['assets/narrow.png']);
+    const toned = await addAsset(
+      {
+        file: `data:image/png;base64,${Buffer.from(await syntheticPhoto()).toString('base64')}`,
+        id: 'toned',
+        role: 'mood',
+        alt: 'A disk',
+        twoTone: true,
+      },
+      { deckDir: dir },
+    );
+    expect(toned.asset.thumb).toBeUndefined();
+  });
+
   test('a plain file becomes one neutral twin with the file source', async () => {
     const png = await sharp({
       create: { width: 640, height: 400, channels: 3, background: '#2f5ce0' },

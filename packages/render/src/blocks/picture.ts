@@ -19,7 +19,7 @@ import type { BlockOf, ShotAdjust, ShotFrame, ShotTrim } from '@turboslide/schem
 import { colorCss } from '@turboslide/schema/color';
 import { shapePath } from '@turboslide/schema/shapes';
 import { classes, el, px, style, voidEl } from '../html.ts';
-import { imageFor, raster, rootAttrs, sizeAttrs, twinAttrs } from './context.ts';
+import { imageFor, raster, rootAttrs, sizeAttrs, thumbAttrs, twinAttrs } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { ditherRender } from './dither-attrs.ts';
 import { pictureRecipeAttr } from './material.ts';
@@ -101,6 +101,8 @@ export function renderPicture(block: BlockOf<'picture'>, ctx: BlockContext): str
     src: shown.src,
     ...twinAttrs(shown),
     ...sizeAttrs(shown.size),
+    // a dithered picture draws a variant or the runtime's canvas, never the small copy
+    ...(dither === undefined ? thumbAttrs(shown) : {}),
     alt: shown.alt,
     style: imgStyle,
     ...(material !== undefined

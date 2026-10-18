@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
-import type { ContentSlide, Deck } from '@turboslide/schema/deck';
+import type { ContentSlide, Deck, Slide } from '@turboslide/schema/deck';
 import { deck as fixtureDeck } from '../__tests__/fixtures.ts';
 import { renderSlide } from '../slide.ts';
 import type { RenderOptions } from '../slide.ts';
@@ -166,5 +166,81 @@ describe('the svg picture (docs/archive/rounds/VECTOR.md 4.4)', () => {
     expect(img).toContain('src="decks/t/assets/opener-brand-light.jpg"');
     expect(img).toContain('data-dark="decks/t/assets/opener-brand-dark.jpg"');
     expect(img).not.toContain('object-fit:contain');
+  });
+});
+
+// Hardening HR-PC#6: a picture whose asset has a 400 px copy carries it as data-thumb and
+// data-thumb-w when the render asks (RenderOptions.thumbs), for the viewer's clones to offer
+// through srcset; a toned, vector or dithered picture never does, and neither does a render that
+// did not ask.
+describe('the small copy of a picture (HR-PC#6)', () => {
+  const photo: Asset = {
+    id: 'field',
+    role: 'mood',
+    alt: 'A field',
+    twins: { neutral: 'assets/field.1a2b3c4d.jpg' },
+    size: [1600, 900],
+    scale: 1,
+    thumb: { file: 'assets/field.5e6f7a8b-w400.webp', size: [400, 225] },
+    source: { kind: 'file' },
+    inline: 'pass-through',
+  };
+  const toned: Asset = {
+    ...photo,
+    id: 'toned',
+    twins: { light: 'assets/toned-light.png', dark: 'assets/toned-dark.png' },
+  };
+  const vector: Asset = { ...upload, id: 'vector', thumb: photo.thumb };
+  const withCopies: Deck = { ...deck, assets: { ...deck.assets, field: photo, toned, vector } };
+  const asked = (theme: 'light' | 'dark'): RenderOptions => ({ ...options(theme), thumbs: true });
+
+  it('writes the copy and its width beside the twin when the render asks', () => {
+    const img = pictureImg(
+      renderSlide(withCopies, canvas([picture('p', 'field')]), asked('light')).html,
+      'p',
+    );
+    expect(img).toContain('src="decks/t/assets/field.1a2b3c4d.jpg"');
+    expect(img).toContain('data-thumb="decks/t/assets/field.5e6f7a8b-w400.webp"');
+    expect(img).toContain('data-thumb-w="400"');
+    expect(img).toContain('width="1600"');
+    const unasked = pictureImg(
+      renderSlide(withCopies, canvas([picture('p', 'field')]), options('light')).html,
+      'p',
+    );
+    expect(unasked).not.toContain('data-thumb');
+  });
+
+  it('writes none for a toned, a vector or a dithered picture', () => {
+    for (const assetId of ['toned', 'vector'])
+      expect(
+        pictureImg(
+          renderSlide(withCopies, canvas([picture('p', assetId)]), asked('dark')).html,
+          'p',
+        ),
+        assetId,
+      ).not.toContain('data-thumb');
+    const dithered = {
+      ...picture('d', 'field'),
+      dither: { pattern: 'bayer8' },
+    } as Block;
+    const html = renderSlide(withCopies, canvas([dithered]), asked('light')).html;
+    expect(html).not.toContain('data-thumb');
+  });
+
+  it('writes the copy on an opener’s picture through the same resolver', () => {
+    const opener: Slide = {
+      schemaVersion: 1,
+      id: 'open',
+      kind: 'opener',
+      sectionId: 'brand',
+      picture: { asset: 'field', fit: 'cover' },
+      plate: {
+        side: 'lower-left',
+        maxWidth: 740,
+        blocks: [{ id: 'big', type: 'heading', level: 'big', text: 'Fields' }],
+      },
+    };
+    const html = renderSlide(withCopies, opener, asked('light')).html;
+    expect(html).toContain('data-thumb="decks/t/assets/field.5e6f7a8b-w400.webp"');
   });
 });

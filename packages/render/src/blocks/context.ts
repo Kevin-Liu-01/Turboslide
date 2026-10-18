@@ -20,6 +20,11 @@ export type ResolvedImage = {
   dark?: string;
   alt: string;
   size?: [number, number];
+  /**
+   * The asset's small copy (hardening HR-PC#6) as a URL with its width, when the render asks for
+   * it (RenderOptions.thumbs) and the image draws the asset's own neutral twin.
+   */
+  thumb?: { src: string; width: number };
 };
 
 /**
@@ -232,8 +237,22 @@ export function imgAttrs(image: ResolvedImage): Record<string, string | undefine
     src: image.src,
     ...twinAttrs(image),
     ...sizeAttrs(image.size),
+    ...thumbAttrs(image),
     alt: image.alt,
   };
+}
+
+/**
+ * `data-thumb` and `data-thumb-w`: the small copy of the picture (HR-PC#6), which a scaled clone
+ * offers beside the twin through `srcset` (viewer LiveClone `chooseSmallCopies`). Nothing when
+ * the image has none; the stage and every other surface ignore the two attributes.
+ */
+export function thumbAttrs(image: ResolvedImage): {
+  'data-thumb'?: string;
+  'data-thumb-w'?: string;
+} {
+  if (image.thumb === undefined) return {};
+  return { 'data-thumb': image.thumb.src, 'data-thumb-w': String(image.thumb.width) };
 }
 
 /**

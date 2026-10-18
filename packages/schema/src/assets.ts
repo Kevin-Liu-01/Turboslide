@@ -197,8 +197,21 @@ export type Asset = {
   metrics?: AssetMetrics;
   /** The materialized dither variants by key (SPEC-3 10.1); pruned by `picture.materialize --prune`. */
   variants?: Record<string, AssetVariant>;
+  /**
+   * A copy of a continuous picture `ASSET_THUMB_WIDTH` px wide, for the surfaces that draw it small
+   * (hardening HR-PC#6: the filmstrip's clones choose it through `srcset`). Absent on a picture no
+   * wider than that, on svg, two-tone and frame assets, and on every asset added before it, which
+   * keep drawing their twin.
+   */
+  thumb?: AssetThumb;
   ext?: Record<string, unknown>;
 };
+
+/** The width of an asset's small copy (HR-PC#6; Kevin's decision of 2026-10-17: 400, not 320). */
+export const ASSET_THUMB_WIDTH = 400;
+
+/** An asset's small copy: the relative path under assets/ and its pixels. */
+type AssetThumb = { file: string; size: [number, number] };
 
 /** A variant key: the sha256 hex digest of 06 4.5. */
 export const ASSET_VARIANT_KEY = /^[0-9a-f]{64}$/;
@@ -365,6 +378,11 @@ export const assetVariantSchema = z.strictObject({
   producedAt: z.string(),
 }) satisfies z.ZodType<AssetVariant>;
 
+const assetThumbSchema = z.strictObject({
+  file: relativePath,
+  size: z.tuple([z.number().int().positive(), z.number().int().positive()]),
+}) satisfies z.ZodType<AssetThumb>;
+
 export const assetSchema = z.strictObject({
   id: slugSchema,
   role: annotate(z.enum(ASSET_ROLES), {
@@ -405,6 +423,7 @@ export const assetSchema = z.strictObject({
   variants: z
     .record(z.string().regex(ASSET_VARIANT_KEY, 'a sha256 hex digest'), assetVariantSchema)
     .optional(),
+  thumb: assetThumbSchema.optional(),
   ext: extSchema,
 }) satisfies z.ZodType<Asset>;
 

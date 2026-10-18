@@ -354,8 +354,9 @@ MISS`.
 
 In the order of SPEC-4 section 7, recorded here without naming a round on any product surface:
 the live monochrome hero after the shader split and a second measurement under the 600 KB
-ceiling; the per deck card with `s-maxage` per revision and a budget row; the 320 px twin variant
-for the filmstrip's clones (a 200 px clone decodes 1600 px twins today); the deck index
+ceiling; the per deck card with `s-maxage` per revision and a budget row; the 400 px copy for the
+filmstrip's clones (hardening HR-PC#6: built for pictures added since 2026-10-17; the GT seed
+deck's pictures have no copy, so its 200 px clones still decode 1600 px twins); the deck index
 `decks/index.json` on the `blob` tier past about 50 decks; a long lived render worker on a host
 over `TURBOSLIDE_WORKER_URL`, and Chromium out of the secret holding function; field INP through
 `web-vitals/attribution` posted to `/api/vitals`, and Lighthouse CI; the gate on the cold first

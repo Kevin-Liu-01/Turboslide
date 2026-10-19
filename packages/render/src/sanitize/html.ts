@@ -108,7 +108,12 @@ export function createPurifier(instance: PurifyLike, host: Purifier['host']): Pu
   };
 }
 
-type PurifierState = { instance: Purifier | null; loading: Promise<Purifier> | null };
+type PurifierState = {
+  instance: Purifier | null;
+  loading: Promise<Purifier> | null;
+  /** Set once the first failed load was logged, so a process says why once and not per call. */
+  warned?: boolean;
+};
 
 const STATE = Symbol.for('turboslide.render.purifier');
 
@@ -166,6 +171,17 @@ export function loadPurifier(): Promise<Purifier> {
     return purifier;
   })().catch((error: unknown) => {
     s.loading = null;
+    // every caller falls back to the regular expressions and says nothing, so the reason is
+    // logged here, once per process (production sanitized without the parser on 2026-10-19
+    // with no line in the function's log; apps/studio/vite.deploy.config.ts FUNCTION_LINKS)
+    if (s.warned !== true) {
+      s.warned = true;
+      const code = (error as { code?: unknown } | null)?.code;
+      const message = error instanceof Error ? error.message.split('\n')[0] : String(error);
+      console.warn(
+        `turboslide sanitizer: DOMPurify did not load (${typeof code === 'string' ? `${code}: ` : ''}${message}); html markup is sanitized with the regular expressions alone`,
+      );
+    }
     throw error;
   });
   return s.loading;
@@ -217,6 +233,9 @@ export function dangerousUri(value: string): boolean {
  * the entity decoding of `dangerousUri` on every URI attribute.
  */
 export function sanitizeHtmlRegex(html: string): string {
+  // the fourth pass drops the SVG animation elements, which set an attribute over time
+  // (`<animate attributeName="href" values="javascript:...">`) where the URI pass never reads it;
+  // DOMPurify drops them too
   return html
     .replace(/<script\b[\s\S]*?<\/script\s*>/gi, '')
     .replace(
@@ -227,6 +246,7 @@ export function sanitizeHtmlRegex(html: string): string {
       /<\/?(iframe|object|embed|base|meta|link|style|form|input|button|textarea|select|template|noscript|math|maction)\b[^>]*>/gi,
       '',
     )
+    .replace(/<\/?(?:animate(?:motion|transform|color)?|set|discard)\b[^>]*>/gi, '')
     .replace(/[\s/]+on[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(
       new RegExp(`\\s+(${URI_ATTRIBUTES})\\s*=\\s*("[^"]*"|'[^']*'|[^\\s>]+)`, 'gi'),

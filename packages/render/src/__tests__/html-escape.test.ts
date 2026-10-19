@@ -88,6 +88,11 @@ const PAYLOADS: { name: string; html: string; forbidden: RegExp[] }[] = [
     html: '<meta http-equiv="refresh" content="0;url=https://attacker.example/login"><p>hello</p>',
     forbidden: [/<meta/i, /attacker\.example/i],
   },
+  {
+    name: '9 svg animation elements that set href over time',
+    html: '<svg><a><animate attributeName="href" values="javascript:alert(1)"/><set attributeName="href" to="javascript:alert(1)"></set><animateMotion dur="1s"></animateMotion><text>x</text></a></svg>',
+    forbidden: [/<animate/i, /<set/i, /javascript:/i],
+  },
 ];
 
 function context(extra: Partial<BlockContext> = {}): BlockContext {

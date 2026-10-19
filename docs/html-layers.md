@@ -54,7 +54,11 @@ Three passes, the ones an `html` block gets:
    `href`, `poster` or `srcset` that points anywhere but `assets/`, `data:image/` or `#` removed
    (`confineLayerMarkup`: the standalone file and the export capture carry no CSP, so an `https:`
    image there would be a fetch the author chose), and the CSS tokenizer. The answer lists the CSS the tokenizer dropped. A layer with neither CSS nor markup
-   left is removed.
+   left is removed. A process that cannot load the parser sanitizes with the regular expressions
+   alone, which also drop the SVG animation elements (`animate`, `set`), and logs the reason
+   once (`turboslide sanitizer: DOMPurify did not load (...)`). The Vercel function carries
+   dompurify and jsdom (`TRACE_DEPS` in `apps/studio/vite.deploy.config.ts`) as plain files:
+   `FUNCTION_LINKS` replaces nf3's links to a package traced at two versions with copies.
 3. At render time, every surface sanitizes again (`packages/render/src/html-layers.ts`), so a
    layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized. A page
    that has not loaded the parser yet draws no markup until it has, and the export capture,

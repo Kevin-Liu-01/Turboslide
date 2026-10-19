@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { cp, readdir, realpath, rm } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -6,6 +7,7 @@ import { devtools } from '@tanstack/devtools-vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import viteReact from '@vitejs/plugin-react';
 import { fumadocsMdx } from 'fumadocs-mdx/vite';
+import type { NitroModule } from 'nitro/types';
 import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
@@ -189,6 +191,63 @@ const TRACE_DEPS = [
   'jsdom',
   ...(NATIVE_ADDON_PRESENT ? [NATIVE_ADDON] : []),
 ];
+
+// A function carries no symbolic link (2026-10-19). nf3 writes a package it traced at two versions
+// once under node_modules/.nf3 and links each dependent to its copy. With dompurify and jsdom
+// traced, whatwg-url is such a package (16.0.1 for data-urls, 17.1.1 for jsdom), and its three
+// links were the only links in a function. On production after 18730d9f6 the parser did not load
+// (`slide.setHtml` kept an `<animate>` element that DOMPurify removes), while the same output
+// loaded jsdom on this machine and failed with "Cannot find module 'whatwg-url'" once the three
+// links were deleted. Once the build has written the function directories, each link under a
+// function's node_modules is replaced by a copy of its target, so a function resolves the same
+// files whether or not the packaging keeps links. A function directory that is itself a link (a
+// route the vercel preset points at __server.func) stays a link: its target is the one copied.
+// `scripts/check-vercel-output.mjs` fails on a link inside a function.
+async function replaceLinksWithCopies(dir: string): Promise<number> {
+  let replaced = 0;
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isSymbolicLink()) {
+      const target = await realpath(path);
+      await rm(path);
+      await cp(target, path, { recursive: true, dereference: true });
+      replaced += 1;
+    } else if (entry.isDirectory()) {
+      replaced += await replaceLinksWithCopies(path);
+    }
+  }
+  return replaced;
+}
+
+/** Every `*.func` directory under functions/ at any depth; a linked function is not walked. */
+async function functionDirectories(dir: string, out: string[] = []): Promise<string[]> {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const path = join(dir, entry.name);
+    if (entry.name.endsWith('.func')) out.push(path);
+    else await functionDirectories(path, out);
+  }
+  return out;
+}
+
+// A module and not a `hooks` entry: Nitro merges the config's hooks with the preset's, and a
+// `compiled` key here could take the place of the vercel preset's own `compiled` hook, which
+// writes the function directories. A module's hook is added beside it.
+const FUNCTION_LINKS: NitroModule = {
+  name: 'turboslide-function-links',
+  setup(nitro) {
+    nitro.hooks.hook('compiled', async () => {
+      const functionsDir = join(nitro.options.output.dir, 'functions');
+      if (!existsSync(functionsDir)) return;
+      let replaced = 0;
+      for (const func of await functionDirectories(functionsDir)) {
+        const modules = join(func, 'node_modules');
+        if (existsSync(modules)) replaced += await replaceLinksWithCopies(modules);
+      }
+      nitro.logger.info(`function links: ${replaced} replaced by copies of their targets`);
+    });
+  },
+};
 
 // The docs (docs/POLISH-2.md 5.2, C23): every page under content/docs, its markdown twin and the
 // search index, read from the content folder when the config loads, so a page added to the folder
@@ -511,6 +570,7 @@ export default defineConfig({
     tanstackStart(PRERENDER),
     nitro({
       traceDeps: TRACE_DEPS,
+      modules: [FUNCTION_LINKS],
       routeRules: ROUTE_RULES,
       serverAssets: [
         {

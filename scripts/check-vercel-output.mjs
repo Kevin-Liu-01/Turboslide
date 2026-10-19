@@ -174,6 +174,16 @@ function functionDirs(dir, out = []) {
   return out;
 }
 
+/** The symbolic links under a directory, never followed. */
+function linksUnder(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isSymbolicLink()) out.push(path);
+    else if (entry.isDirectory()) linksUnder(path, out);
+  }
+  return out;
+}
+
 const mb = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 
 // ---------------------------------------------------------------------------------------------
@@ -439,6 +449,20 @@ if (existsSync(staticDir)) {
 // SPEC-4 0.35, 0.45: each function directory's size against the cap (reported; the cap itself fails a deploy)
 const functions = functionDirs(join(OUT, 'functions'));
 row('functions', 'function directories', functions.length > 0, `${functions.length} found`);
+// 2026-10-19: no symbolic link inside a function (apps/studio/vite.deploy.config.ts
+// FUNCTION_LINKS replaces nf3's links to a package traced at two versions with copies)
+const links = functions.flatMap((dir) => linksUnder(dir));
+row(
+  'functions',
+  'symbolic links inside a function',
+  links.length === 0,
+  links.length === 0
+    ? 'none'
+    : `${links.length}: ${links
+        .slice(0, 3)
+        .map((path) => relative(OUT, path))
+        .join(', ')}`,
+);
 const sizes = [];
 for (const dir of functions) {
   const size = directorySize(dir);

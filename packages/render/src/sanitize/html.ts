@@ -288,10 +288,11 @@ export async function sanitizeHtmlBlock(block: BlockOf<'html'>): Promise<Sanitiz
  * Removes the `id` and `name` attributes of sanitized markup (docs/html-layers.md 3). An HtmlLayer
  * draws in the editor's own document, the size of the sheet, so an id there could shadow one the
  * editor reads (`document.getElementById`, a named property of `window`); a layer's CSS styles its
- * markup by class instead. The parser writes every attribute double quoted.
+ * markup by class instead. Double quoted, single quoted and bare values all go: without the parser
+ * (a process that cannot load it) the markup keeps the quoting its author wrote.
  */
 export function stripIdentities(html: string): string {
-  return html.replace(/\s(?:id|name)="[^"]*"/gi, '');
+  return html.replace(/\s(?:id|name)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
 }
 
 /** The targets an HtmlLayer's markup may load: a deck asset, an inline image, a fragment. */
@@ -354,7 +355,11 @@ export type SanitizedHtmlLayer = {
  * layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized.
  */
 export async function sanitizeHtmlLayer(layer: HtmlLayer): Promise<SanitizedHtmlLayer> {
-  const purifier = await loadPurifier();
+  // a process that cannot load the parser (the Vercel function, whose bundle does not carry
+  // dompurify and jsdom behind the variable import above) sanitizes with the regular expressions,
+  // as the studio's deck payload does (apps/studio/src/server/decks.ts); every render sanitizes
+  // again, DOMPurify in the page and the frame's CSP on the view payloads
+  const purifier = await loadPurifier().catch(() => null);
   const out: HtmlLayer = { ...layer };
   let changed = false;
   let droppedCss: string[] = [];

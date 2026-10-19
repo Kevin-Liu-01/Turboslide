@@ -10,7 +10,12 @@ import type { ContentSlide, Deck } from '@turboslide/schema/deck';
 import { renderSlide } from '../slide.ts';
 import type { RenderOptions } from '../slide.ts';
 import { htmlLayerFrameFor } from '../sanitize/frame.ts';
-import { confineLayerMarkup, loadPurifier, sanitizeHtmlLayer } from '../sanitize/html.ts';
+import {
+  confineLayerMarkup,
+  loadPurifier,
+  sanitizeHtmlLayer,
+  sanitizeMarkup,
+} from '../sanitize/html.ts';
 import { sanitizeCss, sanitizeStyleAttribute } from '../sanitize/css.ts';
 import { scopeCss } from '../sanitize/scope.ts';
 import { deck as baseDeck } from './fixtures.ts';
@@ -184,6 +189,17 @@ describe('the second review of 2026-10-18', () => {
         '<img src="https://evil.example/t.gif"><img src="assets/a-light.jpg"><img srcset="https://evil.example/x 1x"><image href=\'https://evil.example/x\'><a href="#s2">x</a><b id="share">y</b>',
       ),
     ).toBe('<img><img src="assets/a-light.jpg"><img><image><a href="#s2">x</a><b>y</b>');
+  });
+});
+
+describe('a layer sanitized without the parser (the Vercel function, 2026-10-19)', () => {
+  it('drops scripts, handlers, foreign images and every id or name however it is quoted', () => {
+    const raw =
+      '<div class="band" onclick="alert(1)">Q4</div><script>alert(1)</script><img src=https://evil.example/x.gif><b id=share name=\'x\'>y</b><i id="a">z</i>';
+    const clean = confineLayerMarkup(sanitizeMarkup(raw, null).html);
+    expect(clean).not.toMatch(/script|onclick|evil\.example|\sid=|\sname=/);
+    expect(clean).toContain('Q4');
+    expect(clean).toContain('y</b>');
   });
 });
 

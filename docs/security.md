@@ -239,8 +239,9 @@ is read only right now"), logged as `flag.refused` with the flag under `killSwit
 `packages/render/src/sanitize/{html,css,frame}.ts` and `blocks/html-escape.ts` (0.27, 8.4).
 Three layers, all three:
 
-1. The parser at write time and at render time: DOMPurify 3.4.15 over jsdom on the server and the
-   page's window in the browser, with the profile of 8.4 (`FORBID_TAGS` script, iframe, object,
+1. The parser at write time and at render time: DOMPurify over jsdom 26.1.0 on the server (the
+   newest jsdom the Vercel function's runtime loads; docs/html-layers.md 2) and the page's window
+   in the browser, with the profile of 8.4 (`FORBID_TAGS` script, iframe, object,
    embed, base, meta, link, style, form, input, button, textarea, select, math; `style` attributes
    through the CSS value allowlist; `formaction` and `action` never; URI attributes limited to
    `https:`, `data:image/`, `#` and `assets/`), then the regular expressions of round one with

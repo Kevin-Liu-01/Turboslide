@@ -184,6 +184,9 @@ const ASSIST = { maxDuration: 60 } as const;
 // @sparticuz/chromium above). nf3 copies every file of a forced package and traces jsdom's
 // dependencies through their module graph, so neither entry needs the full-trace suffix.
 // Measured on the vercel build: __server.func from 158.8 MB in 1614 files to 171.9 MB in 2853.
+// The traced jsdom is the render package's, 26.1.0 (the `sanitizer` catalog): the function's
+// runtime refuses require() of an ES module, which jsdom 27.0.0 and later need (the 40bffe48a
+// preview logged "ERR_REQUIRE_ESM ... @exodus/bytes/encoding-lite.js from html-encoding-sniffer").
 const TRACE_DEPS = [
   '@sparticuz/chromium*',
   '@paper-design/shaders*',

@@ -52,7 +52,7 @@
     "@turboslide/schema": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "dompurify": "catalog:",
-    "jsdom": "catalog:"
+    "jsdom": "catalog:sanitizer"
   },
   "devDependencies": {
     "@types/jsdom": "catalog:",

@@ -58,7 +58,9 @@ Three passes, the ones an `html` block gets:
    alone, which also drop the SVG animation elements (`animate`, `set`), and logs the reason
    once (`turboslide sanitizer: DOMPurify did not load (...)`). The Vercel function carries
    dompurify and jsdom (`TRACE_DEPS` in `apps/studio/vite.deploy.config.ts`) as plain files:
-   `FUNCTION_LINKS` replaces nf3's links to a package traced at two versions with copies.
+   `FUNCTION_LINKS` replaces nf3's links to a package traced at two versions with copies. The
+   server's jsdom is 26.1.0 (the `sanitizer` catalog in `pnpm-workspace.yaml`): the function's
+   runtime refuses `require()` of an ES module, and jsdom 27.0.0 and later need it.
 3. At render time, every surface sanitizes again (`packages/render/src/html-layers.ts`), so a
    layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized. A page
    that has not loaded the parser yet draws no markup until it has, and the export capture,

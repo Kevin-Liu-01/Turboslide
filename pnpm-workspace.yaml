@@ -91,6 +91,17 @@ catalog:
   wrangler: 4.146.0
   zod: 4.6.1
 
+# The server sanitizer's jsdom (2026-10-19; docs/html-layers.md 2): packages/render loads it with
+# DOMPurify in the Vercel function, whose runtime refuses require() of an ES module (measured on the
+# 40bffe48a preview: "ERR_REQUIRE_ESM: require() of ES Module @exodus/bytes/encoding-lite.js from
+# html-encoding-sniffer"). jsdom 27.0.0 and later require nine ES module packages from CommonJS;
+# 26.1.0 is the newest release whose whole require graph is CommonJS (loaded under
+# `node --no-experimental-require-module`, 0 advisories in its 60 packages). The test packages
+# keep the default catalog's jsdom.
+catalogs:
+  sanitizer:
+    jsdom: 26.1.0
+
 # Round three (gslides-parity SPEC-3 8.10, 11.5 R0; build-3/b4.md request 1): pptxgenjs 4.0.1
 # declares image-size ^1.2.1 but its Node path requires the module name 'sizeof', which does not
 # exist, so image-size is never loaded; no published image-size release fixes GHSA-w3rx-r6r6-pgpr

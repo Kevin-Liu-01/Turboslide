@@ -209,8 +209,9 @@ function readText(path: string): string | undefined {
  * writes survive the in-place re-import `pnpm check` runs). An asset the deck added itself (a
  * material capture, a site capture, an intake) is not in the source and is kept as recorded; an
  * imported asset whose twins are the same files keeps the plate metrics `asset dither
- * --from-recorded` measured and the kept source file, which the source markup cannot carry. A
- * re-import after those writes therefore changes nothing and keeps the revision.
+ * --from-recorded` measured, the kept source file and the 400 px copy `scripts/seed-thumbs.ts`
+ * wrote (hardening HR-PC#6), which the source markup cannot carry. A re-import after those writes
+ * therefore changes nothing and keeps the revision.
  */
 export function carryDeckAssets(
   previous: Record<string, Asset> | undefined,
@@ -232,6 +233,7 @@ export function carryDeckAssets(
       ...(asset.sourceFile === undefined && before.sourceFile !== undefined
         ? { sourceFile: before.sourceFile }
         : {}),
+      ...(asset.thumb === undefined && before.thumb !== undefined ? { thumb: before.thumb } : {}),
     };
   }
   for (const [id, asset] of Object.entries(previous)) {

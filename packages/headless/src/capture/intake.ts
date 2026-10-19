@@ -282,9 +282,10 @@ export async function reencodeContinuous(
  * the stored bytes, as a WebP at quality 80 (alpha kept), for the filmstrip's clones to choose
  * through `srcset` (viewer LiveClone). Null for a picture no wider than that, which the clones draw
  * as it is. `rotate()` applies an orientation the stored bytes carry, as the browser does for the
- * twin.
+ * twin. Exported for `scripts/seed-thumbs.ts`, which writes the same copy for a deck's pictures
+ * that predate HR-PC#6.
  */
-async function smallCopy(
+export async function smallCopy(
   bytes: Uint8Array,
   width: number,
 ): Promise<{ bytes: Uint8Array; size: [number, number] } | null> {

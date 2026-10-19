@@ -154,7 +154,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/cover-fumadocs.4abb4470-w400.webp",
+        "size": [
+          400,
+          225
+        ]
+      }
     },
     "cover-gt-open-source": {
       "id": "cover-gt-open-source",
@@ -171,7 +178,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/cover-gt-open-source.306c39dc-w400.webp",
+        "size": [
+          400,
+          225
+        ]
+      }
     },
     "detail-404-copy": {
       "id": "detail-404-copy",
@@ -906,7 +920,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/gh-gt.efc3d502-w400.webp",
+        "size": [
+          400,
+          250
+        ]
+      }
     },
     "glyph-home-hero": {
       "id": "glyph-home-hero",
@@ -941,7 +962,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/glyph-material-chroma-flow.e2ff38df-w400.webp",
+        "size": [
+          400,
+          227
+        ]
+      }
     },
     "glyph-material-gem-smoke": {
       "id": "glyph-material-gem-smoke",
@@ -958,7 +986,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/glyph-material-gem-smoke.8de3cf53-w400.webp",
+        "size": [
+          400,
+          227
+        ]
+      }
     },
     "glyph-material-god-rays": {
       "id": "glyph-material-god-rays",
@@ -975,7 +1010,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/glyph-material-god-rays.1898e0a5-w400.webp",
+        "size": [
+          400,
+          227
+        ]
+      }
     },
     "glyph-material-grain-gradient": {
       "id": "glyph-material-grain-gradient",
@@ -992,7 +1034,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/glyph-material-grain-gradient.5e22eb36-w400.webp",
+        "size": [
+          400,
+          227
+        ]
+      }
     },
     "glyph-material-liquid-metal": {
       "id": "glyph-material-liquid-metal",
@@ -1009,7 +1058,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/glyph-material-liquid-metal.38a691bd-w400.webp",
+        "size": [
+          400,
+          227
+        ]
+      }
     },
     "glyph-material-smoke-ring": {
       "id": "glyph-material-smoke-ring",
@@ -1026,7 +1082,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/glyph-material-smoke-ring.9355a46c-w400.webp",
+        "size": [
+          400,
+          227
+        ]
+      }
     },
     "gt-careers": {
       "id": "gt-careers",
@@ -1139,7 +1202,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/logo-ge.ba361f89-w400.webp",
+        "size": [
+          400,
+          400
+        ]
+      }
     },
     "logo-gm": {
       "id": "logo-gm",
@@ -1156,7 +1226,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/logo-gm.fc08b4a8-w400.webp",
+        "size": [
+          400,
+          400
+        ]
+      }
     },
     "mood-cable": {
       "id": "mood-cable",
@@ -2640,7 +2717,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/proto-present.9f9332c1-w400.webp",
+        "size": [
+          400,
+          250
+        ]
+      }
     },
     "proto-search-card": {
       "id": "proto-search-card",
@@ -2711,7 +2795,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/reel-poster.99edcaa6-w400.webp",
+        "size": [
+          400,
+          225
+        ]
+      }
     },
     "ref-aicher": {
       "id": "ref-aicher",
@@ -2728,7 +2819,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-aicher.cc537374-w400.webp",
+        "size": [
+          400,
+          222
+        ]
+      }
     },
     "ref-brockmann": {
       "id": "ref-brockmann",
@@ -2745,7 +2843,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-brockmann.755eb5df-w400.webp",
+        "size": [
+          400,
+          574
+        ]
+      }
     },
     "ref-chart": {
       "id": "ref-chart",
@@ -2762,7 +2867,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-chart.378035d3-w400.webp",
+        "size": [
+          400,
+          376
+        ]
+      }
     },
     "ref-chrysler": {
       "id": "ref-chrysler",
@@ -2796,7 +2908,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-rams.30099802-w400.webp",
+        "size": [
+          400,
+          591
+        ]
+      }
     },
     "ref-rosetta": {
       "id": "ref-rosetta",
@@ -2813,7 +2932,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-rosetta.945b7f2d-w400.webp",
+        "size": [
+          400,
+          468
+        ]
+      }
     },
     "ref-solari": {
       "id": "ref-solari",
@@ -2830,7 +2956,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-solari.02539da1-w400.webp",
+        "size": [
+          400,
+          267
+        ]
+      }
     },
     "ref-stamp": {
       "id": "ref-stamp",
@@ -2847,7 +2980,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-stamp.fb54491b-w400.webp",
+        "size": [
+          400,
+          289
+        ]
+      }
     },
     "ref-subway-sign": {
       "id": "ref-subway-sign",
@@ -2864,7 +3004,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-subway-sign.2973cb3e-w400.webp",
+        "size": [
+          400,
+          300
+        ]
+      }
     },
     "ref-vignelli": {
       "id": "ref-vignelli",
@@ -2881,7 +3028,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-vignelli.2163144c-w400.webp",
+        "size": [
+          400,
+          269
+        ]
+      }
     },
     "ref-whole-earth": {
       "id": "ref-whole-earth",
@@ -2898,7 +3052,14 @@
       "source": {
         "kind": "file"
       },
-      "inline": "pass-through"
+      "inline": "pass-through",
+      "thumb": {
+        "file": "assets/ref-whole-earth.06694bff-w400.webp",
+        "size": [
+          400,
+          528
+        ]
+      }
     },
     "site-blog": {
       "id": "site-blog",
@@ -3131,7 +3292,14 @@
         "theme": "light",
         "recipe": "gt-site"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/site-home-dark.53a74b57-w400.webp",
+        "size": [
+          400,
+          250
+        ]
+      }
     },
     "site-home-light": {
       "id": "site-home-light",
@@ -3156,7 +3324,14 @@
         "theme": "light",
         "recipe": "gt-site"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/site-home-light.ef904f6c-w400.webp",
+        "size": [
+          400,
+          250
+        ]
+      }
     },
     "site-pricing": {
       "id": "site-pricing",
@@ -3251,10 +3426,17 @@
       "source": {
         "kind": "file"
       },
-      "inline": "resample-1280"
+      "inline": "resample-1280",
+      "thumb": {
+        "file": "assets/x-banner.4e1a2707-w400.webp",
+        "size": [
+          400,
+          133
+        ]
+      }
     }
   },
-  "revision": 25,
+  "revision": 26,
   "createdAt": "2026-09-10T21:29:42.282Z",
-  "updatedAt": "2026-09-13T03:49:55.295Z"
+  "updatedAt": "2026-10-19T05:13:41.980Z"
 }

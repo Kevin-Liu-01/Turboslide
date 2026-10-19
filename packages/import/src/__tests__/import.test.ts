@@ -473,6 +473,14 @@ describe('carryDeckAssets', () => {
     expect(carryDeckAssets({ a: { ...base, metrics } }, { a: other }).a?.metrics).toBeUndefined();
     expect(carryDeckAssets(undefined, { a: base })).toEqual({ a: base });
   });
+
+  it('keeps the 400 px copy of unchanged twins and drops it when the twins changed (HR-PC#6)', () => {
+    const neutral = { ...base, twins: { neutral: 'assets/a.jpg' } } as unknown as Asset;
+    const thumb = { file: 'assets/a.1a2b3c4d-w400.webp', size: [400, 225] } as Asset['thumb'];
+    expect(carryDeckAssets({ a: { ...neutral, thumb } }, { a: neutral }).a?.thumb).toEqual(thumb);
+    const moved = { ...neutral, twins: { neutral: 'assets/a2.jpg' } } as unknown as Asset;
+    expect(carryDeckAssets({ a: { ...neutral, thumb } }, { a: moved }).a?.thumb).toBeUndefined();
+  });
 });
 
 describe('importDeck on a one-slide deck', () => {

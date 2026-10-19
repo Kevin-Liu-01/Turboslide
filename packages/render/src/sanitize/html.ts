@@ -355,10 +355,10 @@ export type SanitizedHtmlLayer = {
  * layer written by another path (a raw `slide.set`, a bundle) is never drawn unsanitized.
  */
 export async function sanitizeHtmlLayer(layer: HtmlLayer): Promise<SanitizedHtmlLayer> {
-  // a process that cannot load the parser (the Vercel function, whose bundle does not carry
-  // dompurify and jsdom behind the variable import above) sanitizes with the regular expressions,
-  // as the studio's deck payload does (apps/studio/src/server/decks.ts); every render sanitizes
-  // again, DOMPurify in the page and the frame's CSP on the view payloads
+  // a process that cannot load the parser (a server bundle without dompurify and jsdom beside it,
+  // as the Vercel function was until apps/studio/vite.deploy.config.ts traced both) sanitizes with
+  // the regular expressions, as the studio's deck payload does (apps/studio/src/server/decks.ts);
+  // every render sanitizes again, DOMPurify in the page and the frame's CSP on the view payloads
   const purifier = await loadPurifier().catch(() => null);
   const out: HtmlLayer = { ...layer };
   let changed = false;

@@ -170,9 +170,23 @@ const ASSIST = { maxDuration: 60 } as const;
 // bundler resolves, so the traced path is known and the root lookup that @sparticuz/chromium's
 // variable specifier needs never runs. The client bundle is untouched (the plugin is the server
 // build's).
+// dompurify and jsdom joined on 2026-10-19 so the function sanitizes html markup with DOMPurify
+// and the regular expressions are only its second pass (packages/render/src/sanitize/html.ts
+// `loadPurifier`; docs/html-layers.md 3). The server path imports both through variable
+// specifiers the bundler cannot see, so before this the function carried neither package and
+// every `loadPurifier()` rejected with "Cannot find package 'dompurify'": the deck payload and
+// `deck.setHtml`/`slide.setHtml` fell back to the regular expressions alone. A trace entry forces
+// a package into the function by name (the browser branch's static `import('dompurify')` stays the
+// inline chunk it was), and nf3 resolves both names from @turboslide/render, a direct dependency
+// of this app whose package.json declares them, so this app's package.json needs no line (unlike
+// @sparticuz/chromium above). nf3 copies every file of a forced package and traces jsdom's
+// dependencies through their module graph, so neither entry needs the full-trace suffix.
+// Measured on the vercel build: __server.func from 158.8 MB in 1614 files to 171.9 MB in 2853.
 const TRACE_DEPS = [
   '@sparticuz/chromium*',
   '@paper-design/shaders*',
+  'dompurify',
+  'jsdom',
   ...(NATIVE_ADDON_PRESENT ? [NATIVE_ADDON] : []),
 ];
 

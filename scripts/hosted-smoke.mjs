@@ -45,8 +45,8 @@
 // given and are otherwise listed as skipped, never as passed.
 //
 // Round four (gslides-parity SPEC-4 2.6, 4.1, 0.31, 0.38; MILESTONES-4 "Integrator"; build-4/b1.md
-// R12, b2.md R4, b4.md R11): `/home` is a 200 product page (the `.ts-site` root, the hero
-// caption, the Speculation Rules script, no noindex); the icon set, the card, the eight twins
+// R12, b2.md R4, b4.md R11): `/home` is a 200 product page (the `.ts-site` root, the hero's
+// second button, the Speculation Rules script, no noindex); the icon set, the card, the eight twins
 // under `/brand/` and `/home` are requested twice and the second answer must be a 200 of the right
 // type, at the byte count `apps/studio/public/brand-manifest.json` records when the checkout is
 // beside the script, and `x-vercel-cache: HIT` on an https deployment (the static layer answers
@@ -75,7 +75,7 @@
 // the seller's noun of question 10); on a Vite dev server (the shell's
 // entry under `/@id/`) it reads the menu model through `/@fs/<checkout>/packages/chrome/src/menus/model.ts`.
 // The `/home` row's marks are the site build's page (docs/SITE.md): the root `class="ts-site"`
-// (the element carries `id="top"` first), the hero's caption, and the Speculation Rules script.
+// (the element carries `id="top"` first), the hero's second button, and the Speculation Rules script.
 //
 // The hardening round (docs/hardening/HARDENING.md 8.3; HR-SD#5, CRIT-M2): `access answer reads
 // enforce` reads `/api/access/<deck>` (`authorize: 'enforce'`) and keeps the identity cookie the
@@ -386,14 +386,10 @@ const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 
 /**
  * What the served /home carries (SPEC-4 2.6; the site build, docs/SITE.md): the root's class
- * (`<div id="top" class="ts-site"`), the hero's caption, which only the page's body writes, and
- * the Speculation Rules script.
+ * (`<div id="top" class="ts-site"`), the label of the hero's second button, which only the page's
+ * body writes (the hero caption left the page on 2026-10-22), and the Speculation Rules script.
  */
-const HOME_MARKS = [
-  'class="ts-site"',
-  'Claude Code and Codex are editing this presentation with you.',
-  '<script type="speculationrules"',
-];
+const HOME_MARKS = ['class="ts-site"', 'Open the Example Deck', '<script type="speculationrules"'];
 
 /** A Vercel preview deployment (never the production alias): `<project>-<hash>-<team>.vercel.app`. */
 const isPreview = (url) => /^https:\/\/[^/]+-[a-z0-9]{9}-[^/.]+\.vercel\.app\//.test(url);
@@ -511,11 +507,11 @@ function checks(deck, asset) {
     },
     {
       // gslides-parity SPEC-4 2.6 (build-4/b2.md R4), the site build (docs/SITE.md): the page's
-      // root, the hero's caption, the Speculation Rules script, indexable
+      // root, the hero's second button, the Speculation Rules script, indexable
       name: '/home',
       path: '/home',
       expect:
-        'a 200 product page: the .ts-site root, the hero caption, a speculationrules script, no noindex',
+        'a 200 product page: the .ts-site root, the hero button, a speculationrules script, no noindex',
       // the noindex meta is the app's and is always asserted; the x-robots-tag header is asserted on
       // production and on a local server, and reported on a preview: Vercel stamps
       // `x-robots-tag: noindex` on every answer of a non production deployment (measured on the

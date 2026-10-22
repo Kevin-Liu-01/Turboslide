@@ -55,20 +55,15 @@ const docsLinks: string[] = [
 ].filter((href) => href.startsWith('/docs'));
 
 const words: string[] = [
-  FEATURES_HEAD.title,
-  FEATURES_HEAD.lead,
-  FAQ_HEAD.title,
-  FAQ_HEAD.lead,
-  ABOUT_HEAD.title,
-  ABOUT_HEAD.lead,
+  ...[FEATURES_HEAD, FAQ_HEAD, ABOUT_HEAD].flatMap((head) =>
+    head.lead === undefined ? [head.title] : [head.title, head.lead],
+  ),
   ...FEATURE_GROUPS.flatMap((group) => [
-    group.label,
     group.sentence,
     ...group.features.flatMap((feature) => [feature.name, feature.sentence]),
   ]),
   ...QUESTIONS.flatMap((entry) => [entry.question, ...entry.answer]),
   ...ABOUT_BLOCKS.flatMap((block) => [
-    block.label,
     block.sentence,
     ...block.body,
     ...(block.points ?? []).flatMap((point) => [point.name, point.sentence]),

@@ -4,7 +4,6 @@ import type { Theme } from '@turboslide/viewer/theme';
 import { AnimatedMark } from './AnimatedMark';
 import { BUILD_COMMIT } from './build';
 import { FOOTER } from './copy';
-import { Keyed } from './Keyed';
 import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 
@@ -40,9 +39,7 @@ function AppearanceSwitch() {
 /**
  * The footer of every site page and the docs (docs/SITE.md, the footer; Kevin, 2026-10-15: "make
  * a ton better footer using the animated turboslide logo"). On the 12 column grid: the lockup,
- * the animated T in a box at 80 px (48 px on a phone) with the word, and one sentence under it
- * with "people" and "agents" in the site accent, as the title draws them;
- * four columns of links under capital labels with a solid icon each (Product, Agents, Docs,
+ * the animated T in a box at 80 px (48 px on a phone) with the word, then four columns of links under capital labels with a solid icon each (Product, Agents, Docs,
  * Project); then on a soft rule the maker, the build's commit and the appearance switch. On /home
  * the lockup goes back to the top (`top`); everywhere else it goes to /home.
  */
@@ -61,9 +58,6 @@ export function SiteFooter({ top = false }: { top?: boolean }) {
               <AnimatedMark size={80} />
               <span>{FOOTER.word}</span>
             </SiteLink>
-            <p className="site-foot-say t-small">
-              <Keyed text={FOOTER.sentence} keys={FOOTER.keys} />
-            </p>
           </div>
           <nav className="site-foot-cols t-small" aria-label={FOOTER.nav}>
             {FOOTER.columns.map((column) => (

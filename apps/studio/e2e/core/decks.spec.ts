@@ -2045,10 +2045,10 @@ test(title('decks.home.copy-rules'), async ({ browser }) => {
         (h.textContent ?? '').replace(/\s+/g, ' ').trim(),
       );
       /* the page's own copy (docs/SITE.md A.1): outside the recorded run and the code of the
-         transports table, the key chips, the editor's poster and frame, and the viewer's address */
+         transports table, the key chips, and the editor's poster and frame */
       const clone = main.cloneNode(true) as HTMLElement;
       for (const el of clone.querySelectorAll(
-        'script, style, template, pre, code, kbd, picture, iframe, .site-fig-address, [aria-hidden="true"], [hidden]',
+        'script, style, template, pre, code, kbd, picture, iframe, [aria-hidden="true"], [hidden]',
       ))
         el.remove();
       document.body.append(clone);

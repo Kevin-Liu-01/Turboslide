@@ -7,8 +7,8 @@ import { SiteLink } from './SiteLink';
 
 /**
  * The head of a site page (/features, /faq, /about), drawn as /home draws its first screen: the
- * h1 at the display step with its key words in the accent (Keyed.tsx), then the lead beside the
- * page's two buttons, then `children`, the first screen's figure of the real product. `stack`
+ * h1 at the display step with its key words in the accent (Keyed.tsx), then the lead, where the
+ * page has one, beside the page's two buttons, then `children`, the first screen's figure of the real product. `stack`
  * is the column's width with the figure under the head, as /home draws it; `side` is the head
  * alone, the lead over the buttons, in a column its page lays out (/faq puts it over the list on
  * seven columns, beside the shot on the other five).
@@ -33,7 +33,7 @@ export function PageHead({
           <Keyed text={copy.title} keys={copy.keys} />
         </h1>
         <div className="site-page-row">
-          <p className="t-lead">{copy.lead}</p>
+          {copy.lead === undefined ? null : <p className="t-lead">{copy.lead}</p>}
           <div className="site-btns">
             {[primary, secondary].map((action, i) =>
               action === undefined ? null : (

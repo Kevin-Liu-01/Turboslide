@@ -3,7 +3,6 @@ import { Fragment } from 'react';
 
 import { FIGURE_SIZES } from '../../docs/figures';
 import { Frame } from './Frame';
-import { PAGES } from './pages-copy';
 import type { Shot } from './pages-copy';
 import { CropPictures } from './ProductCrop';
 import { SiteIcon } from './SiteIcon';
@@ -40,8 +39,8 @@ function lineParts(line: string): string[] {
 /**
  * The figure of a site page's first screen: framed shots of the real product in one row, each
  * column as wide as its capture's ratio asks, so every frame in the row has one height (site.css
- * `.site-shots`). Each shot has the figure head of /home (the solid icon, the number of the block
- * it belongs to and its name, linked to that block) over the frame and one sentence under it.
+ * `.site-shots`). Each shot has a head over the frame: the solid icon and its name, linked to the
+ * block it belongs to.
  * A crop is a docs figure in both appearances; a code shot is commands on the #101010 panel.
  * Under 1024 px the shots stack, each at its capture's width at most.
  */
@@ -76,7 +75,6 @@ export function PageShots({
         const label = (
           <>
             <SiteIcon name={shot.icon} />
-            {shot.number === undefined ? null : <span className="site-num">{shot.number}</span>}
             {shot.label}
           </>
         );
@@ -108,10 +106,6 @@ export function PageShots({
               </Frame>
             ) : (
               <div className="site-term site-shot-term">
-                <div className="site-term-head">
-                  <span className="t-label">{PAGES.codeSource}</span>
-                  <span className="t-label">{PAGES.commands(shot.lines.length)}</span>
-                </div>
                 <pre>
                   <code>
                     {shot.lines.map((line) => (
@@ -137,7 +131,6 @@ export function PageShots({
                 </pre>
               </div>
             )}
-            <figcaption className="site-shot-note t-small">{shot.caption}</figcaption>
           </figure>
         );
       })}

@@ -1,7 +1,6 @@
 import { PRESENT_SCREEN } from './copy';
 import { Frame } from './Frame';
 import { PresentWindows } from './PresentWindows';
-import { SiteIcon } from './SiteIcon';
 import { ThemePicture } from './ThemePicture';
 
 import viewerDarkPhone from './pictures/viewer-390-dark.webp?url';
@@ -10,7 +9,7 @@ import viewerDark from './pictures/viewer-1440-dark.webp?url';
 import viewerLight from './pictures/viewer-1440-light.webp?url';
 
 /**
- * Screen 04 (docs/SITE.md A.5): the ruled title block, the viewer captured on slide 2 of the
+ * Screen 04 (docs/SITE.md A.5): the title, the viewer captured on slide 2 of the
  * example deck the hero's second button opens (slide 1 draws a defect, V1 of the brief), the six
  * slideshow keys as key chips, and the slideshow beside presenter view (PresentWindows.tsx).
  */
@@ -19,20 +18,11 @@ export function PresentScreen() {
   return (
     <section className="site-screen site-wrap" id="present" aria-labelledby="site-present-title">
       <header className="site-screen-head">
-        <p className="t-label site-label">
-          <SiteIcon name="play" />
-          <span className="site-num">{PRESENT_SCREEN.number}</span>
-          {PRESENT_SCREEN.label}
-        </p>
         <h2 id="site-present-title" className="t-title">
           {PRESENT_SCREEN.sentence}
         </h2>
       </header>
       <figure className="site-fig">
-        <figcaption className="site-fig-head">
-          <span className="t-label">{figure.label}</span>
-          <span className="site-fig-address t-small">{figure.address}</span>
-        </figcaption>
         <Frame>
           <div className="site-viewer-box">
             <ThemePicture

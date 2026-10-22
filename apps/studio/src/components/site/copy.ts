@@ -80,12 +80,7 @@ export const HERO = {
   lead: HOME_LEAD,
   primary: { label: 'New Presentation', href: '/new', id: 'site.hero.new' },
   secondary: { label: 'Open the Example Deck', href: '/deck/gt-brand', id: 'site.hero.example' },
-  note: 'No account is needed.',
   figure: {
-    number: '01',
-    label: 'The editor',
-    caption:
-      'Claude Code and Codex are editing this presentation with you. It lives only in this tab.',
     alt: 'The Turboslide editor on a presentation titled Northwind quarterly review. It shows the title row with Share, the menus File to Help, the toolbar, the filmstrip of five slides and the title slide on the stage. The pointers of Claude Code and Codex are on the slide.',
     frameTitle: 'The Turboslide editor with Claude Code and Codex',
   },
@@ -97,12 +92,8 @@ export const HERO = {
  * words on the slide are the slide's own (home-deck/slides/lighthouse.json).
  */
 export const CANVAS_SCREEN = {
-  number: '02',
-  label: 'Canvas',
   sentence: 'Every object on a slide moves.',
   figure: {
-    label: 'Mood slide',
-    note: 'The heading dragged off its plate and turned. The dashed box is where it was.',
     alt: 'The lighthouse slide, a drone photograph of the lantern room of Cape Hatteras Light printed in a two tone dither. The heading, Cape Hatteras Light, was dragged from the paper plate in the lower right to the sky in the upper left and turned 6 degrees to the left. The selection ring of the editor is on it.',
   },
   slide: {
@@ -115,21 +106,13 @@ export const CANVAS_SCREEN = {
   },
   table: {
     name: 'The heading’s box at rest and moved',
-    caption: 'The heading’s box, in slide px',
     heads: { field: 'Format options', rest: 'At rest', moved: 'Moved' },
     rows: { w: 'Width', h: 'Height', rotate: 'Rotate', x: 'X', y: 'Y' },
   },
-  note: 'A drag writes this box with `block.set` and a turn with `block.rotate`, the same actions an agent runs from the command line.',
 } as const;
 
 export const AGENTS_SCREEN = {
-  number: '03',
-  label: 'Agents',
   sentence: 'An agent runs the same actions as the menus.',
-  terminal: {
-    label: 'Recorded from the CLI',
-    count: (n: number): string => `${n} commands`,
-  },
   table: {
     caption: 'One action, slide.new, on each transport',
     heads: { transport: 'Transport', name: 'Name', actions: 'Actions' },
@@ -150,7 +133,6 @@ export const AGENTS_SCREEN = {
    * `baseRevision` (apps/cli/src/store-actions.ts), and the store's one entry per write.
    */
   flow: {
-    label: 'One path for every caller',
     alt: 'The menu item Slide > New slide and the four transports run into one handler, slide.new. It checks the input against the action’s schema, then checks that baseRevision is current, and Version history records one new revision with its author. A failed input check answers 400 with the failing field, and a stale revision answers 409 with the current document.',
     people: 'People',
     agents: 'Agents',
@@ -172,16 +154,11 @@ export const AGENTS_SCREEN = {
       { id: 'history', name: 'Version history', sub: 'One new revision, with its author' },
     ],
   },
-  note: 'Each transport checks an action’s input the same way. A write names the version of the presentation it read, and if the presentation changed since, it is refused with 409 and the current document.',
 } as const;
 
 export const PRESENT_SCREEN = {
-  number: '04',
-  label: 'Present',
   sentence: 'Anyone with the link can open the presentation and present it.',
   figure: {
-    label: 'The viewer',
-    address: 'turboslide.com/deck/gt-brand',
     alt: 'The Turboslide viewer on the example deck. Its bar holds Previous, the slide counter, Next, the Slide, Grid and Book views, Theme and Present.',
   },
   keysName: 'Keys during a slideshow',
@@ -199,8 +176,6 @@ export const PRESENT_SCREEN = {
    * (PRESENT_TEXT); the slides are slides 2 and 3 of the example deck the viewer above shows.
    */
   windows: {
-    label: 'Slideshow and presenter view',
-    note: 'Press S during a slideshow. Presenter view opens in a second window, and a move in either window moves both. A present link opens the slideshow without your notes.',
     alt: 'Two windows. The slideshow, seen by the audience, shows the slide. S opens presenter view, seen by you, with the timer, the current slide, the next slide and the speaker notes. The left and right arrows in either window move both.',
     show: { label: 'Slideshow', who: 'Seen by the audience' },
     presenter: { label: 'Presenter view', who: 'Seen by you' },
@@ -221,12 +196,8 @@ export const PRESENT_SCREEN = {
  * (apps/studio/content/docs/editor/objects.mdx).
  */
 export const PATTERNS_SCREEN = {
-  number: '05',
-  label: 'Patterns',
   sentence: 'Patterns move in the show, and downloads keep the moment you choose.',
   figure: {
-    label: 'A slide with the Dithering pattern',
-    address: 'Insert > Animated pattern',
     alt: 'A slide titled Questions from Northwind with the Dithering pattern: a sphere printed in dots whose light moves around it.',
   },
   slide: {
@@ -252,7 +223,6 @@ export const PATTERNS_SCREEN = {
       { place: 'With Reduce motion on', pattern: 'Still' },
     ],
   },
-  note: 'Format options > Still picks the moment, from 0 to 60 seconds. Slide > Playback can hold the still in the show, and Tools > Preferences can play patterns in the editor.',
 } as const;
 
 /** One run of a file's sentence: plain words, or the words that name a part, underlined. */
@@ -265,13 +235,8 @@ export type ExportRun = { text: string; part?: 'object' | 'hidden' };
  * `downloadFileName`'s, the numbers docs/pptx.md's.
  */
 export const EXPORT_SCREEN = {
-  number: '06',
-  label: 'Export',
   sentence: 'Download the presentation as a PDF or as a PowerPoint file.',
   files: {
-    label: 'File > Download',
-    address: 'Northwind quarterly review, slide 3',
-    source: 'In the browser',
     heading: 'Orders by quarter',
     list: [
       {
@@ -309,8 +274,6 @@ export const EXPORT_SCREEN = {
     ],
   },
   seam: {
-    label: 'One slide in the two PowerPoint files',
-    note: 'Drag the seam to compare the two files. Each blue outline is one part of the file.',
     pictures: 'Pictures',
     editable: 'Editable text',
     alt: (c: { text: number; rect: number; line: number }): string =>
@@ -334,22 +297,17 @@ export const EXPORT_SCREEN = {
       value: (p: number): string => `Pictures on the left ${p} percent, Editable text on the rest`,
     },
   },
-  note: 'An agent runs the same export with the `export.run` action, for example `turboslide export pptx --mode native`.',
 } as const;
 
 /**
  * The footer of every site page and the docs (SiteFooter.tsx): the lockup with the animated mark,
- * one sentence, four columns of links, then the maker, the build and the appearance switch.
+ * four columns of links, then the maker, the build and the appearance switch.
  */
 export const FOOTER = {
   word: 'Turboslide',
   /** the lockup's name on /home, where it goes back to the top, and on every other page */
   top: 'Turboslide, back to the top',
   home: 'Turboslide home',
-  sentence:
-    'Turboslide is a slides editor in the browser for people and agents. Every command in its menus is also an action an agent can run.',
-  /** the words of the sentence drawn in the site accent, as the title draws them */
-  keys: ['people', 'agents'],
   nav: 'Footer',
   columns: [
     {

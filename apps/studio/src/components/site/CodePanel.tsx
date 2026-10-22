@@ -2,24 +2,12 @@ import { codeRuns } from './code-runs';
 
 /**
  * A code panel of the site pages: commands on the #101010 panel of the landing's recorded run
- * (site.css `.site-term`), each line after a prompt, with the panel's label and a caption. A
- * narrow panel wraps a line between its runs (code-runs.ts), so a flag stays with its value.
+ * (site.css `.site-term`), each line after a prompt. A narrow panel wraps a line between its runs (code-runs.ts), so a flag stays with its value.
  */
-export function CodePanel({
-  label,
-  lines,
-  caption,
-}: {
-  label: string;
-  lines: readonly string[];
-  caption: string;
-}) {
+export function CodePanel({ lines }: { lines: readonly string[] }) {
   return (
     <figure className="site-crop site-code">
       <div className="site-term">
-        <div className="site-term-head">
-          <span className="t-label">{label}</span>
-        </div>
         <pre>
           <code>
             {lines.map((line) => (
@@ -41,7 +29,6 @@ export function CodePanel({
           </code>
         </pre>
       </div>
-      <figcaption className="t-small">{caption}</figcaption>
     </figure>
   );
 }

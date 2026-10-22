@@ -15,10 +15,6 @@ export function PresentWindows() {
   const { windows } = PRESENT_SCREEN;
   return (
     <div className="site-row site-pv-row">
-      <div className="site-row-text">
-        <p className="t-label">{windows.label}</p>
-        <p className="site-row-note t-small">{windows.note}</p>
-      </div>
       <figure className="site-pv" role="img" aria-label={windows.alt}>
         <div className="site-pv-win site-pv-show" aria-hidden="true">
           <div className="site-pv-head">

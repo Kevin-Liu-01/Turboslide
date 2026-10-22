@@ -16,12 +16,7 @@ export function AgentsFlow() {
   const { flow, table } = AGENTS_SCREEN;
   return (
     <>
-      <figure className="site-fig site-flow" aria-labelledby="site-flow-label">
-        <figcaption className="site-fig-head">
-          <span className="t-label" id="site-flow-label">
-            {flow.label}
-          </span>
-        </figcaption>
+      <figure className="site-fig site-flow">
         <Frame>
           <div className="site-flow-body" role="img" aria-label={flow.alt}>
             <ul className="site-flow-from" aria-hidden="true">
@@ -63,7 +58,6 @@ export function AgentsFlow() {
           </div>
         </Frame>
       </figure>
-      <p className="site-note site-flow-note t-small">{AGENTS_SCREEN.note}</p>
     </>
   );
 }

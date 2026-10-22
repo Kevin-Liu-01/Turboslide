@@ -9,15 +9,12 @@ import { SiteLink } from './SiteLink';
 import { Title } from './Title';
 
 /**
- * Screen 01 (docs/SITE.md A.3): the h1 with its two stacks, the lead beside the two buttons and
- * "No account is needed.", then the editor's figure. The figure's head row carries the label and
- * the caption above the frame, so the first screen at 1440 by 900 holds the caption and the top of
- * the editor (the judge's reading of the prototype: its caption sat under the fold). The frame's
- * box has a fixed size, 16:10 above 720 px and the phone's column under it, and holds the poster
- * (a capture of the real editor, the first thing painted in the box) until the live editor in its
- * frame says it is ready (HeroBox.tsx), so nothing moves when it arrives. A press on an avatar
- * of the title goes to the live editor through the box (`press`), which loads the editor first
- * when the poster is still up.
+ * Screen 01 (docs/SITE.md A.3): the h1 with its two stacks, the lead beside the two buttons, then
+ * the editor's figure. The frame's box has a fixed size, 16:10 above 720 px and the phone's column
+ * under it, and holds the poster (a capture of the real editor, the first thing painted in the box)
+ * until the live editor in its frame says it is ready (HeroBox.tsx), so nothing moves when it
+ * arrives. A press on an avatar of the title goes to the live editor through the box (`press`),
+ * which loads the editor first when the poster is still up.
  */
 export function Hero() {
   const press = useRef<OnPress | null>(null);
@@ -52,20 +49,9 @@ export function Hero() {
               {HERO.secondary.label}
             </SiteLink>
           </div>
-          <p className="site-hero-note t-small">{HERO.note}</p>
         </div>
       </div>
       <figure className="site-fig">
-        <figcaption className="site-fig-head">
-          <span className="t-label site-label">
-            <SiteIcon name="pencil-square" />
-            <span className="site-num">{HERO.figure.number}</span>
-            {HERO.figure.label}
-          </span>
-          <span id="site-hero-caption" className="site-fig-note t-small">
-            {HERO.figure.caption}
-          </span>
-        </figcaption>
         <Frame>
           <HeroBox press={press} />
         </Frame>

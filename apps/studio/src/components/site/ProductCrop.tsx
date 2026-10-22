@@ -52,15 +52,7 @@ export function CropPictures({
  * A crop of the product on a site page: one of the docs' figures (public/docs/figures, written by
  * scripts/site/capture.mjs), in the square frame with corner crosses, at its native width at most.
  */
-export function ProductCrop({
-  name,
-  alt,
-  caption,
-}: {
-  name: string;
-  alt: string;
-  caption: string;
-}) {
+export function ProductCrop({ name, alt }: { name: string; alt: string }) {
   const size = FIGURE_SIZES[name];
   if (size === undefined) return null;
   const vars = { '--crop-w': `${size.width}px` } as CSSProperties;
@@ -69,7 +61,6 @@ export function ProductCrop({
       <Frame className="site-crop-frame">
         <CropPictures name={name} alt={alt} />
       </Frame>
-      <figcaption className="t-small">{caption}</figcaption>
     </figure>
   );
 }

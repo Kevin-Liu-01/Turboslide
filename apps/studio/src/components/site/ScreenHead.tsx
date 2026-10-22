@@ -1,31 +1,10 @@
-import { SiteIcon } from './SiteIcon';
-import type { SiteIconName } from './SiteIcon';
-
 /**
- * The ruled head of a landing screen (docs/SITE.md A.4): the hairline seam, the solid icon, the
- * screen's number and label in the first three columns, and its one sentence as the h2 in the
- * other nine.
+ * The ruled head of a landing screen (docs/SITE.md A.4): the hairline seam and the screen's one
+ * sentence as its h2.
  */
-export function ScreenHead({
-  titleId,
-  icon,
-  number,
-  label,
-  sentence,
-}: {
-  titleId: string;
-  icon: SiteIconName;
-  number: string;
-  label: string;
-  sentence: string;
-}) {
+export function ScreenHead({ titleId, sentence }: { titleId: string; sentence: string }) {
   return (
     <header className="site-screen-head">
-      <p className="t-label site-label">
-        <SiteIcon name={icon} />
-        <span className="site-num">{number}</span>
-        {label}
-      </p>
       <h2 id={titleId} className="t-title">
         {sentence}
       </h2>

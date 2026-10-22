@@ -137,11 +137,6 @@
   flex: none;
 }
 
-.ts-site .site-label .site-num {
-  color: var(--pt-ink);
-  font-variant-numeric: var(--pt-numerals);
-}
-
 /* ---- the mark: the T in a box (BoxedMark.tsx), the tab icon's plate, frame and ink ---- */
 
 .ts-site .site-mark {
@@ -319,24 +314,6 @@
   margin: 0;
 }
 
-.ts-site .site-fig-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  padding-bottom: 12px;
-}
-
-.ts-site .site-fig-head .site-fig-note {
-  margin: 0;
-  color: var(--pt-ink-2);
-  text-align: right;
-}
-
-.ts-site .site-fig-address {
-  color: var(--pt-titanium);
-}
-
 .ts-site .site-frame {
   position: relative;
   border: 1px solid var(--pt-hair);
@@ -438,11 +415,6 @@
   gap: 8px;
 }
 
-.ts-site .site-hero-act .site-hero-note {
-  margin: 0;
-  color: var(--pt-titanium);
-}
-
 .ts-site .site-hero .site-fig {
   margin-top: 24px;
 }
@@ -492,13 +464,8 @@
   margin-bottom: 48px;
 }
 
-.ts-site .site-screen-head .t-label {
-  grid-column: 1 / span 3;
-  padding-top: 16px;
-}
-
 .ts-site .site-screen-head h2 {
-  grid-column: 4 / span 9;
+  grid-column: 1 / span 9;
   margin: 0;
   max-width: 21em;
 }
@@ -522,23 +489,6 @@
 
 :root[data-theme='dark'] .ts-site .site-term {
   border-color: var(--pt-hair);
-}
-
-.ts-site .site-term-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-bottom: 1px solid var(--pt-hair-on-ink);
-}
-
-:root[data-theme='dark'] .ts-site .site-term-head {
-  border-bottom-color: var(--pt-plate-on-ink);
-}
-
-.ts-site .site-term-head .t-label {
-  color: var(--pt-panel-text-2);
 }
 
 .ts-site .site-term pre {
@@ -583,11 +533,6 @@
   border-collapse: collapse;
 }
 
-.ts-site .site-spec caption {
-  text-align: left;
-  padding-bottom: 12px;
-}
-
 .ts-site .site-spec th,
 .ts-site .site-spec td {
   text-align: left;
@@ -630,11 +575,6 @@
 .ts-site .site-spec tfoot th,
 .ts-site .site-spec tfoot td {
   border-bottom: 0;
-}
-
-.ts-site .site-transports .site-note {
-  margin: 16px 0 0;
-  color: var(--pt-titanium);
 }
 
 /* from 1024 to 1279 px the run and the table split the columns evenly: five columns there are
@@ -732,8 +672,8 @@
   image-rendering: pixelated;
 }
 
-/* a ruled row under a screen's first figure: its label and note in columns 1 to 3, its drawing
-   in columns 4 to 12; one column under 1024 px */
+/* a ruled row under a screen's first figure: its facts in columns 1 to 3 and its drawing in
+   columns 4 to 12, or the drawing across all twelve; one column under 1024 px */
 .ts-site .site-row {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -746,12 +686,6 @@
 .ts-site .site-row-text {
   grid-column: 1 / span 3;
   padding-top: 16px;
-}
-
-.ts-site .site-row-note {
-  margin: 12px 0 0;
-  max-width: 30ch;
-  color: var(--pt-ink-2);
 }
 
 /* screen 02, Canvas: the slide in columns 1 to 8, the heading's box in 9 to 12 */
@@ -1035,21 +969,9 @@
   border: 1px solid var(--pt-select);
 }
 
-.ts-site .site-canvas-side .site-note {
-  margin: 16px 0 0;
-  color: var(--pt-titanium);
-}
-
-.ts-site .site-canvas-side .site-note code,
-.ts-site .site-ex-note code,
 .ts-site .site-flow-sub code {
   font-size: 13px;
   color: var(--pt-ink);
-}
-
-.ts-site .site-canvas-credit {
-  margin: 8px 0 0;
-  color: var(--pt-titanium);
 }
 
 /* screen 03, the one path: the callers in columns 1 to 3, the stations at the starts of
@@ -1241,15 +1163,9 @@
   border-bottom: 1px solid var(--pt-titanium);
 }
 
-.ts-site .site-flow-note {
-  margin: 16px 0 0;
-  max-width: 44em;
-  color: var(--pt-titanium);
-}
-
 /* screen 04, the slideshow and presenter view: two windows joined by one ink line */
 .ts-site .site-pv {
-  grid-column: 4 / span 9;
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: minmax(0, 38fr) 160px minmax(0, 46fr);
   align-items: start;
@@ -1703,16 +1619,6 @@
   display: block;
 }
 
-.ts-site .site-pp-where .site-note {
-  margin: 16px 0 0;
-  color: var(--pt-titanium);
-}
-
-/* the caption on the figure head's 20 px line, so the two heads share a baseline */
-.ts-site .site-pp-where .site-spec caption {
-  line-height: 20px;
-}
-
 /* screen 06, the files: the slide on the left, one line split three ways to the three files */
 .ts-site .site-ex-defs {
   position: absolute;
@@ -1736,14 +1642,6 @@
 
 .ts-site .site-ex-src {
   position: relative;
-}
-
-.ts-site .site-ex-caption {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  padding-top: 12px;
-  color: var(--pt-ink-2);
 }
 
 .ts-site .site-ex-sheet {
@@ -1883,16 +1781,6 @@
 
 .ts-site .site-ex-key.is-hidden {
   text-decoration-style: dashed;
-}
-
-.ts-site .site-ex-note {
-  margin: 16px 0 0;
-  color: var(--pt-titanium);
-}
-
-/* a command never breaks at its flag's dashes */
-.ts-site .site-ex-note code {
-  white-space: nowrap;
 }
 
 /* screen 06, the seam: one slide, the Pictures file left of the cut, Editable text right of it */
@@ -2179,10 +2067,6 @@
     padding-top: 0;
   }
 
-  .ts-site .site-row-note {
-    max-width: 44ch;
-  }
-
   .ts-site .site-pv,
   .ts-site .site-xs-fig {
     padding-top: 24px;
@@ -2351,12 +2235,6 @@
 
   .ts-site .site-ex-src {
     width: min(100%, 480px);
-  }
-
-  .ts-site .site-ex-caption {
-    position: static;
-    display: block;
-    padding-left: calc(var(--ex-link) / 2 + 16px);
   }
 
   .ts-site .site-ex-src > .site-ex-sheet::after {
@@ -2533,10 +2411,6 @@
     --ex-row-gap: 28px;
   }
 
-  .ts-site .site-ex-caption {
-    padding-left: 32px;
-  }
-
   .ts-site .site-ex-src > .site-ex-sheet::after {
     height: 52px;
   }
@@ -2670,8 +2544,7 @@
   transition: color 120ms ease-out;
 }
 
-.ts-site .site-shot-link:hover,
-.ts-site .site-shot-link:hover .site-num {
+.ts-site .site-shot-link:hover {
   color: var(--pt-accent);
 }
 
@@ -2685,11 +2558,6 @@
   min-height: 100%;
 }
 
-/* the panel's head on one line at every width */
-.ts-site .site-shot-term .site-term-head .t-label {
-  white-space: nowrap;
-}
-
 /* the prompt that waits after the last command, with a block cursor in the panel's text */
 .ts-site .site-shot-term .site-cursor {
   display: inline-block;
@@ -2697,11 +2565,6 @@
   height: 16px;
   vertical-align: -3px;
   background: var(--pt-panel-text-2);
-}
-
-.ts-site .site-shot-note {
-  margin: 12px 0 0;
-  color: var(--pt-ink-2);
 }
 
 /* /about: the editor on eight columns, the phone's viewer on four, cut to the editor's height */
@@ -2761,11 +2624,6 @@
   text-underline-offset: 6px;
 }
 
-/* a block's body starts at the fourth column, under its sentence */
-.ts-site .site-block-body {
-  margin-left: calc((100% + var(--site-gap)) / 4);
-}
-
 /* inline code in a sentence; a code panel's lines keep the panel's own text colour (the ink here
    drew them black on the #101010 panel) */
 .ts-site .site-block-body :not(pre) > code,
@@ -2792,11 +2650,6 @@
 
 .ts-site .site-crop .site-pic img {
   height: auto;
-}
-
-.ts-site .site-crop figcaption {
-  margin-top: 12px;
-  color: var(--pt-titanium);
 }
 
 /* a phone cut whose right edge falls inside a phrase is drawn through a narrower box at its own
@@ -2928,17 +2781,13 @@
   border-top: 1px solid var(--pt-hair);
 }
 
-.ts-site .site-faq-label {
-  padding: 16px 0 4px;
-}
-
 .ts-site .site-faq-item {
   border-bottom: 1px solid var(--pt-hair);
 }
 
 .ts-site .site-faq-item summary {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 20px;
+  grid-template-columns: minmax(0, 1fr) 20px;
   column-gap: 16px;
   align-items: center;
   padding: 20px 0;
@@ -2952,15 +2801,6 @@
 
 .ts-site .site-faq-item summary::-webkit-details-marker {
   display: none;
-}
-
-.ts-site .site-faq-n {
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  font-variant-numeric: var(--pt-numerals);
-  color: var(--pt-titanium);
 }
 
 .ts-site .site-faq-item summary svg {
@@ -2979,8 +2819,8 @@
 }
 
 .ts-site .site-faq-a {
-  max-width: calc(40em + 56px);
-  padding: 0 36px 24px 56px;
+  max-width: 40em;
+  padding: 0 36px 24px 0;
 }
 
 .ts-site .site-faq-a p {
@@ -3039,10 +2879,6 @@
   .ts-site .site-about-phone {
     height: auto;
     aspect-ratio: 780 / 1120;
-  }
-
-  .ts-site .site-block-body {
-    margin-left: 0;
   }
 
   /* the head, then the shot, then the list */
@@ -3125,7 +2961,7 @@
   }
 
   .ts-site .site-faq-item summary {
-    grid-template-columns: 24px minmax(0, 1fr) 20px;
+    grid-template-columns: minmax(0, 1fr) 20px;
     column-gap: 12px;
     padding: 16px 0;
     font-size: 17px;
@@ -3133,7 +2969,7 @@
   }
 
   .ts-site .site-faq-a {
-    padding: 0 0 20px 36px;
+    padding: 0 0 20px;
   }
 }
 
@@ -3454,12 +3290,6 @@
   letter-spacing: -0.024em;
 }
 
-.ts-site .site-foot-say {
-  margin: 0;
-  max-width: 34ch;
-  color: var(--pt-ink-2);
-}
-
 .ts-site .site-foot-cols {
   grid-column: 5 / span 8;
   display: grid;
@@ -3607,7 +3437,6 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
 
 @media (max-width: 1023px) {
   .ts-site .site-hero-row .t-lead,
-  .ts-site .site-screen-head .t-label,
   .ts-site .site-screen-head h2,
   .ts-site .site-term,
   .ts-site .site-transports,
@@ -3621,11 +3450,6 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     justify-self: start;
     align-items: flex-start;
     margin-top: 24px;
-  }
-
-  .ts-site .site-screen-head .t-label {
-    padding-top: 0;
-    margin-bottom: 16px;
   }
 
   .ts-site .site-transports {
@@ -3719,46 +3543,15 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     margin-top: 12px;
   }
 
-  /* New Presentation with "No account is needed." beside it, then the example deck: the stage of
-     the editor below then ends above the fold at 390 by 844 */
+  /* the two buttons on one row, so the stage of the editor below ends above the fold at 390 by
+     844 */
   .ts-site .site-hero-act {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    column-gap: 12px;
-    row-gap: 8px;
     margin-top: 20px;
     padding-top: 0;
   }
 
-  .ts-site .site-hero-act .site-btns {
-    display: contents;
-  }
-
-  .ts-site .site-hero-act .site-btn-line {
-    grid-row: 2;
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
-
-  .ts-site .site-hero-act .site-hero-note {
-    grid-row: 1;
-    grid-column: 2;
-  }
-
   .ts-site .site-hero .site-fig {
     margin-top: 28px;
-  }
-
-  /* the head row stacks: the label, then the sentence under it */
-  .ts-site .site-fig-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-
-  .ts-site .site-fig-head .site-fig-note {
-    text-align: left;
   }
 
   /* the phone's editor box: the full column, never taller than 72 percent of the screen, so a
@@ -3783,10 +3576,6 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-term pre {
     padding: 12px 12px 16px;
     font-size: 12px;
-  }
-
-  .ts-site .site-term-head {
-    padding: 0 12px;
   }
 
   /* each transport as two lines: its name and count, then the call */

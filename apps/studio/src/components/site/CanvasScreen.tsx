@@ -6,7 +6,6 @@ import type { SlideBox } from './canvas-pose';
 import { SCREEN, fitCells, inkOf, onAppearance, printCells } from './cells';
 import { CANVAS_SCREEN } from './copy';
 import { Frame } from './Frame';
-import { InlineCode } from './InlineCode';
 import { ScreenHead } from './ScreenHead';
 import { useMountEffect } from '../useMountEffect';
 
@@ -120,19 +119,9 @@ export function CanvasScreen() {
   const { figure, slide, table } = CANVAS_SCREEN;
   return (
     <section className="site-screen site-wrap" id="canvas" aria-labelledby="site-canvas-title">
-      <ScreenHead
-        titleId="site-canvas-title"
-        icon="cursor-arrow-rays"
-        number={CANVAS_SCREEN.number}
-        label={CANVAS_SCREEN.label}
-        sentence={CANVAS_SCREEN.sentence}
-      />
+      <ScreenHead titleId="site-canvas-title" sentence={CANVAS_SCREEN.sentence} />
       <div className="site-canvas">
         <figure className="site-fig site-canvas-fig">
-          <figcaption className="site-fig-head">
-            <span className="t-label">{figure.label}</span>
-            <span className="site-fig-note t-small">{figure.note}</span>
-          </figcaption>
           <Frame>
             <div ref={sheet} className="site-sheet site-lh" role="img" aria-label={figure.alt}>
               <canvas ref={pic} className="site-cells" aria-hidden="true" />
@@ -171,7 +160,6 @@ export function CanvasScreen() {
         </figure>
         <div className="site-canvas-side">
           <table className="site-spec site-canvas-spec" aria-label={table.name}>
-            <caption className="t-label">{table.caption}</caption>
             <thead>
               <tr>
                 <th className="t-label" scope="col">
@@ -197,10 +185,6 @@ export function CanvasScreen() {
               ))}
             </tbody>
           </table>
-          <p className="site-note t-small">
-            <InlineCode text={CANVAS_SCREEN.note} />
-          </p>
-          <p className="site-canvas-credit t-small">{slide.credit}</p>
         </div>
       </div>
     </section>

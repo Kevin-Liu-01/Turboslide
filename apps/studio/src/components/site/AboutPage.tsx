@@ -38,12 +38,6 @@ function AboutFigure() {
   return (
     <div className="site-shots site-about-shots" role="group" aria-label={PAGES.aboutShotsName}>
       <figure className="site-shot" data-shot="editor">
-        <div className="site-shot-head">
-          <span className="t-label site-label">
-            <SiteIcon name={editor.icon} />
-            {editor.label}
-          </span>
-        </div>
         <Frame className="site-shot-frame">
           <div className="site-about-editor">
             <ThemePicture
@@ -56,15 +50,8 @@ function AboutFigure() {
             />
           </div>
         </Frame>
-        <figcaption className="site-shot-note t-small">{editor.caption}</figcaption>
       </figure>
       <figure className="site-shot" data-shot="viewer">
-        <div className="site-shot-head">
-          <span className="t-label site-label">
-            <SiteIcon name={viewer.icon} />
-            {viewer.label}
-          </span>
-        </div>
         <Frame className="site-shot-frame">
           <div className="site-about-phone">
             {/* the phone's capture at every width: the box is a phone's at every width */}
@@ -77,7 +64,6 @@ function AboutFigure() {
             />
           </div>
         </Frame>
-        <figcaption className="site-shot-note t-small">{viewer.caption}</figcaption>
       </figure>
     </div>
   );
@@ -86,7 +72,7 @@ function AboutFigure() {
 /**
  * /about (the pages step): the head as /home draws its first screen (the h1 with "Turboslide" in
  * the accent, the lead beside New Presentation and Read the Source) over the editor and the viewer
- * (AboutFigure), then six numbered ruled blocks: what
+ * (AboutFigure), then six ruled blocks: what
  * Turboslide is, why it is agent native, its principles, the source and its license, who makes
  * it, and how to reach the project (GitHub issues, with Open an Issue).
  */
@@ -108,15 +94,7 @@ export function AboutPage() {
         <AboutFigure />
       </PageHead>
       {ABOUT_BLOCKS.map((block) => (
-        <SiteBlock
-          key={block.id}
-          id={block.id}
-          number={block.number}
-          label={block.label}
-          icon={block.icon}
-          sentence={block.sentence}
-          keys={block.keys}
-        >
+        <SiteBlock key={block.id} id={block.id} sentence={block.sentence} keys={block.keys}>
           {block.body.map((paragraph) => (
             <p key={paragraph} className="site-block-text">
               <InlineCode text={paragraph} />

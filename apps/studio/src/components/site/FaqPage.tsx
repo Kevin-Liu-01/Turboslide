@@ -8,24 +8,14 @@ import { JsonLd } from './JsonLd';
 import { PageHead } from './PageHead';
 import { PageShots } from './PageShots';
 import { FAQ_HEAD, FAQ_SHOTS, FAQ_SHOT_FOR, PAGES, QUESTIONS } from './pages-copy';
-import type { FaqShotId, Shot } from './pages-copy';
+import type { FaqShotId } from './pages-copy';
 import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 import { faqData } from './structured-data';
 
-/** A question's place in the list, as the list numbers it. */
-const placeOf = (id: string): string =>
-  String(QUESTIONS.findIndex((entry) => entry.id === id) + 1).padStart(2, '0');
-
-/** A shot of /faq with the number of the question it belongs to. */
-function numbered(id: FaqShotId): Shot {
-  const shot: Shot = FAQ_SHOTS[id];
-  return shot.href === undefined ? shot : { ...shot, number: placeOf(shot.href.slice(1)) };
-}
-
 /**
  * /faq (the pages step) on two columns: on the first seven the head (the h1 with "answers" in the
- * accent, the lead, New Presentation and Read the Documentation) and then every question as one
+ * accent over New Presentation and Read the Documentation) and then every question as one
  * disclosure list of native `<details>` (the summary is the button a keyboard and a screen reader
  * reach; the answer is in the page for search and find), each answer with the chapters that say
  * more; on the other five, held in view while the list scrolls, the shot of the product the answer
@@ -55,14 +45,9 @@ export function FaqPage() {
       <div className="site-faq-page site-wrap">
         <div className="site-faq-main">
           <PageHead copy={FAQ_HEAD} layout="side" />
-          <section className="site-faq-list" aria-labelledby="site-faq-title">
-            <h2 id="site-faq-title" className="t-label site-label site-faq-label">
-              <SiteIcon name="question-mark-circle" />
-              <span className="site-num">{String(QUESTIONS.length).padStart(2, '0')}</span>
-              {PAGES.questionsName}
-            </h2>
+          <section className="site-faq-list" aria-label={PAGES.questionsName}>
             <div ref={list} className="site-faq">
-              {QUESTIONS.map((entry, i) => (
+              {QUESTIONS.map((entry) => (
                 <details
                   key={entry.id}
                   id={entry.id}
@@ -73,9 +58,6 @@ export function FaqPage() {
                   }}
                 >
                   <summary>
-                    <span className="site-faq-n" aria-hidden="true">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
                     <span className="site-faq-q">{entry.question}</span>
                     <SiteIcon name="chevron-down" size={20} />
                   </summary>
@@ -106,7 +88,7 @@ export function FaqPage() {
           </section>
         </div>
         <aside className="site-faq-aside" aria-label={PAGES.shotName}>
-          <PageShots key={shot} shots={[numbered(shot)]} control="site.faq.shot" />
+          <PageShots key={shot} shots={[FAQ_SHOTS[shot]]} control="site.faq.shot" />
         </aside>
       </div>
     </main>

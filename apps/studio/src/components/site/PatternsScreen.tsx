@@ -220,19 +220,9 @@ export function PatternsScreen() {
       id="patterns"
       aria-labelledby="site-patterns-title"
     >
-      <ScreenHead
-        titleId="site-patterns-title"
-        icon="cube"
-        number={PATTERNS_SCREEN.number}
-        label={PATTERNS_SCREEN.label}
-        sentence={PATTERNS_SCREEN.sentence}
-      />
+      <ScreenHead titleId="site-patterns-title" sentence={PATTERNS_SCREEN.sentence} />
       <div className="site-pp">
         <figure className="site-fig site-pp-fig">
-          <figcaption className="site-fig-head">
-            <span className="t-label">{figure.label}</span>
-            <span className="site-fig-address t-small">{figure.address}</span>
-          </figcaption>
           <Frame>
             <div className="site-pp-ground">
               <div className="site-pp-body">
@@ -276,8 +266,7 @@ export function PatternsScreen() {
           </Frame>
         </figure>
         <div className="site-pp-where">
-          <table className="site-spec site-pp-spec">
-            <caption className="t-label">{table.caption}</caption>
+          <table className="site-spec site-pp-spec" aria-label={table.caption}>
             <thead>
               <tr>
                 <th className="t-label" scope="col">
@@ -297,7 +286,6 @@ export function PatternsScreen() {
               ))}
             </tbody>
           </table>
-          <p className="site-note t-small">{PATTERNS_SCREEN.note}</p>
         </div>
       </div>
     </section>

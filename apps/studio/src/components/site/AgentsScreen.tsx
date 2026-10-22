@@ -7,31 +7,22 @@ import { RECORDED_RUN, commandParts } from './run';
 import { SiteIcon } from './SiteIcon';
 
 /**
- * Screen 03 (docs/SITE.md A.4): the ruled title block, then the run recorded from the CLI on the
+ * Screen 03 (docs/SITE.md A.4): the title, then the run recorded from the CLI on the
  * #101010 panel beside the one action, slide.new, on each transport with the reference's counts
- * (facts.ts), and under them the one path every caller joins (AgentsFlow.tsx) with the note on
- * the two checks. Static text: no replay and no motion.
+ * (facts.ts), and under them the one path every caller joins (AgentsFlow.tsx). Static text: no
+ * replay and no motion.
  */
 export function AgentsScreen() {
   const { table } = AGENTS_SCREEN;
   return (
     <section className="site-screen site-wrap" id="agents" aria-labelledby="site-agents-title">
       <header className="site-screen-head">
-        <p className="t-label site-label">
-          <SiteIcon name="command-line" />
-          <span className="site-num">{AGENTS_SCREEN.number}</span>
-          {AGENTS_SCREEN.label}
-        </p>
         <h2 id="site-agents-title" className="t-title">
           {AGENTS_SCREEN.sentence}
         </h2>
       </header>
       <div className="site-agents">
         <figure className="site-term">
-          <figcaption className="site-term-head">
-            <span className="t-label">{AGENTS_SCREEN.terminal.label}</span>
-            <span className="t-label">{AGENTS_SCREEN.terminal.count(RECORDED_RUN.length)}</span>
-          </figcaption>
           <pre>
             <code>
               {RECORDED_RUN.map((step) => (
@@ -56,8 +47,7 @@ export function AgentsScreen() {
           </pre>
         </figure>
         <div className="site-transports">
-          <table className="site-spec">
-            <caption className="t-label">{table.caption}</caption>
+          <table className="site-spec" aria-label={table.caption}>
             <thead>
               <tr>
                 <th className="t-label" scope="col">

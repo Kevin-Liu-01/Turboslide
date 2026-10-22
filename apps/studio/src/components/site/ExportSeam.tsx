@@ -206,8 +206,6 @@ export function ExportSeam() {
   return (
     <div className="site-row site-xs-row">
       <div className="site-row-text">
-        <p className="t-label">{seam.label}</p>
-        <p className="site-row-note t-small">{seam.note}</p>
         <dl className="site-xs-holds t-small">
           <div>
             <dt>

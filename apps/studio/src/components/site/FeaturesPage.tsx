@@ -15,10 +15,10 @@ import { softwareData, webPageData } from './structured-data';
 
 /**
  * /features (the pages step): the head as /home draws its first screen (the h1 with "people" and
- * "agents" in the accent, the lead beside New Presentation and Read the Documentation), then the
+ * "agents" in the accent over New Presentation and Read the Documentation), then the
  * first screen's figure, the Theme panel and File > Download a person uses beside the commands an
- * agent runs, each shot linked to its group, then the counts read from facts.ts. Then one
- * numbered ruled block per group (make, present, share and work together, export, agents, run it
+ * agent runs, each shot linked to its group, then the counts read from facts.ts. Then one ruled
+ * block per group (make, present, share and work together, export, agents, run it
  * yourself), each with a crop of the product or a code panel and one sentence per feature linked
  * to its chapter of the documentation.
  */
@@ -50,27 +50,11 @@ export function FeaturesPage() {
         </dl>
       </PageHead>
       {FEATURE_GROUPS.map((group) => (
-        <SiteBlock
-          key={group.id}
-          id={group.id}
-          number={group.number}
-          label={group.label}
-          icon={group.icon}
-          sentence={group.sentence}
-          keys={group.keys}
-        >
+        <SiteBlock key={group.id} id={group.id} sentence={group.sentence} keys={group.keys}>
           {group.figure.kind === 'crop' ? (
-            <ProductCrop
-              name={group.figure.name}
-              alt={group.figure.alt}
-              caption={group.figure.caption}
-            />
+            <ProductCrop name={group.figure.name} alt={group.figure.alt} />
           ) : (
-            <CodePanel
-              label={group.figure.label}
-              lines={group.figure.lines}
-              caption={group.figure.caption}
-            />
+            <CodePanel lines={group.figure.lines} />
           )}
           <ul className="site-feats">
             {group.features.map((feature) => (

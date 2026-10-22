@@ -113,16 +113,11 @@ export function ExportFiles() {
   const { files } = EXPORT_SCREEN;
   return (
     <figure className="site-fig site-ex-fig">
-      <figcaption className="site-fig-head">
-        <span className="t-label">{files.label}</span>
-        <span className="site-fig-address t-small">{files.address}</span>
-      </figcaption>
       <Frame>
         <SlideSymbol />
         <div className="site-ex">
           <div className="site-ex-src">
             <Sheet />
-            <span className="site-ex-caption t-small">{files.source}</span>
           </div>
           <ol className="site-ex-files">
             {files.list.map((file) => (

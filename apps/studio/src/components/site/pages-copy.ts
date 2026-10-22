@@ -27,13 +27,13 @@ type PageAction = {
 };
 
 /**
- * A site page's head: the h1 with its key words in the accent (Keyed.tsx), the lead that says what
- * the page holds, and the page's two buttons, New Presentation first, as /home draws its own.
+ * A site page's head: the h1 with its key words in the accent (Keyed.tsx), the lead where the page
+ * has one, and the page's two buttons, New Presentation first, as /home draws its own.
  */
 export type PageHeadCopy = {
   title: string;
   keys: readonly string[];
-  lead: string;
+  lead?: string;
   actions: readonly PageAction[];
 };
 
@@ -42,16 +42,14 @@ const NEW_PRESENTATION = { label: 'New Presentation', href: '/new', icon: 'plus'
 
 /**
  * One framed shot of a page's first screen: a docs figure (public/docs/figures) or a code panel,
- * under a head that names it and, where it has one, the block or question it belongs to.
+ * under a head that names it and, where it has one, links to the block or question it belongs to.
  */
 export type Shot = {
   id: string;
   label: string;
   icon: SiteIconName;
-  /** the block or answer of the page the shot belongs to, and its number */
+  /** the block or answer of the page the shot belongs to */
   href?: string;
-  number?: string;
-  caption: string;
 } & ({ kind: 'crop'; name: string; alt: string } | { kind: 'code'; lines: readonly string[] });
 
 /** One feature: its name, one sentence, and its chapter of the documentation. */
@@ -59,14 +57,10 @@ type Feature = { name: string; sentence: string; href: string };
 
 /** A figure of a group: a crop of the product (public/docs/figures) or a code panel. */
 type GroupFigure =
-  | { kind: 'crop'; name: string; alt: string; caption: string }
-  | { kind: 'code'; label: string; lines: readonly string[]; caption: string };
+  { kind: 'crop'; name: string; alt: string } | { kind: 'code'; lines: readonly string[] };
 
 export type FeatureGroup = {
   id: string;
-  number: string;
-  label: string;
-  icon: SiteIconName;
   sentence: string;
   /** the words of the sentence drawn in the accent */
   keys: readonly string[];
@@ -78,7 +72,6 @@ export type FeatureGroup = {
 export const FEATURES_HEAD: PageHeadCopy = {
   title: 'Features for people and agents',
   keys: ['people', 'agents'],
-  lead: 'What Turboslide does today, in six groups. Each feature links to its chapter of the documentation.',
   actions: [
     { id: 'site.features.new', ...NEW_PRESENTATION },
     { id: 'site.features.docs', label: 'Read the Docs', href: '/docs', icon: 'book-open' },
@@ -96,10 +89,8 @@ export const FEATURES_SHOTS: readonly Shot[] = [
     name: 'themes-panel',
     label: 'Theme panel',
     icon: 'pencil-square',
-    number: '01',
     href: '#make',
     alt: 'The Theme panel: the Light and Dark appearance, the Swiss theme and brand kit of this presentation, and the first theme tile, Simple.',
-    caption: `${F.themes} themes, each with a light and a dark appearance.`,
   },
   {
     id: 'export',
@@ -107,17 +98,14 @@ export const FEATURES_SHOTS: readonly Shot[] = [
     name: 'file-download',
     label: 'File > Download',
     icon: 'arrow-down-tray',
-    number: '04',
     href: '#export',
     alt: 'The File menu open at Download, with Microsoft PowerPoint, PDF Document, JPEG image, PNG image and More formats.',
-    caption: 'PowerPoint, PDF, JPEG and PNG from the File menu.',
   },
   {
     id: 'agents',
     kind: 'code',
     label: 'Command line',
     icon: 'command-line',
-    number: '05',
     href: '#agents',
     lines: [
       'turboslide info --json',
@@ -127,11 +115,10 @@ export const FEATURES_SHOTS: readonly Shot[] = [
       'turboslide lint all --json',
       'turboslide export pptx --mode flatten --theme both --out exports',
     ],
-    caption: 'The same work as actions an agent runs.',
   },
 ];
 
-/** The counts under the lead, read from facts.ts. */
+/** The counts under the shots, read from facts.ts. */
 export const FEATURE_COUNTS = [
   { id: 'actions', label: 'Actions', value: F.actions, href: '/docs/reference' },
   { id: 'layouts', label: 'Layouts', value: F.layouts, href: '/docs/editor/slides#layouts' },
@@ -142,9 +129,6 @@ export const FEATURE_COUNTS = [
 export const FEATURE_GROUPS: readonly FeatureGroup[] = [
   {
     id: 'make',
-    number: '01',
-    label: 'Make',
-    icon: 'pencil-square',
     sentence: 'Make a presentation in the browser, with no account.',
     keys: ['no account'],
     docs: { label: 'The editor', href: '/docs/editor' },
@@ -152,7 +136,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
       kind: 'crop',
       name: 'editor-top',
       alt: "The top of the Turboslide editor: the title row with the presentation's name, the menus File, Edit, View, Insert, Format, Slide, Arrange, Tools and Help, and the toolbar.",
-      caption: 'The title row, the menus and the toolbar of the editor.',
     },
     features: [
       {
@@ -203,9 +186,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
   },
   {
     id: 'present',
-    number: '02',
-    label: 'Present',
-    icon: 'play',
     sentence: 'Present full screen, with your notes in a second window.',
     keys: ['full screen'],
     docs: { label: 'Presenting', href: '/docs/presenting' },
@@ -213,7 +193,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
       kind: 'crop',
       name: 'viewer-bar',
       alt: "The right end of the viewer's bar: the Slide, Grid and Book views, Theme, Present, full screen, Copy link and Help.",
-      caption: "The right end of the viewer's bar. Present starts the slideshow.",
     },
     features: [
       {
@@ -248,9 +227,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
   },
   {
     id: 'share',
-    number: '03',
-    label: 'Share and work together',
-    icon: 'user-group',
     sentence: 'Share by link or by name, and edit together.',
     keys: ['edit together'],
     docs: { label: 'Sharing and people', href: '/docs/sharing' },
@@ -258,7 +234,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
       kind: 'crop',
       name: 'share-dialog',
       alt: "The sharing dialog: General access set to Anyone with the link with the role Viewer, Copy Link, the Open as a slideshow box, the owner's row and More.",
-      caption: 'The sharing dialog with Anyone with the link and Viewer chosen.',
     },
     features: [
       {
@@ -300,9 +275,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
   },
   {
     id: 'export',
-    number: '04',
-    label: 'Export',
-    icon: 'arrow-down-tray',
     sentence: 'Download what you see on the slide.',
     keys: ['what you see'],
     docs: { label: 'Download and export', href: '/docs/export' },
@@ -310,7 +282,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
       kind: 'crop',
       name: 'file-download',
       alt: 'The File menu open at Download, with Microsoft PowerPoint, PDF Document, JPEG image, PNG image and More formats.',
-      caption: 'File > Download. The web page and the Turboslide file are under More formats.',
     },
     features: [
       {
@@ -344,21 +315,16 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
   },
   {
     id: 'agents',
-    number: '05',
-    label: 'Agents',
-    icon: 'command-line',
     sentence: 'Every menu command is an action an agent can run.',
     keys: ['agent'],
     docs: { label: 'Agents', href: '/docs/agents' },
     figure: {
       kind: 'code',
-      label: 'Command line',
       lines: [
         'turboslide info --json',
         'turboslide slide new --layout split --after title',
         'turboslide export pptx --mode flatten --theme both --out exports',
       ],
-      caption: 'Three commands from the command line chapter.',
     },
     features: [
       {
@@ -402,15 +368,11 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
   },
   {
     id: 'self-hosting',
-    number: '06',
-    label: 'Run it yourself',
-    icon: 'code-bracket',
     sentence: 'Run the studio from its repository on your own computer or server.',
     keys: ['your own'],
     docs: { label: 'Run Turboslide yourself', href: '/docs/self-hosting' },
     figure: {
       kind: 'code',
-      label: 'Your computer',
       lines: [
         'git clone https://github.com/Kevin-Liu-01/Turboslide.git',
         'cd Turboslide',
@@ -418,7 +380,6 @@ export const FEATURE_GROUPS: readonly FeatureGroup[] = [
         'pnpm install',
         'pnpm dev',
       ],
-      caption: 'The studio then answers at localhost:4321.',
     },
     features: [
       {
@@ -470,7 +431,6 @@ export type Question = {
 export const FAQ_HEAD: PageHeadCopy = {
   title: 'Questions and answers',
   keys: ['answers'],
-  lead: 'What people ask before they make a presentation with Turboslide. Each answer links to the documentation that says more.',
   actions: [
     { id: 'site.faq.new', ...NEW_PRESENTATION },
     { id: 'site.faq.docs', label: 'Read the Docs', href: '/docs', icon: 'book-open' },
@@ -480,7 +440,7 @@ export const FAQ_HEAD: PageHeadCopy = {
 /**
  * The shots of /faq: the part of the product an answer talks about, in a column beside the list
  * that holds the shot of the answer opened last (FaqPage.tsx). `href` is the answer the shot
- * belongs to; its number is that question's place in the list.
+ * belongs to.
  */
 export const FAQ_SHOTS = {
   share: {
@@ -491,7 +451,6 @@ export const FAQ_SHOTS = {
     icon: 'user-group',
     href: '#privacy',
     alt: "The sharing dialog: General access set to Anyone with the link with the role Viewer, Copy Link, the Open as a slideshow box, the owner's row and More.",
-    caption: 'Share sets who can open a presentation and what each person can do.',
   },
   download: {
     id: 'download',
@@ -501,7 +460,6 @@ export const FAQ_SHOTS = {
     icon: 'arrow-down-tray',
     href: '#export',
     alt: 'The File menu open at Download, with Microsoft PowerPoint, PDF Document, JPEG image, PNG image and More formats.',
-    caption: 'PowerPoint, PDF, JPEG and PNG, and the Turboslide file under More formats.',
   },
   agents: {
     id: 'agents',
@@ -514,7 +472,6 @@ export const FAQ_SHOTS = {
       'turboslide mcp --deck <folder>',
       'turboslide slide new --layout split --after title',
     ],
-    caption: 'An agent signs in once, then runs the same actions as the menus.',
   },
   source: {
     id: 'source',
@@ -529,7 +486,6 @@ export const FAQ_SHOTS = {
       'pnpm install',
       'pnpm dev',
     ],
-    caption: 'The studio then answers at localhost:4321.',
   },
 } as const satisfies Record<string, Shot>;
 
@@ -712,12 +668,9 @@ export const QUESTIONS: readonly Question[] = [
   },
 ];
 
-/** A block of /about: its number, label, icon and sentence, then its paragraphs. */
+/** A block of /about: its sentence, then its paragraphs. */
 export type AboutBlock = {
   id: string;
-  number: string;
-  label: string;
-  icon: SiteIconName;
   sentence: string;
   /** the words of the sentence drawn in the accent */
   keys: readonly string[];
@@ -748,15 +701,9 @@ export const ABOUT_HEAD: PageHeadCopy = {
  */
 export const ABOUT_FIGURE = {
   editor: {
-    label: 'The editor',
-    icon: 'pencil-square',
-    caption: 'Claude Code and Codex at work on a presentation.',
     alt: 'The Turboslide editor on a presentation titled Northwind quarterly review, with the menus, the toolbar, the filmstrip and the title slide. The pointers of Claude Code and Codex are on the slide.',
   },
   viewer: {
-    label: 'The viewer',
-    icon: 'play',
-    caption: 'Anyone with the link presents it.',
     alt: 'The Turboslide viewer on a phone in the Book view of the example deck, with the slide counter, the Slide, Grid and Book views, Theme and Help in its bar.',
   },
 } as const;
@@ -766,9 +713,6 @@ export const GENERAL_TRANSLATION = 'https://generaltranslation.com';
 export const ABOUT_BLOCKS: readonly AboutBlock[] = [
   {
     id: 'what',
-    number: '01',
-    label: 'What it is',
-    icon: 'presentation-chart-bar',
     sentence: 'A slides editor in the browser.',
     keys: ['browser'],
     body: [
@@ -782,9 +726,6 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
   },
   {
     id: 'agents',
-    number: '02',
-    label: 'Agent native',
-    icon: 'command-line',
     sentence: 'Every menu command is an action.',
     keys: ['action'],
     body: [
@@ -795,9 +736,6 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
   },
   {
     id: 'principles',
-    number: '03',
-    label: 'Principles',
-    icon: 'check-badge',
     sentence: 'Your presentations stay yours.',
     keys: ['yours'],
     body: [],
@@ -820,9 +758,6 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
   },
   {
     id: 'source',
-    number: '04',
-    label: 'Open source',
-    icon: 'code-bracket',
     sentence: 'Open source under the MIT License.',
     keys: ['Open source'],
     body: [
@@ -836,9 +771,6 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
   },
   {
     id: 'maker',
-    number: '05',
-    label: 'Who makes it',
-    icon: 'globe-alt',
     sentence: 'Made by General Translation.',
     keys: ['General Translation'],
     body: [],
@@ -846,9 +778,6 @@ export const ABOUT_BLOCKS: readonly AboutBlock[] = [
   },
   {
     id: 'contact',
-    number: '06',
-    label: 'Contact',
-    icon: 'chat-bubble-left-right',
     sentence: 'Report a problem or ask for a feature on GitHub.',
     keys: ['GitHub'],
     body: [
@@ -862,12 +791,9 @@ export const ABOUT_ISSUE = { label: 'Open an Issue', href: `${REPOSITORY}/issues
 /** The labels the pages share. */
 export const PAGES = {
   docsLink: 'Read the chapter',
-  figure: 'Figure',
   countsName: 'Turboslide in numbers',
   shotsName: 'Turboslide for people and agents',
   shotName: 'The product this answer is about',
   aboutShotsName: 'The editor and the viewer',
-  codeSource: 'From the docs',
-  commands: (n: number): string => `${n} commands`,
   questionsName: 'Questions',
 } as const;

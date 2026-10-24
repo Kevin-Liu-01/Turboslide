@@ -20,7 +20,7 @@ catalog:
   '@codemirror/lang-json': 6.0.2
   '@codemirror/language': 6.12.4
   '@codemirror/lint': 6.9.7
-  '@codemirror/state': 6.7.4
+  '@codemirror/state': 6.7.6
   '@codemirror/view': 6.43.11
   # The design round (docs/DESIGN.md 2.4, decision C3): placement of every floating plate in the
   # editor and the pages through one shared place() (packages/chrome/src/place.ts), 7,057 B gzip

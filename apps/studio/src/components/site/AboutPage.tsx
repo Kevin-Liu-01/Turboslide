@@ -10,7 +10,7 @@ import {
   ABOUT_FIGURE,
   ABOUT_HEAD,
   ABOUT_ISSUE,
-  GENERAL_TRANSLATION,
+  KEVIN_LIU,
   PAGES,
 } from './pages-copy';
 import { SiteBlock } from './SiteBlock';
@@ -83,11 +83,7 @@ export function AboutPage() {
       <JsonLd
         data={webPageData(origin, ABOUT_META, 'AboutPage', {
           about: softwareData(origin),
-          publisher: {
-            '@type': 'Organization',
-            name: 'General Translation',
-            url: GENERAL_TRANSLATION,
-          },
+          publisher: { '@type': 'Person', name: 'Kevin Liu', url: KEVIN_LIU },
         })}
       />
       <PageHead copy={ABOUT_HEAD}>

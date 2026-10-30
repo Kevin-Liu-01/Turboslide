@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 
 import { useMountEffect } from '../useMountEffect';
-import { REDUCED_MOTION, inkOf, onAppearance } from './cells';
+import { REDUCED_MOTION, SCREEN, inkOf, onAppearance, rgbOf } from './cells';
 import type { Rgb } from './cells';
 import {
   FIELD_FONT_PX,
@@ -16,6 +16,8 @@ import {
   cover,
   fadeAt,
   lensAt,
+  revealAt,
+  spansOf,
 } from './field';
 import type { Rect } from './field';
 
@@ -23,11 +25,11 @@ import toneUrl from './pictures/lighthouse-tone.webp?url';
 
 /** The device pixel ratio the field draws at, at most 2. */
 const MAX_DPR = 2;
-/** How far the lens moves toward the pointer each frame (1 under reduced motion). */
-const EASE = 0.28;
 /** The word the footer's field draws, and the share of the field's width it spans. */
 const WORD = 'Turboslide';
 const WORD_SPAN = 0.96;
+/** What the lens never reaches through: the cleared copy, the figure that ends the band, controls. */
+const OPAQUE = '[data-field-clear], [data-field-end], a, button, input, textarea';
 
 type Grid = {
   cols: number;
@@ -39,21 +41,29 @@ type Grid = {
   clear: Uint8Array;
 };
 
+/** The cells the lens picks out: the indices from `first` to `last` of one copy of a span. */
+type Picked = { first: number; last: number };
+
 /** What a field draws: the lighthouse slide behind the hero, or the name in the footer. */
 export type FieldKind = 'slide' | 'word';
 
 /**
  * A field of the site (field.ts; Kevin, 2026-10-30): one canvas filling its parent, a text
- * portrait set in the lighthouse slide's own JSON in Katagami Mono, with a lens under the pointer
- * that inks every cell so the source reads there. The hero's field (`slide`) draws the slide's
- * photograph; the footer's field (`word`) draws the name in Katagami Sans the same way.
+ * portrait set in the lighthouse slide's own JSON in Katagami Mono. The hero's field (`slide`)
+ * draws the slide's photograph; the footer's field (`word`) draws the name in Katagami Sans the
+ * same way.
  *
- * The canvas is decorative (`aria-hidden`) and draws once per size, appearance and font, the
- * footer's on its first approach to the screen; after that only the cells under the lens are drawn
- * again, and only while the lens moves, so the page idles at zero. The canvas fades in once drawn,
- * and nothing in the page's flow depends on it. Content that must read over the field carries
- * `data-field-clear`; its cells stay paper, and with the value `band` its rows stay paper across
- * the field.
+ * The field prints itself once through the deck's 8 by 8 Bayer screen (`SCREEN`, REVEAL_MS), the
+ * same screen the product's two tone pictures use, so it arrives as a dither instead of a fade.
+ * Under the pointer a lens inks every cell, so the source reads there, and picks out the key and
+ * value under the pointer in the site's accent (`spansOf`). A redraw clears a region snapped to
+ * device pixels and draws the cells one cell past it, so a glyph that reaches into its neighbour
+ * leaves no sliver behind.
+ *
+ * The canvas is decorative (`aria-hidden`) and costs nothing at rest: it draws once per size,
+ * appearance and font, the footer's on its first approach to the screen, and after that only the
+ * cells under a moving lens. Content that must read over the field carries `data-field-clear`; its
+ * cells stay paper, and with the value `band` its rows stay paper across the field.
  */
 export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -67,19 +77,28 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
     const cell = cellFor(fontPx);
     let grid: Grid | null = null;
     let ink: Rgb = inkOf(host);
+    let accent: Rgb = ink;
     let family = getComputedStyle(node).fontFamily;
     let picture: HTMLImageElement | null = null;
     let started = false;
-    let frame = 0;
     let cancelled = false;
-    /* the lens: where it is drawn and where it heads */
-    let lens = { x: -1e4, y: -1e4 };
-    let goal = { x: -1e4, y: -1e4 };
-    let drawn = { x: -1e4, y: -1e4 };
+    /* the reveal: when it began, and the progress the canvas holds (a cell is drawn once its
+       threshold in the screen is under it) */
+    let revealStart = -1;
+    let shown = 0;
+    let revealFrame = 0;
+    /* the lens: its centre in field px, null while the pointer is away */
+    let lens: { x: number; y: number } | null = null;
+    let goal: { x: number; y: number } | null = null;
+    let picked: Picked | null = null;
+    let lensFrame = 0;
 
     /* the name's letters are thin against a cell, so its stream leaves out the spaces */
     const stream = kind === 'word' ? SOURCE.replace(/\s+/g, '') : SOURCE;
+    const { spans, at } = spansOf(stream);
     const charAt = (i: number): string => stream[i % stream.length] ?? ' ';
+    const thresholdOf = (col: number, row: number): number =>
+      SCREEN[(row & 7) * 8 + (col & 7)] ?? 1;
 
     /** Paints the slide's photograph into the sample, one pixel a cell. */
     const paintSlide = (
@@ -125,6 +144,152 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
       s.fillStyle = '#fff';
       s.fillText(WORD, box.width / 2, box.height / 2);
       s.restore();
+    };
+
+    /** Readies the context for a batch of glyphs; the colour is set per alpha step. */
+    const pen = (): void => {
+      if (grid === null) return;
+      g.setTransform(grid.dpr, 0, 0, grid.dpr, 0, 0);
+      g.font = `400 ${fontPx}px ${family}`;
+      g.textBaseline = 'middle';
+      g.textAlign = 'center';
+    };
+
+    /* the last fill the pen set, so a run of cells at one alpha sets it once */
+    let lastFill = '';
+    const fill = (rgb: Rgb, alpha: number): void => {
+      const style = `rgb(${rgb[0]} ${rgb[1]} ${rgb[2]} / ${alpha})`;
+      if (style !== lastFill) {
+        g.fillStyle = style;
+        lastFill = style;
+      }
+    };
+
+    /** Draws one cell over what the canvas holds, if the reveal has reached it. */
+    const paintCell = (col: number, row: number): void => {
+      if (grid === null) return;
+      const i = row * grid.cols + col;
+      if (grid.clear[i] === 1 || thresholdOf(col, row) >= shown) return;
+      const x = col * cell.w + cell.w / 2;
+      const y = row * cell.h + cell.h / 2;
+      if (picked !== null && i >= picked.first && i <= picked.last) {
+        fill(accent, 1);
+        g.fillText(charAt(i), x, y);
+        return;
+      }
+      const strength = lens === null ? 0 : lensAt(Math.hypot(x - lens.x, y - lens.y));
+      const alpha = alphaOf(grid.tone[i] ?? 0, strength);
+      if (alpha <= 0.01) return;
+      fill(ink, Math.round(alpha * 20) / 20);
+      g.fillText(charAt(i), x, y);
+    };
+
+    /** Draws a rect of field px again: cleared on whole device pixels, its cells drawn one past it. */
+    const redraw = (rect: Rect): void => {
+      if (grid === null) return;
+      const { dpr } = grid;
+      const x0 = Math.floor(rect.x * dpr) / dpr;
+      const y0 = Math.floor(rect.y * dpr) / dpr;
+      const x1 = Math.ceil((rect.x + rect.w) * dpr) / dpr;
+      const y1 = Math.ceil((rect.y + rect.h) * dpr) / dpr;
+      pen();
+      g.save();
+      g.beginPath();
+      g.rect(x0, y0, x1 - x0, y1 - y0);
+      g.clip();
+      g.clearRect(x0, y0, x1 - x0, y1 - y0);
+      const c = cellsOf(
+        { x: x0 - cell.w, y: y0 - cell.h, w: x1 - x0 + 2 * cell.w, h: y1 - y0 + 2 * cell.h },
+        grid,
+        cell,
+      );
+      lastFill = '';
+      for (let row = c.r0; row < c.r1; row += 1)
+        for (let col = c.c0; col < c.c1; col += 1) paintCell(col, row);
+      g.restore();
+      lastFill = '';
+    };
+
+    /** The rect of field px a lens at a point inks. */
+    const lensRect = (point: { x: number; y: number }): Rect => ({
+      x: point.x - LENS_RADIUS,
+      y: point.y - LENS_RADIUS,
+      w: 2 * LENS_RADIUS,
+      h: 2 * LENS_RADIUS,
+    });
+
+    /** The rect of field px a picked span covers: its row, or its rows across the field. */
+    const pickedRect = (p: Picked): Rect | null => {
+      if (grid === null) return null;
+      const r0 = Math.floor(p.first / grid.cols);
+      const r1 = Math.floor(p.last / grid.cols);
+      if (r0 === r1)
+        return {
+          x: (p.first % grid.cols) * cell.w,
+          y: r0 * cell.h,
+          w: ((p.last % grid.cols) - (p.first % grid.cols) + 1) * cell.w,
+          h: cell.h,
+        };
+      return { x: 0, y: r0 * cell.h, w: grid.cols * cell.w, h: (r1 - r0 + 1) * cell.h };
+    };
+
+    /** The copy of the span under a point, or null over punctuation, paper or a cleared cell. */
+    const pickAt = (point: { x: number; y: number } | null): Picked | null => {
+      if (grid === null || point === null) return null;
+      const col = Math.floor(point.x / cell.w);
+      const row = Math.floor(point.y / cell.h);
+      if (col < 0 || row < 0 || col >= grid.cols || row >= grid.rows) return null;
+      const i = row * grid.cols + col;
+      if (grid.clear[i] === 1) return null;
+      const n = at[i % stream.length] ?? -1;
+      const span = spans[n];
+      if (span === undefined) return null;
+      const base = i - (i % stream.length);
+      return {
+        first: Math.max(0, base + span.start),
+        last: Math.min(grid.cols * grid.rows - 1, base + span.end - 1),
+      };
+    };
+
+    /** Moves the lens to the goal: draws again where it was and where it is, and the two spans. */
+    const moveLens = (): void => {
+      lensFrame = 0;
+      const was = lens;
+      const before = picked;
+      lens = goal;
+      picked = pickAt(lens);
+      const rects: Rect[] = [];
+      if (was !== null) rects.push(lensRect(was));
+      if (lens !== null) rects.push(lensRect(lens));
+      for (const p of [before, picked]) {
+        const r = p === null ? null : pickedRect(p);
+        if (r !== null) rects.push(r);
+      }
+      /* two lens rects that overlap draw as one, so no cell is drawn twice in a frame */
+      const [a, b] = rects;
+      if (rects.length >= 2 && a !== undefined && b !== undefined && overlaps(a, b)) {
+        rects.splice(0, 2, union(a, b));
+      }
+      for (const rect of rects) redraw(rect);
+    };
+
+    /** Draws the cells the reveal has reached since the last frame, then asks for the next. */
+    const revealStep = (now: number): void => {
+      revealFrame = 0;
+      if (grid === null) return;
+      const next = reduced.matches ? 1 : revealAt(now - revealStart);
+      const from = shown;
+      shown = next;
+      pen();
+      lastFill = '';
+      for (let k = 0; k < 64; k += 1) {
+        const t = SCREEN[k] ?? 1;
+        if (t < from || t >= next) continue;
+        for (let row = k >> 3; row < grid.rows; row += 8)
+          for (let col = k & 7; col < grid.cols; col += 8) paintCell(col, row);
+      }
+      lastFill = '';
+      if (next < 1) revealFrame = window.requestAnimationFrame(revealStep);
     };
 
     const build = (): void => {
@@ -182,89 +347,33 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
           );
       }
       grid = { cols, rows, dpr, tone: values, clear };
-      drawCells(0, 0, cols, rows);
+      picked = pickAt(lens);
+      /* the first build starts the reveal; a later one draws at the reveal's current progress */
+      const now = performance.now();
+      if (revealStart < 0) revealStart = now;
+      shown = reduced.matches ? 1 : revealAt(now - revealStart);
+      redraw({ x: 0, y: 0, w: cols * cell.w, h: rows * cell.h });
       node.dataset.ready = '';
-    };
-
-    /** Draws the cells of a block of the grid, after clearing it. */
-    const drawCells = (c0: number, r0: number, c1: number, r1: number): void => {
-      if (grid === null) return;
-      const { cols, dpr, tone: values, clear } = grid;
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g.clearRect(c0 * cell.w, r0 * cell.h, (c1 - c0) * cell.w, (r1 - r0) * cell.h);
-      g.font = `400 ${fontPx}px ${family}`;
-      g.textBaseline = 'middle';
-      g.textAlign = 'center';
-      const [r, gr, b] = ink;
-      let last = -1;
-      for (let row = r0; row < r1; row += 1) {
-        const y = row * cell.h + cell.h / 2;
-        for (let col = c0; col < c1; col += 1) {
-          const i = row * cols + col;
-          if (clear[i] === 1) continue;
-          const x = col * cell.w + cell.w / 2;
-          const alpha = alphaOf(values[i] ?? 0, lensAt(Math.hypot(x - lens.x, y - lens.y)));
-          if (alpha <= 0.01) continue;
-          const step = Math.round(alpha * 20);
-          if (step !== last) {
-            g.fillStyle = `rgb(${r} ${gr} ${b} / ${step / 20})`;
-            last = step;
-          }
-          g.fillText(charAt(i), x, y);
-        }
-      }
-    };
-
-    /** Draws again the cells the lens covered and now covers. */
-    const drawLens = (): void => {
-      if (grid === null) return;
-      const reach = LENS_RADIUS + cell.w;
-      const x0 = Math.min(drawn.x, lens.x) - reach;
-      const x1 = Math.max(drawn.x, lens.x) + reach;
-      const y0 = Math.min(drawn.y, lens.y) - reach;
-      const y1 = Math.max(drawn.y, lens.y) + reach;
-      const c = cellsOf({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, grid, cell);
-      /* a lens that jumped across the field draws its two places, not the band between them */
-      if ((c.c1 - c.c0) * (c.r1 - c.r0) > 2 * ((2 * reach) / cell.w) * ((2 * reach) / cell.h)) {
-        for (const at of [drawn, lens]) {
-          const d = cellsOf(
-            { x: at.x - reach, y: at.y - reach, w: 2 * reach, h: 2 * reach },
-            grid,
-            cell,
-          );
-          drawCells(d.c0, d.r0, d.c1, d.r1);
-        }
-      } else drawCells(c.c0, c.r0, c.c1, c.r1);
-      drawn = { ...lens };
-    };
-
-    const tick = (): void => {
-      frame = 0;
-      const k = reduced.matches ? 1 : EASE;
-      lens = { x: lens.x + (goal.x - lens.x) * k, y: lens.y + (goal.y - lens.y) * k };
-      if (Math.hypot(goal.x - lens.x, goal.y - lens.y) < 0.5) lens = { ...goal };
-      drawLens();
-      if (lens.x !== goal.x || lens.y !== goal.y) frame = window.requestAnimationFrame(tick);
-    };
-    const schedule = (): void => {
-      if (frame === 0) frame = window.requestAnimationFrame(tick);
+      window.cancelAnimationFrame(revealFrame);
+      revealFrame = shown < 1 ? window.requestAnimationFrame(revealStep) : 0;
     };
 
     const onMove = (event: PointerEvent): void => {
       if (grid === null) return;
-      const box = host.getBoundingClientRect();
-      const x = event.clientX - box.left;
-      const y = event.clientY - box.top;
       if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
-      /* the lens enters at the pointer instead of sweeping in from where it last left */
-      if (goal.x < -1e3) lens = { x, y };
-      goal = { x, y };
-      schedule();
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest(OPAQUE)) {
+        onLeave();
+        return;
+      }
+      const box = host.getBoundingClientRect();
+      goal = { x: event.clientX - box.left, y: event.clientY - box.top };
+      if (lensFrame === 0) lensFrame = window.requestAnimationFrame(moveLens);
     };
     const onLeave = (): void => {
-      goal = { x: -1e4, y: -1e4 };
-      lens = { ...goal };
-      drawLens();
+      if (goal === null && lens === null) return;
+      goal = null;
+      if (lensFrame === 0) lensFrame = window.requestAnimationFrame(moveLens);
     };
 
     let pending = 0;
@@ -275,10 +384,16 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
         if (!cancelled) build();
       });
     };
+    const readColours = (): void => {
+      ink = inkOf(host);
+      const value = getComputedStyle(host).getPropertyValue('--site-accent').trim();
+      accent = value === '' ? ink : rgbOf(value);
+    };
+    readColours();
     const resize = new ResizeObserver(rebuild);
     resize.observe(host);
     const stopAppearance = onAppearance(() => {
-      ink = inkOf(host);
+      readColours();
       rebuild();
     });
     host.addEventListener('pointermove', onMove, { passive: true });
@@ -328,7 +443,8 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(lensFrame);
+      window.cancelAnimationFrame(revealFrame);
       window.cancelAnimationFrame(pending);
       near?.disconnect();
       resize.disconnect();
@@ -338,4 +454,14 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
     };
   });
   return <canvas ref={canvas} className="site-field" aria-hidden="true" />;
+}
+
+function overlaps(a: Rect, b: Rect): boolean {
+  return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+}
+
+function union(a: Rect, b: Rect): Rect {
+  const x = Math.min(a.x, b.x);
+  const y = Math.min(a.y, b.y);
+  return { x, y, w: Math.max(a.x + a.w, b.x + b.w) - x, h: Math.max(a.y + a.h, b.y + b.h) - y };
 }

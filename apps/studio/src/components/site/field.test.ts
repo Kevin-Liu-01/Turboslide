@@ -13,13 +13,16 @@ import {
   cover,
   fadeAt,
   lensAt,
+  revealAt,
+  spansOf,
   toneInk,
 } from './field';
 
 // The site's fields (field.ts, SiteField.tsx; Kevin, 2026-10-30): the lighthouse slide as a text
 // portrait in its own JSON. These pin the parts a wrong number would break without a browser:
 // the stream is the slide's file, the photograph covers the band from its top at every window
-// the site draws, and the lens and the ink ramp stay in range.
+// the site draws, the lens and the ink ramp stay in range, the reveal ends whole, and the lens
+// picks out a key with its value.
 
 const slide = JSON.parse(
   readFileSync(new URL('../../../home-deck/slides/lighthouse.json', import.meta.url), 'utf8'),
@@ -81,5 +84,45 @@ describe("the hero's field", () => {
     expect(fadeAt(0, 100)).toBe(1);
     expect(fadeAt(50, 100)).toBe(1);
     expect(fadeAt(99, 100)).toBe(0);
+  });
+
+  it('reveals from nothing to the whole field, fast first', () => {
+    expect(revealAt(0)).toBe(0);
+    expect(revealAt(-10)).toBe(0);
+    expect(revealAt(360)).toBeGreaterThan(0.8);
+    expect(revealAt(720)).toBe(1);
+    expect(revealAt(5000)).toBe(1);
+  });
+
+  it('picks out a key with its value, and a key over an object alone', () => {
+    const text = '{"id":"h","maxWidth":560,"plate":{"side":"lower-right"},"tags":["a b"]}';
+    const { spans, at } = spansOf(text);
+    const read = spans.map((span) => text.slice(span.start, span.end));
+    expect(read).toEqual([
+      '"id":"h"',
+      '"maxWidth":560',
+      '"plate":',
+      '"side":"lower-right"',
+      '"tags":',
+      '"a b"',
+    ]);
+    expect(at[0]).toBe(-1);
+    expect(at[text.indexOf('lower')]).toBe(3);
+    expect(at[text.indexOf('}')]).toBe(-1);
+  });
+
+  it('reads an escaped quote inside a string as part of it', () => {
+    const text = '{"text":"say \\"hi\\" now","n":1}';
+    const { spans } = spansOf(text);
+    expect(spans.map((span) => text.slice(span.start, span.end))).toEqual([
+      '"text":"say \\"hi\\" now"',
+      '"n":1',
+    ]);
+  });
+
+  it('covers every string of the slide in a span', () => {
+    const { at } = spansOf(SOURCE);
+    for (const match of SOURCE.matchAll(/"[^"]*"/g))
+      expect(at[match.index]).toBeGreaterThanOrEqual(0);
   });
 });

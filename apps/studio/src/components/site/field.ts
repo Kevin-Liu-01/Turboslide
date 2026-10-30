@@ -25,8 +25,11 @@ export const WORD_FONT_PX = 8;
 export const FOCUS = { x: 0.62, y: 0 } as const;
 
 /** The lens radius in px and the share of its radius that inks at full strength. */
-export const LENS_RADIUS = 152;
+export const LENS_RADIUS = 136;
 const LENS_CORE = 0.45;
+
+/** How long a field takes to print itself through the Bayer screen when it first draws, in ms. */
+export const REVEAL_MS = 720;
 
 /** Ink alphas: the lightest cell of the picture, the floor the lens lifts every cell to. */
 export const ALPHA = { tone: 0.92, revealed: 0.5 } as const;
@@ -92,4 +95,56 @@ export function fadeAt(row: number, rows: number, solid = 0.62): number {
   if (t <= solid) return 1;
   const u = (t - solid) / (1 - solid);
   return Math.max(0, 1 - u * u * (3 - 2 * u));
+}
+
+/** The reveal's progress at a time into it: 0 to 1, fast first and settling (an ease out). */
+export function revealAt(ms: number, duration = REVEAL_MS): number {
+  const t = Math.min(1, Math.max(0, ms / duration));
+  return 1 - (1 - t) ** 3;
+}
+
+/** A run of the source the lens picks out: a key with its colon and value, or a lone value. */
+export type Span = { start: number; end: number };
+
+/**
+ * The source's spans and, per character, the index of the span it belongs to, or -1 for the
+ * punctuation between them. A key followed by a string, a number or a literal is one span with
+ * its colon and its value; a key followed by an object or an array is a span with its colon; any
+ * other string, number or literal is a span of its own.
+ */
+export function spansOf(text: string): { spans: Span[]; at: Int32Array } {
+  type Token = { kind: 'value' | 'colon' | 'other'; start: number; end: number };
+  const tokens: Token[] = [];
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i] ?? '';
+    const start = i;
+    if (ch === '"') {
+      i += 1;
+      while (i < text.length && text[i] !== '"') i += text[i] === '\\' ? 2 : 1;
+      i = Math.min(text.length, i + 1);
+      tokens.push({ kind: 'value', start, end: i });
+    } else if (/[-0-9a-z]/i.test(ch)) {
+      while (i < text.length && /[-+.0-9a-z]/i.test(text[i] ?? '')) i += 1;
+      tokens.push({ kind: 'value', start, end: i });
+    } else {
+      i += 1;
+      if (ch.trim() !== '') tokens.push({ kind: ch === ':' ? 'colon' : 'other', start, end: i });
+    }
+  }
+  const spans: Span[] = [];
+  for (let t = 0; t < tokens.length; t += 1) {
+    const token = tokens[t];
+    if (token === undefined || token.kind !== 'value') continue;
+    const colon = tokens[t + 1];
+    if (colon?.kind === 'colon') {
+      const value = tokens[t + 2];
+      const pair = value?.kind === 'value';
+      spans.push({ start: token.start, end: pair ? value.end : colon.end });
+      t += pair ? 2 : 1;
+    } else spans.push({ start: token.start, end: token.end });
+  }
+  const at = new Int32Array(text.length).fill(-1);
+  spans.forEach((span, n) => at.fill(n, span.start, span.end));
+  return { spans, at };
 }

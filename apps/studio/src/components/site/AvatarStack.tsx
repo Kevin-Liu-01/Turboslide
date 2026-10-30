@@ -15,17 +15,16 @@ export type OnPress = (who: TryPressed) => void;
 const PRESSED_MS = 1200;
 
 /**
- * One stack of the title (docs/SITE.md B): the avatars fan along a circular arc that rises from
- * the top right of the stack's word. The stack is positioned out of the line's flow, so it takes
- * no width and the sentence keeps its word spacing; site.css places each avatar on the arc from
- * its index (`--i`) and opens the fan on hover and focus. People are generated portraits
- * (Portrait.tsx) and agents the tools' own marks on a plate of their own, each in a solid ring of
- * its live hue (packages/identity/src/hues.ts).
+ * One row of the title (docs/SITE.md B): the avatars overlap in a row after their word, the
+ * later one over the one before it, and spread apart under a pointer or the keyboard's focus with
+ * each one's name under it (site.css). People are generated portraits (Portrait.tsx) and agents
+ * the tools' own marks on a plate of their own, each in a solid ring of its live hue
+ * (packages/identity/src/hues.ts).
  *
  * Each avatar is a button named by its person or tool, with what pressing does as its
  * description; pressing hands the person or the agent to the live editor below (`onPress`). The
- * stack is one tab stop: the arrow keys move along the arc, Home and End go to its ends, and Enter
- * and Space press.
+ * row is one tab stop: the arrow keys move along it, Home and End go to its ends, and Enter and
+ * Space press.
  */
 export function AvatarStack({ kind, onPress }: { kind: 'people' | 'agents'; onPress?: OnPress }) {
   const rows =
@@ -82,7 +81,6 @@ export function AvatarStack({ kind, onPress }: { kind: 'people' | 'agents'; onPr
       data-stack={kind}
       role="group"
       aria-label={kind === 'people' ? 'People' : 'Agents'}
-      style={{ '--n': rows.length } as CSSProperties}
       onKeyDown={move}
     >
       {rows.map((row, i) => (

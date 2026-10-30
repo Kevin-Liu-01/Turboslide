@@ -200,7 +200,6 @@ export function rows(): void {
         const lines = await titleLines(page);
         const facts = await page.evaluate(() => {
           const h1 = document.querySelector('#site-title') as HTMLElement;
-          const size = parseFloat(getComputedStyle(h1).fontSize);
           const words = [...h1.querySelectorAll<HTMLElement>('.site-h1-word')];
           const people = document.createRange();
           people.selectNodeContents(words[0]?.firstChild as Node);
@@ -215,37 +214,41 @@ export function rows(): void {
             range.setEnd(and, at + 1);
           }
           return {
-            size,
-            peopleRight: people.getBoundingClientRect().right,
-            andLeft: range.getBoundingClientRect().left,
             andTop: range.getBoundingClientRect().top,
             peopleTop: people.getBoundingClientRect().top,
-            stacks: [...h1.querySelectorAll('.site-stack')].map((st) => {
+            /* each row's box: its line is the word's when its middle sits inside the word's box */
+            stacks: [...h1.querySelectorAll('.site-stack')].map((st, i) => {
               const r = [...st.querySelectorAll('.site-av')].map((av) =>
                 av.getBoundingClientRect(),
               );
-              return Math.max(...r.map((b) => b.right));
+              const word = document.createRange();
+              word.selectNodeContents(words[i]?.firstChild as Node);
+              const w = word.getBoundingClientRect();
+              const middle =
+                (Math.min(...r.map((b) => b.top)) + Math.max(...r.map((b) => b.bottom))) / 2;
+              return {
+                right: Math.max(...r.map((b) => b.right)),
+                onWordLine: middle > w.top && middle < w.bottom,
+                afterWord: Math.min(...r.map((b) => b.left)) >= w.right - 0.5,
+              };
             }),
             column: (document.querySelector('.site-hero') as HTMLElement).getBoundingClientRect()
               .right,
           };
         });
         const label = `${cell.width} ${cell.theme}`;
-        if (cell.width >= 1024) {
-          expect(lines, `${label}: one line`).toHaveLength(1);
-          /* the arcs take no inline width: "people" and "and" are a word space apart */
-          expect(facts.andLeft - facts.peopleRight, `${label}: a word space`).toBeLessThan(
-            facts.size * 0.35,
+        /* two lines from 1024, "Presentations for people" and "and agents"; on a phone three,
+           "Presentations for", "people" and "and agents"; "and" always starts the last line */
+        expect(lines, `${label}: lines`).toHaveLength(cell.width >= 1024 ? 2 : 3);
+        expect(facts.andTop, `${label}: "and" starts the last line`).toBeGreaterThan(
+          facts.peopleTop + 4,
+        );
+        for (const stack of facts.stacks) {
+          expect(stack.onWordLine, `${label}: each row on its word's line`).toBe(true);
+          expect(stack.afterWord, `${label}: each row after its word`).toBe(true);
+          expect(stack.right).toBeLessThanOrEqual(
+            cell.width >= 1024 ? facts.column + 0.5 : cell.width,
           );
-          for (const right of facts.stacks) expect(right).toBeLessThanOrEqual(facts.column + 0.5);
-        } else {
-          /* on a phone the line breaks after "people": "Presentations for", "people",
-             "and agents", so each arc has the space after its word */
-          expect(lines, `${label}: three lines`).toHaveLength(3);
-          expect(facts.andTop, `${label}: "and" starts the third line`).toBeGreaterThan(
-            facts.peopleTop + 4,
-          );
-          for (const right of facts.stacks) expect(right).toBeLessThanOrEqual(cell.width);
         }
       } finally {
         await close();
@@ -261,9 +264,9 @@ export function rows(): void {
         const facts = await page.evaluate(() => {
           const h1 = document.querySelector('#site-title') as HTMLElement;
           const size = parseFloat(getComputedStyle(h1).fontSize);
-          /* each glyph's ink box from its character's box: Inter's descent is 0.242em, the cap
-             height 0.727em over the baseline, the x-height 0.546em; ascenders reach a little
-             over the cap height */
+          /* each glyph's ink box from its character's box: a descent of 0.242em, the cap height
+             0.727em over the baseline, the x-height 0.546em; ascenders reach a little over the
+             cap height */
           const glyphs: { left: number; right: number; top: number; bottom: number }[] = [];
           const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
           for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
@@ -309,11 +312,15 @@ export function rows(): void {
             range.selectNodeContents(w.firstChild as Node);
             return range.getBoundingClientRect();
           });
-          /* the first avatar of each arc meets its word's top right corner */
+          /* the first avatar of each row follows its word on the word's line */
           const starts = [...h1.querySelectorAll<HTMLElement>('.site-stack')].map((st, i) => {
             const first = (st.querySelector('.site-av') as HTMLElement).getBoundingClientRect();
             const word = words[i] as DOMRect;
-            return { dx: first.left - word.right, above: word.top - first.top };
+            return {
+              dx: first.left - word.right,
+              middle: (first.top + first.bottom) / 2 - (word.top + word.bottom) / 2,
+              height: word.height,
+            };
           });
           const rings = [...h1.querySelectorAll<HTMLElement>('.site-av')].map(
             (av) => getComputedStyle(av).borderTopStyle,
@@ -332,8 +339,12 @@ export function rows(): void {
           else expect(av.size, `${label}: ${av.name}`).toBeGreaterThanOrEqual(24);
         }
         for (const start of facts.starts) {
-          expect(Math.abs(start.dx), `${label}: the arc starts at its word`).toBeLessThanOrEqual(4);
-          expect(start.above, `${label}: the arc rises from the word's top`).toBeGreaterThan(-24);
+          expect(start.dx, `${label}: the row follows its word`).toBeGreaterThanOrEqual(0);
+          expect(start.dx, `${label}: the row follows its word`).toBeLessThanOrEqual(24);
+          expect(
+            Math.abs(start.middle),
+            `${label}: the row sits on its word's line`,
+          ).toBeLessThanOrEqual(start.height / 3);
         }
         expect(
           facts.rings.every((style) => style === 'solid'),
@@ -363,13 +374,13 @@ export function rows(): void {
           .locator('.site-stack[data-stack="people"] .site-av')
           .evaluateAll((all) => all.map((av) => Math.round(av.getBoundingClientRect().left)));
       const closed = await xs();
-      /* a pointer over the arc fans it open: the last avatar moves out along the arc */
+      /* a pointer over the row spreads it apart: the last avatar moves out along the line */
       await page.locator('.site-av[data-name="Cobalt 118"]').hover();
       await page.waitForTimeout(500);
       const open = await xs();
-      expect((open[4] ?? 0) - (closed[4] ?? 0), 'the fan opens').toBeGreaterThan(20);
+      expect((open[4] ?? 0) - (closed[4] ?? 0), 'the row spreads').toBeGreaterThan(20);
       await page.mouse.move(10, 600);
-      /* one tab stop per arc; the arrows move along it */
+      /* one tab stop per row; the arrows move along it */
       await page.locator('.site-av[data-name="Cobalt 118"]').focus();
       await page.keyboard.press('ArrowRight');
       await expect(page.locator('.site-av[data-name="Argon 905"]')).toBeFocused();

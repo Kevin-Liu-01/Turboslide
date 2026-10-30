@@ -709,7 +709,6 @@ export const ABOUT_FIGURE = {
   },
 } as const;
 
-export const GENERAL_TRANSLATION = 'https://generaltranslation.com';
 /** The maker /about names (Kevin, 2026-10-30). */
 export const KEVIN_LIU = 'https://kevinliu.studio';
 

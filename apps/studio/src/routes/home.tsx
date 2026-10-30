@@ -13,6 +13,7 @@ import { PatternsScreen } from '../components/site/PatternsScreen';
 import { PresentScreen } from '../components/site/PresentScreen';
 import { SiteBar } from '../components/site/SiteBar';
 import { SiteFooter } from '../components/site/SiteFooter';
+import fieldToneUrl from '../components/site/pictures/lighthouse-tone.webp?url';
 import siteCss from '../components/site/site.css?url';
 import { useMountEffect } from '../components/useMountEffect';
 
@@ -42,7 +43,12 @@ export const Route = createFileRoute('/home')({
       { property: 'og:description', content: HOME_META.description },
       { property: 'og:url', content: `${SITE.origin()}${HOME_META.path}` },
     ],
-    links: [{ rel: 'stylesheet', href: siteCss }],
+    links: [
+      { rel: 'stylesheet', href: siteCss },
+      /* the hero field's tone picture (13 KB), fetched at low priority beside the HTML so the field
+         prints itself as soon as the page hydrates (SiteField.tsx) */
+      { rel: 'preload', href: fieldToneUrl, as: 'image', fetchPriority: 'low' },
+    ],
   }),
   component: HomePage,
 });

@@ -10408,29 +10408,29 @@
     {
       "id": "home.title.one-line",
       "feature": "decks",
-      "interaction": "The h1 reads and is named \"Presentations for people and agents\"; at 1440 in both appearances it is one line inside the 1280 px column, with its two arcs inside the column and \"people\" and \"and\" one word space apart (the arcs take no width in the line); at 390 it is three lines, \"Presentations for\", \"people\" and \"and agents\"",
+      "interaction": "The h1 reads and is named \"Presentations for people and agents\"; at 1440 and 1024 in both appearances it is two lines inside the column, \"Presentations for people\" ending with the people's row and \"and agents\" ending with the agents' row; at 390 it is three lines, \"Presentations for\", \"people\" and \"and agents\"; each row stands on its word's line after the word",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md B, D8 (72 px so the line fits the 1280 px column); Kevin's note of 2026-10-15 on the stacks",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone."
     },
     {
       "id": "home.title.stacks",
       "feature": "decks",
-      "interaction": "Each arc starts at its word's top right corner and rises from it; at 1440 and 390 in both appearances no avatar covers a letter of the h1, reaches under the bar or leaves the screen; avatars are 36 px or more at 1440 and 24 px or more at 390, each in a solid ring; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are buttons found by role and name",
+      "interaction": "Each row of avatars follows its word on the word's line, in the line's flow; at 1440 and 390 in both appearances no avatar covers a letter of the h1, reaches under the bar or leaves the screen; avatars are 36 px or more at 1440 and 24 px or more at 390, each in a solid ring; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are buttons found by role and name",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md B; Kevin's request of 2026-10-14 (avatars at the top right of people, the four agents beside agents) and his note of 2026-10-15 (\"make them look better coooolrr in an arc and make them interactable\")",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone."
     },
     {
       "id": "home.title.press",
       "feature": "decks",
-      "interaction": "At 1440 a pointer over the people arc fans it open; each arc is one tab stop whose arrow keys, Home and End move the focus along it, and each avatar is described by what pressing it does; in the live editor, Enter on Codex makes a write within 4 s, a click on Argon 905 brings that person into the room's roster, and a click on OpenClaw brings it in with a comment on the slide; each guest leaves within 30 s",
+      "interaction": "At 1440 a pointer over the people's row spreads it apart; each row is one tab stop whose arrow keys, Home and End move the focus along it, and each avatar is described by what pressing it does; in the live editor, Enter on Codex makes a write within 4 s, a click on Argon 905 brings that person into the room's roster, and a click on OpenClaw brings it in with a comment on the slide; each guest leaves within 30 s",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md B and section 5 (the press, the guests); Kevin's note of 2026-10-15 (\"make them interactable\")",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the polish step, 2026-10-15: the arcs' presses reach the live editor of the hero; not yet read on production"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the polish step, 2026-10-15: the arcs' presses reach the live editor of the hero; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone."
     },
     {
       "id": "home.hero.poster-first",

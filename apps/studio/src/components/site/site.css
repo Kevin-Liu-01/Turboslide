@@ -71,11 +71,11 @@
 
 /* ---- the type scale: seven steps, two weights ---- */
 
-/* 72/72 display, the landing's h1: one line across the column at 1440 with its two stacks (D8:
-   80 px left no room for them); it steps down with the window and is 36/44 on a phone */
+/* the display step, the landing's h1 on its two lines: 86 px at 1440, 96 px from 1600, stepping
+   down with the window to 36/44 on a phone */
 .ts-site .t-display {
   margin: 0;
-  font-size: clamp(40px, 5vw, 72px);
+  font-size: clamp(40px, 6vw, 96px);
   line-height: 1;
   font-weight: 500;
   text-wrap: balance;
@@ -393,14 +393,14 @@
   position: relative;
 }
 
-/* the block of the h1, the lead and the buttons, whose cells the field keeps clear; its padding
-   is room over the h1 for the arcs, which rise about 1.7 avatars over the cap line */
+/* the block of the h1, the lead and the buttons, whose cells the field keeps clear */
 .ts-site .site-hero-copy {
-  padding-top: 64px;
+  padding-top: 48px;
   padding-bottom: 16px;
 }
 
-/* the field (SiteField.tsx): one canvas from the section's top left, drawn once and faded in */
+/* the field (SiteField.tsx): one canvas from the section's top left, printed in once through the
+   Bayer screen */
 .ts-site .site-field {
   position: absolute;
   left: 0;
@@ -408,22 +408,12 @@
   display: block;
   font-family: var(--site-code);
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 480ms var(--pt-ease-out);
-}
-
-.ts-site .site-field[data-ready] {
-  opacity: 1;
 }
 
 /* the strip of the field between the copy and the editor: 144 px at 1440, 192 px at 1920 */
 .ts-site .site-hero-fig {
   position: relative;
   margin: clamp(128px, 10vw, 200px) auto 0;
-}
-
-.ts-site .site-h1-word {
-  white-space: nowrap;
 }
 
 .ts-site .site-hero-row {
@@ -2965,92 +2955,52 @@
   }
 }
 
-/* ---- the title's two orbits (Title.tsx, AvatarStack.tsx, orbit.ts, docs/SITE.md B) ----
-   The words "people" and "agents" in the site accent, each with its stack orbiting its last
-   letter (Kevin, 2026-10-16): avatar i sits on a circle of radius --r centred on the bowl of the
-   "e" or the "s" (--cx and --cy, measured from the word's top right corner, where the stack is
-   placed out of the line's flow so the sentence keeps its word spacing), at the angle --mid plus
-   (n - 1) / 2 - i steps of --da. orbit.ts measures the glyphs in the page and writes these values
-   clear of every letter at every width; the em values here are the orbits it finds at 1440 and at
-   390, drawn until the page hydrates. Hover and focus open the fan from --rest to --open about its
-   middle and lift the avatar under the pointer out along its radius, its name outside it on the
-   same radius. */
+/* ---- the title's two rows (Title.tsx, AvatarStack.tsx, docs/SITE.md B) ----
+   "Presentations for people" and "and agents" on two lines (Kevin, 2026-10-30), each ending with
+   its group: the avatars overlap in a row in the line's flow, centred on the x-height, the later
+   one over the one before it. A pointer over a row or the keyboard's focus in it spreads the row
+   apart by translation alone, so nothing in the line moves, and the avatar under the pointer or
+   the focus rises a little with its name under it. */
 
-/* --s, the avatar's diameter, is the word's, so the room after "people" can be measured in it */
 .ts-site .site-h1-word {
-  --s: clamp(28px, 0.5em, 36px);
-  position: relative;
   color: var(--site-accent);
 }
 
-/* the room the people's orbit takes on the right of the "e" before "and": the orbit reaches
-   about 1.24 avatars less a quarter em past the letter's right side (orbit.ts), plus 10 px of air */
-.ts-site .site-h1-word.is-people {
-  margin-right: calc(var(--s) * 1.24 - 0.235em + 10px);
-}
-
-.ts-site .site-h1-br {
-  display: none;
+/* a word and its row break as one; --s, the avatar's diameter, is half the word's size */
+.ts-site .site-h1-group {
+  --s: max(24px, 0.5em);
+  --lap: calc(var(--s) * -0.3);
+  white-space: nowrap;
 }
 
 .ts-site .site-stack {
-  --cx: -0.24em;
-  --cy: 0.715em;
-  --r: calc(0.27em + var(--s) * 0.66);
-  --mid: 28deg;
-  --rest: 29.6deg;
-  --open: 32.5deg;
-  /* the angle orbit.ts centres the fan on when the orbit has the room, in degrees */
-  --prefer: 45;
-  --da: var(--rest);
-  position: absolute;
-  left: 100%;
-  top: 0;
-  width: 0;
-  height: 0;
-  letter-spacing: 0;
+  display: inline-flex;
+  isolation: isolate;
+  margin-left: 0.18em;
+  vertical-align: middle;
   line-height: 0;
+  letter-spacing: 0;
 }
 
-.ts-site .site-stack[data-stack='agents'] {
-  --cx: -0.213em;
-  --mid: 27deg;
-  --open: 42.7deg;
-  --prefer: 45;
-}
-
-/* the fan opens under a pointer and while an avatar has the keyboard's focus; the open fan
-   keeps a hit area over its span (orbit.ts --hit-*), so the pointer never falls between two
-   avatars and closes it */
+/* the row spreads by the overlap under a pointer and while an avatar has the keyboard's focus */
 .ts-site .site-stack:has(.site-av:focus-visible) {
-  --da: var(--open);
+  --spread: calc(var(--s) * 0.34);
 }
 
 @media (hover: hover) {
   .ts-site .site-stack:hover {
-    --da: var(--open);
+    --spread: calc(var(--s) * 0.34);
   }
 }
 
-.ts-site .site-stack[data-orbit]:hover::before {
-  content: '';
-  position: absolute;
-  left: var(--hit-x);
-  top: var(--hit-y);
-  width: var(--hit-w);
-  height: var(--hit-h);
-}
-
 .ts-site .site-av {
-  --phi: calc(var(--mid) + ((var(--n) - 1) / 2 - var(--i)) * var(--da));
   --up: 0px;
-  position: absolute;
-  left: 0;
-  top: 0;
+  position: relative;
   display: block;
+  flex: none;
   width: var(--s);
   height: var(--s);
-  margin: 0;
+  margin: 0 0 0 var(--lap);
   padding: 0;
   border: 2px solid var(--ts-hue);
   border-radius: 50%;
@@ -3063,51 +3013,31 @@
     0 0 0 2px var(--pt-paper),
     0 4px 10px -3px rgb(0 0 0 / 0.32);
   cursor: pointer;
-  translate: calc(var(--cx) + (var(--r) + var(--up)) * cos(var(--phi)) - var(--s) / 2)
-    calc(var(--cy) - (var(--r) + var(--up)) * sin(var(--phi)) - var(--s) / 2);
+  translate: calc(var(--i) * var(--spread, 0px)) calc(var(--up) * -1);
+  transition:
+    translate 200ms var(--pt-ease),
+    scale 200ms var(--pt-ease);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* the fan moves once the measured orbit is in place, so the first placement never animates */
-.ts-site .site-stack[data-orbit] .site-av {
-  transition:
-    translate 240ms var(--pt-ease),
-    scale 240ms var(--pt-ease);
+.ts-site .site-av:first-child {
+  margin-left: 0;
 }
 
-/* the first avatar on top, each later one under the one before it (local order, under 5) */
-.ts-site .site-av:nth-child(1) {
-  z-index: 4;
-}
-
-.ts-site .site-av:nth-child(2) {
-  z-index: 3;
-}
-
-.ts-site .site-av:nth-child(3) {
-  z-index: 2;
-}
-
-.ts-site .site-av:nth-child(4) {
-  z-index: 1;
-}
-
-/* the lifted avatar: out along its radius, a little larger, its name in a label, on top of every
-   avatar of both stacks (5, over the first avatar's 4), so a label that must touch an avatar
-   (orbit.ts labelAngles) is drawn over it; under a pointer that hovers, on the keyboard's focus,
-   and for a moment after a press (a touch) */
+/* the lifted avatar: up a little, a little larger, its name under it, over its neighbours; under a
+   pointer that hovers, on the keyboard's focus, and for a moment after a press (a touch) */
 .ts-site .site-av:focus-visible,
 .ts-site .site-av[data-pressed] {
-  --up: calc(var(--s) * 0.12);
-  z-index: 5;
-  scale: 1.1;
+  --up: calc(var(--s) * 0.1);
+  z-index: 1;
+  scale: 1.08;
 }
 
 @media (hover: hover) {
   .ts-site .site-av:hover {
-    --up: calc(var(--s) * 0.12);
-    z-index: 5;
-    scale: 1.1;
+    --up: calc(var(--s) * 0.1);
+    z-index: 1;
+    scale: 1.08;
   }
 
   .ts-site .site-av:hover::after {
@@ -3121,15 +3051,13 @@
   outline-offset: 3px;
 }
 
-/* the name: outside the avatar, its near edge 6 px from the ring, on its radius or, where the
-   radius would lay it over a letter of the h1, turned off it (orbit.ts `labelAngles`, --la) */
+/* the name: under the avatar, 6 px from its ring */
 .ts-site .site-av::after {
-  --lab: var(--la, var(--phi));
   content: attr(data-name);
   position: absolute;
-  left: calc(50% + (var(--s) / 2 + 6px) * cos(var(--lab)));
-  top: calc(50% - (var(--s) / 2 + 6px) * sin(var(--lab)));
-  translate: calc(-50% + cos(var(--lab)) * 50%) calc(-50% - sin(var(--lab)) * 50%);
+  left: 50%;
+  top: calc(100% + 6px);
+  translate: -50% 0;
   padding: 2px 6px;
   border-radius: var(--pt-radius-sm);
   background: var(--pt-ink);
@@ -3424,37 +3352,6 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     line-height: 44px;
   }
 
-  /* the line breaks after "people", so each orbit has the space after its letter; 22 px
-     avatars, the people on the right of the "e" between the lines above and below, the agents
-     over and after the "s", so the h1 keeps the display step's 44 px lines (24 px avatars
-     needed 52 px lines, 24 px more height) */
-  .ts-site .site-h1-br {
-    display: inline;
-  }
-
-  .ts-site .site-h1-word {
-    --s: 22px;
-  }
-
-  /* the orbits orbit.ts finds at 390; the ring between letter and avatar is its 4 px floor here.
-     The people's fan has no room to open between the lines, so focus lifts without a fan */
-  .ts-site .site-stack {
-    --cx: -0.244em;
-    --r: calc(0.27em + 4px + var(--s) / 2);
-    --mid: 1deg;
-    --rest: 30deg;
-    --open: 30deg;
-    --prefer: 10;
-  }
-
-  .ts-site .site-stack[data-stack='agents'] {
-    --cx: -0.217em;
-    --mid: 26.5deg;
-    --rest: 31.6deg;
-    --open: 43deg;
-    --prefer: 20;
-  }
-
   .ts-site .t-title {
     font-size: 28px;
     line-height: 36px;
@@ -3608,20 +3505,15 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-foot a,
   .ts-site .site-appear-opt,
   .ts-site .site-hero-frame,
-  .ts-site .site-field,
   .ts-site .site-av {
     transition: none;
   }
 
-  /* the orbit keeps its place: no fan, no lift; the label and the focus ring change at once,
+  /* the row keeps its place: no spread, no lift; the label and the focus ring change at once,
      and a press shows the ring without the spread */
   .ts-site .site-stack:hover,
   .ts-site .site-stack:has(.site-av:focus-visible) {
-    --da: var(--rest);
-  }
-
-  .ts-site .site-stack[data-orbit] .site-av {
-    transition: none;
+    --spread: 0px;
   }
 
   .ts-site .site-av:hover,

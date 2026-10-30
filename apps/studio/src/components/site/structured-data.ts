@@ -2,7 +2,7 @@ import { SITE } from '@turboslide/theme/brand/site';
 
 import { plainText } from './InlineCode';
 import type { PageMeta } from './meta';
-import { GENERAL_TRANSLATION } from './pages-copy';
+import { KEVIN_LIU } from './pages-copy';
 import type { Question } from './pages-copy';
 
 /**
@@ -13,8 +13,8 @@ const CONTEXT = 'https://schema.org';
 
 /**
  * The site's WebSite and Organization, in the root document's head on every route (__root.tsx):
- * the name, the address and the 512 px icon as the logo, part of General Translation as /about
- * names its publisher.
+ * the name, the address and the 512 px icon as the logo, founded by Kevin Liu, who /about names as
+ * its publisher (Kevin, 2026-10-30: Turboslide is his personal project).
  */
 export function siteData(origin: string) {
   return {
@@ -27,11 +27,7 @@ export function siteData(origin: string) {
         name: SITE.name,
         url: origin,
         logo: `${origin}${SITE.icons.any512}`,
-        parentOrganization: {
-          '@type': 'Organization',
-          name: 'General Translation',
-          url: GENERAL_TRANSLATION,
-        },
+        founder: { '@type': 'Person', name: 'Kevin Liu', url: KEVIN_LIU },
       },
     ],
   };

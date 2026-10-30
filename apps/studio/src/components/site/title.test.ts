@@ -11,7 +11,7 @@ import { HAIR, portraitFor } from './Portrait';
 import { Title } from './Title';
 import { isTryPress } from './try-frame';
 
-// The title with its two arcs (docs/SITE.md B): the h1's text content and its name are the
+// The title with its two rows (docs/SITE.md B): the h1's text content and its name are the
 // sentence alone; five people under generated names, each a generated portrait with its own hair
 // cut, and the four agents, each a button with its name, the sentence of what pressing does and
 // a live hue; one tab stop per stack; no name outside the generated labels and the four tools;

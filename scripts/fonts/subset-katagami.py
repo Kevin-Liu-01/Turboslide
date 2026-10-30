@@ -6,7 +6,8 @@ Run by hand, never by the build. The output is committed:
 
   apps/studio/src/components/site/fonts/katagami-{sans,mono}-{core,ext}.woff2
   apps/studio/src/components/site/fonts/katagami.json   the record: sources, bytes, glyphs, ranges
-  apps/studio/src/components/site/site.css               the faces between the katagami markers
+  apps/studio/src/components/site/fonts/katagami.css     the faces, loaded on every route by
+                                                         routes/__root.tsx
 
 Each face is cut to what the site draws:
 
@@ -56,9 +57,7 @@ from fontTools.ttLib import TTFont
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'apps/studio/src/components/site/fonts'
-CSS = ROOT / 'apps/studio/src/components/site/site.css'
-START = '/* katagami:generated:start */'
-END = '/* katagami:generated:end */'
+CSS = OUT / 'katagami.css'
 SOURCE_URL = 'https://katagami.kevinliu.studio/fonts/'
 
 FACES = {
@@ -270,20 +269,11 @@ def build(src: Path) -> tuple[dict[str, bytes], str, dict]:
             }
         record['faces'][key] = face_record
     block = (
-        f'{START}\n'
-        '/* written by scripts/fonts/subset-katagami.py; the fallbacks first, then each face with\n'
-        '   its extended file before its core file */\n'
+        '/* written by scripts/fonts/subset-katagami.py, never by hand: the fallbacks first, then each\n'
+        '   face with its extended file before its core file */\n'
         + '\n'.join(fallbacks + rules)
-        + f'{END}'
     )
     return files, block, record
-
-
-def splice(css: str, block: str) -> str:
-    if START in css and END in css:
-        return css[: css.index(START)] + block + css[css.index(END) + len(END) :]
-    anchor = '/* ---- the root and its tokens ---- */'
-    return css.replace(anchor, f'{block}\n\n{anchor}', 1)
 
 
 def main() -> int:
@@ -293,14 +283,14 @@ def main() -> int:
     args = parser.parse_args()
     files, block, record = build(args.src)
     record_text = json.dumps(record, indent=2) + '\n'
-    css = CSS.read_text(encoding='utf-8')
-    next_css = splice(css, block)
+    css = CSS.read_text(encoding='utf-8') if CSS.exists() else ''
+    next_css = block
     if args.check:
         stale = [n for n, d in files.items() if not (OUT / n).exists() or (OUT / n).read_bytes() != d]
         if (OUT / 'katagami.json').read_text(encoding='utf-8') != record_text:
             stale.append('katagami.json')
         if next_css != css:
-            stale.append('site.css')
+            stale.append('katagami.css')
         for name in stale:
             print(f'stale: {name}', file=sys.stderr)
         return 1 if stale else 0

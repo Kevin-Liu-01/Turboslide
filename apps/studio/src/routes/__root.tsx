@@ -22,6 +22,7 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import interWoff2 from '@turboslide/fonts/assets/InterVariable-latin.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
 import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic-latin.woff2?url';
+import katagamiCss from '../components/site/fonts/katagami.css?url';
 import katagamiMonoWoff2 from '../components/site/fonts/katagami-mono-core.woff2?url';
 import katagamiSansWoff2 from '../components/site/fonts/katagami-sans-core.woff2?url';
 import { PAGE_BLOCK_CSS } from '@turboslide/render/block-css-page';
@@ -95,13 +96,21 @@ const SLIDELESS_ROUTES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * The routes drawn in the site's faces (components/site/site.css; Kevin, 2026-10-30): the landing,
- * the docs and the site pages preload the core file of Katagami Sans in place of Inter's, and the
- * landing (its field) and the docs (their code) the core file of Katagami Mono. Inter still loads
- * there through its unicode-range faces when a drawn slide on the page sets it.
+ * The routes drawn in the site's faces (components/site/fonts/katagami.css, loaded on every route;
+ * Kevin, 2026-10-30): the landing, the docs and the site pages preload the core file of Katagami
+ * Sans in place of Inter's, and the landing (its field) and the docs (their code) the core file of
+ * Katagami Mono. Inter still loads there through its unicode-range faces when a drawn slide on the
+ * page sets it. The presentations list and the viewer draw their chrome in Katagami and their
+ * slides in Inter, so they preload both (KATAGAMI_AND_INTER_ROUTES).
  */
 const SITE_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home', '/about', '/features', '/faq']);
 const SITE_MONO_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home']);
+const KATAGAMI_AND_INTER_ROUTES: ReadonlySet<string> = new Set([
+  '/decks/',
+  '/decks/templates',
+  '/decks/trash',
+  '/deck/$deckId',
+]);
 
 /** Whether a page's matched routes draw no slide. */
 function drawsNoSlide(routeIds: readonly string[]): boolean {
@@ -155,6 +164,7 @@ export const Route = createRootRoute({
     const slideless = drawsNoSlide(routeIds);
     const site = routeIds.some((id) => SITE_ROUTES.has(id));
     const siteMono = routeIds.some((id) => SITE_MONO_ROUTES.has(id));
+    const both = routeIds.some((id) => KATAGAMI_AND_INTER_ROUTES.has(id));
     /* the card's absolute address (R02 4.1): TURBOSLIDE_PUBLIC_ORIGIN when the deployment sets
        it, else production; a route with a loader may set its own og:url from its request */
     const card = `${SITE.origin()}${SITE.card.path}`;
@@ -205,7 +215,7 @@ export const Route = createRootRoute({
            on every editor load whose deck draws no italic within seconds, and the face loads
            through `font-display: swap` where a page first draws it */
         ...[
-          ...(site ? [katagamiSansWoff2] : [interWoff2]),
+          ...(site ? [katagamiSansWoff2] : both ? [katagamiSansWoff2, interWoff2] : [interWoff2]),
           ...(siteMono ? [katagamiMonoWoff2] : []),
         ].map((href) => ({
           rel: 'preload',
@@ -226,6 +236,7 @@ export const Route = createRootRoute({
             ]
           : []),
         { rel: 'stylesheet', href: interCss },
+        { rel: 'stylesheet', href: katagamiCss },
         { rel: 'stylesheet', href: tokensCss },
         /* the identity tokens after the chrome tokens they read (SPEC-4 0.8) */
         { rel: 'stylesheet', href: brandCss },

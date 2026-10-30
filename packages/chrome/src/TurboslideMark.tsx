@@ -9,10 +9,10 @@ import { cn } from './lib/cn';
  * The Turboslide mark (docs/NEXT.md 4.1.2, 4.1.3 item 2): the T with three bars in the GT speed
  * register, drawn from the one geometry module (`@turboslide/theme/brand`) so the title row, the
  * /decks bar, the print bar, Not found and the favicon are one form. The size snaps to the
- * drawing's steps (`markStep`): under 24 px the 16 px rows (the one hand drawing, crisp edges),
- * under 32 px the 24 px square with the mark at a 16 px cap on whole rows, and from 32 px the
- * vector at the size itself with its cap in whole pixels and every horizontal edge on a whole row.
- * `currentColor` throughout. Alone it is `role="img"` named "Turboslide"; beside the word pass
+ * drawing's steps (`markStep`): under 24 px the 16 px square with the mark at a 9 px cap, under
+ * 32 px the 24 px square with the mark at a 16 px cap, and from 32 px the vector at the size
+ * itself with its cap in whole pixels; every step is the vector with each horizontal edge on a
+ * whole row (no pixel rows since 2026-10-30). `currentColor` throughout. Alone it is `role="img"` named "Turboslide"; beside the word pass
  * `aria-hidden` so the name is read once. `tile` draws the favicon's tile (the plate, the 1 px
  * frame in the edge role, the mark) at 16, 32 or 48 px in the host's tokens. New in Turboslide
  * (no Prototemplate source; GtMark.tsx stays for the sheet's content).
@@ -57,7 +57,6 @@ export function TurboslideMark({ size, tile = false, className, ...rest }: Turbo
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        shapeRendering={geometry.form === 'rows' ? 'crispEdges' : undefined}
         data-size={size}
         data-form={geometry.form}
         data-tile=""
@@ -78,7 +77,6 @@ export function TurboslideMark({ size, tile = false, className, ...rest }: Turbo
       height={placement.size}
       viewBox={`0 0 ${placement.size} ${placement.size}`}
       fill="currentColor"
-      shapeRendering={placement.form === 'rows' ? 'crispEdges' : undefined}
       data-size={placement.size}
       data-form={placement.form}
       data-cap={placement.cap}

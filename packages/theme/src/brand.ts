@@ -12,8 +12,9 @@
 // bar monogram's T. The units are the GT monogram's: a cap of 120 units from the cap line at y 40
 // to the baseline at y 160. The committed path is `MARK_PATH` with its sha256; brand.test.ts and
 // `scripts/build-brand.ts --check` rebuild it from `MARK_RECTS` and compare, so no font tool is
-// needed. At 16 px the form is the hand drawing `ROWS16`, the one deviation from DECK-GRAMMAR 53
-// (docs/brand.md section 1).
+// needed. Every size draws the vector, 16 px included (Kevin, 2026-10-30: "dont use the pixelated
+// logo, i like the unpixelated version", then "update the favicon too"). The hand drawing
+// `ROWS16` stays for the CLI banner's half blocks alone (docs/brand.md sections 3 and 7).
 
 // ---------------------------------------------------------------------------------------------
 // The tokens (docs/NEXT.md 4.1.2, C's page grammar; B2's day 0 request of
@@ -197,10 +198,12 @@ export const MARK_PATH_SHA256 = '3e95914b621faf3bee9b73421ac62b264ee384c16534602
 export const MARK_VIEWBOX = `${roundTo(MARK_BOX.minX - 4, 1)} ${CAP_TOP - 4} ${roundTo(MARK_BOX.width + 8, 1)} ${CAP_UNITS + 8}`;
 
 // ---------------------------------------------------------------------------------------------
-// The 16 px drawing (the one hand drawing; docs/brand.md section 1 records the deviation)
+// The 16 px rows (the one hand drawing, now the CLI banner's alone; docs/brand.md section 7)
 
 /**
- * The mark at 16 px as rows of `#` (ink) and `.`. At 16 px the slant and the 8 unit cut fall
+ * The mark as 16 px rows of `#` (ink) and `.`, drawn for the tab icon until 2026-10-30, when every
+ * placement and tile moved to the vector; `markBlocks` prints them in the terminal and the path
+ * stays exported for the callers that still draw it. At 16 px the slant and the 8 unit cut fall
  * between pixels, so the form is set as whole pixels on a 12 px cap in rows 2 to 13: the crossbar
  * three rows from column 2 to 13 with the top bar folded into a left arm of 5 px against a right
  * arm of 4 px; the stem 3 px, stepped one pixel left after the cut and again at the bottom bar
@@ -278,18 +281,28 @@ export function rowsInk(rows: readonly string[] = ROWS16): number {
 // ---------------------------------------------------------------------------------------------
 // Placement: the mark in an N px square
 
-/** The sizes the component and the files draw: the rows at 16, the hinted 16 px cap at 24, the vector from 32. */
-export const MARK_STEPS = { rows: 16, hinted: 24, vector: 32 } as const;
+/** The sizes the component and the files draw: a 9 px cap at 16, a 16 px cap at 24, the size itself from 32. */
+export const MARK_STEPS = { small: 16, hinted: 24, vector: 32 } as const;
+
+/**
+ * The cap of the 16 px step, in the bare square and in the tile: the smallest cap at which every
+ * horizontal band of the mark keeps a whole row of its own (`hintedRows(9)`: the crossbar and the
+ * bottom bar two rows, the two gaps, the middle bar's two lines and the cut one row each), so the
+ * cut stays a clear row through the stem. `capAt(16)` would ask for 10, where the 30 unit bars
+ * round to three rows and close the gaps; the 16 px tile's frame leaves 14 px across, where a 9 px
+ * cap is 13.24 px wide.
+ */
+export const MARK_SMALL_CAP = 9;
 
 /** The cap of the mark in an N px square: the whole pixels whose box fits the square's width. */
 export function capAt(size: number): number {
   return Math.floor(size / MARK_ASPECT);
 }
 
-/** The size a request draws at: under 24 the rows at 16, under 32 the hinted placement at 24, from 32 the size itself. */
+/** The size a request draws at: under 24 the 16 px placement, under 32 the 24 px placement, from 32 the size itself. */
 export function markStep(size: number): number {
   if (!Number.isFinite(size) || size <= 0) throw new RangeError(`no mark at ${size} px`);
-  if (size < MARK_STEPS.hinted) return MARK_STEPS.rows;
+  if (size < MARK_STEPS.hinted) return MARK_STEPS.small;
   if (size < MARK_STEPS.vector) return MARK_STEPS.hinted;
   return Math.round(size);
 }
@@ -303,10 +316,12 @@ export type HintedRows = Readonly<Record<number, number>>;
  * and sits on mid cap or half a row above it when the remainder is odd, and the middle bar's two
  * lines keep one height each side of it. At a 16 px cap that is the crossbar on rows 0 to 4, a
  * one row gap, a two row line, the cut on row 7 (half a pixel above mid cap), a two row line, a
- * two row gap and the bottom bar on rows 12 to 16.
+ * two row gap and the bottom bar on rows 12 to 16. At the 9 px cap of the 16 px step
+ * (`MARK_SMALL_CAP`) every band takes one row and the bars two: 2, 1, 1, 1, 1, 1 and 2, the cut on
+ * mid cap. A 10 px cap has no placement: its bars round to three rows and close the gaps.
  */
 export function hintedRows(cap: number): HintedRows {
-  if (!Number.isInteger(cap) || cap < 12)
+  if (!Number.isInteger(cap) || cap < MARK_SMALL_CAP)
     throw new RangeError(`no hinted placement at a ${cap} px cap`);
   const s = cap / CAP_UNITS;
   const bar = Math.max(1, Math.round(30 * s));
@@ -369,7 +384,7 @@ export function markQuadsInBox(
 /** One drawing of the mark: its square, its form, its cap and cap line, and its path in the square's px. */
 export type MarkPlacement = {
   size: number;
-  form: 'rows' | 'vector';
+  form: 'vector';
   cap: number;
   top: number;
   hinted: boolean;
@@ -377,18 +392,17 @@ export type MarkPlacement = {
 };
 
 /**
- * The mark drawn at `size` px (snapped by `markStep`): the 16 px rows, the hinted 16 px cap in
- * the 24 px square, and from 32 px the vector at the size itself with its cap in whole pixels.
- * Every vector placement is hinted (`hintedRows`), so its crossbar, lines, cut and bars land on
- * whole rows at 1x; `hinted: false` draws the plain scaled vector for a comparison picture.
+ * The mark drawn at `size` px (snapped by `markStep`): the 9 px cap in the 16 px square, the 16 px
+ * cap in the 24 px square, and from 32 px the vector at the size itself with its cap in whole
+ * pixels. Every placement is hinted (`hintedRows`), so its crossbar, lines, cut and bars land on
+ * whole rows at 1x and at every whole device pixel ratio; from 32 px `hinted: false` draws the
+ * plain scaled vector for a comparison picture.
  */
 export function markPlacement(size: number, options: { hinted?: boolean } = {}): MarkPlacement {
   const step = markStep(size);
-  if (step === MARK_STEPS.rows)
-    return { size: step, form: 'rows', cap: 12, top: 2, hinted: true, d: ROWS16_PATH };
-  const cap = capAt(step);
+  const cap = step === MARK_STEPS.small ? MARK_SMALL_CAP : capAt(step);
   const top = Math.round((step - cap) / 2);
-  const hinted = step === MARK_STEPS.hinted ? true : (options.hinted ?? true);
+  const hinted = step < MARK_STEPS.vector ? true : (options.hinted ?? true);
   return {
     size: step,
     form: 'vector',
@@ -401,7 +415,8 @@ export function markPlacement(size: number, options: { hinted?: boolean } = {}):
 
 /**
  * An SVG of the mark at `size` CSS px, `currentColor`. Alone the SVG names itself; beside a word
- * pass `decorative` so the name is read once. The rows carry crisp edges; the vector does not.
+ * pass `decorative` so the name is read once. No crisp edges: the slanted edges keep their anti
+ * aliasing and the horizontal ones already sit on whole rows.
  */
 export function markSvg(
   size: number,
@@ -412,14 +427,13 @@ export function markSvg(
   const name = options.decorative
     ? 'aria-hidden="true">'
     : `role="img" aria-label="${title}"><title>${title}</title>`;
-  const crisp = placement.form === 'rows' ? ' shape-rendering="crispEdges"' : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${placement.size} ${placement.size}" width="${placement.size}" height="${placement.size}" fill="currentColor"${crisp} ${name}<path d="${placement.d}"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${placement.size} ${placement.size}" width="${placement.size}" height="${placement.size}" fill="currentColor" ${name}<path d="${placement.d}"/></svg>`;
 }
 
 /**
  * The mark as terminal half blocks (U+2580, U+2584, U+2588): the 16 px rows' mark area (rows 2
- * to 13, columns 2 to 13), two pixel rows per line, six lines of 12 characters, so the terminal
- * prints the tab icon's pixels.
+ * to 13, columns 2 to 13), two pixel rows per line, six lines of 12 characters. A terminal cell
+ * has no anti aliasing, so the banner keeps the whole pixel drawing.
  */
 export function markBlocks(rows: readonly string[] = ROWS16): string[] {
   const lines: string[] = [];
@@ -448,33 +462,34 @@ export const TILE_COLORS = {
 } as const;
 
 /**
- * A tile: its size, the 1 px frame, and the mark it carries (the rows at 16, the hinted vector at
- * 32 and 48). `dx` moves the vector mark left of centre by the same share of the tile as the rows
- * move the T (3/64 of the tile), so every tile places the T alike.
+ * A tile: its size, the 1 px frame, and the hinted vector mark it carries. `dx` moves the mark left
+ * of centre by 3/64 of the tile at 32 and 48 px, the share the 16 px rows moved the T (Kevin,
+ * 2026-10-08: "scooch the t inside the box a little to the left"). At 16 px the 9 px cap is
+ * 13.24 px wide in the frame's 14 px, so the mark stays centred, its ink 0.35 px clear of the
+ * frame on the left and 0.38 px on the right.
  */
 export type TileGeometry = {
   size: 16 | 32 | 48;
   frame: 1;
-  form: 'rows' | 'vector';
+  form: 'vector';
   cap: number;
   top: number;
   dx: number;
 };
 
-/** The three tiles of the icon set: the rows at 16, a 16 px cap at 32 and a 24 px cap at 48, all hinted. */
+/** The three tiles of the icon set: a 9 px cap at 16, a 16 px cap at 32 and a 24 px cap at 48, all hinted. */
 export const TILE_SIZES: Readonly<Record<16 | 32 | 48, TileGeometry>> = {
-  16: { size: 16, frame: 1, form: 'rows', cap: 12, top: 2, dx: 0 },
+  16: { size: 16, frame: 1, form: 'vector', cap: MARK_SMALL_CAP, top: 4, dx: 0 },
   32: { size: 32, frame: 1, form: 'vector', cap: 16, top: 8, dx: -1.5 },
   48: { size: 48, frame: 1, form: 'vector', cap: 24, top: 12, dx: -2.25 },
 };
 
 /** A tile's mark as path data in tile px. */
 export function tileMarkPath(tile: TileGeometry): string {
-  if (tile.form === 'rows') return ROWS16_PATH;
   return quadPath(tileVectorQuads(tile), 2);
 }
 
-/** A vector tile's mark quads in tile px: centred, then moved by the tile's `dx`. */
+/** A tile's mark quads in tile px: centred, then moved by the tile's `dx`. */
 export function tileVectorQuads(tile: TileGeometry): Quad[] {
   const left = (tile.size - MARK_BOX.width * (tile.cap / CAP_UNITS)) / 2 + tile.dx;
   return markQuadsInBox(tile.cap, left, tile.top, { hinted: true });

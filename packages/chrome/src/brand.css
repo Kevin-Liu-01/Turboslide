@@ -60,18 +60,15 @@
 }
 
 /* The mark (TurboslideMark.tsx): currentColor, sized by the component's width and height
-   attributes; the title row's sheet reads --ts-mark over them (TitleRow.css). Crisp edges on the
-   16 px rows alone: the vector's slanted edges keep their anti aliasing, and its horizontal edges
-   already sit on whole rows. Never a gradient, a second colour, a rounded corner or a rotation. */
+   attributes; the title row's sheet reads --ts-mark over them (TitleRow.css). The vector at every
+   size since 2026-10-30 (Kevin: "dont use the pixelated logo"): its slanted edges keep their anti
+   aliasing and its horizontal edges sit on whole rows. Never a gradient, a second colour, a
+   rounded corner or a rotation. */
 .ts-mark {
   display: inline-block;
   flex: 0 0 auto;
   fill: currentColor;
   vertical-align: middle;
-}
-
-.ts-mark[data-form='rows'] {
-  shape-rendering: crispEdges;
 }
 
 /* The tile (SPEC-4 0.4): the mark in ink on an opaque paper plate with a 1 px frame in the

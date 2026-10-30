@@ -63,12 +63,12 @@
     },
     "apps/studio/public/favicon.ico": {
       "bytes": 15086,
-      "sha256": "10af654efb988ec11b8d97f457519646caac6cd14708a70d7f3830a923497f4e",
+      "sha256": "eba5bab4e733a5c54d21569783cfb7cbb20c0a9086f1bd236fdd8b760fbca373",
       "kind": "built"
     },
     "apps/studio/public/icon.svg": {
-      "bytes": 1201,
-      "sha256": "bf33f03ff10b0fd200f97e9979e5258378bd5efb2e3df9d0df5f586571be9d12",
+      "bytes": 1239,
+      "sha256": "325566b7beb60dd4a23c222cf5784ea4b5142ee43a3bef2277da48bb3dbb9c77",
       "kind": "built"
     },
     "apps/studio/public/icons/icon-192.png": {
@@ -132,28 +132,28 @@
       "kind": "captured"
     },
     "packages/theme/brand/icon-tile.svg": {
-      "bytes": 1201,
-      "sha256": "bf33f03ff10b0fd200f97e9979e5258378bd5efb2e3df9d0df5f586571be9d12",
+      "bytes": 1239,
+      "sha256": "325566b7beb60dd4a23c222cf5784ea4b5142ee43a3bef2277da48bb3dbb9c77",
       "kind": "built"
     },
     "packages/theme/brand/mark-24.svg": {
-      "bytes": 903,
-      "sha256": "cce579f1bcf086cc36fd4bcde0a3bc5c24705639cf1e77393ac4813a35cf925e",
+      "bytes": 905,
+      "sha256": "bbabb5b5048a6b8483049d56c50324efba9af26d4d24c09b2ac671a5eb4b16d9",
       "kind": "built"
     },
     "packages/theme/brand/mark-geometry.json": {
-      "bytes": 2886,
-      "sha256": "5f6fd6d8e7f2c2c16556ca0095053576639d4f8fc07f0ac25df93b67873e60bb",
+      "bytes": 2784,
+      "sha256": "84997a263dfc27517360fc20c4981807cc430bf4004de0e8e4992fb70c0ec3fe",
       "kind": "built"
     },
     "packages/theme/brand/mark-small.svg": {
-      "bytes": 774,
-      "sha256": "110a54ed477f620b9c0f32eeaccb40749d9e378f7a25f2ebb17cd949d089d6d6",
+      "bytes": 926,
+      "sha256": "dcc1a2daaf2203f3c2b7787a69e115b8cfa8644d312283197d6f75860bceb9bf",
       "kind": "built"
     },
     "packages/theme/brand/mark.svg": {
-      "bytes": 886,
-      "sha256": "deb451c960e247d322a0fee804cb34dcf66851324281fb26c4fc1f80846a007e",
+      "bytes": 888,
+      "sha256": "278441bfb1467c526a3c24ca4cfcee3b5c4e11b5a027519959572f1effa12e15",
       "kind": "built"
     },
     "packages/theme/brand/og-template.html": {

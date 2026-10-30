@@ -1,7 +1,7 @@
 // The identity's parity test (gslides-parity SPEC-4 0.8, 0.10, 6.4; docs/NEXT.md 4.1.2 and 4.1.3
 // items 1 to 3 and 7): brand.css and brand.ts agree on the sixteen tokens the way tokens.test.ts
 // pins the sheet; the mark's geometry is pinned (the five rectangles, the committed path and its
-// sha256, the 16 px rows, the hinted rows, the placements, the tile); the selection colour holds
+// sha256, the CLI banner's 16 px rows, the hinted rows, the placements, the tile, all vector); the selection colour holds
 // its contrast and is what the selection surfaces read; EmptyFigure.css names the twins site.ts
 // exports; the README head carries the lockup, the www link and no row id; the counts of
 // facts.json (written by `build-brand.ts --facts`) equal the tree, and the twins the build captured
@@ -33,6 +33,7 @@ import {
   MARK_PATH,
   MARK_PATH_SHA256,
   MARK_RECTS,
+  MARK_SMALL_CAP,
   MARK_STEPS,
   ROWS16,
   ROWS16_PATH,
@@ -127,13 +128,10 @@ describe('brand.css agrees with BRAND_TOKENS', () => {
     );
   });
 
-  it('draws the mark in currentColor, crisp edges on the 16 px rows alone, and the tile in the host tokens', () => {
+  it('draws the mark in currentColor with its anti aliasing, and the tile in the host tokens', () => {
     const mark = declarationsOf(brandCss, '.ts-mark');
     expect(mark.fill).toBe('currentColor');
     expect(mark['shape-rendering']).toBeUndefined();
-    expect(declarationsOf(brandCss, ".ts-mark[data-form='rows']")['shape-rendering']).toBe(
-      'crispEdges',
-    );
     expect(declarationsOf(brandCss, '.ts-tile .ts-tile-plate').fill).toBe('var(--pt-paper)');
     expect(declarationsOf(brandCss, '.ts-tile .ts-tile-frame').stroke).toBe('var(--pt-edge)');
     expect(declarationsOf(brandCss, '.ts-tile .ts-tile-mark').fill).toBe('var(--pt-ink)');
@@ -218,7 +216,7 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
     );
   });
 
-  it('draws 16 px as the one hand drawing: a 12 px cap on rows 2 to 13, columns 0, 1, 14 and 15 clear', () => {
+  it("keeps the CLI banner's hand drawing: a 12 px cap on rows 2 to 13, columns 0, 1, 14 and 15 clear", () => {
     expect(ROWS16).toHaveLength(16);
     for (const row of ROWS16) {
       expect(row).toHaveLength(16);
@@ -257,16 +255,31 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
       130: 18,
       160: 24,
     });
+    /* the 9 px cap of the 16 px step: every band on a row of its own, the bars two rows, the cut
+       on mid cap */
+    expect(MARK_SMALL_CAP).toBe(9);
+    expect(hintedRows(9)).toEqual({
+      40: 0,
+      70: 2,
+      82: 3,
+      96: 4,
+      104: 5,
+      118: 6,
+      130: 7,
+      160: 9,
+    });
+    /* a 10 px cap rounds its bars to three rows and closes the gaps; under 9 a band loses its row */
     expect(() => hintedRows(10)).toThrow(RangeError);
+    expect(() => hintedRows(8)).toThrow(RangeError);
     expect(() => hintedRows(15.5)).toThrow(RangeError);
   });
 
-  it('places every vector size with its horizontal edges on whole rows', () => {
-    for (const size of [24, 32, 48, 64, 128, 180, 512]) {
+  it('places every size as the vector with its horizontal edges on whole rows', () => {
+    for (const size of [16, 24, 32, 48, 64, 128, 180, 512]) {
       const placement = markPlacement(size);
       expect(placement.form).toBe('vector');
       expect(placement.hinted).toBe(true);
-      expect(placement.cap).toBe(capAt(size));
+      expect(placement.cap).toBe(size === 16 ? MARK_SMALL_CAP : capAt(size));
       const ys = quadYs(markQuadsAt(size, placement.cap, placement.top));
       for (const y of ys) expect(Math.abs(y - Math.round(y))).toBeLessThan(1e-9);
       expect(Math.min(...ys)).toBe(placement.top);
@@ -275,28 +288,31 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
       expect(Math.min(...xs)).toBeGreaterThanOrEqual(0);
       expect(Math.max(...xs)).toBeLessThanOrEqual(size);
     }
+    expect(markPlacement(16)).toMatchObject({ size: 16, cap: 9, top: 4 });
     expect(markPlacement(24)).toMatchObject({ size: 24, cap: 16, top: 4 });
     expect(markPlacement(64)).toMatchObject({ size: 64, cap: 43, top: 11 });
     /* the plain scaled vector stays available for a comparison picture */
     expect(markPlacement(32, { hinted: false }).hinted).toBe(false);
   });
 
-  it('snaps a size to its step: the rows under 24, the 24 px placement under 32, the size itself from 32', () => {
-    expect(MARK_STEPS).toEqual({ rows: 16, hinted: 24, vector: 32 });
+  it('snaps a size to its step: the 16 px placement under 24, the 24 px placement under 32, the size itself from 32', () => {
+    expect(MARK_STEPS).toEqual({ small: 16, hinted: 24, vector: 32 });
     expect([8, 16, 20, 23].map(markStep)).toEqual([16, 16, 16, 16]);
     expect([24, 28, 31].map(markStep)).toEqual([24, 24, 24]);
     expect([32, 40, 64, 512].map(markStep)).toEqual([32, 40, 64, 512]);
     expect(() => markStep(0)).toThrow(RangeError);
-    expect(markPlacement(20)).toMatchObject({ size: 16, form: 'rows', d: ROWS16_PATH });
+    expect(markPlacement(20)).toMatchObject({ size: 16, form: 'vector', cap: 9 });
+    expect(markPlacement(20).d).toBe(markPlacement(16).d);
+    expect(markPlacement(16).d).not.toBe(ROWS16_PATH);
   });
 
-  it('names itself alone and stays quiet beside a word; crisp edges on the rows alone', () => {
+  it('names itself alone and stays quiet beside a word; no crisp edges at any size', () => {
     const alone = markSvg(16);
     expect(alone).toContain('role="img" aria-label="Turboslide"');
     expect(alone).toContain('<title>Turboslide</title>');
-    expect(alone).toContain(`d="${ROWS16_PATH}"`);
+    expect(alone).toContain(`d="${markPlacement(16).d}"`);
     expect(alone).toContain('viewBox="0 0 16 16" width="16" height="16"');
-    expect(alone).toContain('shape-rendering="crispEdges"');
+    expect(alone).not.toContain('crispEdges');
     const beside = markSvg(64, { decorative: true });
     expect(beside).toContain('aria-hidden="true"');
     expect(beside).not.toContain('<title>');
@@ -318,8 +334,8 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
 });
 
 describe('the tile (SPEC-4 0.4)', () => {
-  it('carries the rows at 16 px and the hinted vector at a 16 and a 24 px cap at 32 and 48 px', () => {
-    expect(TILE_SIZES[16]).toEqual({ size: 16, frame: 1, form: 'rows', cap: 12, top: 2, dx: 0 });
+  it('carries the hinted vector at a 9, a 16 and a 24 px cap at 16, 32 and 48 px', () => {
+    expect(TILE_SIZES[16]).toEqual({ size: 16, frame: 1, form: 'vector', cap: 9, top: 4, dx: 0 });
     expect(TILE_SIZES[32]).toEqual({
       size: 32,
       frame: 1,
@@ -336,7 +352,15 @@ describe('the tile (SPEC-4 0.4)', () => {
       top: 12,
       dx: -2.25,
     });
-    expect(tileMarkPath(TILE_SIZES[16])).toBe(ROWS16_PATH);
+    /* the 16 px tile is the 16 px placement, centred in the frame's 14 px, clear of the frame,
+       every horizontal edge on a whole row */
+    const small = tileVectorQuads(TILE_SIZES[16]);
+    expect(tileMarkPath(TILE_SIZES[16])).toBe(quadPath(small, 2));
+    expect(tileMarkPath(TILE_SIZES[16])).toBe(markPlacement(16).d);
+    expect(Math.min(...quadXs(small))).toBeGreaterThan(1.3);
+    expect(Math.max(...quadXs(small))).toBeLessThan(14.7);
+    for (const y of quadYs(small)) expect(Number.isInteger(y)).toBe(true);
+    expect([Math.min(...quadYs(small)), Math.max(...quadYs(small))]).toEqual([4, 13]);
     for (const tile of [TILE_SIZES[32], TILE_SIZES[48]]) {
       const quads = tileVectorQuads(tile);
       /* the centred mark moved left by 3/64 of the tile, as the rows move the T */

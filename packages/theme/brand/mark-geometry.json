@@ -5,22 +5,18 @@
       "bytes": 242,
       "sha256": "3e95914b621faf3bee9b73421ac62b264ee384c165346025c09dec99c154190a"
     },
-    "rows16": {
-      "bytes": 192,
-      "sha256": "f892bd1fbb83e22737a5da3d9e41bad48fe9e620bb6a2a7fbdde39dacbe10018"
-    },
     "aspect": 1.4715
   },
-  "steps": "the 16 px rows under 24 px; the vector at a 16 px cap in the 24 px square; from 32 px the vector at the size itself, its cap the whole pixels whose box fits the square, every horizontal edge on a whole row",
+  "steps": "the vector at a 9 px cap in the 16 px square under 24 px; at a 16 px cap in the 24 px square under 32 px; from 32 px at the size itself, its cap the whole pixels whose box fits the square; every horizontal edge on a whole row",
   "rows": [
     {
       "path": "apps/studio/public/favicon.ico#16",
       "tile": 16,
-      "form": "rows",
-      "cap": 12,
-      "top": 2,
-      "ink": 71,
-      "colours": 3,
+      "form": "vector",
+      "cap": 9,
+      "top": 4,
+      "ink": 54.9,
+      "colours": 28,
       "plate": "paper"
     },
     {

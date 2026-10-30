@@ -72,23 +72,59 @@ a second colour, a rounded corner, an outline or a rotation.
 
 ## 3. The sizes
 
-`TurboslideMark` and every file draw one of three forms, chosen by `markStep(size)`:
+`TurboslideMark` and every file draw the vector at one of three steps, chosen by
+`markStep(size)`:
 
-- Under 24 px: the 16 px rows (`ROWS16`), the one hand drawing.
-- From 24 px to under 32 px: the 24 px square with the vector at a 16 px cap, every horizontal edge
-  on a whole row.
+- Under 24 px: the 16 px square with the vector at a 9 px cap (`MARK_SMALL_CAP`).
+- From 24 px to under 32 px: the 24 px square with the vector at a 16 px cap.
 - From 32 px: the vector at the size itself, its cap the whole pixels whose box fits the square's
-  width (`capAt`), every horizontal edge on a whole row.
+  width (`capAt`).
 
-Any other requested size snaps to one of these, so no surface draws the mark at a 10 or 13 px cap
-(sheet-judge.md fix 2).
+Every step puts each horizontal edge on a whole row. Any other requested size snaps to one of
+these, so no surface draws the mark at a 10 or 13 px cap (sheet-judge.md fix 2). No placement and
+no file of the icon set draws with `shape-rendering: crispEdges`: the slanted edges keep their
+anti aliasing and the horizontal ones already sit on whole rows.
+
+### The 16 px placement
+
+Until 2026-10-30 the 16 px step and the 16 px tile drew the hand drawing `ROWS16` (below). Kevin
+then asked for the vector at every size ("dont use the pixelated logo, i like the unpixelated
+version", then "update the favicon too"), so the 16 px step is the vector at a 9 px cap, hinted
+like every other size, and the tile keeps its composition: the plate, the 1 px frame in the edge
+role and the mark.
+
+9 px is the smallest cap at which every horizontal band keeps a whole row of its own.
+`hintedRows(9)` gives the crossbar and the bottom bar two rows each, and the two gaps, the middle
+bar's two lines and the cut one row each, so the cut stays a clear row through the stem and sits
+on mid cap. `capAt(16)` would ask for a 10 px cap, where the 30 unit bars round to three rows and
+close the gaps. An 8 px cap loses either the cut or a row of the bottom bar. At 9 px the mark is
+13.24 px wide, which fits the 14 px inside the 16 px tile's frame. The bare 16 px placement and the
+16 px tile draw the same path, centred, with the cap line on row 4.
+
+| Rows (from the cap line) | What they hold                               |
+| ------------------------ | -------------------------------------------- |
+| 0 to 2                   | The crossbar and the top bar                 |
+| 2 to 3                   | The gap                                      |
+| 3 to 4                   | The middle bar's first line                  |
+| 4 to 5                   | The cut, through the stem and the middle bar |
+| 5 to 6                   | The middle bar's second line                 |
+| 6 to 7                   | The gap                                      |
+| 7 to 9                   | The bottom bar                               |
+
+The placement was chosen on 2026-10-30 from renders of the 16 px tile at 1x and 2x, zoomed. The
+candidates were a 9 px cap with the cap line on row 3 or row 4, the same moved 0.25 or 0.5 px
+left, an 8 px cap with a one row bottom bar, and an 8 px cap without the cut. The 9 px cap on row
+4, centred, kept every part of the mark and read as the same form as the 32 and 48 px tiles. The
+ink comes within 0.35 px of the frame on the left and 0.38 px on the right, so the 16 px tile keeps
+no `dx`; the 32 and 48 px tiles keep theirs. The horizontal phase was measured and left alone:
+across one pixel of offset the share of the ink in solid pixels moves by less than 0.02, because
+the 12 degree slant spreads every phase over the rows.
 
 ### The 16 px rows
 
-At 16 px the slant and the 8 unit cut fall between pixels, so the form is set as whole pixels on a
-12 px cap in rows 2 to 13. This is the one hand drawing, recorded here as the deviation from
-DECK-GRAMMAR line 53, which says a mark is never redrawn by hand. Columns 1 and 14 stay clear for
-the tile's frame and its 1 px margin.
+`ROWS16` is the one hand drawing, whole pixels on a 12 px cap in rows 2 to 13, recorded as the
+deviation from DECK-GRAMMAR line 53, which says a mark is never redrawn by hand. Since 2026-10-30
+only the CLI banner prints it (section 7), because a terminal cell has no anti aliasing.
 
 ```
 ................
@@ -119,15 +155,15 @@ frame, and then for one more column on the crossbar, which now ends at column 13
 clear, a 1 px gap on each side. The 32 and 48 px tiles move their vector mark
 left of centre by the same share of the tile, 3/64 (`TileGeometry.dx`: 1.5 and 2.25 px). The rows
 draw 71 ink pixels. `ROWS16_PATH` is their path, 192 bytes, with the sha256
-`f892bd1fbb83e22737a5da3d9e41bad48fe9e620bb6a2a7fbdde39dacbe10018`. The rows draw with
-`shape-rendering: crispEdges`; the vector does not.
+`f892bd1fbb83e22737a5da3d9e41bad48fe9e620bb6a2a7fbdde39dacbe10018`; `brand.test.ts` and
+`build-brand.ts --check` pin both.
 
 ### The hinted placement
 
 Drawn at a 16 px cap with plain scaling, the two middle lines are 1.87 px and the cut 1.07 px, so
 on a 1x screen the lines draw grey and the cut through the stem does not show (sheet-judge.md,
 legibility). `hintedRows(cap)` moves each horizontal edge to a whole row before the shear and keeps
-every rectangle and the slant. At the 16 px cap the rows are:
+every rectangle and the slant. At the 16 px cap of the 24 px square the rows are:
 
 | Rows (from the cap line) | What they hold                               |
 | ------------------------ | -------------------------------------------- |
@@ -146,7 +182,7 @@ picture only.
 
 | Requested size | Drawn                           | Cap and cap line           |
 | -------------- | ------------------------------- | -------------------------- |
-| under 24 px    | The 16 px rows                  | 12 px, rows 2 to 13        |
+| under 24 px    | The 16 px square, hinted vector | 9 px, cap line on row 4    |
 | 24 to 31 px    | The 24 px square, hinted vector | 16 px, cap line on row 4   |
 | 32 px          | Hinted vector                   | 21 px, cap line on row 6   |
 | 48 px          | Hinted vector                   | 32 px, cap line on row 8   |
@@ -193,24 +229,27 @@ with the mark's box and the baseline on whole pixels (sheet-judge.md fix 9);
 Every raster the `prefers-color-scheme` block cannot reach (the `favicon.ico` entries, Safari's base
 rendering of `icon.svg`, Windows) is the mark in ink on an opaque paper plate with a 1 px frame in
 the edge composite: `#656565` on paper and `#888887` on ink (`TILE_COLORS`). Where the block is
-honoured, `icon.svg` swaps to paper ink on an ink plate with the `#888887` frame. The 16 px tile
-carries the rows; the 32 px tile the hinted vector at a 16 px cap on row 8; the 48 px tile a 24 px
-cap on row 12 (`TILE_SIZES`).
+honoured, `icon.svg` swaps to paper ink on an ink plate with the `#888887` frame. Every tile
+carries the hinted vector: the 16 px tile at a 9 px cap on row 4 (section 3), the 32 px tile at a
+16 px cap on row 8 and the 48 px tile at a 24 px cap on row 12 (`TILE_SIZES`). Chrome and Firefox
+draw the tab from `icon.svg`, so on a 2x screen the tab is the 16 px drawing at 32 device pixels
+with its horizontal edges still on whole rows.
 
-The set under `apps/studio/public/`, written by `node scripts/build-brand.ts` on 2026-10-02 and
-served as static files, so every icon, manifest and card request is a CDN answer:
+The set under `apps/studio/public/`, written by `node scripts/build-brand.ts` on 2026-10-02 (the
+16 px tile in `favicon.ico` and `icon.svg` rewritten on 2026-10-30) and served as static files, so
+every icon, manifest and card request is a CDN answer:
 
 | File                                           | What it is                                                                                            | Bytes               |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
-| `favicon.ico`                                  | Three 32 bit BMP entries on the paper tile: the rows at 16 px, the hinted vector at 32 and 48         | 15,086              |
-| `icon.svg`                                     | The 16 px tile with the rows, the `prefers-color-scheme: dark` block and `crispEdges`                 | 1,201               |
+| `favicon.ico`                                  | Three 32 bit BMP entries on the paper tile: the hinted vector at 16, 32 and 48 px                     | 15,086              |
+| `icon.svg`                                     | The 16 px tile with the hinted vector and the `prefers-color-scheme: dark` block                      | 1,239               |
 | `apple-touch-icon.png`                         | 180 px, the paper mark at a 76 px cap on the ink square, opaque, no corners                           | 1,381               |
 | `icons/icon-192.png`, `icon-512.png`           | The `any` icons, the paper mark on the ink square at an 81 and a 215 px cap                           | 1,358 and 3,409     |
 | `icons/icon-mask-192.png`, `icon-mask-512.png` | The `maskable` icons, the mark inside the 40 percent safe circle at a 69 and a 184 px cap             | 1,170 and 2,970     |
 | `icons/icon-mono-512.png`                      | The `monochrome` icon, the mark as alpha                                                              | 3,831               |
 | `icons/icon-dark-192.png`, `icon-dark-512.png` | The ink mark on the paper plate, the inverse of the manifest icons                                    | 1,353 and 3,386     |
-| `manifest.webmanifest`                         | `start_url` `/home`, `background_color` and `theme_color` `#ffffff`, five icons with one purpose each | 955                 |
-| `robots.txt`                                   | `Allow: /og/`; `Disallow` for `/new`, `/decks/trash`, `/print/` and `/edit/`                          | 99                  |
+| `manifest.webmanifest`                         | `start_url` `/home`, `background_color` and `theme_color` `#ffffff`, five icons with one purpose each | 987                 |
+| `robots.txt`                                   | `Allow: /og/`; `Disallow` for `/new`, `/decks/trash`, `/print/` and `/edit/`; the sitemap's address   | 148                 |
 | `brand/mood-earth-dark.jpg`, `-light.jpg`      | The card's mood picture (section 6), 1600 by 900 greyscale                                            | 179,545 and 179,587 |
 | `og/turboslide.png`                            | The card (section 6), 1200 by 630                                                                     | section 6           |
 | `brand-manifest.json`                          | The path, bytes, sha256 and kind of every output                                                      |                     |
@@ -219,11 +258,11 @@ The manifest's colours are the paper `#ffffff` (A's graft, NEXT.md 4.1.2; the ro
 `decks.manifest.paper`), so an installed app opens on white. Production answered `#070707` for
 both on 2026-10-02 before this push.
 
-Every raster except the 16 px tile is the vector drawn by the build's own coverage rasterizer: the
-union of the quads, sixteen sub rows per pixel row, exact spans across. Every pixel is therefore a
-blend of the plate and the ink, and the bytes are deterministic. `mark-geometry.json` records per
-raster the size, the form, the cap, the cap line, the ink and the colour count read back from the
-file (the 16 px entry: 72 ink pixels, three colours).
+Every raster is the vector drawn by the build's own coverage rasterizer: the union of the quads,
+sixteen sub rows per pixel row, exact spans across. Every pixel is therefore the frame, or a blend
+of the plate and the ink, and the bytes are deterministic. `mark-geometry.json` records per raster
+the size, the form, the cap, the cap line, the ink and the colour count read back from the file
+(the 16 px entry: 54.9 px of ink, 28 colours).
 
 The head (`apps/studio/src/routes/__root.tsx`) takes every fact from `SITE` in
 `packages/theme/brand/site.ts`: the description, the card's alt text, the origin rule, the theme
@@ -249,7 +288,8 @@ PNG, JPG or GIF under 1 MB and crops to 2:1; the build fails a card over 1 MB.
 ## 7. The CLI banner
 
 `turboslide --version` (`apps/cli/src/commands/banner.ts`) prints the 16 px rows' mark area
-(rows 2 to 13, columns 2 to 13) as half block characters (U+2580, U+2584, U+2588), two pixel rows
+(rows 2 to 13, columns 2 to 13), the one drawing of the mark that is not the vector, as half block
+characters (U+2580, U+2584, U+2588), two pixel rows
 to a line, six lines, from `markBlocks()` in `brand.ts`. The first four lines carry the word and
 the version, the address, the action count with the effects backend, and the fourth fact; the last
 two glyph lines stand alone. No colour is written, so the output is byte identical with
@@ -348,7 +388,7 @@ it governs and the lane of Round 1 that carries it (NEXT.md 4.1.3 and 4.1.6).
 | Lists are ruled rows; no cards with shadows, no rounded corners, no gradients (39)      | `/decks` as ruled rows; the Share dialog's rows; square chrome with `--pt-radius` on the search field and segmented controls and 8 px on Slideshow             | B2b, B3b      |
 | Heroicons 20 solid, in a key cell or at the start of a row (40)                         | The facts rows on `/home`; no icon before a heading                                                                                                            | B2a           |
 | Diagrams: 11 px square markers, no large arrowheads, labels at 18 px or more (42 to 48) | The `/home` diagrams                                                                                                                                           | B2a           |
-| Speed marks built by the generator, never redrawn by hand (50 to 53)                    | The Turboslide monogram built from rectangles by the same construction; the 16 px rows are the one hand drawing (section 3)                                    | B1            |
+| Speed marks built by the generator, never redrawn by hand (50 to 53)                    | The Turboslide monogram built from rectangles by the same construction; the 16 px rows are the one hand drawing, the CLI banner's (section 3)                  | B1            |
 | Full picture and mood slides with a plate and a credit (8)                              | The mood picture on the card; Not found and the empty `/decks` state; the Sign in plate in Round 3                                                             | B1, B2b, B2c  |
 | Every slide checked in both themes (60 to 63)                                           | Every surface in both appearances; the slide keeps its deck's appearance on the stage, the filmstrip, the presenter and the `/deck` view                       | B3b           |
 | The avoid list (slide 39): no sparkles, no smooth scroll                                | Assist as the word alone; no `scroll-behavior: smooth`                                                                                                         | B3b           |
@@ -538,7 +578,7 @@ toolbar and the filmstrip move from `GtMark` to `TurboslideMark` in lane B3b's p
 
 `node scripts/build-brand.ts` (also `pnpm build:brand`) runs through Node's type stripping with no
 new dependency and no font tool. It writes the SVG sources under `packages/theme/brand/`
-(`mark.svg` the master drawing, `mark-small.svg` the rows, `mark-24.svg` the 24 px placement,
+(`mark.svg` the master drawing, `mark-small.svg` the 16 px placement, `mark-24.svg` the 24 px placement,
 `icon-tile.svg`, `wordmark.svg` the lockup with the word as live text), `og-template.html`, the icon
 set, the manifest, `robots.txt`, the mood picture copies, `mark-geometry.json`, the card and
 `brand-manifest.json`. The flags:
@@ -551,8 +591,9 @@ set, the manifest, `robots.txt`, the mood picture copies, `mark-geometry.json`, 
 - `--check` (`pnpm check` step 29): the committed `MARK_PATH` against a rebuild from `MARK_RECTS`
   and both sha256 digests, the rows' path likewise, then every file against the manifest by bytes
   and sha256, a rebuild compared by pixels for the rasters and the ICO's decoded entries and by
-  bytes for text, the file facts (three ICO entries at 16, 32 and 48 with the 16 px entry at three
-  colours, the scheme block in `icon.svg`, the opaque touch icon, the manifest's paper colours and
+  bytes for text, the file facts (three ICO entries at 16, 32 and 48, each the plate, the frame and
+  the blends to the ink, the scheme block and the 16 px tile's path in `icon.svg` with no
+  `crispEdges`, the opaque touch icon, the manifest's paper colours and
   one purpose per icon, the maskable marks inside the safe circle, alpha only on the monochrome
   icon), the twins' palette, the card's size and its pixels when the local browser is the
   `chromium-1217` build, `mark-geometry.json`, and `facts.json` against the tree.

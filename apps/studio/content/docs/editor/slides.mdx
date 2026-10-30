@@ -3,12 +3,12 @@ title: Slides and layouts
 description: Add, duplicate, skip, move and delete slides, pick a layout for each slide, and bring slides in from another presentation.
 ---
 
-A presentation is a list of slides. The filmstrip on the left shows them in order, and every command on this page also has a row in the Slide menu.
+A presentation is a list of slides. The filmstrip on the left shows them in order. Every command on this page also has a row in the Slide menu.
 
 ## Add a slide
 
-- **Slide > New slide** (Ctrl+M) adds a slide after the current one with the same layout.
-- The arrow beside New slide on the toolbar lists every layout, so you can add a slide with a different one.
+- **Slide > New slide** (Ctrl+M) adds a slide with the same layout after the current slide.
+- The arrow beside New slide on the toolbar lists every layout. Use it to add a slide with a different layout.
 - Right click a card in the filmstrip and choose New slide to add a slide after that card.
 
 ## Duplicate, delete and skip
@@ -19,11 +19,11 @@ A presentation is a list of slides. The filmstrip on the left shows them in orde
 | Slide > Delete slide    | Delete                    | Removes the selected slides. Undo brings them back.                                                                                                       |
 | Slide > Skip slide      |                           | Keeps the slide in the filmstrip, shaded, and leaves it out of the slideshow, the shared view and the downloads. Choose it again to bring the slide back. |
 
-Select several cards first to act on all of them: Shift click selects a range, and Cmd click (Ctrl click on Windows) adds one card.
+To act on several slides, select their cards first. Shift click selects a range. Cmd click (Ctrl click on Windows) adds one card.
 
 ## Move slides
 
-Drag a card in the filmstrip to a new place, or use the keys:
+Drag a card in the filmstrip to a new place, or use these keys:
 
 | Command                 | Key on a Mac   | Key on Windows  |
 | ----------------------- | -------------- | --------------- |
@@ -36,20 +36,20 @@ Drag a card in the filmstrip to a new place, or use the keys:
 
 A layout places the title, the body and the pictures on a slide. Turboslide has 22 layouts: Title slide, Section header, Title and body, Title and two columns, Title only, One column text, Main point, Section title and description, Caption, Big number, Blank, Title, subtitle and body, Ruled rows, Ruled statement list, Title and table, Figure, Pair of figures, Tile grid, Detail grid, Status board, Matrix and Closing.
 
-**Slide > Apply layout** moves the selected slides to another layout. Your content stays: the title, the body, the lists, the tables and the pictures move into the matching places of the new layout, and anything without a place is kept on the slide. A Section header starts a new section that holds the slides after it.
+**Slide > Apply layout** moves the selected slides to another layout. Your content stays on the slide. The title, the body, the lists, the tables and the pictures move into the matching places of the new layout. Content without a matching place stays on the slide. A Section header starts a new section that holds the slides after it.
 
 <Callout title="Change every slide at once">
-  A layout changes where things sit on one slide. A theme changes the colors, the fonts and the
-  frame of every slide. See [Themes and brand kits](/docs/themes).
+  A layout changes the position of the content on one slide. A theme changes the colors, the fonts
+  and the frame of every slide. See [Themes and brand kits](/docs/themes).
 </Callout>
 
 ## Change the background
 
-**Slide > Change background** sets a color or a picture behind the selected slides. Reset to Theme goes back to the theme's background, and Add to Theme uses the color on every slide.
+**Slide > Change background** sets a color or a picture behind the selected slides. Reset to Theme restores the background of the theme. Add to Theme uses the color on every slide.
 
 ## Transitions
 
-**Slide > Transition** sets how a slide enters in the slideshow and the shared view. Choose a transition, its duration from 0 to 3 seconds and, for a transition that moves in from a side, the side it comes from. Apply to selected sets it on the selected slides, and Apply to all sets it for the whole presentation. A slide without its own transition takes the presentation's, and a presentation without one keeps the show's quick fade and rise (Standard).
+**Slide > Transition** sets how a slide enters in the slideshow and the shared view. Choose a transition and a duration from 0 to 3 seconds. For a transition that moves in from a side, also choose that side. Apply to selected sets the transition on the selected slides. Apply to all sets it for the whole presentation. A slide without its own transition uses the transition of the presentation. A presentation without a transition uses Standard, the quick fade and rise of the slideshow.
 
 | Transition      | How the slide enters                  |
 | --------------- | ------------------------------------- |
@@ -65,18 +65,18 @@ A layout places the title, the body and the pictures on a slide. Turboslide has 
 | Rotate and fade | Turns upright as it fades in.         |
 | Drift and fade  | Drifts into place as it fades in.     |
 
-An agent sets the same field with `slide.transition`, and a timed advance with `slide.advance`: the slideshow moves to the next slide by itself a set time after the slide's last animation ends.
+An agent sets the same field with `slide.transition`. It sets a timed advance with `slide.advance`. With a timed advance, the slideshow moves to the next slide by itself a set time after the last animation of the slide ends.
 
 ## Import slides from another presentation
 
 <Steps>
   <Step title="Open Import slides">
-    Choose File > Import slides. The dialog lists your presentations, or click Upload to pick a Turboslide file (.zip).
+    Choose File > Import slides. The dialog lists your presentations. To use a Turboslide file (.zip), click Upload and pick the file.
   </Step>
   <Step title="Pick the slides">
-    Choose a presentation, then click the slides you want, or All.
+    Choose a presentation. Then click the slides that you want, or click All.
   </Step>
   <Step title="Import them">
-    Click Import slides. The copies go after the current slide and take this presentation's theme. The pictures they use are copied too.
+    Click Import slides. The copies go after the current slide and take the theme of this presentation. Turboslide also copies the pictures that they use.
   </Step>
 </Steps>

@@ -3,7 +3,7 @@ title: MCP
 description: Use Turboslide's actions as MCP tools, over standard input and output from the command line or over HTTP from a hosted studio.
 ---
 
-Every action that runs over MCP is a tool whose name starts with `deck_`, such as `deck_get_info` for `deck.info`. A tool takes the same input as its action and returns the same result. The [action reference](/docs/reference) names the tool of every action.
+Every action that runs over MCP is a tool whose name starts with `deck_`. For example, `deck_get_info` is the tool for `deck.info`. A tool takes the same input as its action and returns the same result. The [action reference](/docs/reference) names the tool of every action.
 
 ## Over standard input and output
 
@@ -11,26 +11,26 @@ Every action that runs over MCP is a tool whose name starts with `deck_`, such a
 turboslide mcp --deck decks/my-presentation
 ```
 
-Add this command to your MCP client's server list. The server works on the folder named by `--deck`.
+Add this command to the server list of your MCP client. The server works on the folder that `--deck` names.
 
 ## Over HTTP
 
-A hosted studio answers MCP at `/mcp` with the streamable HTTP transport.
+A hosted studio serves MCP at `/mcp` with the streamable HTTP transport.
 
 <Steps>
   <Step title="Initialize">
-    `POST /mcp` with the JSON-RPC `initialize` request. Name the presentation with `?deck=<id>`; a session that names none reads the example deck, and its write tools are refused. A share or publish tool acts on the session's presentation, and one whose `id` names another is refused with 400. On a hosted studio, send `Authorization: Bearer <key>`; the key's owner is the author of every write, and the `x-turboslide-author` header only labels the run.
+    Send the JSON-RPC `initialize` request with `POST /mcp`. Name the presentation with `?deck=<id>`. A session that names no presentation reads the example deck, and the server refuses its write tools. A share or publish tool acts on the presentation of the session. If its `id` names another presentation, the server refuses the call with 400. On a hosted studio, send `Authorization: Bearer <key>`. The owner of the API key is the author of every write. The `x-turboslide-author` header only labels the run.
   </Step>
   <Step title="Keep the session">
-    The answer carries an `mcp-session-id` header. Send it on every request after.
+    The response carries an `mcp-session-id` header. Send this header on every later request.
   </Step>
   <Step title="Call tools">
-    `tools/list` lists the tools and `tools/call` runs one. `GET /mcp` opens the stream of notifications, and `DELETE /mcp` ends the session.
+    `tools/list` lists the tools, and `tools/call` runs one tool. `GET /mcp` opens the stream of notifications. `DELETE /mcp` ends the session.
   </Step>
 </Steps>
 
-One session is bound to one presentation and one caller, both chosen at initialize.
+Each session is bound to one presentation and one caller. The `initialize` request sets both.
 
 ## Driving an open page
 
-`deck_goto_slide` (the action `view.goto`) runs in an open page: the editor while it is visible, or a `/deck`, `/present` or `/embed` page opened with `?agent=1` while it is visible. A page hidden for 10 seconds detaches, and the call answers 404 until the page is shown again.
+`deck_goto_slide` runs the action `view.goto` in an open page. The page must be visible. It can be the editor, or a `/deck`, `/present` or `/embed` page opened with `?agent=1`. A page that is hidden for 10 seconds detaches. The call then returns 404 until the page is visible again.

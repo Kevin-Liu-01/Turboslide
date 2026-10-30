@@ -19,7 +19,7 @@ export function PresentScreen() {
     <section className="site-screen site-wrap" id="present" aria-labelledby="site-present-title">
       <header className="site-screen-head">
         <h2 id="site-present-title" className="t-title">
-          {PRESENT_SCREEN.sentence}
+          {PRESENT_SCREEN.heading}
         </h2>
       </header>
       <figure className="site-fig">

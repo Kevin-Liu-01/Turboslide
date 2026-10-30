@@ -1,19 +1,21 @@
 import type { ReactNode } from 'react';
 
 import { ThemeButton } from '@turboslide/chrome/ThemeButton';
+import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
 
 import { SignInButton } from '../home/sign-in';
-import { BoxedMark } from './BoxedMark';
 import { NAV } from './copy';
 import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 
 /**
- * The bar of the site pages and /docs (docs/SITE.md A.1, D7): one sticky 56 px row in the 1280 px
- * column with a hairline under it. The lockup (the T in a box at 24 px and the word) links to
- * /home; then `slot` (the docs put their search there); then Features, Documentation, About, FAQ
- * and GitHub (About, FAQ and GitHub leave under 1024 px), one hairline, the
- * product's own theme button, Sign In and New Presentation with its solid plus. At 720 px and
+ * The bar of the site pages and /docs (docs/SITE.md A.1, D7): one sticky 56 px row in the page's
+ * column. It draws no rule at the top of the page; a hairline fades in under it over the first
+ * 48 px of scroll (site.css). The lockup (the product's mark at 24 px, the vector the editor's
+ * title row draws, and the word) links to /home;
+ * then `slot` (the docs put their search there); then Features, Documentation, About, FAQ and
+ * GitHub (About, FAQ and GitHub leave under 1024 px), the product's own theme button, Sign In and
+ * New Presentation with its solid plus. At 720 px and
  * under the row keeps the lockup, the slot, the theme button and New Presentation (site.css);
  * under 390 px the lockup keeps its T and drops the word, so the row fits the column.
  *
@@ -21,8 +23,8 @@ import { SiteLink } from './SiteLink';
  * (home/sign-in.tsx); its slot is drawn at its width from the first paint, so its arrival moves
  * nothing already drawn. The skip link comes first in the Tab order and is shown on focus.
  *
- * The docs' bar (`docs`, docs/SITE.md section 6): the lockup, then the slot (a hairline,
- * Documentation and the search field), the theme button and New Presentation; it names
+ * The docs' bar (`docs`, docs/SITE.md section 6): the lockup, then the slot (Documentation and
+ * the search field), the theme button and New Presentation; it names
  * Documentation once and draws no Sign In, as the docs' bar did before the site build.
  */
 export function SiteBar({
@@ -46,7 +48,7 @@ export function SiteBar({
           className="site-lockup"
           aria-label={NAV.lockup.name}
         >
-          <BoxedMark size={24} />
+          <TurboslideMark size={24} aria-hidden="true" />
           <span>{NAV.lockup.word}</span>
         </SiteLink>
         {slot}
@@ -65,7 +67,6 @@ export function SiteBar({
                 </SiteLink>
               ))}
             </nav>
-            <span className="site-bar-rule" aria-hidden="true" />
           </>
         )}
         <div className="site-bar-act">

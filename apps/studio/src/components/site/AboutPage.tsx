@@ -94,7 +94,7 @@ export function AboutPage() {
         <AboutFigure />
       </PageHead>
       {ABOUT_BLOCKS.map((block) => (
-        <SiteBlock key={block.id} id={block.id} sentence={block.sentence} keys={block.keys}>
+        <SiteBlock key={block.id} id={block.id} heading={block.heading} keys={block.keys}>
           {block.body.map((paragraph) => (
             <p key={paragraph} className="site-block-text">
               <InlineCode text={paragraph} />

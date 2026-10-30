@@ -59,12 +59,12 @@ const words: string[] = [
     head.lead === undefined ? [head.title] : [head.title, head.lead],
   ),
   ...FEATURE_GROUPS.flatMap((group) => [
-    group.sentence,
+    group.heading,
     ...group.features.flatMap((feature) => [feature.name, feature.sentence]),
   ]),
   ...QUESTIONS.flatMap((entry) => [entry.question, ...entry.answer]),
   ...ABOUT_BLOCKS.flatMap((block) => [
-    block.sentence,
+    block.heading,
     ...block.body,
     ...(block.points ?? []).flatMap((point) => [point.name, point.sentence]),
   ]),

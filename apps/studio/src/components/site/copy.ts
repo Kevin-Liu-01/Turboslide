@@ -4,16 +4,19 @@ import { HOME_LEAD } from './meta';
 
 /**
  * Every word of /home in one module (docs/SITE.md A.1), so copy.test.ts and the competitor guard
- * read one file. Plain technical English: declarative sentences in sentence case, no em dash, no
- * metaphor, Title Case on buttons alone (DECK-GRAMMAR.md:22). The h1 stays "Presentations for
- * people and agents" (Kevin, 2026-10-14). The counts come from facts.ts and the recorded commands
- * from run.ts; nothing here types a number the tree holds.
+ * read one file. Plain technical English in the manner of ASD-STE100 (Kevin, 2026-10-30): one idea
+ * per sentence, active voice, present tense, complete sentences in sentence case, no em dash, no
+ * metaphor. Each screen's heading is a short phrase in Title Case (Kevin, 2026-10-30: "Feature
+ * Parity for Agents"), as the buttons are (DECK-GRAMMAR.md:22). Names, table heads and diagram labels
+ * stay noun phrases. The h1 stays "Presentations for people and agents" (Kevin, 2026-10-14). The
+ * counts come from facts.ts and the recorded commands from run.ts; nothing here types a number the
+ * tree holds.
  */
 
 const REPOSITORY = SITE.repository;
 const GITHUB_FILE = `${REPOSITORY}/blob/main`;
-/** General Translation, the maker the footer names. */
-const MAKER = 'https://generaltranslation.com';
+/** Kevin Liu, the maker the footer names (Kevin, 2026-10-30). */
+const MAKER = 'https://kevinliu.studio';
 
 export const NAV = {
   skip: 'Skip to Content',
@@ -68,11 +71,11 @@ export const AGENTS = [
 export const AVATAR_PRESS = {
   person: {
     id: 'site-press-person',
-    sentence: 'Pressing brings this person into the editor below for a short visit.',
+    sentence: 'This button brings this person into the editor below for a short visit.',
   },
   agent: {
     id: 'site-press-agent',
-    sentence: 'Pressing has this agent take its next step in the editor below.',
+    sentence: 'This button tells this agent to take its next step in the editor below.',
   },
 } as const;
 
@@ -81,7 +84,7 @@ export const HERO = {
   primary: { label: 'New Presentation', href: '/new', id: 'site.hero.new' },
   secondary: { label: 'Open the Example Deck', href: '/deck/gt-brand', id: 'site.hero.example' },
   figure: {
-    alt: 'The Turboslide editor on a presentation titled Northwind quarterly review. It shows the title row with Share, the menus File to Help, the toolbar, the filmstrip of five slides and the title slide on the stage. The pointers of Claude Code and Codex are on the slide.',
+    alt: 'The Turboslide editor shows a presentation titled Northwind quarterly review. The top holds the title row with Share, the menus from File to Help and the toolbar. The filmstrip holds five slides, and the stage shows the title slide. The pointers of Claude Code and Codex are on the slide.',
     frameTitle: 'The Turboslide editor with Claude Code and Codex',
   },
 } as const;
@@ -92,9 +95,9 @@ export const HERO = {
  * words on the slide are the slide's own (home-deck/slides/lighthouse.json).
  */
 export const CANVAS_SCREEN = {
-  sentence: 'Every object on a slide moves.',
+  heading: 'Freeform Canvas',
   figure: {
-    alt: 'The lighthouse slide, a drone photograph of the lantern room of Cape Hatteras Light printed in a two tone dither. The heading, Cape Hatteras Light, was dragged from the paper plate in the lower right to the sky in the upper left and turned 6 degrees to the left. The selection ring of the editor is on it.',
+    alt: 'The lighthouse slide shows a drone photograph of the lantern room of Cape Hatteras Light in a two tone dither. The heading, Cape Hatteras Light, has moved from the paper plate at the lower right to the sky at the upper left. It is rotated 6 degrees counterclockwise, and the editor’s selection ring surrounds it.',
   },
   slide: {
     heading: 'Cape Hatteras Light',
@@ -105,16 +108,16 @@ export const CANVAS_SCREEN = {
     chip: 'heading · h',
   },
   table: {
-    name: 'The heading’s box at rest and moved',
-    heads: { field: 'Format options', rest: 'At rest', moved: 'Moved' },
+    name: 'The heading’s box before and after the move',
+    heads: { field: 'Format options', rest: 'Before', moved: 'After' },
     rows: { w: 'Width', h: 'Height', rotate: 'Rotate', x: 'X', y: 'Y' },
   },
 } as const;
 
 export const AGENTS_SCREEN = {
-  sentence: 'An agent runs the same actions as the menus.',
+  heading: 'Feature Parity for Agents',
   table: {
-    caption: 'One action, slide.new, on each transport',
+    caption: 'The action slide.new on each transport',
     heads: { transport: 'Transport', name: 'Name', actions: 'Actions' },
     rows: [
       { id: 'cli', transport: 'Command line', name: 'turboslide slide new', icon: 'command-line' },
@@ -133,7 +136,7 @@ export const AGENTS_SCREEN = {
    * `baseRevision` (apps/cli/src/store-actions.ts), and the store's one entry per write.
    */
   flow: {
-    alt: 'The menu item Slide > New slide and the four transports run into one handler, slide.new. It checks the input against the action’s schema, then checks that baseRevision is current, and Version history records one new revision with its author. A failed input check answers 400 with the failing field, and a stale revision answers 409 with the current document.',
+    alt: 'The menu item Slide > New slide and the four transports all call one handler, slide.new. The handler checks the input against the action’s schema. Then it checks that baseRevision is current. Version history records one new revision with its author. A failed input check returns 400 with the failing field. A stale revision returns 409 with the current document.',
     people: 'People',
     agents: 'Agents',
     menu: 'Slide > New slide',
@@ -142,24 +145,24 @@ export const AGENTS_SCREEN = {
       {
         id: 'input',
         name: 'Input check',
-        sub: 'Against the action’s schema',
-        refusal: '400 and the failing field',
+        sub: 'The input matches the action’s schema',
+        refusal: '400 with the failing field',
       },
       {
         id: 'revision',
         name: 'Revision check',
         sub: '`baseRevision` is current',
-        refusal: '409 and the current document',
+        refusal: '409 with the current document',
       },
-      { id: 'history', name: 'Version history', sub: 'One new revision, with its author' },
+      { id: 'history', name: 'Version history', sub: 'One new revision with its author' },
     ],
   },
 } as const;
 
 export const PRESENT_SCREEN = {
-  sentence: 'Anyone with the link can open the presentation and present it.',
+  heading: 'Present from Any Link',
   figure: {
-    alt: 'The Turboslide viewer on the example deck. Its bar holds Previous, the slide counter, Next, the Slide, Grid and Book views, Theme and Present.',
+    alt: 'The Turboslide viewer shows the example deck. Its bar holds Previous, the slide counter, Next, the Slide, Grid and Book views, Theme and Present.',
   },
   keysName: 'Keys during a slideshow',
   keys: [
@@ -176,9 +179,9 @@ export const PRESENT_SCREEN = {
    * (PRESENT_TEXT); the slides are slides 2 and 3 of the example deck the viewer above shows.
    */
   windows: {
-    alt: 'Two windows. The slideshow, seen by the audience, shows the slide. S opens presenter view, seen by you, with the timer, the current slide, the next slide and the speaker notes. The left and right arrows in either window move both.',
-    show: { label: 'Slideshow', who: 'Seen by the audience' },
-    presenter: { label: 'Presenter view', who: 'Seen by you' },
+    alt: 'The slideshow window shows the slide to the audience. The S key opens presenter view, which only you see. Presenter view shows the timer, the current slide, the next slide and the speaker notes. The left and right arrow keys in either window move both windows.',
+    show: { label: 'Slideshow', who: 'For the audience' },
+    presenter: { label: 'Presenter view', who: 'For you' },
     opens: 'opens',
     moveBoth: 'move both',
     deck: 'GT brand deck',
@@ -196,9 +199,9 @@ export const PRESENT_SCREEN = {
  * (apps/studio/content/docs/editor/objects.mdx).
  */
 export const PATTERNS_SCREEN = {
-  sentence: 'Patterns move in the show, and downloads keep the moment you choose.',
+  heading: 'Animated Patterns',
   figure: {
-    alt: 'A slide titled Questions from Northwind with the Dithering pattern: a sphere printed in dots whose light moves around it.',
+    alt: 'A slide titled Questions from Northwind carries the Dithering pattern. The pattern is a sphere printed in dots, and its light moves around the sphere.',
   },
   slide: {
     heading: 'Questions from Northwind',
@@ -206,7 +209,7 @@ export const PATTERNS_SCREEN = {
     counter: '8 / 9',
   },
   strip: {
-    name: 'The pattern at 0, 2, 4, 6, 8 and 10 seconds. The moment at 4 seconds is the still.',
+    name: 'The pattern at 0, 2, 4, 6, 8 and 10 seconds, with the still at 4 seconds',
     seconds: [0, 2, 4, 6, 8, 10],
     still: 4,
     at: (s: number): string => `${s} s`,
@@ -218,7 +221,7 @@ export const PATTERNS_SCREEN = {
     rows: [
       { place: 'Slideshow and viewer', pattern: 'Moves' },
       { place: 'Editor', pattern: 'Still' },
-      { place: 'PDF and PowerPoint file', pattern: 'Still' },
+      { place: 'PDF and PowerPoint files', pattern: 'Still' },
       { place: 'Thumbnails', pattern: 'Still' },
       { place: 'With Reduce motion on', pattern: 'Still' },
     ],
@@ -235,7 +238,7 @@ export type ExportRun = { text: string; part?: 'object' | 'hidden' };
  * `downloadFileName`'s, the numbers docs/pptx.md's.
  */
 export const EXPORT_SCREEN = {
-  sentence: 'Download the presentation as a PDF or as a PowerPoint file.',
+  heading: 'PDF and PowerPoint Export',
   files: {
     heading: 'Orders by quarter',
     list: [
@@ -243,7 +246,7 @@ export const EXPORT_SCREEN = {
         id: 'pdf',
         kind: 'PDF',
         name: 'Northwind quarterly review.pdf',
-        says: [{ text: 'One page per slide, 13.333 by 7.5 in, with text you can search.' }],
+        says: [{ text: 'Each slide is one page of 13.333 by 7.5 in. You can search its text.' }],
       },
       {
         id: 'pictures',
@@ -252,10 +255,10 @@ export const EXPORT_SCREEN = {
         says: [
           { text: 'The slide is ' },
           { text: 'one picture', part: 'object' },
-          { text: ', 3200 by 1800, over its text in an ' },
+          { text: ' of 3200 by 1800 pixels. Its text sits behind the picture in an ' },
           { text: 'invisible layer', part: 'hidden' },
           {
-            text: ' you can search. On each page, at most 0.1 percent of the pixels differ from the browser.',
+            text: ' that you can search. At most 0.1 percent of the pixels on each page differ from the browser.',
           },
         ],
       },
@@ -266,9 +269,9 @@ export const EXPORT_SCREEN = {
         says: [
           { text: 'The heading is a ' },
           { text: 'text box', part: 'object' },
-          { text: ' and the chart is a ' },
+          { text: '. The chart is a ' },
           { text: 'PowerPoint chart', part: 'object' },
-          { text: '. The layout is within 3 px of the browser.' },
+          { text: '. The layout matches the browser within 3 px.' },
         ],
       },
     ],
@@ -277,12 +280,12 @@ export const EXPORT_SCREEN = {
     pictures: 'Pictures',
     editable: 'Editable text',
     alt: (c: { text: number; rect: number; line: number }): string =>
-      `The opener field, a lit sphere printed in dots with a plate of text at the lower right. Left of the seam is the Pictures file, where the slide is one picture of 3200 by 1800 pixels. Right of it is the Editable text file, where the slide’s ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines are each outlined in blue over its background picture.`,
+      `The opener field slide shows a lit sphere printed in dots, with a plate of text at the lower right. A seam divides the slide. On the left, the Pictures file holds the slide as one picture of 3200 by 1800 pixels. On the right is the Editable text file. Blue outlines mark its ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines over the background picture.`,
     holds: {
       pictures: (c: { text: number }): string =>
-        `One picture of the slide, the logo and ${c.text} text boxes of invisible text.`,
+        `The file holds one picture of the slide, the logo and ${c.text} text boxes of invisible text.`,
       editable: (c: { text: number; rect: number; line: number }): string =>
-        `${c.text} text boxes, ${c.rect} rectangles, ${c.line} lines, the logo and the background picture.`,
+        `The file holds ${c.text} text boxes, ${c.rect} rectangles, ${c.line} lines, the logo and the background picture.`,
     },
     chips: {
       picture: 'Picture of the slide, 3200 by 1800',
@@ -293,14 +296,15 @@ export const EXPORT_SCREEN = {
       text: 'Text box',
     },
     slider: {
-      name: 'Where the two files meet',
-      value: (p: number): string => `Pictures on the left ${p} percent, Editable text on the rest`,
+      name: 'The seam between the two files',
+      value: (p: number): string =>
+        `${p} percent Pictures file on the left, ${100 - p} percent Editable text file on the right`,
     },
   },
 } as const;
 
 /**
- * The footer of every site page and the docs (SiteFooter.tsx): the lockup with the animated mark,
+ * The footer of every site page and the docs (SiteFooter.tsx): the lockup with the mark,
  * four columns of links, then the maker, the build and the appearance switch.
  */
 export const FOOTER = {
@@ -313,7 +317,6 @@ export const FOOTER = {
     {
       id: 'product',
       title: 'Product',
-      icon: 'presentation-chart-bar',
       links: [
         { label: 'New presentation', href: '/new', external: false },
         /* the row decks.home.your-presentations opens /decks from here */
@@ -325,7 +328,6 @@ export const FOOTER = {
     {
       id: 'agents',
       title: 'Agents',
-      icon: 'command-line',
       links: [
         { label: 'Command line', href: '/docs/agents/cli', external: false },
         { label: 'MCP', href: '/docs/agents/mcp', external: false },
@@ -337,7 +339,6 @@ export const FOOTER = {
     {
       id: 'docs',
       title: 'Docs',
-      icon: 'book-open',
       links: [
         { label: 'Getting started', href: '/docs', external: false },
         { label: 'Sharing', href: '/docs/sharing', external: false },
@@ -348,7 +349,6 @@ export const FOOTER = {
     {
       id: 'project',
       title: 'Project',
-      icon: 'code-bracket',
       links: [
         { label: 'About', href: '/about', external: false },
         { label: 'FAQ', href: '/faq', external: false },
@@ -362,7 +362,7 @@ export const FOOTER = {
       ],
     },
   ],
-  made: { before: 'Made by', name: 'General Translation', href: MAKER },
+  made: { before: 'Made by', name: 'Kevin Liu', href: MAKER },
   build: {
     label: 'Build',
     name: (commit: string): string => `Build ${commit}, the commit on GitHub`,

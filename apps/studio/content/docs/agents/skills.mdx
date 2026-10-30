@@ -3,7 +3,7 @@ title: Skills
 description: Four skills that teach an AI agent how to write slides, call the actions, drive an open page and check its work.
 ---
 
-A skill is a folder with a `SKILL.md` file that an agent reads before it starts a task. Turboslide has four, in the repository's `skills/` folder. Each one has a `references/` folder with generated tables of the actions it uses.
+A skill is a folder with a `SKILL.md` file that an agent reads before it starts a task. Turboslide has four skills in the `skills/` folder of the repository. Each skill has a `references/` folder with generated tables of the actions that it uses.
 
 | Skill                                                                                                       | Use it to                                                                                                                                         |
 | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12,4 +12,4 @@ A skill is a folder with a `SKILL.md` file that an agent reads before it starts 
 | [turboslide-studio](https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md) | Drive an open studio page through `window.turboslide.studio`: its controls, the source of a slide, the view and presenting.                       |
 | [turboslide-verify](https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md) | Check a presentation by its output: render both appearances, read the contact sheet, run the linter, and compare downloads with the web render.   |
 
-Give an agent the skill that matches its task. For most tasks that is turboslide-api, with turboslide-verify before the agent says the work is done.
+Give an agent the skill that matches its task. For most tasks, give it turboslide-api. Before the agent reports that the work is done, have it use turboslide-verify.

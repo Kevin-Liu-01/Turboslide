@@ -220,7 +220,7 @@ export function PatternsScreen() {
       id="patterns"
       aria-labelledby="site-patterns-title"
     >
-      <ScreenHead titleId="site-patterns-title" sentence={PATTERNS_SCREEN.sentence} />
+      <ScreenHead titleId="site-patterns-title" heading={PATTERNS_SCREEN.heading} />
       <div className="site-pp">
         <figure className="site-fig site-pp-fig">
           <Frame>

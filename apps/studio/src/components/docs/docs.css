@@ -10,13 +10,17 @@
    field and the Copy Page menu; 8 px the search window); no shadow with a blur or an offset; colour
    transitions of 120 ms on hover alone, none under reduced motion. */
 
+/* the docs keep the 1280 px reading column inside the site's wider page */
+.ts-docs {
+  --site-page: 1280px;
+}
+
 /* ---- the bar's slot: a hairline, Documentation, the search field ---- */
 
 .ts-docs .ts-docs-crumb {
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
   color: var(--pt-ink);
   text-decoration: none;
   white-space: nowrap;
@@ -37,7 +41,6 @@
   font-family: inherit;
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
   cursor: pointer;
   transition:
     border-color 120ms ease-out,
@@ -71,7 +74,7 @@
   height: 24px;
   padding: 0 6px;
   border: 1px solid var(--pt-hair);
-  font-family: var(--pt-text);
+  font-family: var(--site-text);
   font-size: 12px;
   line-height: 16px;
   color: var(--pt-titanium);
@@ -124,14 +127,13 @@
   padding: 6px 0 6px 16px;
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
   color: var(--pt-ink-2);
   text-decoration: none;
   transition: color 120ms ease-out;
 }
 
 .ts-docs .ts-docs-nav-link:hover {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-docs .ts-docs-nav-link:focus-visible {
@@ -142,7 +144,7 @@
    none) and a 2 px rule over the rail filled in the accent; a link under the pointer takes the
    accent too (the site's rule for the current item and the hovered link) */
 .ts-docs .ts-docs-nav-link[aria-current='page'] {
-  color: var(--pt-accent);
+  color: var(--site-accent);
   font-weight: 500;
 }
 
@@ -153,7 +155,7 @@
   top: 6px;
   bottom: 6px;
   width: 2px;
-  background: var(--pt-accent);
+  background: var(--site-accent);
 }
 
 /* a folder's pages: indented under their parent, a step lighter */
@@ -164,7 +166,7 @@
 
 .ts-docs .ts-docs-nav-list .is-sub .ts-docs-nav-link:hover,
 .ts-docs .ts-docs-nav-list .is-sub .ts-docs-nav-link[aria-current='page'] {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-docs .ts-docs-nav-count {
@@ -318,7 +320,7 @@
 
 .ts-docs .ts-docs-body-text a.ts-docs-anchor:hover,
 .ts-docs .ts-docs-sec:has(> h2:target) a.ts-docs-anchor {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-docs .ts-docs-body-text h3,
@@ -327,7 +329,6 @@
   font-size: 17px;
   line-height: 28px;
   font-weight: 500;
-  letter-spacing: -0.012em;
   scroll-margin-top: calc(var(--site-bar-h) + 24px);
 }
 
@@ -353,7 +354,7 @@
   height: 22px;
   padding: 0 6px;
   border: 1px solid var(--pt-field);
-  font-family: var(--pt-text);
+  font-family: var(--site-text);
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
@@ -394,7 +395,7 @@
   border-radius: var(--pt-radius-sm);
   background: none;
   color: var(--pt-panel-text-2);
-  font-family: var(--pt-text);
+  font-family: var(--site-text);
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
@@ -558,7 +559,6 @@
   border-collapse: collapse;
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
 }
 
 .ts-docs .ts-docs-table th,
@@ -679,7 +679,6 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
   cursor: pointer;
   transition: color 120ms ease-out;
 }
@@ -728,14 +727,12 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
   color: var(--pt-ink);
 }
 
 .ts-docs .ts-docs-index-text {
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
   color: var(--pt-ink-2);
 }
 
@@ -744,7 +741,7 @@
 }
 
 .ts-docs .ts-docs-index-row:hover .ts-docs-index-title {
-  color: var(--pt-accent);
+  color: var(--site-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
@@ -804,7 +801,6 @@
   padding: 4px 0;
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
   color: var(--pt-titanium);
   text-decoration: none;
   /* an action's id breaks after its group's dot (a <wbr>, DocsArticle.tsx), any other word too
@@ -824,7 +820,7 @@
 }
 
 .ts-docs .ts-docs-toc a:hover {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-docs .ts-docs-toc a[aria-current='true'] {
@@ -832,7 +828,7 @@
 }
 
 .ts-docs .ts-docs-toc a[aria-current='true']::before {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-docs .ts-docs-toc a:focus-visible {
@@ -953,7 +949,7 @@
 }
 
 .ts-docs .ts-docs-pager-link:hover .ts-docs-pager-title {
-  color: var(--pt-accent);
+  color: var(--site-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
@@ -1007,7 +1003,7 @@
   border: 0;
   background: transparent;
   color: var(--pt-ink);
-  font-family: var(--pt-text);
+  font-family: var(--site-text);
   font-size: 16px;
   outline: none;
 }
@@ -1351,7 +1347,6 @@
 /* a narrow phone (359 px and under, where the row would be 357 px wide): the bar keeps the lockup,
    search and the theme button */
 @media (max-width: 359px) {
-  .ts-docs .site-bar-rule,
   .ts-docs .ts-docs-crumb {
     display: none;
   }

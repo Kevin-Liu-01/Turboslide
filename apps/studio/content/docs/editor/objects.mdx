@@ -9,10 +9,10 @@ Everything on a slide is an object: a text box, a picture, a shape, a line, a ta
 
 Click a text box and type. A placeholder that reads Click to add title or Click to add text becomes a text box when you type in it.
 
-- **Insert > Text box** places a new box: click the slide, or drag to draw one.
-- Bold, Italic and Underline are Cmd+B, Cmd+I and Cmd+U (Ctrl on Windows). Format > Text holds the rest: strikethrough, superscript, subscript, the font, the size and the capitalization.
+- **Insert > Text box** places a new text box. Click the slide, or drag to draw the box.
+- The keys for Bold, Italic and Underline are Cmd+B, Cmd+I and Cmd+U (Ctrl on Windows). Format > Text holds the other text settings: strikethrough, superscript, subscript, the font, the size and the capitalization.
 - Format > Align & indent sets the alignment and the indent. Format > Line & paragraph spacing sets the spacing.
-- Format > Bullets & numbering starts a list: Cmd+Shift+8 for bullets and Cmd+Shift+7 for numbers (Ctrl+Shift on Windows).
+- Format > Bullets & numbering starts a list. Cmd+Shift+8 starts a bulleted list, and Cmd+Shift+7 starts a numbered list (Ctrl+Shift on Windows).
 - Format > Clear formatting (Cmd+\\) removes the size, weight, color and border changes from the selection.
 - **Insert > Link** (Cmd+K) links the selected text to an address or to another slide.
 
@@ -32,25 +32,25 @@ Edit > Find and replace (Cmd+Shift+H) changes a word on every slide at once.
 
 **Use on every slide** in Format > Image makes the selected picture the logo on the title slide and in the footer of every slide.
 
-Pictures can be PNG, JPEG, WebP or GIF; an animated GIF keeps its first frame, and HEIF and JXL are refused. On turboslide.com and any hosted studio, SVG is refused too, and every picture is saved again as a new file, so nothing else from the original file is kept.
+Pictures can be PNG, JPEG, WebP or GIF. An animated GIF keeps only its first frame. HEIF and JXL are refused. On turboslide.com and any hosted studio, SVG is also refused. A hosted studio also saves every picture again as a new file, so nothing else from the original file is kept.
 
 ## Shapes and lines
 
-**Insert > Shape** holds rectangles, rounded rectangles and ellipses, and galleries of shapes, arrows, callouts and equation signs. Click a shape's tile, then click the slide to place it or drag to draw it at a size.
+**Insert > Shape** holds rectangles, rounded rectangles and ellipses. It also holds galleries of shapes, arrows, callouts and equation signs. Click the tile of a shape. Then click the slide to place the shape, or drag to draw it at a size.
 
-**Insert > Line** draws a line, an arrow, an elbow connector or a curved connector. A connector whose ends sit on two shapes follows them when they move.
+**Insert > Line** draws a line, an arrow, an elbow connector or a curved connector. A connector whose ends are on two shapes follows the shapes when they move.
 
 Format > Borders & lines sets the color, the weight, the dash and the ends of a line or a border.
 
 ## Tables and charts
 
-- **Insert > Table** shows a grid: point at the size you want, up to 20 columns by 20 rows, and click. Click a cell and type; Tab moves to the next cell. Format > Table inserts and deletes rows and columns, merges cells and turns on a header row.
+- **Insert > Table** shows a grid. Point at the size that you want, up to 20 columns by 20 rows, and click. Click a cell and type. Tab moves to the next cell. Format > Table inserts and deletes rows and columns, merges cells and turns on a header row.
 - **Insert > Chart** adds a bar, column, line or pie chart with sample numbers. Open Format options to edit the numbers and the labels.
 - **Insert > Diagram** adds a grid, a hierarchy, a timeline, a process, a relationship or a cycle diagram.
 
 ## Animated patterns
 
-**Insert > Animated pattern** opens a gallery of 38 patterns in five groups. Each still shows a pattern in one of its presets; click one to place the pattern with that preset. On the slide a pattern takes your theme's colors.
+**Insert > Animated pattern** opens a gallery of 38 patterns in five groups. Each still shows a pattern in one of its presets. Click a still to place the pattern with that preset. On the slide, a pattern takes the colors of your theme.
 
 | Group    | Patterns                                                                                                                                            |
 | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -60,33 +60,39 @@ Format > Borders & lines sets the color, the weight, the dash and the ends of a 
 | Gradient | Mesh gradient, Grain gradient, Static radial gradient, Static mesh gradient, Color panels, Dot orbit, Silk ribbons, Relief gradient, Orbit gradient |
 | Graphic  | Dithering, Voronoi, Soft register, Dither gradient, Glyph field, Spiral, Dot grid                                                                   |
 
-Two engines draw the patterns, Paper Shaders and Glyphfield, so Gradient holds two cards named Mesh gradient and two named Grain gradient, one of each from each engine: 11 cards in all. Type Glyphfield or Paper in the search field to see one engine's patterns.
+Two engines, Paper Shaders and Glyphfield, draw the patterns. For this reason, Gradient holds two cards named Mesh gradient and two cards named Grain gradient, one from each engine. Gradient has 11 cards in all. Type Glyphfield or Paper in the search field to see the patterns of one engine.
 
 Select a pattern and open Format options to change its preset, its colors, its form, its light, its orientation and its speed.
 
-Every moving pattern has a still: the moment that downloads, thumbnails and any place where it does not play show. Under **Still** in Format options, Play runs the pattern and Pause keeps the moment it shows as the still. The slider and the time field choose a moment from 0 to 60 seconds. Static radial gradient, Static mesh gradient and Dot grid do not move and have no Still group.
+Every moving pattern has a still. The still is the moment that downloads and thumbnails show, and any other place where the pattern does not play. Under **Still** in Format options, Play runs the pattern. Pause keeps the current moment as the still. The slider and the time field choose a moment from 0 to 60 seconds. Static radial gradient, Static mesh gradient and Dot grid do not move, so they have no Still group.
 
-**Slide > Playback** sets whether patterns move in the slideshow and the viewer: Play in the show, or Hold the still. Apply sets it for the whole presentation, and Apply to selected for the selected slides. A viewer with Reduce motion on, or with Play animated patterns set to Off, sees the still.
+**Slide > Playback** sets whether patterns move in the slideshow and the viewer. The two options are Play in the show and Hold the still. Apply sets the option for the whole presentation. Apply to selected sets it for the selected slides. A viewer with Reduce motion on, or with Play animated patterns set to Off, sees the still.
 
-**Tools > Preferences > Play animated patterns** is a setting of this browser: On moves the selected pattern while you edit and the patterns in the slideshow and the viewer, In the show only (the default) moves them in the slideshow and the viewer alone, and Off shows the still everywhere. A change takes effect at once.
+**Tools > Preferences > Play animated patterns** is a setting of this browser. It has three values:
+
+- **On** moves the selected pattern while you edit. It also moves the patterns in the slideshow and the viewer.
+- **In the show only** is the default. It moves the patterns only in the slideshow and the viewer.
+- **Off** shows the still everywhere.
+
+A change takes effect immediately.
 
 ## Animations
 
-Select an object and choose **Insert > Animation**, or Animation in the object's right click menu, to open the Animate panel. Add animation picks a role and an effect. An entrance or an exit takes Fade, Rise in, Slide in, Pop in, Wipe or Draw, and on an object with text also Type on, Word rise, Line reveal, Letter stagger or Tracking in; an exit plays its effect backwards. An emphasis takes Push in, Float or Pulse. Each effect then has:
+To open the Animate panel, select an object and choose **Insert > Animation**. You can also choose Animation in the right click menu of the object. Add animation picks a role and an effect. An entrance or an exit takes Fade, Rise in, Slide in, Pop in, Wipe or Draw. On an object with text, an entrance or an exit can also take Type on, Word rise, Line reveal, Letter stagger or Tracking in. An exit plays its effect backwards. An emphasis takes Push in, Float or Pulse. Each effect then has these settings:
 
-- **Effect**: how the object moves.
-- **Start**: On click waits for the next click or key in the slideshow, With previous starts with the effect before it, and After previous starts when the effect before it ends.
-- **Delay** and **Duration**, in seconds from 0 to 60.
-- **Remove**, which takes the effect off the object.
+- **Effect** sets how the object moves.
+- **Start** sets when the effect plays. On click waits for the next click or key in the slideshow. With previous starts with the effect before it. After previous starts when the effect before it ends.
+- **Delay** and **Duration** are in seconds, from 0 to 60.
+- **Remove** takes the effect off the object.
 
-The panel heads each effect with the step it plays in: When the slide opens, Click 1, Click 2 and so on. In the slideshow each click or key plays the slide's next step, and the show moves to the next slide once the steps are done. An agent writes the same effects with the `motion.*` actions.
+The panel shows each effect under the step in which it plays: When the slide opens, Click 1, Click 2 and so on. In the slideshow, each click or key plays the next step of the slide. When all steps are done, the slideshow moves to the next slide. An agent writes the same effects with the `motion.*` actions.
 
 ## Arrange objects
 
 The Arrange menu orders, aligns, distributes, rotates and groups the selected objects.
 
-- **Order**: Bring to front, Bring forward, Send backward, Send to back.
-- **Align**: one object lines up with the slide; several objects line up with each other.
+- **Order** holds Bring to front, Bring forward, Send backward and Send to back.
+- **Align** lines up one object with the slide, or several objects with each other.
 - **Group** (Cmd+Option+G) moves, resizes and formats several objects as one. Ungroup separates them again.
 
-Arrow keys nudge the selection; Shift and an arrow nudge it further.
+The arrow keys move the selection. Shift and an arrow key move it further.

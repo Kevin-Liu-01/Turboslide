@@ -22,6 +22,8 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import interWoff2 from '@turboslide/fonts/assets/InterVariable-latin.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
 import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic-latin.woff2?url';
+import katagamiMonoWoff2 from '../components/site/fonts/katagami-mono-core.woff2?url';
+import katagamiSansWoff2 from '../components/site/fonts/katagami-sans-core.woff2?url';
 import { PAGE_BLOCK_CSS } from '@turboslide/render/block-css-page';
 import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
@@ -92,6 +94,15 @@ const SLIDELESS_ROUTES: ReadonlySet<string> = new Set([
   '/dev/auth',
 ]);
 
+/**
+ * The routes drawn in the site's faces (components/site/site.css; Kevin, 2026-10-30): the landing,
+ * the docs and the site pages preload the core file of Katagami Sans in place of Inter's, and the
+ * landing (its field) and the docs (their code) the core file of Katagami Mono. Inter still loads
+ * there through its unicode-range faces when a drawn slide on the page sets it.
+ */
+const SITE_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home', '/about', '/features', '/faq']);
+const SITE_MONO_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home']);
+
 /** Whether a page's matched routes draw no slide. */
 function drawsNoSlide(routeIds: readonly string[]): boolean {
   return routeIds.some((id) => SLIDELESS_ROUTES.has(id));
@@ -140,7 +151,10 @@ export const Route = createRootRoute({
     const leaf = matches[matches.length - 1];
     const noindex = leaf !== undefined && NOINDEX_ROUTES.has(leaf.routeId);
     const editor = leaf !== undefined && ITALIC_PRELOAD_ROUTES.has(leaf.routeId);
-    const slideless = drawsNoSlide(matches.map((match) => match.routeId));
+    const routeIds = matches.map((match) => match.routeId);
+    const slideless = drawsNoSlide(routeIds);
+    const site = routeIds.some((id) => SITE_ROUTES.has(id));
+    const siteMono = routeIds.some((id) => SITE_MONO_ROUTES.has(id));
     /* the card's absolute address (R02 4.1): TURBOSLIDE_PUBLIC_ORIGIN when the deployment sets
        it, else production; a route with a loader may set its own og:url from its request */
     const card = `${SITE.origin()}${SITE.card.path}`;
@@ -190,13 +204,16 @@ export const Route = createRootRoute({
            prefetch warms the cache at low priority without the browser's warning a preload draws
            on every editor load whose deck draws no italic within seconds, and the face loads
            through `font-display: swap` where a page first draws it */
-        {
+        ...[
+          ...(site ? [katagamiSansWoff2] : [interWoff2]),
+          ...(siteMono ? [katagamiMonoWoff2] : []),
+        ].map((href) => ({
           rel: 'preload',
-          href: interWoff2,
+          href,
           as: 'font',
           type: 'font/woff2',
           crossOrigin: 'anonymous' as const,
-        },
+        })),
         ...(editor
           ? [
               {

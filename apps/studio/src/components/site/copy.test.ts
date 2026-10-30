@@ -44,6 +44,7 @@ const NAMES = [
   'MIT License',
   'FAQ',
   'General Translation',
+  'Kevin Liu',
   'Page',
   'Northwind',
   'Share',
@@ -87,13 +88,10 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['hero.figure.alt', HERO.figure.alt],
   ['avatar.person', AVATAR_PRESS.person.sentence],
   ['avatar.agent', AVATAR_PRESS.agent.sentence],
-  ['agents.sentence', AGENTS_SCREEN.sentence],
   ['agents.caption', AGENTS_SCREEN.table.caption],
   ['agents.total', AGENTS_SCREEN.table.total],
-  ['present.sentence', PRESENT_SCREEN.sentence],
   ['present.figure.alt', PRESENT_SCREEN.figure.alt],
   ...PRESENT_SCREEN.keys.map((key): [string, string] => [`present.key.${key.key}`, key.label]),
-  ['canvas.sentence', CANVAS_SCREEN.sentence],
   ['canvas.figure.alt', CANVAS_SCREEN.figure.alt],
   ['canvas.slide.heading', CANVAS_SCREEN.slide.heading],
   ['canvas.slide.paragraph', CANVAS_SCREEN.slide.paragraph],
@@ -115,7 +113,6 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['present.windows.presenter', PRESENT_SCREEN.windows.presenter.who],
   ['present.windows.opens', PRESENT_SCREEN.windows.opens],
   ['present.windows.moveBoth', PRESENT_SCREEN.windows.moveBoth],
-  ['patterns.sentence', PATTERNS_SCREEN.sentence],
   ['patterns.figure.alt', PATTERNS_SCREEN.figure.alt],
   ['patterns.strip.name', PATTERNS_SCREEN.strip.name],
   ['patterns.strip.still', PATTERNS_SCREEN.strip.stillAt(4)],
@@ -124,7 +121,6 @@ const sentences: ReadonlyArray<[string, string]> = [
     ['patterns.row.place', row.place],
     ['patterns.row.pattern', row.pattern],
   ]),
-  ['export.sentence', EXPORT_SCREEN.sentence],
   ...EXPORT_SCREEN.files.list.flatMap((file): Array<[string, string]> => [
     [`export.files.${file.id}.kind`, file.kind],
     [`export.files.${file.id}.says`, file.says.map((run) => run.text).join('')],
@@ -144,7 +140,14 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['footer.appearance', FOOTER.appearance.name],
 ];
 
+/* the screens' headings are short phrases in Title Case (Kevin, 2026-10-30: "Feature Parity for
+   Agents"), checked with the buttons */
 const buttons: ReadonlyArray<string> = [
+  CANVAS_SCREEN.heading,
+  AGENTS_SCREEN.heading,
+  PRESENT_SCREEN.heading,
+  PATTERNS_SCREEN.heading,
+  EXPORT_SCREEN.heading,
   NAV.skip,
   NAV.newPresentation.label,
   HERO.primary.label,
@@ -171,9 +174,10 @@ describe('the landing’s copy', () => {
     }
   });
 
-  it('writes every button in Title Case', () => {
+  it('writes every button and screen heading in Title Case', () => {
     for (const label of buttons) {
-      const small = new Set(['a', 'an', 'the', 'to', 'of', 'and', 'or', 'in', 'on', 'for']);
+      expect(label.includes(EM_DASH) || label.endsWith('.'), label).toBe(false);
+      const small = new Set(['a', 'an', 'the', 'to', 'of', 'and', 'or', 'in', 'on', 'for', 'from']);
       const words = label.split(/\s+/);
       words.forEach((word, i) => {
         if (i > 0 && small.has(word)) return;

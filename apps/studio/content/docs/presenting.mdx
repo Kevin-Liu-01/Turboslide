@@ -3,38 +3,39 @@ title: Presenting
 description: Present a presentation full screen, use Presenter view with your notes and a timer, and the keys that control a slideshow.
 ---
 
-A slideshow shows the slides full screen, one at a time, in order. Skipped slides are left out.
+A slideshow shows the slides full screen, one at a time, in order. It leaves out skipped slides.
 
 ## Start a slideshow
 
 <Steps>
   <Step title="Choose where to start">
-    Click Slideshow in the title row to start from the current slide, or open the arrow beside it
-    and choose Start from beginning. Cmd+Enter (Ctrl+F5 on Windows) also starts from the current
-    slide, and Cmd+Shift+Enter (Ctrl+Shift+F5 on Windows) starts from the first.
+    To start from the current slide, click Slideshow in the title row. To start from the first
+    slide, open the arrow beside Slideshow and choose Start from beginning. Cmd+Enter (Ctrl+F5 on
+    Windows) also starts from the current slide. Cmd+Shift+Enter (Ctrl+Shift+F5 on Windows) starts
+    from the first slide.
   </Step>
   <Step title="Move through the slides">
-    Press the Right arrow, Space or Enter, or click the slide, to play the slide's next animation
-    step, or to go to the next slide once its steps are done. Press the Left arrow or Backspace to
-    go back a step.
+    Press the Right arrow, Space or Enter, or click the slide. This plays the next animation step of
+    the slide. When all its steps are done, it goes to the next slide. Press the Left arrow or
+    Backspace to go back one step.
   </Step>
   <Step title="Stop">Press Esc to end the slideshow and return to the editor.</Step>
 </Steps>
 
 ## Presenter view
 
-Presenter view opens a second window with everything you need while you speak:
+Presenter view opens a second window that shows these items while you speak:
 
-- the current slide, with a list of every slide to jump to;
-- the previous and the next slide;
-- your speaker notes, with buttons that make the text larger or smaller;
-- a timer with Pause and Reset, and the time of day.
+- The current slide, and a list of all slides that you can jump to.
+- The previous slide and the next slide.
+- Your speaker notes, with buttons that make the text larger or smaller.
+- A timer with Pause and Reset, and the time of day.
 
-Open it from the arrow beside Slideshow, or press S during a slideshow. The two windows stay on the same slide: a move in one moves the other.
+To open it, choose it from the arrow beside Slideshow, or press S during a slideshow. The two windows always show the same slide. A move in one window also moves the other window.
 
 <Callout title="Presenting over a call">
-  Open Presenter view, then share the slideshow window in your call, not the whole screen. The
-  audience sees the slides and you keep your notes.
+  Open Presenter view. In your call, share only the slideshow window. The audience sees the slides,
+  and only you see your notes.
 </Callout>
 
 ## Keys during a slideshow
@@ -55,13 +56,13 @@ Open it from the arrow beside Slideshow, or press S during a slideshow. The two 
 | Cmd+Shift+F or F11 (F11 on Windows)                           | Turns full screen on or off.          |
 | Cmd+P (Ctrl+P on Windows)                                     | Prints the presentation.              |
 
-A slide's animations play in steps: an effect that starts On click waits for the next click or key, and the effects with it or after it follow on their own (see [Animations](/docs/editor/objects#animations)). Going back shows the slide as it was after the previous step, and from the first step it shows the previous slide as its last step left it. Home, End and a slide number open a slide at its start. A slide's transition plays as it enters (see [Transitions](/docs/editor/slides#transitions)), and a slide with a timed advance moves on by itself after its last step ends.
+The animations of a slide play in steps. An effect that starts On click waits for the next click or key. The effects that start with it or after it follow automatically. See [Animations](/docs/editor/objects#animations). A step back shows the slide as it was after the previous step. From the first step, a step back shows the previous slide in its final state. Home, End and a slide number open a slide at its start. The transition of a slide plays as the slide enters. See [Transitions](/docs/editor/slides#transitions). A slide with a timed advance moves to the next slide by itself after its last step ends.
 
-The toolbar at the bottom left of a slideshow holds the slide list and an Options menu with speaker notes, the laser pointer, full screen, print and Exit.
+The toolbar at the bottom left of a slideshow holds the slide list and an Options menu. The Options menu holds speaker notes, the laser pointer, full screen, print and Exit.
 
 ## Present from a link
 
-A view link opens the presentation in the viewer, where anyone with the link can present it. Add `?present=1` to the link to start the slideshow as the page opens.
+A view link opens the presentation in the viewer. Anyone with the link can present it there. Add `?present=1` to the link to start the slideshow when the page opens.
 
 <Figure
   name="viewer-bar"

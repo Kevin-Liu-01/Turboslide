@@ -3,48 +3,48 @@ title: Agents
 description: Every command in Turboslide is an action that a program or an AI agent can run, over the command line, MCP, HTTP or an open page.
 ---
 
-Turboslide keeps every operation in one table of actions. The menus, the command line, the MCP tools, the HTTP endpoints and the page API are all made from that table, so an agent can do anything a person can, and each action checks its input the same way on every transport.
+Turboslide keeps every operation in one table of actions. The menus, the command line, the MCP tools, the HTTP endpoints and the page API all come from that table. As a result, an agent can do anything that a person can do. Each action also checks its input in the same way on every transport.
 
-## The four ways in
+## The four transports
 
 <Cards>
   <Card title="The command line" href="/docs/agents/cli">
-    `turboslide <command>` on a presentation folder, with `--json` output.
+    Run `turboslide <command>` on a presentation folder, with `--json` output.
   </Card>
   <Card title="MCP" href="/docs/agents/mcp">
-    The same actions as MCP tools, over standard input and output or HTTP.
+    Use the same actions as MCP tools, over standard input and output or over HTTP.
   </Card>
   <Card title="HTTP actions" href="/docs/agents/http">
-    `POST /api/actions/<id>` with the input as JSON.
+    Send `POST /api/actions/<id>` with the input as JSON.
   </Card>
   <Card title="The page API" href="/docs/agents/browser">
-    `window.turboslide.studio` in an open editor page.
+    Call `window.turboslide.studio` in an open editor page.
   </Card>
 </Cards>
 
-The [action reference](/docs/reference) lists every action with its input fields and the name it has on each transport.
+The [action reference](/docs/reference) lists every action with its input fields and its name on each transport.
 
 ## Rules every agent follows
 
-- Every action that changes a presentation takes `baseRevision`, the revision the agent read. If the presentation changed since, the action is refused with status 409 and the current document. Read the response, then try again once.
-- Every write returns the normalized result. Read the new state from the response, not from memory.
-- An unknown field is refused with `unknown_field` and a JSON pointer to it.
-- A presentation file written by a newer release of Turboslide, one with a higher `schemaVersion`, fails validation with the issue `upgrade_pending`. A field that a newer release added under the same `schemaVersion` is kept and written back unchanged.
-- On a studio, a write is recorded under the key's owner as `agent:<tokenId>`. `--author` on the command line and the `x-turboslide-author` header over HTTP only label the run; in a local folder `--author` names the author.
-- A claim about a presentation names the revision it was checked at.
+- Every action that changes a presentation takes `baseRevision`, the revision that the agent read. If the presentation changed after that revision, the action is refused with status 409 and the current document. Read the response, then try again once.
+- Every write returns the normalized result. Read the new state from that response. Do not rely on the state that you held before the write.
+- An unknown field is refused with `unknown_field` and a JSON pointer to the field.
+- A presentation file from a newer release of Turboslide can have a higher `schemaVersion`. Such a file fails validation with the issue `upgrade_pending`. A newer release can also add a field under the same `schemaVersion`. Turboslide keeps that field and writes it back unchanged.
+- On a studio, a write is recorded under the owner of the API key as `agent:<tokenId>`. There, `--author` on the command line and the `x-turboslide-author` header over HTTP only label the run. In a local folder, `--author` names the author.
+- A claim about a presentation names the revision at which it was checked.
 
 ## Leases
 
-`slide.lease` reserves a slide for ten minutes. While another author holds a slide, an agent's write to it is refused with 409 and the holder's name, unless the write sets `force`. A person's write to a leased slide goes through with a warning.
+`slide.lease` reserves a slide for ten minutes. While another author holds a slide, an agent's write to that slide is refused with 409 and the holder's name. A write that sets `force` goes through. A person's write to a leased slide goes through with a warning.
 
-## Tokens
+## API keys
 
-On a hosted studio such as turboslide.com, the HTTP actions and MCP need an API key: `Authorization: Bearer <key>`. `turboslide login --to https://www.turboslide.com` gets one: it prints a code, you approve the code at `/device` while signed in, and the command line stores the key. That key expires after 90 days. On your own computer the routes answer on localhost without a key.
+On a hosted studio such as turboslide.com, the HTTP actions and MCP need an API key. Send it as `Authorization: Bearer <key>`. To get a key, run `turboslide login --to https://www.turboslide.com`. The command prints a code. Approve the code at `/device` while you are signed in. The command line then stores the key. The key expires after 90 days. On your own computer, the routes respond on localhost without a key.
 
-A key acts for the person who approved it, with that person's access to each presentation, and its scopes limit it further: `read`, `comment`, `write`, `export`, `share` and `admin`. A key without `share` reads other people's ids as stand-ins (`ref_` and 22 characters), as a person who may not share does. Comment actions work with a key wherever its owner may comment. The profile's API keys list shows each key and revokes it.
+An API key acts for the person who approved it, with that person's access to each presentation. Its scopes limit it further. The scopes are `read`, `comment`, `write`, `export`, `share` and `admin`. A key without `share` reads the ids of other people as stand-ins, the same as a person who may not share. A stand-in is `ref_` followed by 22 characters. Comment actions work with a key wherever its owner may comment. The API keys list in your profile shows each key and lets you revoke it.
 
 <Callout type="warning" title="Keep tokens secret">
-  A key acts as you. Do not paste it into a presentation, a commit or a chat.
+  An API key acts as you. Do not paste it into a presentation, a commit or a chat.
 </Callout>
 
 ## Skills

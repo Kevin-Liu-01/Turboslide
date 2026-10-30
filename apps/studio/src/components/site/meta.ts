@@ -7,7 +7,7 @@ import { SITE } from '@turboslide/theme/brand/site';
  * file, so the head's words must not pull the page's copy into every route's entry chunk.
  */
 export const HOME_LEAD =
-  'Turboslide is a slides editor in the browser. Every command in its menus is also an action that an agent runs over the command line, MCP or HTTP.';
+  'Turboslide is a slides editor in the browser. Every menu command is also an action that an agent can run over the command line, MCP or HTTP.';
 
 export const HOME_META = {
   title: 'Turboslide is a slides editor in the browser',
@@ -19,21 +19,21 @@ export const HOME_META = {
 export const FEATURES_META = {
   title: 'Turboslide features',
   description:
-    'What Turboslide does today: make, present, share and download presentations, run every command from an agent, and run the studio yourself.',
+    'With Turboslide, you make, present, share and download presentations in the browser. An agent can run every menu command, and you can run the studio yourself.',
   path: '/features',
 } as const;
 
 export const FAQ_META = {
   title: 'Turboslide questions and answers',
   description:
-    'Answers about accounts, where presentations are stored, who can see them, downloads, working offline, agents, limits, backups and running Turboslide yourself.',
+    'This page answers questions about accounts, storage, access, downloads, offline work, agents, limits, backups and running Turboslide yourself.',
   path: '/faq',
 } as const;
 
 export const ABOUT_META = {
   title: 'About Turboslide',
   description:
-    'Turboslide is an open source slides editor in the browser, made by General Translation. Every command in its menus is also an action that an agent runs.',
+    'Kevin Liu makes Turboslide, an open source slides editor in the browser. Every menu command is also an action that an agent can run.',
   path: '/about',
 } as const;
 

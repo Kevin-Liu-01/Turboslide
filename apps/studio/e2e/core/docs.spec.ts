@@ -535,7 +535,7 @@ row('help.docs.figures', async () => {
 
 /**
  * The site's footer under every docs page (docs/SITE.md, the footer): the lockup with the
- * animated T in a box linking to /home, the four columns of links under their labels (Product,
+ * product's mark linking to /home, the four columns of links under their headings (Product,
  * Agents, Docs, Project), the maker's link and the appearance switch, under the page; an external
  * link opens in a new tab.
  */
@@ -550,7 +550,7 @@ row('help.docs.footer', async () => {
         const foot = document.querySelector('.ts-docs .site-foot');
         return {
           lockup: foot?.querySelector('[data-control="site.foot.lockup"]')?.getAttribute('href'),
-          live: foot?.querySelectorAll('svg.site-mark-live .site-mark-run').length ?? 0,
+          mark: foot?.querySelectorAll('svg.ts-mark').length ?? 0,
           columns: [...(foot?.querySelectorAll('.site-foot-cols h2') ?? [])].map(
             (h) => h.textContent?.trim() ?? '',
           ),
@@ -566,12 +566,12 @@ row('help.docs.footer', async () => {
       });
       if (facts.lockup !== '/home')
         faults.push(`${url} at ${width}: the mark links ${facts.lockup}`);
-      if (facts.live === 0) faults.push(`${url} at ${width}: no animated mark`);
+      if (facts.mark !== 1) faults.push(`${url} at ${width}: ${facts.mark} marks`);
       if (
         JSON.stringify(facts.columns) !== JSON.stringify(['Product', 'Agents', 'Docs', 'Project'])
       )
         faults.push(`${url} at ${width}: columns ${facts.columns.join(', ')}`);
-      if (facts.maker !== 'General Translation')
+      if (facts.maker !== 'Kevin Liu')
         faults.push(`${url} at ${width}: the maker "${facts.maker}"`);
       if (facts.switch !== 2) faults.push(`${url} at ${width}: ${facts.switch} appearance buttons`);
       if (facts.external.some((target) => target !== '_blank'))

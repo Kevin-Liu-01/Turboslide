@@ -18,7 +18,7 @@ export function AgentsScreen() {
     <section className="site-screen site-wrap" id="agents" aria-labelledby="site-agents-title">
       <header className="site-screen-head">
         <h2 id="site-agents-title" className="t-title">
-          {AGENTS_SCREEN.sentence}
+          {AGENTS_SCREEN.heading}
         </h2>
       </header>
       <div className="site-agents">

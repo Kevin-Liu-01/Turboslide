@@ -92,7 +92,6 @@ export function DocsShell({ children }: { children: ReactNode }) {
 
   const slot = (
     <>
-      <span className="site-bar-rule" aria-hidden="true" />
       <SiteLink href="/docs" control="docs.bar.documentation" className="ts-docs-crumb">
         {DOCS_WORDS.documentation}
       </SiteLink>

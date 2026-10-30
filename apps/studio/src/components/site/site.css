@@ -1,34 +1,117 @@
 /* The site stylesheet of /home and /docs (docs/SITE.md D7; the Workbench direction Kevin picked on
-   2026-10-14, design-r2/bench/README.md): the type scale, the 1280 px column, the bar, the buttons,
-   the framed figures with their corner crosses, the screens and the footer. The routes link it
+   2026-10-14, design-r2/bench/README.md; full bleed since 2026-10-30): the type scale, the 1280 px
+   column, the bar, the buttons, the hero's field, the framed figures, the screens and the footer. The routes link it
    from their head (`site.css?url`), so no rule reaches another page, and every selector starts at
    the root class `.ts-site` (routes/-home-css.test.ts). Colours are the generated --pt- tokens of
-   packages/chrome/src/tokens.css, so the two appearances follow `html[data-theme]`; the one face
-   is the product's InterVariable 4.1 with its optical sizes. Spacing and component sizes are
+   packages/chrome/src/tokens.css, so the two appearances follow `html[data-theme]`. The site sets
+   Katagami Sans and Katagami Mono (Kevin, 2026-10-30), subset by scripts/fonts/subset-katagami.py
+   into the faces between the markers below; the slides drawn on the page keep the deck's Inter.
+   Letter spacing is the face's own: no rule tightens it. Spacing and component sizes are
    multiples of 8 px and text line heights multiples of 4 px. No shadow with a blur or an offset;
    colour transitions of 120 ms on hover alone, none under reduced motion. */
+
+/* katagami:generated:start */
+/* written by scripts/fonts/subset-katagami.py; the fallbacks first, then each face with
+   its extended file before its core file */
+@font-face {
+  font-family: 'Katagami Sans Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans');
+  size-adjust: 106.06%;
+  ascent-override: 91.34%;
+  descent-override: 22.74%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Katagami Mono Fallback';
+  src: local('Menlo'), local('Consolas'), local('Liberation Mono');
+  size-adjust: 103.81%;
+  ascent-override: 93.32%;
+  descent-override: 23.24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Katagami Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/katagami-sans-ext.woff2') format('woff2');
+  unicode-range:
+    U+00A1-00AC, U+00AE-00B6, U+00B8-00D6, U+00D8-0148, U+014A-017F, U+2000-200B, U+2010-2012,
+    U+2015-2017, U+201A-201B, U+201E-2025, U+2027, U+202F-2055, U+2057, U+205F, U+2212, U+2318;
+}
+
+@font-face {
+  font-family: 'Katagami Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/katagami-sans-core.woff2') format('woff2');
+  unicode-range:
+    U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193;
+}
+
+@font-face {
+  font-family: 'Katagami Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/katagami-mono-ext.woff2') format('woff2');
+  unicode-range:
+    U+00A1-00AC, U+00AE-00B6, U+00B8-00D6, U+00D8-0148, U+014A-017F, U+2000-200B, U+2010-2012,
+    U+2015-2017, U+201A-201B, U+201E-2025, U+2027, U+202F-2055, U+2057, U+205F, U+2212, U+2318;
+}
+
+@font-face {
+  font-family: 'Katagami Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./fonts/katagami-mono-core.woff2') format('woff2');
+  unicode-range:
+    U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193;
+}
+/* katagami:generated:end */
 
 /* ---- the root and its tokens ---- */
 
 .ts-site {
-  --site-page: 1280px;
+  /* the page's column: 1600 px, so the bar, the hero and the footer reach across a laptop's
+     window; the docs keep their 1280 px reading column (docs.css) */
+  --site-page: 1600px;
   --site-side: 32px;
   --site-gap: 32px;
   --site-bar-h: 56px;
+  --site-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --site-code: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
+  /* the product's components inside the site (the theme button, Sign In, tooltips) read the
+     chrome's face tokens, so the site points them at its own faces; the slides drawn on the page
+     keep the deck's Inter through --site-deck */
+  --pt-text: var(--site-text);
+  --pt-display: var(--site-text);
+  --pt-mono: var(--site-code);
+  --site-deck: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
+  /* the site's accent (Kevin, 2026-10-30): vermilion, the red of a seal, 5.1 to 1 on the paper;
+     the product's chrome keeps --pt-accent */
+  --site-accent: oklch(0.56 0.2 33);
   display: block;
   min-height: 100vh;
   background: var(--pt-paper);
   color: var(--pt-ink);
-  font-family: var(--pt-text);
+  font-family: var(--site-text);
   font-size: 17px;
   line-height: 28px;
-  letter-spacing: -0.012em;
   font-weight: 400;
-  font-optical-sizing: auto;
   /* a weight the face lacks is never faked: the pages draw 400 and 500 alone */
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* the accent on ink: 6.5 to 1 */
+:root[data-theme='dark'] .ts-site {
+  --site-accent: oklch(0.68 0.18 36);
 }
 
 .ts-site img {
@@ -59,7 +142,6 @@
   font-size: clamp(40px, 5vw, 72px);
   line-height: 1;
   font-weight: 500;
-  letter-spacing: -0.032em;
   text-wrap: balance;
 }
 
@@ -68,17 +150,14 @@
   font-size: 40px;
   line-height: 48px;
   font-weight: 400;
-  letter-spacing: -0.022em;
   text-wrap: balance;
 }
 
-/* 24/32 a section head, set in the display cut by hand */
+/* 24/32 a section head */
 .ts-site .t-head {
   font-size: 24px;
   line-height: 32px;
   font-weight: 500;
-  letter-spacing: -0.014em;
-  font-variation-settings: 'opsz' 32;
   text-wrap: balance;
 }
 
@@ -86,7 +165,6 @@
 .ts-site .t-lead {
   font-size: 20px;
   line-height: 28px;
-  letter-spacing: -0.017em;
   color: var(--pt-ink-2);
   text-wrap: pretty;
 }
@@ -95,11 +173,10 @@
 .ts-site .t-small {
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
 }
 
-/* 12/16 a label in capitals: Inter has no small caps, so a label is capitals at 12 px, whose
-   cap height is the x-height of 16 px text; `case` lifts brackets and dashes to the capitals.
+/* 12/16 a label in capitals: a label is capitals at 12 px, whose cap height is the x-height of
+   16 px text; `case` lifts brackets and dashes to the capitals.
    Labels name figures, tables, navigation groups and screen numbers (D9, accepted by name in
    packages/lint/src/brand/config.ts) */
 .ts-site .t-label {
@@ -122,8 +199,23 @@
 
 .ts-site pre,
 .ts-site code {
-  font-family: var(--pt-mono);
-  letter-spacing: 0;
+  font-family: var(--site-code);
+}
+
+/* the slides drawn on the page are the deck's, set in its Inter with the theme's own spacing */
+.ts-site .site-sheet,
+.ts-site .site-xs-sheet,
+.ts-site .site-pp-sheet,
+.ts-site .site-pv-slide,
+.ts-site .site-ex-slide {
+  font-family: var(--site-deck);
+  font-optical-sizing: auto;
+}
+
+/* the site draws its rules, wires and plates with empty i elements; they are never italic, so no
+   page asks for an italic face it does not draw */
+.ts-site i {
+  font-style: normal;
 }
 
 /* a label with its solid icon: the icon in the label's colour, 8 px before the words */
@@ -137,7 +229,7 @@
   flex: none;
 }
 
-/* ---- the mark: the T in a box (BoxedMark.tsx), the tab icon's plate, frame and ink ---- */
+/* ---- the T in a box the patterns screen's slide draws: the tab icon's plate, frame and ink ---- */
 
 .ts-site .site-mark {
   display: block;
@@ -167,7 +259,6 @@
   font-size: 16px;
   line-height: 24px;
   font-weight: 500;
-  letter-spacing: -0.011em;
 }
 
 /* ---- buttons: 40 px, the 6 px control corner, Title Case words ---- */
@@ -187,7 +278,6 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -233,21 +323,37 @@
   height: 24px;
   padding: 0 6px;
   border: 1px solid var(--pt-field);
-  font-family: var(--pt-text);
+  font-family: var(--site-text);
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
   color: var(--pt-ink);
 }
 
-/* ---- the bar: sticky, 56 px, a hairline under it ---- */
+/* ---- the bar: sticky, 56 px; its hairline fades in over the first 48 px of scroll ---- */
 
 .ts-site .site-bar {
   position: sticky;
   top: 0;
   z-index: var(--ts-layer-bar);
   background: var(--pt-paper);
-  border-bottom: 1px solid var(--pt-hair);
+  border-bottom: 1px solid transparent;
+}
+
+/* the hairline follows the page's scroll position with no script; a browser without scroll
+   timelines draws no hairline */
+@supports (animation-timeline: scroll()) {
+  .ts-site .site-bar {
+    animation: site-bar-edge linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 48px;
+  }
+}
+
+@keyframes site-bar-edge {
+  to {
+    border-bottom-color: var(--pt-hair);
+  }
 }
 
 .ts-site .site-skip {
@@ -277,7 +383,6 @@
 .ts-site .site-bar-link {
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
   color: var(--pt-ink-2);
   text-decoration: none;
   transition: color 120ms ease-out;
@@ -286,13 +391,7 @@
 /* the link under the pointer and the page's own link in the site accent */
 .ts-site .site-bar-link:hover,
 .ts-site .site-bar-link[aria-current='page'] {
-  color: var(--pt-accent);
-}
-
-.ts-site .site-bar-rule {
-  width: 1px;
-  height: 24px;
-  background: var(--pt-hair);
+  color: var(--site-accent);
 }
 
 .ts-site .site-bar-act {
@@ -308,7 +407,7 @@
   min-width: 72px;
 }
 
-/* ---- figures: a capture in a square frame with a 9 px cross at each corner ---- */
+/* ---- figures: a capture in a square hairline frame ---- */
 
 .ts-site .site-fig {
   margin: 0;
@@ -318,37 +417,6 @@
   position: relative;
   border: 1px solid var(--pt-hair);
   background: var(--pt-paper);
-}
-
-.ts-site .site-x {
-  position: absolute;
-  z-index: 2;
-  width: 9px;
-  height: 9px;
-  background:
-    linear-gradient(var(--pt-cross), var(--pt-cross)) center / 1px 9px no-repeat,
-    linear-gradient(var(--pt-cross), var(--pt-cross)) center / 9px 1px no-repeat;
-  pointer-events: none;
-}
-
-.ts-site .site-x.is-tl {
-  left: -5px;
-  top: -5px;
-}
-
-.ts-site .site-x.is-tr {
-  right: -5px;
-  top: -5px;
-}
-
-.ts-site .site-x.is-bl {
-  left: -5px;
-  bottom: -5px;
-}
-
-.ts-site .site-x.is-br {
-  right: -5px;
-  bottom: -5px;
 }
 
 /* a picture in each appearance (ThemePicture.tsx): the one html[data-theme] names is drawn, the
@@ -374,11 +442,48 @@
   display: block;
 }
 
-/* ---- the landing: screen 01, the hero ---- */
+/* ---- the landing: screen 01, the hero over the field ---- */
 
+/* the hero spans the window and its content keeps the column. The field paints first inside the
+   section's own stacking context and the content after it, so nothing needs a z-index */
 .ts-site .site-hero {
-  /* room over the h1 for the arcs, which rise about 1.7 avatars over the cap line */
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+}
+
+/* the hero's copy and the strip of the field under it; the editor's figure ends the strip */
+.ts-site .site-hero-in {
+  position: relative;
+}
+
+/* the block of the h1, the lead and the buttons, whose cells the field keeps clear; its padding
+   is room over the h1 for the arcs, which rise about 1.7 avatars over the cap line */
+.ts-site .site-hero-copy {
   padding-top: 64px;
+  padding-bottom: 16px;
+}
+
+/* the field (SiteField.tsx): one canvas from the section's top left, drawn once and faded in */
+.ts-site .site-field {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  font-family: var(--site-code);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 480ms var(--pt-ease-out);
+}
+
+.ts-site .site-field[data-ready] {
+  opacity: 1;
+}
+
+/* the strip of the field between the copy and the editor: 144 px at 1440, 192 px at 1920 */
+.ts-site .site-hero-fig {
+  position: relative;
+  margin: clamp(128px, 10vw, 200px) auto 0;
 }
 
 .ts-site .site-h1-word {
@@ -415,10 +520,6 @@
   gap: 8px;
 }
 
-.ts-site .site-hero .site-fig {
-  margin-top: 24px;
-}
-
 /* the editor's box: 1280 by 640 at 1440, so at 1440 by 900 the editor's stage shows its whole
    slide above the fold (the stage is the box's height less the title row, the menus, the
    toolbar, the speaker notes and its own margins); the poster fills it and the live editor's
@@ -449,7 +550,7 @@
   opacity: 1;
 }
 
-/* ---- the screens after the hero: a ruled title block, one sentence, one large figure ---- */
+/* ---- the screens after the hero: one sentence, one large figure ---- */
 
 .ts-site .site-screen {
   padding-top: 128px;
@@ -459,8 +560,6 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--site-gap);
-  border-top: 1px solid var(--pt-hair);
-  padding-top: 16px;
   margin-bottom: 48px;
 }
 
@@ -541,7 +640,6 @@
   border-bottom: 1px solid var(--pt-hair);
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
 }
 
 .ts-site .site-spec thead th {
@@ -620,46 +718,6 @@
   color: var(--pt-ink-2);
 }
 
-/* ---- the seams: each screen head's rule runs to both edges of the window, as the bar's and the
-   footer's rules do, and a 9 px cross in --pt-cross stands where a seam meets an edge of the
-   1280 px column, on the pixel columns the frames' corner crosses use (Frame.tsx). The rule is
-   the head's own border-top, painted out by a border-image outset, which is ink overflow and
-   adds no scroll width. The column's rails are not drawn: text sits flush with the column. ---- */
-
-.ts-site .site-screen-head {
-  position: relative;
-  border-image: linear-gradient(var(--pt-hair) 0 0) 1 / 1px 0 0 0 / 0 100vw;
-}
-
-.ts-site .site-screen-head::before,
-.ts-site .site-foot::before {
-  content: '';
-  position: absolute;
-  top: -5px;
-  height: 9px;
-  background:
-    linear-gradient(var(--pt-cross) 0 0) 4px 0 / 1px 9px no-repeat,
-    linear-gradient(var(--pt-cross) 0 0) 0 4px / 9px 1px no-repeat,
-    linear-gradient(var(--pt-cross) 0 0) calc(100% - 4px) 0 / 1px 9px no-repeat,
-    linear-gradient(var(--pt-cross) 0 0) 100% 4px / 9px 1px no-repeat;
-  pointer-events: none;
-}
-
-.ts-site .site-screen-head::before {
-  left: -4px;
-  right: -4px;
-}
-
-/* the footer spans the window, so its crosses find the column the way .site-wrap sizes it */
-.ts-site .site-foot {
-  position: relative;
-}
-
-.ts-site .site-foot::before {
-  left: calc(50% - min(100% - 2 * var(--site-side), var(--site-page)) / 2 - 4px);
-  width: calc(min(100% - 2 * var(--site-side), var(--site-page)) + 8px);
-}
-
 /* ---- the landing's figures (docs/SITE.md 9): slides drawn on the page, a cell canvas
    printed by cells.ts, the editor's selection drawn to Overlay.css, and ruled rows ---- */
 
@@ -679,8 +737,6 @@
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--site-gap);
   margin-top: 72px;
-  border-top: 1px solid var(--pt-hair);
-  padding-top: 16px;
 }
 
 .ts-site .site-row-text {
@@ -994,7 +1050,6 @@
   height: calc(2 * var(--pad) + 5 * var(--row));
   font-size: 14px;
   line-height: 20px;
-  letter-spacing: -0.006em;
 }
 
 /* whole pixels, so every 1 px rule lands on one row or column of pixels */
@@ -1235,7 +1290,6 @@
   text-align: center;
   font-size: 12px;
   line-height: 16px;
-  letter-spacing: -0.006em;
 }
 
 :root[data-theme='dark'] .ts-site .site-pvc .site-pv-slide {
@@ -1434,7 +1488,6 @@
 }
 
 .ts-site .site-pvc-size i {
-  font-style: normal;
   font-size: 14px;
   color: var(--pt-ink);
 }
@@ -1505,7 +1558,7 @@
 }
 
 .ts-site .site-pp-sheet text {
-  font-family: var(--pt-text);
+  font-family: var(--site-deck);
   fill: var(--pt-ink);
 }
 
@@ -1746,7 +1799,6 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
   overflow-wrap: anywhere;
 }
 
@@ -1843,7 +1895,6 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
 }
 
 .ts-site .site-xs-mode svg {
@@ -2463,7 +2514,7 @@
 
 /* a key word of a heading (Keyed.tsx): the site accent, a text colour alone */
 .ts-site .site-key {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 /* the hero's top padding and rhythm: 64 px over the h1, 20 px to the lead's row, 24 px to the
@@ -2545,7 +2596,7 @@
 }
 
 .ts-site .site-shot-link:hover {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-site .site-shot-frame .site-pic img {
@@ -2610,7 +2661,6 @@
   margin: 8px 0 0;
   font-size: 40px;
   line-height: 48px;
-  letter-spacing: -0.022em;
   font-variant-numeric: var(--pt-numerals);
 }
 
@@ -2796,7 +2846,6 @@
   font-size: 20px;
   line-height: 28px;
   font-weight: 500;
-  letter-spacing: -0.017em;
 }
 
 .ts-site .site-faq-item summary::-webkit-details-marker {
@@ -2995,7 +3044,7 @@
 .ts-site .site-h1-word {
   --s: clamp(28px, 0.5em, 36px);
   position: relative;
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 /* the room the people's orbit takes on the right of the "e" before "and": the orbit reaches
@@ -3257,8 +3306,7 @@
 
 .ts-site .site-foot {
   margin-top: 160px;
-  border-top: 1px solid var(--pt-hair);
-  padding: 64px 0 32px;
+  padding-top: 64px;
 }
 
 .ts-site .site-foot-top {
@@ -3269,6 +3317,19 @@
   align-items: start;
 }
 
+/* a heading read by assistive technology and not drawn */
+.ts-site .site-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 .ts-site .site-foot-brand {
   grid-column: 1 / span 4;
   display: flex;
@@ -3277,17 +3338,16 @@
   gap: 24px;
 }
 
-/* the lockup: the animated mark at 80 px and the word in the display cut at 40/48 */
+/* the lockup: the mark at 32 px and the word at 24/32 */
 .ts-site .site-foot .site-foot-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   color: var(--pt-ink);
   text-decoration: none;
-  font-size: 40px;
-  line-height: 48px;
+  font-size: 24px;
+  line-height: 32px;
   font-weight: 500;
-  letter-spacing: -0.024em;
 }
 
 .ts-site .site-foot-cols {
@@ -3296,10 +3356,6 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--site-gap);
   row-gap: 32px;
-}
-
-.ts-site .site-foot-cols h2 {
-  margin: 0 0 16px;
 }
 
 .ts-site .site-foot-cols ul {
@@ -3319,7 +3375,7 @@
 }
 
 .ts-site .site-foot a:hover {
-  color: var(--pt-accent);
+  color: var(--site-accent);
 }
 
 .ts-site .site-foot-base {
@@ -3329,9 +3385,16 @@
   flex-wrap: wrap;
   gap: 16px 32px;
   margin-top: 80px;
-  padding-top: 24px;
-  border-top: 1px solid var(--pt-hair-soft);
   color: var(--pt-titanium);
+}
+
+/* the name across the window (SiteFooter.tsx): the field fills the band, the band's bottom is the
+   page's bottom */
+.ts-site .site-foot-word {
+  position: relative;
+  height: clamp(120px, 20vw, 400px);
+  margin-top: 48px;
+  overflow: clip;
 }
 
 .ts-site .site-foot-meta {
@@ -3367,7 +3430,6 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  letter-spacing: -0.006em;
   cursor: pointer;
   transition:
     background-color 120ms ease-out,
@@ -3382,55 +3444,6 @@ html[data-theme='light'] .ts-site .site-appear-opt[data-value='light'],
 html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   background: var(--pt-ink);
   color: var(--pt-paper);
-}
-
-/* the animated mark (AnimatedMark.tsx): the 16 px rows build from the top, each run drawn from
-   its left end 45 ms after the row above, then the T slides out to the right and back in from
-   the left, once. Before it is first in view, without script and under reduced motion it is the
-   finished mark; off screen it pauses */
-.ts-site .site-mark-run {
-  transform-box: fill-box;
-  transform-origin: 0 50%;
-}
-
-.ts-site .site-mark[data-play] .site-mark-run {
-  animation: site-mark-build 220ms cubic-bezier(0.2, 0, 0, 1) calc(var(--row) * 45ms) backwards;
-}
-
-.ts-site .site-mark[data-play] .site-mark-slide {
-  animation: site-mark-slide 600ms 900ms;
-}
-
-.ts-site .site-mark[data-paused] .site-mark-run,
-.ts-site .site-mark[data-paused] .site-mark-slide {
-  animation-play-state: paused;
-}
-
-@keyframes site-mark-build {
-  from {
-    transform: scaleX(0);
-  }
-}
-
-@keyframes site-mark-slide {
-  0% {
-    transform: none;
-    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
-  }
-
-  40% {
-    transform: translateX(14px);
-    animation-timing-function: step-end;
-  }
-
-  40.5% {
-    transform: translateX(-14px);
-    animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
-  }
-
-  100% {
-    transform: none;
-  }
 }
 
 /* ---- the layout breakpoint (BRAND_LAYOUT_MAX_PX, 1023 px): one column ---- */
@@ -3468,13 +3481,11 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     --site-side: 16px;
     --site-gap: 16px;
     font-size: 16px;
-    letter-spacing: -0.011em;
   }
 
   .ts-site .t-display {
     font-size: 36px;
     line-height: 44px;
-    letter-spacing: -0.028em;
   }
 
   /* the line breaks after "people", so each orbit has the space after its letter; 22 px
@@ -3511,22 +3522,18 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .t-title {
     font-size: 28px;
     line-height: 36px;
-    letter-spacing: -0.02em;
   }
 
   .ts-site .t-head {
     font-size: 20px;
     line-height: 28px;
-    letter-spacing: -0.012em;
   }
 
   .ts-site .t-lead {
     font-size: 18px;
-    letter-spacing: -0.015em;
   }
 
   .ts-site .site-bar-nav,
-  .ts-site .site-bar-rule,
   .ts-site .site-bar-signin {
     display: none;
   }
@@ -3535,7 +3542,7 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     margin-left: auto;
   }
 
-  .ts-site .site-hero {
+  .ts-site .site-hero-copy {
     padding-top: 24px;
   }
 
@@ -3548,10 +3555,6 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-hero-act {
     margin-top: 20px;
     padding-top: 0;
-  }
-
-  .ts-site .site-hero .site-fig {
-    margin-top: 28px;
   }
 
   /* the phone's editor box: the full column, never taller than 72 percent of the screen, so a
@@ -3626,17 +3629,11 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     row-gap: 40px;
   }
 
-  /* the mark at 48 px (three times the 16 px grid) and the word at 28/36 */
+  /* the word at 20/28 */
   .ts-site .site-foot .site-foot-lockup {
-    gap: 16px;
-    font-size: 28px;
-    line-height: 36px;
-    letter-spacing: -0.02em;
-  }
-
-  .ts-site .site-foot-lockup .site-mark {
-    width: 48px;
-    height: 48px;
+    gap: 12px;
+    font-size: 20px;
+    line-height: 28px;
   }
 
   .ts-site .site-foot-cols {
@@ -3675,6 +3672,7 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-foot a,
   .ts-site .site-appear-opt,
   .ts-site .site-hero-frame,
+  .ts-site .site-field,
   .ts-site .site-av {
     transition: none;
   }
@@ -3700,11 +3698,5 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-av[data-pressed]::before {
     animation: none;
     opacity: 1;
-  }
-
-  /* the finished mark, never the build or the slide */
-  .ts-site .site-mark[data-play] .site-mark-run,
-  .ts-site .site-mark[data-play] .site-mark-slide {
-    animation: none;
   }
 }

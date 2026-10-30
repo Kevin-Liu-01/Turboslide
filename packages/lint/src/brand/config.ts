@@ -213,6 +213,12 @@ export type Override = { files: readonly string[]; rules: readonly BrandRuleId[]
 
 export const OVERRIDES: readonly Override[] = [
   {
+    files: ['apps/studio/src/components/site/site.css'],
+    rules: ['css/inter-only'],
+    reason:
+      "The site's faces (Kevin, 2026-10-30: \"use katagami instead of inter and our mono\"): /home, /docs and the site pages set Katagami Sans and Katagami Mono, cut by scripts/fonts/subset-katagami.py into the faces between the katagami markers with their metric matched fallbacks. The slides drawn on those pages keep the deck's Inter, and the product's chrome and slides are unchanged.",
+  },
+  {
     files: ['packages/chrome/src/dialogs/special-characters-data.ts'],
     rules: ['gt-ui/no-em-dash'],
     reason:

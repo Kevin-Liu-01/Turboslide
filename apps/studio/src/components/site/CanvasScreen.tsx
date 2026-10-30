@@ -119,7 +119,7 @@ export function CanvasScreen() {
   const { figure, slide, table } = CANVAS_SCREEN;
   return (
     <section className="site-screen site-wrap" id="canvas" aria-labelledby="site-canvas-title">
-      <ScreenHead titleId="site-canvas-title" sentence={CANVAS_SCREEN.sentence} />
+      <ScreenHead titleId="site-canvas-title" heading={CANVAS_SCREEN.heading} />
       <div className="site-canvas">
         <figure className="site-fig site-canvas-fig">
           <Frame>

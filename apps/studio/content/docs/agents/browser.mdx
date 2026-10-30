@@ -3,7 +3,7 @@ title: The page API
 description: Drive an open editor or viewer page with window.turboslide.studio, the same actions with access to the page's controls and view.
 ---
 
-An open Turboslide page exposes `window.turboslide.studio`. It is ready after the `turboslide:studio-api-ready` event, whose detail is the result of `describe()`.
+An open Turboslide page exposes `window.turboslide.studio`. The API is ready after the `turboslide:studio-api-ready` event. The detail of this event is the result of `describe()`.
 
 ```js
 window.addEventListener('turboslide:studio-api-ready', async () => {
@@ -35,8 +35,8 @@ window.addEventListener('turboslide:studio-api-ready', async () => {
 | The viewer    | `/deck/<id>` is open. It runs the view actions: go to a slide, change the view, the appearance, present, zoom and render. |
 | The presenter | `/present/<id>` is open. It runs go to a slide and present.                                                               |
 
-`describe().state` carries the page's facts, such as the current slide, the selection and the settings.
+`describe().state` contains the facts of the page, such as the current slide, the selection and the settings.
 
 ## Use the supported surface
 
-Drive the page through these methods and the `data-control` ids. Do not read the page's internal state or click by screen position: those change between releases, and the API does not.
+Drive the page through these methods and the `data-control` ids. Do not read the internal state of the page, and do not click by screen position. The internal state and the screen positions change between releases. The API does not.

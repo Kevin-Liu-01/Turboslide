@@ -151,7 +151,7 @@ export function rows(): void {
             bar: Math.round(
               (bar.querySelector('.site-bar-row') as HTMLElement).getBoundingClientRect().height,
             ),
-            marks: root.querySelectorAll('svg.site-mark').length,
+            marks: root.querySelectorAll('svg.ts-mark').length,
             h1: document.querySelectorAll('h1').length,
             h2: [...root.querySelectorAll('main h2')].map((h) => h.textContent ?? ''),
             figures: root.querySelectorAll('main figure').length,
@@ -167,11 +167,11 @@ export function rows(): void {
           `${label}: bar ${facts.bar}, ${facts.h2.length} screens, overflow ${facts.wide}`,
         );
         expect(facts.bar, `${label}: the 56 px bar`).toBe(56);
-        expect(facts.marks, `${label}: the T in a box in the bar and the footer`).toBe(2);
+        expect(facts.marks, `${label}: the mark in the bar and the footer`).toBe(2);
         expect(facts.h1, `${label}: one h1`).toBe(1);
-        expect(facts.h2, `${label}: the two screens' sentences`).toEqual([
-          'An agent runs the same actions as the menus.',
-          'Anyone with the link can open the presentation and present it.',
+        expect(facts.h2, `${label}: the two screens' headings`).toEqual([
+          'Feature Parity for Agents',
+          'Present from Any Link',
         ]);
         expect(facts.figures, `${label}: the editor, the run and the viewer`).toBe(3);
         expect(facts.keys, `${label}: six slideshow keys`).toBe(6);

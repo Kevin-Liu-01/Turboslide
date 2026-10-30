@@ -11,7 +11,7 @@ import { ScreenHead } from './ScreenHead';
 export function ExportScreen() {
   return (
     <section className="site-screen site-wrap" id="export" aria-labelledby="site-export-title">
-      <ScreenHead titleId="site-export-title" sentence={EXPORT_SCREEN.sentence} />
+      <ScreenHead titleId="site-export-title" heading={EXPORT_SCREEN.heading} />
       <ExportFiles />
       <ExportSeam />
     </section>

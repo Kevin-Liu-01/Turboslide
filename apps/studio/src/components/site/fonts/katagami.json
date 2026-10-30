@@ -1,0 +1,138 @@
+{
+  "source": "https://katagami.kevinliu.studio/fonts/",
+  "weights": [
+    100,
+    900
+  ],
+  "features": [
+    "calt",
+    "ccmp",
+    "locl",
+    "kern",
+    "mark",
+    "mkmk",
+    "case",
+    "tnum",
+    "zero"
+  ],
+  "faces": {
+    "sans": {
+      "source": "KatagamiSans.woff2",
+      "sourceBytes": 284972,
+      "sourceSha256": "fe5165bc790b8ab4c13be439f663a9d377003e9f8b7c714bc78740989ffda4ee",
+      "sourceGlyphs": 3667,
+      "missing": [
+        "U+00AD",
+        "U+0149",
+        "U+200C",
+        "U+200D",
+        "U+200E",
+        "U+200F",
+        "U+2028",
+        "U+2029",
+        "U+202A",
+        "U+202B",
+        "U+202C",
+        "U+202D",
+        "U+202E",
+        "U+2056",
+        "U+2058",
+        "U+2059",
+        "U+205A",
+        "U+205B",
+        "U+205C",
+        "U+205D",
+        "U+205E",
+        "U+2060",
+        "U+2061",
+        "U+2062",
+        "U+2063",
+        "U+2064",
+        "U+2065",
+        "U+2066",
+        "U+2067",
+        "U+2068",
+        "U+2069",
+        "U+206A",
+        "U+206B",
+        "U+206C",
+        "U+206D",
+        "U+206E",
+        "U+206F"
+      ],
+      "files": {
+        "katagami-sans-ext.woff2": {
+          "bytes": 30692,
+          "sha256": "26e981ab95e034f76a3b3392449b52a026b4255fb9cb5bae801972c987c28a83",
+          "glyphs": 399,
+          "unicodeRange": "U+00A1-00AC, U+00AE-00B6, U+00B8-00D6, U+00D8-0148, U+014A-017F, U+2000-200B, U+2010-2012, U+2015-2017, U+201A-201B, U+201E-2025, U+2027, U+202F-2055, U+2057, U+205F, U+2212, U+2318"
+        },
+        "katagami-sans-core.woff2": {
+          "bytes": 26128,
+          "sha256": "851357a618e44e81698deadcee5e2a409c08aa67fcfcb7abd996f9a5719bb96f",
+          "glyphs": 210,
+          "unicodeRange": "U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193"
+        }
+      }
+    },
+    "mono": {
+      "source": "KatagamiMono.woff2",
+      "sourceBytes": 330132,
+      "sourceSha256": "1735d1cf35581c1f892bbc9cf4e3d36cb5649adf89881342510b2f6151c85579",
+      "sourceGlyphs": 4057,
+      "missing": [
+        "U+00AD",
+        "U+0149",
+        "U+200C",
+        "U+200D",
+        "U+200E",
+        "U+200F",
+        "U+2028",
+        "U+2029",
+        "U+202A",
+        "U+202B",
+        "U+202C",
+        "U+202D",
+        "U+202E",
+        "U+2056",
+        "U+2058",
+        "U+2059",
+        "U+205A",
+        "U+205B",
+        "U+205C",
+        "U+205D",
+        "U+205E",
+        "U+2060",
+        "U+2061",
+        "U+2062",
+        "U+2063",
+        "U+2064",
+        "U+2065",
+        "U+2066",
+        "U+2067",
+        "U+2068",
+        "U+2069",
+        "U+206A",
+        "U+206B",
+        "U+206C",
+        "U+206D",
+        "U+206E",
+        "U+206F"
+      ],
+      "files": {
+        "katagami-mono-ext.woff2": {
+          "bytes": 27916,
+          "sha256": "36426ac29d991e870f5e003e421295546c9628a85f6016ab9239c480325749d6",
+          "glyphs": 372,
+          "unicodeRange": "U+00A1-00AC, U+00AE-00B6, U+00B8-00D6, U+00D8-0148, U+014A-017F, U+2000-200B, U+2010-2012, U+2015-2017, U+201A-201B, U+201E-2025, U+2027, U+202F-2055, U+2057, U+205F, U+2212, U+2318"
+        },
+        "katagami-mono-core.woff2": {
+          "bytes": 19068,
+          "sha256": "b302a02f52577180628f0ed9b208169af065a44b817e6acde1c0871633e226fb",
+          "glyphs": 183,
+          "unicodeRange": "U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193"
+        }
+      }
+    }
+  }
+}

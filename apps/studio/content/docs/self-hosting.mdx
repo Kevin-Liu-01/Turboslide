@@ -7,7 +7,7 @@ Turboslide is open source under the MIT license. The repository holds the studio
 
 ## Run it on your computer
 
-You need Node 24 and pnpm 11, which `corepack` installs. Renders, downloads and the tests also need a Chromium build, which `playwright-core` installs.
+You need Node 24 and pnpm 11. `corepack` installs pnpm. Renders, downloads and the tests also need a Chromium build, which `playwright-core` installs.
 
 ```sh
 git clone https://github.com/Kevin-Liu-01/Turboslide.git
@@ -18,7 +18,7 @@ pnpm exec playwright-core install --with-deps chromium
 pnpm dev
 ```
 
-`pnpm dev` starts the studio at http://localhost:4321. Presentations are folders under `decks/` in the repository, and every change is written there.
+`pnpm dev` starts the studio at http://localhost:4321. Each presentation is a folder under `decks/` in the repository. The studio writes every change there.
 
 ## Build it for a server
 
@@ -27,9 +27,9 @@ NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy
 node apps/studio/.output/server/index.mjs
 ```
 
-The build writes a Node server to `apps/studio/.output`. The same build with `NITRO_PRESET=vercel` writes a Vercel deployment. A `node-server` build behind a proxy sets `TURBOSLIDE_TRUST_PROXY` so the studio reads the forwarded host; never set it on Vercel.
+The build writes a Node server to `apps/studio/.output`. The same build with `NITRO_PRESET=vercel` writes a Vercel deployment. Behind a proxy, set `TURBOSLIDE_TRUST_PROXY` on a `node-server` build so that the studio reads the forwarded host. Do not set it on Vercel.
 
-On SIGTERM or Ctrl+C the server stops taking requests, saves the edits it still holds, and exits within 10 seconds, so a process manager can restart it without waiting out its kill timeout.
+On SIGTERM or Ctrl+C, the server stops taking requests, saves the edits that it still holds and exits within 10 seconds. A process manager can therefore restart it without waiting for its kill timeout.
 
 ## Where presentations are stored
 
@@ -41,11 +41,11 @@ The studio picks one store when it starts:
 | `tmp`  | A hosted server with no Blob store | A temporary folder           | No, until the server restarts |
 | `blob` | A hosted server with a Blob store  | Vercel Blob                  | Yes                           |
 
-Set `TURBOSLIDE_STORE` to `file`, `tmp` or `blob` to choose one yourself. `TURBOSLIDE_OVERLAY_DIR` moves the temporary folder.
+To choose the store yourself, set `TURBOSLIDE_STORE` to `file`, `tmp` or `blob`. `TURBOSLIDE_OVERLAY_DIR` sets the location of the temporary folder.
 
-The `blob` store takes a second, private Blob store with `TURBOSLIDE_BLOB_PRIVATE_TOKEN`. With it, every presentation's documents (slides, versions, comments, sharing records) are kept private, and only pictures and produced files stay on the public store, under a random key per presentation. Without it, the studio keeps everything on the one public store. `turboslide admin migrate-storage` moves an existing store to the private layout one resumable step at a time: `plan`, `copy`, `verify`, `rekey`, `cutover` and `delete`, with `rollback` before the cutover.
+The `blob` store can use a second, private Blob store, set with `TURBOSLIDE_BLOB_PRIVATE_TOKEN`. With it, the documents of every presentation are private. These documents are the slides, the versions, the comments and the sharing records. Only pictures and produced files stay on the public store, under a random key for each presentation. Without the private store, the studio keeps everything on the one public store. `turboslide admin migrate-storage` moves an existing store to the private layout one resumable step at a time. The steps are `plan`, `copy`, `verify`, `rekey`, `cutover` and `delete`. `rollback` is available before the cutover.
 
-A nightly backup copies the documents to a third, private store set with `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN`. Pictures are not copied.
+A nightly backup copies the documents to a third private store, set with `TURBOSLIDE_BACKUP_BLOB_READ_WRITE_TOKEN`. The backup does not copy pictures.
 
 ## Required on a hosted server
 
@@ -53,9 +53,9 @@ A nightly backup copies the documents to a third, private store set with `TURBOS
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `TURBOSLIDE_SESSION_SECRET`  | The key that seals the browser's identity cookie, 32 characters or more. A checkout makes its own under `.turboslide/`.                                |
 | `TURBOSLIDE_DOWNLOAD_SECRET` | The key that signs download addresses, 16 bytes or more. Required on the `tmp` and `blob` stores, so an address made on one instance works on another. |
-| `BETTER_AUTH_SECRET`         | The key of account sessions. One value per deployment.                                                                                                 |
+| `BETTER_AUTH_SECRET`         | The key of account sessions. Use one value per deployment.                                                                                             |
 | `TURBOSLIDE_PUBLIC_ORIGIN`   | The site's address, for links in the page head and the sign in mail.                                                                                   |
-| `TURBOSLIDE_TOKEN`           | The bootstrap bearer for agents and the admin. Once an API key exists it runs `admin.bootstrap` alone; agents use API keys.                            |
+| `TURBOSLIDE_TOKEN`           | The bootstrap bearer for agents and the admin. After an API key exists, it runs only `admin.bootstrap`. Agents use API keys.                           |
 
 Keep every token and secret out of the repository.
 
@@ -65,27 +65,27 @@ Keep every token and secret out of the repository.
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Sign in with Google. The redirect address is `<origin>/api/auth/callback/google`. `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` add GitHub the same way.                                                                                       |
 | `TURBOSLIDE_ACCOUNTS`                      | `d1` keeps accounts in the realtime Worker's D1 database. It needs `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_DB_BEARER`. A checkout can use a SQLite file named by `TURBOSLIDE_AUTH_DB` instead. Without a database the studio offers no sign in. |
-| `TURBOSLIDE_AUTH_HOSTS`                    | The host names sign in accepts, as a list. The default is turboslide.com's hosts and localhost; a request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`.                                                                            |
+| `TURBOSLIDE_AUTH_HOSTS`                    | The host names that sign in accepts, as a list. The default is the hosts of turboslide.com and localhost. A request to any other host signs in at `TURBOSLIDE_PUBLIC_ORIGIN`.                                                                  |
 | `TURBOSLIDE_ADMIN_EMAILS`                  | Addresses whose account is the studio's admin from its first sign in.                                                                                                                                                                          |
-| `TURBOSLIDE_MAIL`                          | `off` turns sign in by email off and hides the email field, and the sign in mail's routes answer 404. `capture` keeps outgoing mail in the studio for tests.                                                                                   |
-| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in mail through Resend. Both are needed; with only the key, mail stays off.                                                                                                                                                          |
+| `TURBOSLIDE_MAIL`                          | `off` turns off sign in by email and hides the email field. The sign in email routes then return 404. `capture` keeps outgoing email in the studio for tests.                                                                                  |
+| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`   | Send sign in email through Resend. Both are needed. With only the key, email stays off.                                                                                                                                                        |
 | `TURBOSLIDE_LOCAL_TOKEN`                   | `require` makes the agent surface on localhost ask for the checkout's own token in `.turboslide/token`.                                                                                                                                        |
 
-A sign in mail's link and its six digit code sign in only the browser that asked for them. A link opened in another browser asks for the eight character code the first browser shows.
+The link and the six digit code in a sign in email sign in only the browser that asked for them. A link opened in another browser asks for the eight character code that the first browser shows.
 
 ## Working together
 
 | Variable                                                                   | What it sets                                                                                                                         |
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` (one process), `blob` or `do`. Unset, the studio picks from the variables below.                         |
+| `TURBOSLIDE_REALTIME`                                                      | The realtime tier: `memory` for one process, `blob` or `do`. When it is not set, the studio picks a tier from the variables below.   |
 | `TURBOSLIDE_ROOM_HOST`, `TURBOSLIDE_ROOM_SECRET`, `TURBOSLIDE_ROOM_BEARER` | The realtime Worker on Cloudflare (the `do` tier): its host, the key of its room tickets and the bearer of the studio's calls to it. |
 | `TURBOSLIDE_DB_BEARER`                                                     | The bearer of the Worker's database routes, for `TURBOSLIDE_ACCOUNTS=d1`.                                                            |
 
 ## Limits and switches
 
-Every request counts against a quota per person: writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request answers 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". The quotas count across instances when the accounts database is the realtime Worker's (`TURBOSLIDE_ACCOUNTS=d1`); without it each server instance counts on its own, so a quota holds only on a single process.
+Every request counts against a quota per person. The quotas cover writes per minute per presentation, renders per hour, downloads per day, new presentations per day, pictures per day and the assistant's calls. A refused request returns 429 with `Retry-After` and a sentence such as "Too many slide renders this hour. Try again later". The quotas count across instances when the accounts database is the database of the realtime Worker, set with `TURBOSLIDE_ACCOUNTS=d1`. Without that database, each server instance counts on its own, so a quota holds only on a single process.
 
-`DATABASE_URL`, `REDIS_URL` and the Upstash pair are no longer read. A studio that sets `DATABASE_URL` without `TURBOSLIDE_ACCOUNTS=d1` fails at its first request with an error that names `TURBOSLIDE_ACCOUNTS=d1`. A studio that sets `REDIS_URL` or the Upstash pair writes one `config.degraded` log line naming them.
+The studio no longer reads `DATABASE_URL`, `REDIS_URL` or the Upstash pair. A studio that sets `DATABASE_URL` without `TURBOSLIDE_ACCOUNTS=d1` fails at its first request. The error names `TURBOSLIDE_ACCOUNTS=d1`. A studio that sets `REDIS_URL` or the Upstash pair writes one `config.degraded` log line that names them.
 
 The admin can turn a feature off without a deploy:
 
@@ -93,37 +93,37 @@ The admin can turn a feature off without a deploy:
 turboslide admin flag exports --on false
 ```
 
-The thirteen switches are `realtime`, `presence`, `comments`, `invites`, `email`, `exports`, `uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly` and `assist`. A switched off feature answers 503 with `Retry-After: 60` and one sentence, such as "Downloads are paused right now. Try again in a few minutes".
+The thirteen switches are `realtime`, `presence`, `comments`, `invites`, `email`, `exports`, `uploads`, `renderThumbs`, `materialize`, `htmlBlocks`, `signup`, `readOnly` and `assist`. A feature that is switched off returns 503 with `Retry-After: 60` and one sentence, such as "Downloads are paused right now. Try again in a few minutes".
 
-With the realtime Worker (`TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_BEARER`), the switches are kept in the Worker's database and every instance reads a change within 5 seconds. Without the Worker, each instance keeps its own switches in `.turboslide/flags.json`. While the Worker does not answer, every switch reads on except `realtime`.
+With the realtime Worker, set with `TURBOSLIDE_ROOM_HOST` and `TURBOSLIDE_ROOM_BEARER`, the Worker's database keeps the switches. Every instance reads a change within 5 seconds. Without the Worker, each instance keeps its own switches in `.turboslide/flags.json`. While the Worker does not respond, every switch except `realtime` reads as on.
 
 ## Health and error reports
 
-`GET /api/health` answers 200 with `{ "ok": true, "commit": "<build>" }` when the store reads the canary presentation and the accounts database answers, and 503 with `"ok": false` when either fails. `TURBOSLIDE_CANARY_DECK` names the canary, `gt-brand` by default. Each instance checks at most once every 30 seconds, whoever calls.
+`GET /api/health` returns 200 with `{ "ok": true, "commit": "<build>" }` when the store reads the canary presentation and the accounts database responds. It returns 503 with `"ok": false` when either check fails. `TURBOSLIDE_CANARY_DECK` names the canary presentation. The default is `gt-brand`. Each instance runs the checks at most once every 30 seconds, for any number of callers.
 
-The realtime Worker reads `/api/health` every five minutes and sends one mail through Resend when:
+The realtime Worker reads `/api/health` every five minutes. It sends one email through Resend in these cases:
 
-- two reads in a row fail;
-- the night's backup is not done, or done with failures, at 06:00 UTC;
-- the month's restore drill fails.
+- Two reads in a row fail.
+- At 06:00 UTC, the nightly backup is not done or is done with failures.
+- The monthly restore drill fails.
 
 | Variable                      | What it sets                                                                              |
 | ----------------------------- | ----------------------------------------------------------------------------------------- |
 | `TURBOSLIDE_ALERT_RESEND_KEY` | The Worker's own Resend key. The alert never reads `TURBOSLIDE_MAIL` or `RESEND_API_KEY`. |
-| `TURBOSLIDE_ALERT_TO`         | The addresses that receive an alert, as a comma list.                                     |
-| `TURBOSLIDE_ALERT_FROM`       | The sender. Unset, Resend's test address.                                                 |
+| `TURBOSLIDE_ALERT_TO`         | The addresses that receive an alert, as a comma-separated list.                           |
+| `TURBOSLIDE_ALERT_FROM`       | The sender. When it is not set, the sender is Resend's test address.                      |
 
-These are secrets of the Worker, not of the studio. Mails of one kind are at least an hour apart, and an alert that stays open sends no second mail. Without the key or an address, the Worker writes the alert to its log.
+Set these variables as secrets of the Worker. The studio does not use them. Emails of one kind are at least an hour apart. An alert that stays open sends no second email. Without the key or an address, the Worker writes the alert to its log.
 
-The pages send their errors to `POST /api/x/errors`. The browser removes presentation text, mail and network addresses, tokens and cookies from a report, and the server removes them again before it writes the report to its log as one line. A report is at most 4 KB, and one address can send 30 a minute. Each report also adds one to a daily count by kind and page in the accounts database, kept for 30 days.
+The pages send their errors to `POST /api/x/errors`. The browser removes presentation text, email and network addresses, tokens and cookies from a report. The server removes them again before it writes the report to its log as one line. A report is at most 4 KB. One address can send 30 reports a minute. Each report also adds one to a daily count by kind and page in the accounts database. The database keeps these counts for 30 days.
 
 ## Security and the assistant
 
-| Variable                                   | What it sets                                                                                                                                                                                                                            |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TURBOSLIDE_CSP`                           | The page's Content Security Policy. Unset, the presentation pages (`/deck`, `/edit`, `/new`, `/present`, `/print`, `/embed`, `/s`, `/try`) enforce it and the other pages report; `report` only reports, `enforce` enforces everywhere. |
-| `TURBOSLIDE_EMBED_ANCESTORS`               | More sites that may embed a presentation's page, as a comma list of `https://` origins.                                                                                                                                                 |
-| `TURBOSLIDE_ASSIST`                        | `off` turns the assistant off ("The assistant is off on this Turboslide"); `fixture` answers with a fixed card for tests.                                                                                                               |
-| `ANTHROPIC_API_KEY`, `RAMP_ROUTER_API_KEY` | The assistant's model key. Without either, the assistant answers "The assistant is not set up on this Turboslide yet".                                                                                                                  |
-| `TURBOSLIDE_ASSIST_MODEL`                  | The model the router key uses.                                                                                                                                                                                                          |
-| `TURBOSLIDE_ASSIST_DAY_CAP`                | The assistant's calls per day for a person without an account. The default is 20.                                                                                                                                                       |
+| Variable                                   | What it sets                                                                                                                                                                                                                                                       |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `TURBOSLIDE_CSP`                           | The Content Security Policy of the pages. When it is not set, the presentation pages (`/deck`, `/edit`, `/new`, `/present`, `/print`, `/embed`, `/s`, `/try`) enforce it and the other pages only report. `report` only reports. `enforce` enforces it everywhere. |
+| `TURBOSLIDE_EMBED_ANCESTORS`               | Additional sites that can embed the page of a presentation, as a comma-separated list of `https://` origins.                                                                                                                                                       |
+| `TURBOSLIDE_ASSIST`                        | `off` turns the assistant off, and the assistant shows "The assistant is off on this Turboslide". `fixture` returns a fixed card for tests.                                                                                                                        |
+| `ANTHROPIC_API_KEY`, `RAMP_ROUTER_API_KEY` | The model key of the assistant. Without either key, the assistant shows "The assistant is not set up on this Turboslide yet".                                                                                                                                      |
+| `TURBOSLIDE_ASSIST_MODEL`                  | The model the router key uses.                                                                                                                                                                                                                                     |
+| `TURBOSLIDE_ASSIST_DAY_CAP`                | The assistant's calls per day for a person without an account. The default is 20.                                                                                                                                                                                  |

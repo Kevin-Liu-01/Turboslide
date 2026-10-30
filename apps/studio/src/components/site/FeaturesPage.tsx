@@ -50,7 +50,7 @@ export function FeaturesPage() {
         </dl>
       </PageHead>
       {FEATURE_GROUPS.map((group) => (
-        <SiteBlock key={group.id} id={group.id} sentence={group.sentence} keys={group.keys}>
+        <SiteBlock key={group.id} id={group.id} heading={group.heading} keys={group.keys}>
           {group.figure.kind === 'crop' ? (
             <ProductCrop name={group.figure.name} alt={group.figure.alt} />
           ) : (

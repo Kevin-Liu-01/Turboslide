@@ -103,7 +103,7 @@ FALLBACKS = {
         'local': ['Arial', 'Helvetica Neue', 'Liberation Sans'],
         'file': '/System/Library/Fonts/Supplemental/Arial.ttf',
     },
-    'mono': {'local': ['Menlo', 'Consolas', 'Liberation Mono'], 'file': '/System/Library/Fonts/Menlo.ttc'},
+    'mono': {'local': ['Menlo Regular', 'Menlo-Regular', 'Consolas', 'Liberation Mono'], 'file': '/System/Library/Fonts/Menlo.ttc'},
 }
 
 
@@ -224,7 +224,7 @@ def face_rule(family: str, file: str, unicode_range: str) -> str:
         '  font-style: normal;\n'
         f'  font-weight: {WEIGHTS[0]} {WEIGHTS[1]};\n'
         '  font-display: swap;\n'
-        f"  src: url('./fonts/{file}') format('woff2');\n"
+        f"  src: url('./{file}') format('woff2');\n"
         + wrap_range(unicode_range)
         + '}\n'
     )

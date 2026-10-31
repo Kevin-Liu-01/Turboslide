@@ -337,10 +337,18 @@ export function rows(): void {
             pointers: h1.querySelectorAll('.site-stack[data-stack="people"] .site-pointer').length,
             marks: h1.querySelectorAll('.site-stack[data-stack="agents"] .ts-agent-mark').length,
           };
-          /* the two words in the two faces */
-          const faces = [...h1.querySelectorAll<HTMLElement>('.site-h1-word')].map(
-            (w) => getComputedStyle(w).fontFamily.split(',')[0]?.replace(/['"]/g, '').trim() ?? '',
-          );
+          /* the two words in two faces, each loaded rather than drawn by its fallback */
+          const faces = [...h1.querySelectorAll<HTMLElement>('.site-h1-word')].map((w) => {
+            const style = getComputedStyle(w);
+            const face = style.fontFamily.split(',')[0]?.replace(/['"]/g, '').trim() ?? '';
+            const font = `${style.fontWeight} ${style.fontSize} "${face}"`;
+            const loaded = [...document.fonts].some(
+              (f) => f.family.replace(/['"]/g, '') === face && f.status === 'loaded',
+            );
+            return loaded && document.fonts.check(font, w.textContent ?? '')
+              ? face
+              : `${face} (not loaded)`;
+          });
           return { out, starts, bare, figures, faces };
         });
         const label = `${cell.width} ${cell.theme}`;
@@ -369,8 +377,8 @@ export function rows(): void {
         });
         expect(
           facts.faces,
-          `${label}: "people" in Katagami Sans, "agents" in Katagami Mono`,
-        ).toEqual(['Katagami Sans', 'Katagami Mono']);
+          `${label}: "people" in Katagami Text, "agents" in Katagami Mono`,
+        ).toEqual(['Katagami Text', 'Katagami Mono']);
         const names = [
           ...PEOPLE.map((person) => person.name),
           'Claude Code',

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Cut the interface faces from Katagami Sans and Katagami Mono (Kevin, 2026-10-30: "use katagami
 instead of inter and our mono" on the site; 2026-10-31: "also use more katagami everywhere", so
-every route's chrome draws them; the web-font-optimization brief of 2026-10-30). The slides keep
-their theme's faces: nothing here reaches a `.ts-sheet`.
+every route's chrome draws them; the web-font-optimization brief of 2026-10-30), and the landing
+title's "people" from Katagami Text (Kevin, 2026-10-31: "make people and agents in different
+katagami fonts"). The slides keep their theme's faces: nothing here reaches a `.ts-sheet`.
 
 Run by hand, never by the build. The output is committed:
 
   apps/studio/src/components/site/fonts/katagami-{sans,mono}-{core,ext}.woff2
+  apps/studio/src/components/site/fonts/katagami-text-core.woff2
   apps/studio/src/components/site/fonts/katagami.json   the record: sources, bytes, glyphs, ranges
   apps/studio/src/components/site/fonts/katagami.css     the faces, loaded on every route by
                                                          routes/__root.tsx
@@ -31,8 +33,13 @@ and split in two: a core file with ASCII, the no-break space, the punctuation mo
 key symbols the menus print on a Mac (KEYS), which every route preloads (routes/__root.tsx), and an
 extended file behind its unicode-range that a page downloads only when it draws one of its
 characters. Each unicode-range is read from the cut font's cmap. The metric matched fallback
-faces (Katagami Sans Fallback over Arial, Katagami Mono Fallback over Menlo) come first in the
-block, so no fallback rule sits between a face's two files.
+faces (Katagami Sans Fallback and Katagami Text Fallback over Arial, Katagami Mono Fallback over
+Menlo) come first in the block, so no fallback rule sits between a face's two files.
+
+Katagami Text draws one word, the title's "people" at weight 500 (site.css `.t-display`), so its
+cut is the core file alone with the axis pinned at 500: 13,044 bytes where the whole axis is 27,680,
+preloaded on /home. Another weight of it would be synthesized, so a stylesheet that sets one
+reruns this script with that weight added.
 
 A character the release lacks falls through the stack to the system's face, as it did under
 Inter, whose Latin subset lacks the same ones: the half discs of the theme button, the midline
@@ -48,7 +55,8 @@ the release files of https://katagami.kevinliu.studio/fonts/ (SIL OFL 1.1; the R
 
   curl -O https://katagami.kevinliu.studio/fonts/KatagamiSans.woff2
   curl -O https://katagami.kevinliu.studio/fonts/KatagamiMono.woff2
-  .turboslide/venv/bin/python scripts/fonts/subset-katagami.py --src <folder with the two files>
+  curl -O https://katagami.kevinliu.studio/fonts/KatagamiText.woff2
+  .turboslide/venv/bin/python scripts/fonts/subset-katagami.py --src <folder with the three files>
 
 `--check` cuts again in memory and exits 1 when a committed file or the block differs.
 """
@@ -65,17 +73,20 @@ from pathlib import Path
 
 from fontTools import subset
 from fontTools.ttLib import TTFont
+from fontTools.varLib import instancer
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'apps/studio/src/components/site/fonts'
 CSS = OUT / 'katagami.css'
 SOURCE_URL = 'https://katagami.kevinliu.studio/fonts/'
 
+# each face's wght range and files: the interface faces keep the whole axis in a core and an
+# extended file; Katagami Text draws the title's one word at 500 and needs the core alone
 FACES = {
-    'sans': {'file': 'KatagamiSans.woff2', 'family': 'Katagami Sans'},
-    'mono': {'file': 'KatagamiMono.woff2', 'family': 'Katagami Mono'},
+    'sans': {'file': 'KatagamiSans.woff2', 'family': 'Katagami Sans', 'weights': (100, 900), 'parts': ('ext', 'core')},
+    'mono': {'file': 'KatagamiMono.woff2', 'family': 'Katagami Mono', 'weights': (100, 900), 'parts': ('ext', 'core')},
+    'text': {'file': 'KatagamiText.woff2', 'family': 'Katagami Text', 'weights': (500, 500), 'parts': ('core',)},
 }
-WEIGHTS = (100, 900)
 FEATURES = ['calt', 'ccmp', 'locl', 'kern', 'mark', 'mkmk', 'case', 'tnum', 'zero']
 
 # where the interface's characters come from: the chrome, the viewer, the studio's client code,
@@ -119,6 +130,10 @@ FALLBACKS = {
         'file': '/System/Library/Fonts/Supplemental/Arial.ttf',
     },
     'mono': {'local': ['Menlo Regular', 'Menlo-Regular', 'Consolas', 'Liberation Mono'], 'file': '/System/Library/Fonts/Menlo.ttc'},
+    'text': {
+        'local': ['Arial', 'Helvetica Neue', 'Liberation Sans'],
+        'file': '/System/Library/Fonts/Supplemental/Arial.ttf',
+    },
 }
 
 
@@ -135,7 +150,9 @@ def interface_characters() -> set[int]:
     return chars
 
 
-def cut(source: TTFont, unicodes: set[int]) -> TTFont:
+def cut(source: TTFont, unicodes: set[int], weights: tuple[int, int]) -> TTFont:
+    if weights[0] == weights[1]:
+        source = instancer.instantiateVariableFont(source, {'wght': weights[0]})
     options = subset.Options()
     options.layout_features = FEATURES
     options.hinting = False
@@ -233,12 +250,13 @@ def wrap_range(unicode_range: str) -> str:
     return '  unicode-range:\n' + '\n'.join(lines) + '\n'
 
 
-def face_rule(family: str, file: str, unicode_range: str) -> str:
+def face_rule(family: str, file: str, unicode_range: str, weights: tuple[int, int]) -> str:
+    weight = str(weights[0]) if weights[0] == weights[1] else f'{weights[0]} {weights[1]}'
     return (
         '@font-face {\n'
         f"  font-family: '{family}';\n"
         '  font-style: normal;\n'
-        f'  font-weight: {WEIGHTS[0]} {WEIGHTS[1]};\n'
+        f'  font-weight: {weight};\n'
         '  font-display: swap;\n'
         f"  src: url('./{file}') format('woff2');\n"
         + wrap_range(unicode_range)
@@ -252,7 +270,7 @@ def build(src: Path) -> tuple[dict[str, bytes], str, dict]:
         wanted.update(range(a, b + 1))
     files: dict[str, bytes] = {}
     rules: list[str] = []
-    record: dict = {'source': SOURCE_URL, 'weights': list(WEIGHTS), 'features': FEATURES, 'faces': {}}
+    record: dict = {'source': SOURCE_URL, 'features': FEATURES, 'faces': {}}
     fallbacks: list[str] = []
     for key, spec in FACES.items():
         raw = (src / spec['file']).read_bytes()
@@ -263,6 +281,7 @@ def build(src: Path) -> tuple[dict[str, bytes], str, dict]:
         fallbacks.append(fallback_face(key, source))
         face_record = {
             'source': spec['file'],
+            'weights': list(spec['weights']),
             'sourceBytes': len(raw),
             'sourceSha256': hashlib.sha256(raw).hexdigest(),
             'sourceGlyphs': len(source.getGlyphOrder()),
@@ -270,13 +289,15 @@ def build(src: Path) -> tuple[dict[str, bytes], str, dict]:
             'files': {},
         }
         for part, codepoints in (('ext', ext), ('core', core)):
-            font = cut(TTFont(io.BytesIO(raw), recalcTimestamp=False), set(codepoints))
+            if part not in spec['parts']:
+                continue
+            font = cut(TTFont(io.BytesIO(raw), recalcTimestamp=False), set(codepoints), spec['weights'])
             data = to_bytes(font)
             name = f'katagami-{key}-{part}.woff2'
             files[name] = data
             drawn = sorted(set(TTFont(io.BytesIO(data)).getBestCmap()) & set(codepoints))
             unicode_range = ranges(drawn)
-            rules.append(face_rule(spec['family'], name, unicode_range))
+            rules.append(face_rule(spec['family'], name, unicode_range, spec['weights']))
             face_record['files'][name] = {
                 'bytes': len(data),
                 'sha256': hashlib.sha256(data).hexdigest(),

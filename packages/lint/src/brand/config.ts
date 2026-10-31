@@ -169,8 +169,9 @@ export const ALTERNATES_ROOTS: readonly string[] = [
 /**
  * The product's two families (docs/brand.md section 10, "The interface faces"), read by
  * `css/inter-only`: Inter draws the slides, and since 2026-10-31 (Kevin: "also use more katagami
- * everywhere") Katagami Sans and Katagami Mono draw the interface on every route. A rule may name
- * either family with its metric matched fallback beside the generic and system stacks. A slide
+ * everywhere") Katagami Sans and Katagami Mono draw the interface on every route, and Katagami
+ * Text the landing title's "people" ("make people and agents in different katagami fonts"). A
+ * rule may name any of them with its metric matched fallback beside the generic and system stacks. A slide
  * rule (a selector naming `.ts-sheet`, the root of every drawn slide) names Inter and the theme's
  * own tokens alone: no interface face and no interface token, so no slide takes the chrome's
  * face. An `@font-face` declares Inter, or a Katagami face in the one file the subset script
@@ -178,7 +179,14 @@ export const ALTERNATES_ROOTS: readonly string[] = [
  */
 export const FACES = {
   /** the interface families with their fallbacks, lowercased and unquoted */
-  interface: ['katagami sans', 'katagami sans fallback', 'katagami mono', 'katagami mono fallback'],
+  interface: [
+    'katagami sans',
+    'katagami sans fallback',
+    'katagami mono',
+    'katagami mono fallback',
+    'katagami text',
+    'katagami text fallback',
+  ],
   /** the chrome's face tokens, which brand.css points at the interface families */
   interfaceTokens: ['--pt-text', '--pt-display', '--pt-mono'],
   /** the stylesheet scripts/fonts/subset-katagami.py writes */

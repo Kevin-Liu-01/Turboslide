@@ -515,8 +515,10 @@ the standalone file, the PDF and the PowerPoint export keep the whole files.
 Kevin, 2026-10-30: "use katagami instead of inter and our mono"; 2026-10-31: "also use more
 katagami everywhere". The interface of every route (the site, `/decks`, the viewer, the editor,
 `/new`, the presenter, the print preview, Not found and the sign in pages) draws Katagami Sans, and
-Katagami Mono where it shows code, an id or a token. The slides keep their theme's faces: Inter in
-the library's nine themes, the brand kit's faces where a kit sets them.
+Katagami Mono where it shows code, an id or a token. The landing title's "people" is Katagami Text
+(Kevin, 2026-10-31: "make people and agents in different katagami fonts like katagami text and
+katagami mono"). The slides keep their theme's faces: Inter in the library's nine themes, the
+brand kit's faces where a kit sets them.
 
 - The tokens. `packages/chrome/src/brand.css`, linked after `tokens.css` on every route, sets
   `--pt-text` and `--pt-display` to the Katagami Sans stack and `--pt-mono` to the Katagami Mono
@@ -527,10 +529,12 @@ the library's nine themes, the brand kit's faces where a kit sets them.
   extended file per face (`apps/studio/src/components/site/fonts/`, the record `katagami.json`),
   from every character of the chrome, the viewer, the studio's client code, the docs and the list
   pickers' bullet glyphs. The core holds ASCII, the common punctuation, the four arrows and the
-  seven key symbols a Mac menu prints (⌘ ⌃ ⌥ ⇧ ↩ ⇥ ⌫): Sans 27,608 B, Mono 20,212 B. Every route
-  preloads the Sans core; a route that draws a slide also preloads Inter's Latin subset, and
-  `/home`, `/docs` and `/deck/<id>` the Mono core (`apps/studio/src/routes/__root.tsx`). Each face
-  has a metric matched fallback over Arial or Menlo, so a swap moves no line.
+  seven key symbols a Mac menu prints (⌘ ⌃ ⌥ ⇧ ↩ ⇥ ⌫): Sans 27,608 B, Mono 20,212 B. Katagami
+  Text draws one word, so its cut is the core alone with the axis pinned at the title's weight
+  500: 13,044 B. Every route preloads the Sans core; a route that draws a slide also preloads
+  Inter's Latin subset, `/home`, `/docs` and `/deck/<id>` the Mono core, and `/home` the Text core
+  (`apps/studio/src/routes/__root.tsx`). Each face has a metric matched fallback over Arial or
+  Menlo, so a swap moves no line.
 - The glyphs the release lacks fall through the stack to the system's face, as they did under
   Inter's Latin subset, which lacks the same ones: the theme button's half discs, the midline
   ellipsis, the two small triangles, the presenter's diagonal arrows, the reaction button's face

@@ -12,7 +12,7 @@
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Block, BlockType, ShapeBlock, ShapeKind } from '@turboslide/schema/blocks';
 import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
-import { resizeKindOf, rotateVector } from '@turboslide/schema/canvas';
+import { resizeKindOf, rotateVector, round64 } from '@turboslide/schema/canvas';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
@@ -1145,14 +1145,16 @@ export function freeGesture(
     if (mods.shift) ({ dx, dy } = axisLock(dx, dy));
     const rows = placedOf(slide, ids, boxes);
     if (rows.length === 0) return null;
-    /* the selection snaps by the union of its rotated bounding boxes (SPEC-2 0.107) */
+    /* the selection snaps by the union of its rotated bounding boxes (SPEC-2 0.107); a rotated
+       box's edges are irrational, so the offset is taken at the canvas precision (1/64 px) and
+       every position stays on it */
     const union = unionBox(rows.map((row) => row.pos));
     const snapped = snapMove(union, dx, dy, lines, {
       grid,
       ...(spacing !== undefined ? { spacing } : {}),
     });
-    const sdx = snapped.box[0] - union[0];
-    const sdy = snapped.box[1] - union[1];
+    const sdx = round64(snapped.box[0] - union[0]);
+    const sdy = round64(snapped.box[1] - union[1]);
     if (sdx === 0 && sdy === 0) return null;
     const mutations: Mutation[] = rows.map(({ id, pos }) =>
       posMutation(slide, id, { ...pos, x: pos.x + sdx, y: pos.y + sdy }),

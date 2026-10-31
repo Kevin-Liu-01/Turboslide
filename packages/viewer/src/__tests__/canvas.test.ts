@@ -293,6 +293,30 @@ describe('the first gesture’s write (SPEC-2 1.6)', () => {
     expect(turned?.mutations[0]).toMatchObject({ value: { rotate: 90 } });
     expect(turned?.angle).toBe(90);
   });
+
+  it('moves a rotated object to a snap and writes its box at 1/64 px', () => {
+    const converted = toFreeform(opener, openerBoxes);
+    if (!converted) throw new Error('expected a conversion');
+    const main = (converted.slide.slots.main ?? []).map((b) =>
+      b.id === 'picture' ? { ...b, pos: { ...b.pos!, w: 400, h: 300, rotate: 7 } } : b,
+    );
+    const canvas = { ...converted.slide, slots: { ...converted.slide.slots, main } } as Slide;
+    const boxes: MeasuredBoxes = {
+      ...openerBoxes,
+      blocks: Object.fromEntries(main.map((b) => [b.id, [b.pos!.x, b.pos!.y, b.pos!.w, b.pos!.h]])),
+    };
+    const chip = handle(
+      'free-move',
+      handlesFor(canvas, boxes, { kind: 'block', blockId: 'picture' }),
+    );
+    const ctx = { slide: canvas, boxes, free: { ids: ['picture'], lines: [], grid: true } };
+    const moved = freeGesture(chip, ctx, { x: 200, y: 150 }, { x: 263, y: 191 });
+    const value = (moved?.mutations[0] as { value?: { x: number; y: number } } | undefined)?.value;
+    if (value === undefined) throw new Error('expected a move');
+    /* the rotated bounding box's edges are irrational; the written box is not */
+    expect(Number.isInteger(value.x * 64)).toBe(true);
+    expect(Number.isInteger(value.y * 64)).toBe(true);
+  });
 });
 
 describe('objects, Tab order and the marquee (SPEC-2 6.1 rows 3, 4)', () => {

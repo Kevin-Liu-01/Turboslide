@@ -843,7 +843,7 @@ export function rotateVector(dx: number, dy: number, degrees: number): { dx: num
 }
 
 /** A value at the canvas precision, 1/64 px (the measurer's LayoutUnit), so a rotated result carries no float noise. */
-function round64(value: number): number {
+export function round64(value: number): number {
   return Math.round(value * 64) / 64;
 }
 

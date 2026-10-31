@@ -5,7 +5,7 @@
    the root class `.ts-site` (routes/-home-css.test.ts). Colours are the generated --pt- tokens of
    packages/chrome/src/tokens.css, so the two appearances follow `html[data-theme]`. The site sets
    Katagami Sans and Katagami Mono (Kevin, 2026-10-30), subset by scripts/fonts/subset-katagami.py
-   into the faces between the markers below; the slides drawn on the page keep the deck's Inter.
+   into components/site/fonts/katagami.css; the slides drawn on the page keep the deck's Inter.
    Letter spacing is the face's own: no rule tightens it. Spacing and component sizes are
    multiples of 8 px and text line heights multiples of 4 px. No shadow with a blur or an offset;
    colour transitions of 120 ms on hover alone, none under reduced motion. */
@@ -22,11 +22,8 @@
   --site-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
   --site-code: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
   /* the product's components inside the site (the theme button, Sign In, tooltips) read the
-     chrome's face tokens, so the site points them at its own faces; the slides drawn on the page
-     keep the deck's Inter through --site-deck */
-  --pt-text: var(--site-text);
-  --pt-display: var(--site-text);
-  --pt-mono: var(--site-code);
+     chrome's face tokens, Katagami on every route (packages/chrome/src/brand.css); the slides
+     drawn on the page keep the deck's Inter through --site-deck */
   --site-deck: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
   /* the site's accent (Kevin, 2026-10-30): vermilion, the red of a seal, 5.1 to 1 on the paper;
      the product's chrome keeps --pt-accent */
@@ -588,19 +585,50 @@
   letter-spacing: 0;
 }
 
-/* ---- Canvas: the lighthouse slide across the window, its heading moved and turned by hand ---- */
+/* ---- Canvas: the lighthouse slide across the window, every object on it the editor's object ---- */
 
+/* the figure clips what reaches past the window's sides (a handle of an object dragged off the
+   slide) and lets the selection reach above and below the slide */
 .ts-site .site-cv-fig {
   margin: 0;
+  overflow-x: clip;
 }
 
 /* the slide spans the window up to 1600 px; its sky is the page's paper, so the slide reads as
-   the page with the editor's selection on it */
+   the page with the editor's selection on it. The objects clip to the slide and the selection
+   does not. A finger on the photograph scrolls the page; the objects and the handles take it */
 .ts-site .site-cv-fig .site-sheet {
   width: min(100%, 1600px);
   margin-inline: auto;
+  overflow: visible;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+/* the slide takes the focus only from a press on the photograph or after Delete */
+.ts-site .site-cv-fig .site-sheet:focus {
+  outline: none;
+}
+
+/* the objects in paint order (each one's z-index is its rank) under the selection layer */
+.ts-site .site-cv-objs,
+.ts-site .site-cv-over,
+.ts-site .site-cv-guides {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-site .site-cv-objs {
+  z-index: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ts-site .site-cv-over {
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* an object at its box in slide px, turned about its centre */
@@ -615,73 +643,170 @@
   rotate: var(--r, 0deg);
 }
 
-/* the plate and its words at the theme's sizes (p 22/33, credit 15/21.75) */
-.ts-site .site-lh-plate {
+/* an object is its own drag surface. Its ring stands 10 slide px off a text (text-ring.ts) and
+   on the box of the plate, drawn by ::after in the selection colour under the pointer, on
+   keyboard focus and inside a marquee (Overlay.css .ts-hover); the ring is the drag area too */
+.ts-site .site-cv-obj {
+  cursor: move;
+  touch-action: none;
+  overflow-wrap: break-word;
+}
+
+.ts-site .site-cv-obj::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+}
+
+.ts-site .site-cv-heading::after,
+.ts-site .site-cv-paragraph::after,
+.ts-site .site-cv-credit::after {
+  inset: calc(-10 * var(--u));
+}
+
+.ts-site .site-cv-obj:focus-visible {
+  outline: none;
+}
+
+.ts-site .site-cv-obj:focus-visible::after,
+.ts-site .site-cv-obj[data-hit]::after {
+  border-color: var(--pt-select);
+}
+
+@media (hover: hover) {
+  .ts-site .site-cv-fig:not([data-drag]) .site-cv-obj:hover::after {
+    border-color: var(--pt-select);
+  }
+}
+
+/* a finger's reach around a text that is 5 px tall on a phone */
+@media (pointer: coarse) {
+  .ts-site .site-cv-heading::before,
+  .ts-site .site-cv-paragraph::before,
+  .ts-site .site-cv-credit::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+}
+
+/* the plate and the words at the theme's sizes: the title step 44/47.5 at 500 with the theme's
+   own -0.025em (packages/theme LADDER), the paragraph 22/33, the credit 15/21.75 */
+.ts-site .site-cv-box {
   background: var(--pt-paper);
 }
 
-.ts-site .site-lh-p {
+.ts-site .site-cv-heading {
+  font-size: calc(44 * var(--u));
+  line-height: calc(47.515625 * var(--u));
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.ts-site .site-cv-paragraph {
   font-size: calc(22 * var(--u));
   line-height: calc(33 * var(--u));
 }
 
-.ts-site .site-lh-cap {
+.ts-site .site-cv-credit {
   font-size: calc(15 * var(--u));
   line-height: calc(21.75 * var(--u));
   color: var(--pt-titanium);
 }
 
-/* where the heading was: the box `to-canvas` gave it, dashed */
-.ts-site .site-cv-ghost {
-  border: 1px dashed var(--pt-titanium);
-}
-
-/* the selection on the heading as the editor draws it on a text (Overlay.css, text-ring.ts): the
-   1 px ring 10 slide px off the box and the 12 px rotation ring 24 px over it on its stem; the
-   heading is the drag target out to the ring */
-.ts-site .site-cv-sel::before {
-  content: '';
-  position: absolute;
-  inset: calc(-10 * var(--u));
+/* the selection as the editor draws it (Overlay.css): a 1 px ring in --pt-select on each object
+   of several, and the frame on one object's ring or on several objects' union, with its eight
+   11 px squares and the 12 px turn ring 24 px over its top centre on a stem */
+.ts-site .site-cv-ring,
+.ts-site .site-cv-frame {
   border: 1px solid var(--pt-select);
-  pointer-events: none;
 }
 
-/* the heading at the theme's title step (44/47.5, 500, the theme's -0.025em) */
-.ts-site .site-cv-h {
+.ts-site .site-cv-sq {
   position: absolute;
-  inset: calc(-10 * var(--u));
-  margin: 0;
-  padding: calc(10 * var(--u));
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: calc(44 * var(--u));
-  line-height: calc(47.515625 * var(--u));
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  text-align: left;
-  white-space: nowrap;
-  cursor: move;
+  z-index: 2;
+  width: 11px;
+  height: 11px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-select);
+  background: var(--pt-paper);
+  translate: -50% -50%;
+  pointer-events: auto;
   touch-action: none;
 }
 
-/* a finger's reach around a heading that is 12 px tall on a phone */
-.ts-site .site-cv-h::after {
+/* a square takes the pointer 4 px past its edge */
+.ts-site .site-cv-sq::before {
   content: '';
   position: absolute;
-  inset: -8px;
+  inset: -5px;
 }
 
+.ts-site .site-cv-sq:hover {
+  background: var(--pt-select);
+}
+
+.ts-site .site-cv-sq[data-cv-dir='nw'] {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='n'] {
+  left: 50%;
+  top: 0;
+  cursor: ns-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='ne'] {
+  left: 100%;
+  top: 0;
+  cursor: nesw-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='e'] {
+  left: 100%;
+  top: 50%;
+  cursor: ew-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='se'] {
+  left: 100%;
+  top: 100%;
+  cursor: nwse-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='s'] {
+  left: 50%;
+  top: 100%;
+  cursor: ns-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='sw'] {
+  left: 0;
+  top: 100%;
+  cursor: nesw-resize;
+}
+
+.ts-site .site-cv-sq[data-cv-dir='w'] {
+  left: 0;
+  top: 50%;
+  cursor: ew-resize;
+}
+
+/* the turn handle: a 24 px target round the 12 px ring, its stem down to the top square */
 .ts-site .site-cv-knob {
   position: absolute;
+  z-index: 1;
   left: 50%;
-  top: calc(-10 * var(--u) - 36px);
+  top: -24px;
   width: 24px;
   height: 24px;
-  margin-left: -12px;
+  translate: -50% -50%;
   cursor: grab;
+  pointer-events: auto;
   touch-action: none;
 }
 
@@ -704,13 +829,13 @@
   left: 11.5px;
   top: 18px;
   width: 1px;
-  height: 18px;
+  height: 13.5px;
   background: var(--pt-select);
 }
 
-.ts-site .site-cv-fig[data-dragging='turn'],
-.ts-site .site-cv-fig[data-dragging='turn'] .site-cv-knob {
-  cursor: grabbing;
+.ts-site .site-cv-knob:hover::before,
+.ts-site .site-cv-fig[data-drag='turn'] .site-cv-knob::before {
+  background: var(--pt-select);
 }
 
 .ts-site .site-cv-knob:focus-visible {
@@ -722,7 +847,74 @@
   outline-offset: 2px;
 }
 
-/* the write under the slide: the action and its path in the second ink, the box in ink */
+/* the marquee (Marquee.css): a 1 px rule in --pt-select while the drag lasts */
+.ts-site .site-cv-marquee {
+  display: none;
+  border: 1px solid var(--pt-select);
+}
+
+.ts-site .site-cv-fig[data-drag='marquee'] .site-cv-marquee {
+  display: block;
+}
+
+/* a snap guide (Guides.css): a 1 px line in --pt-guide along the line the box took, while the
+   drag lasts */
+.ts-site .site-cv-guide {
+  position: absolute;
+  background: var(--pt-guide);
+}
+
+.ts-site .site-cv-guide[data-axis='x'] {
+  left: calc(var(--at) / 1600 * 100%);
+  top: calc(var(--from) / 900 * 100%);
+  width: 1px;
+  height: calc(var(--len) / 900 * 100%);
+}
+
+.ts-site .site-cv-guide[data-axis='y'] {
+  left: calc(var(--from) / 1600 * 100%);
+  top: calc(var(--at) / 900 * 100%);
+  width: calc(var(--len) / 1600 * 100%);
+  height: 1px;
+}
+
+/* a drag keeps its cursor wherever the pointer goes */
+.ts-site .site-cv-fig[data-drag='move'] {
+  cursor: move;
+}
+
+.ts-site .site-cv-fig[data-drag='turn'] {
+  cursor: grabbing;
+}
+
+.ts-site .site-cv-fig[data-drag='resize-n'],
+.ts-site .site-cv-fig[data-drag='resize-s'] {
+  cursor: ns-resize;
+}
+
+.ts-site .site-cv-fig[data-drag='resize-e'],
+.ts-site .site-cv-fig[data-drag='resize-w'] {
+  cursor: ew-resize;
+}
+
+.ts-site .site-cv-fig[data-drag='resize-ne'],
+.ts-site .site-cv-fig[data-drag='resize-sw'] {
+  cursor: nesw-resize;
+}
+
+.ts-site .site-cv-fig[data-drag='resize-nw'],
+.ts-site .site-cv-fig[data-drag='resize-se'] {
+  cursor: nwse-resize;
+}
+
+.ts-site .site-cv-fig[data-drag] .site-sheet,
+.ts-site .site-cv-fig[data-drag] .site-sheet * {
+  cursor: inherit;
+}
+
+/* the write under the slide: each line the action and its target in the second ink and the
+   value in ink, a wrapped line hung 2 ch, the mutations of a slide.update 2 ch in. While a
+   gesture lasts its own copy shows, written straight to the DOM */
 .ts-site .site-cv-write {
   margin-top: 24px;
   font-size: 15px;
@@ -732,11 +924,51 @@
 }
 
 .ts-site .site-cv-write code {
+  display: block;
   font-size: inherit;
+}
+
+.ts-site .site-cv-ln {
+  display: block;
+  padding-left: 2ch;
+  text-indent: -2ch;
+}
+
+.ts-site .site-cv-ln.is-in {
+  padding-left: 4ch;
 }
 
 .ts-site .site-cv-json {
   color: var(--pt-ink);
+}
+
+.ts-site .site-cv-write .site-cv-live,
+.ts-site .site-cv-fig[data-drag='move'] .site-cv-code,
+.ts-site .site-cv-fig[data-drag='turn'] .site-cv-code,
+.ts-site .site-cv-fig[data-drag^='resize'] .site-cv-code {
+  display: none;
+}
+
+.ts-site .site-cv-fig[data-drag='move'] .site-cv-live,
+.ts-site .site-cv-fig[data-drag='turn'] .site-cv-live,
+.ts-site .site-cv-fig[data-drag^='resize'] .site-cv-live {
+  display: block;
+}
+
+/* on a phone the four corner squares stay and the write steps down to 13/20 */
+@media (max-width: 720px) {
+  .ts-site .site-cv-sq[data-cv-dir='n'],
+  .ts-site .site-cv-sq[data-cv-dir='e'],
+  .ts-site .site-cv-sq[data-cv-dir='s'],
+  .ts-site .site-cv-sq[data-cv-dir='w'] {
+    display: none;
+  }
+
+  .ts-site .site-cv-write {
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 20px;
+  }
 }
 
 /* ---- Agents: every caller of one action wired into one handler and one record ---- */
@@ -1690,12 +1922,6 @@
     margin-bottom: 24px;
   }
 
-  .ts-site .site-cv-write {
-    margin-top: 16px;
-    font-size: 13px;
-    line-height: 20px;
-  }
-
   .ts-site .site-ag-calls th,
   .ts-site .site-ag-calls td,
   .ts-site .site-ag-name,
@@ -2262,87 +2488,144 @@
 
 /* ---- the title's two rows (Title.tsx, AvatarStack.tsx, docs/SITE.md B) ----
    "Presentations for people" and "and agents" on two lines (Kevin, 2026-10-30), each ending with
-   its group: the avatars overlap in a row in the line's flow, centred on the x-height, the later
-   one over the one before it. A pointer over a row or the keyboard's focus in it spreads the row
-   apart by translation alone, so nothing in the line moves, and the avatar under the pointer or
-   the focus rises a little with its name under it. */
+   its figures, drawn as the editor draws them and with no disc or plate (Kevin, 2026-10-31): a
+   person is the editor's own pointer in the person's live hue inside the halo presence.css gives
+   it, and an agent is its tool's mark. A pointer over a row or the keyboard's focus in it spreads
+   the row by translation alone, so nothing in the line moves; the figure under the pointer or the
+   focus grows a little and shows its flag, ink with the name in paper, at the pointer's side as
+   the editor's flag sits (COLLAB_GEOMETRY.pointer.flagOffset). */
 
 .ts-site .site-h1-word {
   color: var(--site-accent);
 }
 
-/* a word and its row break as one; --s, the avatar's diameter, is half the word's size */
+/* "agents" in the code face, as an agent's flag is; "people" keeps the sentence's face. The mono
+   advance is 1280 of 2048 units, wider than the sans's 1080 on average for these letters, so the
+   word is set tighter (Kevin, 2026-10-31: "reduce font spacing width"), the one negative
+   tracking on the site. */
+.ts-site .site-h1-word[data-word='agents'] {
+  font-family: var(--site-code);
+  letter-spacing: -0.07em;
+}
+
+/* a word and its row break as one */
 .ts-site .site-h1-group {
-  --s: max(24px, 0.5em);
-  --lap: calc(var(--s) * -0.3);
   white-space: nowrap;
 }
 
 .ts-site .site-stack {
-  display: inline-flex;
-  isolation: isolate;
-  margin-left: 0.18em;
+  position: relative;
+  display: inline-block;
+  height: 0.8em;
+  margin-left: 0.14em;
   vertical-align: middle;
   line-height: 0;
   letter-spacing: 0;
 }
 
-/* the row spreads by the overlap under a pointer and while an avatar has the keyboard's focus */
+/* the people: five pointers at their places (POINTER_AT) in a box of fixed size */
+.ts-site .site-stack[data-stack='people'] {
+  width: 2em;
+}
+
+/* the agents: four marks in a row */
+.ts-site .site-stack[data-stack='agents'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12em;
+}
+
+/* the row spreads under a pointer and while a figure has the keyboard's focus */
 .ts-site .site-stack:has(.site-av:focus-visible) {
-  --spread: calc(var(--s) * 0.34);
+  --spread: 0.07em;
 }
 
 @media (hover: hover) {
   .ts-site .site-stack:hover {
-    --spread: calc(var(--s) * 0.34);
+    --spread: 0.07em;
   }
 }
 
 .ts-site .site-av {
-  --up: 0px;
   position: relative;
   display: block;
   flex: none;
-  width: var(--s);
-  height: var(--s);
-  margin: 0 0 0 var(--lap);
+  margin: 0;
   padding: 0;
-  border: 2px solid var(--ts-hue);
-  border-radius: 50%;
-  background: #ffffff;
-  color: #0b0b0b;
+  border: 0;
+  border-radius: var(--pt-radius-sm);
+  background: none;
+  color: var(--pt-ink);
   font: inherit;
-  /* the 2 px page coloured ring that parts an avatar from the one it overlaps, then a soft
-     shadow (accepted by name in packages/lint/src/brand/config.ts) */
-  box-shadow:
-    0 0 0 2px var(--pt-paper),
-    0 4px 10px -3px rgb(0 0 0 / 0.32);
   cursor: pointer;
-  translate: calc(var(--i) * var(--spread, 0px)) calc(var(--up) * -1);
+  translate: calc(var(--i) * var(--spread, 0em)) 0;
   transition:
-    translate 200ms var(--pt-ease),
-    scale 200ms var(--pt-ease);
+    translate 180ms var(--pt-ease),
+    scale 180ms var(--pt-ease);
   -webkit-tap-highlight-color: transparent;
 }
 
-.ts-site .site-av:first-child {
-  margin-left: 0;
+/* a person: the pointer's box keeps the polygon's 16 by 20 with its halo; it grows about its tip */
+.ts-site .site-av.is-person {
+  position: absolute;
+  left: var(--x);
+  top: calc(50% - 0.25em + var(--y));
+  width: 0.4em;
+  height: 0.5em;
+  transform-origin: 12.5% 10%;
 }
 
-/* the lifted avatar: up a little, a little larger, its name under it, over its neighbours; under a
-   pointer that hovers, on the keyboard's focus, and for a moment after a press (a touch) */
+.ts-site .site-pointer {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ts-site .site-pointer-out,
+.ts-site .site-pointer-in {
+  fill: none;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.ts-site .site-pointer-out {
+  stroke: var(--ts-halo-out, #ffffff);
+  stroke-width: 4;
+}
+
+.ts-site .site-pointer-in {
+  stroke: var(--ts-halo-in, #070707);
+  stroke-width: 2;
+}
+
+.ts-site .site-pointer-fill {
+  fill: var(--ts-hue);
+}
+
+/* an agent: the tool's mark at the x-height, in its own colours (agent-marks.css) */
+.ts-site .site-av.is-agent {
+  width: 0.54em;
+  height: 0.54em;
+}
+
+.ts-site .site-av.is-agent .ts-agent-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* the figure in hand: a little larger, over its neighbours, its flag shown */
 .ts-site .site-av:focus-visible,
 .ts-site .site-av[data-pressed] {
-  --up: calc(var(--s) * 0.1);
   z-index: 1;
-  scale: 1.08;
+  scale: 1.14;
 }
 
 @media (hover: hover) {
   .ts-site .site-av:hover {
-    --up: calc(var(--s) * 0.1);
     z-index: 1;
-    scale: 1.08;
+    scale: 1.14;
   }
 
   .ts-site .site-av:hover::after {
@@ -2353,28 +2636,36 @@
 
 .ts-site .site-av:focus-visible {
   outline: 2px solid var(--pt-select);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
-/* the name: under the avatar, 6 px from its ring */
+/* the flag: the editor's ink plate with the name in paper, at the pointer's lower right; under a
+   mark it hangs below the mark's middle. An agent's name is set in the code face. */
 .ts-site .site-av::after {
   content: attr(data-name);
   position: absolute;
-  left: 50%;
-  top: calc(100% + 6px);
-  translate: -50% 0;
-  padding: 2px 6px;
+  left: 78%;
+  top: 92%;
+  height: 20px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-paper);
   border-radius: var(--pt-radius-sm);
   background: var(--pt-ink);
   color: var(--pt-paper);
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
+  font: 500 12px/18px var(--site-text);
   letter-spacing: 0;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+.ts-site .site-av.is-agent::after {
+  left: 50%;
+  top: calc(100% + 6px);
+  translate: -50% 0;
+  font-family: var(--site-code);
 }
 
 .ts-site .site-av:focus-visible::after,
@@ -2383,92 +2674,15 @@
   visibility: visible;
 }
 
-/* a press: the ring in the avatar's hue spreads once and fades */
-.ts-site .site-av::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border: 2px solid var(--ts-hue);
-  border-radius: 50%;
-  opacity: 0;
-  pointer-events: none;
+/* a press: the figure clicks once, down and back, about its tip or its middle */
+.ts-site .site-av[data-pressed] {
+  animation: site-av-click 260ms var(--pt-ease-out) 1;
 }
 
-.ts-site .site-av[data-pressed]::before {
-  animation: site-av-pulse 900ms var(--pt-ease-out) 1;
-}
-
-@keyframes site-av-pulse {
-  from {
-    opacity: 0.9;
-    scale: 1;
+@keyframes site-av-click {
+  40% {
+    scale: 0.86;
   }
-
-  to {
-    opacity: 0;
-    scale: 1.7;
-  }
-}
-
-/* a person: the generated portrait, clipped to the round field */
-.ts-site .site-av .site-face {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-.ts-site .site-face-bg {
-  fill: color-mix(in oklab, var(--ts-hue) 24%, #ffffff);
-}
-
-.ts-site .site-face-cloth {
-  fill: var(--ts-hue);
-}
-
-.ts-site .site-face-collar {
-  fill: color-mix(in oklab, var(--ts-hue) 30%, #ffffff);
-}
-
-.ts-site .site-face-skin,
-.ts-site .site-face-neck {
-  fill: color-mix(in oklab, var(--ts-hue) 7%, #fbf6ef);
-}
-
-.ts-site .site-face-neck {
-  fill: color-mix(in oklab, var(--ts-hue) 14%, #eadfd2);
-}
-
-.ts-site .site-face-hair {
-  fill: color-mix(in oklab, var(--ts-hue) 30%, #141414);
-}
-
-.ts-site .site-face-glasses {
-  fill: none;
-  stroke: #141414;
-  stroke-width: 1.1;
-}
-
-/* an agent: the tool's own mark, in its colours on paper, on a plate of its own that keeps those
-   colours in both appearances (the marks that draw in the ink of the dark appearance keep the
-   ink of the light one here) */
-.ts-site .site-av-plate {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #ffffff;
-}
-
-.ts-site .site-av-plate .ts-agent-mark {
-  width: 62%;
-  height: 62%;
-}
-
-.ts-site .site-av.is-agent .ts-agent-mark[data-ink-on-dark] {
-  color: #0b0b0b;
 }
 
 /* ---- the footer (SiteFooter.tsx): on every site page and the docs ---- */
@@ -2762,22 +2976,17 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     transition: none;
   }
 
-  /* the row keeps its place: no spread, no lift; the label and the focus ring change at once,
-     and a press shows the ring without the spread */
+  /* the row keeps its place and the figures their size; the flag and the focus ring change at
+     once, and a press does not click */
   .ts-site .site-stack:hover,
   .ts-site .site-stack:has(.site-av:focus-visible) {
-    --spread: 0px;
+    --spread: 0em;
   }
 
   .ts-site .site-av:hover,
   .ts-site .site-av:focus-visible,
   .ts-site .site-av[data-pressed] {
-    --up: 0px;
     scale: none;
-  }
-
-  .ts-site .site-av[data-pressed]::before {
     animation: none;
-    opacity: 1;
   }
 }

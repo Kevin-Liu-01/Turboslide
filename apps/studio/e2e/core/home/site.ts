@@ -5,8 +5,8 @@ import { PEOPLE, TITLE_TEXT } from '../../../src/components/site/copy';
 import { extraHTTPHeaders, title } from '../lib';
 
 // The landing's rows of the site build (docs/SITE.md; the landing step, plan A, B and D): the
-// Workbench layout in both appearances at 1440 and 390, the one line title with its two arcs and
-// what pressing an avatar does in the live editor,
+// Workbench layout in both appearances at 1440 and 390, the two line title with its rows of
+// pointers and marks and what pressing one does in the live editor,
 // the hero's poster in a box whose size never changes, and the page's own script without an
 // editor module. The hero step's rows of the live editor are hero.ts's.
 // Every observation is through the page and the network; /home writes no store.
@@ -19,6 +19,7 @@ export const ROWS: readonly string[] = [
   'home.hero.poster-first',
   'home.budget.first-script',
   'home.bar.narrow',
+  'home.canvas.gestures',
 ];
 
 type Theme = 'light' | 'dark';
@@ -139,9 +140,8 @@ export function rows(): void {
             if (cs.display === 'none') continue;
             radii.add(cs.borderTopLeftRadius);
             /* a shadow with an offset or a blur: the first three lengths of any layer non zero
-               (a spread alone, the paper cut of the avatars, is allowed) */
-            /* the title's avatars carry the soft shadow Kevin asked for (docs/SITE.md B) */
-            if (cs.boxShadow !== 'none' && !el.classList.contains('site-av'))
+               (a spread alone is allowed) */
+            if (cs.boxShadow !== 'none')
               for (const layer of cs.boxShadow.split(/,(?![^(]*\))/)) {
                 const lengths = [...layer.matchAll(/(-?[\d.]+)px/g)].map((m) => Number(m[1]));
                 if (lengths.slice(0, 3).some((n) => n !== 0)) shadows.push(cs.boxShadow);
@@ -299,15 +299,15 @@ export function rows(): void {
             const r = av.getBoundingClientRect();
             return {
               name: av.getAttribute('aria-label') ?? '',
-              size: Math.round(r.width),
-              /* the avatar's round field against each glyph's box */
-              covers: glyphs.filter((g) => {
-                const cx = r.left + r.width / 2;
-                const cy = r.top + r.height / 2;
-                const nx = Math.max(g.left, Math.min(cx, g.right));
-                const ny = Math.max(g.top, Math.min(cy, g.bottom));
-                return Math.hypot(nx - cx, ny - cy) < r.width / 2 - 1;
-              }).length,
+              size: Math.round(r.height),
+              /* the figure's box, 1 px in, against each glyph's box */
+              covers: glyphs.filter(
+                (g) =>
+                  r.left + 1 < g.right &&
+                  r.right - 1 > g.left &&
+                  r.top + 1 < g.bottom &&
+                  r.bottom - 1 > g.top,
+              ).length,
               underBar: r.top - bar.bottom,
               left: r.left,
               right: r.right,
@@ -318,7 +318,7 @@ export function rows(): void {
             range.selectNodeContents(w.firstChild as Node);
             return range.getBoundingClientRect();
           });
-          /* the first avatar of each row follows its word on the word's line */
+          /* the first figure of each row follows its word on the word's line */
           const starts = [...h1.querySelectorAll<HTMLElement>('.site-stack')].map((st, i) => {
             const first = (st.querySelector('.site-av') as HTMLElement).getBoundingClientRect();
             const word = words[i] as DOMRect;
@@ -328,10 +328,20 @@ export function rows(): void {
               height: word.height,
             };
           });
-          const rings = [...h1.querySelectorAll<HTMLElement>('.site-av')].map(
-            (av) => getComputedStyle(av).borderTopStyle,
+          /* no disc, plate or ring: a person is the editor's pointer, an agent its tool's mark */
+          const bare = [...h1.querySelectorAll<HTMLElement>('.site-av')].every((av) => {
+            const cs = getComputedStyle(av);
+            return cs.borderTopStyle === 'none' && cs.backgroundColor === 'rgba(0, 0, 0, 0)';
+          });
+          const figures = {
+            pointers: h1.querySelectorAll('.site-stack[data-stack="people"] .site-pointer').length,
+            marks: h1.querySelectorAll('.site-stack[data-stack="agents"] .ts-agent-mark').length,
+          };
+          /* the two words in the two faces */
+          const faces = [...h1.querySelectorAll<HTMLElement>('.site-h1-word')].map(
+            (w) => getComputedStyle(w).fontFamily.split(',')[0]?.replace(/['"]/g, '').trim() ?? '',
           );
-          return { out, starts, rings };
+          return { out, starts, bare, figures, faces };
         });
         const label = `${cell.width} ${cell.theme}`;
         expect(facts.out).toHaveLength(9);
@@ -341,8 +351,8 @@ export function rows(): void {
           expect(av.left, `${label}: ${av.name} on the screen`).toBeGreaterThanOrEqual(0);
           expect(av.right, `${label}: ${av.name} on the screen`).toBeLessThanOrEqual(cell.width);
           if (cell.width >= 1024)
-            expect(av.size, `${label}: ${av.name}`).toBeGreaterThanOrEqual(36);
-          else expect(av.size, `${label}: ${av.name}`).toBeGreaterThanOrEqual(24);
+            expect(av.size, `${label}: ${av.name}`).toBeGreaterThanOrEqual(24);
+          else expect(av.size, `${label}: ${av.name}`).toBeGreaterThanOrEqual(16);
         }
         for (const start of facts.starts) {
           expect(start.dx, `${label}: the row follows its word`).toBeGreaterThanOrEqual(0);
@@ -352,10 +362,15 @@ export function rows(): void {
             `${label}: the row sits on its word's line`,
           ).toBeLessThanOrEqual(start.height / 3);
         }
+        expect(facts.bare, `${label}: no disc, plate or ring`).toBe(true);
+        expect(facts.figures, `${label}: five pointers and four marks`).toEqual({
+          pointers: 5,
+          marks: 4,
+        });
         expect(
-          facts.rings.every((style) => style === 'solid'),
-          `${label}: solid rings`,
-        ).toBe(true);
+          facts.faces,
+          `${label}: "people" in Katagami Sans, "agents" in Katagami Mono`,
+        ).toEqual(['Katagami Sans', 'Katagami Mono']);
         const names = [
           ...PEOPLE.map((person) => person.name),
           'Claude Code',
@@ -380,7 +395,7 @@ export function rows(): void {
           .locator('.site-stack[data-stack="people"] .site-av')
           .evaluateAll((all) => all.map((av) => Math.round(av.getBoundingClientRect().left)));
       const closed = await xs();
-      /* a pointer over the row spreads it apart: the last avatar moves out along the line */
+      /* a pointer over the row spreads it apart: the last figure moves out along the line */
       await page.locator('.site-av[data-name="Cobalt 118"]').hover();
       await page.waitForTimeout(500);
       const open = await xs();
@@ -445,6 +460,64 @@ export function rows(): void {
         .toEqual([]);
     } finally {
       await close();
+    }
+  });
+
+  test(title('home.canvas.gestures'), async ({ browser }) => {
+    test.setTimeout(180_000);
+    for (const cell of [CELLS[0], CELLS[3]] as (typeof CELLS)[number][]) {
+      const { page, close } = await open(browser, cell);
+      try {
+        const label = `${cell.width} ${cell.theme}`;
+        await page.locator('#canvas .site-cv-fig').scrollIntoViewIfNeeded();
+        /* the committed line (the live one beside it holds a drag's last frame) */
+        const line = page.locator('#site-cv-write .site-cv-code');
+        /* the call the line prints last: its action, block and the position it writes */
+        const written = async (): Promise<{ call: string; pos: Record<string, number> }> => {
+          const text = (await line.textContent()) ?? '';
+          const at = text.lastIndexOf('block.set');
+          const json = text.slice(text.indexOf('{', at), text.indexOf('}', at) + 1);
+          return { call: text.slice(at, text.indexOf('{', at)).trim(), pos: JSON.parse(json) };
+        };
+        const centre = async (selector: string): Promise<{ x: number; y: number }> => {
+          const box = await page.locator(selector).boundingBox();
+          if (box === null) throw new Error(`${selector} has no box`);
+          return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+        };
+        /* a press on the paragraph selects it with the frame and the turn handle */
+        const p = await centre('[data-cv="p1"]');
+        await page.mouse.click(p.x, p.y);
+        await expect(page.locator('[data-cv="p1"]'), label).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.locator('[data-cv-frame] .site-cv-knob'), label).toBeVisible();
+        /* a drag moves it, and the line reads the editor's write */
+        await page.mouse.move(p.x, p.y);
+        await page.mouse.down();
+        await page.mouse.move(p.x - 40, p.y - 30, { steps: 8 });
+        await page.mouse.up();
+        const moved = await written();
+        expect(moved.call, label).toBe('block.set lighthouse#p1 /pos');
+        expect(moved.pos.x, label).not.toBe(929);
+        /* undo writes the paragraph's first box forward */
+        await page.keyboard.press('ControlOrMeta+z');
+        const undone = await written();
+        expect(undone.call, label).toBe('block.set lighthouse#p1 /pos');
+        expect({ x: undone.pos.x, y: undone.pos.y }, label).toEqual({ x: 929, y: 618.25 });
+        /* the turned heading moves to a snap and its box stays at 1/64 px */
+        const h = await centre('[data-cv="h"]');
+        await page.mouse.move(h.x, h.y);
+        await page.mouse.down();
+        await page.mouse.move(h.x + 37, h.y + 23, { steps: 8 });
+        await page.mouse.up();
+        const heading = await written();
+        expect(heading.call, label).toBe('block.set lighthouse#h /pos');
+        for (const key of ['x', 'y'])
+          expect(Number.isInteger((heading.pos[key] ?? 0.5) * 64), `${label}: ${key}`).toBe(true);
+        /* Escape clears the selection */
+        await page.keyboard.press('Escape');
+        await expect(page.locator('[data-cv][aria-pressed="true"]'), label).toHaveCount(0);
+      } finally {
+        await close();
+      }
     }
   });
 

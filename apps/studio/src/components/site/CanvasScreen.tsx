@@ -1,10 +1,48 @@
-import { useRef } from 'react';
-import type { CSSProperties, RefObject } from 'react';
+import { Fragment, useLayoutEffect, useRef, useState } from 'react';
+import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, RefObject } from 'react';
 
-import { tipProps } from '@turboslide/chrome/Tooltip';
+import { hideTooltip, tipProps } from '@turboslide/chrome/Tooltip';
 
-import { LIGHTHOUSE, RING_OFFSET, clampPose, grow, poseJson, turnTo } from './canvas-pose';
-import type { Pose, SlideBox } from './canvas-pose';
+import {
+  DIRS,
+  INITIAL,
+  applyMutations,
+  callFor,
+  duplicate,
+  frameOf,
+  isGround,
+  marqueeBox,
+  marqueeHits,
+  mergeGuides,
+  moveGesture,
+  nudge,
+  objectById,
+  order,
+  paintRanks,
+  placeOf,
+  printCall,
+  redo,
+  removeAll,
+  resizeGesture,
+  ringOf,
+  selectableIds,
+  turnBy,
+  turnGesture,
+  turnHome,
+  undo,
+  write,
+} from './canvas-pose';
+import type {
+  Call,
+  CanvasState,
+  Dir,
+  Gesture,
+  Line,
+  OrderMove,
+  Placed,
+  Point,
+  Scene,
+} from './canvas-pose';
 import { SCREEN, fitCells, inkOf, onAppearance, printCells } from './cells';
 import { CANVAS_SCREEN } from './copy';
 import { ScreenHead } from './ScreenHead';
@@ -16,24 +54,125 @@ import toneUrl from './pictures/lighthouse-tone.webp?url';
 const TONE_COLS = 800;
 /** Tone bytes at or under this read as no ink, above the codec's ringing. */
 const TONE_FLOOR = 10;
+/** A press travels this many CSS px before it is a drag: a finger's wobble stays a tap. */
+const SLOP = { mouse: 3, touch: 8 } as const;
 
 /** A box of the slide as the custom properties site.css places it by (`.site-obj`). */
-function place(box: SlideBox): CSSProperties {
-  return {
-    '--x': box.x,
-    '--y': box.y,
-    '--w': box.w,
-    '--h': box.h,
-    '--r': `${box.rotate ?? 0}deg`,
-  } as CSSProperties;
+function place(placed: Placed): CSSProperties {
+  const [x, y, w, h] = placed.box;
+  return { '--x': x, '--y': y, '--w': w, '--h': h, '--r': `${placed.rotate}deg` } as CSSProperties;
 }
 
-const GHOST = grow(LIGHTHOUSE.rest, RING_OFFSET);
-const START: Pose = {
-  x: LIGHTHOUSE.moved.x,
-  y: LIGHTHOUSE.moved.y,
-  rotate: LIGHTHOUSE.moved.rotate,
-};
+/** The same placement written straight to an element, for a drag that renders nothing. */
+function setPlace(el: HTMLElement, placed: Placed): void {
+  const [x, y, w, h] = placed.box;
+  el.style.setProperty('--x', String(x));
+  el.style.setProperty('--y', String(y));
+  el.style.setProperty('--w', String(w));
+  el.style.setProperty('--h', String(h));
+  el.style.setProperty('--r', `${placed.rotate}deg`);
+}
+
+/** The turn the handle reports: the first selected object's. */
+function angleOf(scene: Scene, selected: readonly string[]): number {
+  const first = selected[0];
+  return first === undefined ? 0 : (objectById(scene, first)?.pos.rotate ?? 0);
+}
+
+/**
+ * Places every object, ring, frame and the turn handle of the figure as `scene` and `selected`
+ * stand: after a render, so nothing a drag wrote outlives it, and on every pointer move of a drag
+ * for the scene the gesture would write.
+ */
+function paint(root: HTMLElement, scene: Scene, selected: readonly string[]): void {
+  const byId = new Map(scene.map((object) => [object.id, object]));
+  for (const el of root.querySelectorAll<HTMLElement>('[data-cv]')) {
+    const object = byId.get(el.dataset.cv ?? '');
+    if (object !== undefined) setPlace(el, placeOf(object));
+  }
+  for (const el of root.querySelectorAll<HTMLElement>('[data-cv-ring]')) {
+    const object = byId.get(el.dataset.cvRing ?? '');
+    if (object !== undefined) setPlace(el, ringOf(object));
+  }
+  const frame = frameOf(scene, selected);
+  const frameEl = root.querySelector<HTMLElement>('[data-cv-frame]');
+  if (frame !== null && frameEl !== null) setPlace(frameEl, frame);
+  const knob = root.querySelector<HTMLElement>('.site-cv-knob');
+  if (knob !== null) {
+    const angle = angleOf(scene, selected);
+    knob.setAttribute('aria-valuenow', String(angle));
+    knob.setAttribute('aria-valuetext', CANVAS_SCREEN.degrees(angle));
+  }
+}
+
+/** The snap guides of a drag, one pooled `i` per merged line, drawn in --pt-guide (site.css). */
+function drawGuides(box: HTMLElement, guides: readonly Line[]): void {
+  const lines = mergeGuides(guides);
+  while (box.children.length < lines.length) box.append(document.createElement('i'));
+  [...box.children].forEach((child, index) => {
+    const el = child as HTMLElement;
+    const line = lines[index];
+    el.hidden = line === undefined;
+    if (line === undefined) return;
+    el.className = 'site-cv-guide';
+    el.dataset.axis = line.axis;
+    el.style.setProperty('--at', String(line.at));
+    el.style.setProperty('--from', String(line.from));
+    el.style.setProperty('--len', String(line.to - line.from));
+  });
+}
+
+/** A JSON value in parts, each comma ending one, so a narrow line breaks between values. */
+function valueParts(value: string): string[] {
+  return value.split(/(?<=,)/);
+}
+
+/** The printed call as lines: the action and its target in the second ink, the value in ink. */
+function CallLines({ call }: { call: Call }) {
+  return printCall(call).map((line, index) => (
+    <span key={index} className={line.inner === true ? 'site-cv-ln is-in' : 'site-cv-ln'}>
+      <span className="site-cv-op">{line.op}</span>
+      {line.value === undefined ? null : (
+        <>
+          {' '}
+          <span className="site-cv-json">
+            {valueParts(line.value).map((part, i) => (
+              <Fragment key={i}>
+                {i > 0 ? <wbr /> : null}
+                {part}
+              </Fragment>
+            ))}
+          </span>
+        </>
+      )}
+    </span>
+  ));
+}
+
+/** The same lines written into the drag's own element, so a drag renders nothing through React. */
+function printInto(el: HTMLElement, call: Call): void {
+  const span = (className: string, text: string): HTMLSpanElement => {
+    const out = document.createElement('span');
+    out.className = className;
+    out.textContent = text;
+    return out;
+  };
+  el.replaceChildren(
+    ...printCall(call).map((line) => {
+      const out = span(line.inner === true ? 'site-cv-ln is-in' : 'site-cv-ln', '');
+      out.append(span('site-cv-op', line.op));
+      if (line.value !== undefined) {
+        const json = span('site-cv-json', '');
+        valueParts(line.value).forEach((part, i) => {
+          if (i > 0) json.append(document.createElement('wbr'));
+          json.append(part);
+        });
+        out.append(' ', json);
+      }
+      return out;
+    }),
+  );
+}
 
 /**
  * Prints the slide's picture through the deck's 8 by 8 screen at the size the slide is shown: a
@@ -89,188 +228,374 @@ function useLighthouse(
   });
 }
 
-/**
- * The heading's two gestures, as the editor's stage reads them: a drag on the heading moves its
- * box (whole slide px, its centre kept on the slide), a drag on the handle turns it about its
- * centre (whole degrees, Shift for 15 degree steps), and with the focus the arrow keys do the same
- * (1 px or 1 degree, Shift for 10 px or 15 degrees). Each change writes the box's custom
- * properties and the `/pos` the editor would commit under the slide, straight to the DOM, so a
- * drag renders nothing through React. Nothing moves on its own.
- */
-function useMove(root: RefObject<HTMLElement | null>) {
-  useMountEffect(() => {
-    const figure = root.current;
-    const sheet = figure?.querySelector<HTMLElement>('.site-sheet');
-    const sel = figure?.querySelector<HTMLElement>('.site-cv-sel');
-    const heading = figure?.querySelector<HTMLElement>('.site-cv-h');
-    const knob = figure?.querySelector<HTMLElement>('.site-cv-knob');
-    const json = figure?.querySelector<HTMLElement>('.site-cv-json');
-    if (!figure || !sheet || !sel || !heading || !knob || !json) return;
-    let pose: Pose = START;
+/** One press on the slide, from pointer down to pointer up. */
+type Drag = {
+  pointer: number;
+  kind: 'move' | 'resize' | 'turn' | 'marquee' | 'tap';
+  dir: Dir;
+  /** the selection the gesture acts on */
+  ids: readonly string[];
+  rect: DOMRect;
+  /** the press in slide px and in client px */
+  start: Point;
+  client: Point;
+  slop: number;
+  armed: boolean;
+  /** the object pressed, and what a press that never travels does to the selection */
+  pressed: string | null;
+  onClick: 'keep' | 'drop' | 'only';
+  shift: boolean;
+  result: Gesture | null;
+  hits: string[];
+};
 
-    const set = (next: Pose): void => {
-      pose = clampPose(next);
-      sel.style.setProperty('--x', String(pose.x));
-      sel.style.setProperty('--y', String(pose.y));
-      sel.style.setProperty('--r', `${pose.rotate}deg`);
-      knob.setAttribute('aria-valuenow', String(pose.rotate));
-      knob.setAttribute('aria-valuetext', CANVAS_SCREEN.degrees(pose.rotate));
-      json.textContent = poseJson(pose);
-    };
-
-    type Drag =
-      | { mode: 'move'; id: number; x0: number; y0: number; from: Pose; k: number }
-      | { mode: 'turn'; id: number; cx: number; cy: number };
-    let drag: Drag | null = null;
-
-    const start = (event: PointerEvent, mode: 'move' | 'turn'): void => {
-      if (event.button !== 0) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const target = event.currentTarget as HTMLElement;
-      target.focus({ preventScroll: true });
-      target.setPointerCapture(event.pointerId);
-      figure.setAttribute('data-dragging', mode);
-      if (mode === 'move') {
-        const k = 1600 / sheet.clientWidth;
-        drag = { mode, id: event.pointerId, x0: event.clientX, y0: event.clientY, from: pose, k };
-      } else {
-        const r = sel.getBoundingClientRect();
-        drag = { mode, id: event.pointerId, cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
-      }
-    };
-    const onMoveDown = (event: PointerEvent): void => start(event, 'move');
-    const onTurnDown = (event: PointerEvent): void => start(event, 'turn');
-    const onPointerMove = (event: PointerEvent): void => {
-      if (drag === null || event.pointerId !== drag.id) return;
-      if (drag.mode === 'move') {
-        set({
-          ...pose,
-          x: Math.round(drag.from.x + (event.clientX - drag.x0) * drag.k),
-          y: Math.round(drag.from.y + (event.clientY - drag.y0) * drag.k),
-        });
-      } else {
-        const deg = (Math.atan2(event.clientY - drag.cy, event.clientX - drag.cx) * 180) / Math.PI;
-        set({ ...pose, rotate: turnTo(deg + 90, event.shiftKey ? 15 : 1) });
-      }
-    };
-    const onPointerUp = (event: PointerEvent): void => {
-      if (drag === null || event.pointerId !== drag.id) return;
-      drag = null;
-      figure.removeAttribute('data-dragging');
-    };
-
-    const ARROWS: Record<string, [number, number]> = {
-      ArrowLeft: [-1, 0],
-      ArrowRight: [1, 0],
-      ArrowUp: [0, -1],
-      ArrowDown: [0, 1],
-    };
-    const onMoveKey = (event: KeyboardEvent): void => {
-      const arrow = ARROWS[event.key];
-      if (arrow === undefined) return;
-      event.preventDefault();
-      const step = event.shiftKey ? 10 : 1;
-      set({ ...pose, x: pose.x + arrow[0] * step, y: pose.y + arrow[1] * step });
-    };
-    const onTurnKey = (event: KeyboardEvent): void => {
-      const arrow = ARROWS[event.key];
-      const by = arrow === undefined ? undefined : arrow[0] + arrow[1];
-      if (by === undefined && event.key !== 'Home') return;
-      event.preventDefault();
-      const step = event.shiftKey ? 15 : 1;
-      set({ ...pose, rotate: by === undefined ? 0 : turnTo(pose.rotate + by * step, step) });
-    };
-
-    heading.addEventListener('pointerdown', onMoveDown);
-    knob.addEventListener('pointerdown', onTurnDown);
-    heading.addEventListener('keydown', onMoveKey);
-    knob.addEventListener('keydown', onTurnKey);
-    for (const el of [heading, knob]) {
-      el.addEventListener('pointermove', onPointerMove);
-      el.addEventListener('pointerup', onPointerUp);
-      el.addEventListener('pointercancel', onPointerUp);
-    }
-    return () => {
-      heading.removeEventListener('pointerdown', onMoveDown);
-      knob.removeEventListener('pointerdown', onTurnDown);
-      heading.removeEventListener('keydown', onMoveKey);
-      knob.removeEventListener('keydown', onTurnKey);
-      for (const el of [heading, knob]) {
-        el.removeEventListener('pointermove', onPointerMove);
-        el.removeEventListener('pointerup', onPointerUp);
-        el.removeEventListener('pointercancel', onPointerUp);
-      }
-    };
-  });
-}
+const ARROWS: Readonly<Record<string, readonly [number, number]>> = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1],
+};
 
 /**
- * The Canvas screen: the lighthouse slide across the window, every box the one the CLI wrote
- * (canvas-pose.ts), its heading moved off the plate and turned, with a dashed box where it was and
- * the editor's selection ring and rotation handle on it. The heading moves under a drag and turns
- * by its handle, and the line under the slide is the `/pos` the editor commits for the heading as
- * it stands, so the gesture and the data it writes are one thing. The picture is printed live at
- * the size shown (cells.ts); the ring and the handle are drawn to the editor's Overlay.css.
+ * The Canvas screen: the lighthouse slide across the window as a small canvas with the editor's
+ * gestures. Every object (the heading, the paragraph, the credit and the plate) selects with the
+ * editor's ring, eight resize squares and turn handle (Overlay.css). A drag moves the selection,
+ * a square resizes it and the handle turns it, each snapping to the slide's guides, its edges and
+ * centre, the other objects' edges and centres and their equal gaps, with the snapped line drawn
+ * in --pt-guide; Shift click and a marquee on the photograph select several. The arrows nudge,
+ * Cmd D duplicates, Delete deletes, Cmd and the arrows reorder, Cmd Z and Shift Cmd Z undo and
+ * redo, and Escape clears. The line under the slide is the action call the editor sends for the
+ * last write (canvas-pose.ts, checked against the editor's own functions), written while the
+ * pointer moves, so the gesture and the data it writes are one thing. A drag writes custom
+ * properties straight to the DOM and renders nothing through React; nothing moves on its own.
  */
 export function CanvasScreen() {
-  const root = useRef<HTMLElement>(null);
+  const [state, setState] = useState<CanvasState>(INITIAL);
+  /* the state the handlers read between a write and its render */
+  const live = useRef(state);
+  const fig = useRef<HTMLElement>(null);
   const sheet = useRef<HTMLDivElement>(null);
   const pic = useRef<HTMLCanvasElement>(null);
+  const liveCode = useRef<HTMLElement>(null);
+  const guides = useRef<HTMLDivElement>(null);
+  const marquee = useRef<HTMLElement>(null);
+  const drag = useRef<Drag | null>(null);
+  const pointerFocus = useRef(false);
+  /* the element that held the focus before a key's write: a reorder moves it in the DOM */
+  const refocus = useRef<HTMLElement | null>(null);
   useLighthouse(sheet, pic);
-  useMove(root);
-  const { slide, write } = CANVAS_SCREEN;
+
+  const focusQuietly = (el: HTMLElement | null | undefined): void => {
+    pointerFocus.current = true;
+    el?.focus({ preventScroll: true });
+    pointerFocus.current = false;
+  };
+
+  useLayoutEffect(() => {
+    live.current = state;
+    if (fig.current !== null) paint(fig.current, state.scene, state.selected);
+    const el = refocus.current;
+    refocus.current = null;
+    if (el !== null && el.isConnected && document.activeElement !== el) focusQuietly(el);
+  });
+
+  const commit = (next: CanvasState): void => {
+    live.current = next;
+    setState(next);
+  };
+
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>): void => {
+    const el = sheet.current;
+    if (drag.current !== null || el === null || event.button !== 0) return;
+    const target = event.target as Element;
+    const square = target.closest<HTMLElement>('[data-cv-dir]');
+    const knob = target.closest<HTMLElement>('.site-cv-knob');
+    const object = target.closest<HTMLElement>('[data-cv]');
+    const touch = event.pointerType === 'touch';
+    const kind: Drag['kind'] =
+      square !== null
+        ? 'resize'
+        : knob !== null
+          ? 'turn'
+          : object !== null
+            ? 'move'
+            : touch
+              ? 'tap'
+              : 'marquee';
+    const s = live.current;
+    const rect = el.getBoundingClientRect();
+    const k = 1600 / rect.width;
+    let ids = s.selected;
+    let onClick: Drag['onClick'] = 'keep';
+    const pressed = object?.dataset.cv ?? null;
+    if (pressed !== null) {
+      const selected = ids.includes(pressed);
+      if (event.shiftKey) {
+        if (selected) onClick = 'drop';
+        else ids = [...ids, pressed];
+      } else if (!selected) ids = [pressed];
+      else if (ids.length > 1) onClick = 'only';
+    }
+    /* a finger on the photograph scrolls the page; only a tap that never travels clears */
+    if (kind !== 'tap') {
+      event.preventDefault();
+      el.setPointerCapture(event.pointerId);
+    }
+    hideTooltip();
+    /* after a press the arrows nudge: the focus goes to the object, or to the first selected
+       object for a handle; the turn handle's own arrows serve the keyboard alone */
+    if (kind === 'move') focusQuietly(object);
+    else if (kind === 'turn' || kind === 'resize')
+      focusQuietly(el.querySelector<HTMLElement>(`[data-cv="${ids[0] ?? ''}"]`));
+    else if (kind === 'marquee') focusQuietly(el);
+    drag.current = {
+      pointer: event.pointerId,
+      kind,
+      dir: (square?.dataset.cvDir ?? 'se') as Dir,
+      ids,
+      rect,
+      start: { x: (event.clientX - rect.left) * k, y: (event.clientY - rect.top) * k },
+      client: { x: event.clientX, y: event.clientY },
+      slop: touch ? SLOP.touch : SLOP.mouse,
+      armed: false,
+      pressed,
+      onClick,
+      shift: event.shiftKey,
+      result: null,
+      hits: [],
+    };
+    if (ids !== s.selected) commit({ ...s, selected: ids });
+  };
+
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>): void => {
+    const d = drag.current;
+    const root = fig.current;
+    if (d === null || root === null || event.pointerId !== d.pointer) return;
+    if (!d.armed) {
+      if (Math.hypot(event.clientX - d.client.x, event.clientY - d.client.y) < d.slop) return;
+      if (d.kind === 'tap') {
+        drag.current = null;
+        return;
+      }
+      d.armed = true;
+      root.setAttribute('data-drag', d.kind === 'resize' ? `resize-${d.dir}` : d.kind);
+    }
+    const k = 1600 / d.rect.width;
+    const now = { x: (event.clientX - d.rect.left) * k, y: (event.clientY - d.rect.top) * k };
+    const s = live.current;
+    if (d.kind === 'marquee') {
+      const box = marqueeBox(d.start, now);
+      if (marquee.current !== null) setPlace(marquee.current, { box, rotate: 0 });
+      d.hits = marqueeHits(s.scene, box);
+      for (const el of root.querySelectorAll<HTMLElement>('[data-cv]'))
+        el.toggleAttribute('data-hit', d.hits.includes(el.dataset.cv ?? ''));
+      return;
+    }
+    const mods = { shift: event.shiftKey, alt: event.altKey, meta: event.metaKey || event.ctrlKey };
+    const dx = now.x - d.start.x;
+    const dy = now.y - d.start.y;
+    d.result =
+      d.kind === 'move'
+        ? moveGesture(s.scene, d.ids, dx, dy, mods)
+        : d.kind === 'resize'
+          ? resizeGesture(s.scene, d.ids, d.dir, dx, dy, mods)
+          : turnGesture(s.scene, d.ids, d.start, now, mods);
+    const scene = d.result === null ? s.scene : applyMutations(s.scene, d.result.mutations).scene;
+    paint(root, scene, s.selected);
+    if (guides.current !== null) drawGuides(guides.current, d.result?.guides ?? []);
+    if (liveCode.current !== null)
+      printInto(liveCode.current, d.result === null ? s.call : callFor(d.result.mutations));
+  };
+
+  const end = (event: PointerEvent<HTMLDivElement>, cancelled: boolean): void => {
+    const d = drag.current;
+    const root = fig.current;
+    if (d === null || root === null || event.pointerId !== d.pointer) return;
+    drag.current = null;
+    root.removeAttribute('data-drag');
+    if (guides.current !== null) drawGuides(guides.current, []);
+    for (const el of root.querySelectorAll<HTMLElement>('[data-hit]'))
+      el.removeAttribute('data-hit');
+    const s = live.current;
+    if (cancelled) {
+      paint(root, s.scene, s.selected);
+      return;
+    }
+    if (!d.armed) {
+      const pressed = d.pressed;
+      if (pressed !== null && d.onClick === 'drop')
+        commit({ ...s, selected: s.selected.filter((id) => id !== pressed) });
+      else if (pressed !== null && d.onClick === 'only') commit({ ...s, selected: [pressed] });
+      else if ((d.kind === 'marquee' || d.kind === 'tap') && !d.shift && s.selected.length > 0)
+        commit({ ...s, selected: [] });
+      return;
+    }
+    if (d.kind === 'marquee') {
+      const selected = d.shift ? [...new Set([...s.selected, ...d.hits])] : d.hits;
+      commit({ ...s, selected });
+      return;
+    }
+    if (d.result === null) paint(root, s.scene, s.selected);
+    else commit(write(s, d.result.mutations));
+  };
+
+  /* a Tab onto an object selects it, as the editor's Tab does; a press selects in onPointerDown */
+  const onFocus = (event: FocusEvent<HTMLElement>): void => {
+    const id = (event.target as HTMLElement).dataset.cv;
+    const s = live.current;
+    if (pointerFocus.current || id === undefined || s.selected.includes(id)) return;
+    commit({ ...s, selected: [id] });
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
+    if (drag.current !== null) return;
+    const s = live.current;
+    const mod = event.metaKey || event.ctrlKey;
+    const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+    const anchor = s.selected[0];
+    const onKnob = (event.target as Element).classList.contains('site-cv-knob');
+    const arrow = ARROWS[key];
+    let next: CanvasState | null = null;
+    if (mod && key === 'z') next = event.shiftKey ? redo(s) : undo(s);
+    else if (mod && key === 'y') next = redo(s);
+    else if (mod && key === 'a') next = { ...s, selected: selectableIds(s.scene) };
+    else if (anchor === undefined) return;
+    else if (mod && key === 'd') {
+      const copy = duplicate(s.scene, s.selected);
+      next = write(s, copy.mutations, copy.call, copy.copies);
+    } else if (key === 'Escape') next = { ...s, selected: [] };
+    else if (key === 'Delete' || key === 'Backspace') {
+      focusQuietly(sheet.current);
+      next = write(s, removeAll(s.scene, s.selected), undefined, []);
+    } else if (arrow !== undefined && mod && arrow[1] !== 0) {
+      const move: OrderMove = event.shiftKey
+        ? arrow[1] < 0
+          ? 'front'
+          : 'back'
+        : arrow[1] < 0
+          ? 'forward'
+          : 'backward';
+      next = write(s, order(s.scene, anchor, move), { id: 'block.order', blockId: anchor, move });
+    } else if (arrow !== undefined && onKnob) {
+      const step = event.shiftKey ? 15 : 1;
+      next = write(s, turnBy(s.scene, s.selected, (arrow[0] - arrow[1]) * step));
+    } else if (arrow !== undefined && !mod) {
+      const step = event.shiftKey ? 10 : 1;
+      next = write(s, nudge(s.scene, s.selected, arrow[0] * step, arrow[1] * step));
+    } else if (key === 'Home' && onKnob) next = write(s, turnHome(s.scene, s.selected));
+    else return;
+    event.preventDefault();
+    if (next === s) return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && fig.current?.contains(active) === true)
+      refocus.current = active;
+    commit(next);
+  };
+
+  const { scene, selected } = state;
+  const ranks = paintRanks(scene);
+  /* the objects in paint order, so the DOM order is the stacking order and no z-index is written */
+  const painted = [...scene].sort((a, b) => (ranks.get(a.id) ?? 0) - (ranks.get(b.id) ?? 0));
+  const frame = frameOf(scene, selected);
+  const several = selected.length > 1;
+  const angle = angleOf(scene, selected);
   return (
     <section className="site-claim site-cv" id="canvas" aria-labelledby="site-canvas-title">
       <ScreenHead titleId="site-canvas-title" heading={CANVAS_SCREEN.heading} />
-      <figure ref={root} className="site-cv-fig" aria-label={CANVAS_SCREEN.figure.alt}>
-        <div ref={sheet} className="site-sheet">
-          <canvas ref={pic} className="site-cells" aria-hidden="true" />
-          <i className="site-obj site-lh-plate" style={place(LIGHTHOUSE.plate)} />
-          <span
-            className="site-obj site-lh-p"
-            style={place(LIGHTHOUSE.paragraph)}
-            aria-hidden="true"
-          >
-            {slide.paragraph}
-          </span>
-          <span
-            className="site-obj site-lh-cap"
-            style={place(LIGHTHOUSE.credit)}
-            aria-hidden="true"
-          >
-            {slide.credit}
-          </span>
-          <i className="site-obj site-cv-ghost" style={place(GHOST)} />
-          <div className="site-obj site-cv-sel" style={place(LIGHTHOUSE.moved)}>
-            <button
-              type="button"
-              className="site-cv-h"
-              aria-describedby="site-cv-write"
-              {...tipProps(CANVAS_SCREEN.move)}
-            >
-              {slide.heading}
-            </button>
-            <span
-              className="site-cv-knob"
-              role="slider"
-              tabIndex={0}
-              aria-label={CANVAS_SCREEN.turn.name}
-              aria-valuemin={0}
-              aria-valuemax={359}
-              aria-valuenow={START.rotate}
-              aria-valuetext={CANVAS_SCREEN.degrees(START.rotate)}
-              {...tipProps(CANVAS_SCREEN.turn)}
-            />
+      <figure
+        ref={fig}
+        className="site-cv-fig"
+        aria-label={CANVAS_SCREEN.figure.alt}
+        onFocus={onFocus}
+        onKeyDown={onKeyDown}
+      >
+        <div
+          ref={sheet}
+          className="site-sheet"
+          tabIndex={-1}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={(event) => end(event, false)}
+          onPointerCancel={(event) => end(event, true)}
+        >
+          <div className="site-cv-objs">
+            {painted.map((object) => {
+              if (isGround(object))
+                return (
+                  <canvas key={object.id} ref={pic} className="site-cells" aria-hidden="true" />
+                );
+              const tip = CANVAS_SCREEN.objects[object.type as keyof typeof CANVAS_SCREEN.objects];
+              const text = typeof object.fields.text === 'string' ? object.fields.text : undefined;
+              return (
+                <div
+                  key={object.id}
+                  role="button"
+                  tabIndex={0}
+                  data-cv={object.id}
+                  className={`site-obj site-cv-obj site-cv-${object.type}`}
+                  style={place(placeOf(object))}
+                  aria-pressed={selected.includes(object.id)}
+                  aria-label={text === undefined ? tip.name : undefined}
+                  aria-describedby="site-cv-write"
+                  {...tipProps(tip)}
+                >
+                  {text}
+                </div>
+              );
+            })}
+          </div>
+          <div className="site-cv-over">
+            {several
+              ? selected.map((id) => {
+                  const object = objectById(scene, id);
+                  return object === undefined ? null : (
+                    <i
+                      key={id}
+                      data-cv-ring={id}
+                      className="site-obj site-cv-ring"
+                      style={place(ringOf(object))}
+                    />
+                  );
+                })
+              : null}
+            {frame === null ? null : (
+              <div
+                data-cv-frame=""
+                className={several ? 'site-obj site-cv-frame is-group' : 'site-obj site-cv-frame'}
+                style={place(frame)}
+              >
+                {DIRS.map((dir) => (
+                  <i
+                    key={dir}
+                    data-cv-dir={dir}
+                    className="site-cv-sq"
+                    aria-hidden="true"
+                    {...tipProps(CANVAS_SCREEN.resize)}
+                  />
+                ))}
+                <span
+                  className="site-cv-knob"
+                  role="slider"
+                  tabIndex={0}
+                  aria-label={CANVAS_SCREEN.turn.name}
+                  aria-valuemin={0}
+                  aria-valuemax={359}
+                  aria-valuenow={angle}
+                  aria-valuetext={CANVAS_SCREEN.degrees(angle)}
+                  aria-describedby="site-cv-write"
+                  {...tipProps(CANVAS_SCREEN.turn)}
+                />
+              </div>
+            )}
+            <i ref={marquee} className="site-obj site-cv-marquee" />
+            <div ref={guides} className="site-cv-guides" aria-hidden="true" />
           </div>
         </div>
         <figcaption className="site-cv-write site-wrap" id="site-cv-write">
-          <code>
-            <span className="site-cv-op">
-              {write.action} {write.block} {write.path}
-            </span>{' '}
-            <span className="site-cv-json">{poseJson(START)}</span>
+          <code className="site-cv-code">
+            <CallLines call={state.call} />
           </code>
+          <code ref={liveCode} className="site-cv-live" aria-hidden="true" />
         </figcaption>
       </figure>
     </section>

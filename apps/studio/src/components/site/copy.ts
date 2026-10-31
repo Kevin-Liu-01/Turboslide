@@ -33,7 +33,7 @@ export const NAV = {
   newPresentation: { label: 'New Presentation', href: '/new' },
 } as const;
 
-/** The h1 in its four runs of words; the two stacks sit after `people` and after `agents`. */
+/** The h1 in its four runs of words; the two rows sit after `people` and after `agents`. */
 export const TITLE = {
   before: 'Presentations for',
   people: 'people',
@@ -44,9 +44,9 @@ export const TITLE = {
 export const TITLE_TEXT = `${TITLE.before} ${TITLE.people} ${TITLE.and} ${TITLE.agents}`;
 
 /**
- * The people of the title's first stack: the generated names the product gives a visitor without
+ * The people of the title's first row: the generated names the product gives a visitor without
  * an account (`labelFor` of packages/identity/src/labels.ts: a word of LABEL_WORDS and a number),
- * never a real person's name, each ringed in one of the live hues (slots 1 to 5).
+ * never a real person's name, each drawn as a pointer in one of the live hues (slots 1 to 5).
  */
 export const PEOPLE = [
   { name: 'Cobalt 118', hue: 1 },
@@ -56,12 +56,12 @@ export const PEOPLE = [
   { name: 'Xenon 734', hue: 5 },
 ] as const;
 
-/** The agents of the second stack, by their brand ids (agent-marks.tsx), each with its hue. */
+/** The agents of the second row, by their brand ids (agent-marks.tsx), each drawn as its mark. */
 export const AGENTS = [
-  { brand: 'claude-code', hue: 6 },
-  { brand: 'codex', hue: 3 },
-  { brand: 'openclaw', hue: 2 },
-  { brand: 'hermes', hue: 4 },
+  { brand: 'claude-code' },
+  { brand: 'codex' },
+  { brand: 'openclaw' },
+  { brand: 'hermes' },
 ] as const;
 
 /**
@@ -90,17 +90,17 @@ export const HERO = {
 } as const;
 
 /**
- * The Canvas screen (CanvasScreen.tsx): the lighthouse slide across the window after one drag and
- * one turn of its heading, which the CLI wrote (canvas-pose.ts), with a dashed box where the
- * heading was. The heading moves under a drag and turns by its handle, and the line under the
- * slide is the write the editor commits for it. The words on the slide are the slide's own
- * (home-deck/slides/lighthouse.json); the write is `block.set` on the heading's `/pos`
- * (packages/viewer/src/Gestures.tsx).
+ * The Canvas screen (CanvasScreen.tsx): the lighthouse slide across the window as a canvas whose
+ * heading, paragraph, credit and plate select, move, resize and turn as the editor's objects do,
+ * on the editor's snap arithmetic (canvas-pose.ts). The line under the slide is the action call
+ * the editor sends for the last write. The words on the slide are the slide's own
+ * (home-deck/slides/lighthouse.json); the objects' names and the handles' sentences are the
+ * Tooltip primitive's.
  */
 export const CANVAS_SCREEN = {
   heading: 'Freeform Canvas',
   figure: {
-    alt: 'The lighthouse slide shows a drone photograph of the lantern room of Cape Hatteras Light in a two tone dither. The heading, Cape Hatteras Light, has moved from the paper plate at the lower right to the sky at the upper left. It is rotated 6 degrees counterclockwise, and a dashed box marks where it was.',
+    alt: 'The lighthouse slide shows a drone photograph of the lantern room of Cape Hatteras Light in a two tone dither. Its heading, Cape Hatteras Light, has moved from the paper plate at the lower right to the sky at the upper left and is rotated 6 degrees counterclockwise.',
   },
   slide: {
     heading: 'Cape Hatteras Light',
@@ -108,11 +108,23 @@ export const CANVAS_SCREEN = {
       "The lantern of Cape Hatteras Light on North Carolina's Outer Banks, printed through an 8 by 8 screen at 2 px cells.",
     credit: 'Photograph: National Park Service, public domain',
   },
-  /** the heading and its handle, as the Tooltip primitive names them */
-  move: { name: 'Heading', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
-  turn: { name: 'Rotate', doc: 'Drag the handle to turn the heading.', key: 'Arrow keys' },
+  /** each object by its block type, as the Tooltip primitive and a screen reader name it */
+  objects: {
+    box: { name: 'Plate', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
+    heading: { name: 'Heading', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
+    paragraph: { name: 'Paragraph', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
+    credit: { name: 'Credit', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
+  },
+  resize: {
+    name: 'Resize',
+    doc: 'Drag the handle to resize the selection, and hold the shift key to keep its ratio.',
+  },
+  turn: {
+    name: 'Rotate',
+    doc: 'Drag the handle to turn the selection, and hold the shift key for 15 degree steps.',
+    key: 'Arrow keys',
+  },
   degrees: (deg: number): string => `${deg} degrees`,
-  write: { action: 'block.set', block: 'lighthouse#h', path: '/pos' },
 } as const;
 
 /**

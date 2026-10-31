@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Slide } from '@turboslide/schema/deck';
+import { RESIZE_HANDLES } from '@turboslide/schema/geometry';
+import type { OrderMove, ResizeHandle } from '@turboslide/schema/geometry';
 import { boundingBoxOf, freeNudgeMutations, zOrderMutations } from '@turboslide/viewer/Freeform';
 import { EMPTY_BOXES, actionForMutations, freeGesture } from '@turboslide/viewer/Gestures';
 import type { GestureContext, Handle } from '@turboslide/viewer/Gestures';
@@ -8,7 +10,6 @@ import { marqueeHits as editorMarqueeHits } from '@turboslide/viewer/Marquee';
 import { boxSnapLines, sheetEdgeLines, sheetSnapLines } from '@turboslide/viewer/snap';
 
 import {
-  DIRS,
   INITIAL,
   LIGHTHOUSE,
   SHEET_LINES,
@@ -35,7 +36,7 @@ import {
   undo,
   write,
 } from './canvas-pose';
-import type { Dir, Gesture, Mods, OrderMove, Point, Scene } from './canvas-pose';
+import type { Gesture, Mods, Point, Scene } from './canvas-pose';
 
 // The Canvas screen (CanvasScreen.tsx): every gesture on the lighthouse slide is run here and
 // through the editor's own functions on the same slide (viewer Gestures.tsx freeGesture,
@@ -67,7 +68,7 @@ function editorContext(scene: Scene, ids: readonly string[]): GestureContext {
   return { slide, boxes: EMPTY_BOXES, free: { ids: [...ids], lines, grid: false, spacing } };
 }
 
-function handle(kind: Handle['kind'], blockId: string, dir?: Dir): Handle {
+function handle(kind: Handle['kind'], blockId: string, dir?: ResizeHandle): Handle {
   return {
     id: `${kind}:${blockId}`,
     kind,
@@ -97,7 +98,7 @@ function editor(
   start: Point,
   now: Point,
   mods: Mods,
-  dir?: Dir,
+  dir?: ResizeHandle,
 ): Seen {
   const anchor = ids[0] ?? '';
   const g = freeGesture(handle(kind, anchor, dir), editorContext(scene, ids), start, now, mods);
@@ -195,7 +196,7 @@ describe('the gestures, against the editor', () => {
 
   it('resizes as freeGesture resizes, from all eight handles', () => {
     for (const ids of SELECTIONS)
-      for (const dir of DIRS)
+      for (const dir of RESIZE_HANDLES)
         for (const [dx, dy] of DELTAS)
           for (const mods of MODS) {
             const now = { x: from.x + dx, y: from.y + dy };

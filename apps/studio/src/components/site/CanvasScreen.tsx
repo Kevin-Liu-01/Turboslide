@@ -4,9 +4,10 @@ import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, RefObject 
 import { AGENT_BRANDS, AgentMark } from '@turboslide/chrome/presence/agent-marks';
 import { hideTooltip, tipProps } from '@turboslide/chrome/Tooltip';
 import { hueFor } from '@turboslide/identity/hues';
+import { RESIZE_HANDLES, mergeGuides } from '@turboslide/schema/geometry';
+import type { OrderMove, ResizeHandle, SnapLine } from '@turboslide/schema/geometry';
 
 import {
-  DIRS,
   INITIAL,
   applyMutations,
   callFor,
@@ -15,7 +16,6 @@ import {
   isGround,
   marqueeBox,
   marqueeHits,
-  mergeGuides,
   moveGesture,
   nudge,
   objectById,
@@ -35,18 +35,7 @@ import {
   write,
 } from './canvas-pose';
 import { CHAR_MS, EMPTY, MOVE_MS, RUN, STEP_MS, stepMutations } from './agent-run';
-import type {
-  Call,
-  CanvasState,
-  Dir,
-  Gesture,
-  Line,
-  OrderMove,
-  Placed,
-  Point,
-  Pos,
-  Scene,
-} from './canvas-pose';
+import type { Call, CanvasState, Gesture, Placed, Point, Pos, Scene } from './canvas-pose';
 import { Pointer } from './AvatarStack';
 import { REDUCED_MOTION, SCREEN, fitCells, inkOf, onAppearance, printCells } from './cells';
 import { CANVAS_SCREEN } from './copy';
@@ -115,7 +104,7 @@ function paint(root: HTMLElement, scene: Scene, selected: readonly string[]): vo
 }
 
 /** The snap guides of a drag, one pooled `i` per merged line, drawn in --pt-guide (site.css). */
-function drawGuides(box: HTMLElement, guides: readonly Line[]): void {
+function drawGuides(box: HTMLElement, guides: readonly SnapLine[]): void {
   const lines = mergeGuides(guides);
   while (box.children.length < lines.length) box.append(document.createElement('i'));
   [...box.children].forEach((child, index) => {
@@ -248,7 +237,7 @@ function useLighthouse(
 type Drag = {
   pointer: number;
   kind: 'move' | 'resize' | 'turn' | 'marquee' | 'tap';
-  dir: Dir;
+  dir: ResizeHandle;
   /** the selection the gesture acts on */
   ids: readonly string[];
   rect: DOMRect;
@@ -608,7 +597,7 @@ export function CanvasScreen() {
     drag.current = {
       pointer: event.pointerId,
       kind,
-      dir: (square?.dataset.cvDir ?? 'se') as Dir,
+      dir: (square?.dataset.cvDir ?? 'se') as ResizeHandle,
       ids,
       rect,
       start: { x: (event.clientX - rect.left) * k, y: (event.clientY - rect.top) * k },
@@ -832,7 +821,7 @@ export function CanvasScreen() {
                 className={several ? 'site-obj site-cv-frame is-group' : 'site-obj site-cv-frame'}
                 style={place(frame)}
               >
-                {DIRS.map((dir) => (
+                {RESIZE_HANDLES.map((dir) => (
                   <i
                     key={dir}
                     data-cv-dir={dir}

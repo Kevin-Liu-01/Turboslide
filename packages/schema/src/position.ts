@@ -6,10 +6,13 @@
 // round two adds rotation, flip and the group tag (SPEC-2 2.1): `rotate` is degrees clockwise in
 // [0, 360), `flip` mirrors the box after the rotation, `group` is the slug the members of one
 // group share (SPEC 7.7's flat tag; block.group writes it on two or more blocks). Snapping and
-// the guide lines live in freeform.ts; this module imports only zod, annotate and ids.
+// the guide lines live in geometry.ts; this module imports only zod, annotate, ids and the three
+// rotation and order helpers of geometry.ts, which it re-exports.
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
 import { slugSchema } from './ids.ts';
+
+export { normalizeRotation, toggleFlip, zOf } from './geometry.ts';
 
 export const FLIPS = ['h', 'v', 'hv'] as const;
 export type Flip = (typeof FLIPS)[number];
@@ -69,29 +72,6 @@ export const positionSchema = annotate(positionObjectSchema.optional(), {
   group: 'Layout',
   help: 'The box on the 1600 by 900 sheet in px; required under the freeform layout and in the objects layer, forbidden elsewhere (docs/freeform.md).',
 });
-
-/** The z a block sorts by: its recorded z, or 0. */
-export function zOf(position: Position | undefined): number {
-  return position?.z ?? 0;
-}
-
-/** A rotation brought into [0, 360): 370 is 10, -90 is 270 (SPEC-2 2.1.1). */
-export function normalizeRotation(degrees: number): number {
-  const wrapped = degrees % 360;
-  const positive = wrapped < 0 ? wrapped + 360 : wrapped;
-  // -0 and 360 both read as 0
-  return positive === 360 || Object.is(positive, -0) ? 0 : positive;
-}
-
-/** The flip after toggling one axis: h on nothing is h, h on h is nothing, v on h is hv (block.flip). */
-export function toggleFlip(current: Flip | undefined, axis: 'h' | 'v'): Flip | undefined {
-  const h = (current === 'h' || current === 'hv') !== (axis === 'h');
-  const v = (current === 'v' || current === 'hv') !== (axis === 'v');
-  if (h && v) return 'hv';
-  if (h) return 'h';
-  if (v) return 'v';
-  return undefined;
-}
 
 /** The centre of a position box. */
 export function positionCenter(pos: Position): { x: number; y: number } {

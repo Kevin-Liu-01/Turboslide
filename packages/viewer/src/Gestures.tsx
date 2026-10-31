@@ -12,7 +12,7 @@
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Block, BlockType, ShapeBlock, ShapeKind } from '@turboslide/schema/blocks';
 import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
-import { resizeKindOf, rotateVector, round64 } from '@turboslide/schema/canvas';
+import { resizeKindOf } from '@turboslide/schema/canvas';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable, tableBoxHeight } from '@turboslide/schema/blocks/table';
@@ -27,11 +27,21 @@ import {
 } from '@turboslide/schema/connect';
 import type { Slide } from '@turboslide/schema/deck';
 import { canvasObjects, PLATE_WIDTHS, slotsForLayout } from '@turboslide/schema/deck';
-import { boundingBox, unionBox } from '@turboslide/schema/freeform';
+import {
+  axisLock,
+  boundingBox,
+  normalizeRotation,
+  rotateVector,
+  rotationFromDrag,
+  round64,
+  snapMove,
+  snapResize,
+  unionBox,
+} from '@turboslide/schema/geometry';
+import type { SnapLine } from '@turboslide/schema/geometry';
 import type { BlockSlot, Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
-import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box } from '@turboslide/schema/render';
 import { isConnectorKind, isLineKind, isPathKind } from '@turboslide/schema/shapes';
 import type { LineKind } from '@turboslide/schema/shapes';
@@ -50,12 +60,11 @@ import {
   posFor,
   scaleGroupMutations,
 } from './Freeform';
-import { rotateMutations, rotationFromDrag } from './rotate';
+import { rotateMutations } from './rotate';
 import type { Selection } from './Selection';
 import { blockById, selectedBlockId } from './Selection';
 import {
   FREE_MIN_SIZE,
-  axisLock,
   CROP_FLIP_PX,
   plateSideFor,
   PLATE_SIDES_BY_KIND,
@@ -63,16 +72,14 @@ import {
   RESIZE_DIRS,
   resizeCursor,
   snapKey,
-  snapMove,
   snapPlateWidth,
   snapRatio,
-  snapResize,
   snapScaleValue,
   snapShotWidth,
   stepInSet,
   stepRatio,
 } from './snap';
-import type { ResizeDir, SnapLine } from './snap';
+import type { ResizeDir } from './snap';
 
 /** The sheet box type the overlay reads, so the chrome package needs no dependency on the schema. */
 export type { Box } from '@turboslide/schema/render';
@@ -1162,7 +1169,7 @@ export function freeGesture(
     return { mutations, guides: snapped.guides };
   }
   if (handle.kind === 'free-resize' && handle.dir !== undefined) {
-    /* the one resize model (schema/canvas.ts resizeBox through snapResize): the opposite edge
+    /* the one resize model (schema/geometry.ts resizeBox through snapResize): the opposite edge
        or corner held on the sheet, Shift or a locked kind keeping the ratio, Alt about the
        centre, a rotated object's handles along its own axes (SPEC-5-amendments A4) */
     if (ids.length > 1) {
@@ -1337,7 +1344,7 @@ export function nudgeMutation(
     }
     case 'free-resize': {
       // the handle's edge moves by one pixel per step along the object's own axis: Right and Up
-      // grow, Left and Down shrink; the same model as the drag (schema/canvas.ts resizeBox)
+      // grow, Left and Down shrink; the same model as the drag (schema/geometry.ts resizeBox)
       const pos = posFor(slide, blockId, boxes);
       if (!pos || handle.dir === undefined) return null;
       const kind = resizeKindOf(block);

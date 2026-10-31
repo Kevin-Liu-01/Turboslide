@@ -1,11 +1,15 @@
 // Render records (SPEC 4.2 "render"). One record per slide, theme and scale: the headless
 // driver measures boxes, line counts, font sizes and weights so judges read structure before
-// pixels (SPEC 7.6 item 3), and lists the rasters the exporter must screenshot.
+// pixels (SPEC 7.6 item 3), and lists the rasters the exporter must screenshot. The box type and
+// the sheet constants live in ./geometry.ts, without zod, and are re-exported here.
 import { z } from 'zod';
+import type { Box } from './geometry.ts';
+import { SHEET_HEIGHT, SHEET_WIDTH } from './geometry.ts';
 import type { AssetId, BlockId, SlideId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 
-export type Box = [number, number, number, number];
+export type { Box } from './geometry.ts';
+export { CONTENT_BOX, RAIL_PX, SHEET_HEIGHT, SHEET_WIDTH } from './geometry.ts';
 
 /** The two sheet themes a render, a twin or a finding is stamped with (SPEC 2.1, 4.2). */
 export type Theme = 'light' | 'dark';
@@ -96,16 +100,6 @@ export const renderRecordSchema = z.strictObject({
     screenshotMs: z.number().nonnegative(),
   }),
 }) satisfies z.ZodType<RenderRecord>;
-
-/** The sheet in px (SPEC 2.1). */
-export const SHEET_WIDTH = 1600;
-export const SHEET_HEIGHT = 900;
-
-/** The content box: the slide inset 57 px with 72 by 80 padding (SPEC 2.1; DECK-GRAMMAR.md:15). */
-export const CONTENT_BOX: Box = [137, 129, 1326, 642];
-
-/** Rails and rules at 56 px from the sheet edges (SPEC 2.1). */
-export const RAIL_PX = 56;
 
 /** True when a box lies inside the sheet (the sheet/overflow rule, SPEC 7.7). */
 export function boxInsideSheet(box: Box): boolean {

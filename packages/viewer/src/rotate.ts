@@ -3,18 +3,27 @@
 // drag of the rotation handle stands for with the 15 degree snap under Shift, and the `pos`
 // writes of a rotation or a flip over the schema's arithmetic (rotatePositions, flipPositions), so
 // the handle, Option+Left and Right, Arrange > Rotate and the CLI's block.rotate land the same
-// numbers. Pure over sheet pixels; rotate.test.ts pins it.
-import { rotateVector } from '@turboslide/schema/canvas';
+// numbers. The angle, its snap and the drag's rotation live in @turboslide/schema/geometry, without
+// zod, and are re-exported here. Pure over sheet pixels; rotate.test.ts pins it.
 import type { Slide } from '@turboslide/schema/deck';
-import { flipPositions, rotatePositions } from '@turboslide/schema/freeform';
+import {
+  flipPositions,
+  normalizeRotation,
+  rotatePositions,
+  rotateVector,
+} from '@turboslide/schema/geometry';
 import type { Mutation } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
-import { normalizeRotation } from '@turboslide/schema/position';
 
 import type { Point } from './Gestures';
 
-/** Shift snaps the rotation to multiples of this many degrees (R05 C5). */
-export const ROTATE_SNAP_DEG = 15;
+export {
+  ROTATE_SNAP_DEG,
+  angleAbout,
+  rotationFromDrag,
+  snapAngle,
+} from '@turboslide/schema/geometry';
+
 /** Option+Left and Option+Right rotate by this many degrees; with Shift by one (R04 B7). */
 export const ROTATE_KEY_DEG = 15;
 export const ROTATE_KEY_FINE_DEG = 1;
@@ -28,38 +37,6 @@ export const ROTATE_READOUT_MS = 600;
 /** The centre of a position box. */
 export function centreOf(pos: Pick<Position, 'x' | 'y' | 'w' | 'h'>): Point {
   return { x: pos.x + pos.w / 2, y: pos.y + pos.h / 2 };
-}
-
-/**
- * The angle of a point about a centre in degrees clockwise from the top (the handle's rest
- * position), in [0, 360).
- */
-export function angleAbout(centre: Point, point: Point): number {
-  const degrees = (Math.atan2(point.x - centre.x, -(point.y - centre.y)) * 180) / Math.PI;
-  return normalizeRotation(degrees);
-}
-
-/** An angle snapped to the nearest multiple of `step`, normalized. */
-export function snapAngle(degrees: number, step: number = ROTATE_SNAP_DEG): number {
-  return normalizeRotation(Math.round(degrees / step) * step);
-}
-
-/**
- * The rotation a handle drag stands for: the object's angle when the drag began plus the angle
- * the pointer swept about the box centre; Shift snaps the result to 15 degree steps. Rounded to
- * whole degrees without Shift, so the write is a readable number.
- */
-export function rotationFromDrag(
-  startAngle: number,
-  centre: Point,
-  from: Point,
-  to: Point,
-  options: { shift?: boolean } = {},
-): number {
-  const swept = angleAbout(centre, to) - angleAbout(centre, from);
-  const raw = startAngle + swept;
-  if (options.shift === true) return snapAngle(raw);
-  return normalizeRotation(Math.round(raw));
 }
 
 /** The angle a rotate key steps by: 15 degrees, 1 with Shift; Left is counter clockwise. */

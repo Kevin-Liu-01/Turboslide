@@ -3,30 +3,20 @@
 // --pt-guide over the sheet along the line the box took (Guides.css; --pt-titanium until round
 // four, when the orchestrator's ruling 1 gave the guides their own colour). A guide is a SnapLine
 // from the snap engine with its extent already stretched to cover the source and the snapped box
-// (snap.ts guideFor). `mergeGuides` folds duplicates so two blocks on the same edge draw one
-// line. The component lives in the overlay layer in CSS pixels, never inside the sheet.
+// (schema/geometry.ts guideFor). `mergeGuides` (schema/geometry.ts, re-exported here) folds
+// duplicates so two blocks on the same edge draw one line. The component lives in the overlay
+// layer in CSS pixels, never inside the sheet.
 import type { CSSProperties } from 'react';
+
+import { mergeGuides } from '@turboslide/schema/geometry';
 
 import type { SnapLine } from './snap';
 
 import './Guides.css';
 
-export type Guide = SnapLine;
+export { mergeGuides } from '@turboslide/schema/geometry';
 
-/** Guides on the same axis at the same position become one, spanning both extents. */
-export function mergeGuides(guides: readonly Guide[]): Guide[] {
-  const out: Guide[] = [];
-  for (const guide of guides) {
-    const same = out.find((g) => g.axis === guide.axis && Math.abs(g.at - guide.at) < 0.5);
-    if (same) {
-      same.from = Math.min(same.from, guide.from);
-      same.to = Math.max(same.to, guide.to);
-      continue;
-    }
-    out.push({ ...guide });
-  }
-  return out;
-}
+export type Guide = SnapLine;
 
 /** The CSS placement of one guide: a 1px line at `at` from `from` to `to`, in CSS pixels. */
 export function guideStyle(guide: Guide, k: number): CSSProperties {

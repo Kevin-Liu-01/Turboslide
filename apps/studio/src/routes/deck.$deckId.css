@@ -1,0 +1,565 @@
+/* The viewer of /deck/<id> in the paradigms of 2026-10-30 (Kevin: "we also need to update /decks
+   and the slide viewer as well to use all my new paradigms and out with the old"). The shell is
+   the Prototemplate port in packages/chrome/src, shared with /embed and with the editor, so this
+   sheet changes nothing there: every selector names the route's root `.ts-deckview`
+   (routes/deck.$deckId.tsx), either as an ancestor or through `body:has(.ts-deckview)` for the
+   tooltip and the preview card, which mount on the body. -deck-view.test.ts holds every selector
+   to that.
+
+   What changes, in order:
+   1. Faces. The chrome's three face tokens point at Katagami Sans and Katagami Mono, the faces
+      components/site/fonts/katagami.css declares on every route, as .ts-site does on the site.
+      The slides keep Inter: they read --text and --display under .ts-sheet, never these tokens.
+      Mono sets the slide numbers, the count and the keys, always in tabular figures.
+   2. Accent. Vermilion fills the one call to action, Present. --pt-select stays the editor's.
+   3. No lines between regions. The toolbar, the sidebar, the filter row and the progress track
+      draw no rule; the regions read by their grounds. Seg dividers, ruled tables and the book's
+      section dividers go too, and the letter spacing is the face's own everywhere.
+   4. Fewer words. Previous, Next, Theme, Fullscreen, Copy Link, Help and the three modes show
+      their icons alone, and their words stay the accessible name. The book's helper lead, its
+      section ordinals and the sidebar's repeated totals leave; the slide numbers stay.
+   5. The slide is the content. Wider than 900 px the stage's ground is the slide's own paper and
+      the sheet loses its ring, so every slide reaches the edges of the stage the way a picture
+      slide's backdrop already did (stage.css .is-picture). Present mode keeps its surround.
+   6. The deck strip (-deck-strip.tsx) takes the progress line's place at the window's foot.
+
+   Radii stay on the ladder (6 px controls); spacing is on the 4 px grid; motion is transform,
+   opacity and colour over the --pt-dur tokens, none under reduced motion. */
+
+/* ---- the root and its tokens ---- */
+
+body:has(.ts-deckview) {
+  --pt-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-display: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-mono: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
+  /* the site's vermilion (site.css --site-accent): 5.1 to 1 against the light paper */
+  --deck-accent: oklch(0.56 0.2 33);
+  /* the deck strip's row at the window's foot */
+  --deck-strip-h: 24px;
+}
+
+/* 6.5 to 1 against the dark paper, which is also the label's colour on the dark fill */
+:root[data-theme='dark'] body:has(.ts-deckview) {
+  --deck-accent: oklch(0.68 0.18 36);
+}
+
+.ts-deckview {
+  display: contents;
+}
+
+/* the shell ends above the strip; presenting takes the whole window again */
+.ts-deckview .pt-viewer {
+  bottom: var(--deck-strip-h);
+}
+
+.ts-deckview .pt-viewer.is-present {
+  bottom: 0;
+}
+
+/* ---- the toolbar ---- */
+
+.ts-deckview .pt-toolbar {
+  border-bottom: 0;
+  padding: 0 16px 0 12px;
+}
+
+.ts-deckview .pt-toolbar .pt-sep {
+  display: none;
+}
+
+.ts-deckview .pt-toolbar .pt-ib {
+  position: relative;
+}
+
+/* the controls an icon and its tooltip already name: icon squares at every width, the word kept
+   for assistive technology (visually hidden, never display: none, which would drop the name) */
+.ts-deckview .pt-toolbar .pt-ib:is(.pt-prev, .pt-next, .pt-theme, .pt-full, .pt-copy, .pt-help-btn),
+.ts-deckview .pt-toolbar .pt-bar-r > .pt-seg .pt-ib {
+  width: 32px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+}
+
+.ts-deckview
+  .pt-toolbar
+  .pt-ib:is(.pt-prev, .pt-next, .pt-theme, .pt-full, .pt-copy, .pt-help-btn)
+  .pt-lb,
+.ts-deckview .pt-toolbar .pt-bar-r > .pt-seg .pt-ib .pt-lb {
+  position: absolute;
+  display: block;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the mode seg: three icons, the current one on the ink indicator, no frame and no dividers */
+.ts-deckview .pt-toolbar .pt-seg {
+  border-color: transparent;
+}
+
+.ts-deckview .pt-toolbar .pt-seg .pt-ib {
+  border-right: 0;
+}
+
+.ts-deckview .pt-bar-deck,
+.ts-deckview .pt-bar-brand b {
+  font-size: 15px;
+  letter-spacing: normal;
+}
+
+/* the count: the place in mono figures, no frame until the pointer is on it; the gap is one mono
+   cell, the width of the space after the slash, so 01 / 85 reads evenly */
+.ts-deckview .pt-toolbar .pt-count {
+  gap: 1ch;
+  border-color: transparent;
+  color: var(--pt-titanium);
+  font-family: var(--pt-mono);
+  font-size: 13px;
+}
+
+.ts-deckview .pt-toolbar .pt-count:hover {
+  border-color: var(--pt-hair);
+}
+
+.ts-deckview .pt-toolbar .pt-count.is-editing {
+  border-color: var(--pt-ink);
+}
+
+.ts-deckview .pt-count b,
+.ts-deckview .pt-count-field {
+  font-family: var(--pt-mono);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* Present: the one vermilion surface of the page, the paper's colour on the fill (5.1 to 1 in
+   light, 6.5 to 1 in dark); the hover keeps the frame and gives the colour to the word */
+.ts-deckview .pt-toolbar .pt-ib.is-solid.pt-present-btn {
+  background: var(--deck-accent);
+  border-color: var(--deck-accent);
+  color: var(--pt-paper);
+}
+
+.ts-deckview .pt-toolbar .pt-ib.is-solid.pt-present-btn:hover {
+  background: transparent;
+  border-color: var(--deck-accent);
+  color: var(--deck-accent);
+}
+
+/* ---- the sidebar ---- */
+
+.ts-deckview .pt-sb,
+.ts-deckview .pt-sb-head,
+.ts-deckview .pt-sb-tools {
+  border: 0;
+}
+
+.ts-deckview .pt-sb-head > b {
+  font-size: 14px;
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-sb-head .pt-seg {
+  border-color: transparent;
+}
+
+.ts-deckview .pt-sb-head .pt-seg .pt-ib {
+  border-right: 0;
+}
+
+/* the field on the plate ground, framed in ink while it has the focus */
+.ts-deckview .pt-sb .pt-filter {
+  border-color: transparent;
+  background: var(--pt-plate);
+}
+
+.ts-deckview .pt-sb .pt-filter:focus-within {
+  border-color: var(--pt-ink);
+}
+
+/* the deck's total is the toolbar count's (01 / 85) */
+.ts-deckview .pt-sb .pt-filter-count {
+  display: none;
+}
+
+.ts-deckview .pt-grp-head {
+  height: 28px;
+  color: var(--pt-ink-2);
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+/* a section's count is the range its numbers already show; it returns while the filter holds
+   text, where it counts the matches */
+.ts-deckview .pt-grp-head::after {
+  content: none;
+}
+
+.ts-deckview .pt-sb:has(.pt-filter input:not(:placeholder-shown)) .pt-grp-head::after {
+  content: attr(data-count);
+  font-family: var(--pt-mono);
+}
+
+.ts-deckview .pt-orow-n {
+  font-family: var(--pt-mono);
+  font-weight: 400;
+  font-size: 11.5px;
+}
+
+/* the current row is its frame's ring and its ink, not a bar at the column's edge */
+.ts-deckview .pt-orow.is-active::before {
+  content: none;
+}
+
+/* outline density: the current row sits on the plate ground */
+.ts-deckview .pt-tree:not(.is-shots) .pt-orow {
+  margin: 0 6px;
+  padding: 0 4px 0 6px;
+  border-radius: var(--pt-radius);
+}
+
+.ts-deckview .pt-tree:not(.is-shots) .pt-orow.is-active {
+  background: var(--pt-plate);
+}
+
+/* thumbnail density: the frame takes the row's whole width and the caption under it reads the
+   number and the title on one line; the picture names the kind, so the kind glyph leaves */
+.ts-deckview .pt-tree.is-shots .pt-orow {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto 16px;
+  row-gap: 8px;
+  padding: 6px 12px 10px;
+}
+
+.ts-deckview .pt-tree.is-shots .pt-orow .pt-thumb-frame.is-card {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.ts-deckview .pt-tree.is-shots .pt-orow .pt-orow-n {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+}
+
+.ts-deckview .pt-tree.is-shots .pt-orow > svg {
+  display: none;
+}
+
+.ts-deckview .pt-tree.is-shots .pt-orow .pt-orow-name {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.ts-deckview .pt-tree.is-shots .pt-orow .pt-orow-marks {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+/* a frame is the slide's edge, drawn as a hairline; ink on hover, the ink ring when current */
+.ts-deckview .pt-thumb-frame.is-card {
+  border-color: var(--pt-hair);
+}
+
+/* ---- the stage: the slide's own paper from edge to edge ----
+   Wider than 900 px only: below it the stage is portrait and Sheet.tsx sets the sheet under the
+   toolbar, so the paper would fill the stage's lower half with nothing on it; there the sheet
+   keeps its ring on the chrome's plate. */
+
+@media (min-width: 901px) {
+  .ts-deckview .ts-stagewrap.ts-sheet:not(.is-present) {
+    background: var(--paper);
+  }
+
+  .ts-deckview .ts-stagewrap:not(.is-present) .pt-sheet-stage > .sheet {
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* the strip carries the place, so the progress row closes */
+.ts-deckview .pt-main {
+  grid-template-rows: var(--pt-toolbar-h) minmax(0, 1fr) 0;
+}
+
+.ts-deckview .pt-progress {
+  display: none;
+}
+
+/* ---- the deck strip (-deck-strip.tsx) ---- */
+
+.ts-deckview .ts-deck-strip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--deck-strip-h);
+  box-sizing: border-box;
+  display: flex;
+  padding: 0 16px;
+  background: var(--pt-paper);
+  cursor: pointer;
+}
+
+.ts-deckview .pt-viewer.is-present ~ .ts-deck-strip {
+  display: none;
+}
+
+.ts-deckview .ts-deck-strip:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-deckview .ts-deck-tick {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* a tick: 12 px tall, scaled to 6 at rest and 10 at a section's start, so the lens moves a
+   transform alone; the ticks up to the place in ink-2, the place in ink and 2 px wide */
+.ts-deckview .ts-deck-tick::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 0.5px);
+  bottom: 6px;
+  width: 1px;
+  height: 12px;
+  background: var(--pt-titanium);
+  opacity: 0.5;
+  transform: scaleY(0.5);
+  transform-origin: 50% 100%;
+  transition:
+    transform var(--pt-dur-fast) var(--pt-ease-out),
+    opacity var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-deckview .ts-deck-tick.is-start::before {
+  transform: scaleY(0.8333);
+}
+
+.ts-deckview .ts-deck-tick.is-past::before {
+  background: var(--pt-ink-2);
+  opacity: 1;
+}
+
+.ts-deckview .ts-deck-tick.is-on::before {
+  left: calc(50% - 1px);
+  width: 2px;
+  background: var(--pt-ink);
+  opacity: 1;
+  transform: none;
+}
+
+/* the lens under the pointer: the tick stands up in ink with its number beside it in mono, its
+   neighbours rise to a section start's height */
+.ts-deckview .ts-deck-tick:hover::before {
+  background: var(--pt-ink);
+  opacity: 1;
+  transform: none;
+}
+
+.ts-deckview .ts-deck-tick:hover + .ts-deck-tick::before,
+.ts-deckview .ts-deck-tick:has(+ .ts-deck-tick:hover)::before {
+  opacity: 1;
+  transform: scaleY(0.8333);
+}
+
+.ts-deckview .ts-deck-tick:hover::after {
+  content: attr(data-n);
+  position: absolute;
+  left: calc(50% + 4px);
+  bottom: 5px;
+  padding: 0 4px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 400 11px/14px var(--pt-mono);
+  font-variant-numeric: var(--pt-numerals);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* the last ticks put the number on their left, inside the window */
+.ts-deckview .ts-deck-tick:nth-last-child(-n + 3):hover::after {
+  left: auto;
+  right: calc(50% + 4px);
+}
+
+/* ---- the grid ---- */
+
+.ts-deckview .pt-grid .pt-thumbs {
+  gap: 24px;
+  padding: 24px 24px 64px;
+}
+
+.ts-deckview .pt-grid .pt-thumbs > .pt-sec-label {
+  padding: 24px 0 0;
+  border-top: 0;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-grid .pt-thumbs > .pt-sec-label:first-child {
+  padding-top: 0;
+}
+
+/* a tile: the frame across the tile, then the number and the title on one line under it */
+.ts-deckview .pt-grid .pt-thumb {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 8px;
+}
+
+.ts-deckview .pt-grid .pt-thumb-body {
+  display: contents;
+}
+
+.ts-deckview .pt-grid .pt-thumb-frame {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  border-color: var(--pt-hair);
+}
+
+.ts-deckview .pt-grid .pt-thumb:hover .pt-thumb-frame,
+.ts-deckview .pt-grid .pt-thumb:focus-visible .pt-thumb-frame,
+.ts-deckview .pt-grid .pt-thumb.is-active .pt-thumb-frame {
+  border-color: var(--pt-ink);
+}
+
+.ts-deckview .pt-grid .pt-thumb .n {
+  grid-column: 1;
+  grid-row: 2;
+  padding-top: 0;
+  font-family: var(--pt-mono);
+  font-weight: 400;
+  font-size: 11.5px;
+  line-height: 16px;
+}
+
+.ts-deckview .pt-grid .pt-thumb-title {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 0;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+/* ---- the book ---- */
+
+.ts-deckview .pt-book-head {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.ts-deckview .pt-book-head h1 {
+  letter-spacing: normal;
+}
+
+/* the lead says how to read the book; the pages and their numbers show it */
+.ts-deckview .pt-book-head p {
+  display: none;
+}
+
+/* the deck's facts as two quiet columns: the key, then the value in mono */
+.ts-deckview .pt-book-meta > div,
+.ts-deckview .pt-book-meta > div:first-child {
+  padding: 4px 0;
+  border: 0;
+}
+
+.ts-deckview .pt-book-meta dd {
+  font-family: var(--pt-mono);
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-book-toc a {
+  padding: 6px 0;
+  border-bottom: 0;
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-book-toc small,
+.ts-deckview .pt-book-sec small {
+  font-family: var(--pt-mono);
+}
+
+/* a section opens with space and its name; the range stays, the ordinal goes */
+.ts-deckview .pt-book-sec {
+  padding-top: 48px;
+  border-top: 0;
+}
+
+.ts-deckview .pt-book-sec small span:first-child {
+  display: none;
+}
+
+.ts-deckview .pt-book-sec h2 {
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-pn b {
+  font-family: var(--pt-mono);
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-page-frame {
+  border-color: var(--pt-hair);
+}
+
+.ts-deckview .pt-page:hover .pt-page-frame,
+.ts-deckview .pt-page.is-active .pt-page-frame {
+  border-color: var(--pt-ink);
+}
+
+/* ---- the floating plates: the help card, the toast, the tooltip, the present card ---- */
+
+.ts-deckview .pt-help-card h3,
+.ts-deckview .pt-help-card th,
+.ts-deckview .ts-present-card h2 {
+  letter-spacing: normal;
+}
+
+.ts-deckview .pt-help-card th,
+.ts-deckview .pt-help-card td {
+  border: 0;
+}
+
+.ts-deckview .pt-help-card td:first-child {
+  font-family: var(--pt-mono);
+  font-weight: 400;
+}
+
+/* above the strip on a window wider than a phone (Toast.css hangs it under the toolbar there) */
+@media (min-width: 601px) {
+  .ts-deckview .pt-toast {
+    bottom: calc(22px + var(--deck-strip-h));
+  }
+
+  .ts-deckview .pt-viewer.is-present ~ .pt-toast {
+    bottom: 22px;
+  }
+}
+
+body:has(.ts-deckview) .pt-tip-name {
+  letter-spacing: normal;
+}
+
+body:has(.ts-deckview) .pt-tip-key {
+  font-family: var(--pt-mono);
+  letter-spacing: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-deckview .ts-deck-tick::before {
+    transition: none;
+  }
+}

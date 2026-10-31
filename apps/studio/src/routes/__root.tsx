@@ -101,10 +101,11 @@ const SLIDELESS_ROUTES: ReadonlySet<string> = new Set([
  * Sans in place of Inter's, and the landing (its field) and the docs (their code) the core file of
  * Katagami Mono. Inter still loads there through its unicode-range faces when a drawn slide on the
  * page sets it. The presentations list and the viewer draw their chrome in Katagami and their
- * slides in Inter, so they preload both (KATAGAMI_AND_INTER_ROUTES).
+ * slides in Inter, so they preload both (KATAGAMI_AND_INTER_ROUTES); the viewer also preloads the
+ * Mono core, since its slide numbers and its strip are set in it from the first paint.
  */
 const SITE_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home', '/about', '/features', '/faq']);
-const SITE_MONO_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home']);
+const SITE_MONO_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home', '/deck/$deckId']);
 const KATAGAMI_AND_INTER_ROUTES: ReadonlySet<string> = new Set([
   '/decks/',
   '/decks/templates',

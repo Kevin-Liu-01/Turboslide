@@ -216,7 +216,13 @@ export const OVERRIDES: readonly Override[] = [
     files: ['apps/studio/src/components/site/site.css'],
     rules: ['css/inter-only'],
     reason:
-      "The site's faces (Kevin, 2026-10-30: \"use katagami instead of inter and our mono\"): /home, /docs and the site pages set Katagami Sans and Katagami Mono, cut by scripts/fonts/subset-katagami.py into the faces between the katagami markers with their metric matched fallbacks. The slides drawn on those pages keep the deck's Inter, and the product's chrome and slides are unchanged.",
+      "The site's faces (Kevin, 2026-10-30: \"use katagami instead of inter and our mono\"): /home, /docs and the site pages set Katagami Sans and Katagami Mono, cut by scripts/fonts/subset-katagami.py into components/site/fonts/katagami.css with their metric matched fallbacks. The slides drawn on those pages keep the deck's Inter, and the product's chrome and slides are unchanged.",
+  },
+  {
+    files: ['apps/studio/src/routes/deck.$deckId.css'],
+    rules: ['css/mono-outside-code'],
+    reason:
+      'The viewer\'s faces (Kevin, 2026-10-30: "use katagami instead of inter and our mono"; "we also need to update /decks and the slide viewer as well to use all my new paradigms"): /deck/<id> points --pt-mono at Katagami Mono and sets the slide numbers, the count, the section ranges, the deck strip\'s numbers and the keys in it, the paradigm\'s use of mono for ids, shortcuts and tabular figures. Every rule of the sheet names the route\'s root, so the editor, /embed and the slides keep Inter.',
   },
   {
     files: ['packages/chrome/src/dialogs/special-characters-data.ts'],

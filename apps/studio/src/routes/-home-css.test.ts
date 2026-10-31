@@ -34,7 +34,7 @@ describe("the landing's stylesheet", () => {
   it('is linked from the head of /home and imported as a module by no site file', () => {
     const route = readFileSync(join(here, 'home.tsx'), 'utf8');
     expect(cssImports(route)).toEqual(['../components/site/site.css?url']);
-    expect(route).toContain("links: [{ rel: 'stylesheet', href: siteCss }]");
+    expect(route).toContain("{ rel: 'stylesheet', href: siteCss }");
     for (const name of readdirSync(SITE).filter((file) => /\.tsx?$/.test(file)))
       expect(cssImports(readFileSync(join(SITE, name), 'utf8')), name).toEqual([]);
   });

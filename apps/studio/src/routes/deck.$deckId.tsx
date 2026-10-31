@@ -12,7 +12,10 @@ import type { DeckPayload, GetDeckInput } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
 import { AccessPage } from './-access-page';
 import { deckCardMeta, deckCardPicture } from './-deck-card';
+import { DeckStrip } from './-deck-strip';
 import { REFUSED_PAGE, RouteRefused, isAddressRefusal } from './-refused-page';
+
+import './deck.$deckId.css';
 
 // The viewer (SPEC 3.4, 6.1): slide, grid, book and present modes; the theme;
 // the keys; #NN and #s/<slideId> hashes; the sidebar tree, the toolbar, the
@@ -185,16 +188,22 @@ function DeckPage() {
       replace: true,
     });
   };
+  /* the viewer's root (deck.$deckId.css): every rule of the restyle names it, so /embed, which
+     renders the same DeckViewer, and the editor, which shares the shell's components, draw as
+     before; the strip is its last child, after the shell it reads */
   return (
-    <DeckViewer
-      payload={payload}
-      rest={rest}
-      mode={search.mode}
-      theme={search.theme}
-      present={search.present === 1}
-      agent={search.agent === 1}
-      onModeChange={onModeChange}
-    />
+    <div className="ts-deckview">
+      <DeckViewer
+        payload={payload}
+        rest={rest}
+        mode={search.mode}
+        theme={search.theme}
+        present={search.present === 1}
+        agent={search.agent === 1}
+        onModeChange={onModeChange}
+      />
+      <DeckStrip deck={payload.deck} />
+    </div>
   );
 }
 

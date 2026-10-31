@@ -1,93 +1,113 @@
 import { PRESENT_TEXT } from '@turboslide/viewer/present/strings';
 
 import { PRESENT_SCREEN } from './copy';
+import { PRESENT_DECK_TITLE, PRESENT_DECK_TOTAL, PRESENT_SLIDES } from './present-deck';
+import type { PresentSlide } from './present-deck';
+
+import toneUrl from './pictures/lighthouse-tone.webp?url';
 
 /**
- * Screen 04's second row (docs/SITE.md 9): the slideshow, seen by the audience, and presenter
- * view, seen by you, joined by one ink line with a 9 px marker on each window's edge, since a
- * move in either window moves both. S over the line opens presenter view; the arrows under it
- * move both. Presenter view is drawn to PresenterConsole.tsx with the viewer's own words
- * (PRESENT_TEXT): the timer, the deck's title, "Slideshow connected", the current slide with its
- * counter, the next slide and the notes column. The slides are the example deck's slides 2 and 3
- * on its #101010 ground. No script; one geometry in both appearances.
+ * A slide of the landing's deck drawn small in the example theme (PresentScreen.tsx): its own
+ * container, so a slide px is `100cqw / 1600` and every size is the theme's ladder (h1 88, big
+ * 72, h2 44, lead 26, rows 20; packages/theme LADDER) at the 137 px margin. A title slide draws
+ * its heading and lead, a rows slide its heading, lead and ruled rows on the 5 to 7 columns, a
+ * statement its one line, and the lighthouse its picture, the tone the Canvas screen prints, under
+ * the plate with its heading.
  */
-export function PresentWindows() {
-  const { windows } = PRESENT_SCREEN;
+function MiniSlide({ slide }: { slide: PresentSlide }) {
+  if (slide.kind === 'mood')
+    return (
+      <span className="site-mini is-mood">
+        <img className="site-mini-pic" src={toneUrl} alt="" width={800} height={450} />
+        <span className="site-mini-plate">
+          <span className="site-mini-h2">{slide.heading}</span>
+        </span>
+      </span>
+    );
+  if (slide.kind === 'rows')
+    return (
+      <span className="site-mini is-rows">
+        <span className="site-mini-in">
+          <span>
+            <span className="site-mini-h2">{slide.heading}</span>
+            {slide.lead === '' ? null : <span className="site-mini-p">{slide.lead}</span>}
+          </span>
+          <span>
+            {slide.rows.map((row) => (
+              <span key={row.key} className="site-mini-row">
+                <span className="site-mini-key">{row.key}</span>
+                <span>{row.value}</span>
+              </span>
+            ))}
+          </span>
+        </span>
+      </span>
+    );
+  if (slide.kind === 'statement')
+    return (
+      <span className="site-mini is-statement">
+        <span className="site-mini-in">
+          <span className="site-mini-big">{slide.heading}</span>
+        </span>
+      </span>
+    );
   return (
-    <div className="site-row site-pv-row">
-      <figure className="site-pv" role="img" aria-label={windows.alt}>
-        <div className="site-pv-win site-pv-show" aria-hidden="true">
-          <div className="site-pv-head">
-            <span className="t-label">{windows.show.label}</span>
-            <span className="site-pv-who t-small">{windows.show.who}</span>
+    <span className="site-mini is-title">
+      <span className="site-mini-in">
+        <span className="site-mini-h1">{slide.heading}</span>
+        <span className="site-mini-lead">{slide.lead}</span>
+      </span>
+    </span>
+  );
+}
+
+/**
+ * The slideshow and presenter view of one deck, at slide `at` of PRESENT_SLIDES, drawn to the
+ * product's two windows: the slideshow is the slide on the --pt-panel-ink surround a full screen
+ * window draws, and presenter view is PresenterConsole.tsx's head, current slide, counter, next
+ * slide and speaker notes, in the viewer's own words (PRESENT_TEXT). Both windows draw from the
+ * one index, so a step moves both, as the product's two windows move together.
+ */
+export function PresentWindows({ at }: { at: number }) {
+  const { windows } = PRESENT_SCREEN;
+  const slide = PRESENT_SLIDES[at] ?? PRESENT_SLIDES[0];
+  const next = PRESENT_SLIDES[at + 1];
+  if (slide === undefined) return null;
+  return (
+    <div className="site-pr-wins">
+      <div className="site-pr-win is-show">
+        <span className="site-pr-label">{windows.show}</span>
+        <div className="site-pr-show" aria-hidden="true">
+          <MiniSlide slide={slide} />
+        </div>
+      </div>
+      <div className="site-pr-win is-presenter">
+        <span className="site-pr-label">{windows.presenter}</span>
+        <div className="site-pr-console">
+          <div className="site-pr-head">
+            <span className="site-pr-deck">{PRESENT_DECK_TITLE}</span>
+            <span className="site-pr-on">{PRESENT_TEXT.connected}</span>
           </div>
-          <div className="site-pv-box">
-            <div className="site-pv-slide">
-              <span>{windows.slide.title}</span>
+          <div className="site-pr-now" aria-hidden="true">
+            <MiniSlide slide={slide} />
+          </div>
+          <div className="site-pr-under">
+            <div className="site-pr-next">
+              <span className="site-pr-counter" aria-live="polite">
+                {PRESENT_TEXT.counter(at + 1, PRESENT_DECK_TOTAL)}
+              </span>
+              <span className="site-pr-cap">{PRESENT_TEXT.nextSlide}</span>
+              <span className="site-pr-thumb" aria-hidden="true">
+                {next === undefined ? null : <MiniSlide slide={next} />}
+              </span>
             </div>
-            <div className="site-pv-link">
-              <i className="site-pv-line" />
-              <i className="site-pv-dot is-a" />
-              <i className="site-pv-dot is-b" />
-              <span className="site-pv-say is-up t-small">
-                <kbd className="pt-kbd site-kbd">S</kbd>
-                <span>{windows.opens}</span>
-              </span>
-              <span className="site-pv-say is-down t-small">
-                <kbd className="pt-kbd site-kbd">←</kbd>
-                <kbd className="pt-kbd site-kbd">→</kbd>
-                <span>{windows.moveBoth}</span>
-              </span>
+            <div className="site-pr-notes">
+              <span className="site-pr-cap">{PRESENT_TEXT.notes}</span>
+              <p>{slide.notes === '' ? PRESENT_TEXT.noNotes : slide.notes}</p>
             </div>
           </div>
         </div>
-        <div className="site-pv-win site-pv-pres" aria-hidden="true">
-          <div className="site-pv-head">
-            <span className="t-label">{windows.presenter.label}</span>
-            <span className="site-pv-who t-small">{windows.presenter.who}</span>
-          </div>
-          <div className="site-pv-box site-pvc">
-            <div className="site-pvc-head">
-              <span className="site-pvc-timer">
-                <span className="site-pvc-label">{PRESENT_TEXT.timer}</span>
-                <b>{windows.time}</b>
-              </span>
-              <span className="site-pvc-title">{windows.deck}</span>
-              <span className="site-pvc-on">{PRESENT_TEXT.connected}</span>
-            </div>
-            <div className="site-pvc-body">
-              <div className="site-pvc-stage">
-                <div className="site-pv-slide">
-                  <span>{windows.slide.title}</span>
-                </div>
-                <div className="site-pvc-counter">
-                  <b>{PRESENT_TEXT.counter(windows.slide.index, windows.slide.total)}</b>
-                  <span>{windows.slide.title}</span>
-                  <svg viewBox="0 0 10 6" width="10" height="6">
-                    <path d="M0 0h10L5 6Z" />
-                  </svg>
-                </div>
-                <div className="site-pvc-next">
-                  <span className="site-pvc-label">{PRESENT_TEXT.nextSlide}</span>
-                  <div className="site-pv-slide is-centre">
-                    <span>{windows.next}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="site-pvc-side">
-                <div className="site-pvc-tab">
-                  <span>{PRESENT_TEXT.notes}</span>
-                </div>
-                <div className="site-pvc-size">
-                  <i>−</i>
-                  {windows.notesSize}
-                  <i>+</i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </figure>
+      </div>
     </div>
   );
 }

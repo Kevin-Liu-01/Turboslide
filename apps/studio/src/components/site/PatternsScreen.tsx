@@ -1,64 +1,62 @@
 import { useRef } from 'react';
-import type { RefObject } from 'react';
+import type { CSSProperties, RefObject } from 'react';
 
-import { ROWS16_PATH } from '@turboslide/theme/brand';
+import { TILE_SIZES, tileMarkPath } from '@turboslide/theme/brand';
+import { tipProps } from '@turboslide/chrome/Tooltip';
 
 import { REDUCED_MOTION, inkOf, onAppearance } from './cells';
 import { PATTERNS_SCREEN } from './copy';
-import { Frame } from './Frame';
 import { PATTERN_RECIPE, printPattern } from './pattern-cells';
 import { ScreenHead } from './ScreenHead';
 import { useMountEffect } from '../useMountEffect';
 
-const { strip } = PATTERNS_SCREEN;
-/** Seconds between two moments of the strip. */
-const STEP_S = (strip.seconds[1] ?? 2) - (strip.seconds[0] ?? 0);
+/** The deck's footer mark, the vector mark of the 16 px tile (packages/theme brand.ts). */
+const MARK_PATH = tileMarkPath(TILE_SIZES[16]);
+
+const { time } = PATTERNS_SCREEN;
+/** The axis's span in seconds: its first moment to its last. */
+const SPAN = (time.seconds[time.seconds.length - 1] ?? 10) - (time.seconds[0] ?? 0);
 /** Frames a second while the slide plays. */
 const FPS_MS = 1000 / 30;
+/** A key's step on the axis in seconds, and with Shift. */
+const KEY_STEP = { small: 0.5, large: 2 } as const;
 
 /**
- * Plays the slide and draws the strip (pattern-cells.ts). Cells are the recipe's 3 of the slide's
- * 1,600 units rounded to whole device pixels, at least 2, one canvas pixel per cell scaled up
- * pixelated; the slide and the strip share the cell. The strip's moments are drawn once per
- * layout; the slide plays from its still while at least half of it is on screen and the tab is
- * shown, at 30 frames a second, looping over the strip's span (0 to 10 s, 0 to 6 s on a phone)
- * with a 1 px playhead on the axis. Under reduced motion it draws the still once and the playhead
- * is absent. The ink is `--pt-ink`, read again when the appearance changes.
+ * Plays the slide and runs the time axis (pattern-cells.ts). Cells are the recipe's 3 of the
+ * slide's 1,600 units rounded to whole device pixels, at least 2, one canvas pixel per cell scaled
+ * up pixelated. The slide plays from the still while at least half of it is on screen and the tab
+ * is shown, at 30 frames a second, looping over the axis's span, and the playhead follows it. A
+ * pointer over the axis, a drag on it, or the arrow keys with its focus hold the slide at that
+ * moment; when the pointer leaves or the focus goes, it plays on from there. Under reduced motion
+ * it shows the still and moves only when the axis is moved. The ink is `--pt-ink`, read again
+ * when the appearance changes. The playhead moves by transform alone.
  */
 function usePattern(rootRef: RefObject<HTMLElement | null>) {
   useMountEffect(() => {
     const root = rootRef.current;
-    const body = root?.querySelector<HTMLElement>('.site-pp-body');
     const slide = root?.querySelector<HTMLElement>('.site-pp-slide');
-    const slideCells = slide?.querySelector<HTMLCanvasElement>('.site-pp-cells');
-    const time = root?.querySelector<HTMLElement>('.site-pp-time');
+    const canvas = slide?.querySelector<HTMLCanvasElement>('.site-pp-cells');
+    const axis = root?.querySelector<HTMLElement>('.site-pp-time');
     const head = root?.querySelector<HTMLElement>('.site-pp-head');
-    if (!root || !body || !slide || !slideCells || !time || !head) return;
-    const items = [...root.querySelectorAll<HTMLElement>('.site-pp-strip li')];
+    if (!root || !slide || !canvas || !axis || !head) return;
     const reduce = window.matchMedia(REDUCED_MOTION);
-    const images = new WeakMap<HTMLCanvasElement, ImageData>();
-    let cell = 2;
-    let axis = { x0: 0, step: 0, y: 0, span: 10 };
+    let image: ImageData | null = null;
     let ink = 0;
-    let shown: number = strip.still;
+    let shown: number = time.still;
+    let track = 0;
 
     const readInk = (): void => {
       const [r, g, b] = inkOf(root);
       ink = ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
     };
 
-    /* the pattern at second s on a w by h box, centred, in whole cells of `cell` device pixels;
-       m is the recipe's unit, u0 and v0 the box's centre in the recipe's space */
-    const draw = (
-      canvas: HTMLCanvasElement,
-      w: number,
-      h: number,
-      s: number,
-      m: number,
-      u0: number,
-      v0: number,
-    ): void => {
+    /* the pattern at second s over the slide, centred, in whole cells of `cell` device pixels */
+    const draw = (s: number): void => {
+      const w = slide.clientWidth;
+      const h = slide.clientHeight;
+      if (w === 0 || h === 0) return;
       const dpr = window.devicePixelRatio || 1;
+      const cell = Math.max(2, Math.round((3 * w * dpr) / 1600));
       const cols = Math.floor((w * dpr) / cell / 2) * 2;
       const rows = Math.floor((h * dpr) / cell / 2) * 2;
       if (cols < 2 || rows < 2) return;
@@ -76,84 +74,48 @@ function usePattern(rootRef: RefObject<HTMLElement | null>) {
       }
       const g = canvas.getContext('2d');
       if (g === null) return;
-      let image = images.get(canvas);
-      if (image === undefined || image.width !== cols || image.height !== rows) {
+      if (image === null || image.width !== cols || image.height !== rows)
         image = g.createImageData(cols, rows);
-        images.set(canvas, image);
-      }
-      printPattern(new Uint32Array(image.data.buffer), cols, rows, s, cell / dpr / m, u0, v0, ink);
+      const pixels = new Uint32Array(image.data.buffer);
+      printPattern(
+        pixels,
+        cols,
+        rows,
+        s,
+        cell / dpr / h,
+        PATTERN_RECIPE.u0,
+        PATTERN_RECIPE.v0,
+        ink,
+      );
       g.putImageData(image, 0, 0);
     };
 
-    const drawSlide = (s: number): void => {
-      const w = slide.clientWidth;
-      const h = slide.clientHeight;
-      if (w > 0 && h > 0) draw(slideCells, w, h, s, h, PATTERN_RECIPE.u0, PATTERN_RECIPE.v0);
-    };
-
-    /* each moment as a square around the sphere, the sphere 0.8 of the square across */
-    const drawStrip = (): void => {
-      for (const li of items) {
-        const shot = li.querySelector<HTMLElement>('.site-pp-shot');
-        const canvas = shot?.querySelector<HTMLCanvasElement>('.site-pp-cells');
-        if (!shot || !canvas || shot.clientWidth === 0) continue;
-        const side = shot.clientWidth;
-        draw(canvas, side, side, Number(li.dataset.s), side / 0.8, 0, 0);
-      }
-    };
-
-    /* whole pixels: an odd shot width, so each tick and the axis land on whole pixels; the slide
-       takes the strip's width and a whole pixel height, both centred */
-    const layout = (): void => {
-      const ground = body.parentElement;
-      if (ground === null) return;
-      const cs = getComputedStyle(ground);
-      const avail = ground.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      const live = items.filter((li) => getComputedStyle(li).display !== 'none').length;
-      const gap = parseFloat(getComputedStyle(body).getPropertyValue('--pp-gap')) || 16;
-      let shot = Math.floor((avail - (live - 1) * gap) / live);
-      if (shot % 2 === 0) shot -= 1;
-      const w = live * shot + (live - 1) * gap;
-      body.style.setProperty('--pp-n', String(live));
-      body.style.setProperty('--pp-shot', `${shot}px`);
-      body.style.setProperty('--pp-w', `${w}px`);
-      body.style.setProperty('--pp-h', `${Math.round((w * 9) / 16)}px`);
-      body.style.marginLeft = `${Math.floor((avail - w) / 2)}px`;
-      body.dataset.laid = '';
-      cell = Math.max(2, Math.round((3 * w * (window.devicePixelRatio || 1)) / 1600));
-      axis = { x0: (shot - 1) / 2, step: shot + gap, y: shot + 12 + 6, span: (live - 1) * STEP_S };
-    };
-
-    /* the slide and the playhead at second s */
+    /* the slide, the playhead and the slider's value at second s */
     const show = (s: number): void => {
       shown = s;
-      drawSlide(s);
-      const x = Math.round(axis.x0 + (s / STEP_S) * axis.step);
-      head.style.transform = `translate(${x}px, ${axis.y - 10}px)`;
-    };
-
-    const paint = (): void => {
-      layout();
-      show(shown % axis.span);
-      drawStrip();
+      draw(s);
+      head.style.transform = `translateX(${Math.round((s / SPAN) * track)}px)`;
+      const tenth = Math.round(s * 10) / 10;
+      axis.setAttribute('aria-valuenow', String(tenth));
+      axis.setAttribute('aria-valuetext', time.value(tenth));
     };
 
     let raf = 0;
     let playing = false;
+    let held = false;
+    let inView = false;
     let from = 0;
     let base = shown;
     let last = 0;
-    let inView = false;
     const tick = (now: number): void => {
       raf = requestAnimationFrame(tick);
       if (now - last < FPS_MS) return;
       last = now;
-      show((base + (now - from) / 1000) % axis.span);
+      show((base + (now - from) / 1000) % SPAN);
     };
     const play = (): void => {
-      if (playing || reduce.matches || !inView || document.hidden) return;
+      if (playing || held || reduce.matches || !inView || document.hidden) return;
       playing = true;
-      time.setAttribute('data-playing', '');
       base = shown;
       from = performance.now();
       last = 0;
@@ -164,14 +126,68 @@ function usePattern(rootRef: RefObject<HTMLElement | null>) {
       playing = false;
       cancelAnimationFrame(raf);
     };
-    const toStill = (): void => {
+    const hold = (s: number): void => {
+      held = true;
       pause();
-      time.removeAttribute('data-playing');
-      show(strip.still);
+      show(Math.min(SPAN, Math.max(0, s)));
+    };
+    const release = (): void => {
+      held = false;
+      play();
+    };
+
+    /* the axis: hover and drag hold the moment under the pointer; on touch only a drag does,
+       so a swipe over it still scrolls the page */
+    const secondsAt = (event: PointerEvent): number => {
+      const rect = axis.getBoundingClientRect();
+      return ((event.clientX - rect.left) / rect.width) * SPAN;
+    };
+    let pressed = -1;
+    const down = (event: PointerEvent): void => {
+      if (event.button !== 0) return;
+      pressed = event.pointerId;
+      axis.setPointerCapture(event.pointerId);
+      hold(secondsAt(event));
+    };
+    const move = (event: PointerEvent): void => {
+      if (pressed === event.pointerId || event.pointerType === 'mouse') hold(secondsAt(event));
+    };
+    const up = (event: PointerEvent): void => {
+      if (pressed !== event.pointerId) return;
+      pressed = -1;
+      if (event.pointerType !== 'mouse') release();
+    };
+    const leave = (event: PointerEvent): void => {
+      if (pressed === -1 && event.pointerType === 'mouse' && document.activeElement !== axis)
+        release();
+    };
+    const key = (event: KeyboardEvent): void => {
+      const step = event.shiftKey ? KEY_STEP.large : KEY_STEP.small;
+      const to: Record<string, number> = {
+        ArrowLeft: shown - step,
+        ArrowDown: shown - step,
+        ArrowRight: shown + step,
+        ArrowUp: shown + step,
+        Home: 0,
+        End: SPAN,
+      };
+      const next = to[event.key];
+      if (next === undefined) return;
+      event.preventDefault();
+      hold(next);
+    };
+    const blur = (): void => {
+      if (pressed === -1) release();
+    };
+
+    const layout = (): void => {
+      track = axis.clientWidth;
+      head.style.left = '0';
+      show(shown);
     };
 
     readInk();
-    paint();
+    layout();
     const seen = new IntersectionObserver(
       (entries) => {
         inView = entries.some((entry) => entry.isIntersecting);
@@ -183,20 +199,37 @@ function usePattern(rootRef: RefObject<HTMLElement | null>) {
     seen.observe(slide);
     const visibility = (): void => (document.hidden ? pause() : play());
     document.addEventListener('visibilitychange', visibility);
-    const motion = (): void => (reduce.matches ? toStill() : play());
+    const motion = (): void => {
+      if (!reduce.matches) return play();
+      pause();
+      show(time.still);
+    };
     reduce.addEventListener('change', motion);
-    const resize = new ResizeObserver(paint);
-    resize.observe(root);
+    axis.addEventListener('pointerdown', down);
+    axis.addEventListener('pointermove', move);
+    axis.addEventListener('pointerup', up);
+    axis.addEventListener('pointercancel', up);
+    axis.addEventListener('pointerleave', leave);
+    axis.addEventListener('keydown', key);
+    axis.addEventListener('blur', blur);
+    const resize = new ResizeObserver(layout);
+    resize.observe(slide);
     const stop = onAppearance(() => {
       readInk();
       show(shown);
-      drawStrip();
     });
     return () => {
       pause();
       seen.disconnect();
       document.removeEventListener('visibilitychange', visibility);
       reduce.removeEventListener('change', motion);
+      axis.removeEventListener('pointerdown', down);
+      axis.removeEventListener('pointermove', move);
+      axis.removeEventListener('pointerup', up);
+      axis.removeEventListener('pointercancel', up);
+      axis.removeEventListener('pointerleave', leave);
+      axis.removeEventListener('keydown', key);
+      axis.removeEventListener('blur', blur);
       resize.disconnect();
       stop();
     };
@@ -204,89 +237,79 @@ function usePattern(rootRef: RefObject<HTMLElement | null>) {
 }
 
 /**
- * Screen 05, Patterns (docs/SITE.md 9): a slide with the Dithering pattern on the editor's
- * stage ground, the moments of its movement on one time axis with the still ringed in the
- * selection blue, and where the pattern moves. With motion on the slide plays and a playhead
- * runs on the axis; with Reduce motion on it holds the still.
+ * The Patterns screen: its head beside a slide of the landing's deck with the Dithering pattern,
+ * playing, over its time axis. The axis is a slider: the moment the pointer or the keys pick is
+ * the moment the slide shows, and the still every other place shows is marked on it with the one
+ * ink square. The playhead is the screen's one accent.
  */
 export function PatternsScreen() {
   const root = useRef<HTMLElement>(null);
   usePattern(root);
-  const { figure, slide, table } = PATTERNS_SCREEN;
+  const { figure, slide } = PATTERNS_SCREEN;
   return (
     <section
       ref={root}
-      className="site-screen site-wrap"
+      className="site-claim site-pp"
       id="patterns"
       aria-labelledby="site-patterns-title"
     >
-      <ScreenHead titleId="site-patterns-title" heading={PATTERNS_SCREEN.heading} />
-      <div className="site-pp">
-        <figure className="site-fig site-pp-fig">
-          <Frame>
-            <div className="site-pp-ground">
-              <div className="site-pp-body">
-                <div className="site-pp-slide" role="img" aria-label={figure.alt}>
-                  <canvas className="site-pp-cells" aria-hidden="true" />
-                  <svg className="site-pp-sheet" viewBox="0 0 1600 900" aria-hidden="true">
-                    <g transform="translate(64 836) scale(2)" shapeRendering="crispEdges">
-                      <rect className="site-mark-plate" width="16" height="16" />
-                      <rect className="site-mark-frame" x="0.5" y="0.5" width="15" height="15" />
-                      <path className="site-mark-ink" d={ROWS16_PATH} />
-                    </g>
-                    <text x="949" y="698" fontSize="46" fontWeight="500" letterSpacing="-0.92">
-                      {slide.heading}
-                    </text>
-                    <text x="949" y="742" fontSize="22" letterSpacing="-0.1">
-                      {slide.sentence}
-                    </text>
-                    <text className="is-num" x="1536" y="864" fontSize="16" textAnchor="end">
-                      {slide.counter}
-                    </text>
-                  </svg>
-                </div>
-                <div className="site-pp-time">
-                  <ol className="site-pp-strip" aria-label={strip.name}>
-                    {strip.seconds.map((s) => (
-                      <li key={s} data-s={s} className={s === strip.still ? 'is-still' : undefined}>
-                        <div className="site-pp-shot">
-                          <canvas className="site-pp-cells" aria-hidden="true" />
-                        </div>
-                        <div className="site-pp-tick" aria-hidden="true" />
-                        <span className="site-pp-at t-small">
-                          {s === strip.still ? strip.stillAt(s) : strip.at(s)}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                  <i className="site-pp-head" aria-hidden="true" />
-                </div>
-              </div>
-            </div>
-          </Frame>
-        </figure>
-        <div className="site-pp-where">
-          <table className="site-spec site-pp-spec" aria-label={table.caption}>
-            <thead>
-              <tr>
-                <th className="t-label" scope="col">
-                  {table.heads.place}
-                </th>
-                <th className="t-label" scope="col">
-                  {table.heads.pattern}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {table.rows.map((row) => (
-                <tr key={row.place}>
-                  <th scope="row">{row.place}</th>
-                  <td>{row.pattern}</td>
-                </tr>
+      <div className="site-pp-in site-wrap">
+        <ScreenHead
+          titleId="site-patterns-title"
+          heading={PATTERNS_SCREEN.heading}
+          lead={PATTERNS_SCREEN.lead}
+          wrap={false}
+        />
+        <figure className="site-pp-fig">
+          <div className="site-pp-slide" role="img" aria-label={figure.alt}>
+            <canvas className="site-pp-cells" aria-hidden="true" />
+            <svg className="site-pp-sheet" viewBox="0 0 1600 900" aria-hidden="true">
+              <g transform="translate(64 836) scale(2)">
+                <rect className="site-mark-plate" width="16" height="16" />
+                <rect className="site-mark-frame" x="0.5" y="0.5" width="15" height="15" />
+                <path className="site-mark-ink" d={MARK_PATH} />
+              </g>
+              <text x="949" y="698" fontSize="46" fontWeight="500" letterSpacing="-0.92">
+                {slide.heading}
+              </text>
+              <text x="949" y="742" fontSize="22" letterSpacing="-0.1">
+                {slide.sentence}
+              </text>
+              <text className="is-num" x="1536" y="864" fontSize="16" textAnchor="end">
+                {slide.counter}
+              </text>
+            </svg>
+          </div>
+          <div
+            className="site-pp-time"
+            role="slider"
+            tabIndex={0}
+            aria-label={time.name}
+            aria-valuemin={0}
+            aria-valuemax={SPAN}
+            aria-valuenow={time.still}
+            aria-valuetext={time.value(time.still)}
+            {...tipProps({ name: time.name, doc: time.doc, key: time.key })}
+          >
+            <ol className="site-pp-ticks" aria-hidden="true">
+              {time.seconds.map((s) => (
+                <li
+                  key={s}
+                  className={s === time.still ? 'is-still' : undefined}
+                  style={{ '--at': s / SPAN } as CSSProperties}
+                >
+                  <span>{s === time.still ? time.stillAt(s) : time.at(s)}</span>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </ol>
+            {/* at the still from the first paint; the script moves it by transform from there */}
+            <i
+              className="site-pp-head"
+              style={{ left: `${(time.still / SPAN) * 100}%` }}
+              aria-hidden="true"
+            />
+          </div>
+        </figure>
       </div>
     </section>
   );

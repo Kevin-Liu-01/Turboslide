@@ -1,51 +1,58 @@
-import { PRESENT_SCREEN } from './copy';
-import { Frame } from './Frame';
-import { PresentWindows } from './PresentWindows';
-import { ThemePicture } from './ThemePicture';
+import { useState } from 'react';
+import type { KeyboardEvent } from 'react';
 
-import viewerDarkPhone from './pictures/viewer-390-dark.webp?url';
-import viewerLightPhone from './pictures/viewer-390-light.webp?url';
-import viewerDark from './pictures/viewer-1440-dark.webp?url';
-import viewerLight from './pictures/viewer-1440-light.webp?url';
+import { tipProps } from '@turboslide/chrome/Tooltip';
+
+import { PRESENT_SCREEN } from './copy';
+import { PRESENT_LAST } from './present-deck';
+import { PresentWindows } from './PresentWindows';
+import { ScreenHead } from './ScreenHead';
 
 /**
- * Screen 04 (docs/SITE.md A.5): the title, the viewer captured on slide 2 of the
- * example deck the hero's second button opens (slide 1 draws a defect, V1 of the brief), the six
- * slideshow keys as key chips, and the slideshow beside presenter view (PresentWindows.tsx).
+ * The Present screen: the slideshow beside presenter view, both drawn from one slide index
+ * (PresentWindows.tsx), then the six keys of a slideshow. The two arrow keys are buttons, and
+ * with the focus on either the arrow keys work too: each step moves both windows, the slide, the
+ * counter, the next slide and the speaker notes together, through the first four slides of the
+ * landing's deck (present-deck.ts). The other keys are listed for what they do in the product.
  */
 export function PresentScreen() {
-  const { figure } = PRESENT_SCREEN;
+  const [at, setAt] = useState(0);
+  const step = (by: number): void => setAt((now) => Math.min(PRESENT_LAST, Math.max(0, now + by)));
+  const onKey = (event: KeyboardEvent<HTMLElement>): void => {
+    const by = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    if (by === 0) return;
+    event.preventDefault();
+    step(by);
+  };
   return (
-    <section className="site-screen site-wrap" id="present" aria-labelledby="site-present-title">
-      <header className="site-screen-head">
-        <h2 id="site-present-title" className="t-title">
-          {PRESENT_SCREEN.heading}
-        </h2>
-      </header>
-      <figure className="site-fig">
-        <Frame>
-          <div className="site-viewer-box">
-            <ThemePicture
-              light={{ wide: viewerLight, phone: viewerLightPhone }}
-              dark={{ wide: viewerDark, phone: viewerDarkPhone }}
-              wideSize={[2360, 1784]}
-              phoneSize={[780, 1120]}
-              alt={figure.alt}
-            />
-          </div>
-        </Frame>
+    <section className="site-claim site-pr" id="present" aria-labelledby="site-present-title">
+      <ScreenHead titleId="site-present-title" heading={PRESENT_SCREEN.heading} />
+      <figure className="site-pr-fig site-wrap" aria-label={PRESENT_SCREEN.windows.name}>
+        <PresentWindows at={at} />
       </figure>
-      <dl className="site-keys t-small" aria-label={PRESENT_SCREEN.keysName}>
+      <ul className="site-keys site-wrap" aria-label={PRESENT_SCREEN.keysName} onKeyDown={onKey}>
         {PRESENT_SCREEN.keys.map((entry) => (
-          <div key={entry.label}>
-            <dt>
-              <kbd className="pt-kbd site-kbd">{entry.key}</kbd>
-            </dt>
-            <dd>{entry.label}</dd>
-          </div>
+          <li key={entry.label}>
+            {'step' in entry ? (
+              <button
+                type="button"
+                className="site-keys-item"
+                aria-disabled={entry.step < 0 ? at === 0 : at === PRESENT_LAST}
+                onClick={() => step(entry.step)}
+                {...tipProps({ name: entry.label, doc: entry.doc, key: entry.words })}
+              >
+                <kbd className="pt-kbd site-kbd">{entry.key}</kbd>
+                <span>{entry.label}</span>
+              </button>
+            ) : (
+              <span className="site-keys-item">
+                <kbd className="pt-kbd site-kbd">{entry.key}</kbd>
+                <span>{entry.label}</span>
+              </span>
+            )}
+          </li>
         ))}
-      </dl>
-      <PresentWindows />
+      </ul>
     </section>
   );
 }

@@ -10399,11 +10399,11 @@
     {
       "id": "home.page.layout",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the T in a box, one h1, the editor's figure, screen 02 (the recorded run and the transports table), screen 03 (the viewer and six key chips) and the footer's three columns; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset",
+      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the vector mark, one h1, the five screens' headings in order (Freeform Canvas, Feature Parity for Agents, Present from Any Link, Animated Patterns, PDF and PowerPoint Export), six figures (the editor, the canvas, the callers, the two windows, the pattern and the seam), six slideshow keys and the footer's four columns with the vector mark; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset outside the title's avatars",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md A; the brief's problems L1 to L13 of the landing before it",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production"
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"make the other rows and sections a lot better and more intentional and redesign them to convey information better following less is more\"): five screens, each one claim proved by one demonstration."
     },
     {
       "id": "home.title.one-line",

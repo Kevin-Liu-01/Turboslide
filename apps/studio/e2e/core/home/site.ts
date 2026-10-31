@@ -169,11 +169,17 @@ export function rows(): void {
         expect(facts.bar, `${label}: the 56 px bar`).toBe(56);
         expect(facts.marks, `${label}: the mark in the bar and the footer`).toBe(2);
         expect(facts.h1, `${label}: one h1`).toBe(1);
-        expect(facts.h2, `${label}: the two screens' headings`).toEqual([
+        expect(facts.h2, `${label}: the five screens' headings`).toEqual([
+          'Freeform Canvas',
           'Feature Parity for Agents',
           'Present from Any Link',
+          'Animated Patterns',
+          'PDF and PowerPoint Export',
         ]);
-        expect(facts.figures, `${label}: the editor, the run and the viewer`).toBe(3);
+        expect(
+          facts.figures,
+          `${label}: the editor, the canvas, the callers, the two windows, the pattern and the seam`,
+        ).toBe(6);
         expect(facts.keys, `${label}: six slideshow keys`).toBe(6);
         expect(facts.footer, `${label}: four footer columns`).toBe(4);
         expect(facts.wide, `${label}: nothing wider than the viewport`).toBeLessThanOrEqual(0);

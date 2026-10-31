@@ -90,116 +90,105 @@ export const HERO = {
 } as const;
 
 /**
- * Screen 02, Canvas (docs/SITE.md 9): the lighthouse slide after one drag and one turn of its
- * heading, which the CLI wrote (canvas-pose.ts), beside the heading's box at rest and moved. The
- * words on the slide are the slide's own (home-deck/slides/lighthouse.json).
+ * The Canvas screen (CanvasScreen.tsx): the lighthouse slide across the window after one drag and
+ * one turn of its heading, which the CLI wrote (canvas-pose.ts), with a dashed box where the
+ * heading was. The heading moves under a drag and turns by its handle, and the line under the
+ * slide is the write the editor commits for it. The words on the slide are the slide's own
+ * (home-deck/slides/lighthouse.json); the write is `block.set` on the heading's `/pos`
+ * (packages/viewer/src/Gestures.tsx).
  */
 export const CANVAS_SCREEN = {
   heading: 'Freeform Canvas',
   figure: {
-    alt: 'The lighthouse slide shows a drone photograph of the lantern room of Cape Hatteras Light in a two tone dither. The heading, Cape Hatteras Light, has moved from the paper plate at the lower right to the sky at the upper left. It is rotated 6 degrees counterclockwise, and the editor’s selection ring surrounds it.',
+    alt: 'The lighthouse slide shows a drone photograph of the lantern room of Cape Hatteras Light in a two tone dither. The heading, Cape Hatteras Light, has moved from the paper plate at the lower right to the sky at the upper left. It is rotated 6 degrees counterclockwise, and a dashed box marks where it was.',
   },
   slide: {
     heading: 'Cape Hatteras Light',
     paragraph:
       "The lantern of Cape Hatteras Light on North Carolina's Outer Banks, printed through an 8 by 8 screen at 2 px cells.",
     credit: 'Photograph: National Park Service, public domain',
-    /** the editor's selection chip on the heading: its kind and its id */
-    chip: 'heading · h',
   },
-  table: {
-    name: 'The heading’s box before and after the move',
-    heads: { field: 'Format options', rest: 'Before', moved: 'After' },
-    rows: { w: 'Width', h: 'Height', rotate: 'Rotate', x: 'X', y: 'Y' },
-  },
+  /** the heading and its handle, as the Tooltip primitive names them */
+  move: { name: 'Heading', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
+  turn: { name: 'Rotate', doc: 'Drag the handle to turn the heading.', key: 'Arrow keys' },
+  degrees: (deg: number): string => `${deg} degrees`,
+  write: { action: 'block.set', block: 'lighthouse#h', path: '/pos' },
 } as const;
 
+/**
+ * The Agents screen (AgentsScreen.tsx): one action, `slide.new`, called by a person from the
+ * editor's menu and by an agent on each transport, every call wired into the one handler and the
+ * one revision Version history records. The table is the data: each caller's own spelling of the
+ * call (packages/chrome/src/menus/model.ts and the generated contracts; facts.test.ts reads them
+ * back) and how many of the actions each transport carries (facts.ts).
+ */
 export const AGENTS_SCREEN = {
   heading: 'Feature Parity for Agents',
   table: {
     caption: 'The action slide.new on each transport',
-    heads: { transport: 'Transport', name: 'Name', actions: 'Actions' },
+    person: { transport: 'Editor', name: 'Slide > New slide', icon: 'cursor-arrow-rays' },
     rows: [
       { id: 'cli', transport: 'Command line', name: 'turboslide slide new', icon: 'command-line' },
       { id: 'mcp', transport: 'MCP', name: 'deck_new_slide', icon: 'puzzle-piece' },
       { id: 'http', transport: 'HTTP', name: 'POST /api/actions/slide.new', icon: 'globe-alt' },
       { id: 'page', transport: 'Page', name: "studio.invoke('slide.new', input)", icon: 'window' },
     ],
-    total: 'Every action',
+    count: (n: number): string => `${n} actions`,
   },
-  /**
-   * The path every caller of `slide.new` joins (docs/SITE.md A.4): the menu item and the four
-   * transports, the one handler, its two checks with their refusals, and the revision Version
-   * history records. Each label is the source's own: the menu row (packages/chrome/src/menus/
-   * model.ts, `action('slide.new')`), the dispatcher's input check (packages/agent/src/
-   * dispatch.ts), `errorStatus` (packages/schema/src/errors.ts), `commit` and its
-   * `baseRevision` (apps/cli/src/store-actions.ts), and the store's one entry per write.
-   */
-  flow: {
-    alt: 'The menu item Slide > New slide and the four transports all call one handler, slide.new. The handler checks the input against the action’s schema. Then it checks that baseRevision is current. Version history records one new revision with its author. A failed input check returns 400 with the failing field. A stale revision returns 409 with the current document.',
-    people: 'People',
-    agents: 'Agents',
-    menu: 'Slide > New slide',
-    stations: [
-      { id: 'handler', name: 'slide.new', sub: 'One handler for every caller', code: true },
-      {
-        id: 'input',
-        name: 'Input check',
-        sub: 'The input matches the action’s schema',
-        refusal: '400 with the failing field',
-      },
-      {
-        id: 'revision',
-        name: 'Revision check',
-        sub: '`baseRevision` is current',
-        refusal: '409 with the current document',
-      },
-      { id: 'history', name: 'Version history', sub: 'One new revision with its author' },
-    ],
+  /** where every call lands: the handler and the record of the write */
+  path: {
+    name: 'Where every call of slide.new lands',
+    action: 'slide.new',
+    history: 'Version history',
+    record: 'One revision with its author',
   },
 } as const;
 
+/**
+ * The Present screen (PresentScreen.tsx): the slideshow and presenter view, two windows that move
+ * together (apps/studio/content/docs/presenting.mdx), walking the landing's own deck
+ * (present-deck.ts), then the keys of a slideshow. The two arrow keys are buttons that move both
+ * windows. The console's own words come from the viewer (PRESENT_TEXT).
+ */
 export const PRESENT_SCREEN = {
   heading: 'Present from Any Link',
-  figure: {
-    alt: 'The Turboslide viewer shows the example deck. Its bar holds Previous, the slide counter, Next, the Slide, Grid and Book views, Theme and Present.',
+  windows: {
+    name: 'The slideshow and presenter view of one deck, which move together',
+    show: 'Slideshow',
+    presenter: 'Presenter view',
   },
   keysName: 'Keys during a slideshow',
   keys: [
-    { key: '→', label: 'Next slide' },
-    { key: '←', label: 'Previous slide' },
+    {
+      key: '←',
+      label: 'Previous slide',
+      step: -1,
+      doc: 'Moves both windows back one slide.',
+      words: 'Left arrow',
+    },
+    {
+      key: '→',
+      label: 'Next slide',
+      step: 1,
+      doc: 'Moves both windows to the next slide.',
+      words: 'Right arrow',
+    },
     { key: 'S', label: 'Presenter view' },
     { key: 'L', label: 'Laser pointer' },
     { key: 'B', label: 'Black slide' },
     { key: 'Esc', label: 'Stop presenting' },
   ],
-  /**
-   * The row under the keys: the slideshow and presenter view, two windows that move together
-   * (apps/studio/content/docs/presenting.mdx). The console's own words come from the viewer
-   * (PRESENT_TEXT); the slides are slides 2 and 3 of the example deck the viewer above shows.
-   */
-  windows: {
-    alt: 'The slideshow window shows the slide to the audience. The S key opens presenter view, which only you see. Presenter view shows the timer, the current slide, the next slide and the speaker notes. The left and right arrow keys in either window move both windows.',
-    show: { label: 'Slideshow', who: 'For the audience' },
-    presenter: { label: 'Presenter view', who: 'For you' },
-    opens: 'opens',
-    moveBoth: 'move both',
-    deck: 'GT brand deck',
-    /** a frozen reading of the console's timer, four seconds after it opened */
-    time: '0:04',
-    slide: { index: 2, total: 85, title: 'General Translation' },
-    next: 'Every product in every language',
-    notesSize: '16 px',
-  },
 } as const;
 
 /**
- * Screen 05, Patterns (docs/SITE.md 9): a slide with the Dithering pattern beside the moments
- * of its movement, one of them held as the still, and where the pattern moves
+ * The Patterns screen (PatternsScreen.tsx): a slide with the Dithering pattern playing over its
+ * time axis, which a pointer or the arrow keys scrub, with the moment every still place shows
+ * marked on it, and one sentence on where the pattern moves
  * (apps/studio/content/docs/editor/objects.mdx).
  */
 export const PATTERNS_SCREEN = {
   heading: 'Animated Patterns',
+  lead: 'The pattern moves in the slideshow and the viewer and holds its still in the editor, the thumbnails and exported files.',
   figure: {
     alt: 'A slide titled Questions from Northwind carries the Dithering pattern. The pattern is a sphere printed in dots, and its light moves around the sphere.',
   },
@@ -208,87 +197,47 @@ export const PATTERNS_SCREEN = {
     sentence: 'Thank you for the time today.',
     counter: '8 / 9',
   },
-  strip: {
-    name: 'The pattern at 0, 2, 4, 6, 8 and 10 seconds, with the still at 4 seconds',
+  time: {
+    name: 'Time',
+    doc: 'Shows the pattern at one moment.',
+    key: 'Left and right arrows',
     seconds: [0, 2, 4, 6, 8, 10],
     still: 4,
     at: (s: number): string => `${s} s`,
     stillAt: (s: number): string => `Still, ${s} s`,
-  },
-  table: {
-    caption: 'Where the pattern moves',
-    heads: { place: 'Place', pattern: 'Pattern' },
-    rows: [
-      { place: 'Slideshow and viewer', pattern: 'Moves' },
-      { place: 'Editor', pattern: 'Still' },
-      { place: 'PDF and PowerPoint files', pattern: 'Still' },
-      { place: 'Thumbnails', pattern: 'Still' },
-      { place: 'With Reduce motion on', pattern: 'Still' },
-    ],
+    value: (s: number): string => `${s.toFixed(1)} seconds`,
   },
 } as const;
 
-/** One run of a file's sentence: plain words, or the words that name a part, underlined. */
-export type ExportRun = { text: string; part?: 'object' | 'hidden' };
-
 /**
- * Screen 06, Export (docs/SITE.md 9): the files File > Download writes from one slide, then one
- * slide cut by a seam between the two PowerPoint files, with the parts each file holds
- * (export-parts.ts). The modes' names are the Download dialog's (DIALOGS.download), the file names
- * `downloadFileName`'s, the numbers docs/pptx.md's.
+ * The Export screen (ExportScreen.tsx): one slide cut by a seam between the two PowerPoint files
+ * the CLI wrote for it, the parts each file holds outlined on its side (export-parts.ts), then
+ * what each file File > Download writes holds. The modes' names are the Download dialog's
+ * (DIALOGS.download), the numbers docs/pptx.md's, the counts the parts lists'.
  */
 export const EXPORT_SCREEN = {
   heading: 'PDF and PowerPoint Export',
   files: {
-    heading: 'Orders by quarter',
-    list: [
-      {
-        id: 'pdf',
-        kind: 'PDF',
-        name: 'Northwind quarterly review.pdf',
-        says: [{ text: 'Each slide is one page of 13.333 by 7.5 in. You can search its text.' }],
-      },
-      {
-        id: 'pictures',
-        kind: 'PowerPoint, Pictures',
-        name: 'Northwind quarterly review.pptx',
-        says: [
-          { text: 'The slide is ' },
-          { text: 'one picture', part: 'object' },
-          { text: ' of 3200 by 1800 pixels. Its text sits behind the picture in an ' },
-          { text: 'invisible layer', part: 'hidden' },
-          {
-            text: ' that you can search. At most 0.1 percent of the pixels on each page differ from the browser.',
-          },
-        ],
-      },
-      {
-        id: 'editable',
-        kind: 'PowerPoint, Editable text',
-        name: 'Northwind quarterly review (editable).pptx',
-        says: [
-          { text: 'The heading is a ' },
-          { text: 'text box', part: 'object' },
-          { text: '. The chart is a ' },
-          { text: 'PowerPoint chart', part: 'object' },
-          { text: '. The layout matches the browser within 3 px.' },
-        ],
-      },
-    ],
+    pictures: {
+      name: 'Pictures',
+      holds: (c: { text: number }): string =>
+        `A PowerPoint file that holds this slide as one picture of 3200 by 1800 pixels over ${c.text} boxes of invisible text. At most 0.1 percent of its pixels differ from the browser.`,
+    },
+    editable: {
+      name: 'Editable text',
+      holds: (c: { text: number; rect: number; line: number }): string =>
+        `A PowerPoint file that holds this slide as ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines over the background picture. Its layout matches the browser within 3 px.`,
+    },
+    pdf: {
+      name: 'PDF',
+      holds: 'One page of 13.333 by 7.5 in for each slide, with text you can search.',
+    },
   },
   seam: {
-    pictures: 'Pictures',
-    editable: 'Editable text',
     alt: (c: { text: number; rect: number; line: number }): string =>
       `The opener field slide shows a lit sphere printed in dots, with a plate of text at the lower right. A seam divides the slide. On the left, the Pictures file holds the slide as one picture of 3200 by 1800 pixels. On the right is the Editable text file. Blue outlines mark its ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines over the background picture.`,
-    holds: {
-      pictures: (c: { text: number }): string =>
-        `The file holds one picture of the slide, the logo and ${c.text} text boxes of invisible text.`,
-      editable: (c: { text: number; rect: number; line: number }): string =>
-        `The file holds ${c.text} text boxes, ${c.rect} rectangles, ${c.line} lines, the logo and the background picture.`,
-    },
     chips: {
-      picture: 'Picture of the slide, 3200 by 1800',
+      picture: 'Picture of the slide',
       invisible: 'Invisible text',
       background: 'Background picture',
       line: 'Line',
@@ -297,6 +246,9 @@ export const EXPORT_SCREEN = {
     },
     slider: {
       name: 'The seam between the two files',
+      tip: 'Seam',
+      doc: 'Drag it to compare the two PowerPoint files.',
+      key: 'Left and right arrows',
       value: (p: number): string =>
         `${p} percent Pictures file on the left, ${100 - p} percent Editable text file on the right`,
     },

@@ -1,18 +1,19 @@
 import { Fragment, useRef } from 'react';
 import type { CSSProperties, RefObject } from 'react';
 
-import { ROWS16_PATH } from '@turboslide/theme/brand';
+import { tipProps } from '@turboslide/chrome/Tooltip';
+import { TILE_SIZES, tileMarkPath } from '@turboslide/theme/brand';
 
 import { SCREEN, fitCells, inkOf, onAppearance, printCells } from './cells';
 import { EXPORT_SCREEN } from './copy';
 import { EDITABLE_PARTS, PICTURES_PARTS, countParts } from './export-parts';
 import type { ExportPart } from './export-parts';
-import { Frame } from './Frame';
-import { SiteIcon } from './SiteIcon';
 import { useMountEffect } from '../useMountEffect';
 
+/** The deck's footer mark, the vector mark of the 16 px tile (packages/theme brand.ts). */
+const MARK_PATH = tileMarkPath(TILE_SIZES[16]);
+
 const EDITABLE = countParts(EDITABLE_PARTS);
-const PICTURES = countParts(PICTURES_PARTS);
 
 /**
  * The slide's words at the sizes, tracking and optical sizes the example theme sets them
@@ -189,12 +190,13 @@ function useSeam(frameRef: RefObject<HTMLDivElement | null>) {
 }
 
 /**
- * Screen 06's second row (docs/SITE.md 9): the opener field slide cut by a seam between the
+ * The Export screen's figure (docs/SITE.md 9): the opener field slide cut by a seam between the
  * two PowerPoint files the CLI wrote for it (export-parts.ts). The slide is drawn once from the
  * Editable text file's parts; over it two layers in the editor's selection style (Overlay.css:
  * the 1 px --pt-select ring and the square chip) are clipped at the cut: left, the Pictures file
  * (one picture, the logo laid over it again, the text there but invisible, dashed); right, the
- * Editable text file (each text box, rectangle and line). The counts beside it are the files'.
+ * Editable text file (each text box, rectangle and line). The seam's handle sits at the slide's
+ * middle; no frame, no bar.
  */
 export function ExportSeam() {
   const frame = useRef<HTMLDivElement>(null);
@@ -204,168 +206,130 @@ export function ExportSeam() {
   const heading = byId('h/text');
   const logo = byId('footer-logo:1');
   return (
-    <div className="site-row site-xs-row">
-      <div className="site-row-text">
-        <dl className="site-xs-holds t-small">
-          <div>
-            <dt>
-              <SiteIcon name="photo" />
-              {seam.pictures}
-            </dt>
-            <dd>{seam.holds.pictures(PICTURES)}</dd>
-          </div>
-          <div>
-            <dt>
-              <SiteIcon name="document-text" />
-              {seam.editable}
-            </dt>
-            <dd>{seam.holds.editable(EDITABLE)}</dd>
-          </div>
-        </dl>
-      </div>
-      <figure className="site-xs-fig">
-        <Frame>
-          <div ref={frame} className="site-xs">
-            <div className="site-xs-bar" aria-hidden="true">
-              <span className="site-xs-mode">
-                <SiteIcon name="photo" />
-                {seam.pictures}
-              </span>
-              <span className="site-xs-mode">
-                {seam.editable}
-                <SiteIcon name="document-text" />
-              </span>
-            </div>
-            <div className="site-xs-sheet">
-              <div className="site-xs-layer" role="img" aria-label={seam.alt(EDITABLE)}>
-                <canvas className="site-cells site-xs-field" aria-hidden="true" />
-                <svg
-                  className="site-xs-svg"
-                  viewBox="0 0 1600 900"
-                  preserveAspectRatio="none"
+    <figure className="site-xs-fig site-wrap">
+      <div ref={frame} className="site-xs">
+        <div className="site-xs-sheet">
+          <div className="site-xs-layer" role="img" aria-label={seam.alt(EDITABLE)}>
+            <canvas className="site-cells site-xs-field" aria-hidden="true" />
+            <svg
+              className="site-xs-svg"
+              viewBox="0 0 1600 900"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path className="is-hair" d={FRAME_PATH} />
+              <path className="is-cross" d={CROSS_PATH} />
+            </svg>
+            {EDITABLE_PARTS.filter((part) => part.kind === 'rect').map((part) => (
+              <i key={part.id} className="site-xs-box site-xs-rect" style={at(part)} />
+            ))}
+            {logo === undefined ? null : (
+              <svg
+                className="site-xs-box site-xs-mark"
+                style={at(logo)}
+                viewBox="0 0 16 16"
+                aria-hidden="true"
+              >
+                <rect className="is-plate" width="16" height="16" />
+                <rect className="is-frame" x="0.5" y="0.5" width="15" height="15" />
+                <path className="is-ink" d={MARK_PATH} />
+              </svg>
+            )}
+            {EDITABLE_PARTS.filter((part) => part.kind === 'text').map((part) => {
+              const style = TEXT_STYLE[part.id];
+              return (
+                <span
+                  key={part.id}
+                  className={`site-xs-box site-xs-text${MUTED.has(part.id) ? ' is-muted' : ''}`}
+                  style={
+                    {
+                      ...at(part),
+                      '--fs': style?.fs,
+                      '--lh': style?.lh,
+                      '--ls': style?.ls,
+                      '--fw': style?.fw,
+                      '--op': style?.op,
+                    } as CSSProperties
+                  }
                   aria-hidden="true"
                 >
-                  <path className="is-hair" d={FRAME_PATH} />
-                  <path className="is-cross" d={CROSS_PATH} />
-                </svg>
-                {EDITABLE_PARTS.filter((part) => part.kind === 'rect').map((part) => (
-                  <i key={part.id} className="site-xs-box site-xs-rect" style={at(part)} />
-                ))}
-                {logo === undefined ? null : (
-                  <svg
-                    className="site-xs-box site-xs-mark"
-                    style={at(logo)}
-                    viewBox="0 0 16 16"
-                    shapeRendering="crispEdges"
-                    aria-hidden="true"
-                  >
-                    <rect className="is-plate" width="16" height="16" />
-                    <rect className="is-frame" x="0.5" y="0.5" width="15" height="15" />
-                    <path className="is-ink" d={ROWS16_PATH} />
-                  </svg>
-                )}
-                {EDITABLE_PARTS.filter((part) => part.kind === 'text').map((part) => {
-                  const style = TEXT_STYLE[part.id];
-                  return (
-                    <span
-                      key={part.id}
-                      className={`site-xs-box site-xs-text${MUTED.has(part.id) ? ' is-muted' : ''}`}
-                      style={
-                        {
-                          ...at(part),
-                          '--fs': style?.fs,
-                          '--lh': style?.lh,
-                          '--ls': style?.ls,
-                          '--fw': style?.fw,
-                          '--op': style?.op,
-                        } as CSSProperties
-                      }
-                      aria-hidden="true"
-                    >
-                      {(part.text ?? []).map((line, i) => (
-                        <Fragment key={line}>
-                          {i > 0 ? <br /> : null}
-                          {line}
-                        </Fragment>
-                      ))}
-                    </span>
-                  );
-                })}
-              </div>
-              <div className="site-xs-layer is-pictures" aria-hidden="true">
-                {PICTURES_PARTS.filter((part) => part.id !== 'sheet').map((part) => (
-                  <i
-                    key={part.id}
-                    className={`site-xs-box site-xs-ring${part.invisible === true ? ' is-dash' : ''}${isSmall(part) ? ' is-small' : ''}`}
-                    style={at(part)}
-                  />
-                ))}
-                <b className="site-xs-chip" style={chip(0, 0)}>
-                  {seam.chips.picture}
-                </b>
-                {plate === undefined ? null : (
-                  <b
-                    className="site-xs-chip"
-                    style={chip(plate.box[0], plate.box[1], '0', '-100%')}
-                  >
-                    {seam.chips.invisible}
-                  </b>
-                )}
-              </div>
-              <div className="site-xs-layer is-editable" aria-hidden="true">
-                <svg className="site-xs-svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
-                  <path className="is-sel" d={ALL_LINES} />
-                </svg>
-                {EDITABLE_PARTS.filter((part) => part.kind !== 'line').map((part) => (
-                  <i
-                    key={part.id}
-                    className={`site-xs-box site-xs-ring${isSmall(part) ? ' is-small' : ''}`}
-                    style={at(part)}
-                  />
-                ))}
-                <b className="site-xs-chip" style={chip(1600, 0, '-100%')}>
-                  {seam.chips.background}
-                </b>
-                <b className="site-xs-chip" style={chip(1543, 200, '-100%', '-50%')}>
-                  {seam.chips.line}
-                </b>
-                {plate === undefined ? null : (
-                  <b
-                    className="site-xs-chip"
-                    style={chip(plate.box[0], plate.box[1], '0', '-100%')}
-                  >
-                    {seam.chips.rect}
-                  </b>
-                )}
-                {heading === undefined ? null : (
-                  <b
-                    className="site-xs-chip"
-                    style={chip(heading.box[0] + heading.box[2], heading.box[1], '-100%')}
-                  >
-                    {seam.chips.text}
-                  </b>
-                )}
-              </div>
-            </div>
-            <div
-              className="site-xs-seam"
-              role="slider"
-              tabIndex={0}
-              aria-label={seam.slider.name}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={50}
-              aria-valuetext={seam.slider.value(50)}
-            >
-              <i className="site-xs-knob">
-                <svg viewBox="0 0 14 10" width="14" height="10" aria-hidden="true">
-                  <path d="M4.5 1.5 1.5 5l3 3.5M9.5 1.5l3 3.5-3 3.5" />
-                </svg>
-              </i>
-            </div>
+                  {(part.text ?? []).map((line, i) => (
+                    <Fragment key={line}>
+                      {i > 0 ? <br /> : null}
+                      {line}
+                    </Fragment>
+                  ))}
+                </span>
+              );
+            })}
           </div>
-        </Frame>
-      </figure>
-    </div>
+          <div className="site-xs-layer is-pictures" aria-hidden="true">
+            {PICTURES_PARTS.filter((part) => part.id !== 'sheet').map((part) => (
+              <i
+                key={part.id}
+                className={`site-xs-box site-xs-ring${part.invisible === true ? ' is-dash' : ''}${isSmall(part) ? ' is-small' : ''}`}
+                style={at(part)}
+              />
+            ))}
+            <b className="site-xs-chip" style={chip(0, 0)}>
+              {seam.chips.picture}
+            </b>
+            {plate === undefined ? null : (
+              <b className="site-xs-chip" style={chip(plate.box[0], plate.box[1], '0', '-100%')}>
+                {seam.chips.invisible}
+              </b>
+            )}
+          </div>
+          <div className="site-xs-layer is-editable" aria-hidden="true">
+            <svg className="site-xs-svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
+              <path className="is-sel" d={ALL_LINES} />
+            </svg>
+            {EDITABLE_PARTS.filter((part) => part.kind !== 'line').map((part) => (
+              <i
+                key={part.id}
+                className={`site-xs-box site-xs-ring${isSmall(part) ? ' is-small' : ''}`}
+                style={at(part)}
+              />
+            ))}
+            <b className="site-xs-chip" style={chip(1600, 0, '-100%')}>
+              {seam.chips.background}
+            </b>
+            <b className="site-xs-chip" style={chip(1543, 200, '-100%', '-50%')}>
+              {seam.chips.line}
+            </b>
+            {plate === undefined ? null : (
+              <b className="site-xs-chip" style={chip(plate.box[0], plate.box[1], '0', '-100%')}>
+                {seam.chips.rect}
+              </b>
+            )}
+            {heading === undefined ? null : (
+              <b
+                className="site-xs-chip"
+                style={chip(heading.box[0] + heading.box[2], heading.box[1], '-100%')}
+              >
+                {seam.chips.text}
+              </b>
+            )}
+          </div>
+        </div>
+        <div
+          className="site-xs-seam"
+          role="slider"
+          tabIndex={0}
+          aria-label={seam.slider.name}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={50}
+          aria-valuetext={seam.slider.value(50)}
+          {...tipProps({ name: seam.slider.tip, doc: seam.slider.doc, key: seam.slider.key })}
+        >
+          <i className="site-xs-knob">
+            <svg viewBox="0 0 14 10" width="14" height="10" aria-hidden="true">
+              <path d="M4.5 1.5 1.5 5l3 3.5M9.5 1.5l3 3.5-3 3.5" />
+            </svg>
+          </i>
+        </div>
+      </div>
+    </figure>
   );
 }

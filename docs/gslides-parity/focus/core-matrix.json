@@ -10011,12 +10011,12 @@
     {
       "id": "decks.list.ruled-rows",
       "feature": "decks",
-      "interaction": "The listed presentations draw as ruled rows with a 64 by 36 framed thumbnail, the hatch strip after \"Start a new presentation\", and Sign In as text in the bar for an anonymous visitor",
+      "interaction": "The listed presentations draw as ruled rows with a 64 by 36 framed thumbnail, no rails and no hatch strip on the page, and Sign In as text in the bar for an anonymous visitor",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "audit-brand-surfaces 26 (cards as boxes)",
-      "note": "docs/NEXT.md 4.1.3 item 10 and 4.1.5 (B2b): the list view is the default and draws the rows; the cards stay under Grid view. A deployment that offers no sign in method draws no Sign In, and the driver reads the bar's `data-sign-in` for it"
+      "note": "docs/NEXT.md 4.1.3 item 10 and 4.1.5 (B2b): the list view is the default and draws the rows; the cards stay under Grid view. A deployment that offers no sign in method draws no Sign In, and the driver reads the bar's `data-sign-in` for it Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\")."
     },
     {
       "id": "chrome.buttons.one-rule",
@@ -10589,12 +10589,12 @@
     {
       "id": "chrome.font.one-subset",
       "feature": "chrome",
-      "interaction": "Cold on /home, /decks and /new at 1440: one font request, the Latin subset of InterVariable named in inter.css, at most 120,000 B; no requested file or loaded family carries \"GT Inter\" or \"Berkeley\"; document.fonts reports Inter loaded",
+      "interaction": "Cold at 1440: on /new one font request, the Latin subset of InterVariable named in inter.css, at most 120,000 B, and document.fonts reports Inter loaded; on /home and /decks every font request is a Katagami file of components/site/fonts or that Latin subset, the Katagami Sans core among them, at most 200,000 B together, and document.fonts reports Katagami Sans loaded; no requested file or loaded family carries \"GT Inter\" or \"Berkeley\"",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-type 1.4: 352,615 B over the wire on production /home, the whole InterVariable on every route",
-      "note": "Design round (docs/DESIGN.md 11), DR-D1#3"
+      "note": "Design round (docs/DESIGN.md 11), DR-D1#3 Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\")."
     },
     {
       "id": "chrome.font.on-demand",
@@ -11071,12 +11071,12 @@
     {
       "id": "decks.trash.ruled-rows",
       "feature": "decks",
-      "interaction": "/decks/trash at 1440 and 390 stands on the rails of /decks and lists a trashed deck as a ruled row of the rows table (a table row owning its 1 px rule at 1440, two lines under 720 px) with the 64 by 36 framed thumbnail and no frame on the row; Restore and Delete forever are 32 px text buttons without a frame, Recent presentations and Empty trash too; the title keeps 96 px; nothing crosses the viewport",
+      "interaction": "/decks/trash at 1440 and 390 draws no rails and lists a trashed deck as a ruled row of the rows table (a table row owning its 1 px rule at 1440, two lines under 720 px) with the 64 by 36 framed thumbnail and no frame on the row; Restore and Delete forever are 32 px text buttons without a frame, Recent presentations and Empty trash too; the title keeps 96 px; nothing crosses the viewport",
       "driver": "core/decks.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "verify-r1.md finding 11; Round 1 pass 2 P2-2 (production 2026-10-05: trash-trash-listed-*.jpg, a framed card with framed Restore and Delete forever)",
-      "note": "Round 1 follow-up, lane C item 5: apps/studio/src/routes/decks.trash.tsx TrashRow on the page grammar (.ts-decks-page), decks.css; the data-control ids stay (trash.card.<id> is the row)"
+      "note": "Round 1 follow-up, lane C item 5: apps/studio/src/routes/decks.trash.tsx TrashRow on the page grammar (.ts-decks-page), decks.css; the data-control ids stay (trash.card.<id> is the row) Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\")."
     },
     {
       "id": "accounts.plate.signin-page",
@@ -11274,11 +11274,11 @@
     {
       "id": "chrome.font.official-inter",
       "feature": "chrome",
-      "interaction": "Cold at 1440 on /home, /decks, /new, /signin and /docs: exactly one font request, InterVariable-latin.woff2, whose bytes and sha256 equal its web record in packages/fonts/export/fonts.json; document.fonts holds one loaded Inter face; in spans of that face at 100 px, weight 400, font-optical-sizing none, font-kerning none, '6969' measures 4 x 1,191 / 2,048 x 100 px with 'ss01' and 4 x 1,270 / 2,048 x 100 px without, 'aaaa' 4 x 1,254 / 2,048 x 100 px with 'cv11' and 4 x 1,150 / 2,048 x 100 px without, each within 1 px, and with 'tnum' '1111' and '0000' measure the same width",
+      "interaction": "Cold at 1440 on /new and /signin exactly one font request, InterVariable-latin.woff2, and on /home, /decks and /docs at most that one beside the Katagami files of components/site/fonts (the Katagami Sans core among them), its bytes and sha256 equal to its web record in packages/fonts/export/fonts.json; document.fonts holds one loaded Inter face on /new and /signin and at most one elsewhere; in spans of that face, where it is loaded, at 100 px, weight 400, font-optical-sizing none, font-kerning none, '6969' measures 4 x 1,191 / 2,048 x 100 px with 'ss01' and 4 x 1,270 / 2,048 x 100 px without, 'aaaa' 4 x 1,254 / 2,048 x 100 px with 'cv11' and 4 x 1,150 / 2,048 x 100 px without, each within 1 px, and with 'tnum' '1111' and '0000' measure the same width",
       "driver": "core/chrome.spec.ts",
       "today": "works",
       "evidence": "research-header 4.1 (Version 4.001;git-9221beed3, opsz 14 to 32, wght 100 to 900, 42 features in the Latin subset); docs/DESIGN.md 4.2 (the advance widths)",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4"
+      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4 Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\")."
     },
     {
       "id": "chrome.font.no-stylistic-sets",

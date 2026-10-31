@@ -264,11 +264,16 @@ export function chromeFoundation(): string[] {
     test.info().annotations.push({ type: 'pairs', description: readings.join('; ') });
   });
 
-  /* DESIGN.md 4.4: cold, one font request on /home, /decks and /new, the Latin subset of the
-     original Inter at most 120,000 B; no GT Inter and no Berkeley Mono anywhere */
+  /* DESIGN.md 4.4: cold, one font request on /new, the Latin subset of the original Inter at
+     most 120,000 B; /home and /decks draw their chrome in the site's faces since 2026-10-30
+     (Kevin: "use katagami instead of inter and our mono"), the Katagami files of
+     components/site/fonts beside Inter's Latin subset for the slides they draw; no GT Inter and no
+     Berkeley Mono anywhere */
   row('chrome.font.one-subset', async ({ browser }) => {
     test.setTimeout(300_000);
     const facts: string[] = [];
+    const katagami = /\/katagami-(?:sans|mono)-(?:core|ext)(?:-[\w-]{8})?\.woff2$/;
+    const latin = /\/InterVariable-latin(?:-[\w-]{8})?\.woff2$/;
     for (const path of ['/home', '/decks', '/new']) {
       const { page } = await contextAt(browser, 1440, 900);
       await page.goto(path);
@@ -276,32 +281,50 @@ export function chromeFoundation(): string[] {
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(2000);
       /* the font files the page fetched, read from Resource Timing as home.budget.shared reads
-         them: one entry per fetch, a preload the face then used counted once (a dev server also
-         imports each face's URL as a module, `?import&url`, which is script) */
-      const fonts = await page.evaluate(() =>
-        (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
-          .filter((r) => /\.(woff2?|ttf|otf)(\?|$)/.test(r.name) && !/[?&]import\b/.test(r.name))
-          .map((r) => ({ url: r.name, bytes: r.encodedBodySize || r.decodedBodySize })),
-      );
+         them: one entry per file, a preload the face then used counted once (a dev server also
+         imports each face's URL as a module, `?import&url`, which is script, and adds a `?t=` to a
+         file written after it started) */
+      const fonts = await page.evaluate(() => {
+        const seen = new Map<string, number>();
+        for (const r of performance.getEntriesByType('resource') as PerformanceResourceTiming[]) {
+          if (!/\.(woff2?|ttf|otf)(\?|$)/.test(r.name) || /[?&]import\b/.test(r.name)) continue;
+          const url = new URL(r.name).pathname;
+          seen.set(url, Math.max(seen.get(url) ?? 0, r.encodedBodySize || r.decodedBodySize));
+        }
+        return [...seen].map(([url, bytes]) => ({ url, bytes }));
+      });
       const families = await page.evaluate(() =>
         [...document.fonts].map((face) => `${face.family} ${face.style} ${face.status}`),
       );
-      const interLoaded = await page.evaluate(() =>
-        document.fonts.check('16px Inter', 'Turboslide'),
-      );
+      const loaded = await page.evaluate(() => ({
+        inter: document.fonts.check('16px Inter', 'Turboslide'),
+        katagami: document.fonts.check('16px "Katagami Sans"', 'Turboslide'),
+      }));
       facts.push(
         `${path}: ${fonts.map((f) => `${f.url.split('/').pop()} ${f.bytes} B`).join(', ') || 'none'}; ${families.length} faces`,
       );
-      expect(fonts, `${path}: one font request`).toHaveLength(1);
-      /* the file as the dev server names it, or with the build's eight character hash */
-      expect(fonts[0]?.url, `${path}: the Latin subset`).toMatch(
-        /\/InterVariable-latin(?:-[\w-]{8})?\.woff2(?:\?|$)/,
-      );
-      expect(fonts[0]?.bytes ?? 0, `${path}: at most 120,000 B`).toBeLessThanOrEqual(120_000);
-      expect(fonts[0]?.bytes ?? 0).toBeGreaterThan(0);
       for (const name of [...fonts.map((f) => f.url), ...families])
         expect(name, `${path}: no GT Inter and no Berkeley`).not.toMatch(/GT Inter|Berkeley/i);
-      expect(interLoaded, `${path}: Inter is loaded`).toBe(true);
+      if (path === '/new') {
+        expect(fonts, `${path}: one font request`).toHaveLength(1);
+        /* the file as the dev server names it, or with the build's eight character hash */
+        expect(fonts[0]?.url, `${path}: the Latin subset`).toMatch(latin);
+        expect(fonts[0]?.bytes ?? 0, `${path}: at most 120,000 B`).toBeLessThanOrEqual(120_000);
+        expect(fonts[0]?.bytes ?? 0).toBeGreaterThan(0);
+        expect(loaded.inter, `${path}: Inter is loaded`).toBe(true);
+      } else {
+        for (const f of fonts)
+          expect(f.url, `${path}: a Katagami file or Inter's Latin subset`).toMatch(
+            new RegExp(`${katagami.source}|${latin.source}`),
+          );
+        expect(
+          fonts.some((f) => /katagami-sans-core/.test(f.url)),
+          `${path}: the Katagami Sans core`,
+        ).toBe(true);
+        const total = fonts.reduce((sum, f) => sum + f.bytes, 0);
+        expect(total, `${path}: at most 200,000 B of fonts`).toBeLessThanOrEqual(200_000);
+        expect(loaded.katagami, `${path}: Katagami Sans is loaded`).toBe(true);
+      }
     }
     test.info().annotations.push({ type: 'fonts', description: facts.join('; ') });
   });

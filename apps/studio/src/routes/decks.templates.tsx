@@ -5,6 +5,8 @@ import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-r
 
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { Dialog } from '@turboslide/chrome/Dialog';
+/* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
+import { Icon } from '@turboslide/chrome/icons-base';
 import { Menu } from '@turboslide/chrome/Menu';
 import type { MenuCloseReason } from '@turboslide/chrome/Menu';
 import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/context';
@@ -51,6 +53,12 @@ import './decks.templates.css';
  * so the drivers wait for it. Every string a person reads is in sentence case with no trailing
  * period on a heading (docs/grammar.md); the strings move to menus/strings.ts by the integrator's
  * merge (b5b.md).
+ *
+ * The paradigms of 2026-10-30 (Kevin: "update /decks ... and out with the old"): /decks' bar and
+ * width in Katagami (decks.css, decks.templates.css), the way back at the bar's end, no lead under
+ * the heading and none under a group's name, no rule between the groups; the cards keep their
+ * cover, name, theme, count and sentence, and the template new presentations start from carries
+ * the page's one vermilion mark.
  */
 export const Route = createFileRoute('/decks/templates')({
   loader: async () => ({ gallery: await listTemplateGallery() }),
@@ -61,14 +69,9 @@ export const Route = createFileRoute('/decks/templates')({
 /** The gallery's words (docs/archive/rounds/PRODUCT.md 4.3; sentence case, headings without a period). */
 export const TEMPLATES = {
   title: HOME.gallery,
-  lead: 'Start a presentation from a template. The copy is yours to edit, and the template stays as it is.',
-  organisation: 'Your organisation',
-  organisationLead:
-    'Templates saved on this Turboslide. Open a presentation and choose File > Save as template to add one.',
+  organisation: 'Your Organisation',
   turboslide: 'Turboslide',
-  turboslideLead: "Turboslide's own templates.",
-  empty:
-    'No templates are saved on this Turboslide yet. Open a presentation and choose File > Save as template.',
+  empty: 'Templates saved with File > Save as template appear here.',
   usedForNew: 'Used for new presentations',
   useForNew: 'Use for new presentations',
   rename: 'Rename',
@@ -264,13 +267,24 @@ function GalleryPage() {
   return (
     <main
       ref={page}
-      className="ts-home ts-home-page ts-gallery-page"
+      className="ts-home ts-home-page ts-decks-page ts-gallery-page"
       data-control={TEMPLATE_CONTROLS.page}
       data-default={gallery.default}
     >
       <header className="ts-appbar">
-        <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
-        <span />
+        <div className="ts-decks-wrap ts-appbar-row">
+          <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
+          <nav className="ts-appbar-nav" aria-label="Presentations">
+            <Link
+              to="/decks"
+              className="pt-ib is-text ts-appbar-link"
+              data-control="templates.back"
+              {...tipProps({ name: TEMPLATES.back, doc: 'Back to your presentations.' })}
+            >
+              <span className="pt-lb">{TEMPLATES.back}</span>
+            </Link>
+          </nav>
+        </div>
       </header>
 
       {/* the theme's sprite once, so a cover's GT mark (`<use href="#gt-mark">`) draws (SPEC 5.1), the way DeckViewer mounts it */}
@@ -280,33 +294,15 @@ function GalleryPage() {
         dangerouslySetInnerHTML={{ __html: gallery.sprite }}
       />
 
-      <section className="ts-gallery" aria-labelledby="ts-gallery-heading">
-        <div className="ts-gallery-head">
-          <div>
-            <h1 id="ts-gallery-heading">{TEMPLATES.title}</h1>
-            <p className="ts-gallery-lead">{TEMPLATES.lead}</p>
-          </div>
-          <Link
-            to="/decks"
-            className="pt-ib is-text"
-            data-control="templates.back"
-            {...tipProps({ name: TEMPLATES.back, doc: 'Back to your presentations.' })}
-          >
-            <span className="pt-lb">{TEMPLATES.back}</span>
-          </Link>
-        </div>
+      <section className="ts-gallery ts-decks-wrap" aria-labelledby="ts-gallery-heading">
+        <h1 id="ts-gallery-heading">{TEMPLATES.title}</h1>
 
         <section
           className="ts-gallery-group"
           aria-labelledby="ts-gallery-organisation"
           data-control={TEMPLATE_CONTROLS.organisation}
         >
-          <div className="ts-gallery-group-head">
-            <div>
-              <h2 id="ts-gallery-organisation">{TEMPLATES.organisation}</h2>
-              <p className="ts-gallery-group-lead">{TEMPLATES.organisationLead}</p>
-            </div>
-          </div>
+          <h2 id="ts-gallery-organisation">{TEMPLATES.organisation}</h2>
           {gallery.organisation.length === 0 ? (
             <p className="ts-gallery-empty" data-control="templates.group.organisation.empty">
               {TEMPLATES.empty}
@@ -325,12 +321,7 @@ function GalleryPage() {
           aria-labelledby="ts-gallery-turboslide"
           data-control={TEMPLATE_CONTROLS.turboslide}
         >
-          <div className="ts-gallery-group-head">
-            <div>
-              <h2 id="ts-gallery-turboslide">{TEMPLATES.turboslide}</h2>
-              <p className="ts-gallery-group-lead">{TEMPLATES.turboslideLead}</p>
-            </div>
-          </div>
+          <h2 id="ts-gallery-turboslide">{TEMPLATES.turboslide}</h2>
           <ul className="ts-gallery-cards">
             {gallery.turboslide.map((card) => (
               <GalleryCard key={card.id} card={card} {...cardProps(card)} />
@@ -485,9 +476,7 @@ function GalleryCard({
               doc: `${items.map((item) => item.label).join(', ')} for ${card.name}.`,
             })}
           >
-            <span aria-hidden="true" className="ts-gallery-dots">
-              ⋮
-            </span>
+            <Icon name="ellipsis-vertical" />
           </button>
         ) : null}
         {card.description !== undefined ? (

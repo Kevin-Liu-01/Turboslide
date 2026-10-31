@@ -6,7 +6,6 @@ import { getRequest } from '@tanstack/react-start/server';
 
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { DeleteForeverDialog } from '@turboslide/chrome/dialogs/DeleteForever';
-import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
 /* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
 import { Icon } from '@turboslide/chrome/icons-base';
 /* the page words without the rest of the strings file (hardening HR-PC#2) */
@@ -55,12 +54,16 @@ import './decks.css';
  * forever focused), the card's Restore and Delete forever are 32 px with Delete forever in ink and
  * its glyph, and Empty trash is the page's one solid button, since it is the page's act.
  *
- * The Round 1 follow-up (lane C item 5): /decks draws ruled rows on the page grammar since Round 1
- * (decks.index.tsx DeckRowView), and this page, one click away, still drew boxed cards with framed
- * buttons. It now stands on the same grammar (the rails, the 58 px bar with a seam, the column)
- * and lists the trashed decks in the same ruled rows: the 64 by 36 framed thumbnail and the title,
- * the trashed date, the slide count, then Restore and Delete forever as 32 px text buttons. The
- * data-control ids stay (`trash.card.<id>` is the row), so every reader of the page reads it.
+ * The Round 1 follow-up (lane C item 5): /decks draws ruled rows since Round 1 (decks.index.tsx
+ * DeckRowView), and this page lists the trashed decks in the same ruled rows: the 64 by 36 framed
+ * thumbnail and the title, the trashed date, the slide count, then Restore and Delete forever as
+ * 32 px text buttons. The data-control ids stay (`trash.card.<id>` is the row), so every reader of
+ * the page reads it.
+ *
+ * The paradigms of 2026-10-30 (Kevin: "update /decks ... and out with the old"): the page is
+ * /decks' bar and width in Katagami (decks.css), with no rails, seams or sentence under the
+ * heading; the way back to the list sits at the bar's end, as Trash sits on /decks, and the empty
+ * trash is its one line.
  */
 export const Route = createFileRoute('/decks/trash')({
   loader: () => ({ decks: loadTrash() }),
@@ -98,11 +101,9 @@ function errorMessage(error: unknown): string {
 
 type Confirm = { kind: 'one'; card: DeckCard } | { kind: 'all'; cards: ReadonlyArray<DeckCard> };
 
-/** The empty trash (SPEC-4 1.10): the figure, the title, one sentence, no action. */
+/** The empty trash (SPEC-4 1.10): one line, no action. */
 export const TRASH_EMPTY = {
   title: HOME.trashEmpty,
-  sentence:
-    'Presentations moved to the trash appear here until they are restored or deleted forever.',
 } as const;
 
 function TrashPage() {
@@ -207,16 +208,24 @@ function TrashPage() {
 
   return (
     <main ref={page} className="ts-home ts-home-page ts-decks-page ts-trash-page">
-      {/* the column's two rails, drawn once for the page (grammar.css .ts-rails), as on /decks */}
-      <div className="ts-rails" aria-hidden="true" />
-      <header className="ts-appbar ts-seam">
-        <div className="ts-col ts-appbar-row">
+      <header className="ts-appbar">
+        <div className="ts-decks-wrap ts-appbar-row">
           <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
+          <nav className="ts-appbar-nav" aria-label="Presentations">
+            <Link
+              to="/decks"
+              className="pt-ib is-text ts-appbar-link"
+              data-control="trash.back"
+              {...tipProps({ name: HOME.back, doc: 'Back to your presentations.' })}
+            >
+              <span className="pt-lb">{HOME.back}</span>
+            </Link>
+          </nav>
         </div>
       </header>
 
-      <section className="ts-trash ts-seam" aria-labelledby="ts-trash-heading">
-        <div className="ts-col">
+      <section className="ts-trash" aria-labelledby="ts-trash-heading">
+        <div className="ts-decks-wrap">
           {/* the listing streams behind the shell (SPEC-4 0.29): the frames stand in until it lands,
           and a refetch keeps the cards on the page (decks.index.tsx useStreamedList) */}
           <Suspense
@@ -310,21 +319,8 @@ function TrashBody({
   return (
     <>
       <div className="ts-trash-head">
-        <div>
-          <h1 id="ts-trash-heading">{HOME.trash}</h1>
-          <p>
-            Presentations moved to the trash stay here until they are restored or deleted forever.
-          </p>
-        </div>
+        <h1 id="ts-trash-heading">{HOME.trash}</h1>
         <div className="ts-trash-actions">
-          <Link
-            to="/decks"
-            className="pt-ib is-text"
-            data-control="trash.back"
-            {...tipProps({ name: HOME.back, doc: 'Back to your presentations.' })}
-          >
-            <span className="pt-lb">{HOME.back}</span>
-          </Link>
           <button
             type="button"
             className="pt-ib is-text"
@@ -368,7 +364,9 @@ function TrashBody({
         </table>
       ) : shown.length === 0 ? (
         <div className="ts-home-empty-figure" data-control="trash.empty-state">
-          <EmptyFigure figure="figure" title={TRASH_EMPTY.title} sentence={TRASH_EMPTY.sentence} />
+          <section className="ts-empty ts-decks-empty" data-control="empty">
+            <p className="ts-empty-title">{TRASH_EMPTY.title}</p>
+          </section>
         </div>
       ) : (
         <table className="ts-rows" data-control="trash.cards">

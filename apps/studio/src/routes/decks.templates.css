@@ -1,147 +1,107 @@
-/* The template gallery, /decks/templates (docs/archive/rounds/PRODUCT.md 4.3; B5b): the app bar of the home page
-   (decks.css), a head with the title and the way back, one lead sentence, then Your organisation
-   and Turboslide as two groups of cards. A card is the cover slide as a live clone in the
-   template's appearance over a hairline, the name, the slide count and one sentence, with the
-   card menu button at the right; the template new presentations start from carries an ink mark
-   on its cover. Lines are 1px and drawn once (SPEC 2.2 line law), colors are tokens only, Inter at
-   13px with its default glyphs, the ink state on hover as the home cards draw it. The design
-   round's ladder (docs/DESIGN.md 3.1): the cards and covers square, the menu button and the
-   rename field at the 6 px control corner, the default mark a chip at 4 px; the meta line names
-   the template's theme and counts in tabular figures. */
-.ts-gallery {
-  padding: 24px 0 48px;
+/* The template gallery, /decks/templates (docs/archive/rounds/PRODUCT.md 4.3; B5b), on /decks' bar,
+   width and faces (decks.css; the paradigms of 2026-10-30): the heading, then Your Organisation and
+   Turboslide as two groups of cards with space between them and no rule. A card is the cover slide
+   as a live clone in the template's appearance in a 1 px frame, the name, the theme and the slide
+   count, and one sentence, with the card menu button at the right; the template new presentations
+   start from carries the page's one vermilion mark on its cover. Like decks.css, every rule names
+   the page's root, since a route's module stylesheet reaches every page. The ladder (docs/DESIGN.md
+   3.1): the cards and covers square, the menu button and the rename field at the 6 px control
+   corner, the default mark a chip at 4 px; the meta line counts in tabular figures. */
+
+.ts-gallery-page .ts-gallery {
+  padding: 24px 0 0;
 }
 
-.ts-gallery-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
+.ts-gallery-page .ts-gallery-group {
+  margin-top: 40px;
 }
 
-.ts-gallery-head h1 {
-  margin: 0;
-  font-family: var(--pt-display);
-  font-weight: 500;
-  font-size: 22px;
-  letter-spacing: -0.02em;
-  color: var(--pt-ink);
-}
-
-.ts-gallery-lead {
-  margin: 6px 0 0;
-  max-width: 64ch;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--pt-ink-2);
-}
-
-.ts-gallery-group {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--pt-hair);
-}
-
-.ts-gallery-group-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.ts-gallery-group h2 {
+.ts-gallery-page .ts-gallery-group h2 {
   margin: 0;
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 16px;
-  letter-spacing: -0.01em;
-  color: var(--pt-ink);
-}
-
-.ts-gallery-group-lead {
-  margin: 4px 0 0;
-  font-size: 12.5px;
+  line-height: 24px;
   color: var(--pt-ink-2);
 }
 
 /* the group with nothing saved yet: one sentence in place of the cards */
-.ts-gallery-empty {
-  margin: 16px 0 0;
-  padding: 20px;
-  border: 1px solid var(--pt-hair);
-  font-size: 13px;
-  line-height: 1.5;
+.ts-gallery-page .ts-gallery-empty {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 20px;
   color: var(--pt-ink-2);
 }
 
-.ts-gallery-cards {
+.ts-gallery-page .ts-gallery-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 32px 24px;
   margin: 16px 0 0;
   padding: 0;
   list-style: none;
 }
 
-/* a card: the cover, then the body row; one hairline around it, ink on hover or focus within */
-.ts-gallery-card {
+/* a card: the cover, then the body; the cover's frame turns ink on hover or focus within */
+.ts-gallery-page .ts-gallery-card {
   position: relative;
   display: grid;
-  border: 1px solid var(--pt-hair);
+}
+
+.ts-gallery-page .ts-gallery-cover {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
   transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
 }
 
-.ts-gallery-card:hover,
-.ts-gallery-card:focus-within {
+.ts-gallery-page .ts-gallery-card:hover .ts-gallery-cover,
+.ts-gallery-page .ts-gallery-card:focus-within .ts-gallery-cover {
   border-color: var(--pt-ink);
 }
 
-.ts-gallery-card.is-busy {
-  border-color: var(--pt-hair-soft);
+.ts-gallery-page .ts-gallery-card.is-busy .ts-gallery-cover {
+  border-color: var(--pt-hair);
 }
 
-.ts-gallery-cover {
-  position: relative;
-  display: block;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border-bottom: 1px solid var(--pt-hair-soft);
-  background: var(--pt-paper);
-}
-
-.ts-gallery-cover[data-theme='dark'] {
+.ts-gallery-page .ts-gallery-cover[data-theme='dark'] {
   background: #070707;
 }
 
 /* the live clone (LiveClone's `.ts-sheet.is-clone` root, its frame off) fills the cover */
-.ts-gallery-cover > .ts-sheet,
-.ts-gallery-cover > .ts-gallery-plate {
+.ts-gallery-page .ts-gallery-cover > .ts-sheet,
+.ts-gallery-page .ts-gallery-cover > .ts-gallery-plate {
   position: absolute;
   inset: 0;
 }
 
-/* the plate while the cover cannot be drawn: the name in the template's appearance */
-.ts-gallery-plate {
+/* the plate while the cover cannot be drawn: the name in the template's appearance, in the
+   slides' face */
+.ts-gallery-page .ts-gallery-plate {
   display: grid;
   place-items: center;
   height: 100%;
   padding: 16px;
+  box-sizing: border-box;
   text-align: center;
-  font-family: var(--pt-display);
+  font-family: var(--decks-slide);
   font-weight: 500;
   font-size: 14px;
   color: var(--pt-ink-2);
 }
 
-.ts-gallery-cover[data-theme='dark'] .ts-gallery-plate {
+.ts-gallery-page .ts-gallery-cover[data-theme='dark'] .ts-gallery-plate {
   color: #f2f2f0;
 }
 
 /* the whole cover opens the template: one button over the cover alone (the same 16:9 box, drawn
    from the card's top), so the clone's markup never sits inside a control and the name and the
    menu button under the cover keep their own clicks */
-.ts-gallery-open {
+.ts-gallery-page .ts-gallery-open {
   position: absolute;
   top: 0;
   left: 0;
@@ -152,83 +112,86 @@
   margin: 0;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: transparent;
   cursor: pointer;
 }
 
-.ts-gallery-open:focus-visible {
+.ts-gallery-page .ts-gallery-open:focus-visible {
   outline: 1px solid var(--pt-ink);
-  outline-offset: -1px;
+  outline-offset: -2px;
 }
 
-.ts-gallery-open:disabled {
+.ts-gallery-page .ts-gallery-open:disabled {
   cursor: default;
 }
 
-/* the mark of the template new presentations start from: an ink plate in the cover's corner */
-.ts-gallery-default {
+/* the mark of the template new presentations start from: the page's one vermilion, a chip in
+   the cover's corner */
+.ts-gallery-page .ts-gallery-default {
   position: absolute;
   top: 8px;
   left: 8px;
   z-index: 2;
-  padding: 3px 7px;
+  padding: 2px 8px;
   border-radius: var(--pt-radius-sm);
-  background: var(--pt-ink);
+  background: var(--decks-accent);
+  /* the paper on the accent: 5.1 to 1 in light, 6.5 to 1 in dark */
   color: var(--pt-paper);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 20px;
   font-weight: 500;
-  letter-spacing: 0.01em;
   pointer-events: none;
 }
 
-.ts-gallery-body {
+.ts-gallery-page .ts-gallery-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 32px;
   grid-template-rows: auto auto auto;
   column-gap: 8px;
-  padding: 10px 8px 10px 12px;
+  padding: 10px 0 0;
 }
 
-.ts-gallery-name {
+.ts-gallery-page .ts-gallery-name {
   grid-column: 1;
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 26px;
-  line-height: 26px;
+  min-height: 28px;
+  line-height: 28px;
   box-sizing: border-box;
   appearance: none;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: none;
   color: var(--pt-ink);
   text-align: left;
   text-decoration: none;
   font-family: var(--pt-display);
   font-weight: 500;
-  font-size: 13.5px;
-  letter-spacing: -0.01em;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.ts-gallery-name:hover {
+.ts-gallery-page .ts-gallery-name:hover {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
 }
 
-.ts-gallery-name:focus-visible {
+.ts-gallery-page .ts-gallery-name:focus-visible {
   outline: 1px solid var(--pt-ink);
   outline-offset: 2px;
 }
 
-.ts-gallery-meta {
+.ts-gallery-page .ts-gallery-meta {
   grid-column: 1;
-  margin-top: 2px;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 20px;
   font-variant-numeric: var(--pt-numerals);
   color: var(--pt-ink-2);
   white-space: nowrap;
@@ -238,15 +201,15 @@
 
 /* the theme's name leads the meta line in the ink of the name above it, the slide count after it
    in the second ink (docs/DESIGN.md 9) */
-.ts-gallery-theme {
+.ts-gallery-page .ts-gallery-theme {
   color: var(--pt-ink);
 }
 
-.ts-gallery-sentence {
+.ts-gallery-page .ts-gallery-sentence {
   grid-column: 1 / -1;
   margin: 6px 0 0;
-  font-size: 12.5px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 20px;
   color: var(--pt-ink-2);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -254,45 +217,46 @@
   overflow: hidden;
 }
 
-.ts-gallery-more {
+.ts-gallery-page .ts-gallery-more {
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: start;
   justify-self: end;
-}
-
-.ts-gallery-more .ts-gallery-dots {
-  font-size: 18px;
-  line-height: 1;
+  width: 32px;
+  padding: 0;
+  justify-content: center;
 }
 
 /* the in place rename: the field takes the name's row at the same height (SPEC-3 9.2 L6) */
-.ts-gallery-rename {
+.ts-gallery-page .ts-gallery-rename {
   grid-column: 1;
   margin: 0;
 }
 
-.ts-gallery-rename input {
+.ts-gallery-page .ts-gallery-rename input {
   box-sizing: border-box;
   width: 100%;
-  height: 26px;
+  height: 28px;
   padding: 0 6px;
   border: 1px solid var(--pt-ink);
   border-radius: var(--pt-radius);
   background: var(--pt-paper);
   color: var(--pt-ink);
-  font: 500 13.5px var(--pt-display);
+  font: 500 14px var(--pt-display);
 }
 
-.ts-gallery-rename input:focus-visible {
+.ts-gallery-page .ts-gallery-rename input:focus-visible {
   outline: none;
 }
 
 @media (max-width: 720px) {
-  .ts-gallery-head,
-  .ts-gallery-group-head {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .ts-gallery-page .ts-gallery-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-gallery-page .ts-gallery-cover {
+    transition: none;
   }
 }

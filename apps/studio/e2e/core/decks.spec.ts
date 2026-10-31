@@ -2315,9 +2315,9 @@ test(title('decks.list.ruled-rows'), async () => {
       );
     });
     const rule = cells[0] ? getComputedStyle(cells[0]) : null;
-    const strip = document.querySelector('#templates');
-    const hatch = strip?.nextElementSibling ?? null;
-    const hatchFill = hatch?.querySelector<HTMLElement>('.ts-hatch');
+    /* the page draws no rails and no hatch (Kevin, 2026-10-30: "dont do rails") */
+    const hatches = document.querySelectorAll('.ts-decks-page .ts-hatch, .ts-decks-hatch').length;
+    const rails = document.querySelectorAll('.ts-decks-page .ts-rails').length;
     const signIn = document.querySelector<HTMLElement>('.ts-appbar [data-control="home.signIn"]');
     const scs = signIn ? getComputedStyle(signIn) : null;
     return {
@@ -2330,8 +2330,8 @@ test(title('decks.list.ruled-rows'), async () => {
       thumbImg: thumb?.querySelector('img')?.getAttribute('src') ?? null,
       framed,
       rule: rule ? `${rule.borderBottomWidth} ${rule.borderBottomStyle}` : null,
-      hatchAfterStrip: hatch?.classList.contains('ts-decks-hatch') ?? false,
-      hatchImage: hatchFill ? getComputedStyle(hatchFill).backgroundImage : '',
+      hatches,
+      rails,
       offered: signIn !== null,
       signIn: signIn
         ? {
@@ -2350,7 +2350,7 @@ test(title('decks.list.ruled-rows'), async () => {
     (await page.locator('.ts-appbar-end').getAttribute('data-sign-in')) === 'offered';
   test.info().annotations.push({
     type: 'rows',
-    description: `rows ${facts.list}, cards ${facts.cards}; the deck's entry a ${facts.row}; thumbnail ${JSON.stringify(facts.thumb)} ${facts.thumbBorder} (edge ${facts.edge}), src ${facts.thumbImg}; a box around the row ${facts.framed}; the row's rule ${facts.rule}; the hatch after the strip ${facts.hatchAfterStrip} (${facts.hatchImage.slice(0, 40)}); sign in offered by the deployment ${offered}, drawn ${JSON.stringify(facts.signIn)}`,
+    description: `rows ${facts.list}, cards ${facts.cards}; the deck's entry a ${facts.row}; thumbnail ${JSON.stringify(facts.thumb)} ${facts.thumbBorder} (edge ${facts.edge}), src ${facts.thumbImg}; a box around the row ${facts.framed}; the row's rule ${facts.rule}; hatches ${facts.hatches}, rails ${facts.rails}; sign in offered by the deployment ${offered}, drawn ${JSON.stringify(facts.signIn)}`,
   });
   expect(facts.list, 'the list draws as rows by default').toBe(true);
   expect(facts.cards, 'no card grid by default').toBe(false);
@@ -2359,8 +2359,8 @@ test(title('decks.list.ruled-rows'), async () => {
   expect(facts.thumbBorder, 'framed in the edge role').toBe(`1px solid ${facts.edge}`);
   expect(facts.framed, 'the row is ruled, not boxed').toBe(false);
   expect(facts.rule, 'the row owns its line').toBe('1px solid');
-  expect(facts.hatchAfterStrip, 'the hatch strip follows Start a new presentation').toBe(true);
-  expect(facts.hatchImage, 'the hatch is drawn').toContain('repeating-linear-gradient');
+  expect(facts.hatches, 'no hatch strip').toBe(0);
+  expect(facts.rails, 'no rails').toBe(0);
   if (offered) {
     expect(facts.signIn?.text, 'Sign In as text in the bar').toBe('Sign In');
     expect(facts.signIn?.border, 'no frame around Sign In').toBe('rgba(0, 0, 0, 0)');

@@ -325,7 +325,7 @@ export function pagesR1f(): string[] {
       readings.push(`${width}: ${JSON.stringify(facts)}`);
       expect(facts.inRows, `the deck is a ruled row of the rows table at ${width}`).toBe(true);
       expect(facts.cards, 'no boxed card').toBe(0);
-      expect(facts.rails, "the page stands on /decks' rails").toBe(true);
+      expect(facts.rails, 'the page draws no rails').toBe(false);
       expect(facts.tag, 'a table row').toBe('TR');
       expect(facts.rule, 'the row owns its 1 px rule').toBe('1px');
       expect(facts.rowFrame, 'the row draws no frame').toEqual([]);

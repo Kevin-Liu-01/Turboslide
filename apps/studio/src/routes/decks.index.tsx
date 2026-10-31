@@ -14,7 +14,6 @@ import { getRequest } from '@tanstack/react-start/server';
 
 import { AppBarBrand } from '@turboslide/chrome/AppBarBrand';
 import { Dialog, DialogCheck } from '@turboslide/chrome/Dialog';
-import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
 import { GtMark } from '@turboslide/chrome/GtMark';
 /* the base glyphs alone, without the editor's set (hardening HR-PC#2) */
 import { Icon } from '@turboslide/chrome/icons-base';
@@ -31,7 +30,6 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 import { GT_COVER } from '@turboslide/theme/brand/site';
 
-import { MoodFigure } from '../components/home/MoodFigure';
 import { SignInButton, offersSignIn, readSignInFacts } from '../components/home/sign-in';
 import { useMountEffect } from '../components/useMountEffect';
 import {
@@ -59,6 +57,7 @@ import {
   syncExport,
 } from '../server/download';
 import { getServerHealth } from '../server/health';
+import { DecksField } from './-decks-field';
 import { RouterLinkSlot } from './-link-slot';
 import {
   TRASH_REFUSED_EVENT,
@@ -74,20 +73,25 @@ import {
 } from './-recent';
 import type { DeckOpenFacts, RecentEntry, TrashRefusedDetail } from './-recent';
 
-import '../components/home/grammar.css';
 import './decks.css';
 
 /**
- * The home page, /decks (gslides-parity SPEC 6.2; R03 a.1 and finding 13): Google's three bands.
- * The app bar with the Turboslide lockup (the mark to this page, the word to /home; SPEC-4 0.16,
- * 1.10) and a search field that filters the list by title; "Start a new presentation" with the
- * Blank card (opens /new) and the GT brand deck card (a copy of the GT template, opened at once)
- * under a Template gallery link that scrolls to the strip; "Recent presentations" as a grid of
- * cards (a 320 by 180 thumbnail of slide 1 in the deck's appearance, the title, "Opened 2 hours
- * ago" from this browser's history or "Edited <date>") with a list view toggle, a sort control
- * and a per card menu (Open, Open in new tab, Present, Rename, Make a copy, Download, Move to
- * trash). Trash at the bottom links to /decks/trash. The list is the viewer's (docs/NEXT.md 3.2
- * H2; server/deck-scope.ts): an anonymous visitor's cards are this browser's Recent record alone
+ * The home page, /decks (gslides-parity SPEC 6.2; R03 a.1 and finding 13), on the paradigms of
+ * 2026-10-30 (Kevin: "update /decks ... to use all my new paradigms and out with the old"): the
+ * page uses the window's width with no rails, seams or hatch, its chrome is set in Katagami
+ * through the `--pt-` face tokens (decks.css) while the thumbnails stay the slides' Inter, and
+ * vermilion marks the one act the page leads with, the Blank presentation tile. Three parts:
+ * the bar with the Turboslide lockup (the mark to this page, the word to /home; SPEC-4 0.16,
+ * 1.10), a search field that filters the list by title, Trash and Sign In; the start band, full
+ * bleed, its tiles Blank presentation (opens /new), the GT brand deck (a copy of the GT template,
+ * opened at once) and Template gallery over a field set in the calls the tiles make
+ * (./-decks-field.tsx); then "Recent Presentations" as ruled rows by default or a
+ * grid of cards (a thumbnail of slide 1 in the deck's appearance, the title, "Opened 2 hours ago"
+ * from this browser's history or "Edited <date>"), with a view toggle, a sort control and a per
+ * card menu (Open, Open in new tab, Present, Rename, Make a copy, Download, Move to trash). The
+ * band's heading stays for screen readers alone: the tiles name what they start. The list is the
+ * viewer's (docs/NEXT.md 3.2 H2; server/deck-scope.ts): an anonymous visitor's cards are this
+ * browser's Recent record alone
  * and the store is not asked, a signed in person's are the decks they own and the ones shared
  * with them, and the deployment's admin may show every deck with the filter `?show=all`
  * (server/decks.ts listHomeDecks, scoped as the Open dialog's `listDecks` and the `deck.list`
@@ -506,15 +510,21 @@ export const DECKS_PAGE = {
   lastOpened: 'Last opened',
   slides: 'Slides',
   actions: 'Actions',
+  /* the list's heading, a short Title Case phrase (Kevin, 2026-10-30); the page title keeps
+     HOME.recent */
+  recent: 'Recent Presentations',
 } as const;
 
-/** The empty states of the band (SPEC-4 1.10): the figure, a title, one sentence, one action at most. */
+/**
+ * The empty states of the list (SPEC-4 1.10), one line and one action each since 2026-10-30: the
+ * start band above already offers every way to begin, so the line needs no sentence pointing at
+ * it, and a search with no match offers Clear Search instead of a sentence asking for it.
+ */
 export const HOME_EMPTY = {
   title: 'No presentations yet',
-  sentence: 'Start one with the Blank presentation card above, or start from a template.',
   action: 'New Presentation',
   noMatch: (query: string) => `No presentation matches "${query}"`,
-  noMatchSentence: 'Clear the search to see every presentation again.',
+  clear: 'Clear Search',
 } as const;
 
 function HomePage() {
@@ -538,6 +548,7 @@ function HomePage() {
       void navigate({ to: '/decks/templates', replace: true });
   }, [navigate]);
   const page = useRef<HTMLElement>(null);
+  const searchField = useRef<HTMLInputElement>(null);
   const snackbar = useSnackbar();
   const [query, setQuery] = useState('');
   /* the cookie's settings on the server and on the first client render (SPEC-3 9.2 L1); the
@@ -844,18 +855,22 @@ function HomePage() {
     onCopied: () => void refresh(),
     onError: (message) => snackbar.show(message),
     onUnlisted,
+    /* the button leaves with the state it belongs to, so the focus goes back to the field */
+    onClearSearch: () => {
+      setQuery('');
+      searchField.current?.focus();
+    },
   };
 
   return (
     <main ref={page} className="ts-home ts-home-page ts-decks-page" data-node={node}>
-      {/* the column's two rails, drawn once for the page (grammar.css .ts-rails) */}
-      <div className="ts-rails" aria-hidden="true" />
-      <header className="ts-appbar ts-seam">
-        <div className="ts-col ts-appbar-row">
+      <header className="ts-appbar">
+        <div className="ts-decks-wrap ts-appbar-row">
           <AppBarBrand linkComponent={RouterLinkSlot} homeTo="/decks" aboutTo="/home" />
           <label className="ts-appbar-search">
             <Icon name="search" />
             <input
+              ref={searchField}
               type="search"
               value={query}
               placeholder={HOME.search}
@@ -867,40 +882,46 @@ function HomePage() {
               {...tipProps({ name: HOME.search, doc: 'Filters the list by title.' })}
             />
           </label>
-          {/* Sign In as text for an anonymous visitor (docs/NEXT.md 4.1.2, B's graft), drawn only
-            where the deployment offers a method; the loader read the facts, so it is in the
-            server's HTML; a link to /signin with this page to return to (docs/POLISH-2.md 4.3) */}
-          <span
-            className="ts-appbar-end"
-            data-sign-in={offersSignIn(signIn) && !signIn.signedIn ? 'offered' : 'none'}
-          >
-            <SignInButton
-              facts={signIn}
-              control="home.signIn"
-              className="pt-ib ts-appbar-signin"
-              next="/decks"
-            />
-          </span>
+          {/* the page's two other places: Trash, and Sign In as text for an anonymous visitor
+            (docs/NEXT.md 4.1.2, B's graft), drawn only where the deployment offers a method; the
+            loader read the facts, so it is in the server's HTML; a link to /signin with this page
+            to return to (docs/POLISH-2.md 4.3) */}
+          <nav className="ts-appbar-nav" aria-label="Presentations">
+            <Link
+              to="/decks/trash"
+              className="pt-ib is-text ts-appbar-link"
+              data-control="home.trash"
+              {...tipProps({
+                name: HOME.trash,
+                doc: 'Opens the presentations moved to the trash.',
+              })}
+            >
+              <span className="pt-lb">{HOME.trash}</span>
+            </Link>
+            <span
+              className="ts-appbar-end"
+              data-sign-in={offersSignIn(signIn) && !signIn.signedIn ? 'offered' : 'none'}
+            >
+              <SignInButton
+                facts={signIn}
+                control="home.signIn"
+                className="pt-ib ts-appbar-signin"
+                next="/decks"
+              />
+            </span>
+          </nav>
         </div>
       </header>
 
-      <section className="ts-strip ts-seam" id="templates" aria-labelledby="ts-strip-heading">
-        <div className="ts-col">
-          <div className="ts-strip-head">
-            <h2 id="ts-strip-heading">{HOME.startNew}</h2>
-            {/* the gallery page (docs/archive/rounds/PRODUCT.md 4.3): Your organisation's templates and Turboslide's */}
-            <Link
-              to="/decks/templates"
-              className="ts-strip-gallery"
-              data-control="home.gallery"
-              {...tipProps({
-                name: HOME.gallery,
-                doc: 'Every template a presentation can start from, the ones saved here included.',
-              })}
-            >
-              {HOME.gallery}
-            </Link>
-          </div>
+      {/* the start band, full bleed over its field (./-decks-field.tsx): each plate stands in the
+        text of the call it makes (`data-field-call`, an index of FIELD_CALLS) and each name keeps
+        its cells clear. The heading names the band for screen readers; the tiles name themselves. */}
+      <section className="ts-strip" id="templates" aria-labelledby="ts-strip-heading">
+        <DecksField />
+        <div className="ts-decks-wrap">
+          <h2 id="ts-strip-heading" className="ts-visually-hidden">
+            {HOME.startNew}
+          </h2>
           <ul className="ts-strip-cards">
             <li>
               <Link
@@ -909,10 +930,12 @@ function HomePage() {
                 data-control="home.blank"
                 {...tipProps({ name: HOME.blank, doc: 'Starts an untitled presentation.' })}
               >
-                <span className="ts-template-plate">
-                  <Icon name="plus" size={40} />
+                <span className="ts-template-plate" data-field-call="0">
+                  <Icon name="plus" size={32} />
                 </span>
-                <span className="ts-template-label">{HOME.blank}</span>
+                <span className="ts-template-label" data-field-clear="">
+                  {HOME.blank}
+                </span>
               </Link>
             </li>
             <li>
@@ -927,23 +950,40 @@ function HomePage() {
                   doc: 'Makes a copy of the GT brand template and opens it.',
                 })}
               >
-                <span className="ts-template-plate ts-template-gt">
+                <span className="ts-template-plate ts-template-gt" data-field-call="1">
                   <GtBrandCover />
                 </span>
-                <span className="ts-template-label">{creating ? 'Opening' : HOME.gtBrand}</span>
+                <span className="ts-template-label" data-field-clear="">
+                  {creating ? 'Opening' : HOME.gtBrand}
+                </span>
               </button>
+            </li>
+            {/* the gallery page (docs/archive/rounds/PRODUCT.md 4.3), the band's third tile: Your
+              organisation's templates and Turboslide's */}
+            <li>
+              <Link
+                to="/decks/templates"
+                className="ts-template ts-template-more"
+                data-control="home.gallery"
+                {...tipProps({
+                  name: HOME.gallery,
+                  doc: 'Every template a presentation can start from, the ones saved here included.',
+                })}
+              >
+                <span className="ts-template-plate" data-field-call="2">
+                  <Icon name="grid" size={28} />
+                </span>
+                <span className="ts-template-label" data-field-clear="">
+                  {HOME.gallery}
+                </span>
+              </Link>
             </li>
           </ul>
         </div>
       </section>
 
-      {/* the hatch strip where the topic changes (slide 49; A's graft) */}
-      <div className="ts-decks-hatch ts-seam" aria-hidden="true">
-        <div className="ts-col-bare ts-hatch" />
-      </div>
-
       <section
-        className="ts-recent ts-seam"
+        className="ts-recent"
         aria-labelledby="ts-recent-heading"
         // the opened order is this browser's alone: without the Recent cookie the band is hidden
         // until mounted, then shown in its final order (L1); with the cookie the server rendered
@@ -952,11 +992,9 @@ function HomePage() {
           !mounted && settings.sort === 'opened' && recent.length === 0 ? '' : undefined
         }
       >
-        <div className="ts-col">
+        <div className="ts-decks-wrap">
           <div className="ts-recent-head">
-            <div>
-              <h2 id="ts-recent-heading">{HOME.recent}</h2>
-            </div>
+            <h2 id="ts-recent-heading">{DECKS_PAGE.recent}</h2>
             <div className="ts-recent-tools">
               {/* the deployment admin's filter (docs/NEXT.md 3.2 H2): drawn once the listing says
                 the viewer may show every deck */}
@@ -1023,23 +1061,6 @@ function HomePage() {
           </Suspense>
         </div>
       </section>
-
-      <footer className="ts-home-tail">
-        <div className="ts-col">
-          <Link
-            to="/decks/trash"
-            className="pt-ib is-text"
-            data-control="home.trash"
-            {...tipProps({
-              name: HOME.trash,
-              doc: 'Presentations moved to the trash; restore or delete them forever.',
-            })}
-          >
-            <Icon name="archive" />
-            <span className="pt-lb">{HOME.trash}</span>
-          </Link>
-        </div>
-      </footer>
 
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
     </main>
@@ -1306,6 +1327,8 @@ type ListProps = {
   onError: (message: string) => void;
   /** the decks of this browser the listing does not hold, each time it lands (item 75) */
   onUnlisted?: (ids: ReadonlyArray<string>) => void;
+  /** empties the search field, from the no match state's Clear Search */
+  onClearSearch: () => void;
 };
 
 function DeckList({
@@ -1328,6 +1351,7 @@ function DeckList({
   onCopied,
   onError,
   onUnlisted,
+  onClearSearch,
 }: ListProps & { list: ReadonlyArray<DeckCard> }) {
   /* the answered renames over every card, the folded ones included: an anonymous visitor's
      cards are this browser's Recent record and the store's own heads (docs/NEXT.md 3.2 H2 lists
@@ -1411,31 +1435,37 @@ function DeckList({
   return (
     <>
       {visible.length === 0 ? (
+        /* the empty states (SPEC-4 1.10): one line and one action, in the space the rows' frames
+           held, so the band and the bar above never move */
         <div className="ts-home-empty-figure" data-control="home.empty">
           {shown.length === 0 ? (
-            /* the empty list carries one of the deck's mood pictures with its credit (docs/NEXT.md
-               4.1.3 item 11, question 5), the empty state's structure of EmptyFigure around it */
-            <section className="ts-empty ts-home-empty-mood" data-control="empty">
-              <MoodFigure size="empty" control="home.empty.mood" />
-              <h2 className="ts-empty-title">{HOME_EMPTY.title}</h2>
-              <p className="ts-empty-sentence">{HOME_EMPTY.sentence}</p>
-              <div className="ts-empty-action">
-                <Link
-                  to="/new"
-                  className="pt-ib is-solid"
-                  data-control="home.empty.new"
-                  {...tipProps({ name: HOME_EMPTY.action, doc: 'Starts a blank presentation.' })}
-                >
-                  {HOME_EMPTY.action}
-                </Link>
-              </div>
+            <section className="ts-empty ts-decks-empty" data-control="empty">
+              <p className="ts-empty-title">{HOME_EMPTY.title}</p>
+              <Link
+                to="/new"
+                className="pt-ib is-solid"
+                data-control="home.empty.new"
+                {...tipProps({ name: HOME_EMPTY.action, doc: 'Starts a blank presentation.' })}
+              >
+                {HOME_EMPTY.action}
+              </Link>
             </section>
           ) : (
-            <EmptyFigure
-              figure="figure"
-              title={HOME_EMPTY.noMatch(query.trim())}
-              sentence={HOME_EMPTY.noMatchSentence}
-            />
+            <section className="ts-empty ts-decks-empty" data-control="empty">
+              <p className="ts-empty-title">{HOME_EMPTY.noMatch(query.trim())}</p>
+              <button
+                type="button"
+                className="pt-ib"
+                data-control="home.empty.clear"
+                onClick={onClearSearch}
+                {...tipProps({
+                  name: HOME_EMPTY.clear,
+                  doc: 'Empties the search field and shows every presentation.',
+                })}
+              >
+                {HOME_EMPTY.clear}
+              </button>
+            </section>
           )}
         </div>
       ) : settings.view === 'grid' ? (

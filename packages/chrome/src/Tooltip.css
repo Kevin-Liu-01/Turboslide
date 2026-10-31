@@ -40,7 +40,6 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 12.5px;
-  letter-spacing: -0.005em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -264,11 +264,12 @@ export function chromeFoundation(): string[] {
     test.info().annotations.push({ type: 'pairs', description: readings.join('; ') });
   });
 
-  /* DESIGN.md 4.4: cold, one font request on /new, the Latin subset of the original Inter at
-     most 120,000 B; /home and /decks draw their chrome in the site's faces since 2026-10-30
-     (Kevin: "use katagami instead of inter and our mono"), the Katagami files of
-     components/site/fonts beside Inter's Latin subset for the slides they draw; no GT Inter and no
-     Berkeley Mono anywhere */
+  /* DESIGN.md 4.4 restated for the interface faces (Kevin, 2026-10-30: "use katagami instead of
+     inter and our mono"; 2026-10-31: "also use more katagami everywhere"): cold, every route
+     requests the Katagami Sans core for its chrome; /new requests that and the Latin subset of
+     the original Inter (at most 120,000 B) for its slide, and nothing else; /home and /decks
+     request Katagami files of components/site/fonts and at most that Latin subset; no GT Inter
+     and no Berkeley Mono anywhere */
   row('chrome.font.one-subset', async ({ browser }) => {
     test.setTimeout(300_000);
     const facts: string[] = [];
@@ -305,25 +306,30 @@ export function chromeFoundation(): string[] {
       );
       for (const name of [...fonts.map((f) => f.url), ...families])
         expect(name, `${path}: no GT Inter and no Berkeley`).not.toMatch(/GT Inter|Berkeley/i);
+      for (const f of fonts)
+        expect(f.url, `${path}: a Katagami file or Inter's Latin subset`).toMatch(
+          new RegExp(`${katagami.source}|${latin.source}`),
+        );
+      /* the files as the dev server names them, or with the build's eight character hash */
+      const sansCore = fonts.filter((f) =>
+        /\/katagami-sans-core(?:-[\w-]{8})?\.woff2$/.test(f.url),
+      );
+      const inter = fonts.filter((f) => latin.test(f.url));
+      expect(sansCore, `${path}: the Katagami Sans core, once`).toHaveLength(1);
+      expect(sansCore[0]?.bytes ?? 0, `${path}: the Katagami Sans core's bytes`).toBeGreaterThan(0);
+      expect(inter.length, `${path}: at most one Inter file`).toBeLessThanOrEqual(1);
+      expect(loaded.katagami, `${path}: Katagami Sans is loaded`).toBe(true);
+      const total = fonts.reduce((sum, f) => sum + f.bytes, 0);
       if (path === '/new') {
-        expect(fonts, `${path}: one font request`).toHaveLength(1);
-        /* the file as the dev server names it, or with the build's eight character hash */
-        expect(fonts[0]?.url, `${path}: the Latin subset`).toMatch(latin);
-        expect(fonts[0]?.bytes ?? 0, `${path}: at most 120,000 B`).toBeLessThanOrEqual(120_000);
-        expect(fonts[0]?.bytes ?? 0).toBeGreaterThan(0);
+        /* the editor's chrome and its slide: two files, nothing else at first paint */
+        expect(fonts, `${path}: two font requests`).toHaveLength(2);
+        expect(inter, `${path}: the Latin subset, once`).toHaveLength(1);
+        expect(inter[0]?.bytes ?? 0, `${path}: at most 120,000 B`).toBeLessThanOrEqual(120_000);
+        expect(inter[0]?.bytes ?? 0).toBeGreaterThan(0);
+        expect(total, `${path}: at most 150,000 B of fonts`).toBeLessThanOrEqual(150_000);
         expect(loaded.inter, `${path}: Inter is loaded`).toBe(true);
       } else {
-        for (const f of fonts)
-          expect(f.url, `${path}: a Katagami file or Inter's Latin subset`).toMatch(
-            new RegExp(`${katagami.source}|${latin.source}`),
-          );
-        expect(
-          fonts.some((f) => /katagami-sans-core/.test(f.url)),
-          `${path}: the Katagami Sans core`,
-        ).toBe(true);
-        const total = fonts.reduce((sum, f) => sum + f.bytes, 0);
         expect(total, `${path}: at most 200,000 B of fonts`).toBeLessThanOrEqual(200_000);
-        expect(loaded.katagami, `${path}: Katagami Sans is loaded`).toBe(true);
       }
     }
     test.info().annotations.push({ type: 'fonts', description: facts.join('; ') });

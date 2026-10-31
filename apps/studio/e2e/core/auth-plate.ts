@@ -979,7 +979,8 @@ export function authPlateRows(): string[] {
             failures.push(`${appearance}: the G is not the four colour mark`);
           if (facts.text !== 'Continue with Google')
             failures.push(`${appearance}: the label reads "${facts.text}"`);
-          if (facts.weight !== '500' || !/Inter/.test(facts.family))
+          /* the interface's face on every route since 2026-10-31 (packages/chrome/src/brand.css) */
+          if (facts.weight !== '500' || !/Katagami Sans/.test(facts.family))
             failures.push(`${appearance}: the label is ${facts.weight} ${facts.family}`);
           if (ratio < 4.5) failures.push(`${appearance}: the label reads ${ratio.toFixed(2)}:1`);
         } finally {
@@ -1159,7 +1160,7 @@ export function authPlateRows(): string[] {
           readings.push(`${where}: ${JSON.stringify(facts)}`);
           if (facts.features.some((f) => f !== 'normal'))
             failures.push(`${where}: font features ${facts.features.join(' ')}`);
-          if (facts.families.some((f) => !/Inter/.test(f)))
+          if (facts.families.some((f) => !/Katagami Sans/.test(f)))
             failures.push(`${where}: faces ${facts.families.join(' ')}`);
           if (facts.radii.some((r) => r !== '6px'))
             failures.push(`${where}: control corners ${facts.radii.join(' ')}`);

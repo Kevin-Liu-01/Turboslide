@@ -44,7 +44,6 @@
   font-weight: 500;
   font-size: 48px;
   line-height: 1.02;
-  letter-spacing: -0.03em;
   margin: 0;
   text-wrap: balance;
 }
@@ -91,7 +90,6 @@
   font-size: 14px;
   line-height: 1.3;
   font-weight: 500;
-  letter-spacing: -0.01em;
   color: var(--pt-ink);
   text-align: right;
   white-space: nowrap;
@@ -116,7 +114,6 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 14px;
-  letter-spacing: -0.01em;
 }
 
 .pt-book-toc a span {
@@ -169,7 +166,6 @@
   font-weight: 500;
   font-size: 32px;
   line-height: 1.05;
-  letter-spacing: -0.025em;
   margin: 0;
   text-wrap: balance;
 }
@@ -201,7 +197,6 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 24px;
-  letter-spacing: -0.02em;
   line-height: 1;
   color: var(--pt-ink);
   margin-bottom: 8px;
@@ -254,7 +249,6 @@
 
   .pt-book-head h1 {
     font-size: 32px;
-    letter-spacing: -0.025em;
   }
 
   .pt-book-head p {

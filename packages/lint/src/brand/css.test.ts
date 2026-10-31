@@ -97,7 +97,7 @@ describe('the CSS checks', () => {
     expect(rulesOf('.a { text-transform: uppercase } .b { letter-spacing: 0.06em }')).toEqual([]);
   });
 
-  test('css/inter-only reads a face outside Inter and its fallbacks', () => {
+  test('css/inter-only reads a face outside Inter, Katagami and their fallbacks', () => {
     expect(
       rulesOf(
         "--x: 1; .a { font-family: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif }",
@@ -109,6 +109,39 @@ describe('the CSS checks', () => {
       'css/inter-only',
     ]);
     expect(rulesOf("@font-face { font-family: 'Inter'; src: url(i.woff2) }")).toEqual([]);
+  });
+
+  test('css/inter-only lets the interface name Katagami and keeps every slide rule in Inter', () => {
+    /* the interface's two stacks (packages/chrome/src/brand.css) */
+    expect(
+      rulesOf(
+        ".a { font-family: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif }",
+      ),
+    ).toEqual([]);
+    expect(rulesOf(".a { font: 500 14px 'Katagami Sans', sans-serif }")).toEqual([]);
+    /* a slide's rule names Inter or the theme's tokens, never an interface face or token */
+    expect(rulesOf('.ts-sheet h1 { font-family: var(--display) }')).toEqual([]);
+    expect(rulesOf(".ts-sheet .q { font-family: 'Inter', sans-serif }")).toEqual([]);
+    expect(rulesOf(".ts-sheet .q { font-family: 'Katagami Sans', sans-serif }")).toEqual([
+      'css/inter-only',
+    ]);
+    expect(rulesOf('.ts-sheet.ts-editor .q { font: 13px/1 var(--pt-text) }')).toEqual([
+      'css/inter-only',
+    ]);
+    expect(rulesOf('.a, .ts-sheet .b { font-family: var(--pt-display) }')).toEqual([
+      'css/inter-only',
+    ]);
+    expect(rulesOf('.ts-sheet-like .b { font-family: var(--pt-display) }')).toEqual([]);
+    /* the Katagami faces are declared by the subset script's stylesheet alone */
+    const face = "@font-face { font-family: 'Katagami Sans'; src: url(k.woff2) }";
+    expect(rulesOf(face, 'apps/studio/src/components/site/fonts/katagami.css')).toEqual([]);
+    expect(rulesOf(face)).toEqual(['css/inter-only']);
+    expect(
+      rulesOf(
+        "@font-face { font-family: 'Katagami Mono Fallback'; src: local('Menlo Regular') }",
+        'apps/studio/src/components/site/fonts/katagami.css',
+      ),
+    ).toEqual([]);
   });
 
   test('css/single-rail reads the retired outer rail', () => {

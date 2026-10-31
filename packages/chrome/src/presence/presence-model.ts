@@ -316,9 +316,10 @@ export function doingShort(doing: string): string {
 
 /**
  * The width a step flag of `text` reserves in CSS px, for its placement beside a pointer or a
- * block: the flag itself is as wide as its words (presence.css `.has-step`), and 13 px Inter at
- * weight 500 runs about 6 to 7 px a character, so 7 px a character with the 14 px chip, its 6 px
- * gap, 12 px of padding and the 2 px border is never short; a name's flag keeps its fixed 120 px.
+ * block: the flag itself is as wide as its words (presence.css `.has-step`), and 13 px Katagami
+ * Sans at weight 500 runs about 6 to 7 px a character, so 7 px a character with the 14 px chip, its
+ * 6 px gap, 12 px of padding and the 2 px border is never short; a name's flag keeps its fixed 120
+ * px.
  */
 export function flagWidthOf(text: string): number {
   return Math.max(120, Math.ceil(34 + text.length * 7));

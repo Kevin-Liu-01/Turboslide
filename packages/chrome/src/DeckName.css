@@ -17,7 +17,6 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 14.5px;
-  letter-spacing: -0.01em;
   white-space: nowrap;
   min-width: 0;
   overflow: hidden;
@@ -55,7 +54,6 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 14.5px;
-  letter-spacing: -0.01em;
   appearance: none;
 }
 

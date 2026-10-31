@@ -48,7 +48,6 @@
   font-variant-numeric: var(--pt-numerals);
   font-size: 20px;
   font-weight: 500;
-  letter-spacing: -0.01em;
 }
 
 .ts-presenter-title {

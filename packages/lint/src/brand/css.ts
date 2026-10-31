@@ -1,6 +1,7 @@
 // The CSS checks of the brand lint (docs/NEXT.md 4.1.3 item 25): smooth scrolling, radii outside
-// the radius rule, monospace outside the code surfaces, eyebrows, faces outside Inter and the
-// retired outer rail, and since the design round (docs/DESIGN.md 2.6, 3.5, 4.2, 4.5, 6.5) the
+// the radius rule, monospace outside the code surfaces, eyebrows, faces outside the product's two
+// families (Inter on the slides, Katagami in the interface; config.ts FACES) and the retired
+// outer rail, and since the design round (docs/DESIGN.md 2.6, 3.5, 4.2, 4.5, 6.5) the
 // stacking scale, drop shadows, the one scrollbar, the numerals token and the chrome's
 // alternates, read from the tree's plain stylesheets (AGENTS.md code rules: one tokens.css
 // and one small CSS file per component). The gt-ui plugin reads script files alone
@@ -14,6 +15,7 @@ import {
   ALTERNATES_OWNERS,
   CODE_SURFACES,
   CSS_RULES,
+  FACES,
   NUMERALS_OWNERS,
   RADIUS_EXCEPTIONS,
   SCROLLBAR_OWNERS,
@@ -165,11 +167,11 @@ const MESSAGES: Record<CssRuleId, string> = {
   'css/radius':
     'A radius outside the radius rule (DECK-GRAMMAR.md:39; NEXT.md 4.1.2 "Corners"): 0, 50%, var(--pt-radius) or a named exception in packages/lint/src/brand/config.ts.',
   'css/mono-outside-code':
-    'Monospace outside a code surface (DECK-GRAMMAR.md:31 "Nothing else uses monospace"; P:BRAND.md section 6): set it in Inter, or name the surface in CODE_SURFACES if it shows code, a token or a file path.',
+    'Monospace outside a code surface (DECK-GRAMMAR.md:31 "Nothing else uses monospace"; P:BRAND.md section 6): set it in var(--pt-text), or name the surface in CODE_SURFACES if it shows code, a token or a file path.',
   'css/no-eyebrow':
     'No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.',
   'css/inter-only':
-    'Type is Inter only (DECK-GRAMMAR.md:24): this face is outside Inter and its fallbacks.',
+    "Two families (DECK-GRAMMAR.md:24; docs/brand.md section 10): Inter on the slides, Katagami Sans and Katagami Mono in the interface. This face is outside both and their fallbacks, a .ts-sheet rule names an interface face or token, or an @font-face declares Katagami outside the subset script's katagami.css.",
   'css/single-rail':
     'One rail: the outer pair 10 px outside the column (--tc-rail-outer) is retired (P:.oxlintrc.json gt-ui/single-rail).',
   'css/z-index':
@@ -181,7 +183,7 @@ const MESSAGES: Record<CssRuleId, string> = {
   'css/numerals':
     'Tabular figures written by hand (docs/DESIGN.md 4.5): use the .pt-num class or font-variant-numeric: var(--pt-numerals).',
   'css/chrome-alternates':
-    "A stylistic set, a character variant (ss01 to ss20, cv01 to cv99, salt, swsh, aalt), a font-variant-alternates or var(--display-features) outside a .ts-sheet rule: General Translation's alternates belong to its theme's slides (docs/DESIGN.md 4.2, docs/POLISH-2.md 2.3); the chrome, the pages, the landing, the marks and the card draw Inter's defaults.",
+    "A stylistic set, a character variant (ss01 to ss20, cv01 to cv99, salt, swsh, aalt), a font-variant-alternates or var(--display-features) outside a .ts-sheet rule: General Translation's alternates belong to its theme's slides (docs/DESIGN.md 4.2, docs/POLISH-2.md 2.3); the chrome, the pages, the landing, the marks and the card draw their faces' defaults.",
 };
 
 /** The ladder's three tokens, declared once in tokens.css. */
@@ -215,6 +217,12 @@ const SANS_FALLBACKS = new Set([
 ]);
 const NON_INTER_GENERIC =
   /(?:^|[\s,])(?:serif|cursive|fantasy|ui-serif|ui-rounded|math)(?=$|[\s,;])/i;
+/** The interface families (config.ts FACES): any rule but a slide's may name them. */
+const INTERFACE_FACES: ReadonlySet<string> = new Set(FACES.interface);
+/** A `var()` of one of the chrome's face tokens. */
+const INTERFACE_TOKEN = new RegExp(`var\\(\\s*(?:${FACES.interfaceTokens.join('|')})\\s*[,)]`);
+/** A selector that names the root class of a drawn slide. */
+const SLIDE_SELECTOR = new RegExp(`\\.${FACES.slideRoot}(?![\\w-])`);
 
 function normalizeSelector(selector: string): string {
   return selector
@@ -318,10 +326,20 @@ export function lintCss(
       if (on('css/mono-outside-code') && MONO.test(value) && !isCodeSurface(file, selector))
         report('css/mono-outside-code', decl);
       if (on('css/inter-only')) {
-        const outside = families(property, value).some(
-          (f) => f && !f.startsWith('var(') && !SANS_FALLBACKS.has(f) && !MONO.test(f),
+        /* a slide's rule names Inter, the theme's tokens and the generic stacks alone */
+        const slide = SLIDE_SELECTOR.test(selector);
+        const named = families(property, value);
+        const outside = named.some(
+          (f) =>
+            f &&
+            !f.startsWith('var(') &&
+            !SANS_FALLBACKS.has(f) &&
+            !(MONO.test(f) && !INTERFACE_FACES.has(f)) &&
+            (slide || !INTERFACE_FACES.has(f)),
         );
-        if (outside || NON_INTER_GENERIC.test(value)) report('css/inter-only', decl);
+        const chromeInSlide = slide && INTERFACE_TOKEN.test(value);
+        if (outside || chromeInSlide || NON_INTER_GENERIC.test(value))
+          report('css/inter-only', decl);
       }
     }
     if (
@@ -330,7 +348,9 @@ export function lintCss(
       decl.atRules.some((a) => a.startsWith('@font-face'))
     ) {
       const face = families(property, value)[0] ?? '';
-      if (!face.startsWith('inter')) report('css/inter-only', decl);
+      const declared =
+        face.startsWith('inter') || (INTERFACE_FACES.has(face) && file === FACES.interfaceFaceFile);
+      if (!declared) report('css/inter-only', decl);
     }
     if (
       on('css/no-eyebrow') &&

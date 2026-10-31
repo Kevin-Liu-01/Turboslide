@@ -1,10 +1,11 @@
-/* Insert > Logo (dialogs/Logo.tsx; docs/archive/rounds/FEATURES.md 4.3, 4.6): the search field over three groups
-   of 96 px tiles, each tile the mark drawn twice on a paper half and an ink half whose grounds are
-   the kit's two Background colours (set inline, so the dark appearance keeps both halves), the
-   title under it in 12 px, and the foot with the check, the licence row and the source sentence.
-   Inter, hairline tile borders in --pt-hair, the pointed or selected tile in ink, radius 0, no
-   other decoration (docs/brand.md; the Icon dialog's grid is the precedent). Five tiles fit the
-   640 px card's 592 px body at 1440 and at 1280 (5 by 96 plus 4 by 8 is 512). Tokens only. */
+/* Insert > Logo (dialogs/Logo.tsx; docs/archive/rounds/FEATURES.md 4.3, 4.6): the search field over
+   three groups of 96 px tiles, each tile the mark drawn twice on a paper half and an ink half whose
+   grounds are the kit's two Background colours (set inline, so the dark appearance keeps both
+   halves), the title under it in 12 px, and the foot with the check, the licence row and the source
+   sentence. Katagami Sans, hairline tile borders in --pt-hair, the pointed or selected tile in ink,
+   radius 0, no other decoration (docs/brand.md; the Icon dialog's grid is the precedent). Five
+   tiles fit the 640 px card's 592 px body at 1440 and at 1280 (5 by 96 plus 4 by 8 is 512). Tokens
+   only. */
 .ts-logo {
   display: flex;
   flex-direction: column;

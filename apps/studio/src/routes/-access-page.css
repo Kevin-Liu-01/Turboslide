@@ -19,7 +19,6 @@
 .ts-access-frame .ts-access-title {
   font-size: var(--ts-h2);
   line-height: 1.18;
-  letter-spacing: -0.025em;
   margin-bottom: 16px;
 }
 

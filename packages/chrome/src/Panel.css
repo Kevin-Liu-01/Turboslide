@@ -31,7 +31,6 @@
   min-width: 0;
   margin: 0;
   font: 500 14px/1.2 var(--pt-display);
-  letter-spacing: -0.005em;
   color: var(--pt-ink);
   white-space: nowrap;
   overflow: hidden;

@@ -55,7 +55,7 @@ import './decks.templates.css';
  * merge (b5b.md).
  *
  * The paradigms of 2026-10-30 (Kevin: "update /decks ... and out with the old"): /decks' bar and
- * width in Katagami (decks.css, decks.templates.css), the way back at the bar's end, no lead under
+ * width in Katagami (brand.css, decks.templates.css), the way back at the bar's end, no lead under
  * the heading and none under a group's name, no rule between the groups; the cards keep their
  * cover, name, theme, count and sentence, and the template new presentations start from carries
  * the page's one vermilion mark.

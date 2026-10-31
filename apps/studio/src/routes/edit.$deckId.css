@@ -3,8 +3,8 @@
    stage (SourceDrawer.css), the overlay over the sheet (Overlay.css), the palette over everything
    (Palette.css). This file holds only what the route itself draws: the two owner markers, the
    twin panes' overlay, the conflict card and the external revision banner. Colors are --pt- tokens
-   only; type is Inter at 13px. Lines follow SPEC 2.2: the card draws its own ink frame as the one
-   dialog state, the banner a --pt-hair frame, each once. */
+   only; type is Katagami Sans at 13px. Lines follow SPEC 2.2: the card draws its own ink frame as
+   the one dialog state, the banner a --pt-hair frame, each once. */
 
 /* the two owner markers: in the DOM, never painted, never hidden (hidden would deactivate them) */
 .ts-owner {

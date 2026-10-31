@@ -82,7 +82,6 @@
   background: none;
   color: var(--pt-ink);
   font: 500 14px/1 var(--pt-display);
-  letter-spacing: -0.005em;
   text-align: left;
   white-space: nowrap;
   overflow: hidden;

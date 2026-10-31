@@ -61,7 +61,7 @@ import './decks.css';
  * the page reads it.
  *
  * The paradigms of 2026-10-30 (Kevin: "update /decks ... and out with the old"): the page is
- * /decks' bar and width in Katagami (decks.css), with no rails, seams or sentence under the
+ * /decks' bar and width in Katagami (brand.css), with no rails, seams or sentence under the
  * heading; the way back to the list sits at the bar's end, as Trash sits on /decks, and the empty
  * trash is its one line.
  */

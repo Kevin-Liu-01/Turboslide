@@ -14,11 +14,11 @@ import './MenuBar.css';
 
 /**
  * The menu bar (gslides-parity SPEC 1.1, 2.11, 13.1; R01 "Menu bar placement and behaviour",
- * R08 B1 to B6): the ten menus in Google's order, left aligned, 13 px Inter, 12 px of padding per
- * title, 28 px tall, drawing no rule of its own. `role="menubar"` with one tab stop: the titles
- * are `menuitem`s with roving tabindex; Left and Right move between them, Down or Enter opens,
- * a click opens, and while one is open hovering another title switches menus (R08 B2) as do the
- * arrows from inside the open plate (`onNavigate`). Esc closes and returns focus to the title;
+ * R08 B1 to B6): the ten menus in Google's order, left aligned, 13 px Katagami Sans, 12 px of
+ * padding per title, 28 px tall, drawing no rule of its own. `role="menubar"` with one tab stop:
+ * the titles are `menuitem`s with roving tabindex; Left and Right move between them, Down or Enter
+ * opens, a click opens, and while one is open hovering another title switches menus (R08 B2) as do
+ * the arrows from inside the open plate (`onNavigate`). Esc closes and returns focus to the title;
  * Tab closes and leaves. The access keys (Ctrl+Option plus the letter, Alt plus it on Windows)
  * open a menu from anywhere through `shell.setMenuOpen` (useEditorKeys.ts). Every row inside a
  * plate is drawn by Menu.tsx from the model with `assignAccessKeys` applied once per menu.

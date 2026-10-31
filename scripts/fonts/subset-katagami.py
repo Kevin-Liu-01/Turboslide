@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""Cut the site's faces from Katagami Sans and Katagami Mono (Kevin, 2026-10-30: "use katagami
-instead of inter and our mono" on the site; the web-font-optimization brief of the same day).
+"""Cut the interface faces from Katagami Sans and Katagami Mono (Kevin, 2026-10-30: "use katagami
+instead of inter and our mono" on the site; 2026-10-31: "also use more katagami everywhere", so
+every route's chrome draws them; the web-font-optimization brief of 2026-10-30). The slides keep
+their theme's faces: nothing here reaches a `.ts-sheet`.
 
 Run by hand, never by the build. The output is committed:
 
@@ -9,11 +11,12 @@ Run by hand, never by the build. The output is committed:
   apps/studio/src/components/site/fonts/katagami.css     the faces, loaded on every route by
                                                          routes/__root.tsx
 
-Each face is cut to what the site draws:
+Each face is cut to what the interface draws:
 
-  characters  every character in the site's and the docs' sources and content (the files listed
-              in CONTENT below), plus Latin-1 Supplement, Latin Extended-A and the general
-              punctuation block, so new copy rarely needs a rerun
+  characters  every character in the sources of the chrome, the viewer, the studio's routes,
+              editor and components, the docs' content and the list pickers' bullet glyphs (the
+              files listed in CONTENT below, less EXCLUDE), plus Latin-1 Supplement, Latin
+              Extended-A and the general punctuation block, so new copy rarely needs a rerun
   weights     the wght axis kept whole, 100 to 900; limiting it to the 400 and 500 the stylesheets
               set saves 14.5 KB on the two core files but rounds the outlines at 500 again, which
               moves the antialiased edges of every heading (the pixel diff of 2026-10-30), so it
@@ -23,12 +26,20 @@ Each face is cut to what the site draws:
               the rest are dropped, which the brand lint forbids outside the slides anyway
   hinting     dropped
 
-and split in two: a core file with ASCII, the no-break space and the punctuation most pages draw
-(quotes, dashes, the ellipsis, the middle dot, the multiplication sign, the arrows), which the
-site routes preload (routes/__root.tsx), and an extended file behind its unicode-range that a page
-downloads only when it draws one of its characters. Each unicode-range is read from the cut font's
-cmap. The metric matched fallback faces (Katagami Sans Fallback over Arial, Katagami Mono
-Fallback over Menlo) come first in the block, so no fallback rule sits between a face's two files.
+and split in two: a core file with ASCII, the no-break space, the punctuation most pages draw
+(quotes, dashes, the ellipsis, the middle dot, the multiplication sign, the arrows) and the seven
+key symbols the menus print on a Mac (KEYS), which every route preloads (routes/__root.tsx), and an
+extended file behind its unicode-range that a page downloads only when it draws one of its
+characters. Each unicode-range is read from the cut font's cmap. The metric matched fallback
+faces (Katagami Sans Fallback over Arial, Katagami Mono Fallback over Menlo) come first in the
+block, so no fallback rule sits between a face's two files.
+
+A character the release lacks falls through the stack to the system's face, as it did under
+Inter, whose Latin subset lacks the same ones: the half discs of the theme button, the midline
+ellipsis, the small triangles and the diagonal arrows of the presenter's text glyphs, the face of
+the comment card's reaction button and three of the eleven bullet glyphs (the arrow, the 3D arrow
+and the box). Each sits in a box of fixed size, so the fallback moves nothing. The reactions'
+emoji draw in the system's colour emoji face; their characters are never in the cut.
 
 Rerun it when the copy gains a character outside the kept blocks, when a stylesheet sets a new
 weight or turns on a new OpenType feature, or when Katagami ships a new version. The sources are
@@ -67,26 +78,30 @@ FACES = {
 WEIGHTS = (100, 900)
 FEATURES = ['calt', 'ccmp', 'locl', 'kern', 'mark', 'mkmk', 'case', 'tnum', 'zero']
 
-# where the site's characters come from: its components, its routes, the docs and their content
+# where the interface's characters come from: the chrome, the viewer, the studio's client code,
+# the docs and their content, the agent manifest, and the bullet glyphs the list pickers draw
 CONTENT = [
-    'apps/studio/src/components/site',
-    'apps/studio/src/components/docs',
+    'packages/chrome/src',
+    'packages/viewer/src',
+    'apps/studio/src/routes',
+    'apps/studio/src/editor',
+    'apps/studio/src/components',
     'apps/studio/src/docs',
     'apps/studio/content/docs',
     'scripts/site',
     'packages/agent/generated/manifest.json',
-    'apps/studio/src/routes/home.tsx',
-    'apps/studio/src/routes/docs.tsx',
-    'apps/studio/src/routes/docs.$.tsx',
-    'apps/studio/src/routes/about.tsx',
-    'apps/studio/src/routes/features.tsx',
-    'apps/studio/src/routes/faq.tsx',
-    'packages/chrome/src/presence/agent-marks.tsx',
+    'packages/schema/src/text.ts',
 ]
+# the Special characters dialog lists some 600 characters a seller inserts into a slide; each tile
+# draws its one character at a fixed size, so the dialog adds nothing to the cut
+EXCLUDE = {'special-characters-data.ts'}
 TEXT = re.compile(r'\.(tsx?|mdx?|json|css)$')
 
 KEEP_BLOCKS = [(0x20, 0x7E), (0xA0, 0xFF), (0x100, 0x17F), (0x2000, 0x206F)]
-CORE = set(range(0x20, 0x7F)) | {
+# the key symbols of a Mac chord (packages/chrome/src/menus/chords.ts MAC_SYMBOLS): Command,
+# Control, Option, Shift, Return, Tab and Delete; every menu and the viewer's search chip print them
+KEYS = {0x2318, 0x2303, 0x2325, 0x21E7, 0x21A9, 0x21E5, 0x232B}
+CORE = set(range(0x20, 0x7F)) | KEYS | {
     0xA0, 0xB7, 0xD7, 0x2013, 0x2014, 0x2018, 0x2019, 0x201C, 0x201D, 0x2026,
     0x2190, 0x2191, 0x2192, 0x2193,
 }
@@ -107,13 +122,14 @@ FALLBACKS = {
 }
 
 
-def site_characters() -> set[int]:
+def interface_characters() -> set[int]:
     chars: set[int] = set()
     for entry in CONTENT:
         path = ROOT / entry
         files = [path] if path.is_file() else sorted(p for p in path.rglob('*') if TEXT.search(p.name))
         for file in files:
-            if '.test.' in file.name:
+            skipped = {'__tests__', '__fixtures__'} & set(file.parts)
+            if '.test.' in file.name or file.name in EXCLUDE or skipped:
                 continue
             chars.update(ord(c) for c in file.read_text(encoding='utf-8') if ord(c) >= 0x20)
     return chars
@@ -231,7 +247,7 @@ def face_rule(family: str, file: str, unicode_range: str) -> str:
 
 
 def build(src: Path) -> tuple[dict[str, bytes], str, dict]:
-    wanted = site_characters()
+    wanted = interface_characters()
     for a, b in KEEP_BLOCKS:
         wanted.update(range(a, b + 1))
     files: dict[str, bytes] = {}

@@ -301,7 +301,7 @@ export function DecksField() {
   return <canvas ref={canvas} className="ts-decks-field" aria-hidden="true" />;
 }
 
-/** The monospace stack the page points `--pt-mono` at (decks.css): Katagami Mono on /decks. */
+/** The monospace stack `--pt-mono` names on every route (brand.css): Katagami Mono. */
 function monoOf(element: Element): string {
   return getComputedStyle(element).getPropertyValue('--pt-mono').trim() || 'monospace';
 }

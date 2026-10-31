@@ -8,9 +8,10 @@ import { Scratch, extraHTTPHeaders, newDeck, teardownAll, title } from './lib';
 import { isCoreId } from './matrix';
 
 // Lane F's rows of polish two in core/chrome.spec.ts (docs/POLISH-2.md 2.4, 2.5, 6.2): the one
-// served face is the Inter 4.1 release file its record names, its features take effect (measured
-// by advance widths), no element outside a slide draws a stylistic set or a character variant, and
-// every number alone outside a slide and a code surface draws tabular figures. The spec file calls
+// served Inter is the 4.1 release file its record names, beside the Katagami files the interface
+// draws on every route since 2026-10-31, its features take effect (measured by advance widths), no
+// element outside a slide draws a stylistic set or a character variant, and every number alone
+// outside a slide and a code surface draws tabular figures. The spec file calls
 // `chromeFontP2()` once and spreads its ids into its coverage list; a row registers once its id is
 // in the matrix. Every context is fresh (no cache, so the first load is cold), the appearance is
 // stored before the first paint as the theme button stores it, and the decks the editor pages make
@@ -148,8 +149,15 @@ async function figuresOf(page: Page): Promise<{ read: number; proportional: stri
   );
 }
 
-/** The pages drawn in the site's faces since 2026-10-30 (routes/__root.tsx). */
-const SITE_FACE_PATHS: ReadonlySet<string> = new Set(['/home', '/decks', '/docs']);
+/**
+ * The pages of the official-inter row that draw a slide at first paint, so Inter loads there; the
+ * others draw Katagami alone, and Inter's Latin subset answers at most once (routes/__root.tsx
+ * preloads it on every route that is not slideless, /decks among them, for its title plates).
+ */
+const SLIDE_PATHS: ReadonlySet<string> = new Set(['/new']);
+
+/** A Katagami file of components/site/fonts, as the dev server names it or with the build's hash. */
+const KATAGAMI_FILE = /\/katagami-(?:sans|mono)-(?:core|ext)[^/]*\.woff2$/;
 
 export function chromeFontP2(): string[] {
   const declared: string[] = [];
@@ -237,29 +245,36 @@ export function chromeFontP2(): string[] {
             box.remove();
             return out as Record<keyof typeof spans, number>;
           }, SPECIMEN_PX);
-        const widths = await specimen().catch(async () => {
-          await page.waitForLoadState('load');
-          await page.evaluate(() => document.fonts.ready.then(() => undefined));
-          return specimen();
-        });
-        /* one file: every font response names the Latin upright, and one of them carries its bytes;
-           on the pages drawn in the site's faces (Kevin, 2026-10-30) the Katagami files of
-           components/site/fonts sit beside it, and Inter loads only where a slide is drawn */
-        const site = SITE_FACE_PATHS.has(path);
-        const files = [...new Set(fonts.map((f) => f.url))].filter(
-          (url) => !(site && /\/katagami-(?:sans|mono)-(?:core|ext)[^/]*\.woff2$/.test(url)),
+        /* the responses before any specimen, which would ask for Inter on a page that draws none */
+        const answered = [...fonts];
+        /* the specimen reads Inter's features where the page loaded its face */
+        const widths =
+          faces.length === 1
+            ? await specimen().catch(async () => {
+                await page.waitForLoadState('load');
+                await page.evaluate(() => document.fonts.ready.then(() => undefined));
+                return specimen();
+              })
+            : null;
+        /* the Katagami files of components/site/fonts draw the interface on every route
+           (Kevin, 2026-10-31: "also use more katagami everywhere"), the Sans core among them;
+           every other font response names the Latin upright, one of them carries its bytes where
+           the page draws a slide, and Inter loads only there */
+        const slide = SLIDE_PATHS.has(path);
+        const files = [...new Set(answered.map((f) => f.url))].filter(
+          (url) => !KATAGAMI_FILE.test(url),
         );
-        const latin = fonts.filter(
+        const latin = answered.filter(
           (f) => f.status === 200 && /\/InterVariable-latin(?!-ext)[^/]*\.woff2/.test(f.url),
         );
         readings.push(
-          `${path}: ${files.length} font file(s) in ${fonts.length} response(s) (${fonts.map((f) => `${f.url.split('/').pop()} ${f.status} ${f.bytes} B ${f.sha256.slice(0, 12)}`).join(', ')}); loaded Inter faces ${faces.length} (${faces.join('; ')}); widths 6969 ${widths.six9.toFixed(2)} and with ss01 ${widths.six9Open.toFixed(2)}, aaaa ${widths.a.toFixed(2)} and with cv11 ${widths.aSingle.toFixed(2)}, tnum 1111 ${widths.ones.toFixed(2)} and 0000 ${widths.zeros.toFixed(2)}`,
+          `${path}: ${files.length} Inter file(s) in ${answered.length} font response(s) (${answered.map((f) => `${f.url.split('/').pop()} ${f.status} ${f.bytes} B ${f.sha256.slice(0, 12)}`).join(', ')}); loaded Inter faces ${faces.length} (${faces.join('; ')})${widths ? `; widths 6969 ${widths.six9.toFixed(2)} and with ss01 ${widths.six9Open.toFixed(2)}, aaaa ${widths.a.toFixed(2)} and with cv11 ${widths.aSingle.toFixed(2)}, tnum 1111 ${widths.ones.toFixed(2)} and 0000 ${widths.zeros.toFixed(2)}` : ''}`,
         );
-        if (site && !fonts.some((f) => /\/katagami-sans-core[^/]*\.woff2$/.test(f.url)))
+        if (!answered.some((f) => /\/katagami-sans-core[^/]*\.woff2$/.test(f.url)))
           failures.push(`${path}: no Katagami Sans core`);
-        if (site ? files.length > 1 || latin.length > 1 : files.length !== 1 || latin.length !== 1)
+        if (slide ? files.length !== 1 || latin.length !== 1 : files.length > 1 || latin.length > 1)
           failures.push(
-            `${path}: ${files.length} font files, ${latin.length} full answer(s) of the Latin file`,
+            `${path}: ${files.length} Inter files, ${latin.length} full answer(s) of the Latin file`,
           );
         for (const f of latin) {
           if (f.bytes !== LATIN.bytes)
@@ -267,29 +282,32 @@ export function chromeFontP2(): string[] {
           if (f.sha256 !== LATIN.sha256)
             failures.push(`${path}: sha256 ${f.sha256}, not the record's`);
         }
-        if (site ? faces.length > 1 : faces.length !== 1)
+        if (slide ? faces.length !== 1 : faces.length > 1)
           failures.push(`${path}: ${faces.length} loaded Inter faces`);
-        const near = (got: number, units: number, what: string): void => {
-          /* the specimen reads Inter's features where the page loaded its face */
-          if (faces.length !== 1) return;
-          if (Math.abs(got - expectedWidth(units)) > 1)
-            failures.push(
-              `${path}: ${what} ${got.toFixed(2)} px, ${expectedWidth(units).toFixed(2)} expected`,
-            );
-        };
-        near(widths.six9, ADVANCE.six9, '6969');
-        near(widths.six9Open, ADVANCE.six9Open, "6969 with 'ss01'");
-        near(widths.a, ADVANCE.a, 'aaaa');
-        near(widths.aSingle, ADVANCE.aSingle, "aaaa with 'cv11'");
-        if (faces.length === 1 && Math.abs(widths.ones - widths.zeros) > 0.01)
-          failures.push(`${path}: tnum 1111 ${widths.ones} and 0000 ${widths.zeros}`);
+        if (widths) {
+          const near = (got: number, units: number, what: string): void => {
+            if (Math.abs(got - expectedWidth(units)) > 1)
+              failures.push(
+                `${path}: ${what} ${got.toFixed(2)} px, ${expectedWidth(units).toFixed(2)} expected`,
+              );
+          };
+          near(widths.six9, ADVANCE.six9, '6969');
+          near(widths.six9Open, ADVANCE.six9Open, "6969 with 'ss01'");
+          near(widths.a, ADVANCE.a, 'aaaa');
+          near(widths.aSingle, ADVANCE.aSingle, "aaaa with 'cv11'");
+          if (Math.abs(widths.ones - widths.zeros) > 0.01)
+            failures.push(`${path}: tnum 1111 ${widths.ones} and 0000 ${widths.zeros}`);
+        }
       } finally {
         if (scratch.ids.size > 0) await teardownAll(page, scratch).catch(() => undefined);
         await context.close();
       }
     }
     test.info().annotations.push({ type: 'face', description: readings.join(' | ') });
-    expect(failures, 'one Inter file, the release, with its features in effect').toEqual([]);
+    expect(
+      failures,
+      'the Katagami Sans core on every page and one Inter file, the release, with its features in effect',
+    ).toEqual([]);
   });
 
   row('chrome.font.no-stylistic-sets', async ({ browser }) => {

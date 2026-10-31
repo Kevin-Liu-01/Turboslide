@@ -885,6 +885,13 @@ stale-while-revalidate=3600` only for the public shape of an open or published d
 
 The deviations recorded from M1 to round four (2026-09-10 to 2026-09-14) are in `docs/archive/deviations.md`. A later deviation is recorded in its round's specification.
 
+- The interface faces (Kevin, 2026-10-31: "also use more katagami everywhere"): SPEC 2.2 and
+  DECK-GRAMMAR.md:24 set the chrome in Inter. Every route's chrome now draws Katagami Sans and
+  Katagami Mono through `--pt-text`, `--pt-display` and `--pt-mono`, set once in
+  `packages/chrome/src/brand.css` while `tokens.css` keeps its values; the slides keep their
+  theme's faces under `.ts-sheet`, and the brand lint's `css/inter-only` holds both halves
+  (`docs/brand.md` section 10, "The interface faces").
+
 ## License
 
 The repository license is SPEC open question 14 and is Kevin's decision. MIT (`LICENSE`,

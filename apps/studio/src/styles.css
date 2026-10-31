@@ -1,7 +1,7 @@
 /* App-level styles only. Chrome tokens come from @turboslide/chrome tokens.css
    (SPEC 2.2) and the sheet from the theme's sheet.css and stage.css (SPEC 5.1);
-   routes/__root.tsx loads them once. Chrome type is Inter at 13px (SPEC 2.2).
-   Colors are the --pt- tokens only. */
+   routes/__root.tsx loads them once. Chrome type is Katagami Sans at 13px (SPEC 2.2; brand.css
+   since 2026-10-31). Colors are the --pt- tokens only. */
 
 *,
 *::before,
@@ -64,7 +64,6 @@ body {
   font-weight: 500;
   font-size: 28px;
   line-height: 1.1;
-  letter-spacing: -0.02em;
   margin: 18px 0 0;
 }
 
@@ -104,7 +103,6 @@ body {
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 15px;
-  letter-spacing: -0.01em;
 }
 
 .ts-deck-id {

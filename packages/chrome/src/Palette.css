@@ -184,7 +184,6 @@
   font-weight: 500;
   font-size: 12.5px;
   line-height: 1.3;
-  letter-spacing: -0.005em;
   color: var(--pt-titanium);
   border-bottom: 1px solid var(--pt-hair);
 }
@@ -264,7 +263,6 @@
   font-weight: 500;
   font-size: 14px;
   line-height: 1.3;
-  letter-spacing: -0.01em;
   color: var(--pt-ink-2);
   white-space: nowrap;
   overflow: hidden;

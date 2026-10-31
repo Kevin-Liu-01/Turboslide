@@ -60,7 +60,6 @@
 
 .ts-comment-quote {
   color: var(--pt-ink-2);
-  font-style: italic;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

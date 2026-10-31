@@ -7,10 +7,10 @@
    to that.
 
    What changes, in order:
-   1. Faces. The chrome's three face tokens point at Katagami Sans and Katagami Mono, the faces
-      components/site/fonts/katagami.css declares on every route, as .ts-site does on the site.
-      The slides keep Inter: they read --text and --display under .ts-sheet, never these tokens.
-      Mono sets the slide numbers, the count and the keys, always in tabular figures.
+   1. Faces. The chrome draws Katagami Sans on every route (packages/chrome/src/brand.css); here
+      Katagami Mono also sets the slide numbers, the count and the keys, always in tabular
+      figures. The slides keep Inter: they read --text and --display under .ts-sheet, never the
+      chrome's face tokens.
    2. Accent. Vermilion fills the one call to action, Present. --pt-select stays the editor's.
    3. No lines between regions. The toolbar, the sidebar, the filter row and the progress track
       draw no rule; the regions read by their grounds. Seg dividers, ruled tables and the book's
@@ -29,9 +29,6 @@
 /* ---- the root and its tokens ---- */
 
 body:has(.ts-deckview) {
-  --pt-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --pt-display: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --pt-mono: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
   /* the site's vermilion (site.css --site-accent): 5.1 to 1 against the light paper */
   --deck-accent: oklch(0.56 0.2 33);
   /* the deck strip's row at the window's foot */

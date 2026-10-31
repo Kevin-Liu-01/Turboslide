@@ -1120,7 +1120,7 @@ export function chromeDropdowns(): string[] {
       expect(look.trigger.border, `${where}: the field boundary`).toBe(`1px ${look.tokens.field}`);
       expect(look.trigger.ground).toBe(look.tokens.paper);
       expect(look.trigger.ink).toBe(look.tokens.ink);
-      expect(look.trigger.font).toMatch(/Inter/);
+      expect(look.trigger.font, `${where}: the interface's face`).toMatch(/Katagami Sans/);
       expect(look.trigger.numerals).toMatch(/tabular-nums/);
       expect(look.trigger.chevron).toBe(true);
       expect(look.list.radius).toBe('6px');

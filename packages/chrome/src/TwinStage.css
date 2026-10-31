@@ -46,7 +46,6 @@
   font-weight: 500;
   font-size: 12.5px;
   line-height: 1;
-  letter-spacing: -0.005em;
   color: var(--pt-titanium);
   user-select: none;
 }

@@ -63,7 +63,6 @@
   min-height: 18px;
   color: var(--pt-ink-2);
   font-size: 12px;
-  font-style: italic;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

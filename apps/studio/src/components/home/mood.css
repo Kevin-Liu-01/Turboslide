@@ -65,7 +65,6 @@
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: var(--ts-label, 13px);
-  letter-spacing: -0.005em;
   color: var(--pt-ink);
 }
 

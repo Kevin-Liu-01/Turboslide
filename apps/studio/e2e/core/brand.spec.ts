@@ -1582,12 +1582,21 @@ test(title('fonts.preload.italic-on-edit-only'), async () => {
     type: 'preloads',
     description: `/decks: ${decks.join(', ') || 'none'}; /edit: ${edit.join(', ') || 'none'}`,
   });
-  expect(decks.length, '/decks carries one font preload (the upright)').toBe(1);
-  expect(decks[0] ?? '', 'the upright').not.toMatch(/Italic/i);
+  /* every route preloads the Katagami Sans core for its chrome and a route that draws slides
+     Inter's Latin upright (routes/__root.tsx; Kevin, 2026-10-31: "also use more katagami
+     everywhere"); neither page draws Katagami Mono at first paint */
+  const sansCore = (hrefs: string[]) => hrefs.filter((href) => /katagami-sans-core/.test(href));
+  const upright = (hrefs: string[]) =>
+    hrefs.filter((href) => /InterVariable-latin/.test(href) && !/Italic/i.test(href));
+  expect(decks.length, '/decks carries two font preloads').toBe(2);
+  expect(sansCore(decks), '/decks: the Katagami Sans core').toHaveLength(1);
+  expect(upright(decks), "/decks: Inter's Latin upright").toHaveLength(1);
   /* the italic is a prefetch rather than a preload since the console hotfix of 2026-09-29: a
      preload drew the browser's unused-preload warning on every editor load whose deck drew no
      italic within seconds; the prefetch warms the cache without it */
-  expect(edit.length, '/edit carries two: the upright preload and the italic prefetch').toBe(2);
+  expect(edit.length, '/edit carries three: the two preloads and the italic prefetch').toBe(3);
+  expect(sansCore(edit), '/edit: the Katagami Sans core').toHaveLength(1);
+  expect(upright(edit), "/edit: Inter's Latin upright").toHaveLength(1);
   expect(edit.find((href) => /Italic/i.test(href)) ?? '', 'the italic is on /edit').toMatch(
     /Italic/i,
   );

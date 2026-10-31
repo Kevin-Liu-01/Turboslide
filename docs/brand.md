@@ -215,9 +215,15 @@ pixels (`docs/gslides-parity/round1/sheet/marks/bearing.json`, load 19.60):
 
 The space after the mark is half the cap less that bearing. The product draws one lockup size: the
 22 px word beside the 24 px placement (`.ts-brand-lockup` in `packages/chrome/src/brand.css`,
-`AppBarBrand.tsx`). There the cap is 16.0 px, the bearing 72 units (0.77 px) and the square leaves
-0.23 px right of the mark's ink, so the flex gap is 7 px. Both links are 24 px tall with their
-content centred, so the word's baseline lands on row 20 of the box with the mark's.
+`AppBarBrand.tsx`), in Katagami Sans 500 since 2026-10-31 (section 10, "The interface faces").
+Katagami Sans has Inter's vertical metrics, read from the release file's own tables: 2048 units
+to the em, a cap of 1490 units, typo ascender and descender 1984 and 494 with `USE_TYPO_METRICS`
+set. It has no optical size axis, and its T's left bearing at weight 500 is 90 units. So the cap
+is 16.0 px, the bearing 0.97 px and the square leaves 0.23 px right of the mark's ink, which
+gives 6.80 px; the flex gap is 7 px. Both links are 24 px tall with their content centred, so the
+word's baseline (0.8638 em under the top of a line height of 1) lands on row 20 of the box with
+the mark's. The word keeps the face's own spacing. The README pair, the card and the wordmark
+file below keep Inter, which `scripts/build-brand.ts` sets.
 
 The 22 px word is the smallest lockup. An 18 px word would ask for a 13 px cap, which the size
 steps do not draw. The README pair and the card draw the lockup at a 66 px word (a 48 px cap)
@@ -377,7 +383,7 @@ it governs and the lane of Round 1 that carries it (NEXT.md 4.1.3 and 4.1.6).
 
 | The deck's rule                                                                         | Turboslide                                                                                                                                                     | Lane          |
 | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| Inter is the only typeface; display weight 500 at most (lines 20, 24)                   | `--pt-display` and `--pt-text` resolve to Inter; the lockup's word is live Inter 500                                                                           | B1, B5 lint   |
+| Inter is the only typeface; display weight 500 at most (lines 20, 24)                   | Slides draw Inter; since 2026-10-31 `--pt-display` and `--pt-text` resolve to Katagami Sans; the lockup's word is live Katagami Sans 500                       | B1, B5 lint   |
 | Sentence case headings with no trailing period; Title Case only on buttons (22)         | Menu rows, tooltips and headings in sentence case; every button label in Title Case                                                                            | B3a, B2c, B3b |
 | Straight technical English, no metaphors, no em dashes, no exclamation marks (23)       | The forbidden words list of `packages/chrome/src/menus/strings.ts`; the words push                                                                             | B3a           |
 | Paper and ink tokens, a dark token remap (27, 28)                                       | `packages/chrome/src/tokens.css`, with the deviations of section 10                                                                                            | B3b           |
@@ -448,7 +454,7 @@ numbers are data in `packages/theme/src/scale.ts`, and `scale.test.ts` pins the 
 | `--pt-radius-sm`, `--pt-radius`, `--pt-radius-lg`          | 4, 6 and 8 px                                               | DECK-GRAMMAR.md 40 squares every corner. The chrome takes General Translation's UI ladder instead (decision C4, question 1): 4 px chips, 6 px controls and small floating plates, 8 px windows. Slides, thumbnails, rails, the selection ring and everything on a slide stay square |
 | `--pt-ring`, `.pt-float`, `.pt-window`, `.pt-kbd`          | a 1 px paper gap and a 1 px `--pt-hair-soft` line           | The deck draws no shadows; a floating plate separates by its `--pt-edge` frame and the ring, with no blur and no offset (decision C5)                                                                                                                                               |
 | `--ts-layer-stage` to `--ts-layer-skip`                    | 0, 10, 20 to 90                                             | None in the deck. Ten stacking layers for the chrome's floating surfaces, applied through the top layer by `packages/chrome/src/Layer.ts` (decision C1)                                                                                                                             |
-| `--pt-numerals`, `.pt-num`                                 | `tabular-nums`; `tabular-nums slashed-zero` on codes        | The deck sets figures per slide. The chrome writes Inter's tabular figures through one token wherever a number aligns or changes in place (decision C9)                                                                                                                             |
+| `--pt-numerals`, `.pt-num`                                 | `tabular-nums`; `tabular-nums slashed-zero` on codes        | The deck sets figures per slide. The chrome writes its face's tabular figures through one token wherever a number aligns or changes in place (decision C9)                                                                                                                          |
 | `--pt-thumb`                                               | ink at 0.44 in both appearances, 3.12:1 and 3.97:1          | Was ink at 0.32 (2.17:1 and 2.58:1), under the 3:1 of WCAG 2.2 SC 1.4.11 for the scrollbar thumb                                                                                                                                                                                    |
 | The scrollbar (`::-webkit-scrollbar` at the root, Firefox) | an 8 px gutter, a 4 px thumb with round ends, 6 px on hover | Every scroller draws one bar with no class (decision C11); the deck's `head.html` 188 to 198 carries a Firefox gate that never applies, reported to Prototemplate in the round's ship note                                                                                          |
 | `.pt-icon`                                                 | Inter's default glyphs                                      | The chrome leaves the deck's alternates `cv11` and `ss01`, which belong to the General Translation theme's slides (decision C6, question 8)                                                                                                                                         |
@@ -503,6 +509,44 @@ Since DR-D1#3 the page loads the release files cut into unicode-range subsets by
 113,752 B (the whole file 352,240 B), the Latin italic 126,000 B, and Latin Extended, Cyrillic,
 Greek, Vietnamese and the remaining symbols load when their text is drawn. The render documents,
 the standalone file, the PDF and the PowerPoint export keep the whole files.
+
+### The interface faces (2026-10-31)
+
+Kevin, 2026-10-30: "use katagami instead of inter and our mono"; 2026-10-31: "also use more
+katagami everywhere". The interface of every route (the site, `/decks`, the viewer, the editor,
+`/new`, the presenter, the print preview, Not found and the sign in pages) draws Katagami Sans, and
+Katagami Mono where it shows code, an id or a token. The slides keep their theme's faces: Inter in
+the library's nine themes, the brand kit's faces where a kit sets them.
+
+- The tokens. `packages/chrome/src/brand.css`, linked after `tokens.css` on every route, sets
+  `--pt-text` and `--pt-display` to the Katagami Sans stack and `--pt-mono` to the Katagami Mono
+  stack on `:root`, each with its metric matched fallback face second. `tokens.css` keeps every
+  `--pt-` name and value. `--pt-numerals` stays `tabular-nums`: Katagami Sans carries `tnum` and
+  `zero`.
+- The files. `scripts/fonts/subset-katagami.py` cuts the two release files into a core and an
+  extended file per face (`apps/studio/src/components/site/fonts/`, the record `katagami.json`),
+  from every character of the chrome, the viewer, the studio's client code, the docs and the list
+  pickers' bullet glyphs. The core holds ASCII, the common punctuation, the four arrows and the
+  seven key symbols a Mac menu prints (⌘ ⌃ ⌥ ⇧ ↩ ⇥ ⌫): Sans 27,608 B, Mono 20,212 B. Every route
+  preloads the Sans core; a route that draws a slide also preloads Inter's Latin subset, and
+  `/home`, `/docs` and `/deck/<id>` the Mono core (`apps/studio/src/routes/__root.tsx`). Each face
+  has a metric matched fallback over Arial or Menlo, so a swap moves no line.
+- The glyphs the release lacks fall through the stack to the system's face, as they did under
+  Inter's Latin subset, which lacks the same ones: the theme button's half discs, the midline
+  ellipsis, the two small triangles, the presenter's diagonal arrows, the reaction button's face
+  and three bullet glyphs (the arrow, the 3D arrow and the box). Each draws in a box of fixed size.
+  Text in Cyrillic or Greek inside the chrome (a deck name, a comment) draws in the metric matched
+  Arial; a slide's text in those scripts keeps Inter's subsets.
+- The isolation. Every drawn slide's root is `.ts-sheet` (the stage, the editor, the filmstrip's
+  live clone, the presenter, the print pages and the hidden canvas measure root of
+  `packages/viewer/src/canvas-measure.ts`), whose `font-family` is the theme's `--text`
+  (`packages/render/src/block-css.ts`), so no slide inherits the chrome's face; the CLI's renders
+  and the exports never load the chrome. The brand lint's `css/inter-only` lets the interface name
+  the Katagami stacks and fails a `.ts-sheet` rule that names a Katagami face or a `--pt-` face
+  token, and an `@font-face` of Katagami outside the subset script's `katagami.css`.
+- Outside the shell. The server's own HTML answers (the access pages of `s.$token.ts` and
+  `published.ts`) and the mail templates load no web face and name Inter with system fallbacks;
+  the exported web page (`packages/viewer/standalone`) keeps its own chrome copy.
 
 ## 11. The selection colour
 

@@ -5,12 +5,10 @@
    root `.ts-decks-page`, except the two the plain pages share (the link ink of `.ts-home` and the
    scrollbar gutter).
 
-   The faces: the root points the chrome's face tokens at Katagami Sans and Katagami Mono
-   (components/site/fonts/katagami.css defines them on every route), on the root itself and on the
-   document while the root is mounted, so the card menu, the tooltips and the dialogs, which draw
-   in document.body, read them too. tokens.css keeps every --pt- name and value. The slides keep
-   Inter: a thumbnail is a capture, and the title plate that stands in for one reads --decks-slide.
-   No rule tightens a face's letter spacing.
+   The faces: the chrome's face tokens are Katagami Sans and Katagami Mono on every route
+   (packages/chrome/src/brand.css), so the pages, the card menu, the tooltips and the dialogs draw
+   in them with no rule here. The slides keep Inter: a thumbnail is a capture, and the title plate
+   that stands in for one reads --decks-slide. No rule tightens a face's letter spacing.
 
    The width: the page uses the window. A wrap of at most 1600 px with a side gutter of 16 to
    40 px holds the bar, the band's tiles and the list; the start band's field runs edge to edge.
@@ -26,18 +24,12 @@
 /* ---- the root: faces, accent, width ---- */
 
 .ts-decks-page {
-  --decks-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --decks-code: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
-  /* the slides' face, for the title plate a capture replaces (tokens.css's value of --pt-text) */
+  /* the slides' face, for the title plate a capture replaces (the sheet's --text) */
   --decks-slide: 'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --pt-text: var(--decks-text);
-  --pt-display: var(--decks-text);
-  --pt-mono: var(--decks-code);
   /* vermilion, 5.1 to 1 on the paper (site.css --site-accent) */
   --decks-accent: oklch(0.56 0.2 33);
   --decks-page: 1600px;
   --decks-side: clamp(16px, 2.8vw, 40px);
-  font-family: var(--decks-text);
   /* a weight the face lacks is never faked: the pages draw 400 and 500 alone */
   font-synthesis: none;
 }
@@ -45,13 +37,6 @@
 /* the accent on ink: 6.5 to 1 */
 :root[data-theme='dark'] .ts-decks-page {
   --decks-accent: oklch(0.68 0.18 36);
-}
-
-/* the document while a presentations page is mounted, for the surfaces drawn in document.body */
-:root:has(.ts-decks-page) {
-  --pt-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --pt-display: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --pt-mono: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
 }
 
 .ts-home-page.ts-decks-page {

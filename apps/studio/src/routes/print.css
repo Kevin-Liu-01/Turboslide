@@ -6,8 +6,8 @@
    upper part of the page and the notes the rest. Colors are the chrome's tokens on screen; the
    sheet keeps the theme's own tokens (sheet.css) so the paper prints as the deck draws it. The
    design round (docs/DESIGN.md 3.1, 4, 6): the bar's buttons and the dropdown at the 6 px control
-   corner, Inter's default glyphs, the progress in tabular figures, the bar on the docked layer,
-   and the document on the shared scrollbar of tokens.css. */
+   corner, Katagami Sans in its default glyphs, the progress in tabular figures, the bar on the
+   docked layer, and the document on the shared scrollbar of tokens.css. */
 .ts-print {
   min-height: 100vh;
   background: var(--pt-plate);

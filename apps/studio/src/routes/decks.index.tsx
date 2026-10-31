@@ -79,7 +79,7 @@ import './decks.css';
  * The home page, /decks (gslides-parity SPEC 6.2; R03 a.1 and finding 13), on the paradigms of
  * 2026-10-30 (Kevin: "update /decks ... to use all my new paradigms and out with the old"): the
  * page uses the window's width with no rails, seams or hatch, its chrome is set in Katagami
- * through the `--pt-` face tokens (decks.css) while the thumbnails stay the slides' Inter, and
+ * through the `--pt-` face tokens (brand.css) while the thumbnails stay the slides' Inter, and
  * vermilion marks the one act the page leads with, the Blank presentation tile. Three parts:
  * the bar with the Turboslide lockup (the mark to this page, the word to /home; SPEC-4 0.16,
  * 1.10), a search field that filters the list by title, Trash and Sign In; the start band, full

@@ -32,7 +32,6 @@
   font-weight: 500;
   font-size: var(--ts-h2);
   line-height: 1.18;
-  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 

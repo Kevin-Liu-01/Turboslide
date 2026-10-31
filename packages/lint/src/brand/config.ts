@@ -1,8 +1,8 @@
 // The brand lint's configuration (docs/NEXT.md 4.1.3 item 25): the chrome source rules ported
 // from the gt-ui plugin of Prototemplate (P:.oxlintrc.json 38 to 50,
 // P:scripts/oxlint-plugins/gt-ui.ts), the CSS checks for smooth scrolling, off-token radii,
-// monospace outside the code surfaces, eyebrows, faces outside Inter and the retired outer rail,
-// and the credits check for mood pictures. This module is the one place a rule is turned off for
+// monospace outside the code surfaces, eyebrows, faces outside the product's two families (FACES)
+// and the retired outer rail, and the credits check for mood pictures. This module is the one place a rule is turned off for
 // a file, a radius or a monospace surface is named as an exception, or a finding is accepted;
 // each entry carries its reason, the way P:.oxlintrc.json carries its overrides.
 //
@@ -166,6 +166,27 @@ export const ALTERNATES_ROOTS: readonly string[] = [
   'packages/theme/brand/',
 ];
 
+/**
+ * The product's two families (docs/brand.md section 10, "The interface faces"), read by
+ * `css/inter-only`: Inter draws the slides, and since 2026-10-31 (Kevin: "also use more katagami
+ * everywhere") Katagami Sans and Katagami Mono draw the interface on every route. A rule may name
+ * either family with its metric matched fallback beside the generic and system stacks. A slide
+ * rule (a selector naming `.ts-sheet`, the root of every drawn slide) names Inter and the theme's
+ * own tokens alone: no interface face and no interface token, so no slide takes the chrome's
+ * face. An `@font-face` declares Inter, or a Katagami face in the one file the subset script
+ * writes.
+ */
+export const FACES = {
+  /** the interface families with their fallbacks, lowercased and unquoted */
+  interface: ['katagami sans', 'katagami sans fallback', 'katagami mono', 'katagami mono fallback'],
+  /** the chrome's face tokens, which brand.css points at the interface families */
+  interfaceTokens: ['--pt-text', '--pt-display', '--pt-mono'],
+  /** the stylesheet scripts/fonts/subset-katagami.py writes */
+  interfaceFaceFile: 'apps/studio/src/components/site/fonts/katagami.css',
+  /** the class every drawn slide's root carries */
+  slideRoot: 'ts-sheet',
+} as const;
+
 /** One finding: the rule, the file from the tree's root, a 1-based line and column, the text. */
 export type BrandFinding = {
   rule: BrandRuleId;
@@ -213,16 +234,10 @@ export type Override = { files: readonly string[]; rules: readonly BrandRuleId[]
 
 export const OVERRIDES: readonly Override[] = [
   {
-    files: ['apps/studio/src/components/site/site.css'],
-    rules: ['css/inter-only'],
-    reason:
-      "The site's faces (Kevin, 2026-10-30: \"use katagami instead of inter and our mono\"): /home, /docs and the site pages set Katagami Sans and Katagami Mono, cut by scripts/fonts/subset-katagami.py into components/site/fonts/katagami.css with their metric matched fallbacks. The slides drawn on those pages keep the deck's Inter, and the product's chrome and slides are unchanged.",
-  },
-  {
     files: ['apps/studio/src/routes/deck.$deckId.css'],
     rules: ['css/mono-outside-code'],
     reason:
-      'The viewer\'s faces (Kevin, 2026-10-30: "use katagami instead of inter and our mono"; "we also need to update /decks and the slide viewer as well to use all my new paradigms"): /deck/<id> points --pt-mono at Katagami Mono and sets the slide numbers, the count, the section ranges, the deck strip\'s numbers and the keys in it, the paradigm\'s use of mono for ids, shortcuts and tabular figures. Every rule of the sheet names the route\'s root, so the editor, /embed and the slides keep Inter.',
+      'The viewer\'s faces (Kevin, 2026-10-30: "use katagami instead of inter and our mono"; "we also need to update /decks and the slide viewer as well to use all my new paradigms"): /deck/<id> sets the slide numbers, the count, the section ranges, the deck strip\'s numbers and the keys in Katagami Mono (--pt-mono), the paradigm\'s use of mono for ids, shortcuts and tabular figures. Every rule of the sheet names the route\'s root, so the editor and /embed set those in Katagami Sans and the slides keep Inter.',
   },
   {
     files: ['packages/chrome/src/dialogs/special-characters-data.ts'],
@@ -556,14 +571,6 @@ export const ACCEPTED: readonly Acceptance[] = [
     match: '.ts-site .t-label',
     reason:
       "The Workbench labels of /home and /docs (docs/SITE.md D9; Kevin's pick of the Workbench direction, 2026-10-14): 12 px capitals at +0.06em that name a figure, a table, a navigation group or a screen number, never set above a page's heading at 1024 px and over; on a phone a screen's number and label sit above its one sentence, the accepted case.",
-    owner: 'the integrator',
-  },
-  {
-    rule: 'css/no-shadow',
-    file: 'apps/studio/src/components/site/site.css',
-    match: '.ts-site .site-av { box-shadow',
-    reason:
-      "The avatars of /home's title arcs (docs/SITE.md B; Kevin's note of 2026-10-15, \"make them look better coooolrr in an arc\", and the polish step's brief: a 2 px ring in the page colour between overlapping avatars and a soft shadow): round avatars that overlap on an arc and lift under the pointer. The one soft shadow on the site; never on a plate, a panel or the product's chrome.",
     owner: 'the integrator',
   },
   {

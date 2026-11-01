@@ -1,7 +1,7 @@
 /* The Connect card (docs/deck-transfer.md): a ruled block under the deck list on /decks, in the
    list's grammar (apps/studio/src/routes/decks.css): one --pt-hair frame, 11.5px titanium head,
    rows ruled with --pt-hair-soft, the command in the mono face on a plate, the Copy button as the
-   shell's text .pt-ib. Colors are tokens only, radius 0, Katagami Sans at 13px (SPEC 2.2 line
+   shell's text .pt-ib. Colors are tokens only, radius 0, Katagami Text at 13px (SPEC 2.2 line
    law). */
 .ts-connect {
   margin: 24px 0 0;

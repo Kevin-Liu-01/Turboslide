@@ -1582,20 +1582,20 @@ test(title('fonts.preload.italic-on-edit-only'), async () => {
     type: 'preloads',
     description: `/decks: ${decks.join(', ') || 'none'}; /edit: ${edit.join(', ') || 'none'}`,
   });
-  /* every route preloads the Katagami Sans core for its chrome and a route that draws slides
-     Inter's Latin upright (routes/__root.tsx; Kevin, 2026-10-31: "also use more katagami
-     everywhere"); neither page draws Katagami Mono at first paint */
-  const sansCore = (hrefs: string[]) => hrefs.filter((href) => /katagami-sans-core/.test(href));
+  /* every route preloads the Katagami Text core for its chrome and a route that draws slides
+     Inter's Latin upright (routes/__root.tsx; Kevin, 2026-11-01: "make the whole turboslide in
+     katagami text"); neither page draws Katagami Mono at first paint */
+  const textCore = (hrefs: string[]) => hrefs.filter((href) => /katagami-text-core/.test(href));
   const upright = (hrefs: string[]) =>
     hrefs.filter((href) => /InterVariable-latin/.test(href) && !/Italic/i.test(href));
   expect(decks.length, '/decks carries two font preloads').toBe(2);
-  expect(sansCore(decks), '/decks: the Katagami Sans core').toHaveLength(1);
+  expect(textCore(decks), '/decks: the Katagami Text core').toHaveLength(1);
   expect(upright(decks), "/decks: Inter's Latin upright").toHaveLength(1);
   /* the italic is a prefetch rather than a preload since the console hotfix of 2026-09-29: a
      preload drew the browser's unused-preload warning on every editor load whose deck drew no
      italic within seconds; the prefetch warms the cache without it */
   expect(edit.length, '/edit carries three: the two preloads and the italic prefetch').toBe(3);
-  expect(sansCore(edit), '/edit: the Katagami Sans core').toHaveLength(1);
+  expect(textCore(edit), '/edit: the Katagami Text core').toHaveLength(1);
   expect(upright(edit), "/edit: Inter's Latin upright").toHaveLength(1);
   expect(edit.find((href) => /Italic/i.test(href)) ?? '', 'the italic is on /edit').toMatch(
     /Italic/i,

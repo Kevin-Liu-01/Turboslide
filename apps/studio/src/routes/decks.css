@@ -5,7 +5,7 @@
    root `.ts-decks-page`, except the two the plain pages share (the link ink of `.ts-home` and the
    scrollbar gutter).
 
-   The faces: the chrome's face tokens are Katagami Sans and Katagami Mono on every route
+   The faces: the chrome's face tokens are Katagami Text and Katagami Mono on every route
    (packages/chrome/src/brand.css), so the pages, the card menu, the tooltips and the dialogs draw
    in them with no rule here. The slides keep Inter: a thumbnail is a capture, and the title plate
    that stands in for one reads --decks-slide. No rule tightens a face's letter spacing.

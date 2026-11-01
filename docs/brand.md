@@ -214,18 +214,18 @@ pixels (`docs/gslides-parity/round1/sheet/marks/bearing.json`, load 19.60):
 | The T's left bearing, of 2048 | 90  | 86  | 82  | 76  | 72  | 68  | 61  | 57  | 53  | 49  |
 
 The space after the mark is half the cap less that bearing. The product draws one lockup size: the
-22 px word beside the 24 px placement (`.ts-brand-lockup` in `packages/chrome/src/brand.css`,
-`AppBarBrand.tsx`), in Katagami Sans 500 since 2026-10-31 (section 10, "The interface faces").
-Katagami Sans has Inter's vertical metrics, read from the release file's own tables: 2048 units
-to the em, a cap of 1490 units, typo ascender and descender 1984 and 494 with `USE_TYPO_METRICS`
-set. It has no optical size axis, and its T's left bearing at weight 500 is 90 units. So the cap
-is 16.0 px, the bearing 0.97 px and the square leaves 0.23 px right of the mark's ink, which
-gives 6.80 px; the flex gap is 7 px. Both links are 24 px tall with their content centred, so the
-word's baseline (0.8638 em under the top of a line height of 1) lands on row 20 of the box with
-the mark's. The word keeps the face's own spacing. The README pair, the card and the wordmark
+23 px word beside the 24 px placement (`.ts-brand-lockup` in `packages/chrome/src/brand.css`,
+`AppBarBrand.tsx`), in Katagami Text 500 since 2026-11-01 (section 10, "The interface faces").
+Katagami Text has Inter's line metrics with a lower cap, read from the release file's own tables:
+2048 units to the em, a cap of 1430 units, typo ascender and descender 1984 and 494 with
+`USE_TYPO_METRICS` set. It has no optical size axis, and its T's left bearing at weight 500 is 74
+units. The word is 23 px so its cap meets the mark's 16 px: the cap is 16.06 px, the bearing
+0.83 px and the square leaves 0.23 px right of the mark's ink, which gives 6.97 px; the flex gap
+is 7 px. Both links are 24 px tall with their content centred, so the word's baseline (0.8638 em
+under the top of a line height of 1, 20.37 px) lands on row 20 of the box with the mark's. The word keeps the face's own spacing. The README pair, the card and the wordmark
 file below keep Inter, which `scripts/build-brand.ts` sets.
 
-The 22 px word is the smallest lockup. An 18 px word would ask for a 13 px cap, which the size
+The 23 px word is the smallest lockup. An 18 px word would ask for a 13 px cap, which the size
 steps do not draw. The README pair and the card draw the lockup at a 66 px word (a 48 px cap)
 with the mark's box and the baseline on whole pixels (sheet-judge.md fix 9);
 `packages/theme/brand/wordmark.svg` is that lockup with the word as live text.
@@ -383,7 +383,7 @@ it governs and the lane of Round 1 that carries it (NEXT.md 4.1.3 and 4.1.6).
 
 | The deck's rule                                                                         | Turboslide                                                                                                                                                     | Lane          |
 | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| Inter is the only typeface; display weight 500 at most (lines 20, 24)                   | Slides draw Inter; since 2026-10-31 `--pt-display` and `--pt-text` resolve to Katagami Sans; the lockup's word is live Katagami Sans 500                       | B1, B5 lint   |
+| Inter is the only typeface; display weight 500 at most (lines 20, 24)                   | Slides draw Inter; since 2026-11-01 `--pt-display` and `--pt-text` resolve to Katagami Text; the lockup's word is live Katagami Text 500                       | B1, B5 lint   |
 | Sentence case headings with no trailing period; Title Case only on buttons (22)         | Menu rows, tooltips and headings in sentence case; every button label in Title Case                                                                            | B3a, B2c, B3b |
 | Straight technical English, no metaphors, no em dashes, no exclamation marks (23)       | The forbidden words list of `packages/chrome/src/menus/strings.ts`; the words push                                                                             | B3a           |
 | Paper and ink tokens, a dark token remap (27, 28)                                       | `packages/chrome/src/tokens.css`, with the deviations of section 10                                                                                            | B3b           |
@@ -510,29 +510,29 @@ Since DR-D1#3 the page loads the release files cut into unicode-range subsets by
 Greek, Vietnamese and the remaining symbols load when their text is drawn. The render documents,
 the standalone file, the PDF and the PowerPoint export keep the whole files.
 
-### The interface faces (2026-10-31)
+### The interface faces (2026-10-31, Katagami Text since 2026-11-01)
 
 Kevin, 2026-10-30: "use katagami instead of inter and our mono"; 2026-10-31: "also use more
-katagami everywhere". The interface of every route (the site, `/decks`, the viewer, the editor,
-`/new`, the presenter, the print preview, Not found and the sign in pages) draws Katagami Sans, and
-Katagami Mono where it shows code, an id or a token. The landing title's "people" is Katagami Text
-(Kevin, 2026-10-31: "make people and agents in different katagami fonts like katagami text and
-katagami mono"). The slides keep their theme's faces: Inter in the library's nine themes, the
+katagami everywhere"; 2026-11-01: "make the whole turboslide in katagami text and change the
+people to katagami sans". The interface of every route (the site, `/decks`, the viewer, the
+editor, `/new`, the presenter, the print preview, Not found and the sign in pages) draws Katagami
+Text, and Katagami Mono where it shows code, an id or a token. The landing title's "people" is
+Katagami Sans and its "agents" Katagami Mono. The slides keep their theme's faces: Inter in the library's nine themes, the
 brand kit's faces where a kit sets them.
 
 - The tokens. `packages/chrome/src/brand.css`, linked after `tokens.css` on every route, sets
-  `--pt-text` and `--pt-display` to the Katagami Sans stack and `--pt-mono` to the Katagami Mono
+  `--pt-text` and `--pt-display` to the Katagami Text stack and `--pt-mono` to the Katagami Mono
   stack on `:root`, each with its metric matched fallback face second. `tokens.css` keeps every
-  `--pt-` name and value. `--pt-numerals` stays `tabular-nums`: Katagami Sans carries `tnum` and
+  `--pt-` name and value. `--pt-numerals` stays `tabular-nums`: Katagami Text carries `tnum` and
   `zero`.
-- The files. `scripts/fonts/subset-katagami.py` cuts the two release files into a core and an
+- The files. `scripts/fonts/subset-katagami.py` cuts the Text and Mono release files into a core and an
   extended file per face (`apps/studio/src/components/site/fonts/`, the record `katagami.json`),
   from every character of the chrome, the viewer, the studio's client code, the docs and the list
   pickers' bullet glyphs. The core holds ASCII, the common punctuation, the four arrows and the
-  seven key symbols a Mac menu prints (⌘ ⌃ ⌥ ⇧ ↩ ⇥ ⌫): Sans 27,608 B, Mono 20,212 B. Katagami
-  Text draws one word, so its cut is the core alone with the axis pinned at the title's weight
-  500: 13,044 B. Every route preloads the Sans core; a route that draws a slide also preloads
-  Inter's Latin subset, `/home`, `/docs` and `/deck/<id>` the Mono core, and `/home` the Text core
+  seven key symbols a Mac menu prints (⌘ ⌃ ⌥ ⇧ ↩ ⇥ ⌫): Text 27,680 B, Mono 20,212 B. Katagami
+  Sans draws one word, so its cut is the core alone with the axis pinned at the title's weight
+  500: 13,024 B. Every route preloads the Text core; a route that draws a slide also preloads
+  Inter's Latin subset, `/home`, `/docs` and `/deck/<id>` the Mono core, and `/home` the Sans core
   (`apps/studio/src/routes/__root.tsx`). Each face has a metric matched fallback over Arial or
   Menlo, so a swap moves no line.
 - The glyphs the release lacks fall through the stack to the system's face, as they did under

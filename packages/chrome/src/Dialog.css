@@ -1,7 +1,7 @@
 /* Dialog (Dialog.tsx): a centred paper card over the scrim (gslides-parity SPEC 13.3; R08 B9).
    The card keeps the frame weight (--pt-edge) because it floats over a scrim, where the hairline
    would vanish (SPEC 2.2, the help card's rule); rows inside it are ruled in --pt-hair-soft and
-   the actions row draws --pt-hair above itself. 13 px Katagami Sans, 24 px padding; the card is
+   the actions row draws --pt-hair above itself. 13 px Katagami Text, 24 px padding; the card is
    tokens.css's .pt-window (the design round, docs/DESIGN.md 3.2: paper, the --pt-edge frame, the 8
    px corner, the ring), fields and controls with a box take the 6 px corner, the checkbox 4 px, no
    shadow; the scrim fades over the toast duration and the card rises 8 px over the enter duration;

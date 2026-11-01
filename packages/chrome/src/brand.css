@@ -49,19 +49,20 @@
 }
 
 /* The interface faces (Kevin, 2026-10-30: "use katagami instead of inter and our mono";
-   2026-10-31: "also use more katagami everywhere"): every route's chrome draws Katagami Sans, and
-   Katagami Mono where it shows code, an id or a token. The faces and their metric matched
+   2026-10-31: "also use more katagami everywhere"; 2026-11-01: "make the whole turboslide in
+   katagami text"): every route's chrome draws Katagami Text, and Katagami Mono where it shows
+   code, an id or a token. The faces and their metric matched
    fallbacks are apps/studio/src/components/site/fonts/katagami.css, cut by
    scripts/fonts/subset-katagami.py and linked on every route before tokens.css; this sheet is
    linked after tokens.css (routes/__root.tsx), so these three values replace its Inter and system
    stacks on :root while tokens.css keeps every --pt- name and value. Tabular figures stay
-   --pt-numerals: Katagami Sans carries tnum and zero. No slide reads these tokens: a slide's root
+   --pt-numerals: Katagami Text carries tnum and zero. No slide reads these tokens: a slide's root
    is .ts-sheet, whose font-family is the theme's --text (packages/render/src/block-css.ts), Inter
    in the nine themes of the library, and the brand lint's css/inter-only fails a .ts-sheet rule
    that names a Katagami face or one of these tokens. */
 :root {
-  --pt-display: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
-  --pt-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-display: 'Katagami Text', 'Katagami Text Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --pt-text: 'Katagami Text', 'Katagami Text Fallback', 'Helvetica Neue', Arial, sans-serif;
   --pt-mono: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
 }
 
@@ -108,15 +109,15 @@
 
 /* The lockup (docs/NEXT.md 4.1.2; brand-a 32 to 43): the mark at the word's cap, the baselines
    met, half the cap between the mark's ink and the word's T. The product draws one size, the
-   22 px word beside the mark's 24 px placement (AppBarBrand.tsx, size 24), in Katagami Sans 500
-   since 2026-10-31. Read from the release file's own tables (KatagamiSans.woff2, 2048 units to
-   the em, the wght axis at 500): the cap is 1490 units, 16.0 px at 22 px, the mark's cap on rows
+   23 px word beside the mark's 24 px placement (AppBarBrand.tsx, size 24), in Katagami Text 500
+   since 2026-11-01. Read from the release file's own tables (KatagamiText.woff2, 2048 units to
+   the em, the wght axis at 500): the cap is 1430 units, 16.06 px at 23 px, the mark's cap on rows
    4 to 20 of its 24 px square. Both links are 24 px tall with their content centred, so the
    word's baseline lands on row 20 with the mark's: the typo ascender and descender (1984 and 494,
-   USE_TYPO_METRICS set) put it 0.8638 em under the top of a line height of 1, 20.00 px in the
-   box. The gap is half the cap (8 px) less the T's left bearing (90 units, 0.97 px; the face has
-   no optical size axis) less the 0.23 px of the square right of the mark's ink: 6.80 px, drawn
-   7 px. The word keeps the face's own spacing. The mark keeps its own width and height
+   USE_TYPO_METRICS set) put it 0.8638 em under the top of a line height of 1, 20.37 px in the
+   box. The gap is half the cap (8.03 px) less the T's left bearing (74 units, 0.83 px; the face
+   has no optical size axis) less the 0.23 px of the square right of the mark's ink: 6.97 px,
+   drawn 7 px. The word keeps the face's own spacing. The mark keeps its own width and height
    attributes, so a size that is not the 24 px step draws its own crisp step centred in the 24 px
    box. The mark links to the files page and the word to the product page; focus is the shell's
    1 px ink ring, offset so it clears the glyphs. */
@@ -148,7 +149,7 @@
 .ts-brand-lockup-word {
   font-family: var(--pt-display);
   font-weight: 500;
-  font-size: 22px;
+  font-size: 23px;
   line-height: 1;
   white-space: nowrap;
 }

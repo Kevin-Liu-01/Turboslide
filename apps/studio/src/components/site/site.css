@@ -4,7 +4,8 @@
    from their head (`site.css?url`), so no rule reaches another page, and every selector starts at
    the root class `.ts-site` (routes/-home-css.test.ts). Colours are the generated --pt- tokens of
    packages/chrome/src/tokens.css, so the two appearances follow `html[data-theme]`. The site sets
-   Katagami Sans and Katagami Mono (Kevin, 2026-10-30), subset by scripts/fonts/subset-katagami.py
+   Katagami Text and Katagami Mono (Kevin, 2026-10-30 and 2026-11-01: "make the whole turboslide
+   in katagami text"), subset by scripts/fonts/subset-katagami.py
    into components/site/fonts/katagami.css; the slides drawn on the page keep the deck's Inter.
    Letter spacing is the face's own: no rule tightens it. Spacing and component sizes are
    multiples of 8 px and text line heights multiples of 4 px. No shadow with a blur or an offset;
@@ -19,7 +20,7 @@
   --site-side: 32px;
   --site-gap: 32px;
   --site-bar-h: 56px;
-  --site-text: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --site-text: 'Katagami Text', 'Katagami Text Fallback', 'Helvetica Neue', Arial, sans-serif;
   --site-code: 'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace;
   /* the product's components inside the site (the theme button, Sign In, tooltips) read the
      chrome's face tokens, Katagami on every route (packages/chrome/src/brand.css); the slides
@@ -2499,14 +2500,14 @@
   color: var(--site-accent);
 }
 
-/* the two words in two Katagami faces (Kevin, 2026-10-31: "make people and agents in different
-   katagami fonts like katagami text and katagami mono"): "people" in Katagami Text, cut at the
-   title's 500 alone and preloaded on /home (scripts/fonts/subset-katagami.py), and "agents" in
-   the code face, as an agent's flag is. The mono advance is 1280 of 2048 units, wider than the
+/* the two words in two Katagami faces of their own (Kevin, 2026-10-31: "make people and agents
+   in different katagami fonts"; 2026-11-01: "change the people to katagami sans"): "people" in
+   Katagami Sans, cut at the title's 500 alone and preloaded on /home
+   (scripts/fonts/subset-katagami.py), and "agents" in the code face, as an agent's flag is. The mono advance is 1280 of 2048 units, wider than the
    sans's 1080 on average for these letters, so "agents" is set tighter (Kevin, 2026-10-31:
    "reduce font spacing width"), the one negative tracking on the site. */
 .ts-site .site-h1-word[data-word='people'] {
-  font-family: 'Katagami Text', 'Katagami Text Fallback', 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .ts-site .site-h1-word[data-word='agents'] {

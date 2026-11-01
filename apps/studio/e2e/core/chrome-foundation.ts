@@ -265,15 +265,15 @@ export function chromeFoundation(): string[] {
   });
 
   /* DESIGN.md 4.4 restated for the interface faces (Kevin, 2026-10-30: "use katagami instead of
-     inter and our mono"; 2026-10-31: "also use more katagami everywhere"): cold, every route
-     requests the Katagami Sans core for its chrome; /new requests that and the Latin subset of
+     inter and our mono"; 2026-11-01: "make the whole turboslide in katagami text"): cold, every
+     route requests the Katagami Text core for its chrome; /new requests that and the Latin subset of
      the original Inter (at most 120,000 B) for its slide, and nothing else; /home and /decks
      request Katagami files of components/site/fonts and at most that Latin subset; no GT Inter
      and no Berkeley Mono anywhere */
   row('chrome.font.one-subset', async ({ browser }) => {
     test.setTimeout(300_000);
     const facts: string[] = [];
-    const katagami = /\/katagami-(?:sans|mono)-(?:core|ext)(?:-[\w-]{8})?\.woff2$/;
+    const katagami = /\/katagami-(?:text|mono|sans)-(?:core|ext)(?:-[\w-]{8})?\.woff2$/;
     const latin = /\/InterVariable-latin(?:-[\w-]{8})?\.woff2$/;
     for (const path of ['/home', '/decks', '/new']) {
       const { page } = await contextAt(browser, 1440, 900);
@@ -299,7 +299,7 @@ export function chromeFoundation(): string[] {
       );
       const loaded = await page.evaluate(() => ({
         inter: document.fonts.check('16px Inter', 'Turboslide'),
-        katagami: document.fonts.check('16px "Katagami Sans"', 'Turboslide'),
+        katagami: document.fonts.check('16px "Katagami Text"', 'Turboslide'),
       }));
       facts.push(
         `${path}: ${fonts.map((f) => `${f.url.split('/').pop()} ${f.bytes} B`).join(', ') || 'none'}; ${families.length} faces`,
@@ -311,14 +311,14 @@ export function chromeFoundation(): string[] {
           new RegExp(`${katagami.source}|${latin.source}`),
         );
       /* the files as the dev server names them, or with the build's eight character hash */
-      const sansCore = fonts.filter((f) =>
-        /\/katagami-sans-core(?:-[\w-]{8})?\.woff2$/.test(f.url),
+      const textCore = fonts.filter((f) =>
+        /\/katagami-text-core(?:-[\w-]{8})?\.woff2$/.test(f.url),
       );
       const inter = fonts.filter((f) => latin.test(f.url));
-      expect(sansCore, `${path}: the Katagami Sans core, once`).toHaveLength(1);
-      expect(sansCore[0]?.bytes ?? 0, `${path}: the Katagami Sans core's bytes`).toBeGreaterThan(0);
+      expect(textCore, `${path}: the Katagami Text core, once`).toHaveLength(1);
+      expect(textCore[0]?.bytes ?? 0, `${path}: the Katagami Text core's bytes`).toBeGreaterThan(0);
       expect(inter.length, `${path}: at most one Inter file`).toBeLessThanOrEqual(1);
-      expect(loaded.katagami, `${path}: Katagami Sans is loaded`).toBe(true);
+      expect(loaded.katagami, `${path}: Katagami Text is loaded`).toBe(true);
       const total = fonts.reduce((sum, f) => sum + f.bytes, 0);
       if (path === '/new') {
         /* the editor's chrome and its slide: two files, nothing else at first paint */

@@ -1,7 +1,7 @@
 /* App-level styles only. Chrome tokens come from @turboslide/chrome tokens.css
    (SPEC 2.2) and the sheet from the theme's sheet.css and stage.css (SPEC 5.1);
-   routes/__root.tsx loads them once. Chrome type is Katagami Sans at 13px (SPEC 2.2; brand.css
-   since 2026-10-31). Colors are the --pt- tokens only. */
+   routes/__root.tsx loads them once. Chrome type is Katagami Text at 13px (SPEC 2.2; brand.css
+   since 2026-11-01). Colors are the --pt- tokens only. */
 
 *,
 *::before,

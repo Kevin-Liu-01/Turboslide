@@ -168,9 +168,9 @@ export const ALTERNATES_ROOTS: readonly string[] = [
 
 /**
  * The product's two families (docs/brand.md section 10, "The interface faces"), read by
- * `css/inter-only`: Inter draws the slides, and since 2026-10-31 (Kevin: "also use more katagami
- * everywhere") Katagami Sans and Katagami Mono draw the interface on every route, and Katagami
- * Text the landing title's "people" ("make people and agents in different katagami fonts"). A
+ * `css/inter-only`: Inter draws the slides, and since 2026-11-01 (Kevin: "make the whole
+ * turboslide in katagami text") Katagami Text and Katagami Mono draw the interface on every route,
+ * and Katagami Sans the landing title's "people" ("change the people to katagami sans"). A
  * rule may name any of them with its metric matched fallback beside the generic and system stacks. A slide
  * rule (a selector naming `.ts-sheet`, the root of every drawn slide) names Inter and the theme's
  * own tokens alone: no interface face and no interface token, so no slide takes the chrome's
@@ -180,12 +180,12 @@ export const ALTERNATES_ROOTS: readonly string[] = [
 export const FACES = {
   /** the interface families with their fallbacks, lowercased and unquoted */
   interface: [
-    'katagami sans',
-    'katagami sans fallback',
-    'katagami mono',
-    'katagami mono fallback',
     'katagami text',
     'katagami text fallback',
+    'katagami mono',
+    'katagami mono fallback',
+    'katagami sans',
+    'katagami sans fallback',
   ],
   /** the chrome's face tokens, which brand.css points at the interface families */
   interfaceTokens: ['--pt-text', '--pt-display', '--pt-mono'],
@@ -245,7 +245,7 @@ export const OVERRIDES: readonly Override[] = [
     files: ['apps/studio/src/routes/deck.$deckId.css'],
     rules: ['css/mono-outside-code'],
     reason:
-      'The viewer\'s faces (Kevin, 2026-10-30: "use katagami instead of inter and our mono"; "we also need to update /decks and the slide viewer as well to use all my new paradigms"): /deck/<id> sets the slide numbers, the count, the section ranges, the deck strip\'s numbers and the keys in Katagami Mono (--pt-mono), the paradigm\'s use of mono for ids, shortcuts and tabular figures. Every rule of the sheet names the route\'s root, so the editor and /embed set those in Katagami Sans and the slides keep Inter.',
+      'The viewer\'s faces (Kevin, 2026-10-30: "use katagami instead of inter and our mono"; "we also need to update /decks and the slide viewer as well to use all my new paradigms"): /deck/<id> sets the slide numbers, the count, the section ranges, the deck strip\'s numbers and the keys in Katagami Mono (--pt-mono), the paradigm\'s use of mono for ids, shortcuts and tabular figures. Every rule of the sheet names the route\'s root, so the editor and /embed set those in Katagami Text and the slides keep Inter.',
   },
   {
     files: ['packages/chrome/src/dialogs/special-characters-data.ts'],

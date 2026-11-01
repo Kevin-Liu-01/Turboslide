@@ -1,5 +1,5 @@
 /* The Animate panel (HTML-SLIDES-DESIGN 2.5, its first part): one card per effect of the selected
-   object, then Add animation. Katagami Sans, the radius ladder, hairlines from the tokens. */
+   object, then Add animation. Katagami Text, the radius ladder, hairlines from the tokens. */
 .ts-animate-body {
   display: flex;
   flex-direction: column;

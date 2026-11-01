@@ -3,7 +3,7 @@
    still in a hairline frame with the name under it and the entry's presets as a row of 48 by 30
    tiles. Two columns fill the 720 px card's 672 px body at 1440 and at 1280 (2 by 320 plus a 32 px
    gap); the Background dialog embeds the same grid compact, two fluid columns in its 392 px body.
-   Katagami Sans, hairlines in --pt-hair, the pointed or selected card in ink, radius 0, tokens
+   Katagami Text, hairlines in --pt-hair, the pointed or selected card in ink, radius 0, tokens
    only, nothing decorative (docs/brand.md section 8: a dialog never draws a dither or a shader of
    its own; the stills are content the seller is choosing). */
 .ts-shader {

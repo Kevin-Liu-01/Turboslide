@@ -257,7 +257,7 @@ export function chromeFontP2(): string[] {
               })
             : null;
         /* the Katagami files of components/site/fonts draw the interface on every route
-           (Kevin, 2026-10-31: "also use more katagami everywhere"), the Sans core among them;
+           (Kevin, 2026-10-31: "also use more katagami everywhere"), the Text core among them;
            every other font response names the Latin upright, one of them carries its bytes where
            the page draws a slide, and Inter loads only there */
         const slide = SLIDE_PATHS.has(path);
@@ -270,8 +270,8 @@ export function chromeFontP2(): string[] {
         readings.push(
           `${path}: ${files.length} Inter file(s) in ${answered.length} font response(s) (${answered.map((f) => `${f.url.split('/').pop()} ${f.status} ${f.bytes} B ${f.sha256.slice(0, 12)}`).join(', ')}); loaded Inter faces ${faces.length} (${faces.join('; ')})${widths ? `; widths 6969 ${widths.six9.toFixed(2)} and with ss01 ${widths.six9Open.toFixed(2)}, aaaa ${widths.a.toFixed(2)} and with cv11 ${widths.aSingle.toFixed(2)}, tnum 1111 ${widths.ones.toFixed(2)} and 0000 ${widths.zeros.toFixed(2)}` : ''}`,
         );
-        if (!answered.some((f) => /\/katagami-sans-core[^/]*\.woff2$/.test(f.url)))
-          failures.push(`${path}: no Katagami Sans core`);
+        if (!answered.some((f) => /\/katagami-text-core[^/]*\.woff2$/.test(f.url)))
+          failures.push(`${path}: no Katagami Text core`);
         if (slide ? files.length !== 1 || latin.length !== 1 : files.length > 1 || latin.length > 1)
           failures.push(
             `${path}: ${files.length} Inter files, ${latin.length} full answer(s) of the Latin file`,
@@ -306,7 +306,7 @@ export function chromeFontP2(): string[] {
     test.info().annotations.push({ type: 'face', description: readings.join(' | ') });
     expect(
       failures,
-      'the Katagami Sans core on every page and one Inter file, the release, with its features in effect',
+      'the Katagami Text core on every page and one Inter file, the release, with its features in effect',
     ).toEqual([]);
   });
 

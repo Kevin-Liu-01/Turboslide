@@ -7,7 +7,7 @@
    to that.
 
    What changes, in order:
-   1. Faces. The chrome draws Katagami Sans on every route (packages/chrome/src/brand.css); here
+   1. Faces. The chrome draws Katagami Text on every route (packages/chrome/src/brand.css); here
       Katagami Mono also sets the slide numbers, the count and the keys, always in tabular
       figures. The slides keep Inter: they read --text and --display under .ts-sheet, never the
       chrome's face tokens.

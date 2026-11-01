@@ -6961,11 +6961,11 @@
     {
       "id": "fonts.preload.italic-on-edit-only",
       "feature": "fonts",
-      "interaction": "/decks carries two font preload links (the Katagami Sans core and Inter's Latin upright); /edit carries three: those two preloads and the italic prefetch (a prefetch since the console hotfix of 2026-09-29, so the browser draws no unused preload warning)",
+      "interaction": "/decks carries two font preload links (the Katagami Text core and Inter's Latin upright); /edit carries three: those two preloads and the italic prefetch (a prefetch since the console hotfix of 2026-09-29, so the browser draws no unused preload warning)",
       "driver": "core/brand.spec.ts",
       "today": "not driven",
       "evidence": "audit-fonts 12 (__root.tsx 124 to 137)",
-      "note": "Ship one P1; docs/archive/rounds/FEATURES.md 3.1 (B2: the italic preload narrows to /edit, measured on a cold cache first); lands only under the P1 condition Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Ship one P1; docs/archive/rounds/FEATURES.md 3.1 (B2: the italic preload narrows to /edit, measured on a cold cache first); lands only under the P1 condition Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "fonts.table.takes-family",
@@ -10412,16 +10412,16 @@
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md B, D8 (72 px so the line fits the 1280 px column); Kevin's note of 2026-10-15 on the stacks",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone. Restated by the figures step, 2026-10-31 (Kevin: \"replace 'people' and 'agents' with far better representations of the people and agents (maybe no backgrounds and circles\" and \"make people and agents in different katagami fonts\"): a person is the editor's own pointer in a live hue, an agent its tool's mark, with no disc, plate, ring or shadow; \"people\" is set in Katagami Text and \"agents\" in Katagami Mono."
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone. Restated by the figures step, 2026-10-31 (Kevin: \"replace 'people' and 'agents' with far better representations of the people and agents (maybe no backgrounds and circles\" and \"make people and agents in different katagami fonts\"): a person is the editor's own pointer in a live hue, an agent its tool's mark, with no disc, plate, ring or shadow; \"people\" is set in Katagami Sans (since 2026-11-01, Kevin: \"change the people to katagami sans\") and \"agents\" in Katagami Mono."
     },
     {
       "id": "home.title.stacks",
       "feature": "decks",
-      "interaction": "Each row follows its word on the word's line, in the line's flow; at 1440 and 390 in both appearances no figure covers a letter of the h1, reaches under the bar or leaves the screen; the people's row is five of the editor's pointers and the agents' row the four tools' marks, with no disc, plate or ring, each 24 px tall or more at 1440 and 16 px or more at 390; \"people\" is set in Katagami Text and \"agents\" in Katagami Mono; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are buttons found by role and name",
+      "interaction": "Each row follows its word on the word's line, in the line's flow; at 1440 and 390 in both appearances no figure covers a letter of the h1, reaches under the bar or leaves the screen; the people's row is five of the editor's pointers and the agents' row the four tools' marks, with no disc, plate or ring, each 24 px tall or more at 1440 and 16 px or more at 390; \"people\" is set in Katagami Sans and \"agents\" in Katagami Mono; the five people and four agents (Claude Code, Codex, OpenClaw, Hermes) are buttons found by role and name",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md B; Kevin's request of 2026-10-14 (avatars at the top right of people, the four agents beside agents) and his note of 2026-10-15 (\"make them look better coooolrr in an arc and make them interactable\")",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone. Restated by the figures step, 2026-10-31 (Kevin: \"replace 'people' and 'agents' with far better representations of the people and agents (maybe no backgrounds and circles\" and \"make people and agents in different katagami fonts\"): a person is the editor's own pointer in a live hue, an agent its tool's mark, with no disc, plate, ring or shadow; \"people\" is set in Katagami Text and \"agents\" in Katagami Mono."
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14, restated by the polish step, 2026-10-15 (Kevin: the stacks in an arc and interactable): not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone. Restated by the figures step, 2026-10-31 (Kevin: \"replace 'people' and 'agents' with far better representations of the people and agents (maybe no backgrounds and circles\" and \"make people and agents in different katagami fonts\"): a person is the editor's own pointer in a live hue, an agent its tool's mark, with no disc, plate, ring or shadow; \"people\" is set in Katagami Sans (since 2026-11-01, Kevin: \"change the people to katagami sans\") and \"agents\" in Katagami Mono."
     },
     {
       "id": "home.title.press",
@@ -10430,7 +10430,7 @@
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md B and section 5 (the press, the guests); Kevin's note of 2026-10-15 (\"make them interactable\")",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the polish step, 2026-10-15: the arcs' presses reach the live editor of the hero; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone. Restated by the figures step, 2026-10-31 (Kevin: \"replace 'people' and 'agents' with far better representations of the people and agents (maybe no backgrounds and circles\" and \"make people and agents in different katagami fonts\"): a person is the editor's own pointer in a live hue, an agent its tool's mark, with no disc, plate, ring or shadow; \"people\" is set in Katagami Text and \"agents\" in Katagami Mono."
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the polish step, 2026-10-15: the arcs' presses reach the live editor of the hero; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"fix the 4 people/agents thing to right of people and agents. maybe we need a better title header\"): two lines, each ending with its row of avatars in the line's flow; the arcs and orbit.ts are gone. Restated by the figures step, 2026-10-31 (Kevin: \"replace 'people' and 'agents' with far better representations of the people and agents (maybe no backgrounds and circles\" and \"make people and agents in different katagami fonts\"): a person is the editor's own pointer in a live hue, an agent its tool's mark, with no disc, plate, ring or shadow; \"people\" is set in Katagami Sans (since 2026-11-01, Kevin: \"change the people to katagami sans\") and \"agents\" in Katagami Mono."
     },
     {
       "id": "home.hero.poster-first",
@@ -10598,12 +10598,12 @@
     {
       "id": "chrome.font.one-subset",
       "feature": "chrome",
-      "interaction": "Cold at 1440 on /home, /decks and /new every font request is a Katagami file of components/site/fonts or the Latin subset of InterVariable named in inter.css; the Katagami Sans core is requested once and document.fonts reports Katagami Sans loaded, with at most one Inter file; on /new there are exactly two requests, the Katagami Sans core and that Latin subset (at most 120,000 B), at most 150,000 B together, and document.fonts reports Inter loaded; on /home and /decks the fonts are at most 200,000 B together; no requested file or loaded family carries \"GT Inter\" or \"Berkeley\"",
+      "interaction": "Cold at 1440 on /home, /decks and /new every font request is a Katagami file of components/site/fonts or the Latin subset of InterVariable named in inter.css; the Katagami Text core is requested once and document.fonts reports Katagami Text loaded, with at most one Inter file; on /new there are exactly two requests, the Katagami Text core and that Latin subset (at most 120,000 B), at most 150,000 B together, and document.fonts reports Inter loaded; on /home and /decks the fonts are at most 200,000 B together; no requested file or loaded family carries \"GT Inter\" or \"Berkeley\"",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "research-type 1.4: 352,615 B over the wire on production /home, the whole InterVariable on every route",
-      "note": "Design round (docs/DESIGN.md 11), DR-D1#3 Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\"). Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Design round (docs/DESIGN.md 11), DR-D1#3 Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\"). Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "chrome.font.on-demand",
@@ -10750,7 +10750,7 @@
       "today": "broken",
       "severity": 1,
       "evidence": "research-surfaces 3.2: the You need access buttons square",
-      "note": "Design round (docs/DESIGN.md 11), DR-D5#2 Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Design round (docs/DESIGN.md 11), DR-D5#2 Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "chrome.scroll.default-everywhere",
@@ -11110,12 +11110,12 @@
     {
       "id": "accounts.google-button-guideline",
       "feature": "share",
-      "interaction": "On /signin and in the editor's sign in window, in both appearances: Continue with Google draws #FFFFFF with a 1 px #747775 edge on light and #131314 with a 1 px #8E918F edge on dark, the standard four colour G at 18 px, and the label \"Continue with Google\" in Katagami Sans 500 at 4.5:1 or more on that fill; not driven with the reason on a server without a Google client",
+      "interaction": "On /signin and in the editor's sign in window, in both appearances: Continue with Google draws #FFFFFF with a 1 px #747775 edge on light and #131314 with a 1 px #8E918F edge on dark, the standard four colour G at 18 px, and the label \"Continue with Google\" in Katagami Text 500 at 4.5:1 or more on that fill; not driven with the reason on a server without a Google client",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "docs/NEXT.md question 4 and 4.3.3; research-auth question 3, 09-editor-dialog-mailoff-1440-dark.jpg (the ink fill)",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2 Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#2 Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "accounts.plate.cancel-comes-home",
@@ -11157,12 +11157,12 @@
     {
       "id": "accounts.dialog-in-brand",
       "feature": "share",
-      "interaction": "The plate on /signin and in the editor's window, in both appearances: Katagami Sans in its default glyphs, the chrome's tokens, 6 px controls, the 8 px window and no box around the page's column, provider rows with the mark and the words aligned left, one hairline \"or\" row, Title Case buttons, the mark at the page's head, no Cancel, no footer and no shadow",
+      "interaction": "The plate on /signin and in the editor's window, in both appearances: Katagami Text in its default glyphs, the chrome's tokens, 6 px controls, the 8 px window and no box around the page's column, provider rows with the mark and the words aligned left, one hairline \"or\" row, Title Case buttons, the mark at the page's head, no Cancel, no footer and no shadow",
       "driver": "core/share.spec.ts",
       "today": "broken",
       "severity": 2,
       "evidence": "research-auth K6, 4.2; docs/NEXT.md 4.3.2 item 7 (its \"no radius\" read under the DESIGN.md 3.1 ladder)",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4 Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Polish two (docs/POLISH-2.md 6), P2-A#4 Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "accounts.failure-says-why",
@@ -11283,11 +11283,11 @@
     {
       "id": "chrome.font.official-inter",
       "feature": "chrome",
-      "interaction": "Cold at 1440 on /home, /decks, /new, /signin and /docs the Katagami Sans core is among the font responses; besides the Katagami files there is at most one font file, InterVariable-latin.woff2, and on /new exactly that one, its bytes and sha256 equal to its web record in packages/fonts/export/fonts.json; document.fonts holds one loaded Inter face on /new and at most one elsewhere; in spans of that face, where it is loaded, at 100 px, weight 400, font-optical-sizing none, font-kerning none, '6969' measures 4 x 1,191 / 2,048 x 100 px with 'ss01' and 4 x 1,270 / 2,048 x 100 px without, 'aaaa' 4 x 1,254 / 2,048 x 100 px with 'cv11' and 4 x 1,150 / 2,048 x 100 px without, each within 1 px, and with 'tnum' '1111' and '0000' measure the same width",
+      "interaction": "Cold at 1440 on /home, /decks, /new, /signin and /docs the Katagami Text core is among the font responses; besides the Katagami files there is at most one font file, InterVariable-latin.woff2, and on /new exactly that one, its bytes and sha256 equal to its web record in packages/fonts/export/fonts.json; document.fonts holds one loaded Inter face on /new and at most one elsewhere; in spans of that face, where it is loaded, at 100 px, weight 400, font-optical-sizing none, font-kerning none, '6969' measures 4 x 1,191 / 2,048 x 100 px with 'ss01' and 4 x 1,270 / 2,048 x 100 px without, 'aaaa' 4 x 1,254 / 2,048 x 100 px with 'cv11' and 4 x 1,150 / 2,048 x 100 px without, each within 1 px, and with 'tnum' '1111' and '0000' measure the same width",
       "driver": "core/chrome.spec.ts",
       "today": "works",
       "evidence": "research-header 4.1 (Version 4.001;git-9221beed3, opsz 14 to 32, wght 100 to 900, 42 features in the Latin subset); docs/DESIGN.md 4.2 (the advance widths)",
-      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4 Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\"). Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Polish two (docs/POLISH-2.md 6), P2-F#4 Restated by the full bleed round, 2026-10-30 (Kevin: \"use katagami instead of inter and our mono\", \"dont do rails\", \"update /decks and the slide viewer as well to use all my new paradigms\"). Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "chrome.font.no-stylistic-sets",
@@ -11371,12 +11371,12 @@
     {
       "id": "chrome.select.look",
       "feature": "chrome",
-      "interaction": "At 1440 and 390 in both appearances, the Share dialog's General access field: the trigger is 32 px, radius 6 px, a 1 px `--pt-field` border, `--pt-paper` ground, `--pt-ink` text in Katagami Sans with tabular figures and the sprite's chevron; the open list computes radius 6 px, a 1 px `--pt-edge` border and `--pt-ring` with no blur or offset; rows are square and 28 px with tabular figures; the lit row draws `--pt-plate`; row text on paper and the lit row's ink on `--pt-plate` hold 4.5:1. In the light appearance at 1440 the compact trigger of the table's Format options is 22 px, and in the Publish size list the figures \"480\" of Small and \"960\" of Medium measure the same width. In forced colours (emulated) the General access list's active option computes the system's Highlight ground and HighlightText ink (4.5:1), the chosen row draws its check at 3:1 on the list's ground, and the focused trigger, open and closed, draws a 2 px solid outline 1 px outside its border",
+      "interaction": "At 1440 and 390 in both appearances, the Share dialog's General access field: the trigger is 32 px, radius 6 px, a 1 px `--pt-field` border, `--pt-paper` ground, `--pt-ink` text in Katagami Text with tabular figures and the sprite's chevron; the open list computes radius 6 px, a 1 px `--pt-edge` border and `--pt-ring` with no blur or offset; rows are square and 28 px with tabular figures; the lit row draws `--pt-plate`; row text on paper and the lit row's ink on `--pt-plate` hold 4.5:1. In the light appearance at 1440 the compact trigger of the table's Format options is 22 px, and in the Publish size list the figures \"480\" of Small and \"960\" of Medium measure the same width. In forced colours (emulated) the General access list's active option computes the system's Highlight ground and HighlightText ink (4.5:1), the chosen row draws its check at 3:1 on the list's ground, and the focused trigger, open and closed, draws a 2 px solid outline 1 px outside its border",
       "driver": "core/chrome.spec.ts",
       "today": "broken",
       "severity": 1,
       "evidence": "DESIGN.md 3.1, 3.2, 4.5, 5.3",
-      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the nine deck themes of 7.2 leave the chrome's tokens as they are (the chrome draws its own appearance), so the row reads the two appearances; the forced colours step is DD-fix's (the keyboard verifier's pass 1, finding 2: the active option was invisible in every list and a focused trigger looked unfocused) Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Sans and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
+      "note": "Dropdowns (docs/DROPDOWNS.md 7), DD-C#2; the nine deck themes of 7.2 leave the chrome's tokens as they are (the chrome draws its own appearance), so the row reads the two appearances; the forced colours step is DD-fix's (the keyboard verifier's pass 1, finding 2: the active option was invisible in every list and a focused trigger looked unfocused) Restated by the Katagami step, 2026-10-31 (Kevin: \"also use more katagami everywhere\"): every route's interface draws Katagami Text (since 2026-11-01, Kevin: \"make the whole turboslide in katagami text\") and Katagami Mono (packages/chrome/src/brand.css), slides keep the theme's Inter."
     },
     {
       "id": "chrome.select.agent-set",

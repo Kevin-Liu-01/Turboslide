@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Cut the interface faces from Katagami Sans and Katagami Mono (Kevin, 2026-10-30: "use katagami
+"""Cut the interface faces from Katagami Text and Katagami Mono (Kevin, 2026-10-30: "use katagami
 instead of inter and our mono" on the site; 2026-10-31: "also use more katagami everywhere", so
-every route's chrome draws them; the web-font-optimization brief of 2026-10-30), and the landing
-title's "people" from Katagami Text (Kevin, 2026-10-31: "make people and agents in different
-katagami fonts"). The slides keep their theme's faces: nothing here reaches a `.ts-sheet`.
+every route's chrome draws them; 2026-11-01: "make the whole turboslide in katagami text"; the
+web-font-optimization brief of 2026-10-30), and the landing title's "people" from Katagami Sans
+(Kevin, 2026-11-01: "change the people to katagami sans"). The slides keep their theme's faces:
+nothing here reaches a `.ts-sheet`.
 
 Run by hand, never by the build. The output is committed:
 
-  apps/studio/src/components/site/fonts/katagami-{sans,mono}-{core,ext}.woff2
-  apps/studio/src/components/site/fonts/katagami-text-core.woff2
+  apps/studio/src/components/site/fonts/katagami-{text,mono}-{core,ext}.woff2
+  apps/studio/src/components/site/fonts/katagami-sans-core.woff2
   apps/studio/src/components/site/fonts/katagami.json   the record: sources, bytes, glyphs, ranges
   apps/studio/src/components/site/fonts/katagami.css     the faces, loaded on every route by
                                                          routes/__root.tsx
@@ -33,12 +34,12 @@ and split in two: a core file with ASCII, the no-break space, the punctuation mo
 key symbols the menus print on a Mac (KEYS), which every route preloads (routes/__root.tsx), and an
 extended file behind its unicode-range that a page downloads only when it draws one of its
 characters. Each unicode-range is read from the cut font's cmap. The metric matched fallback
-faces (Katagami Sans Fallback and Katagami Text Fallback over Arial, Katagami Mono Fallback over
+faces (Katagami Text Fallback and Katagami Sans Fallback over Arial, Katagami Mono Fallback over
 Menlo) come first in the block, so no fallback rule sits between a face's two files.
 
-Katagami Text draws one word, the title's "people" at weight 500 (site.css `.t-display`), so its
-cut is the core file alone with the axis pinned at 500: 13,044 bytes where the whole axis is 27,680,
-preloaded on /home. Another weight of it would be synthesized, so a stylesheet that sets one
+Katagami Sans draws one word, the title's "people" at weight 500 (site.css `.t-display`), so its
+cut is the core file alone with the axis pinned at 500: 13,024 bytes where the whole axis is
+27,608, preloaded on /home. Another weight of it would be synthesized, so a stylesheet that sets one
 reruns this script with that weight added.
 
 A character the release lacks falls through the stack to the system's face, as it did under
@@ -81,11 +82,11 @@ CSS = OUT / 'katagami.css'
 SOURCE_URL = 'https://katagami.kevinliu.studio/fonts/'
 
 # each face's wght range and files: the interface faces keep the whole axis in a core and an
-# extended file; Katagami Text draws the title's one word at 500 and needs the core alone
+# extended file; Katagami Sans draws the title's one word at 500 and needs the core alone
 FACES = {
-    'sans': {'file': 'KatagamiSans.woff2', 'family': 'Katagami Sans', 'weights': (100, 900), 'parts': ('ext', 'core')},
+    'text': {'file': 'KatagamiText.woff2', 'family': 'Katagami Text', 'weights': (100, 900), 'parts': ('ext', 'core')},
     'mono': {'file': 'KatagamiMono.woff2', 'family': 'Katagami Mono', 'weights': (100, 900), 'parts': ('ext', 'core')},
-    'text': {'file': 'KatagamiText.woff2', 'family': 'Katagami Text', 'weights': (500, 500), 'parts': ('core',)},
+    'sans': {'file': 'KatagamiSans.woff2', 'family': 'Katagami Sans', 'weights': (500, 500), 'parts': ('core',)},
 }
 FEATURES = ['calt', 'ccmp', 'locl', 'kern', 'mark', 'mkmk', 'case', 'tnum', 'zero']
 
@@ -125,12 +126,12 @@ FREQ = {
     'v': 0.0083, 'k': 0.0059, 'x': 0.0014, 'j': 0.0009, 'q': 0.0008, 'z': 0.0007,
 }
 FALLBACKS = {
-    'sans': {
+    'text': {
         'local': ['Arial', 'Helvetica Neue', 'Liberation Sans'],
         'file': '/System/Library/Fonts/Supplemental/Arial.ttf',
     },
     'mono': {'local': ['Menlo Regular', 'Menlo-Regular', 'Consolas', 'Liberation Mono'], 'file': '/System/Library/Fonts/Menlo.ttc'},
-    'text': {
+    'sans': {
         'local': ['Arial', 'Helvetica Neue', 'Liberation Sans'],
         'file': '/System/Library/Fonts/Supplemental/Arial.ttf',
     },

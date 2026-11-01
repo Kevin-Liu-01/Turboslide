@@ -12,14 +12,14 @@
     "zero"
   ],
   "faces": {
-    "sans": {
-      "source": "KatagamiSans.woff2",
+    "text": {
+      "source": "KatagamiText.woff2",
       "weights": [
         100,
         900
       ],
-      "sourceBytes": 284972,
-      "sourceSha256": "fe5165bc790b8ab4c13be439f663a9d377003e9f8b7c714bc78740989ffda4ee",
+      "sourceBytes": 290044,
+      "sourceSha256": "1e244c044506784d1a425ab138c916434e6e7c85c44d98524415617afdf9dc42",
       "sourceGlyphs": 3667,
       "missing": [
         "U+00AD",
@@ -72,16 +72,16 @@
         "U+2922"
       ],
       "files": {
-        "katagami-sans-ext.woff2": {
-          "bytes": 31372,
-          "sha256": "067f436eb6e9be13c9284cce02b110c2c5d4e68ac4d9d90243f26e3d0cff94c1",
-          "glyphs": 413,
+        "katagami-text-ext.woff2": {
+          "bytes": 31872,
+          "sha256": "78df4b5fece06b7d20ad8912455397c60cb3a9c15a68c167aea97addcb1a3350",
+          "glyphs": 411,
           "unicodeRange": "U+00A1-00AC, U+00AE-00B6, U+00B8-00D6, U+00D8-0148, U+014A-017F, U+2000-200B, U+2010-2012, U+2015-2017, U+201A-201B, U+201E-2025, U+2027, U+202F-2055, U+2057, U+205F, U+20AC, U+2212, U+25A0, U+25AA, U+25C4, U+25C6-25C7, U+25CB, U+25CF, U+25E6, U+2605, U+26A0, U+2713, U+2756"
         },
-        "katagami-sans-core.woff2": {
-          "bytes": 27608,
-          "sha256": "923d18337cd86f15453f775f2c4a5a9bb0bf97fc3caa2265ba9b5a8b5954cd03",
-          "glyphs": 217,
+        "katagami-text-core.woff2": {
+          "bytes": 27680,
+          "sha256": "fbf0a90860471238114c8f068572f7ec093fadf4b6d941821e03b6d2bbb33c41",
+          "glyphs": 215,
           "unicodeRange": "U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193, U+21A9, U+21E5, U+21E7, U+2303, U+2318, U+2325, U+232B"
         }
       }
@@ -159,14 +159,14 @@
         }
       }
     },
-    "text": {
-      "source": "KatagamiText.woff2",
+    "sans": {
+      "source": "KatagamiSans.woff2",
       "weights": [
         500,
         500
       ],
-      "sourceBytes": 290044,
-      "sourceSha256": "1e244c044506784d1a425ab138c916434e6e7c85c44d98524415617afdf9dc42",
+      "sourceBytes": 284972,
+      "sourceSha256": "fe5165bc790b8ab4c13be439f663a9d377003e9f8b7c714bc78740989ffda4ee",
       "sourceGlyphs": 3667,
       "missing": [
         "U+00AD",
@@ -219,10 +219,10 @@
         "U+2922"
       ],
       "files": {
-        "katagami-text-core.woff2": {
-          "bytes": 13044,
-          "sha256": "ebe3dca2390487045521906166df92cf2e5cca4a9fb488c11bcdca2abd6aa7d4",
-          "glyphs": 215,
+        "katagami-sans-core.woff2": {
+          "bytes": 13024,
+          "sha256": "07bba397f308199325ccde9165ea860c4d9f3ee8a88c327fcd7be40a3c1828d3",
+          "glyphs": 217,
           "unicodeRange": "U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193, U+21A9, U+21E5, U+21E7, U+2303, U+2318, U+2325, U+232B"
         }
       }

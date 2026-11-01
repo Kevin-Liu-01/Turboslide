@@ -100,16 +100,16 @@ const SLIDELESS_ROUTES: ReadonlySet<string> = new Set([
 
 /**
  * The routes whose first screen sets Katagami Mono (Kevin, 2026-10-30): the landing's field, the
- * docs' code and the viewer's slide numbers and strip. They preload the Mono core beside the Sans
+ * docs' code and the viewer's slide numbers and strip. They preload the Mono core beside the Text
  * core; every other route loads it on first use, behind its metric matched fallback.
  */
 const MONO_FIRST_SCREEN_ROUTES: ReadonlySet<string> = new Set(['/docs', '/home', '/deck/$deckId']);
 
 /**
- * The routes whose first screen sets Katagami Text (Kevin, 2026-10-31: "make people and agents in
- * different katagami fonts"): the landing's title, whose "people" is its one word in that face.
+ * The routes whose first screen sets Katagami Sans (Kevin, 2026-11-01: "change the people to
+ * katagami sans"): the landing's title, whose "people" is its one word in that face.
  */
-const TEXT_FIRST_SCREEN_ROUTES: ReadonlySet<string> = new Set(['/home']);
+const SANS_FIRST_SCREEN_ROUTES: ReadonlySet<string> = new Set(['/home']);
 
 /** Whether a page's matched routes draw no slide. */
 function drawsNoSlide(routeIds: readonly string[]): boolean {
@@ -162,7 +162,7 @@ export const Route = createRootRoute({
     const routeIds = matches.map((match) => match.routeId);
     const slideless = drawsNoSlide(routeIds);
     const mono = routeIds.some((id) => MONO_FIRST_SCREEN_ROUTES.has(id));
-    const text = routeIds.some((id) => TEXT_FIRST_SCREEN_ROUTES.has(id));
+    const sans = routeIds.some((id) => SANS_FIRST_SCREEN_ROUTES.has(id));
     /* the card's absolute address (R02 4.1): TURBOSLIDE_PUBLIC_ORIGIN when the deployment sets
        it, else production; a route with a loader may set its own og:url from its request */
     const card = `${SITE.origin()}${SITE.card.path}`;
@@ -203,11 +203,11 @@ export const Route = createRootRoute({
         { rel: 'manifest', href: SITE.icons.manifest },
         /* the faces start with the HTML (SPEC-3 9.2 G1), so no request waits for a stylesheet
            and each face's metric matched fallback covers its swap. Every route draws its chrome
-           in Katagami Sans (Kevin, 2026-10-31: "also use more katagami everywhere") and preloads
-           its core file; a route that draws a slide also preloads Inter's Latin subset
+           in Katagami Text (Kevin, 2026-11-01: "make the whole turboslide in katagami text") and
+           preloads its core file; a route that draws a slide also preloads Inter's Latin subset
            (docs/DESIGN.md 4.4: 113 KB where the whole file was 352 KB), the face of the
            library's themes; MONO_FIRST_SCREEN_ROUTES add the Mono core and
-           TEXT_FIRST_SCREEN_ROUTES the Katagami Text cut. Another script's subset of Inter, a
+           SANS_FIRST_SCREEN_ROUTES the Katagami Sans cut. Another script's subset of Inter, a
            face's extended file and the Mono core elsewhere load through their unicode-range when
            their text is drawn. The italic is prefetched on the editor alone
            (docs/archive/rounds/FEATURES.md 3.1, the fonts P1 item; audit-fonts 12: /decks,
@@ -216,10 +216,10 @@ export const Route = createRootRoute({
            deck draws no italic within seconds, and the face loads through `font-display: swap`
            where a page first draws it */
         ...[
-          katagamiSansWoff2,
+          katagamiTextWoff2,
           ...(slideless ? [] : [interWoff2]),
           ...(mono ? [katagamiMonoWoff2] : []),
-          ...(text ? [katagamiTextWoff2] : []),
+          ...(sans ? [katagamiSansWoff2] : []),
         ].map((href) => ({
           rel: 'preload',
           href,

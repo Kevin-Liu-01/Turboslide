@@ -93,17 +93,18 @@ describe('brand.css agrees with BRAND_TOKENS', () => {
   });
 
   it("points the chrome's three face tokens at Katagami on :root and declares no other --pt- token", () => {
-    /* Kevin, 2026-10-31: "also use more katagami everywhere"; tokens.css keeps its Inter stacks
-       and brand.css, linked after it on every route, replaces the three values */
+    /* Kevin, 2026-10-31: "also use more katagami everywhere"; 2026-11-01: "make the whole
+       turboslide in katagami text"; tokens.css keeps its Inter stacks and brand.css, linked after
+       it on every route, replaces the three values */
     const declared = rootTokens(brandCss, ':root');
-    const sans = "'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif";
+    const text = "'Katagami Text', 'Katagami Text Fallback', 'Helvetica Neue', Arial, sans-serif";
     expect(
       Object.keys(declared)
         .filter((name) => !name.startsWith('ts-'))
         .sort(),
     ).toEqual(['pt-display', 'pt-mono', 'pt-text']);
-    expect(declared['pt-text']).toBe(sans);
-    expect(declared['pt-display']).toBe(sans);
+    expect(declared['pt-text']).toBe(text);
+    expect(declared['pt-display']).toBe(text);
     expect(declared['pt-mono']).toBe(
       "'Katagami Mono', 'Katagami Mono Fallback', ui-monospace, Menlo, monospace",
     );
@@ -158,10 +159,10 @@ describe('brand.css agrees with BRAND_TOKENS', () => {
     expect(declarationsOf(brandCss, '.ts-tile .ts-tile-mark').fill).toBe('var(--pt-ink)');
   });
 
-  it("sets the lockup at the 22 px word beside the 24 px mark box, a 7 px gap and the face's own spacing", () => {
+  it("sets the lockup at the 23 px word beside the 24 px mark box, a 7 px gap and the face's own spacing", () => {
     expect(declarationsOf(brandCss, '.ts-brand-lockup').gap).toBe('7px');
     const word = declarationsOf(brandCss, '.ts-brand-lockup-word');
-    expect(word['font-size']).toBe('22px');
+    expect(word['font-size']).toBe('23px');
     expect(word['font-weight']).toBe('500');
     /* no tracking below the face's own since 2026-10-31 (the paradigms: no negative spacing) */
     expect(word['letter-spacing']).toBeUndefined();
@@ -171,19 +172,19 @@ describe('brand.css agrees with BRAND_TOKENS', () => {
     expect(declarationsOf(brandCss, '.ts-brand-lockup-mark').width).toBe('24px');
     expect(declarationsOf(brandCss, '.ts-brand-lockup-mark').height).toBe('24px');
     expect(declarationsOf(brandCss, '.ts-brand-lockup-word').height).toBe('24px');
-    /* the gap's arithmetic in Katagami Sans 500 (brand.css, read from KatagamiSans.woff2): half
-       the cap (1490 of 2048 units) less the T's left bearing (90 units; no optical size axis) less
-       the square's 0.23 px right of the mark's ink, 6.80 px drawn as 7 */
-    const cap = (1490 / 2048) * 22;
+    /* the gap's arithmetic in Katagami Text 500 (brand.css, read from KatagamiText.woff2): half
+       the cap (1430 of 2048 units) less the T's left bearing (74 units; no optical size axis) less
+       the square's 0.23 px right of the mark's ink, 6.97 px drawn as 7 */
+    const cap = (1430 / 2048) * 23;
     const placement = markPlacement(24);
     const inkRight = Math.max(...quadXs(markQuadsAt(24, placement.cap, placement.top)));
-    const gap = cap / 2 - (90 / 2048) * 22 - (24 - inkRight);
-    expect(gap).toBeCloseTo(6.8, 1);
+    const gap = cap / 2 - (74 / 2048) * 23 - (24 - inkRight);
+    expect(gap).toBeCloseTo(6.97, 1);
     expect(Math.round(gap)).toBe(7);
     expect(Math.round(cap)).toBe(placement.cap);
     /* the baseline under a line height of 1 on the typo ascender and descender (1984, 494), in
-       the 22 px line centred in the 24 px box: row 20, the mark's */
-    const baseline = (24 - 22) / 2 + ((1 - (1984 + 494) / 2048) / 2 + 1984 / 2048) * 22;
+       the 23 px line centred in the 24 px box: row 20, the mark's */
+    const baseline = (24 - 23) / 2 + ((1 - (1984 + 494) / 2048) / 2 + 1984 / 2048) * 23;
     expect(Math.round(baseline)).toBe(placement.top + placement.cap);
   });
 });

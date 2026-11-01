@@ -50,7 +50,7 @@ export type FieldKind = 'slide' | 'word';
 /**
  * A field of the site (field.ts; Kevin, 2026-10-30): one canvas filling its parent, a text
  * portrait set in the lighthouse slide's own JSON in Katagami Mono. The hero's field (`slide`)
- * draws the slide's photograph; the footer's field (`word`) draws the name in Katagami Sans the
+ * draws the slide's photograph; the footer's field (`word`) draws the name in Katagami Text the
  * same way.
  *
  * The field prints itself once through the deck's 8 by 8 Bayer screen (`SCREEN`, REVEAL_MS), the

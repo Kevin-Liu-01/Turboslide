@@ -833,7 +833,7 @@ export function Overlay({ view }: OverlayProps) {
       {view.sites.map((site, i) => (
         <span
           key={`site:${i}`}
-          className="ts-site"
+          className="ts-conn-site"
           style={{ left: site.x * k, top: site.y * k }}
           aria-hidden="true"
         />

@@ -2456,7 +2456,7 @@ export async function run(t) {
         const q = await t.sheetPoint(to.x, to.y);
         const mid = await t.drag(p, q, {
           steps: 18,
-          during: async () => ({ sites: await t.count('.ts-overlay .ts-site') }),
+          during: async () => ({ sites: await t.count('.ts-overlay .ts-conn-site') }),
         });
         const obj = await t.newObjectAfter(S, before, 15_000).catch(() => null);
         await t.press('Escape');

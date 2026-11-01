@@ -20,6 +20,7 @@ export const ROWS: readonly string[] = [
   'home.budget.first-script',
   'home.bar.narrow',
   'home.canvas.gestures',
+  'home.page.after-editor',
 ];
 
 type Theme = 'light' | 'dark';
@@ -122,6 +123,54 @@ export function rows(): void {
       }
     }
     test.info().annotations.push({ type: 'bar', description: notes.join(' | ') });
+  });
+
+  /* 2026-11-01 (Kevin: "fix how when going to /home it can just break"): the editor's overlay
+     sheet drew its connection sites as `.ts-site`, a route's sheet stays loaded after a client
+     navigation, and /home reached from the editor was a 7 px column with the bar packed left */
+  test(title('home.page.after-editor'), async ({ browser }) => {
+    test.setTimeout(360_000);
+    const context = await browser.newContext({
+      extraHTTPHeaders,
+      viewport: { width: 1440, height: 900 },
+    });
+    try {
+      const page = await context.newPage();
+      expect((await page.goto('/new'))?.status(), '/new answers 200').toBe(200);
+      await page.locator('[data-control="title.home"]').first().click({ timeout: 180_000 });
+      await page.waitForURL(/\/decks(?:[?#]|$)/, { timeout: 60_000 });
+      await page.locator('[data-control="appbar.about"]').first().click({ timeout: 60_000 });
+      await page.waitForURL(/\/home(?:[?#]|$)/, { timeout: 60_000 });
+      await page.locator('.ts-site[data-hydrated]').waitFor({ timeout: 60_000 });
+      const facts = await page.evaluate(() => {
+        const width = (selector: string): number =>
+          document.querySelector(selector)?.getBoundingClientRect().width ?? 0;
+        return {
+          window: document.documentElement.clientWidth,
+          root: width('.ts-site'),
+          main: width('main'),
+          title: width('#site-title'),
+          nav: document.querySelector('.site-bar-nav')?.getBoundingClientRect().left ?? 0,
+          overlaySheet: [...document.styleSheets].some((sheet) => {
+            try {
+              return [...sheet.cssRules].some((rule) => /\.ts-conn-site\b/.test(rule.cssText));
+            } catch {
+              return false;
+            }
+          }),
+        };
+      });
+      test.info().annotations.push({ type: 'after-editor', description: JSON.stringify(facts) });
+      expect(facts.overlaySheet, "the editor's overlay sheet is still loaded").toBe(true);
+      expect(facts.root, 'the root spans the window').toBe(facts.window);
+      expect(facts.main, 'main spans the window').toBe(facts.window);
+      expect(facts.title, 'the title spans the column').toBeGreaterThan(facts.window / 2);
+      expect(facts.nav, 'the nav sits on the right half of the bar').toBeGreaterThan(
+        facts.window / 2,
+      );
+    } finally {
+      await context.close();
+    }
   });
 
   test(title('home.page.layout'), async ({ browser }) => {

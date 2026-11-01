@@ -416,8 +416,9 @@
   pointer-events: none;
 }
 
-/* a connection site: a 6px ring in ink on paper (SPEC-2 6.2) */
-.ts-site {
+/* a connection site: a 6px ring in ink on paper (SPEC-2 6.2); never `.ts-site`, the class of the
+   site's root, which this sheet would collapse to a dot on /home once the editor has loaded */
+.ts-conn-site {
   position: absolute;
   box-sizing: border-box;
   width: 7px;

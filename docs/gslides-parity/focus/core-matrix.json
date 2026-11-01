@@ -10586,6 +10586,15 @@
       "note": "The site build (docs/SITE.md; the canvas step, 2026-10-31, Kevin: \"make the freeform canvas much better and cooler with more abilities, or get rid of it\"): every object of the lighthouse slide selects, moves, resizes and turns with the editor's snapping, several at once by Shift click or a marquee, with duplicate, delete, order and undo; the line under the slide prints the editor's write for each gesture."
     },
     {
+      "id": "home.page.after-editor",
+      "feature": "decks",
+      "interaction": "At 1440 in the light appearance, /home reached from the editor by client navigation (the title row's mark to /decks, then About Turboslide) draws the site root and main across the window, the title across more than half of it and the nav on the bar's right half, while the editor's overlay sheet is still loaded",
+      "driver": "core/home.spec.ts",
+      "today": "not driven",
+      "evidence": "apps/studio/src/routes/-home-css.test.ts (no sheet but site.css and docs.css names .ts-site)",
+      "note": "2026-11-01 (Kevin: \"fix how when going to /home it can just break\"): the editor's overlay drew its connection sites as .ts-site (absolute, 7 px), a route's module sheet stays loaded after a client navigation, and /home reached from the editor was a 7 px column with the bar packed left; the sites are .ts-conn-site since."
+    },
+    {
       "id": "chrome.colors.pairs-at-floor",
       "feature": "chrome",
       "interaction": "On /new at 1440 in both appearances, read from computed styles and composited over the paper: every text pair of the generated table (packages/theme/src/palette.ts PAIRS) at 4.5:1 or more, the menu key text on a hovered File row and every key chip of the tooltip (on Undo), the search card and the toolbar search pill read from the drawn elements over their composited grounds included, and the field boundary, the scrollbar thumb, the status glyphs and the selection colours at 3:1 or more",

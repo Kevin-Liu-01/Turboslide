@@ -22,6 +22,9 @@ const cssImports = (source: string): string[] =>
 
 const STEPS = /^(from|to|[\d.]+%)(\s*,\s*(from|to|[\d.]+%))*$/;
 
+/** folders that hold no stylesheet of ours: installs, build output and the native build */
+const SKIP = new Set(['node_modules', 'dist', '.output', 'target', 'wasm', 'generated']);
+
 function selectors(css: string): string[] {
   const text = css.replace(/\/\*[\s\S]*?\*\//g, '');
   return [...text.matchAll(/([^{};]+)\{/g)]
@@ -43,6 +46,31 @@ describe("the landing's stylesheet", () => {
     const all = selectors(readFileSync(join(SITE, 'site.css'), 'utf8'));
     expect(all.length).toBeGreaterThan(100);
     expect(all.filter((selector) => !/(?:^|\s)\.ts-site(?=$|[\s.:[])/.test(selector))).toEqual([]);
+  });
+
+  // The other direction (2026-11-01): a route's module stylesheet stays loaded after a client
+  // navigation leaves the route, so the root class is safe only while no other sheet names it.
+  // The editor's overlay drew its connection sites as `.ts-site` (absolute, 7 px), and /home
+  // reached from the editor without a reload was a 7 px dot with the bar packed against it.
+  it('is the only sheet that names the site root, beside the docs', () => {
+    const sheetsUnder = (dir: string): string[] =>
+      readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        if (SKIP.has(entry.name)) return [];
+        const at = join(dir, entry.name);
+        if (entry.isDirectory()) return sheetsUnder(at);
+        return entry.name.endsWith('.css') ? [at] : [];
+      });
+    const sheets = [
+      ...sheetsUnder(join(here, '..')),
+      ...sheetsUnder(join(here, '..', '..', '..', '..', 'packages')),
+    ];
+    expect(sheets.length).toBeGreaterThan(20);
+    const own = new Set([join(SITE, 'site.css'), join(DOCS, 'docs.css')]);
+    const naming = sheets.filter(
+      (f) =>
+        !own.has(f) && selectors(readFileSync(f, 'utf8')).some((s) => /\.ts-site(?![\w-])/.test(s)),
+    );
+    expect(naming).toEqual([]);
   });
 
   // post-deploy review: `.site-block-body code` (inline code, ink at 0.875em) also matched the

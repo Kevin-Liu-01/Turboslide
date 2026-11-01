@@ -299,7 +299,7 @@ describe('Overlay on a freeform slide', () => {
       rulers: { on: true, pointer: { x: 400, y: 300 }, selection: [200, 200, 300, 100] },
     });
     const { container } = render(<Overlay view={view} />);
-    expect(container.querySelectorAll('.ts-site')).toHaveLength(1);
+    expect(container.querySelectorAll('.ts-conn-site')).toHaveLength(1);
     expect(container.querySelectorAll('.ts-deck-guide')).toHaveLength(2);
     expect(container.querySelectorAll('.ts-ruler')).toHaveLength(2);
     const guide = container.querySelector<HTMLElement>('[data-control="guide.x.800"]');

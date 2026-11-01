@@ -170,7 +170,7 @@ export const ALTERNATES_ROOTS: readonly string[] = [
  * The product's two families (docs/brand.md section 10, "The interface faces"), read by
  * `css/inter-only`: Inter draws the slides, and since 2026-11-01 (Kevin: "make the whole
  * turboslide in katagami text") Katagami Text and Katagami Mono draw the interface on every route,
- * and Katagami Sans the landing title's "people" ("change the people to katagami sans"). A
+ * and Katagami Round the landing title's "people" ("make people use katagami round"). A
  * rule may name any of them with its metric matched fallback beside the generic and system stacks. A slide
  * rule (a selector naming `.ts-sheet`, the root of every drawn slide) names Inter and the theme's
  * own tokens alone: no interface face and no interface token, so no slide takes the chrome's
@@ -184,8 +184,8 @@ export const FACES = {
     'katagami text fallback',
     'katagami mono',
     'katagami mono fallback',
-    'katagami sans',
-    'katagami sans fallback',
+    'katagami round',
+    'katagami round fallback',
   ],
   /** the chrome's face tokens, which brand.css points at the interface families */
   interfaceTokens: ['--pt-text', '--pt-display', '--pt-mono'],

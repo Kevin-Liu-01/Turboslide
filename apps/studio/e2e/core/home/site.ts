@@ -377,8 +377,8 @@ export function rows(): void {
         });
         expect(
           facts.faces,
-          `${label}: "people" in Katagami Sans, "agents" in Katagami Mono`,
-        ).toEqual(['Katagami Sans', 'Katagami Mono']);
+          `${label}: "people" in Katagami Round, "agents" in Katagami Mono`,
+        ).toEqual(['Katagami Round', 'Katagami Mono']);
         const names = [
           ...PEOPLE.map((person) => person.name),
           'Claude Code',

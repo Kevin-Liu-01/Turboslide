@@ -159,14 +159,14 @@
         }
       }
     },
-    "sans": {
-      "source": "KatagamiSans.woff2",
+    "round": {
+      "source": "KatagamiRound.woff2",
       "weights": [
         500,
         500
       ],
-      "sourceBytes": 284972,
-      "sourceSha256": "fe5165bc790b8ab4c13be439f663a9d377003e9f8b7c714bc78740989ffda4ee",
+      "sourceBytes": 358900,
+      "sourceSha256": "9d030ab6cdbb425625b41a2c640717545a2f400eb0de406c6826e83ebd17331a",
       "sourceGlyphs": 3667,
       "missing": [
         "U+00AD",
@@ -219,10 +219,10 @@
         "U+2922"
       ],
       "files": {
-        "katagami-sans-core.woff2": {
-          "bytes": 13024,
-          "sha256": "07bba397f308199325ccde9165ea860c4d9f3ee8a88c327fcd7be40a3c1828d3",
-          "glyphs": 217,
+        "katagami-round-core.woff2": {
+          "bytes": 15480,
+          "sha256": "392c70078e0b781e63501c2efe9d06c18e85767b42e2dd79120cdbe8d265eb79",
+          "glyphs": 215,
           "unicodeRange": "U+0020-007E, U+00A0, U+00B7, U+00D7, U+2013-2014, U+2018-2019, U+201C-201D, U+2026, U+2190-2193, U+21A9, U+21E5, U+21E7, U+2303, U+2318, U+2325, U+232B"
         }
       }

@@ -273,7 +273,7 @@ export function chromeFoundation(): string[] {
   row('chrome.font.one-subset', async ({ browser }) => {
     test.setTimeout(300_000);
     const facts: string[] = [];
-    const katagami = /\/katagami-(?:text|mono|sans)-(?:core|ext)(?:-[\w-]{8})?\.woff2$/;
+    const katagami = /\/katagami-(?:text|mono|round)-(?:core|ext)(?:-[\w-]{8})?\.woff2$/;
     const latin = /\/InterVariable-latin(?:-[\w-]{8})?\.woff2$/;
     for (const path of ['/home', '/decks', '/new']) {
       const { page } = await contextAt(browser, 1440, 900);

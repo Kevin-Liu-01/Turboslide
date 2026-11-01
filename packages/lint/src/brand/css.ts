@@ -171,7 +171,7 @@ const MESSAGES: Record<CssRuleId, string> = {
   'css/no-eyebrow':
     'No eyebrow labels (DECK-GRAMMAR.md:23): uppercase text with positive letter spacing is the tracked label above a heading.',
   'css/inter-only':
-    "Two families (DECK-GRAMMAR.md:24; docs/brand.md section 10): Inter on the slides, Katagami Text, Katagami Mono and Katagami Sans in the interface. This face is outside both and their fallbacks, a .ts-sheet rule names an interface face or token, or an @font-face declares Katagami outside the subset script's katagami.css.",
+    "Two families (DECK-GRAMMAR.md:24; docs/brand.md section 10): Inter on the slides, Katagami Text, Katagami Mono and Katagami Round in the interface. This face is outside both and their fallbacks, a .ts-sheet rule names an interface face or token, or an @font-face declares Katagami outside the subset script's katagami.css.",
   'css/single-rail':
     'One rail: the outer pair 10 px outside the column (--tc-rail-outer) is retired (P:.oxlintrc.json gt-ui/single-rail).',
   'css/z-index':

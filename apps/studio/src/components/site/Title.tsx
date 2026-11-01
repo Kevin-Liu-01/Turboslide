@@ -11,7 +11,7 @@ import { TITLE, TITLE_TEXT } from './copy';
  * measuring. The heading is named by the sentence alone (its `aria-label`; its text content is the
  * sentence too, since the pointers and the marks are svg), and the figures inside it are buttons a
  * keyboard reaches. The two words take two Katagami faces beside the title's Katagami Text (Kevin,
- * 2026-10-31 and 2026-11-01): "people" Katagami Sans and "agents" Katagami Mono, the face of an
+ * 2026-10-31 and 2026-11-01): "people" Katagami Round and "agents" Katagami Mono, the face of an
  * agent's flag. On a phone "Presentations for" takes the first line of three.
  */
 export function Title({ onPress }: { onPress?: OnPress }) {

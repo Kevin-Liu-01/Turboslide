@@ -157,7 +157,7 @@ async function figuresOf(page: Page): Promise<{ read: number; proportional: stri
 const SLIDE_PATHS: ReadonlySet<string> = new Set(['/new']);
 
 /** A Katagami file of components/site/fonts, as the dev server names it or with the build's hash. */
-const KATAGAMI_FILE = /\/katagami-(?:sans|mono|text)-(?:core|ext)[^/]*\.woff2$/;
+const KATAGAMI_FILE = /\/katagami-(?:text|mono|round)-(?:core|ext)[^/]*\.woff2$/;
 
 export function chromeFontP2(): string[] {
   const declared: string[] = [];

@@ -115,14 +115,14 @@ describe('the CSS checks', () => {
     /* the interface's two stacks (packages/chrome/src/brand.css) */
     expect(
       rulesOf(
-        ".a { font-family: 'Katagami Sans', 'Katagami Sans Fallback', 'Helvetica Neue', Arial, sans-serif }",
+        ".a { font-family: 'Katagami Text', 'Katagami Text Fallback', 'Helvetica Neue', Arial, sans-serif }",
       ),
     ).toEqual([]);
-    expect(rulesOf(".a { font: 500 14px 'Katagami Sans', sans-serif }")).toEqual([]);
+    expect(rulesOf(".a { font: 500 14px 'Katagami Text', sans-serif }")).toEqual([]);
     /* a slide's rule names Inter or the theme's tokens, never an interface face or token */
     expect(rulesOf('.ts-sheet h1 { font-family: var(--display) }')).toEqual([]);
     expect(rulesOf(".ts-sheet .q { font-family: 'Inter', sans-serif }")).toEqual([]);
-    expect(rulesOf(".ts-sheet .q { font-family: 'Katagami Sans', sans-serif }")).toEqual([
+    expect(rulesOf(".ts-sheet .q { font-family: 'Katagami Text', sans-serif }")).toEqual([
       'css/inter-only',
     ]);
     expect(rulesOf('.ts-sheet.ts-editor .q { font: 13px/1 var(--pt-text) }')).toEqual([
@@ -133,7 +133,7 @@ describe('the CSS checks', () => {
     ]);
     expect(rulesOf('.ts-sheet-like .b { font-family: var(--pt-display) }')).toEqual([]);
     /* the Katagami faces are declared by the subset script's stylesheet alone */
-    const face = "@font-face { font-family: 'Katagami Sans'; src: url(k.woff2) }";
+    const face = "@font-face { font-family: 'Katagami Text'; src: url(k.woff2) }";
     expect(rulesOf(face, 'apps/studio/src/components/site/fonts/katagami.css')).toEqual([]);
     expect(rulesOf(face)).toEqual(['css/inter-only']);
     expect(

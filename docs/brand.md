@@ -513,11 +513,11 @@ the standalone file, the PDF and the PowerPoint export keep the whole files.
 ### The interface faces (2026-10-31, Katagami Text since 2026-11-01)
 
 Kevin, 2026-10-30: "use katagami instead of inter and our mono"; 2026-10-31: "also use more
-katagami everywhere"; 2026-11-01: "make the whole turboslide in katagami text and change the
-people to katagami sans". The interface of every route (the site, `/decks`, the viewer, the
+katagami everywhere"; 2026-11-01: "make the whole turboslide in katagami text" and "make people
+use katagami round". The interface of every route (the site, `/decks`, the viewer, the
 editor, `/new`, the presenter, the print preview, Not found and the sign in pages) draws Katagami
 Text, and Katagami Mono where it shows code, an id or a token. The landing title's "people" is
-Katagami Sans and its "agents" Katagami Mono. The slides keep their theme's faces: Inter in the library's nine themes, the
+Katagami Round and its "agents" Katagami Mono. The slides keep their theme's faces: Inter in the library's nine themes, the
 brand kit's faces where a kit sets them.
 
 - The tokens. `packages/chrome/src/brand.css`, linked after `tokens.css` on every route, sets
@@ -530,9 +530,9 @@ brand kit's faces where a kit sets them.
   from every character of the chrome, the viewer, the studio's client code, the docs and the list
   pickers' bullet glyphs. The core holds ASCII, the common punctuation, the four arrows and the
   seven key symbols a Mac menu prints (⌘ ⌃ ⌥ ⇧ ↩ ⇥ ⌫): Text 27,680 B, Mono 20,212 B. Katagami
-  Sans draws one word, so its cut is the core alone with the axis pinned at the title's weight
-  500: 13,024 B. Every route preloads the Text core; a route that draws a slide also preloads
-  Inter's Latin subset, `/home`, `/docs` and `/deck/<id>` the Mono core, and `/home` the Sans core
+  Round draws one word, so its cut is the core alone with the axis pinned at the title's weight
+  500: 15,480 B. Every route preloads the Text core; a route that draws a slide also preloads
+  Inter's Latin subset, `/home`, `/docs` and `/deck/<id>` the Mono core, and `/home` the Round core
   (`apps/studio/src/routes/__root.tsx`). Each face has a metric matched fallback over Arial or
   Menlo, so a swap moves no line.
 - The glyphs the release lacks fall through the stack to the system's face, as they did under

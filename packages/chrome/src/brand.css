@@ -221,22 +221,9 @@
   border: 1px solid var(--pt-hair);
 }
 
-/* The Not found page (SPEC-4 1.10; __root.tsx NotFound; docs/archive/rounds/PRODUCT.md 3.6): the empty figure
-   with the 64 px mark over the notfound twin's crop, the heading, one paragraph, three .pt-ib
-   buttons in sentence case at the hero's 40 px (audit-interface 37). Body text at --ts-body,
-   nothing under --ts-small. */
-.ts-notfound {
-  max-width: var(--ts-rail);
-  margin: 0 auto;
-  padding: 56px 24px 96px;
-  color: var(--pt-ink);
-  font: var(--ts-body) / 1.55 var(--pt-text);
-}
-
-.ts-notfound .ts-empty-title {
-  font-size: var(--ts-h2);
-}
-
+/* The refused page's buttons (routes/-refused-page.tsx), the row the old Not found page drew:
+   .pt-ib at the hero's 40 px (audit-interface 37). The Not found page is the site's since
+   2026-11-01 (apps/studio/src/components/site/NotFoundPage.tsx, site.css). */
 .ts-notfound-actions {
   display: flex;
   flex-wrap: wrap;

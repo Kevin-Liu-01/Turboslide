@@ -204,6 +204,7 @@ export function rows(): void {
             h1: document.querySelectorAll('h1').length,
             h2: [...root.querySelectorAll('main h2')].map((h) => h.textContent ?? ''),
             figures: root.querySelectorAll('main figure').length,
+            tiles: root.querySelectorAll('#themes .site-th-tile').length,
             keys: root.querySelectorAll('.site-keys kbd').length,
             footer: root.querySelectorAll('footer .site-foot-cols h2').length,
             wide: document.documentElement.scrollWidth - innerWidth,
@@ -219,16 +220,17 @@ export function rows(): void {
         expect(facts.marks, `${label}: the mark in the bar and the footer`).toBe(2);
         expect(facts.h1, `${label}: one h1`).toBe(1);
         expect(facts.h2, `${label}: the five screens' headings`).toEqual([
-          'Freeform Canvas',
-          'Feature Parity for Agents',
+          'Agents Edit Beside You',
+          'Nine Themes',
           'Present from Any Link',
           'Animated Patterns',
           'PDF and PowerPoint Export',
         ]);
         expect(
           facts.figures,
-          `${label}: the editor, the canvas, the callers, the two windows, the pattern and the seam`,
-        ).toBe(6);
+          `${label}: the editor, the agent's canvas, the two windows, the pattern and the seam`,
+        ).toBe(5);
+        expect(facts.tiles, `${label}: the nine theme tiles`).toBe(9);
         expect(facts.keys, `${label}: six slideshow keys`).toBe(6);
         expect(facts.footer, `${label}: four footer columns`).toBe(4);
         expect(facts.wide, `${label}: nothing wider than the viewport`).toBeLessThanOrEqual(0);
@@ -526,9 +528,16 @@ export function rows(): void {
       const { page, close } = await open(browser, cell);
       try {
         const label = `${cell.width} ${cell.theme}`;
-        await page.locator('#canvas .site-cv-fig').scrollIntoViewIfNeeded();
-        /* the committed line (the live one beside it holds a drag's last frame) */
-        const line = page.locator('#site-cv-write .site-cv-code');
+        const fig = page.locator('#agents .site-cv-fig');
+        await fig.scrollIntoViewIfNeeded();
+        /* the agent's six writes land in the log, then the slide is the reader's */
+        await expect(fig, label).toHaveAttribute('data-run', 'done', { timeout: 60_000 });
+        const rows = page.locator('#site-cv-write .site-log-row');
+        await expect(rows, label).toHaveCount(6);
+        await expect(page.locator('#site-cv-write .site-log-row[data-who="agent"]')).toHaveCount(6);
+        await expect(rows.last(), label).toContainText('block.set lighthouse#h /pos');
+        /* the last row of the log (the live line under it holds a drag's last frame) */
+        const line = rows.last().locator('.site-cv-code');
         /* the call the line prints last: its action, block and the position it writes */
         const written = async (): Promise<{ call: string; pos: Record<string, number> }> => {
           const text = (await line.textContent()) ?? '';
@@ -554,6 +563,10 @@ export function rows(): void {
         const moved = await written();
         expect(moved.call, label).toBe('block.set lighthouse#p1 /pos');
         expect(moved.pos.x, label).not.toBe(929);
+        await expect(rows.last(), `${label}: the reader's write under the reader`).toHaveAttribute(
+          'data-who',
+          'you',
+        );
         /* undo writes the paragraph's first box forward */
         await page.keyboard.press('ControlOrMeta+z');
         const undone = await written();

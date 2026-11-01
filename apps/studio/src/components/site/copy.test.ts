@@ -10,7 +10,6 @@ import {
 } from '@turboslide/theme/copy';
 
 import {
-  AGENTS_SCREEN,
   AVATAR_PRESS,
   CANVAS_SCREEN,
   EXPORT_SCREEN,
@@ -19,6 +18,7 @@ import {
   NAV,
   PATTERNS_SCREEN,
   PRESENT_SCREEN,
+  THEMES_SCREEN,
   TITLE_TEXT,
 } from './copy';
 import { HOME_META } from './meta';
@@ -100,13 +100,11 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['canvas.turn.name', CANVAS_SCREEN.turn.name],
   ['canvas.turn.doc', CANVAS_SCREEN.turn.doc],
   ['canvas.degrees', CANVAS_SCREEN.degrees(354)],
-  ['agents.caption', AGENTS_SCREEN.table.caption],
-  ['agents.person', AGENTS_SCREEN.table.person.transport],
-  ...AGENTS_SCREEN.table.rows.map((row): [string, string] => [`agents.${row.id}`, row.transport]),
-  ['agents.count', AGENTS_SCREEN.table.count(190)],
-  ['agents.path.name', AGENTS_SCREEN.path.name],
-  ['agents.path.history', AGENTS_SCREEN.path.history],
-  ['agents.path.record', AGENTS_SCREEN.path.record],
+  ['canvas.log.name', CANVAS_SCREEN.log.name],
+  ['canvas.log.you', CANVAS_SCREEN.log.you],
+  ['canvas.replay.name', CANVAS_SCREEN.replay.name],
+  ['canvas.replay.doc', CANVAS_SCREEN.replay.doc],
+  ['themes.name', THEMES_SCREEN.name],
   ['present.windows.name', PRESENT_SCREEN.windows.name],
   ['present.windows.show', PRESENT_SCREEN.windows.show],
   ['present.windows.presenter', PRESENT_SCREEN.windows.presenter],
@@ -141,7 +139,7 @@ const sentences: ReadonlyArray<[string, string]> = [
    Agents"), checked with the buttons */
 const buttons: ReadonlyArray<string> = [
   CANVAS_SCREEN.heading,
-  AGENTS_SCREEN.heading,
+  THEMES_SCREEN.heading,
   PRESENT_SCREEN.heading,
   PATTERNS_SCREEN.heading,
   EXPORT_SCREEN.heading,

@@ -1,7 +1,9 @@
 import { Fragment, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, FocusEvent, KeyboardEvent, PointerEvent, RefObject } from 'react';
 
+import { AGENT_BRANDS, AgentMark } from '@turboslide/chrome/presence/agent-marks';
 import { hideTooltip, tipProps } from '@turboslide/chrome/Tooltip';
+import { hueFor } from '@turboslide/identity/hues';
 
 import {
   DIRS,
@@ -32,6 +34,7 @@ import {
   undo,
   write,
 } from './canvas-pose';
+import { CHAR_MS, EMPTY, MOVE_MS, RUN, STEP_MS, stepMutations } from './agent-run';
 import type {
   Call,
   CanvasState,
@@ -41,11 +44,14 @@ import type {
   OrderMove,
   Placed,
   Point,
+  Pos,
   Scene,
 } from './canvas-pose';
-import { SCREEN, fitCells, inkOf, onAppearance, printCells } from './cells';
+import { Pointer } from './AvatarStack';
+import { REDUCED_MOTION, SCREEN, fitCells, inkOf, onAppearance, printCells } from './cells';
 import { CANVAS_SCREEN } from './copy';
 import { ScreenHead } from './ScreenHead';
+import { SiteIcon } from './SiteIcon';
 import { useMountEffect } from '../useMountEffect';
 
 import toneUrl from './pictures/lighthouse-tone.webp?url';
@@ -80,8 +86,8 @@ function angleOf(scene: Scene, selected: readonly string[]): number {
 }
 
 /**
- * Places every object, ring, frame and the turn handle of the figure as `scene` and `selected`
- * stand: after a render, so nothing a drag wrote outlives it, and on every pointer move of a drag
+ * Places every object, ring, frame, the agent's flag and the turn handle of the figure as `scene`
+ * and `selected` stand: after a render, so nothing a drag wrote outlives it, and on every pointer move of a drag
  * for the scene the gesture would write.
  */
 function paint(root: HTMLElement, scene: Scene, selected: readonly string[]): void {
@@ -97,6 +103,9 @@ function paint(root: HTMLElement, scene: Scene, selected: readonly string[]): vo
   const frame = frameOf(scene, selected);
   const frameEl = root.querySelector<HTMLElement>('[data-cv-frame]');
   if (frame !== null && frameEl !== null) setPlace(frameEl, frame);
+  const flag = root.querySelector<HTMLElement>('[data-cv-agent]');
+  const flagOn = byId.get(flag?.dataset.cvAgent ?? '');
+  if (flag !== null && flagOn !== undefined) setPlace(flag, ringOf(flagOn));
   const knob = root.querySelector<HTMLElement>('.site-cv-knob');
   if (knob !== null) {
     const angle = angleOf(scene, selected);
@@ -176,13 +185,16 @@ function printInto(el: HTMLElement, call: Call): void {
 
 /**
  * Prints the slide's picture through the deck's 8 by 8 screen at the size the slide is shown: a
- * cell is the smallest whole CSS px that keeps the cells at or under the tone's 800 columns (2 px
- * on a 1440 window, 1 px on a phone), the tone area-averaged to that grid by the browser's
- * downscale. The same cells print in the appearance's ink. Nothing animates.
+ * cell is the smallest whole CSS px that keeps the cells at or under the tone's 800 columns, the
+ * tone area-averaged to that grid by the browser's downscale. The same cells print in the
+ * appearance's ink. `reveal` (0 to 1) keeps the cells whose screen threshold is under it, so the
+ * agent's insert prints the picture in through the screen; `redraw` draws at the current reveal.
  */
 function useLighthouse(
   sheet: RefObject<HTMLDivElement | null>,
   pic: RefObject<HTMLCanvasElement | null>,
+  reveal: RefObject<number>,
+  redraw: { current: () => void },
 ) {
   useMountEffect(() => {
     const box = sheet.current;
@@ -197,7 +209,8 @@ function useLighthouse(
       if (rect.width === 0 || rect.height === 0) return;
       const cell = Math.max(1, Math.ceil(rect.width / TONE_COLS));
       const ink = inkOf(box);
-      const key = `${rect.width}x${rect.height}+${rect.left}:${cell}:${window.devicePixelRatio}:${ink.join()}`;
+      const shown = reveal.current;
+      const key = `${rect.width}x${rect.height}+${rect.left}:${cell}:${window.devicePixelRatio}:${ink.join()}:${shown}`;
       if (key === last) return;
       last = key;
       const { cols, rows } = fitCells(canvas, rect, cell);
@@ -212,15 +225,18 @@ function useLighthouse(
       const data = g.getImageData(0, 0, cols, rows).data;
       printCells(canvas, cols, rows, ink, (col, row) => {
         const byte = data[(row * cols + col) * 4] ?? 0;
-        return byte > TONE_FLOOR && byte / 255 > (SCREEN[(row & 7) * 8 + (col & 7)] ?? 1);
+        const at = SCREEN[(row & 7) * 8 + (col & 7)] ?? 1;
+        return byte > TONE_FLOOR && byte / 255 > at && at < shown;
       });
     };
+    redraw.current = draw;
     tone.addEventListener('load', draw);
     tone.src = toneUrl;
     const resize = new ResizeObserver(draw);
     resize.observe(box);
     const stop = onAppearance(draw);
     return () => {
+      redraw.current = () => {};
       tone.removeEventListener('load', draw);
       resize.disconnect();
       stop();
@@ -256,23 +272,101 @@ const ARROWS: Readonly<Record<string, readonly [number, number]>> = {
   ArrowDown: [0, 1],
 };
 
+/** Who wrote a row of the log: the agent of the run, or the person on the page. */
+type Who = 'agent' | 'you';
+type LogRow = { key: number; who: Who; call: Call };
+/** Where the run stands: waiting to be seen, writing, or handed over. */
+type Run = 'idle' | 'running' | 'done';
+
+/** The log keeps the last rows that fit beside the slide. */
+const LOG_ROWS = 8;
+const AGENT = AGENT_BRANDS['claude-code'];
+/** The live hues of the agent's flag and of the person's pointer (packages/identity hues.ts). */
+const AGENT_HUE = hueFor(3);
+const YOU_HUE = hueFor(1);
+const AGENT_LOG: readonly LogRow[] = RUN.map((step, key) => ({
+  key,
+  who: 'agent',
+  call: step.call,
+}));
+/** The slide after each write of the run. */
+const SCENES: readonly Scene[] = RUN.reduce<Scene[]>(
+  (scenes, step) => [...scenes, applyMutations(scenes.at(-1) ?? EMPTY, stepMutations(step)).scene],
+  [],
+);
+/** The screen before the run: an empty freeform slide, nothing selected. */
+const IDLE: CanvasState = { ...INITIAL, scene: EMPTY, selected: [] };
+
+/** A position part way from `a` to `b`, turned the short way. */
+function lerpPos(a: Pos, b: Pos, t: number): Pos {
+  const turn = (((b.rotate ?? 0) - (a.rotate ?? 0) + 540) % 360) - 180;
+  const mix = (from: number, to: number): number => from + (to - from) * t;
+  return {
+    x: mix(a.x, b.x),
+    y: mix(a.y, b.y),
+    w: mix(a.w, b.w),
+    h: mix(a.h, b.h),
+    z: b.z,
+    rotate: ((((a.rotate ?? 0) + turn * t) % 360) + 360) % 360,
+  };
+}
+
+/** The ease of the agent's move: out, as the editor's own moves settle. */
+const easeOut = (t: number): number => 1 - (1 - t) ** 3;
+
+/** One row of the log: who wrote it, drawn as the editor draws them, and the call. */
+function LogEntry({ row }: { row: LogRow }) {
+  return (
+    <li className="site-log-row" data-who={row.who}>
+      <span className="site-log-who">
+        {row.who === 'agent' ? (
+          <AgentMark brand="claude-code" size={14} className="site-log-mark" />
+        ) : (
+          <span className="site-log-pointer" style={{ '--ts-hue': YOU_HUE } as CSSProperties}>
+            <Pointer />
+          </span>
+        )}
+        {row.who === 'agent' ? AGENT.name : CANVAS_SCREEN.log.you}
+      </span>
+      <code className="site-cv-code">
+        <CallLines call={row.call} />
+      </code>
+    </li>
+  );
+}
+
 /**
- * The Canvas screen: the lighthouse slide across the window as a small canvas with the editor's
- * gestures. Every object (the heading, the paragraph, the credit and the plate) selects with the
- * editor's ring, eight resize squares and turn handle (Overlay.css). A drag moves the selection,
- * a square resizes it and the handle turns it, each snapping to the slide's guides, its edges and
- * centre, the other objects' edges and centres and their equal gaps, with the snapped line drawn
- * in --pt-guide; Shift click and a marquee on the photograph select several. The arrows nudge,
- * Cmd D duplicates, Delete deletes, Cmd and the arrows reorder, Cmd Z and Shift Cmd Z undo and
- * redo, and Escape clears. The line under the slide is the action call the editor sends for the
- * last write (canvas-pose.ts, checked against the editor's own functions), written while the
- * pointer moves, so the gesture and the data it writes are one thing. A drag writes custom
- * properties straight to the DOM and renders nothing through React; nothing moves on its own.
+ * The Agents screen: the lighthouse slide as a small canvas with the editor's gestures, built by
+ * an agent and then handed to the reader. When half the slide first comes into view the agent
+ * writes the slide from empty in six calls (agent-run.ts), its flag standing on each object as
+ * the write lands, the picture printing in through the deck's screen and the texts typing in;
+ * each call lands in the log beside the slide in the editor's own spelling. The last write moves
+ * the heading into the sky and turns it, and the slide is the reader's: every object (the
+ * heading, the paragraph, the credit and the plate) selects with the editor's ring, eight resize
+ * squares and turn handle (Overlay.css). A drag moves the selection, a square resizes it and the
+ * handle turns it, each snapping to the slide's guides, its edges and centre, the other objects'
+ * edges and centres and their equal gaps, with the snapped line drawn in --pt-guide; Shift click
+ * and a marquee on the photograph select several. The arrows nudge, Cmd D duplicates, Delete
+ * deletes, Cmd and the arrows reorder, Cmd Z and Shift Cmd Z undo and redo, and Escape clears.
+ * Each of the reader's writes lands in the same log under the reader's pointer, so the agent's
+ * calls and the person's are one list of one table's actions. A press on the slide during the run
+ * ends it at once; Replay runs it again from an empty slide. Under Reduce motion, or when the
+ * slide is already in view at load, the run is never played and the log holds its six calls.
  */
 export function CanvasScreen() {
   const [state, setState] = useState<CanvasState>(INITIAL);
+  const [run, setRun] = useState<Run>('done');
+  const [log, setLog] = useState<readonly LogRow[]>(AGENT_LOG);
+  /* the object the agent's flag stands on, and the text it is typing */
+  const [agentAt, setAgentAt] = useState<string | null>(null);
+  const [typing, setTyping] = useState<{ id: string; n: number } | null>(null);
   /* the state the handlers read between a write and its render */
   const live = useRef(state);
+  const runNow = useRef<Run>('done');
+  const rowKey = useRef(AGENT_LOG.length);
+  const timers = useRef<{ timeouts: number[]; frames: number[] }>({ timeouts: [], frames: [] });
+  const reveal = useRef(1);
+  const redrawPicture = useRef<() => void>(() => {});
   const fig = useRef<HTMLElement>(null);
   const sheet = useRef<HTMLDivElement>(null);
   const pic = useRef<HTMLCanvasElement>(null);
@@ -283,7 +377,7 @@ export function CanvasScreen() {
   const pointerFocus = useRef(false);
   /* the element that held the focus before a key's write: a reorder moves it in the DOM */
   const refocus = useRef<HTMLElement | null>(null);
-  useLighthouse(sheet, pic);
+  useLighthouse(sheet, pic, reveal, redrawPicture);
 
   const focusQuietly = (el: HTMLElement | null | undefined): void => {
     pointerFocus.current = true;
@@ -299,14 +393,177 @@ export function CanvasScreen() {
     if (el !== null && el.isConnected && document.activeElement !== el) focusQuietly(el);
   });
 
+  /* a write of the reader's lands in the log; a change of selection alone does not */
   const commit = (next: CanvasState): void => {
+    if (next.seq !== live.current.seq && runNow.current === 'done') {
+      const row: LogRow = { key: rowKey.current++, who: 'you', call: next.call };
+      setLog((rows) => [...rows, row].slice(-LOG_ROWS));
+    }
     live.current = next;
     setState(next);
   };
 
+  const stopRun = (): void => {
+    for (const id of timers.current.timeouts) window.clearTimeout(id);
+    for (const id of timers.current.frames) window.cancelAnimationFrame(id);
+    timers.current = { timeouts: [], frames: [] };
+  };
+
+  const later = (fn: () => void, ms: number): void => {
+    timers.current.timeouts.push(window.setTimeout(fn, ms));
+  };
+
+  /** Runs `each(t)` for t from 0 to 1 over `ms`, one frame at a time, then `then`. */
+  const tween = (ms: number, each: (t: number) => void, then: () => void): void => {
+    const from = performance.now();
+    const frame = (now: number): void => {
+      const t = Math.min(1, (now - from) / ms);
+      each(t);
+      if (t < 1) timers.current.frames.push(window.requestAnimationFrame(frame));
+      else then();
+    };
+    timers.current.frames.push(window.requestAnimationFrame(frame));
+  };
+
+  const setRunState = (next: Run): void => {
+    runNow.current = next;
+    setRun(next);
+  };
+
+  /** The slide handed over: the run's last state with the heading selected, the log complete. */
+  const handOver = (): void => {
+    stopRun();
+    setRunState('done');
+    setAgentAt(null);
+    setTyping(null);
+    setLog(AGENT_LOG);
+    reveal.current = 1;
+    redrawPicture.current();
+    live.current = INITIAL;
+    setState(INITIAL);
+  };
+
+  const runStep = (index: number): void => {
+    const current = RUN[index];
+    const row = AGENT_LOG[index];
+    if (current === undefined || row === undefined) {
+      handOver();
+      return;
+    }
+    setLog((rows) => [...rows, row]);
+    setAgentAt(current.target);
+    const before = SCENES[index - 1] ?? EMPTY;
+    const after = SCENES[index] ?? EMPTY;
+    const moved = current.call.id === 'block.set';
+    if (moved) {
+      /* the heading travels to its write, drawn straight to the DOM, then the reader has it */
+      const from = objectById(before, current.target)?.pos;
+      const to = objectById(after, current.target)?.pos;
+      const root = fig.current;
+      if (from === undefined || to === undefined || root === null) {
+        handOver();
+        return;
+      }
+      later(() => {
+        tween(
+          MOVE_MS,
+          (t) => {
+            const pos = lerpPos(from, to, easeOut(t));
+            const scene = before.map((object) =>
+              object.id === current.target ? { ...object, pos } : object,
+            );
+            paint(root, scene, []);
+          },
+          () => later(handOver, STEP_MS / 2),
+        );
+      }, STEP_MS / 3);
+      return;
+    }
+    live.current = { ...IDLE, scene: after, call: current.call };
+    setState(live.current);
+    let busy = 0;
+    if (current.target === 'picture') {
+      busy = STEP_MS;
+      tween(
+        STEP_MS,
+        (t) => {
+          reveal.current = t;
+          redrawPicture.current();
+        },
+        () => undefined,
+      );
+    }
+    const text = objectById(after, current.target)?.fields.text;
+    if (current.types && typeof text === 'string') {
+      busy = text.length * CHAR_MS;
+      setTyping({ id: current.target, n: 0 });
+      tween(
+        busy,
+        (t) => setTyping({ id: current.target, n: Math.round(t * text.length) }),
+        () => setTyping(null),
+      );
+    }
+    later(() => runStep(index + 1), busy + STEP_MS);
+  };
+
+  const startRun = (): void => {
+    stopRun();
+    setRunState('running');
+    runStep(0);
+  };
+
+  /** The slide emptied for the run, nothing printed, nothing in the log. */
+  const empty = (): void => {
+    stopRun();
+    setRunState('idle');
+    setLog([]);
+    setAgentAt(null);
+    setTyping(null);
+    reveal.current = 0;
+    redrawPicture.current();
+    live.current = IDLE;
+    setState(IDLE);
+  };
+
+  const replay = (): void => {
+    hideTooltip();
+    empty();
+    startRun();
+  };
+
+  /* the run plays once, when half the slide is first in view, unless motion is reduced or the
+     slide is on screen at load (a reload in place keeps what the reader saw) */
+  useMountEffect(() => {
+    const el = sheet.current;
+    if (el === null || typeof IntersectionObserver === 'undefined') return;
+    if (window.matchMedia(REDUCED_MOTION).matches) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) return;
+    empty();
+    const seen = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.intersectionRatio >= 0.5)) return;
+        seen.disconnect();
+        if (runNow.current === 'idle') startRun();
+      },
+      { threshold: [0.5] },
+    );
+    seen.observe(el);
+    return () => {
+      seen.disconnect();
+      stopRun();
+    };
+  });
+
   const onPointerDown = (event: PointerEvent<HTMLDivElement>): void => {
     const el = sheet.current;
     if (drag.current !== null || el === null || event.button !== 0) return;
+    /* a press during the run hands the slide over at once */
+    if (runNow.current !== 'done') {
+      event.preventDefault();
+      handOver();
+      return;
+    }
     const target = event.target as Element;
     const square = target.closest<HTMLElement>('[data-cv-dir]');
     const knob = target.closest<HTMLElement>('.site-cv-knob');
@@ -403,8 +660,10 @@ export function CanvasScreen() {
     const scene = d.result === null ? s.scene : applyMutations(s.scene, d.result.mutations).scene;
     paint(root, scene, s.selected);
     if (guides.current !== null) drawGuides(guides.current, d.result?.guides ?? []);
-    if (liveCode.current !== null)
-      printInto(liveCode.current, d.result === null ? s.call : callFor(d.result.mutations));
+    if (liveCode.current !== null) {
+      liveCode.current.hidden = d.result === null;
+      if (d.result !== null) printInto(liveCode.current, callFor(d.result.mutations));
+    }
   };
 
   const end = (event: PointerEvent<HTMLDivElement>, cancelled: boolean): void => {
@@ -414,6 +673,7 @@ export function CanvasScreen() {
     drag.current = null;
     root.removeAttribute('data-drag');
     if (guides.current !== null) drawGuides(guides.current, []);
+    if (liveCode.current !== null) liveCode.current.hidden = true;
     for (const el of root.querySelectorAll<HTMLElement>('[data-hit]'))
       el.removeAttribute('data-hit');
     const s = live.current;
@@ -449,6 +709,10 @@ export function CanvasScreen() {
 
   const onKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
     if (drag.current !== null) return;
+    if (runNow.current !== 'done') {
+      if ((event.target as Element).closest('.site-cv-objs, .site-cv-over') !== null) handOver();
+      return;
+    }
     const s = live.current;
     const mod = event.metaKey || event.ctrlKey;
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
@@ -495,17 +759,22 @@ export function CanvasScreen() {
   const { scene, selected } = state;
   const ranks = paintRanks(scene);
   /* the objects in paint order, so the DOM order is the stacking order and no z-index is written */
-  const painted = [...scene].sort((a, b) => (ranks.get(a.id) ?? 0) - (ranks.get(b.id) ?? 0));
+  const painted = [...scene]
+    .filter((object) => !isGround(object))
+    .sort((a, b) => (ranks.get(a.id) ?? 0) - (ranks.get(b.id) ?? 0));
+  const ground = scene.some(isGround);
   const frame = frameOf(scene, selected);
   const several = selected.length > 1;
   const angle = angleOf(scene, selected);
+  const flagOn = agentAt === null ? undefined : objectById(scene, agentAt);
   return (
-    <section className="site-claim site-cv" id="canvas" aria-labelledby="site-canvas-title">
-      <ScreenHead titleId="site-canvas-title" heading={CANVAS_SCREEN.heading} />
+    <section className="site-claim site-cv" id="agents" aria-labelledby="site-agents-title">
+      <ScreenHead titleId="site-agents-title" heading={CANVAS_SCREEN.heading} />
       <figure
         ref={fig}
-        className="site-cv-fig"
+        className="site-cv-fig site-wrap"
         aria-label={CANVAS_SCREEN.figure.alt}
+        data-run={run}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
       >
@@ -519,13 +788,12 @@ export function CanvasScreen() {
           onPointerCancel={(event) => end(event, true)}
         >
           <div className="site-cv-objs">
+            <canvas ref={pic} className="site-cells" hidden={!ground} aria-hidden="true" />
             {painted.map((object) => {
-              if (isGround(object))
-                return (
-                  <canvas key={object.id} ref={pic} className="site-cells" aria-hidden="true" />
-                );
               const tip = CANVAS_SCREEN.objects[object.type as keyof typeof CANVAS_SCREEN.objects];
-              const text = typeof object.fields.text === 'string' ? object.fields.text : undefined;
+              const full = typeof object.fields.text === 'string' ? object.fields.text : undefined;
+              const text =
+                full !== undefined && typing?.id === object.id ? full.slice(0, typing.n) : full;
               return (
                 <div
                   key={object.id}
@@ -535,7 +803,7 @@ export function CanvasScreen() {
                   className={`site-obj site-cv-obj site-cv-${object.type}`}
                   style={place(placeOf(object))}
                   aria-pressed={selected.includes(object.id)}
-                  aria-label={text === undefined ? tip.name : undefined}
+                  aria-label={full === undefined ? tip.name : full}
                   aria-describedby="site-cv-write"
                   {...tipProps(tip)}
                 >
@@ -587,15 +855,49 @@ export function CanvasScreen() {
                 />
               </div>
             )}
+            {/* the agent's selection as the editor draws another author's: a ring in the
+                author's hue and a flag with its mark and name (presence.css) */}
+            <div
+              data-cv-agent={flagOn?.id ?? ''}
+              className="site-obj site-cv-agent"
+              data-on={flagOn === undefined ? undefined : ''}
+              style={
+                {
+                  ...(flagOn === undefined ? {} : place(ringOf(flagOn))),
+                  '--ts-hue': AGENT_HUE,
+                } as CSSProperties
+              }
+              aria-hidden="true"
+            >
+              <span className="site-cv-flag">
+                <AgentMark brand="claude-code" size={12} className="site-log-mark" />
+                {AGENT.name}
+              </span>
+            </div>
             <i ref={marquee} className="site-obj site-cv-marquee" />
             <div ref={guides} className="site-cv-guides" aria-hidden="true" />
           </div>
         </div>
-        <figcaption className="site-cv-write site-wrap" id="site-cv-write">
-          <code className="site-cv-code">
-            <CallLines call={state.call} />
-          </code>
-          <code ref={liveCode} className="site-cv-live" aria-hidden="true" />
+        <figcaption className="site-log" aria-label={CANVAS_SCREEN.log.name}>
+          <div className="site-log-in">
+            <ol className="site-log-rows" id="site-cv-write">
+              {log.map((row) => (
+                <LogEntry key={row.key} row={row} />
+              ))}
+            </ol>
+            <code ref={liveCode} className="site-cv-code site-cv-live" hidden aria-hidden="true" />
+          </div>
+          {run === 'done' ? (
+            <button
+              type="button"
+              className="site-log-replay"
+              aria-label={CANVAS_SCREEN.replay.name}
+              onClick={replay}
+              {...tipProps(CANVAS_SCREEN.replay)}
+            >
+              <SiteIcon name="play" />
+            </button>
+          ) : null}
         </figcaption>
       </figure>
     </section>

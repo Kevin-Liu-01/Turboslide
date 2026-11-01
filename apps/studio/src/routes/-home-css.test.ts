@@ -38,8 +38,16 @@ describe("the landing's stylesheet", () => {
     const route = readFileSync(join(here, 'home.tsx'), 'utf8');
     expect(cssImports(route)).toEqual(['../components/site/site.css?url']);
     expect(route).toContain("{ rel: 'stylesheet', href: siteCss }");
+    /* a `?url` import is the file's address and injects nothing: Not found links the sheet as a
+       React stylesheet resource where it draws (NotFoundPage.tsx) */
     for (const name of readdirSync(SITE).filter((file) => /\.tsx?$/.test(file)))
-      expect(cssImports(readFileSync(join(SITE, name), 'utf8')), name).toEqual([]);
+      expect(
+        cssImports(readFileSync(join(SITE, name), 'utf8')).filter((spec) => !spec.endsWith('?url')),
+        name,
+      ).toEqual([]);
+    const notFound = readFileSync(join(SITE, 'NotFoundPage.tsx'), 'utf8');
+    expect(cssImports(notFound)).toEqual(['./site.css?url']);
+    expect(notFound).toContain('<link rel="stylesheet" href={siteCss} precedence="default" />');
   });
 
   it('names the site root in every selector', () => {

@@ -974,7 +974,8 @@ export function designDecks(): string[] {
         await page.locator(plate.root).first().waitFor({ timeout: 120_000 });
         const buttons = await page.evaluate((root) => {
           const scope = document.querySelector(root);
-          return [...(scope?.querySelectorAll<HTMLElement>('.pt-ib') ?? [])]
+          /* the product's buttons, and the site's on Not found (NotFoundPage.tsx, since 2026-11-01) */
+          return [...(scope?.querySelectorAll<HTMLElement>('.pt-ib, .site-btn') ?? [])]
             .filter((el) => el.getClientRects().length > 0)
             .map((el) => ({
               label: (el.textContent ?? '').trim(),

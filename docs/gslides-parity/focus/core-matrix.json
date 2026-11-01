@@ -358,10 +358,11 @@
     {
       "id": "decks.notfound.page",
       "feature": "decks",
-      "interaction": "An address with no route answers 404 with Not found and its three links",
+      "interaction": "An address with no route answers 404 with the site's Page Not Found, its 404 drawn in the characters of the address, and its three links",
       "driver": "core/decks.spec.ts",
       "today": "works",
-      "evidence": "audit-decks row 60"
+      "evidence": "audit-decks row 60",
+      "note": "Restated 2026-11-01 (Kevin: \"404 page needs to be updated to[o]\"): the page is the site's (components/site/NotFoundPage.tsx)."
     },
     {
       "id": "decks.file.make-a-copy",
@@ -10399,11 +10400,11 @@
     {
       "id": "home.page.layout",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the vector mark, one h1, the five screens' headings in order (Freeform Canvas, Feature Parity for Agents, Present from Any Link, Animated Patterns, PDF and PowerPoint Export), six figures (the editor, the canvas, the callers, the two windows, the pattern and the seam), six slideshow keys and the footer's four columns with the vector mark; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset outside the title's avatars",
+      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the vector mark, one h1, the five screens' headings in order (Agents Edit Beside You, Nine Themes, Present from Any Link, Animated Patterns, PDF and PowerPoint Export), five figures (the editor, the agent's canvas, the two windows, the pattern and the seam), nine theme tiles, six slideshow keys and the footer's four columns with the vector mark; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset outside the title's avatars",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md A; the brief's problems L1 to L13 of the landing before it",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"make the other rows and sections a lot better and more intentional and redesign them to convey information better following less is more\"): five screens, each one claim proved by one demonstration."
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"make the other rows and sections a lot better and more intentional and redesign them to convey information better following less is more\"): five screens, each one claim proved by one demonstration. Restated by the home sections step, 2026-11-01 (Kevin: \"the sections below home dont make much sense and dont have very good visuals that show off cool stuff\"): the Canvas and Agents screens are one screen where an agent builds the slide and hands it over, and the Themes screen draws one title slide in the nine themes."
     },
     {
       "id": "home.title.one-line",
@@ -10579,11 +10580,11 @@
     {
       "id": "home.canvas.gestures",
       "feature": "decks",
-      "interaction": "At 1440 in the light appearance and 390 in the dark one, a press on the Canvas screen's paragraph selects it with the frame and the turn handle; a drag moves it and the line under the slide reads block.set lighthouse#p1 /pos with its new box; Cmd or Ctrl Z writes its first box (929, 618.25) forward; a drag on the turned heading writes block.set lighthouse#h /pos with x and y at 1/64 px; Escape clears the selection",
+      "interaction": "At 1440 in the light appearance and 390 in the dark one, once the Agents screen is in view Claude Code's six writes land in the log beside the slide, the last block.set lighthouse#h /pos, and the slide is handed over; a press on the paragraph selects it with the frame and the turn handle; a drag moves it and the log's last row, under You, reads block.set lighthouse#p1 /pos with its new box; Cmd or Ctrl Z writes its first box (929, 618.25) forward; a drag on the turned heading writes block.set lighthouse#h /pos with x and y at 1/64 px; Escape clears the selection",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "docs/SITE.md (the Canvas screen); canvas-pose.test.ts pins every gesture against the editor's freeGesture, freeNudgeMutations and zOrderMutations",
-      "note": "The site build (docs/SITE.md; the canvas step, 2026-10-31, Kevin: \"make the freeform canvas much better and cooler with more abilities, or get rid of it\"): every object of the lighthouse slide selects, moves, resizes and turns with the editor's snapping, several at once by Shift click or a marquee, with duplicate, delete, order and undo; the line under the slide prints the editor's write for each gesture."
+      "evidence": "docs/SITE.md (the Agents screen); agent-run.test.ts builds LIGHTHOUSE from the run's six writes; canvas-pose.test.ts pins every gesture against the editor's freeGesture, freeNudgeMutations and zOrderMutations",
+      "note": "The site build (docs/SITE.md; the canvas step, 2026-10-31, Kevin: \"make the freeform canvas much better and cooler with more abilities, or get rid of it\"): every object of the lighthouse slide selects, moves, resizes and turns with the editor's snapping, several at once by Shift click or a marquee, with duplicate, delete, order and undo; the line under the slide prints the editor's write for each gesture. Restated by the home sections step, 2026-11-01 (Kevin: \"the sections below home dont make much sense and dont have very good visuals that show off cool stuff\"): an agent builds the slide in six writes, each in a log beside the slide in the editor's spelling, and every write of the reader's lands in the same log."
     },
     {
       "id": "home.page.after-editor",

@@ -5,7 +5,6 @@ import '@turboslide/schema/jitless';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import {
   HeadContent,
-  Link,
   Scripts,
   createRootRoute,
   useRouter,
@@ -18,7 +17,6 @@ import { useState } from 'react';
 import brandCss from '@turboslide/chrome/brand.css?url';
 import { PREFERENCES_BOOT_STATEMENT } from '@turboslide/chrome/chrome-preferences';
 import tokensCss from '@turboslide/chrome/tokens.css?url';
-import { tipProps } from '@turboslide/chrome/Tooltip';
 import interWoff2 from '@turboslide/fonts/assets/InterVariable-latin.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
 import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic-latin.woff2?url';
@@ -31,14 +29,12 @@ import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
 
-import { MoodFigure } from '../components/home/MoodFigure';
-import { PageFrame } from '../components/home/PageFrame';
 import { JsonLd } from '../components/site/JsonLd';
+import { NotFoundPage } from '../components/site/NotFoundPage';
 import { siteData } from '../components/site/structured-data';
 import { useMountEffect } from '../components/useMountEffect';
 import appCss from '../styles.css?url';
 import { ANALYTICS_BOOT_SCRIPT, isMeasuredPath, stopAnalytics } from './-analytics';
-import { RouterLinkSlot } from './-link-slot';
 
 // The document shell (SPEC 3.4): the theme boot script runs in the head before
 // first paint (gt-theme then gt-deck-theme; since the product round a first
@@ -254,68 +250,8 @@ export const Route = createRootRoute({
     };
   },
   shellComponent: RootDocument,
-  notFoundComponent: NotFound,
+  notFoundComponent: NotFoundPage,
 });
-
-/**
- * Not found (gslides-parity SPEC-4 1.10; docs/archive/rounds/PRODUCT.md 3.6; docs/NEXT.md 4.1.3 item 11): the page
- * frame (components/home/PageFrame.tsx: the 1104 px column, its rails and the 58 px bar with the
- * lockup), the heading, two full sentences and three `.pt-ib` buttons at 40 px with Title Case
- * labels (DECK-GRAMMAR 22, which Round 1 takes over the clutter audit's sentence case), all
- * router links, then one of the deck's mood pictures with its credit (docs/NEXT.md question 5;
- * components/home/MoodFigure.tsx, a picture whose licence lane B4 read). The dithered figure with
- * the old mark left with Round 1, so the lockup is the page's one mark.
- */
-export const NOT_FOUND = {
-  title: 'Not found',
-  sentence:
-    'No page is at this address. Start a new presentation, open your presentations or read what Turboslide is.',
-  newPresentation: 'New Presentation',
-  decks: 'Your Presentations',
-  about: 'About Turboslide',
-} as const;
-
-function NotFound() {
-  return (
-    <PageFrame className="ts-notfound" control="notfound" linkComponent={RouterLinkSlot}>
-      <h1 className="ts-page-title">{NOT_FOUND.title}</h1>
-      <p className="ts-page-sentence">{NOT_FOUND.sentence}</p>
-      <div className="ts-page-actions ts-notfound-actions">
-        <Link
-          to="/new"
-          className="pt-ib is-solid"
-          data-control="notfound.new"
-          {...tipProps({ name: NOT_FOUND.newPresentation, doc: 'Starts a blank presentation' })}
-        >
-          {NOT_FOUND.newPresentation}
-        </Link>
-        <Link
-          to="/decks"
-          className="pt-ib"
-          data-control="notfound.decks"
-          {...tipProps({
-            name: NOT_FOUND.decks,
-            doc: 'Your presentations and the ones shared with you',
-          })}
-        >
-          {NOT_FOUND.decks}
-        </Link>
-        <Link
-          to="/home"
-          className="pt-ib"
-          data-control="notfound.about"
-          {...tipProps({
-            name: NOT_FOUND.about,
-            doc: 'What Turboslide is and how fast it runs',
-          })}
-        >
-          {NOT_FOUND.about}
-        </Link>
-      </div>
-      <MoodFigure control="notfound.mood" />
-    </PageFrame>
-  );
-}
 
 /**
  * The devtools, mounted after hydration and never for an automated browser (gslides-parity

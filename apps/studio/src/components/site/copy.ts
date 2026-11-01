@@ -90,17 +90,25 @@ export const HERO = {
 } as const;
 
 /**
- * The Canvas screen (CanvasScreen.tsx): the lighthouse slide across the window as a canvas whose
- * heading, paragraph, credit and plate select, move, resize and turn as the editor's objects do,
- * on the editor's snap arithmetic (canvas-pose.ts). The line under the slide is the action call
- * the editor sends for the last write. The words on the slide are the slide's own
- * (home-deck/slides/lighthouse.json); the objects' names and the handles' sentences are the
- * Tooltip primitive's.
+ * The Agents screen (CanvasScreen.tsx): an agent builds the lighthouse slide in six writes
+ * (agent-run.ts), then the slide is the reader's, a canvas whose heading, paragraph, credit and
+ * plate select, move, resize and turn as the editor's objects do, on the editor's snap arithmetic
+ * (canvas-pose.ts). The log beside the slide holds every write in the editor's spelling under who
+ * made it. The words on the slide are the slide's own (home-deck/slides/lighthouse.json); the
+ * objects' names and the handles' sentences are the Tooltip primitive's.
  */
 export const CANVAS_SCREEN = {
-  heading: 'Freeform Canvas',
+  heading: 'Agents Edit Beside You',
   figure: {
-    alt: 'The lighthouse slide shows a drone photograph of the lantern room of Cape Hatteras Light in a two tone dither. Its heading, Cape Hatteras Light, has moved from the paper plate at the lower right to the sky at the upper left and is rotated 6 degrees counterclockwise.',
+    alt: 'Claude Code builds the lighthouse slide in six writes. It places a drone photograph of the lantern room of Cape Hatteras Light, a paper plate, the heading, a paragraph and the credit. Its last write moves the heading to the sky and turns it 6 degrees. Then every object on the slide is yours to move.',
+  },
+  log: {
+    name: 'The writes on this slide in order, by Claude Code and by you',
+    you: 'You',
+  },
+  replay: {
+    name: 'Replay',
+    doc: 'Plays the six writes of Claude Code again from an empty slide.',
   },
   slide: {
     heading: 'Cape Hatteras Light',
@@ -128,32 +136,14 @@ export const CANVAS_SCREEN = {
 } as const;
 
 /**
- * The Agents screen (AgentsScreen.tsx): one action, `slide.new`, called by a person from the
- * editor's menu and by an agent on each transport, every call wired into the one handler and the
- * one revision Version history records. The table is the data: each caller's own spelling of the
- * call (packages/chrome/src/menus/model.ts and the generated contracts; facts.test.ts reads them
- * back) and how many of the actions each transport carries (facts.ts).
+ * The Themes screen (ThemesScreen.tsx): the title slide of the landing's own deck in each theme of
+ * the library, in the picker's order, each tile in the theme's colours of the page's appearance,
+ * with its title composition, accent bar, rules and counter (theme-tiles.ts). The words are the
+ * deck's (present-deck.ts); each tile's name is the theme's.
  */
-export const AGENTS_SCREEN = {
-  heading: 'Feature Parity for Agents',
-  table: {
-    caption: 'The action slide.new on each transport',
-    person: { transport: 'Editor', name: 'Slide > New slide', icon: 'cursor-arrow-rays' },
-    rows: [
-      { id: 'cli', transport: 'Command line', name: 'turboslide slide new', icon: 'command-line' },
-      { id: 'mcp', transport: 'MCP', name: 'deck_new_slide', icon: 'puzzle-piece' },
-      { id: 'http', transport: 'HTTP', name: 'POST /api/actions/slide.new', icon: 'globe-alt' },
-      { id: 'page', transport: 'Page', name: "studio.invoke('slide.new', input)", icon: 'window' },
-    ],
-    count: (n: number): string => `${n} actions`,
-  },
-  /** where every call lands: the handler and the record of the write */
-  path: {
-    name: 'Where every call of slide.new lands',
-    action: 'slide.new',
-    history: 'Version history',
-    record: 'One revision with its author',
-  },
+export const THEMES_SCREEN = {
+  heading: 'Nine Themes',
+  name: 'The title slide of one deck in each of the nine themes',
 } as const;
 
 /**

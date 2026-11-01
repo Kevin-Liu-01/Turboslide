@@ -7,12 +7,11 @@ import { ACTIONS } from '@turboslide/schema/actions';
 import { THEME_IDS } from '@turboslide/schema/brand';
 import { LAYOUT_IDS } from '@turboslide/schema/deck';
 
-import { AGENTS_SCREEN } from './copy';
 import { SITE_FACTS } from './facts';
 
 // The site's counts (docs/SITE.md A.1): every number of facts.ts recomputed from the action
-// table, the layout and theme ids, the material catalog and the generated contracts, and the names of slide.new on each transport read from the
-// generated files, so the page never states a count or a name the tree does not have.
+// table, the layout and theme ids, the material catalog and the generated contracts, so the page
+// never states a count the tree does not have.
 
 const root = new URL('../../../../../', import.meta.url);
 const json = <T>(path: string): T => JSON.parse(readFileSync(new URL(path, root), 'utf8')) as T;
@@ -42,15 +41,5 @@ describe('the landing’s facts', () => {
       'packages/agent/generated/cli.json',
     );
     expect(cli.actions).toHaveLength(SITE_FACTS.cli);
-    const slideNew = cli.actions.find((each) => each.action === 'slide.new');
-    const rows = Object.fromEntries(AGENTS_SCREEN.table.rows.map((row) => [row.id, row.name]));
-    expect(rows['cli']).toBe(`turboslide ${slideNew?.command.join(' ')}`);
-    const mcp = json<
-      { tools: { name: string; action: string }[] } | { name: string; action: string }[]
-    >('packages/agent/generated/mcp-tools.json');
-    const tools = Array.isArray(mcp) ? mcp : mcp.tools;
-    expect(tools.find((tool) => tool.action === 'slide.new')?.name).toBe(rows['mcp']);
-    expect(rows['http']).toBe('POST /api/actions/slide.new');
-    expect(rows['page']).toBe("studio.invoke('slide.new', input)");
   });
 });

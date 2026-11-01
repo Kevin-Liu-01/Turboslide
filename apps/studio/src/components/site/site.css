@@ -586,21 +586,25 @@
   letter-spacing: 0;
 }
 
-/* ---- Canvas: the lighthouse slide across the window, every object on it the editor's object ---- */
+/* ---- Agents: the lighthouse slide an agent builds and hands over, every object on it the
+   editor's object, and the log of every write beside it ---- */
 
-/* the figure clips what reaches past the window's sides (a handle of an object dragged off the
-   slide) and lets the selection reach above and below the slide */
+/* the slide and the log side by side in the column, the log as tall as the slide; under 1024 px
+   the log sits under the slide. The figure clips what reaches past the window's sides (a handle
+   of an object dragged off the slide) and lets the selection reach above and below the slide */
 .ts-site .site-cv-fig {
-  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+  gap: var(--site-gap);
+  margin-block: 0;
   overflow-x: clip;
 }
 
-/* the slide spans the window up to 1600 px; its sky is the page's paper, so the slide reads as
-   the page with the editor's selection on it. The objects clip to the slide and the selection
-   does not. A finger on the photograph scrolls the page; the objects and the handles take it */
+/* the slide's sky is the page's paper, so the slide reads as the page with the editor's
+   selection on it, inside a hairline frame. The objects clip to the slide and the selection does
+   not. A finger on the photograph scrolls the page; the objects and the handles take it */
 .ts-site .site-cv-fig .site-sheet {
-  width: min(100%, 1600px);
-  margin-inline: auto;
+  outline: 1px solid var(--pt-hair);
   overflow: visible;
   user-select: none;
   -webkit-user-select: none;
@@ -913,18 +917,64 @@
   cursor: inherit;
 }
 
-/* the write under the slide: each line the action and its target in the second ink and the
-   value in ink, a wrapped line hung 2 ch, the mutations of a slide.update 2 ch in. While a
-   gesture lasts its own copy shows, written straight to the DOM */
-.ts-site .site-cv-write {
-  margin-top: 24px;
-  font-size: 15px;
-  line-height: 24px;
+/* the log beside the slide: every write on it in order, the newest at the foot, each row its
+   author as the editor draws them (an agent's mark, a person's pointer in the person's hue) and
+   the call, the action and its target in the second ink and the value in ink, a wrapped line
+   hung 2 ch, the mutations of a slide.update 2 ch in. The rows that no longer fit leave at the
+   head under a fade. While a gesture lasts its call shows at the foot, written straight to the
+   DOM. The log is as tall as the slide, so a row arriving moves nothing outside it */
+.ts-site .site-log {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  contain: size;
+  font-size: 12px;
+  line-height: 18px;
   color: var(--pt-ink-2);
   overflow-wrap: anywhere;
 }
 
-.ts-site .site-cv-write code {
+.ts-site .site-log-in {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, transparent, black 96px);
+}
+
+.ts-site .site-log-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-site .site-log-who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-site .site-log-mark {
+  flex: 0 0 auto;
+}
+
+.ts-site .site-log-pointer {
+  display: block;
+  flex: 0 0 auto;
+  width: 11px;
+  height: 14px;
+}
+
+.ts-site .site-log code {
   display: block;
   font-size: inherit;
 }
@@ -943,20 +993,97 @@
   color: var(--pt-ink);
 }
 
-.ts-site .site-cv-write .site-cv-live,
-.ts-site .site-cv-fig[data-drag='move'] .site-cv-code,
-.ts-site .site-cv-fig[data-drag='turn'] .site-cv-code,
-.ts-site .site-cv-fig[data-drag^='resize'] .site-cv-code {
+/* a gesture's call under the last row, in the person's row style */
+.ts-site .site-cv-live {
+  margin-top: 16px;
+  color: var(--pt-ink-2);
+}
+
+.ts-site .site-log .site-cv-live[hidden] {
   display: none;
 }
 
-.ts-site .site-cv-fig[data-drag='move'] .site-cv-live,
-.ts-site .site-cv-fig[data-drag='turn'] .site-cv-live,
-.ts-site .site-cv-fig[data-drag^='resize'] .site-cv-live {
-  display: block;
+/* Replay: the solid play glyph at the log's head over the fade, once the agent has handed the
+   slide over */
+.ts-site .site-log-replay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  cursor: pointer;
 }
 
-/* on a phone the four corner squares stay and the write steps down to 13/20 */
+.ts-site .site-log-replay:hover {
+  border-color: var(--pt-ink);
+}
+
+/* the agent's selection, as the editor draws another author's (presence.css): a 2 px ring in the
+   author's hue on the object it writes, which follows the object, and a flag in the hue at the
+   ring's top left with the author's mark and name in paper */
+.ts-site .site-cv-agent {
+  border: 2px solid var(--ts-hue);
+  opacity: 0;
+  transition:
+    opacity 160ms var(--pt-ease-out),
+    left 240ms var(--pt-ease-out),
+    top 240ms var(--pt-ease-out),
+    width 240ms var(--pt-ease-out),
+    height 240ms var(--pt-ease-out);
+  pointer-events: none;
+}
+
+.ts-site .site-cv-agent[data-on] {
+  opacity: 1;
+}
+
+.ts-site .site-cv-flag {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px 0 6px;
+  background: var(--ts-hue);
+  color: var(--ts-halo-out, var(--pt-paper));
+  font: 500 12px/22px var(--site-text);
+  white-space: nowrap;
+}
+
+/* the ring stands still while the slide is printed or the heading turns under it */
+.ts-site .site-cv-fig[data-run='running'] .site-cv-agent[data-cv-agent='h'] {
+  transition: opacity 160ms var(--pt-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-site .site-cv-agent {
+    transition: none;
+  }
+}
+
+/* under 1024 px the log sits under the slide */
+@media (max-width: 1023px) {
+  .ts-site .site-cv-fig {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-site .site-log {
+    height: 320px;
+  }
+}
+
+/* on a phone the four corner squares stay and the log under the slide keeps a fixed height */
 @media (max-width: 720px) {
   .ts-site .site-cv-sq[data-cv-dir='n'],
   .ts-site .site-cv-sq[data-cv-dir='e'],
@@ -965,280 +1092,144 @@
     display: none;
   }
 
-  .ts-site .site-cv-write {
-    margin-top: 16px;
-    font-size: 13px;
-    line-height: 20px;
+  .ts-site .site-log {
+    height: 248px;
   }
 }
 
-/* ---- Agents: every caller of one action wired into one handler and one record ---- */
+/* ---- Themes: the title slide of one deck in each of the nine themes ---- */
 
-.ts-site .site-ag-fig {
-  --ag-row: 48px;
-  --ag-run: 56px;
-  --ag-wire: var(--pt-ink-2);
+/* three tiles a row in the column, two under 720 px with the ninth across both */
+.ts-site .site-th-grid {
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px var(--site-gap);
   margin-block: 0;
-}
-
-/* the callers, then the bus every caller's wire meets on the table's right */
-.ts-site .site-ag-from {
-  position: relative;
-  padding-right: var(--ag-run);
-}
-
-.ts-site .site-ag-from::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: calc(var(--ag-row) / 2);
-  bottom: calc(var(--ag-row) / 2);
-  width: 1px;
-  background: var(--ag-wire);
-}
-
-.ts-site .site-ag-calls {
-  border-collapse: collapse;
-}
-
-.ts-site .site-ag-calls tr {
-  height: var(--ag-row);
-}
-
-/* the person's row stands 16 px apart from the agents' rows */
-.ts-site .site-ag-calls tr.is-person {
-  height: calc(var(--ag-row) + 16px);
-}
-
-.ts-site .site-ag-calls th,
-.ts-site .site-ag-calls td {
-  padding: 12px 40px 0 0;
-  text-align: left;
-  vertical-align: top;
-  white-space: nowrap;
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 400;
-}
-
-.ts-site .site-ag-calls th {
-  font-weight: 500;
-}
-
-.ts-site .site-ag-calls th svg {
-  color: var(--pt-ink-2);
-}
-
-.ts-site .site-ag-call code {
-  font-size: 15px;
-}
-
-/* the share of the actions each transport carries, and the caller's wire to the bus */
-.ts-site .site-ag-calls .site-ag-n {
-  position: relative;
-  padding-right: 16px;
-  text-align: right;
-  color: var(--pt-ink-2);
-  font-variant-numeric: var(--pt-numerals);
-}
-
-.ts-site .site-ag-n::after {
-  content: '';
-  position: absolute;
-  left: 100%;
-  top: calc(var(--ag-row) / 2);
-  width: var(--ag-run);
-  height: 1px;
-  background: var(--ag-wire);
-}
-
-/* the path from the bus: the handler, then the record; 11 px ink squares on one line */
-.ts-site .site-ag-path {
-  display: flex;
-  height: 11px;
-  margin: 0 288px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.ts-site .site-ag-stop {
-  position: relative;
-  display: flex;
-  flex: 1 1 0;
-  align-items: center;
+/* a tile's slide takes the theme's colours in the appearance it opens in (theme-tiles.ts), set
+   on the tile as --th-*, under the names the slide reads; the page's appearance changes only the
+   hairline round it */
+.ts-site .site-th-sheet {
+  --pt-paper: var(--th-paper);
+  --pt-ink: var(--th-ink);
+  outline: 1px solid var(--pt-hair);
 }
 
-.ts-site .site-ag-stop::before {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--ag-wire);
-}
-
-.ts-site .site-ag-stop::after {
-  content: '';
-  flex: none;
-  width: 11px;
-  height: 11px;
-  background: var(--pt-ink);
-}
-
-.ts-site .site-ag-name,
-.ts-site .site-ag-rec {
+/* the copy at the theme's title composition, inside the 137 px margins of the 1600 by 900 sheet */
+.ts-site .site-th-copy {
   position: absolute;
-  white-space: nowrap;
-  font-size: 16px;
-  line-height: 24px;
+  left: calc(137 * var(--u));
+  right: calc(137 * var(--u));
+  top: 50%;
+  translate: 0 -50%;
 }
 
-.ts-site .site-ag-name {
+.ts-site .site-th-sheet[data-compose='top-left'] .site-th-copy {
+  top: calc(129 * var(--u));
+  translate: none;
+}
+
+.ts-site .site-th-sheet[data-compose='bottom-left'] .site-th-copy {
+  top: auto;
+  bottom: calc(129 * var(--u));
+  translate: none;
+}
+
+.ts-site .site-th-sheet[data-compose='centre'] .site-th-copy {
+  text-align: center;
+}
+
+.ts-site .site-th-h {
+  margin: 0;
+  font-size: calc(84 * var(--u));
+  line-height: 1.05;
   font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
-.ts-site code.site-ag-name {
-  font-size: 15px;
+.ts-site .site-th-lead {
+  margin: calc(24 * var(--u)) 0 0;
+  font-size: calc(30 * var(--u));
+  line-height: 1.35;
+  color: var(--th-ink-2);
 }
 
-/* the handler's name over its square */
-.ts-site .site-ag-stop:not(.is-end) .site-ag-name {
-  right: 5.5px;
-  bottom: 19px;
-  translate: 50% 0;
+/* the accent bar over the heading of Swiss and Signal */
+.ts-site .site-th-bar {
+  display: block;
+  width: calc(96 * var(--u));
+  height: calc(12 * var(--u));
+  margin-bottom: calc(32 * var(--u));
+  background: var(--th-accent);
 }
 
-/* the record's name and its sentence after the last square */
-.ts-site .site-ag-stop.is-end .site-ag-name,
-.ts-site .site-ag-stop.is-end .site-ag-rec {
-  left: calc(100% + 16px);
+.ts-site .site-th-sheet[data-compose='centre'] .site-th-bar {
+  margin-inline: auto;
 }
 
-.ts-site .site-ag-stop.is-end .site-ag-name {
-  top: -6.5px;
+/* the frame's rules at the top and the bottom and General Translation's rails, in the ink's hair */
+.ts-site .site-th-rule {
+  position: absolute;
+  left: calc(137 * var(--u));
+  right: calc(137 * var(--u));
+  height: 0;
+  border-top: calc(2 * var(--u)) solid color-mix(in srgb, var(--pt-ink) 18%, transparent);
 }
 
-.ts-site .site-ag-stop.is-end .site-ag-rec {
-  top: 17.5px;
+.ts-site .site-th-rule.is-top {
+  top: calc(72 * var(--u));
+}
+
+.ts-site .site-th-rule.is-bottom {
+  bottom: calc(72 * var(--u));
+}
+
+.ts-site .site-th-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: calc(2 * var(--u)) solid color-mix(in srgb, var(--pt-ink) 18%, transparent);
+}
+
+.ts-site .site-th-rail.is-left {
+  left: calc(137 * var(--u));
+}
+
+.ts-site .site-th-rail.is-right {
+  right: calc(137 * var(--u));
+}
+
+/* the slide counter at the lower right, in the hint colour */
+.ts-site .site-th-count {
+  position: absolute;
+  right: calc(137 * var(--u));
+  bottom: calc(40 * var(--u));
+  font-size: calc(20 * var(--u));
+  line-height: 1;
+  font-variant-numeric: var(--pt-numerals);
+  color: var(--th-hint);
+}
+
+.ts-site .site-th-name {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 20px;
   color: var(--pt-ink-2);
 }
 
-/* under 1280 px: one line on the left joins the callers and runs down to the handler and the
-   record */
-@media (max-width: 1279px) {
-  .ts-site .site-ag-fig {
-    display: block;
-    padding-left: 32px;
+@media (max-width: 720px) {
+  .ts-site .site-th-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 16px;
   }
 
-  .ts-site .site-ag-from {
-    max-width: 640px;
-    padding-right: 0;
-  }
-
-  .ts-site .site-ag-from::after,
-  .ts-site .site-ag-n::after {
-    display: none;
-  }
-
-  .ts-site .site-ag-calls,
-  .ts-site .site-ag-calls tbody {
-    display: block;
-  }
-
-  .ts-site .site-ag-calls tr,
-  .ts-site .site-ag-calls tr.is-person {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    column-gap: 16px;
-    height: auto;
-    padding: 12px 0;
-  }
-
-  .ts-site .site-ag-calls th,
-  .ts-site .site-ag-calls td,
-  .ts-site .site-ag-calls .site-ag-n {
-    padding: 0;
-  }
-
-  .ts-site .site-ag-calls .site-ag-call {
+  .ts-site .site-th-tile:last-child {
     grid-column: 1 / -1;
-    grid-row: 2;
-    margin-top: 4px;
-    padding-left: 24px;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
-  .ts-site .site-ag-calls .site-ag-n {
-    grid-row: 1;
-    grid-column: 2;
-  }
-
-  /* the bus through each row and the tick from the bus to the caller's icon */
-  .ts-site .site-ag-calls tr::before {
-    content: '';
-    position: absolute;
-    left: -27px;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: var(--ag-wire);
-  }
-
-  .ts-site .site-ag-calls tr:first-child::before {
-    top: 24px;
-  }
-
-  .ts-site .site-ag-calls tr::after {
-    content: '';
-    position: absolute;
-    left: -27px;
-    top: 24px;
-    width: 19px;
-    height: 1px;
-    background: var(--ag-wire);
-  }
-
-  .ts-site .site-ag-path {
-    display: block;
-    height: auto;
-    margin: 0;
-  }
-
-  .ts-site .site-ag-stop {
-    display: block;
-    padding-top: 24px;
-  }
-
-  .ts-site .site-ag-stop::before {
-    position: absolute;
-    left: -27px;
-    top: 0;
-    width: 1px;
-    height: 30px;
-  }
-
-  .ts-site .site-ag-stop + .site-ag-stop::before {
-    top: -7px;
-    height: 37px;
-  }
-
-  .ts-site .site-ag-stop::after {
-    position: absolute;
-    left: -32px;
-    top: 30px;
-  }
-
-  .ts-site .site-ag-stop .site-ag-name,
-  .ts-site .site-ag-stop .site-ag-rec,
-  .ts-site .site-ag-stop:not(.is-end) .site-ag-name {
-    position: static;
-    display: block;
-    translate: none;
-    white-space: normal;
   }
 }
 
@@ -1921,18 +1912,6 @@
   .ts-site .site-claim-head,
   .ts-site .site-pp-in > .site-claim-head {
     margin-bottom: 24px;
-  }
-
-  .ts-site .site-ag-calls th,
-  .ts-site .site-ag-calls td,
-  .ts-site .site-ag-name,
-  .ts-site .site-ag-rec {
-    font-size: 15px;
-  }
-
-  .ts-site .site-ag-call code,
-  .ts-site code.site-ag-name {
-    font-size: 14px;
   }
 
   .ts-site .site-pr-console {
@@ -2996,4 +2975,54 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
     scale: none;
     animation: none;
   }
+}
+
+/* ---- Not found (NotFoundPage.tsx): the missing address as a field across the window, faint,
+   and in full ink inside 404 ---- */
+
+.ts-site.ts-notfound {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-site .site-nf {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.ts-site .site-nf-bar {
+  display: flex;
+  align-items: center;
+  height: var(--site-bar-h);
+}
+
+/* the field: one row of 14 unit Katagami Mono every 18 units of the 1600 by 560 drawing, and 404
+   in Katagami Text at 800 and 600 units (their inline styles, NotFoundPage.tsx); the rows draw
+   faint across the field, the figures draw a faint ground and the rows draw in full ink inside
+   them */
+.ts-site .site-nf-fig {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: clamp(16px, 4vh, 48px);
+  fill: var(--pt-ink);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ts-site .site-nf-faint {
+  opacity: 0.09;
+}
+
+.ts-site .site-nf-ground {
+  opacity: 0.06;
+}
+
+.ts-site .site-nf-copy {
+  padding-block: clamp(24px, 4vh, 48px) 96px;
+}
+
+.ts-site .site-nf-title {
+  margin: 0 0 24px;
 }

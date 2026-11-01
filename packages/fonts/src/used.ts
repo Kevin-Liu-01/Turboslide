@@ -1,11 +1,12 @@
 // The catalog families a deck uses (gslides-parity SPEC-5-amendments A5 item 3; docs/archive/rounds/PRODUCT.md
 // 4.2), from the schema alone: every `typography.family` of every block of the given slides (the
-// blocks a composite's cells hold included) and every role of the brand kit's fonts, in FONT_IDS order,
-// never the theme's default face (Inter is the base stylesheet's). The editor page runs this on
+// blocks a composite's cells hold included), every role of the brand kit's fonts and the theme's
+// faces for the roles the kit leaves alone, in FONT_IDS order, never Inter (the base stylesheet's). The editor page runs this on
 // every document change to decide whether the sheet needs a stylesheet link at all, so the module
 // reads nothing but the schema and weighs nothing; the renderer re-exports it beside the
 // @font-face emission (@turboslide/render/fonts).
 import type { Block } from '@turboslide/schema/blocks';
+import { themeFactsOf } from '@turboslide/schema/brand';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
 import { slideFieldTypographies } from '@turboslide/schema/field-typography';
@@ -24,11 +25,14 @@ export function blockFamilies(block: Block, out: Set<FontId>): void {
 /**
  * The catalog faces a deck uses, in FONT_IDS order: every `typography.family` of every block of
  * the given slides, every face a fixed kind's field carries of its own (the cover's heading and
- * lead, a statement's big line; build/field-fonts.md 2) and every role of the brand kit's `fonts`
- * (docs/archive/rounds/PRODUCT.md 4.1). The theme's default face (Inter) is never in the answer because the base
- * stylesheet always carries it.
+ * lead, a statement's big line; build/field-fonts.md 2), every role of the brand kit's `fonts`
+ * (docs/archive/rounds/PRODUCT.md 4.1) and the theme's face for each role the kit names none of
+ * (`THEME_FACTS` fonts). Inter is never in the answer because the base stylesheet always carries it.
  */
-export function usedFontIds(deck: Pick<Deck, 'brand'>, slides: Iterable<Slide>): FontId[] {
+export function usedFontIds(
+  deck: Pick<Deck, 'brand'> & Partial<Pick<Deck, 'theme'>>,
+  slides: Iterable<Slide>,
+): FontId[] {
   const used = new Set<FontId>();
   for (const slide of slides) {
     for (const { block } of slideBlocks(slide)) blockFamilies(block, used);
@@ -41,6 +45,9 @@ export function usedFontIds(deck: Pick<Deck, 'brand'>, slides: Iterable<Slide>):
   if (roles !== undefined)
     for (const family of Object.values(roles))
       if (typeof family === 'string' && isFontId(family)) used.add(family);
+  const faces = themeFactsOf(deck.theme).fonts;
+  if (roles?.display === undefined) used.add(faces.display);
+  if (roles?.text === undefined) used.add(faces.text);
   used.delete(DEFAULT_FONT_ID);
   return FONT_IDS.filter((id) => used.has(id));
 }

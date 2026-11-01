@@ -15,6 +15,7 @@ import { renderSlide } from './slide.ts';
 import { kitStyle } from './slide.ts';
 import { counterText, frameBandHtml, frameBandOf, GT_BAND, WORDMARK_HTML } from './stage.ts';
 import {
+  THEME_COVER_ATTRIBUTE,
   THEME_CSS_CLASS,
   THEME_CSS_SCOPE,
   THEME_CSS_STYLE_ID,
@@ -426,22 +427,13 @@ describe('the theme library', () => {
     }
   });
 
-  it('draws one rule at the top for Swiss and both rules for Night and Slate', () => {
-    const swiss = parseCss(themeCss(deck(undefined, 'swiss'))).map((rule) => rule.selector);
-    expect(swiss).toContain(`${themeScope('swiss')} .frame .rule.bottom`);
-    expect(swiss).not.toContain(`${themeScope('swiss')} .frame .rule`);
-    expect(swiss).not.toContain(`${themeScope('swiss')} .frame .rule.top`);
-    for (const id of ['night', 'slate'] as const) {
+  it('hides every frame part of a theme that draws its parts in their place', () => {
+    for (const id of ['swiss', 'night', 'slate', 'simple'] as const) {
       const selectors = parseCss(themeCss(deck(undefined, id))).map((rule) => rule.selector);
-      expect(
-        selectors.some((selector) => selector.includes('.frame .rule')),
-        id,
-      ).toBe(false);
+      expect(selectors, id).toContain(`${themeScope(id)} .frame .rule`);
+      expect(selectors, id).toContain(`${themeScope(id)} .frame::before`);
+      expect(selectors, id).toContain(`${themeScope(id)} .frame .cross`);
     }
-    const simple = parseCss(themeCss(deck(undefined, 'simple'))).map((rule) => rule.selector);
-    expect(simple).toContain(`${themeScope('simple')} .frame .rule`);
-    expect(simple).toContain(`${themeScope('simple')} .frame::before`);
-    expect(simple).toContain(`${themeScope('simple')} .frame::after`);
   });
 
   it('lets a kit toggle draw a part the theme leaves out and a kit colour win over the theme', () => {
@@ -467,7 +459,8 @@ describe('the theme library', () => {
     const title = (id: string) => `${themeScope(id)} .slide[data-kind='title'] .left-mid`;
     const swiss = parseCss(themeCss(deck(undefined, 'swiss')));
     expect(swiss.find((rule) => rule.selector === title('swiss'))?.declarations).toEqual({
-      top: '0',
+      top: 'auto',
+      bottom: '0',
       transform: 'none',
     });
     expect(
@@ -478,14 +471,124 @@ describe('the theme library', () => {
     expect(coral.find((rule) => rule.selector === title('coral'))?.declarations['bottom']).toBe(
       '0',
     );
-    const mint = parseCss(themeCss(deck(undefined, 'mint')));
-    expect(mint.find((rule) => rule.selector === title('mint'))?.declarations['text-align']).toBe(
+    const sand = parseCss(themeCss(deck(undefined, 'sand')));
+    expect(sand.find((rule) => rule.selector === title('sand'))?.declarations['text-align']).toBe(
       'center',
+    );
+    // a theme with a panel or a disc stops the title's column short of it
+    const mint = parseCss(themeCss(deck(undefined, 'mint')));
+    expect(mint.find((rule) => rule.selector === title('mint'))?.declarations['right']).toBe(
+      '520px',
     );
     const simple = parseCss(themeCss(deck(undefined, 'simple')));
     expect(simple.some((rule) => rule.selector.startsWith(title('simple')))).toBe(false);
     expect(simple.some((rule) => rule.selector.endsWith('.frame::before'))).toBe(true);
     expect(simple.some((rule) => rule.selector.endsWith('h1::before'))).toBe(false);
+  });
+
+  it("sets each theme in its faces and its heading tracking, the kit's roles over them", () => {
+    const root = (id: StoredThemeId) =>
+      parseCss(themeCss(deck(undefined, id))).find((rule) => rule.selector === themeScope(id))
+        ?.declarations ?? {};
+    expect(root('coral')['--display']).toBe(fontStack('fraunces'));
+    expect(root('coral')['--text']).toBe(fontStack('dm-sans'));
+    // Inter is the sheet's own stack, so a theme set in it writes no stack
+    expect(root('signal')['--display']).toBe(fontStack('oswald'));
+    expect(root('signal')['--text']).toBeUndefined();
+    expect(root('simple')['--display']).toBeUndefined();
+    const headings = (id: StoredThemeId) =>
+      parseCss(themeCss(deck(undefined, id))).find((rule) => rule.selector.endsWith('.slide .big'))
+        ?.declarations;
+    expect(headings('signal')).toEqual({
+      'letter-spacing': '0.005em',
+      'text-transform': 'uppercase',
+    });
+    expect(headings('swiss')).toEqual({ 'letter-spacing': '-0.04em' });
+    expect(headings('simple')).toBeUndefined();
+    // the kit's display face follows the theme's at the same root and wins
+    const kit = parseCss(themeCss(deck({ fonts: { display: 'lora' } }, 'coral'))).filter(
+      (rule) => rule.selector === themeScope('coral'),
+    );
+    expect(kit.map((rule) => rule.declarations['--display'])).toEqual([
+      fontStack('fraunces'),
+      fontStack('lora'),
+    ]);
+  });
+
+  it("draws the title slide's parts on it alone and every other slide's parts under the objects", () => {
+    const rulesOf = (id: StoredThemeId) => parseCss(themeCss(deck(undefined, id)));
+    const cover = `[${THEME_COVER_ATTRIBUTE}]`;
+    const find = (id: StoredThemeId, selector: string) =>
+      rulesOf(id).find((rule) => rule.selector === `${themeScope(id)} ${selector}`)?.declarations;
+    // Coral's field over the sheet's top 405 px, in the slide box's coordinates (57 px inside)
+    expect(find('coral', `.slide${cover}::before`)).toEqual({
+      content: "''",
+      position: 'absolute',
+      'z-index': '-1',
+      'pointer-events': 'none',
+      left: '-57px',
+      top: '-57px',
+      width: '1600px',
+      height: '405px',
+      background: 'var(--accent)',
+    });
+    expect(find('coral', `.slide:not(${cover})::before`)).toMatchObject({ height: '88px' });
+    expect(find('coral', `.slide${cover}::after`)).toBeUndefined();
+    // Night's moons are discs in a tone of the accent over the paper
+    expect(find('night', `.slide${cover}::before`)).toMatchObject({
+      'border-radius': '50%',
+      background: 'color-mix(in srgb, var(--accent) 24%, var(--paper))',
+    });
+    // Sand's frames are hairlines, two round the title slide
+    expect(find('sand', `.slide${cover}::after`)?.border).toBe('1px solid var(--accent)');
+    expect(find('sand', `.slide:not(${cover})::after`)).toBeUndefined();
+    // Mint's card: the green ground, then the paper over it
+    expect(find('mint', `.slide:not(${cover})::before`)?.background).toBe('var(--accent)');
+    expect(find('mint', `.slide:not(${cover})::after`)).toMatchObject({
+      left: '-17px',
+      width: '1520px',
+      background: 'var(--paper)',
+    });
+    // the title's size, and Simple draws nothing
+    expect(find('signal', `.slide${cover} h1`)).toEqual({ 'font-size': '128px' });
+    expect(
+      rulesOf('simple').some((rule) => / \.slide[^ ]*::(before|after)$/.test(rule.selector)),
+    ).toBe(false);
+    // the attribute rides on the title slide of a theme with parts of its own, nowhere else
+    expect(renderSlide(deck(undefined, 'coral'), title, options).html).toMatch(
+      new RegExp(`<section[^>]* ${THEME_COVER_ATTRIBUTE}[ >]`),
+    );
+    expect(renderSlide(deck(undefined, 'simple'), title, options).html).not.toContain(
+      THEME_COVER_ATTRIBUTE,
+    );
+    expect(renderSlide(deck(undefined, 'general-translation'), title, options).html).not.toContain(
+      THEME_COVER_ATTRIBUTE,
+    );
+  });
+
+  it("sets a flooded title in its own colours unless the kit names the appearance's colours", () => {
+    const flood = (brand: BrandKit | undefined, appearance: 'light' | 'dark') =>
+      parseCss(themeCss(deck(brand, 'signal'))).find(
+        (rule) =>
+          rule.selector ===
+          `${appearance === 'dark' ? darkOf('signal') : lightOf('signal')} .slide[${THEME_COVER_ATTRIBUTE}]`,
+      )?.declarations;
+    expect(flood(undefined, 'dark')).toMatchObject({
+      '--paper': '#ffd400',
+      '--ink': '#000000',
+      '--accent': '#000000',
+      color: 'var(--ink)',
+    });
+    expect(flood(undefined, 'light')?.['--paper']).toBe('#ffd400');
+    // Slate's title is the other appearance
+    const slate = parseCss(themeCss(deck(undefined, 'slate'))).find(
+      (rule) => rule.selector === `${lightOf('slate')} .slide[${THEME_COVER_ATTRIBUTE}]`,
+    )?.declarations;
+    expect(slate?.['--paper']).toBe(themeRecord('slate').colors.dark.paper);
+    // a kit's colours for an appearance reach the title slide too
+    const kit = { colors: { dark: { background: '#202020' } } } as BrandKit;
+    expect(flood(kit, 'dark')).toBeUndefined();
+    expect(flood(kit, 'light')?.['--paper']).toBe('#ffd400');
   });
 
   it('draws no GT mark, no wordmark band and no counter format of GT on a Simple title slide', () => {
@@ -575,12 +678,12 @@ describe('the theme library', () => {
      colour the slide draws in the deck's theme under its kit, never General Translation's */
   it('answers the hex a colour paints with the deck’s tokens', () => {
     const mint = deckTokens(deck(undefined, 'mint'), 'light');
-    expect(colorHexOf(mint, 'paper')).toBe('#e8f3ee');
-    expect(colorHexOf(mint, 'ink')).toBe('#0d271d');
-    expect(colorHexOf(mint, 'blue')).toBe('#11734f');
-    expect(colorHexOf(mint, 'accent')).toBe('#11734f');
-    /* an alpha of the ink over the theme's paper: rgba(13, 39, 29, 0.18) on #e8f3ee */
-    expect(colorHexOf(mint, 'hair')).toBe(composite(mint.hair, '#e8f3ee'));
+    expect(colorHexOf(mint, 'paper')).toBe('#f4faf6');
+    expect(colorHexOf(mint, 'ink')).toBe('#0b2419');
+    expect(colorHexOf(mint, 'blue')).toBe('#0f6b48');
+    expect(colorHexOf(mint, 'accent')).toBe('#0f6b48');
+    /* an alpha of the ink over the theme's paper: rgba(11, 36, 25, 0.18) on #f4faf6 */
+    expect(colorHexOf(mint, 'hair')).toBe(composite(mint.hair, '#f4faf6'));
     expect(colorHexOf(mint, 'hair')).not.toBe(colorHexOf(deckTokens(deck(), 'light'), 'hair'));
     expect(colorHexOf(mint, 'green')).toBe('#12a37a');
     expect(colorHexOf(mint, '#AA3366')).toBe('#aa3366');
@@ -588,7 +691,7 @@ describe('the theme library', () => {
     const kit = deckTokens(deck({ colors: { light: { primary: '#aa3366' } } }, 'mint'), 'light');
     expect(colorHexOf(kit, 'blue')).toBe('#aa3366');
     expect(colorHexOf(kit, 'accent')).toBe('#aa3366');
-    expect(colorHexOf(kit, 'paper')).toBe('#e8f3ee');
+    expect(colorHexOf(kit, 'paper')).toBe('#f4faf6');
     const gt = deckTokens(deck(), 'dark');
     expect(colorHexOf(gt, 'paper')).toBe(TOKENS.dark.paper);
     expect(colorHexOf(gt, 'hair')).toBe('#3b3b3a');

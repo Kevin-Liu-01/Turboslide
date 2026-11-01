@@ -4,13 +4,14 @@
 // studio's HTTP route answer the same rows from packages/theme/src/themes.ts.
 import { THEME_RECORDS } from '@turboslide/theme/themes';
 import type { ThemeId } from '@turboslide/schema/brand';
+import type { FontId } from '@turboslide/schema/fonts';
 
 import type { CommandContext } from '../context.ts';
 import { runDeckAction } from '../dispatch.ts';
 import { UsageError } from '../exit.ts';
 
 const USAGE = `usage:
-  turboslide theme list             the nine themes: id, name, default appearance and tokens (theme.list)`;
+  turboslide theme list             the nine themes: id, name, default appearance, faces and tokens (theme.list)`;
 
 /** One row of `theme.list`. */
 export type ThemeRow = {
@@ -18,6 +19,7 @@ export type ThemeRow = {
   name: string;
   sentence: string;
   defaultAppearance: 'light' | 'dark';
+  fonts: { display: FontId; text: FontId };
   tokens: { light: Record<string, string>; dark: Record<string, string> };
 };
 
@@ -29,6 +31,7 @@ export function themeList(): { themes: ThemeRow[] } {
       name: theme.name,
       sentence: theme.sentence,
       defaultAppearance: theme.defaultAppearance,
+      fonts: { ...theme.fonts },
       tokens: { light: { ...theme.tokens.light }, dark: { ...theme.tokens.dark } },
     })),
   };
@@ -41,7 +44,7 @@ export async function theme(ctx: CommandContext): Promise<number> {
   ctx.out.result(answer);
   for (const row of answer.themes)
     ctx.out.human(
-      `${row.id.padEnd(20)} ${row.defaultAppearance.padEnd(5)}  ${row.tokens.light.ink} on ${row.tokens.light.paper}  ${row.name}`,
+      `${row.id.padEnd(20)} ${row.defaultAppearance.padEnd(5)}  ${row.tokens.light.ink} on ${row.tokens.light.paper}  ${row.fonts.display.padEnd(19)} ${row.name}`,
     );
   ctx.out.human(`${answer.themes.length} themes; deck set /theme <id> picks one`);
   return 0;

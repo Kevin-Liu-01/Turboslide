@@ -4249,7 +4249,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'theme.list': action({
     id: 'theme.list',
     label: 'Themes',
-    doc: 'The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme.',
+    doc: 'The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, the catalog faces of its headings and its text, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme, and its font roles over the theme faces.',
     group: 'deck',
     mutates: false,
     transports: ['cli', 'mcp', 'http'],
@@ -4262,6 +4262,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           name: z.string(),
           sentence: z.string(),
           defaultAppearance: z.enum(APPEARANCES),
+          fonts: z.strictObject({ display: z.enum(FONT_IDS), text: z.enum(FONT_IDS) }),
           tokens: z.strictObject({
             light: z.record(z.string(), z.string()),
             dark: z.record(z.string(), z.string()),

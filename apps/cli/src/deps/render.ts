@@ -3,6 +3,7 @@
 // runtime that shows the slide named by the hash, draws the dither canvases and stamps
 // data-ts-ready), and renderStandalone gives the single-file viewer. The theme bundle comes from
 // @turboslide/render/theme-node, which reads the theme and font packages once per run.
+import { fontFileDataUri } from '@turboslide/fonts/catalog-node';
 import { renderDeck } from '@turboslide/render/deck';
 import type { RenderedDeck, ThemeBundle } from '@turboslide/render/deck';
 import { renderStandalone } from '@turboslide/render/standalone';
@@ -48,6 +49,9 @@ export function renderThemeDocument(
     gtWord: true,
     present: true,
     title: `${loaded.deck.title} (${theme})`,
+    /* the document is a file, so the catalog faces a deck uses (its theme's, its kit's, its
+       blocks') travel as data URIs, the export's capture's source (export/src/scene/extract.ts) */
+    fontSrc: (id, file) => fontFileDataUri(id, file.file),
   });
   return { html: rendered.html, slides: rendered.slides, warnings: rendered.warnings };
 }

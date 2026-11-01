@@ -37,8 +37,8 @@ import type { FontId } from '@turboslide/schema/fonts';
 import { DEFAULT_FONT_ID } from '@turboslide/schema/fonts';
 import { fontFamilyStack } from '@turboslide/fonts/summary';
 import { contrastRatio as wcagRatio } from '@turboslide/theme/contrast';
-import type { ThemeRecord } from '@turboslide/theme/themes';
-import { themeRecord } from '@turboslide/theme/themes';
+import type { PartFill, ThemePart, ThemeRecord } from '@turboslide/theme/themes';
+import { BASE_HEADING_TRACKING, themeRecord } from '@turboslide/theme/themes';
 import type { ThemeName, TokenName } from '@turboslide/theme/tokens';
 import {
   DISPLAY,
@@ -225,11 +225,74 @@ function tokenDeclarations(tokens: Readonly<Record<TokenName, string>>): string[
 }
 
 /**
+ * The attribute renderSlide writes on a title slide, and on a slide converted from one, of a
+ * theme whose title slide draws parts or colours of its own (docs/DESIGN.md 7.2): its rules scope
+ * to it, so a title moved onto the canvas keeps them.
+ */
+export const THEME_COVER_ATTRIBUTE = 'data-ts-cover';
+
+/** True when a theme's title slide draws parts or colours of its own, the slides renderSlide stamps. */
+export function themeHasCover(theme: ThemeRecord): boolean {
+  return theme.title.parts.length > 0 || theme.title.colors !== null;
+}
+
+/** The slide's two pseudo elements, one part each, in the part list's order. */
+const PART_ELEMENTS = ['::before', '::after'] as const;
+
+/** The paint of a fill: the theme's tokens, so a kit colour and a flooded title recolour it. */
+const FILLS: Readonly<Record<PartFill, string>> = {
+  accent: 'background: var(--accent)',
+  ink: 'background: var(--ink)',
+  paper: 'background: var(--paper)',
+  tone: 'background: color-mix(in srgb, var(--accent) 24%, var(--paper))',
+  line: 'border: 1px solid var(--accent)',
+};
+
+/**
+ * The declarations of a part (themes.ts ThemePart): a pseudo element at z-index -1 inside the
+ * slide's stacking context (stage.css `isolation: isolate`), so the text, the objects and a
+ * slide's own background colour (`.slide-bg`) paint over it and a click passes to the slide, at
+ * its box on the sheet, which is the slide box moved out by the 57 px the box sits inside it.
+ */
+function partDeclarations(part: ThemePart): string[] {
+  const [x, y, w, h] = part.box;
+  return [
+    "content: ''",
+    'position: absolute',
+    'z-index: -1',
+    'pointer-events: none',
+    `left: ${x - SLIDE_INSET}px`,
+    `top: ${y - SLIDE_INSET}px`,
+    `width: ${w}px`,
+    `height: ${h}px`,
+    FILLS[part.fill],
+    ...(part.round === true ? ['border-radius: 50%'] : []),
+  ];
+}
+
+/** The slide box's inset on the sheet (stage.css `.ts-sheet .slide { inset: 57px }`). */
+const SLIDE_INSET = 57;
+
+function partRules(parts: readonly ThemePart[], slide: string): Rule[] {
+  return parts.slice(0, PART_ELEMENTS.length).map((part, i) => ({
+    selector: `${slide}${PART_ELEMENTS[i]}`,
+    declarations: partDeclarations(part),
+  }));
+}
+
+/**
  * The rules of a theme other than General Translation (docs/DESIGN.md 7.2, 7.4): the twelve
- * tokens of each appearance, the display features, the title slide's composition and the accent
- * bar over each heading. The frame is the deck's (`frameRules`), since a kit toggle overrides it.
+ * tokens of each appearance, the two faces and the display features, the headings' tracking and
+ * case, the title slide's composition, column, size and parts, every other slide's parts and the
+ * accent bar over each heading. The frame is the deck's (`frameRules`), since a kit toggle
+ * overrides it, the kit's font roles follow at the same specificity and win, and the title slide's
+ * own colours are `titleColourRules`, which a kit's colours turn off.
  */
 function themeRules(theme: ThemeRecord, root: string): Rule[] {
+  const faces: string[] = [];
+  if (theme.fonts.display !== DEFAULT_FONT_ID)
+    faces.push(`--display: ${fontStack(theme.fonts.display)}`);
+  if (theme.fonts.text !== DEFAULT_FONT_ID) faces.push(`--text: ${fontStack(theme.fonts.text)}`);
   const rules: Rule[] = [
     {
       selector: appearanceScope('light', root),
@@ -238,9 +301,18 @@ function themeRules(theme: ThemeRecord, root: string): Rule[] {
     { selector: appearanceScope('dark', root), declarations: tokenDeclarations(theme.tokens.dark) },
     {
       selector: root,
-      declarations: [`--${DISPLAY_FEATURES_TOKEN}: ${theme.displayFeatures}`],
+      declarations: [...faces, `--${DISPLAY_FEATURES_TOKEN}: ${theme.displayFeatures}`],
     },
   ];
+  const heading: string[] = [];
+  if (theme.heading.tracking !== BASE_HEADING_TRACKING)
+    heading.push(`letter-spacing: ${theme.heading.tracking}em`);
+  if (theme.heading.uppercase) heading.push('text-transform: uppercase');
+  if (heading.length > 0)
+    rules.push({
+      selector: `${root} .slide h1, ${root} .slide h2, ${root} .slide .big`,
+      declarations: heading,
+    });
   // the fixed title kind's column (slide.ts, `.left-mid` in the title section); a slide converted
   // to the canvas keeps its own boxes
   const title = `${root} .slide[data-kind='title'] .left-mid`;
@@ -261,6 +333,20 @@ function themeRules(theme: ThemeRecord, root: string): Rule[] {
     default:
       break;
   }
+  if (theme.title.columnRight > 0)
+    rules.push({ selector: title, declarations: [`right: ${theme.title.columnRight}px`] });
+  // the title slide's own parts, size and colours; every other slide's parts, and the title
+  // slide's where it has none of its own
+  const cover = `${root} .slide[${THEME_COVER_ATTRIBUTE}]`;
+  if (theme.title.size !== null)
+    rules.push({ selector: `${cover} h1`, declarations: [`font-size: ${theme.title.size}px`] });
+  rules.push(...partRules(theme.title.parts, cover));
+  rules.push(
+    ...partRules(
+      theme.parts,
+      themeHasCover(theme) ? `${root} .slide:not([${THEME_COVER_ATTRIBUTE}])` : `${root} .slide`,
+    ),
+  );
   if (theme.title.accentBar) {
     // the bar sits outside the heading's box, so no measured box, line or canvas conversion moves
     rules.push({
@@ -281,6 +367,23 @@ function themeRules(theme: ThemeRecord, root: string): Rule[] {
     });
   }
   return rules;
+}
+
+/**
+ * The title slide's own colours where the theme sets it on another ground (a flood, the other
+ * appearance): its twelve tokens on the stamped slide, and its text colour, which the sheet root
+ * resolves once for every slide. Nothing for an appearance whose colours the kit names, so a
+ * customer's colours reach the title slide too.
+ */
+function titleColourRules(theme: ThemeRecord, root: string, kit: BrandKit | undefined): Rule[] {
+  const tokens = theme.title.tokens;
+  if (tokens === null) return [];
+  return (['light', 'dark'] as const)
+    .filter((appearance) => kit?.colors?.[appearance] === undefined)
+    .map((appearance) => ({
+      selector: `${appearanceScope(appearance, root)} .slide[${THEME_COVER_ATTRIBUTE}]`,
+      declarations: [...tokenDeclarations(tokens[appearance]), 'color: var(--ink)'],
+    }));
 }
 
 /**
@@ -328,7 +431,10 @@ export function themeCss(deck: ThemeDeck, options: ThemeCssOptions = {}): string
   const root = options.root ?? themeScope(themeId);
   const theme = themeRecord(themeId);
   const kit = deck.brand;
-  const rules: Rule[] = themeId === GT_THEME_ID ? [] : themeRules(theme, root);
+  const rules: Rule[] =
+    themeId === GT_THEME_ID
+      ? []
+      : [...themeRules(theme, root), ...titleColourRules(theme, root, kit)];
   if (kit !== undefined) {
     rules.push(...colourRules(kit, 'light', theme, root), ...colourRules(kit, 'dark', theme, root));
     const declarations: string[] = [];

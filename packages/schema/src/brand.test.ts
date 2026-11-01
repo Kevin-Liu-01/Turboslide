@@ -242,6 +242,7 @@ describe('the theme library in the schema', () => {
       logo: false,
       frame: { rails: false, top: false, bottom: false, crosses: false },
       pictures: false,
+      fonts: { display: 'inter', text: 'inter' },
     });
   });
 
@@ -272,9 +273,11 @@ describe('the theme library in the schema', () => {
       bottom: true,
       crosses: true,
     });
+    // General Translation alone draws a frame; the other themes draw parts of their own
+    // (packages/theme/src/themes.ts)
     expect(frameOf('swiss', undefined)).toEqual({
       rails: false,
-      top: true,
+      top: false,
       bottom: false,
       crosses: false,
     });

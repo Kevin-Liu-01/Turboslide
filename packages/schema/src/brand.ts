@@ -276,6 +276,12 @@ export type ThemeFacts = {
   frame: ThemeFrame;
   /** the four GT materials Section header, Caption and Closing take */
   pictures: boolean;
+  /**
+   * the catalog faces the theme sets its headings and its text in where the kit names no font
+   * role (Kevin, 2026-11-01: "our themes suck make them look a lot better"); the font loader
+   * reads them here so a deck in the theme fetches its faces
+   */
+  fonts: { display: FontId; text: FontId };
 };
 
 const NO_FRAME: ThemeFrame = { rails: false, top: false, bottom: false, crosses: false };
@@ -288,6 +294,7 @@ export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
     logo: false,
     frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'inter', text: 'inter' },
   },
   'general-translation': {
     appearance: 'dark',
@@ -295,13 +302,15 @@ export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
     logo: true,
     frame: { rails: true, top: true, bottom: true, crosses: true },
     pictures: true,
+    fonts: { display: 'inter', text: 'inter' },
   },
   swiss: {
     appearance: 'light',
     counter: { show: true, format: 'n' },
     logo: false,
-    frame: { rails: false, top: true, bottom: false, crosses: false },
+    frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'instrument-sans', text: 'instrument-sans' },
   },
   mint: {
     appearance: 'light',
@@ -309,6 +318,7 @@ export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
     logo: false,
     frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'bricolage-grotesque', text: 'dm-sans' },
   },
   coral: {
     appearance: 'light',
@@ -316,20 +326,23 @@ export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
     logo: false,
     frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'fraunces', text: 'dm-sans' },
   },
   night: {
     appearance: 'dark',
     counter: { show: true, format: 'n' },
     logo: false,
-    frame: { rails: false, top: true, bottom: true, crosses: false },
+    frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'space-grotesk', text: 'inter' },
   },
   slate: {
     appearance: 'light',
     counter: { show: true, format: 'n' },
     logo: false,
-    frame: { rails: false, top: true, bottom: true, crosses: false },
+    frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'ibm-plex-sans', text: 'ibm-plex-sans' },
   },
   sand: {
     appearance: 'light',
@@ -337,6 +350,7 @@ export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
     logo: false,
     frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'newsreader', text: 'newsreader' },
   },
   signal: {
     appearance: 'dark',
@@ -344,6 +358,7 @@ export const THEME_FACTS: Readonly<Record<ThemeId, ThemeFacts>> = {
     logo: false,
     frame: NO_FRAME,
     pictures: false,
+    fonts: { display: 'oswald', text: 'inter' },
   },
 };
 

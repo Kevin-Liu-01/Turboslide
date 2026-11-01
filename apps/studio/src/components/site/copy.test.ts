@@ -105,6 +105,7 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['canvas.replay.name', CANVAS_SCREEN.replay.name],
   ['canvas.replay.doc', CANVAS_SCREEN.replay.doc],
   ['themes.name', THEMES_SCREEN.name],
+  ['themes.alt', THEMES_SCREEN.alt('General Translation')],
   ['present.windows.name', PRESENT_SCREEN.windows.name],
   ['present.windows.show', PRESENT_SCREEN.windows.show],
   ['present.windows.presenter', PRESENT_SCREEN.windows.presenter],

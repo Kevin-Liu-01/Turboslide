@@ -52471,6 +52471,94 @@
                   "dark"
                 ]
               },
+              "fonts": {
+                "type": "object",
+                "properties": {
+                  "display": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "enum": [
+                      "inter",
+                      "roboto",
+                      "open-sans",
+                      "lato",
+                      "montserrat",
+                      "poppins",
+                      "source-sans-3",
+                      "source-serif-4",
+                      "merriweather",
+                      "playfair-display",
+                      "lora",
+                      "pt-serif",
+                      "libre-baskerville",
+                      "eb-garamond",
+                      "nunito",
+                      "raleway",
+                      "work-sans",
+                      "dm-sans",
+                      "space-grotesk",
+                      "oswald",
+                      "bebas-neue",
+                      "roboto-mono",
+                      "jetbrains-mono",
+                      "ibm-plex-sans",
+                      "ibm-plex-mono",
+                      "fira-code",
+                      "geist",
+                      "geist-mono",
+                      "instrument-sans",
+                      "manrope",
+                      "bricolage-grotesque",
+                      "schibsted-grotesk",
+                      "newsreader",
+                      "fraunces"
+                    ]
+                  }
+                },
+                "required": [
+                  "display",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
               "tokens": {
                 "type": "object",
                 "properties": {
@@ -52505,6 +52593,7 @@
               "name",
               "sentence",
               "defaultAppearance",
+              "fonts",
               "tokens"
             ],
             "additionalProperties": false
@@ -71155,7 +71244,7 @@
     {
       "name": "deck_list_themes",
       "action": "theme.list",
-      "description": "The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme.",
+      "description": "The theme library: each of the nine themes with its id, name, one sentence, the appearance a deck in it draws when none is chosen, the catalog faces of its headings and its text, and its twelve sheet tokens per appearance. deck.set /theme takes any of the ids; a brand kit draws over the theme, and its font roles over the theme faces.",
       "inputSchema": {
         "$id": "#/$defs/DeckInfoInput",
         "type": "object",
@@ -71198,6 +71287,94 @@
                     "dark"
                   ]
                 },
+                "fonts": {
+                  "type": "object",
+                  "properties": {
+                    "display": {
+                      "type": "string",
+                      "enum": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
+                      ]
+                    },
+                    "text": {
+                      "type": "string",
+                      "enum": [
+                        "inter",
+                        "roboto",
+                        "open-sans",
+                        "lato",
+                        "montserrat",
+                        "poppins",
+                        "source-sans-3",
+                        "source-serif-4",
+                        "merriweather",
+                        "playfair-display",
+                        "lora",
+                        "pt-serif",
+                        "libre-baskerville",
+                        "eb-garamond",
+                        "nunito",
+                        "raleway",
+                        "work-sans",
+                        "dm-sans",
+                        "space-grotesk",
+                        "oswald",
+                        "bebas-neue",
+                        "roboto-mono",
+                        "jetbrains-mono",
+                        "ibm-plex-sans",
+                        "ibm-plex-mono",
+                        "fira-code",
+                        "geist",
+                        "geist-mono",
+                        "instrument-sans",
+                        "manrope",
+                        "bricolage-grotesque",
+                        "schibsted-grotesk",
+                        "newsreader",
+                        "fraunces"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "display",
+                    "text"
+                  ],
+                  "additionalProperties": false
+                },
                 "tokens": {
                   "type": "object",
                   "properties": {
@@ -71232,6 +71409,7 @@
                 "name",
                 "sentence",
                 "defaultAppearance",
+                "fonts",
                 "tokens"
               ],
               "additionalProperties": false

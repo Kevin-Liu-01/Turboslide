@@ -137,13 +137,13 @@ export const CANVAS_SCREEN = {
 
 /**
  * The Themes screen (ThemesScreen.tsx): the title slide of the landing's own deck in each theme of
- * the library, in the picker's order, each tile in the theme's colours of the page's appearance,
- * with its title composition, accent bar, rules and counter (theme-tiles.ts). The words are the
- * deck's (present-deck.ts); each tile's name is the theme's.
+ * the library, in the picker's order, each tile the renderer's picture of it in the theme
+ * (theme-tiles.ts). Each tile's name is the theme's, and its picture's alt names the theme.
  */
 export const THEMES_SCREEN = {
   heading: 'Nine Themes',
   name: 'The title slide of one deck in each of the nine themes',
+  alt: (theme: string): string => `The title slide of the onboarding plan in the ${theme} theme.`,
 } as const;
 
 /**

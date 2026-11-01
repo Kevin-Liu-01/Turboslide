@@ -5,7 +5,15 @@
 import { describe, expect, it } from 'vitest';
 import { GT_THEME_ID, LEGACY_THEME_ID, THEME_FACTS, THEME_IDS } from '@turboslide/schema/brand';
 import { contrastRatio } from './contrast.ts';
-import { THEME_FLOORS, THEME_RECORDS, deriveTokens, themeName, themeRecord } from './themes.ts';
+import {
+  BASE_HEADING_TRACKING,
+  MAX_THEME_PARTS,
+  THEME_FLOORS,
+  THEME_RECORDS,
+  deriveTokens,
+  themeName,
+  themeRecord,
+} from './themes.ts';
 import { DISPLAY, TOKENS, TOKEN_NAMES } from './tokens.ts';
 
 const APPEARANCES = ['light', 'dark'] as const;
@@ -35,6 +43,59 @@ describe('the theme library', () => {
       expect(theme.title.mark, theme.id).toBe(facts.logo ? 'gt' : 'none');
       expect(theme.band.counter, theme.id).toBe(facts.counter.show ? facts.counter.format : 'none');
       expect(theme.pictures, theme.id).toBe(facts.pictures ? 'gt-materials' : 'none');
+      expect(theme.fonts, theme.id).toBe(facts.fonts);
+    }
+  });
+
+  // Kevin, 2026-11-01: "our themes suck make them look a lot better", then "make these more
+  // visually distinct, look at google slides themes". Nine palettes over one Inter layout read as
+  // one theme. Each theme past Simple and General Translation now has a heading face of its own,
+  // parts of its own on the title slide and on every other slide, and no two themes draw the same
+  // parts on either.
+  it('gives every theme past the sheet its own heading face and its own parts', () => {
+    const stated = THEME_RECORDS.filter(
+      (theme) => theme.id !== GT_THEME_ID && theme.id !== 'simple',
+    );
+    expect(new Set(stated.map((theme) => theme.fonts.display)).size).toBe(stated.length);
+    const key = (parts: unknown, colors: unknown = null) => JSON.stringify([parts, colors]);
+    expect(new Set(stated.map((theme) => key(theme.parts))).size).toBe(stated.length);
+    expect(new Set(stated.map((theme) => key(theme.title.parts, theme.title.colors))).size).toBe(
+      stated.length,
+    );
+    for (const theme of stated) {
+      expect(theme.fonts.display, theme.id).not.toBe('inter');
+      expect(theme.parts.length, theme.id).toBeGreaterThan(0);
+      expect(theme.title.parts.length, theme.id).toBeGreaterThan(0);
+      for (const parts of [theme.parts, theme.title.parts])
+        expect(parts.length, theme.id).toBeLessThanOrEqual(MAX_THEME_PARTS);
+      // a title set on a ground of its own draws that ground as its first part
+      if (theme.title.colors !== null)
+        expect(theme.title.parts[0], theme.id).toEqual({ box: [0, 0, 1600, 900], fill: 'paper' });
+    }
+    for (const id of [GT_THEME_ID, 'simple'] as const) {
+      const theme = themeRecord(id);
+      expect(theme.fonts, id).toEqual({ display: 'inter', text: 'inter' });
+      expect(theme.heading, id).toEqual({ tracking: BASE_HEADING_TRACKING, uppercase: false });
+      expect([theme.parts, theme.title.parts, theme.title.colors, theme.title.size], id).toEqual([
+        [],
+        [],
+        null,
+        null,
+      ]);
+    }
+  });
+
+  it("holds a flooded title's colours at the floors on its own ground", () => {
+    for (const theme of THEME_RECORDS) {
+      if (theme.title.colors === null) continue;
+      for (const appearance of APPEARANCES) {
+        const colors = theme.title.colors[appearance];
+        for (const [role, floor] of Object.entries(THEME_FLOORS))
+          expect(
+            contrastRatio(colors[role as keyof typeof colors], colors.paper),
+            `${theme.id} title ${appearance} ${role}`,
+          ).toBeGreaterThanOrEqual(floor);
+      }
     }
   });
 
@@ -104,13 +165,20 @@ describe('the theme library', () => {
       expect(theme.sentence.endsWith('.'), theme.id).toBe(true);
       expect(theme.sentence, theme.id).not.toMatch(/—|Google/);
     }
-    expect(themeRecord('swiss').title).toEqual({
-      composition: 'top-left',
+    expect(themeRecord('swiss').title).toMatchObject({
+      composition: 'bottom-left',
+      columnRight: 0,
+      size: 104,
       accentBar: true,
       mark: 'none',
+      colors: null,
     });
     expect(themeRecord('signal').title.accentBar).toBe(true);
-    expect(themeRecord('mint').title.composition).toBe('centre');
+    expect(themeRecord('signal').heading.uppercase).toBe(true);
+    expect(themeRecord('signal').title.colors?.dark.paper).toBe('#ffd400');
+    expect(themeRecord('slate').title.colors?.light).toEqual(themeRecord('slate').colors.dark);
+    expect(themeRecord('mint').title.columnRight).toBe(520);
+    expect(themeRecord('sand').title.composition).toBe('centre');
     expect(themeRecord('coral').title.composition).toBe('bottom-left');
   });
 });

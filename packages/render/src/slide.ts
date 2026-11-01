@@ -26,9 +26,16 @@ import { slideFieldTypography } from '@turboslide/schema/field-typography';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import type { SlotPosition } from '@turboslide/schema/brand';
 import { GT_THEME_ID, themeFactsOf, themeIdOf } from '@turboslide/schema/brand';
+import { themeRecord } from '@turboslide/theme/themes';
 import type { FontSrc } from './fonts.ts';
 import { deckFontsCss, routeFontSrc } from './fonts.ts';
-import { THEME_CSS_CLASS, THEME_SLIDE_ATTRIBUTE, themeCss } from './theme-css.ts';
+import {
+  THEME_COVER_ATTRIBUTE,
+  THEME_CSS_CLASS,
+  THEME_SLIDE_ATTRIBUTE,
+  themeCss,
+  themeHasCover,
+} from './theme-css.ts';
 import { counterShownOn, frameBandOf } from './stage.ts';
 import type { HtmlLayerOptions } from './html-layers.ts';
 import { renderHtmlLayers } from './html-layers.ts';
@@ -301,6 +308,12 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
   // The residual rules are written against `.ts-x-<slideId>`; rewriteSlideScope prefixes `.ts-sheet`
   // so they keep the cascade weight they had in the deck, where the theme's rules had one class less.
   const themeId = themeIdOf(deck.theme);
+  /* the title slide's own parts and colours (theme-css.ts themeHasCover) belong to the title slide
+     and to a slide converted from it, whose conversion record names the title kind */
+  const cover =
+    themeId !== GT_THEME_ID &&
+    themeHasCover(themeRecord(themeId)) &&
+    (slide.kind === 'title' || grammarRecordOf(slide)?.kind === 'title');
   const common = {
     'data-slide': slide.id,
     'data-kind': slide.kind,
@@ -308,6 +321,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     /* a theme other than General Translation stamps its id, which its rules scope to (theme-css.ts
        themeScope); a General Translation slide keeps its markup byte for byte */
     [THEME_SLIDE_ATTRIBUTE]: themeId === GT_THEME_ID ? undefined : themeId,
+    [THEME_COVER_ATTRIBUTE]: cover,
   };
   const active = options.active !== false ? 'is-on' : undefined;
   const pictureKind = slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing';

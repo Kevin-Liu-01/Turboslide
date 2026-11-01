@@ -301,9 +301,12 @@ export function brandThemes(): string[] {
           default:
             check(column !== null && column.transform !== 'none', 'left, centred vertically');
         }
+        // the bar is read on the title slide, which a theme may set in colours of its own (Signal's
+        // black on yellow, themes.ts `title.tokens`)
+        const titleAccent = record.title.tokens?.[appearance].accent ?? tokens.accent;
         check(
           record.title.accentBar
-            ? drawn.bar !== null && drawn.bar.color === rgbOf(tokens.accent)
+            ? drawn.bar !== null && drawn.bar.color === rgbOf(titleAccent)
             : drawn.bar === null,
           `accent bar ${JSON.stringify(drawn.bar)}`,
         );

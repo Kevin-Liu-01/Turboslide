@@ -1097,7 +1097,7 @@
   }
 }
 
-/* ---- Themes: the title slide of one deck in each of the nine themes ---- */
+/* ---- Themes: the title slide of one deck in each of the nine themes, as the renderer draws it ---- */
 
 /* three tiles a row in the column, two under 720 px with the ninth across both */
 .ts-site .site-th-grid {
@@ -1109,110 +1109,15 @@
   list-style: none;
 }
 
-/* a tile's slide takes the theme's colours in the appearance it opens in (theme-tiles.ts), set
-   on the tile as --th-*, under the names the slide reads; the page's appearance changes only the
-   hairline round it */
-.ts-site .site-th-sheet {
-  --pt-paper: var(--th-paper);
-  --pt-ink: var(--th-ink);
-  outline: 1px solid var(--pt-hair);
-}
-
-/* the copy at the theme's title composition, inside the 137 px margins of the 1600 by 900 sheet */
-.ts-site .site-th-copy {
-  position: absolute;
-  left: calc(137 * var(--u));
-  right: calc(137 * var(--u));
-  top: 50%;
-  translate: 0 -50%;
-}
-
-.ts-site .site-th-sheet[data-compose='top-left'] .site-th-copy {
-  top: calc(129 * var(--u));
-  translate: none;
-}
-
-.ts-site .site-th-sheet[data-compose='bottom-left'] .site-th-copy {
-  top: auto;
-  bottom: calc(129 * var(--u));
-  translate: none;
-}
-
-.ts-site .site-th-sheet[data-compose='centre'] .site-th-copy {
-  text-align: center;
-}
-
-.ts-site .site-th-h {
-  margin: 0;
-  font-size: calc(84 * var(--u));
-  line-height: 1.05;
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  text-wrap: balance;
-}
-
-.ts-site .site-th-lead {
-  margin: calc(24 * var(--u)) 0 0;
-  font-size: calc(30 * var(--u));
-  line-height: 1.35;
-  color: var(--th-ink-2);
-}
-
-/* the accent bar over the heading of Swiss and Signal */
-.ts-site .site-th-bar {
+/* a tile is the renderer's own picture of the title slide in the theme (theme-tiles.mjs), at the
+   sheet's 16 by 9, with the page's hairline round it */
+.ts-site .site-th-pic {
   display: block;
-  width: calc(96 * var(--u));
-  height: calc(12 * var(--u));
-  margin-bottom: calc(32 * var(--u));
-  background: var(--th-accent);
-}
-
-.ts-site .site-th-sheet[data-compose='centre'] .site-th-bar {
-  margin-inline: auto;
-}
-
-/* the frame's rules at the top and the bottom and General Translation's rails, in the ink's hair */
-.ts-site .site-th-rule {
-  position: absolute;
-  left: calc(137 * var(--u));
-  right: calc(137 * var(--u));
-  height: 0;
-  border-top: calc(2 * var(--u)) solid color-mix(in srgb, var(--pt-ink) 18%, transparent);
-}
-
-.ts-site .site-th-rule.is-top {
-  top: calc(72 * var(--u));
-}
-
-.ts-site .site-th-rule.is-bottom {
-  bottom: calc(72 * var(--u));
-}
-
-.ts-site .site-th-rail {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  border-left: calc(2 * var(--u)) solid color-mix(in srgb, var(--pt-ink) 18%, transparent);
-}
-
-.ts-site .site-th-rail.is-left {
-  left: calc(137 * var(--u));
-}
-
-.ts-site .site-th-rail.is-right {
-  right: calc(137 * var(--u));
-}
-
-/* the slide counter at the lower right, in the hint colour */
-.ts-site .site-th-count {
-  position: absolute;
-  right: calc(137 * var(--u));
-  bottom: calc(40 * var(--u));
-  font-size: calc(20 * var(--u));
-  line-height: 1;
-  font-variant-numeric: var(--pt-numerals);
-  color: var(--th-hint);
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  outline: 1px solid var(--pt-hair);
+  background: var(--pt-hair-soft);
 }
 
 .ts-site .site-th-name {

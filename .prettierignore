@@ -29,6 +29,8 @@ docs/gslides-parity/
 # the fonts manifest scripts/build-fonts.py writes, compared by `turboslide fonts build --check`
 packages/schema/src/__fixtures__/gslides-r1
 packages/fonts/export/fonts.json
+# the catalog export cuts' manifest, written by packages/fonts/scripts/build-export-cuts.mjs
+packages/fonts/export/catalog/catalog.json
 
 # Round four (gslides-parity SPEC-4 0.38; the integrator at merge 2): the wasm module is wasm-bindgen's
 # output, committed as a build product whose bytes packages/native/BUILD-RECORD.json pins, so the

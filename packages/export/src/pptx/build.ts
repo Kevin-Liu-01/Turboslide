@@ -18,7 +18,6 @@
 // kit's picture logos sit, over the block's own 2x raster in Editable text; a shader whose frame
 // was missing or stale is the report's one `shaders:` row.
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
 import PptxGenJS from 'pptxgenjs';
 
@@ -32,8 +31,8 @@ import { COLUMN_GAP_PX } from '@turboslide/schema/typography';
 
 import { cleanContentTypes, setAppTitles, stripRepairRisks } from '../ooxml/clean.ts';
 import type { ContentTypesClean } from '../ooxml/clean.ts';
-import { embedFonts } from '../ooxml/fonts.ts';
-import type { EmbedFont } from '../ooxml/fonts.ts';
+import { embedFonts, usedFaceSlots } from '../ooxml/fonts.ts';
+import type { FontSlot } from '../ooxml/fonts.ts';
 import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { groupShapes } from '../ooxml/groups.ts';
@@ -49,7 +48,14 @@ import { addHiddenTitle, setSlideName } from '../ooxml/titles.ts';
 import type { HiddenTitle } from '../ooxml/titles.ts';
 import { validatePackage } from '../ooxml/validate.ts';
 import type { PackageValidation } from '../ooxml/validate.ts';
-import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
+import {
+  listParts,
+  openPackage,
+  readPart,
+  slideParts,
+  writePackage,
+  writePart,
+} from '../ooxml/zip.ts';
 import { KIT_LOGO_BLOCK_IDS } from '../scene/kit-logos.ts';
 import { pendingShadersOf, shadersOf } from '../scene/shaders.ts';
 import type { SceneShader } from '../scene/shaders.ts';
@@ -58,7 +64,7 @@ import type { Scene, SceneRaster, SceneText } from '../scene/types.ts';
 import { PAGE_EMU, PAGE_IN, compositeHex, parseCssColor, pxToEmu, szOf } from '../units.ts';
 import { addSceneChart } from './chart.ts';
 import type { FontSet, FontsCatalog } from './fonts-map.ts';
-import { entryFor, pickFamily } from './fonts-map.ts';
+import { embedList, entryFor, pickFamily } from './fonts-map.ts';
 import { addPicture, addPictureBackground, addRaster, dataUri, mimeOf } from './images.ts';
 import type { PictureSource } from './images.ts';
 import { addCross, addLinkRect, addSceneLine, addSceneRect, addSceneRule } from './lines.ts';
@@ -71,7 +77,7 @@ import { describeFormats, encodePageRaster } from './page-raster.ts';
 import type { PageRaster } from './page-raster.ts';
 import { objectName, transformProps } from './shapes.ts';
 import { addSceneTable } from './table.ts';
-import { addSceneText, addShapeText, familyFor } from './text.ts';
+import { addSceneText, addShapeText, faceFor } from './text.ts';
 import type { TextEmitOptions } from './text.ts';
 
 export type BuildOptions = {
@@ -235,13 +241,16 @@ export function hiddenTitleFor(scene: Scene, fontSet: FontSet): HiddenTitle {
   const y = Math.max(0, pxToEmu(box[1]));
   const cx = Math.max(1, Math.min(pxToEmu(box[2]), PAGE_EMU.width - x));
   const cy = Math.max(1, Math.min(pxToEmu(box[3]), PAGE_EMU.height - y));
+  const face = text ? faceFor(text.style, fontSet) : undefined;
   return {
     title: scene.title ?? scene.slideId,
     name: `ts:${scene.slideId}#title`,
     off: [x, y],
     ext: [cx, cy],
     sz: szOf(text?.style.size ?? 44),
-    family: text ? familyFor(text.style, fontSet) : pickFamily(44, 500, fontSet).family,
+    family: face?.family ?? pickFamily(44, 500, fontSet).family,
+    // a catalog heading's Bold slot, so the embedded faces are the ones the heading uses
+    ...(face?.cut && face.bold ? { bold: true } : {}),
     colorHex: parseCssColor(text?.style.color ?? scene.ink).hex,
   };
 }
@@ -808,23 +817,23 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   );
   const embedded: string[] = [];
   if (options.embedFonts === true && options.mode === 'native') {
-    const fonts: EmbedFont[] = [];
-    for (const family of families) {
-      const entry = options.fontsCatalog.entries.find((e) => e.family === family);
-      if (!entry?.file) continue;
-      const path = join(options.fontsCatalog.dir, entry.file);
-      if (!existsSync(path)) {
-        warnings.push(`${family}: fonts.json names ${entry.file} but the file is missing`);
-        continue;
-      }
-      fonts.push({ family, ttf: readFileSync(path) });
-    }
-    const result = await embedFonts(zip, fonts);
+    // the faces the written runs name, read back from the parts, so a run of every emitter
+    // (text, tables, charts, the hidden titles) asks for its family and slot
+    const used = new Map<string, Set<FontSlot>>();
+    for (const part of listParts(zip).filter((p) =>
+      /^ppt\/(slides\/slide|charts\/chart)\d+\.xml$/.test(p),
+    ))
+      usedFaceSlots(await readPart(zip, part), used);
+    const list = embedList(used, options.fontsCatalog);
+    warnings.push(...list.warnings);
+    const result = await embedFonts(zip, list.fonts);
     embedded.push(...result.embedded);
     warnings.push(...result.warnings);
     residual.add(
-      `fonts: ${embedded.length} face(s) embedded as fntdata parts (--embed-fonts); PowerPoint's acceptance of the uncompressed EOT is the scheduled manual pass (docs/export-verification.md)`,
+      `fonts: ${result.parts.length} face(s) of ${embedded.length} famil${embedded.length === 1 ? 'y' : 'ies'} embedded as fntdata parts (--embed-fonts): ${embedded.join(', ')}; PowerPoint's acceptance of the uncompressed EOT is the scheduled manual pass (docs/export-verification.md)`,
     );
+    for (const [family, reason] of list.missing)
+      residual.add(`fonts: ${family} not embedded: ${reason}`);
   } else if (options.embedFonts === true) {
     residual.add(
       'fonts: --embed-fonts ignored in flatten mode; the text layer is invisible and no viewer draws it (docs/pptx.md)',

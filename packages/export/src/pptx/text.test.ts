@@ -15,6 +15,7 @@ import {
   addShapeText,
   bulletCharacterCode,
   catalogFace,
+  faceFor,
   familyFor,
   guardLinkSpaces,
   layerInsetNetOfPreset,
@@ -52,13 +53,17 @@ const options: TextEmitOptions = {
 describe('a field’s own face in the scene (build/field-fonts.md 2)', () => {
   // the cover's heading and lead and a statement's big line draw their own family inline, so the
   // scene's run (measure.ts firstFamily over the computed font-family) carries the catalog name;
-  // familyFor names it as is, the way it names a block's, and the theme's face keeps the set's pick
+  // familyFor names the face's export cut for the run's size and weight (docs/pptx.md "The catalog
+  // faces in Editable text"), the way it names a block's, and the theme's face keeps the set's pick
   it('names the catalog face the field computed, and the set’s pick for the theme face', () => {
     expect(familyFor({ ...style, family: 'Fraunces', size: 88, weight: 500 }, 'exact')).toBe(
-      'Fraunces',
+      'Fraunces Display Medium',
     );
     expect(familyFor({ ...style, family: 'Manrope', size: 26, weight: 400 }, 'exact')).toBe(
       'Manrope',
+    );
+    expect(faceFor({ ...style, family: 'Fraunces', size: 22, weight: 700 }, 'exact')).toMatchObject(
+      { family: 'Fraunces', bold: true },
     );
     expect(catalogFace({ ...style, family: 'Fraunces' })).toBe('Fraunces');
     expect(catalogFace({ ...style, family: 'Inter' })).toBeNull();
@@ -192,7 +197,9 @@ describe('the off-cut face advance', () => {
       textBox: [137, 129, 600, 33],
       style,
       native: true,
-      lines: [{ box: [137, 129, 600, 33], runs: [{ text: words, box: [137, 129, 400, 33], style }] }],
+      lines: [
+        { box: [137, 129, 600, 33], runs: [{ text: words, box: [137, 129, 400, 33], style }] },
+      ],
     };
     const families = new Set<string>();
     const out = textRuns(text, { ...options, fontSet: 'standard', families });
@@ -204,7 +211,12 @@ describe('the off-cut face advance', () => {
     const heading: SceneText = {
       ...text,
       style: big,
-      lines: [{ box: [137, 129, 600, 96], runs: [{ text: 'Title', box: [137, 129, 220, 96], style: big }] }],
+      lines: [
+        {
+          box: [137, 129, 600, 96],
+          runs: [{ text: 'Title', box: [137, 129, 220, 96], style: big }],
+        },
+      ],
     };
     const display = textRuns(heading, { ...options, fontSet: 'standard', families });
     expect(display[0]?.options?.fontFace).toBe('Inter Display Alternates');

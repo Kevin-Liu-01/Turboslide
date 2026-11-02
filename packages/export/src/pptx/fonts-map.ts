@@ -22,8 +22,14 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { catalogFont } from '@turboslide/fonts/catalog';
+import type { ExportCut, ExportPick } from '@turboslide/fonts/export-cuts';
+import { exportPlanFor, pickExportCut } from '@turboslide/fonts/export-cuts';
 import { FONT_NAMES } from '@turboslide/fonts/names';
 import type { ExportFontSet } from '@turboslide/schema/export';
+import type { FontCategory, FontId } from '@turboslide/schema/fonts';
+
+import type { EmbedFont, FontSlot } from '../ooxml/fonts.ts';
 
 export type FontSet = ExportFontSet;
 
@@ -49,6 +55,8 @@ export type FontEntry = {
   weight: number;
   opsz: number;
   display: boolean;
+  /** the italic twin of the family (gslides-parity SPEC-2 7.1), embedded in its Italic slot */
+  italic: boolean;
 };
 
 type FontsJsonFace = {
@@ -57,6 +65,7 @@ type FontsJsonFace = {
   weight: number;
   opsz?: number;
   display?: boolean;
+  italic?: boolean;
   sizes?: number[];
   sets?: string[];
 };
@@ -79,6 +88,34 @@ export type FontsCatalog = {
   built: boolean;
   /** The standard set's width difference from the browser (fonts.json `spacing`); empty unbuilt. */
   spacing: Record<string, Record<string, number>>;
+  /** The catalog faces' cuts under `catalog/` (catalog.json, build-export-cuts.mjs). */
+  cuts: CatalogCuts;
+};
+
+/** One built cut of a catalog face (catalog.json `faces.<id>.cuts`). */
+export type CatalogCutEntry = ExportCut & {
+  bytes: number;
+  sha256: string;
+  /** whole pixel size to the share the cut draws wider than the browser; opsz faces only */
+  spacing?: Record<string, number>;
+};
+
+export type CatalogCuts = {
+  version: string;
+  /** The directory the face folders live in. */
+  dir: string;
+  /** Every built cut, by face. */
+  cuts: CatalogCutEntry[];
+  /** Face id to the reason it has no cut (the licence rule of export-cuts.ts). */
+  refused: Partial<Record<FontId, string>>;
+};
+
+type CatalogJson = {
+  version?: string;
+  faces?: Record<
+    string,
+    { refused?: string | null; cuts?: Omit<CatalogCutEntry, 'id'>[] } | undefined
+  >;
 };
 
 function fontsExportDir(): string {
@@ -95,15 +132,40 @@ function fontsExportDir(): string {
   }
 }
 
-/** Reads packages/fonts/export/fonts.json when present. */
+/**
+ * Reads packages/fonts/export/catalog/catalog.json when present: the built cuts of the catalog
+ * faces (packages/fonts/scripts/build-export-cuts.mjs) and the faces the licence rule refuses.
+ */
+export function loadCatalogCuts(dir: string): CatalogCuts {
+  const path = join(dir, 'catalog.json');
+  const empty: CatalogCuts = { version: 'unbuilt', dir, cuts: [], refused: {} };
+  if (!existsSync(path)) return empty;
+  let parsed: CatalogJson;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8')) as CatalogJson;
+  } catch {
+    return { ...empty, version: 'unreadable' };
+  }
+  const cuts: CatalogCutEntry[] = [];
+  const refused: CatalogCuts['refused'] = {};
+  for (const [id, face] of Object.entries(parsed.faces ?? {})) {
+    if (typeof face?.refused === 'string') refused[id as FontId] = face.refused;
+    for (const cut of face?.cuts ?? []) cuts.push({ ...cut, id: id as FontId });
+  }
+  return { version: parsed.version ?? 'unknown', dir, cuts, refused };
+}
+
+/** Reads packages/fonts/export/fonts.json when present, and the catalog cuts beside it. */
 export function loadFontsCatalog(dir: string = fontsExportDir()): FontsCatalog {
   const path = join(dir, 'fonts.json');
-  if (!existsSync(path)) return { version: 'unbuilt', entries: [], dir, built: false, spacing: {} };
+  const cuts = loadCatalogCuts(join(dir, 'catalog'));
+  if (!existsSync(path))
+    return { version: 'unbuilt', entries: [], dir, built: false, spacing: {}, cuts };
   let parsed: FontsJson;
   try {
     parsed = JSON.parse(readFileSync(path, 'utf8')) as FontsJson;
   } catch {
-    return { version: 'unreadable', entries: [], dir, built: false, spacing: {} };
+    return { version: 'unreadable', entries: [], dir, built: false, spacing: {}, cuts };
   }
   const faces: FontsJsonFace[] = Array.isArray(parsed.faces)
     ? parsed.faces
@@ -118,6 +180,7 @@ export function loadFontsCatalog(dir: string = fontsExportDir()): FontsCatalog {
       weight: f.weight,
       opsz: f.opsz ?? 14,
       display: f.display ?? false,
+      italic: f.italic ?? false,
     }));
   return {
     version: parsed.version ?? 'unknown',
@@ -125,6 +188,7 @@ export function loadFontsCatalog(dir: string = fontsExportDir()): FontsCatalog {
     dir,
     built: entries.length > 0,
     spacing: parsed.spacing ?? {},
+    cuts,
   };
 }
 
@@ -257,4 +321,148 @@ export function catalogFamilyName(computed: string): string | null {
   const first = firstFamily(computed);
   if (first === '' || first === 'Inter') return null;
   return CATALOG_NAMES.has(first) ? first : null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The catalog faces' cuts (docs/pptx.md "The catalog faces in Editable text";
+// @turboslide/fonts/export-cuts)
+
+const CATALOG_IDS: ReadonlyMap<string, FontId> = new Map(
+  Object.entries(FONT_NAMES).map(([id, name]) => [name, id as FontId]),
+);
+
+/** The planned cuts of a catalog face by its family name; empty for Inter and an unknown name. */
+export function catalogCuts(name: string): ExportCut[] {
+  const id = CATALOG_IDS.get(name);
+  if (id === undefined || id === 'inter') return [];
+  return exportPlanFor(id).cuts;
+}
+
+/**
+ * The cut a run of a catalog face travels in (export-cuts.ts pickExportCut): the family its
+ * `a:latin typeface` names and the bold flag. Planned from the catalog's facts, so the name is
+ * the same whether or not the files are built; null for a name the catalog does not hold.
+ */
+export function catalogPick(
+  name: string,
+  sizePx: number,
+  weight: number,
+  italic: boolean,
+): ExportPick | null {
+  return pickExportCut(catalogCuts(name), sizePx, weight, italic);
+}
+
+/**
+ * The residual line for a catalog run whose weight has no cut (a static face's missing weight, or
+ * a weight outside 300 to 700); null when the cut is the run's weight.
+ */
+export function catalogWeightSubstitution(
+  name: string,
+  weight: number,
+  pick: ExportPick,
+): string | null {
+  if (pick.cut.weight === weight) return null;
+  const boldSlot = pick.cut.slot === 'bold' || pick.cut.slot === 'boldItalic';
+  return `fonts: ${name} weight ${weight} exported as the ${pick.cut.weight} cut${pick.bold && !boldSlot ? ' plus bold' : ''}; the export cuts carry ${[...new Set(catalogCuts(name).map((c) => c.weight))].join(', ')} (docs/pptx.md)`;
+}
+
+/** The DrawingML pitch and family byte of a catalog category (variable pitch, the GDI family). */
+const CATEGORY_PITCH: Readonly<Record<FontCategory, number>> = {
+  sans: 0x22,
+  serif: 0x12,
+  display: 0x52,
+  mono: 0x31,
+};
+
+/** The slots a slot falls back to when the set has no cut for it, nearest first. */
+const SLOT_FALLBACK: Readonly<Record<FontSlot, readonly FontSlot[]>> = {
+  regular: [],
+  bold: ['regular'],
+  italic: ['regular'],
+  boldItalic: ['bold', 'italic', 'regular'],
+};
+
+/** The pitch and family byte the export set's Inter faces carry (variable pitch, swiss). */
+export const INTER_PITCH_FAMILY = 0x22;
+
+export type EmbedList = {
+  fonts: EmbedFont[];
+  /** family to the reason it could not be embedded, one line each in the residual */
+  missing: Map<string, string>;
+  /** a file the manifest names but the folder lacks: a broken set, a report warning */
+  warnings: string[];
+};
+
+/**
+ * The files an embed takes for the faces the runs name (ooxml/fonts.ts usedFaceSlots): per
+ * family and slot, the Inter set's file (Regular and Italic; the set has no Bold, so a bold run
+ * of an Inter family is the viewer's synthesis, as the residual's weight line says) or the
+ * catalog cut, and per family with no file the reason: the licence rule refusing the face, the
+ * code panel's mono face outside every set, or a set that was not built.
+ */
+export function embedList(
+  used: ReadonlyMap<string, ReadonlySet<FontSlot>>,
+  catalog: FontsCatalog,
+): EmbedList {
+  const out: EmbedList = { fonts: [], missing: new Map(), warnings: [] };
+  for (const [family, slots] of used) {
+    const inter = catalog.entries.filter((e) => e.family === family && e.file !== undefined);
+    const cuts = catalog.cuts.cuts.filter((c) => c.family === family);
+    const fileOf = (slot: FontSlot): string | null => {
+      const italic = slot === 'italic' || slot === 'boldItalic';
+      const entry =
+        slot === 'regular' || slot === 'italic'
+          ? inter.find((e) => e.italic === italic)
+          : undefined;
+      if (entry?.file) return join(catalog.dir, entry.file);
+      const cut = cuts.find((c) => c.slot === slot);
+      return cut ? join(catalog.cuts.dir, cut.id, cut.file) : null;
+    };
+    const embedded = new Set<FontSlot>();
+    let absent = false;
+    for (const wanted of slots) {
+      // a slot the set has no cut for takes the nearest upright one, which the viewer slants or
+      // emboldens as the browser does for a face without that style
+      const slot = [wanted, ...SLOT_FALLBACK[wanted]].find((s) => fileOf(s) !== null);
+      if (slot === undefined || embedded.has(slot)) continue;
+      const path = fileOf(slot) ?? '';
+      if (!existsSync(path)) {
+        // the hosted function carries the theme faces' folders alone (vite.deploy.config.ts), so
+        // a catalog cut the manifest lists may be absent there; an Inter file never is
+        if (inter.length > 0)
+          out.warnings.push(`${family}: the export set names ${path} but the file is missing`);
+        else absent = true;
+        continue;
+      }
+      embedded.add(slot);
+      const cut = cuts[0];
+      out.fonts.push({
+        family,
+        slot,
+        ttf: readFileSync(path),
+        pitchFamily: cut ? CATEGORY_PITCH[catalogFont(cut.id).category] : INTER_PITCH_FAMILY,
+      });
+    }
+    if (embedded.size > 0 || inter.length > 0 || (cuts.length > 0 && !absent)) continue;
+    const planned = [...CATALOG_IDS.entries()].find(([name]) =>
+      catalogCuts(name).some((c) => c.family === family),
+    );
+    if (planned) {
+      const [name, id] = planned;
+      const refused = catalog.cuts.refused[id];
+      out.missing.set(
+        family,
+        refused !== undefined
+          ? `${refused}; it travels by name and a viewer without ${name} substitutes`
+          : absent
+            ? `the cuts of ${name} are not on this host, which carries the theme faces' cuts alone (docs/pptx.md); it travels by name`
+            : 'the catalog cuts are not on this host (node packages/fonts/scripts/build-export-cuts.mjs builds them); it travels by name',
+      );
+    } else if (family === MONO_FAMILY)
+      out.missing.set(family, "the code panel's face is in no export set; it travels by name");
+    else if (!catalog.built)
+      out.missing.set(family, 'the Inter export set is not built here (turboslide fonts build)');
+    else out.missing.set(family, 'no export set holds it; it travels by name');
+  }
+  return out;
 }

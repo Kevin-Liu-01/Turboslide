@@ -8,8 +8,12 @@
 //   in the nearest cut, which LibreOffice renders wider; measured on the deck, 0.82 percent at
 //   27 px and 1.7 percent at 30 px on Inter Text 26 Medium. A measurement wins over the computed
 //   share for the same family and size.
-// Sizes in neither source are not corrected.
+// Sizes in neither source are not corrected. A catalog face's cut at a fixed optical size has its
+// own table (packages/fonts/export/catalog/catalog.json `spacing` per cut, computed the same way
+// by build-export-cuts.py), read by catalogAdvanceExcess.
 import { readFileSync } from 'node:fs';
+
+import type { ExportCut } from '@turboslide/fonts/export-cuts';
 
 import { calibrationFile } from '../calibration/locate.ts';
 import { loadFontsCatalog } from './fonts-map.ts';
@@ -50,4 +54,33 @@ export function faceAdvanceExcess(
   const sizes = table[family];
   if (!sizes) return 0;
   return sizes[String(sizePx)] ?? sizes[String(Math.round(sizePx))] ?? 0;
+}
+
+let catalogTables: Map<string, Record<string, number>> | undefined;
+
+/** The catalog cuts' spacing tables, by `<face id>/<file>`. */
+export function loadCatalogAdvance(): Map<string, Record<string, number>> {
+  if (catalogTables) return catalogTables;
+  catalogTables = new Map();
+  for (const cut of loadFontsCatalog().cuts.cuts)
+    if (cut.spacing) catalogTables.set(`${cut.id}/${cut.file}`, cut.spacing);
+  return catalogTables;
+}
+
+/**
+ * The fraction by which a catalog cut draws a run at `sizePx` wider than the browser's optical
+ * size draws it; a size past either end of the table takes the end's share (the browser clamps
+ * the optical size to the axis the same way). 0 for a cut without a table.
+ */
+export function catalogAdvanceExcess(
+  cut: ExportCut,
+  sizePx: number,
+  tables: Map<string, Record<string, number>> = loadCatalogAdvance(),
+): number {
+  const table = tables.get(`${cut.id}/${cut.file}`);
+  if (!table) return 0;
+  const sizes = Object.keys(table).map(Number);
+  if (sizes.length === 0) return 0;
+  const size = Math.min(Math.max(...sizes), Math.max(Math.min(...sizes), Math.round(sizePx)));
+  return table[String(size)] ?? 0;
 }

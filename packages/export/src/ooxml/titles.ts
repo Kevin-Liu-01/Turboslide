@@ -19,6 +19,8 @@ export type HiddenTitle = {
   /** The run size in hundredths of a point (units.ts szOf). */
   sz: number;
   family: string;
+  /** The heading's bold flag, so the run asks for the slot the heading's cut fills. */
+  bold?: boolean;
   /** Six hex digits. */
   colorHex: string;
 };
@@ -86,7 +88,7 @@ export function addHiddenTitle(xml: string, title: HiddenTitle): string {
     `<p:spPr><a:xfrm><a:off x="${title.off[0]}" y="${title.off[1]}"/><a:ext cx="${title.ext[0]}" cy="${title.ext[1]}"/></a:xfrm>` +
     '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>' +
     '<p:txBody><a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t"><a:noAutofit/></a:bodyPr><a:lstStyle/>' +
-    `<a:p><a:pPr algn="l" indent="0" marL="0"><a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="${title.sz}" dirty="0">` +
+    `<a:p><a:pPr algn="l" indent="0" marL="0"><a:buNone/></a:pPr><a:r><a:rPr lang="en-US" sz="${title.sz}"${title.bold === true ? ' b="1"' : ''} dirty="0">` +
     `<a:solidFill><a:srgbClr val="${title.colorHex}"><a:alpha val="0"/></a:srgbClr></a:solidFill>` +
     `<a:latin typeface="${escapeXml(title.family)}"/></a:rPr><a:t>${escapeXml(title.title)}</a:t></a:r>` +
     `<a:endParaRPr lang="en-US" sz="${title.sz}" dirty="0"/></a:p></p:txBody></p:sp>`;

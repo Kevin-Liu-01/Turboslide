@@ -23,6 +23,8 @@ export type ReportInput = {
   files: string[];
   families: string[];
   embedded: string[];
+  /** --embed-fonts was asked for; the residual's `fonts:` lines name why a family is not embedded */
+  embedFonts?: boolean;
   slides: ExportReport['slides'];
   geometryInBounds: boolean;
   /** Flatten with every page raster within budget and the package valid (pptx/build.ts). */
@@ -101,7 +103,9 @@ export function buildReport(input: ReportInput): ExportReport {
     residual.push(
       input.mode === 'flatten'
         ? `fonts not embedded: ${required.join(', ')}; the text layer is invisible, so no viewer draws them (docs/pptx.md)`
-        : `fonts not embedded: ${required.join(', ')}; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them`,
+        : input.embedFonts === true
+          ? `fonts not embedded: ${required.join(', ')}; a viewer without them installed substitutes (SPEC 8.4); the fonts lines above say why`
+          : `fonts not embedded: ${required.join(', ')}; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them`,
     );
   for (const w of input.warnings) residual.push(`warning: ${w}`);
   const report: ExportReport = {

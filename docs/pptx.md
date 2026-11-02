@@ -45,7 +45,7 @@ the browser's optical size taken back as character spacing, Inter Display and In
 at 44 px and over, and Inter Display Alternates for a heading that draws `cv11` and `ss01`;
 `--fonts exact` names Inter Text 14 to Inter Text 26 under 44 px instead. `--embed-fonts`
 (`embedFonts` in `export.run`) embeds the faces as fntdata parts for a viewer without them installed,
-off by default for the repair reason above. The set holds the Regular and Medium cuts only
+the Inter set's and each catalog face's cuts (below), off by default for the repair reason above. The set holds the Regular and Medium cuts only
 (`packages/fonts/export`, `fonts-map.ts EXPORT_WEIGHTS`), while the inspector's typography control
 offers 300 to 700 with the 500 cap as a lint: a run measured at 600 or 700 travels as the Medium
 family with the bold flag (`b="1"`), a run under 400 as the Regular family, and the report's
@@ -67,6 +67,77 @@ background colour or a covering picture writes none, as the sheet shows none, an
 turned or scaled heading is left out. General Translation draws no parts, so its scenes carry no
 `themeParts` and its files are unchanged. `theme-parts-export.test.ts` exports the landing deck's
 title and body slides in the seven themes and reads the shapes back.
+
+**The catalog faces in Editable text** (2026-11-02). A run set in a catalog face (a theme's display
+or text face, a brand kit's font role, a block's `typography.family`) names a static cut of that
+face, planned from the catalog's facts alone by `packages/fonts/src/export-cuts.ts`, so the name is
+the same with or without `--embed-fonts`. Weights 400 and 700 are the face's own family in its
+Regular and Bold slots; every other weight from 300 to 700 is a family of its own named after the
+weight (`Oswald SemiBold`, `DM Sans Light`), the legacy naming Windows lists a variable font's
+named instances under and the static Google Fonts families use, the way Inter's Medium cut is
+`Inter Medium`; an italic run takes the face's italic cut where one ships. A face whose optical
+size axis reaches past 24 (Fraunces, DM Sans, Bricolage Grotesque, Newsreader, Source Serif 4) is
+cut at opsz 24 for text and at opsz 72, or the axis maximum, for runs of 44 px and over under
+`<Name> Display` (`Fraunces Display SemiBold`), the Inter set's split at the same size, and the
+width a cut draws over the browser's optical size at the run's size (`font-optical-sizing: auto`)
+is taken back as character spacing from the cut's table in `catalog.json`, as the Inter set's is
+from `fonts.json` (DM Sans at opsz 24 draws 9.3 percent wider than the browser's opsz 40). The
+weight follows the CSS font matching algorithm (CSS Fonts 4, 5.2), so a static face lands on the
+cut the browser drew, a run of 600 or more over a lighter cut carries the bold flag the browser
+synthesizes, and a weight with no cut is one residual line (`fonts: PT Serif weight 600 exported
+as the 700 cut ...`). Until this round the run named the face alone with the bold flag from 600,
+so a SemiBold heading drew Bold where the face was installed.
+
+Under `--embed-fonts` the builder reads the faces back from the written runs of every slide and
+chart, the hidden titles included (`ooxml/fonts.ts usedFaceSlots`), takes each family's file per
+slot from the Inter set or the catalog cuts (`fonts-map.ts embedList`), and writes one
+`<p:embeddedFont>` per family with its files in the schema's slot order (regular, bold, italic,
+boldItalic), each EOT header declaring the family and style of the cut's name table IDs 1 and 2.
+A slot with no cut (the italic of a face that ships none, the bold of an Inter family) embeds the
+upright, which the viewer slants or emboldens as the browser does. A family that cannot be
+embedded is one residual line with its reason: `fonts: IBM Plex Sans SemiBold not embedded: the
+OFL Reserved Font Name "Plex" forbids an instanced cut under that name; ...`, the code panel's
+DejaVu Sans Mono, or a host without the cuts. `export check` lists each embedded typeface with its
+slots and the faces the runs name with no part, and reports as an issue a part that declares
+another family, a typeface listed twice and a typeface no run names, the three font list faults
+PowerPoint repairs (MS-OE376 2.1.1170).
+
+Committed cuts, not a conversion at export time: the catalog's woff2 files are variable, one file
+per style with up to four axes (Fraunces carries opsz, wght, SOFT and WONK), and a run needs a
+static instance at its weight and optical size, since a viewer draws an embedded variable font at
+its default instance where it draws it at all (Fraunces at opsz 9 and weight 400). Instancing at
+export time needs a font engine the export does not carry (woff2's transformed glyf, gvar with
+its interpolation, HVAR, MVAR, avar), and the hosted function has no Python for fontTools. The
+cuts are made once by `node packages/fonts/scripts/build-export-cuts.mjs` from the committed woff2
+files, nothing fetched, with fontTools 4.65.0 in the fonts venv, the toolchain
+`scripts/build-fonts.py` cuts the Inter set with, into `packages/fonts/export/catalog/<id>/` beside
+the face's `LICENSE`, with `catalog.json` recording per cut the family, slot, weight, optical size,
+bytes, sha256 and spacing table; `--check` rebuilds into a temporary folder and compares by sha256,
+and `packages/fonts/src/export-cuts.test.ts` compares the committed files with the manifest and the
+manifest with the plan.
+
+The licence rule (docs/archive/rounds/PRODUCT.md 4.2): every catalog face is under the SIL OFL 1.1
+or the Apache License 2.0, every file's fsType is 0 (installable embedding), and the cuts keep the
+copyright, trademark and licence name records. An instanced cut is a Modified Version, which the
+OFL forbids to carry a Reserved Font Name, so the seven variable faces that declare one (Source
+Sans 3, Merriweather, Playfair Display, Lora, Libre Baskerville, Raleway, and IBM Plex Sans, Slate's
+face) have no cut: their runs keep the planned names and travel by name, and the residual names
+each one. The static faces (Lato, Poppins, PT Serif, Bebas Neue, IBM Plex Mono) are decoded from
+woff2 as they ship, their name tables untouched, since their Windows names already answer to the
+planned family and style.
+
+The Vercel function carries the manifest and the cuts of the faces the themes draw
+(`THEME_FACE_IDS` of `export-cuts.ts`: Instrument Sans, Bricolage Grotesque, DM Sans, Fraunces,
+Space Grotesk, Newsreader and Oswald; 96 files, 7.5 MiB of the set's 42.4), named in
+`apps/studio/vite.deploy.config.ts` `PACKAGES_PATTERN`, with every other face's folder in
+`PACKAGES_IGNORE`: the glob Nitro bundles appends `/**` to a pattern that does not end in `*`, so
+the group's `fonts/export/*` alone took the whole catalog folder. A hosted export under Embed fonts
+embeds a themed deck's type, and a face only a kit or a block names is one residual line, `the cuts
+of Lato are not on this host, which carries the theme faces' cuts alone`, never a warning.
+`theme-faces-export.test.ts` exports the landing deck (`apps/studio/home-deck`, eight slides) in
+Coral and Signal under `embedFonts` and reads the parts back with `listEmbeddedFonts` and
+`listEmbeddedFontParts`: every run names a family a part declares, each part declares the family
+and style of its slot, and `export check` reads both files back valid.
 
 ## The Google Slides parity round (gslides-parity SPEC 7.2 to 7.6)
 
@@ -400,7 +471,8 @@ and the report's residual states the part and relationship counts.
    is not a rounded rectangle, `tables` and `mergedCells` as `a:tc` elements carrying `rowSpan` or
    `gridSpan`; the "round two:" line of the read-back), the media parts classed by their bytes (the PNG header's color type and bit depth,
    the JPEG marker) so the formats a flatten file uses are visible, the slide names and title
-   placeholders, the embedded fonts, python-pptx reopening the file when an interpreter with the
+   placeholders, the embedded fonts per typeface and slot with the family each part declares and
+   the faces the runs name with no part, python-pptx reopening the file when an interpreter with the
    module exists (`TURBOSLIDE_PYTHON`, then the workspace's `.turboslide/venv/bin/python`), and
    QuickLook. Exit 0 when the package is valid, the page size is right, every shape shows on the
    page (round two: a shape whose box crosses an edge is in bounds and listed as `crossing`; a
@@ -419,7 +491,8 @@ PowerPoint cannot run headless on Linux, so the PowerPoint pass stays the manual
 
 - The repair dialog. Its known triggers in generated files are font parts it rejects (the
   uncompressed EOT wrap is unverified in PowerPoint; the flatten file carries none and the native
-  file carries them only under `--embed-fonts`), `kern="0"` and empty `extLst` (stripped),
+  file carries them only under `--embed-fonts`; the catalog cuts add Bold and Italic slots and
+  families named after a weight, both unverified in PowerPoint too), `kern="0"` and empty `extLst` (stripped),
   content type overrides for missing parts (removed), targets with spaces in media names
   (pptxgenjs avoids them), and relationships to missing parts (the validation fails the report).
 - The hidden title. Home, Arrange, Selection Pane lists `ts:<slideId>#title` hidden on every

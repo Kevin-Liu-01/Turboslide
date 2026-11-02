@@ -22,7 +22,7 @@ import type { SceneDash, SceneTable, SceneTableCell, SceneText } from '../scene/
 import { PX_PER_IN, pxToIn, pxToPt } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import { fillProps, lineColor } from './lines.ts';
-import { familyFor, textRuns } from './text.ts';
+import { faceFor, textRuns } from './text.ts';
 import type { TextEmitOptions } from './text.ts';
 
 export type TableEmitOptions = TextEmitOptions & {
@@ -123,7 +123,8 @@ export function tableCell(
   options: TableEmitOptions,
 ): PptxGenJS.TableCell {
   const style = text?.style;
-  const family = style ? familyFor(style, options.fontSet) : undefined;
+  const face = style ? faceFor(style, options.fontSet) : undefined;
+  const family = face?.family;
   if (family) options.families.add(family);
   // the exact line pitch on the cell (the text box writes the same lnSpc): without it LibreOffice
   // lays the cell's lines out at the face's natural height, which puts the first line about 6 px
@@ -139,6 +140,8 @@ export function tableCell(
     border: cellBorders(table, rowIndex, options.paperHex, cell),
     ...(cell.fill !== undefined ? { fill: fillProps(cell.fill, options.paperHex) } : {}),
     ...(family ? { fontFace: family } : {}),
+    // a catalog cut's Bold slot or synthesized bold; an Inter cell keeps the family alone
+    ...(face?.cut && face.bold ? { bold: true } : {}),
     fontSize: pxToPt(style?.size ?? table.size),
     ...(cell.rowspan !== undefined && cell.rowspan > 1 ? { rowspan: cell.rowspan } : {}),
     ...(cell.colspan !== undefined && cell.colspan > 1 ? { colspan: cell.colspan } : {}),

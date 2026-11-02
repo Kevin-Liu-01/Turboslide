@@ -3,7 +3,10 @@
 // relationships (ooxml/validate.ts); the geometry pass reads the page size, every shape's bounds
 // and the checklist counts (verify/geometry.ts); the media parts are classed by their bytes (the
 // PNG header's color type and bit depth, the JPEG marker) so the report says which page raster
-// formats a flatten file uses; the slide names and title placeholders are read back; python-pptx
+// formats a flatten file uses; the slide names and title placeholders are read back; the font
+// parts are read per typeface and slot with the family each part's EOT header declares, beside the
+// faces the runs name that no part embeds (a part that declares another family, a typeface listed
+// twice or listed and named by no run is an issue: each is a known repair trigger); python-pptx
 // reopens the file when an interpreter with the module exists (TURBOSLIDE_PYTHON, then the
 // workspace's .turboslide/venv); QuickLook renders the first page on macOS. `valid` is the zip walk
 // plus the page size plus the reopen when it ran; every other number is reported, not gated.
@@ -16,6 +19,8 @@ import { promisify } from 'node:util';
 import type { ExportCheck } from '@turboslide/schema/export';
 import { exportCheckSchema } from '@turboslide/schema/export';
 
+import { listEmbeddedFontParts, usedFaceSlots } from './ooxml/fonts.ts';
+import type { FontSlot } from './ooxml/fonts.ts';
 import { looksLikeSvg } from './ooxml/svg.ts';
 import { listParts, openPackage, readPart, readPartBytes, slideParts } from './ooxml/zip.ts';
 import { hasTitlePlaceholder, readSlideName } from './ooxml/titles.ts';
@@ -137,6 +142,34 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
   const notes = parts.filter((p) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(p)).length;
   const charts = parts.filter((p) => /^ppt\/charts\/chart\d+\.xml$/.test(p)).length;
 
+  // the faces the runs name and the parts that embed them (docs/pptx.md "The catalog faces in
+  // Editable text")
+  const named = new Map<string, Set<FontSlot>>();
+  for (const part of parts.filter((p) => /^ppt\/(slides\/slide|charts\/chart)\d+\.xml$/.test(p)))
+    usedFaceSlots(await readPart(zip, part), named);
+  const fontParts = await listEmbeddedFontParts(zip);
+  const fontIssues: string[] = [];
+  const listed = new Set<string>();
+  for (const typeface of geometry.embeddedFonts) {
+    if (listed.has(typeface)) fontIssues.push(`the embedded font list names ${typeface} twice`);
+    listed.add(typeface);
+    if (!named.has(typeface))
+      fontIssues.push(`the embedded font ${typeface} is named by no run (MS-OE376 2.1.1170)`);
+  }
+  for (const font of fontParts) {
+    if (font.part === null || font.declares === null)
+      fontIssues.push(`${font.typeface} ${font.slot}: no readable font part`);
+    else if (font.declares !== font.typeface)
+      fontIssues.push(
+        `${font.part} declares "${font.declares}" where the list names "${font.typeface}"`,
+      );
+    else if (font.fontFamily !== font.typeface)
+      fontIssues.push(
+        `${font.part}: the font's name table answers to "${font.fontFamily ?? ''}" where the list names "${font.typeface}"`,
+      );
+  }
+  const fontsNotEmbedded = [...named.keys()].filter((typeface) => !listed.has(typeface)).sort();
+
   const formats: Record<string, number> = {};
   let mediaBytes = 0;
   for (const part of parts.filter((p) => /^ppt\/media\//.test(p))) {
@@ -171,7 +204,7 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
     }
   }
 
-  const issues = [...validation.issues];
+  const issues = [...validation.issues, ...fontIssues];
   if (!geometry.pageSizeOk)
     issues.push(
       `page size ${geometry.pageSize.cx} by ${geometry.pageSize.cy} EMU, expected 12192000 by 6858000`,
@@ -198,6 +231,15 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
     formats,
     mediaBytes,
     embeddedFonts: geometry.embeddedFonts,
+    fontParts: fontParts.map((font) => ({
+      typeface: font.typeface,
+      slot: font.slot,
+      part: font.part,
+      declares: font.declares,
+      style: font.style,
+      bytes: font.bytes,
+    })),
+    fontsNotEmbedded,
     custGeom: geometry.custGeomCount,
     normAutofit: geometry.normAutofitCount,
     kernZero: geometry.kernZeroCount,
@@ -228,7 +270,19 @@ export function describeCheck(check: ExportCheck): string[] {
     `${check.file}: ${(check.bytes / (1024 * 1024)).toFixed(2)} MiB, ${check.parts} parts, ${check.slides} slide(s), ${check.notes} notes part(s)`,
     `page: ${check.pageSize.cx} by ${check.pageSize.cy} EMU ${check.pageSizeOk ? '(13.333 by 7.5 in)' : 'UNEXPECTED'}; ${check.shapes} shapes, ${check.outOfBounds} out of bounds`,
     `media: ${formats === '' ? 'none' : formats}; ${(check.mediaBytes / (1024 * 1024)).toFixed(2)} MiB`,
-    `fonts embedded: ${check.embeddedFonts.length === 0 ? 'none' : check.embeddedFonts.join(', ')}`,
+    `fonts embedded: ${
+      check.embeddedFonts.length === 0
+        ? 'none'
+        : check.embeddedFonts
+            .map(
+              (typeface) =>
+                `${typeface} (${(check.fontParts ?? [])
+                  .filter((f) => f.typeface === typeface)
+                  .map((f) => `${f.slot} ${(f.bytes / 1024).toFixed(0)} KB`)
+                  .join(', ')})`,
+            )
+            .join(', ')
+    }; by name only: ${(check.fontsNotEmbedded ?? []).join(', ') || 'none'}`,
     `titles: ${check.titledSlides} of ${check.slides} slide(s) carry a title placeholder; slide names ${check.slideNames.filter((n) => n !== '').length} set`,
     `checklist: ${check.custGeom} custGeom, ${check.normAutofit} normAutofit, ${check.kernZero} kern="0"`,
     `round two: ${check.italicRuns ?? 0} italic run(s), ${check.rotated ?? 0} rotated, ${check.groups ?? 0} group(s), ${check.charts ?? 0} chart part(s), ${check.connectors ?? 0} attached connector(s), ${check.numCol ?? 0} numCol, ${check.avLst ?? 0} avLst, ${check.tables ?? 0} table(s) with ${check.mergedCells ?? 0} merged cell(s)`,

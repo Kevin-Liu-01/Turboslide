@@ -11,9 +11,11 @@ import {
   EOT_VERSION,
   embedFonts,
   eotWrap,
+  listEmbeddedFontParts,
   listEmbeddedFonts,
   readEotHeader,
   readTtfInfo,
+  usedFaceSlots,
 } from './fonts.ts';
 import { readAttributes, inPage } from './geometry.ts';
 import { countGroups, groupShapes, listShapes } from './groups.ts';
@@ -26,7 +28,7 @@ import {
   writeAltText,
   writeColumns,
 } from './shapes.ts';
-import { entryMethods, openPackage, readPart, writePackage } from './zip.ts';
+import { entryMethods, openPackage, readPart, readPartBytes, writePackage } from './zip.ts';
 
 const RUN =
   '<a:r><a:rPr lang="en-US" sz="2640" spc="-66" kern="0" dirty="0"><a:solidFill><a:srgbClr val="070707"/></a:solidFill><a:latin typeface="Inter Display Alternates"/></a:rPr><a:t>Export fidelity</a:t></a:r>';
@@ -157,8 +159,13 @@ describe('EOT wrap and font parts (pptx report section 4.9)', () => {
     'the EOT header carries the sizes, the version, the magic and the family',
     () => {
       if (!ttf) return;
+      // reading the name table leaves the bytes as they were: the UTF-16BE strings are swapped on a
+      // copy, so the embedded font's name table answers to the family the EOT header declares
+      const before = Buffer.from(ttf.bytes);
       const info = readTtfInfo(ttf.bytes);
-      expect(info.family.length).toBeGreaterThan(0);
+      expect(Buffer.compare(Buffer.from(ttf.bytes), before)).toBe(0);
+      expect(readTtfInfo(ttf.bytes).family).toBe(info.family);
+      expect(info.family).toMatch(/^Inter\b/);
       expect(info.fsType).toBe(0);
       const eot = eotWrap(ttf.bytes, info);
       const header = readEotHeader(eot);
@@ -211,6 +218,74 @@ describe('EOT wrap and font parts (pptx report section 4.9)', () => {
       expect(again.embedded).toEqual([]);
     },
   );
+
+  const interDir = ttf ? join(ttf.path, '..') : undefined;
+
+  test.skipIf(!interDir || !existsSync(join(interDir, 'Inter-Italic.ttf')))(
+    'embedFonts writes one entry per family with its slots in schema order, read back per part',
+    async () => {
+      const zip = new JSZip();
+      zip.file(
+        '[Content_Types].xml',
+        '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="xml" ContentType="application/xml"/></Types>',
+      );
+      zip.file(
+        'ppt/_rels/presentation.xml.rels',
+        '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="x" Target="slideMasters/slideMaster1.xml"/></Relationships>',
+      );
+      zip.file(
+        'ppt/presentation.xml',
+        '<p:presentation xmlns:p="p" xmlns:r="r"><p:sldSz cx="12192000" cy="6858000"/><p:notesSz cx="6858000" cy="9144000"/><p:defaultTextStyle/></p:presentation>',
+      );
+      const regular = readFileSync(join(interDir ?? '', 'Inter-Regular.ttf'));
+      const italic = readFileSync(join(interDir ?? '', 'Inter-Italic.ttf'));
+      // the italic first: the list still carries the schema's order, regular before italic
+      const result = await embedFonts(zip, [
+        { family: 'Inter', slot: 'italic', ttf: italic },
+        { family: 'Inter', slot: 'regular', ttf: regular, pitchFamily: 34 },
+        { family: 'Inter', slot: 'regular', ttf: regular },
+      ]);
+      expect(result.warnings).toEqual([]);
+      expect(result.embedded).toEqual(['Inter']);
+      expect(result.parts).toEqual(['ppt/fonts/font1.fntdata', 'ppt/fonts/font2.fntdata']);
+      expect(await readPart(zip, 'ppt/presentation.xml')).toContain(
+        '<p:embeddedFont><p:font typeface="Inter" pitchFamily="34" charset="0"/><p:regular r:id="rIdFont3"/><p:italic r:id="rIdFont2"/></p:embeddedFont>',
+      );
+      const parts = await listEmbeddedFontParts(zip);
+      expect(
+        parts.map((p) => [p.typeface, p.slot, p.part, p.declares, p.style, p.fontFamily]),
+      ).toEqual([
+        ['Inter', 'regular', 'ppt/fonts/font2.fntdata', 'Inter', 'Regular', 'Inter'],
+        ['Inter', 'italic', 'ppt/fonts/font1.fntdata', 'Inter', 'Italic', 'Inter'],
+      ]);
+      const eot = await readPartBytes(zip, 'ppt/fonts/font1.fntdata');
+      const header = readEotHeader(eot);
+      expect([header.italic, header.weight]).toEqual([true, 400]);
+      // the font data is the file's bytes, untouched by reading its names
+      const source = readFileSync(join(interDir ?? '', 'Inter-Italic.ttf'));
+      expect(
+        Buffer.compare(Buffer.from(eot.subarray(eot.byteLength - source.byteLength)), source),
+      ).toBe(0);
+    },
+  );
+});
+
+describe('the faces the runs name (usedFaceSlots)', () => {
+  test('reads each run typeface with the slot its b and i ask for, and skips theme references', () => {
+    const xml =
+      '<a:r><a:rPr lang="en-US" sz="5760" b="1" dirty="0"><a:latin typeface="Fraunces Display"/></a:rPr><a:t>A</a:t></a:r>' +
+      '<a:r><a:rPr lang="en-US" i="1"><a:solidFill><a:srgbClr val="000000"/></a:solidFill><a:latin typeface="DM Sans"/></a:rPr><a:t>b</a:t></a:r>' +
+      '<a:r><a:rPr lang="en-US"><a:latin typeface="DM Sans"/></a:rPr><a:t>c</a:t></a:r>' +
+      '<a:r><a:rPr lang="en-US" b="1" i="1"><a:latin typeface="A &amp; B"/></a:rPr><a:t>d</a:t></a:r>' +
+      '<a:endParaRPr lang="en-US" sz="1320" dirty="0"/>' +
+      '<c:txPr><a:p><a:pPr><a:defRPr sz="1200"><a:latin typeface="+mn-lt"/></a:defRPr></a:pPr></a:p></c:txPr>';
+    const used = usedFaceSlots(xml);
+    expect([...used].map(([family, slots]) => [family, [...slots].sort()])).toEqual([
+      ['Fraunces Display', ['bold']],
+      ['DM Sans', ['italic', 'regular']],
+      ['A & B', ['boldItalic']],
+    ]);
+  });
 });
 
 describe('stored media (slides report section 3.3)', () => {

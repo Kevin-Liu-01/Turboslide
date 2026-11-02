@@ -21,6 +21,7 @@
     "./assets/InterVariable-Italic.woff2": "./assets/InterVariable-Italic.woff2",
     "./assets/*": "./assets/*",
     "./export": "./src/export.ts",
+    "./export-cuts": "./src/export-cuts.ts",
     "./export/fonts.json": "./export/fonts.json",
     "./index": "./src/index.ts",
     "./package.json": "./package.json"

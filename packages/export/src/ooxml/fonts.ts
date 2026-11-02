@@ -5,10 +5,12 @@
 // `[Content_Types].xml` gains the `application/x-fontdata` default (PowerPoint reports a corrupt
 // file without it, pandoc issue 11492), ppt/_rels/presentation.xml.rels gains one font
 // relationship per file, and presentation.xml gains `<p:embeddedFontLst>` after `<p:notesSz>` with
-// one `<p:embeddedFont>` per family. PowerPoint requires every listed typeface to be unique and
-// used (MS-OE376 2.1.1170); the caller passes the families the runs use. PowerPoint acceptance of
-// the uncompressed EOT is unverified on this machine (pptx report section 7).
-import { hasPart, readPart, writePart } from './zip.ts';
+// one `<p:embeddedFont>` per family holding its files in the schema's slot order (regular, bold,
+// italic, boldItalic; ECMA-376 Part 1, 19.2.1.9). PowerPoint requires every listed typeface to be
+// unique and used (MS-OE376 2.1.1170); the caller passes the faces the runs name, read from the
+// written runs by usedFaceSlots. PowerPoint acceptance of the uncompressed EOT is unverified on
+// this machine (pptx report section 7).
+import { hasPart, readPart, readPartBytes, writePart } from './zip.ts';
 import type { Package } from './zip.ts';
 
 export type TtfInfo = {
@@ -64,7 +66,10 @@ function nameRecords(
     let value: string;
     let score: number;
     if (platform === 3 && (encoding === 1 || encoding === 10)) {
-      value = Buffer.from(bytes.buffer, bytes.byteOffset + stringOffset + offset, length)
+      // UTF-16BE, swapped on a copy: a Buffer over the font's own ArrayBuffer would swap the
+      // name strings of the bytes the caller embeds
+      const start = stringOffset + offset;
+      value = Buffer.from(bytes.subarray(start, start + length))
         .swap16()
         .toString('utf16le');
       score = language === 0x0409 ? 3 : 2;
@@ -95,9 +100,11 @@ export function readTtfInfo(bytes: Uint8Array): TtfInfo {
   const os2Version = view.getUint16(os2.offset);
   const panose = bytes.slice(os2.offset + 32, os2.offset + 42);
   const macStyle = view.getUint16(head.offset + 44);
+  // the legacy family and style (IDs 1 and 2) are what the EOT header carries and what GDI and
+  // PowerPoint match a run's typeface against; the typographic pair (16, 17) groups the weights
   return {
-    family: names.get(16) ?? names.get(1) ?? '',
-    subfamily: names.get(17) ?? names.get(2) ?? 'Regular',
+    family: names.get(1) ?? names.get(16) ?? '',
+    subfamily: names.get(2) ?? names.get(17) ?? 'Regular',
     fullName: names.get(4) ?? names.get(1) ?? '',
     version: names.get(5) ?? '',
     weightClass: view.getUint16(os2.offset + 4),
@@ -214,25 +221,78 @@ export function readEotHeader(eot: Uint8Array): {
   version: number;
   magic: number;
   family: string;
+  style: string;
+  italic: boolean;
+  weight: number;
 } {
   const view = new DataView(eot.buffer, eot.byteOffset, eot.byteLength);
   const familySize = view.getUint16(82, true);
+  // StyleName follows FamilyName and Padding2 (the 0x00020001 layout, eotWrap)
+  const styleAt = 84 + familySize + 2;
+  const styleSize = view.getUint16(styleAt, true);
   return {
     eotSize: view.getUint32(0, true),
     fontDataSize: view.getUint32(4, true),
     version: view.getUint32(8, true),
     magic: view.getUint16(34, true),
     family: Buffer.from(eot.buffer, eot.byteOffset + 84, familySize).toString('utf16le'),
+    style: Buffer.from(eot.buffer, eot.byteOffset + styleAt + 2, styleSize).toString('utf16le'),
+    italic: eot[27] === 1,
+    weight: view.getUint32(28, true),
   };
 }
 
-export type EmbedFont = { family: string; ttf: Uint8Array };
+/** The four faces of a DrawingML family, in the schema's order. */
+export const FONT_SLOTS = ['regular', 'bold', 'italic', 'boldItalic'] as const;
+export type FontSlot = (typeof FONT_SLOTS)[number];
+
+export type EmbedFont = {
+  family: string;
+  /** the slot the file fills; default regular */
+  slot?: FontSlot;
+  ttf: Uint8Array;
+  /** the `pitchFamily` byte; default 34 (variable pitch, swiss) */
+  pitchFamily?: number;
+};
 
 export type EmbedResult = { embedded: string[]; parts: string[]; warnings: string[] };
 
 const FONT_REL_TYPE = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/font';
 
-/** Embeds the fonts into the package. Families already listed are skipped. */
+/** The slot of a run from its `b` and `i` attributes. */
+export function slotOf(bold: boolean, italic: boolean): FontSlot {
+  if (bold) return italic ? 'boldItalic' : 'bold';
+  return italic ? 'italic' : 'regular';
+}
+
+/**
+ * The faces the written runs name, per typeface the slots its runs ask for: every run, default
+ * and end of paragraph property with an `a:latin typeface` (slides and charts alike), its slot
+ * from its own `b` and `i`. Theme references (`+mj-lt`) are skipped.
+ */
+export function usedFaceSlots(
+  xml: string,
+  out: Map<string, Set<FontSlot>> = new Map(),
+): Map<string, Set<FontSlot>> {
+  for (const m of xml.matchAll(
+    /<a:(rPr|defRPr|endParaRPr)\b([^>]*?)(?:\/>|>([\s\S]*?)<\/a:\1>)/g,
+  )) {
+    const face = /<a:latin typeface="([^"]+)"/.exec(m[3] ?? '')?.[1];
+    if (face === undefined || face.startsWith('+')) continue;
+    const attrs = m[2] ?? '';
+    const slot = slotOf(/\sb="(1|true)"/.test(attrs), /\si="(1|true)"/.test(attrs));
+    const family = unescapeXml(face);
+    const slots = out.get(family) ?? new Set<FontSlot>();
+    slots.add(slot);
+    out.set(family, slots);
+  }
+  return out;
+}
+
+/**
+ * Embeds the fonts into the package, one `<p:embeddedFont>` per family with its files in slot
+ * order. Families already listed are skipped, and a second file for a slot already filled.
+ */
 export async function embedFonts(zip: Package, fonts: EmbedFont[]): Promise<EmbedResult> {
   const result: EmbedResult = { embedded: [], parts: [], warnings: [] };
   if (fonts.length === 0) return result;
@@ -249,9 +309,16 @@ export async function embedFonts(zip: Package, fonts: EmbedFont[]): Promise<Embe
   let nextRel = Math.max(0, ...existingIds) + 1;
   let fontIndex = 1;
   while (hasPart(zip, `ppt/fonts/font${fontIndex}.fntdata`)) fontIndex += 1;
-  const entries: string[] = [];
+  const families = new Map<string, { pitchFamily: number; slots: Map<FontSlot, string> }>();
   for (const font of fonts) {
-    if (new RegExp(`<p:font typeface="${escapeRegExp(font.family)}"`).test(presentation)) continue;
+    if (new RegExp(`<p:font typeface="${escapeRegExp(escapeXml(font.family))}"`).test(presentation))
+      continue;
+    const slot = font.slot ?? 'regular';
+    const entry = families.get(font.family) ?? {
+      pitchFamily: font.pitchFamily ?? 34,
+      slots: new Map<FontSlot, string>(),
+    };
+    if (entry.slots.has(slot)) continue;
     let info: TtfInfo;
     try {
       info = readTtfInfo(font.ttf);
@@ -276,13 +343,21 @@ export async function embedFonts(zip: Package, fonts: EmbedFont[]): Promise<Embe
       /<\/Relationships>/,
       `<Relationship Id="${rId}" Type="${FONT_REL_TYPE}" Target="fonts/font${fontIndex}.fntdata"/></Relationships>`,
     );
-    entries.push(
-      `<p:embeddedFont><p:font typeface="${escapeXml(font.family)}" pitchFamily="34" charset="0"/><p:regular r:id="${rId}"/></p:embeddedFont>`,
-    );
-    result.embedded.push(font.family);
+    entry.slots.set(slot, rId);
+    families.set(font.family, entry);
     result.parts.push(part);
     fontIndex += 1;
     nextRel += 1;
+  }
+  const entries: string[] = [];
+  for (const [family, entry] of families) {
+    const slots = FONT_SLOTS.filter((slot) => entry.slots.has(slot))
+      .map((slot) => `<p:${slot} r:id="${entry.slots.get(slot) ?? ''}"/>`)
+      .join('');
+    entries.push(
+      `<p:embeddedFont><p:font typeface="${escapeXml(family)}" pitchFamily="${entry.pitchFamily}" charset="0"/>${slots}</p:embeddedFont>`,
+    );
+    result.embedded.push(family);
   }
   if (entries.length > 0) {
     if (/<p:embeddedFontLst>/.test(presentation)) {
@@ -319,6 +394,68 @@ export async function listEmbeddedFonts(zip: Package): Promise<string[]> {
   return [...presentation.matchAll(/<p:font typeface="([^"]+)"/g)].map((m) =>
     unescapeXml(m[1] ?? ''),
   );
+}
+
+export type EmbeddedFontPart = {
+  /** the typeface `<p:font>` lists */
+  typeface: string;
+  slot: FontSlot;
+  /** the part the slot's relationship targets, or null when it names no part */
+  part: string | null;
+  /** the family the part's EOT header declares, or null when the part is missing or unreadable */
+  declares: string | null;
+  /** the style the EOT header declares */
+  style: string | null;
+  /** the family the font data's own name table answers to (ID 1), which PowerPoint loads by */
+  fontFamily: string | null;
+  bytes: number;
+};
+
+/**
+ * Every slot of every listed typeface with the part its relationship targets, the family and
+ * style the part's EOT header declares and the family the font data's own name table answers to,
+ * so a reader can see that each run's face is the face the part answers to (export check,
+ * docs/pptx.md).
+ */
+export async function listEmbeddedFontParts(zip: Package): Promise<EmbeddedFontPart[]> {
+  const presentation = await readPart(zip, 'ppt/presentation.xml');
+  const rels = hasPart(zip, 'ppt/_rels/presentation.xml.rels')
+    ? await readPart(zip, 'ppt/_rels/presentation.xml.rels')
+    : '';
+  const targets = new Map<string, string>();
+  for (const m of rels.matchAll(/<Relationship\b[^>]*>/g)) {
+    const id = /\sId="([^"]+)"/.exec(m[0])?.[1];
+    const target = /\sTarget="([^"]+)"/.exec(m[0])?.[1];
+    if (id && target) targets.set(id, target.startsWith('/') ? target.slice(1) : `ppt/${target}`);
+  }
+  const out: EmbeddedFontPart[] = [];
+  for (const m of presentation.matchAll(/<p:embeddedFont>([\s\S]*?)<\/p:embeddedFont>/g)) {
+    const body = m[1] ?? '';
+    const typeface = unescapeXml(/<p:font typeface="([^"]+)"/.exec(body)?.[1] ?? '');
+    for (const slot of FONT_SLOTS) {
+      const rId = new RegExp(`<p:${slot} r:id="([^"]+)"`).exec(body)?.[1];
+      if (rId === undefined) continue;
+      const part = targets.get(rId) ?? null;
+      let declares: string | null = null;
+      let style: string | null = null;
+      let fontFamily: string | null = null;
+      let bytes = 0;
+      if (part !== null && hasPart(zip, part)) {
+        const eot = await readPartBytes(zip, part);
+        bytes = eot.byteLength;
+        try {
+          const header = readEotHeader(eot);
+          declares = header.family;
+          style = header.style;
+          fontFamily = readTtfInfo(eot.subarray(header.eotSize - header.fontDataSize)).family;
+        } catch {
+          declares = null;
+        }
+      }
+      out.push({ typeface, slot, part, declares, style, fontFamily, bytes });
+    }
+  }
+  return out;
 }
 
 function escapeRegExp(value: string): string {

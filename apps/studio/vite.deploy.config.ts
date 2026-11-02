@@ -12,6 +12,9 @@ import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
+import { THEME_FACE_IDS } from '@turboslide/fonts/export-cuts';
+import { FONT_IDS } from '@turboslide/schema/fonts';
+
 import { STATIC_HEADERS, prerenderNonce, staticPageCsp } from './src/server/headers.ts';
 import { buildDefine } from './src/server/build-commit';
 
@@ -130,8 +133,33 @@ const PACKAGES_DIR = `${REPO}packages`;
 // `packages/materials/previews/*`, about 600 KB of webp once B5's `build-shader-previews.mjs`
 // commits them) join the group so a server route that serves a still from the workspace finds the
 // file in the function; on a tree without the folder the glob matches nothing.
-const PACKAGES_PATTERN =
-  '{theme/src/gt-ink-paper/*.css,theme/assets/sprite.svg,fonts/src/inter.css,fonts/assets/InterVariable.woff2,fonts/assets/*/*,fonts/export/*,export/src/calibration/calibration.json,materials/previews/*}';
+// The catalog faces' export cuts (docs/pptx.md "The catalog faces in Editable text"): the manifest
+// and the folders of the faces the themes draw (THEME_FACE_IDS, 7.3 MiB of the set's 42.4), so a
+// hosted export under Embed fonts embeds a themed deck's type; a face only a kit or a block names
+// has no folder here and its runs travel by name, which the report's residual says. One entry per
+// folder, no nested braces in the group's pattern. The glob Nitro bundles (tinyglobby,
+// `expandDirectories` on) appends `/**` to a pattern that does not end in `*`, and this one ends
+// in `}`, so every entry takes the files under it: `fonts/export/*` alone would carry the whole
+// catalog folder (measured with tinyglobby 0.2.17, 286 files). PACKAGES_IGNORE leaves out the
+// folders of the faces no theme draws.
+const CATALOG_CUTS = [
+  'fonts/export/catalog/catalog.json',
+  ...THEME_FACE_IDS.map((id) => `fonts/export/catalog/${id}/*`),
+];
+const PACKAGES_IGNORE = FONT_IDS.filter((id) => id !== 'inter' && !THEME_FACE_IDS.includes(id)).map(
+  (id) => `fonts/export/catalog/${id}/**`,
+);
+const PACKAGES_PATTERN = `{${[
+  'theme/src/gt-ink-paper/*.css',
+  'theme/assets/sprite.svg',
+  'fonts/src/inter.css',
+  'fonts/assets/InterVariable.woff2',
+  'fonts/assets/*/*',
+  'fonts/export/*',
+  ...CATALOG_CUTS,
+  'export/src/calibration/calibration.json',
+  'materials/previews/*',
+].join(',')}}`;
 
 // Vercel Functions (docs/hosting.md, section limits): the base function keeps the project's
 // duration default written out; the routes that render or export (and the server functions, which
@@ -582,7 +610,12 @@ export default defineConfig({
           pattern: SEED_PATTERN,
           ignore: SEED_IGNORE,
         },
-        { baseName: 'packages', dir: PACKAGES_DIR, pattern: PACKAGES_PATTERN },
+        {
+          baseName: 'packages',
+          dir: PACKAGES_DIR,
+          pattern: PACKAGES_PATTERN,
+          ignore: PACKAGES_IGNORE,
+        },
       ],
       publicAssets: [
         {

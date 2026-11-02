@@ -88,7 +88,7 @@ shapes verify. Measured cost in the image: 5 flatten pages convert in about 640 
 | Chrome for Testing | Playwright build `chromium-1217` (the Linux binary reports `Chromium 147.0.7727.0`; the macOS build of the same revision is Chrome for Testing 147.0.7727.15) | the build `shoot-slide.mjs` hard-codes; `TURBOSLIDE_CHROME` points at it, `TURBOSLIDE_GPU=swiftshader`; the headless package's renderer string reads `Chrome for Testing 147.0.7727.0, SwiftShader, Google` |
 | LibreOffice        | 25.2.3.2 (`4:25.2.3-2+deb13u6`)                                                                                                                               | the newest in Debian 13's repositories for arm64; TDF's 26.8 builds are x86_64 only, see below                                                                                                              |
 | poppler            | 25.03.0                                                                                                                                                       | `pdftocairo` (the rasterizer), `pdftoppm` (fallback), `pdfinfo`                                                                                                                                             |
-| Export fonts       | `packages/fonts/export/*.ttf`, 38 faces under the upstream Inter names since the design round (docs/DESIGN.md 4.3), each upright and italic (SPEC-2 7.1)   | installed under `/usr/local/share/fonts/turboslide`; the Dockerfile asserts at least 38 files there at build time |
+| Export fonts       | `packages/fonts/export/*.ttf`, 38 faces under the upstream Inter names since the design round (docs/DESIGN.md 4.3), each upright and italic (SPEC-2 7.1)      | installed under `/usr/local/share/fonts/turboslide`; the Dockerfile asserts at least 38 files there at build time                                                                                           |
 | The repo           | `pnpm install` inside the image; `turboslide` on PATH                                                                                                         | the CLI runs its TypeScript source through Node's type stripping                                                                                                                                            |
 
 The default command is the job queue (`apps/render-worker/src/main.ts`) on port 4322: `render`,
@@ -373,6 +373,12 @@ and the light file of a native export at a named revision, and record the result
    font box. Record `eotAccepted: true|false` and, when false, the message and which families
    substituted. If PowerPoint refuses the file, retest with a MicroType Express compressed EOT
    before changing the payload.
+   The catalog cuts (docs/pptx.md "The catalog faces in Editable text"): export the landing deck
+   in Coral and in Signal native with `--embed-fonts` (`theme-faces-export.test.ts` with
+   `TURBOSLIDE_KEEP_EXPORT_TEST=1` keeps the files) on a machine without Fraunces, DM Sans and
+   Oswald installed; each opens with no repair prompt, the title draws in `Fraunces Display` (or
+   `Oswald`) and Replace Fonts lists none of them as substituted, and a SemiBold heading keeps
+   its weight. Record `catalogCutsAccepted: true|false` beside `eotAccepted`.
 2. First-baseline constant. On the calibration deck's `cal-text` slide exported native, measure
    the vertical offset of the first line of each text box against the Turboslide render (export
    the slide as PNG at 1600 by 900 from PowerPoint, then `compareBlock` in `verify/diff.ts`, or

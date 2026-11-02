@@ -62184,6 +62184,64 @@
               "type": "string"
             }
           },
+          "fontParts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "typeface": {
+                  "type": "string"
+                },
+                "slot": {
+                  "type": "string",
+                  "enum": [
+                    "regular",
+                    "bold",
+                    "italic",
+                    "boldItalic"
+                  ]
+                },
+                "part": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "declares": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "style": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "typeface",
+                "slot",
+                "part",
+                "declares",
+                "style",
+                "bytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "fontsNotEmbedded": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "custGeom": {
             "type": "integer",
             "minimum": 0,

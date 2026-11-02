@@ -349,6 +349,7 @@ function themeReport(built: BuildResult, input: ThemeReportInput): ExportReport 
     files: [path],
     families: built.families,
     embedded: built.embedded,
+    ...(plan.input.embedFonts === true ? { embedFonts: true } : {}),
     slides: slidesWithScene,
     geometryInBounds: built.geometryInBounds,
     perfect: built.perfect,

@@ -28,12 +28,16 @@ import type { SceneRect, SceneRun, SceneStyle, SceneText } from '../scene/types.
 import { PAGE_IN, PX_PER_IN, parseCssColor, pxToIn, pxToPt } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import type { BaselineTarget } from './baseline.ts';
-import { faceAdvanceExcess } from './face-advance.ts';
+import type { ExportCut } from '@turboslide/fonts/export-cuts';
+
+import { catalogAdvanceExcess, faceAdvanceExcess } from './face-advance.ts';
 import type { FontSet } from './fonts-map.ts';
 import {
   BOLD_FROM,
   MONO_FAMILY,
   catalogFamilyName,
+  catalogPick,
+  catalogWeightSubstitution,
   drawsAlternates,
   pickFamily,
   weightSubstitution,
@@ -81,11 +85,9 @@ const SHEET_FAMILIES = new Set(['Inter', 'GT Inter', 'DejaVu Sans Mono', 'Menlo'
 
 /**
  * A catalog face (gslides-parity SPEC-5-amendments A5 item 5; docs/archive/rounds/PRODUCT.md 4.2, 4.5): the
- * computed family of a run whose typography or brand kit names a `FONT_IDS` face is that face's
- * name (the renderer's `--ts-font-<id>` variable or the kit's `--display` and `--text` stacks
- * resolve to it), so the file names it in `a:latin typeface` as is and the residual line says
- * PowerPoint may substitute it on a machine without the face. The sheet's own families (Inter
- * and the mono stack) keep the set's pick.
+ * computed family of a run whose typography, brand kit or theme names a `FONT_IDS` face is that
+ * face's name (the renderer's `--ts-font-<id>` variable or the kit's `--display` and `--text`
+ * stacks resolve to it). The sheet's own families (Inter and the mono stack) keep the set's pick.
  */
 export function catalogFace(style: SceneStyle): string | null {
   if (style.mono) return null;
@@ -94,17 +96,37 @@ export function catalogFace(style: SceneStyle): string | null {
   return family;
 }
 
-/** The residual line a catalog face adds once per family (A5 item 5). */
-export function catalogFaceResidual(family: string): string {
-  return `font: ${family} travels by name; PowerPoint substitutes it on a machine without the face (the catalog's licence allows embedding, which the export does not do)`;
+export type RunFace = {
+  /** the family `a:latin typeface` names */
+  family: string;
+  /** the run's `b="1"` */
+  bold: boolean;
+  /** the catalog cut the run travels in (docs/pptx.md "The catalog faces in Editable text") */
+  cut?: ExportCut;
+};
+
+/**
+ * The face a style travels under: the mono stack for the code panel; for a catalog face the cut
+ * of its export plan (fonts-map.ts catalogPick: the family named after the weight unless 400 or
+ * 700, `Display` from 44 px for a face with an optical size axis, the bold flag on a Bold slot or
+ * over a lighter cut at 600 and up), so the run names a family an embedded part declares; else
+ * the Inter set's pick with the bold flag from 600 up.
+ */
+export function faceFor(style: SceneStyle, set: FontSet): RunFace {
+  if (style.mono) return { family: MONO_FAMILY, bold: false };
+  const face = catalogFace(style);
+  if (face !== null) {
+    const pick = catalogPick(face, style.size, style.weight, style.italic === true);
+    if (pick !== null) return { family: pick.cut.family, bold: pick.bold, cut: pick.cut };
+    return { family: face, bold: style.weight >= BOLD_FROM };
+  }
+  const pick = pickFamily(style.size, style.weight, set, drawsAlternates(style.features));
+  return { family: pick.family, bold: pick.bold };
 }
 
-/** The family for a style: the mono stack for the code panel, a catalog face by name, else the set's pick. */
+/** The family for a style (faceFor). */
 export function familyFor(style: SceneStyle, set: FontSet): string {
-  if (style.mono) return MONO_FAMILY;
-  const face = catalogFace(style);
-  if (face !== null) return face;
-  return pickFamily(style.size, style.weight, set, drawsAlternates(style.features)).family;
+  return faceFor(style, set).family;
 }
 
 /** The Unicode code point of a bullet glyph as pptxgenjs `characterCode` wants it: four hex digits. */
@@ -146,19 +168,22 @@ function runOptions(
   lineStart: boolean,
 ): PptxGenJS.TextPropsOptions {
   const color = parseCssColor(run.style.color);
-  const family = familyFor(run.style, options.fontSet);
+  const face = faceFor(run.style, options.fontSet);
+  const family = face.family;
   options.families.add(family);
   const out: PptxGenJS.TextPropsOptions = {
     fontFace: family,
     fontSize: pxToPt(run.style.size),
     color: color.hex,
   };
-  const face = catalogFace(run.style);
-  if (face !== null) {
-    // a catalog face travels by name with the bold flag from 600 up (its own cuts carry the
-    // weight on a machine that has the face); the residual names the substitution risk once
-    if (run.style.weight >= BOLD_FROM) out.bold = true;
-    options.residual?.add(catalogFaceResidual(face));
+  const catalog = catalogFace(run.style);
+  if (catalog !== null) {
+    // a catalog face names the cut of its weight, a Bold slot or a synthesized bold with the
+    // flag; a weight with no cut is one residual line per face and weight
+    if (face.bold) out.bold = true;
+    const pick = face.cut ? { cut: face.cut, bold: face.bold } : null;
+    const note = pick ? catalogWeightSubstitution(catalog, run.style.weight, pick) : null;
+    if (note !== null) options.residual?.add(note);
   } else if (!run.style.mono) {
     // a weight the set has no cut for: 600 and 700 travel as Medium plus bold, 300 as Regular
     const pick = pickFamily(
@@ -175,7 +200,15 @@ function runOptions(
   // A text face drawn wider than the browser draws the run (the standard set's opsz 14 faces above
   // 14 px, fonts.json spacing; an exact cut off its size in LibreOffice, calibration.json
   // faceAdvance): that share of the run's width is taken back across its characters.
-  const excess = run.style.mono || face !== null ? 0 : faceAdvanceExcess(family, run.style.size);
+  // A catalog cut at a fixed optical size measures the same against the browser's (catalog.json
+  // spacing per cut).
+  const excess = run.style.mono
+    ? 0
+    : face.cut
+      ? catalogAdvanceExcess(face.cut, run.style.size)
+      : catalog !== null
+        ? 0
+        : faceAdvanceExcess(family, run.style.size);
   if (excess > 0 && run.text.length > 0 && !run.gt) {
     const perChar = (excess * run.box[2]) / run.text.length;
     out.charSpacing = Math.round(pxToPt(run.style.letterSpacing - perChar) * 100) / 100;

@@ -790,3 +790,15 @@ Fraunces: `ofl/fraunces/Fraunces[SOFT,WONK,opsz,wght].ttf` and
 `Fraunces-Italic[SOFT,WONK,opsz,wght].ttf` as `packages/fonts/assets/fraunces/` (194,936 and
 235,660 bytes). Copyright 2020 The Fraunces Project Authors (github.com/undercasetype/Fraunces).
 SIL Open Font License 1.1.
+
+The export cuts (docs/pptx.md "The catalog faces in Editable text"): the static TrueType files
+under `packages/fonts/export/catalog/<id>/`, made from the woff2 files above by
+`packages/fonts/scripts/build-export-cuts.mjs` with fontTools, for the PowerPoint export to embed
+under `--embed-fonts`. A cut of a variable file is an instance at one weight and optical size
+under its own family name (`Fraunces Display SemiBold`), a Modified Version under the OFL: its
+copyright, trademark, designer and licence name records are kept, and the family's licence text
+is copied beside the files as `LICENSE`. No family that declares a Reserved Font Name has an
+instanced cut (Source Sans 3, Merriweather, Playfair Display, Lora, Libre Baskerville, Raleway and
+IBM Plex Sans are left out, and their runs travel by name); the static files of Lato, PT Serif,
+IBM Plex Mono, Poppins and Bebas Neue are decoded from woff2 as they ship, their name tables
+untouched. `packages/fonts/export/catalog/catalog.json` records every file with its sha256.

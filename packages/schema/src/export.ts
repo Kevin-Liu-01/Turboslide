@@ -417,6 +417,20 @@ export type ExportCheck = {
   formats: Record<string, number>;
   mediaBytes: number;
   embeddedFonts: string[];
+  /**
+   * Every embedded font slot with the part its relationship targets and the family and style the
+   * part's EOT header declares (docs/pptx.md "The catalog faces in Editable text").
+   */
+  fontParts?: {
+    typeface: string;
+    slot: 'regular' | 'bold' | 'italic' | 'boldItalic';
+    part: string | null;
+    declares: string | null;
+    style: string | null;
+    bytes: number;
+  }[];
+  /** The typefaces the runs name that no font part embeds. */
+  fontsNotEmbedded?: string[];
   custGeom: number;
   normAutofit: number;
   kernZero: number;
@@ -460,6 +474,19 @@ export const exportCheckSchema = z.strictObject({
   formats: z.record(z.string(), z.number().int().nonnegative()),
   mediaBytes: z.number().int().nonnegative(),
   embeddedFonts: z.array(z.string()),
+  fontParts: z
+    .array(
+      z.strictObject({
+        typeface: z.string(),
+        slot: z.enum(['regular', 'bold', 'italic', 'boldItalic']),
+        part: z.string().nullable(),
+        declares: z.string().nullable(),
+        style: z.string().nullable(),
+        bytes: z.number().int().nonnegative(),
+      }),
+    )
+    .optional(),
+  fontsNotEmbedded: z.array(z.string()).optional(),
   custGeom: z.number().int().nonnegative(),
   normAutofit: z.number().int().nonnegative(),
   kernZero: z.number().int().nonnegative(),

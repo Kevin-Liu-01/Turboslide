@@ -233,7 +233,7 @@ export function isContinuousTone(scene: Scene): boolean {
  * heading's face, size and color (an alpha 0 run), or the content box in the display face when the
  * slide measured no text. Kept inside the page so the geometry read-back stays in bounds.
  */
-export function hiddenTitleFor(scene: Scene, fontSet: FontSet): HiddenTitle {
+export function hiddenTitleFor(scene: Scene, fontSet: FontSet, embedCuts = false): HiddenTitle {
   const headings = new Set(scene.blocks.filter((b) => b.type === 'heading').map((b) => b.blockId));
   const text = scene.texts.find((t) => headings.has(t.blockId)) ?? scene.texts[0];
   const box = text?.textBox ?? DEFAULT_TITLE_BOX;
@@ -241,7 +241,7 @@ export function hiddenTitleFor(scene: Scene, fontSet: FontSet): HiddenTitle {
   const y = Math.max(0, pxToEmu(box[1]));
   const cx = Math.max(1, Math.min(pxToEmu(box[2]), PAGE_EMU.width - x));
   const cy = Math.max(1, Math.min(pxToEmu(box[3]), PAGE_EMU.height - y));
-  const face = text ? faceFor(text.style, fontSet) : undefined;
+  const face = text ? faceFor(text.style, fontSet, embedCuts) : undefined;
   return {
     title: scene.title ?? scene.slideId,
     name: `ts:${scene.slideId}#title`,
@@ -304,6 +304,8 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     frames: { name: string; transform: ReturnType<typeof transformProps> }[];
   }[] = [];
 
+  // a run in a catalog face names its cut only where the file carries the cuts (text.ts faceFor)
+  const embedCuts = options.embedFonts === true && options.mode === 'native';
   for (const [sceneIndex, scene] of scenes.entries()) {
     const paperHex = parseCssColor(scene.paper).hex;
     const hairHex = parseCssColor(scene.frame.rules[0]?.color ?? scene.ink).hex;
@@ -363,6 +365,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     };
     const textOptions: TextEmitOptions = {
       fontSet: options.fontSet,
+      embedCuts,
       invisible: options.mode === 'flatten',
       hairHex,
       families,
@@ -786,7 +789,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     xml = grouped.xml;
     if (scene) {
       xml = setSlideName(xml, scene.title ?? scene.slideId);
-      xml = addHiddenTitle(xml, hiddenTitleFor(scene, options.fontSet));
+      xml = addHiddenTitle(xml, hiddenTitleFor(scene, options.fontSet, embedCuts));
     }
     counts.italicRuns += (xml.match(/<a:rPr\b[^>]*\si="1"/g) ?? []).length;
     counts.rotated += (xml.match(/<[ap]:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;

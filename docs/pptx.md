@@ -69,9 +69,13 @@ turned or scaled heading is left out. General Translation draws no parts, so its
 title and body slides in the seven themes and reads the shapes back.
 
 **The catalog faces in Editable text** (2026-11-02). A run set in a catalog face (a theme's display
-or text face, a brand kit's font role, a block's `typography.family`) names a static cut of that
-face, planned from the catalog's facts alone by `packages/fonts/src/export-cuts.ts`, so the name is
-the same with or without `--embed-fonts`. Weights 400 and 700 are the face's own family in its
+or text face, a brand kit's font role, a block's `typography.family`) names the face itself in a
+file that embeds no face, with the bold flag from 600, the family an installed copy of the face
+answers to (the rows `fonts.export.editable-names-face` and `fonts.field.own-face`; the guard held
+a9319a6aa on the second when every run named a cut that no machine has installed). Under
+`--embed-fonts` it names a static cut of that face, planned from the catalog's facts alone by
+`packages/fonts/src/export-cuts.ts` (`text.ts faceFor`, `TextEmitOptions.embedCuts`), the family
+the embedded part declares. Weights 400 and 700 are the face's own family in its
 Regular and Bold slots; every other weight from 300 to 700 is a family of its own named after the
 weight (`Oswald SemiBold`, `DM Sans Light`), the legacy naming Windows lists a variable font's
 named instances under and the static Google Fonts families use, the way Inter's Medium cut is

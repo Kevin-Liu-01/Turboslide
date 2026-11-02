@@ -123,7 +123,7 @@ export function tableCell(
   options: TableEmitOptions,
 ): PptxGenJS.TableCell {
   const style = text?.style;
-  const face = style ? faceFor(style, options.fontSet) : undefined;
+  const face = style ? faceFor(style, options.fontSet, options.embedCuts === true) : undefined;
   const family = face?.family;
   if (family) options.families.add(family);
   // the exact line pitch on the cell (the text box writes the same lnSpc): without it LibreOffice

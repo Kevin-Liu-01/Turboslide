@@ -56,9 +56,19 @@ describe('a field’s own face in the scene (build/field-fonts.md 2)', () => {
   // familyFor names the face's export cut for the run's size and weight (docs/pptx.md "The catalog
   // faces in Editable text"), the way it names a block's, and the theme's face keeps the set's pick
   it('names the catalog face the field computed, and the set’s pick for the theme face', () => {
+    // a file that embeds no cut names the face an installed copy answers to (the rows
+    // fonts.export.editable-names-face and fonts.field.own-face); one that embeds the cuts names
+    // the cut the run draws
     expect(familyFor({ ...style, family: 'Fraunces', size: 88, weight: 500 }, 'exact')).toBe(
+      'Fraunces',
+    );
+    expect(familyFor({ ...style, family: 'Fraunces', size: 88, weight: 500 }, 'exact', true)).toBe(
       'Fraunces Display Medium',
     );
+    expect(faceFor({ ...style, family: 'Fraunces', size: 88, weight: 500 }, 'exact')).toEqual({
+      family: 'Fraunces',
+      bold: false,
+    });
     expect(familyFor({ ...style, family: 'Manrope', size: 26, weight: 400 }, 'exact')).toBe(
       'Manrope',
     );

@@ -74,6 +74,12 @@ export type TextEmitOptions = {
   links?: LinkResolver;
   /** The paper hex a shape's translucent fill composites on (a shape with text, SPEC-2 2.2.17). */
   paperHex?: string;
+  /**
+   * The file embeds the catalog cuts (`--embed-fonts` in Editable text): a run in a catalog face
+   * names its cut's family, which travels in the file; without them it names the face itself, the
+   * family an installed copy of the face answers to (faceFor).
+   */
+  embedCuts?: boolean;
 };
 
 /**
@@ -106,17 +112,19 @@ export type RunFace = {
 };
 
 /**
- * The face a style travels under: the mono stack for the code panel; for a catalog face the cut
- * of its export plan (fonts-map.ts catalogPick: the family named after the weight unless 400 or
- * 700, `Display` from 44 px for a face with an optical size axis, the bold flag on a Bold slot or
- * over a lighter cut at 600 and up), so the run names a family an embedded part declares; else
- * the Inter set's pick with the bold flag from 600 up.
+ * The face a style travels under: the mono stack for the code panel; for a catalog face in a file
+ * that embeds the cuts (`cuts`), the cut of its export plan (fonts-map.ts catalogPick: the family
+ * named after the weight unless 400 or 700, `Display` from 44 px for a face with an optical size
+ * axis, the bold flag on a Bold slot or over a lighter cut at 600 and up), so the run names a
+ * family an embedded part declares; in a file that embeds none, the face itself with the bold flag
+ * from 600 up, the family an installed copy answers to (the rows fonts.export.editable-names-face
+ * and fonts.field.own-face read it); else the Inter set's pick with the bold flag from 600 up.
  */
-export function faceFor(style: SceneStyle, set: FontSet): RunFace {
+export function faceFor(style: SceneStyle, set: FontSet, cuts = false): RunFace {
   if (style.mono) return { family: MONO_FAMILY, bold: false };
   const face = catalogFace(style);
   if (face !== null) {
-    const pick = catalogPick(face, style.size, style.weight, style.italic === true);
+    const pick = cuts ? catalogPick(face, style.size, style.weight, style.italic === true) : null;
     if (pick !== null) return { family: pick.cut.family, bold: pick.bold, cut: pick.cut };
     return { family: face, bold: style.weight >= BOLD_FROM };
   }
@@ -125,8 +133,8 @@ export function faceFor(style: SceneStyle, set: FontSet): RunFace {
 }
 
 /** The family for a style (faceFor). */
-export function familyFor(style: SceneStyle, set: FontSet): string {
-  return faceFor(style, set).family;
+export function familyFor(style: SceneStyle, set: FontSet, cuts = false): string {
+  return faceFor(style, set, cuts).family;
 }
 
 /** The Unicode code point of a bullet glyph as pptxgenjs `characterCode` wants it: four hex digits. */
@@ -168,7 +176,7 @@ function runOptions(
   lineStart: boolean,
 ): PptxGenJS.TextPropsOptions {
   const color = parseCssColor(run.style.color);
-  const face = faceFor(run.style, options.fontSet);
+  const face = faceFor(run.style, options.fontSet, options.embedCuts === true);
   const family = face.family;
   options.families.add(family);
   const out: PptxGenJS.TextPropsOptions = {
@@ -280,7 +288,7 @@ export function guardLinkSpaces(runs: readonly SceneRun[]): SceneRun[] {
  */
 export function gapFiller(run: SceneRun, options: TextEmitOptions): PptxGenJS.TextProps | null {
   if (run.gapAfter === undefined || run.spaceWidth === undefined) return null;
-  const family = familyFor(run.style, options.fontSet);
+  const family = familyFor(run.style, options.fontSet, options.embedCuts === true);
   options.families.add(family);
   return {
     text: ' ',

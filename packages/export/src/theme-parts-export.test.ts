@@ -16,6 +16,7 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import type { Deck, Slide } from '@turboslide/schema/deck';
 import type { ThemeId } from '@turboslide/schema/brand';
 import { resolveExecutable } from '@turboslide/headless/launch';
+import { lightFamily } from '@turboslide/fonts/summary';
 import { themeRecord } from '@turboslide/theme/themes';
 
 import { checkPptx } from './check.ts';
@@ -180,6 +181,22 @@ describe.skipIf(skip)("the theme's parts in Editable text", () => {
       new RegExp(`<p:bg><p:bgPr><a:solidFill><a:srgbClr val="${accent}"`, 'i'),
     );
     expect(shapeNamed(mint.plan ?? '', 'ts:plan#theme/1')).toContain(`<a:off x="${pxToEmu(40)}"`);
+  });
+
+  // fonts.export.editable-names-face, fonts.field.own-face: a file that embeds no face names each
+  // catalog face as an installed copy answers to it, never a cut's family (Fraunces Display Medium)
+  test("names each theme's display face itself in a file that embeds no face", async () => {
+    for (const theme of THEMES) {
+      const face = lightFamily(themeRecord(theme).fonts.display).name;
+      const xml = await slideXml(results.get(theme)?.files[0] ?? '');
+      const named = new Set(
+        [...(xml.title ?? '').matchAll(/<a:latin typeface="([^"]+)"/g)].map((m) => m[1]),
+      );
+      expect([...named], theme).toContain(face);
+      // no cut of the face (`Fraunces Display Medium`, `Oswald SemiBold`) travels by name
+      for (const family of named)
+        expect(family?.startsWith(`${face} `), `${theme} names ${family}`).toBe(false);
+    }
   });
 
   test('keeps every file valid with every shape on the page or crossing its edge', async () => {

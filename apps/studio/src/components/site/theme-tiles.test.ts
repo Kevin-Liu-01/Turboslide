@@ -7,7 +7,6 @@ import { describe, expect, it } from 'vitest';
 
 import { THEME_RECORDS } from '@turboslide/theme/themes';
 
-import pictures from './theme-pictures.json';
 import { THEME_TILES } from './theme-tiles';
 
 // The Themes screen's copy of the theme library (theme-tiles.ts): the same nine themes in the
@@ -21,6 +20,10 @@ const slide = readFileSync(
   join(here, '..', '..', '..', 'home-deck', 'slides', 'title.json'),
   'utf8',
 );
+const pictures = JSON.parse(readFileSync(join(here, 'theme-pictures.json'), 'utf8')) as Record<
+  string,
+  string
+>;
 const sha = (text: string): string => createHash('sha256').update(text).digest('hex');
 
 describe("the Themes screen's tiles", () => {
@@ -33,9 +36,7 @@ describe("the Themes screen's tiles", () => {
   it('show a picture rendered from each theme as it stands', () => {
     expect(Object.keys(pictures)).toEqual(THEME_RECORDS.map((theme) => theme.id));
     for (const theme of THEME_RECORDS) {
-      expect(pictures[theme.id as keyof typeof pictures], theme.id).toBe(
-        sha(JSON.stringify(theme) + slide),
-      );
+      expect(pictures[theme.id], theme.id).toBe(sha(JSON.stringify(theme) + slide));
       const bytes = statSync(join(here, 'pictures', `theme-${theme.id}.webp`)).size;
       expect(bytes, theme.id).toBeLessThanOrEqual(22_000);
     }

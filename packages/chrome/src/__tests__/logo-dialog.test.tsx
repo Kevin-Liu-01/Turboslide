@@ -597,9 +597,9 @@ describe('LogoDialog', () => {
     await search('github');
     const paper = control('dialog.logo.tile.github.paper');
     const ink = control('dialog.logo.tile.github.ink');
-    expect(paper?.style.background).toBe(rgbOf('#e8f3ee'));
-    expect(paper?.style.color).toBe(rgbOf('#0d271d'));
-    expect(ink?.style.background).toBe(rgbOf('#0b1f18'));
+    expect(paper?.style.background).toBe(rgbOf('#f4faf6'));
+    expect(paper?.style.color).toBe(rgbOf('#0b2419'));
+    expect(ink?.style.background).toBe(rgbOf('#0a1d16'));
     expect(ink?.style.color).toBe(rgbOf('#e4f2eb'));
     expect(
       ink
@@ -618,7 +618,7 @@ describe('LogoDialog', () => {
       </second.Host>,
     );
     await search('github');
-    expect(control('dialog.logo.tile.github.paper')?.style.background).toBe(rgbOf('#e8f3ee'));
+    expect(control('dialog.logo.tile.github.paper')?.style.background).toBe(rgbOf('#f4faf6'));
     expect(control('dialog.logo.tile.github.ink')?.style.background).toBe(rgbOf('#101820'));
     expect(
       control('dialog.logo.tile.github.ink')

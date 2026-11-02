@@ -453,6 +453,22 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           color: parsed.alpha < 1 ? compositeHex(parsed, paperHex) : parsed.hex,
         };
       }
+      // The theme's parts under every object (docs/DESIGN.md 7.2), where nothing covers them: a
+      // slide's own background colour and a covering picture paint over them on the sheet. A
+      // solid part over the whole sheet (a flooded title, a card's ground) is the slide's
+      // background, so no sheet sized shape sits under the objects to be grabbed by mistake.
+      if (!hasPicture && backgroundRaster === undefined && scene.background === undefined)
+        (scene.themeParts ?? []).forEach((part, i) => {
+          const [x, y, w, h] = part.box;
+          const [, , sheetW, sheetH] = scene.sheet;
+          const covers = x <= 0.5 && y <= 0.5 && x + w >= sheetW - 0.5 && y + h >= sheetH - 0.5;
+          const solid = parseCssColor(part.fill).alpha === 1;
+          if (covers && solid && part.line === undefined && part.shape === undefined) {
+            slide.background = { color: parseCssColor(part.fill).hex };
+            return;
+          }
+          addSceneRect(slide, part, { paperHex, namePrefix }, `theme/${i}`);
+        });
       // The picture, then the chrome over it.
       if (hasPicture || backgroundRaster !== undefined) {
         if (backgroundRaster !== undefined) {

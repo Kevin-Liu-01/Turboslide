@@ -996,10 +996,10 @@ describe('the insert (4.4, 4.11)', () => {
     const asset = output.asset;
     if (asset.source.kind !== 'logo') throw new Error('logo source');
     /* Mint's light and dark ink, never General Translation's #070707 and #f2f2f0 */
-    expect(asset.source.tint).toEqual({ light: '#0d271d', dark: '#e4f2eb' });
+    expect(asset.source.tint).toEqual({ light: '#0b2419', dark: '#e4f2eb' });
     if (asset.vector === undefined || !('light' in asset.vector))
       throw new Error('two vector files');
-    expect(readFileSync(join(dir, asset.vector.light), 'utf8')).toContain('fill="#0d271d"');
+    expect(readFileSync(join(dir, asset.vector.light), 'utf8')).toContain('fill="#0b2419"');
     expect(readFileSync(join(dir, asset.vector.dark), 'utf8')).toContain('fill="#e4f2eb"');
     expect(readFileSync(join(dir, asset.vector.dark), 'utf8')).not.toContain('#f2f2f0');
   });

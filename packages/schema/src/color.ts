@@ -56,7 +56,7 @@ export const colorSchema = z.union([
 
 /**
  * The one label per token the inspector's palette shows. `blue` reads "Primary", the brand kit's
- * role it paints in every theme (Mint's `#11734f`, General Translation's `#2f5ce0`), so the
+ * role it paints in every theme (Mint's `#0f6b48`, General Translation's `#2f5ce0`), so the
  * swatch's name matches the colour it draws.
  */
 export const COLOR_LABELS: Readonly<Record<ColorToken, string>> = {

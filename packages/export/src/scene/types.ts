@@ -176,8 +176,11 @@ export type SceneRect = SceneObject & {
   /** The computed fill; `rgba(0, 0, 0, 0)` for a shape with no fill, which the builder writes as no fill. */
   fill: string;
   blockId?: string;
-  /** `box` and `shape` are the freeform round's box and closed shape blocks (docs/freeform.md). */
-  role: 'plate' | 'chip' | 'panel' | 'other' | 'box' | 'shape';
+  /**
+   * `box` and `shape` are the freeform round's box and closed shape blocks (docs/freeform.md);
+   * `theme` is a part of the deck's theme or the accent bar over a heading (docs/DESIGN.md 7.2).
+   */
+  role: 'plate' | 'chip' | 'panel' | 'other' | 'box' | 'shape' | 'theme';
   group?: string;
   /** An outline, when the element draws a border on every side (the code panel in dark). */
   line?: { color: string; width: number };
@@ -409,6 +412,11 @@ export type Scene = {
   charts?: SceneChart[];
   /** The slide background of SPEC-2 2.6, when the slide has one. */
   background?: SceneBackground;
+  /**
+   * The theme's parts under every object, in paint order: the slide's two pseudo elements, then
+   * the accent bar over each heading (docs/DESIGN.md 7.2); absent when the theme draws none.
+   */
+  themeParts?: SceneRect[];
   rasters: SceneRaster[];
   blocks: SceneBlock[];
   notes?: string;

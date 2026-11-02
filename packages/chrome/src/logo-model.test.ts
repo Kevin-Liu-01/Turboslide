@@ -295,7 +295,7 @@ describe('the appearance rule (4.3, 4.4)', () => {
     expect(kitTextColour(blue, 'dark')).toBe('#f2f2f0');
     /* a Mint deck reads Mint's ink, never General Translation's, and a kit's Text over it wins */
     const mint = { theme: 'mint' } as const;
-    expect(kitTextColour(mint, 'light')).toBe('#0d271d');
+    expect(kitTextColour(mint, 'light')).toBe('#0b2419');
     expect(kitTextColour(mint, 'dark')).toBe('#e4f2eb');
     expect(
       kitTextColour({ ...mint, brand: { colors: { dark: { text: '#fafafa' } } } }, 'dark'),
@@ -307,11 +307,11 @@ describe('the appearance rule (4.3, 4.4)', () => {
     expect(kitBackgroundColour(gt, 'light')).toBe('#ffffff');
     expect(kitBackgroundColour(gt, 'dark')).toBe('#070707');
     const mint = { theme: 'mint' } as const;
-    expect(kitBackgroundColour(mint, 'light')).toBe('#e8f3ee');
-    expect(kitBackgroundColour(mint, 'dark')).toBe('#0b1f18');
+    expect(kitBackgroundColour(mint, 'light')).toBe('#f4faf6');
+    expect(kitBackgroundColour(mint, 'dark')).toBe('#0a1d16');
     const kitted: ThemeDeck = { ...mint, brand: { colors: { dark: { background: '#101820' } } } };
     expect(kitBackgroundColour(kitted, 'dark')).toBe('#101820');
-    expect(kitBackgroundColour(kitted, 'light')).toBe('#e8f3ee');
+    expect(kitBackgroundColour(kitted, 'light')).toBe('#f4faf6');
   });
 });
 

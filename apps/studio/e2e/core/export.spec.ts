@@ -3658,7 +3658,7 @@ test(title('export.fonts.upstream-names'), async () => {
  * downloads of a fresh identity's five). The shadow's colour is Swiss's dark ink and the outline's
  * is Swiss's dark hair composited on Swiss's dark paper, where the GT sheet would give its own.
  * Then the same deck in Mint, light, with both colours set to the blue token: the shadow and the
- * outline are Mint's Primary (`#11734f`), the `--blue` the stage computes, where a fixed table
+ * outline are Mint's Primary (`#0f6b48`), the `--blue` the stage computes, where a fixed table
  * would give `#2F5CE0` on every theme (the verifier's pass 4 finding 4).
  */
 test(title('themes.export.pptx-token-colours'), async ({ browser }) => {

@@ -459,8 +459,7 @@ describe('the theme library', () => {
     const title = (id: string) => `${themeScope(id)} .slide[data-kind='title'] .left-mid`;
     const swiss = parseCss(themeCss(deck(undefined, 'swiss')));
     expect(swiss.find((rule) => rule.selector === title('swiss'))?.declarations).toEqual({
-      top: 'auto',
-      bottom: '0',
+      top: '0',
       transform: 'none',
     });
     expect(
@@ -549,8 +548,8 @@ describe('the theme library', () => {
       width: '1520px',
       background: 'var(--paper)',
     });
-    // the title's size, and Simple draws nothing
-    expect(find('signal', `.slide${cover} h1`)).toEqual({ 'font-size': '128px' });
+    // every title keeps the ladder's size, and Simple draws nothing
+    expect(find('signal', `.slide${cover} h1`)).toBeUndefined();
     expect(
       rulesOf('simple').some((rule) => / \.slide[^ ]*::(before|after)$/.test(rule.selector)),
     ).toBe(false);

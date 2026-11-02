@@ -19,7 +19,7 @@ describe('colorHexFor', () => {
     expect(colorHexFor('ink', 'dark', deck('swiss'))).toBe('F4F4F2');
     // rgba(244, 244, 242, 0.22) over #111111
     expect(colorHexFor('hair', 'dark', deck('swiss'))).toBe('434343');
-    expect(colorHexFor('ink', 'light', deck('mint'))).toBe('0D271D');
+    expect(colorHexFor('ink', 'light', deck('mint'))).toBe('0B2419');
   });
 
   it('reads the kit over the theme and leaves a hex and a semantic hue alone', () => {
@@ -34,9 +34,9 @@ describe('colorHexFor', () => {
   it("reads the blue token as the deck's Primary, as the stage draws it", () => {
     expect(colorHexFor('blue', 'light')).toBe('2F5CE0');
     expect(colorHexFor('blue', 'dark', deck('general-translation'))).toBe('2F5CE0');
-    expect(colorHexFor('blue', 'light', deck('mint'))).toBe('11734F');
+    expect(colorHexFor('blue', 'light', deck('mint'))).toBe('0F6B48');
     expect(colorHexFor('blue', 'dark', deck('mint'))).toBe('4CC59A');
-    expect(sceneShadow({ color: 'blue' }, 'light', deck('mint')).colorHex).toBe('11734F');
+    expect(sceneShadow({ color: 'blue' }, 'light', deck('mint')).colorHex).toBe('0F6B48');
     expect(
       colorHexFor('blue', 'light', deck('mint', { colors: { light: { primary: '#0b3d91' } } })),
     ).toBe('0B3D91');

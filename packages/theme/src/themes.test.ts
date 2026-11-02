@@ -76,12 +76,7 @@ describe('the theme library', () => {
       const theme = themeRecord(id);
       expect(theme.fonts, id).toEqual({ display: 'inter', text: 'inter' });
       expect(theme.heading, id).toEqual({ tracking: BASE_HEADING_TRACKING, uppercase: false });
-      expect([theme.parts, theme.title.parts, theme.title.colors, theme.title.size], id).toEqual([
-        [],
-        [],
-        null,
-        null,
-      ]);
+      expect([theme.parts, theme.title.parts, theme.title.colors], id).toEqual([[], [], null]);
     }
   });
 
@@ -166,9 +161,8 @@ describe('the theme library', () => {
       expect(theme.sentence, theme.id).not.toMatch(/—|Google/);
     }
     expect(themeRecord('swiss').title).toMatchObject({
-      composition: 'bottom-left',
+      composition: 'top-left',
       columnRight: 0,
-      size: 104,
       accentBar: true,
       mark: 'none',
       colors: null,

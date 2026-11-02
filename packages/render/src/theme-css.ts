@@ -283,7 +283,7 @@ function partRules(parts: readonly ThemePart[], slide: string): Rule[] {
 /**
  * The rules of a theme other than General Translation (docs/DESIGN.md 7.2, 7.4): the twelve
  * tokens of each appearance, the two faces and the display features, the headings' tracking and
- * case, the title slide's composition, column, size and parts, every other slide's parts and the
+ * case, the title slide's composition, column and parts, every other slide's parts and the
  * accent bar over each heading. The frame is the deck's (`frameRules`), since a kit toggle
  * overrides it, the kit's font roles follow at the same specificity and win, and the title slide's
  * own colours are `titleColourRules`, which a kit's colours turn off.
@@ -335,11 +335,9 @@ function themeRules(theme: ThemeRecord, root: string): Rule[] {
   }
   if (theme.title.columnRight > 0)
     rules.push({ selector: title, declarations: [`right: ${theme.title.columnRight}px`] });
-  // the title slide's own parts, size and colours; every other slide's parts, and the title
-  // slide's where it has none of its own
+  // the title slide's own parts; every other slide's parts, and the title slide's where it has
+  // none of its own
   const cover = `${root} .slide[${THEME_COVER_ATTRIBUTE}]`;
-  if (theme.title.size !== null)
-    rules.push({ selector: `${cover} h1`, declarations: [`font-size: ${theme.title.size}px`] });
   rules.push(...partRules(theme.title.parts, cover));
   rules.push(
     ...partRules(

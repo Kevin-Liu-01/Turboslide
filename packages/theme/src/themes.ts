@@ -1,7 +1,7 @@
 // The theme library as data (docs/DESIGN.md 7.2): nine themes, each with a light and a dark
 // appearance. A record holds the theme's name, the sentence its picker tile shows, the twelve
 // sheet tokens per appearance, its two faces and how it sets its headings, the display features,
-// the frame, the band, the title slide's composition, size and colours, the parts it draws on the
+// the frame, the band, the title slide's composition and colours, the parts it draws on the
 // title slide and on every other slide, and the starter pictures. The structure (the default appearance, the counter, the
 // logo, the frame, the pictures) is the schema's table (`THEME_FACTS` in
 // @turboslide/schema/brand), so the deck readers and these records cannot disagree; the colours
@@ -72,14 +72,15 @@ export type ThemeRecord = {
   band: { wordmark: 'gt' | 'none'; counter: CounterFormat | 'none' };
   /**
    * the title slide: where its heading and lead sit, how far the column stops short of the content
-   * box's right edge (px, to keep clear of a disc or a panel), the heading's size where it is not
-   * the ladder's 88 px, the accent bar over each heading, the GT mark, the parts it draws, and its
-   * own five colours per appearance where it is set on another ground than the deck (a flood)
+   * box's right edge (px, to keep clear of a disc or a panel), the accent bar over each heading,
+   * the GT mark, the parts it draws, and its own five colours per appearance where it is set on
+   * another ground than the deck (a flood). The heading keeps the ladder's 88 px in every theme:
+   * a title moved onto the canvas keeps the boxes it was measured in, so a size of its own would
+   * overflow them after a change of theme
    */
   title: {
     composition: TitleComposition;
     columnRight: number;
-    size: number | null;
     accentBar: boolean;
     mark: 'gt' | 'none';
     parts: readonly ThemePart[];
@@ -167,7 +168,6 @@ type Spec = {
   colors?: Readonly<Record<ThemeName, ThemeColors>>;
   composition: TitleComposition;
   columnRight?: number;
-  size?: number;
   accentBar?: boolean;
   titleParts?: readonly ThemePart[];
   titleColors?: Readonly<Record<ThemeName, ThemeColors>>;
@@ -215,7 +215,6 @@ function record(id: ThemeId, spec: Spec): ThemeRecord {
     title: {
       composition: spec.composition,
       columnRight: spec.columnRight ?? 0,
-      size: spec.size ?? null,
       accentBar: spec.accentBar === true,
       mark: facts.logo ? 'gt' : 'none',
       parts: spec.titleParts ?? [],
@@ -255,17 +254,16 @@ export const THEME_RECORDS: ReadonlyArray<ThemeRecord> = [
   record('swiss', {
     name: 'Swiss',
     sentence:
-      'Instrument Sans set tight on white under a heavy black rule, a red square over the title at the bottom left and a red bar over each heading.',
+      'Instrument Sans set tight on white under a heavy black rule, the title at the top left over a red square and a red bar over each heading.',
     colors: {
       light: colors('#ffffff', '#111111', '#45474c', '#767980', '#d7261e'),
       dark: colors('#111111', '#f4f4f2', '#bcbdc1', '#8d9097', '#ff5a4f'),
     },
-    composition: 'bottom-left',
-    size: 104,
+    composition: 'top-left',
     accentBar: true,
     titleParts: [
       { box: [0, 53, 1600, 6], fill: 'ink' },
-      { box: [137, 129, 216, 216], fill: 'accent' },
+      { box: [137, 555, 216, 216], fill: 'accent' },
     ],
     parts: [
       { box: [0, 53, 1600, 6], fill: 'ink' },
@@ -302,7 +300,6 @@ export const THEME_RECORDS: ReadonlyArray<ThemeRecord> = [
       dark: colors('#1f0f0b', '#fbe9e3', '#d6b4aa', '#a58177', '#ff7a5c'),
     },
     composition: 'bottom-left',
-    size: 96,
     titleParts: [{ box: [0, 0, 1600, 405], fill: 'accent' }],
     parts: [{ box: [0, 0, 1600, 88], fill: 'accent' }],
     tracking: -0.02,
@@ -366,7 +363,6 @@ export const THEME_RECORDS: ReadonlyArray<ThemeRecord> = [
       dark: colors('#000000', '#ffffff', '#c8c8c8', '#8c8c8c', '#ffd400'),
     },
     composition: 'bottom-left',
-    size: 128,
     accentBar: true,
     titleParts: [{ box: [0, 0, 1600, 900], fill: 'paper' }],
     titleColors: {

@@ -1162,6 +1162,68 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         .filter(([corner]) => framePart(frameEl?.querySelector(`.cross.${corner}`)))
         .map(([, box]) => box);
 
+      // The theme's parts (docs/DESIGN.md 7.2; packages/theme/src/themes.ts ThemePart, drawn by
+      // render/theme-css.ts partRules): the slide's ::before and ::after, each a box on the sheet
+      // under every object, filled, outlined or a disc, then the accent bar over each heading
+      // (`h1::before`, `h2::before`). Read from the computed styles, so a kit colour and a flooded
+      // title travel as drawn. A colour is normalized through a canvas, because Chromium reports a
+      // `color-mix()` fill as `color(srgb ...)`.
+      const swatch = document.createElement('canvas').getContext('2d', {
+        willReadFrequently: true,
+      });
+      const rgbaOf = (value: string): { css: string; alpha: number } => {
+        if (swatch === null) return { css: value, alpha: 1 };
+        swatch.clearRect(0, 0, 1, 1);
+        swatch.fillStyle = 'rgba(0, 0, 0, 0)';
+        swatch.fillStyle = value;
+        swatch.fillRect(0, 0, 1, 1);
+        const [r = 0, g = 0, b = 0, a = 0] = swatch.getImageData(0, 0, 1, 1).data;
+        const alpha = round(a / 255);
+        return {
+          css: a === 255 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${alpha})`,
+          alpha,
+        };
+      };
+      const themeParts: Scene['rects'] = [];
+      const partOf = (host: Element, pseudo: '::before' | '::after'): void => {
+        const c = getComputedStyle(host, pseudo);
+        if (c.content === 'none' || c.display === 'none' || c.position !== 'absolute') return;
+        const border = c.borderTopStyle !== 'none' ? parseFloat(c.borderTopWidth) || 0 : 0;
+        // a pseudo element is content-box (the sheet's border-box rule names elements alone), so
+        // its border sits outside its width and height
+        const grow = c.boxSizing === 'border-box' ? 0 : 2 * border;
+        const w = parseFloat(c.width) + grow;
+        const h = parseFloat(c.height) + grow;
+        const fill = rgbaOf(c.backgroundColor);
+        if (!(w > 0 && h > 0) || (border === 0 && fill.alpha === 0)) return;
+        const r = host.getBoundingClientRect();
+        const part: Scene['rects'][number] = {
+          box: [
+            round(r.left - ox + (parseFloat(c.left) || 0)),
+            round(r.top - oy + (parseFloat(c.top) || 0)),
+            round(w),
+            round(h),
+          ],
+          fill: fill.css,
+          role: 'theme',
+        };
+        if (border > 0) part.line = { color: rgbaOf(c.borderTopColor).css, width: border };
+        if (c.borderTopLeftRadius === '50%') part.shape = 'ellipse';
+        themeParts.push(part);
+      };
+      partOf(slide, '::before');
+      partOf(slide, '::after');
+      for (const heading of slide.querySelectorAll<HTMLElement>('h1, h2')) {
+        // the bar sits at a place relative to an upright heading; a turned or scaled one is left
+        // out (the offset sizes are whole pixels, so an upright heading reads within 1 px)
+        const r = heading.getBoundingClientRect();
+        const upright =
+          Math.abs(r.width - heading.offsetWidth) < 1 &&
+          Math.abs(r.height - heading.offsetHeight) < 1;
+        if (upright && getComputedStyle(heading, '::before').content === '""')
+          partOf(heading, '::before');
+      }
+
       // Wordmark and counter from the stage.
       const wordmarkSvg = stage.querySelector<SVGElement>('.wordmark svg');
       const wordmark = wordmarkSvg ? toBox(wordmarkSvg.getBoundingClientRect()) : undefined;
@@ -1255,6 +1317,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       if (counter) out.counter = counter;
       if (chartsDom.length > 0) out.chartsDom = chartsDom;
       if (background) out.background = background;
+      if (themeParts.length > 0) out.themeParts = themeParts;
       return out;
     },
     {

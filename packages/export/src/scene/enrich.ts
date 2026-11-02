@@ -34,7 +34,7 @@ import type { Scene, SceneBullet, SceneDither, SceneShadow, SceneText } from './
  * reads the deck's theme under its brand kit (render/theme-css.ts `deckTokens`, the values the
  * page computes; docs/DESIGN.md 7.5, G12), General Translation's sheet when no deck is given.
  * `blue` is the kit's Primary and reads the deck's `--blue`, as `colorCss` writes it (Mint's
- * `#11734f`); green, amber and red are the fixed semantic hues.
+ * `#0f6b48`); green, amber and red are the fixed semantic hues.
  */
 export function colorHexFor(
   color: Color,

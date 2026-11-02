@@ -53,6 +53,21 @@ residual carries one line per such weight (`fonts: weight 700 exported as the Me
 bold ...`), so a file that differs from the web render in weight says so. The menu calls this
 mode "Editable text" and states the tolerance; nothing in it is called identical.
 
+**The theme's parts in Editable text** (docs/DESIGN.md 7.2, 2026-11-02). A theme past Simple and
+General Translation draws up to two solid parts on its title slide and two on every other slide,
+as the slide's `::before` and `::after` at z-index -1, and Swiss and Signal draw a bar over each
+heading as the heading's `::before`. The scene measure (`scene/measure.ts`) reads them from the
+computed styles into `Scene.themeParts`, so a kit colour and a flooded title travel as drawn, with
+a `color-mix()` tone normalized to rgb through a canvas. The builder writes them first on the
+slide, before every object, named `ts:<slide>#theme/<n>`: a rectangle, an ellipse for a disc, an
+outline with no fill for a hairline (drawn in by half its stroke, as every outlined shape is), and
+a solid part over the whole sheet (Signal's and Slate's flooded title, Mint's green ground) as the
+slide's background colour, so no sheet sized shape lies under the objects. A slide with its own
+background colour or a covering picture writes none, as the sheet shows none, and a bar over a
+turned or scaled heading is left out. General Translation draws no parts, so its scenes carry no
+`themeParts` and its files are unchanged. `theme-parts-export.test.ts` exports the landing deck's
+title and body slides in the seven themes and reads the shapes back.
+
 ## The Google Slides parity round (gslides-parity SPEC 7.2 to 7.6)
 
 Both modes take two flags: `--include-skipped` carries the slides marked `skip` (left out by

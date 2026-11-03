@@ -182,9 +182,12 @@ function shareLinkPath(url: unknown): string | null {
 /**
  * B, a second anonymous person, on the deck through the editor link on B's origin; returns B's
  * page once its stream is connected and its toolbar reads editing. `ready` is when B's editor
- * was ready (the join row's clock).
+ * was ready (the join row's clock); `atReady` runs at that moment, before the join finishes.
  */
-async function joinB(browser: Browser): Promise<{ page: Page; ready: number; person: Person }> {
+async function joinB(
+  browser: Browser,
+  atReady?: (page: Page, ready: number) => void,
+): Promise<{ page: Page; ready: number; person: Person }> {
   expect(linkPath, 'the editor link was minted by share.setGeneralAccess').not.toBeNull();
   const person = await contextAt(browser, B_BASE);
   others.push(person);
@@ -193,6 +196,7 @@ async function joinB(browser: Browser): Promise<{ page: Page; ready: number; per
   await B.waitForURL(new RegExp(`/edit/${deck}`), { timeout: 30_000 });
   await waitEditor(B);
   const ready = Date.now();
+  atReady?.(B, ready);
   await connected(B);
   await dismissPrompt(B);
   await expect(B.locator('.pt-viewer:not(.ts-skeleton)').first()).toHaveAttribute(
@@ -283,6 +287,36 @@ async function dismissPrompt(p: Page): Promise<void> {
     await ctl(p, 'sync.persisted.apply')
       .click({ timeout: 2000 })
       .catch(() => undefined);
+}
+/** How often the join row looks for a presence chip; each chip is timed to its first sighting. */
+const CHIP_POLL_MS = 50;
+/** The `data-control` of every presence chip on the page; none while it navigates. */
+async function chipControls(p: Page): Promise<string[]> {
+  return p
+    .locator('[data-control^="presence.chip."]')
+    .evaluateAll((els) => els.map((el) => el.getAttribute('data-control') ?? ''))
+    .catch(() => []);
+}
+/**
+ * The first sighting of each presence chip on `p` that is not in `before`, in ms from `since`, by
+ * its `data-control`, looked for every CHIP_POLL_MS until `enough` answers true or `timeout` ms
+ * after `since`. A sighting is stamped when the look that found it returns, so it never reads early.
+ */
+async function chipSightings(
+  p: Page,
+  since: number,
+  before: ReadonlySet<string>,
+  enough: (seen: ReadonlyMap<string, number>) => boolean,
+  timeout = 10_000,
+): Promise<Map<string, number>> {
+  const seen = new Map<string, number>();
+  while (!enough(seen) && Date.now() - since < timeout) {
+    const chips = await chipControls(p);
+    const at = Date.now() - since;
+    for (const chip of chips) if (!before.has(chip) && !seen.has(chip)) seen.set(chip, at);
+    if (!enough(seen)) await new Promise((r) => setTimeout(r, CHIP_POLL_MS));
+  }
+  return seen;
 }
 /** The tab's own client id once the hello bound it. */
 async function clientIdOf(p: Page): Promise<string> {
@@ -1121,30 +1155,29 @@ test(title('realtime.join.chip-within-1s'), async ({ browser }) => {
     const roomA: Room = tier === 'do' ? await roomOf(A) : { object: null, colo: null };
     const roomsB: Room[] = [];
     for (let round = 1; round <= 3; round += 1) {
-      const { page: B, ready, person } = await joinB(browser);
-      const bId = await clientIdOf(B);
-      let inA: number | null = null;
-      let inB: number | null = null;
-      await Promise.all([
-        expect
-          .poll(() => A.locator(`[data-control="presence.chip.${bId}"]`).count(), {
-            timeout: 10_000,
-          })
-          .toBeGreaterThan(0)
-          .then(() => {
-            inA = Date.now() - ready;
-          })
-          .catch(() => undefined),
-        expect
-          .poll(() => B.locator(`[data-control="presence.chip.${aId}"]`).count(), {
-            timeout: 10_000,
-          })
-          .toBeGreaterThan(0)
-          .then(() => {
-            inB = Date.now() - ready;
-          })
-          .catch(() => undefined),
-      ]);
+      /* both chips are looked for from B's editor ready while B's join finishes, and each is timed
+         to its first sighting. Before this the look began after joinB's connected poll (steps of
+         100, 250, 500 and 1000 ms), so a hello 420 ms after ready read as 1093 ms with both chips
+         already drawn (the production rerun of dccd4c8db, 2026-11-03) */
+      const before = new Set(await chipControls(A));
+      const sightings: { inA?: Promise<Map<string, number>>; inB?: Promise<Map<string, number>> } =
+        {};
+      let bId: string | null = null;
+      const { page: B, person } = await joinB(browser, (page, at) => {
+        sightings.inA = chipSightings(
+          A,
+          at,
+          before,
+          (seen) => bId !== null && seen.has(`presence.chip.${bId}`),
+        );
+        sightings.inB = chipSightings(page, at, new Set(), (seen) =>
+          seen.has(`presence.chip.${aId}`),
+        );
+      });
+      bId = await clientIdOf(B);
+      const [seenInA, seenInB] = await Promise.all([sightings.inA, sightings.inB]);
+      const inA = seenInA?.get(`presence.chip.${bId}`) ?? null;
+      const inB = seenInB?.get(`presence.chip.${aId}`) ?? null;
       rounds.push(
         `round ${round}: B's chip in A ${inA ?? 'not within 10 s'} ms, A's chip in B ${inB ?? 'not within 10 s'} ms after B's editor was ready`,
       );

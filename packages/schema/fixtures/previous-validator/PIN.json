@@ -1,7 +1,7 @@
 {
-  "sha": "f7e97039fc6b6667a826f545a21f4d08c2a324fa",
-  "date": "2026-10-11T09:22:46-07:00",
+  "sha": "dccd4c8dbd3f5be0872e5c22cc18d439a94ad7f7",
+  "date": "2026-11-02T15:36:30-08:00",
   "zod": "4.6.1",
-  "bytes": 423311,
-  "sha256": "64c428f094a3994f072e0b29bdeb4676c83d141e1f89ac6c1ebab334f3b1a568"
+  "bytes": 435773,
+  "sha256": "3d1dcc41d7fbf0b35dd9c55ef1e21ac53c75ed36cc2957fbcfe53db42873d045"
 }

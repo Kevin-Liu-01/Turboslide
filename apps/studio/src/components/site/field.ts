@@ -17,7 +17,7 @@ export const cellFor = (px: number): Cell => ({ w: px * 0.625, h: px * 1.25 });
 
 /** The hero's type: Katagami Mono at 12 px, so one cell is 7.5 by 15 px. */
 export const FIELD_FONT_PX = 12;
-export const CELL: Cell = cellFor(FIELD_FONT_PX);
+const CELL: Cell = cellFor(FIELD_FONT_PX);
 /** The footer's name is drawn finer, at 8 px, so its letters have twice the rows. */
 export const WORD_FONT_PX = 8;
 
@@ -29,7 +29,7 @@ export const LENS_RADIUS = 136;
 const LENS_CORE = 0.45;
 
 /** How long a field takes to print itself through the Bayer screen when it first draws, in ms. */
-export const REVEAL_MS = 720;
+const REVEAL_MS = 720;
 
 /** Ink alphas: the lightest cell of the picture, the floor the lens lifts every cell to. */
 export const ALPHA = { tone: 0.92, revealed: 0.5 } as const;

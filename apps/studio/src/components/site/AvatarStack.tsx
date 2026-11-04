@@ -33,7 +33,7 @@ const { width: POINTER_W, height: POINTER_H, points: POINTER_POINTS } = COLLAB_G
  * 12 by 16 polygon of COLLAB_GEOMETRY in the person's live hue, inside the paper and ink halo that
  * keeps it legible on any ground. The tip is at the box's top left, 2 units in.
  */
-export function Pointer() {
+function Pointer() {
   return (
     <svg
       className="site-pointer"

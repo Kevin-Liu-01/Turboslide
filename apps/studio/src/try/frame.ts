@@ -4,7 +4,7 @@ import type { UseBlockerOpts } from '@tanstack/react-router';
  * The frame's side of the protocol of components/site/try-frame.ts (docs/SITE.md C.11): which
  * window frames /try, and where a navigation away from /try goes.
  */
-export { TRY_READY, isTryPress, isTryVisible } from '../components/site/try-frame';
+export { TRY_READY, isTryChapter, isTryPress, isTryVisible } from '../components/site/try-frame';
 export type { TryPressed } from '../components/site/try-frame';
 
 /** The window above a framed /try, or null when it stands alone or the parent is another origin. */

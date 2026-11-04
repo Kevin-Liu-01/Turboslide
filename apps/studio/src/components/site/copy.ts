@@ -1,5 +1,6 @@
 import { SITE } from '@turboslide/theme/brand/site';
 
+import { SITE_FACTS } from './facts';
 import { HOME_LEAD } from './meta';
 
 /**
@@ -90,171 +91,35 @@ export const HERO = {
 } as const;
 
 /**
- * The Agents screen (CanvasScreen.tsx): an agent builds the lighthouse slide in six writes
- * (agent-run.ts), then the slide is the reader's, a canvas whose heading, paragraph, credit and
- * plate select, move, resize and turn as the editor's objects do, on the editor's snap arithmetic
- * (canvas-pose.ts). The log beside the slide holds every write in the editor's spelling under who
- * made it. The words on the slide are the slide's own (home-deck/slides/lighthouse.json); the
- * objects' names and the handles' sentences are the Tooltip primitive's.
+ * The chapters after the hero (Chapters.tsx): one section each, its heading and one sentence
+ * beside a live editor that plays the chapter in the deck (try/story.ts). Each heading is a short
+ * Title Case phrase, as the screens' were; each sentence says what that editor shows.
  */
-export const CANVAS_SCREEN = {
-  heading: 'Agents Edit Beside You',
-  figure: {
-    alt: 'Claude Code builds the lighthouse slide in six writes. It places a drone photograph of the lantern room of Cape Hatteras Light, a paper plate, the heading, a paragraph and the credit. Its last write moves the heading to the sky and turns it 6 degrees. Then every object on the slide is yours to move.',
-  },
-  log: {
-    name: 'The writes on this slide in order, by Claude Code and by you',
-    you: 'You',
-  },
-  replay: {
-    name: 'Replay',
-    doc: 'Plays the six writes of Claude Code again from an empty slide.',
-  },
-  slide: {
-    heading: 'Cape Hatteras Light',
-    paragraph:
-      "The lantern of Cape Hatteras Light on North Carolina's Outer Banks, printed through an 8 by 8 screen at 2 px cells.",
-    credit: 'Photograph: National Park Service, public domain',
-  },
-  /** each object by its block type, as the Tooltip primitive and a screen reader name it */
-  objects: {
-    box: { name: 'Plate', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
-    heading: { name: 'Heading', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
-    paragraph: { name: 'Paragraph', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
-    credit: { name: 'Credit', doc: 'Drag it to move it on the slide.', key: 'Arrow keys' },
-  },
-  resize: {
-    name: 'Resize',
-    doc: 'Drag the handle to resize the selection, and hold the shift key to keep its ratio.',
-  },
-  turn: {
-    name: 'Rotate',
-    doc: 'Drag the handle to turn the selection, and hold the shift key for 15 degree steps.',
-    key: 'Arrow keys',
-  },
-  degrees: (deg: number): string => `${deg} degrees`,
-} as const;
-
-/**
- * The Themes screen (ThemesScreen.tsx): the title slide of the landing's own deck in each theme of
- * the library, in the picker's order, each tile the renderer's picture of it in the theme
- * (theme-tiles.ts). Each tile's name is the theme's, and its picture's alt names the theme.
- */
-export const THEMES_SCREEN = {
-  heading: 'Nine Themes',
-  name: 'The title slide of one deck in each of the nine themes',
-  alt: (theme: string): string => `The title slide of the onboarding plan in the ${theme} theme.`,
-} as const;
-
-/**
- * The Present screen (PresentScreen.tsx): the slideshow and presenter view, two windows that move
- * together (apps/studio/content/docs/presenting.mdx), walking the landing's own deck
- * (present-deck.ts), then the keys of a slideshow. The two arrow keys are buttons that move both
- * windows. The console's own words come from the viewer (PRESENT_TEXT).
- */
-export const PRESENT_SCREEN = {
-  heading: 'Present from Any Link',
-  windows: {
-    name: 'The slideshow and presenter view of one deck, which move together',
-    show: 'Slideshow',
-    presenter: 'Presenter view',
-  },
-  keysName: 'Keys during a slideshow',
-  keys: [
+export const STORY = {
+  /** each chapter's editor frame, named for the screen reader */
+  frameTitle: (heading: string): string => `The Turboslide editor, ${heading}`,
+  chapters: [
     {
-      key: '←',
-      label: 'Previous slide',
-      step: -1,
-      doc: 'Moves both windows back one slide.',
-      words: 'Left arrow',
+      id: 'agents',
+      heading: 'Agents Edit Beside You',
+      lead: 'Claude Code lays a pattern from the shader library behind a slide while Codex places a photograph on it. Each write is one action in your history.',
     },
     {
-      key: '→',
-      label: 'Next slide',
-      step: 1,
-      doc: 'Moves both windows to the next slide.',
-      words: 'Right arrow',
+      id: 'features',
+      heading: 'Every Feature You Reach For',
+      lead: `The editor has charts, tables, shapes, animation and ${SITE_FACTS.themes} themes. Every deck downloads as PowerPoint with its text still editable.`,
     },
-    { key: 'S', label: 'Presenter view' },
-    { key: 'L', label: 'Laser pointer' },
-    { key: 'B', label: 'Black slide' },
-    { key: 'Esc', label: 'Stop presenting' },
+    {
+      id: 'together',
+      heading: 'Edit Together',
+      lead: 'People and agents open the same link. Each one has a pointer, and each one can comment on a slide.',
+    },
+    {
+      id: 'present',
+      heading: 'Present from the Editor',
+      lead: 'The slideshow starts from any slide. The deck you edit is the deck you show.',
+    },
   ],
-} as const;
-
-/**
- * The Patterns screen (PatternsScreen.tsx): a slide with the Dithering pattern playing over its
- * time axis, which a pointer or the arrow keys scrub, with the moment every still place shows
- * marked on it, and one sentence on where the pattern moves
- * (apps/studio/content/docs/editor/objects.mdx).
- */
-export const PATTERNS_SCREEN = {
-  heading: 'Animated Patterns',
-  lead: 'The pattern moves in the slideshow and the viewer and holds its still in the editor, the thumbnails and exported files.',
-  figure: {
-    alt: 'A slide titled Questions from Northwind carries the Dithering pattern. The pattern is a sphere printed in dots, and its light moves around the sphere.',
-  },
-  slide: {
-    heading: 'Questions from Northwind',
-    sentence: 'Thank you for the time today.',
-    counter: '8 / 9',
-  },
-  time: {
-    name: 'Time',
-    doc: 'Shows the pattern at one moment.',
-    key: 'Left and right arrows',
-    seconds: [0, 2, 4, 6, 8, 10],
-    still: 4,
-    at: (s: number): string => `${s} s`,
-    stillAt: (s: number): string => `Still, ${s} s`,
-    value: (s: number): string => `${s.toFixed(1)} seconds`,
-  },
-} as const;
-
-/**
- * The Export screen (ExportScreen.tsx): one slide cut by a seam between the two PowerPoint files
- * the CLI wrote for it, the parts each file holds outlined on its side (export-parts.ts), then
- * what each file File > Download writes holds. The modes' names are the Download dialog's
- * (DIALOGS.download), the numbers docs/pptx.md's, the counts the parts lists'.
- */
-export const EXPORT_SCREEN = {
-  heading: 'PDF and PowerPoint Export',
-  files: {
-    pictures: {
-      name: 'Pictures',
-      holds: (c: { text: number }): string =>
-        `A PowerPoint file that holds this slide as one picture of 3200 by 1800 pixels over ${c.text} boxes of invisible text. At most 0.1 percent of its pixels differ from the browser.`,
-    },
-    editable: {
-      name: 'Editable text',
-      holds: (c: { text: number; rect: number; line: number }): string =>
-        `A PowerPoint file that holds this slide as ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines over the background picture. Its layout matches the browser within 3 px.`,
-    },
-    pdf: {
-      name: 'PDF',
-      holds: 'One page of 13.333 by 7.5 in for each slide, with text you can search.',
-    },
-  },
-  seam: {
-    alt: (c: { text: number; rect: number; line: number }): string =>
-      `The opener field slide shows a lit sphere printed in dots, with a plate of text at the lower right. A seam divides the slide. On the left, the Pictures file holds the slide as one picture of 3200 by 1800 pixels. On the right is the Editable text file. Blue outlines mark its ${c.text} text boxes, ${c.rect} rectangles and ${c.line} lines over the background picture.`,
-    chips: {
-      picture: 'Picture of the slide',
-      invisible: 'Invisible text',
-      background: 'Background picture',
-      line: 'Line',
-      rect: 'Rectangle',
-      text: 'Text box',
-    },
-    slider: {
-      name: 'The seam between the two files',
-      tip: 'Seam',
-      doc: 'Drag it to compare the two PowerPoint files.',
-      key: 'Left and right arrows',
-      value: (p: number): string =>
-        `${p} percent Pictures file on the left, ${100 - p} percent Editable text file on the right`,
-    },
-  },
 } as const;
 
 /**

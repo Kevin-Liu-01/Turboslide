@@ -2,8 +2,10 @@
  * The words between /home and the live editor in its frame (docs/SITE.md C.11), same origin on
  * both sides: the frame (/try, src/try/) says `ts-try:ready` once its editor drew its first frame
  * with the agents in the roster; the page says `ts-try:visible` whenever the frame enters or leaves
- * the screen; and the page says `ts-try:press` when a visitor presses an avatar of the title: an
- * agent then takes its next step in the editor, and a person joins it for a short visit. The
+ * the screen; the page says `ts-try:press` when a visitor presses an avatar of the title: an
+ * agent then takes its next step in the editor, and a person joins it for a short visit; and the
+ * page says `ts-try:chapter` to the editor of a chapter's section once it is ready
+ * (ChapterBox.tsx), and that frame plays the chapter (try/story.ts); 0 is the hero's own loop. The
  * appearance travels as the viewer's own `gt-theme` message and storage event
  * (@turboslide/viewer/theme), which the editor already listens to. Nothing else crosses. The words
  * live with the landing, which never imports the editor's modules (graph.test.ts).
@@ -11,12 +13,17 @@
 export const TRY_READY = 'ts-try:ready';
 export const TRY_VISIBLE = 'ts-try:visible';
 export const TRY_PRESS = 'ts-try:press';
+export const TRY_CHAPTER = 'ts-try:chapter';
+
+/** The story's chapters after the hero at rest (chapter 0): agents, features, together, present. */
+export const TRY_CHAPTERS = 4;
 
 /** The frame's address in the hero. */
 export const TRY_FRAME_SRC = '/try?frame=1';
 
 export type TryReady = { type: typeof TRY_READY };
 export type TryVisible = { type: typeof TRY_VISIBLE; visible: boolean };
+export type TryChapter = { type: typeof TRY_CHAPTER; chapter: number };
 
 /** The agents of the title's second stack, by their brand ids (agent-marks.tsx). */
 const TRY_AGENT_BRANDS = ['claude-code', 'codex', 'openclaw', 'hermes'] as const;
@@ -40,6 +47,18 @@ export function isTryVisible(data: unknown): data is TryVisible {
     data !== null &&
     (data as { type?: unknown }).type === TRY_VISIBLE &&
     typeof (data as { visible?: unknown }).visible === 'boolean'
+  );
+}
+
+export function isTryChapter(data: unknown): data is TryChapter {
+  if (typeof data !== 'object' || data === null) return false;
+  const row = data as { type?: unknown; chapter?: unknown };
+  return (
+    row.type === TRY_CHAPTER &&
+    typeof row.chapter === 'number' &&
+    Number.isInteger(row.chapter) &&
+    row.chapter >= 0 &&
+    row.chapter <= TRY_CHAPTERS
   );
 }
 

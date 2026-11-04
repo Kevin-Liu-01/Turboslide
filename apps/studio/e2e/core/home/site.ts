@@ -1,14 +1,15 @@
 import { expect, test } from '@playwright/test';
-import type { Browser, Page } from '@playwright/test';
+import type { Browser, Frame, Locator, Page } from '@playwright/test';
 
-import { PEOPLE, TITLE_TEXT } from '../../../src/components/site/copy';
+import { PEOPLE, STORY, TITLE_TEXT } from '../../../src/components/site/copy';
 import { extraHTTPHeaders, title } from '../lib';
 
 // The landing's rows of the site build (docs/SITE.md; the landing step, plan A, B and D): the
 // Workbench layout in both appearances at 1440 and 390, the two line title with its rows of
 // pointers and marks and what pressing one does in the live editor,
-// the hero's poster in a box whose size never changes, and the page's own script without an
-// editor module. The hero step's rows of the live editor are hero.ts's.
+// the hero's poster in a box whose size never changes, the chapters after the hero each playing
+// in a live editor, and the page's own script without an editor module. The hero
+// step's rows of the live editor are hero.ts's.
 // Every observation is through the page and the network; /home writes no store.
 
 export const ROWS: readonly string[] = [
@@ -19,7 +20,7 @@ export const ROWS: readonly string[] = [
   'home.hero.poster-first',
   'home.budget.first-script',
   'home.bar.narrow',
-  'home.canvas.gestures',
+  'home.story.chapters',
   'home.page.after-editor',
 ];
 
@@ -57,6 +58,13 @@ async function open(
   await page.locator('.ts-site[data-hydrated]').waitFor({ timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   return { page, close: () => context.close() };
+}
+
+/** The document of a frame element, for its `turboslideTry` handle and the page API. */
+async function frameOf(locator: Locator): Promise<Frame> {
+  const frame = await (await locator.elementHandle()).contentFrame();
+  if (frame === null) throw new Error('the frame has no document');
+  return frame;
 }
 
 /** The tops of the h1's text lines, from the client rects of its text (the stacks left out). */
@@ -204,8 +212,6 @@ export function rows(): void {
             h1: document.querySelectorAll('h1').length,
             h2: [...root.querySelectorAll('main h2')].map((h) => h.textContent ?? ''),
             figures: root.querySelectorAll('main figure').length,
-            tiles: root.querySelectorAll('#themes .site-th-tile').length,
-            keys: root.querySelectorAll('.site-keys kbd').length,
             footer: root.querySelectorAll('footer .site-foot-cols h2').length,
             wide: document.documentElement.scrollWidth - innerWidth,
             radii: [...radii],
@@ -214,24 +220,17 @@ export function rows(): void {
         });
         const label = `${cell.width} ${cell.theme}`;
         notes.push(
-          `${label}: bar ${facts.bar}, ${facts.h2.length} screens, overflow ${facts.wide}`,
+          `${label}: bar ${facts.bar}, ${facts.h2.length} chapters, overflow ${facts.wide}`,
         );
         expect(facts.bar, `${label}: the 56 px bar`).toBe(56);
         expect(facts.marks, `${label}: the mark in the bar and the footer`).toBe(2);
         expect(facts.h1, `${label}: one h1`).toBe(1);
-        expect(facts.h2, `${label}: the five screens' headings`).toEqual([
-          'Agents Edit Beside You',
-          'Nine Themes',
-          'Present from Any Link',
-          'Animated Patterns',
-          'PDF and PowerPoint Export',
-        ]);
-        expect(
-          facts.figures,
-          `${label}: the editor, the agent's canvas, the two windows, the pattern and the seam`,
-        ).toBe(5);
-        expect(facts.tiles, `${label}: the nine theme tiles`).toBe(9);
-        expect(facts.keys, `${label}: six slideshow keys`).toBe(6);
+        expect(facts.h2, `${label}: the story's four chapter headings`).toEqual(
+          STORY.chapters.map((chapter) => chapter.heading),
+        );
+        expect(facts.figures, `${label}: the hero's editor and one in each chapter`).toBe(
+          1 + STORY.chapters.length,
+        );
         expect(facts.footer, `${label}: four footer columns`).toBe(4);
         expect(facts.wide, `${label}: nothing wider than the viewport`).toBeLessThanOrEqual(0);
         expect(
@@ -522,72 +521,77 @@ export function rows(): void {
     }
   });
 
-  test(title('home.canvas.gestures'), async ({ browser }) => {
-    test.setTimeout(180_000);
-    for (const cell of [CELLS[0], CELLS[3]] as (typeof CELLS)[number][]) {
-      const { page, close } = await open(browser, cell);
-      try {
-        const label = `${cell.width} ${cell.theme}`;
-        const fig = page.locator('#agents .site-cv-fig');
-        await fig.scrollIntoViewIfNeeded();
-        /* the agent's six writes land in the log, then the slide is the reader's */
-        await expect(fig, label).toHaveAttribute('data-run', 'done', { timeout: 60_000 });
-        const rows = page.locator('#site-cv-write .site-log-row');
-        await expect(rows, label).toHaveCount(6);
-        await expect(page.locator('#site-cv-write .site-log-row[data-who="agent"]')).toHaveCount(6);
-        await expect(rows.last(), label).toContainText('block.set lighthouse#h /pos');
-        /* the last row of the log (the live line under it holds a drag's last frame) */
-        const line = rows.last().locator('.site-cv-code');
-        /* the call the line prints last: its action, block and the position it writes */
-        const written = async (): Promise<{ call: string; pos: Record<string, number> }> => {
-          const text = (await line.textContent()) ?? '';
-          const at = text.lastIndexOf('block.set');
-          const json = text.slice(text.indexOf('{', at), text.indexOf('}', at) + 1);
-          return { call: text.slice(at, text.indexOf('{', at)).trim(), pos: JSON.parse(json) };
-        };
-        const centre = async (selector: string): Promise<{ x: number; y: number }> => {
-          const box = await page.locator(selector).boundingBox();
-          if (box === null) throw new Error(`${selector} has no box`);
-          return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-        };
-        /* a press on the paragraph selects it with the frame and the turn handle */
-        const p = await centre('[data-cv="p1"]');
-        await page.mouse.click(p.x, p.y);
-        await expect(page.locator('[data-cv="p1"]'), label).toHaveAttribute('aria-pressed', 'true');
-        await expect(page.locator('[data-cv-frame] .site-cv-knob'), label).toBeVisible();
-        /* a drag moves it, and the line reads the editor's write */
-        await page.mouse.move(p.x, p.y);
-        await page.mouse.down();
-        await page.mouse.move(p.x - 40, p.y - 30, { steps: 8 });
-        await page.mouse.up();
-        const moved = await written();
-        expect(moved.call, label).toBe('block.set lighthouse#p1 /pos');
-        expect(moved.pos.x, label).not.toBe(929);
-        await expect(rows.last(), `${label}: the reader's write under the reader`).toHaveAttribute(
-          'data-who',
-          'you',
+  /* the chapters after the hero (docs/SITE.md 5, "The chapters"; Kevin, 2026-11-03): each
+     section's editor plays its chapter in the hero's deck, the hero's own editor stays at rest,
+     and a section far from the window unloads its editor */
+  test(title('home.story.chapters'), async ({ browser }) => {
+    test.setTimeout(420_000);
+    const { page, close } = await open(browser, CELLS[0] as (typeof CELLS)[number]);
+    try {
+      const sections = page.locator('.site-chapter');
+      await expect(sections).toHaveCount(STORY.chapters.length);
+      for (const [i, chapter] of STORY.chapters.entries()) {
+        const section = sections.nth(i);
+        await section.scrollIntoViewIfNeeded();
+        await expect(section.locator('h2')).toHaveText(chapter.heading);
+        const box = section.locator('.site-chapter-box');
+        await expect(box, `${chapter.id}: its editor is ready`).toHaveAttribute(
+          'data-state',
+          'live',
+          { timeout: 120_000 },
         );
-        /* undo writes the paragraph's first box forward */
-        await page.keyboard.press('ControlOrMeta+z');
-        const undone = await written();
-        expect(undone.call, label).toBe('block.set lighthouse#p1 /pos');
-        expect({ x: undone.pos.x, y: undone.pos.y }, label).toEqual({ x: 929, y: 618.25 });
-        /* the turned heading moves to a snap and its box stays at 1/64 px */
-        const h = await centre('[data-cv="h"]');
-        await page.mouse.move(h.x, h.y);
-        await page.mouse.down();
-        await page.mouse.move(h.x + 37, h.y + 23, { steps: 8 });
-        await page.mouse.up();
-        const heading = await written();
-        expect(heading.call, label).toBe('block.set lighthouse#h /pos');
-        for (const key of ['x', 'y'])
-          expect(Number.isInteger((heading.pos[key] ?? 0.5) * 64), `${label}: ${key}`).toBe(true);
-        /* Escape clears the selection */
-        await page.keyboard.press('Escape');
-        await expect(page.locator('[data-cv][aria-pressed="true"]'), label).toHaveCount(0);
-      } finally {
-        await close();
+        const frame = await frameOf(section.locator('iframe'));
+        const playing = () => frame.evaluate(() => window.turboslideTry?.chapter() ?? -1);
+        await expect.poll(playing, { timeout: 15_000 }).toBe(i + 1);
+        const slides = () =>
+          frame.evaluate(async () => {
+            const studio = (
+              window as unknown as {
+                turboslide?: { studio?: { invoke: (a: string, i: unknown) => Promise<unknown> } };
+              }
+            ).turboslide?.studio;
+            const info = (await studio?.invoke('deck.info', {})) as
+              { sections?: { slides: { id: string }[] }[] } | undefined;
+            return (info?.sections ?? []).flatMap((part) => part.slides.map((slide) => slide.id));
+          });
+        if (i === 0)
+          await expect
+            .poll(async () => (await slides()).some((id) => id.startsWith('story-light-')), {
+              timeout: 30_000,
+            })
+            .toBe(true);
+        if (i === 1)
+          await expect
+            .poll(async () => (await slides()).some((id) => id.startsWith('story-chart-')), {
+              timeout: 30_000,
+            })
+            .toBe(true);
+        if (i === 2)
+          await expect
+            .poll(() => frame.evaluate(() => window.turboslideTry?.guests().length ?? 0), {
+              timeout: 20_000,
+            })
+            .toBeGreaterThan(0);
+        if (i === 3)
+          await expect
+            .poll(
+              () => frame.evaluate(() => document.querySelector('.pt-viewer.is-present') !== null),
+              { timeout: 15_000 },
+            )
+            .toBe(true);
       }
+      /* the hero's editor stayed at rest, with no slide a chapter adds */
+      await page.evaluate(() => window.scrollTo(0, 0));
+      const hero = await frameOf(page.locator('[data-hero-box] iframe'));
+      expect(await hero.evaluate(() => window.turboslideTry?.chapter() ?? -1)).toBe(0);
+      /* back at the top the last section is far from the window, and its editor unloads */
+      await expect(sections.last().locator('.site-chapter-box')).toHaveAttribute(
+        'data-state',
+        'empty',
+        { timeout: 10_000 },
+      );
+    } finally {
+      await close();
     }
   });
 

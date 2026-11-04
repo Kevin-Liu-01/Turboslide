@@ -4772,6 +4772,9 @@ export function createEditorController(init: {
     uploadAbove: FRAME_UPLOAD_ABOVE_BYTES,
     onError: (error) => {
       console.warn('shader frame', error);
+      /* a backend without the server keeps no still (docs/SITE.md D10): the shader draws live,
+         and the landing's story lays one behind a slide (try/story.ts), so nothing is said */
+      if (backend.tabOnly !== undefined) return;
       say(SHADER_FRAME_FAILED_SENTENCE);
     },
   });

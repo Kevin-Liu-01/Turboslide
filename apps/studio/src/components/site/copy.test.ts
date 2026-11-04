@@ -9,18 +9,7 @@ import {
   wordsOutsideSentenceCase,
 } from '@turboslide/theme/copy';
 
-import {
-  AVATAR_PRESS,
-  CANVAS_SCREEN,
-  EXPORT_SCREEN,
-  FOOTER,
-  HERO,
-  NAV,
-  PATTERNS_SCREEN,
-  PRESENT_SCREEN,
-  THEMES_SCREEN,
-  TITLE_TEXT,
-} from './copy';
+import { AVATAR_PRESS, FOOTER, HERO, NAV, STORY, TITLE_TEXT } from './copy';
 import { HOME_META } from './meta';
 
 // The landing's words (docs/SITE.md A.1; plain technical English): no em dash, en dash or
@@ -56,27 +45,8 @@ const NAMES = [
   'Book',
   'Theme',
   'Present',
-  /* the figures of screens 02 to 06: the photograph's place and author and its licence, the
-     product's menus, panels and settings by name, the example deck and its file names */
-  'Cape Hatteras Light',
-  'North Carolina',
-  'Outer Banks',
-  'National Park Service',
-  'X',
-  'Y',
-  'New',
-  'Version',
-  'Format',
-  'Still',
-  'Reduce',
-  'Dithering',
-  'Download',
-  'Pictures',
-  'Editable',
+  /* the story's second chapter names the file a download writes */
   'PowerPoint',
-  'PDF',
-  'S',
-  'Questions from Northwind',
 ];
 
 const sentences: ReadonlyArray<[string, string]> = [
@@ -87,46 +57,7 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['hero.figure.alt', HERO.figure.alt],
   ['avatar.person', AVATAR_PRESS.person.sentence],
   ['avatar.agent', AVATAR_PRESS.agent.sentence],
-  ['canvas.figure.alt', CANVAS_SCREEN.figure.alt],
-  ['canvas.slide.heading', CANVAS_SCREEN.slide.heading],
-  ['canvas.slide.paragraph', CANVAS_SCREEN.slide.paragraph],
-  ['canvas.slide.credit', CANVAS_SCREEN.slide.credit],
-  ...Object.entries(CANVAS_SCREEN.objects).flatMap(([type, tip]): Array<[string, string]> => [
-    [`canvas.objects.${type}.name`, tip.name],
-    [`canvas.objects.${type}.doc`, tip.doc],
-  ]),
-  ['canvas.resize.name', CANVAS_SCREEN.resize.name],
-  ['canvas.resize.doc', CANVAS_SCREEN.resize.doc],
-  ['canvas.turn.name', CANVAS_SCREEN.turn.name],
-  ['canvas.turn.doc', CANVAS_SCREEN.turn.doc],
-  ['canvas.degrees', CANVAS_SCREEN.degrees(354)],
-  ['canvas.log.name', CANVAS_SCREEN.log.name],
-  ['canvas.log.you', CANVAS_SCREEN.log.you],
-  ['canvas.replay.name', CANVAS_SCREEN.replay.name],
-  ['canvas.replay.doc', CANVAS_SCREEN.replay.doc],
-  ['themes.name', THEMES_SCREEN.name],
-  ['themes.alt', THEMES_SCREEN.alt('General Translation')],
-  ['present.windows.name', PRESENT_SCREEN.windows.name],
-  ['present.windows.show', PRESENT_SCREEN.windows.show],
-  ['present.windows.presenter', PRESENT_SCREEN.windows.presenter],
-  ...PRESENT_SCREEN.keys.flatMap((key): Array<[string, string]> => [
-    [`present.key.${key.key}`, key.label],
-    ...('doc' in key ? [[`present.key.${key.key}.doc`, key.doc] as [string, string]] : []),
-  ]),
-  ['patterns.lead', PATTERNS_SCREEN.lead],
-  ['patterns.figure.alt', PATTERNS_SCREEN.figure.alt],
-  ['patterns.time.name', PATTERNS_SCREEN.time.name],
-  ['patterns.time.doc', PATTERNS_SCREEN.time.doc],
-  ['patterns.time.still', PATTERNS_SCREEN.time.stillAt(4)],
-  ['patterns.time.value', PATTERNS_SCREEN.time.value(4)],
-  ['export.files.pictures', EXPORT_SCREEN.files.pictures.holds({ text: 4 })],
-  ['export.files.editable', EXPORT_SCREEN.files.editable.holds({ text: 4, rect: 3, line: 12 })],
-  ['export.files.pdf', EXPORT_SCREEN.files.pdf.holds],
-  ['export.seam.alt', EXPORT_SCREEN.seam.alt({ text: 4, rect: 3, line: 12 })],
-  ...Object.values(EXPORT_SCREEN.seam.chips).map((c): [string, string] => ['export.seam.chip', c]),
-  ['export.seam.slider', EXPORT_SCREEN.seam.slider.name],
-  ['export.seam.doc', EXPORT_SCREEN.seam.slider.doc],
-  ['export.seam.value', EXPORT_SCREEN.seam.slider.value(50)],
+  ...STORY.chapters.map((chapter): [string, string] => [`story.${chapter.id}`, chapter.lead]),
   ...FOOTER.columns.flatMap((column): Array<[string, string]> => [
     [`footer.${column.id}`, column.title],
     ...column.links.map((link): [string, string] => [`footer.${column.id}.link`, link.label]),
@@ -136,14 +67,10 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['footer.appearance', FOOTER.appearance.name],
 ];
 
-/* the screens' headings are short phrases in Title Case (Kevin, 2026-10-30: "Feature Parity for
+/* the story's headings are short phrases in Title Case (Kevin, 2026-10-30: "Feature Parity for
    Agents"), checked with the buttons */
 const buttons: ReadonlyArray<string> = [
-  CANVAS_SCREEN.heading,
-  THEMES_SCREEN.heading,
-  PRESENT_SCREEN.heading,
-  PATTERNS_SCREEN.heading,
-  EXPORT_SCREEN.heading,
+  ...STORY.chapters.map((chapter) => chapter.heading),
   NAV.skip,
   NAV.newPresentation.label,
   HERO.primary.label,
@@ -170,7 +97,7 @@ describe('the landing’s copy', () => {
     }
   });
 
-  it('writes every button and screen heading in Title Case', () => {
+  it('writes every button and chapter heading in Title Case', () => {
     for (const label of buttons) {
       expect(label.includes(EM_DASH) || label.endsWith('.'), label).toBe(false);
       const small = new Set(['a', 'an', 'the', 'to', 'of', 'and', 'or', 'in', 'on', 'for', 'from']);

@@ -5,10 +5,9 @@
 // the snap engine, the rotation of a handle drag and the guide merge the viewer's snap.ts,
 // rotate.ts and Guides.tsx kept (SPEC-2 6.1 rows 7, 9 and 11). Those modules re-export these
 // names beside their own, as ids.ts does for slug.ts, so every importer keeps its path. This
-// module imports types alone, so a page that must not load zod or the shape table runs the
-// editor's own arithmetic from here: the landing's Canvas screen (apps/studio/src/components/site/
-// canvas-pose.ts; site/graph.test.ts keeps the shape table off /home). Pure functions over sheet
-// pixels.
+// module imports types alone, so a page that must not load zod or the shape table can run the
+// editor's own arithmetic from here (the landing's Canvas screen did until the story replaced it
+// on 2026-11-03). Pure functions over sheet pixels.
 import type { BlockType } from './blocks.ts';
 import type { ColsRatio } from './deck.ts';
 import type { BlockId } from './ids.ts';

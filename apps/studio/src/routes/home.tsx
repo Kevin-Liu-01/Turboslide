@@ -4,15 +4,11 @@ import { createFileRoute, useRouter } from '@tanstack/react-router';
 
 import { SITE } from '@turboslide/theme/brand/site';
 
-import { CanvasScreen } from '../components/site/CanvasScreen';
-import { ExportScreen } from '../components/site/ExportScreen';
+import { Chapters } from '../components/site/Chapters';
 import { Hero } from '../components/site/Hero';
 import { HOME_META } from '../components/site/meta';
-import { PatternsScreen } from '../components/site/PatternsScreen';
-import { PresentScreen } from '../components/site/PresentScreen';
 import { SiteBar } from '../components/site/SiteBar';
 import { SiteFooter } from '../components/site/SiteFooter';
-import { ThemesScreen } from '../components/site/ThemesScreen';
 import fieldToneUrl from '../components/site/pictures/lighthouse-tone.webp?url';
 import siteCss from '../components/site/site.css?url';
 import { useMountEffect } from '../components/useMountEffect';
@@ -20,12 +16,11 @@ import { useMountEffect } from '../components/useMountEffect';
 /**
  * The landing, /home, in the Workbench layout Kevin picked on 2026-10-14 (docs/SITE.md): the bar
  * with the T in a box; screen 01, the one line h1 with its two avatar stacks, the lead with New
- * Presentation and Open the Example Deck, and the editor in a square frame with corner crosses;
- * screen 02, an agent builds a slide in six writes and hands it over as a canvas, every write of
- * the agent's and the reader's in one log; screen 03, one title slide in the nine themes; screen
- * 04, the viewer, the slideshow keys and presenter view; screen 05, an animated pattern and its
- * still; screen 06, the files a download writes and the two PowerPoint files at a seam; the
- * footer. The page's own stylesheet is linked from its head (`site.css?url`),
+ * Presentation and Open the Example Deck, and the live editor in its frame; then four sections,
+ * each a heading and a sentence beside a live editor that plays one chapter in the hero's deck
+ * (agents editing beside you, the features, editing together, the slideshow; Kevin, 2026-11-03:
+ * "the hero's presentation is used to show a bunch of things", then "just make it sectioned off
+ * like before"); the footer. The page's own stylesheet is linked from its head (`site.css?url`),
  * so no rule of it reaches another route (routes/-home-css.test.ts). The page imports no editor
  * module (components/site/graph.test.ts).
  *
@@ -77,11 +72,7 @@ function HomePage() {
       <SiteBar />
       <main id="main">
         <Hero />
-        <CanvasScreen />
-        <ThemesScreen />
-        <PresentScreen />
-        <PatternsScreen />
-        <ExportScreen />
+        <Chapters />
       </main>
       <SiteFooter top />
     </div>

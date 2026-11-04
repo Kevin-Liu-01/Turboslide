@@ -111,7 +111,8 @@ type RunnerState = {
 
 export type Runner = {
   start: () => void;
-  stop: () => void;
+  /** ends both agents' loops; settles once each has left its step, so nothing writes after it */
+  stop: () => Promise<void>;
   pause: () => void;
   resume: () => void;
   /** the page's word: the frame is on screen or not */
@@ -739,6 +740,8 @@ export function createRunner(options: RunnerOptions): Runner {
       const ours = Object.keys(document.slides).filter(ownSlide);
       if (ours.length >= AGENT_SLIDES_MAX) return 'skipped';
     }
+    /* a paused runner names no task: the story's chapter speaks for the agents meanwhile */
+    await gate.wait();
     say(agent, task.doing);
     try {
       for (const step of task.steps) {
@@ -830,15 +833,19 @@ export function createRunner(options: RunnerOptions): Runner {
     }
   };
 
+  /* the agents' loops of the last start, which stop() waits out */
+  let loops: Promise<void>[] = [];
+
   return {
     start() {
       if (running) return;
       running = true;
-      for (const key of keys) void runAgent(key).catch(() => undefined);
+      loops = keys.map((key) => runAgent(key).catch(() => undefined));
       void directorTick();
     },
     stop() {
       running = false;
+      return Promise.all(loops).then(() => undefined);
     },
     pause() {
       paused = true;

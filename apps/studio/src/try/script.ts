@@ -176,13 +176,15 @@ const REGIONS_SLIDE = {
 
 const REGION_NAMES = ['North America', 'Europe', 'Asia', 'South America'];
 
-const regionData = (values: number[]) => ({
+/** The chart's data by region (the story's chart slide draws the same, story.ts). */
+export const regionData = (values: number[]) => ({
   categories: REGION_NAMES,
   series: [{ name: 'Orders', values }],
 });
 
-const regionChart = (values: number[]) => ({
-  slideId: REGIONS,
+/** The `chart.setData` input of the chart on `slideId`. */
+export const regionChart = (values: number[], slideId: string = REGIONS) => ({
+  slideId,
   blockId: 'chart',
   ...regionData(values),
 });

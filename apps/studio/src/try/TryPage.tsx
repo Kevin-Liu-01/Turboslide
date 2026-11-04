@@ -24,6 +24,8 @@ declare global {
       press: TrySession['press'];
       /** the guests of the title's stacks in the room now */
       guests: () => string[];
+      /** the story's chapter playing now (story.ts), 0 at rest */
+      chapter: () => number;
     };
   }
 }
@@ -62,6 +64,7 @@ export function TryPage({
       visitor: session.visitor.author.principalId,
       press: (who) => session.press(who),
       guests: () => session.guests.active(),
+      chapter: () => session.story.chapter(),
     };
     return () => {
       delete window.turboslideTry;

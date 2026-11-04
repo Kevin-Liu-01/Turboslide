@@ -10400,11 +10400,11 @@
     {
       "id": "home.page.layout",
       "feature": "decks",
-      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the vector mark, one h1, the five screens' headings in order (Agents Edit Beside You, Nine Themes, Present from Any Link, Animated Patterns, PDF and PowerPoint Export), five figures (the editor, the agent's canvas, the two windows, the pattern and the seam), nine theme tiles, six slideshow keys and the footer's four columns with the vector mark; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset outside the title's avatars",
+      "interaction": "At 1440 and 390 in both appearances /home draws the 56 px bar with the vector mark, one h1, the four chapters' headings in order (Agents Edit Beside You, Every Feature You Reach For, Edit Together, Present from the Editor), five figures (the hero's editor and one editor in each chapter) and the footer's four columns with the vector mark; nothing is wider than the viewport; every corner on the ladder (0, 4, 6, 8 px, round) and no shadow with a blur or an offset outside the title's avatars",
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "docs/SITE.md A; the brief's problems L1 to L13 of the landing before it",
-      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"make the other rows and sections a lot better and more intentional and redesign them to convey information better following less is more\"): five screens, each one claim proved by one demonstration. Restated by the home sections step, 2026-11-01 (Kevin: \"the sections below home dont make much sense and dont have very good visuals that show off cool stuff\"): the Canvas and Agents screens are one screen where an agent builds the slide and hands it over, and the Themes screen draws one title slide in the nine themes."
+      "note": "The site build (docs/SITE.md; plan /Users/kevinliu/turboslide-scratch/site/plan.md G.3), the landing step, 2026-10-14: the Workbench page replaced the landing of docs/LANDING.md, whose 84 home.* rows and five decks.home.* rows were retired; not yet read on production Restated by the full bleed round, 2026-10-30 (Kevin: \"make the other rows and sections a lot better and more intentional and redesign them to convey information better following less is more\"): five screens, each one claim proved by one demonstration. Restated by the home sections step, 2026-11-01 (Kevin: \"the sections below home dont make much sense and dont have very good visuals that show off cool stuff\"): the Canvas and Agents screens are one screen where an agent builds the slide and hands it over, and the Themes screen draws one title slide in the nine themes. Restated by the story step, 2026-11-03 (Kevin: \"make the homepage that as youre scrolling, the hero's presentation is used to show a bunch of things\"): the five screens left the page for four sections, each with a live editor that plays one chapter in the hero's deck (home.story.chapters)."
     },
     {
       "id": "home.title.one-line",
@@ -10578,13 +10578,13 @@
       "note": "The site build (docs/SITE.md; the small fixes lane of 2026-10-16): under 390 px the site pages' lockup draws its T alone (site.css)"
     },
     {
-      "id": "home.canvas.gestures",
+      "id": "home.story.chapters",
       "feature": "decks",
-      "interaction": "At 1440 in the light appearance and 390 in the dark one, once the Agents screen is in view Claude Code's six writes land in the log beside the slide, the last block.set lighthouse#h /pos, and the slide is handed over; a press on the paragraph selects it with the frame and the turn handle; a drag moves it and the log's last row, under You, reads block.set lighthouse#p1 /pos with its new box; Cmd or Ctrl Z writes its first box (929, 618.25) forward; a drag on the turned heading writes block.set lighthouse#h /pos with x and y at 1/64 px; Escape clears the selection",
+      "interaction": "At 1440 in the light appearance each of the four sections after the hero, scrolled into view, loads a live editor that plays its chapter in the hero's deck: Claude Code adds a story-light slide with a pattern of the shader library behind it and Codex places Cape Hatteras Light; Codex adds a story-chart slide with its chart while Claude Code tries three themes; people and agents of the title visit the title slide; the slideshow runs and steps through the deck. The hero's editor stays at rest, and back at the top the last section's editor unloads",
       "driver": "core/home.spec.ts",
       "today": "not driven",
-      "evidence": "docs/SITE.md (the Agents screen); agent-run.test.ts builds LIGHTHOUSE from the run's six writes; canvas-pose.test.ts pins every gesture against the editor's freeGesture, freeNudgeMutations and zOrderMutations",
-      "note": "The site build (docs/SITE.md; the canvas step, 2026-10-31, Kevin: \"make the freeform canvas much better and cooler with more abilities, or get rid of it\"): every object of the lighthouse slide selects, moves, resizes and turns with the editor's snapping, several at once by Shift click or a marquee, with duplicate, delete, order and undo; the line under the slide prints the editor's write for each gesture. Restated by the home sections step, 2026-11-01 (Kevin: \"the sections below home dont make much sense and dont have very good visuals that show off cool stuff\"): an agent builds the slide in six writes, each in a log beside the slide in the editor's spelling, and every write of the reader's lands in the same log."
+      "evidence": "docs/SITE.md 5 (The chapters); apps/studio/src/try/story.test.ts holds the chapters' scripts to the action table and the director's moves",
+      "note": "The site build (docs/SITE.md; section 5, The chapters), the story step, 2026-11-03 (Kevin: \"make the homepage that as youre scrolling, the hero's presentation is used to show a bunch of things - 1. agents edit beside you (can show a slide with shader library and then hatteras appearing in) 2. full featrures\"; his choices: drive the live editor, and the story replaces the screens below the hero; then \"just make it sectioned off like before\": one section per chapter, each with its own editor). It replaced home.canvas.gestures, whose Canvas screen left the page."
     },
     {
       "id": "home.page.after-editor",
@@ -10593,7 +10593,7 @@
       "driver": "core/home.spec.ts",
       "today": "not driven",
       "evidence": "apps/studio/src/routes/-home-css.test.ts (no sheet but site.css and docs.css names .ts-site)",
-      "note": "2026-11-01 (Kevin: \"fix how when going to /home it can just break\"): the editor's overlay drew its connection sites as .ts-site (absolute, 7 px), a route's module sheet stays loaded after a client navigation, and /home reached from the editor was a 7 px column with the bar packed left; the sites are .ts-conn-site since."
+      "note": "The site build (docs/SITE.md; the home sections step), 2026-11-01 (Kevin: \"fix how when going to /home it can just break\"): the editor's overlay drew its connection sites as .ts-site (absolute, 7 px), a route's module sheet stays loaded after a client navigation, and /home reached from the editor was a 7 px column with the bar packed left; the sites are .ts-conn-site since."
     },
     {
       "id": "chrome.colors.pairs-at-floor",

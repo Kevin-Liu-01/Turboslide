@@ -10,6 +10,7 @@ import { validateDocument } from '@turboslide/schema/validate';
 import {
   HERO_ASSET_BASE,
   HERO_DECK_TITLE,
+  HERO_LIGHTHOUSE,
   HERO_PICTURE,
   HERO_SLIDES,
   heroDocument,
@@ -17,9 +18,9 @@ import {
 
 // The presentation of the landing's live editor (docs/SITE.md C.8): it validates, the lint finds
 // nothing that must be fixed, and it carries no General Translation picture or mark (the judge's
-// correction of the Workbench prototype). It holds two pictures, served from the site's public
-// folder: the Earth on the title slide, and the drawing made for it, which no slide shows until
-// Claude Code places it. The competitor guard (packages/lint/src/brand/competitor.ts) reads this
+// correction of the Workbench prototype). It holds three pictures, served from the site's public
+// folder: the Earth on the title slide, the drawing made for it, which no slide shows until Claude
+// Code places it, and Cape Hatteras Light, which Codex places in the story (story.ts). The competitor guard (packages/lint/src/brand/competitor.ts) reads this
 // folder's sources with the rest of apps/studio/src.
 
 const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'public');
@@ -48,11 +49,14 @@ describe('the hero deck', () => {
     expect(blocking).toEqual([]);
   });
 
-  it('names no General Translation and holds the Earth and its own drawing, the drawing on no slide yet', () => {
+  it('names no General Translation and holds the Earth, its own drawing and the lighthouse, the last two on no slide yet', () => {
     const text = JSON.stringify(document);
     expect(text).not.toMatch(/general translation|gt-brand|mood-earth/i);
-    expect(Object.keys(document.deck.assets).sort()).toEqual(['earth', HERO_PICTURE].sort());
-    expect(JSON.stringify(document.slides)).not.toContain(`"asset":"${HERO_PICTURE}"`);
+    expect(Object.keys(document.deck.assets).sort()).toEqual(
+      ['earth', HERO_PICTURE, HERO_LIGHTHOUSE].sort(),
+    );
+    for (const asset of [HERO_PICTURE, HERO_LIGHTHOUSE])
+      expect(JSON.stringify(document.slides)).not.toContain(`"asset":"${asset}"`);
   });
 
   it('serves its pictures from the site’s own files', () => {

@@ -1,11 +1,9 @@
 import { BAYER8 } from '@turboslide/effects/bayer';
 
 /**
- * The cell printer the landing's dithered figures share (docs/SITE.md 9): one
- * canvas pixel per cell, drawn in the page's ink and scaled up by a whole number of device pixels
- * with `image-rendering: pixelated` (site.css), so every cell is square and whole; the paper
- * shows through the cells left unlit. A figure redraws when its box or the appearance changes.
- * Nothing here reaches the editor: the screen is the deck's own table (packages/effects).
+ * What the landing's dithered grounds share (SiteField.tsx, the /decks field): the deck's 8 by 8
+ * screen as thresholds, a colour read as bytes, the ink a figure prints in and the appearance's
+ * change. Nothing here reaches the editor: the screen is the deck's own table (packages/effects).
  */
 
 export const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
@@ -56,53 +54,4 @@ export function onAppearance(callback: () => void): () => void {
     observer.disconnect();
     scheme.removeEventListener('change', callback);
   };
-}
-
-/**
- * Sizes a cell canvas over a box of `width` by `height` CSS px at `cell` CSS px a cell: whole
- * cells only, the canvas moved by less than a device pixel so its first cell starts on one (a box
- * at a fractional offset would split a row of cells). Returns the grid's columns and rows.
- */
-export function fitCells(
-  canvas: HTMLCanvasElement,
-  box: DOMRect,
-  cell: number,
-): { cols: number; rows: number } {
-  const cols = Math.max(1, Math.floor(box.width / cell));
-  const rows = Math.max(1, Math.floor(box.height / cell));
-  if (canvas.width !== cols) canvas.width = cols;
-  if (canvas.height !== rows) canvas.height = rows;
-  canvas.style.width = `${cols * cell}px`;
-  canvas.style.height = `${rows * cell}px`;
-  const dpr = window.devicePixelRatio || 1;
-  const snap = (v: number): number => (Math.round(v * dpr) - v * dpr) / dpr;
-  canvas.style.transform = `translate(${snap(box.left)}px, ${snap(box.top)}px)`;
-  return { cols, rows };
-}
-
-/**
- * Prints a grid: `lit(col, row)` decides each cell, which is drawn opaque in the ink. One pass,
- * one `putImageData`.
- */
-export function printCells(
-  canvas: HTMLCanvasElement,
-  cols: number,
-  rows: number,
-  ink: Rgb,
-  lit: (col: number, row: number) => boolean,
-): void {
-  const g = canvas.getContext('2d');
-  if (g === null) return;
-  const image = g.createImageData(cols, rows);
-  const data = image.data;
-  for (let row = 0; row < rows; row += 1)
-    for (let col = 0; col < cols; col += 1) {
-      if (!lit(col, row)) continue;
-      const i = (row * cols + col) * 4;
-      data[i] = ink[0];
-      data[i + 1] = ink[1];
-      data[i + 2] = ink[2];
-      data[i + 3] = 255;
-    }
-  g.putImageData(image, 0, 0);
 }

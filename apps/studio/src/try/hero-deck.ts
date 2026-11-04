@@ -5,9 +5,10 @@ import type { DeckDocument, Slide } from '@turboslide/schema/deck';
  * The presentation in the landing's live editor (docs/SITE.md C.8): "Northwind quarterly review",
  * five slides in the Swiss theme, made for the page and owned by nobody. Northwind is a made up
  * company; the deck carries no General Translation mark and no product name but its own. It
- * holds two pictures: NASA's Blue Marble on the title slide, drawn by the editor's own picture
- * dither, and a drawing made for it, a warehouse rack of parcels, which no slide shows until
- * Claude Code places it (script.ts). The tab room starts from this document on every load, so a
+ * holds three pictures: NASA's Blue Marble on the title slide, drawn by the editor's own picture
+ * dither; a drawing made for it, a warehouse rack of parcels, which no slide shows until Claude
+ * Code places it (script.ts); and Cape Hatteras Light, which no slide shows until Codex places it
+ * in the story's first chapter (story.ts). The tab room starts from this document on every load, so a
  * reload of /home starts the hero again (hero-deck.test.ts validates it and runs the lint over it).
  */
 export const HERO_DECK_TITLE = 'Northwind quarterly review';
@@ -48,8 +49,38 @@ const EARTH: Asset = {
 /** The id of the warehouse drawing, the picture Claude Code places (script.ts). */
 export const HERO_PICTURE = 'warehouse';
 
+/** The id of Cape Hatteras Light, the photograph Codex places in the story's first chapter (story.ts). */
+export const HERO_LIGHTHOUSE = 'hatteras';
+
+/** The deck's theme, which the story's second chapter changes and puts back (story.ts). */
+export const HERO_THEME = 'swiss';
+
+/**
+ * The lantern room of Cape Hatteras Light from a drone, the landing deck's two-tone twins
+ * (home-deck/assets/mood-lighthouse-*.png, 18 KB each) copied to the site's hero folder; the
+ * record is the landing deck's, with the file names of that folder.
+ */
+const HATTERAS: Asset = {
+  id: HERO_LIGHTHOUSE,
+  role: 'mood',
+  alt: "Cape Hatteras Light's lantern room above the Outer Banks, from a drone, rendered as a two-tone dither",
+  twins: { light: 'hatteras-light.png', dark: 'hatteras-dark.png' },
+  size: [1600, 900],
+  scale: 1,
+  source: {
+    kind: 'photo',
+    origin: 'File:Cape Hatteras Lighthouse inspection 12-11-2020 - 53553243102.jpg',
+    artist: 'National Park Service',
+    license: 'public domain',
+    shareAlike: false,
+  },
+  credit: 'Photograph: National Park Service, public domain',
+  inline: 'two-color',
+};
+
 const ASSETS: DeckDocument['deck']['assets'] = {
   [EARTH.id]: EARTH,
+  [HATTERAS.id]: HATTERAS,
   [HERO_PICTURE]: {
     id: HERO_PICTURE,
     role: 'other',
@@ -228,7 +259,7 @@ export function heroDocument(deckId: string, now: Date = new Date()): DeckDocume
       schemaVersion: 1,
       id: deckId,
       title: HERO_DECK_TITLE,
-      theme: 'swiss',
+      theme: HERO_THEME,
       defaults: { appearance: 'light' },
       sections: [{ id: 'deck', name: 'Deck', slideIds: SLIDES.map((slide) => slide.id) }],
       assets: structuredClone(ASSETS),

@@ -10,7 +10,7 @@ import siteCss from './site.css?url';
  * The Not found page's words: one Title Case heading and the three buttons (DECK-GRAMMAR 22),
  * the labels the matrix rows decks.notfound.page and decks.notfound.sentence-case read.
  */
-export const NOT_FOUND = {
+const NOT_FOUND = {
   title: 'Page Not Found',
   lockup: 'Turboslide home',
   figure: (path: string): string => `404, drawn in the characters of ${path}`,
@@ -35,7 +35,7 @@ const DIGITS: CSSProperties = { fontFamily: 'var(--site-text)', fontSize: 600, f
 const ROW_CHARS = Math.ceil(FIELD_W / (GLYPH * 0.6)) + 1;
 
 /** The rows of the field: the address repeated, each row starting three characters on. */
-export function fieldRows(path: string): string[] {
+function fieldRows(path: string): string[] {
   const unit = `${path} `;
   const long = unit.repeat(Math.ceil((ROW_CHARS + unit.length * 3) / unit.length) + 1);
   return Array.from({ length: Math.ceil(FIELD_H / ROW_H) }, (_, row) => {

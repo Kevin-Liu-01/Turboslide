@@ -10,13 +10,22 @@ import type { EditorController } from '../editor/controller';
 import type { EditorDeck } from '../server/write';
 import { createRunner } from './agents';
 import type { AgentHandle, Runner } from './agents';
-import { TRY_READY, framingWindow, isTryPress, isTryVisible, topWindow } from './frame';
+import {
+  TRY_READY,
+  framingWindow,
+  isTryChapter,
+  isTryPress,
+  isTryVisible,
+  topWindow,
+} from './frame';
 import type { TryPressed } from './frame';
 import { createGuests } from './guests';
 import type { GuestHandle, Guests } from './guests';
 import { HERO_ASSET_BASE, heroDocument } from './hero-deck';
 import { REVIEW } from './script';
 import type { AgentKey } from './script';
+import { createStory, isStorySlide } from './story';
+import type { Story } from './story';
 import { createTabBackend } from './tab-backend';
 import type { TabPerson, TabRoom } from './tab-backend';
 import { tryVisitor } from './visitor';
@@ -56,6 +65,8 @@ export type TrySession = {
   runner: Runner;
   view: TryVisitor;
   guests: Guests;
+  /** the chapters (story.ts), played on the page's `ts-try:chapter` */
+  story: Story;
   /** a press on an avatar of the page's title (components/site/try-frame.ts `ts-try:press`) */
   press: (who: TryPressed) => void;
   /** EditorRoot's controller, once made */
@@ -201,12 +212,12 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     };
   };
   const view = tryVisitor({ room, principalId, win });
-  const runner = createRunner({
-    agents: { claude: handleOf('claude'), codex: handleOf('codex') },
-    review: REVIEW,
-    visitor: view,
-    reducedMotion: () => win.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  });
+  const reducedMotion = (): boolean => win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* one handle per agent, so the hero's loop and the story's chapters drive the same controllers */
+  const handles = { claude: handleOf('claude'), codex: handleOf('codex') };
+  const runner = createRunner({ agents: handles, review: REVIEW, visitor: view, reducedMotion });
+  /* made after the guests and the press below, which a chapter uses */
+  let story: Story | null = null;
   /** the hue slots the room's live rows hold, as the visitor's roster tells them (1 to 6) */
   const heldHues = (): HueSlot[] =>
     (visitorController?.getSnapshot().roster ?? [])
@@ -235,8 +246,9 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     },
     visitor: view,
     document: () => room.server.document(),
-    open: () => !runner.state().paused,
-    reducedMotion: () => win.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    /* the hero's loop runs, or the story's third chapter hosts the visits while it is paused */
+    open: () => !runner.state().paused || story?.hosting() === true,
+    reducedMotion,
     onArrive: (key) => pulse(key),
   });
 
@@ -311,6 +323,34 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     guests.visit({ key: principal, kind: 'person' });
   };
 
+  const told = createStory({
+    main: runner,
+    runner: (script) =>
+      createRunner({
+        agents: handles,
+        script,
+        visitor: view,
+        ownSlide: isStorySlide,
+        reducedMotion,
+      }),
+    tidy: handles.claude,
+    visitor: {
+      goto: (slideId) => view.goto(slideId),
+      present: (on) => {
+        void visitorController?.invoke('view.present', { on }).catch(() => undefined);
+      },
+      activeSlide: () => view.activeSlide(),
+    },
+    visit: (visit) => press(visit),
+    hush: () => {
+      say(TRY_AGENTS.claude.author.principalId, null);
+      say(TRY_AGENTS.codex.author.principalId, null);
+    },
+    setTimeout: (run, ms) => win.setTimeout(run, ms),
+    clearTimeout: (id) => win.clearTimeout(id),
+  });
+  story = told;
+
   /** the agents' first pose on the title slide: the poster's still, and the first live frame */
   const pose = (): void => {
     say(TRY_AGENTS.claude.author.principalId, 'writing the lead');
@@ -334,10 +374,18 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     const parent = framingWindow(win);
     const onMessage = (event: MessageEvent): void => {
       if (event.origin !== win.location.origin || event.source !== parent) return;
-      if (isTryVisible(event.data)) runner.setOnScreen(event.data.visible);
+      if (isTryVisible(event.data)) {
+        runner.setOnScreen(event.data.visible);
+        told.setOnScreen(event.data.visible);
+      }
       if (isTryPress(event.data)) press(event.data.who);
+      if (isTryChapter(event.data)) told.set(event.data.chapter);
     };
-    const onVisibility = (): void => runner.setVisible(win.document.visibilityState === 'visible');
+    const onVisibility = (): void => {
+      const visible = win.document.visibilityState === 'visible';
+      runner.setVisible(visible);
+      told.setVisible(visible);
+    };
     win.addEventListener('message', onMessage);
     win.document.addEventListener('visibilitychange', onVisibility);
     onVisibility();
@@ -365,7 +413,8 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
       if (readyTimer !== undefined) clearInterval(readyTimer);
       if (opening !== undefined) win.clearTimeout(opening);
       opening = undefined;
-      runner.stop();
+      void told.stop();
+      void runner.stop();
       guests.stop();
       win.removeEventListener('message', onMessage);
       win.document.removeEventListener('visibilitychange', onVisibility);
@@ -382,6 +431,7 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     runner,
     view,
     guests,
+    story: told,
     press,
     attachVisitor(controller) {
       visitorController = controller;

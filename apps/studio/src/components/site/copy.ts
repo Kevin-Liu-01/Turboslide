@@ -102,22 +102,22 @@ export const STORY = {
     {
       id: 'agents',
       heading: 'Agents Edit Beside You',
-      lead: 'Claude Code lays a pattern from the shader library behind a slide while Codex places a photograph on it. Each write is one action in your history.',
+      lead: 'Claude Code and Codex build a slide while you watch, ask each other in comments and answer with edits.',
     },
     {
       id: 'features',
       heading: 'Every Feature You Reach For',
-      lead: `The editor has charts, tables, shapes, animation and ${SITE_FACTS.themes} themes. Every deck downloads as PowerPoint with its text still editable.`,
+      lead: `The editor has charts, tables, shapes, animation and ${SITE_FACTS.themes} themes, and every deck downloads as PowerPoint with its text still editable.`,
     },
     {
       id: 'together',
       heading: 'Edit Together',
-      lead: 'People and agents open the same link. Each one has a pointer, and each one can comment on a slide.',
+      lead: 'People and agents open the same link, each with a pointer, and talk in comments on the slide.',
     },
     {
       id: 'present',
       heading: 'Present from the Editor',
-      lead: 'The slideshow starts from any slide. The deck you edit is the deck you show.',
+      lead: 'The slideshow starts from any slide with its transitions, and the deck you edit is the deck you show.',
     },
   ],
 } as const;

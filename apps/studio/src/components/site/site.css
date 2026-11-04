@@ -434,25 +434,24 @@
   opacity: 1;
 }
 
-/* ---- the chapters after the hero (Chapters.tsx): one section each, its heading and sentence in
-   the first four columns beside a live editor in the other eight, which plays the chapter
-   (try/story.ts). No frame around the section, no eyebrow, no rule between them; space separates
-   them ---- */
+/* ---- the chapters after the hero (Chapters.tsx): each a band across the window over a glyph
+   field of its own (chapter-fields.ts, printed by SiteField.tsx), its copy and its live editor
+   laid out its own way: the copy left of the editor, right of it, over it, then under it on the
+   slideshow's dark band. No frame round a section, no eyebrow, no rule between them ---- */
 
 .ts-site .site-chapter {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: 176px 0;
+}
+
+.ts-site .site-chapter-in {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--site-gap);
   align-items: center;
-  padding-top: 160px;
-}
-
-.ts-site .site-chapter:last-of-type {
-  padding-bottom: 160px;
-}
-
-.ts-site .site-chapter-head {
-  grid-column: 1 / span 4;
 }
 
 .ts-site .site-chapter-head .t-title {
@@ -461,10 +460,6 @@
 
 .ts-site .site-chapter-head .t-lead {
   margin: 16px 0 0;
-}
-
-.ts-site .site-chapter-fig {
-  grid-column: 5 / span 8;
 }
 
 /* the chapter's editor: 2:1 like the hero's, paper until its frame says it is ready, then the
@@ -480,24 +475,79 @@
   opacity: 1;
 }
 
-/* under the layout breakpoint a chapter is one column: the heading and the sentence, then the
-   editor across the column, as tall as the hero's on a phone */
+/* agents: the copy in the first four columns over the globe, the editor in the other eight */
+.ts-site .site-chapter[data-chapter='agents'] .site-chapter-head {
+  grid-column: 1 / span 4;
+}
+
+.ts-site .site-chapter[data-chapter='agents'] .site-chapter-fig {
+  grid-column: 5 / span 8;
+}
+
+/* features: the editor first and the copy in the last four columns, the chart rising behind */
+.ts-site .site-chapter[data-chapter='features'] .site-chapter-fig {
+  grid-column: 1 / span 8;
+  grid-row: 1;
+}
+
+.ts-site .site-chapter[data-chapter='features'] .site-chapter-head {
+  grid-column: 9 / span 4;
+  grid-row: 1;
+}
+
+/* together: the copy centred over the editor, which spans ten columns, the pointers round them */
+.ts-site .site-chapter[data-chapter='together'] .site-chapter-head {
+  grid-column: 3 / span 8;
+  justify-self: center;
+  max-width: 34em;
+  text-align: center;
+}
+
+.ts-site .site-chapter[data-chapter='together'] .site-chapter-fig {
+  grid-column: 2 / span 10;
+  margin-top: 64px;
+}
+
+/* present: the slideshow's dark band in both appearances, its field in the panel's text, the
+   editor across ten columns and the copy under it */
+.ts-site .site-chapter[data-chapter='present'] {
+  --pt-ink: var(--pt-panel-text);
+  --pt-ink-2: var(--pt-panel-text-2);
+  background: var(--pt-panel-ink);
+  color: var(--pt-panel-text);
+}
+
+.ts-site .site-chapter[data-chapter='present'] .site-chapter-fig {
+  grid-column: 2 / span 10;
+  grid-row: 1;
+}
+
+.ts-site .site-chapter[data-chapter='present'] .site-chapter-head {
+  grid-column: 2 / span 6;
+  grid-row: 2;
+  margin-top: 48px;
+}
+
+/* under the layout breakpoint every chapter is one column: the copy, then the editor */
 @media (max-width: 1023px) {
   .ts-site .site-chapter {
-    padding-top: 96px;
+    padding: 112px 0;
   }
 
-  .ts-site .site-chapter:last-of-type {
-    padding-bottom: 96px;
-  }
-
-  .ts-site .site-chapter-head,
-  .ts-site .site-chapter-fig {
+  .ts-site .site-chapter[data-chapter] .site-chapter-head,
+  .ts-site .site-chapter[data-chapter] .site-chapter-fig {
     grid-column: 1 / -1;
+    grid-row: auto;
+    margin-top: 0;
   }
 
-  .ts-site .site-chapter-fig {
+  .ts-site .site-chapter[data-chapter] .site-chapter-fig {
     margin-top: 32px;
+  }
+
+  .ts-site .site-chapter[data-chapter='together'] .site-chapter-head {
+    justify-self: stretch;
+    text-align: left;
   }
 }
 

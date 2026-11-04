@@ -102,8 +102,11 @@ export const HERO_SLIDES = {
   plan: 'plan',
 } as const;
 
-/** The title's sentence; the agents' first pose puts Claude Code's caret at its end (session.ts). */
-const TITLE_LEAD = 'Where the quarter stands and what ships next.';
+/**
+ * The title's sentence; the agents' first pose puts Claude Code's caret at its end (session.ts),
+ * and the story puts it back after its third chapter rewrites it (story.ts).
+ */
+export const TITLE_LEAD = 'Where the quarter stands and what ships next.';
 
 const SLIDES: readonly Slide[] = [
   /* the title as `turboslide slide to-canvas title` arranges it (the grammar record keeps the

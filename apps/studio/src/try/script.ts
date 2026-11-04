@@ -189,8 +189,10 @@ export const regionChart = (values: number[], slideId: string = REGIONS) => ({
   ...regionData(values),
 });
 
-/** A box of Codex's order flow, at its first (uneven) place. */
-const flowBox = (id: string, text: string, x: number, y: number, z: number) => ({
+/**
+ * A box of Codex's order flow, at its first (uneven) place; the story's flow slide draws it too.
+ */
+export const flowBox = (id: string, text: string, x: number, y: number, z: number) => ({
   id,
   type: 'box',
   fill: 'plate',
@@ -223,7 +225,7 @@ const ORDER_FLOW_SLIDE = {
 } as const;
 
 /** The arrow between two boxes of the flow once Claude Code has evened the gaps. */
-const flowArrow = (id: string, x: number) => ({
+export const flowArrow = (id: string, x: number) => ({
   id,
   type: 'shape',
   shape: 'arrow',

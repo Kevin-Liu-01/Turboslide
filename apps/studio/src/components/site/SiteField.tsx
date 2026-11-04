@@ -3,6 +3,8 @@ import { useRef } from 'react';
 import { useMountEffect } from '../useMountEffect';
 import { REDUCED_MOTION, SCREEN, inkOf, onAppearance, rgbOf } from './cells';
 import type { Rgb } from './cells';
+import { FIELD_QUIET, paintArt } from './chapter-fields';
+import type { FieldArt } from './chapter-fields';
 import {
   FIELD_FONT_PX,
   FOCUS,
@@ -22,6 +24,9 @@ import {
 import type { Rect } from './field';
 
 import toneUrl from './pictures/lighthouse-tone.webp?url';
+
+/** The Blue Marble the agents chapter's globe prints, the hero deck's own copy (public/hero/). */
+const GLOBE_URL = '/hero/earth.jpg';
 
 /** The device pixel ratio the field draws at, at most 2. */
 const MAX_DPR = 2;
@@ -64,8 +69,21 @@ export type FieldKind = 'slide' | 'word';
  * appearance and font, the footer's on its first approach to the screen, and after that only the
  * cells under a moving lens. Content that must read over the field carries `data-field-clear`; its
  * cells stay paper, and with the value `band` its rows stay paper across the field.
+ *
+ * A chapter's field (Chapters.tsx) passes `art` and `source`: it prints that art
+ * (chapter-fields.ts `paintArt`) in that source, unfaded and at FIELD_QUIET of the ink at rest
+ * (Kevin, 2026-11-04: "make the text in the back more subtle"), and draws on its first approach to
+ * the screen, as the footer's does.
  */
-export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
+export function SiteField({
+  kind = 'slide',
+  art,
+  source = SOURCE,
+}: {
+  kind?: FieldKind;
+  art?: FieldArt;
+  source?: string;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useMountEffect(() => {
     const node = canvas.current;
@@ -94,7 +112,7 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
     let lensFrame = 0;
 
     /* the name's letters are thin against a cell, so its stream leaves out the spaces */
-    const stream = kind === 'word' ? SOURCE.replace(/\s+/g, '') : SOURCE;
+    const stream = kind === 'word' && art === undefined ? source.replace(/\s+/g, '') : source;
     const { spans, at } = spansOf(stream);
     const charAt = (i: number): string => stream[i % stream.length] ?? ' ';
     const thresholdOf = (col: number, row: number): number =>
@@ -178,7 +196,9 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
         return;
       }
       const strength = lens === null ? 0 : lensAt(Math.hypot(x - lens.x, y - lens.y));
-      const alpha = alphaOf(grid.tone[i] ?? 0, strength);
+      /* a chapter's field sits quieter than the hero's at rest; the lens brings it to full */
+      const quiet = art === undefined ? 1 : FIELD_QUIET + (1 - FIELD_QUIET) * strength;
+      const alpha = alphaOf(grid.tone[i] ?? 0, strength) * quiet;
       if (alpha <= 0.01) return;
       fill(ink, Math.round(alpha * 20) / 20);
       g.fillText(charAt(i), x, y);
@@ -294,7 +314,13 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
 
     const build = (): void => {
       const box = host.getBoundingClientRect();
-      if (box.width === 0 || (kind === 'slide' && picture === null)) return;
+      if (box.width === 0) return;
+      if (
+        art === undefined
+          ? kind === 'slide' && picture === null
+          : art === 'globe' && picture === null
+      )
+        return;
       const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
       const cols = Math.max(1, Math.ceil(box.width / cell.w));
       const rows = Math.max(1, Math.ceil(box.height / cell.h));
@@ -308,12 +334,17 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
       const s = sample.getContext('2d', { willReadFrequently: true });
       if (s === null) return;
       s.imageSmoothingQuality = 'high';
-      if (kind === 'slide') paintSlide(s, box, cols, rows);
+      if (art !== undefined) {
+        s.save();
+        s.scale(1 / cell.w, 1 / cell.h);
+        paintArt(s, box, art, picture);
+        s.restore();
+      } else if (kind === 'slide') paintSlide(s, box, cols, rows);
       else paintWord(s, box);
       const data = s.getImageData(0, 0, cols, rows).data;
       const values = new Float32Array(cols * rows);
       for (let row = 0; row < rows; row += 1) {
-        const fade = kind === 'slide' ? fadeAt(row, rows) : 1;
+        const fade = kind === 'slide' && art === undefined ? fadeAt(row, rows) : 1;
         for (let col = 0; col < cols; col += 1) {
           const i = row * cols + col;
           /* the ink follows the picture's light in both appearances, a positive on ink and a
@@ -407,12 +438,14 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
       const loads: Promise<unknown>[] = [
         document.fonts.load(`${fontPx}px ${family}`).catch(() => []),
       ];
-      if (kind === 'word' && sans !== '')
+      if (kind === 'word' && art === undefined && sans !== '')
         loads.push(document.fonts.load(`500 100px ${sans}`).catch(() => []));
-      if (kind === 'slide') {
+      const src =
+        art === 'globe' ? GLOBE_URL : art === undefined && kind === 'slide' ? toneUrl : null;
+      if (src !== null) {
         const image = new Image();
         image.decoding = 'async';
-        image.src = toneUrl;
+        image.src = src;
         loads.push(
           image.decode().then(() => {
             picture = image;
@@ -425,9 +458,10 @@ export function SiteField({ kind = 'slide' }: { kind?: FieldKind }) {
         build();
       });
     };
-    /* the hero's field draws at once; the footer's when it comes within a screen of the view */
+    /* the hero's field draws at once; the footer's and the chapters' when they come within a
+       screen of the view */
     const near =
-      kind === 'word' && typeof IntersectionObserver !== 'undefined'
+      (kind === 'word' || art !== undefined) && typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver(
             (entries) => {
               if (entries.some((entry) => entry.isIntersecting)) {

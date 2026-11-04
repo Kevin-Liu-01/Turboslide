@@ -3,22 +3,37 @@ import { describe, expect, it } from 'vitest';
 import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 
+import { CHAPTER_FIELDS } from '../components/site/chapter-fields';
 import { TRY_CHAPTERS } from '../components/site/try-frame';
 import { fill, takesBase } from './agents';
 import type { Runner } from './agents';
 import { HERO_THEME, heroDocument } from './hero-deck';
-import { SLIDESHOW_MS, STORY_SCRIPTS, STORY_VISITS, createStory, isStorySlide } from './story';
+import {
+  SLIDESHOW_MS,
+  STORY_SCRIPTS,
+  STORY_TRANSITION,
+  STORY_VISITS,
+  createStory,
+  isStorySlide,
+} from './story';
 import type { AgentScript } from './script';
 import type { StoryVisit } from './story';
 
 // The chapters after the hero (docs/SITE.md 5, "The chapters"): their scripts name actions the
 // page API runs with inputs their schemas take, every slide a chapter adds carries the story's
-// prefix, and every `after` has the other agent's `signal`. The director pauses the hero's loop
-// for a chapter and resumes it at rest, runs one runner a chapter, puts back what a chapter added
-// once its runner has stopped, hosts the third chapter's visits and steps the fourth chapter's
-// slideshow, and moves one chapter at a time to the last one the page named.
+// prefix, every `after` has the other agent's `signal`, and every action a section's glyph field
+// names is one its chapter runs (components/site/chapter-fields.ts). The director pauses the
+// hero's loop for a chapter and resumes it at rest, runs one runner a chapter, puts back what a
+// chapter changed once its runner has stopped, hosts the third chapter's visits and steps the
+// fourth chapter's slideshow, and moves one chapter at a time to the last one the page named.
 
 const scripts = Object.entries(STORY_SCRIPTS);
+/* the threads a chapter's comment opens, as the runner saves them for its later steps */
+const THREAD = '01j9zzzzzzzzzzzzzzzzzzzzzz';
+const saved = new Map<string, unknown>([
+  ['lightThread', THREAD],
+  ['leadThread', THREAD],
+]);
 
 describe("the story's scripts", () => {
   it('give every action of the table an input its schema takes', () => {
@@ -29,7 +44,7 @@ describe("the story's scripts", () => {
           expect(isActionId(step.action), step.action).toBe(true);
           if (!isActionId(step.action)) continue;
           expect(ACTIONS[step.action].transports, step.action).toContain('window');
-          const filled = fill(step.input, 1, new Map()) as Record<string, unknown>;
+          const filled = fill(step.input, 1, saved) as Record<string, unknown>;
           const input = takesBase(step.action) ? { ...filled, baseRevision: 3 } : filled;
           const parsed = ACTIONS[step.action].input.safeParse(input);
           expect(
@@ -45,6 +60,27 @@ describe("the story's scripts", () => {
         for (const step of task.steps)
           if (step.kind === 'act' && step.action === 'slide.insert')
             expect(isStorySlide(fill(step.slide, 1, new Map()) as string), task.name).toBe(true);
+  });
+
+  it("are what each section's glyph field names", () => {
+    const actionsOf = (script: AgentScript): Set<string> =>
+      new Set(
+        Object.values(script)
+          .flat()
+          .flatMap((task) =>
+            task.steps.flatMap((step) => (step.kind === 'act' ? [step.action] : [])),
+          ),
+      );
+    const ran: Record<string, Set<string>> = {
+      agents: actionsOf(STORY_SCRIPTS[1]),
+      features: actionsOf(STORY_SCRIPTS[2]),
+      together: actionsOf(STORY_SCRIPTS[3]),
+      /* the fourth chapter is the director's: the transition, then the slideshow it steps */
+      present: new Set(['slide.transition', 'view.present', 'view.goto']),
+    };
+    for (const [id, field] of Object.entries(CHAPTER_FIELDS))
+      for (const match of field.source.matchAll(/"action":"([A-Za-z.]+)"/g))
+        expect(ran[id]?.has(match[1] ?? ''), `${id}: ${match[1]}`).toBe(true);
   });
 
   it('wait only on a signal the other agent gives', () => {
@@ -121,6 +157,16 @@ function harness() {
         }
         if (action === 'deck.set')
           document = { ...document, deck: { ...document.deck, theme: HERO_THEME } };
+        if (action === 'slide.transition') {
+          const { transition } = input as { transition: unknown };
+          const { transition: _was, ...deck } = document.deck as typeof document.deck & {
+            transition?: unknown;
+          };
+          document = {
+            ...document,
+            deck: (transition === null ? deck : { ...deck, transition }) as typeof document.deck,
+          };
+        }
         return Promise.resolve({});
       },
       document: () => document,
@@ -193,15 +239,26 @@ describe("the story's director", () => {
     const h = harness();
     h.story.set(4);
     await h.story.settled();
-    expect(h.log).toEqual(['hush', 'pause main', 'goto title', 'present true']);
+    expect(h.log).toEqual([
+      'hush',
+      'pause main',
+      `slide.transition ${JSON.stringify({ transition: STORY_TRANSITION, baseRevision: 7 })}`,
+      'goto title',
+      'present true',
+    ]);
     h.advance(SLIDESHOW_MS * 2);
     const order = h.doc().deck.sections.flatMap((section) => section.slideIds);
-    expect(h.log.slice(4)).toEqual([`goto ${order[1]}`, `goto ${order[2]}`]);
+    expect(h.log.slice(5)).toEqual([`goto ${order[1]}`, `goto ${order[2]}`]);
     h.story.set(0);
     await h.story.settled();
-    expect(h.log.slice(6)).toEqual(['present false', 'hush', 'resume main']);
+    expect(h.log.slice(7)).toEqual([
+      'present false',
+      'slide.transition {"transition":null,"baseRevision":7}',
+      'hush',
+      'resume main',
+    ]);
     h.advance(SLIDESHOW_MS * 3);
-    expect(h.log).toHaveLength(9);
+    expect(h.log).toHaveLength(11);
   });
 
   it('hosts the visits of the third chapter while the frame is on screen', async () => {

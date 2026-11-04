@@ -1,28 +1,40 @@
 import { PEOPLE } from '../components/site/copy';
 import { TRY_CHAPTERS } from '../components/site/try-frame';
 import type { AgentHandle, Runner } from './agents';
-import { HERO_LIGHTHOUSE, HERO_SLIDES, HERO_THEME } from './hero-deck';
-import { regionChart, regionData } from './script';
-import type { AgentScript } from './script';
+import { HERO_LIGHTHOUSE, HERO_SLIDES, HERO_THEME, TITLE_LEAD } from './hero-deck';
+import { flowArrow, flowBox, regionChart, regionData } from './script';
+import type { AgentScript, Step } from './script';
 
 /**
  * The chapters after the hero (docs/SITE.md 5, "The chapters"): each section of /home after the
  * hero holds a frame of this editor, and the page names its chapter once the frame is ready
  * (`ts-try:chapter`, components/site/ChapterBox.tsx), so the hero's own presentation shows each
- * claim. Chapter 0 is the hero, the agents' loop of script.ts. Chapters 1 and 2 pause that loop
- * and run a script of their own on the same two agents (agents.ts `createRunner` over the scripts
- * below, its own director moving the visitor's stage to what the agents write): Claude Code adds a
- * slide, lays a pattern of the shader library behind it and tries two more, and Codex places Cape
- * Hatteras Light on it; then Codex adds a chart slide, grows the chart, turns it to columns and
- * adds a table while Claude Code tries three themes and goes back to Swiss. Chapter 3 holds the
- * stage on the title slide while two people of the title and OpenClaw and Hermes visit it
- * (guests.ts), OpenClaw and Hermes leaving a comment each. Chapter 4 starts the slideshow and steps
- * it through the deck. A chapter's script starts again while its section stays on screen.
+ * claim. Chapter 0 is the hero, the agents' loop of script.ts. Chapters 1 to 3 pause that loop and
+ * run a script of their own on the same two agents (agents.ts `createRunner` over the scripts
+ * below, its own director moving the visitor's stage to what the agents write; Kevin, 2026-11-03:
+ * "make the stuff each agent is doing a lot more impressive"):
+ *
+ * 1. Claude Code adds a slide, lays a pattern of the shader library behind it and tries two more;
+ *    Codex places Cape Hatteras Light as a disc, drags it into place and asks in a comment for a
+ *    heading that names the light; Claude Code types it and answers, Codex resolves the thread,
+ *    and Claude Code turns the heading 6 degrees into the sky.
+ * 2. Codex adds a chart slide and grows the chart, turns it to columns and adds a table, then
+ *    draws an order flow on a second slide; Claude Code animates the chart, aligns and spaces the
+ *    flow's boxes, Codex connects them and turns the chart to a pie, and Claude Code tries Coral,
+ *    Night and Mint before it goes back to Swiss.
+ * 3. On the title slide Codex asks in a comment for a lead that names the quarter, Claude Code
+ *    rewrites the lead and answers, Codex resolves it and Claude Code puts the lead back, while
+ *    two people of the title and OpenClaw and Hermes visit the slide (guests.ts), OpenClaw and
+ *    Hermes leaving a comment each.
+ *
+ * Chapter 4 gives the deck a transition and starts the slideshow, which steps through the deck. A
+ * chapter's script starts again while its section stays on screen.
  *
  * Every chapter leaves the deck as it found it: the slides a chapter adds carry the `story-`
  * prefix, and leaving the chapter waits for its agents to stop, then removes those slides and puts
- * the theme back; leaving the slideshow ends it. Should a frame be named chapters faster than
- * they play, the director moves from the chapter it plays to the last one named, one at a time.
+ * back the theme, the title's lead and the deck's transition; leaving the slideshow ends it.
+ * Should a frame be named chapters faster than they play, the director moves from the chapter it
+ * plays to the last one named, one at a time.
  */
 
 /** The prefix of every slide a chapter adds. */
@@ -36,6 +48,7 @@ export function isStorySlide(slideId: string): boolean {
 const { title } = HERO_SLIDES;
 const LIGHT = 'story-light-{loop}';
 const CHART = 'story-chart-{loop}';
+const FLOW = 'story-flow-{loop}';
 
 /** The first chapter's slide, whole: a paper plate with its heading, sentence and credit. */
 const LIGHT_SLIDE = {
@@ -50,7 +63,7 @@ const LIGHT_SLIDE = {
         id: 'h',
         type: 'heading',
         level: 'h2',
-        text: 'Cape Hatteras Light',
+        text: 'Cape Hatteras',
         pos: { x: 136, y: 572, w: 624, h: 72, z: 5 },
       },
       {
@@ -69,7 +82,7 @@ const LIGHT_SLIDE = {
   },
 } as const;
 
-/** The second chapter's slide, whole: a heading and a sentence before the chart and the table. */
+/** The second chapter's chart slide, whole: a heading and a sentence before the chart and table. */
 const CHART_SLIDE = {
   schemaVersion: 1,
   id: CHART,
@@ -94,6 +107,26 @@ const CHART_SLIDE = {
   },
 } as const;
 
+/** The second chapter's flow slide, whole: a heading and the first box of the order flow. */
+const FLOW_SLIDE = {
+  schemaVersion: 1,
+  id: FLOW,
+  kind: 'content',
+  layout: { type: 'freeform' },
+  slots: {
+    main: [
+      {
+        id: 'h',
+        type: 'heading',
+        level: 'h2',
+        text: 'How an order moves',
+        pos: { x: 137, y: 110, w: 1100, h: 72, z: 0 },
+      },
+      flowBox('placed', 'Order placed', 137, 400, 1),
+    ],
+  },
+} as const;
+
 /** The patterns of the shader library Claude Code tries, in order; the last one stays. */
 const PATTERNS = ['paper:god-rays', 'paper:smoke-ring', 'paper:mesh-gradient'] as const;
 
@@ -104,14 +137,16 @@ const THEMES = [
   { id: 'mint', name: 'Mint' },
 ] as const;
 
-/** A step that only shows the slide as it stands. */
-const look = (slide: string, ms = 1800) =>
-  [
-    { kind: 'point', slide, at: { x: 1000, y: 420 } },
-    { kind: 'hold', ms },
-    { kind: 'point', slide, at: { x: 560, y: 640 } },
-    { kind: 'hold', ms },
-  ] as const;
+/** The transition the fourth chapter gives the deck before its slideshow. */
+export const STORY_TRANSITION = { name: 'blur-swipe', durationMs: 700 } as const;
+
+/** Steps that only show the slide as it stands. */
+const look = (slide: string, ms = 1800): Step[] => [
+  { kind: 'point', slide, at: { x: 1000, y: 420 } },
+  { kind: 'hold', ms },
+  { kind: 'point', slide, at: { x: 560, y: 640 } },
+  { kind: 'hold', ms },
+];
 
 /** Chapter 1: agents edit beside you. */
 const AGENTS: AgentScript = {
@@ -159,30 +194,68 @@ const AGENTS: AgentScript = {
     {
       name: 'Try two more patterns',
       doing: 'trying patterns',
-      steps: PATTERNS.slice(1).flatMap((materialId) => [
-        { kind: 'select', slide: LIGHT, block: 'ground' } as const,
-        { kind: 'hold', ms: 1400 } as const,
+      steps: PATTERNS.slice(1).flatMap((materialId): Step[] => [
+        { kind: 'select', slide: LIGHT, block: 'ground' },
+        { kind: 'hold', ms: 1400 },
         {
           kind: 'act',
           action: 'block.set',
           slide: LIGHT,
           block: 'ground',
           input: { slideId: LIGHT, blockId: 'ground', path: '/materialId', value: materialId },
-        } as const,
+        },
       ]),
       needs: [`${LIGHT}#ground`],
     },
     {
-      name: 'Look over the slide',
-      doing: 'reading the slide',
-      after: 'placed',
-      steps: [...look(LIGHT), ...look(LIGHT)],
-      needs: [LIGHT],
+      name: 'Answer Codex',
+      doing: 'renaming the heading',
+      after: 'asked',
+      steps: [
+        { kind: 'point', slide: LIGHT, at: { x: 330, y: 610 } },
+        { kind: 'select', slide: LIGHT, block: 'h' },
+        { kind: 'write', slide: LIGHT, block: 'h', path: '/text', text: 'Cape Hatteras Light' },
+        {
+          kind: 'act',
+          action: 'comment.reply',
+          slide: LIGHT,
+          input: {
+            threadId: '$lightThread',
+            body: { text: 'Done. It names the light now.', mentions: [] },
+          },
+        },
+        { kind: 'signal', signal: 'answered' },
+      ],
+      needs: [`${LIGHT}#h`],
+    },
+    {
+      name: 'Turn the heading into the sky',
+      doing: 'turning the heading',
+      after: 'resolved',
+      steps: [
+        { kind: 'select', slide: LIGHT, block: 'h' },
+        { kind: 'hold', ms: 900 },
+        {
+          kind: 'act',
+          action: 'block.set',
+          slide: LIGHT,
+          block: 'h',
+          input: {
+            slideId: LIGHT,
+            blockId: 'h',
+            path: '/pos',
+            value: { x: 136, y: 96, w: 760, h: 96, z: 8, rotate: 354 },
+          },
+        },
+        { kind: 'signal', signal: 'turned' },
+        ...look(LIGHT),
+      ],
+      needs: [`${LIGHT}#h`],
     },
     {
       name: 'Remove the lighthouse slide',
       doing: 'putting the deck back',
-      after: 'placed',
+      after: 'looked',
       tidy: true,
       steps: [
         { kind: 'point', slide: LIGHT, at: { x: 800, y: 450 } },
@@ -197,7 +270,7 @@ const AGENTS: AgentScript = {
       doing: 'placing a photograph',
       after: 'ground',
       steps: [
-        { kind: 'point', slide: LIGHT, at: { x: 1180, y: 300 } },
+        { kind: 'point', slide: LIGHT, at: { x: 1340, y: 300 } },
         {
           kind: 'act',
           action: 'block.insert',
@@ -211,14 +284,58 @@ const AGENTS: AgentScript = {
               alt: 'The lantern room of Cape Hatteras Light above the Outer Banks, from a drone',
               type: 'picture',
               asset: HERO_LIGHTHOUSE,
-              pos: { x: 864, y: 96, w: 640, h: 360, z: 3 },
+              mask: 'ellipse',
+              pos: { x: 1180, y: 150, w: 380, h: 380, z: 3 },
             },
           },
         },
-        { kind: 'select', slide: LIGHT, block: 'photo' },
-        { kind: 'hold', ms: 1200 },
-        { kind: 'signal', signal: 'placed' },
+        { kind: 'drag', slide: LIGHT, block: 'photo', to: { x: 1000, y: 120 } },
       ],
+      needs: [LIGHT],
+    },
+    {
+      name: 'Ask for a heading that names the light',
+      doing: 'leaving a comment',
+      after: 'ground',
+      steps: [
+        { kind: 'point', slide: LIGHT, at: { x: 300, y: 610 } },
+        { kind: 'select', slide: LIGHT, block: 'h' },
+        {
+          kind: 'act',
+          action: 'comment.add',
+          slide: LIGHT,
+          block: 'h',
+          input: {
+            anchor: { kind: 'block', slideId: LIGHT, blockId: 'h' },
+            body: { text: 'Can the heading name the light?', mentions: [] },
+          },
+          save: { key: 'lightThread', from: 'thread.id' },
+        },
+        { kind: 'signal', signal: 'asked' },
+      ],
+      needs: [`${LIGHT}#h`],
+    },
+    {
+      name: 'Resolve the heading thread',
+      doing: 'resolving a comment',
+      after: 'answered',
+      steps: [
+        { kind: 'point', slide: LIGHT, at: { x: 520, y: 600 } },
+        {
+          kind: 'act',
+          action: 'comment.resolve',
+          slide: LIGHT,
+          input: { threadId: '$lightThread' },
+        },
+        { kind: 'signal', signal: 'resolved' },
+      ],
+      needs: [LIGHT],
+    },
+    {
+      name: 'Look over the slide',
+      doing: 'reading the slide',
+      after: 'turned',
+      steps: [...look(LIGHT), { kind: 'signal', signal: 'looked' }],
       needs: [LIGHT],
     },
   ],
@@ -228,38 +345,88 @@ const AGENTS: AgentScript = {
 const FEATURES: AgentScript = {
   claude: [
     {
-      name: 'Try three themes',
-      doing: 'trying themes',
+      name: 'Animate the chart',
+      doing: 'animating the chart',
       after: 'chart-ready',
       steps: [
-        ...THEMES.flatMap((theme) => [
-          { kind: 'say', words: `trying the ${theme.name} theme` } as const,
+        { kind: 'point', slide: CHART, at: { x: 480, y: 600 } },
+        { kind: 'select', slide: CHART, block: 'chart' },
+        {
+          kind: 'act',
+          action: 'motion.add',
+          slide: CHART,
+          block: 'chart',
+          input: {
+            slideId: CHART,
+            effect: {
+              block: 'chart',
+              role: 'enter',
+              motion: { preset: 'rise-in' },
+              start: 'click',
+            },
+          },
+        },
+        { kind: 'signal', signal: 'animated' },
+      ],
+      needs: [`${CHART}#chart`],
+    },
+    {
+      name: 'Align and space the boxes',
+      doing: 'evening out Codex’s boxes',
+      after: 'drawn',
+      steps: [
+        { kind: 'point', slide: FLOW, at: { x: 800, y: 420 } },
+        {
+          kind: 'act',
+          action: 'block.align',
+          slide: FLOW,
+          block: 'packed',
+          input: {
+            slideId: FLOW,
+            blockIds: ['placed', 'packed', 'delivered'],
+            edge: 'middle',
+            to: 'selection',
+          },
+        },
+        { kind: 'point', slide: FLOW, at: { x: 780, y: 470 } },
+        {
+          kind: 'act',
+          action: 'block.distribute',
+          slide: FLOW,
+          block: 'packed',
+          input: { slideId: FLOW, blockIds: ['placed', 'packed', 'delivered'], axis: 'horizontal' },
+        },
+        { kind: 'signal', signal: 'evened' },
+      ],
+      needs: [`${FLOW}#placed`, `${FLOW}#packed`, `${FLOW}#delivered`],
+    },
+    {
+      name: 'Try three themes',
+      doing: 'trying themes',
+      after: 'connected',
+      steps: [
+        ...THEMES.flatMap((theme): Step[] => [
+          { kind: 'say', words: `trying the ${theme.name} theme` },
           {
             kind: 'act',
             action: 'deck.set',
-            slide: CHART,
+            slide: FLOW,
             input: { path: '/theme', value: theme.id },
-          } as const,
-          { kind: 'point', slide: CHART, at: { x: 700, y: 500 } } as const,
-          { kind: 'hold', ms: 1400 } as const,
+          },
+          { kind: 'point', slide: FLOW, at: { x: 700, y: 500 } },
+          { kind: 'hold', ms: 1400 },
         ]),
         { kind: 'say', words: 'going back to Swiss' },
         {
           kind: 'act',
           action: 'deck.set',
-          slide: CHART,
+          slide: FLOW,
           input: { path: '/theme', value: HERO_THEME },
         },
+        ...look(FLOW),
         { kind: 'signal', signal: 'themed' },
       ],
-      needs: [CHART],
-    },
-    {
-      name: 'Look over the chart',
-      doing: 'reading the slide',
-      after: 'tabled',
-      steps: look(CHART),
-      needs: [CHART],
+      needs: [FLOW],
     },
   ],
   codex: [
@@ -278,7 +445,7 @@ const FEATURES: AgentScript = {
       needs: [title],
     },
     {
-      name: 'Add a chart',
+      name: 'Add and grow a chart',
       doing: 'adding a chart',
       steps: [
         { kind: 'point', slide: CHART, at: { x: 500, y: 520 } },
@@ -299,6 +466,14 @@ const FEATURES: AgentScript = {
               pos: { x: 137, y: 270, w: 700, h: 520, z: 2 },
             },
           },
+        },
+        { kind: 'say', words: 'filling the chart' },
+        {
+          kind: 'act',
+          action: 'chart.setData',
+          slide: CHART,
+          block: 'chart',
+          input: regionChart([20, 15, 10, 3], CHART),
         },
         {
           kind: 'act',
@@ -354,17 +529,99 @@ const FEATURES: AgentScript = {
             },
           },
         },
-        { kind: 'signal', signal: 'tabled' },
       ],
       needs: [CHART],
     },
     {
-      name: 'Remove the chart slide',
+      name: 'Draw the order flow',
+      doing: 'drawing a flow',
+      steps: [
+        { kind: 'point', slide: CHART, at: { x: 1100, y: 760 } },
+        {
+          kind: 'act',
+          action: 'slide.insert',
+          slide: FLOW,
+          input: { sectionId: 'deck', after: CHART, slide: FLOW_SLIDE },
+        },
+        { kind: 'point', slide: FLOW, at: { x: 760, y: 440 } },
+        {
+          kind: 'act',
+          action: 'block.insert',
+          slide: FLOW,
+          block: 'packed',
+          input: {
+            slideId: FLOW,
+            slot: 'main',
+            block: flowBox('packed', 'Packed in the warehouse', 560, 250, 2),
+          },
+        },
+        { kind: 'drag', slide: FLOW, block: 'packed', to: { x: 600, y: 360 } },
+        { kind: 'point', slide: FLOW, at: { x: 1300, y: 520 } },
+        {
+          kind: 'act',
+          action: 'block.insert',
+          slide: FLOW,
+          block: 'delivered',
+          input: {
+            slideId: FLOW,
+            slot: 'main',
+            block: flowBox('delivered', 'Delivered', 1143, 440, 3),
+          },
+        },
+        { kind: 'signal', signal: 'drawn' },
+      ],
+      needs: [CHART],
+    },
+    {
+      name: 'Connect the boxes',
+      doing: 'connecting the boxes',
+      after: 'evened',
+      steps: [
+        { kind: 'point', slide: FLOW, at: { x: 548, y: 480 } },
+        {
+          kind: 'act',
+          action: 'block.insert',
+          slide: FLOW,
+          block: 'arrow-1',
+          input: { slideId: FLOW, slot: 'main', block: flowArrow('arrow-1', 477) },
+        },
+        { kind: 'point', slide: FLOW, at: { x: 1052, y: 480 } },
+        {
+          kind: 'act',
+          action: 'block.insert',
+          slide: FLOW,
+          block: 'arrow-2',
+          input: { slideId: FLOW, slot: 'main', block: flowArrow('arrow-2', 980) },
+        },
+        { kind: 'signal', signal: 'connected' },
+      ],
+      needs: [`${FLOW}#packed`],
+    },
+    {
+      name: 'Turn the chart to a pie',
+      doing: 'switching to a pie',
+      after: 'animated',
+      steps: [
+        { kind: 'point', slide: CHART, at: { x: 520, y: 500 } },
+        {
+          kind: 'act',
+          action: 'chart.setKind',
+          slide: CHART,
+          block: 'chart',
+          input: { slideId: CHART, blockId: 'chart', kind: 'pie' },
+        },
+        ...look(CHART),
+      ],
+      needs: [`${CHART}#chart`],
+    },
+    {
+      name: 'Remove the slides',
       doing: 'putting the deck back',
       after: 'themed',
       tidy: true,
       steps: [
-        ...look(CHART),
+        { kind: 'point', slide: FLOW, at: { x: 800, y: 450 } },
+        { kind: 'act', action: 'slide.remove', slide: FLOW, input: { slideId: FLOW } },
         { kind: 'point', slide: CHART, at: { x: 800, y: 450 } },
         { kind: 'act', action: 'slide.remove', slide: CHART, input: { slideId: CHART } },
       ],
@@ -373,8 +630,94 @@ const FEATURES: AgentScript = {
   ],
 };
 
+/** The lead Claude Code writes in the third chapter, naming the quarter. */
+const LEAD_NAMED = 'Where the third quarter stands and what ships next.';
+
+/** Chapter 3: edit together, on the title slide. */
+const TOGETHER: AgentScript = {
+  claude: [
+    {
+      name: 'Answer Codex',
+      doing: 'rewriting the lead',
+      after: 'asked',
+      steps: [
+        { kind: 'point', slide: title, at: { x: 600, y: 310 } },
+        { kind: 'select', slide: title, block: 'lead' },
+        { kind: 'write', slide: title, block: 'lead', path: '/text', text: LEAD_NAMED },
+        {
+          kind: 'act',
+          action: 'comment.reply',
+          slide: title,
+          input: {
+            threadId: '$leadThread',
+            body: { text: 'Done. It names the third quarter.', mentions: [] },
+          },
+        },
+        { kind: 'signal', signal: 'answered' },
+      ],
+      needs: [`${title}#lead`],
+    },
+    {
+      name: 'Put the lead back',
+      doing: 'putting the lead back',
+      after: 'resolved',
+      tidy: true,
+      steps: [
+        { kind: 'hold', ms: 3200 },
+        { kind: 'select', slide: title, block: 'lead' },
+        { kind: 'write', slide: title, block: 'lead', path: '/text', text: TITLE_LEAD },
+      ],
+      needs: [`${title}#lead`],
+    },
+  ],
+  codex: [
+    {
+      name: 'Ask for a lead that names the quarter',
+      doing: 'leaving a comment',
+      steps: [
+        { kind: 'point', slide: title, at: { x: 560, y: 310 } },
+        { kind: 'select', slide: title, block: 'lead' },
+        {
+          kind: 'act',
+          action: 'comment.add',
+          slide: title,
+          block: 'lead',
+          input: {
+            anchor: { kind: 'block', slideId: title, blockId: 'lead' },
+            body: { text: 'Can the lead name the quarter?', mentions: [] },
+          },
+          save: { key: 'leadThread', from: 'thread.id' },
+        },
+        { kind: 'signal', signal: 'asked' },
+      ],
+      needs: [`${title}#lead`],
+    },
+    {
+      name: 'Resolve the lead thread',
+      doing: 'resolving a comment',
+      after: 'answered',
+      steps: [
+        { kind: 'point', slide: title, at: { x: 900, y: 320 } },
+        {
+          kind: 'act',
+          action: 'comment.resolve',
+          slide: title,
+          input: { threadId: '$leadThread' },
+        },
+        { kind: 'signal', signal: 'resolved' },
+        ...look(title),
+      ],
+      needs: [title],
+    },
+  ],
+};
+
 /** The scripts of the chapters the agents play, by chapter. */
-export const STORY_SCRIPTS: Readonly<Record<1 | 2, AgentScript>> = { 1: AGENTS, 2: FEATURES };
+export const STORY_SCRIPTS: Readonly<Record<1 | 2 | 3, AgentScript>> = {
+  1: AGENTS,
+  2: FEATURES,
+  3: TOGETHER,
+};
 
 /** A visit of the third chapter: a person of the title by name and hue, or OpenClaw or Hermes. */
 export type StoryVisit =
@@ -401,7 +744,7 @@ export type StoryOptions = {
   main: Pick<Runner, 'pause' | 'resume'>;
   /** a runner of the two agents over a chapter's script (session.ts) */
   runner: (script: AgentScript) => Runner;
-  /** the agent whose controller removes what a chapter added */
+  /** the agent whose controller writes the transition and puts back what a chapter changed */
   tidy: Pick<AgentHandle, 'invoke' | 'document' | 'revision'>;
   /** the visitor's editor */
   visitor: {
@@ -449,17 +792,33 @@ export function createStory(options: StoryOptions): Story {
     timers = [];
   };
 
-  /** the slides a chapter added and the theme it changed, put back by one agent's controller */
+  /** one write of the tidy agent, with its base revision; a refusal is left as it is */
+  const write = (action: string, input: Record<string, unknown>): Promise<unknown> =>
+    options.tidy
+      .invoke(action, { ...input, baseRevision: options.tidy.revision() })
+      .catch(() => undefined);
+
+  /** what a chapter added or changed, put back by one agent's controller */
   const putBack = async (): Promise<void> => {
-    const { tidy } = options;
-    for (const slideId of Object.keys(tidy.document().slides).filter(isStorySlide))
-      await tidy
-        .invoke('slide.remove', { slideId, baseRevision: tidy.revision() })
-        .catch(() => undefined);
-    if (tidy.document().deck.theme !== HERO_THEME)
-      await tidy
-        .invoke('deck.set', { path: '/theme', value: HERO_THEME, baseRevision: tidy.revision() })
-        .catch(() => undefined);
+    const document = (): ReturnType<typeof options.tidy.document> => options.tidy.document();
+    for (const slideId of Object.keys(document().slides).filter(isStorySlide))
+      await write('slide.remove', { slideId });
+    if (document().deck.theme !== HERO_THEME)
+      await write('deck.set', { path: '/theme', value: HERO_THEME });
+    const titleSlide = document().slides[title] as { slots?: Record<string, unknown> } | undefined;
+    const lead = titleSlide?.slots?.main;
+    const leadText = Array.isArray(lead)
+      ? (lead as { id?: string; text?: unknown }[]).find((block) => block.id === 'lead')?.text
+      : undefined;
+    if (typeof leadText === 'string' && leadText !== TITLE_LEAD)
+      await write('block.set', {
+        slideId: title,
+        blockId: 'lead',
+        path: '/text',
+        value: TITLE_LEAD,
+      });
+    if ((document().deck as { transition?: unknown }).transition !== undefined)
+      await write('slide.transition', { transition: null });
   };
 
   /** the third chapter's visits, again every VISITS_AGAIN_MS while it plays */
@@ -479,13 +838,13 @@ export function createStory(options: StoryOptions): Story {
 
   const leave = async (chapter: number): Promise<void> => {
     clearTimers();
-    if (chapter === 1 || chapter === 2) {
+    if (chapter >= 1 && chapter <= 3) {
       const runner = active;
       active = null;
       await runner?.stop();
-      await putBack();
     }
     if (chapter === 4) options.visitor.present(false);
+    if (chapter !== 0) await putBack();
     options.hush();
   };
 
@@ -495,19 +854,19 @@ export function createStory(options: StoryOptions): Story {
       return;
     }
     options.main.pause();
-    if (chapter === 1 || chapter === 2) {
+    if (chapter === 1 || chapter === 2 || chapter === 3) {
       const runner = options.runner(STORY_SCRIPTS[chapter]);
       runner.setOnScreen(onScreen);
       runner.setVisible(visible);
       runner.start();
       active = runner;
+      if (chapter === 3) {
+        options.visitor.goto(title);
+        visits();
+      }
       return;
     }
-    if (chapter === 3) {
-      options.visitor.goto(title);
-      visits();
-      return;
-    }
+    void write('slide.transition', { transition: STORY_TRANSITION });
     options.visitor.goto(title);
     options.visitor.present(true);
     later(step, SLIDESHOW_MS);

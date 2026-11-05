@@ -77,7 +77,7 @@ export function ChapterBox({ chapter, title }: { chapter: number; title: string 
       {state === 'empty' ? null : (
         <iframe
           ref={frame}
-          className="site-hero-frame"
+          className="site-chapter-frame"
           src={TRY_FRAME_SRC}
           title={title}
           allow="fullscreen; clipboard-write"

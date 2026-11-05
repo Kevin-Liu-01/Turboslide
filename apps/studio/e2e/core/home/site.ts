@@ -40,11 +40,19 @@ const BAR_PAGES: readonly string[] = ['/home', '/features', '/about', '/faq', '/
 async function open(
   browser: Browser,
   cell: { width: number; height: number; theme: Theme },
+  { holdFrame = false }: { holdFrame?: boolean } = {},
 ): Promise<{ page: Page; close: () => Promise<void> }> {
   const context = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: cell.width, height: cell.height },
   });
+  /* a row that reads the poster keeps the editor's frame from loading, so the poster stays up
+     while it is read; the swap itself is home.hero.swap-no-shift's */
+  if (holdFrame)
+    await context.route(
+      (url) => url.pathname === '/try',
+      (route) => route.abort(),
+    );
   await context.addInitScript((theme) => {
     try {
       localStorage.setItem('gt-theme', theme);
@@ -598,7 +606,7 @@ export function rows(): void {
   test(title('home.hero.poster-first'), async ({ browser }) => {
     test.setTimeout(120_000);
     for (const cell of CELLS) {
-      const { page, close } = await open(browser, cell);
+      const { page, close } = await open(browser, cell, { holdFrame: true });
       try {
         const box = page.locator('[data-hero-box]');
         const before = await box.boundingBox();
@@ -612,7 +620,8 @@ export function rows(): void {
             natural: shown.naturalWidth,
             fetched: performance
               .getEntriesByType('resource')
-              .filter((r) => /hero-(1280|358)-(light|dark)/.test(r.name)).length,
+              /* the pictures alone: a build also names a script chunk after the poster's module */
+              .filter((r) => /hero-(1280|358)-(light|dark)[^/]*\.webp/.test(r.name)).length,
           };
         });
         await page.waitForTimeout(2_000);

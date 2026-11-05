@@ -120,9 +120,11 @@ export function rows(): void {
           cls: (window as unknown as { __shifts: number[] }).__shifts.reduce((n, v) => n + v, 0),
           posters: document.querySelectorAll('[data-hero-box] picture').length,
           fcp: performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? 0,
+          /* the frame's document: the build's /assets/try-frame-*.js chunk is the page's own */
           frame:
-            performance.getEntriesByType('resource').find((r) => r.name.includes('/try'))
-              ?.startTime ?? Infinity,
+            performance
+              .getEntriesByType('resource')
+              .find((r) => new URL(r.name).pathname === '/try')?.startTime ?? Infinity,
         }));
         expect(after, `${label}: the box keeps its size`).toEqual(before);
         expect(facts.cls, `${label}: no layout shift`).toBe(0);

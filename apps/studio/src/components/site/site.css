@@ -416,9 +416,10 @@
   scroll-margin-top: calc(var(--site-bar-h) + 16px);
 }
 
-/* the live editor's frame (HeroBox.tsx): over the poster in the same box, shown once it says it
-   is ready, so the swap moves nothing */
-.ts-site .site-hero-frame {
+/* the live editor's frame (HeroBox.tsx) and a chapter's (ChapterBox.tsx): over the poster or the
+   paper in the same box, shown once it says it is ready, so the swap moves nothing */
+.ts-site .site-hero-frame,
+.ts-site .site-chapter-frame {
   position: absolute;
   inset: 0;
   display: block;
@@ -471,7 +472,7 @@
   background: var(--pt-paper);
 }
 
-.ts-site .site-chapter-box[data-state='live'] .site-hero-frame {
+.ts-site .site-chapter-box[data-state='live'] .site-chapter-frame {
   opacity: 1;
 }
 
@@ -1639,6 +1640,7 @@ html[data-theme='dark'] .ts-site .site-appear-opt[data-value='dark'] {
   .ts-site .site-foot a,
   .ts-site .site-appear-opt,
   .ts-site .site-hero-frame,
+  .ts-site .site-chapter-frame,
   .ts-site .site-av {
     transition: none;
   }

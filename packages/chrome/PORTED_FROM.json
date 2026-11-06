@@ -527,6 +527,10 @@
       "source": "new (the chrome round of 2026-09-11)",
       "commit": ""
     },
+    "src/tip.ts": {
+      "source": "new (2026-11-05: Tooltip.tsx's manager moved out as plain DOM, with attachTip for /home's static page)",
+      "commit": ""
+    },
     "src/IconPicker.tsx": {
       "source": "new (the chrome round of 2026-09-11; the card lifted out of inspector/icon.tsx of M3)",
       "commit": ""
@@ -583,6 +587,10 @@
       "source": "new (the design round, docs/DESIGN.md 2.3: the top layer through popover=\"manual\" with the scale's order)",
       "commit": ""
     },
+    "src/top-layer.ts": {
+      "source": "new (2026-11-05: Layer.ts's manager moved out as plain DOM, for the tooltip of /home's static page)",
+      "commit": ""
+    },
     "src/place.ts": {
       "source": "new (the design round, docs/DESIGN.md 2.4: @floating-ui/dom in place of placeMenu, the tooltip's place and anchoredAt)",
       "commit": ""
@@ -620,6 +628,10 @@
     },
     "src/theme.ts": {
       "source": "deck/parts/tail.html (storedTheme, toggleTheme, applyTheme, the storage and message listeners) and src/components/viewer/ThemeButton.tsx",
+      "commit": "7dd934f6028003410efdb6796c14161e23fbbabf"
+    },
+    "src/theme-state.ts": {
+      "source": "deck/parts/tail.html (storedTheme, the dual key) and src/components/viewer/ThemeButton.tsx (readTheme, postTheme), moved out of theme.ts on 2026-11-05 as plain DOM for /home's static page",
       "commit": "7dd934f6028003410efdb6796c14161e23fbbabf"
     },
     "src/dither.ts": {

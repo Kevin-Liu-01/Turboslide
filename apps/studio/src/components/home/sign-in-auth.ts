@@ -8,7 +8,7 @@ import type { AuthMethods } from '@turboslide/chrome/auth/auth-model';
 import type { AuthActions } from '@turboslide/chrome/auth/AuthPlate';
 
 import { answerSignInMerge } from './sign-in';
-import type { SignInFacts } from './sign-in';
+import type { SignInFacts } from './sign-in-facts';
 
 /**
  * The better-auth exchanges of the pages' sign in (/signin and /device, docs/POLISH-2.md 4.3; the

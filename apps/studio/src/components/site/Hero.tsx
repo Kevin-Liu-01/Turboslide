@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 
-import type { OnPress } from './AvatarStack';
 import { AVATAR_PRESS, HERO } from './copy';
 import { Frame } from './Frame';
+import type { OnPress } from './frame-boxes';
 import { HeroBox } from './HeroBox';
 import { SiteIcon } from './SiteIcon';
 import { SiteField } from './SiteField';

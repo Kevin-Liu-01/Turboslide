@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
+import { useRef } from 'react';
 
 import { ThemeButton } from '@turboslide/chrome/ThemeButton';
 import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
 
-import { SignInButton } from '../home/sign-in';
+import { useMountEffect } from '../useMountEffect';
 import { NAV } from './copy';
+import { attachSignInSlot } from './sign-in-slot';
 import { SiteIcon } from './SiteIcon';
 import { SiteLink } from './SiteLink';
 
@@ -19,9 +21,9 @@ import { SiteLink } from './SiteLink';
  * under the row keeps the lockup, the slot, the theme button and New Presentation (site.css);
  * under 390 px the lockup keeps its T and drops the word, so the row fits the column.
  *
- * Sign In appears after hydration, once the deployment answers that it offers a method
- * (home/sign-in.tsx); its slot is drawn at its width from the first paint, so its arrival moves
- * nothing already drawn. The skip link comes first in the Tab order and is shown on focus.
+ * Sign In appears once the deployment answers that it offers a method (sign-in-slot.ts, which
+ * this bar calls on mount and /home's static script calls on its load); its slot is drawn at its
+ * width from the first paint, so its arrival moves nothing already drawn. The skip link comes first in the Tab order and is shown on focus.
  *
  * The docs' bar (`docs`, docs/SITE.md section 6): the lockup, then the slot (Documentation and
  * the search field), the theme button and New Presentation; it names
@@ -36,6 +38,8 @@ export function SiteBar({
   skipTo?: string;
   docs?: boolean;
 }) {
+  const signIn = useRef<HTMLSpanElement>(null);
+  useMountEffect(() => (signIn.current === null ? undefined : attachSignInSlot(signIn.current)));
   return (
     <header className="site-bar">
       <a className="site-skip site-btn site-btn-ink site-btn-sm" href={skipTo}>
@@ -71,14 +75,7 @@ export function SiteBar({
         )}
         <div className="site-bar-act">
           <ThemeButton className="site-bar-theme" />
-          {docs ? null : (
-            <span className="site-bar-signin">
-              <SignInButton
-                control="site.nav.signIn"
-                className="site-btn site-btn-quiet site-btn-sm"
-              />
-            </span>
-          )}
+          {docs ? null : <span ref={signIn} className="site-bar-signin" />}
           <SiteLink
             href={NAV.newPresentation.href}
             control={docs ? 'docs.bar.new' : 'site.nav.new'}

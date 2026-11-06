@@ -8,7 +8,8 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import { YouNeedAccess } from '@turboslide/chrome/YouNeedAccess';
 
 import { PageFrame } from '../components/home/PageFrame';
-import { offersSignIn, readSignInFacts } from '../components/home/sign-in';
+import { readSignInFacts } from '../components/home/sign-in';
+import { offersSignIn } from '../components/home/sign-in-facts';
 import { useMountEffect } from '../components/useMountEffect';
 import { RouterLinkSlot } from './-link-slot';
 

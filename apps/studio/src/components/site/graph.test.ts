@@ -51,7 +51,7 @@ function resolveImport(from: string, spec: string): string | null {
   return target === undefined ? null : join(pkg.dir, target);
 }
 
-function walk(entry: string): Set<string> {
+function walk(entry: string, bare: Set<string> = new Set()): Set<string> {
   const seen = new Set<string>();
   const queue = [entry];
   while (queue.length > 0) {
@@ -63,6 +63,7 @@ function walk(entry: string): Set<string> {
       if (spec.includes('?url')) continue;
       const next = resolveImport(file, spec);
       if (next !== null) queue.push(next);
+      else if (!spec.startsWith('.')) bare.add(spec);
     }
   }
   return seen;
@@ -92,8 +93,41 @@ describe("the landing's module graph", () => {
         file === 'packages/schema/src/shapes.ts' ||
         file.startsWith('packages/schema/src/shapes/') ||
         (file.startsWith('apps/studio/src/components/home/') &&
-          file !== 'apps/studio/src/components/home/sign-in.tsx'),
+          file !== 'apps/studio/src/components/home/sign-in-facts.ts'),
     );
     expect(forbidden).toEqual([]);
+  });
+});
+
+/* /home's own script (docs/SITE.md D13): the server's render of /home loads it alone, bundled on
+   its own, so its graph holds no React, no router, no component and no stylesheet (a stylesheet
+   would not survive the worker pipeline that bundles it, routes/__root.tsx PAGE_SCRIPTS) */
+const scriptPackages = new Set<string>();
+const script = [
+  ...walk(join(ROOT, 'apps/studio/src/components/site/home-entry.ts'), scriptPackages),
+].map(rel);
+
+describe("/home's static script", () => {
+  it('attaches the behaviours through the modules the components call', () => {
+    for (const file of [
+      'field-canvas.ts',
+      'frame-boxes.ts',
+      'avatar-stack.ts',
+      'appearance.ts',
+      'sign-in-slot.ts',
+    ])
+      expect(script).toContain(`apps/studio/src/components/site/${file}`);
+    expect(script).toContain('packages/chrome/src/tip.ts');
+    expect(script).toContain('packages/viewer/src/theme-state.ts');
+  });
+
+  it('reaches no React, no router, no component and no stylesheet', () => {
+    expect(
+      [...scriptPackages].filter((spec) => /^(?:react|react-dom|scheduler|@tanstack\/)/.test(spec)),
+    ).toEqual([]);
+    expect(script.filter((file) => /\.(?:tsx|css)$/.test(file))).toEqual([]);
+    expect(script).not.toContain('packages/viewer/src/theme.ts');
+    expect(script).not.toContain('packages/viewer/src/dither.ts');
+    expect(script).not.toContain('packages/chrome/src/Layer.ts');
   });
 });

@@ -7,8 +7,8 @@ import { AuthRefusal, cleanDeviceCode } from '@turboslide/chrome/auth/auth-model
 import type { DeviceRequestFacts } from '@turboslide/chrome/auth/AuthPlate';
 
 import { MoodFigure } from '../components/home/MoodFigure';
-import { NO_SIGN_IN } from '../components/home/sign-in';
-import type { SignInFacts } from '../components/home/sign-in';
+import { NO_SIGN_IN } from '../components/home/sign-in-facts';
+import type { SignInFacts } from '../components/home/sign-in-facts';
 import { methodsOf, pageActions } from '../components/home/sign-in-auth';
 import { RouterLinkSlot } from './-link-slot';
 

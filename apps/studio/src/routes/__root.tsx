@@ -4,11 +4,13 @@
 import '@turboslide/schema/jitless';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import {
+  Asset,
   HeadContent,
   Scripts,
   createRootRoute,
   useRouter,
   useRouterState,
+  useTags,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
@@ -29,6 +31,7 @@ import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
 
+import homeScript from '../components/site/home-entry.ts?worker&url';
 import { JsonLd } from '../components/site/JsonLd';
 import { NotFoundPage } from '../components/site/NotFoundPage';
 import { siteData } from '../components/site/structured-data';
@@ -277,6 +280,33 @@ function DevtoolsMount() {
   ) : null;
 }
 
+/**
+ * The static pages and their own scripts (docs/SITE.md D13; Kevin, 2026-11-05, for the first
+ * script budget of 120,000 B, `home.budget.first-script`): the server's render of such a page
+ * links no module of the client router, React or the app, neither the entry nor its preloads, and
+ * loads the page's one script instead, which attaches the page's behaviours to the markup through
+ * the functions its components call. The script is bundled on its own through Vite's worker
+ * pipeline (`?worker&url`), the one Vite path that builds a module into a file of its own and
+ * gives both environments its address; it is a page script, not a worker, and no `import()` is
+ * involved. A document the client router already runs reached the page by a client navigation, so
+ * the components render and attach themselves there and the client render keeps the router's tags.
+ */
+const PAGE_SCRIPTS: ReadonlyMap<string, string> = new Map([['/home', homeScript]]);
+
+/** The route's head tags without the client router's module preloads, for a static page. */
+function StaticHeadContent({ nonce }: { nonce: string | undefined }) {
+  const tags = useTags().filter(
+    (tag) => !(tag.tag === 'link' && tag.attrs?.rel === 'modulepreload'),
+  );
+  return (
+    <>
+      {tags.map((tag) => (
+        <Asset {...tag} key={`tsr-meta-${JSON.stringify(tag)}`} nonce={nonce} />
+      ))}
+    </>
+  );
+}
+
 function RootDocument({ children }: { children: ReactNode }) {
   /* the request's CSP nonce (SPEC-3 8.8): the router carries it from the security headers middleware
      (router.tsx requestNonce); the browser hides the attribute once the script ran, so the hydration
@@ -286,6 +316,13 @@ function RootDocument({ children }: { children: ReactNode }) {
   const slideless = useRouterState({
     select: (state) => drawsNoSlide(state.matches.map((match) => match.routeId)),
   });
+  /* a static page's own script, on the server's render alone: in the browser the router runs only
+     in a document that reached the page by a client navigation, where its components attach
+     themselves */
+  const leafScript = useRouterState({
+    select: (state) => PAGE_SCRIPTS.get(state.matches.at(-1)?.routeId ?? '') ?? null,
+  });
+  const pageScript = import.meta.env.SSR ? leafScript : null;
   /* a client navigation away from the measured pages turns analytics off for the rest of the
      document before the new route renders its title (-analytics.ts) */
   useMountEffect(() =>
@@ -308,7 +345,7 @@ function RootDocument({ children }: { children: ReactNode }) {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: SHELL_BOOT_SCRIPT }}
         />
-        <HeadContent />
+        {pageScript === null ? <HeadContent /> : <StaticHeadContent nonce={nonce} />}
         {/* the theme-color meta follows the stamped theme before first paint (SPEC-4 1.6) */}
         <script
           nonce={nonce}
@@ -337,8 +374,12 @@ function RootDocument({ children }: { children: ReactNode }) {
         {children}
         {/* Dev only (SPEC 3.3 item 5): the component is Solid based and must never reach a
             production bundle. The devtools() Vite plugin strips it from builds as well. */}
-        {import.meta.env.DEV ? <DevtoolsMount /> : null}
-        <Scripts />
+        {import.meta.env.DEV && pageScript === null ? <DevtoolsMount /> : null}
+        {pageScript === null ? (
+          <Scripts />
+        ) : (
+          <script type="module" src={pageScript} nonce={nonce} suppressHydrationWarning />
+        )}
       </body>
     </html>
   );

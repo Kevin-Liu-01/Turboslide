@@ -30,7 +30,8 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import { DOWNLOAD_WORDS, downloadFromPage, fileNameOf } from '@turboslide/chrome/download';
 import { GT_COVER } from '@turboslide/theme/brand/site';
 
-import { SignInButton, offersSignIn, readSignInFacts } from '../components/home/sign-in';
+import { SignInButton, readSignInFacts } from '../components/home/sign-in';
+import { offersSignIn } from '../components/home/sign-in-facts';
 import { useMountEffect } from '../components/useMountEffect';
 import {
   RESTORING_STEP_MS,

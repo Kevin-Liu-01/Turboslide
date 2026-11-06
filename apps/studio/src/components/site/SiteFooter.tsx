@@ -1,7 +1,10 @@
+import { useRef } from 'react';
+
 import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
-import { applyTheme, useTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
+import { useMountEffect } from '../useMountEffect';
+import { attachAppearance } from './appearance';
 import { BUILD_COMMIT } from './build';
 import { FOOTER } from './copy';
 import { SiteField } from './SiteField';
@@ -10,15 +13,15 @@ import { SiteLink } from './SiteLink';
 const THEMES: readonly Theme[] = ['light', 'dark'];
 
 /**
- * The appearance switch: Light and Dark as two buttons in one 6 px group. The pressed one is
- * drawn from `html[data-theme]` (site.css), so the first paint is right before any script runs;
- * `aria-pressed` follows the same attribute once the page is hydrated (`useTheme`), and a press
- * goes through `applyTheme`, the way the bar's theme button and the D key do.
+ * The appearance switch: Light and Dark as two buttons in one 6 px group, which `attachAppearance`
+ * (appearance.ts) keeps pressed and answers. The server's `aria-pressed` names dark, the boot
+ * script's default; the pressed look is drawn from `html[data-theme]` (site.css) before any script.
  */
 function AppearanceSwitch() {
-  const theme = useTheme();
+  const group = useRef<HTMLDivElement>(null);
+  useMountEffect(() => (group.current === null ? undefined : attachAppearance(group.current)));
   return (
-    <div className="site-appear" role="group" aria-label={FOOTER.appearance.name}>
+    <div ref={group} className="site-appear" role="group" aria-label={FOOTER.appearance.name}>
       {THEMES.map((value) => (
         <button
           key={value}
@@ -26,8 +29,7 @@ function AppearanceSwitch() {
           className="site-appear-opt"
           data-value={value}
           data-control={`site.foot.appearance.${value}`}
-          aria-pressed={theme === value}
-          onClick={() => applyTheme(value)}
+          aria-pressed={value === 'dark'}
         >
           {FOOTER.appearance[value]}
         </button>

@@ -10,6 +10,7 @@
   "exports": {
     "./model": "./src/model.ts",
     "./theme": "./src/theme.ts",
+    "./theme-state": "./src/theme-state.ts",
     "./hash": "./src/hash.ts",
     "./keys": "./src/keys.ts",
     "./dither": "./src/dither.ts",

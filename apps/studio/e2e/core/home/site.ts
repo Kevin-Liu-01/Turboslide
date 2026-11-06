@@ -648,17 +648,22 @@ export function rows(): void {
     test.setTimeout(120_000);
     const context = await browser.newContext({ extraHTTPHeaders });
     const page = await context.newPage();
-    const scripts: { url: string; bytes: number }[] = [];
+    const loaded: { url: string; bytes: number }[] = [];
     page.on('requestfinished', async (request) => {
-      /* the page's own scripts: the hero's frame is a document of its own (docs/SITE.md D1) */
+      /* the page's scripts: the hero's frame is a document of its own (docs/SITE.md D1) */
       if (request.resourceType() !== 'script' || request.frame() !== page.mainFrame()) return;
       const sizes = await request.sizes().catch(() => null);
-      scripts.push({ url: request.url(), bytes: sizes?.responseBodySize ?? 0 });
+      loaded.push({ url: request.url(), bytes: sizes?.responseBodySize ?? 0 });
     });
     try {
       await page.goto('/home');
       await page.locator('.ts-site[data-hydrated]').waitFor({ timeout: 30_000 });
       await page.waitForLoadState('networkidle');
+      /* the page's own: a script of another origin is not the page's (Google Analytics' gtag.js on
+         production since 2026-10-16, routes/-analytics.ts), so it is named and not counted */
+      const origin = new URL(page.url()).origin;
+      const scripts = loaded.filter((s) => new URL(s.url).origin === origin);
+      const others = loaded.filter((s) => new URL(s.url).origin !== origin);
       const paths = scripts.map((s) => new URL(s.url).pathname);
       /* the router's entry carries editor/refusal.ts (the refused page's sentence table, a module
          with no import) on every route; nothing else of src/editor may load */
@@ -667,11 +672,13 @@ export function rows(): void {
           p,
         ),
       );
-      const dev = paths.some((p) => p.startsWith('/@vite/'));
+      /* a dev server serves the modules one by one from these prefixes; a build from /assets */
+      const dev = paths.some((p) => /^\/(?:@vite|@fs|@id|src|node_modules)\//.test(p));
       const total = scripts.reduce((n, s) => n + s.bytes, 0);
+      const elsewhere = others.reduce((n, s) => n + s.bytes, 0);
       test.info().annotations.push({
         type: 'script',
-        description: `${scripts.length} scripts, ${total} B on the wire${dev ? ' (a dev server: modules one by one, the byte line is read on a build)' : ''}`,
+        description: `${scripts.length} scripts, ${total} B on the wire${dev ? ' (a dev server: modules one by one, the byte line is read on a build)' : ''}; ${others.length} of other origins, ${elsewhere} B, not counted`,
       });
       expect(editor, 'no editor module on the landing').toEqual([]);
       if (!dev) expect(total, "the page's own script under 120,000 B gzip").toBeLessThan(120_000);

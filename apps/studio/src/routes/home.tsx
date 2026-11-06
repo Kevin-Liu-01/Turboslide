@@ -29,6 +29,14 @@ import { useMountEffect } from '../components/useMountEffect';
  * `data-hydrated` once the handlers are attached, and the Speculation Rules of SPEC-4 0.42
  * (`prerender` for `/new` at `moderate` eagerness, `prefetch` for `/decks` and `/deck/gt-brand`).
  * The root is a block that holds the bar, `main` and the footer, so each keeps its landmark.
+ *
+ * A static page since 2026-11-05 (docs/SITE.md D13): the server's render loads no client router,
+ * React or app module, only home-entry.ts, which attaches the behaviours and stamps
+ * `data-hydrated` (routes/__root.tsx `PAGE_SCRIPTS`). This component renders the same markup and,
+ * when /home is reached by a client navigation from a page the router runs, its components attach
+ * themselves and HomePage stamps `data-hydrated`. The page's links are document navigations from
+ * a static load, so the rules also prefetch every page of this origin a link names once the
+ * pointer rests on it (`moderate`), as the router's intent preload did.
  */
 export const Route = createFileRoute('/home')({
   head: () => ({
@@ -52,7 +60,10 @@ export const Route = createFileRoute('/home')({
 /** The rules of 0.42 as the browser reads them (Chrome and Edge; others ignore the script). */
 export const SPECULATION_RULES = {
   prerender: [{ source: 'list', urls: ['/new'], eagerness: 'moderate' }],
-  prefetch: [{ source: 'list', urls: ['/decks', '/deck/gt-brand'] }],
+  prefetch: [
+    { source: 'list', urls: ['/decks', '/deck/gt-brand'] },
+    { source: 'document', where: { href_matches: '/*' }, eagerness: 'moderate' },
+  ],
 } as const;
 
 const SPECULATION_RULES_JSON = JSON.stringify(SPECULATION_RULES);

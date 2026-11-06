@@ -1,18 +1,14 @@
-import type { CSSProperties, KeyboardEvent, MouseEvent } from 'react';
-import { useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useRef } from 'react';
 
 import { AGENT_BRANDS, AgentMark } from '@turboslide/chrome/presence/agent-marks';
 import { hueFor } from '@turboslide/identity/hues';
 import { COLLAB_GEOMETRY } from '@turboslide/render/collab';
 
+import { useMountEffect } from '../useMountEffect';
+import { attachAvatarStack } from './avatar-stack';
 import { AGENTS, AVATAR_PRESS, PEOPLE } from './copy';
-import type { TryPressed } from './try-frame';
-
-/** What the title does with a press: the hero hands it to the live editor (HeroBox.tsx). */
-export type OnPress = (who: TryPressed) => void;
-
-/** How long a pressed figure shows its flag, so a touch reads the name too. */
-const PRESSED_MS = 1200;
+import type { OnPress } from './frame-boxes';
 
 /**
  * Where each person's pointer rests in its row, in em of the title: the left edge, then the offset
@@ -56,11 +52,15 @@ function Pointer() {
  * ink with the name in paper at the side the editor's flag takes (site.css).
  *
  * Each figure is a button named by its person or tool, with what pressing does as its
- * description; pressing hands the person or the agent to the live editor below (`onPress`), where
- * the same pointer or mark appears. The row is one tab stop: the arrow keys move along it, Home and
- * End go to its ends, and Enter and Space press.
+ * description; `attachAvatarStack` (avatar-stack.ts) hands a pressed person or agent to the live
+ * editor below (`onPress`) and moves the row's one tab stop with the arrow keys. This component
+ * calls it on mount; on /home's static load the page's script does (home-entry.ts).
  */
 export function AvatarStack({ kind, onPress }: { kind: 'people' | 'agents'; onPress?: OnPress }) {
+  const stack = useRef<HTMLSpanElement>(null);
+  useMountEffect(() =>
+    stack.current === null ? undefined : attachAvatarStack(stack.current, onPress),
+  );
   const rows =
     kind === 'people'
       ? PEOPLE.map((person, i) => {
@@ -68,7 +68,7 @@ export function AvatarStack({ kind, onPress }: { kind: 'people' | 'agents'; onPr
           return {
             key: person.name,
             name: person.name,
-            who: { kind: 'person', name: person.name, hue: person.hue } as TryPressed,
+            data: { 'data-hue': person.hue },
             brand: null,
             style: {
               '--ts-hue': hueFor(person.hue),
@@ -81,49 +81,18 @@ export function AvatarStack({ kind, onPress }: { kind: 'people' | 'agents'; onPr
       : AGENTS.map((agent, i) => ({
           key: agent.brand,
           name: AGENT_BRANDS[agent.brand].name,
-          who: { kind: 'agent', brand: agent.brand } as TryPressed,
+          data: { 'data-brand': agent.brand },
           brand: agent.brand,
           style: { '--i': i } as CSSProperties,
         }));
-  /* the figure that takes the row's one tab stop: the last one focused */
-  const [current, setCurrent] = useState(0);
-  const press = (event: MouseEvent<HTMLButtonElement>, who: TryPressed): void => {
-    const button = event.currentTarget;
-    /* the figure clicks once (site.css); a second press restarts it */
-    delete button.dataset.pressed;
-    void button.offsetWidth;
-    button.dataset.pressed = '';
-    window.setTimeout(() => {
-      delete button.dataset.pressed;
-    }, PRESSED_MS);
-    onPress?.(who);
-  };
-  const move = (event: KeyboardEvent<HTMLSpanElement>): void => {
-    const step: Record<string, number> = {
-      ArrowRight: 1,
-      ArrowDown: 1,
-      ArrowLeft: -1,
-      ArrowUp: -1,
-      Home: -rows.length,
-      End: rows.length,
-    };
-    const by = step[event.key];
-    if (by === undefined) return;
-    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('.site-av')];
-    const from = buttons.indexOf(document.activeElement as HTMLButtonElement);
-    const next = Math.min(rows.length - 1, Math.max(0, (from < 0 ? current : from) + by));
-    event.preventDefault();
-    setCurrent(next);
-    buttons[next]?.focus();
-  };
   const describedBy = kind === 'people' ? AVATAR_PRESS.person.id : AVATAR_PRESS.agent.id;
   return (
     <span
+      ref={stack}
       className="site-stack"
       data-stack={kind}
       role="group"
       aria-label={kind === 'people' ? 'People' : 'Agents'}
-      onKeyDown={move}
     >
       {rows.map((row, i) => (
         <button
@@ -132,12 +101,10 @@ export function AvatarStack({ kind, onPress }: { kind: 'people' | 'agents'; onPr
           className={`site-av ${row.brand === null ? 'is-person' : 'is-agent'}`}
           aria-label={row.name}
           aria-describedby={describedBy}
-          tabIndex={i === current ? 0 : -1}
+          tabIndex={i === 0 ? 0 : -1}
           data-name={row.name}
-          {...(row.brand === null ? {} : { 'data-brand': row.brand })}
+          {...row.data}
           style={row.style}
-          onFocus={() => setCurrent(i)}
-          onClick={(event) => press(event, row.who)}
         >
           {row.brand === null ? <Pointer /> : <AgentMark brand={row.brand} size={24} />}
         </button>

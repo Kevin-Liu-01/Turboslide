@@ -1,6 +1,6 @@
 import { AvatarStack } from './AvatarStack';
-import type { OnPress } from './AvatarStack';
 import { TITLE, TITLE_TEXT } from './copy';
+import type { OnPress } from './frame-boxes';
 
 /**
  * The landing's h1, "Presentations for people and agents" (docs/SITE.md B), set on two lines that

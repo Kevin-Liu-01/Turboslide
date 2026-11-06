@@ -845,6 +845,16 @@ mark? })`, `TitleHomeLink` (`title.home`), and `Progress` with the deck's ramp m
     `lazyRouteComponent` importers are the Start plugin's, and the `import()` calls inside server
     function handlers (`apps/studio/src/server/*.ts`, `start.ts`) and the Node only packages are
     the server's, keeping those imports out of the client graph.
+  - Static pages (docs/SITE.md D13; 2026-11-05): `/home`'s server render loads no client router,
+    React or app module, only its own script, `apps/studio/src/components/site/home-entry.ts`,
+    named in `PAGE_SCRIPTS` of `routes/__root.tsx` and bundled alone through Vite's `?worker&url`
+    (a page script, not a worker, and no `import()`). It attaches the page's behaviours through
+    the framework free modules the components call on mount, so `/home` reached by a client
+    navigation behaves the same. Its graph imports no React, router, `.tsx` or stylesheet
+    (`components/site/graph.test.ts`), which is why the chrome's tooltip manager (`tip.ts`), its
+    top layer manager (`top-layer.ts`) and the viewer's document theme (`theme-state.ts`) are
+    modules of their own; `Tooltip.tsx`, `Layer.ts` and `theme.ts` keep the React parts and
+    re-export the moved names.
   - The studio side of the seams as merge 2 installed them (B3's days 2 to 5, b3.md R10):
     `apps/studio/src/routes/-link-slot.tsx` `RouterLinkSlot` is the router's `Link` as the
     chrome's `LinkComponent` slot (`EditorRoot` fills `linkComponent` with it, `AppBarBrand` on

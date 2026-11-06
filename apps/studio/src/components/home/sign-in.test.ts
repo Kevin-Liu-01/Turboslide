@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { NO_SIGN_IN, SIGN_IN_WORDS, offersSignIn } from './sign-in';
+import { NO_SIGN_IN, SIGN_IN_WORDS, offersSignIn } from './sign-in-facts';
 
-// Sign In on the pages outside the editor (sign-in.tsx; docs/NEXT.md 4.1.2): drawn only where the
+// Sign In on the pages outside the editor (sign-in-facts.ts; docs/NEXT.md 4.1.2): drawn only where the
 // deployment offers a method; it opens the one Sign in dialog (the design round, DR-D5#2b).
 
 describe('the page Sign In', () => {

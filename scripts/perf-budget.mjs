@@ -539,10 +539,13 @@ function assertFlag(check, name, ok, asserted) {
   );
 }
 
-/** SPEC-4 2.3, 0.47 and docs/archive/rounds/POLISH.md 3.5: the LCP element of /home is the hero picture (a /home/ image since the polish round), the plate's text or the twin. The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
+/** SPEC-4 2.3, 0.47 and docs/archive/rounds/POLISH.md 3.5: the LCP element of /home is the hero picture, the plate's text or the twin. The hero picture was a /home/ image from the polish round; since the site build it is the poster of components/site/pictures, emitted as a hashed asset (/assets/hero-1280-light-<hash>.webp, hero-358 on a phone). The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
 function lcpIsPlateOrTwin(el, url) {
   if (typeof url === 'string' && /\/brand\//.test(url)) return true;
-  if (typeof url === 'string' && /\/home\//.test(url) && /^IMG(?:\.|$)/.test(el ?? '')) return true;
+  const picture = /^IMG(?:\.|$)/.test(el ?? '');
+  if (typeof url === 'string' && picture && /\/home\//.test(url)) return true;
+  if (typeof url === 'string' && picture && /\/hero-\d+-(?:light|dark)[-.][^/]*$/.test(url))
+    return true;
   return typeof el === 'string' && /^(?:H1|H2|P|SPAN|A|STRONG|EM)(?:\.|$)/.test(el);
 }
 

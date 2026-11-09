@@ -187,9 +187,12 @@ notes.push(
 for (const dir of presentServers) {
   for (const file of walk(dir)) {
     const rel = relative(dist, file);
+    // a chunk is a script: the loose match on the file name reads script files alone, so a
+    // picture the materials ship (previews/pulsing-border--solid-line.webp) is not a Solid chunk
+    const base = rel.split('/').pop() ?? '';
     const nameHit =
       SOLID_PATTERNS.find((p) => p.test(rel)) ||
-      (/solid/i.test(rel.split('/').pop() ?? '') ? /solid/i : null);
+      (/\.[cm]?js$/.test(base) && /solid/i.test(base) ? /solid/i : null);
     if (nameHit) failures.push(`Solid or devtools chunk in server output (file name): ${rel}`);
     if (!isTextFile(file)) continue;
     const text = readFileSync(file, 'utf8');

@@ -60,7 +60,12 @@ export function DocsShell({ children }: { children: ReactNode }) {
   );
 
   const openSearch = (): void => {
-    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    /* a second Cmd+K, or "/" on a result, from inside the open window keeps the first opener:
+       the field it would record leaves the page with the window, and the focus fell to the body */
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) opener.current = null;
+    else if (active.closest('[data-control="docs.search.window"]') === null)
+      opener.current = active;
     if (contents.current !== null) contents.current.open = false;
     setSearching(true);
   };

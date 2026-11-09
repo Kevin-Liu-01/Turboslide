@@ -88,6 +88,18 @@ export default function SearchWindow({ onClose }: { onClose: () => void }) {
         aria-label="Search the documentation"
         data-control="docs.search.window"
         onKeyDown={(event) => {
+          if (event.key === 'Tab') {
+            /* the window says it is modal and the layer does not make the page inert, so Tab
+               turns at the window's ends: the field and the result links */
+            const stops = Array.from(
+              event.currentTarget.querySelectorAll<HTMLElement>('input, a[href]'),
+            );
+            const edge = event.shiftKey ? stops[0] : stops[stops.length - 1];
+            if (edge === undefined || document.activeElement !== edge) return;
+            event.preventDefault();
+            (event.shiftKey ? stops[stops.length - 1] : stops[0])?.focus();
+            return;
+          }
           if (event.key === 'Escape') onClose();
           else if (event.key === 'ArrowDown') setAt((was) => Math.min(was + 1, hits.length - 1));
           else if (event.key === 'ArrowUp') setAt((was) => Math.max(was - 1, 0));

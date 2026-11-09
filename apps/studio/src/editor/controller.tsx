@@ -2629,12 +2629,25 @@ export function createEditorController(init: {
     if (keyClock.first === null) keyClock.first = now;
     keyClock.last = now;
   };
-  if (typeof document !== 'undefined') {
+  /* the four listeners live from start() to stop(): added at creation they were never removed,
+     so every controller a page ever made (one per editor mount, one per guest visit of the
+     landing's frame, try/session.ts) stayed reachable from the document and read every key */
+  const listen = (): void => {
+    if (typeof document === 'undefined') return;
     document.addEventListener('pointerdown', onPointerHeld, true);
     document.addEventListener('pointerup', onPointerFree, true);
     document.addEventListener('pointercancel', onPointerFree, true);
     document.addEventListener('keydown', onKeyStroke, true);
-  }
+  };
+  const unlisten = (): void => {
+    if (typeof document === 'undefined') return;
+    document.removeEventListener('pointerdown', onPointerHeld, true);
+    document.removeEventListener('pointerup', onPointerFree, true);
+    document.removeEventListener('pointercancel', onPointerFree, true);
+    document.removeEventListener('keydown', onKeyStroke, true);
+    /* a press that was down at the stop has no release to wait for */
+    pointerHeld = false;
+  };
   const openNamePrompt = (): void => {
     promptedName = true;
     namePromptDue = false;
@@ -4790,6 +4803,7 @@ export function createEditorController(init: {
     start() {
       if (alive) return;
       alive = true;
+      listen();
       setDocument(snapshot.document, 'all');
       // the room (SPEC-3 3.6): a stored deck opens its stream now; a draft opens it on its first write
       if (init.payload.draft !== true) {
@@ -4805,6 +4819,7 @@ export function createEditorController(init: {
     },
     stop() {
       alive = false;
+      unlisten();
       shaderFrames.dispose();
       const client = room;
       room = null;

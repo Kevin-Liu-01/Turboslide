@@ -174,19 +174,6 @@
   border-bottom: 1px solid var(--pt-hair-soft);
 }
 
-/* the whole-window banner over a read only editor (a trashed presentation) */
-.ts-shell-banner {
-  grid-column: 1 / -1;
-  grid-row: 4;
-  align-self: start;
-  z-index: var(--ts-layer-docked);
-  margin: 8px 16px;
-  padding: 8px 12px;
-  background: var(--pt-ink);
-  color: var(--pt-paper);
-  font: 13px/1.4 var(--pt-text);
-}
-
 @media (max-width: 900px) {
   .pt-viewer.is-editor,
   .pt-viewer.is-editor[data-rpanel],

@@ -297,6 +297,11 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
         `action must be one of ${SERVER_SIDE_WINDOW_ACTIONS.join(', ')}; the rest run in the page`,
       );
     }
+    // an action the table gives no window transport is not a page's to run, whatever list names
+    // it: `logo.refresh` is the index route's action, for the agent bearer and the cron secret
+    // (docs/archive/rounds/FEATURES.md 4.2), and a browser reached the rebuild through here
+    if (!ACTIONS[parsed.action].transports.includes('window'))
+      throw new TypeError(`${parsed.action} has no window transport`);
     const author = authorSchema.safeParse(parsed.author);
     if (!author.success) throw new TypeError('author must be { kind, name, runId? }');
     // the action's own schema runs in the dispatcher (InvalidInputError with the pointer); this

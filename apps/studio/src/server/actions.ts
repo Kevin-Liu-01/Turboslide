@@ -90,6 +90,7 @@ import {
 } from './authorize';
 import type { AuthContext, NamedDeckCheck } from './authorize';
 import {
+  ADMIN_ONLY,
   registerAccountActions,
   registerAdminActions as registerAccountAdminActions,
 } from './auth/actions';
@@ -1311,12 +1312,16 @@ function registerSlideImport(
 /**
  * `admin.flag` (gslides-parity SPEC-3 0.33, 8.12): reads or flips a kill switch through
  * server/flags.ts; every instance reads the change within 5 s. The window and HTTP transports
- * reach it through the dispatcher like every action; `authorize()` ran before (an admin only
- * action by the capability table once the record store binds; the bootstrap bearer and the
- * checkout holder are the admin today).
+ * reach it through the dispatcher like every action. The handler decides the caller itself: the
+ * deployment admin alone (an admin account, the bootstrap bearer, the checkout holder;
+ * `callerFactsFor`). The agent routes refuse `admin.*` at their gate (agent-gate.ts
+ * `isDeploymentAdmin`), but the editor's server function decides only `read` on the page's deck
+ * for an action with no deck of its own (agent-actions.ts), so without this check any visitor's
+ * browser flipped a switch for the whole deployment.
  */
-function registerAdminActions(dispatcher: Dispatcher): void {
+function registerAdminActions(dispatcher: Dispatcher, caller: Caller): void {
   dispatcher.register('admin.flag', async (input) => {
+    if (caller.admin !== true) throw new ForbiddenError(ADMIN_ONLY);
     const { name, on } = input as { name: FlagName; on?: boolean };
     if (on !== undefined) await setFlag(name, on);
     const value = await flagOn(name);
@@ -1541,7 +1546,7 @@ export async function deckDispatcher(
     },
   });
   registerWorkerActions(dispatcher, deckId, store);
-  registerAdminActions(dispatcher);
+  registerAdminActions(dispatcher, facts.caller);
   const view = viewScopeOf(facts);
   const session =
     options.withView && view.allowed

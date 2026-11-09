@@ -437,10 +437,15 @@ export function attachField(
       const image = new Image();
       image.decoding = 'async';
       image.src = src;
+      /* a picture that does not load or decode leaves the field undrawn (build needs it); with
+         no catch it was also an unhandled rejection on every load of the page */
       loads.push(
-        image.decode().then(() => {
-          picture = image;
-        }),
+        image.decode().then(
+          () => {
+            picture = image;
+          },
+          () => undefined,
+        ),
       );
     }
     void Promise.all(loads).then(() => {

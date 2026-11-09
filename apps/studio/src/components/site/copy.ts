@@ -183,8 +183,8 @@ export const FOOTER = {
   ],
   made: { before: 'Made by', name: 'Kevin Liu', href: MAKER },
   build: {
-    label: 'Build',
-    name: (commit: string): string => `Build ${commit}, the commit on GitHub`,
+    label: 'Version 1',
+    name: (commit: string): string => `Version 1 at ${commit}, the commit on GitHub`,
     href: (commit: string): string => `${REPOSITORY}/commit/${commit}`,
   },
   appearance: { name: 'Appearance', light: 'Light', dark: 'Dark' },

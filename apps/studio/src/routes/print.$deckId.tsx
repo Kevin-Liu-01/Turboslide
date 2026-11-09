@@ -136,10 +136,24 @@ function sleep(ms: number): Promise<void> {
 function PrintPage() {
   /* the request's CSP nonce (router.tsx requestNonce), so the enforced policy of the document
      routes runs the fit script below (HR-W#2); the browser hides the attribute after the run */
-  const nonce = useRouter().options.ssr?.nonce;
+  const router = useRouter();
+  const nonce = router.options.ssr?.nonce;
   const payload = Route.useLoaderData();
   const search = Route.useSearch();
   const { deckId } = Route.useParams();
+  /* Esc is the key Close Preview's tooltip names. A key something on the page took first (the
+     layout dropdown closing its list) is left to it, and the return is the cut the link makes
+     (no view transition, the comment on the link says why) */
+  useMountEffect(() => {
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      event.preventDefault();
+      void router.navigate({ to: '/edit/$deckId', params: { deckId }, viewTransition: false });
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  });
   const snackbar = useSnackbar();
   const [layout, setLayout] = useState<PrintLayout>(search.layout ?? 'slides');
   const [includeSkipped, setIncludeSkipped] = useState(search.skipped === 1);

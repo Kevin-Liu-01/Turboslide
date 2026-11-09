@@ -203,4 +203,31 @@ describe('the second click on a selected text box (AMENDMENTS.md A2)', () => {
     click(run(m), 1, 24);
     expect(editing(m)).toBe(false);
   });
+
+  /* a press whose release never comes: the browser cancels the pointer (a touch that became a
+     scroll) or the window loses focus with the button down (Cmd Tab). The press must not stay
+     armed, or the next release anywhere runs its tap and the next movement drags the box */
+  for (const end of ['pointercancel', 'blur'] as const) {
+    it(`disarms the press on the selected box when the window sees ${end} before a release`, () => {
+      mounted = mount();
+      const m = mounted;
+      click(run(m), 1);
+      const at = { clientX: 300, clientY: 240 };
+      act(() => {
+        run(m).dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, button: 0, ...at }));
+        run(m).dispatchEvent(
+          new MouseEvent('mousedown', { bubbles: true, button: 0, detail: 1, ...at }),
+        );
+      });
+      act(() => {
+        window.dispatchEvent(new Event(end));
+      });
+      /* a later release that belongs to no press of the stage opens nothing */
+      act(() => {
+        window.dispatchEvent(new MouseEvent('pointerup', { button: 0, ...at }));
+      });
+      expect(editing(m)).toBe(false);
+      expect(m.dispatch).not.toHaveBeenCalled();
+    });
+  }
 });

@@ -6530,17 +6530,25 @@ export function Editor({
    * pointer up before that is a tap, which runs what the press named (a table cell's caret, a
    * chart mark's cell, the second click's text session, AMENDMENTS.md A2) at the release point
    * and nothing else. The press is disarmed before the tap runs, so a session the tap opens never
-   * finds a drag armed under it.
+   * finds a drag armed under it. The browser's cancel (a touch that became a scroll) and the
+   * window losing focus before the release (Cmd Tab with the button down) disarm it too, with no
+   * tap: no release will come, and an arm left behind turned the next pointer movement, with no
+   * button down, into a drag of this object.
    */
   const armPress = (next: Press) => {
     press.current = next;
+    const disarm = () => {
+      press.current = null;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', disarm);
+      window.removeEventListener('blur', disarm);
+    };
     const move = (ev: PointerEvent) => {
       const p = press.current;
       if (!p) return;
       if (Math.hypot(ev.clientX - p.clientX, ev.clientY - p.clientY) < DRAG_START_PX) return;
-      press.current = null;
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
+      disarm();
       const slideNow = slideRef.current;
       if (!slideNow) return;
       const ids = selectedIds(selectionRef.current, extraRef.current);
@@ -6549,13 +6557,13 @@ export function Editor({
     };
     const up = (ev: PointerEvent) => {
       const p = press.current;
-      press.current = null;
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
+      disarm();
       p?.tap?.({ x: ev.clientX, y: ev.clientY, target: ev.target });
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', disarm);
+    window.addEventListener('blur', disarm);
   };
 
   /** A press on the empty sheet or the workspace drags a marquee over the objects' bounding boxes; a plain click clears (SPEC-2 6.1 row 3, 0.100). */

@@ -1636,7 +1636,7 @@ export const markBlockSchema = z.strictObject({
     label: 'Width',
     control: 'number',
     group: 'Layout',
-    help: 'The symbol is 1213 by 771, so width is 1.573 times height (report 03 section 4.5).',
+    help: 'The logo is square, so width equals height; a wider box draws it at its height, at the left.',
   }),
   h: annotate(z.number().positive(), { label: 'Height', control: 'number', group: 'Layout' }),
 }) satisfies z.ZodType<MarkBlock>;

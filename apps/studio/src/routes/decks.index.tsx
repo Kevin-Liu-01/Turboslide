@@ -1792,7 +1792,7 @@ export function Thumb({
 function GtBrandCover() {
   return (
     <span className="ts-template-cover">
-      <GtMark width={56} height={36} />
+      <GtMark size={36} />
       <img
         src={GT_BRAND_COVER}
         width={GT_COVER.width}

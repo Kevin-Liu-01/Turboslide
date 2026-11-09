@@ -11574,9 +11574,9 @@
                 "label": "Width",
                 "control": "number",
                 "group": "Layout",
-                "help": "The symbol is 1213 by 771, so width is 1.573 times height (report 03 section 4.5)."
+                "help": "The logo is square, so width equals height; a wider box draws it at its height, at the left."
               },
-              "description": "The symbol is 1213 by 771, so width is 1.573 times height (report 03 section 4.5)."
+              "description": "The logo is square, so width equals height; a wider box draws it at its height, at the left."
             },
             "h": {
               "type": "number",

@@ -77,8 +77,8 @@ export function renderMark(block: BlockOf<'mark'>, ctx: BlockContext): string {
 
 /**
  * `markSizes`: the compression specimen of s17:3-6 and s17:13-17: one column per size, the mark at
- * the size on a rule with a 16 px caption naming the size. The symbol is 1213 by 771 units, so the
- * height is the width over 1.573 rounded the way the slide rounds it.
+ * the size on a rule with a 16 px caption naming the size. The symbol is the square logo, so the
+ * height is the width (Prototemplate a45c5ac5, slide 25).
  */
 export function renderMarkSizes(block: BlockOf<'markSizes'>, ctx: BlockContext): string {
   const labels: Record<number, string> = {
@@ -101,10 +101,9 @@ export function renderMarkSizes(block: BlockOf<'markSizes'>, ctx: BlockContext):
   return el('div', rootAttrs(block, ctx, { className: 'sizes' }), cells);
 }
 
-/** The heights the slide gives the mark at each width (s17:13-17). */
+/** The height the slide gives the mark at a width: the logo is square (slide 25). */
 export function markHeight(width: number): number {
-  const known: Record<number, number> = { 16: 10, 32: 20, 64: 41, 128: 81, 256: 163 };
-  return known[width] ?? Math.round(width / 1.573);
+  return width;
 }
 
 /** `matrix`: the 4 by 4 Bayer table of s26:9-18 as a ruled grid of tabular numerals. */

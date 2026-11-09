@@ -154,10 +154,10 @@ async function sparklesIn(page: Page, selector: string) {
   );
 }
 
-/** The head of the GT monogram's path (packages/chrome/src/GtMark.tsx), drawn by the GT deck alone. */
-const GT_MARK_D = 'M363 222.5L1197 222.5';
+/** The head of the GT logo's path (packages/chrome/src/GtMark.tsx), drawn by the GT deck alone. */
+const GT_MARK_D = 'M225.36 163.71C223.32 169.27';
 
-/** The GT monograms drawn in the chrome, outside any slide. */
+/** The GT logos drawn in the chrome, outside any slide. */
 async function gtMarks(page: Page) {
   return page.evaluate((head) => {
     return [...document.querySelectorAll('path')].filter(
@@ -531,7 +531,7 @@ export function chromeRound1(): string[] {
         `the Turboslide mark on ${where}`,
       ).toBeGreaterThan(0);
     for (const where of ['editorGt', 'decksGt', 'viewGt'] as const)
-      expect(marks[where], `no GT monogram outside a GT deck on ${where}`).toBe(0);
+      expect(marks[where], `no GT logo outside a GT deck on ${where}`).toBe(0);
     expect(bannerHasGlyph, "the CLI banner draws the brand module's glyph").toBe(true);
   });
 

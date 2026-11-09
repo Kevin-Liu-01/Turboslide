@@ -942,7 +942,7 @@ export function ThemesPanel({ document, render, commit, onNotice, onClose }: The
             {markKind === 'picture' && logoSrc !== undefined ? (
               <img src={logoSrc} alt="" />
             ) : markKind === 'none' ? null : (
-              <svg width="66" height="42" fill="currentColor" aria-hidden="true">
+              <svg width="42" height="42" fill="currentColor" aria-hidden="true">
                 <use href="#gt-mark" />
               </svg>
             )}

@@ -70,7 +70,7 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 /* sidebar: the slide list; its right edge is the seam with the stage (line law) */
 .sb { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--hair); background: var(--paper); }
 .sb-head { height: var(--bar-h); flex: 0 0 var(--bar-h); display: flex; align-items: center; gap: 8px; padding: 0 12px; border-bottom: 1px solid var(--hair); }
-.sb-head svg { width: 22px; height: 14px; color: var(--ink); flex: 0 0 auto; }
+.sb-head svg { width: 16px; height: 16px; color: var(--ink); flex: 0 0 auto; }
 .sb-head b { font-family: var(--display); font-weight: 500; font-size: 13.5px; letter-spacing: -0.01em; white-space: nowrap; }
 .sb-head span { margin-left: auto; font-size: 12px; color: var(--titanium); font-variant-numeric: var(--numerals); white-space: nowrap; }
 .thumbs { flex: 1 1 auto; padding: 6px 8px 28px 8px; display: flex; flex-direction: column; gap: 10px; }
@@ -96,7 +96,7 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(
 .toolbar .count b { color: var(--ink); font-weight: 500; font-family: var(--display); font-size: 14px; }
 .toolbar .sep { width: 1px; height: 22px; background: var(--hair); margin: 0 8px; }
 .bar-brand { display: none; align-items: center; gap: 10px; padding: 0 6px; }
-.bar-brand svg { width: 25px; height: 16px; color: var(--ink); }
+.bar-brand svg { width: 16px; height: 16px; color: var(--ink); }
 .bar-brand b { font-family: var(--display); font-weight: 500; font-size: 14.5px; letter-spacing: -0.01em; white-space: nowrap; }
 .viewer.no-sb .bar-brand, .viewer.is-overview .bar-brand { display: inline-flex; }
 .ib { appearance: none; background: none; border: 1px solid transparent; color: var(--ink-2); font: 13px/1 var(--text); height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; white-space: nowrap; border-radius: var(--radius); }

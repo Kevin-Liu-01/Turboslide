@@ -208,7 +208,9 @@ describe.skipIf(skip)('measureCanvas in Chromium (SPEC-2 1.3)', () => {
     for (const id of ['mark', 'heading', 'lead']) {
       const was = record[id];
       const box = id === 'mark' ? boxes?.mark : boxes?.blocks[id];
-      expect(rounded(box), id).toEqual([was?.x, was?.y, was?.w, was?.h]);
+      // the GT logo is square: the record's 132 by 84 slot draws it 84 square at the slot's left
+      const w = id === 'mark' ? Math.min(was?.w ?? 0, was?.h ?? 0) : was?.w;
+      expect(rounded(box), id).toEqual([was?.x, was?.y, w, was?.h]);
     }
     expect(boxes?.prompted).toEqual([]);
     // the measured boxes are the layout's, at 1/64 px: the centred heading sits at a fraction
@@ -234,8 +236,9 @@ describe.skipIf(skip)('measureCanvas in Chromium (SPEC-2 1.3)', () => {
       expect(boxes?.plate, `${id} plate`).toBeDefined();
       expect((boxes?.plate ?? [0, 0, 0, 0])[2], `${id} plate width`).toBeGreaterThan(100);
     }
-    expect(rounded(measured.get('closing-source')?.mark).slice(2)).toEqual([138, 88]);
-    expect(rounded(measured.get('title-source')?.mark).slice(2)).toEqual([132, 84]);
+    // the square GT logo in the closing's 138 by 88 slot and the title's 132 by 84 slot
+    expect(rounded(measured.get('closing-source')?.mark).slice(2)).toEqual([88, 88]);
+    expect(rounded(measured.get('title-source')?.mark).slice(2)).toEqual([84, 84]);
     expect(measured.get('statement-source')?.blocks['big']).toBeDefined();
     expect(measured.get('statement-source')?.mark).toBeUndefined();
     expect(measured.get('statement-source')?.picture).toBeUndefined();
@@ -267,7 +270,7 @@ describe.skipIf(skip)('measureCanvas in Chromium (SPEC-2 1.3)', () => {
     // the prompt's box is where the stage draws the h1 and the lead of the fixture's title
     expect(boxes?.blocks['heading']?.[0]).toBe(137);
     expect(boxes?.blocks['lead']?.[0]).toBe(137);
-    expect(rounded(boxes?.mark).slice(2)).toEqual([132, 84]);
+    expect(rounded(boxes?.mark).slice(2)).toEqual([84, 84]);
     // the prompt is not content: the fit sees no text in the empty placeholders
     expect(fits.get('fresh-title')?.['heading']?.contentHeight).toBeUndefined();
   });

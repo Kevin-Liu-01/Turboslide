@@ -471,7 +471,7 @@ function HalfOfGlyph({
         color: ground === 'paper' ? grounds.paperText : grounds.inkText,
       }}
     >
-      <svg className="ts-logo-glyph" viewBox="0 0 1213 771" aria-hidden="true">
+      <svg className="ts-logo-glyph" viewBox="0 0 207.4 207.4" aria-hidden="true">
         <use href="#gt-mark" />
       </svg>
     </span>

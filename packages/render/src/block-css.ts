@@ -43,6 +43,8 @@ export const BLOCK_CSS = `
 .ts-sheet .mood-plate p { margin-top: 12px; color: var(--ink); }
 .ts-sheet .s-closing .opener-plate { top: 0; bottom: auto; max-width: 720px; }
 .ts-sheet .s-closing .opener-plate .mark { display: block; width: 138px; height: 88px; fill: currentColor; margin-bottom: 24px; }
+/* the GT logo is square (Prototemplate a45c5ac5: 88 by 88); a kit's picture keeps the 138 by 88 slot */
+.ts-sheet .s-closing .opener-plate svg.mark { width: 88px; }
 
 /* ---- layouts ---- */
 /* the head of a split as two columns (s21:4, s34:3-5, s38:3-5, s61:4-5, s80:4-6) */
@@ -140,7 +142,7 @@ export const BLOCK_CSS = `
 .ts-sheet .lineage figure { margin: 0; }
 .ts-sheet .lineage .plate { display: grid; place-items: center; height: 90px; background: #ffffff; border: 1px solid var(--hair); }
 .ts-sheet .lineage img { display: block; height: 56px; width: auto; }
-.ts-sheet .lineage svg { display: block; height: 40px; width: 63px; color: #070707; }
+.ts-sheet .lineage svg { display: block; height: 52px; width: 52px; color: #070707; }
 .ts-sheet .lineage figcaption { margin-top: 8px; font-size: 15px; line-height: 1.4; color: var(--ink-2); }
 
 /* ---- panel variants ---- */
@@ -238,13 +240,15 @@ export const BLOCK_CSS = `
    docs/archive/rounds/OBJECTS.md 3.3 item 3); at the box the conversion measured nothing changes, so the
    fidelity gate holds.
    hotfix-4 causes W2 and W8 add the mark object (renderMark writes no size for a positioned mark
-   and the class mark-block; the symbol keeps its ratio inside the box) and the panel object: the
+   and the class mark-block; the square logo takes the box's height, or its width when that is
+   smaller, at the box's left edge, as a kit picture sits at left center and as the sized form
+   does in context.ts markSvg) and the panel object: the
    panel fills its box and the two marks of its term form take half and the whole of the content
    height (16 and 32 at the measured box) with their width from the symbol's ratio (panel.ts
    MARK_VIEW_BOX). The mark rule keys on the class, never on data-type: a surface rendered without
    block attributes (the deck build, the present surface, a flatten sheet) writes no data-type, and
    an unsized svg no rule reaches draws at 300 by 150 (hotfix-4 section 3) */
-.ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: 100%; height: 100%; }
+.ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: auto; max-width: 100%; height: 100%; aspect-ratio: 1; }
 .ts-sheet .free > img.mark-block, .ts-sheet .free > .link > img.mark-block { display: block; width: 100%; height: 100%; object-fit: contain; object-position: left center; }
 .ts-sheet .free > .panel, .ts-sheet .free > .link > .panel { box-sizing: border-box; height: 100%; }
 .ts-sheet .free > .panel.term > svg.mark-s, .ts-sheet .free > .link > .panel.term > svg.mark-s { height: 50%; width: auto; }

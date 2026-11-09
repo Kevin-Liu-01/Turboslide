@@ -47,8 +47,10 @@
     },
     "src/GtMark.tsx": {
       "source": "src/components/viewer/GtMark.tsx",
-      "commit": "229d413e3f8e39ba2e566817d2d291ea5523b136",
-      "changes": []
+      "commit": "a45c5ac57e854a484e76c5fa25b4f4c2358109c0",
+      "changes": [
+        "the path and the viewBox of LOGO (src/lib/logo.ts) are inlined, since the chrome has no @/lib alias"
+      ]
     },
     "src/ToolButton.tsx": {
       "source": "src/components/viewer/ToolButton.tsx",

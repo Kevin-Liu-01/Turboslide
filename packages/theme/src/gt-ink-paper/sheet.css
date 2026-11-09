@@ -324,12 +324,12 @@
 .ts-sheet .gt-word {
   position: relative;
   display: inline-block;
-  vertical-align: -0.008em;
-} /* the symbol's viewBox leaves 8 of 771 units under the glyph, so this lift puts the glyph's foot on the baseline; the glyph itself is 0.724em tall, Inter's cap height */
+  vertical-align: -0.033em;
+} /* the symbol's viewBox is the logo's drawn box; a round mark at Inter's cap height (0.727em) reads small, so it overshoots the cap height and the baseline by 0.033em a side: 0.793em square, its foot 0.033em under the baseline (head:75-76, Prototemplate a45c5ac5) */
 .ts-sheet .gt-word svg {
   display: block;
-  height: 0.74em;
-  width: 1.164em;
+  height: 0.793em;
+  width: 0.793em;
   fill: currentColor;
 }
 .ts-sheet .gt-word .sr {

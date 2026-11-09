@@ -25,7 +25,9 @@ describe('the sprite', () => {
     expect(symbols.map((symbol) => symbol.id)).toEqual(spriteIds);
     expect(symbols.map((symbol) => symbol.id)).toEqual(ICON_NAMES.map(iconSymbolId));
     expect(symbols.filter((symbol) => symbol.viewBox === '0 0 20 20')).toHaveLength(71);
-    expect(symbols.find((symbol) => symbol.id === 'gt-mark')?.viewBox).toBe('-8 214 1213 771');
+    expect(symbols.find((symbol) => symbol.id === 'gt-mark')?.viewBox).toBe(
+      '24.3 24.3 207.4 207.4',
+    );
   });
 
   it('is what src/sprite.ts was generated from', () => {
@@ -43,14 +45,14 @@ describe('the sprite', () => {
     expect(iconMarkup('arrow-top-right-on-square', { ext: true })).toBe(
       '<svg class="ic ext" aria-hidden="true"><use href="#i-arrow-top-right-on-square"/></svg>',
     );
-    expect(markMarkup(132, 84)).toBe(
-      '<svg width="132" height="84" fill="currentColor" aria-hidden="true"><use href="#gt-mark"/></svg>',
+    expect(markMarkup(88, 88)).toBe(
+      '<svg width="88" height="88" fill="currentColor" aria-hidden="true"><use href="#gt-mark"/></svg>',
     );
     expect(GT_WORD_MARKUP).toBe(
       '<span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span>',
     );
     expect(
-      symbolMarkup('gt-mark').startsWith('<symbol id="gt-mark" viewBox="-8 214 1213 771">'),
+      symbolMarkup('gt-mark').startsWith('<symbol id="gt-mark" viewBox="24.3 24.3 207.4 207.4">'),
     ).toBe(true);
     const markup = spriteMarkup(['check-circle', 'gt-mark']);
     expect(markup.startsWith('<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0"')).toBe(

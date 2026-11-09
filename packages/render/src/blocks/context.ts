@@ -184,7 +184,11 @@ export function iconSvg(
  * the diagram). The class, not `data-type`, keys the rule: a surface rendered without block
  * attributes (the deck build, the present surface the PDF gate shoots, a flatten sheet) writes no
  * `data-type`, and an unsized svg no rule reaches draws at the browser's 300 by 150 default
- * (hotfix-4 section 3, the ship step).
+ * (hotfix-4 section 3, the ship step). The mark is the square logo (sprite.svg `#gt-mark`,
+ * Prototemplate a45c5ac5, which replaced the 1213 by 771 monogram on 2026-11-08), so a sized box
+ * draws at its smaller side, at the box's left edge where the monogram began: the title's 132 by
+ * 84 slot, which also frames a brand kit's picture and so keeps its size, draws the logo 84
+ * square under the heading's left edge.
  */
 export function markSvg(
   ctx: BlockContext,
@@ -194,8 +198,9 @@ export function markSvg(
   attributes: Record<string, string> = {},
   sized = true,
 ): string {
+  const side = Math.min(w, h);
   let out = sized
-    ? `<svg width="${w}" height="${h}" fill="currentColor"`
+    ? `<svg width="${side}" height="${side}" fill="currentColor"`
     : '<svg fill="currentColor"';
   const extra = sized
     ? attributes

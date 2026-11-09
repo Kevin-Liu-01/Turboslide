@@ -149,7 +149,10 @@ asserts that the two agree. A change to a token, a size or a grid constant is ma
 and `tokens.ts` together; the test fails otherwise. `packages/theme/assets/sprite.svg` is the
 sprite copied out of `head.html` (67 Heroicons plus `gt-mark` after the editor depth round added
 the three text alignment glyphs; the ids are in `sprite-ids.json`) and `sprite.ts` is generated
-from it.
+from it. Since 2026-11-09 `gt-mark` is the GT logo, Axis and meridian behind, from `head.html`
+line 466 (Prototemplate a45c5ac5), on its square box `24.3 24.3 207.4 207.4`; a box written for
+the 1213 by 771 monogram it replaced draws the logo at its smaller side, at the box's left
+(`packages/render/src/blocks/context.ts` `markSvg`, `block-css.ts` `.mark-block`).
 
 A UI capability change walks the chain in this order (SPEC 7.5): schema and migration, mutation,
 inspector control with label and `data-control`, action table entry, `pnpm generate:contracts`,

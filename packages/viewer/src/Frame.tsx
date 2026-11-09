@@ -24,7 +24,7 @@ import { pad2 } from './model';
  * the GT band, the Frame renders as it always did.
  */
 export type FrameProps = {
-  /** the 28 by 18 mark at the bottom left, drawn from the sprite's #gt-mark */
+  /** the 18 by 18 logo at the bottom left, drawn from the sprite's #gt-mark */
   wordmark?: boolean;
   /** the `01 / 85` counter at the bottom right */
   counter?: boolean;
@@ -56,14 +56,14 @@ export function Frame({ wordmark = true, counter = true, index = 0, total = 0, b
           {band.logo.kind === 'picture' ? (
             <img src={band.logo.src} width={band.logo.w} height={band.logo.h} alt="" />
           ) : (
-            <svg width={28} height={18} fill="currentColor" aria-hidden="true">
+            <svg width={18} height={18} fill="currentColor" aria-hidden="true">
               <use href="#gt-mark" />
             </svg>
           )}
         </div>
       ) : wordmark && !kit ? (
         <div className="wordmark" aria-hidden="true">
-          <svg width={28} height={18} fill="currentColor" aria-hidden="true">
+          <svg width={18} height={18} fill="currentColor" aria-hidden="true">
             <use href="#gt-mark" />
           </svg>
         </div>

@@ -24,12 +24,12 @@ import { el, escapeAttr, escapeText } from './html.ts';
 export const FRAME_HTML =
   '<div class="frame"><div class="rule top"></div><div class="rule bottom"></div><span class="cross tl"></span><span class="cross tr"></span><span class="cross bl"></span><span class="cross br"></span></div>';
 
-/** The wordmark: the mark at 28 by 18 in titanium (head:463). */
+/** The wordmark: the square logo at 18 by 18 in titanium (head:531, Prototemplate a45c5ac5). */
 export const WORDMARK_HTML =
-  '<div class="wordmark" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>';
+  '<div class="wordmark" aria-hidden="true"><svg width="18" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>';
 
 /** The footer logo's box: 18 px tall, scaled to the asset's ratio and capped at 120 px wide (PRODUCT.md 4.1). */
-export const FOOTER_LOGO = { h: 18, maxW: 120, defaultW: 28 } as const;
+export const FOOTER_LOGO = { h: 18, maxW: 120, defaultW: 18 } as const;
 
 /** The title slide's logo box the kit fits a picture into (PRODUCT.md 4.1). */
 export const MARK_BOX = { w: 132, h: 84 } as const;
@@ -202,7 +202,7 @@ export function frameBandHtml(band: FrameBand): string {
      it the export's document and the print document drew no footer logo (docs/archive/rounds/FEATURES.md 4.8;
      build/b7.md R1) */
   if (band.logo.kind === 'default')
-    logo = `<div class="wordmark ts-kit-wordmark ${positionClass(band.logo.position)}" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>`;
+    logo = `<div class="wordmark ts-kit-wordmark ${positionClass(band.logo.position)}" aria-hidden="true"><svg width="18" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div>`;
   else if (band.logo.kind === 'picture')
     logo = `<div class="wordmark ts-kit-wordmark ${positionClass(band.logo.position)} is-picture" aria-hidden="true" style="width:${band.logo.w}px"><img src="${escapeAttr(band.logo.src)}" width="${band.logo.w}" height="${band.logo.h}" alt=""></div>`;
   const text =

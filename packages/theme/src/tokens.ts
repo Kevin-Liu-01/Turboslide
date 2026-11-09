@@ -285,10 +285,14 @@ export const FONTS = {
   indic: "'Noto Sans Devanagari', 'Kohinoor Devanagari', 'Devanagari Sangam MN', sans-serif",
 } as const;
 
-/** The mark symbol's viewBox and aspect (head:463; report 03 section 4.5). */
+/**
+ * The mark symbol's viewBox and aspect: the logo's square drawn box (head:466, Prototemplate
+ * a45c5ac5, which replaced the 1213 by 771 monogram on 2026-11-08), and the GT word's square
+ * box (head:75-76).
+ */
 export const MARK = {
-  viewBox: '-8 214 1213 771',
-  aspect: 1213 / 771,
-  textHeight: '0.74em',
-  textWidth: '1.164em',
+  viewBox: '24.3 24.3 207.4 207.4',
+  aspect: 1,
+  textHeight: '0.793em',
+  textWidth: '0.793em',
 } as const;

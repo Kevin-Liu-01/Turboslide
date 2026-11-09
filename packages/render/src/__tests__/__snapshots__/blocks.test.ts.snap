@@ -496,7 +496,7 @@ exports[`block catalog > renders logoPlates (logos) in light 1`] = `
 
 exports[`block catalog > renders mark (mark) in dark 1`] = `
 {
-  "html": "<svg width="520" height="331" fill="currentColor" data-block="mark" data-type="mark" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg>",
+  "html": "<svg width="331" height="331" fill="currentColor" data-block="mark" data-type="mark" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg>",
   "rasters": [
     {
       "alpha": true,
@@ -510,7 +510,7 @@ exports[`block catalog > renders mark (mark) in dark 1`] = `
 
 exports[`block catalog > renders mark (mark) in light 1`] = `
 {
-  "html": "<svg width="520" height="331" fill="currentColor" data-block="mark" data-type="mark" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg>",
+  "html": "<svg width="331" height="331" fill="currentColor" data-block="mark" data-type="mark" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg>",
   "rasters": [
     {
       "alpha": true,
@@ -524,7 +524,7 @@ exports[`block catalog > renders mark (mark) in light 1`] = `
 
 exports[`block catalog > renders markSizes (sizes) in dark 1`] = `
 {
-  "html": "<div class="sizes" data-block="sizes" data-type="markSizes"><div><svg width="16" height="10" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:1"><use href="#gt-mark"/></svg><span class="cap step">16px favicon</span></div><div><svg width="32" height="20" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:2"><use href="#gt-mark"/></svg><span class="cap step">32px CLI banner</span></div><div><svg width="64" height="41" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:3"><use href="#gt-mark"/></svg><span class="cap step">64px README header</span></div><div><svg width="128" height="81" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:4"><use href="#gt-mark"/></svg><span class="cap step">128px npm page</span></div><div><svg width="256" height="163" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:5"><use href="#gt-mark"/></svg><span class="cap step">256px website</span></div></div>",
+  "html": "<div class="sizes" data-block="sizes" data-type="markSizes"><div><svg width="16" height="16" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:1"><use href="#gt-mark"/></svg><span class="cap step">16px favicon</span></div><div><svg width="32" height="32" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:2"><use href="#gt-mark"/></svg><span class="cap step">32px CLI banner</span></div><div><svg width="64" height="64" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:3"><use href="#gt-mark"/></svg><span class="cap step">64px README header</span></div><div><svg width="128" height="128" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:4"><use href="#gt-mark"/></svg><span class="cap step">128px npm page</span></div><div><svg width="256" height="256" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:5"><use href="#gt-mark"/></svg><span class="cap step">256px website</span></div></div>",
   "rasters": [
     {
       "alpha": true,
@@ -562,7 +562,7 @@ exports[`block catalog > renders markSizes (sizes) in dark 1`] = `
 
 exports[`block catalog > renders markSizes (sizes) in light 1`] = `
 {
-  "html": "<div class="sizes" data-block="sizes" data-type="markSizes"><div><svg width="16" height="10" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:1"><use href="#gt-mark"/></svg><span class="cap step">16px favicon</span></div><div><svg width="32" height="20" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:2"><use href="#gt-mark"/></svg><span class="cap step">32px CLI banner</span></div><div><svg width="64" height="41" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:3"><use href="#gt-mark"/></svg><span class="cap step">64px README header</span></div><div><svg width="128" height="81" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:4"><use href="#gt-mark"/></svg><span class="cap step">128px npm page</span></div><div><svg width="256" height="163" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:5"><use href="#gt-mark"/></svg><span class="cap step">256px website</span></div></div>",
+  "html": "<div class="sizes" data-block="sizes" data-type="markSizes"><div><svg width="16" height="16" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:1"><use href="#gt-mark"/></svg><span class="cap step">16px favicon</span></div><div><svg width="32" height="32" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:2"><use href="#gt-mark"/></svg><span class="cap step">32px CLI banner</span></div><div><svg width="64" height="64" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:3"><use href="#gt-mark"/></svg><span class="cap step">64px README header</span></div><div><svg width="128" height="128" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:4"><use href="#gt-mark"/></svg><span class="cap step">128px npm page</span></div><div><svg width="256" height="256" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:5"><use href="#gt-mark"/></svg><span class="cap step">256px website</span></div></div>",
   "rasters": [
     {
       "alpha": true,
@@ -752,7 +752,7 @@ exports[`block catalog > renders panel (pre) in light 1`] = `
 
 exports[`block catalog > renders panel (term) in dark 1`] = `
 {
-  "html": "<div class="panel term" data-block="term" data-type="panel" data-run="term/code"><svg width="25" height="16" aria-hidden="true" data-raster="mark" data-rid="term:1"><use href="#gt-mark"/></svg><svg width="50" height="32" aria-hidden="true" data-raster="mark" data-rid="term:2"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>",
+  "html": "<div class="panel term" data-block="term" data-type="panel" data-run="term/code"><svg width="16" height="16" aria-hidden="true" data-raster="mark" data-rid="term:1"><use href="#gt-mark"/></svg><svg width="32" height="32" aria-hidden="true" data-raster="mark" data-rid="term:2"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>",
   "rasters": [
     {
       "alpha": true,
@@ -772,7 +772,7 @@ exports[`block catalog > renders panel (term) in dark 1`] = `
 
 exports[`block catalog > renders panel (term) in light 1`] = `
 {
-  "html": "<div class="panel term" data-block="term" data-type="panel" data-run="term/code"><svg width="25" height="16" aria-hidden="true" data-raster="mark" data-rid="term:1"><use href="#gt-mark"/></svg><svg width="50" height="32" aria-hidden="true" data-raster="mark" data-rid="term:2"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>",
+  "html": "<div class="panel term" data-block="term" data-type="panel" data-run="term/code"><svg width="16" height="16" aria-hidden="true" data-raster="mark" data-rid="term:1"><use href="#gt-mark"/></svg><svg width="32" height="32" aria-hidden="true" data-raster="mark" data-rid="term:2"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>",
   "rasters": [
     {
       "alpha": true,

@@ -229,9 +229,10 @@ describe('objects of the canvas scale their content with the box', () => {
     );
   });
 
-  it('a mark object writes no size of its own and fills its box; a flow mark keeps its pixel size (hotfix-4 W2)', () => {
+  it('a mark object writes no size of its own and takes its box at the left; a flow mark keeps its pixel size, square at its smaller side (hotfix-4 W2)', () => {
+    // the logo is square: a box written for the 1213 by 771 monogram draws it at its height
     const flow = renderBlock({ id: 'mk', type: 'mark', w: 160, h: 100 }, context('light'));
-    expect(flow).toContain('<svg width="160" height="100" fill="currentColor"');
+    expect(flow).toContain('<svg width="100" height="100" fill="currentColor"');
     const object = renderBlock(
       { id: 'mk', type: 'mark', w: 160, h: 100, pos: { ...pos, w: 320, h: 200 } },
       { ...context('light'), slotWidth: 320, slotHeight: 200 },
@@ -244,7 +245,7 @@ describe('objects of the canvas scale their content with the box', () => {
     expect(object).toContain('<use href="#gt-mark"/>');
     expect(flow).not.toContain('mark-block');
     expect(BLOCK_CSS).toContain(
-      '.ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: 100%; height: 100%; }',
+      '.ts-sheet .free > svg.mark-block, .ts-sheet .free > .link > svg.mark-block { display: block; fill: currentColor; width: auto; max-width: 100%; height: 100%; aspect-ratio: 1; }',
     );
     expect(BLOCK_CSS).not.toContain('svg[data-type="mark"]');
   });
@@ -264,7 +265,7 @@ describe('objects of the canvas scale their content with the box', () => {
     expect(object).toContain('<use href="#gt-mark"/>');
   });
 
-  it('a panel object fills its box and its term marks are sized by the box; a flow panel keeps 25 by 16 and 50 by 32 (hotfix-4 W8)', () => {
+  it('a panel object fills its box and its term marks are sized by the box; a flow panel keeps 16 and 32 square (hotfix-4 W8)', () => {
     const term = {
       id: 'pn',
       type: 'panel' as const,
@@ -273,8 +274,8 @@ describe('objects of the canvas scale their content with the box', () => {
       marks: true as const,
     };
     const flow = renderBlock(term, context('light'));
-    expect(flow).toContain('<svg width="25" height="16" aria-hidden="true"');
-    expect(flow).toContain('<svg width="50" height="32" aria-hidden="true"');
+    expect(flow).toContain('<svg width="16" height="16" aria-hidden="true"');
+    expect(flow).toContain('<svg width="32" height="32" aria-hidden="true"');
     expect(flow).not.toContain('viewBox');
     const object = renderBlock(
       { ...term, pos: { ...pos, w: 600, h: 60 } },
@@ -282,8 +283,8 @@ describe('objects of the canvas scale their content with the box', () => {
     );
     expect(object).toContain(`<svg class="mark-s" viewBox="${MARK_VIEW_BOX}" aria-hidden="true"`);
     expect(object).toContain(`<svg class="mark-l" viewBox="${MARK_VIEW_BOX}" aria-hidden="true"`);
-    expect(object).not.toContain('width="25"');
-    expect(object).not.toContain('width="50"');
+    expect(object).not.toContain('width="16"');
+    expect(object).not.toContain('width="32"');
     expect(object).toContain('class="panel term"');
     expect(BLOCK_CSS).toContain(
       '.ts-sheet .free > .panel, .ts-sheet .free > .link > .panel { box-sizing: border-box; height: 100%; }',

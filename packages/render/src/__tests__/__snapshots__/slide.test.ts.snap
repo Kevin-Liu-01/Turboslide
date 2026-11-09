@@ -418,7 +418,7 @@ exports[`renderSlide > renders statement slide thesis in light 1`] = `
 
 exports[`renderSlide > renders title slide title in dark 1`] = `
 {
-  "html": "<section class="slide is-on" data-slide="title" data-kind="title"><div class="in"><div class="left-mid" data-slot="main"><svg width="132" height="84" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg><h1 style="margin-top:44px" data-block="heading" data-type="heading" data-run="heading/text">General Translation</h1><p class="lead muted max-p" style="margin-top:26px" data-block="lead" data-type="paragraph" data-run="lead/text">This deck covers the brand.</p></div></div></section>",
+  "html": "<section class="slide is-on" data-slide="title" data-kind="title"><div class="in"><div class="left-mid" data-slot="main"><svg width="84" height="84" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg><h1 style="margin-top:44px" data-block="heading" data-type="heading" data-run="heading/text">General Translation</h1><p class="lead muted max-p" style="margin-top:26px" data-block="lead" data-type="paragraph" data-run="lead/text">This deck covers the brand.</p></div></div></section>",
   "rasters": [
     {
       "alpha": true,
@@ -441,7 +441,7 @@ exports[`renderSlide > renders title slide title in dark 1`] = `
 
 exports[`renderSlide > renders title slide title in light 1`] = `
 {
-  "html": "<section class="slide is-on" data-slide="title" data-kind="title"><div class="in"><div class="left-mid" data-slot="main"><svg width="132" height="84" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg><h1 style="margin-top:44px" data-block="heading" data-type="heading" data-run="heading/text">General Translation</h1><p class="lead muted max-p" style="margin-top:26px" data-block="lead" data-type="paragraph" data-run="lead/text">This deck covers the brand.</p></div></div></section>",
+  "html": "<section class="slide is-on" data-slide="title" data-kind="title"><div class="in"><div class="left-mid" data-slot="main"><svg width="84" height="84" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg><h1 style="margin-top:44px" data-block="heading" data-type="heading" data-run="heading/text">General Translation</h1><p class="lead muted max-p" style="margin-top:26px" data-block="lead" data-type="paragraph" data-run="lead/text">This deck covers the brand.</p></div></div></section>",
   "rasters": [
     {
       "alpha": true,
@@ -462,4 +462,4 @@ exports[`renderSlide > renders title slide title in light 1`] = `
 }
 `;
 
-exports[`stage, deck, thumb and standalone > renders the stage with frame, wordmark and counter 1`] = `"<div class="ts-sheet sheet ts-present" data-theme="light"><div class="ts-stage stage"><div class="frame"><div class="rule top"></div><div class="rule bottom"></div><span class="cross tl"></span><span class="cross tr"></span><span class="cross bl"></span><span class="cross br"></span></div><section class="slide is-on"></section><div class="wordmark" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div><div class="counter">01 / 85</div></div></div>"`;
+exports[`stage, deck, thumb and standalone > renders the stage with frame, wordmark and counter 1`] = `"<div class="ts-sheet sheet ts-present" data-theme="light"><div class="ts-stage stage"><div class="frame"><div class="rule top"></div><div class="rule bottom"></div><span class="cross tl"></span><span class="cross tr"></span><span class="cross bl"></span><span class="cross br"></span></div><section class="slide is-on"></section><div class="wordmark" aria-hidden="true"><svg width="18" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div><div class="counter">01 / 85</div></div></div>"`;

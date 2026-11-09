@@ -40,9 +40,14 @@ export const TIP_ID = 'pt-tip';
  */
 const REST_MS = 500;
 
-/** Inside these surfaces a tooltip shows on hover alone, never on keyboard focus (3.1.1). */
+/**
+ * Inside these surfaces a tooltip shows on hover alone, never on keyboard focus (3.1.1). A menu
+ * is named by its role as well as by the two classes: the Insert menu, the collaborators and
+ * account menus (presence/PlateMenu.tsx) and the outline's row menu carry `role="menu"` and
+ * neither class, and each arrow key drew the focused row's plate over the rows under it.
+ */
 export const QUIET_FOCUS_SURFACES =
-  '.ts-menu, .ts-context-menu, [role="dialog"], [role="alertdialog"]';
+  '.ts-menu, .ts-context-menu, [role="menu"], [role="dialog"], [role="alertdialog"]';
 
 /** True when a focus on the anchor must not show its tooltip: the anchor sits in a menu or a dialog. */
 export function quietOnFocus(anchor: HTMLElement): boolean {

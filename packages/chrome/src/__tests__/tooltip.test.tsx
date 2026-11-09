@@ -367,6 +367,31 @@ describe('Tooltip', () => {
     }
   });
 
+  it('shows no tip on keyboard focus inside a menu, whatever class the menu carries (docs/archive/rounds/PRODUCT.md 3.1.1)', () => {
+    render(
+      <>
+        <div role="menu" aria-label="Insert">
+          <button type="button" role="menuitem" {...tipProps({ name: 'Text box', doc: 'A box.' })}>
+            Text box
+          </button>
+        </div>
+        <button type="button" {...tipProps({ name: 'Outside', doc: 'A control.' })}>
+          Outside
+        </button>
+      </>,
+    );
+    const row = screen.getByRole('menuitem', { name: 'Text box' });
+    /* an arrow key moves the focus to the row: the plate would cover the rows under it */
+    fireEvent.keyDown(document.body, { key: 'ArrowDown' });
+    fireEvent.focus(row);
+    expect(layer()?.hidden ?? true).toBe(true);
+    expect(shownTooltipAnchor()).toBeNull();
+    /* the same focus on a control outside a menu shows its tip */
+    const outside = screen.getByRole('button', { name: 'Outside' });
+    tabTo(outside);
+    expect(shownTooltipAnchor()).toBe(outside);
+  });
+
   it('spreads onto any element through tipProps', () => {
     render(<span {...tipProps({ name: 'Mark', doc: 'A mark.' })}>x</span>);
     expect(document.querySelector('[data-tip="Mark"]')).not.toBeNull();

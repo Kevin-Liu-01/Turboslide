@@ -366,16 +366,26 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
   const placed = usePlate(box, { layer: 'popover', anchor: menu.anchor, side: 'below', gap: 2 });
   const top = placed?.top ?? start.top;
 
+  /* the listeners and the first row's focus belong to the menu opening for a row, not to every
+     render: `onClose` is a new function on each render of the sidebar, and an effect keyed on it
+     ran again each time, which put the focus back on the first row under a person arrowing
+     through the menu. Escape returns the focus to what opened the menu (the More button, or the
+     row after a right click) */
+  const close = useRef(onClose);
+  close.current = onClose;
+  const anchor = menu.anchor;
+  const itemId = item.id;
   useEffect(() => {
     const onDown = (event: globalThis.MouseEvent) => {
       if (box.current && event.target instanceof Node && !box.current.contains(event.target))
-        onClose();
+        close.current();
     };
     const onKey = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
-        onClose();
+        close.current();
+        anchor.focus();
       }
     };
     document.addEventListener('mousedown', onDown);
@@ -385,7 +395,7 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey, true);
     };
-  }, [onClose]);
+  }, [anchor, itemId]);
 
   const run = (label: string, work: () => Promise<unknown>) => {
     onClose();

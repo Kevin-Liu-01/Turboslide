@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { workedDocument } from '@turboslide/schema/fixtures';
@@ -142,5 +142,43 @@ describe('the outline rows', () => {
       expect(row.querySelector('.pt-orow-more')?.getAttribute('data-tip')).toBe('Slide menu');
     }
     expect(container.querySelectorAll('a.pt-orow [title], a.pt-orow[title]')).toHaveLength(0);
+  });
+
+  it('keeps the focus on the row menu item a person arrowed to through a render of the sidebar, and returns it to the More button on Escape', () => {
+    const dispatch: EditorDispatch = () => Promise.resolve({});
+    const tree = (count: string) => (
+      <ShellContext value={shellState()}>
+        <Sidebar
+          title="Fixture"
+          count={count}
+          sections={SECTIONS}
+          thumb="shot"
+          hrefFor={(item) => `#s/${item.id}`}
+          edit={{
+            revision: 3,
+            dispatch,
+            document: worked,
+            deck: worked.deck,
+            settings: { sectionsTree: true },
+          }}
+        />
+      </ShellContext>
+    );
+    const { container, rerender } = render(tree('2 slides'));
+    const more = rows(container)[0]?.querySelector<HTMLElement>('.pt-orow-more');
+    if (!more) throw new Error('the first row has no More button');
+    fireEvent.click(more);
+    const items = Array.from(container.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    expect(items.length).toBeGreaterThan(1);
+    /* the menu opens with its first row focused */
+    expect(document.activeElement).toBe(items[0]);
+    fireEvent.keyDown(items[0] as HTMLElement, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(items[1]);
+    /* the sidebar renders again (a save, a remote edit): the focus stays where it was put */
+    rerender(tree('2 slides, saved'));
+    expect(document.activeElement).toBe(items[1]);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(container.querySelector('[role="menu"]')).toBeNull();
+    expect(document.activeElement).toBe(more);
   });
 });

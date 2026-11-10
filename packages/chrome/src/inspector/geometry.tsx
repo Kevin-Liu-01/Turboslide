@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import type { Block } from '@turboslide/schema/blocks';
 import { locksAspect, resizeBox, resizeKindOf } from '@turboslide/schema/canvas';
@@ -142,21 +142,48 @@ export function SizeRotationSection({ blocks, measured, group, write }: Geometry
     );
   };
 
-  const setRotate = (degrees: number) => {
+  /** One rotation write; answers the action's promise when it dispatches one. */
+  const setRotate = (degrees: number): Promise<unknown> | undefined => {
     const to = ((Math.round(degrees) % 360) + 360) % 360;
     if (write.editor?.rotate && one === undefined) {
       write.editor.rotate(to - rotate, 'selection');
+      return undefined;
+    }
+    const written = write.dispatch('block.rotate', {
+      slideId: write.slideId,
+      blockIds: ids,
+      ...(one !== undefined ? { to } : { by: to - rotate }),
+      ...about,
+      baseRevision: write.revision,
+    });
+    write.report(written);
+    return written;
+  };
+
+  /* the dial's angle while it is dragged or keyed: drawn on the canvas through the editor's
+     preview and written once on the release, as SliderField does (fields.tsx), so a drag is one
+     write and one undo entry. The ref beside the state is what the release reads, for a press
+     that moves and releases inside one event turn (SliderField's note) */
+  const [dial, setDial] = useState<number | null>(null);
+  const dialRef = useRef<number | null>(null);
+  const moveDial = (value: number) => {
+    dialRef.current = value;
+    setDial(value);
+    write.editor?.previewRotate?.(value - rotate);
+  };
+  const releaseDial = () => {
+    const value = dialRef.current;
+    dialRef.current = null;
+    setDial(null);
+    if (value === null) return;
+    /* a new document ends the canvas's preview (Editor.tsx); a release that writes nothing, or a
+       write refused, takes it down here */
+    const endPreview = () => write.editor?.previewRotate?.(null);
+    if (Math.round(value) === Math.round(rotate)) {
+      endPreview();
       return;
     }
-    write.report(
-      write.dispatch('block.rotate', {
-        slideId: write.slideId,
-        blockIds: ids,
-        ...(one !== undefined ? { to } : { by: to - rotate }),
-        ...about,
-        baseRevision: write.revision,
-      }),
-    );
+    setRotate(value)?.catch(endPreview);
   };
 
   const doFlip = (axis: 'h' | 'v') => {
@@ -244,7 +271,7 @@ export function SizeRotationSection({ blocks, measured, group, write }: Geometry
       <div className="ts-fo-fields is-two">
         <NumberField
           label={words.rotate}
-          value={one !== undefined ? rotate : blocks.length > 0 ? 0 : undefined}
+          value={dial ?? (one !== undefined ? rotate : blocks.length > 0 ? 0 : undefined)}
           control="formatOptions.size.rotate"
           onCommit={setRotate}
           disabled={write.busy || blocks.length === 0}
@@ -257,13 +284,25 @@ export function SizeRotationSection({ blocks, measured, group, write }: Geometry
             min={0}
             max={359}
             step={1}
-            value={Math.round(rotate)}
+            value={Math.round(dial ?? rotate)}
             aria-label={`${words.rotate} dial`}
-            aria-valuetext={`${Math.round(rotate)}°`}
+            aria-valuetext={`${Math.round(dial ?? rotate)}°`}
             data-control="formatOptions.size.rotate.dial"
             disabled={write.busy || blocks.length === 0}
             {...dialTip}
-            onChange={(event) => setRotate(Number(event.target.value))}
+            onChange={(event) => moveDial(Number(event.target.value))}
+            onPointerDown={() => {
+              /* a release outside the input (a drag that ends past the track) still writes: the
+                 document sees the pointer up the input does not */
+              document.addEventListener('pointerup', releaseDial, { once: true });
+              document.addEventListener('pointercancel', releaseDial, { once: true });
+            }}
+            onPointerUp={releaseDial}
+            onKeyUp={releaseDial}
+            onBlur={(event) => {
+              dialTip.onBlur(event);
+              releaseDial();
+            }}
           />
         </label>
       </div>

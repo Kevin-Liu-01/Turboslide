@@ -155,6 +155,8 @@ export type EditorSelection = {
  */
 export type EditorHandle = {
   rotate?: (by: number, about?: 'each' | 'selection') => void;
+  /** the rotate dial's live turn by `by` degrees, drawn on the canvas with nothing written; null ends it */
+  previewRotate?: (by: number | null) => void;
   flip?: (axis: 'h' | 'v', about?: 'each' | 'selection') => void;
   group?: () => void;
   ungroup?: () => void;

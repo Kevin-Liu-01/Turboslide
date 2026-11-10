@@ -394,6 +394,25 @@ describe('the rotated ring (docs/archive/rounds/OBJECTS.md 2.4; selection-box.ts
   });
 });
 
+describe('the rotate dial’s preview (chrome inspector/geometry.tsx; EditorHandle.previewRotate)', () => {
+  it('turns the selection on the draft with no write, follows the dial, and null takes it down', () => {
+    mounted = mount(documentOf(joinedSlide()), { selection: { kind: 'block', blockId: 'b' } });
+    const { container, view, handle, calls } = mounted;
+    expect(wrapperOf(container, 'b')?.getAttribute('data-rotate')).toBeNull();
+    act(() => handle().previewRotate(30));
+    expect(wrapperOf(container, 'b')?.getAttribute('data-rotate')).toBe('30');
+    expect(view().selectionPos).toMatchObject({ x: 700, y: 200, w: 240, h: 160, rotate: 30 });
+    act(() => handle().previewRotate(45));
+    expect(wrapperOf(container, 'b')?.getAttribute('data-rotate')).toBe('45');
+    expect(view().rotation).toBe(45);
+    expect(calls).toEqual([]);
+    expect(mounted.doc().slides['free']).toEqual(joinedSlide());
+    act(() => handle().previewRotate(null));
+    expect(wrapperOf(container, 'b')?.getAttribute('data-rotate')).toBeNull();
+    expect(calls).toEqual([]);
+  });
+});
+
 describe('the budget (docs/archive/rounds/OBJECTS.md 2.4; gesture-frame.ts)', () => {
   it('degrades a move after two slow frames: the wrappers move inline, the sheet keeps its markup, the ring follows', async () => {
     const frames = fakeFrames();

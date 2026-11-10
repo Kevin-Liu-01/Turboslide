@@ -715,6 +715,12 @@ export type EditorHandle = {
   /** the live scale of the sheet (the fit scale while the zoom is Fit), read through the ref the step uses */
   scale: () => number;
   rotate: (by: number) => void;
+  /**
+   * The Format options dial's live turn (chrome inspector/geometry.tsx): the selection drawn
+   * turned by `by` degrees on the draft document and nothing written, the way a rotation handle's
+   * drag previews; null takes the preview down. The dial's release writes once.
+   */
+  previewRotate: (by: number | null) => void;
   flip: (axis: 'h' | 'v') => void;
   group: () => void;
   ungroup: () => void;
@@ -5117,6 +5123,40 @@ export function Editor({
     });
   };
 
+  /** The dial's preview (EditorHandle.previewRotate): rotateSelection's rows drawn, no write. */
+  const previewRotation = (by: number | null) => {
+    if (by === null) {
+      if (gesture.current === null && !frameDown.current) setDraft(null);
+      return;
+    }
+    const slideNow = slideRef.current;
+    const ids = selectedObjectIds();
+    if (!slideNow || ids.length === 0 || editingRef.current || gesture.current) return;
+    /* a slide off the canvas previews over the provisional conversion, as a handle's drag does;
+       the release converts it with the measured boxes (commitCanvas) */
+    const provisional = provisionalCanvas(slideNow, boxesRef.current);
+    if (!isFreeformSlide(slideNow) && !provisional) return;
+    const canvas = provisional?.slide ?? slideNow;
+    const boxesNow = provisional ? boxesFromPositions(canvas, boxesRef.current) : boxesRef.current;
+    const rows = selectedPositions(canvas, boxesNow, ids);
+    const mutations = rotateMutations(canvas, rows, { by }, rows.length > 1 ? 'selection' : 'each');
+    if (mutations.length === 0) {
+      setDraft(null);
+      return;
+    }
+    try {
+      setDraft(
+        draftDocument(canvas, provisional ? [provisional.replace, ...mutations] : mutations),
+      );
+    } catch {
+      setDraft(null);
+      return;
+    }
+    const first = mutations[0];
+    if (first && first.op === 'block.set' && first.value !== undefined)
+      showAngle(((first.value as Position).rotate ?? 0) as number);
+  };
+
   const flipSelection = (axis: 'h' | 'v') => {
     const ids = selectedObjectIds();
     if (ids.length === 0 || editingRef.current) return;
@@ -5440,6 +5480,7 @@ export function Editor({
       zoomStep: zoomStepBy,
       scale: () => kRef.current,
       rotate: rotateSelection,
+      previewRotate: previewRotation,
       flip: flipSelection,
       group: groupSelection,
       ungroup: ungroupSelection,

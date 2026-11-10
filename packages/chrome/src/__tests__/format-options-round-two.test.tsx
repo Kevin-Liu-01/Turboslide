@@ -147,6 +147,48 @@ describe('Size & rotation and Position', () => {
       expect(el, 'no native titles').toBeNull();
   });
 
+  /* the dial wrote one block.rotate per degree of a drag, each an undo entry of its own; it
+     previews through the editor while it moves and writes once on the release, as SliderField */
+  it('the dial previews while it moves and writes one block.rotate on the release', () => {
+    dispatch.mockClear();
+    const previews: Array<number | null> = [];
+    panel('t', { editor: { previewRotate: (by) => previews.push(by) } });
+    const dial = control('formatOptions.size.rotate.dial') as HTMLInputElement;
+    expect(dial.value).toBe('30');
+    fireEvent.pointerDown(dial);
+    for (const value of ['31', '35', '40', '45']) fireEvent.change(dial, { target: { value } });
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(previews).toEqual([1, 5, 10, 15]);
+    expect(dial.value).toBe('45');
+    expect((control('formatOptions.size.rotate') as HTMLInputElement).value).toBe('45');
+    /* a release past the track still writes: the document sees the pointer up */
+    fireEvent.pointerUp(document);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenLastCalledWith('block.rotate', {
+      slideId: 'cv',
+      blockIds: ['t'],
+      to: 45,
+      baseRevision: 7,
+    });
+    /* the arrows held on the dial preview each step; the key's release writes once */
+    fireEvent.change(dial, { target: { value: '31' } });
+    fireEvent.change(dial, { target: { value: '32' } });
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    fireEvent.keyUp(dial, { key: 'ArrowRight' });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenLastCalledWith(
+      'block.rotate',
+      expect.objectContaining({ blockIds: ['t'], to: 32 }),
+    );
+    /* a drag released where it started writes nothing and takes the preview down */
+    fireEvent.pointerDown(dial);
+    fireEvent.change(dial, { target: { value: '50' } });
+    fireEvent.change(dial, { target: { value: '30' } });
+    fireEvent.pointerUp(dial);
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(previews.at(-1)).toBeNull();
+  });
+
   it('lock aspect ratio scales the other side; a group shows its union and a Width edit scales every member (0.102)', () => {
     dispatch.mockClear();
     panel('t');

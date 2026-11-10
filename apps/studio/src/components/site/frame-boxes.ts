@@ -16,6 +16,11 @@ const FADE_MS = 150;
 const LOAD_MARGIN = '40% 0px';
 /** How far outside the window it may go before it unloads, so few editors are alive at once. */
 const DROP_MARGIN = '120% 0px';
+/**
+ * How long a chapter's box stays within LOAD_MARGIN before its editor loads: a fling down the page
+ * passes a box in less, so it boots no editor it would drop a moment later.
+ */
+const LOAD_DWELL_MS = 400;
 
 /** The live editor's frame of /try, added at the end of its box. */
 function frameIn(box: HTMLElement, className: string): HTMLIFrameElement {
@@ -124,9 +129,9 @@ export function attachHeroBox(box: HTMLElement): { press: OnPress; detach: () =>
  * A chapter's live editor (ChapterBox.tsx draws its box; docs/SITE.md 5, "The chapters"): the
  * same frame of /try as the hero's, which plays one chapter of the story (try/story.ts), named by
  * the box's `data-chapter`. The box keeps its size and shows paper until the frame says it is
- * ready, then the frame fades in over it, so nothing moves. The frame loads once the box comes
- * within LOAD_MARGIN of the window and unloads past DROP_MARGIN, so the page holds the hero's
- * editor and one or two of these. On its ready the page names the chapter (`ts-try:chapter`) and
+ * ready, then the frame fades in over it, so nothing moves. The frame loads once the box has
+ * stayed within LOAD_MARGIN of the window for LOAD_DWELL_MS and unloads past DROP_MARGIN, so the
+ * page holds the hero's editor and one or two of these, and a fling past a box loads nothing. On its ready the page names the chapter (`ts-try:chapter`) and
  * tells it whether the box is on screen (`ts-try:visible`), as it does whenever that changes; off
  * screen its agents wait. The box's `data-state` is `empty`, `loading` or `live`.
  */
@@ -136,18 +141,33 @@ export function attachChapterBox(box: HTMLElement): () => void {
   let onScreen = false;
   let ready = false;
   let frame: HTMLIFrameElement | null = null;
+  /* the dwell's timer while the box is near and its editor not loaded yet */
+  let dwell: number | undefined;
+  const settle = (): void => {
+    window.clearTimeout(dwell);
+    dwell = undefined;
+  };
   const last = (entries: IntersectionObserverEntry[]) => entries[entries.length - 1];
   const near = new IntersectionObserver(
     (entries) => {
-      if (last(entries)?.isIntersecting !== true || frame !== null) return;
-      frame = frameIn(box, 'site-chapter-frame');
-      box.dataset.state = 'loading';
+      if (last(entries)?.isIntersecting !== true) {
+        settle();
+        return;
+      }
+      if (frame !== null || dwell !== undefined) return;
+      dwell = window.setTimeout(() => {
+        dwell = undefined;
+        if (frame !== null) return;
+        frame = frameIn(box, 'site-chapter-frame');
+        box.dataset.state = 'loading';
+      }, LOAD_DWELL_MS);
     },
     { rootMargin: LOAD_MARGIN },
   );
   const far = new IntersectionObserver(
     (entries) => {
       if (last(entries)?.isIntersecting !== false) return;
+      settle();
       ready = false;
       frame?.remove();
       frame = null;
@@ -174,6 +194,7 @@ export function attachChapterBox(box: HTMLElement): () => void {
   far.observe(box);
   seen.observe(box);
   return () => {
+    settle();
     window.removeEventListener('message', onMessage);
     near.disconnect();
     far.disconnect();

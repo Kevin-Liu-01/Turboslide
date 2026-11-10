@@ -2368,10 +2368,17 @@ export function createEditorController(init: {
    * `checkBase` compares the next write's base against `reportedRevision()`, so a floor the page
    * had not reached refused the very base this answer handed out ("baseRevision 9 is stale; the
    * document is at revision 8", VERIFICATION F22, the two chains of gslides-actions.spec.ts on
-   * a loaded dev server whose checkpoint took longer than the old 5 s cap).
+   * a loaded dev server whose checkpoint took longer than the old 5 s cap). The wait listens on
+   * the snapshot's listeners, which every move of the reported revision publishes to (the room
+   * client's `onStatus`, a checkpoint's document), and sets one timer, the cap's.
    */
   const acknowledgedAbove = (base: number): Promise<number> =>
-    awaitAcknowledged(reportedRevision, base);
+    awaitAcknowledged(reportedRevision, base, (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    });
 
   const rejectDraftQueue = (error: Error): void => {
     const queued = draftQueue.splice(0);

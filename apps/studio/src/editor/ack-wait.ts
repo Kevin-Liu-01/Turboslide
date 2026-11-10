@@ -4,7 +4,7 @@
 // room's checkpointer has committed the entry, and the checkpointer runs at 2 s idle or at its
 // 10 s hard limit while ops keep arriving (server/checkpoint.ts CHECKPOINT_IDLE_MS and
 // CHECKPOINT_MAX_MS). Pure, so the policy is unit tested (ack-wait.test.ts); the controller
-// passes its reported revision and the real clock.
+// passes its reported revision and its snapshot subscription.
 
 /**
  * How long a write's answer waits for the acknowledgement that moves the revision above its
@@ -20,12 +20,6 @@ export const ACK_WAIT_MS = 15_000;
 export type AckWaitOptions = {
   /** the cap; ACK_WAIT_MS by default */
   waitMs?: number;
-  /** the poll interval; 20 ms by default */
-  pollMs?: number;
-  /** the clock, for tests */
-  now?: () => number;
-  /** the sleep, for tests */
-  sleep?: (ms: number) => Promise<void>;
 };
 
 /**
@@ -38,21 +32,36 @@ export type AckWaitOptions = {
  * caller that reads the answer and writes with it therefore always passes `checkBase`; when the
  * cap was hit the answer equals its base and the revision arithmetic of a strict caller is off
  * by one until the checkpoint lands, which is the honest state of the memory tier.
+ *
+ * `subscribe` registers a listener for every change the reported revision is read from (the
+ * controller's snapshot subscription: the room client's `onStatus` publishes after every move of
+ * its revision) and answers the unsubscribe. The wait reads the revision when a listener call
+ * comes and holds one timer, the cap's. It polled every 20 ms before, so each write in flight on
+ * the memory tier set 100 to 500 timers until its checkpoint (about 1,550 a second in the
+ * landing's hero frame while its agents typed, measured 2026-11-09).
  */
-export async function awaitAcknowledged(
+export function awaitAcknowledged(
   reported: () => number,
   base: number,
+  subscribe: (listener: () => void) => () => void,
   options: AckWaitOptions = {},
 ): Promise<number> {
-  const now = options.now ?? (() => Date.now());
-  const sleep =
-    options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
-  const waitMs = options.waitMs ?? ACK_WAIT_MS;
-  const pollMs = options.pollMs ?? 20;
-  const until = now() + waitMs;
-  while (reported() <= base) {
-    if (now() > until) return reported();
-    await sleep(pollMs);
-  }
-  return reported();
+  if (reported() > base) return Promise.resolve(reported());
+  return new Promise<number>((resolve) => {
+    let settled = false;
+    let unsubscribe: (() => void) | undefined;
+    const finish = (): void => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(cap);
+      unsubscribe?.();
+      resolve(reported());
+    };
+    const cap = setTimeout(finish, options.waitMs ?? ACK_WAIT_MS);
+    unsubscribe = subscribe(() => {
+      if (reported() > base) finish();
+    });
+    // a subscription that called its listener at once has already finished the wait
+    if (settled) unsubscribe();
+  });
 }

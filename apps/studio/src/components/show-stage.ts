@@ -26,3 +26,58 @@ export function showStageSize(box: StageSize): StageSize {
   if (letterbox === 0 || letterbox >= SHOW_BAR_ROW) return box;
   return { width: box.width, height: box.height - SHOW_BAR_ROW };
 }
+
+/** The two reports of a stage's box: its ResizeObserver (a new size) and the window's resize event. */
+export type StageWatch = {
+  ResizeObserver?: new (callback: () => void) => {
+    observe: (target: Element) => void;
+    disconnect: () => void;
+  };
+  onResize: (listener: () => void) => () => void;
+};
+
+function windowWatch(): StageWatch {
+  return {
+    ...(typeof ResizeObserver === 'undefined' ? {} : { ResizeObserver }),
+    onResize: (listener) => {
+      window.addEventListener('resize', listener);
+      return () => window.removeEventListener('resize', listener);
+    },
+  };
+}
+
+/**
+ * The show keeps the stage's box: in the top layer its `inset: 0` would resolve against the
+ * window, which on a phone without full screen is taller than the stage, and the toolbar left the
+ * slide for the window's foot. Before it enters the layer the show is fixed on its stage's box in
+ * the window, and it follows that box while it is open. The stage's ResizeObserver reports a new
+ * size and the window's resize event a move too; one resize fires both, and the second report
+ * writes nothing (the presenter audit of a95d4097d, item 5). Returns the stop.
+ */
+export function pinShowToStage(
+  el: HTMLElement,
+  stage: Element,
+  watch: StageWatch = windowWatch(),
+): () => void {
+  let written = '';
+  const fit = (): void => {
+    const box = stage.getBoundingClientRect();
+    const key = `${box.left} ${box.top} ${box.width} ${box.height}`;
+    if (key === written) return;
+    written = key;
+    el.style.position = 'fixed';
+    el.style.inset = 'auto';
+    el.style.left = `${box.left}px`;
+    el.style.top = `${box.top}px`;
+    el.style.width = `${box.width}px`;
+    el.style.height = `${box.height}px`;
+  };
+  fit();
+  const observer = watch.ResizeObserver === undefined ? null : new watch.ResizeObserver(fit);
+  observer?.observe(stage);
+  const stop = watch.onResize(fit);
+  return () => {
+    observer?.disconnect();
+    stop();
+  };
+}

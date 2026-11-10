@@ -52,6 +52,7 @@ import {
   openPresenterView,
   requestPresentFullscreen,
 } from './presentActions';
+import { pinShowToStage } from './show-stage';
 import { useMountEffect } from './useMountEffect';
 import { useSlideClock } from './useSlideClock';
 
@@ -298,31 +299,13 @@ export function Slideshow({
   const snackbar = useSnackbar();
 
   const root = useRef<HTMLDivElement>(null);
-  /* the show keeps the stage's box: in the top layer its `inset: 0` would resolve against the
-     window, which on a phone without full screen is taller than the stage, and the toolbar left
-     the slide for the window's foot. Before it enters the layer the show is fixed on its stage's
-     box in the window, and it follows that box while it is open. */
+  /* the show keeps the stage's box, fixed on it before it enters the top layer and following it
+     while it is open (show-stage.ts pinShowToStage) */
   useLayoutEffect(() => {
     const el = root.current;
     const stage = el?.parentElement;
     if (!el || !stage) return undefined;
-    const fit = (): void => {
-      const box = stage.getBoundingClientRect();
-      el.style.position = 'fixed';
-      el.style.inset = 'auto';
-      el.style.left = `${box.left}px`;
-      el.style.top = `${box.top}px`;
-      el.style.width = `${box.width}px`;
-      el.style.height = `${box.height}px`;
-    };
-    fit();
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(fit);
-    observer?.observe(stage);
-    window.addEventListener('resize', fit);
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('resize', fit);
-    };
+    return pinShowToStage(el, stage);
   }, []);
   /* the show takes the show layer of the top layer (docs/DESIGN.md 2.2, 2.3): over the editor's
      docked surfaces and the name prompt bar, which are in the top layer since DR-D2#1, and under

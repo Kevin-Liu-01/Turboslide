@@ -28,7 +28,11 @@ import type { BlankSlide } from '@turboslide/viewer/present/presentModel';
 import { PresentShortcuts } from '@turboslide/viewer/present/PresentShortcuts';
 import { mountSlideLinkClicks } from '@turboslide/viewer/present/slideLinks';
 import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
-import type { PresentChannel, PresentMessage } from '@turboslide/viewer/present/presentSync';
+import type {
+  PresentChannel,
+  PresentEnvelope,
+  PresentReply,
+} from '@turboslide/viewer/present/presentSync';
 import { PresentToolbar } from '@turboslide/viewer/present/PresentToolbar';
 import { SlideList } from '@turboslide/viewer/present/SlideList';
 import { BlankLayer, LaserPointer } from '@turboslide/viewer/present/SlideshowLayer';
@@ -280,6 +284,8 @@ export function Slideshow({
   const [barShown, setBarShown] = useState(false);
   const [popover, setPopover] = useState<Popover>(null);
   const [optionsAnchor, setOptionsAnchor] = useState<HTMLElement | null>(null);
+  /* the presenter's latest goto this show has applied: every state names it (presentSync `reply`) */
+  const [answer, setAnswer] = useState<PresentReply | null>(null);
   const snackbar = useSnackbar();
 
   const root = useRef<HTMLDivElement>(null);
@@ -320,10 +326,40 @@ export function Slideshow({
   const audienceTold = useRef(false);
   const channel = useRef<PresentChannel | null>(null);
   const listAnchor = useRef<HTMLElement | null>(null);
+  /* the slide a presenter goto asked for before the render that shows it: a second goto in the
+     same task reads it, not the slide still drawn (the presenter audit of a95d4097d, item 1) */
+  const moving = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    moving.current = null;
+  });
 
   /* the latest facts for the mount-time listeners */
-  const live = useRef({ play, index, total, blank, laser, popover, activeId, onGoto, onExit, say });
-  live.current = { play, index, total, blank, laser, popover, activeId, onGoto, onExit, say };
+  const live = useRef({
+    play,
+    index,
+    total,
+    blank,
+    laser,
+    popover,
+    activeId,
+    answer,
+    onGoto,
+    onExit,
+    say,
+  });
+  live.current = {
+    play,
+    index,
+    total,
+    blank,
+    laser,
+    popover,
+    activeId,
+    answer,
+    onGoto,
+    onExit,
+    say,
+  };
 
   /* the slide clock of the slide shown, on the stage's slide body; the timed advance leaves the
      slide as the next key does */
@@ -553,25 +589,40 @@ export function Slideshow({
 
   /* the channel to the presenter window: the audience reports its state and follows goto */
   useMountEffect(() => {
-    const onMessage = (message: PresentMessage) => {
+    const onMessage = (message: PresentEnvelope) => {
       const state = live.current;
       switch (message.type) {
         case 'hello':
           postState();
           return;
         case 'goto': {
+          /* every goto is answered, a move to where the show already is included: the state this
+             renders names it, and the presenter holds back until it arrives (createMoveTracker) */
+          setAnswer({ to: message.from, seq: message.seq });
           /* the presenter's move: a slide at its start or at the state after a step */
           const at: ClockEntry =
             message.step === undefined || message.step === 0 ? 'start' : message.step;
+          const aimed = moving.current;
           if (message.slideId === state.activeId) {
+            /* the slide drawn: it stays (over a goto still on its way), and plays its own steps */
+            if (aimed !== null) {
+              moving.current = null;
+              state.onGoto(message.slideId);
+            }
             const slideClock = clock.current;
             if (slideClock === null || message.step === undefined) return;
             if (message.step === slideClock.step() + 1) slideClock.next();
             else if (message.step !== slideClock.step()) slideClock.go(message.step);
             return;
           }
+          if (message.slideId === aimed) {
+            /* the slide is on its way: it enters at the step this later goto names */
+            enterRef.current(message.slideId, at);
+            return;
+          }
           if (state.play.some((s) => s.id === message.slideId)) {
             enterRef.current(message.slideId, at);
+            moving.current = message.slideId;
             state.onGoto(message.slideId);
           }
           return;
@@ -596,6 +647,7 @@ export function Slideshow({
         blank: state.blank,
         laser: state.laser,
         ...stepFacts(stepsRef.current, current?.id ?? state.activeId),
+        reply: state.answer,
       });
     };
     postState();
@@ -606,7 +658,7 @@ export function Slideshow({
     };
   });
 
-  /* every change of the facts reaches the presenter window */
+  /* every change of the facts reaches the presenter window, with the presenter move they answer */
   useEffect(() => {
     const shown = play[index];
     const slideId = shown?.id ?? activeId;
@@ -618,8 +670,9 @@ export function Slideshow({
       blank,
       laser,
       ...stepFacts(steps, slideId),
+      reply: answer,
     });
-  }, [activeId, index, total, blank, laser, play, steps]);
+  }, [activeId, index, total, blank, laser, play, steps, answer]);
 
   const closePopover = useCallback(
     (refocus: HTMLElement | null) => {

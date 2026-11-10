@@ -7,6 +7,8 @@ import type {
   StorageEventLike,
 } from '../presentSync';
 import {
+  createMoveTracker,
+  MOVE_ANSWER_MS,
   openPresentChannel,
   PRESENT_PROTOCOL,
   parsePresentEnvelope,
@@ -153,6 +155,16 @@ describe('openPresentChannel', () => {
     expect(() => channel.post({ type: 'hello' })).not.toThrow();
     channel.close();
   });
+
+  it('returns the sequence number of each message it posts, and 0 once closed', () => {
+    const channel = openPresentChannel('d', 'presenter', () => undefined, {
+      BroadcastChannel: fakeBroadcast(),
+    });
+    expect(channel.post({ type: 'hello' })).toBe(1);
+    expect(channel.post({ type: 'goto', slideId: 'two', step: 0 })).toBe(2);
+    channel.close();
+    expect(channel.post({ type: 'bye' })).toBe(0);
+  });
 });
 
 describe('parsePresentEnvelope', () => {
@@ -181,6 +193,31 @@ describe('parsePresentEnvelope', () => {
     );
     expect(parsePresentEnvelope({ ...base, type: 'present', on: false })).not.toBeNull();
     expect(parsePresentEnvelope({ ...base, type: 'bye' })).not.toBeNull();
+  });
+
+  it('accepts a state that names the goto it answers, or none', () => {
+    const state = {
+      ...base,
+      type: 'state',
+      slideId: 'x',
+      index: 1,
+      total: 3,
+      blank: null,
+      laser: false,
+      step: 0,
+      steps: 0,
+    };
+    expect(parsePresentEnvelope({ ...state, reply: { to: 'w2', seq: 4 } })).toMatchObject({
+      reply: { to: 'w2', seq: 4 },
+    });
+    expect(parsePresentEnvelope({ ...state, reply: null })).not.toBeNull();
+    /* a window from before the field */
+    expect(parsePresentEnvelope(state)).not.toBeNull();
+    expect(parsePresentEnvelope({ ...state, reply: { to: 'w2' } })).toBeNull();
+    expect(parsePresentEnvelope({ ...state, reply: { to: 'w2', seq: 0 } })).toBeNull();
+    expect(parsePresentEnvelope({ ...state, reply: { to: 'w2', seq: 1.5 } })).toBeNull();
+    expect(parsePresentEnvelope({ ...state, reply: { to: 2, seq: 1 } })).toBeNull();
+    expect(parsePresentEnvelope({ ...state, reply: 'w2' })).toBeNull();
   });
 
   it('refuses noise, another protocol version and malformed fields', () => {
@@ -218,5 +255,55 @@ describe('parsePresentEnvelope', () => {
         steps: 0,
       }),
     ).toBeNull();
+  });
+});
+
+// The presenter's reply rule (the presenter audit of a95d4097d, item 1): while its latest move is
+// in flight, a late answer to an older press is never followed, a state that answers no move of
+// this window waits, and the answer to the latest move ends the hold.
+describe('createMoveTracker', () => {
+  const answer = (to: string, seq: number) => ({ reply: { to, seq } });
+
+  it('follows every state while no move of its own is in flight', () => {
+    const moves = createMoveTracker('me', { now: () => 0 });
+    expect(moves.follows({})).toBe(true);
+    expect(moves.follows({ reply: null })).toBe(true);
+    expect(moves.follows(answer('other', 9))).toBe(true);
+  });
+
+  it('never follows a late answer to an older move, and follows the answer to the latest', () => {
+    let clock = 0;
+    const moves = createMoveTracker('me', { now: () => clock });
+    moves.sent(3);
+    moves.sent(4);
+    expect(moves.follows(answer('me', 3))).toBe(false);
+    clock += MOVE_ANSWER_MS * 10;
+    expect(moves.follows(answer('me', 3)), 'however late it comes').toBe(false);
+    expect(moves.follows(answer('me', 4))).toBe(true);
+    /* answered: the audience's own moves after it are followed */
+    expect(moves.follows(answer('me', 4))).toBe(true);
+    expect(moves.follows(answer('me', 3)), 'nothing in flight any more').toBe(true);
+  });
+
+  it('holds a state that answers no move of its own until the hold runs out', () => {
+    let clock = 1000;
+    const moves = createMoveTracker('me', { now: () => clock, holdMs: 500 });
+    moves.sent(7);
+    expect(moves.follows({ reply: null })).toBe(false);
+    expect(moves.follows({})).toBe(false);
+    expect(moves.follows(answer('another-presenter', 12))).toBe(false);
+    clock += 499;
+    expect(moves.follows({ reply: null })).toBe(false);
+    clock += 1;
+    expect(moves.follows({ reply: null })).toBe(true);
+    expect(moves.follows({ reply: null })).toBe(true);
+  });
+
+  it('takes an answer to a later move as the answer to the latest', () => {
+    const moves = createMoveTracker('me', { now: () => 0 });
+    moves.sent(2);
+    expect(moves.follows(answer('me', 5))).toBe(true);
+    moves.sent(0);
+    expect(moves.follows({ reply: null }), 'a closed channel posts nothing to wait for').toBe(true);
   });
 });

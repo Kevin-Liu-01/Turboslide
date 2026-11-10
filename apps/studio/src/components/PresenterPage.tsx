@@ -17,9 +17,13 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { motionField } from '@turboslide/viewer/model';
 import type { ViewerSlide } from '@turboslide/viewer/model';
 import { PresenterConsole } from '@turboslide/viewer/present/PresenterConsole';
-import { openPresentChannel } from '@turboslide/viewer/present/presentSync';
+import { createMoveTracker, openPresentChannel } from '@turboslide/viewer/present/presentSync';
 import { stepsOf } from '@turboslide/viewer/slide-clock';
-import type { PresentChannel, PresentMessage } from '@turboslide/viewer/present/presentSync';
+import type {
+  MoveTracker,
+  PresentChannel,
+  PresentEnvelope,
+} from '@turboslide/viewer/present/presentSync';
 import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
 import { installThemeBridge, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
@@ -148,6 +152,8 @@ export function PresenterPage({
   const [connected, setConnected] = useState(false);
   const toast = useToast();
   const channel = useRef<PresentChannel | null>(null);
+  /* this window's move in flight: a late answer to an older press is never followed */
+  const moves = useRef<MoveTracker | null>(null);
   const live = useRef<Live>({
     play,
     index,
@@ -169,10 +175,11 @@ export function PresenterPage({
   }, []);
 
   useMountEffect(() => {
-    const onMessage = (message: PresentMessage) => {
+    const onMessage = (message: PresentEnvelope) => {
       switch (message.type) {
         case 'state':
           setConnected(true);
+          if (moves.current?.follows(message) === false) return;
           follow(message.slideId, message.step, message.steps);
           return;
         case 'goto':
@@ -187,16 +194,19 @@ export function PresenterPage({
     };
     const opened = openPresentChannel(deckId, 'presenter', onMessage);
     channel.current = opened;
+    moves.current = createMoveTracker(opened.id);
     opened.post({ type: 'hello' });
     return () => {
       opened.post({ type: 'bye' });
       opened.close();
       channel.current = null;
+      moves.current = null;
     };
   });
 
   /* the console's own move: local first, then the audience window follows; a step names the
-     state after it on that slide (HTML-SLIDES-DESIGN 2.6), 'end' the slide after its last step */
+     state after it on that slide (HTML-SLIDES-DESIGN 2.6), 'end' the slide after its last step.
+     The audience's states hold back until one answers this move (createMoveTracker). */
   const goto = useCallback((to: number, at: number | 'end' = 0) => {
     const target = live.current.play[to];
     if (target === undefined) return;
@@ -204,7 +214,8 @@ export function PresenterPage({
     const step = at === 'end' ? steps : Math.max(0, Math.min(steps, at));
     setIndex(to);
     setClock({ step, steps });
-    channel.current?.post({ type: 'goto', slideId: target.id, step });
+    const seq = channel.current?.post({ type: 'goto', slideId: target.id, step }) ?? 0;
+    moves.current?.sent(seq);
   }, []);
 
   /* the window API owner (SPEC 7.4: the presenter answers view.goto and view.present) */

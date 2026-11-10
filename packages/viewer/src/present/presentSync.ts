@@ -10,12 +10,18 @@ import type { BlankSlide } from './presentModel';
  * The environment is injectable so the protocol is unit tested without a browser. Version 2
  * (HTML-SLIDES-DESIGN 2.6) adds the slide clock's steps: `state` carries the step shown and the
  * slide's step count, and `goto` may name a step, so each window follows the other's clicks; a
- * version 1 window is ignored.
+ * version 1 window is ignored. A state names the presenter move it answers (`reply`: the latest
+ * `goto` the audience had applied when it drew that state), so a presenter with a newer move in
+ * flight can tell a late answer from a current one (`createMoveTracker`; the presenter audit of
+ * a95d4097d, item 1).
  */
 
 export const PRESENT_PROTOCOL = 2;
 
 export type PresentRole = 'audience' | 'presenter';
+
+/** A `goto` named by its sender's window id and the sequence number of its envelope. */
+export type PresentReply = { to: string; seq: number };
 
 export type PresentMessageBody =
   /** a window arrived; the audience answers with its state */
@@ -31,6 +37,11 @@ export type PresentMessageBody =
       /** the slide clock's step shown (0 before the first click) and the slide's click steps */
       step: number;
       steps: number;
+      /**
+       * the latest `goto` the audience had applied when it drew this state, null before any; a
+       * window that predates the field sends none
+       */
+      reply?: PresentReply | null;
     }
   /** move to a slide, at the state after `step` when given (its start when absent); each role follows the other's */
   | { type: 'goto'; slideId: string; step?: number }
@@ -83,7 +94,8 @@ export type PresentChannel = {
   /** this window's id; messages it sent are dropped on the way back in */
   readonly id: string;
   readonly transport: 'broadcast' | 'storage' | 'none';
-  post: (body: PresentMessageBody) => void;
+  /** sends one message; returns its sequence number, 0 once the channel is closed */
+  post: (body: PresentMessageBody) => number;
   close: () => void;
 };
 
@@ -113,7 +125,8 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
         typeof record.laser !== 'boolean' ||
         !(record.blank === null || record.blank === 'black' || record.blank === 'white') ||
         !isStep(record.step) ||
-        !isStep(record.steps)
+        !isStep(record.steps) ||
+        !(record.reply === undefined || record.reply === null || isReply(record.reply))
       )
         return null;
       break;
@@ -124,6 +137,17 @@ export function parsePresentEnvelope(data: unknown): PresentEnvelope | null {
       break;
   }
   return record as PresentEnvelope;
+}
+
+function isReply(value: unknown): value is PresentReply {
+  if (typeof value !== 'object' || value === null) return false;
+  const reply = value as Record<string, unknown>;
+  return (
+    typeof reply.to === 'string' &&
+    typeof reply.seq === 'number' &&
+    Number.isInteger(reply.seq) &&
+    reply.seq > 0
+  );
 }
 
 function isStep(value: unknown): value is number {
@@ -168,7 +192,7 @@ function browserEnv(): PresentChannelEnv {
 export function openPresentChannel(
   deckId: string,
   role: PresentRole,
-  onMessage: (message: PresentMessage) => void,
+  onMessage: (message: PresentEnvelope) => void,
   env: PresentChannelEnv = browserEnv(),
 ): PresentChannel {
   const id = (env.id ?? randomId)();
@@ -214,14 +238,70 @@ export function openPresentChannel(
     id,
     transport,
     post(body) {
-      if (closed) return;
+      if (closed) return 0;
       seq += 1;
       send({ ...body, from: id, role, v: PRESENT_PROTOCOL, at: now(), seq });
+      return seq;
     },
     close() {
       if (closed) return;
       closed = true;
       dispose();
+    },
+  };
+}
+
+/**
+ * How long a presenter move holds back the audience states that answer no move of this window (a
+ * state from a window that predates `reply`, or from an audience that never received the move):
+ * after it, they are followed again, so the presenter cannot stop following for good.
+ */
+export const MOVE_ANSWER_MS = 2000;
+
+/** The presenter's record of its own move in flight; `follows` decides each audience state. */
+export type MoveTracker = {
+  /** a `goto` this window posted, by the sequence number `post` returned */
+  sent: (seq: number) => void;
+  /** whether to follow a state of the audience window */
+  follows: (state: { reply?: PresentReply | null }) => boolean;
+};
+
+/**
+ * The reply rule of the presenter window (the presenter audit of a95d4097d, item 1). The presenter
+ * moves at once and posts `goto`; the audience applies it and answers with a state whose `reply`
+ * names it. Until the latest move is answered, the states the audience sends describe it before
+ * that move: a late answer to an older press, or an earlier state still on its way. Following one
+ * put the presenter back a slide or a step, and on a slide with click steps its next press then
+ * asked for a step the audience already showed, which the audience dropped. So while a move is in
+ * flight, an answer to an older move of this window is never followed, a state that answers no
+ * move of this window waits out `holdMs`, and the answer to the latest move (or a later one) ends
+ * the hold; from then on every state is followed, the audience's own moves included.
+ */
+export function createMoveTracker(
+  id: string,
+  options: { now?: () => number; holdMs?: number } = {},
+): MoveTracker {
+  const now = options.now ?? (() => Date.now());
+  const holdMs = options.holdMs ?? MOVE_ANSWER_MS;
+  let pending = 0;
+  let sentAt = 0;
+  return {
+    sent(seq) {
+      if (seq <= 0) return;
+      pending = seq;
+      sentAt = now();
+    },
+    follows(state) {
+      if (pending === 0) return true;
+      const reply = state.reply;
+      if (reply !== undefined && reply !== null && reply.to === id) {
+        if (reply.seq < pending) return false;
+        pending = 0;
+        return true;
+      }
+      if (now() - sentAt < holdMs) return false;
+      pending = 0;
+      return true;
     },
   };
 }

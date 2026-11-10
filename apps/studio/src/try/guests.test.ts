@@ -9,7 +9,8 @@ import { heroDocument } from './hero-deck';
 // person joins, points at the slide the visitor is looking at and leaves after STAY_MS; a second
 // press keeps them longer; OpenClaw and Hermes leave one comment on that slide and resolve it
 // before they leave; a guest writes nothing else; nothing is posted while the agents' gate is
-// shut; and under reduced motion each pointer move is one post.
+// shut, and a stay that runs out meanwhile ends the visit; and under reduced motion each pointer
+// move is one post.
 
 type Log = {
   presence: { key: string; state: AgentPresence }[];
@@ -106,6 +107,17 @@ describe("the title's guests", () => {
     await vi.advanceTimersByTimeAsync(2000);
     expect(log.presence.length).toBeGreaterThan(0);
     guests.stop();
+  });
+
+  it('ends a visit whose stay runs out while the gate is shut, and leaves no timer', async () => {
+    const { guests, log } = setup({ open: () => false });
+    guests.visit({ key: 'agent:openclaw', kind: 'agent', comment: 'Checked this slide.' });
+    await vi.advanceTimersByTimeAsync(STAY_MS + 400);
+    expect(log.presence).toEqual([]);
+    expect(log.invokes).toEqual([]);
+    expect(log.left).toEqual(['agent:openclaw']);
+    expect(guests.active()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('under reduced motion moves the pointer in one post', async () => {

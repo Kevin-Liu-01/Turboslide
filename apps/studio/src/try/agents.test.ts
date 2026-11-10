@@ -15,9 +15,9 @@ import type { AgentKey, Task } from './script';
 // moves between slides, selects blocks and types. The properties: no agent write lands on the
 // visitor's slide or selected block once they engaged, a deck level write never lands while they
 // type or drag, a slide the visitor wrote on is never removed, nothing is written or posted while
-// paused, under reduced motion a pointer move is one post, one loop with an idle visitor ends
-// on the deck it started from, every slide reads at every write (no empty text), and a press
-// wakes an agent out of a pause or a wait and sends the visitor's stage to its slide.
+// paused (and no timer is set), under reduced motion a pointer move is one post, one loop with an
+// idle visitor ends on the deck it started from, every slide reads at every write (no empty text),
+// and a press wakes an agent out of a pause or a wait and sends the visitor's stage to its slide.
 
 type Model = { document: DeckDocument; theme: string; values: number[]; comments: number };
 
@@ -516,6 +516,8 @@ describe("the agents' runner", () => {
       await vi.advanceTimersByTimeAsync(10_000);
       expect(w.writes.length).toBe(writes);
       expect(w.presence.length).toBe(posts);
+      /* every loop waits on the gate: no timer is left to wake it, so nothing polls */
+      expect(vi.getTimerCount()).toBe(0);
       runner.setOnScreen(true);
       runner.setVisible(true);
       runner.resume();

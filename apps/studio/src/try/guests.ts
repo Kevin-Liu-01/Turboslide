@@ -13,7 +13,9 @@ import type { AgentPresence, VisitorView } from './agents';
  * it leaves; while it is in the room its chip and flags say what it does ("reading this slide",
  * "leaving a comment"). A guest writes nothing on a slide, so the visitor's work is never
  * touched. A second press while a guest is in the room keeps them longer. Visits pause with the
- * agents (off screen, hidden) and under reduced motion the pointer jumps instead of travelling.
+ * agents (off screen, hidden), and a visit whose stay runs out while paused ends there, so a guest
+ * never waits on a shut gate past its stay. Under reduced motion the pointer jumps instead of
+ * travelling.
  */
 
 /** One guest as a visit drives it: a headless editor controller on the tab room (session.ts). */
@@ -84,8 +86,13 @@ export function createGuests(options: GuestsOptions): Guests {
   let visits = 0;
   const live = new Map<string, { until: number }>();
 
-  const gate = async (): Promise<void> => {
-    while (running && !options.open()) await sleep(200);
+  /** waits while the agents' gate is shut; false once the guests stopped or the stay ran out */
+  const gate = async (stay: { until: number }): Promise<boolean> => {
+    while (running && !options.open()) {
+      if (now() >= stay.until) return false;
+      await sleep(200);
+    }
+    return running;
   };
 
   const run = async (plan: GuestPlan, handle: GuestHandle, stay: { until: number }) => {
@@ -103,7 +110,7 @@ export function createGuests(options: GuestsOptions): Guests {
     let thread: string | null = null;
     if (plan.kind === 'agent') handle.say?.('reading this slide');
     while (running && now() < stay.until) {
-      await gate();
+      if (!(await gate(stay))) break;
       const slideId = slideOf();
       if (!running || slideId === null) break;
       const target = { x: 260 + random() * 1080, y: 180 + random() * 540 };
@@ -115,13 +122,16 @@ export function createGuests(options: GuestsOptions): Guests {
       } else {
         const from = pointer;
         const frames = Math.max(1, Math.round((700 + random() * 300) / FRAME_MS));
-        for (let i = 1; i <= frames && running; i += 1) {
-          await gate();
+        let i = 1;
+        for (; i <= frames && running; i += 1) {
+          if (!(await gate(stay))) break;
           const t = ease(i / frames);
           pointer = { x: from.x + (target.x - from.x) * t, y: from.y + (target.y - from.y) * t };
           handle.present({ slideId, pointer });
           await sleep(FRAME_MS);
         }
+        /* stopped, or the stay ran out while the gate was shut */
+        if (i <= frames) break;
       }
       if (!arrived) {
         arrived = true;

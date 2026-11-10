@@ -39,10 +39,11 @@ import type { AgentKey, AgentScript, SheetPoint, Step, Task } from './script';
  * they wrote and their typing hold throughout.
  *
  * It runs only while the frame's document is visible and the page says the frame is on screen;
- * paused, it writes nothing and posts no presence. Under reduced motion the pointer jumps to its
- * target and no drag ghost is drawn; every write still happens. A task whose action fails is
- * skipped and the agent goes on. Pure over its dependencies, so agents.test.ts runs it on a fake
- * clock with a simulated visitor.
+ * paused, it writes nothing, posts no presence and sets no timer: every loop waits on the gate,
+ * which the next call that opens it (`resume`, `setOnScreen`, `setVisible`) or `stop` releases.
+ * Under reduced motion the pointer jumps to its target and no drag ghost is drawn; every write
+ * still happens. A task whose action fails is skipped and the agent goes on. Pure over its
+ * dependencies, so agents.test.ts runs it on a fake clock with a simulated visitor.
  */
 
 /** What the runner draws of an agent: its slide, selection, caret, pointer and drag box. */
@@ -304,11 +305,23 @@ export function createRunner(options: RunnerOptions): Runner {
   const follow = new Set<AgentKey>();
   let watchFrom = -Infinity;
 
+  /* the loops waiting on a closed gate, released together when it opens or the runner stops */
+  let held: (() => void)[] = [];
   const gate: Gate = {
     open: () => running && !paused && onScreen && visible,
     wait: async () => {
-      while (running && !gate.open()) await sleep(200);
+      while (running && !gate.open())
+        await new Promise<void>((resolve) => {
+          held.push(resolve);
+        });
     },
+  };
+  /** releases the waiting loops once the gate is open or the runner stopped */
+  const regate = (): void => {
+    if (running && !gate.open()) return;
+    const waiting = held;
+    held = [];
+    for (const release of waiting) release();
   };
   const jitter = (from: number, to: number): number => from + (to - from) * random();
 
@@ -650,8 +663,12 @@ export function createRunner(options: RunnerOptions): Runner {
         signals.set(step.signal, loop);
         return 'ok';
       case 'wait': {
-        const from = now();
+        let from = now();
         while (running && signals.get(step.signal) !== loop) {
+          /* paused, the other agent cannot give the signal: the wait and its clock hold */
+          const closed = now();
+          await gate.wait();
+          from += now() - closed;
           if (now() - from > WAIT_MS) return 'failed';
           /* a pressed agent leaves a wait and starts its next task at once */
           if (pressed.delete(agent)) {
@@ -761,6 +778,7 @@ export function createRunner(options: RunnerOptions): Runner {
 
   /** the agent reads a slide while it waits: the next of its review tasks, or a short rest */
   const reviewOnce = async (agent: AgentKey): Promise<void> => {
+    await gate.wait();
     const list = review[agent];
     if (list.length === 0) {
       await doze(agent, 200);
@@ -793,6 +811,9 @@ export function createRunner(options: RunnerOptions): Runner {
       const retried = new Set<Task>();
       let waitingFrom: number | null = null;
       while (running && queue.length > 0) {
+        /* paused, the agent holds before its next task (a task it cannot do is not one to skip) */
+        await gate.wait();
+        if (!running) break;
         const index = queue.findIndex((task) => ready(task, mine));
         if (index < 0) {
           /* every task left waits on the other agent: read a slide meanwhile; past WAIT_MS the
@@ -828,6 +849,7 @@ export function createRunner(options: RunnerOptions): Runner {
   /* the director's own tick, for a stage left on a slide no agent writes any more */
   const directorTick = async (): Promise<void> => {
     while (running) {
+      await gate.wait();
       await sleep(1000);
       if (gate.open()) direct();
     }
@@ -845,6 +867,7 @@ export function createRunner(options: RunnerOptions): Runner {
     },
     stop() {
       running = false;
+      regate();
       return Promise.all(loops).then(() => undefined);
     },
     pause() {
@@ -852,12 +875,15 @@ export function createRunner(options: RunnerOptions): Runner {
     },
     resume() {
       paused = false;
+      regate();
     },
     setOnScreen(on) {
       onScreen = on;
+      regate();
     },
     setVisible(on) {
       visible = on;
+      regate();
     },
     nudge(agent) {
       if (!keys.includes(agent)) return;

@@ -207,3 +207,66 @@ describe('a held arrow in the console', () => {
     expect(moves).toEqual([1, 1]);
   });
 });
+
+// A typed slide number (the presenter audit of a95d4097d, item 4): a number waits 1.5 s for
+// Enter. A move before Enter now drops it; it stayed pending, so a digit, then an arrow, then
+// Enter jumped to the typed slide instead of moving on.
+describe('a typed slide number in the console', () => {
+  const key = (name: string) =>
+    act(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true }));
+    });
+
+  function mountAt(index: number, onGoto: (index: number, step?: number | 'end') => void) {
+    container = document.createElement('div');
+    document.body.append(container);
+    root = createRoot(container);
+    const render = (connected: boolean) =>
+      act(() => {
+        root?.render(
+          createElement(PresenterConsole, {
+            title: 'Quarterly review',
+            slides: SLIDES,
+            index,
+            theme: 'light',
+            connected,
+            platform: 'mac',
+            onGoto,
+          }),
+        );
+      });
+    render(true);
+    return render;
+  }
+
+  it('goes to the typed slide on Enter', () => {
+    const moves: number[] = [];
+    mountAt(0, (to) => moves.push(to));
+    key('3');
+    key('Enter');
+    expect(moves).toEqual([2]);
+  });
+
+  it('drops the typed number when an arrow moves first, so Enter moves on', () => {
+    const moves: number[] = [];
+    mountAt(0, (to) => moves.push(to));
+    key('3');
+    key('ArrowRight');
+    key('Enter');
+    /* the arrow to the second slide, then Enter as Next from the slide shown (index 0 here) */
+    expect(moves).toEqual([1, 1]);
+    key('2');
+    key('Home');
+    key('Enter');
+    expect(moves).toEqual([1, 1, 0, 1]);
+  });
+
+  it('keeps the typed number through a render that moves nothing', () => {
+    const moves: number[] = [];
+    const render = mountAt(0, (to) => moves.push(to));
+    key('2');
+    render(false);
+    key('Enter');
+    expect(moves).toEqual([1]);
+  });
+});

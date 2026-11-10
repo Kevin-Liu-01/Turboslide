@@ -522,16 +522,21 @@ export function Slideshow({
         case 'exit':
           exit();
           return;
+        /* a move drops a typed number, as in the console (the presenter audit of a95d4097d, item 4) */
         case 'next':
+          clearDigits();
           gate.press(event, () => step(1, event.repeat));
           return;
         case 'previous':
+          clearDigits();
           gate.press(event, () => step(-1, event.repeat));
           return;
         case 'first':
+          clearDigits();
           goto(0);
           return;
         case 'last':
+          clearDigits();
           goto(state.total - 1);
           return;
         case 'digit':

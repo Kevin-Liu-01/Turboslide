@@ -143,3 +143,19 @@ describe('a held arrow in the show', () => {
     expect(exits).toBe(1);
   });
 });
+
+// A typed slide number in the show (the presenter audit of a95d4097d, item 4): a move before
+// Enter drops it, as in the console, so a digit, an arrow and Enter move on.
+describe('a typed slide number in the show', () => {
+  it('goes to the typed slide on Enter, and drops it when an arrow moves first', () => {
+    mount();
+    key('keydown', '3');
+    key('keydown', 'Enter');
+    expect(moves).toEqual(['s3']);
+    key('keydown', '1');
+    key('keydown', 'ArrowLeft');
+    key('keydown', 'Enter');
+    /* Left to s2, then Enter as Next to s3; the typed 1 is gone */
+    expect(moves).toEqual(['s3', 's2', 's3']);
+  });
+});

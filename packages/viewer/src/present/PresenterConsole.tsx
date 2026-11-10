@@ -286,20 +286,26 @@ export function PresenterConsole({
       });
       if (action === null) return;
       switch (action.type) {
+        /* a move drops a typed number: a digit, an arrow and Enter moved on, not to the digit's
+           slide (the presenter audit of a95d4097d, item 4) */
         case 'next':
           event.preventDefault();
+          clearDigits();
           gate.press(event, () => keys.current.step(1));
           return;
         case 'previous':
           event.preventDefault();
+          clearDigits();
           gate.press(event, () => keys.current.step(-1));
           return;
         case 'first':
           event.preventDefault();
+          clearDigits();
           if (now.total > 0) now.onGoto(0);
           return;
         case 'last':
           event.preventDefault();
+          clearDigits();
           if (now.total > 0) now.onGoto(now.total - 1);
           return;
         case 'digit':
@@ -333,7 +339,7 @@ export function PresenterConsole({
       document.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('blur', onBlur);
       gate.cancel();
-      window.clearTimeout(digitTimer.current);
+      clearDigits();
     };
   }, []);
 

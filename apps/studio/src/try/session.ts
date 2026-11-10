@@ -324,7 +324,15 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
   };
 
   const told = createStory({
-    main: runner,
+    /* the hero's loop: a chapter pauses it, and back at rest it runs (started now if a chapter
+       named on the frame's ready had kept the opening hold from starting it) */
+    main: {
+      pause: () => runner.pause(),
+      resume: () => {
+        runner.resume();
+        if (!options.still) begin();
+      },
+    },
     runner: (script) =>
       createRunner({
         agents: handles,
@@ -379,7 +387,15 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
         told.setOnScreen(event.data.visible);
       }
       if (isTryPress(event.data)) press(event.data.who);
-      if (isTryChapter(event.data)) told.set(event.data.chapter);
+      if (isTryChapter(event.data)) {
+        /* a chapter's frame: the chapter pauses the hero's loop, so the opening hold never starts
+           it (a started loop waits on its gate the whole time the chapter plays) */
+        if (event.data.chapter !== 0 && opening !== undefined) {
+          win.clearTimeout(opening);
+          opening = undefined;
+        }
+        told.set(event.data.chapter);
+      }
     };
     const onVisibility = (): void => {
       const visible = win.document.visibilityState === 'visible';

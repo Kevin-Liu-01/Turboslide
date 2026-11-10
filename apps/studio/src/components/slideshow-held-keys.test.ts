@@ -159,3 +159,37 @@ describe('a typed slide number in the show', { timeout: 30_000 }, () => {
     expect(moves).toEqual(['s3', 's2', 's3']);
   });
 });
+
+// The end plate (docs/archive/rounds/POLISH.md item 98): a jump leaves it. Home, End, a typed
+// number, the list or a slide link moved the slide under the plate and left the plate up, so the
+// next Next left the show (e2e/present.spec.ts, Home then Space after the last slide).
+describe('the end plate', { timeout: 30_000 }, () => {
+  it('leaves the plate on Home, so the next key moves on instead of leaving the show', () => {
+    mount();
+    key('keydown', 'End');
+    key('keydown', 'ArrowRight');
+    key('keyup', 'ArrowRight');
+    expect(ended()).toBe(true);
+    key('keydown', 'Home');
+    expect(ended()).toBe(false);
+    expect(moves.at(-1)).toBe('s1');
+    key('keydown', ' ');
+    expect(exits).toBe(0);
+    expect(moves.at(-1)).toBe('s2');
+  });
+
+  it('leaves the plate on End and on a typed number too', () => {
+    mount();
+    key('keydown', 'End');
+    key('keydown', 'ArrowRight');
+    expect(ended()).toBe(true);
+    key('keydown', 'End');
+    expect(ended()).toBe(false);
+    key('keydown', 'ArrowRight');
+    expect(ended()).toBe(true);
+    key('keydown', '2');
+    key('keydown', 'Enter');
+    expect(ended()).toBe(false);
+    expect(moves.at(-1)).toBe('s2');
+  });
+});

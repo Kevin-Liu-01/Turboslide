@@ -367,7 +367,10 @@ export function Slideshow({
 
   const goto = useCallback((to: number, at: ClockEntry = 'start') => {
     const target = live.current.play[to];
-    if (target === undefined || target.id === live.current.activeId) return;
+    if (target === undefined) return;
+    /* a jump leaves the end plate, to the slide shown included (End on the plate) */
+    setEnded(false);
+    if (target.id === live.current.activeId) return;
     enterRef.current(target.id, at);
     live.current.onGoto(target.id);
   }, []);
@@ -615,6 +618,8 @@ export function Slideshow({
           /* every goto is answered, a move to where the show already is included: the state this
              renders names it, and the presenter holds back until it arrives (createMoveTracker) */
           setAnswer({ to: message.from, seq: message.seq });
+          /* the presenter knows no end plate: its move shows the slide it names */
+          setEnded(false);
           /* the presenter's move: a slide at its start or at the state after a step */
           const at: ClockEntry =
             message.step === undefined || message.step === 0 ? 'start' : message.step;

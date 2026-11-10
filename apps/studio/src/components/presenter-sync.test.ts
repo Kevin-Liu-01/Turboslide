@@ -366,6 +366,23 @@ describe('the slideshow window answers the presenter', { timeout: 30_000 }, () =
     expect(states().at(-1)).toMatchObject({ slideId: 's2', reply: { seq } });
   });
 
+  it('leaves the end plate for the slide a presenter goto names', () => {
+    mountShow();
+    const keyDown = (key: string) =>
+      act(() => {
+        document.body.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+      });
+    keyDown('End');
+    keyDown('ArrowRight');
+    const plate = () => container?.querySelector('[data-control="present.end"]') ?? null;
+    expect(plate()).not.toBeNull();
+    act(() => {
+      presenter?.post({ type: 'goto', slideId: 's1', step: 0 });
+    });
+    expect(plate()).toBeNull();
+    expect(showing()).toBe('s1');
+  });
+
   it('lands on the latest of two gotos that arrive before one render', () => {
     const { states } = mountShow();
     let last = 0;

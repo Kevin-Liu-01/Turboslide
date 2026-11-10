@@ -1,6 +1,8 @@
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import { createFrameCoalescer } from '@turboslide/viewer/gesture-frame';
+
 import { PROMPTS } from './menus/strings.ts';
 import { hideTooltip, tipProps } from './Tooltip';
 
@@ -155,24 +157,43 @@ export function NotesPane({
       event.stopPropagation();
   };
 
-  /* the handle: drag resizes between 0 and 40 percent of the window; double click toggles */
+  /* the handle: drag resizes between 0 and 40 percent of the window; double click toggles. The
+     page keeps the height as a state of the whole editor, so the drag sends one height per
+     animation frame (the last pointer position of the frame), the release's own height, and on a
+     cancelled pointer (the system took it) the last height the drag showed */
   const onHandleDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.button !== 0) return;
     event.preventDefault();
     const startY = event.clientY;
     const startHeight = height;
     const viewport = windowHeight ?? window.innerHeight;
-    const move = (ev: PointerEvent) => {
-      callbacks.current.onHeightChange(
-        clampNotesHeight(startHeight + (startY - ev.clientY), viewport),
-      );
+    const heightAt = (y: number) => clampNotesHeight(startHeight + (startY - y), viewport);
+    const frame = createFrameCoalescer({
+      request: (callback) => window.requestAnimationFrame(callback),
+      cancel: (handle) => window.cancelAnimationFrame(handle),
+    });
+    let sent = startHeight;
+    let latest = startHeight;
+    const send = (next: number) => {
+      if (next === sent) return;
+      sent = next;
+      callbacks.current.onHeightChange(next);
     };
-    const up = () => {
+    const move = (ev: PointerEvent) => {
+      latest = heightAt(ev.clientY);
+      const next = latest;
+      frame.push(() => send(next));
+    };
+    const end = (ev: PointerEvent) => {
       window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      frame.cancel();
+      send(ev.type === 'pointerup' ? heightAt(ev.clientY) : latest);
     };
     window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
   };
 
   const onHandleKey = (event: ReactKeyboardEvent<HTMLButtonElement>) => {

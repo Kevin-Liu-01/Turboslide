@@ -215,12 +215,43 @@ describe('NotesPane', () => {
     if (!handle) throw new Error('no handle');
     expect(handle.getAttribute('data-tip')).toBe('Speaker notes');
     expect(handle.hasAttribute('title')).toBe(false);
+    /* the page renders the editor on each height: one per animation frame, the last move wins */
+    const frames: Array<FrameRequestCallback | null> = [];
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      frames.push(callback),
+    );
+    vi.stubGlobal('cancelAnimationFrame', (handle: number) => {
+      frames[handle - 1] = null;
+    });
+    const flushFrame = () =>
+      act(() => {
+        for (const callback of frames.splice(0)) callback?.(0);
+      });
     fireEvent.pointerDown(handle, { button: 0, clientY: 800 });
+    fireEvent.pointerMove(window, { clientY: 760 });
     fireEvent.pointerMove(window, { clientY: 700 });
+    expect(onHeightChange).not.toHaveBeenCalled();
+    flushFrame();
+    expect(onHeightChange).toHaveBeenCalledTimes(1);
     expect(onHeightChange).toHaveBeenLastCalledWith(NOTES_DEFAULT_HEIGHT + 100);
+    /* the release sends its own height at once and drops the frame still pending */
     fireEvent.pointerMove(window, { clientY: 100 });
+    fireEvent.pointerUp(window, { clientY: 100 });
+    expect(onHeightChange).toHaveBeenCalledTimes(2);
     expect(onHeightChange).toHaveBeenLastCalledWith(360);
-    fireEvent.pointerUp(window);
+    flushFrame();
+    expect(onHeightChange).toHaveBeenCalledTimes(2);
+    /* a cancelled pointer (the system took it) ends the drag at the last height it showed */
+    onHeightChange.mockClear();
+    fireEvent.pointerDown(handle, { button: 0, clientY: 800 });
+    fireEvent.pointerMove(window, { clientY: 780 });
+    fireEvent.pointerCancel(window);
+    expect(onHeightChange).toHaveBeenCalledTimes(1);
+    expect(onHeightChange).toHaveBeenLastCalledWith(NOTES_DEFAULT_HEIGHT + 20);
+    fireEvent.pointerMove(window, { clientY: 600 });
+    flushFrame();
+    expect(onHeightChange).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
     fireEvent.doubleClick(handle);
     expect(onHeightChange).toHaveBeenLastCalledWith(0);
     fireEvent.keyDown(handle, { key: 'ArrowUp', shiftKey: true });

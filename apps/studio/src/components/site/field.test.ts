@@ -9,9 +9,11 @@ import {
   SHEET,
   SOURCE,
   alphaOf,
+  cellFor,
   cellsOf,
   cover,
   fadeAt,
+  layoutKey,
   lensAt,
   revealAt,
   spansOf,
@@ -21,8 +23,8 @@ import {
 // The site's fields (field.ts, SiteField.tsx; Kevin, 2026-10-30): the lighthouse slide as a text
 // portrait in its own JSON. These pin the parts a wrong number would break without a browser:
 // the stream is the slide's file, the photograph covers the band from its top at every window
-// the site draws, the lens and the ink ramp stay in range, the reveal ends whole, and the lens
-// picks out a key with its value.
+// the site draws, the lens and the ink ramp stay in range, the reveal ends whole, the lens
+// picks out a key with its value, and a resize that keeps the grid draws nothing.
 
 const slide = JSON.parse(
   readFileSync(new URL('../../../home-deck/slides/lighthouse.json', import.meta.url), 'utf8'),
@@ -57,6 +59,25 @@ describe("the hero's field", () => {
       c1: 6,
       r1: 3,
     });
+  });
+
+  it('keys a drawing to its grid, so a resize inside the same cells draws nothing', () => {
+    const cell = cellFor(12);
+    const at = (width: number, height: number, copy: { x: number; y: number }, end: number) => {
+      const grid = { cols: Math.ceil(width / cell.w), rows: Math.ceil(height / cell.h), dpr: 2 };
+      const clear = [cellsOf({ ...copy, w: 600, h: 120 }, grid, cell)];
+      return layoutKey(grid, clear, Math.floor(end / cell.h));
+    };
+    const drawn = at(1436, 900, { x: 96, y: 200 }, 640);
+    /* two pixels wider, the copy a pixel lower and the figure two pixels lower: the same cells */
+    expect(at(1438, 900, { x: 96, y: 201 }, 642)).toBe(drawn);
+    /* a column more, the copy a row lower, the figure a row lower: a new drawing each */
+    expect(at(1444, 900, { x: 96, y: 200 }, 640)).not.toBe(drawn);
+    expect(at(1436, 900, { x: 96, y: 216 }, 640)).not.toBe(drawn);
+    expect(at(1436, 900, { x: 96, y: 200 }, 656)).not.toBe(drawn);
+    expect(layoutKey({ cols: 192, rows: 60, dpr: 1 }, [], null)).not.toBe(
+      layoutKey({ cols: 192, rows: 60, dpr: 2 }, [], null),
+    );
   });
 
   it('eases the lens from full strength in its core to nothing at its radius', () => {

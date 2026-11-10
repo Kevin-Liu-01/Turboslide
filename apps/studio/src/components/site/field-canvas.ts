@@ -14,11 +14,12 @@ import {
   cellsOf,
   cover,
   fadeAt,
+  layoutKey,
   lensAt,
   revealAt,
   spansOf,
 } from './field';
-import type { Rect } from './field';
+import type { Cells, Rect } from './field';
 
 import toneUrl from './pictures/lighthouse-tone.webp?url';
 
@@ -30,6 +31,10 @@ const MAX_DPR = 2;
 /** The word the footer's field draws, and the share of the field's width it spans. */
 const WORD = 'Turboslide';
 const WORD_SPAN = 0.96;
+/** How far around content that must read its cells stay paper, in field px. */
+const CLEAR_PAD = 8;
+/** How far from the view a field counts as near: it starts there, and draws again on a resize. */
+const NEAR_MARGIN = '100% 0px';
 /** What the lens never reaches through: the cleared copy, the figure that ends the band, controls. */
 const OPAQUE = '[data-field-clear], [data-field-end], a, button, input, textarea';
 
@@ -67,10 +72,13 @@ type FieldOptions = { kind?: FieldKind; art?: FieldArt; source?: string };
  * device pixels and draws the cells one cell past it, so a glyph that reaches into its neighbour
  * leaves no sliver behind.
  *
- * The canvas is decorative (`aria-hidden`) and costs nothing at rest: it draws once per size,
- * appearance and font, the footer's on its first approach to the screen, and after that only the
- * cells under a moving lens. Content that must read over the field carries `data-field-clear`; its
- * cells stay paper, and with the value `band` its rows stay paper across the field.
+ * The canvas is decorative (`aria-hidden`) and costs nothing at rest: it draws once per grid
+ * (field.ts `layoutKey`: the cells, the device pixel ratio and the cells kept clear), appearance
+ * and font, the footer's on its first approach to the screen, and after that only the cells under
+ * a moving lens. A resize that leaves the grid as it was draws nothing, and a field more than a
+ * screen from the view draws for a resize or an appearance only once it comes near again. Content
+ * that must read over the field carries `data-field-clear`; its cells stay paper, and with the
+ * value `band` its rows stay paper across the field.
  *
  * A chapter's field (Chapters.tsx) passes `art` and `source`: it prints that art
  * (chapter-fields.ts `paintArt`) in that source, unfaded and at FIELD_QUIET of the ink at rest
@@ -104,6 +112,8 @@ export function attachField(
   let goal: { x: number; y: number } | null = null;
   let picked: Picked | null = null;
   let lensFrame = 0;
+  /* what the canvas was last drawn for (field.ts `layoutKey`) */
+  let drawnFor = '';
 
   /* the name's letters are thin against a cell, so its stream leaves out the spaces */
   const stream = kind === 'word' && art === undefined ? source.replace(/\s+/g, '') : source;
@@ -305,7 +315,33 @@ export function attachField(
     if (next < 1) revealFrame = window.requestAnimationFrame(revealStep);
   };
 
-  const build = (): void => {
+  /** The cells content asks to keep clear; `data-field-clear="band"` clears its rows across. */
+  const clearCells = (box: DOMRect, size: { cols: number; rows: number }): Cells[] => {
+    const out: Cells[] = [];
+    for (const el of host.querySelectorAll<HTMLElement>('[data-field-clear]')) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0) continue;
+      const band = el.dataset.fieldClear === 'band';
+      const x = band ? 0 : r.left - box.left;
+      const w = band ? box.width : r.width;
+      out.push(
+        cellsOf(
+          {
+            x: x - CLEAR_PAD,
+            y: r.top - box.top - CLEAR_PAD,
+            w: w + 2 * CLEAR_PAD,
+            h: r.height + 2 * CLEAR_PAD,
+          },
+          size,
+          cell,
+        ),
+      );
+    }
+    return out;
+  };
+
+  /** Samples what the field draws and draws it whole; unless forced, only for a new grid. */
+  const build = (force: boolean): void => {
     const box = host.getBoundingClientRect();
     if (box.width === 0) return;
     if (
@@ -315,8 +351,24 @@ export function attachField(
     const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
     const cols = Math.max(1, Math.ceil(box.width / cell.w));
     const rows = Math.max(1, Math.ceil(box.height / cell.h));
-    node.width = Math.round(cols * cell.w * dpr);
-    node.height = Math.round(rows * cell.h * dpr);
+    const clearAt = clearCells(box, { cols, rows });
+    const end =
+      kind === 'slide' && art === undefined
+        ? host.querySelector('[data-field-end]')?.getBoundingClientRect()
+        : undefined;
+    const key = layoutKey(
+      { cols, rows, dpr },
+      clearAt,
+      end === undefined ? null : Math.floor((end.top - box.top) / cell.h),
+    );
+    if (!force && grid !== null && key === drawnFor) return;
+    drawnFor = key;
+    /* setting a canvas's size reallocates and clears its bitmap, so only a new size sets it; the
+       whole redraw below clears what the same size held */
+    const width = Math.round(cols * cell.w * dpr);
+    const height = Math.round(rows * cell.h * dpr);
+    if (node.width !== width) node.width = width;
+    if (node.height !== height) node.height = height;
     node.style.width = `${cols * cell.w}px`;
     node.style.height = `${rows * cell.h}px`;
     const sample = document.createElement('canvas');
@@ -344,30 +396,9 @@ export function attachField(
       }
     }
     const clear = new Uint8Array(cols * rows);
-    const keep = (rect: Rect, pad: number): void => {
-      const c = cellsOf(
-        { x: rect.x - pad, y: rect.y - pad, w: rect.w + 2 * pad, h: rect.h + 2 * pad },
-        { cols, rows },
-        cell,
-      );
+    for (const c of clearAt)
       for (let row = c.r0; row < c.r1; row += 1)
         clear.fill(1, row * cols + c.c0, row * cols + c.c1);
-    };
-    /* `data-field-clear="band"` clears the element's rows across the whole field */
-    for (const el of host.querySelectorAll<HTMLElement>('[data-field-clear]')) {
-      const r = el.getBoundingClientRect();
-      const band = el.dataset.fieldClear === 'band';
-      if (r.width > 0)
-        keep(
-          {
-            x: band ? 0 : r.left - box.left,
-            y: r.top - box.top,
-            w: band ? box.width : r.width,
-            h: r.height,
-          },
-          8,
-        );
-    }
     grid = { cols, rows, dpr, tone: values, clear };
     picked = pickAt(lens);
     /* the first build starts the reveal; a later one draws at the reveal's current progress */
@@ -398,12 +429,25 @@ export function attachField(
     if (lensFrame === 0) lensFrame = window.requestAnimationFrame(moveLens);
   };
 
+  /* whether the field is within NEAR_MARGIN of the view; near until the observer says otherwise */
+  let near = true;
+  /* a draw asked for while the field was far, made when it comes near (true: forced) */
+  let owed: boolean | null = null;
   let pending = 0;
-  const rebuild = (): void => {
+  let forceNext = false;
+  /** Draws again on the next frame, at most once a frame; a far field owes it until it is near. */
+  const rebuild = (force = false): void => {
     if (!started) return;
+    if (!near) {
+      owed = force || owed === true;
+      return;
+    }
+    forceNext ||= force;
     window.cancelAnimationFrame(pending);
     pending = window.requestAnimationFrame(() => {
-      if (!cancelled) build();
+      const forced = forceNext;
+      forceNext = false;
+      if (!cancelled) build(forced);
     });
   };
   const readColours = (): void => {
@@ -412,11 +456,11 @@ export function attachField(
     accent = value === '' ? ink : rgbOf(value);
   };
   readColours();
-  const resize = new ResizeObserver(rebuild);
+  const resize = new ResizeObserver(() => rebuild());
   resize.observe(host);
   const stopAppearance = onAppearance(() => {
     readColours();
-    rebuild();
+    rebuild(true);
   });
   host.addEventListener('pointermove', onMove, { passive: true });
   host.addEventListener('pointerleave', onLeave);
@@ -451,32 +495,39 @@ export function attachField(
     void Promise.all(loads).then(() => {
       if (cancelled) return;
       family = getComputedStyle(node).fontFamily;
-      build();
+      build(true);
     });
   };
   /* the hero's field draws at once; the footer's and the chapters' when they come within a
-     screen of the view */
-  const near =
-    (kind === 'word' || art !== undefined) && typeof IntersectionObserver !== 'undefined'
-      ? new IntersectionObserver(
+     screen of the view. Every field keeps the watch, so a far one draws only once it is near. */
+  const lazy = kind === 'word' || art !== undefined;
+  const watch =
+    typeof IntersectionObserver === 'undefined'
+      ? null
+      : new IntersectionObserver(
           (entries) => {
-            if (entries.some((entry) => entry.isIntersecting)) {
-              near?.disconnect();
-              start();
+            const entry = entries[entries.length - 1];
+            if (entry === undefined) return;
+            near = entry.isIntersecting;
+            if (!near) return;
+            if (!started) start();
+            else if (owed !== null) {
+              const force = owed;
+              owed = null;
+              rebuild(force);
             }
           },
-          { rootMargin: '100% 0px' },
-        )
-      : null;
-  if (near === null) start();
-  else near.observe(host);
+          { rootMargin: NEAR_MARGIN },
+        );
+  if (watch === null || !lazy) start();
+  watch?.observe(host);
 
   return () => {
     cancelled = true;
     window.cancelAnimationFrame(lensFrame);
     window.cancelAnimationFrame(revealFrame);
     window.cancelAnimationFrame(pending);
-    near?.disconnect();
+    watch?.disconnect();
     resize.disconnect();
     stopAppearance();
     host.removeEventListener('pointermove', onMove);

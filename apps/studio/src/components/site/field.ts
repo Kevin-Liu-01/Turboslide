@@ -69,6 +69,24 @@ export function cellsOf(
   };
 }
 
+/** A span of whole cells: columns c0 to c1 and rows r0 to r1, the ends excluded. */
+export type Cells = ReturnType<typeof cellsOf>;
+
+/**
+ * What a field's drawing depends on, to the cell (field-canvas.ts `build`): the grid's size and
+ * device pixel ratio, the cells content keeps clear, and the row of the element that ends the
+ * hero's band. A resize that leaves it the same moves nothing a cell shows, so the field keeps
+ * the canvas it drew.
+ */
+export function layoutKey(
+  grid: { cols: number; rows: number; dpr: number },
+  clear: readonly Cells[],
+  endRow: number | null,
+): string {
+  const spans = clear.map((c) => `${c.c0},${c.r0},${c.c1},${c.r1}`);
+  return [grid.cols, grid.rows, grid.dpr, endRow ?? '-', ...spans].join(' ');
+}
+
 /** A tone (0 paper to 1 ink) through the levels and a smoothstep, so the midtones open up. */
 export function toneInk(tone: number): number {
   const t = Math.min(1, Math.max(0, (tone - LEVELS.low) / (LEVELS.high - LEVELS.low)));

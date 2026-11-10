@@ -166,3 +166,49 @@ describe('the Paint format button and the brush (docs/archive/rounds/POLISH.md 2
     expect(stage.listeners()).toBe(0);
   });
 });
+
+/* the tail's fold measure (ToolbarTail.tsx, 3.4) read every slot's width on every render of the
+   editor, which is one render per keystroke; it measures when the controls change and when the
+   bar or a slot changes size (a ResizeObserver), and not on a render that changes neither */
+describe('the toolbar tail fold measure', () => {
+  it('reads the slots again on a size change, not on a render with the same controls', () => {
+    let reads = 0;
+    const width = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      get(this: HTMLElement) {
+        if (this.dataset.slot !== undefined) reads += 1;
+        return 40;
+      },
+    });
+    const sizes: Array<() => void> = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          sizes.push(callback);
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    try {
+      const { container, rerender } = render(<Harness input={input()} />);
+      expect(container.querySelectorAll('.ts-tb-tail > [data-slot]').length).toBeGreaterThan(0);
+      reads = 0;
+      /* a new input with the same controls: the editor's render on a keystroke */
+      rerender(<Harness input={input({ revision: 413 })} />);
+      rerender(<Harness input={input({ revision: 414 })} />);
+      expect(reads).toBe(0);
+      /* a slot or the bar changed size */
+      act(() => {
+        for (const size of sizes) size();
+      });
+      expect(reads).toBeGreaterThan(0);
+    } finally {
+      if (width) Object.defineProperty(HTMLElement.prototype, 'offsetWidth', width);
+      vi.unstubAllGlobals();
+    }
+  });
+});

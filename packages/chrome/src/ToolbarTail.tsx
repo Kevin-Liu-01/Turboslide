@@ -354,28 +354,46 @@ export function ToolbarTail() {
   const widths = useRef(new Map<string, number>());
   const [resizeTick, setResizeTick] = useState(0);
   const controlIds = controls.map((control) => control.control).join('|');
+  /* the bar and each of its children are observed, so a slot whose width changes with its value
+     (a font name, a size) measures again without a measure on every render */
+  const observer = useRef<ResizeObserver | null>(null);
+  const observed = useRef(new WeakSet<Element>());
+  const observeChildren = (el: HTMLElement) => {
+    const watch = observer.current;
+    if (watch === null) return;
+    for (const child of el.children) {
+      if (observed.current.has(child)) continue;
+      observed.current.add(child);
+      watch.observe(child);
+    }
+  };
 
   useMountEffect(() => {
     const el = tailRef.current;
     if (!el) return undefined;
     const bump = () => setResizeTick((tick) => tick + 1);
-    let observer: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
-      observer = new ResizeObserver(bump);
-      observer.observe(el);
+      observer.current = new ResizeObserver(bump);
+      observer.current.observe(el);
+      observeChildren(el);
     }
     window.addEventListener('resize', bump);
     return () => {
-      observer?.disconnect();
+      observer.current?.disconnect();
+      observer.current = null;
+      observed.current = new WeakSet();
       window.removeEventListener('resize', bump);
     };
   });
 
-  /* measured before paint on every selection change and every resize: the slots' widths, the room
-     the tail's end leaves, then the plan; a control the plan folds leaves the row with its divider */
+  /* measured before paint when the controls change and when the bar or a slot changes size (the
+     observer's tick): the slots' widths, the room the tail's end leaves, then the plan; a control
+     the plan folds leaves the row with its divider. Not on every render: the editor renders the
+     bar once per keystroke, and each measure read every slot's layout */
   useLayoutEffect(() => {
     const el = tailRef.current;
     if (!el) return;
+    observeChildren(el);
     const slots = [...el.querySelectorAll<HTMLElement>(':scope > [data-slot]')];
     let unknown = false;
     for (const slot of slots) {
@@ -391,16 +409,15 @@ export function ToolbarTail() {
     const end = [...el.querySelectorAll<HTMLElement>(':scope > .ts-tb-end, :scope > .ts-tb-hide')];
     const endWidth = end.reduce((sum, each) => sum + each.offsetWidth + TAIL_GAP_PX, 0);
     const available = el.clientWidth - endWidth;
+    const ids = controlIds === '' ? [] : controlIds.split('|');
     const plan = foldPlan(
-      controls.map((control) => ({
-        id: control.control,
-        width: widths.current.get(control.control) ?? 0,
-      })),
+      ids.map((id) => ({ id, width: widths.current.get(id) ?? 0 })),
       available,
     );
     const same = plan.size === folded.size && [...plan].every((id) => folded.has(id));
     if (!same) setFolded(plan);
-  }, [controlIds, controls, folded, resizeTick]);
+    // observeChildren reads refs alone
+  }, [controlIds, folded, resizeTick]);
 
   /* a change of selection closes any open plate */
   useEffect(() => {

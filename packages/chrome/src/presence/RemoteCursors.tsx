@@ -235,11 +235,15 @@ export function RemoteCursors({
   const caretMoved = useRef(new Map<string, { key: string; at: number }>());
   /* the box each caret was last measured at, kept for CARET_KEEP_MS when a measure fails (3.5) */
   const caretBoxes = useRef(new Map<string, { box: Box; at: number }>());
+  /* the flags fade with the clock (11 6.5): a tick each second while another person is on this
+     slide, and none on a slide nobody else has open, where the tick drew nothing */
   const [, tick] = useState(0);
+  const anyone = others.length > 0;
   useEffect(() => {
+    if (!anyone) return undefined;
     const timer = window.setInterval(() => tick((n) => n + 1), 1000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [anyone]);
   const sheet =
     body ??
     (typeof document === 'undefined'

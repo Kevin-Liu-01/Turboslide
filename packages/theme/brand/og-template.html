@@ -21,6 +21,12 @@
       body {
         margin: 0;
       }
+      /* the card keeps Inter (docs/brand.md section 4): brand.css sets the chrome's faces to Katagami Text
+   since 2026-10-31, a face this page does not load, so the card's text takes the lockup's Inter */
+      body {
+        --pt-display: Inter, 'Inter Fallback', system-ui, sans-serif;
+        --pt-text: Inter, 'Inter Fallback', system-ui, sans-serif;
+      }
       body {
         width: 1200px;
         height: 630px;

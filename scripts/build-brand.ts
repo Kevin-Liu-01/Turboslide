@@ -650,6 +650,9 @@ async function ogTemplateHtml(): Promise<string> {
 <link rel="stylesheet" href="../../chrome/src/brand.css">
 <style>
 html, body { margin: 0; }
+/* the card keeps Inter (docs/brand.md section 4): brand.css sets the chrome's faces to Katagami Text
+   since 2026-10-31, a face this page does not load, so the card's text takes the lockup's Inter */
+body { --pt-display: ${INTER_STACK}; --pt-text: ${INTER_STACK}; }
 body { width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; background: var(--pt-paper); color: var(--pt-ink); font-family: var(--pt-display); -webkit-font-smoothing: antialiased; }
 .card { position: relative; width: ${CARD.width}px; height: ${CARD.height}px; overflow: hidden; }
 .card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }

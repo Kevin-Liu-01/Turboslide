@@ -29,8 +29,26 @@ declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
 }
 
+const counts = vi.hoisted(() => ({ clones: 0, dispatchers: 0 }));
+
 vi.mock('./useStudioSession', () => ({ useStudioSession: () => undefined }));
-vi.mock('@turboslide/viewer/LiveClone', () => ({ LiveClone: () => null }));
+vi.mock('@turboslide/viewer/LiveClone', () => ({
+  LiveClone: () => {
+    counts.clones += 1;
+    return null;
+  },
+}));
+/* each presenter adapter builds one dispatcher: the count is how often the adapter was rebuilt */
+vi.mock('@turboslide/agent/dispatch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@turboslide/agent/dispatch')>();
+  return {
+    ...actual,
+    createDispatcher: () => {
+      counts.dispatchers += 1;
+      return actual.createDispatcher();
+    },
+  };
+});
 vi.mock('@turboslide/render/slide', () => ({
   renderSlide: (_deck: unknown, slide: { id: string }) => ({
     html: `<section class="slide" data-slide="${slide.id}"></section>`,
@@ -364,5 +382,27 @@ describe('the slideshow window answers the presenter', () => {
     });
     expect(showing()).toBe('s3');
     expect(states().at(-1)).toMatchObject({ slideId: 's3', reply: { seq: last } });
+  });
+});
+
+// A state that changes nothing (the presenter audit of a95d4097d, item 5): the audience sends one
+// on every change of its facts and on hello. The console's clock facts were a new object each
+// time, so each one rendered the console with its three clones, and every render built the agent
+// adapter again.
+describe('the presenter and a state that changes nothing', () => {
+  it('renders nothing for it and keeps its agent adapter', () => {
+    const host = mount();
+    state('s2', 1, null, 1, 2);
+    expect(shown(host)).toEqual({ index: '1', step: '1' });
+    const clones = counts.clones;
+    const dispatchers = counts.dispatchers;
+    for (let i = 0; i < 5; i += 1) state('s2', 1, null, 1, 2);
+    expect(counts.clones - clones, 'no clone renders').toBe(0);
+    expect(counts.dispatchers - dispatchers, 'no adapter is built').toBe(0);
+    /* a state that moves renders, and still builds no adapter */
+    state('s2', 1, null, 2, 2);
+    expect(shown(host)).toEqual({ index: '1', step: '2' });
+    expect(counts.clones).toBeGreaterThan(clones);
+    expect(counts.dispatchers - dispatchers).toBe(0);
   });
 });

@@ -171,7 +171,10 @@ export function PresenterPage({
     if (at < 0) return;
     setIndex(at);
     const motion = live.current.play[at]?.motion;
-    setClock({ step: step ?? 0, steps: steps ?? stepsOf(motion) });
+    const next = { step: step ?? 0, steps: steps ?? stepsOf(motion) };
+    /* the same facts keep the same object: a state that changes nothing renders nothing (the
+       presenter audit of a95d4097d, item 5) */
+    setClock((was) => (was.step === next.step && was.steps === next.steps ? was : next));
   }, []);
 
   useMountEffect(() => {
@@ -218,14 +221,22 @@ export function PresenterPage({
     moves.current?.sent(seq);
   }, []);
 
-  /* the window API owner (SPEC 7.4: the presenter answers view.goto and view.present) */
+  /* the window API owner (SPEC 7.4: the presenter answers view.goto and view.present), built once:
+     its actions read the page through refs, so a render builds no dispatcher (the presenter audit
+     of a95d4097d, item 5); another deck in the same page builds it again */
   const [ownerEl, setOwnerEl] = useState<HTMLElement | null>(null);
-  const adapter = useRef(createLiveAdapter(presenterAdapter(deckId, live, goto, channel)));
-  adapter.current.update(presenterAdapter(deckId, live, goto, channel));
+  const [adapter] = useState(() =>
+    createLiveAdapter(presenterAdapter(deckId, live, goto, channel)),
+  );
+  const adapterDeck = useRef(deckId);
+  if (adapterDeck.current !== deckId) {
+    adapterDeck.current = deckId;
+    adapter.update(presenterAdapter(deckId, live, goto, channel));
+  }
   useLayoutEffect(() => {
     if (!ownerEl) return;
-    return registerStudioAutomation(adapter.current.adapter, ownerEl);
-  }, [ownerEl]);
+    return registerStudioAutomation(adapter.adapter, ownerEl);
+  }, [ownerEl, adapter]);
   useStudioSession({ deckId, author: 'presenter', enabled: agent });
 
   return (

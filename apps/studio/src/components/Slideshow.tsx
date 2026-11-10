@@ -34,6 +34,7 @@ import type {
   PresentReply,
 } from '@turboslide/viewer/present/presentSync';
 import { PresentToolbar } from '@turboslide/viewer/present/PresentToolbar';
+import { createRepeatGate } from '@turboslide/viewer/present/repeatGate';
 import { SlideList } from '@turboslide/viewer/present/SlideList';
 import { BlankLayer, LaserPointer } from '@turboslide/viewer/present/SlideshowLayer';
 import { PRESENT_TEXT } from '@turboslide/viewer/present/strings';
@@ -385,12 +386,13 @@ export function Slideshow({
   }, []);
 
   const step = useCallback(
-    (delta: number) => {
+    (delta: number, held = false) => {
       const { index: at, total: count } = live.current;
       if (endedRef.current) {
-        /* on the end plate: back returns to the last slide, forward leaves the show */
+        /* on the end plate: back returns to the last slide, forward leaves the show; a held key's
+           repeat stops at the plate, so holding Next through the deck never leaves the show */
         if (delta < 0) setEnded(false);
-        else exit();
+        else if (!held) exit();
         return;
       }
       /* the slide's own steps first (HTML-SLIDES-DESIGN 2.6) */
@@ -477,8 +479,10 @@ export function Slideshow({
   }, [goto]);
 
   /* the keys, on the document ahead of the reading surface's listener (SPEC 10.2: Google's
-     presenting letters win while presenting) */
+     presenting letters win while presenting); a held arrow moves at most once a frame and stops
+     when it is let go (repeatGate.ts) */
   useMountEffect(() => {
+    const gate = createRepeatGate();
     const clearDigits = () => {
       digits.current = '';
       window.clearTimeout(digitTimer.current);
@@ -511,10 +515,10 @@ export function Slideshow({
           exit();
           return;
         case 'next':
-          step(1);
+          gate.press(event, () => step(1, event.repeat));
           return;
         case 'previous':
-          step(-1);
+          gate.press(event, () => step(-1, event.repeat));
           return;
         case 'first':
           goto(0);
@@ -575,13 +579,20 @@ export function Slideshow({
       if (inZone) showBar();
       else if (!barHover.current) glanceBar();
     };
+    const onKeyUp = (event: KeyboardEvent) => gate.release(event.key);
+    const onBlur = () => gate.cancel();
     document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener('keyup', onKeyUp, true);
+    window.addEventListener('blur', onBlur);
     document.addEventListener('fullscreenchange', onFullscreen);
     window.addEventListener('pointermove', onPointerMove);
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
+      document.removeEventListener('keyup', onKeyUp, true);
+      window.removeEventListener('blur', onBlur);
       document.removeEventListener('fullscreenchange', onFullscreen);
       window.removeEventListener('pointermove', onPointerMove);
+      gate.cancel();
       window.clearTimeout(digitTimer.current);
       window.clearTimeout(barTimer.current);
     };

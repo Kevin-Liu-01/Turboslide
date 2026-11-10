@@ -131,3 +131,79 @@ describe('the presenter console timer', () => {
     expect(cloneRenders.count).toBe(3);
   });
 });
+
+// A held arrow in the console (the presenter audit of a95d4097d, item 2): one press is one move
+// at once, the repeats move at most once a frame, and letting the key go drops the repeat not
+// yet run, so the presenter never moves past where the key was let go.
+describe('a held arrow in the console', () => {
+  let frames: Array<() => void> = [];
+  const frame = () => {
+    const due = frames;
+    frames = [];
+    act(() => {
+      for (const run of due) run();
+    });
+  };
+  const key = (type: 'keydown' | 'keyup', name: string, repeat = false) =>
+    act(() => {
+      document.body.dispatchEvent(new KeyboardEvent(type, { key: name, repeat, bubbles: true }));
+    });
+
+  function mountWith(onGoto: (index: number, step?: number | 'end') => void): void {
+    container = document.createElement('div');
+    document.body.append(container);
+    root = createRoot(container);
+    act(() => {
+      root?.render(
+        createElement(PresenterConsole, {
+          title: 'Quarterly review',
+          slides: SLIDES,
+          index: 0,
+          theme: 'light',
+          connected: true,
+          platform: 'mac',
+          onGoto,
+        }),
+      );
+    });
+  }
+
+  beforeEach(() => {
+    frames = [];
+    vi.stubGlobal('requestAnimationFrame', (run: () => void) => frames.push(run));
+    vi.stubGlobal('cancelAnimationFrame', (handle: number) => {
+      frames[handle - 1] = () => undefined;
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('moves once for a press and once a frame for the repeats while the key is held', () => {
+    const moves: number[] = [];
+    mountWith((index) => moves.push(index));
+    key('keydown', 'ArrowRight');
+    expect(moves).toEqual([1]);
+    /* four repeats queued behind a slow move: one more move, on the next frame */
+    for (let i = 0; i < 4; i += 1) key('keydown', 'ArrowRight', true);
+    expect(moves).toEqual([1]);
+    frame();
+    expect(moves).toEqual([1, 1]);
+    key('keyup', 'ArrowRight');
+  });
+
+  it('drops the repeat not yet run when the key is let go', () => {
+    const moves: number[] = [];
+    mountWith((index) => moves.push(index));
+    key('keydown', 'ArrowRight');
+    key('keydown', 'ArrowRight', true);
+    key('keydown', 'ArrowRight', true);
+    key('keyup', 'ArrowRight');
+    frame();
+    expect(moves).toEqual([1]);
+    /* the next press is a move at once again */
+    key('keydown', 'ArrowRight');
+    expect(moves).toEqual([1, 1]);
+  });
+});

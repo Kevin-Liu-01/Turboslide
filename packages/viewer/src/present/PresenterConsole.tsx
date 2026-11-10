@@ -6,6 +6,7 @@ import { hiddenAt, stepsOf } from '../slide-clock';
 import type { Theme } from '../theme';
 import type { PresentPlatform } from './presentKeys';
 import { presentKeyAction } from './presentKeys';
+import { createRepeatGate } from './repeatGate';
 import {
   counterText,
   formatElapsed,
@@ -260,53 +261,61 @@ export function PresenterConsole({
     listButton.current?.focus();
   }, []);
 
-  /* the keys of the show that move it, read on the document so the console needs no focus */
+  /* the latest of what the keys read, for the listener registered once below */
+  const keys = useRef({ step, total, onGoto, onSay, listOpen, platform });
+  keys.current = { step, total, onGoto, onSay, listOpen, platform };
+
+  /* the keys of the show that move it, read on the document so the console needs no focus; a
+     held arrow moves at most once a frame, from the slide shown then, and stops when it is let
+     go (repeatGate.ts; the presenter audit of a95d4097d, item 2) */
   useEffect(() => {
+    const gate = createRepeatGate();
     const clearDigits = () => {
       digits.current = '';
       window.clearTimeout(digitTimer.current);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (listOpen) return;
+      const now = keys.current;
+      if (now.listOpen) return;
       const action = presentKeyAction(event, {
         blank: null,
         digits: digits.current !== '',
         control: isControlTarget(event.target),
         editable: isEditableTarget(event.target),
-        platform,
+        platform: now.platform,
       });
       if (action === null) return;
       switch (action.type) {
         case 'next':
           event.preventDefault();
-          step(1);
+          gate.press(event, () => keys.current.step(1));
           return;
         case 'previous':
           event.preventDefault();
-          step(-1);
+          gate.press(event, () => keys.current.step(-1));
           return;
         case 'first':
           event.preventDefault();
-          if (total > 0) onGoto(0);
+          if (now.total > 0) now.onGoto(0);
           return;
         case 'last':
           event.preventDefault();
-          if (total > 0) onGoto(total - 1);
+          if (now.total > 0) now.onGoto(now.total - 1);
           return;
         case 'digit':
           event.preventDefault();
           digits.current += action.digit;
           window.clearTimeout(digitTimer.current);
           digitTimer.current = window.setTimeout(clearDigits, DIGIT_HOLD_MS);
-          onSay?.(PRESENT_TEXT.slideNumber(digits.current));
+          now.onSay?.(PRESENT_TEXT.slideNumber(digits.current));
           return;
         case 'go': {
           event.preventDefault();
           const typed = digits.current;
           clearDigits();
-          const n = slideNumberOf(typed, total);
-          if (n === null) onSay?.(PRESENT_TEXT.noSlide(Number.parseInt(typed, 10)));
-          else onGoto(n - 1);
+          const n = slideNumberOf(typed, now.total);
+          if (n === null) now.onSay?.(PRESENT_TEXT.noSlide(Number.parseInt(typed, 10)));
+          else now.onGoto(n - 1);
           return;
         }
         default:
@@ -314,12 +323,19 @@ export function PresenterConsole({
           return;
       }
     };
+    const onKeyUp = (event: KeyboardEvent) => gate.release(event.key);
+    const onBlur = () => gate.cancel();
     document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
+      gate.cancel();
       window.clearTimeout(digitTimer.current);
     };
-  }, [listOpen, platform, step, total, onGoto, onSay]);
+  }, []);
 
   const notes = current?.notes?.trim() ?? '';
 

@@ -29,6 +29,13 @@ export type EditHistory = {
   redo: () => HistoryEntry | undefined;
   /** the entries to undo, newest first, down to and including the entry with `id` */
   undoTo: (id: number) => HistoryEntry[];
+  /**
+   * Puts back a step whose write was refused, so nothing was undone or redone: the entry `undo()`
+   * moved to the redo stack returns to the undo stack, the entry `redo()` moved returns to the
+   * redo stack, and the step leaves the log. It does nothing unless the entry is still on top of
+   * the stack the step moved it to, so a step put back out of order moves nothing.
+   */
+  revert: (step: 'undo' | 'redo', entry: HistoryEntry) => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
   /** the undo stack, oldest first: what History lists with "Undo to here" */
@@ -85,6 +92,20 @@ export function createEditHistory(now: () => string = () => new Date().toISOStri
         out.push(entry);
       }
       return out;
+    },
+    revert(step, entry) {
+      const from = step === 'undo' ? redoStack : undoStack;
+      const to = step === 'undo' ? undoStack : redoStack;
+      if (from[from.length - 1] !== entry) return;
+      from.pop();
+      to.push(entry);
+      for (let index = steps.length - 1; index >= 0; index -= 1) {
+        const taken = steps[index];
+        if (taken !== undefined && taken.kind === step && taken.entry === entry) {
+          steps.splice(index, 1);
+          break;
+        }
+      }
     },
     canUndo: () => undoStack.length > 0,
     canRedo: () => redoStack.length > 0,

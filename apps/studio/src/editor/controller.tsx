@@ -2887,6 +2887,23 @@ export function createEditorController(init: {
      against the first's write still in flight, read nothing left and said "already changed", so
      one slide of two came back (slides.delete.two-selected-key-undo on the memory tier) */
   const undoRedoChain = serialChain();
+  /**
+   * Whether a refused undo or redo step left the document as it was, so its entry goes back to
+   * the stack it came from (`history.revert`). A step through the room does: a write the schema
+   * or the reducer refuses is never applied, and one the room refuses is taken back out of the
+   * document by the room client (room-client.ts `rebasePast` and `fold`). A server first step
+   * applies nothing before the server answers. The draft's first write is neither: its local
+   * document keeps the step while the save is tried again, so its entry stays where the step
+   * put it. Before this the entry of a refused undo sat on the redo stack with nothing undone:
+   * the next Cmd+Z skipped that change for an older one and Cmd+Shift+Z applied it twice.
+   */
+  const stepLeftNothing = (entry: HistoryEntry, mutations: Mutation[]): boolean =>
+    room !== null || stepTravelsServerFirst(entry.mutations, mutations);
+  /** Puts refused steps back, oldest first, and publishes the stacks so Undo and Redo read them. */
+  const putBack = (step: 'undo' | 'redo', entries: readonly HistoryEntry[]): void => {
+    for (const entry of entries) history.revert(step, entry);
+    publish({});
+  };
   const undoOnce = async (): Promise<void> => {
     const entry = history.undo();
     if (!entry) return;
@@ -2899,6 +2916,7 @@ export function createEditorController(init: {
     try {
       await undoStep(entry, inverse);
     } catch (error) {
+      if (stepLeftNothing(entry, inverse)) putBack('undo', [entry]);
       say(`Undo failed: ${errorMessage(error)}`);
     }
   };
@@ -2926,6 +2944,7 @@ export function createEditorController(init: {
         await commitServerFirst(forward, `redo ${entry.label}`, { kind: 'redo', entry });
       else await commitAs(forward, `redo ${entry.label}`, 'redo', 'admitted');
     } catch (error) {
+      if (stepLeftNothing(entry, forward)) putBack('redo', [entry]);
       say(`Redo failed: ${errorMessage(error)}`);
     }
   };
@@ -2934,10 +2953,14 @@ export function createEditorController(init: {
   const undoTo = (id: number): Promise<void> => undoRedoChain(() => undoToOnce(id));
   const undoToOnce = async (id: number): Promise<void> => {
     const entries = history.undoTo(id);
-    for (const entry of entries) {
+    for (const [at, entry] of entries.entries()) {
+      const inverse = stepMutations(entry, entry.inverse, 'inverse');
       try {
-        await undoStep(entry, stepMutations(entry, entry.inverse, 'inverse'));
+        await undoStep(entry, inverse);
       } catch (error) {
+        // the refused step and the older ones not yet run go back to the undo stack, the oldest
+        // first, which is the order they came off in reverse; the steps before it stay undone
+        if (stepLeftNothing(entry, inverse)) putBack('undo', entries.slice(at).reverse());
         say(`Undo failed: ${errorMessage(error)}`);
         return;
       }

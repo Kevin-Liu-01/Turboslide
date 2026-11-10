@@ -8,14 +8,14 @@ your row.
 
 ## Execution order and status
 
-| Plan | Title                                                                                  | Priority | Effort | Depends on | Status                                                                  |
-| ---- | -------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ----------------------------------------------------------------------- |
-| 001  | The editor controller removes its document listeners when it stops                     | P1       | S      | none       | DONE                                                                    |
-| 002  | A cancelled press on an object's body is disarmed                                      | P1       | S      | none       | DONE                                                                    |
-| 003  | No tooltip on keyboard focus inside any menu, and the outline row menu keeps its focus | P2       | S      | none       | DONE (two commits)                                                      |
-| 004  | The docs search keeps focus inside its window and returns it to its opener             | P2       | S      | none       | DONE                                                                    |
-| 005  | Esc closes the print preview, as its tooltip says                                      | P2       | S      | none       | DONE                                                                    |
-| 006  | A failed undo or redo leaves the history as it was                                     | P2       | M      | none       | TODO: it changes what Cmd+Z does after a refusal, so it waits for Kevin |
+| Plan | Title                                                                                  | Priority | Effort | Depends on | Status             |
+| ---- | -------------------------------------------------------------------------------------- | -------- | ------ | ---------- | ------------------ |
+| 001  | The editor controller removes its document listeners when it stops                     | P1       | S      | none       | DONE               |
+| 002  | A cancelled press on an object's body is disarmed                                      | P1       | S      | none       | DONE               |
+| 003  | No tooltip on keyboard focus inside any menu, and the outline row menu keeps its focus | P2       | S      | none       | DONE (two commits) |
+| 004  | The docs search keeps focus inside its window and returns it to its opener             | P2       | S      | none       | DONE               |
+| 005  | Esc closes the print preview, as its tooltip says                                      | P2       | S      | none       | DONE               |
+| 006  | A failed undo or redo leaves the history as it was                                     | P2       | M      | none       | DONE               |
 
 Status values: TODO, IN PROGRESS, DONE, BLOCKED (with a reason), REJECTED (with a reason).
 
@@ -25,8 +25,10 @@ different functions.
 Plans 001 to 005 and the small fixes were applied on the branch `claude/shadcn-improve` in the
 same session, each as its own commit with a unit test where the code has a test harness, and
 checked in a browser on a dev server (the docs search, the account menu, typing, undo, a drag and
-the print preview). Plan 003 landed as two commits, one per defect. A row marked DONE is found
-with `git log --oneline -- <a file of the row>`.
+the print preview). Plan 003 landed as two commits, one per defect. Plan 006 was applied on
+2026-11-10: a step the room refuses goes back to its stack, and the draft's first write, whose
+document keeps the step, is left as it was. A row marked DONE is found with
+`git log --oneline -- <a file of the row>`.
 
 ## Small fixes that need no plan
 

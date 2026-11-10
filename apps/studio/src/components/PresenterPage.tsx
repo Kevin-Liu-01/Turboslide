@@ -199,7 +199,18 @@ export function PresenterPage({
     channel.current = opened;
     moves.current = createMoveTracker(opened.id);
     opened.post({ type: 'hello' });
+    /* a tab closed or reloaded never unmounts: the page hiding says bye, and a page back from the
+       back-forward cache says hello again, which the show answers with its state (the presenter
+       audit of a95d4097d, item 5) */
+    const onPageHide = () => opened.post({ type: 'bye' });
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) opened.post({ type: 'hello' });
+    };
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
     return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('pageshow', onPageShow);
       opened.post({ type: 'bye' });
       opened.close();
       channel.current = null;

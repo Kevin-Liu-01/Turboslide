@@ -406,3 +406,51 @@ describe('the presenter and a state that changes nothing', () => {
     expect(counts.dispatchers - dispatchers).toBe(0);
   });
 });
+
+// A window that closes (the presenter audit of a95d4097d, item 5): a closed or reloaded tab never
+// unmounts its page, so `bye` went only with an unmount and the console kept reading "Connected"
+// after the show's tab was closed. The page hiding says bye now, and a page back from the
+// back-forward cache announces itself again.
+function pageEvent(type: 'pagehide' | 'pageshow', persisted: boolean): void {
+  act(() => {
+    window.dispatchEvent(Object.assign(new Event(type), { persisted }));
+  });
+}
+
+describe('a window whose page hides', () => {
+  afterEach(() => {
+    presenter?.close();
+    presenter = null;
+  });
+
+  it('the show says bye, and its state again when the page comes back', () => {
+    const { states } = mountShow();
+    pageEvent('pagehide', false);
+    expect(heard.at(-1)?.type).toBe('bye');
+    const before = states().length;
+    pageEvent('pageshow', true);
+    expect(states().length).toBe(before + 1);
+    expect(heard.at(-1)).toMatchObject({ type: 'state', slideId: 's1' });
+    /* a first load's pageshow is not a return */
+    pageEvent('pageshow', false);
+    expect(states().length).toBe(before + 1);
+  });
+
+  it('the console reads the show as gone once its page says bye', () => {
+    const host = mount();
+    state('s1', 0, null);
+    const link = () =>
+      host.querySelector('[data-control="presenter.connection"]')?.getAttribute('data-connected');
+    expect(link()).toBe('true');
+    act(() => audience?.post({ type: 'bye' }));
+    expect(link()).toBe('false');
+  });
+
+  it('the presenter says bye when its page hides, and hello when it comes back', () => {
+    mount();
+    pageEvent('pagehide', false);
+    expect(heard.at(-1)?.type).toBe('bye');
+    pageEvent('pageshow', true);
+    expect(heard.at(-1)?.type).toBe('hello');
+  });
+});

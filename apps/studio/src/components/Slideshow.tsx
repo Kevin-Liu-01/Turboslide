@@ -667,7 +667,18 @@ export function Slideshow({
       });
     };
     postState();
+    /* a tab closed or reloaded never unmounts: the page hiding says bye, so the presenter reads
+       the show as gone, and a page back from the back-forward cache reports its state again (the
+       presenter audit of a95d4097d, item 5) */
+    const onPageHide = () => opened.post({ type: 'bye' });
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) postState();
+    };
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('pageshow', onPageShow);
     return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('pageshow', onPageShow);
       opened.post({ type: 'bye' });
       opened.close();
       channel.current = null;

@@ -54,6 +54,22 @@ export function deckMatches(
   return out;
 }
 
+/**
+ * The matches of the query and their count per slide, from one walk of the deck: the count line,
+ * Replace's state and Prev and Next all read it, so a keystroke in Find scans the deck once.
+ */
+export function findSummary(
+  document: DeckDocument,
+  order: ReadonlyArray<string>,
+  find: string,
+  matchCase: boolean,
+): { matches: FindMatch[]; perSlide: ReadonlyMap<string, number> } {
+  const matches = deckMatches(document, order, find, matchCase);
+  const perSlide = new Map<string, number>();
+  for (const match of matches) perSlide.set(match.slideId, (perSlide.get(match.slideId) ?? 0) + 1);
+  return { matches, perSlide };
+}
+
 /** The plain strings inside one block, in the walk's order (every Text field, ids and assets left out). */
 function blockStrings(block: unknown): string[] {
   const out: string[] = [];
@@ -157,19 +173,11 @@ export function FindReplaceDialog() {
   });
 
   const order = useMemo(() => slideOrder(input.document.deck), [input.document]);
-  const counts = useMemo(
-    () =>
-      order.map((id) => ({
-        id,
-        count: countMatches(slideStrings(input.document, id), find, matchCase),
-      })),
-    [order, input.document, find, matchCase],
-  );
-  const total = counts.reduce((sum, row) => sum + row.count, 0);
-  const matches = useMemo(
-    () => deckMatches(input.document, order, find, matchCase),
+  const { matches, perSlide } = useMemo(
+    () => findSummary(input.document, order, find, matchCase),
     [input.document, order, find, matchCase],
   );
+  const total = matches.length;
   /* the match the seller stands on: the first one on the current slide as the query is typed,
      then the one Prev and Next step to (docs/archive/rounds/PRODUCT.md section 5: "1 of 2"; audit-gaps 21) */
   const [stepped, setStepped] = useState<number | null>(null);
@@ -255,8 +263,7 @@ export function FindReplaceDialog() {
         {
           label: DIALOGS.findReplace.replace,
           onClick: () => run([input.slideId]),
-          disabled:
-            find === '' || (counts.find((row) => row.id === input.slideId)?.count ?? 0) === 0,
+          disabled: find === '' || (perSlide.get(input.slideId) ?? 0) === 0,
           control: 'dialog.findReplace.replace',
           doc: 'Replaces the matches on this slide',
         },
@@ -275,7 +282,7 @@ export function FindReplaceDialog() {
         hint={
           find === ''
             ? undefined
-            : `${total} match${total === 1 ? '' : 'es'} on ${counts.filter((row) => row.count > 0).length} slide${counts.filter((row) => row.count > 0).length === 1 ? '' : 's'}`
+            : `${total} match${total === 1 ? '' : 'es'} on ${perSlide.size} slide${perSlide.size === 1 ? '' : 's'}`
         }
       >
         <input

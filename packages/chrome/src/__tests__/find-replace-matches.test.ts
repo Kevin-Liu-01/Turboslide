@@ -4,7 +4,7 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import { slideOrder } from '@turboslide/schema/deck';
 
-import { deckMatches } from '../dialogs/FindReplace';
+import { countMatches, deckMatches, findSummary, slideStrings } from '../dialogs/FindReplace';
 import { openingCollapsed, readCollapsedSections, writeCollapsedSections } from '../FormatOptions';
 
 // Find and replace's match list (docs/archive/rounds/PRODUCT.md section 5; audit-gaps 21) and the Format options
@@ -39,6 +39,46 @@ describe('deckMatches', () => {
     expect(
       deckMatches(doc, order, 'acme', false).filter((row) => row.blockId === null).length,
     ).toBe(2);
+  });
+});
+
+/* the dialog counted the matches per slide with one walk of the deck (slideStrings) and listed
+   them with a second (deckMatches) on every keystroke in Find; one walk answers both */
+describe('findSummary', () => {
+  const base = workedDocument();
+  const order = slideOrder(base.deck);
+  const first = order[0] ?? '';
+  const doc: DeckDocument = {
+    deck: base.deck,
+    slides: {
+      ...base.slides,
+      [first]: { ...base.slides[first]!, notes: 'the rule and the rule again' },
+    } as DeckDocument['slides'],
+  };
+
+  it('counts per slide what the slide strings count, from the matches', () => {
+    for (const query of ['the', 'rule', 'a', 'zzz']) {
+      const { matches, perSlide } = findSummary(doc, order, query, false);
+      let total = 0;
+      for (const id of order) {
+        const here = countMatches(slideStrings(doc, id), query, false);
+        total += here;
+        expect(perSlide.get(id) ?? 0, `${query} on ${id}`).toBe(here);
+      }
+      expect(matches.length).toBe(total);
+    }
+  });
+
+  it('reads each slide of the deck once per query', () => {
+    let reads = 0;
+    const slides = new Proxy(doc.slides, {
+      get(target, key, receiver) {
+        if (typeof key === 'string' && key in target) reads += 1;
+        return Reflect.get(target, key, receiver) as unknown;
+      },
+    });
+    findSummary({ deck: doc.deck, slides }, order, 'the', false);
+    expect(reads).toBe(order.length);
   });
 });
 

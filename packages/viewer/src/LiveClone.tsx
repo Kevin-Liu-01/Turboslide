@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 
 import { Frame } from './Frame';
 import { SHEET_W } from './model';
@@ -48,6 +48,8 @@ const NONE: ReadonlyArray<string> = [];
 export function LiveClone({ html, theme, frame = true, hidden = NONE }: LiveCloneProps) {
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
+  /* once per html: a clone renders again with its list (a show's slide list on every hover) */
+  const markup = useMemo(() => ({ __html: lazyPictures(html) }), [html]);
 
   useLayoutEffect(() => {
     const el = root.current;
@@ -92,11 +94,7 @@ export function LiveClone({ html, theme, frame = true, hidden = NONE }: LiveClon
     <div ref={root} className="ts-sheet sheet is-clone" data-theme={theme} aria-hidden="true">
       <div className="ts-stage stage">
         {frame ? <Frame wordmark={false} counter={false} /> : null}
-        <div
-          ref={body}
-          className="pt-slide"
-          dangerouslySetInnerHTML={{ __html: lazyPictures(html) }}
-        />
+        <div ref={body} className="pt-slide" dangerouslySetInnerHTML={markup} />
       </div>
     </div>
   );

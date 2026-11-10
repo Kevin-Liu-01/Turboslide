@@ -1,3 +1,5 @@
+import type { Ref } from 'react';
+
 import type { BlankSlide } from './presentModel';
 import { PRESENT_TEXT } from './strings';
 
@@ -22,13 +24,24 @@ export function BlankLayer({ blank, onDismiss }: { blank: BlankSlide; onDismiss:
   );
 }
 
-export function LaserPointer({ x, y }: { x: number; y: number }) {
+/** The dot's place for a pointer position: the show writes it straight to the dot's style. */
+export function laserTransform(x: number, y: number): string {
+  return `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+}
+
+/**
+ * The dot drawn at `x` and `y`; the show moves it afterwards through `ref` with `laserTransform`,
+ * one style write a frame, so a pointer move never renders the show (the presenter audit of
+ * a95d4097d, item 3).
+ */
+export function LaserPointer({ x, y, ref }: { x: number; y: number; ref?: Ref<HTMLDivElement> }) {
   return (
     <div
+      ref={ref}
       className="ts-present-laser"
       data-control="present.laserDot"
       aria-hidden="true"
-      style={{ transform: `translate(${Math.round(x)}px, ${Math.round(y)}px)` }}
+      style={{ transform: laserTransform(x, y) }}
     />
   );
 }

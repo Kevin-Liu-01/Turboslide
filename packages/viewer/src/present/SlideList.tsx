@@ -78,19 +78,23 @@ export function SlideList({
     option?.scrollIntoView({ block: 'nearest' });
   }, [focused]);
 
-  /* a press outside closes; registered after the opening click has finished bubbling */
+  /* a press outside closes; registered once, after the opening click has finished bubbling, and
+     reading the caller's latest onClose, so a caller's new callback never re-arms it (the
+     presenter audit of a95d4097d, item 3) */
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     const onPress = (event: PointerEvent) => {
       if (root.current && event.target instanceof Node && root.current.contains(event.target))
         return;
-      onClose();
+      close.current();
     };
     const timer = window.setTimeout(() => document.addEventListener('pointerdown', onPress), 0);
     return () => {
       window.clearTimeout(timer);
       document.removeEventListener('pointerdown', onPress);
     };
-  }, [onClose]);
+  }, []);
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     event.stopPropagation();

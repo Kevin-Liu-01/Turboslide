@@ -36,7 +36,11 @@ import type {
 import { PresentToolbar } from '@turboslide/viewer/present/PresentToolbar';
 import { createRepeatGate } from '@turboslide/viewer/present/repeatGate';
 import { SlideList } from '@turboslide/viewer/present/SlideList';
-import { BlankLayer, LaserPointer } from '@turboslide/viewer/present/SlideshowLayer';
+import {
+  BlankLayer,
+  LaserPointer,
+  laserTransform,
+} from '@turboslide/viewer/present/SlideshowLayer';
 import { PRESENT_TEXT } from '@turboslide/viewer/present/strings';
 import { isControlTarget, isEditableTarget } from '@turboslide/viewer/present/ui';
 import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
@@ -280,7 +284,11 @@ export function Slideshow({
   const [laser, setLaser] = useState(false);
   /* past the last slide (docs/archive/rounds/POLISH.md item 98): the end plate, which a click or the next key leaves */
   const [ended, setEnded] = useState(false);
-  const [pointer, setPointer] = useState({ x: -100, y: -100 });
+  /* the pointer and the laser dot: a move writes the dot's style in a frame callback and never
+     renders the show, whose slide list redrew every clone on each move (the presenter audit of
+     a95d4097d, item 3); the dot appears where the pointer is when the laser turns on */
+  const pointerAt = useRef({ x: -100, y: -100 });
+  const laserDot = useRef<HTMLDivElement>(null);
   const [fullscreen, setFullscreen] = useState(isFullscreen);
   const [barShown, setBarShown] = useState(false);
   const [popover, setPopover] = useState<Popover>(null);
@@ -570,8 +578,16 @@ export function Slideshow({
       }
     };
     const onFullscreen = () => setFullscreen(isFullscreen());
+    let laserFrame = 0;
+    const placeLaser = () => {
+      laserFrame = 0;
+      const { x, y } = pointerAt.current;
+      if (laserDot.current) laserDot.current.style.transform = laserTransform(x, y);
+    };
     const onPointerMove = (event: PointerEvent) => {
-      if (live.current.laser) setPointer({ x: event.clientX, y: event.clientY });
+      pointerAt.current = { x: event.clientX, y: event.clientY };
+      if (live.current.laser && laserFrame === 0)
+        laserFrame = window.requestAnimationFrame(placeLaser);
       const box = root.current?.getBoundingClientRect();
       if (!box) return;
       const inZone =
@@ -593,6 +609,7 @@ export function Slideshow({
       document.removeEventListener('fullscreenchange', onFullscreen);
       window.removeEventListener('pointermove', onPointerMove);
       gate.cancel();
+      if (laserFrame !== 0) window.cancelAnimationFrame(laserFrame);
       window.clearTimeout(digitTimer.current);
       window.clearTimeout(barTimer.current);
     };
@@ -692,6 +709,14 @@ export function Slideshow({
       fadeBar();
     },
     [fadeBar],
+  );
+  const closeList = useCallback(() => closePopover(listAnchor.current), [closePopover]);
+  const pickFromList = useCallback(
+    (to: number) => {
+      closePopover(listAnchor.current);
+      goto(to);
+    },
+    [closePopover, goto],
   );
 
   const onMenuSelect = (item: MenuItem) => {
@@ -824,11 +849,8 @@ export function Slideshow({
           theme={theme}
           placement="up"
           layer={useLayer}
-          onSelect={(to) => {
-            closePopover(listAnchor.current);
-            goto(to);
-          }}
-          onClose={() => closePopover(listAnchor.current)}
+          onSelect={pickFromList}
+          onClose={closeList}
         />
       ) : null}
       {popover === 'options' && optionsAnchor !== null ? (
@@ -874,7 +896,9 @@ export function Slideshow({
         </div>
       ) : null}
       {blank !== null ? <BlankLayer blank={blank} onDismiss={() => setBlank(null)} /> : null}
-      {laser ? <LaserPointer x={pointer.x} y={pointer.y} /> : null}
+      {laser ? (
+        <LaserPointer ref={laserDot} x={pointerAt.current.x} y={pointerAt.current.y} />
+      ) : null}
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
     </div>
   );

@@ -131,9 +131,10 @@ export function attachHeroBox(box: HTMLElement): { press: OnPress; detach: () =>
  * the box's `data-chapter`. The box keeps its size and shows paper until the frame says it is
  * ready, then the frame fades in over it, so nothing moves. The frame loads once the box has
  * stayed within LOAD_MARGIN of the window for LOAD_DWELL_MS and unloads past DROP_MARGIN, so the
- * page holds the hero's editor and one or two of these, and a fling past a box loads nothing. On its ready the page names the chapter (`ts-try:chapter`) and
- * tells it whether the box is on screen (`ts-try:visible`), as it does whenever that changes; off
- * screen its agents wait. The box's `data-state` is `empty`, `loading` or `live`.
+ * page holds the hero's editor and one or two of these, and a fling past a box loads nothing. On
+ * its ready the page tells it whether the box is on screen (`ts-try:visible`), as it does
+ * whenever that changes, then names the chapter (`ts-try:chapter`); off screen its agents wait.
+ * The box's `data-state` is `empty`, `loading` or `live`.
  */
 export function attachChapterBox(box: HTMLElement): () => void {
   if (typeof IntersectionObserver === 'undefined') return () => undefined;
@@ -185,8 +186,9 @@ export function attachChapterBox(box: HTMLElement): () => void {
     if (event.origin !== window.location.origin) return;
     if (frame === null || event.source !== frame.contentWindow || !isTryReady(event.data)) return;
     ready = true;
-    postTo(frame, { type: TRY_CHAPTER, chapter });
+    /* whether it is on screen first, so a chapter that starts off screen sets no timer at all */
     postTo(frame, { type: TRY_VISIBLE, visible: onScreen });
+    postTo(frame, { type: TRY_CHAPTER, chapter });
     box.dataset.state = 'live';
   };
   window.addEventListener('message', onMessage);

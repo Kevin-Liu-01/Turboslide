@@ -130,6 +130,19 @@ describe('the presenter console timer', () => {
     expect(elapsed(host)).toBe('0:00');
     expect(cloneRenders.count).toBe(3);
   });
+
+  // the wall clock reads every 15 s; it re-renders its own leaf, never the console with its clones
+  // (the presenter audit of a95d4097d, item 5)
+  it('moves the wall clock without rendering the root', () => {
+    const host = mount();
+    const clock = () => host.querySelector('[data-control="presenter.clock"]')?.textContent;
+    const before = clock();
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(clock()).not.toBe(before);
+    expect(cloneRenders.count).toBe(3);
+  });
 });
 
 // A held arrow in the console (the presenter audit of a95d4097d, item 2): one press is one move

@@ -172,6 +172,20 @@ function useClock(): string {
   return time;
 }
 
+/**
+ * The wall clock. It owns `useClock`, so its 15 s read re-renders this leaf only, never the
+ * console with its three live clones (the presenter audit of a95d4097d, item 5), as the timer's
+ * leaf does for its tick.
+ */
+function PresenterClock() {
+  const clock = useClock();
+  return (
+    <span className="ts-presenter-clock" data-control="presenter.clock">
+      <span className="ts-presenter-label">{PRESENT_TEXT.clock}</span> {clock}
+    </span>
+  );
+}
+
 function Preview({
   slide,
   theme,
@@ -222,7 +236,6 @@ export function PresenterConsole({
   const steps = stepCount ?? stepsOf(current?.motion);
   /* the next preview: the current slide's next step while one remains, else the next slide's start */
   const nextIsStep = current !== undefined && stepNow < steps;
-  const clock = useClock();
   const [notesSize, setNotesSize] = useState<number>(NOTES_FONT.initial);
   const [listOpen, setListOpen] = useState(false);
   const listButton = useRef<HTMLButtonElement>(null);
@@ -359,9 +372,7 @@ export function PresenterConsole({
           >
             {connected ? PRESENT_TEXT.connected : PRESENT_TEXT.disconnected}
           </span>
-          <span className="ts-presenter-clock" data-control="presenter.clock">
-            <span className="ts-presenter-label">{PRESENT_TEXT.clock}</span> {clock}
-          </span>
+          <PresenterClock />
         </div>
       </header>
 

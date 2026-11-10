@@ -37,10 +37,43 @@ export function formatSlideHash(form: SlideHashForm, slide: { id: string; n: num
   return form === 'n' ? `#${slide.n}` : `#s/${encodeURIComponent(slide.id)}`;
 }
 
+/**
+ * The fewest milliseconds between two hash writes. Safari refuses a page more than 100
+ * `replaceState` calls in 30 s and Chrome ignores them past 200 in 10 s, and a held arrow or a run
+ * of presenter moves selects a slide every frame (the presenter audit of a95d4097d, item 2). A
+ * write after a quiet gap goes at once; one inside the gap waits for its end, the latest standing
+ * for the ones before it, so a run writes its first slide at once and its last one when it ends.
+ */
+export const HASH_WRITE_GAP_MS = 350;
+
+let lastWrite = Number.NEGATIVE_INFINITY;
+let trailing = 0;
+
 /** Writes the hash with replaceState, never assign: the viewer's moves are not history entries (tail.html show). */
 export function writeSlideHash(form: SlideHashForm, slide: { id: string; n: number }): void {
   const next = formatSlideHash(form, slide);
+  if (trailing !== 0) {
+    window.clearTimeout(trailing);
+    trailing = 0;
+  }
   if (window.location.hash === next) return;
+  const wait = lastWrite + HASH_WRITE_GAP_MS - Date.now();
+  if (wait <= 0) {
+    replaceHash(next);
+    return;
+  }
+  const { pathname, search } = window.location;
+  trailing = window.setTimeout(() => {
+    trailing = 0;
+    const here = window.location;
+    /* the page moved on (another route, another query) while the write waited: it is dropped */
+    if (here.pathname !== pathname || here.search !== search || here.hash === next) return;
+    replaceHash(next);
+  }, wait);
+}
+
+function replaceHash(next: string): void {
+  lastWrite = Date.now();
   try {
     window.history.replaceState(
       null,

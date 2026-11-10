@@ -289,8 +289,8 @@ export const MARK_STEPS = { small: 16, hinted: 24, vector: 32 } as const;
  * horizontal band of the mark keeps a whole row of its own (`hintedRows(9)`: the crossbar and the
  * bottom bar two rows, the two gaps, the middle bar's two lines and the cut one row each), so the
  * cut stays a clear row through the stem. `capAt(16)` would ask for 10, where the 30 unit bars
- * round to three rows and close the gaps; the 16 px tile's frame leaves 14 px across, where a 9 px
- * cap is 13.24 px wide.
+ * round to three rows and close the gaps; an 11 px cap is 16.19 px wide and leaves the square. A
+ * 9 px cap is 13.24 px wide.
  */
 export const MARK_SMALL_CAP = 9;
 
@@ -450,27 +450,27 @@ export function markBlocks(rows: readonly string[] = ROWS16): string[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The tile: the mark in ink on an opaque paper plate with a 1 px frame in the edge composite, for
-// every raster the prefers-color-scheme block cannot reach (the ICO entries, Safari's base
-// rendering of icon.svg, Windows). Where the block is honoured the SVG swaps to paper ink on an
-// ink plate.
+// The tile: the tab icon's square. Since 2026-11-09 it carries the mark alone, with no plate and
+// no frame (Kevin asked for the border around the favicon to go). icon.svg draws the mark in ink
+// and swaps to paper ink where prefers-color-scheme: dark is honoured; the favicon.ico entries,
+// which carry no colour scheme, are the ink with the mark's coverage as alpha on a transparent
+// ground. The touch and manifest icons keep their opaque square, because iOS and the launchers
+// fill a transparent ground with a colour of their own.
 
 /** The plate and the ink per appearance, the theme's exact values (tokens.ts TOKENS). */
 export const TILE_COLORS = {
-  light: { plate: '#ffffff', ink: '#070707', frame: '#656565' },
-  dark: { plate: '#070707', ink: '#f2f2f0', frame: '#888887' },
+  light: { plate: '#ffffff', ink: '#070707' },
+  dark: { plate: '#070707', ink: '#f2f2f0' },
 } as const;
 
 /**
- * A tile: its size, the 1 px frame, and the hinted vector mark it carries. `dx` moves the mark left
- * of centre by 3/64 of the tile at 32 and 48 px, the share the 16 px rows moved the T (Kevin,
- * 2026-10-08: "scooch the t inside the box a little to the left"). At 16 px the 9 px cap is
- * 13.24 px wide in the frame's 14 px, so the mark stays centred, its ink 0.35 px clear of the
- * frame on the left and 0.38 px on the right.
+ * A tile: its size and the hinted vector mark it carries. `dx` moves the mark left of centre by
+ * 3/64 of the tile at 32 and 48 px, the share the 16 px rows moved the T (Kevin, 2026-10-08:
+ * "scooch the t inside the box a little to the left"). At 16 px the 9 px cap is 13.24 px wide, so
+ * the mark stays centred, its ink 1.35 px from the left edge and 1.38 px from the right.
  */
 export type TileGeometry = {
   size: 16 | 32 | 48;
-  frame: 1;
   form: 'vector';
   cap: number;
   top: number;
@@ -479,9 +479,9 @@ export type TileGeometry = {
 
 /** The three tiles of the icon set: a 9 px cap at 16, a 16 px cap at 32 and a 24 px cap at 48, all hinted. */
 export const TILE_SIZES: Readonly<Record<16 | 32 | 48, TileGeometry>> = {
-  16: { size: 16, frame: 1, form: 'vector', cap: MARK_SMALL_CAP, top: 4, dx: 0 },
-  32: { size: 32, frame: 1, form: 'vector', cap: 16, top: 8, dx: -1.5 },
-  48: { size: 48, frame: 1, form: 'vector', cap: 24, top: 12, dx: -2.25 },
+  16: { size: 16, form: 'vector', cap: MARK_SMALL_CAP, top: 4, dx: 0 },
+  32: { size: 32, form: 'vector', cap: 16, top: 8, dx: -1.5 },
+  48: { size: 48, form: 'vector', cap: 24, top: 12, dx: -2.25 },
 };
 
 /** A tile's mark as path data in tile px. */

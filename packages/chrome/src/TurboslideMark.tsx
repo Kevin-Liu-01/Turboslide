@@ -13,8 +13,8 @@ import { cn } from './lib/cn';
  * 32 px the 24 px square with the mark at a 16 px cap, and from 32 px the vector at the size
  * itself with its cap in whole pixels; every step is the vector with each horizontal edge on a
  * whole row (no pixel rows since 2026-10-30). `currentColor` throughout. Alone it is `role="img"` named "Turboslide"; beside the word pass
- * `aria-hidden` so the name is read once. `tile` draws the favicon's tile (the plate, the 1 px
- * frame in the edge role, the mark) at 16, 32 or 48 px in the host's tokens. New in Turboslide
+ * `aria-hidden` so the name is read once. `tile` draws the favicon's tile (the mark alone, with no
+ * plate and no frame since 2026-11-09) at 16, 32 or 48 px in the host's ink. New in Turboslide
  * (no Prototemplate source; GtMark.tsx stays for the sheet's content).
  */
 export type TurboslideMarkProps = {
@@ -61,8 +61,6 @@ export function TurboslideMark({ size, tile = false, className, ...rest }: Turbo
         data-form={geometry.form}
         data-tile=""
       >
-        <rect className="ts-tile-plate" x="0" y="0" width={size} height={size} />
-        <rect className="ts-tile-frame" x="0.5" y="0.5" width={size - 1} height={size - 1} />
         <path className="ts-tile-mark" d={tileMarkPath(geometry)} />
       </svg>
     );

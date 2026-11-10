@@ -78,16 +78,14 @@ describe('TurboslideMark', () => {
     expect(big.querySelector('path')?.getAttribute('d')).toBe(markPlacement(64).d);
   });
 
-  it('draws the tile at 16, 32 and 48 and refuses another size', () => {
+  it('draws the tile at 16, 32 and 48 as the mark alone and refuses another size', () => {
     const { container } = render(<TurboslideMark size={16} tile />);
     const svg = container.querySelector('svg.ts-tile')!;
     expect(svg.getAttribute('viewBox')).toBe('0 0 16 16');
     expect(svg.getAttribute('data-form')).toBe('vector');
     expect(svg.getAttribute('shape-rendering')).toBeNull();
-    expect(svg.querySelector('.ts-tile-plate')?.getAttribute('width')).toBe('16');
-    const frame = svg.querySelector('.ts-tile-frame')!;
-    expect(frame.getAttribute('x')).toBe('0.5');
-    expect(frame.getAttribute('width')).toBe('15');
+    /* no plate and no frame since 2026-11-09 */
+    expect(svg.querySelectorAll('rect')).toHaveLength(0);
     expect(svg.querySelector('.ts-tile-mark')?.getAttribute('d')).toBe(
       tileMarkPath(TILE_SIZES[16]),
     );

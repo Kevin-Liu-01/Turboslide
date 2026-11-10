@@ -31,10 +31,11 @@
 //                                           and its recorded inputs against the seed deck,
 //                                           facts.json against the tree
 //
-// The set (SPEC-4 0.13; R02 section 3): favicon.ico (16, 32 and 48 px BMP entries on the paper
-// tile: the vector at a 9, a 16 and a 24 px cap), icon.svg (the 16 px tile with the
-// prefers-color-scheme block), apple-touch-icon.png (180, the paper mark on the ink
-// square, no corners), icons/icon-192.png and icon-512.png (the ink tile, `any`),
+// The set (SPEC-4 0.13; R02 section 3): favicon.ico (16, 32 and 48 px BMP entries: the mark alone
+// in ink with its coverage as alpha, no plate and no frame, at a 9, a 16 and a 24 px cap),
+// icon.svg (the 16 px mark alone with the prefers-color-scheme block), apple-touch-icon.png (180,
+// the paper mark on the ink square, no corners), icons/icon-192.png and icon-512.png (the ink
+// tile, `any`),
 // icons/icon-mask-192.png and icon-mask-512.png (`maskable`, the mark inside the 40 percent safe
 // circle), icons/icon-mono-512.png (`monochrome`, the mark as alpha), icons/icon-dark-192.png and
 // icon-dark-512.png (the paper plate, the inverse of the manifest icons), manifest.webmanifest
@@ -51,8 +52,9 @@
 // logo", "update the favicon too"), is the vector at its cap with its horizontal edges on whole
 // rows (brand.ts `markQuadsAt`, `tileVectorQuads`),
 // drawn by this script's own coverage rasterizer (the union of the quads, sixteen sub rows per
-// pixel row, exact spans across), so every pixel is a blend of the plate and the ink and the
-// bytes are deterministic. The ICO writer is the design copy's (three 32 bit BMP entries with AND
+// pixel row, exact spans across), so every pixel is a blend of the plate and the ink, or on the
+// transparent ICO entries the ink at the mark's coverage as alpha, and the bytes are
+// deterministic. The ICO writer is the design copy's (three 32 bit BMP entries with AND
 // masks; Pillow round trips it with zero differing pixels). The twins are committed assets with
 // their recipe rather than a CI build output: byte identity holds only on a Mac with ANGLE Metal
 // (J1 2.5), so `--check` compares them by bytes against the committed files and regenerates them
@@ -154,16 +156,9 @@ const hex = (color: string): Rgb => {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
 
-const LIGHT = {
-  plate: hex(TILE_COLORS.light.plate),
-  ink: hex(TILE_COLORS.light.ink),
-  frame: hex(TILE_COLORS.light.frame),
-};
-const DARK = {
-  plate: hex(TILE_COLORS.dark.plate),
-  ink: hex(TILE_COLORS.dark.ink),
-  frame: hex(TILE_COLORS.dark.frame),
-};
+const LIGHT = { plate: hex(TILE_COLORS.light.plate), ink: hex(TILE_COLORS.light.ink) };
+const DARK = { plate: hex(TILE_COLORS.dark.plate), ink: hex(TILE_COLORS.dark.ink) };
+const BLACK: Rgb = [0, 0, 0];
 
 /**
  * The twins' palettes (SPEC-4 0.12): index 0 is the unlit cell and index 1 the lit cell. On the
@@ -272,29 +267,21 @@ function tileQuads(tile: TileGeometry): Quad[] {
 }
 
 /**
- * The plate tile at 16, 32 or 48 px: the plate, the 1 px frame, the hinted vector mark over the
- * plate (a 9 px cap at 16, 16 at 32, 24 at 48).
+ * The tile at 16, 32 or 48 px: the hinted vector mark alone (a 9 px cap at 16, 16 at 32, 24 at
+ * 48), no plate and no frame.
  */
-function tileRaster(tile: TileGeometry, colors: typeof LIGHT): Raster {
-  const { size } = tile;
-  const raster = markRaster(size, tileQuads(tile), colors.plate, colors.ink);
-  for (let i = 0; i < size; i += 1) {
-    put(raster, i, 0, colors.frame);
-    put(raster, i, size - 1, colors.frame);
-    put(raster, 0, i, colors.frame);
-    put(raster, size - 1, i, colors.frame);
-  }
-  return raster;
+function tileRaster(tile: TileGeometry, ink: Rgb): Raster {
+  return alphaRaster(tile.size, tileQuads(tile), ink);
 }
 
-/** The monochrome icon: black with the mark's coverage as alpha over a transparent ground. */
-function monoRaster(size: number, quads: readonly Quad[]): Raster {
+/** The mark in `ink`, its coverage as alpha, on a transparent ground (the tiles, the mono icon). */
+function alphaRaster(size: number, quads: readonly Quad[], ink: Rgb): Raster {
   const raster = blank(size, size, null);
   const cover = coverageOf(quads, size, size);
   for (let y = 0; y < size; y += 1)
     for (let x = 0; x < size; x += 1) {
       const level = Math.round((cover[y * size + x] ?? 0) * 255);
-      if (level > 0) put(raster, x, y, [0, 0, 0], level);
+      if (level > 0) put(raster, x, y, ink, level);
     }
   return raster;
 }
@@ -505,15 +492,15 @@ function masterSvg(): string {
   );
 }
 
-/** icon.svg (SPEC-4 0.13, 1.4): the 16 px tile with the hinted vector and the prefers-color-scheme block. */
+/** icon.svg (SPEC-4 0.13, 1.4): the 16 px tile's mark alone and the dark colour scheme block. */
 function iconTileSvg(): string {
   const l = TILE_COLORS.light;
   const d = TILE_COLORS.dark;
   return (
     SVG_NOTE(
-      'the tab icon: the mark at a 9 px cap, its horizontal edges on whole rows, in ink on an opaque paper plate with a 1 px frame in the edge composite; paper ink on an ink plate where prefers-color-scheme: dark is honoured',
+      'the tab icon: the mark alone at a 9 px cap, its horizontal edges on whole rows, in ink on a transparent ground with no plate and no frame; paper ink where prefers-color-scheme: dark is honoured',
     ) +
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="Turboslide"><title>Turboslide</title><style>.plate{fill:${l.plate}}.frame{fill:none;stroke:${l.frame};stroke-width:1}.ink{fill:${l.ink}}@media (prefers-color-scheme: dark){.plate{fill:${d.plate}}.frame{stroke:${d.frame}}.ink{fill:${d.ink}}}</style><rect class="plate" x="0" y="0" width="16" height="16"/><rect class="frame" x="0.5" y="0.5" width="15" height="15"/><path class="ink" d="${tileMarkPath(TILE_SIZES[16])}"/></svg>\n`
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="Turboslide"><title>Turboslide</title><style>.ink{fill:${l.ink}}@media (prefers-color-scheme: dark){.ink{fill:${d.ink}}}</style><path class="ink" d="${tileMarkPath(TILE_SIZES[16])}"/></svg>\n`
   );
 }
 
@@ -808,9 +795,9 @@ async function build(): Promise<Build> {
   add(`${BRAND_DIR}/wordmark.svg`, wordmarkSvg());
   add(OG_TEMPLATE_PATH, await ogTemplateHtml());
 
-  /* the ICO: the paper tiles at 16, 32 and 48 (the hinted vector) */
+  /* the ICO: the tiles at 16, 32 and 48, the hinted vector alone in ink on a transparent ground */
   const tiles = [TILE_SIZES[16], TILE_SIZES[32], TILE_SIZES[48]];
-  add(`${PUBLIC_DIR}/favicon.ico`, writeIco(tiles.map((tile) => tileRaster(tile, LIGHT))));
+  add(`${PUBLIC_DIR}/favicon.ico`, writeIco(tiles.map((tile) => tileRaster(tile, LIGHT.ink))));
   for (const tile of tiles)
     geometry.push({
       path: `${PUBLIC_DIR}/favicon.ico#${tile.size}`,
@@ -820,7 +807,7 @@ async function build(): Promise<Build> {
       top: tile.top,
       ink: inkOf(tileQuads(tile), tile.size),
       colours: 0,
-      plate: 'paper',
+      plate: 'none',
     });
 
   /* the touch icon: the paper mark on the ink square, opaque, no corners (1.5 step 3) */
@@ -863,7 +850,7 @@ async function build(): Promise<Build> {
   /* the monochrome icon: the mark as alpha */
   add(
     `${PUBLIC_DIR}${ICON_PATHS.mono512}`,
-    await pngOfRaster(monoRaster(ICONS.mono512.size, iconQuads(ICONS.mono512))),
+    await pngOfRaster(alphaRaster(ICONS.mono512.size, iconQuads(ICONS.mono512), BLACK)),
   );
   geometry.push(vectorRow(`${PUBLIC_DIR}${ICON_PATHS.mono512}`, ICONS.mono512, 'none'));
 
@@ -1867,17 +1854,32 @@ function checkMarkData(): void {
 }
 
 /** True when every pixel is opaque and lies on the line from `ground` to `ink` (a blend, no third colour). */
-function blendsOnly(image: Decoded, ground: Rgb, ink: Rgb, extra: Rgb[] = []): boolean {
+function blendsOnly(image: Decoded, ground: Rgb, ink: Rgb): boolean {
   for (let i = 0; i < image.data.length; i += 4) {
     if (image.data[i + 3] !== 255) return false;
     const px: Rgb = [image.data[i] ?? 0, image.data[i + 1] ?? 0, image.data[i + 2] ?? 0];
-    if (extra.some((c) => c[0] === px[0] && c[1] === px[1] && c[2] === px[2])) continue;
     const span = ink[0] - ground[0] || ink[1] - ground[1] || ink[2] - ground[2] || 1;
     const lead = ink[0] - ground[0] !== 0 ? 0 : ink[1] - ground[1] !== 0 ? 1 : 2;
     const level = Math.round((((px[lead] ?? 0) - (ground[lead] ?? 0)) * 255) / span);
     const want = blend(ground, ink, Math.max(0, Math.min(255, level)));
     for (let c = 0; c < 3; c += 1) if (Math.abs((want[c] ?? 0) - (px[c] ?? 0)) > 1) return false;
   }
+  return true;
+}
+
+/**
+ * True when every pixel is transparent or `ink` at some alpha, and the square's outer rows and
+ * columns are transparent: the mark alone, with no plate and no frame.
+ */
+function inkAlphaOnly(image: Decoded, ink: Rgb): boolean {
+  for (let y = 0; y < image.height; y += 1)
+    for (let x = 0; x < image.width; x += 1) {
+      const i = (y * image.width + x) * 4;
+      if ((image.data[i + 3] ?? 0) === 0) continue;
+      if (x === 0 || y === 0 || x === image.width - 1 || y === image.height - 1) return false;
+      if (image.data[i] !== ink[0] || image.data[i + 1] !== ink[1] || image.data[i + 2] !== ink[2])
+        return false;
+    }
   return true;
 }
 
@@ -1947,11 +1949,11 @@ async function check(): Promise<void> {
     fail(`favicon.ico entries are ${sizes.join(', ')}, expected 16, 32, 48`);
   for (const entry of ico) {
     const tile = TILE_SIZES[entry.width as 16 | 32 | 48];
-    if (!samePixels(entry, tileRaster(tile, LIGHT)))
+    if (!samePixels(entry, tileRaster(tile, LIGHT.ink)))
       fail(`favicon.ico ${entry.width} px entry differs from the tile raster`);
-    if (!blendsOnly(entry, LIGHT.plate, LIGHT.ink, [LIGHT.frame]))
+    if (!inkAlphaOnly(entry, LIGHT.ink))
       fail(
-        `favicon.ico ${entry.width} px entry carries a colour that is not the plate, the frame or a blend to the ink`,
+        `favicon.ico ${entry.width} px entry carries a plate, a frame or a colour beside the ink and its alpha`,
       );
   }
   const iconSvg = new TextDecoder().decode(publicFile(ICON_PATHS.svg));
@@ -1961,6 +1963,8 @@ async function check(): Promise<void> {
     fail('icon.svg carries crispEdges; the vector keeps the anti aliasing of its slanted edges');
   if (!iconSvg.includes(`d="${tileMarkPath(TILE_SIZES[16])}"`))
     fail("icon.svg does not draw the 16 px tile's vector mark");
+  if (/<rect\b/.test(iconSvg))
+    fail('icon.svg draws a plate or a frame; the tab icon is the mark alone');
   const touch = await decodePng(publicFile(ICON_PATHS.touch));
   if (touch.width !== 180 || touch.height !== 180)
     fail(`apple-touch-icon.png is ${touch.width} by ${touch.height}`);
@@ -1981,12 +1985,7 @@ async function check(): Promise<void> {
       fail(`${path}: the mark leaves the 40 percent safe circle`);
   }
   const mono = await decodePng(publicFile(ICON_PATHS.mono512));
-  for (let i = 0; i < mono.data.length; i += 4)
-    if (
-      (mono.data[i + 3] ?? 0) > 0 &&
-      (mono.data[i] !== 0 || mono.data[i + 1] !== 0 || mono.data[i + 2] !== 0)
-    )
-      fail('icon-mono-512.png carries a colour beside its alpha');
+  if (!inkAlphaOnly(mono, BLACK)) fail('icon-mono-512.png carries a colour beside its alpha');
   const webmanifest = JSON.parse(new TextDecoder().decode(publicFile(ICON_PATHS.manifest))) as {
     start_url?: string;
     background_color?: string;

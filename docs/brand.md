@@ -90,16 +90,16 @@ anti aliasing and the horizontal ones already sit on whole rows.
 Until 2026-10-30 the 16 px step and the 16 px tile drew the hand drawing `ROWS16` (below). Kevin
 then asked for the vector at every size ("dont use the pixelated logo, i like the unpixelated
 version", then "update the favicon too"), so the 16 px step is the vector at a 9 px cap, hinted
-like every other size, and the tile keeps its composition: the plate, the 1 px frame in the edge
-role and the mark.
+like every other size. The tile kept its plate and its 1 px frame until 2026-11-09, when Kevin
+asked for the border around the favicon to go; it is now the mark alone (section 5).
 
 9 px is the smallest cap at which every horizontal band keeps a whole row of its own.
 `hintedRows(9)` gives the crossbar and the bottom bar two rows each, and the two gaps, the middle
 bar's two lines and the cut one row each, so the cut stays a clear row through the stem and sits
 on mid cap. `capAt(16)` would ask for a 10 px cap, where the 30 unit bars round to three rows and
-close the gaps. An 8 px cap loses either the cut or a row of the bottom bar. At 9 px the mark is
-13.24 px wide, which fits the 14 px inside the 16 px tile's frame. The bare 16 px placement and the
-16 px tile draw the same path, centred, with the cap line on row 4.
+close the gaps, and an 11 px cap is 16.19 px wide, wider than the square. An 8 px cap loses either
+the cut or a row of the bottom bar. At 9 px the mark is 13.24 px wide. The bare 16 px placement and
+the 16 px tile draw the same path, centred, with the cap line on row 4.
 
 | Rows (from the cap line) | What they hold                               |
 | ------------------------ | -------------------------------------------- |
@@ -115,8 +115,8 @@ The placement was chosen on 2026-10-30 from renders of the 16 px tile at 1x and 
 candidates were a 9 px cap with the cap line on row 3 or row 4, the same moved 0.25 or 0.5 px
 left, an 8 px cap with a one row bottom bar, and an 8 px cap without the cut. The 9 px cap on row
 4, centred, kept every part of the mark and read as the same form as the 32 and 48 px tiles. The
-ink comes within 0.35 px of the frame on the left and 0.38 px on the right, so the 16 px tile keeps
-no `dx`; the 32 and 48 px tiles keep theirs. The horizontal phase was measured and left alone:
+ink sits 1.35 px from the left edge and 1.38 px from the right, so the 16 px tile keeps no `dx`;
+the 32 and 48 px tiles keep theirs. The horizontal phase was measured and left alone:
 across one pixel of offset the share of the ink in solid pixels moves by less than 0.02, because
 the 12 degree slant spreads every phase over the rows.
 
@@ -232,14 +232,18 @@ with the mark's box and the baseline on whole pixels (sheet-judge.md fix 9);
 
 ## 5. The tile and the icon set
 
-Every raster the `prefers-color-scheme` block cannot reach (the `favicon.ico` entries, Safari's base
-rendering of `icon.svg`, Windows) is the mark in ink on an opaque paper plate with a 1 px frame in
-the edge composite: `#656565` on paper and `#888887` on ink (`TILE_COLORS`). Where the block is
-honoured, `icon.svg` swaps to paper ink on an ink plate with the `#888887` frame. Every tile
-carries the hinted vector: the 16 px tile at a 9 px cap on row 4 (section 3), the 32 px tile at a
-16 px cap on row 8 and the 48 px tile at a 24 px cap on row 12 (`TILE_SIZES`). Chrome and Firefox
-draw the tab from `icon.svg`, so on a 2x screen the tab is the 16 px drawing at 32 device pixels
-with its horizontal edges still on whole rows.
+The tab icon is the mark alone: no plate and no frame (Kevin, 2026-11-09, who asked for the border
+around the favicon to go; until then every tile was the mark on an opaque plate inside a 1 px frame
+in the edge composite). `icon.svg` draws the mark in the ink `#070707` and, where the
+`prefers-color-scheme: dark` block is honoured, in the paper ink `#f2f2f0` (`TILE_COLORS`). The
+`favicon.ico` entries carry no colour scheme, so they are the ink with the mark's coverage as alpha
+on a transparent ground; a browser that draws them on a dark tab strip shows the dark mark there.
+The touch and manifest icons keep their opaque square, because iOS and the launchers fill a
+transparent ground with a colour of their own. Every tile carries the hinted vector: the 16 px
+tile at a 9 px cap on row 4 (section 3), the 32 px tile at a 16 px cap on row 8 and the 48 px tile
+at a 24 px cap on row 12 (`TILE_SIZES`). Chrome and Firefox draw the tab from `icon.svg`, so on a
+2x screen the tab is the 16 px drawing at 32 device pixels with its horizontal edges still on whole
+rows.
 
 The set under `apps/studio/public/`, written by `node scripts/build-brand.ts` on 2026-10-02 (the
 16 px tile in `favicon.ico` and `icon.svg` rewritten on 2026-10-30) and served as static files, so
@@ -247,8 +251,8 @@ every icon, manifest and card request is a CDN answer:
 
 | File                                           | What it is                                                                                            | Bytes               |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
-| `favicon.ico`                                  | Three 32 bit BMP entries on the paper tile: the hinted vector at 16, 32 and 48 px                     | 15,086              |
-| `icon.svg`                                     | The 16 px tile with the hinted vector and the `prefers-color-scheme: dark` block                      | 1,239               |
+| `favicon.ico`                                  | Three 32 bit BMP entries, the hinted vector alone in ink with alpha at 16, 32 and 48 px               | 15,086              |
+| `icon.svg`                                     | The 16 px tile's hinted vector alone with the `prefers-color-scheme: dark` block                      | 990                 |
 | `apple-touch-icon.png`                         | 180 px, the paper mark at a 76 px cap on the ink square, opaque, no corners                           | 1,381               |
 | `icons/icon-192.png`, `icon-512.png`           | The `any` icons, the paper mark on the ink square at an 81 and a 215 px cap                           | 1,358 and 3,409     |
 | `icons/icon-mask-192.png`, `icon-mask-512.png` | The `maskable` icons, the mark inside the 40 percent safe circle at a 69 and a 184 px cap             | 1,170 and 2,970     |
@@ -265,10 +269,11 @@ The manifest's colours are the paper `#ffffff` (A's graft, NEXT.md 4.1.2; the ro
 both on 2026-10-02 before this push.
 
 Every raster is the vector drawn by the build's own coverage rasterizer: the union of the quads,
-sixteen sub rows per pixel row, exact spans across. Every pixel is therefore the frame, or a blend
-of the plate and the ink, and the bytes are deterministic. `mark-geometry.json` records per raster
-the size, the form, the cap, the cap line, the ink and the colour count read back from the file
-(the 16 px entry: 54.9 px of ink, 28 colours).
+sixteen sub rows per pixel row, exact spans across. Every pixel of an opaque icon is therefore a
+blend of the plate and the ink, every pixel of the `favicon.ico` entries and the monochrome icon is
+the ink at the mark's coverage as alpha, and the bytes are deterministic. `mark-geometry.json`
+records per raster the size, the form, the cap, the cap line, the ink and the colour count read
+back from the file (the 16 px entry: 54.9 px of ink, 27 colours).
 
 The head (`apps/studio/src/routes/__root.tsx`) takes every fact from `SITE` in
 `packages/theme/brand/site.ts`: the description, the card's alt text, the origin rule, the theme
@@ -587,18 +592,18 @@ SC 1.4.11 Non-text Contrast of WCAG 2.2
 https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html). SC 1.4.3 exempts text that is
 part of a logo or brand name.
 
-| Pair                                                         | Light   | Dark    | Where                                                       | Criterion                    |
-| ------------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------- | ---------------------------- |
-| `--pt-ink` on `--pt-paper`                                   | 20.14:1 | 17.97:1 | Headings, body, the mark on its plate                       | 1.4.3, passes 4.5:1          |
-| `--pt-ink-2` on paper                                        | 10.88:1 | 10.59:1 | Captions, the card's address, secondary copy                | 1.4.3, passes 4.5:1          |
-| `--pt-titanium` on paper                                     | 4.70:1  | 6.20:1  | The chrome's secondary text; the deck's `#8a8f98` is 3.25:1 | 1.4.3, passes 4.5:1          |
-| The tile's frame (`#656565` on paper, `#888887` on ink)      | 5.83:1  | 5.68:1  | The tile's edge                                             | 1.4.11, passes 3:1           |
-| The frame against Chrome's tab strips (`#dee1e6`, `#202124`) | 4.45:1  | 4.54:1  | The tile's edge on both strips                              | 1.4.11, passes 3:1           |
-| `--pt-select` `#2f5ce0` on `#ffffff`                         | 5.63:1  | 5.63:1  | The selection ring on a white slide                         | 1.4.11, passes 3:1           |
-| `--pt-select` `#2f5ce0` on `#070707`                         | 3.58:1  | 3.58:1  | The selection ring on a dark photograph                     | 1.4.11, passes 3:1           |
-| `--pt-guide` on `#ffffff`                                    | 4.62:1  | 3.77:1  | A snap guide on a white slide                               | 1.4.11, passes 3:1           |
-| `--pt-guide` on `#070707`                                    | 4.36:1  | 5.34:1  | A snap guide on a dark photograph                           | 1.4.11, passes 3:1           |
-| The chip's `#ffffff` text on `#2f5ce0`                       | 5.63:1  | 5.63:1  | The selection chip                                          | 1.4.3, passes 4.5:1 at 13 px |
+| Pair                                                            | Light   | Dark    | Where                                                       | Criterion                    |
+| --------------------------------------------------------------- | ------- | ------- | ----------------------------------------------------------- | ---------------------------- |
+| `--pt-ink` on `--pt-paper`                                      | 20.14:1 | 17.97:1 | Headings, body, the mark on its plate                       | 1.4.3, passes 4.5:1          |
+| `--pt-ink-2` on paper                                           | 10.88:1 | 10.59:1 | Captions, the card's address, secondary copy                | 1.4.3, passes 4.5:1          |
+| `--pt-titanium` on paper                                        | 4.70:1  | 6.20:1  | The chrome's secondary text; the deck's `#8a8f98` is 3.25:1 | 1.4.3, passes 4.5:1          |
+| The tab icon's ink on Chrome's tab strip (`#dee1e6`, `#202124`) | 15.37:1 | 14.36:1 | The mark alone on the strip                                 | 1.4.11, passes 3:1           |
+| The tab icon's ink on Chrome's tab (`#ffffff`, `#35363a`)       | 20.14:1 | 10.77:1 | The mark alone on the active tab                            | 1.4.11, passes 3:1           |
+| `--pt-select` `#2f5ce0` on `#ffffff`                            | 5.63:1  | 5.63:1  | The selection ring on a white slide                         | 1.4.11, passes 3:1           |
+| `--pt-select` `#2f5ce0` on `#070707`                            | 3.58:1  | 3.58:1  | The selection ring on a dark photograph                     | 1.4.11, passes 3:1           |
+| `--pt-guide` on `#ffffff`                                       | 4.62:1  | 3.77:1  | A snap guide on a white slide                               | 1.4.11, passes 3:1           |
+| `--pt-guide` on `#070707`                                       | 4.36:1  | 5.34:1  | A snap guide on a dark photograph                           | 1.4.11, passes 3:1           |
+| The chip's `#ffffff` text on `#2f5ce0`                          | 5.63:1  | 5.63:1  | The selection chip                                          | 1.4.3, passes 4.5:1 at 13 px |
 
 The mark's alt text is "Turboslide"; alone the mark is `role="img"`, beside the word it is
 `aria-hidden` so the name is read once. The card's credit is 15 px titanium on the dark plate.

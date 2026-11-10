@@ -150,13 +150,14 @@ describe('brand.css agrees with BRAND_TOKENS', () => {
     );
   });
 
-  it('draws the mark in currentColor with its anti aliasing, and the tile in the host tokens', () => {
+  it('draws the mark in currentColor with its anti aliasing, and the tile as the mark alone in the host ink', () => {
     const mark = declarationsOf(brandCss, '.ts-mark');
     expect(mark.fill).toBe('currentColor');
     expect(mark['shape-rendering']).toBeUndefined();
-    expect(declarationsOf(brandCss, '.ts-tile .ts-tile-plate').fill).toBe('var(--pt-paper)');
-    expect(declarationsOf(brandCss, '.ts-tile .ts-tile-frame').stroke).toBe('var(--pt-edge)');
     expect(declarationsOf(brandCss, '.ts-tile .ts-tile-mark').fill).toBe('var(--pt-ink)');
+    /* no plate and no frame since 2026-11-09 */
+    expect(brandCss).not.toContain('ts-tile-plate');
+    expect(brandCss).not.toContain('ts-tile-frame');
   });
 
   it("sets the lockup at the 23 px word beside the 24 px mark box, a 7 px gap and the face's own spacing", () => {
@@ -364,10 +365,9 @@ describe('the mark (docs/NEXT.md 4.1.2; the Round 1 sheet)', () => {
 
 describe('the tile (SPEC-4 0.4)', () => {
   it('carries the hinted vector at a 9, a 16 and a 24 px cap at 16, 32 and 48 px', () => {
-    expect(TILE_SIZES[16]).toEqual({ size: 16, frame: 1, form: 'vector', cap: 9, top: 4, dx: 0 });
+    expect(TILE_SIZES[16]).toEqual({ size: 16, form: 'vector', cap: 9, top: 4, dx: 0 });
     expect(TILE_SIZES[32]).toEqual({
       size: 32,
-      frame: 1,
       form: 'vector',
       cap: 16,
       top: 8,
@@ -375,19 +375,18 @@ describe('the tile (SPEC-4 0.4)', () => {
     });
     expect(TILE_SIZES[48]).toEqual({
       size: 48,
-      frame: 1,
       form: 'vector',
       cap: 24,
       top: 12,
       dx: -2.25,
     });
-    /* the 16 px tile is the 16 px placement, centred in the frame's 14 px, clear of the frame,
-       every horizontal edge on a whole row */
+    /* the 16 px tile is the 16 px placement, centred in the square, 1.35 px from the left edge and
+       1.38 px from the right, every horizontal edge on a whole row */
     const small = tileVectorQuads(TILE_SIZES[16]);
     expect(tileMarkPath(TILE_SIZES[16])).toBe(quadPath(small, 2));
     expect(tileMarkPath(TILE_SIZES[16])).toBe(markPlacement(16).d);
-    expect(Math.min(...quadXs(small))).toBeGreaterThan(1.3);
-    expect(Math.max(...quadXs(small))).toBeLessThan(14.7);
+    expect(Math.min(...quadXs(small))).toBeCloseTo(1.35, 2);
+    expect(Math.max(...quadXs(small))).toBeCloseTo(14.62, 2);
     for (const y of quadYs(small)) expect(Number.isInteger(y)).toBe(true);
     expect([Math.min(...quadYs(small)), Math.max(...quadYs(small))]).toEqual([4, 13]);
     for (const tile of [TILE_SIZES[32], TILE_SIZES[48]]) {
@@ -396,23 +395,24 @@ describe('the tile (SPEC-4 0.4)', () => {
       const centred = quadXs(markQuadsAt(tile.size, tile.cap, tile.top));
       expect(tile.dx).toBe((-3 / 64) * tile.size);
       quadXs(quads).forEach((x, i) => expect(x).toBeCloseTo((centred[i] ?? 0) + tile.dx, 9));
-      /* clear of the 1 px frame and its 1 px margin */
+      /* at least 2 px clear of the square's edges */
       expect(Math.min(...quadXs(quads))).toBeGreaterThan(2);
       expect(Math.max(...quadXs(quads))).toBeLessThan(tile.size - 2);
       expect(tileMarkPath(tile)).toBe(quadPath(quads, 2));
     }
   });
 
-  it('uses the theme colours and the edge composite for the frame, which holds 3:1 on both plates', () => {
+  it('uses the theme colours, and the bare mark holds 10:1 on the tab strip and the tab of each appearance', () => {
     expect(TILE_COLORS.light.plate).toBe(TOKENS.light.paper);
     expect(TILE_COLORS.light.ink).toBe(TOKENS.light.ink);
     expect(TILE_COLORS.dark.plate).toBe(TOKENS.dark.paper);
     expect(TILE_COLORS.dark.ink).toBe(TOKENS.dark.ink);
-    expect(contrastRatio(TILE_COLORS.light.frame, TILE_COLORS.light.plate)).toBeGreaterThan(5.8);
-    expect(contrastRatio(TILE_COLORS.dark.frame, TILE_COLORS.dark.plate)).toBeGreaterThan(5.6);
-    /* Chrome's tab strips (SPEC-4 1.12): the frame reads on both */
-    expect(contrastRatio(TILE_COLORS.light.frame, '#dee1e6')).toBeGreaterThan(4.4);
-    expect(contrastRatio(TILE_COLORS.dark.frame, '#202124')).toBeGreaterThan(4.5);
+    /* Chrome's tab strip and active tab (SPEC-4 1.12), light then dark: the mark has no plate of
+       its own since 2026-11-09, so the ink reads straight on them */
+    for (const ground of ['#dee1e6', '#ffffff'])
+      expect(contrastRatio(TILE_COLORS.light.ink, ground)).toBeGreaterThan(10);
+    for (const ground of ['#202124', '#35363a'])
+      expect(contrastRatio(TILE_COLORS.dark.ink, ground)).toBeGreaterThan(10);
   });
 });
 

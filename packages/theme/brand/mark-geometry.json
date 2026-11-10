@@ -16,8 +16,8 @@
       "cap": 9,
       "top": 4,
       "ink": 54.9,
-      "colours": 28,
-      "plate": "paper"
+      "colours": 27,
+      "plate": "none"
     },
     {
       "path": "apps/studio/public/favicon.ico#32",
@@ -26,8 +26,8 @@
       "cap": 16,
       "top": 8,
       "ink": 190.7,
-      "colours": 47,
-      "plate": "paper"
+      "colours": 46,
+      "plate": "none"
     },
     {
       "path": "apps/studio/public/favicon.ico#48",
@@ -36,8 +36,8 @@
       "cap": 24,
       "top": 12,
       "ink": 425.6,
-      "colours": 64,
-      "plate": "paper"
+      "colours": 63,
+      "plate": "none"
     },
     {
       "path": "apps/studio/public/apple-touch-icon.png",

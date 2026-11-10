@@ -90,19 +90,8 @@
   vertical-align: middle;
 }
 
-/* The tile (SPEC-4 0.4): the mark in ink on an opaque paper plate with a 1 px frame in the
-   edge composite; in chrome the plate and the frame are the host's tokens (--pt-edge over
-   --pt-paper is the composite the rasters carry). */
-.ts-tile .ts-tile-plate {
-  fill: var(--pt-paper);
-}
-
-.ts-tile .ts-tile-frame {
-  fill: none;
-  stroke: var(--pt-edge);
-  stroke-width: 1;
-}
-
+/* The tile (SPEC-4 0.4): the favicon's placement of the mark, alone in the host's ink with no
+   plate and no frame since 2026-11-09, as icon.svg draws it. */
 .ts-tile .ts-tile-mark {
   fill: var(--pt-ink);
 }

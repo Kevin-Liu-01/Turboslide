@@ -1586,10 +1586,13 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   // presentations. A template is a read only deck folder under decks/templates/<id>; the writes
   // below are the only writes that touch one, and every mutating action on a template's own
   // document is refused with the sentence `TEMPLATE_READ_ONLY` of @turboslide/store/templates.
+  // The collection is shared by every account of a deployment, so the writes that change a saved
+  // template or the default are the deployment admin's (Kevin, 2026-11-09); `template.list`
+  // answers `manage` so a caller knows before it tries.
   'template.list': action({
     id: 'template.list',
     label: 'Templates',
-    doc: 'The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from.',
+    doc: 'The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from and whether the caller manages the collection.',
     group: 'deck',
     mutates: false,
     transports: A,
@@ -1599,6 +1602,11 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       templates: z.array(templateIndexEntrySchema),
       /** the deployment default (decks/templates/default.json), `blank` when none is set */
       default: slugSchema,
+      manage: z
+        .boolean()
+        .describe(
+          'Whether the caller may rename, replace and delete organisation templates and choose the default: the deployment admin, or anyone on a checkout',
+        ),
     }),
     cli: { usage: 'turboslide template list' },
     mcp: 'deck_list_templates',
@@ -1625,7 +1633,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'template.create': action({
     id: 'template.create',
     label: 'Save as template',
-    doc: 'Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery; a name an organisation template already carries replaces that template and keeps its slug (the dialog says so first).',
+    doc: 'Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery. A name an organisation template already carries replaces that template and keeps its slug for the deployment admin (the dialog says so first) and is refused for anyone else.',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1650,7 +1658,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'template.update': action({
     id: 'template.update',
     label: 'Replace a template',
-    doc: 'Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused.',
+    doc: 'Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused. The deployment admin alone.',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1671,7 +1679,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'template.rename': action({
     id: 'template.rename',
     label: 'Rename a template',
-    doc: 'Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused.',
+    doc: 'Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused. The deployment admin alone.',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1688,7 +1696,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'template.delete': action({
     id: 'template.delete',
     label: 'Delete a template',
-    doc: 'Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true.',
+    doc: 'Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true. The deployment admin alone.',
     group: 'deck',
     mutates: true,
     transports: A,
@@ -1705,7 +1713,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'template.setDefault': action({
     id: 'template.setDefault',
     label: 'Use for new presentations',
-    doc: 'Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. An agent token needs the admin scope.',
+    doc: 'Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. The deployment admin alone.',
     group: 'deck',
     mutates: true,
     transports: A,

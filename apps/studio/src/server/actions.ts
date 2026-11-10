@@ -52,6 +52,7 @@ import {
   renameTemplate,
   saveTemplate,
   setDefaultTemplate,
+  templateIdForName,
   templateSlides,
   updateTemplate,
 } from '@turboslide/store/templates';
@@ -72,6 +73,7 @@ import {
 import { placeInsert } from '../editor/place-insert';
 import { hostedAccessHooks, readerOwnIds, readerPeople } from './access';
 import { dispatcherWithStandIns } from './stand-ins';
+import { managesTemplates, templateNameTaken } from './template-manager';
 import type { StandIns } from './stand-ins';
 import { listingScope } from './deck-scope';
 import type { ListingScope } from './deck-scope';
@@ -79,7 +81,7 @@ import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
 import { requestRunId } from '@turboslide/agent/http/auth';
 
-import { agentAuth } from './auth';
+import { agentAuth, onOpenCheckout } from './auth';
 import {
   DeniedError,
   authorize,
@@ -1117,10 +1119,12 @@ function registerHostedDeckActions(
 
 /**
  * The template actions of the product round (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md R3) over the
- * collection's decks folder: the two reads, Save as template and Replace under the deck's copy
- * right with its revision checked, and the three deckless writes (Rename, Delete, Use for new
- * presentations), which an agent token reaches with the admin scope alone; a person's session is
- * this deployment's (anonymous principals this round) and passes. `readOnly` refuses every write.
+ * collection's decks folder: the two reads, Save as template under the deck's copy right with
+ * its revision checked, and the writes that change what every account shares, which are the
+ * manager's alone (`managesTemplates` of template-manager.ts: the deployment admin, or anyone on
+ * a checkout's open localhost): Replace, the three deckless writes (Rename, Delete, Use for new
+ * presentations) and a save under a name an organisation template already carries. `readOnly`
+ * refuses every write.
  * A template saved on the blob tier travels through the collection's `templates` facet: every
  * read pulls the store's index first and every write pushes the folder and the index after
  * (b7.md FR2, blob-templates.ts), so a template saved on one instance lists on every other.
@@ -1130,15 +1134,14 @@ function registerTemplateActions(
   decks: HostedDecks,
   caller: AuthContext | null,
   requestBound: boolean,
+  /** whether the caller manages the shared collection (template-manager.ts) */
+  manager: boolean,
 ): void {
   const decksDir = decks.decksDir;
   const identity = caller === null ? 'anonymous' : (identityLabel(caller) ?? 'anonymous');
   const writer = async (action: string): Promise<void> => {
     await assertFlag('readOnly', { identity, action });
-    if (caller?.agent !== undefined && !caller.agent.scopes.includes('admin'))
-      throw new ForbiddenError(
-        'Renaming, deleting and choosing the default template need an agent token with the admin scope',
-      );
+    if (!manager) throw new ForbiddenError(ADMIN_ONLY);
   };
   const copier = async (action: string, deckId: string, baseRevision: number): Promise<void> => {
     await assertFlag('readOnly', { identity, action, deckId });
@@ -1172,6 +1175,7 @@ function registerTemplateActions(
     return {
       templates: readTemplateIndex(decksDir),
       default: readDefaultTemplateId(decksDir),
+      manage: manager,
     };
   });
   dispatcher.register('template.slides', async (input) => {
@@ -1188,6 +1192,10 @@ function registerTemplateActions(
     };
     await copier('template.create', deckId, baseRevision);
     await decks.templates.pull();
+    // a name an organisation template carries would replace it: the manager's alone
+    const taken = templateIdForName(decksDir, name).existing;
+    if (taken?.organisation === true && !manager)
+      throw new ForbiddenError(templateNameTaken(taken.name));
     const result = await saveTemplate(decksDir, {
       deckId,
       name,
@@ -1203,6 +1211,7 @@ function registerTemplateActions(
       sentence?: string;
       baseRevision: number;
     };
+    if (!manager) throw new ForbiddenError(ADMIN_ONLY);
     await copier('template.update', deckId, baseRevision);
     await decks.templates.pull();
     const result = await updateTemplate(decksDir, {
@@ -1483,11 +1492,14 @@ export async function deckDispatcher(
     request !== undefined,
   );
   // the templates of the product round over the collection's folder (docs/archive/rounds/PRODUCT.md 4.3)
+  const creator = creatorContextOf(request, facts);
   registerTemplateActions(
     dispatcher,
     decks,
-    creatorContextOf(request, facts),
+    creator,
     request !== undefined,
+    // outside a request (a unit test, the CLI's rule) no decision is made
+    request === undefined || managesTemplates(creator, onOpenCheckout(request)),
   );
   // the assistant's two actions on this deck (docs/archive/rounds/PRODUCT.md 6.2; build/b6.md R3): the route
   // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP

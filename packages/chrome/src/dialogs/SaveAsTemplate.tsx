@@ -19,9 +19,12 @@ import { tipProps } from '../Tooltip';
  * While the name matches an organisation template already saved (the slug rule the store
  * applies), the dialog reads "Replace the template <name>" and Save runs `template.update { id,
  * deckId, sentence, baseRevision }`, so the template keeps its slug and the gallery lists one card
- * with the new cover; a name that gives one of Turboslide's own ids cannot be saved. The list of
- * templates comes from `template.list` when the dialog opens. The strings live here until the
- * integrator's merge moves them to menus/strings.ts (build/b5b.md).
+ * with the new cover; a name that gives one of Turboslide's own ids cannot be saved. Replacing is
+ * the template manager's (the deployment admin; `manage` of the `template.list` answer): for
+ * anyone else a name an organisation template carries reads "pick another name" and Save is off,
+ * the way one of Turboslide's own does. The list of templates comes from `template.list` when the
+ * dialog opens. The strings live here until the integrator's merge moves them to
+ * menus/strings.ts (build/b5b.md).
  */
 export const SAVE_AS_TEMPLATE = {
   title: 'Save as template',
@@ -35,6 +38,8 @@ export const SAVE_AS_TEMPLATE = {
   replaceDoc:
     'A template of this name is saved already. Saving replaces its slides and keeps its place in the gallery',
   turboslide: (name: string) => `${name} is one of Turboslide's templates; pick another name`,
+  /** the sentence the server answers too (the studio's template-manager.ts `templateNameTaken`) */
+  taken: (name: string) => `${name} is one of your organisation's templates; pick another name`,
   save: 'Save',
   replaceSave: 'Replace',
   cancel: 'Cancel',
@@ -46,7 +51,10 @@ export const SAVE_AS_TEMPLATE = {
 /** The gallery page the snackbar's action opens. */
 const GALLERY_PATH = '/decks/templates';
 
-type TemplateListAnswer = { templates?: TemplateIndexEntry[] };
+type TemplateListAnswer = { templates?: TemplateIndexEntry[]; manage?: boolean };
+
+/** What the dialog reads from `template.list`: the saved templates and whether the viewer may replace one. */
+type TemplateList = { rows: ReadonlyArray<TemplateIndexEntry>; manage: boolean };
 
 export function SaveAsTemplateDialog() {
   const shell = useEditorShell();
@@ -57,7 +65,7 @@ export function SaveAsTemplateDialog() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /* the templates saved on this deployment, for the replace sentence; null until the list answers */
-  const [templates, setTemplates] = useState<ReadonlyArray<TemplateIndexEntry> | null>(null);
+  const [list, setList] = useState<TemplateList | null>(null);
 
   useMountEffect(() => {
     let alive = true;
@@ -65,11 +73,14 @@ export function SaveAsTemplateDialog() {
       .dispatch('template.list', {})
       .then((answer) => {
         if (!alive) return;
-        const rows = (answer as TemplateListAnswer | undefined)?.templates;
-        setTemplates(Array.isArray(rows) ? rows : []);
+        const listed = answer as TemplateListAnswer | undefined;
+        setList({
+          rows: Array.isArray(listed?.templates) ? listed.templates : [],
+          manage: listed?.manage === true,
+        });
       })
       .catch(() => {
-        if (alive) setTemplates([]);
+        if (alive) setList({ rows: [], manage: false });
       });
     return () => {
       alive = false;
@@ -78,9 +89,12 @@ export function SaveAsTemplateDialog() {
 
   const trimmed = name.trim();
   const slug = slugify(trimmed);
-  const match = templates?.find((row) => row.id === slug);
-  /* the same slug rule the store applies: an organisation template of the name is replaced, one of Turboslide's is refused */
-  const replaces = match !== undefined && match.organisation === true ? match : null;
+  const match = list?.rows.find((row) => row.id === slug);
+  /* the same slug rule the store applies: an organisation template of the name is replaced by the
+     manager and refused for anyone else, one of Turboslide's is refused for everyone */
+  const organisation = match !== undefined && match.organisation === true ? match : null;
+  const replaces = list?.manage === true ? organisation : null;
+  const taken = list?.manage === true ? null : organisation;
   const fixed = match !== undefined && match.organisation !== true ? match : null;
   const noId = trimmed !== '' && slug === '';
 
@@ -97,7 +111,7 @@ export function SaveAsTemplateDialog() {
   }
 
   const run = () => {
-    if (trimmed === '' || busy || fixed !== null || noId || templates === null) return;
+    if (trimmed === '' || busy || fixed !== null || taken !== null || noId || list === null) return;
     setBusy(true);
     setError(null);
     const words = sentence.trim();
@@ -144,7 +158,8 @@ export function SaveAsTemplateDialog() {
     doc: 'The template name; its slug is the template id. Enter saves',
     key: 'Enter',
   });
-  const disabled = busy || trimmed === '' || fixed !== null || noId || templates === null;
+  const disabled =
+    busy || trimmed === '' || fixed !== null || taken !== null || noId || list === null;
 
   return (
     <Dialog
@@ -201,6 +216,15 @@ export function SaveAsTemplateDialog() {
           data-control="dialog.saveAsTemplate.fixedSentence"
         >
           {SAVE_AS_TEMPLATE.turboslide(fixed.name)}
+        </p>
+      ) : null}
+      {taken !== null ? (
+        <p
+          className="ts-dialog-error"
+          role="alert"
+          data-control="dialog.saveAsTemplate.takenSentence"
+        >
+          {SAVE_AS_TEMPLATE.taken(taken.name)}
         </p>
       ) : null}
       {noId ? (

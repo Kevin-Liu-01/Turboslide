@@ -106,7 +106,7 @@ describe('the saved templates across two blob instances', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  /** Saves the seed deck as a template on `decks`, the way saveDeckAsTemplate does, and pushes it. */
+  /** Saves the seed deck as a template on `decks`, the way the studio's template.create does, and pushes it. */
   async function saveOn(decks: HostedDecks, name: string, sentence?: string): Promise<string> {
     await decks.open('gt-brand');
     await decks.ensureAssets('gt-brand');

@@ -4,8 +4,8 @@
 // `template default <id>`, each the CLI transport of one template.* action over the checkout's
 // decks folder (commands/deck.ts registerDeckActions), so the CLI, the MCP server, the HTTP route
 // and the gallery page run one implementation (@turboslide/store/templates). With `--to <studio>`
-// the action runs on the hosted studio (dispatch.ts); the three deckless writes need an agent
-// token with the admin scope there.
+// the action runs on the hosted studio (dispatch.ts), where Replace and the three deckless writes
+// are the deployment admin's (the studio's template-manager.ts).
 import type { TemplateIndexEntry } from '@turboslide/schema/actions';
 import type { TemplateSlideRow, TemplateWriteResult } from '@turboslide/store/templates';
 
@@ -24,7 +24,7 @@ const USAGE = `usage:
   turboslide template delete <id> --confirm
   turboslide template default <id>          blank restores the blank deck Turboslide ships`;
 
-type ListAnswer = { templates: TemplateIndexEntry[]; default: string };
+type ListAnswer = { templates: TemplateIndexEntry[]; default: string; manage: boolean };
 type SlidesAnswer = { id: string; name: string; slides: TemplateSlideRow[] };
 
 /** The deck's revision for the two writes that base on a deck (create and update). */

@@ -1951,7 +1951,7 @@
       "post": {
         "operationId": "template.list",
         "summary": "Templates",
-        "description": "The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from.",
+        "description": "The template index: every template with its name, category, cover, sentence, slide count, theme and appearance, the organisation flag of a template saved on this deployment and its brand kit, plus the id of the template new presentations start from and whether the caller manages the collection.",
         "externalDocs": {
           "url": "/docs/reference/deck"
         },
@@ -2199,7 +2199,7 @@
       "post": {
         "operationId": "template.create",
         "summary": "Save as template",
-        "description": "Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery; a name an organisation template already carries replaces that template and keeps its slug (the dialog says so first).",
+        "description": "Saves a deck as a template of this deployment: decks/templates/<slug of the name> with the deck manifest, its slides, its assets and its brand kit, listed under Your organisation in the gallery. A name an organisation template already carries replaces that template and keeps its slug for the deployment admin (the dialog says so first) and is refused for anyone else.",
         "externalDocs": {
           "url": "/docs/reference/deck"
         },
@@ -2342,7 +2342,7 @@
       "post": {
         "operationId": "template.update",
         "summary": "Replace a template",
-        "description": "Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused.",
+        "description": "Replaces the slides, assets and brand kit of an organisation template from a deck and keeps its id, name and sentence; the templates Turboslide ships are refused. The deployment admin alone.",
         "externalDocs": {
           "url": "/docs/reference/deck"
         },
@@ -2485,7 +2485,7 @@
       "post": {
         "operationId": "template.rename",
         "summary": "Rename a template",
-        "description": "Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused.",
+        "description": "Renames an organisation template; its id and its folder stay, so every link and every default record still name it. The templates Turboslide ships are refused. The deployment admin alone.",
         "externalDocs": {
           "url": "/docs/reference/deck"
         },
@@ -2628,7 +2628,7 @@
       "post": {
         "operationId": "template.delete",
         "summary": "Delete a template",
-        "description": "Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true.",
+        "description": "Deletes an organisation template folder and its index row; presentations made from it are not changed. The template new presentations start from is refused until another is chosen, and so are the templates Turboslide ships. Irreversible; `confirm` must be true. The deployment admin alone.",
         "externalDocs": {
           "url": "/docs/reference/deck"
         },
@@ -2771,7 +2771,7 @@
       "post": {
         "operationId": "template.setDefault",
         "summary": "Use for new presentations",
-        "description": "Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. An agent token needs the admin scope.",
+        "description": "Makes a template the one /new and the Blank card start from on this deployment (decks/templates/default.json), whose name, logo and appearance every Reset and every default logo read; `blank` restores the blank deck Turboslide ships. The deployment admin alone.",
         "externalDocs": {
           "url": "/docs/reference/deck"
         },
@@ -54519,11 +54519,16 @@
           "default": {
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "manage": {
+            "type": "boolean",
+            "description": "Whether the caller may rename, replace and delete organisation templates and choose the default: the deployment admin, or anyone on a checkout"
           }
         },
         "required": [
           "templates",
-          "default"
+          "default",
+          "manage"
         ],
         "additionalProperties": false
       },

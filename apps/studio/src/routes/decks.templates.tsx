@@ -44,9 +44,12 @@ import './decks.templates.css';
  * draft nothing writes until the first edit. The card menu under Your organisation carries Rename
  * (in place, `template.rename`), Use for new presentations (`template.setDefault`) and Delete (a
  * confirm dialog, `template.delete`, refused for the default until another is chosen); Turboslide's
- * Blank carries Use for new presentations alone, which restores today's draft. On General
- * Translation's deployment the 85 slide GT brand deck is listed under Your organisation under its
- * own name, "General Translation brand deck", never as a Turboslide template. The /decks strip's
+ * Blank carries Use for new presentations alone, which restores today's draft. The menus are the
+ * template manager's (`gallery.manage`, server/template-manager.ts: the deployment admin, or
+ * anyone on a checkout's open localhost); every other viewer's cards carry no menu button. On
+ * General Translation's deployment the 85 slide GT brand deck is listed under Your organisation
+ * under its own name, "General Translation brand deck", never as a Turboslide template. The
+ * /decks strip's
  * link, `/decks#templates` and File > New > From template gallery point here (the requests to B1
  * and the integrator in build/b5b.md). The loader awaits the gallery: the covers render on the
  * server, a few kilobytes each. The page announces hydration (`data-hydrated`) like the home page,
@@ -111,10 +114,15 @@ function errorMessage(error: unknown): string {
 
 type CardMenuState = { id: string; anchor: HTMLElement };
 
-/** The rows of a card's menu: Rename and Delete on an organisation template, Use for new presentations unless it is the default already. */
-export function cardMenuItems(card: TemplateCard): MenuItem[] {
+/**
+ * The rows of a card's menu: Rename and Delete on an organisation template, Use for new
+ * presentations unless it is the default already. None for a viewer who does not manage the
+ * collection, so the card draws no menu button.
+ */
+export function cardMenuItems(card: TemplateCard, manage: boolean): MenuItem[] {
   const base = TEMPLATE_CONTROLS.card(card.id);
   const items: MenuItem[] = [];
+  if (!manage) return items;
   if (card.organisation === true)
     items.push({ id: `${base}.rename`, label: TEMPLATES.rename, icon: 'pencil', status: 'now' });
   if (!card.isDefault)
@@ -258,6 +266,7 @@ function GalleryPage() {
     disabled: creating !== null,
     renaming: renaming === card.id,
     menuOpen: menu?.id === card.id,
+    manage: gallery.manage,
     onOpen: () => void open(card),
     onMenu: (anchor) => setMenu({ id: card.id, anchor }),
     onRename: (name) => void rename(card, name),
@@ -333,7 +342,7 @@ function GalleryPage() {
       {menu !== null && menuCard !== undefined ? (
         <Menu
           id="templates-card-menu"
-          items={cardMenuItems(menuCard)}
+          items={cardMenuItems(menuCard, gallery.manage)}
           context={DEFAULT_MENU_CONTEXT}
           label="Template actions"
           anchor={{ kind: 'element', element: menu.anchor }}
@@ -382,6 +391,8 @@ type CardProps = {
   disabled: boolean;
   renaming: boolean;
   menuOpen: boolean;
+  /** the viewer manages the collection: the card carries its menu */
+  manage: boolean;
   onOpen: () => void;
   onMenu: (anchor: HTMLElement) => void;
   onRename: (name: string) => void;
@@ -400,13 +411,14 @@ function GalleryCard({
   disabled,
   renaming,
   menuOpen,
+  manage,
   onOpen,
   onMenu,
   onRename,
   onCancelRename,
 }: CardProps) {
   const base = TEMPLATE_CONTROLS.card(card.id);
-  const items = cardMenuItems(card);
+  const items = cardMenuItems(card, manage);
   const doc =
     card.description ??
     `${TEMPLATES.themed(card.themeName, card.slides)}; opens a presentation made from it.`;

@@ -115,6 +115,19 @@ build answers its file's name, and the job records, render records and export re
 studio's routes and server functions pass on have every path under the instance's folders cut to
 its last segment.
 
+What belongs to the deployment and not to a deck (2026-11-09). No deck decision covers a kill
+switch or the template collection every account shares, so their handlers decide the caller
+themselves, on every transport. `admin.flag` is the deployment admin's (section 5). Rename,
+Delete, Use for new presentations and replacing a saved template are the template manager's
+(`server/template-manager.ts` `managesTemplates`): the deployment admin, which is an admin
+account's session, an admin account's key with the `admin` scope, the bootstrap bearer or a
+checkout's holder; and anyone on a checkout whose localhost surface is open (`auth.ts`
+`onOpenCheckout`), because the person at that machine holds the folder. Saving a new template
+needs `copy` on the deck, and a name an organisation template already carries is refused for
+anyone but the manager. `template.list` answers `manage`; the gallery's card menus and the Save
+as template dialog read it, so neither offers what the server refuses. The editor's action server
+function also refuses an action the table gives no window transport.
+
 Where the call sits: every server function of `decks.ts`, `download.ts`, `bundle.ts`, `render.ts`
 and `agent-actions.ts`; the routes `/api/actions/*`, `/api/render/*`, `/api/export/*`, the bundle
 routes and `/api/x/*`; the assets route through the page's `assetBase`. B2's `write.ts`,

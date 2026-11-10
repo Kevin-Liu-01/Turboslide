@@ -274,10 +274,12 @@ export function registerDeckActions(
   );
   /* the templates of the product round over the same folder (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md
      R3): the two reads, Save as template and Replace with the source deck's revision checked, and
-     the three deckless writes; a checkout's holder is its owner, so no scope check here */
+     the three deckless writes; a checkout's holder is its owner, so no scope check here and
+     `manage` is true */
   dispatcher.register('template.list', () => ({
     templates: readTemplateIndex(deps.decksDir),
     default: readDefaultTemplateId(deps.decksDir),
+    manage: true,
   }));
   dispatcher.register('template.slides', (input) =>
     templateSlides(deps.decksDir, (input as { id: string }).id),

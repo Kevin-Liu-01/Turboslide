@@ -147,6 +147,28 @@ export function requireAgentAuth(request: Request): Response | undefined {
   return undefined;
 }
 
+/**
+ * Whether a request with no bearer is on a checkout's open localhost surface: the localhost rule
+ * admits it and every host it names is local (SPEC-3 0.23, 8.8). The person at that machine
+ * holds the folder, with or without a browser's cookie, so the shared templates are theirs to
+ * manage (template-manager.ts). False wherever `TURBOSLIDE_TOKEN` is set, which is every hosted
+ * deployment, and on a checkout that requires its token. Over an explicit runtime so the unit
+ * tests drive it, like `agentAuthWith`.
+ */
+export function onOpenCheckoutWith(
+  request: Request,
+  runtime: Pick<IdentityRuntime, 'env' | 'keys' | 'checkoutToken' | 'hosted'>,
+): boolean {
+  if (request.headers.has('authorization')) return false;
+  const result = agentAuthWith(request, runtime);
+  if (!result.ok || result.mode !== 'localhost') return false;
+  return refuseSpoofedLocalhost(request, runtime.env) === null;
+}
+
+export function onOpenCheckout(request: Request): boolean {
+  return onOpenCheckoutWith(request, identityRuntime());
+}
+
 /** The author of an agent request: the bound identity, else the header or query, else the fallback. */
 export function agentAuthor(request: Request, fallback: string = HTTP_DEFAULT_AUTHOR): Author {
   return requestAuthor(request, fallback);

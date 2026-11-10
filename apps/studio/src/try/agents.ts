@@ -41,9 +41,10 @@ import type { AgentKey, AgentScript, SheetPoint, Step, Task } from './script';
  * It runs only while the frame's document is visible and the page says the frame is on screen;
  * paused, it writes nothing, posts no presence and sets no timer: every loop waits on the gate,
  * which the next call that opens it (`resume`, `setOnScreen`, `setVisible`) or `stop` releases.
- * Under reduced motion the pointer jumps to its target and no drag ghost is drawn; every write
- * still happens. A task whose action fails is skipped and the agent goes on. Pure over its
- * dependencies, so agents.test.ts runs it on a fake clock with a simulated visitor.
+ * Under reduced motion the pointer jumps to its target, no drag ghost is drawn, and a text or
+ * speaker notes land in one write instead of a letter or a word at a time (Kevin, 2026-11-09);
+ * every write still happens. A task whose action fails is skipped and the agent goes on. Pure over
+ * its dependencies, so agents.test.ts runs it on a fake clock with a simulated visitor.
  */
 
 /** What the runner draws of an agent: its slide, selection, caret, pointer and drag box. */
@@ -583,6 +584,27 @@ export function createRunner(options: RunnerOptions): Runner {
     const free = async (action: string): Promise<boolean> =>
       (await until(action, slideId, blockId, {})) && allowed(action, slideId, blockId, {});
     if (length > keep || rest.length > 0) caret(length);
+    if (reduced()) {
+      /* the letters do not run: what the old and the new text do not share is replaced at once */
+      if (length === keep && rest.length === 0) return 'ok';
+      if (!(await free('slide.update'))) return 'blocked';
+      keystroke(agent, 'slide.update', slideId, blockId, {
+        slideId,
+        mutations: [
+          {
+            op: 'text.replace',
+            slideId,
+            blockId,
+            path,
+            range: [keep, length],
+            text: rest.join(''),
+          },
+        ],
+      });
+      caret(keep + rest.length);
+      await nap(agent, jitter(STEP_MS, STEP_MS + 200));
+      return 'ok';
+    }
     while (length > keep) {
       if (!(await free('slide.update'))) return 'blocked';
       keystroke(agent, 'slide.update', slideId, blockId, {
@@ -619,7 +641,9 @@ export function createRunner(options: RunnerOptions): Runner {
     const current = typeof notes === 'string' ? notes : '';
     let n = 0;
     while (n < words.length && current.startsWith(words.slice(0, n + 1).join(' '))) n += 1;
-    for (let i = n + 1; i <= words.length; i += 1) {
+    /* under reduced motion the words do not run: the notes land whole */
+    const from = reduced() ? Math.max(n + 1, words.length) : n + 1;
+    for (let i = from; i <= words.length; i += 1) {
       if (!(await until('slide.update', slideId, undefined, {}))) return 'blocked';
       if (!allowed('slide.update', slideId, undefined, {})) return 'blocked';
       keystroke(agent, 'slide.update', slideId, undefined, {

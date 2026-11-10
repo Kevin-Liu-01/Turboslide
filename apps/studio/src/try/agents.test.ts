@@ -15,9 +15,10 @@ import type { AgentKey, Task } from './script';
 // moves between slides, selects blocks and types. The properties: no agent write lands on the
 // visitor's slide or selected block once they engaged, a deck level write never lands while they
 // type or drag, a slide the visitor wrote on is never removed, nothing is written or posted while
-// paused (and no timer is set), under reduced motion a pointer move is one post, one loop with an
-// idle visitor ends on the deck it started from, every slide reads at every write (no empty text),
-// and a press wakes an agent out of a pause or a wait and sends the visitor's stage to its slide.
+// paused (and no timer is set), under reduced motion a pointer move is one post and a text one
+// write, one loop with an idle visitor ends on the deck it started from, every slide reads at every
+// write (no empty text), and a press wakes an agent out of a pause or a wait and sends the
+// visitor's stage to its slide.
 
 type Model = { document: DeckDocument; theme: string; values: number[]; comments: number };
 
@@ -527,7 +528,7 @@ describe("the agents' runner", () => {
     runner.stop();
   });
 
-  it('under reduced motion moves a pointer in one post and draws no drag box', async () => {
+  it('under reduced motion moves a pointer in one post, draws no drag box and writes a text whole', async () => {
     let view: VisitorView | null = null;
     const w = world(() => view!);
     view = {
@@ -564,6 +565,19 @@ describe("the agents' runner", () => {
       if (row.state.selection === undefined && row.state.pointer !== undefined)
         expect(targets.has(`${row.state.pointer.x},${row.state.pointer.y}`), row.agent).toBe(true);
     expect(w.writes.some((row) => row.action === 'block.set')).toBe(true);
+    /* a text lands in one write and speaker notes whole: no letter, no word at a time */
+    const steps = [...Object.values(SCRIPT), ...Object.values(REVIEW)].flatMap(
+      (tasks: readonly Task[]) => tasks.flatMap((task) => task.steps),
+    );
+    const notes = new Set(steps.flatMap((step) => (step.kind === 'notes' ? [step.text] : [])));
+    expect(w.writes.filter((row) => row.action === 'text.insert')).toEqual([]);
+    const updates = w.writes
+      .filter((row) => row.action === 'slide.update')
+      .flatMap((row) => row.input.mutations as { op: string; path: string; value?: unknown }[]);
+    expect(updates.some((mutation) => mutation.op === 'text.replace')).toBe(true);
+    for (const mutation of updates)
+      if (mutation.op === 'slide.set' && mutation.path === '/notes')
+        expect(notes.has(mutation.value as string)).toBe(true);
   });
 
   it('ends a loop with an idle visitor on the deck it started from', async () => {

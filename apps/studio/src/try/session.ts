@@ -356,6 +356,7 @@ function createTrySession(options: { win: Window; still: boolean }): TrySession 
     },
     setTimeout: (run, ms) => win.setTimeout(run, ms),
     clearTimeout: (id) => win.clearTimeout(id),
+    reducedMotion,
   });
   story = told;
 

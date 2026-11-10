@@ -27,8 +27,9 @@ import type { AgentScript, Step } from './script';
  *    two people of the title and OpenClaw and Hermes visit the slide (guests.ts), OpenClaw and
  *    Hermes leaving a comment each.
  *
- * Chapter 4 gives the deck a transition and starts the slideshow, which steps through the deck. A
- * chapter's script starts again while its section stays on screen. While the section is off screen
+ * Chapter 4 gives the deck a transition and starts the slideshow, which steps through the deck;
+ * under reduced motion it stays on the title slide (Kevin, 2026-11-09). A chapter's script starts
+ * again while its section stays on screen. While the section is off screen
  * or the tab is hidden the chapter waits: its runner pauses, and the third chapter's visits and the
  * slideshow's steps hold the time they have left and carry on from there.
  *
@@ -761,6 +762,8 @@ export type StoryOptions = {
   clearTimeout: (id: number) => void;
   /** the clock the held timers measure what they have left by; Date.now unless set */
   now?: () => number;
+  /** reduced motion: the slideshow does not step */
+  reducedMotion?: () => boolean;
 };
 
 export type Story = {
@@ -907,7 +910,7 @@ export function createStory(options: StoryOptions): Story {
     void write('slide.transition', { transition: STORY_TRANSITION });
     options.visitor.goto(title);
     options.visitor.present(true);
-    later(step, SLIDESHOW_MS);
+    if (options.reducedMotion?.() !== true) later(step, SLIDESHOW_MS);
   };
 
   /* read through a call, since stop() sets it while a move awaits */

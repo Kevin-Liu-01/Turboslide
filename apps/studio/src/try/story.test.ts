@@ -25,8 +25,8 @@ import type { StoryVisit } from './story';
 // names is one its chapter runs (components/site/chapter-fields.ts). The director pauses the
 // hero's loop for a chapter and resumes it at rest, runs one runner a chapter, puts back what a
 // chapter changed once its runner has stopped, hosts the third chapter's visits and steps the
-// fourth chapter's slideshow, holds both while the frame is off screen or hidden, and moves one
-// chapter at a time to the last one the page named.
+// fourth chapter's slideshow (on the title alone under reduced motion), holds both while the
+// frame is off screen or hidden, and moves one chapter at a time to the last one the page named.
 
 const scripts = Object.entries(STORY_SCRIPTS);
 /* the threads a chapter's comment opens, as the runner saves them for its later steps */
@@ -137,7 +137,7 @@ function fakeRunner(log: string[], script: AgentScript): Runner {
   };
 }
 
-function harness() {
+function harness({ reduced = false }: { reduced?: boolean } = {}) {
   const log: string[] = [];
   const timers = new Map<number, { run: () => void; at: number }>();
   let now = 0;
@@ -191,6 +191,7 @@ function harness() {
       timers.delete(id);
     },
     now: () => now,
+    reducedMotion: () => reduced,
   });
   /** runs every timer due by `ms` from now, in order */
   const advance = (ms: number): void => {
@@ -282,6 +283,16 @@ describe("the story's director", () => {
     expect(h.visits).toEqual(STORY_VISITS);
     h.story.setOnScreen(false);
     expect(h.story.hosting()).toBe(false);
+  });
+
+  it('keeps the slideshow on the title slide under reduced motion', async () => {
+    const h = harness({ reduced: true });
+    h.story.set(4);
+    await h.story.settled();
+    expect(h.log.slice(-2)).toEqual(['goto title', 'present true']);
+    expect(h.armed()).toBe(0);
+    h.advance(SLIDESHOW_MS * 5);
+    expect(h.log.filter((line) => line.startsWith('goto'))).toEqual(['goto title']);
   });
 
   it('holds the slideshow off screen or hidden and carries on with the time it had left', async () => {

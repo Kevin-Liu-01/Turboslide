@@ -5147,31 +5147,61 @@ export function Editor({
     });
   };
 
+  /* the dial's preview context, fixed at its first turn the way a handle's drag fixes its own at
+     the press (beginGesture): the stage measures the turned draft, so a conversion taken again
+     from those boxes at every turn grew the box on a slide off the canvas (1326 by 48 drawn as
+     2493 by 2423 after six turns, measured on the dev server). A new document or another
+     selection takes it again */
+  const rotatePreview = useRef<{
+    doc: DeckDocument;
+    slideId: string;
+    ids: string;
+    canvas: Slide;
+    replace: Mutation | null;
+    boxes: MeasuredBoxes;
+  } | null>(null);
+
   /** The dial's preview (EditorHandle.previewRotate): rotateSelection's rows drawn, no write. */
   const previewRotation = (by: number | null) => {
     if (by === null) {
+      rotatePreview.current = null;
       if (gesture.current === null && !frameDown.current) setDraft(null);
       return;
     }
     const slideNow = slideRef.current;
     const ids = selectedObjectIds();
     if (!slideNow || ids.length === 0 || editingRef.current || gesture.current) return;
-    /* a slide off the canvas previews over the provisional conversion, as a handle's drag does;
-       the release converts it with the measured boxes (commitCanvas) */
-    const provisional = provisionalCanvas(slideNow, boxesRef.current);
-    if (!isFreeformSlide(slideNow) && !provisional) return;
-    const canvas = provisional?.slide ?? slideNow;
-    const boxesNow = provisional ? boxesFromPositions(canvas, boxesRef.current) : boxesRef.current;
-    const rows = selectedPositions(canvas, boxesNow, ids);
+    let start = rotatePreview.current;
+    if (
+      start === null ||
+      start.doc !== docRef.current ||
+      start.slideId !== slideNow.id ||
+      start.ids !== ids.join(' ')
+    ) {
+      /* a slide off the canvas previews over the provisional conversion, as a handle's drag does;
+         the release converts it with the measured boxes (commitCanvas, the store action) */
+      const provisional = provisionalCanvas(slideNow, boxesRef.current);
+      if (!isFreeformSlide(slideNow) && !provisional) return;
+      const canvas = provisional?.slide ?? slideNow;
+      start = {
+        doc: docRef.current,
+        slideId: slideNow.id,
+        ids: ids.join(' '),
+        canvas,
+        replace: provisional?.replace ?? null,
+        boxes: provisional ? boxesFromPositions(canvas, boxesRef.current) : boxesRef.current,
+      };
+      rotatePreview.current = start;
+    }
+    const { canvas, replace } = start;
+    const rows = selectedPositions(canvas, start.boxes, ids);
     const mutations = rotateMutations(canvas, rows, { by }, rows.length > 1 ? 'selection' : 'each');
     if (mutations.length === 0) {
       setDraft(null);
       return;
     }
     try {
-      setDraft(
-        draftDocument(canvas, provisional ? [provisional.replace, ...mutations] : mutations),
-      );
+      setDraft(draftDocument(canvas, replace !== null ? [replace, ...mutations] : mutations));
     } catch {
       setDraft(null);
       return;

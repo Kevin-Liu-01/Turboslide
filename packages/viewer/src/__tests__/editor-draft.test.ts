@@ -415,6 +415,66 @@ describe('the rotate dial’s preview (chrome inspector/geometry.tsx; EditorHand
   });
 });
 
+describe('the rotate dial’s preview on a slide off the canvas', () => {
+  /* Chrome measures a turned wrapper by its bounding box; the stage re-measures each preview
+     frame, and a conversion taken again from those boxes at every turn grew the box (1326 by 48
+     drawn as 2493 by 2423 after six turns on the dev server). The stub below answers the turned
+     box the way Chrome does; the conversion is taken once, at the first turn */
+  it('keeps the box the first turn converted while the dial keeps turning', () => {
+    restoreRects?.();
+    const original = Element.prototype.getBoundingClientRect;
+    const rect = (left: number, top: number, width: number, height: number): DOMRect => ({
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+      x: left,
+      y: top,
+      toJSON: () => ({}),
+    });
+    Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
+      const el = this as HTMLElement;
+      if (el.classList.contains('pt-slide') || el.querySelector(':scope > .pt-slide') !== null)
+        return rect(0, 0, 1600, 900);
+      if (el.classList.contains('free')) {
+        const onSheet = el.parentElement?.classList.contains('freeform-sheet') === true;
+        const left = parseFloat(el.style.left) + (onSheet ? 0 : 137);
+        const top = parseFloat(el.style.top) + (onSheet ? 0 : 129);
+        const w = parseFloat(el.style.width);
+        const h = parseFloat(el.style.height);
+        const turn = (Number(el.dataset['rotate'] ?? 0) * Math.PI) / 180;
+        const bw = Math.abs(w * Math.cos(turn)) + Math.abs(h * Math.sin(turn));
+        const bh = Math.abs(w * Math.sin(turn)) + Math.abs(h * Math.cos(turn));
+        return rect(left + (w - bw) / 2, top + (h - bh) / 2, bw, bh);
+      }
+      if (el.dataset['block'] === 'h') return rect(137, 129, 1326, 48);
+      return rect(0, 0, 0, 0);
+    };
+    restoreRects = () => {
+      Element.prototype.getBoundingClientRect = original;
+    };
+    const slide: Slide = {
+      schemaVersion: 1,
+      id: 'free',
+      kind: 'content',
+      layout: { type: 'stack', gap: 22 },
+      slots: { main: [{ id: 'h', type: 'heading', level: 'h2', text: 'Title' } as Block] },
+    };
+    mounted = mount(documentOf(slide), { selection: { kind: 'block', blockId: 'h' } });
+    const { view, handle, calls } = mounted;
+    act(() => handle().previewRotate(5));
+    const first = view().selectionPos;
+    expect(first).toMatchObject({ w: 1326, h: 48, rotate: 5 });
+    for (const by of [10, 15, 20, 25, 30]) act(() => handle().previewRotate(by));
+    expect(view().selectionPos).toMatchObject({ x: first?.x, y: first?.y, w: 1326, h: 48 });
+    expect(view().rotation).toBe(30);
+    expect(calls).toEqual([]);
+    act(() => handle().previewRotate(null));
+  });
+});
+
 describe('the caret a keystroke reports (Editor.tsx onCaretInfo)', () => {
   it('compares the range and the marks', () => {
     const at = (from: number, to: number, marks: CaretInfo['marks'] = {}): CaretInfo => ({

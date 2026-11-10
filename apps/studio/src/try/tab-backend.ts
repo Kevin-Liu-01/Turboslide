@@ -26,10 +26,15 @@ import { tabComments } from './tab-comments';
  * transform, reducer, roster and presence the studio's memory tier runs; the visitor's editor and
  * the two agents are three clients of it. A checkpoint follows two seconds after the last op (ten
  * at most while ops keep coming), so the revision moves and Version history has rows. Comments are
- * kept in memory (tab-comments.ts), the version rows too, and the unsent queue's mirror is memory
- * alone. Nothing is written to the server, no deck id reaches the store, and a reload starts from
- * the shipped deck. What needs the server answers `TabOnly.sentence` (docs/SITE.md D10).
+ * kept in memory (tab-comments.ts), the version rows too (the last TAB_VERSIONS_MAX of them, since
+ * the agents checkpoint every ten seconds for as long as the tab stays open), and the unsent
+ * queue's mirror is memory alone. Nothing is written to the server, no deck id reaches the store,
+ * and a reload starts from the shipped deck. What needs the server answers `TabOnly.sentence`
+ * (docs/SITE.md D10).
  */
+
+/** The most version rows the tab keeps; an older row leaves as a new one comes. */
+export const TAB_VERSIONS_MAX = 50;
 
 /** One of the room's people: the visitor, or an agent. */
 export type TabPerson = {
@@ -157,6 +162,15 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
   const maxMs = options.checkpointMaxMs ?? 10_000;
   const channel = memoryChannel();
   const versions: Version[] = [];
+  /* the rows made, so a row's number keeps counting after the oldest leave */
+  let made = 0;
+  const addVersion = (row: Omit<Version, 'n'>): Version => {
+    made += 1;
+    const version: Version = { n: made, ...row };
+    versions.push(version);
+    if (versions.length > TAB_VERSIONS_MAX) versions.splice(0, versions.length - TAB_VERSIONS_MAX);
+    return version;
+  };
   /* the entries a checkpoint covers, told by the room before it moves the revision */
   let covered: Entry[] = [];
   const server = fakeRoomServer({
@@ -194,8 +208,7 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
       const edits = covered.filter((entry) => entry.kind === 'edit');
       const last = edits[edits.length - 1];
       if (last === undefined) return;
-      versions.push({
-        n: versions.length + 1,
+      addVersion({
         revision: server.document().deck.revision,
         author: last.author,
         note: last.note ?? '',
@@ -292,16 +305,13 @@ export function createTabBackend(options: TabBackendOptions): TabBackend {
     listVersions: async () => [...versions],
     saveVersion: async ({ author, note }) => {
       await checkpoint();
-      const version: Version = {
-        n: versions.length + 1,
+      return addVersion({
         revision: server.document().deck.revision,
         author,
         note,
         createdAt: new Date().toISOString(),
         mutations: [],
-      };
-      versions.push(version);
-      return version;
+      });
     },
     leaseSlide: async ({ slideId, author, minutes }): Promise<Lease> => ({
       slideId,

@@ -6,12 +6,13 @@ import { TabOnlyError } from '../editor/backend';
 import { createEditorController } from '../editor/controller';
 import type { EditorController } from '../editor/controller';
 import { heroDocument } from './hero-deck';
-import { createTabBackend } from './tab-backend';
+import { TAB_VERSIONS_MAX, createTabBackend } from './tab-backend';
 import type { TabPerson } from './tab-backend';
 
 // The tab backend (docs/SITE.md D3, C.4): two headless editor controllers, the visitor and Claude
 // Code, on one tab room; a write of one reaches the other, comments add, reply and resolve,
-// checkpoints make version rows, and the features that need the server answer the tab's sentence.
+// checkpoints make version rows (the last TAB_VERSIONS_MAX of them, numbered on), and the features
+// that need the server answer the tab's sentence.
 // `fetch` throws for the whole file, so any call that would leave the tab fails the test.
 
 const visitor: TabPerson = {
@@ -148,4 +149,29 @@ describe('the tab backend', () => {
     room.stop();
     expect(fetchStub).not.toHaveBeenCalled();
   }, 20_000);
+
+  it('keeps the last TAB_VERSIONS_MAX version rows and numbers on past them', async () => {
+    const deckId = 'try-test';
+    const { backend, room } = createTabBackend({
+      deckId,
+      document: heroDocument(deckId),
+      people: [visitor],
+      tabOnly: {
+        sentence: TAB_ONLY.sentence,
+        dialogs: [],
+        action: { label: 'New Presentation', run: () => undefined },
+      },
+      openPage: () => undefined,
+    });
+    const saves = TAB_VERSIONS_MAX + 7;
+    for (let i = 1; i <= saves; i += 1)
+      await backend.saveVersion({ deckId, author: visitor.author, note: `save ${i}` });
+    const rows = await backend.listVersions({ deckId });
+    expect(rows).toHaveLength(TAB_VERSIONS_MAX);
+    expect(rows[0]?.n).toBe(8);
+    expect(rows.at(-1)).toMatchObject({ n: saves, note: `save ${saves}` });
+    expect(room.versions()).toHaveLength(TAB_VERSIONS_MAX);
+    room.stop();
+    expect(fetchStub).not.toHaveBeenCalled();
+  });
 });

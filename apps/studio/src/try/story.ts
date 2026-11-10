@@ -28,7 +28,9 @@ import type { AgentScript, Step } from './script';
  *    Hermes leaving a comment each.
  *
  * Chapter 4 gives the deck a transition and starts the slideshow, which steps through the deck. A
- * chapter's script starts again while its section stays on screen.
+ * chapter's script starts again while its section stays on screen. While the section is off screen
+ * or the tab is hidden the chapter waits: its runner pauses, and the third chapter's visits and the
+ * slideshow's steps hold the time they have left and carry on from there.
  *
  * Every chapter leaves the deck as it found it: the slides a chapter adds carry the `story-`
  * prefix, and leaving the chapter waits for its agents to stop, then removes those slides and puts
@@ -757,6 +759,8 @@ export type StoryOptions = {
   hush: () => void;
   setTimeout: (run: () => void, ms: number) => number;
   clearTimeout: (id: number) => void;
+  /** the clock the held timers measure what they have left by; Date.now unless set */
+  now?: () => number;
 };
 
 export type Story = {
@@ -764,7 +768,7 @@ export type Story = {
   set: (chapter: number) => void;
   /** the chapter playing now */
   chapter: () => number;
-  /** forwards the page's and the document's word to the chapter's runner */
+  /** forwards the page's and the document's word to the chapter's runner and holds its timers */
   setOnScreen: (on: boolean) => void;
   setVisible: (visible: boolean) => void;
   /** the third chapter plays: the guests visit though the hero's loop is paused */
@@ -774,22 +778,56 @@ export type Story = {
   stop: () => Promise<void>;
 };
 
+/**
+ * A timer of the story: armed while the frame is on screen and its document visible, held with
+ * the time it has left otherwise, so the visits and the slideshow carry on from where they were.
+ */
+type Timer = { run: () => void; left: number; due: number; id: number | null };
+
 export function createStory(options: StoryOptions): Story {
+  const now = options.now ?? (() => Date.now());
   let target = 0;
   let current = 0;
   let onScreen = true;
   let visible = true;
   let stopped = false;
   let active: Runner | null = null;
-  let timers: number[] = [];
+  let timers: Timer[] = [];
   let moving: Promise<void> = Promise.resolve();
 
+  const open = (): boolean => onScreen && visible;
+  const arm = (timer: Timer): void => {
+    timer.due = now() + timer.left;
+    timer.id = options.setTimeout(() => {
+      timers = timers.filter((each) => each !== timer);
+      timer.run();
+    }, timer.left);
+  };
   const later = (run: () => void, ms: number): void => {
-    timers.push(options.setTimeout(run, ms));
+    const timer: Timer = { run, left: ms, due: 0, id: null };
+    timers.push(timer);
+    if (open()) arm(timer);
+  };
+  /** off screen or hidden: every armed timer stops and keeps what it has left */
+  const hold = (): void => {
+    for (const timer of timers) {
+      if (timer.id === null) continue;
+      options.clearTimeout(timer.id);
+      timer.id = null;
+      timer.left = Math.max(0, timer.due - now());
+    }
+  };
+  /** back on screen and visible: every held timer runs out what it had left */
+  const release = (): void => {
+    for (const timer of timers) if (timer.id === null) arm(timer);
   };
   const clearTimers = (): void => {
-    for (const id of timers) options.clearTimeout(id);
+    for (const timer of timers) if (timer.id !== null) options.clearTimeout(timer.id);
     timers = [];
+  };
+  const regate = (): void => {
+    if (open()) release();
+    else hold();
   };
 
   /** one write of the tidy agent, with its base revision; a refusal is left as it is */
@@ -894,10 +932,12 @@ export function createStory(options: StoryOptions): Story {
     setOnScreen(on) {
       onScreen = on;
       active?.setOnScreen(on);
+      regate();
     },
     setVisible(on) {
       visible = on;
       active?.setVisible(on);
+      regate();
     },
     hosting: () => current === 3 && onScreen && visible,
     settled: () => moving,

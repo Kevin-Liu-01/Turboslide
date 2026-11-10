@@ -25,7 +25,8 @@ import type { StoryVisit } from './story';
 // names is one its chapter runs (components/site/chapter-fields.ts). The director pauses the
 // hero's loop for a chapter and resumes it at rest, runs one runner a chapter, puts back what a
 // chapter changed once its runner has stopped, hosts the third chapter's visits and steps the
-// fourth chapter's slideshow, and moves one chapter at a time to the last one the page named.
+// fourth chapter's slideshow, holds both while the frame is off screen or hidden, and moves one
+// chapter at a time to the last one the page named.
 
 const scripts = Object.entries(STORY_SCRIPTS);
 /* the threads a chapter's comment opens, as the runner saves them for its later steps */
@@ -189,6 +190,7 @@ function harness() {
     clearTimeout: (id) => {
       timers.delete(id);
     },
+    now: () => now,
   });
   /** runs every timer due by `ms` from now, in order */
   const advance = (ms: number): void => {
@@ -211,7 +213,17 @@ function harness() {
   const setTheme = (theme: string): void => {
     document = { ...document, deck: { ...document.deck, theme } } as DeckDocument;
   };
-  return { story, log, visits, advance, addStorySlide, setTheme, doc: () => document };
+  return {
+    story,
+    log,
+    visits,
+    advance,
+    addStorySlide,
+    setTheme,
+    doc: () => document,
+    /** the timers armed now */
+    armed: () => timers.size,
+  };
 }
 
 describe("the story's director", () => {
@@ -270,6 +282,48 @@ describe("the story's director", () => {
     expect(h.visits).toEqual(STORY_VISITS);
     h.story.setOnScreen(false);
     expect(h.story.hosting()).toBe(false);
+  });
+
+  it('holds the slideshow off screen or hidden and carries on with the time it had left', async () => {
+    const h = harness();
+    h.story.set(4);
+    await h.story.settled();
+    const gotos = (): string[] => h.log.filter((line) => line.startsWith('goto'));
+    const order = h.doc().deck.sections.flatMap((section) => section.slideIds);
+    h.advance(SLIDESHOW_MS / 2);
+    for (const [away, back] of [
+      [() => h.story.setOnScreen(false), () => h.story.setOnScreen(true)],
+      [() => h.story.setVisible(false), () => h.story.setVisible(true)],
+    ] as const) {
+      const shown = gotos().length;
+      away();
+      expect(h.armed()).toBe(0);
+      h.advance(SLIDESHOW_MS * 20);
+      expect(gotos()).toHaveLength(shown);
+      back();
+      expect(h.armed()).toBe(1);
+      h.advance(SLIDESHOW_MS / 2 - 1);
+      expect(gotos()).toHaveLength(shown);
+      h.advance(1);
+      expect(gotos()).toHaveLength(shown + 1);
+      h.advance(SLIDESHOW_MS / 2);
+    }
+    expect(gotos()).toEqual(['goto title', `goto ${order[1]}`, `goto ${order[2]}`]);
+  });
+
+  it('holds the visits of the third chapter off screen and goes on with the next one', async () => {
+    const h = harness();
+    h.story.set(3);
+    await h.story.settled();
+    h.advance(0);
+    expect(h.visits).toEqual(STORY_VISITS.slice(0, 1));
+    h.story.setVisible(false);
+    expect(h.armed()).toBe(0);
+    h.advance(60_000);
+    expect(h.visits).toEqual(STORY_VISITS.slice(0, 1));
+    h.story.setVisible(true);
+    h.advance(1400);
+    expect(h.visits).toEqual(STORY_VISITS.slice(0, 2));
   });
 
   it('moves one chapter at a time to the last one named', async () => {

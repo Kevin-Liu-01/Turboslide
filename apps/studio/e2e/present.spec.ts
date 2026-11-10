@@ -192,8 +192,12 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
   );
   await body.press('g');
   await expect(viewer).toHaveAttribute('data-mode', 'slide');
+  /* D leaves the theme as the show opened it; the page draws the deck's own appearance, which
+     for the fixture is light, so the earlier 'dark' read the theme and not the key */
+  const theme = await page.locator('html').getAttribute('data-theme');
   await body.press('d');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.waitForTimeout(300);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', theme ?? '');
   await expect(viewer).toHaveClass(/is-present/);
 
   // the toolbar appears when the pointer moves to the bottom left
@@ -233,6 +237,7 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
     'Open speaker notes',
     'Turn on the laser pointer',
     'Enter full screen',
+    'Play animated patterns',
     'More',
     'Exit',
   ]);
@@ -328,10 +333,9 @@ test('Presenter view lists the unskipped slides with their notes and syncs with 
   await pause.click();
   await expect(pause).toHaveText('Pause');
 
-  // the Audience tools tab is present and disabled
-  const audience = console.locator('[data-control="presenter.tab.audience"]');
-  await expect(audience).toHaveAttribute('aria-disabled', 'true');
-  await expect(audience).toHaveAttribute('data-tip', 'Audience tools');
+  // no Audience tools tab: the polish round took it out of the console (14612488b), as
+  // core/decks.spec.ts asserts
+  await expect(console.locator('[data-control="presenter.tab.audience"]')).toHaveCount(0);
 
   // Next in the console drives the slideshow window through the play list; the skipped slide never shows
   const seen: string[] = [String(await show.getAttribute('data-slide-id'))];
@@ -480,6 +484,7 @@ test('the two Later stubs of the Options menu return behind Tools > Advanced too
     'Auto-play',
     'Turn on the laser pointer',
     'Enter full screen',
+    'Play animated patterns',
     'Turn on the pen',
     'More',
     'Exit',

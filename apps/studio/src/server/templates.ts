@@ -24,8 +24,10 @@ import type { AuthContext } from './authorize';
  * `template.update` through the deck's dispatcher (server/actions.ts), not from here. The
  * covers render on the server through `@turboslide/render/slide` over the template's own
  * document, in the appearance a deck made from it opens in, so a template needs no deck id and no
- * thumbnail route; a cover's pictures draw as empty plates until the template asset route of
- * build/b5b.md lands (the request to the integrator), because a template folder's twins are not
+ * thumbnail route; a cover never draws embedded HTML (template-cover.ts: an `html` block is its
+ * note, an HtmlLayer is left out), because anyone who may copy a deck can save one; a cover's
+ * pictures draw as empty plates until the template asset route of build/b5b.md lands (the
+ * request to the integrator), because a template folder's twins are not
  * served by /decks/<id>/assets. createServerFn lives only under apps/studio/src/server (SPEC 3.3
  * item 4). Every write goes through the collection's folder (`ensureDecks().decksDir`), so the
  * file and tmp stores persist it; on the blob tier the folder lives in this instance's overlay
@@ -69,10 +71,6 @@ export type TemplateGallery = {
   sprite: string;
 };
 
-/** A transparent pixel: a cover's pictures load as empty plates instead of broken image glyphs. */
-const EMPTY_PIXEL =
-  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
 function requireSlug(value: unknown, name: string): string {
   if (typeof value !== 'string' || !SLUG_PATTERN.test(value))
     throw new TypeError(`${name} must be a slug`);
@@ -107,7 +105,7 @@ const listTemplateGalleryFn = createServerFn({ method: 'GET' }).handler(
     const { ensureDecks, hostingFacts } = await import('./root');
     const { readDefaultTemplateId, readTemplateIndex, templateDocument } =
       await import('@turboslide/store/templates');
-    const { renderSlide } = await import('./render');
+    const { templateCoverHtml } = await import('./template-cover');
     const { themeName } = await import('@turboslide/theme/themes');
     const { requestContext } = await import('./authorize');
     const { requestManagesTemplates } = await import('./template-manager');
@@ -128,17 +126,8 @@ const listTemplateGalleryFn = createServerFn({ method: 'GET' }).handler(
         theme = themeName(document.deck.theme);
         const slideId = row.cover ?? document.deck.sections[0]?.slideIds[0];
         const slide = slideId === undefined ? undefined : document.slides[slideId];
-        if (slide !== undefined) {
-          coverHtml = renderSlide(document.deck, slide, {
-            theme: coverAppearance,
-            chrome: false,
-            assetBase: '',
-            assetSrc: () => EMPTY_PIXEL,
-            blockAttrs: false,
-            gtWord: false,
-            prompts: true,
-          }).html;
-        }
+        if (slide !== undefined)
+          coverHtml = templateCoverHtml(document.deck, slide, coverAppearance);
       } catch {
         // a template folder that cannot be read draws as a plate with its name
       }

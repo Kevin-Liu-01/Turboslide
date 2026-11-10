@@ -285,6 +285,9 @@ content="default-src 'none'; img-src 'self' data: https://<public store>; style-
 Policy: in a deck shared beyond its owner, `html` blocks render only under the owner's "Allow
 embedded HTML blocks in this shared presentation" switch; otherwise the block renders as its note
 in a plate (`htmlBlockPolicy`). The `htmlBlocks` kill switch renders every block as its note.
+A template's cover on the gallery always takes the note policy and draws no HtmlLayer
+(`apps/studio/src/server/template-cover.ts`, 2026-11-09): anyone who may copy a deck can save it
+as a template, and every visitor's gallery draws the cover.
 
 The tokenizer and the scope (2026-10-18, after a security review of the HtmlLayer work): the
 CSS tokenizer reads comments, strings, unquoted `url()` and escapes as a browser does and rebuilds

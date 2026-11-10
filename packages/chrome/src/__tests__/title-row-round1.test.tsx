@@ -249,7 +249,9 @@ describe('the More key', () => {
       const { container, unmount } = render(<Harness input={input(extra)} />);
       fireEvent.click(container.querySelector('[data-control="title.more"]')!);
       fireEvent.click(
-        document.getElementById(TITLE_MORE_MENU_ID)!.querySelector('[data-menu-item="title.presence"]')!,
+        document
+          .getElementById(TITLE_MORE_MENU_ID)!
+          .querySelector('[data-menu-item="title.presence"]')!,
       );
       const rows = Array.from(
         document.getElementById('ts-menu-roster')!.querySelectorAll('[role="menuitem"]'),

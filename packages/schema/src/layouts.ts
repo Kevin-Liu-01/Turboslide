@@ -375,7 +375,8 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     google: true,
     kind: 'opener',
     doc: 'The plate lower left at 740 px: the section title and one sentence; in General Translation over a full-bleed two-tone picture with its credit, in another theme on the theme’s ground.',
-    sentence: 'Section header: the section title and one sentence, over a full picture in General Translation',
+    sentence:
+      'Section header: the section title and one sentence, over a full picture in General Translation',
     icon: 'rectangle-stack',
     needsPicture: true,
     make: (id, deck, sectionId) => {
@@ -791,7 +792,8 @@ const ENTRIES: ReadonlyArray<LayoutEntry> = [
     google: false,
     kind: 'closing',
     doc: 'A plate upper left at 720 px carrying the kit’s logo, the thesis and the addresses; in General Translation over a two-tone render, in another theme on the theme’s ground.',
-    sentence: 'Closing: your logo, a closing line and your addresses, over a picture in General Translation',
+    sentence:
+      'Closing: your logo, a closing line and your addresses, over a picture in General Translation',
     icon: 'check-badge',
     needsPicture: true,
     make: (id, deck) => {

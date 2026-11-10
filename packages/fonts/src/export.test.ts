@@ -116,8 +116,14 @@ describe('the export font set', () => {
     expect(standard).toHaveLength(10);
     const exact = exportFaces('exact');
     for (const size of fonts.textSizes) {
-      expect(exact.some((f) => f.family === `Inter Text ${size}`), String(size)).toBe(true);
-      expect(exact.some((f) => f.family === `Inter Text ${size} Medium`), String(size)).toBe(true);
+      expect(
+        exact.some((f) => f.family === `Inter Text ${size}`),
+        String(size),
+      ).toBe(true);
+      expect(
+        exact.some((f) => f.family === `Inter Text ${size} Medium`),
+        String(size),
+      ).toBe(true);
     }
     const display = exact.filter((f) => f.display && !f.italic);
     expect(display.map((f) => [f.family, f.weight, f.opsz, f.frozen])).toEqual([

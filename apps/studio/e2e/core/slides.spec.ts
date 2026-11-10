@@ -136,9 +136,7 @@ async function importListing(p: Page) {
 async function openImportSlides(p: Page) {
   await menuPath(p, 'file', 'file.importSlides');
   await ctl(p, 'dialog.importSlides').waitFor({ timeout: 8000 });
-  await expect
-    .poll(async () => (await importListing(p)).busy, { timeout: 30_000 })
-    .toBe(false);
+  await expect.poll(async () => (await importListing(p)).busy, { timeout: 30_000 }).toBe(false);
   return importListing(p);
 }
 
@@ -310,7 +308,9 @@ test(title('slides.import.tiles-in-view-first'), async () => {
         const seen = tiles.filter((b) => within(b, 0));
         const drawn = seen.filter((b) => {
           const img = b.querySelector('img');
-          return img !== null && img.getAttribute('src') !== null && img.complete && img.naturalWidth > 0;
+          return (
+            img !== null && img.getAttribute('src') !== null && img.complete && img.naturalWidth > 0
+          );
         });
         return {
           ids: seen.map(idOf),

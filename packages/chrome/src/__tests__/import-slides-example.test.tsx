@@ -30,7 +30,16 @@ const SLIDE = 'content-rule';
 const dispatch = vi.fn(() => Promise.resolve({ revision: 413 }));
 
 function row(id: string, title: string, updatedAt: string, extra: Partial<DeckHeadRow> = {}) {
-  return { id, title, slides: 3, sections: 1, revision: 4, updatedAt, createdAt: updatedAt, ...extra };
+  return {
+    id,
+    title,
+    slides: 3,
+    sections: 1,
+    revision: 4,
+    updatedAt,
+    createdAt: updatedAt,
+    ...extra,
+  };
 }
 const EXAMPLE: DeckHeadRow = row('gt-brand', 'GT brand deck', '2026-09-13T03:49:55Z', {
   slides: 95,
@@ -209,7 +218,11 @@ describe('the tile pictures of a long list (item 2, P2-1)', () => {
   const SOURCE: SourceDeckSlides = {
     id: 'gt-brand',
     title: 'GT brand deck',
-    slides: Array.from({ length: 95 }, (_, n) => ({ id: `s${n}`, title: `Slide ${n + 1}`, n: n + 1 })),
+    slides: Array.from({ length: 95 }, (_, n) => ({
+      id: `s${n}`,
+      title: `Slide ${n + 1}`,
+      n: n + 1,
+    })),
   };
 
   async function openTiles() {

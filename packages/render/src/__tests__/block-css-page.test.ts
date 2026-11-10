@@ -14,9 +14,9 @@ function rulesOf(css: string): string[] {
 
 describe('the block CSS of a page', () => {
   it('drops every comment and the blank lines they leave', () => {
-    expect(withoutCssComments('a { color: red; } /* one */\n\n/* two\n lines */\nb { margin: 0 }')).toBe(
-      'a { color: red; } \nb { margin: 0 }',
-    );
+    expect(
+      withoutCssComments('a { color: red; } /* one */\n\n/* two\n lines */\nb { margin: 0 }'),
+    ).toBe('a { color: red; } \nb { margin: 0 }');
   });
 
   it('keeps every rule of BLOCK_CSS and carries no comment', () => {

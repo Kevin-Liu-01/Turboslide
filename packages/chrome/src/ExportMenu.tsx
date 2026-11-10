@@ -99,7 +99,8 @@ const FONTS: readonly SegOption<ExportFontSet>[] = [
   {
     value: 'standard',
     label: 'Standard',
-    title: 'The names Inter installs under: Inter, Inter Medium, Inter Display, Inter Display Medium',
+    title:
+      'The names Inter installs under: Inter, Inter Medium, Inter Display, Inter Display Medium',
   },
   {
     value: 'exact',

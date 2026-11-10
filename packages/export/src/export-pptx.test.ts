@@ -348,9 +348,7 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
     expect([...(fonts?.embedded ?? []), ...(fonts?.requiredOnViewer ?? [])]).toContain(
       'Inter Display Alternates',
     );
-    expect([...(fonts?.embedded ?? []), ...(fonts?.requiredOnViewer ?? [])]).toContain(
-      'Inter',
-    );
+    expect([...(fonts?.embedded ?? []), ...(fonts?.requiredOnViewer ?? [])]).toContain('Inter');
   });
 
   test.skipIf(!existsSync(VENV_PYTHON))(

@@ -184,7 +184,7 @@ export function exportFace(
   if (display) {
     const alternates = query.alternates === true && w === 500;
     const face = faces.find(
-      (f) => f.display && f.weight === w && (f.frozen.length > 0) === alternates,
+      (f) => f.display && f.weight === w && f.frozen.length > 0 === alternates,
     );
     if (face) return face;
   }

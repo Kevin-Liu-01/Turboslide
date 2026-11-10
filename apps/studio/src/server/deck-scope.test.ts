@@ -443,9 +443,7 @@ describe('the example deck in Import slides (the Round 1 follow-up, lane A item 
   test('is not offered twice, to no identity, from the trash, when missing, restricted or unreadable', async () => {
     reads.length = 0;
     expect(await exampleHead(new Set(['gt-brand']), own, deps(head('gt-brand'), null))).toBeNull();
-    expect(
-      await exampleHead(new Set(), { kind: 'none' }, deps(head('gt-brand'), null)),
-    ).toBeNull();
+    expect(await exampleHead(new Set(), { kind: 'none' }, deps(head('gt-brand'), null))).toBeNull();
     expect(reads).toEqual([]);
     expect(
       await exampleHead(
@@ -455,7 +453,9 @@ describe('the example deck in Import slides (the Round 1 follow-up, lane A item 
       ),
     ).toBeNull();
     expect(await exampleHead(new Set(), browser, deps(null, null))).toBeNull();
-    expect(await exampleHead(new Set(), browser, deps(head('gt-brand'), record('gt-brand')))).toBeNull();
+    expect(
+      await exampleHead(new Set(), browser, deps(head('gt-brand'), record('gt-brand'))),
+    ).toBeNull();
     expect(await exampleHead(new Set(), browser, deps(head('gt-brand'), 'unreadable'))).toBeNull();
   });
 });

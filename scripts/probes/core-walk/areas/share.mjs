@@ -534,7 +534,8 @@ async function productRound(t) {
         const el = document.querySelector(`[data-control="${control}"]`);
         if (!el) return null;
         const probe = document.createElement('div');
-        probe.style.cssText = 'position:fixed;left:-20px;top:-20px;border:1px solid var(--pt-field)';
+        probe.style.cssText =
+          'position:fixed;left:-20px;top:-20px;border:1px solid var(--pt-field)';
         (el.parentElement ?? document.body).append(probe);
         const field = getComputedStyle(probe).borderTopColor;
         probe.remove();

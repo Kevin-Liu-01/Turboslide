@@ -76,7 +76,9 @@ async function deckInfo(decks: HostedDecks): Promise<number> {
   return read.document.deck.revision;
 }
 
-async function timed<T>(run: () => Promise<T>): Promise<{ ms: number; value?: T; error?: unknown }> {
+async function timed<T>(
+  run: () => Promise<T>,
+): Promise<{ ms: number; value?: T; error?: unknown }> {
   const started = Date.now();
   try {
     const value = await run();

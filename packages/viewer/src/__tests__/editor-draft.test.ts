@@ -12,6 +12,8 @@ import { applyMutations } from '@turboslide/schema/reduce';
 
 import { Editor } from '../Editor';
 import type { EditorHandle, EditorOverlayView } from '../Editor';
+import type { CaretInfo } from '../InlineText';
+import { sameCaret } from '../InlineText';
 import { gestureClock } from '../gesture-frame';
 import { drawDraftMutation } from '../Gestures';
 import type { Handle } from '../Gestures';
@@ -410,6 +412,113 @@ describe('the rotate dial’s preview (chrome inspector/geometry.tsx; EditorHand
     act(() => handle().previewRotate(null));
     expect(wrapperOf(container, 'b')?.getAttribute('data-rotate')).toBeNull();
     expect(calls).toEqual([]);
+  });
+});
+
+describe('the caret a keystroke reports (Editor.tsx onCaretInfo)', () => {
+  it('compares the range and the marks', () => {
+    const at = (from: number, to: number, marks: CaretInfo['marks'] = {}): CaretInfo => ({
+      range: [from, to],
+      marks,
+    });
+    expect(sameCaret(at(3, 3), at(3, 3))).toBe(true);
+    expect(sameCaret(at(3, 3), at(4, 4))).toBe(false);
+    expect(sameCaret(at(3, 5), at(3, 4))).toBe(false);
+    expect(sameCaret(at(3, 3, { b: true }), at(3, 3))).toBe(false);
+    expect(sameCaret(at(3, 3, { b: true }), at(3, 3, { b: true }))).toBe(true);
+    expect(sameCaret(null, null)).toBe(true);
+    expect(sameCaret(null, at(0, 0))).toBe(false);
+  });
+
+  /* a keystroke reports the caret from its input event and again from the selectionchange after
+     it; the page rendered the whole editor for each, so the second, equal report is not passed on */
+  it('passes on one report per keystroke: the selectionchange after the input says nothing new', async () => {
+    const slide: Slide = {
+      schemaVersion: 1,
+      id: 'free',
+      kind: 'content',
+      layout: { type: 'freeform' },
+      slots: {
+        main: [
+          {
+            id: 'tb',
+            type: 'text',
+            text: 'Hello',
+            pos: { x: 100, y: 100, w: 480, h: 64, z: 0 },
+          } as Block,
+        ],
+      },
+    };
+    const frames = fakeFrames();
+    const carets: Array<CaretInfo | null> = [];
+    mounted = mount(documentOf(slide), { onCaret: (info) => carets.push(info) });
+    const { container, view } = mounted;
+    const run = container.querySelector<HTMLElement>('.pt-slide [data-run="tb/text"]');
+    if (!run) throw new Error('no run');
+    act(() => {
+      run.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, clientX: 200, clientY: 230 }));
+    });
+    expect(view().editing).toBe(true);
+    /* the session's element is the run itself (jsdom keeps contentEditable as a property) */
+    const editable = container.querySelector<HTMLElement>('.pt-slide [data-run="tb/text"]');
+    if (!editable) throw new Error('no editable');
+    if (!editable.hasAttribute('tabindex')) editable.tabIndex = -1;
+    editable.focus();
+    expect(document.activeElement).toBe(editable);
+    const textNode = () => {
+      const walker = document.createTreeWalker(editable, NodeFilter.SHOW_TEXT);
+      return walker.nextNode() as Text;
+    };
+    /* the caret before the keystroke, as the browser placed it */
+    act(() => {
+      window.getSelection()?.collapse(textNode(), 5);
+      document.dispatchEvent(new Event('selectionchange'));
+    });
+    const before = carets.length;
+    expect(carets.at(-1)?.range).toEqual([5, 5]);
+    frames.flush();
+    /* the box reads of the stage's measure (Freeform.tsx measureBoxes), counted per call */
+    let reads = 0;
+    const rects = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function (this: Element): DOMRect {
+      reads += 1;
+      return rects.call(this);
+    };
+    /* one keystroke: the text grows by a letter, the input event, then the selectionchange */
+    const key = (data: string) =>
+      act(() => {
+        textNode().data = `${textNode().data}${data}`;
+        window.getSelection()?.collapse(textNode(), textNode().data.length);
+        editable.dispatchEvent(
+          new InputEvent('input', { bubbles: true, inputType: 'insertText', data }),
+        );
+        document.dispatchEvent(new Event('selectionchange'));
+      });
+    try {
+      key('!');
+      expect(carets.length - before).toBe(1);
+      expect(carets.at(-1)?.range).toEqual([6, 6]);
+      /* the keystroke's boxes wait for the frame: no layout read inside the input event, and two
+         keys inside one frame measure once */
+      expect(reads).toBe(0);
+      key('?');
+      expect(reads).toBe(0);
+      expect(carets.length - before).toBe(2);
+      frames.flush();
+      const once = reads;
+      expect(once).toBeGreaterThan(0);
+      frames.flush();
+      expect(reads).toBe(once);
+    } finally {
+      Element.prototype.getBoundingClientRect = rects;
+    }
+    /* the session ends with its write while the stage is mounted */
+    await act(async () => {
+      editable.blur();
+      await Promise.resolve();
+    });
+    expect(view().editing).toBe(false);
+    expect(carets.at(-1)).toBeNull();
   });
 });
 

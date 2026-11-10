@@ -193,6 +193,7 @@ import {
   plainOffsetOf,
   readRunText,
   runKey,
+  sameCaret,
   sessionContextTarget,
   sessionPressVerdict,
   tableRowAppendMutation,
@@ -2912,9 +2913,28 @@ export function Editor({
   };
 
   const onCaretInfo = (info: CaretInfo) => {
+    /* the selectionchange after a keystroke reports the caret its input event reported: the page
+       hears a change alone, so a keystroke renders it once rather than twice */
+    if (sameCaret(caretRef.current, info)) return;
     caretRef.current = info;
     onCaretRef.current?.(info);
   };
+
+  /* a keystroke's boxes and a table's grown rows, once per animation frame before the paint that
+     shows the keystroke, rather than a forced layout inside every input event */
+  const inputFrame = useRef<FrameCoalescer | null>(null);
+  const measureAfterInput = () => {
+    if (inputFrame.current === null)
+      inputFrame.current = createFrameCoalescer({
+        request: (callback) => window.requestAnimationFrame(callback),
+        cancel: (handle) => window.cancelAnimationFrame(handle),
+      });
+    inputFrame.current.push(() => {
+      followTableRows();
+      measure();
+    });
+  };
+  useEffect(() => () => inputFrame.current?.cancel(), []);
 
   const stageRect = () => body.current?.parentElement?.getBoundingClientRect();
 
@@ -8142,10 +8162,7 @@ export function Editor({
             onListLeave={onListBackspace}
             onIndent={onIndent}
             onCaret={onCaretInfo}
-            onInput={() => {
-              followTableRows();
-              measure();
-            }}
+            onInput={measureAfterInput}
             onPaste={pasteIntoCell}
             onUndo={() => onUndoRef.current?.()}
             onRedo={() => onRedoRef.current?.()}

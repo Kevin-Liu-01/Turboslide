@@ -1698,6 +1698,20 @@ export type InlineTextEndReason =
 /** What the toolbar reads about the caret: the plain range and the marks of the run it sits in (SPEC-2 6.2). */
 export type CaretInfo = { range: [number, number]; marks: RunMarks & { b?: true } };
 
+/**
+ * Whether two caret reports say the same: the range and the marks. A keystroke reports the caret
+ * twice, from the `input` event and from the `selectionchange` after it; the stage passes on a
+ * change alone, so the page renders once per keystroke (Editor.tsx onCaretInfo).
+ */
+export function sameCaret(a: CaretInfo | null, b: CaretInfo | null): boolean {
+  if (a === null || b === null) return a === b;
+  return (
+    a.range[0] === b.range[0] &&
+    a.range[1] === b.range[1] &&
+    JSON.stringify(a.marks) === JSON.stringify(b.marks)
+  );
+}
+
 /** A slide the link popover can point at: its id and the title the filmstrip shows. */
 export type SlideTarget = { id: string; title: string };
 

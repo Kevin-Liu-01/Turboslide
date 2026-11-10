@@ -31,6 +31,7 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 | [pptx.md](pptx.md)                               | The PowerPoint export: what perfect means and the page raster policy                                                                                    |
 | [deck-transfer.md](deck-transfer.md)             | The deck bundle: pack, unpack, push and pull                                                                                                            |
 | [hosting-chromium.md](hosting-chromium.md)       | Renders and exports inside the Vercel function                                                                                                          |
+| [html-layers.md](html-layers.md)                 | A deck's and a slide's own HTML and CSS layers, and the server's sanitizer                                                                              |
 | [native.md](native.md)                           | The Rust crate with its napi and wasm bindings                                                                                                          |
 | [export-verification.md](export-verification.md) | The verify loop, the render worker and the calibration constants                                                                                        |
 | [judge-loop.md](judge-loop.md)                   | The render, sheet, lint, judge and gate procedure                                                                                                       |

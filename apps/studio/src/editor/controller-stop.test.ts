@@ -66,9 +66,9 @@ describe("the editor controller's document listeners", () => {
     vi.unstubAllGlobals();
   });
 
-  function controllerOnTheTab() {
+  function controllerOnTheTab(record?: (call: string) => void) {
     const deckId = 'stop-test';
-    const { backend, payloadFor } = createTabBackend({
+    const { backend: tab, payloadFor } = createTabBackend({
       deckId,
       document: heroDocument(deckId),
       people: [visitor],
@@ -80,6 +80,22 @@ describe("the editor controller's document listeners", () => {
       openPage: () => undefined,
       checkpointIdleMs: 50,
     });
+    /* every call the controller makes on the backend, by method and action, when asked */
+    const backend =
+      record === undefined
+        ? tab
+        : (Object.fromEntries(
+            Object.entries(tab).map(([key, value]) => [
+              key,
+              typeof value === 'function'
+                ? (...args: unknown[]) => {
+                    const input = args[0] as { action?: unknown } | undefined;
+                    record(typeof input?.action === 'string' ? `${key} ${input.action}` : key);
+                    return (value as (...a: unknown[]) => unknown).apply(tab, args);
+                  }
+                : value,
+            ]),
+          ) as typeof tab);
     return createEditorController({
       deckId,
       author: visitor.author,
@@ -116,5 +132,28 @@ describe("the editor controller's document listeners", () => {
       controller.stop();
     }
     expect(doc.total()).toBe(0);
+  });
+
+  /* the reads a start schedules (the sidecar and the inbox, 60 ms after the room attaches) and
+     the History panel's re-read were left running by stop(): a stopped editor read the comments,
+     the notifications and the versions of a deck nobody had open */
+  it('drops the comment, inbox and version reads still pending at the stop', async () => {
+    vi.useFakeTimers();
+    try {
+      const calls: string[] = [];
+      const controller = controllerOnTheTab((call) => calls.push(call));
+      controller.start();
+      controller.stop();
+      const before = calls.length;
+      await vi.advanceTimersByTimeAsync(5_000);
+      const late = calls.slice(before).filter((call) => /comment|notification|version/i.test(call));
+      expect(late).toEqual([]);
+      /* a second start schedules them again */
+      controller.start();
+      await vi.advanceTimersByTimeAsync(5_000);
+      controller.stop();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

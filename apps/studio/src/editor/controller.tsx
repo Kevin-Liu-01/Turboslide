@@ -4821,6 +4821,13 @@ export function createEditorController(init: {
       alive = false;
       unlisten();
       shaderFrames.dispose();
+      /* the reads and the banner still waiting on a timer: a stopped editor reads nothing more */
+      for (const timer of [commentsTimer, inboxTimer, versionsTimer, externalTimer])
+        if (timer !== undefined) clearTimeout(timer);
+      commentsTimer = undefined;
+      inboxTimer = undefined;
+      versionsTimer = undefined;
+      externalTimer = undefined;
       const client = room;
       room = null;
       if (client !== null) void client.stop();

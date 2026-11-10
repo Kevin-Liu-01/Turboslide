@@ -1,5 +1,5 @@
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { PROMPTS } from './menus/strings.ts';
 import { hideTooltip, tipProps } from './Tooltip';
@@ -14,11 +14,31 @@ export const NOTES_BURST_MS = 400;
 /** A drag below this height hides the pane (SPEC 8: drag to the bottom to hide). */
 const HIDE_BELOW_PX = 16;
 
+/* the panes holding typed notes their 400 ms timer has not written yet, each with the flush that
+   writes them now. A pane joins on a keystroke and leaves when its draft is written or it
+   unmounts. The page counts them in its leave warning and writes them on `pagehide` and when the
+   tab turns hidden (apps/studio/src/editor/leave-warning.ts), as it does InlineText's bursts */
+const heldNoteFlushes = new Set<() => void>();
+
+/** How many notes panes hold typed notes their timer has not written yet. */
+export function heldNotes(): number {
+  return heldNoteFlushes.size;
+}
+
+/** Writes every held notes draft now, through each pane's own commit. */
+export function flushHeldNotes(): void {
+  for (const flush of [...heldNoteFlushes]) flush();
+}
+
 export type NotesPaneProps = {
   /** the current slide's notes; the pane shows the slide's own text on every slide change */
   slideId: string;
   notes: string;
-  /** one write per 400 ms pause since the last keystroke, and on blur and slide change: `slide.set /notes` */
+  /**
+   * one write per 400 ms pause since the last keystroke, and on blur, slide change, unmount and
+   * the page's flushHeldNotes: `slide.set /notes`. The draft of a slide reaches the callback of a
+   * render that showed that slide, so a callback may bind its render's slide
+   */
   onCommit: (notes: string) => void;
   /** the pane's height in CSS pixels; 0 hides it. The page keeps it (View > Show speaker notes) */
   height: number;
@@ -62,34 +82,45 @@ export function NotesPane({
   const [draft, setDraft] = useState(notes);
   const field = useRef<HTMLTextAreaElement>(null);
   const timer = useRef(0);
+  /* the field's text as last typed or shown, and the text last written or received */
+  const typed = useRef(notes);
   const committed = useRef(notes);
+  /* the callbacks of the last committed render, so they belong to the slide in `shownSlide` until
+     the slide change below has written that slide's draft */
   const callbacks = useRef({ onCommit, onHeightChange });
-  callbacks.current = { onCommit, onHeightChange };
   const shownSlide = useRef(slideId);
 
-  /* a slide change: whatever was typed on the slide before is written now, and the new slide's
-     notes fill the field */
-  useLayoutEffect(() => {
-    if (shownSlide.current !== slideId) {
-      window.clearTimeout(timer.current);
-      if (draft !== committed.current) callbacks.current.onCommit(draft);
-      shownSlide.current = slideId;
-    }
-    committed.current = notes;
-    setDraft(notes);
-    // the draft is the field's own state; the effect reads it on the slide change only
-  }, [slideId, notes]);
-
-  const flush = () => {
+  /* writes the held draft now through the shown slide's callback and leaves the held set; stable,
+     since it reads refs alone */
+  const flush = useCallback(() => {
     window.clearTimeout(timer.current);
     timer.current = 0;
-    const text = field.current?.value ?? draft;
+    heldNoteFlushes.delete(flush);
+    const text = typed.current;
     if (text === committed.current) return;
     committed.current = text;
     callbacks.current.onCommit(text);
-  };
+  }, []);
 
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  /* a slide change: whatever was typed on the slide before is written now, through that slide's
+     callback, and the new slide's notes fill the field */
+  useLayoutEffect(() => {
+    if (shownSlide.current !== slideId) {
+      flush();
+      shownSlide.current = slideId;
+    }
+    typed.current = notes;
+    committed.current = notes;
+    setDraft(notes);
+  }, [slideId, notes, flush]);
+
+  /* after the slide change above, so it reads the callbacks of the slide being left */
+  useLayoutEffect(() => {
+    callbacks.current = { onCommit, onHeightChange };
+  });
+
+  /* an unmount writes the held draft (the pane leaves with the editor or the last slide) */
+  useEffect(() => flush, [flush]);
 
   /* Cmd Option Shift S (Google's "Open speaker notes panel") focuses the pane from anywhere */
   useEffect(() => {
@@ -106,9 +137,11 @@ export function NotesPane({
   }, [bindKey, height]);
 
   const onChange = (value: string) => {
+    typed.current = value;
     setDraft(value);
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(flush, NOTES_BURST_MS);
+    heldNoteFlushes.add(flush);
   };
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {

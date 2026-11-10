@@ -2,7 +2,14 @@
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { clampNotesHeight, NOTES_BURST_MS, NOTES_DEFAULT_HEIGHT, NotesPane } from '../NotesPane';
+import {
+  clampNotesHeight,
+  flushHeldNotes,
+  heldNotes,
+  NOTES_BURST_MS,
+  NOTES_DEFAULT_HEIGHT,
+  NotesPane,
+} from '../NotesPane';
 import { hideTooltip, resetTooltipTiming } from '../Tooltip';
 
 // The speaker notes pane (gslides-parity SPEC 8): the prompt, one write per 400 ms pause, the
@@ -92,6 +99,98 @@ describe('NotesPane', () => {
     );
     expect(onCommit).toHaveBeenLastCalledWith('One more line');
     expect(field().value).toBe('Two');
+  });
+
+  /* EditorRoot binds each render's onCommit to the slide it shows (`slideId: slide.id`), so the
+     draft of the slide before a change must reach the callback of the render that showed it, not
+     the new slide's: a collaborator's delete or an agent's goto changes the slide with no blur */
+  it("writes the old slide's draft through the old slide's callback on a slide change", () => {
+    const writes: Array<[string, string]> = [];
+    const pane = (slideId: string, notes: string) => (
+      <NotesPane
+        slideId={slideId}
+        notes={notes}
+        onCommit={(text) => writes.push([slideId, text])}
+        height={NOTES_DEFAULT_HEIGHT}
+        onHeightChange={() => undefined}
+        windowHeight={900}
+      />
+    );
+    const { rerender } = render(pane('s1', 'One'));
+    fireEvent.change(field(), { target: { value: 'One more' } });
+    rerender(pane('s2', 'Two'));
+    expect(writes).toEqual([['s1', 'One more']]);
+    expect(field().value).toBe('Two');
+    act(() => {
+      vi.advanceTimersByTime(NOTES_BURST_MS * 2);
+    });
+    expect(writes).toEqual([['s1', 'One more']]);
+    /* the new slide's typing goes to the new slide */
+    fireEvent.change(field(), { target: { value: 'Two more' } });
+    act(() => {
+      vi.advanceTimersByTime(NOTES_BURST_MS + 10);
+    });
+    expect(writes).toEqual([
+      ['s1', 'One more'],
+      ['s2', 'Two more'],
+    ]);
+  });
+
+  it('writes a held draft when the pane unmounts, and the timer writes nothing after', () => {
+    const onCommit = vi.fn();
+    const { unmount } = render(
+      <NotesPane
+        slideId="s1"
+        notes=""
+        onCommit={onCommit}
+        height={NOTES_DEFAULT_HEIGHT}
+        onHeightChange={() => undefined}
+        windowHeight={900}
+      />,
+    );
+    fireEvent.change(field(), { target: { value: 'Typed' } });
+    unmount();
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledWith('Typed');
+    act(() => {
+      vi.advanceTimersByTime(NOTES_BURST_MS * 2);
+    });
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(heldNotes()).toBe(0);
+  });
+
+  /* the page counts a held draft in its leave warning and writes it on pagehide and when the tab
+     turns hidden (apps/studio/src/editor/leave-warning.ts), as it does InlineText's bursts */
+  it('counts a draft its timer has not written, and flushHeldNotes writes it at once', () => {
+    const onCommit = vi.fn();
+    render(
+      <NotesPane
+        slideId="s1"
+        notes=""
+        onCommit={onCommit}
+        height={NOTES_DEFAULT_HEIGHT}
+        onHeightChange={() => undefined}
+        windowHeight={900}
+      />,
+    );
+    expect(heldNotes()).toBe(0);
+    fireEvent.change(field(), { target: { value: 'Held' } });
+    expect(heldNotes()).toBe(1);
+    flushHeldNotes();
+    expect(onCommit).toHaveBeenCalledWith('Held');
+    expect(heldNotes()).toBe(0);
+    act(() => {
+      vi.advanceTimersByTime(NOTES_BURST_MS * 2);
+    });
+    expect(onCommit).toHaveBeenCalledTimes(1);
+    /* a burst the timer writes leaves the count too */
+    fireEvent.change(field(), { target: { value: 'Held again' } });
+    expect(heldNotes()).toBe(1);
+    act(() => {
+      vi.advanceTimersByTime(NOTES_BURST_MS + 10);
+    });
+    expect(heldNotes()).toBe(0);
+    expect(onCommit).toHaveBeenLastCalledWith('Held again');
   });
 
   it('clamps the height to 40 percent of the window and hides under 16 px', () => {

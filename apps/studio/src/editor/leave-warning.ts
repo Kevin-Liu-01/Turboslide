@@ -3,21 +3,36 @@
 // the listeners `leaveListeners` answers.
 
 import { REFUSALS } from '@turboslide/chrome/menus/strings';
+import { flushHeldNotes, heldNotes } from '@turboslide/chrome/NotesPane';
 import { flushHeldBursts, heldBursts } from '@turboslide/viewer/InlineText';
 
 import type { EditorBackend } from './backend';
 import type { EditorSnapshot } from './controller';
 
 /**
+ * The typed text this tab holds and has not written yet: the text sessions' bursts (InlineText
+ * heldBursts; the burst waits TEXT_BURST_MS after the last key) and the speaker notes pane's
+ * draft (NotesPane heldNotes; NOTES_BURST_MS after the last key).
+ */
+export function heldTyping(): number {
+  return heldBursts() + heldNotes();
+}
+
+/** Writes the held typing now: the text sessions' bursts, then the notes pane's draft. */
+export function flushHeldTyping(): void {
+  flushHeldBursts();
+  flushHeldNotes();
+}
+
+/**
  * The writes of this tab the server has not acknowledged: the room client's pending operations
  * (the controller's own count before the room attaches), the deck writes that run on the server,
- * such as a picture upload, which the room counts only once they come back, and the text sessions
- * holding typed keys their burst has not written yet (`held`, InlineText heldBursts; the burst
- * waits TEXT_BURST_MS after the last key).
+ * such as a picture upload, which the room counts only once they come back, and the typing held
+ * before its write (`held`, heldTyping).
  */
 export function unsavedWrites(
   snapshot: Pick<EditorSnapshot, 'sync' | 'pending' | 'serverWrites'>,
-  held: number = heldBursts(),
+  held: number = heldTyping(),
 ): number {
   return (snapshot.sync?.pending ?? snapshot.pending) + snapshot.serverWrites + held;
 }
@@ -48,13 +63,13 @@ type LeaveListeners = {
 
 /**
  * The listeners EditorRoot registers on the window and the document. A reload or a navigation
- * fires `pagehide` and nothing else that the room client sees, so `pagehide` writes the text
- * sessions' held bursts (InlineText heldBursts, the keys of the last 100 ms) and then stops the
- * controller: the room client holds the burst as a pending operation when it persists them and
- * posts the presence leave with keepalive. A tab turning hidden writes the bursts too, since a
- * phone may discard a hidden tab with no `pagehide`. A page the browser restores from its cache
- * reloads, since its stream and its client id are gone. `flush`, `visibility` and `reload` are
- * the browser's unless a test passes its own.
+ * fires `pagehide` and nothing else that the room client sees, so `pagehide` writes the held
+ * typing (heldTyping: the text sessions' keys of the last 100 ms, the notes typed in the last
+ * 400 ms) and then stops the controller: the room client holds the writes as pending operations
+ * when it persists them and posts the presence leave with keepalive. A tab turning hidden writes
+ * the held typing too, since a phone may discard a hidden tab with no `pagehide`. A page the
+ * browser restores from its cache reloads, since its stream and its client id are gone. `flush`,
+ * `visibility` and `reload` are the browser's unless a test passes its own.
  */
 export function leaveListeners(
   controller: {
@@ -62,7 +77,7 @@ export function leaveListeners(
     stop: () => void;
   },
   backend: Pick<EditorBackend, 'kind'>,
-  flush: () => void = flushHeldBursts,
+  flush: () => void = flushHeldTyping,
   visibility: () => DocumentVisibilityState = () => document.visibilityState,
   reload: () => void = () => window.location.reload(),
 ): LeaveListeners {

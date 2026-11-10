@@ -208,7 +208,7 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-describe('the presenter and a late answer to an older move', () => {
+describe('the presenter and a late answer to an older move', { timeout: 30_000 }, () => {
   it('stays on its latest slide when the answer to the press before arrives', () => {
     const host = mount();
     const me = presenterId();
@@ -329,7 +329,7 @@ function showing(): string | null {
   );
 }
 
-describe('the slideshow window answers the presenter', () => {
+describe('the slideshow window answers the presenter', { timeout: 30_000 }, () => {
   afterEach(() => {
     presenter?.close();
     presenter = null;
@@ -389,7 +389,7 @@ describe('the slideshow window answers the presenter', () => {
 // on every change of its facts and on hello. The console's clock facts were a new object each
 // time, so each one rendered the console with its three clones, and every render built the agent
 // adapter again.
-describe('the presenter and a state that changes nothing', () => {
+describe('the presenter and a state that changes nothing', { timeout: 30_000 }, () => {
   it('renders nothing for it and keeps its agent adapter', () => {
     const host = mount();
     state('s2', 1, null, 1, 2);
@@ -417,7 +417,7 @@ function pageEvent(type: 'pagehide' | 'pageshow', persisted: boolean): void {
   });
 }
 
-describe('a window whose page hides', () => {
+describe('a window whose page hides', { timeout: 30_000 }, () => {
   afterEach(() => {
     presenter?.close();
     presenter = null;

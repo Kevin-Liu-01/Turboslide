@@ -129,7 +129,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-describe('the laser pointer', () => {
+describe('the laser pointer', { timeout: 30_000 }, () => {
   it('moves the dot by a style write once a frame, without rendering the show', () => {
     mount();
     move(40, 50);

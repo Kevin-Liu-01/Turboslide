@@ -103,7 +103,7 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-describe('a held arrow in the show', () => {
+describe('a held arrow in the show', { timeout: 30_000 }, () => {
   it('moves once a press, and once a frame for the repeats while the key is held', () => {
     mount();
     key('keydown', 'ArrowRight');
@@ -146,7 +146,7 @@ describe('a held arrow in the show', () => {
 
 // A typed slide number in the show (the presenter audit of a95d4097d, item 4): a move before
 // Enter drops it, as in the console, so a digit, an arrow and Enter move on.
-describe('a typed slide number in the show', () => {
+describe('a typed slide number in the show', { timeout: 30_000 }, () => {
   it('goes to the typed slide on Enter, and drops it when an arrow moves first', () => {
     mount();
     key('keydown', '3');

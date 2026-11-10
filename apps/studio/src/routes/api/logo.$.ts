@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { errorResponse, jsonResponse, refuse } from '@turboslide/agent/http/errors';
 import { LOGO_WORDS } from '@turboslide/chrome/logo-model';
 import { ACTIONS } from '@turboslide/schema/actions';
+import { ForbiddenError } from '@turboslide/schema/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { DEFAULT_BLANK_TITLE } from '@turboslide/store/templates';
 
@@ -39,9 +40,11 @@ import { createStoredDeck, deckDir, isUnsavedDraft, openDeckStore } from '../../
 //                                              public data; the same origin page or any caller);
 //                                              `since` names a refresh's `builtAt` the answering
 //                                              instance adopts when its copy is older (4.2)
-//   POST /api/logo/refresh { dryRun? }         the index rebuild: the agent bearer or
-//                                              `Authorization: Bearer <CRON_SECRET>` (what a Vercel
-//                                              cron sends), else 401 (4.2)
+//   POST /api/logo/refresh { dryRun? }         the index rebuild: `Authorization: Bearer
+//                                              <CRON_SECRET>` (what a Vercel cron sends) or an
+//                                              agent credential of whoever runs the deployment
+//                                              (403 for any other agent credential, which may
+//                                              ask for the dry run alone), else 401 (4.2)
 //   GET  /api/logo/refresh                     the daily cron of apps/studio/vercel.json: Vercel's
 //                                              cron sends a GET with `Authorization: Bearer
 //                                              <CRON_SECRET>`, so a GET runs the full rebuild with
@@ -241,7 +244,7 @@ async function serveSearch(request: Request): Promise<Response> {
  */
 async function serveCronRefresh(request: Request): Promise<Response> {
   const { logoService, refreshCredential } = await import('../../server/logos');
-  if (refreshCredential(request) !== 'cron')
+  if ((await refreshCredential(request)) !== 'cron')
     return refuse(
       401,
       'unauthorized',
@@ -257,8 +260,9 @@ async function serveCronRefresh(request: Request): Promise<Response> {
 
 /** The refresh (4.2): two credentials, a dry run answers the counts with no fetch. */
 async function serveRefresh(request: Request): Promise<Response> {
-  const { logoService, refreshCredential } = await import('../../server/logos');
-  const credential = refreshCredential(request);
+  const { logoService, mayRebuildLogoIndex, refreshCredential } =
+    await import('../../server/logos');
+  const credential = await refreshCredential(request);
   if (credential === null)
     return refuse(
       401,
@@ -275,9 +279,16 @@ async function serveRefresh(request: Request): Promise<Response> {
       return refuse(400, 'invalid_input', 'logo.refresh takes { dryRun?: boolean }');
     dryRun = (parsed.data as { dryRun?: boolean }).dryRun === true;
   }
+  // a dry run reads the counts; the rebuild itself is the deployment's (logos.ts
+  // refreshCredential), so an account's own API key is refused it
+  if (!dryRun && !mayRebuildLogoIndex(credential)) {
+    const { ADMIN_ONLY } = await import('../../server/auth/actions');
+    return errorResponse(new ForbiddenError(ADMIN_ONLY), 'logo.refresh');
+  }
   try {
     const counts = await (await logoService()).refresh({ dryRun });
-    return jsonResponse({ ...counts, credential });
+    // the answer names the credential as it always has: the cron's, or an agent's
+    return jsonResponse({ ...counts, credential: credential === 'cron' ? 'cron' : 'agent' });
   } catch (error) {
     return (await storeBusy(error, 'logo.refresh')) ?? errorResponse(error, 'logo.refresh');
   }

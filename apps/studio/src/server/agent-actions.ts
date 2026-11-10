@@ -298,7 +298,7 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
       );
     }
     // an action the table gives no window transport is not a page's to run, whatever list names
-    // it: `logo.refresh` is the index route's action, for the agent bearer and the cron secret
+    // it: `logo.refresh` is the index route's action, for whoever runs the deployment and the cron
     // (docs/archive/rounds/FEATURES.md 4.2), and a browser reached the rebuild through here
     if (!ACTIONS[parsed.action].transports.includes('window'))
       throw new TypeError(`${parsed.action} has no window transport`);

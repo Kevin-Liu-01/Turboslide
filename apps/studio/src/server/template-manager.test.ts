@@ -1,6 +1,7 @@
-// Who manages the template collection every account of a deployment shares (template-manager.ts;
-// Kevin, 2026-11-09: "Admin only"). The rule is a pure function over the context every transport
-// carries, and the open checkout rule is driven over an explicit runtime. The rest runs the real
+// Who manages the template collection every account of a deployment shares (template-manager.ts,
+// deployment-admin.ts; Kevin, 2026-11-09: "Admin only"). The rule is a pure function over the
+// context every transport carries, and the open checkout rule is driven over an explicit
+// runtime. The rest runs the real
 // server functions, the real deck dispatcher, the real access store and the real identity
 // runtime over a file store with no `TURBOSLIDE_TOKEN`: a browser on a host that is not local is
 // a stranger to the collection, and a browser on localhost holds the checkout. TanStack Start's
@@ -94,7 +95,8 @@ const { createWithRecord, loadAccessRecord } = await import('./access');
 const { deckDispatcher } = await import('./actions');
 const { setSecurityLogSink } = await import('./log');
 const { createStoredDeck, openDeckStore } = await import('./root');
-const { managesTemplates, templateNameTaken } = await import('./template-manager');
+const { runsDeployment } = await import('./deployment-admin');
+const { templateNameTaken } = await import('./template-manager');
 const { deleteStoredTemplate, listTemplateGallery, renameStoredTemplate, useTemplateForNew } =
   await import('./templates');
 
@@ -207,28 +209,28 @@ describe('the template manager rule', () => {
     }) as AuthContext;
 
   it('is the deployment admin: a session, or a key that carries the admin scope', () => {
-    expect(managesTemplates(account(true), false)).toBe(true);
-    expect(managesTemplates(key(true, ['admin']), false)).toBe(true);
+    expect(runsDeployment(account(true), false)).toBe(true);
+    expect(runsDeployment(key(true, ['admin']), false)).toBe(true);
     // an admin account's key without the scope, and the scope on anyone else's key
-    expect(managesTemplates(key(true, ['read', 'write']), false)).toBe(false);
-    expect(managesTemplates(key(false, ['admin']), false)).toBe(false);
+    expect(runsDeployment(key(true, ['read', 'write']), false)).toBe(false);
+    expect(runsDeployment(key(false, ['admin']), false)).toBe(false);
   });
 
   it('refuses an account that is not an admin, an anonymous browser and nobody', () => {
-    expect(managesTemplates(account(false), false)).toBe(false);
+    expect(runsDeployment(account(false), false)).toBe(false);
     expect(
-      managesTemplates(
+      runsDeployment(
         { principal: { id: 'anon_1', kind: 'anonymous', admin: false }, linkGrants: [] },
         false,
       ),
     ).toBe(false);
-    expect(managesTemplates({ principal: null, linkGrants: [] }, false)).toBe(false);
-    expect(managesTemplates(null, false)).toBe(false);
+    expect(runsDeployment({ principal: null, linkGrants: [] }, false)).toBe(false);
+    expect(runsDeployment(null, false)).toBe(false);
   });
 
   it('admits anyone on an open checkout', () => {
-    expect(managesTemplates(null, true)).toBe(true);
-    expect(managesTemplates(account(false), true)).toBe(true);
+    expect(runsDeployment(null, true)).toBe(true);
+    expect(runsDeployment(account(false), true)).toBe(true);
   });
 });
 
@@ -320,6 +322,24 @@ describe('the shared templates on a host that is not local', () => {
     const list = (await act(stranger, 'template.list', {})) as ListAnswer;
     expect(list.default).toBe('blank');
     expect(list.templates.find((row) => row.id === 'shared-sales')?.name).toBe('Shared sales');
+  }, 60_000);
+});
+
+describe('the logo index rebuild on a host that is not local', () => {
+  it('refuses the visitor the rebuild through the dispatcher', async () => {
+    const request = new Request(`${REMOTE}/api/actions/logo.refresh?deck=${stranger.deck}`, {
+      method: 'POST',
+      headers: { cookie: stranger.cookie },
+    });
+    const { dispatcher } = await deckDispatcher(stranger.deck, { request });
+    const refusal = await refusalOf(
+      dispatcher.dispatch(
+        'logo.refresh',
+        {},
+        { author: authorOf(stranger), deckDir: join(root, 'decks', stranger.deck) },
+      ),
+    );
+    expect(refusal).toEqual({ name: 'ForbiddenError', message: ADMIN_ONLY });
   }, 60_000);
 });
 

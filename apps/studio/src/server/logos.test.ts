@@ -68,6 +68,7 @@ import {
   logoInsert,
   logoPlacementOn,
   rasterizeLogoPng,
+  mayRebuildLogoIndex,
   refreshCredential,
   registerLogoActions,
 } from './logos';
@@ -526,6 +527,35 @@ describe('the refresh (4.2, 4.9)', () => {
     expect((await service.search('acme')).logos[0]?.slug).toBe('acme');
   });
 
+  it('runs one rebuild at a time on an instance: a call made while one runs takes its answer', async () => {
+    const store = memoryLogoStore();
+    let known: LogoIndex | null = null;
+    const fixture = fixtureUpstream(() => known);
+    let manifests = 0;
+    const upstream = {
+      ...fixture,
+      manifest: async () => {
+        manifests += 1;
+        return fixture.manifest();
+      },
+    };
+    const service = createLogoService({
+      store,
+      upstream,
+      rasterize: fakeRasterizer,
+      now: () => NOW,
+    });
+    await service.refresh();
+    known = await service.index();
+    manifests = 0;
+    const [first, second] = await Promise.all([service.refresh(), service.refresh()]);
+    expect(manifests).toBe(1);
+    expect(second).toBe(first);
+    // the flight has ended: the next call rebuilds again
+    await service.refresh();
+    expect(manifests).toBe(2);
+  });
+
   it('keeps the previous file and records lastError when the upstream does not answer', async () => {
     const store = memoryLogoStore();
     await refreshLogoIndex({
@@ -853,7 +883,7 @@ describe('the refresh (4.2, 4.9)', () => {
     );
   });
 
-  it('accepts the agent bearer and the cron secret for the refresh and refuses neither and a wrong secret', () => {
+  it('tells the cron secret, the bearer of whoever runs the deployment and any other agent credential apart, and refuses no credential and a wrong secret', async () => {
     const env = { CRON_SECRET: 'cron-secret-for-the-test-0000000000' };
     const req = (bearer?: string) =>
       new Request('https://studio.example/api/logo/refresh', {
@@ -862,11 +892,19 @@ describe('the refresh (4.2, 4.9)', () => {
       });
     const refusing = () => ({ ok: false });
     const accepting = () => ({ ok: true });
-    expect(refreshCredential(req(env.CRON_SECRET), env, refusing)).toBe('cron');
-    expect(refreshCredential(req('the-agent-bearer'), env, accepting)).toBe('agent');
-    expect(refreshCredential(req(), env, refusing)).toBeNull();
-    expect(refreshCredential(req('wrong-secret'), env, refusing)).toBeNull();
-    expect(refreshCredential(req(env.CRON_SECRET), {}, refusing)).toBeNull();
+    const runs = () => Promise.resolve(true);
+    const visits = () => Promise.resolve(false);
+    expect(await refreshCredential(req(env.CRON_SECRET), env, refusing, visits)).toBe('cron');
+    expect(await refreshCredential(req('the-admin-bearer'), env, accepting, runs)).toBe('admin');
+    // an account's own API key passes the agent rule and is not the deployment's
+    expect(await refreshCredential(req('an-account-key'), env, accepting, visits)).toBe('agent');
+    expect(await refreshCredential(req(), env, refusing, runs)).toBeNull();
+    expect(await refreshCredential(req('wrong-secret'), env, refusing, runs)).toBeNull();
+    expect(await refreshCredential(req(env.CRON_SECRET), {}, refusing, visits)).toBeNull();
+    // the rebuild is the cron's and the deployment's; any agent credential may ask for a dry run
+    expect(mayRebuildLogoIndex('cron')).toBe(true);
+    expect(mayRebuildLogoIndex('admin')).toBe(true);
+    expect(mayRebuildLogoIndex('agent')).toBe(false);
   });
 });
 

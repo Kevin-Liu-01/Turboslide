@@ -171,7 +171,7 @@ description: The actions of the asset group, with their input fields and their n
 
 ## logo.refresh [#logo.refresh]
 
-**Refresh the logo index.** Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch.
+**Refresh the logo index.** Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch. The rebuild is the deployment admin’s or the cron’s; any agent credential may ask for the dry run.
 
 | Field    | Type    | Required | Description                             |
 | -------- | ------- | -------- | --------------------------------------- |

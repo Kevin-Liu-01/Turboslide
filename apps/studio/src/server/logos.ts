@@ -8,7 +8,7 @@
 // twins, the asset record with its `logo` source, the picture block at the logo size for an agent
 // that names a slide, the kit's three slots for `everySlide` and `kit`, one write) and the three
 // action handlers `logo.search`, `logo.insert` and `logo.refresh` for the deck dispatcher. The
-// refresh route's two credentials (the agent bearer, `CRON_SECRET`) are decided here too. The
+// refresh route's two credentials (the deployment admin's bearer, `CRON_SECRET`) are decided here too. The
 // runtime seams (the store, the upstream, the rasterizer, the clock) are injected so logos.test.ts
 // drives every rule over fakes; `logoService()` binds the deployment's: the disk under the state
 // folder on a checkout and the tmp store, the public Blob store hosted, the upstream the variable
@@ -90,6 +90,7 @@ import type { DeckStore } from '@turboslide/store/store';
 import { bodyRect, freeRectangles, occupiedRects } from '../editor/place-insert';
 import { agentAuth } from './auth';
 import { cronCredential } from './cron';
+import { bearerRunsDeployment } from './deployment-admin';
 import {
   LOGO_DOWN_MESSAGE,
   applyLogoDiscoveries,
@@ -696,6 +697,9 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
     return { ...(await facts()), logos: rows.map(searchRowOf), source: LOGO_SOURCE, indexed };
   };
 
+  /* the rebuild in flight on this instance, if any */
+  let rebuilding: Promise<RefreshCounts> | undefined;
+
   const refresh = async (options: { dryRun?: boolean } = {}): Promise<RefreshCounts> => {
     if (options.dryRun === true) {
       const current = await index();
@@ -706,6 +710,15 @@ export function createLogoService(deps: LogoServiceDeps): LogoService {
       const lastError = memoryError ?? counts.lastError;
       return { ...counts, ...(lastError !== undefined ? { lastError } : {}) };
     }
+    // one rebuild at a time on this instance: a second caller while one runs takes its answer,
+    // so two runs never fetch the manifest twice and write over each other's index here
+    rebuilding ??= rebuild().finally(() => {
+      rebuilding = undefined;
+    });
+    return rebuilding;
+  };
+
+  const rebuild = async (): Promise<RefreshCounts> => {
     // the store's index first, on every instance: the fixture upstream decides its takedown from
     // the index this instance holds (4.9), and a held copy older than another instance's refresh
     // would re list what that refresh dropped (the verifier's pass 2 F.5 finding 3), so the
@@ -830,18 +843,33 @@ export function resetLogoService(): void {
 // The refresh credentials (4.2; judge-design rejection 7)
 
 /**
- * Who may refresh (4.2): the agent bearer as every agent route decides it (the token, or a
- * checkout's localhost), or `Authorization: Bearer <CRON_SECRET>`, all a Vercel cron sends, as
- * cron.ts decides it for every cron route (hardening O#1a); with neither, or a wrong secret, 401.
+ * The credential a refresh request carries (4.2): `cron` for `Authorization: Bearer
+ * <CRON_SECRET>`, all a Vercel cron sends, as cron.ts decides it for every cron route (hardening
+ * O#1a); `admin` for an agent credential of whoever runs the deployment (deployment-admin.ts:
+ * the bootstrap bearer, an admin account's key with the `admin` scope, a checkout's open
+ * localhost); `agent` for any other agent credential; null with none or a wrong secret (401).
+ * The rebuild takes `cron` or `admin` (`mayRebuildLogoIndex`); a dry run, which fetches and
+ * writes nothing, takes any of the three. 4.2 named "the agent bearer" when the static bearer
+ * was the only one; since accounts every account's API key passes `agentAuth`, and the rebuild
+ * fetches the manifest, rasterizes marks for as long as the function's budget lasts and rewrites
+ * the index every instance reads.
  */
-export function refreshCredential(
+export type RefreshCredential = 'cron' | 'admin' | 'agent';
+
+export async function refreshCredential(
   request: Request,
   env: Readonly<Record<string, string | undefined>> = process.env,
   agent: (request: Request) => { ok: boolean } = agentAuth,
-): 'agent' | 'cron' | null {
+  admin: (request: Request) => Promise<boolean> = bearerRunsDeployment,
+): Promise<RefreshCredential | null> {
   if (cronCredential(request, env)) return 'cron';
-  if (agent(request).ok) return 'agent';
-  return null;
+  if (!agent(request).ok) return null;
+  return (await admin(request)) ? 'admin' : 'agent';
+}
+
+/** Whether a credential may run the rebuild itself, not only a dry run. */
+export function mayRebuildLogoIndex(credential: RefreshCredential): boolean {
+  return credential === 'cron' || credential === 'admin';
 }
 
 // ---------------------------------------------------------------------------------------------

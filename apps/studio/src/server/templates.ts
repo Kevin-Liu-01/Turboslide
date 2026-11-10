@@ -20,7 +20,7 @@ import type { AuthContext } from './authorize';
  * `createFromTemplate` (deck.create over any id of the index through the store's collection, the
  * same `createDeck` the CLI and the MCP server run) and the gallery card menu's `renameTemplate`,
  * `deleteTemplate` and `setDefaultTemplate` (Use for new presentations), which are the template
- * manager's alone (template-manager.ts). File > Save as template runs `template.create` and
+ * manager's alone (template-manager.ts, deployment-admin.ts). File > Save as template runs `template.create` and
  * `template.update` through the deck's dispatcher (server/actions.ts), not from here. The
  * covers render on the server through `@turboslide/render/slide` over the template's own
  * document, in the appearance a deck made from it opens in, so a template needs no deck id and no
@@ -92,11 +92,11 @@ async function requireTemplateWriter(action: string): Promise<AuthContext> {
   const { identityLabel, requestContext } = await import('./authorize');
   const { assertFlag } = await import('./flags');
   const { ADMIN_ONLY } = await import('./auth/actions');
-  const { requestManagesTemplates } = await import('./template-manager');
+  const { requestRunsDeployment } = await import('./deployment-admin');
   const ctx = await requestContext();
   const identity = identityLabel(ctx) ?? 'anonymous';
   await assertFlag('readOnly', { identity, action });
-  if (!(await requestManagesTemplates(ctx))) throw new TypeError(ADMIN_ONLY);
+  if (!(await requestRunsDeployment(ctx))) throw new TypeError(ADMIN_ONLY);
   return ctx;
 }
 
@@ -108,8 +108,8 @@ const listTemplateGalleryFn = createServerFn({ method: 'GET' }).handler(
     const { templateCoverHtml } = await import('./template-cover');
     const { themeName } = await import('@turboslide/theme/themes');
     const { requestContext } = await import('./authorize');
-    const { requestManagesTemplates } = await import('./template-manager');
-    const manage = await requestManagesTemplates(await requestContext());
+    const { requestRunsDeployment } = await import('./deployment-admin');
+    const manage = await requestRunsDeployment(await requestContext());
     const decks = await ensureDecks();
     // the saved templates of the other instances first (one head when nothing moved; FR2)
     await decks.templates.pull();

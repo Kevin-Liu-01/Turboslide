@@ -73,9 +73,10 @@ import {
 import { placeInsert } from '../editor/place-insert';
 import { hostedAccessHooks, readerOwnIds, readerPeople } from './access';
 import { dispatcherWithStandIns } from './stand-ins';
-import { managesTemplates, templateNameTaken } from './template-manager';
+import { templateNameTaken } from './template-manager';
 import type { StandIns } from './stand-ins';
 import { listingScope } from './deck-scope';
+import { runsDeployment } from './deployment-admin';
 import type { ListingScope } from './deck-scope';
 import { registerStoreStatusActions } from './agent-actions';
 import { registerAssistActions } from './assist';
@@ -592,6 +593,8 @@ function registerLogoActionsLazily(
   dispatcher: Dispatcher,
   deckId: string,
   deckStore: DeckStore,
+  /** whether the caller runs the deployment (deployment-admin.ts): the rebuild is theirs alone */
+  operator: boolean,
 ): void {
   let inner: Promise<Dispatcher> | undefined;
   const load = (): Promise<Dispatcher> =>
@@ -605,7 +608,18 @@ function registerLogoActionsLazily(
       return d;
     }));
   for (const id of LOGO_ACTION_IDS)
-    dispatcher.register(id, async (input, context) => (await load()).dispatch(id, input, context));
+    dispatcher.register(id, async (input, context) => {
+      // the rebuild fetches the manifest, rasterizes marks for as long as the function's budget
+      // lasts and rewrites the index every instance reads: the deployment's, like the route
+      // (logos.ts refreshCredential), on /api/actions and MCP too; a dry run reads the counts
+      if (
+        id === 'logo.refresh' &&
+        !operator &&
+        (input as { dryRun?: boolean } | null)?.dryRun !== true
+      )
+        throw new ForbiddenError(ADMIN_ONLY);
+      return (await load()).dispatch(id, input, context);
+    });
 }
 
 /**
@@ -1121,7 +1135,7 @@ function registerHostedDeckActions(
  * The template actions of the product round (docs/archive/rounds/PRODUCT.md 4.3; build/b5b.md R3) over the
  * collection's decks folder: the two reads, Save as template under the deck's copy right with
  * its revision checked, and the writes that change what every account shares, which are the
- * manager's alone (`managesTemplates` of template-manager.ts: the deployment admin, or anyone on
+ * manager's alone (`runsDeployment` of deployment-admin.ts: the deployment admin, or anyone on
  * a checkout's open localhost): Replace, the three deckless writes (Rename, Delete, Use for new
  * presentations) and a save under a name an organisation template already carries. `readOnly`
  * refuses every write.
@@ -1493,20 +1507,17 @@ export async function deckDispatcher(
   );
   // the templates of the product round over the collection's folder (docs/archive/rounds/PRODUCT.md 4.3)
   const creator = creatorContextOf(request, facts);
-  registerTemplateActions(
-    dispatcher,
-    decks,
-    creator,
-    request !== undefined,
-    // outside a request (a unit test, the CLI's rule) no decision is made
-    request === undefined || managesTemplates(creator, onOpenCheckout(request)),
-  );
+  // whether the caller runs the deployment, for the two things no deck decision covers (the
+  // shared templates, the logo index rebuild); outside a request (a unit test, the CLI's rule)
+  // no decision is made
+  const operator = request === undefined || runsDeployment(creator, onOpenCheckout(request));
+  registerTemplateActions(dispatcher, decks, creator, request !== undefined, operator);
   // the assistant's two actions on this deck (docs/archive/rounds/PRODUCT.md 6.2; build/b6.md R3): the route
   // /api/assist registers the same handlers on demand; here they answer /api/actions and MCP
   registerAssistActions(dispatcher, { store: liveStore, deckId });
   // the logo picker's three actions over this deck (docs/archive/rounds/FEATURES.md 4.11; build/b6.md R4), so
   // /api/actions/logo.search, deck_logo_search and the window transport answer them
-  registerLogoActionsLazily(dispatcher, deckId, liveStore);
+  registerLogoActionsLazily(dispatcher, deckId, liveStore, operator);
   registerSlideImport(
     dispatcher,
     deckId,

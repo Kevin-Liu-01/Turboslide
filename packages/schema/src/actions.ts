@@ -4561,7 +4561,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'logo.refresh': action({
     id: 'logo.refresh',
     label: 'Refresh the logo index',
-    doc: 'Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch.',
+    doc: 'Rebuilds the cached logo index from thesvg.org’s manifest inside its time budget, marks the variants that answer 404 unavailable, drops the marks the source removed with their cached files and answers the counts; with dryRun it answers the counts, the index’s date, its last failure and its progress without an upstream fetch. The rebuild is the deployment admin’s or the cron’s; any agent credential may ask for the dry run.',
     group: 'asset',
     mutates: false,
     transports: noWindow,

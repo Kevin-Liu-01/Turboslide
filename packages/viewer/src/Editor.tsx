@@ -1302,6 +1302,10 @@ export function Editor({
   const [sites, setSites] = useState<Point[]>([]);
   const [drawPoints, setDrawPoints] = useState<Point[]>([]);
   const [scroll, setScroll] = useState({ left: 0, top: 0 });
+  /* the stage's scroll, stored only when it moved: the zoom's own scroll write is followed by the
+     scroller's scroll event with the same numbers */
+  const takeScroll = (next: { left: number; top: number }) =>
+    setScroll((prev) => (prev.left === next.left && prev.top === next.top ? prev : next));
 
   const root = useRef<HTMLDivElement>(null);
   /* the editor shell stamps View > Mode on the viewer root; the stage follows it when the route
@@ -3158,7 +3162,7 @@ export function Editor({
     const target = scrollForCenter(center, fit, stageSize);
     el.scrollLeft = target.left;
     el.scrollTop = target.top;
-    setScroll({ left: el.scrollLeft, top: el.scrollTop });
+    takeScroll({ left: el.scrollLeft, top: el.scrollTop });
     // the scroll follows the zoom, its centre and the stage box
   }, [zoom, zoomCenter, stageSize.width, stageSize.height]);
 
@@ -6108,7 +6112,12 @@ export function Editor({
   }, [selection, extra]);
 
   /* Cmd+scroll and a trackpad pinch zoom about the pointer (SPEC-2 6.1 row 27): the default is
-     prevented over the stage so the page never zooms there */
+     prevented over the stage so the page never zooms there. A pinch sends wheel events faster
+     than frames; their steps compound on the zoom not yet published (`wheelZoom`), and the page
+     hears one zoom per animation frame, the last centre with the compounded zoom, so the stage
+     renders and scrolls once per frame rather than once per event */
+  const wheelZoom = useRef<number | null>(null);
+  const zoomFrame = useRef<FrameCoalescer | null>(null);
   useEffect(() => {
     const el = root.current;
     if (!el) return;
@@ -6117,19 +6126,39 @@ export function Editor({
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       const sheet = stageRect();
-      const current = zoomRef.current === 'fit' ? k : zoomRef.current;
+      const current = wheelZoom.current ?? (zoomRef.current === 'fit' ? k : zoomRef.current);
       const next = zoomFromWheel(current, e.deltaY);
       if (Math.abs(next - current) < 1e-4) return;
       const pointerAt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      /* the sheet has not moved inside the frame, so the point under the pointer stands */
       const under = sheet ? sheetPoint(sheet, e.clientX, e.clientY) : { x: 800, y: 450 };
-      onZoomRef.current?.(
+      const center = centerKeepingPoint(
+        under,
+        pointerAt,
+        { width: rect.width, height: rect.height },
         next,
-        centerKeepingPoint(under, pointerAt, { width: rect.width, height: rect.height }, next),
       );
+      wheelZoom.current = next;
+      if (zoomFrame.current === null)
+        zoomFrame.current = createFrameCoalescer({
+          request: (callback) => window.requestAnimationFrame(callback),
+          cancel: (handle) => window.cancelAnimationFrame(handle),
+        });
+      zoomFrame.current.push(() => {
+        wheelZoom.current = null;
+        onZoomRef.current?.(next, center);
+      });
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
   }, [k]);
+  useEffect(
+    () => () => {
+      zoomFrame.current?.cancel();
+      wheelZoom.current = null;
+    },
+    [],
+  );
 
   const onHandleDown = (handle: Handle, e: PointerEvent) => {
     if (e.button !== 0) return;
@@ -8044,7 +8073,7 @@ export function Editor({
           dir="next"
           edges={false}
           scrollerRef={scroller}
-          onScroll={setScroll}
+          onScroll={takeScroll}
         >
           {/* the counter follows the deck's Slide numbers (Insert > Slide numbers: on, off, skip
               title slides) the way the show, the PDF and the PowerPoint do through the render's

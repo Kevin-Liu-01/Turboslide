@@ -522,6 +522,56 @@ describe('the caret a keystroke reports (Editor.tsx onCaretInfo)', () => {
   });
 });
 
+describe('Cmd+scroll and a pinch zoom once per frame (SPEC-2 6.1 row 27)', () => {
+  it('compounds the wheel steps of a frame into one zoom the page hears at the frame', () => {
+    const frames = fakeFrames();
+    const zooms: Array<{ zoom: unknown; center: unknown }> = [];
+    mounted = mount(documentOf(joinedSlide()), {
+      onZoom: (zoom, center) => zooms.push({ zoom, center }),
+    });
+    const stage = mounted.container.firstElementChild;
+    if (!(stage instanceof HTMLElement)) throw new Error('no stage root');
+    frames.flush();
+    const wheel = (deltaY: number) =>
+      stage.dispatchEvent(
+        new WheelEvent('wheel', {
+          deltaY,
+          ctrlKey: true,
+          clientX: 820,
+          clientY: 280,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    /* a pinch: three wheel events inside one frame */
+    act(() => {
+      expect(wheel(-50)).toBe(false);
+      wheel(-50);
+      wheel(-50);
+    });
+    expect(zooms).toEqual([]);
+    frames.flush();
+    expect(zooms).toHaveLength(1);
+    /* the same zoom one wheel of the summed delta gives, from the same start (the stub page keeps
+       the zoom it was mounted with) */
+    act(() => {
+      wheel(-150);
+    });
+    frames.flush();
+    expect(zooms).toHaveLength(2);
+    expect(zooms[0]?.zoom as number).toBeCloseTo(zooms[1]?.zoom as number, 6);
+    const [first, second] = zooms.map((each) => each.center as { x: number; y: number });
+    expect(first?.x).toBeCloseTo(second?.x ?? NaN, 6);
+    expect(first?.y).toBeCloseTo(second?.y ?? NaN, 6);
+    /* a wheel without Cmd or Ctrl scrolls and asks for no zoom */
+    act(() => {
+      stage.dispatchEvent(new WheelEvent('wheel', { deltaY: -50, bubbles: true }));
+    });
+    frames.flush();
+    expect(zooms).toHaveLength(2);
+  });
+});
+
 describe('the budget (docs/archive/rounds/OBJECTS.md 2.4; gesture-frame.ts)', () => {
   it('degrades a move after two slow frames: the wrappers move inline, the sheet keeps its markup, the ring follows', async () => {
     const frames = fakeFrames();

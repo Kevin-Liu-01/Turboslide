@@ -1,7 +1,6 @@
 import { SITE } from '@turboslide/theme/brand/site';
 
 import { SITE_FACTS } from './facts';
-import { HOME_LEAD } from './meta';
 
 /**
  * Every word of /home in one module (docs/SITE.md A.1), so copy.test.ts and the competitor guard
@@ -10,8 +9,11 @@ import { HOME_LEAD } from './meta';
  * metaphor. Each screen's heading is a short phrase in Title Case (Kevin, 2026-10-30: "Feature
  * Parity for Agents"), as the buttons are (DECK-GRAMMAR.md:22). Names, table heads and diagram labels
  * stay noun phrases. The h1 stays "Presentations for people and agents" (Kevin, 2026-10-14). The
- * counts come from facts.ts and the recorded commands from run.ts; nothing here types a number the
- * tree holds.
+ * header names no product, since the bar above it does (Kevin, 2026-11-12, on the hero: "make the
+ * header better. it's turboslide", then "no turboslide shouldnt be in the header"): the lead
+ * begins with what a visitor does, and the name stays in the bar, the page's title and its
+ * description (meta.ts). The counts come from facts.ts and the recorded commands from run.ts;
+ * nothing here types a number the tree holds.
  */
 
 const REPOSITORY = SITE.repository;
@@ -66,6 +68,14 @@ export const AGENTS = [
 ] as const;
 
 /**
+ * The agent writing the title (docs/SITE.md section 4; Kevin, 2026-11-12: "Build S", the header
+ * drawn as a text object the visitor has selected on a slide): Claude Code's caret after "agents"
+ * with the flag the editor gives an agent at work, its mark and the step it names (docs/SITE.md
+ * D5). The flag is drawn from the caret's `data-flag`, so the h1's text stays the sentence.
+ */
+export const CARET = { brand: 'claude-code', flag: 'Claude Code: writing the title' } as const;
+
+/**
  * What pressing an avatar does, read by a screen reader after the avatar's name (each button's
  * `aria-describedby`); the label a pointer or the focus lifts names the avatar alone.
  */
@@ -81,7 +91,7 @@ export const AVATAR_PRESS = {
 } as const;
 
 export const HERO = {
-  lead: HOME_LEAD,
+  lead: 'Make slides in the browser. Every menu command is also an action that an agent can run over the command line, MCP or HTTP.',
   primary: { label: 'New Presentation', href: '/new', id: 'site.hero.new' },
   secondary: { label: 'Open the Example Deck', href: '/deck/gt-brand', id: 'site.hero.example' },
   figure: {

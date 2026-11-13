@@ -8,7 +8,7 @@ import { LABEL_NUMBERS, isLabelWord } from '@turboslide/identity/labels';
 import { COLLAB_GEOMETRY } from '@turboslide/render/collab';
 
 import { POINTER_AT } from './AvatarStack';
-import { AGENTS, AVATAR_PRESS, PEOPLE, TITLE_TEXT } from './copy';
+import { AGENTS, AVATAR_PRESS, CARET, PEOPLE, TITLE_TEXT } from './copy';
 import { Title } from './Title';
 import { isTryPress } from './try-frame';
 
@@ -16,7 +16,9 @@ import { isTryPress } from './try-frame';
 // sentence alone; five people under generated names, each the editor's pointer in a live hue, and
 // the four agents, each its tool's mark; every figure a button with its name and the sentence of
 // what pressing does; one tab stop per row; no name outside the generated labels and the four
-// tools; the press each figure sends is one the frame protocol takes.
+// tools; the press each figure sends is one the frame protocol takes; Claude Code's caret after
+// "agents", hidden from assistive technology, its flag's words in an attribute (Kevin, 2026-11-12:
+// "Build S").
 
 const html = renderToStaticMarkup(createElement(Title));
 
@@ -92,10 +94,24 @@ describe('the landing’s title', () => {
     expect(new Set(POINTER_AT.map(([, y]) => y)).size).toBe(5);
     expect(html).not.toContain('site-face');
     expect(html).not.toContain('site-av-plate');
-    /* four marks and five pointers, no text: the h1's text stays the sentence */
-    expect((html.match(/class="ts-agent-mark/g) ?? []).length).toBe(4);
-    expect((html.match(/<svg\b/g) ?? []).length).toBe(9);
+    /* four marks and five pointers, and the caret flag's mark, no text: the h1's text stays the
+       sentence */
+    expect((html.match(/class="ts-agent-mark/g) ?? []).length).toBe(5);
+    expect((html.match(/<svg\b/g) ?? []).length).toBe(10);
     expect(html).not.toContain('<text');
+  });
+
+  it("draws Claude Code's caret after agents with its flag outside the h1's text", () => {
+    const caret = /<span class="site-caret" aria-hidden="true">([\s\S]*?)<\/span><\/span>/.exec(
+      html,
+    );
+    expect(caret, 'the caret').not.toBeNull();
+    const at = html.indexOf('class="site-caret"');
+    expect(html.indexOf('data-word="agents"')).toBeLessThan(at);
+    expect(html.indexOf('data-stack="agents"')).toBeGreaterThan(at);
+    expect(caret?.[1]).toContain(`data-flag="${CARET.flag}"`);
+    expect(caret?.[1]).toContain(`data-brand="${CARET.brand}"`);
+    expect(textContent).not.toContain(CARET.flag);
   });
 
   it('sends presses the frame protocol takes', () => {

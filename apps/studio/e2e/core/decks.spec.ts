@@ -1375,8 +1375,9 @@ test(title('decks.recent.this-browser-sentence'), async () => {
 test(title('decks.home.seller-lead'), async ({ browser }) => {
   test.setTimeout(90_000);
   /* the site build (docs/SITE.md A.3, B): the h1 is page text, "Presentations for people and
-     agents", one line at 1440 (home.title.one-line reads its boxes); the lead begins with what
-     Turboslide is; the second hero button opens the GT brand deck */
+     agents", one line at 1440 (home.title.one-line reads its boxes); the lead begins with what a
+     visitor does and names no product, since the bar above it does (Kevin, 2026-11-12: "no
+     turboslide shouldnt be in the header"); the second hero button opens the GT brand deck */
   const fresh = await browser.newContext({
     extraHTTPHeaders,
     viewport: { width: 1440, height: 900 },
@@ -1394,9 +1395,11 @@ test(title('decks.home.seller-lead'), async ({ browser }) => {
     expect(h1?.replace(/\s+/g, ' ').trim(), "the h1 reads the seller's sentence").toBe(HOME_H1);
     const lead = await p.locator('.site-hero .t-lead').first().textContent();
     expect(
-      lead?.replace(/\s+/g, ' ').trim().startsWith('Turboslide is a slides editor in the browser.'),
+      lead?.replace(/\s+/g, ' ').trim().startsWith('Make slides in the browser.'),
       "the lead begins with the first visit's sentence",
     ).toBe(true);
+    const header = await p.locator('.site-hero-copy').first().innerText();
+    expect(header, 'the header names no product').not.toMatch(/turboslide/i);
     const deckButton = p.locator('.site-hero a[href="/deck/gt-brand"]').first();
     await expect(deckButton, 'the second button opens the example deck').toHaveText(
       'Open the Example Deck',

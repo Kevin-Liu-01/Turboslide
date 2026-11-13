@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Browser, Frame, Locator, Page } from '@playwright/test';
 
-import { PEOPLE, STORY, TITLE_TEXT } from '../../../src/components/site/copy';
+import { CARET, PEOPLE, STORY, TITLE_TEXT } from '../../../src/components/site/copy';
 import { extraHTTPHeaders, title } from '../lib';
 
 // The landing's rows of the site build (docs/SITE.md; the landing step, plan A, B and D): the
@@ -407,7 +407,59 @@ export function rows(): void {
               ? face
               : `${face} (not loaded)`;
           });
-          return { out, starts, bare, figures, faces };
+          /* the header as a text object (Kevin, 2026-11-12: "Build S"): the selection ring round
+             the h1 with its eight squares on its line, and Claude Code's caret after "agents" with
+             its flag under it */
+          const ring = (
+            document.querySelector('.site-sel-ring') as HTMLElement
+          ).getBoundingClientRect();
+          const box = h1.getBoundingClientRect();
+          const squares = [...document.querySelectorAll<HTMLElement>('.site-sel-h')].map((sq) => {
+            const r = sq.getBoundingClientRect();
+            const x = (r.left + r.right) / 2;
+            const y = (r.top + r.bottom) / 2;
+            const onX = Math.abs(x - ring.left - 0.5) <= 1 || Math.abs(x - ring.right + 0.5) <= 1;
+            const onY = Math.abs(y - ring.top - 0.5) <= 1 || Math.abs(y - ring.bottom + 0.5) <= 1;
+            return onX || onY;
+          });
+          const caretEl = h1.querySelector('.site-caret') as HTMLElement;
+          const caret = caretEl.getBoundingClientRect();
+          const flagEl = caretEl.querySelector('.site-caret-flag') as HTMLElement;
+          const flag = flagEl.getBoundingClientRect();
+          const agentsWord = words[1] as DOMRect;
+          const firstMark = (
+            h1.querySelector('.site-stack[data-stack="agents"] .site-av') as HTMLElement
+          ).getBoundingClientRect();
+          const lead = (
+            document.querySelector('.site-hero .t-lead') as HTMLElement
+          ).getBoundingClientRect();
+          const selection = {
+            encloses:
+              ring.left <= box.left - 8 &&
+              ring.right >= box.right + 8 &&
+              ring.top <= box.top - 8 &&
+              ring.bottom >= box.bottom + 8,
+            onScreen: ring.left >= 0 && ring.right <= innerWidth && ring.top >= bar.bottom,
+            squares,
+            ringColor: getComputedStyle(document.querySelector('.site-sel-ring') as HTMLElement)
+              .borderTopColor,
+            select: getComputedStyle(document.documentElement)
+              .getPropertyValue('--pt-select')
+              .trim(),
+            caretAfterWord: caret.left >= agentsWord.right - 0.5 && caret.right <= firstMark.left,
+            caretHidden: caretEl.getAttribute('aria-hidden') === 'true',
+            flagWords: getComputedStyle(flagEl, '::after').content,
+            flagCovers: glyphs.filter(
+              (g) =>
+                flag.left + 1 < g.right &&
+                flag.right - 1 > g.left &&
+                flag.top + 1 < g.bottom &&
+                flag.bottom - 1 > g.top,
+            ).length,
+            flagOnScreen: flag.left >= 0 && flag.right <= innerWidth,
+            leadClear: lead.top >= Math.max(flag.bottom, ring.bottom),
+          };
+          return { out, starts, bare, figures, faces, selection };
         });
         const label = `${cell.width} ${cell.theme}`;
         expect(facts.out).toHaveLength(9);
@@ -437,6 +489,24 @@ export function rows(): void {
           facts.faces,
           `${label}: "people" in Katagami Round, "agents" in Katagami Mono`,
         ).toEqual(['Katagami Round', 'Katagami Mono']);
+        const sel = facts.selection;
+        expect(sel.encloses, `${label}: the ring stands 8 px or more off the h1`).toBe(true);
+        expect(sel.onScreen, `${label}: the ring under the bar and on the screen`).toBe(true);
+        expect(sel.squares, `${label}: eight squares on the ring`).toEqual(Array(8).fill(true));
+        const hex = (rgb: string): string =>
+          `#${(rgb.match(/\d+/g) ?? [])
+            .slice(0, 3)
+            .map((n) => Number(n).toString(16).padStart(2, '0'))
+            .join('')}`;
+        expect(hex(sel.ringColor), `${label}: the ring in the selection blue`).toBe(
+          sel.select.toLowerCase(),
+        );
+        expect(sel.caretAfterWord, `${label}: the caret after "agents"`).toBe(true);
+        expect(sel.caretHidden, `${label}: the caret hidden from assistive technology`).toBe(true);
+        expect(sel.flagWords, `${label}: the caret's flag`).toBe(`"${CARET.flag}"`);
+        expect(sel.flagCovers, `${label}: the flag covers no letter`).toBe(0);
+        expect(sel.flagOnScreen, `${label}: the flag on the screen`).toBe(true);
+        expect(sel.leadClear, `${label}: the lead under the ring and the flag`).toBe(true);
         const names = [
           ...PEOPLE.map((person) => person.name),
           'Claude Code',

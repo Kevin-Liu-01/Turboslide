@@ -9,7 +9,7 @@ import {
   wordsOutsideSentenceCase,
 } from '@turboslide/theme/copy';
 
-import { AVATAR_PRESS, FOOTER, HERO, NAV, STORY, TITLE_TEXT } from './copy';
+import { AVATAR_PRESS, CARET, FOOTER, HERO, NAV, STORY, TITLE_TEXT } from './copy';
 import { HOME_META } from './meta';
 
 // The landing's words (docs/SITE.md A.1; plain technical English): no em dash, en dash or
@@ -54,6 +54,7 @@ const sentences: ReadonlyArray<[string, string]> = [
   ['meta.description', HOME_META.description],
   ['title', TITLE_TEXT],
   ['hero.lead', HERO.lead],
+  ['hero.caret', CARET.flag],
   ['hero.figure.alt', HERO.figure.alt],
   ['avatar.person', AVATAR_PRESS.person.sentence],
   ['avatar.agent', AVATAR_PRESS.agent.sentence],
@@ -82,6 +83,21 @@ const buttons: ReadonlyArray<string> = [
 describe('the landing’s copy', () => {
   it('keeps the h1 as Kevin wrote it', () => {
     expect(TITLE_TEXT).toBe('Presentations for people and agents');
+  });
+
+  /* Kevin, 2026-11-12: "no turboslide shouldnt be in the header"; the bar above it names the
+     product, and the page's title and description keep the name for search */
+  it('names no product in the header', () => {
+    for (const text of [
+      TITLE_TEXT,
+      HERO.lead,
+      CARET.flag,
+      HERO.primary.label,
+      HERO.secondary.label,
+    ])
+      expect(text, text).not.toMatch(/turboslide/i);
+    expect(HOME_META.title).toMatch(/^Turboslide /);
+    expect(HOME_META.description).toMatch(/^Turboslide /);
   });
 
   it('is plain technical English in sentence case', () => {

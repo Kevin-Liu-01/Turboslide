@@ -221,9 +221,10 @@ export const TURBOSLIDE_CHROME: ChromeScope = {
      ink outline of the two halves inside it (docs/archive/rounds/RETURN.md 4.1; return/build/b1.md R10) */
   active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"], .ts-chip.is-self, .ts-title-slideshow`,
   lint: '.ts-lint-box',
-  /* the canvas selection surfaces of Overlay.css and Marquee.css (ruling 1) */
+  /* the canvas selection surfaces of Overlay.css and Marquee.css (ruling 1), and the picture of
+     that ring round /home's h1 with its eight squares (site.css; Kevin, 2026-11-12: "Build S") */
   select:
-    '.ts-select, .ts-select-chip, .ts-hover, .ts-handle, .ts-marquee, .ts-group, .ts-crop-frame, .ts-turn',
+    '.ts-select, .ts-select-chip, .ts-hover, .ts-handle, .ts-marquee, .ts-group, .ts-crop-frame, .ts-turn, .site-sel-ring, .site-sel-h',
   guides: '.ts-guide',
   /* the one rail check (NEXT.md 4.1.3 item 25): /home, /decks and its sub pages, Not found */
   rails: '.ts-site, .ts-home-page, .ts-notfound',

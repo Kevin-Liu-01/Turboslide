@@ -15,8 +15,9 @@ import { useMountEffect } from '../components/useMountEffect';
 
 /**
  * The landing, /home, in the Workbench layout Kevin picked on 2026-10-14 (docs/SITE.md): the bar
- * with the T in a box; screen 01, the one line h1 with its two avatar stacks, the lead with New
- * Presentation and Open the Example Deck, and the live editor in its frame; then four sections,
+ * with the T in a box; screen 01, the h1 with its two avatar stacks inside the editor's selection
+ * ring with Claude Code's caret (Kevin, 2026-11-12: "Build S"), the lead with New Presentation and
+ * Open the Example Deck, and the live editor in its frame; then four sections,
  * each a heading and a sentence beside a live editor that plays one chapter in the hero's deck
  * (agents editing beside you, the features, editing together, the slideshow; Kevin, 2026-11-03:
  * "the hero's presentation is used to show a bunch of things", then "just make it sectioned off

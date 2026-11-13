@@ -9,6 +9,9 @@ import { SiteField } from './SiteField';
 import { SiteLink } from './SiteLink';
 import { Title } from './Title';
 
+/** The ring's eight squares, from its top left corner clockwise. */
+const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as const;
+
 /**
  * Screen 01 (docs/SITE.md A.3; full bleed since 2026-10-30): the field across the window behind
  * everything (SiteField.tsx), the h1 with its two stacks, the lead beside the two buttons, then
@@ -18,6 +21,10 @@ import { Title } from './Title';
  * until the live editor in its frame says it is ready (HeroBox.tsx), so nothing moves when it
  * arrives. A press on an avatar of the title goes to the live editor through the box (`press`),
  * which loads the editor first when the poster is still up.
+ *
+ * The h1 is drawn as a text object the visitor has selected on a slide (Kevin, 2026-11-12: "Build
+ * S"): the editor's selection ring with its eight squares round it, a picture that takes no
+ * pointer, and Claude Code's caret inside it after "agents" (Title.tsx).
  */
 export function Hero() {
   const press = useRef<OnPress | null>(null);
@@ -26,7 +33,14 @@ export function Hero() {
       <SiteField />
       <div className="site-hero-in site-wrap">
         <div className="site-hero-copy" data-field-clear="band">
-          <Title onPress={(who) => press.current?.(who)} />
+          <div className="site-sel">
+            <i className="site-sel-ring" aria-hidden="true">
+              {HANDLES.map((at) => (
+                <i key={at} className="site-sel-h" data-at={at} />
+              ))}
+            </i>
+            <Title onPress={(who) => press.current?.(who)} />
+          </div>
           {/* what pressing an avatar does, read after its name (AvatarStack.tsx) */}
           <span id={AVATAR_PRESS.person.id} hidden>
             {AVATAR_PRESS.person.sentence}

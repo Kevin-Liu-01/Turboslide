@@ -249,7 +249,7 @@ secret.ts` refuses a shorter session secret and the server answers 500 on every 
   | 4362 | b2 (text and slides)                                                              | the text and filmstrip smokes                                                                                                               |
   | 4363 | b3 (objects: shapes, lines, pictures, arrange)                                    | the objects smokes, `scripts/canvas-fidelity.mjs` under the lock                                                                            |
   | 4364 | b4 (the drivers)                                                                  | the probe's `--core` mode and `apps/studio/e2e/core/*.spec.ts` while they are written                                                       |
-  | 4365 | b5 (documents: README, `docs/readme/**`, the /home copy)                          | `docs/readme/shoot-readme.mjs` as a smoke                                                                                                   |
+  | 4365 | b5 (documents: README, `docs/readme/**`, the /home copy)                          | the README pictures as a smoke                                                                                                              |
   | 4366 | b6 (access, sharing and collaboration)                                            | `roles`, `comments`, `share` and `security` specs, in shadow and in enforce mode (`TURBOSLIDE_AUTHORIZE=enforce` on the server)             |
   | 4367 | the integrator                                                                    | the merge smokes and `node scripts/probes/core-gate.mjs --base http://localhost:4367` beside 4321                                           |
   | 4368 | unassigned                                                                        | spare                                                                                                                                       |
@@ -294,8 +294,8 @@ secret.ts` refuses a shorter session secret and the server answers 500 on every 
   `apps/studio/e2e/core/<area>.spec.ts` (created and torn down through the product, one context per
   file, a second person a second context, no fixture and no disk). `node scripts/probes/core-gate.mjs
 --base <origin> [--out <dir>] [--parked docs/gslides-parity/focus/ship-<commit>.json]` runs both,
-  merges every row by id, writes `core-matrix.md` and `core-gate.json` (the `results` map by id is
-  what `docs/readme/what-works.mjs --results` renders the README from), asserts `retries` zero and
+  merges every row by id, writes `core-matrix.md` and `core-gate.json` (with the `results` map by
+  id), asserts `retries` zero and
   exits 1 on any failed, not driven or no step row outside the committed parked list; against a
   localhost base it takes `.turboslide/e2e.lock` itself for the whole run, so a caller never holds
   the lock while it runs; against a deployment it needs no lock and sends `VERCEL_OIDC_TOKEN` as
@@ -303,9 +303,9 @@ secret.ts` refuses a shorter session secret and the server answers 500 on every 
   the orchestrator's ruling (3) marks manual (`manual: <the obstacle>` in the matrix, a step in
   `docs/gslides-parity/focus/manual-checklist.md`) is recorded not driven with its reason, is never
   counted as passed, parks no feature and fails no ship; a failed manual row fails like any other.
-  A not driven row is never reported as passed, anywhere. Step 19 also runs `node
-docs/readme/what-works.mjs --check`: the README section "What works today" is rendered from the
-  matrix and a stale one fails the chain. The evidence the gate, the probes, the layout shift
+  A not driven row is never reported as passed, anywhere. The README carried a section "What
+  works today" rendered from the matrix until 2026-11-12, when the short README replaced it and
+  its renderer left step 19. The evidence the gate, the probes, the layout shift
   audit and the audit scripts write under `docs/gslides-parity/focus/verification/` (the JSON and
   the generated layout shift reports) and the audits' JSON under `focus/audit-*/` and
   `return/audit-*/` are in `.prettierignore` as written, the rule the earlier rounds' evidence

@@ -1386,7 +1386,7 @@ const summary = {
   noStep,
   /* the local rows this run did not record (PEOPLE.md 6.2): listed apart, never passed, never a reason to park */
   local,
-  /* the run's results by row id, the shape docs/readme/what-works.mjs --results reads (b5.md R10) */
+  /* the run's results by row id */
   commit: gitCommit(),
   origin: BASE,
   date: new Date(startedAt).toISOString().slice(0, 10),

@@ -6,7 +6,7 @@ The documents of Turboslide. Start with the first table. `docs/readme/docs-index
 
 | Document                                                      | What it is                                                                                                                      |
 | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| [../README.md](../README.md)                                  | What Turboslide is, how to start it, the CLI                                                                                    |
+| [../README.md](../README.md)                                  | What Turboslide is, how to run it on your computer and how to host it                                                           |
 | [../AGENTS.md](../AGENTS.md)                                  | The rules for working in this repository                                                                                        |
 | [NEXT.md](NEXT.md)                                            | The next program from 2026-10-02: the rounds for speed, cost, features, the brand and sign in                                   |
 | [LANDING.md](LANDING.md)                                      | The landing redesign of `/home`: one eight slide deck the visitor edits, tailors, runs and presents                             |
@@ -62,7 +62,7 @@ These specifications are in `archive/rounds/` since the last push of Round 1 (`N
 | [archive/status/](archive/status/)                 | The milestone and hosting status documents of 2026-09-10 to 2026-09-22 and their five early evidence folders                                   |
 | [archive/gslides-parity/](archive/gslides-parity/) | The specifications, milestone plans, build status records and verification records of the parity rounds one to five                            |
 | [archive/deviations.md](archive/deviations.md)     | The deviations list that `AGENTS.md` carried from M1 to round four                                                                             |
-| [readme/](readme/)                                 | The README renderer of "What works today" with its pictures, and the tests of this index and of the evidence policy                            |
+| [readme/](readme/)                                 | The README lockups, and the tests of this index, of the evidence policy and of the docs paths named outside `docs/`                            |
 | [spec/](spec/)                                     | The base specification, the milestone plan and the three experiment reports of 2026-09-10; `spec/README.md` records their provenance           |
 
 The parity rounds one to five are in `archive/gslides-parity/` (`SPEC.md` to `SPEC-5.md`, `MILESTONES*.md`, `BUILD-STATUS*.md`, `VERIFICATION*.md`), cited in code by name as "gslides-parity SPEC-n". Their evidence stays under `gslides-parity/`.

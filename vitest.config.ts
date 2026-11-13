@@ -17,7 +17,7 @@ export default defineConfig({
         test: {
           name: 'scripts',
           root: '.',
-          // docs/readme/what-works.test.mjs pins the README section against the matrix (b5.md R3)
+          // docs/readme holds the tests of the docs index, the evidence policy and the docs paths
           include: ['scripts/**/*.test.mjs', 'docs/readme/**/*.test.mjs'],
         },
       },

@@ -315,6 +315,8 @@ The table of the 1208 rows is rendered into `docs/gslides-parity/focus/rows.md` 
 
 ## 7. The README section "What works today"
 
+Since 2026-11-12 the README is a short page with no section of rows: Kevin asked for "a far simpler and direct readme". The renderer `docs/readme/what-works.mjs`, its test and its pictures left the tree with that change, and check step 19 is the format gate alone. The text below is the record of the focus round.
+
 The text below is the README for the ship, to replace the "Feature tour" of `README.md` (lines 46 to 312) as the first section after the introduction, in plain technical English, with no count typed by hand; the counts a reader wants are the matrix's and are rendered from `core-matrix.json`, never typed. It is rendered from the matrix: a feature's paragraph appears only while every row of that feature passes on production, and a feature with a failed or not driven row is listed as held with the rows that hold it. The 135 preset claim at `README.md` 146 and 404 leaves with the first ship. One sentence holds across the outputs once `export.pdf.file`, `export.pptx.perfect`, `present.skipped-left-out`, `share.view-link-excludes-skipped-and-notes` and `share.present-link-excludes-skipped` pass: skipped slides and speaker notes stay out of the PDF, the PowerPoint file, the show and the view link unless the seller checks the box that includes them; until then the sentence is not in the README.
 
 > ## What works today

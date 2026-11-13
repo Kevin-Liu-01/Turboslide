@@ -673,7 +673,6 @@ describe('the README head and the brand record (docs/NEXT.md 4.1.3 items 7 and 8
       .replace(/\]\([^)]*\)/g, ']')
       .replace(/"[^"]*"/g, '""');
     expect(prose).not.toMatch(/\b[a-z][a-z0-9-]*(\.[a-z0-9-]+){2,}\b/);
-    expect(head).not.toContain('<!-- what-works:begin -->');
   });
 
   it('states the action count facts.json carries', () => {

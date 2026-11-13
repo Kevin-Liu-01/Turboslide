@@ -340,9 +340,7 @@ const steps = [
   // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had
   // not touched: the tree is prettier-clean (AGENTS.md code rules). Last, so the M1 step numbers
   // that AGENTS.md and the status documents cite stay valid.
-  // the focus round (docs/FOCUS.md 7, "rendered, never typed"): the README section "What works
-  // today" is what docs/readme/what-works.mjs renders from core-matrix.json; a stale one fails here
-  { cmd: 'pnpm format:check && node docs/readme/what-works.mjs --check' },
+  { cmd: 'pnpm format:check' },
   // gslides-parity SPEC 14.1, steps 20 and 21: the Google parity audit (the verifier's script;
   // the menu model tests until it exists) and the parity round's end to end specs, the ten tasks
   // of SPEC 11.2 first. The report lands in the current round's folder (SPEC-3 16.2 names

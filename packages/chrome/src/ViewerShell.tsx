@@ -245,6 +245,8 @@ export function ViewerShell({
   const [booted, setBooted] = useState(false);
   /* true one frame after that: from here on the column transitions apply */
   const [settledState, setSettledState] = useState(false);
+  /* true for the frames a show starts or ends on: the column changes without its transition */
+  const [presentShift, setPresentShift] = useState(false);
 
   const stageRef = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
@@ -437,7 +439,10 @@ export function ViewerShell({
   const setHelp = (open: boolean) => setHelpOpen(open);
 
   /* presenting keeps the sheet that is up: only the grid, which has no sheet,
-     hands over to the slide; the list leaves with the chrome and comes back with it */
+     hands over to the slide; the list leaves with the chrome and comes back with it, at once:
+     the column's width animation refit the stage and rasterized the slide again on every frame
+     of its 220 ms (ViewerShell.css), while the toolbar left at once anyway, so the show starts
+     and ends as one cut and the stage refits once (the slide motion round) */
   const setPresent = (on: boolean) => {
     if (on === presentRef.current) return;
     if (on) {
@@ -451,7 +456,7 @@ export function ViewerShell({
     }
     setPresentState(on);
     presentRef.current = on;
-    if (sidebarRef.current && !narrowRef.current) moveSidebar(on ? 'close' : 'open');
+    setPresentShift(true);
   };
 
   const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
@@ -566,6 +571,19 @@ export function ViewerShell({
     });
     return () => cancelAnimationFrame(frame);
   }, [booted]);
+
+  /* the shift holds until a frame has drawn the new columns, so their transition never starts */
+  useLayoutEffect(() => {
+    if (!presentShift) return undefined;
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => setPresentShift(false));
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, [presentShift]);
 
   /* the list is in the DOM while it is wanted, and for the closing duration after */
   const sidebarShown = (listOpen && !present) || sbMotion === 'close';
@@ -699,6 +717,7 @@ export function ViewerShell({
             data-sb={sb}
             data-density={density}
             data-settled={settledState ? '' : undefined}
+            data-present-shift={presentShift ? '' : undefined}
             data-sb-moving={sbMotion ?? undefined}
             data-entering={transition && !transition.native ? transition.to : undefined}
             onTouchStart={narrow ? onTouchStart : undefined}
@@ -742,6 +761,7 @@ export function ViewerShell({
           data-sb={sb}
           data-density={density}
           data-settled={settledState ? '' : undefined}
+          data-present-shift={presentShift ? '' : undefined}
           data-sb-moving={sbMotion ?? undefined}
           data-entering={transition && !transition.native ? transition.to : undefined}
           onTouchStart={narrow ? onTouchStart : undefined}

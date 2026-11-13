@@ -53,6 +53,14 @@
   transition: grid-template-columns var(--pt-dur-sb) var(--pt-ease);
 }
 
+/* a show starts and ends as one cut (ViewerShell.tsx setPresent): the columns change at once and
+   the stage refits once, in the viewer and in the editor; the shift attribute covers the frame a
+   show ends on, when is-present has already gone */
+.pt-viewer.is-present,
+.pt-viewer[data-present-shift] {
+  transition: none;
+}
+
 /* the list's own fade (Sidebar.css) waits for the settle as well */
 .pt-viewer:not([data-settled]) > .pt-sb,
 .pt-viewer:not([data-settled]) > .pt-sb.is-hidden {

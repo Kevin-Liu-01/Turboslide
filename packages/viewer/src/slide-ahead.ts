@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import type { Theme } from './theme';
 
 /**
@@ -108,4 +110,44 @@ export function whenIdle(work: () => void, fallbackMs = 200): () => void {
   }
   const id = window.setTimeout(work, fallbackMs);
   return () => window.clearTimeout(id);
+}
+
+/** How long after a move a surface waits before it prepares the next one: past the move's frames. */
+export const AHEAD_AFTER_MS = 400;
+
+/** A slide to prepare: its markup, and the stage-wide picture a full-picture slide shows. */
+export type AheadSlide = { id: string; html: string; backdrop?: string | undefined };
+
+/**
+ * Decodes the pictures of `slides` once the surface has settled after its last change: 400 ms
+ * after it, at idle. A held key changes the slides again before the wait ends, so a run of moves
+ * prepares nothing it passes. Stage passes the slides beside the one shown; the presenter console
+ * passes the next slide, whose full size pictures its current frame draws after the next move.
+ */
+export function usePicturesAhead(
+  slides: readonly AheadSlide[],
+  theme: Theme,
+  enabled = true,
+): void {
+  const key = slides
+    .map((slide) => `${slide.id}:${slide.html.length}:${slide.backdrop ?? ''}`)
+    .join(' ');
+  useEffect(() => {
+    if (!enabled || slides.length === 0) return undefined;
+    let cancelIdle: () => void = () => undefined;
+    const wait = window.setTimeout(() => {
+      cancelIdle = whenIdle(() => {
+        for (const slide of slides)
+          decodeAhead([
+            ...(slide.backdrop === undefined ? [] : [slide.backdrop]),
+            ...slidePictures(slide.html, theme),
+          ]);
+      });
+    }, AHEAD_AFTER_MS);
+    return () => {
+      window.clearTimeout(wait);
+      cancelIdle();
+    };
+    // the slides by id and markup: the array is new on every render of the caller
+  }, [key, theme, enabled]);
 }

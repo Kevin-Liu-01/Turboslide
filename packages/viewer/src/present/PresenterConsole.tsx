@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LiveClone } from '../LiveClone';
+import { usePicturesAhead } from '../slide-ahead';
 import type { ViewerSlide } from '../model';
 import { hiddenAt, stepsOf } from '../slide-clock';
 import type { Theme } from '../theme';
@@ -236,6 +237,10 @@ export function PresenterConsole({
   const steps = stepCount ?? stepsOf(current?.motion);
   /* the next preview: the current slide's next step while one remains, else the next slide's start */
   const nextIsStep = current !== undefined && stepNow < steps;
+  /* the next slide's full size pictures, decoded once this move has settled: the next move puts
+     it in the current frame, which draws the full copies where the small preview drew the small
+     ones (small-copies.ts), and they appeared one by one after the move */
+  usePicturesAhead(next === undefined ? [] : [{ id: next.id, html: next.html }], theme);
   const [notesSize, setNotesSize] = useState<number>(NOTES_FONT.initial);
   const [listOpen, setListOpen] = useState(false);
   const listButton = useRef<HTMLButtonElement>(null);

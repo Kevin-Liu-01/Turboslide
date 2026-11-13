@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { FrameBand } from '@turboslide/render/stage';
 import { bandForSlide } from '@turboslide/render/stage';
@@ -7,6 +9,7 @@ import { isPictureKind } from './model';
 import type { ViewerSlide } from './model';
 import { ShaderLayer } from './present/ShaderLayer';
 import { Sheet } from './Sheet';
+import { decodeAhead, slidePictures, whenIdle } from './slide-ahead';
 import { showsPicture, useSlideChange } from './slide-change';
 import { SlideBackdrop, SlideView } from './SlideView';
 import type { Theme } from './theme';
@@ -32,7 +35,15 @@ export type StageProps = {
   band?: FrameBand;
   /** the deck's shader palette (ViewerDeck.palette), for the live shader the ShaderLayer plays */
   palette?: ShaderPalette | undefined;
+  /**
+   * The slides the next move most likely shows, the way it goes first (`slidesAhead`): their
+   * pictures are fetched and decoded once this slide has settled, so the move draws them at once
+   */
+  ahead?: readonly ViewerSlide[];
 };
+
+/** How long after a move the stage waits before it prepares the next one: past the move's frames. */
+const AHEAD_AFTER_MS = 400;
 
 /**
  * The stage in slide mode (SPEC 5.5): the theme's .ts-sheet root over the
@@ -59,6 +70,7 @@ export function Stage({
   onStep,
   band,
   palette,
+  ahead,
 }: StageProps) {
   const picture =
     slide && mode === 'slide' && isPictureKind(slide.kind) ? slide.picture : undefined;
@@ -66,6 +78,33 @@ export function Stage({
   const { change, entered } = useSlideChange(
     slide ? { id: slide.id, html: slide.html, picture: backdropSrc } : undefined,
   );
+  /* the next move's pictures, decoded once this slide has settled; a held key moves again
+     before the wait ends and prepares nothing it passes */
+  const aheadKey = (ahead ?? []).map((next) => `${next.id}:${next.html.length}`).join(' ');
+  useEffect(() => {
+    if (ahead === undefined || ahead.length === 0 || mode !== 'slide') return undefined;
+    let cancelIdle: () => void = () => undefined;
+    const wait = window.setTimeout(() => {
+      cancelIdle = whenIdle(() => {
+        for (const next of ahead) {
+          const backdrop = isPictureKind(next.kind)
+            ? theme === 'dark'
+              ? next.picture?.dark
+              : next.picture?.light
+            : undefined;
+          decodeAhead([
+            ...(backdrop === undefined ? [] : [backdrop]),
+            ...slidePictures(next.html, theme),
+          ]);
+        }
+      });
+    }, AHEAD_AFTER_MS);
+    return () => {
+      window.clearTimeout(wait);
+      cancelIdle();
+    };
+    // the slides ahead by id and markup; the array is new on every render of the caller
+  }, [aheadKey, theme, mode]);
   /* present mode: the sheet alone on the show's surround (gslides-parity SPEC 9.2) */
   const classes = ['ts-stagewrap', 'ts-sheet'];
   if (showsPicture(change)) classes.push('is-picture');

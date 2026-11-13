@@ -169,4 +169,52 @@ describe('the stage on a move', () => {
   });
 });
 
+describe('the stage between moves', () => {
+  it("decodes the next slides' pictures once the slide shown has settled", async () => {
+    vi.useFakeTimers();
+    const decoded: string[] = [];
+    vi.stubGlobal(
+      'Image',
+      class {
+        decoding = 'auto';
+        src = '';
+        decode(): Promise<void> {
+          decoded.push(this.src);
+          return Promise.resolve();
+        }
+      },
+    );
+    try {
+      const next = {
+        ...slide('b'),
+        html: '<section class="slide"><img src="/next.jpg"></section>',
+      };
+      await act(async () => {
+        root?.render(
+          createElement(Stage, {
+            slide: slide('a'),
+            index: 0,
+            total: 2,
+            stageSize: { width: 1600, height: 900 },
+            mode: 'slide',
+            present: true,
+            narrow: false,
+            theme: 'light',
+            dir: 'next',
+            ahead: [next],
+          }),
+        );
+      });
+      expect(decoded).toEqual([]);
+      await act(async () => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(decoded).toEqual(['/next.jpg']);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.useRealTimers();
+    }
+  });
+});
+
 vi.mock('@turboslide/viewer/present/ShaderLayer', () => ({ ShaderLayer: () => null }));

@@ -96,6 +96,7 @@ import type { ViewerDeck } from '@turboslide/viewer/model';
 import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
 import type { Selection as StageSelection } from '@turboslide/viewer/Selection';
 import { blockById, blockFamily, cellPointer, listItemPointer } from '@turboslide/viewer/Selection';
+import { slidesAhead } from '@turboslide/viewer/slide-ahead';
 import { Stage } from '@turboslide/viewer/Stage';
 import { applyTheme, installThemeBridge, useTheme } from '@turboslide/viewer/theme';
 
@@ -2292,6 +2293,10 @@ function EditorStage({
           dir={shell.dir ?? 'next'}
           onStep={onStep}
           palette={viewerDeck.palette}
+          /* the show's next move: its slides' pictures decoded once this one has settled */
+          {...(shell.present
+            ? { ahead: slidesAhead(play, shell.active, shell.dir ?? 'next') }
+            : {})}
           band={frameBandOf(
             snap.document.deck,
             /* the band's logo twin follows the slide's appearance, as the stage does (docs/NEXT.md

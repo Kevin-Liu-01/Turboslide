@@ -16,6 +16,7 @@ import { GridView } from '@turboslide/viewer/GridView';
 import { pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck } from '@turboslide/viewer/model';
 import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
+import { slidesAhead } from '@turboslide/viewer/slide-ahead';
 import { Stage } from '@turboslide/viewer/Stage';
 import { applyTheme, installThemeBridge, postTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
@@ -369,6 +370,8 @@ function StageBridge({
         onStep={onStep}
         {...(deck.band === undefined ? {} : { band: deck.band })}
         palette={deck.palette}
+        /* the next move's slides, the way the keys page: the play list in a show */
+        ahead={slidesAhead(shell.present ? play : deck.slides, shell.active, shell.dir ?? 'next')}
       />
       {shell.present ? (
         <Slideshow

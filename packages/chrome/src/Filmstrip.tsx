@@ -478,7 +478,10 @@ export function Filmstrip({
      window API write left the current card out of view when the callback ran before the row's
      box settled, so the current row is followed once more a frame after it changes */
   useEffect(() => {
-    if (!active || typeof window === 'undefined') return undefined;
+    /* a hidden strip (a show) follows nothing: the follow measures the card and scrolls, a forced
+       layout inside every move of the show, and its scroll brought new cards near, which mounted
+       their clones; the current card follows when the strip shows again (the slide motion round) */
+    if (!active || hidden || typeof window === 'undefined') return undefined;
     const frame = window.requestAnimationFrame(() => {
       const el = listRef.current?.querySelector<HTMLElement>(
         `.ts-card[data-id="${CSS.escape(active)}"]`,
@@ -486,7 +489,7 @@ export function Filmstrip({
       if (el) follow(el);
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [active, follow]);
+  }, [active, follow, hidden]);
   /* one observer over the list decides which cards hold a clone (SPEC-4 0.41) */
   const window_ = useNearWindow(listRef);
 
@@ -1199,7 +1202,7 @@ export function Filmstrip({
                 near={window_.isNear(item.id)}
                 handlers={handlers}
                 track={window_.track(item.id)}
-                follow={item.id === active ? follow : undefined}
+                follow={item.id === active && !hidden ? follow : undefined}
                 readOnly={edit.readOnly === true}
               />
             ))}

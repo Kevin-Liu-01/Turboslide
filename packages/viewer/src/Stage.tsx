@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import type { ShaderPalette } from '@turboslide/materials/presets';
 import type { FrameBand } from '@turboslide/render/stage';
 import { bandForSlide } from '@turboslide/render/stage';
@@ -9,7 +7,8 @@ import { isPictureKind } from './model';
 import type { ViewerSlide } from './model';
 import { ShaderLayer } from './present/ShaderLayer';
 import { Sheet } from './Sheet';
-import { SlideView } from './SlideView';
+import { showsPicture, useSlideChange } from './slide-change';
+import { SlideBackdrop, SlideView } from './SlideView';
 import type { Theme } from './theme';
 
 import './Stage.css';
@@ -43,7 +42,9 @@ export type StageProps = {
  * the book are siblings the shell renders over the stage while their mode is
  * up; the sheet hides then, so the fixed stage keeps its fit. In slide mode the ShaderLayer
  * plays the slide's largest shader under its Playback and the viewer's settings (the shader
- * design 3.3).
+ * design 3.3). A move is one slide change (slide-change.ts): the backdrop and the slide bodies
+ * change on one timeline, and the root keeps the picture state while a picture slide is still
+ * leaving, so a move into or out of an opener never cuts the picture across the stage.
  */
 export function Stage({
   slide,
@@ -59,21 +60,19 @@ export function Stage({
   band,
   palette,
 }: StageProps) {
-  const picture = slide && isPictureKind(slide.kind) ? slide.picture : undefined;
-  const isPicture = Boolean(picture) && mode === 'slide';
-  const backdropSrc = useMemo(
-    () => (picture ? (theme === 'dark' ? picture.dark : picture.light) : undefined),
-    [picture, theme],
+  const picture =
+    slide && mode === 'slide' && isPictureKind(slide.kind) ? slide.picture : undefined;
+  const backdropSrc = picture ? (theme === 'dark' ? picture.dark : picture.light) : undefined;
+  const { change, entered } = useSlideChange(
+    slide ? { id: slide.id, html: slide.html, picture: backdropSrc } : undefined,
   );
   /* present mode: the sheet alone on the show's surround (gslides-parity SPEC 9.2) */
   const classes = ['ts-stagewrap', 'ts-sheet'];
-  if (isPicture) classes.push('is-picture');
+  if (showsPicture(change)) classes.push('is-picture');
   if (present) classes.push('is-present');
   return (
     <div className={classes.join(' ')} data-theme={theme} data-present={present ? '' : undefined}>
-      <div className="backdrop" aria-hidden="true">
-        {backdropSrc ? <img src={backdropSrc} alt="" /> : null}
-      </div>
+      <SlideBackdrop change={change} />
       <Sheet
         stageSize={stageSize}
         present={present}
@@ -90,10 +89,10 @@ export function Stage({
           counter={slide?.counter ?? true}
           {...(band === undefined ? {} : { band: bandForSlide(band, slide) })}
         />
-        {slide ? (
+        {slide && change ? (
           <SlideView
-            slideId={slide.id}
-            html={slide.html}
+            change={change}
+            onEntered={entered}
             theme={theme}
             {...(mode === 'slide'
               ? {

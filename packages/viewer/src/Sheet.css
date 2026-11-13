@@ -7,8 +7,9 @@
 
    Slide change: the stage carries data-dir, the way the last move went. The
    incoming slide fades from 0 and rises 6px over the slide duration, from
-   below for next and from above for previous; the outgoing one fades over
-   the fast duration. All off under reduced motion. */
+   below for next and from above for previous, over the slide the move left,
+   which holds still until the incoming one has entered (slide-change.ts).
+   All off under reduced motion. */
 
 /* the click and swipe surface for the fixed sheet; shown only in slide mode */
 .pt-sheet-stage {
@@ -73,7 +74,16 @@
   opacity: 1;
 }
 
-/* ---- the slide change ---- */
+/* ---- the slide change (slide-change.ts, SlideView.tsx) ----
+   The arriving body fades in and rises 6px (falls on a move back) over --pt-dur-slide on the
+   decelerating --pt-ease, so it is three quarters there at 60 ms and nine tenths at 90 ms: the
+   move reads as resolved in about 100 ms, and the rest is the settle. A slide's own transition
+   replaces the rise through the slide clock. The body the move left holds still under the
+   arriving one until the arrival's animations end; with a full-picture slide on either side the
+   leaving body and the pictures move in the phases `changePhases` names (data-out, data-in), timed
+   by --ts-change, the arrival's length, which SlideView writes on the sheet's root; a second-half
+   fade runs ease-in-out, so a picture uncovers over its whole half and not in two frames. A move that
+   comes while the slide before it is still entering is a cut (data-enter="cut"). */
 
 @keyframes pt-slide-up {
   from {
@@ -109,20 +119,77 @@
   }
 }
 
+@keyframes pt-picture-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .pt-sheet-stage[data-dir='next'] .ts-stage > .pt-slide {
-    animation: pt-slide-up var(--pt-dur-slide) var(--pt-ease-out) both;
+    animation: pt-slide-up var(--pt-dur-slide) var(--pt-ease) both;
   }
 
   .pt-sheet-stage[data-dir='prev'] .ts-stage > .pt-slide {
-    animation: pt-slide-down var(--pt-dur-slide) var(--pt-ease-out) both;
+    animation: pt-slide-down var(--pt-dur-slide) var(--pt-ease) both;
   }
 
-  .pt-sheet-stage[data-dir] .ts-stage > .pt-slide.is-leaving {
-    animation: pt-slide-out var(--pt-dur-fast) var(--pt-ease-out) both;
-    pointer-events: none;
-    will-change: opacity;
+  .pt-sheet-stage[data-dir] .ts-stage > .pt-slide.is-leaving,
+  .pt-sheet-stage[data-dir] .ts-stage > .pt-slide[data-enter='cut'] {
+    animation: none;
   }
+
+  .pt-sheet-stage[data-dir] .ts-stage > .pt-slide.is-leaving[data-out='all'] {
+    animation: pt-slide-out var(--ts-change, var(--pt-dur-slide)) var(--pt-ease) both;
+  }
+
+  .pt-sheet-stage[data-dir] .ts-stage > .pt-slide.is-leaving[data-out='late'] {
+    animation: pt-slide-out calc(var(--ts-change, var(--pt-dur-slide)) / 2) ease-in-out
+      calc(var(--ts-change, var(--pt-dur-slide)) / 2) both;
+  }
+
+  .ts-sheet > .backdrop > img[data-in='all'] {
+    animation: pt-picture-in var(--ts-change, var(--pt-dur-slide)) var(--pt-ease) both;
+  }
+
+  .ts-sheet > .backdrop > img[data-in='early'] {
+    animation: pt-picture-in calc(var(--ts-change, var(--pt-dur-slide)) / 2) var(--pt-ease) both;
+  }
+
+  .ts-sheet > .backdrop > img[data-out='late'] {
+    animation: pt-slide-out calc(var(--ts-change, var(--pt-dur-slide)) / 2) ease-in-out
+      calc(var(--ts-change, var(--pt-dur-slide)) / 2) both;
+  }
+}
+
+.ts-stage > .pt-slide.is-leaving {
+  pointer-events: none;
+}
+
+/* the backdrop holds the leaving and the arriving picture, stacked; its own ground is clear and
+   each picture carries the paper under itself, so a picture fades in from the stage's surround
+   and never from a block of paper (the theme's .backdrop paints paper, stage.css) */
+.ts-sheet.is-picture > .backdrop {
+  background: transparent;
+}
+
+.ts-sheet > .backdrop > img {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+}
+
+/* a slide body SlideView shows paints its own paper unless its slide is a full picture
+   (data-paper): the sheet paints the same paper under it, so a settled slide looks as before,
+   but the body is opaque, so the slide a move leaves is covered as the arriving one fades in
+   rather than showing through it, and the sheet can go clear for a picture while the other
+   slide of the change still shows on its paper */
+.pt-sheet-stage .ts-stage > .pt-slide[data-paper] {
+  background: var(--paper);
 }
 
 /* present: the ring goes, the sheet reads as the window (head:369) */

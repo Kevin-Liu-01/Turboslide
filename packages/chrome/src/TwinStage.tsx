@@ -4,7 +4,8 @@ import { Frame } from '@turboslide/viewer/Frame';
 import { isPictureKind } from '@turboslide/viewer/model';
 import type { ViewerSlide } from '@turboslide/viewer/model';
 import { Sheet } from '@turboslide/viewer/Sheet';
-import { SlideView } from '@turboslide/viewer/SlideView';
+import { showsPicture, useSlideChange } from '@turboslide/viewer/slide-change';
+import { SlideBackdrop, SlideView } from '@turboslide/viewer/SlideView';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { cn } from './lib/cn';
@@ -93,13 +94,18 @@ function TwinPane({
 }: PaneProps) {
   const picture = slide && isPictureKind(slide.kind) ? slide.picture : undefined;
   const backdropSrc = picture ? (theme === 'dark' ? picture.dark : picture.light) : undefined;
+  /* the stage's slide change (slide-change.ts): the backdrop and the bodies on one timeline */
+  const { change, entered } = useSlideChange(
+    slide ? { id: slide.id, html: slide.html, picture: backdropSrc } : undefined,
+  );
   return (
     <div className="ts-twin-pane" data-twin-theme={theme}>
       <div className="ts-twin-stage">
-        <div className={cn('ts-twin-root ts-sheet', picture && 'is-picture')} data-theme={theme}>
-          <div className="backdrop" aria-hidden="true">
-            {backdropSrc ? <img src={backdropSrc} alt="" /> : null}
-          </div>
+        <div
+          className={cn('ts-twin-root ts-sheet', showsPicture(change) && 'is-picture')}
+          data-theme={theme}
+        >
+          <SlideBackdrop change={change} />
           <Sheet
             stageSize={paneSize}
             present={false}
@@ -109,7 +115,7 @@ function TwinPane({
             edges={false}
           >
             <Frame index={index} total={total} />
-            {slide ? <SlideView slideId={slide.id} html={slide.html} theme={theme} /> : null}
+            {change ? <SlideView change={change} onEntered={entered} theme={theme} /> : null}
             {overlay ? overlay(theme) : null}
           </Sheet>
         </div>

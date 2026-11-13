@@ -18,6 +18,7 @@
     "./Frame": "./src/Frame.tsx",
     "./Sheet": "./src/Sheet.tsx",
     "./SlideView": "./src/SlideView.tsx",
+    "./slide-change": "./src/slide-change.ts",
     "./Stage": "./src/Stage.tsx",
     "./LiveClone": "./src/LiveClone.tsx",
     "./GridView": "./src/GridView.tsx",

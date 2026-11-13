@@ -1986,6 +1986,11 @@ export function EditorRoot({
         keys="paged"
         hash="id"
         onModeChange={(mode) => onSearch({ mode: mode === 'slide' ? undefined : mode })}
+        /* the controller hears a move in the event that makes it, so the shell's state and the
+           controller's land in one render; ShellBridge's layout effect told it after the shell's
+           render, and every move of a show rendered the whole editor twice before its first
+           frame (the slide motion round). The effect stays for the moves that skip `select`. */
+        onSelect={(id) => controller.setActiveSlide(id)}
         homeHref="/decks"
         sidebarEdit={sidebarEdit}
         editor={editorInput}

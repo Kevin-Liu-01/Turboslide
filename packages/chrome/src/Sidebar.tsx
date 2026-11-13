@@ -1,5 +1,14 @@
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
-import { Fragment, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  Fragment,
+  memo,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Deck, DeckDocument, Slide, SlideKind } from '@turboslide/schema/deck';
 import { deckAppearance } from '@turboslide/schema/deck';
 import type { ClipboardStore } from '@turboslide/viewer/clipboard';
@@ -227,8 +236,13 @@ type RowProps = {
  * browser's meaning, and carries data-preview for the hover preview layer.
  * In edit mode it is draggable, shows the drop line while a row is over it
  * and carries the menu button at its right end.
+ *
+ * Memoized: a move renders the two rows whose `active` changed and no other (the slide motion
+ * round: every advance of a show rendered all 85 rows of /deck/gt-brand's hidden list, its cards
+ * and thumbs, twice). The list hands it stable callbacks for that; an edit row's `edit` object is
+ * new on every render, so the editor's tree under Show sections as a tree renders as before.
  */
-function TreeRow({
+const TreeRow = memo(function TreeRow({
   section,
   item,
   active,
@@ -339,7 +353,7 @@ function TreeRow({
       ) : null}
     </a>
   );
-}
+});
 
 type MenuState = { item: ShellItem; section: ShellSection; anchor: HTMLElement };
 
@@ -764,12 +778,16 @@ function TreeSidebar({
     }
   };
 
-  const onPick = (item: ShellItem, event: MouseEvent<HTMLElement> | null) => {
+  /* one function for the life of the list, so a memoized row keeps its props across a move */
+  const pickWith = useRef({ select, narrow, setSidebar });
+  pickWith.current = { select, narrow, setSidebar };
+  const [onPick] = useState(() => (item: ShellItem, event: MouseEvent<HTMLElement> | null) => {
     if (event && isModified(event)) return;
     event?.preventDefault();
-    select(item.id);
-    if (narrow) setSidebar(false);
-  };
+    const now = pickWith.current;
+    now.select(item.id);
+    if (now.narrow) now.setSidebar(false);
+  });
 
   const visibleItems = (section: ShellSection): readonly ShellItem[] =>
     filtering ? section.items.filter((item) => haystack(section, item).includes(q)) : section.items;
@@ -1026,7 +1044,10 @@ function TreeSidebar({
                     theme={theme}
                     href={hrefFor(item)}
                     onPick={onPick}
-                    follow={item.id === active ? follow : undefined}
+                    /* a hidden list (a show, the grid) follows nothing: the follow measures
+                       the row and scrolls, a forced layout inside every move of the show; the
+                       active row follows when the list shows again */
+                    follow={item.id === active && !hidden ? follow : undefined}
                     near={window_.isNear(item.id)}
                     track={window_.track(item.id)}
                     edit={rowEdit(item)}

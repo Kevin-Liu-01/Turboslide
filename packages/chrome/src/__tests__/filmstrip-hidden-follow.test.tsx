@@ -16,7 +16,8 @@ import { hideTooltip } from '../Tooltip';
 // The editor's filmstrip during a show (the slide motion round): the strip is hidden, and every
 // move of the show measured the current card and scrolled the hidden strip (15 ms of forced
 // layout per move at 4x CPU on /edit/<id>, and its scroll brought new cards near, which mounted
-// their clones). A hidden strip follows nothing; the current card follows when it shows again.
+// their clones), and reset the selection to the current card, which rendered the whole editor a
+// second time. A hidden strip follows and resets nothing; both happen when it shows again.
 
 const worked = workedDocument();
 const IDS = ['opener-brand', 'title', 'thesis', 'content-rule'];
@@ -71,12 +72,14 @@ function shellState(active: string, present: boolean): ShellState {
 }
 
 const dispatch: EditorDispatch = () => Promise.resolve({});
+const selections: string[][] = [];
 const EDIT: SidebarEdit = {
   revision: 1,
   dispatch,
   document: worked,
   deck: worked.deck,
   clipboard: createClipboardStore(null),
+  onSelectionChange: (ids) => selections.push([...ids]),
 };
 
 function strip(active: string, present: boolean) {
@@ -106,6 +109,7 @@ async function flushFrames(): Promise<void> {
 
 beforeEach(() => {
   frames = [];
+  selections.length = 0;
   vi.stubGlobal('requestAnimationFrame', (frame: FrameRequestCallback) => {
     frames.push(frame);
     return frames.length;
@@ -133,5 +137,19 @@ describe('the filmstrip during a show', () => {
     view.rerender(strip('content-rule', false));
     await flushFrames();
     expect(measured).toHaveBeenCalled();
+  });
+
+  it('reports no selection while the show hides it, and the current card when it shows', async () => {
+    const view = render(strip('title', true));
+    await flushFrames();
+    selections.length = 0;
+    view.rerender(strip('thesis', true));
+    view.rerender(strip('content-rule', true));
+    await flushFrames();
+    /* each report reached the editor's state and rendered the whole editor again */
+    expect(selections).toEqual([]);
+    view.rerender(strip('content-rule', false));
+    await flushFrames();
+    expect(selections).toEqual([['content-rule']]);
   });
 });

@@ -520,12 +520,16 @@ export function Filmstrip({
     onSelectionRef.current?.(ordered);
   };
   useEffect(() => {
+    /* a strip hidden by a show resets nothing: the reset reaches the editor's state
+       (onSelectionChange) and rendered the whole editor a second time on every move of the show
+       (the slide motion round); the selection follows the current card when the strip shows */
+    if (hidden) return;
     if (active && !selectedRef.current.includes(active)) {
       anchorRef.current = active;
       setSelection([active]);
     }
     // the selection follows the current card; setSelection reads refs
-  }, [active]);
+  }, [active, hidden]);
 
   /* the handle the shell reads for Edit > Select all and Select none (SPEC-2 8.6, 0.61) */
   const orderRef = useRef(order);

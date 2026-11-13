@@ -29,7 +29,7 @@ const SMALL_WORDS = new Set([
 /** The surfaces of the rule and their addresses. */
 const SURFACES: ReadonlyArray<{ name: string; path: string; ready: string }> = [
   { name: 'editor', path: '/new', ready: '.pt-viewer:not(.ts-skeleton)[data-settled]' },
-  { name: '/home', path: '/home', ready: 'main.ts-product[data-hydrated]' },
+  { name: '/home', path: '/home', ready: '.ts-site[data-hydrated]' },
   { name: '/decks', path: '/decks', ready: '.ts-home-page[data-hydrated]' },
   { name: 'Not found', path: '/no-such-page-buttons-rule', ready: '[data-control="notfound"]' },
   {

@@ -875,8 +875,9 @@ stale-while-revalidate=3600` only for the public shape of an open or published d
     present and print routes (the print route's line is the integrator's on b3.md R7); the
     presenter is its own chunk (`components/PresenterPage.tsx`, imported inside `component`, so
     `scripts/check.mjs` `INNER_HTML_ALLOW` names it and not the route file). The shell driver's
-    default `readySelector` and the chrome lint's roots carry `.ts-product` (the `/home` root,
-    b2.md R1) and `.ts-notfound`.
+    default `readySelector` and the chrome lint's roots carry `.ts-site` (the root of `/home`,
+    `/docs` and the site pages since docs/SITE.md D7, in place of b2.md R1's `.ts-product`) and
+    `.ts-notfound`.
   - `turboslide --version` (SPEC-4 0.17; B1's day 3): a flag parsed in `apps/cli/src/cli.ts`
     before the command table and handled by `apps/cli/src/commands/banner.ts`; it prints
     `markBlocks(8)` from the brand module beside the word, the version, the hosted address, the

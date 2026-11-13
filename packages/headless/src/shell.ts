@@ -288,11 +288,13 @@ export async function driveShell<TConfig, TAudit extends object>(
         deck = true;
       }
     } else {
-      // the roots a studio page mounts: the ported shell, the studio, the files pages, and since
-      // round four the /home product page (`.ts-product`, build-4/b2.md R1) and the Not found page
+      // the roots a studio page mounts: the ported shell, the studio, the files pages, the site
+      // root of /home, /docs and the site pages (`.ts-site` since docs/SITE.md D7; it replaced
+      // round four's `.ts-product`, and `lint --chrome` on /home waited for that root until
+      // 2026-11-13) and the Not found page
       await page.waitForSelector(
         plan.readySelector ??
-          '.pt-viewer, .ts-studio, .viewer, .ts-home-page, .ts-trash-page, .ts-product, .ts-notfound',
+          '.pt-viewer, .ts-studio, .viewer, .ts-home-page, .ts-trash-page, .ts-site, .ts-notfound',
         { timeout },
       );
     }

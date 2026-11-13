@@ -71,9 +71,14 @@ export function useSlideClock(options: {
     const asked = entry.current?.slideId === slideId ? entry.current.at : null;
     entry.current = null;
     const kept = stepsRef.current.slideId === slideId ? stepsRef.current.step : null;
+    /* a move that came while the slide before it was still entering shows at once (SlideView's
+       cut, slide-change.ts): the slide stands at the end of its first step, its transition and
+       the effects that come with it drawn done */
+    const wanted = asked ?? kept ?? 'start';
+    const cut = body.getAttribute('data-enter') === 'cut';
     const made = createSlideClock(body, motion, {
       reduced,
-      entry: asked ?? kept ?? 'start',
+      entry: cut && wanted === 'start' ? 0 : wanted,
       onAdvance: () => advance.current(),
       onStep: (step, count) => setSteps({ slideId, step, steps: count }),
     });

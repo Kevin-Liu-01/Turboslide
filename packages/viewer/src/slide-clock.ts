@@ -2,8 +2,11 @@
 // the viewer's present mode and the embed. It compiles the slide's effects to Web Animations
 // (@turboslide/render/motion) on the rehearsal timeline (`scheduleOf`): every Animation is
 // created paused with its start as its delay, so any moment of the slide is drawn by setting
-// every Animation's time (`seek`), and a step plays by giving only that segment's Animations a
-// start time on the document timeline, so transform and opacity run on the compositor. A click
+// every Animation's time (`seek`), and a step plays by playing only that segment's Animations from
+// the segment's start, so transform and opacity run on the compositor. `play()` leaves the start
+// time pending until the frame that first draws the step, so a step whose frame comes late (the
+// move's render, a decode) still shows its first frame; a start time set to the moment of the call
+// skipped the frames that frame was late by, and a transition jumped into its middle. A click
 // while a segment plays finishes it at once and begins the next; back shows the state after the
 // previous step. A hidden tab pauses the clock and the timed advance, and showing it resumes
 // from the same moment. Under reduced motion no Animation runs: each step cuts to its state
@@ -184,11 +187,6 @@ function strokeKeyframes(shape: SVGGeometryElement, exit: boolean): MotionKeyfra
   return exit ? frames.reverse() : frames;
 }
 
-function timelineNow(doc: Document): number | null {
-  const now = doc.timeline?.currentTime;
-  return typeof now === 'number' ? now : null;
-}
-
 /**
  * Creates the clock of one slide body (the `.pt-slide` element that holds the rendered slide).
  * The body must carry block attributes (`data-block`), as the show's and the viewer's renders do.
@@ -237,10 +235,15 @@ export function createSlideClock(
     });
   };
 
-  /* the transition: the entering body's own keyframes replace today's rise; none is a cut */
+  /* the transition: the entering body's own keyframes replace today's rise when the slide enters
+     at its start; a slide entered at a later step (a move back, a presenter's step) keeps the
+     default fade, since its transition does not play, and `none` is a cut either way */
   if (motion.transition !== undefined) {
-    body.style.animation = 'none';
-    undos.push(() => body.style.removeProperty('animation'));
+    const cuts = motion.transition.name === 'none' || motion.transition.durationMs <= 0;
+    if (cuts || options.entry === 'start') {
+      body.style.animation = 'none';
+      undos.push(() => body.style.removeProperty('animation'));
+    }
     if (!reduced) {
       const compiled = compileTransition(motion.transition);
       animate(
@@ -423,7 +426,6 @@ export function createSlideClock(
     }
     const segment = schedule.segments[k];
     if (segment === undefined) return;
-    const now = timelineNow(doc);
     for (const run of runs) {
       const animation = run.animation;
       if (run.step < k) {
@@ -437,8 +439,8 @@ export function createSlideClock(
       } else {
         animation.pause();
         animation.currentTime = segment.startMs;
+        /* pending until the frame that draws it: every Animation of the step starts on that frame */
         if (paused) held.push(animation);
-        else if (now !== null) animation.startTime = now - segment.startMs;
         else animation.play();
       }
     }

@@ -17,6 +17,8 @@ class FakeAnimation {
   readonly keyframes: unknown[];
   readonly timing: FakeTiming;
   private start: number | null = null;
+  /** a start time written by the clock, rather than resolved by the frame that draws the step */
+  startSet = false;
   constructor(keyframes: unknown[], timing: FakeTiming) {
     this.keyframes = keyframes;
     this.timing = timing;
@@ -26,6 +28,7 @@ class FakeAnimation {
   }
   set startTime(value: number | null) {
     this.start = value;
+    this.startSet = true;
     this.playState = 'running';
   }
   pause(): void {
@@ -161,6 +164,33 @@ describe('createSlideClock', () => {
     expect(clock.next()).toBe(true);
     expect(clock.next()).toBe(true);
     expect(clock.next()).toBe(false);
+  });
+
+  it('plays a step from its first frame: the start waits for the frame that draws it', () => {
+    const { clock, blocks } = create(threeClicks);
+    clock.next();
+    const runs = runsOf(blocks[0] as FakeElement);
+    expect(runs.every((a) => a.playState === 'running')).toBe(true);
+    /* play() from the segment's start, never a start time of the moment of the call, which
+       skipped the frames a late first frame was late by */
+    expect(runs.some((a) => a.startSet)).toBe(false);
+    expect(runs.every((a) => a.currentTime === clock.schedule.segments[1]?.startMs)).toBe(true);
+  });
+
+  it('replaces the default rise with a transition only when the transition plays', () => {
+    const motion: SlideMotion = {
+      effects: [],
+      transition: { name: 'crossfade', durationMs: 400 },
+    };
+    const forward = create(motion, false, 'start');
+    expect(forward.body.style.animation).toBe('none');
+    expect(forward.body.animations).toHaveLength(1);
+    /* a move back enters at the end: the transition does not play, the default fade does */
+    const back = create(motion, false, 'end');
+    expect(back.body.style.animation).toBeUndefined();
+    /* `none` is a cut both ways */
+    const cut = create({ effects: [], transition: { name: 'none', durationMs: 0 } }, false, 'end');
+    expect(cut.body.style.animation).toBe('none');
   });
 
   it('hides an entering block before its click with its first effect filled backwards', () => {

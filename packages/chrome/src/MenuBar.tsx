@@ -27,9 +27,17 @@ export type MenuBarProps = {
   className?: string;
 };
 
-/** The menus with their rows' access keys assigned once. */
+let withAccessKeys: ReadonlyArray<MenuData> | null = null;
+
+/**
+ * The menus with their rows' access keys assigned once. The menu table is static, and the menu
+ * bar and the menus key asked for it on every render of the editor: in a show, where every move
+ * renders the editor twice, assigning the keys over every row was 21 ms of each move at 4x CPU
+ * (the slide motion round). The answer is built on the first call and kept.
+ */
 export function menusWithAccessKeys(): ReadonlyArray<MenuData> {
-  return MENUS.map((menu) => ({ ...menu, items: assignAccessKeys(menu.items) }));
+  withAccessKeys ??= MENUS.map((menu) => ({ ...menu, items: assignAccessKeys(menu.items) }));
+  return withAccessKeys;
 }
 
 export function MenuBar({ className }: MenuBarProps) {

@@ -9,6 +9,18 @@ Turboslide is a slides editor in the browser. People and agents edit the same pr
 
 Use it at https://www.turboslide.com. No account is needed.
 
+## Features
+
+- The editor has menus, a toolbar, keyboard shortcuts and Search the menus (Alt+/), with a filmstrip, layouts, speaker notes and find and replace. It saves as you type, and Version history brings back any earlier version.
+- Slides hold text, pictures and logos, shapes and lines, tables, charts and animated patterns, which you can align, group and arrange.
+- Nine themes each have a light and a dark appearance, and a brand kit sets your logo, colors, fonts and footer.
+- A slideshow runs full screen, and Presenter view shows your notes, the next slide and a timer.
+- You share by link or with people by name, with a role for each. Several people can edit at once, follow each other and leave comments.
+- The assistant shortens a slide's text, writes its speaker notes or tailors the slide for a customer. Nothing changes until you accept its card.
+- Downloads are PowerPoint (each slide as a picture, or editable text), PDF, JPEG, PNG, a web page that presents itself, and a Turboslide file that opens again.
+
+Tools > Advanced tools shows more commands in the menus. The [documentation](https://www.turboslide.com/docs) covers each feature.
+
 ## For agents
 
 - Command line: in a checkout, `pnpm exec turboslide <command> --json` runs an action on a presentation folder. See [The command line](https://www.turboslide.com/docs/agents/cli).
@@ -67,7 +79,24 @@ The project needs a Pro plan, because exports run for up to 800 seconds and a cr
 
 [Run Turboslide yourself](https://www.turboslide.com/docs/self-hosting) lists every variable, and [docs/hosting.md](docs/hosting.md) is the full reference.
 
-## Work on the code
+## How it is built
+
+Turboslide is a pnpm workspace of TypeScript packages on Node 24, with one Rust crate. A presentation is a typed document: a `deck.json` with one JSON file per slide. Every change, from the editor, the command line, MCP or HTTP, is one action from the table in `packages/schema`. One dispatcher checks its input and applies it, so every surface edits the same way.
+
+| Part                                                | What it does                                                                                                                                                                                          |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/studio`                                       | The web app: TanStack Start with React 19 on Vite and Nitro. It serves the editor, the viewer, the slideshow, the docs, and the HTTP and MCP routes for agents.                                       |
+| `packages/schema`                                   | The document model: types and Zod schemas, the validator, the migrations, the layouts and the table of 203 actions.                                                                                   |
+| `packages/render`                                   | One renderer that turns a slide into HTML and CSS for the editor, the viewer, the slideshow, the screenshots and the exports.                                                                         |
+| `packages/viewer`, `packages/chrome`                | The React stage, with selection, handles and snapping, and the editor around it: menus, toolbar, filmstrip and dialogs. The styles are plain CSS on design tokens.                                    |
+| `packages/store`                                    | The deck store with versions and slide leases. It writes files under `decks/` in a checkout and to Vercel Blob when hosted.                                                                           |
+| `packages/export`, `packages/headless`              | Renders and downloads in headless Chromium through `playwright-core`. PowerPoint files are written with pptxgenjs.                                                                                    |
+| `packages/agent`, `packages/mcp`, `apps/cli`        | The dispatcher, the HTTP request rules, the MCP server and the `turboslide` command. The contracts (OpenAPI, `llms.txt`, the MCP tools and the skill references) are generated from the action table. |
+| `packages/realtime`, `apps/realtime-worker`         | Live editing and presence through a Cloudflare Worker with Durable Objects. On the hosted studio, its D1 database keeps the accounts, which use better-auth.                                          |
+| `packages/effects`, `crates/turboslide-native`      | Dithering and image comparison in Rust, built as a Node addon and as WebAssembly, with a TypeScript copy of the same arithmetic.                                                                      |
+| `packages/lint`, `packages/theme`, `packages/fonts` | The slide checks, the nine themes and the catalog of openly licensed fonts.                                                                                                                           |
+
+Vitest runs the unit tests and Playwright runs the browser tests. `pnpm check` runs the whole acceptance chain.
 
 ```sh
 pnpm generate-routes

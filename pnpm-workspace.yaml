@@ -87,7 +87,7 @@ catalog:
   typescript: 6.0.3
   ulid: 3.0.2
   vite: 8.2.2
-  vitest: 4.1.11
+  vitest: 5.0.3
   wrangler: 4.146.0
   zod: 4.6.1
 

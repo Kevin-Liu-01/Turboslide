@@ -16,8 +16,8 @@ catalogs:
       specifier: 6.20.3
       version: 6.20.3
     '@codemirror/commands':
-      specifier: 6.11.0
-      version: 6.11.0
+      specifier: 6.11.1
+      version: 6.11.1
     '@codemirror/lang-json':
       specifier: 6.0.2
       version: 6.0.2
@@ -563,7 +563,7 @@ importers:
         version: 6.20.3
       '@codemirror/commands':
         specifier: 'catalog:'
-        version: 6.11.0
+        version: 6.11.1
       '@codemirror/lang-json':
         specifier: 'catalog:'
         version: 6.0.2
@@ -1316,8 +1316,8 @@ packages:
   '@codemirror/autocomplete@6.20.3':
     resolution: {integrity: sha512-tlosUqb+3BbxCxZdu4tKeRghPFC+QM7q4X5YhKV2eCmPG+1r2F3f4AaSz5sCrFqUtX4Jh20VFTKecl16MgiV9g==}
 
-  '@codemirror/commands@6.11.0':
-    resolution: {integrity: sha512-/K4Rl5BN0OtTiPWmJCdqODu38XnDMsDxKY5rgrPnCkutPTJf2wVbkoixLfealF5Kwse/s8P8M5jAiURiwSwnFA==}
+  '@codemirror/commands@6.11.1':
+    resolution: {integrity: sha512-O/4hG3SC1YwcmQ0d2UVNDs+AsaNWd1iHVxbTeEBuqH+6bExAiPK3iS/BvpY6rZGURALv4ZD3sIgcCmRvw3ehBg==}
 
   '@codemirror/lang-json@6.0.2':
     resolution: {integrity: sha512-x2OtO+AvwEHrEwR0FyyPtfDUiloG3rnVTSZV1W8UteaLL8/MajQd8DpvUb2YVzC+/T18aSDv0H9mu+xw0EStoQ==}
@@ -6516,7 +6516,7 @@ snapshots:
       '@codemirror/view': 6.43.11
       '@lezer/common': 1.5.2
 
-  '@codemirror/commands@6.11.0':
+  '@codemirror/commands@6.11.1':
     dependencies:
       '@codemirror/language': 6.12.4
       '@codemirror/state': 6.7.4

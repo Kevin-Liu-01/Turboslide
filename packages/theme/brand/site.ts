@@ -112,7 +112,7 @@ export const GT_COVER = {
   theme: 'dark',
   width: 320,
   height: 180,
-  path: '/brand/cover/gt-brand-dark-44ba6212.png',
+  path: '/brand/cover/gt-brand-dark-da677625.png',
   inputs: '9c67dc861b313bbb',
 } as const;
 

@@ -155,7 +155,7 @@ async function sparklesIn(page: Page, selector: string) {
 }
 
 /** The head of the GT logo's path (packages/chrome/src/GtMark.tsx), drawn by the GT deck alone. */
-const GT_MARK_D = 'M225.36 163.71C223.32 169.27';
+const GT_MARK_D = 'M128 24.3C185.2718 24.3 231.7 70.7282';
 
 /** The GT logos drawn in the chrome, outside any slide. */
 async function gtMarks(page: Page) {

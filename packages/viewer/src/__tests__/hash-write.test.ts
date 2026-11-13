@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // presenter moves selects a slide every frame, and browsers refuse or ignore `replaceState` past
 // a rate (Safari: 100 in 30 s; Chrome: 200 in 10 s). A write after a quiet gap goes at once; the
 // writes inside the gap fold into one at its end, with the latest slide, on the same page only.
+// The write goes through the document's own `replaceState` (History.prototype), past a client
+// router's patch of `window.history.replaceState`, and keeps the router's history state.
 
 type HashModule = typeof import('../hash');
 
@@ -19,10 +21,10 @@ beforeEach(() => {
   vi.useFakeTimers({ now: new Date('2026-11-09T09:00:00Z') });
   window.history.replaceState(null, '', '/deck/d');
   calls = 0;
-  const replace = window.history.replaceState.bind(window.history);
-  vi.spyOn(window.history, 'replaceState').mockImplementation((...args) => {
+  const replace = History.prototype.replaceState;
+  vi.spyOn(History.prototype, 'replaceState').mockImplementation(function (this: History, ...args) {
     calls += 1;
-    replace(...args);
+    replace.apply(this, args);
   });
 });
 
@@ -85,5 +87,31 @@ describe('writeSlideHash', () => {
     vi.advanceTimersByTime(1000);
     expect(window.location.pathname).toBe('/decks');
     expect(window.location.hash).toBe('');
+  });
+
+  it('passes a router that patched history.replaceState and keeps its state', async () => {
+    const { writeSlideHash } = await load();
+    /* what @tanstack/history does: the instance method is wrapped to notify the router */
+    const heard: unknown[] = [];
+    const own = window.history.replaceState;
+    window.history.replaceState({ __TSR_index: 3, key: 'k' }, '', '/deck/d');
+    window.history.replaceState = function (this: History, ...args) {
+      heard.push(args);
+      return own.apply(this, args);
+    };
+    try {
+      writeSlideHash('id', { id: 'two', n: 2 });
+      expect(window.location.hash).toBe('#s/two');
+      expect(heard).toHaveLength(0);
+      expect(window.history.state).toEqual({ __TSR_index: 3, key: 'k' });
+    } finally {
+      delete (window.history as { replaceState?: unknown }).replaceState;
+    }
+  });
+
+  it('reads the address hash a router navigation keeps (addressHash)', async () => {
+    const { addressHash, writeSlideHash } = await load();
+    writeSlideHash('id', { id: 'three', n: 3 });
+    expect(addressHash()).toBe('s/three');
   });
 });

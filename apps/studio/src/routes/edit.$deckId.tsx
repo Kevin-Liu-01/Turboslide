@@ -4,6 +4,7 @@ import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router';
 import type { ErrorComponentProps } from '@tanstack/react-router';
 
 import { authorLabel } from '@turboslide/store/store';
+import { addressHash } from '@turboslide/viewer/hash';
 
 import { EditorSkeleton } from '../components/EditorSkeleton';
 import { EditorRoot, authorOfIdentity } from '../editor/EditorRoot';
@@ -116,7 +117,7 @@ function EditPage() {
         for (const key of Object.keys(next)) if (next[key] === undefined) delete next[key];
         return next;
       },
-      hash: true,
+      hash: addressHash,
       replace: true,
     });
   };

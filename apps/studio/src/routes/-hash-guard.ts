@@ -1,12 +1,15 @@
 // The hash guard of the pinned /new page (gslides-parity build-4/hotfix-2.md cause A4). After the
 // first save, routes/new.tsx pins the address bar to /edit/<id> through the browser's own
 // `History.prototype.replaceState` while the router still stands on /new (SPEC-2 8.6: a route
-// change would remount the editor and lose its history). The viewer shell writes the slide hash
+// change would remount the editor and lose its history). The viewer shell wrote the slide hash
 // on every move with `window.history.replaceState` (viewer/hash.ts), which is the router's
-// wrapper, and hands it the pinned pathname, so the router read a move to /edit/<id>#s/…,
+// wrapper, and handed it the pinned pathname, so the router read a move to /edit/<id>#s/…,
 // matched the edit route, ran its loader and mounted a second editor: a second controller, a
 // second room client with a new client id, the first one stopped with its last flush dropped
 // (three edits lost in the reproduction) and the tab's own first id drawn as a collaborator.
+//
+// Since the slide motion round the shell writes through `History.prototype.replaceState`, past
+// the wrapper and so past this guard; the guard stays for every other caller of the wrapper.
 //
 // The guard stands in for `window.history.replaceState` while the page is pinned. A call whose
 // URL names the pinned pathname is split in two: the router's wrapper is told the same move on

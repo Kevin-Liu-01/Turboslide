@@ -2,6 +2,7 @@ import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router';
 
 import { REFUSALS } from '@turboslide/chrome/menus/strings';
 import type { ShellMode } from '@turboslide/chrome/shell-data';
+import { addressHash } from '@turboslide/viewer/hash';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { DeckViewer } from '../components/DeckViewer';
@@ -184,7 +185,7 @@ function DeckPage() {
   const onModeChange = (mode: ShellMode) => {
     void navigate({
       search: (prev) => ({ ...prev, mode: mode === 'slide' ? undefined : mode }),
-      hash: true,
+      hash: addressHash,
       replace: true,
     });
   };

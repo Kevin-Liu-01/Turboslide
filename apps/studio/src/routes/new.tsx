@@ -5,6 +5,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { parseAuthor } from '@turboslide/schema/mutations';
 /* the page title's words without the rest of the strings file (hardening HR-PC#2) */
 import { TITLE_ROW } from '@turboslide/chrome/menus/page-words';
+import { addressHash } from '@turboslide/viewer/hash';
 
 import { EditorSkeleton } from '../components/EditorSkeleton';
 import { useMountEffect } from '../components/useMountEffect';
@@ -44,7 +45,10 @@ import { installHashGuard } from './-hash-guard';
  * second editor beside the first (a second room client and client id; the first one's last
  * flush dropped). From the first save until unmount `installHashGuard` (./-hash-guard.ts) stands
  * in for the wrapper: a call on the pinned path becomes the same move on /new for the router and
- * the native pin of the address afterwards.
+ * the native pin of the address afterwards. Since the slide motion round the shell writes the
+ * hash through the document's own `History.prototype.replaceState`, which the router never
+ * hears, so a move no longer reaches the guard; the guard stays for any other caller of the
+ * wrapper, and a search change keeps the slide through `hash: addressHash`.
  *
  * Round four (gslides-parity SPEC-4 0.34, 0.42; PP 3.5, 6): `ssr: 'data-only'` runs the loader
  * on the server, so the draft rides the document as dehydrated loader data and the server
@@ -153,10 +157,12 @@ function NewPage() {
       // the address already names the saved deck: the search changes on this route (the router
       // still stands on /new) and the address is pinned to /edit/<id> again afterwards, so the
       // editor is not remounted and its history stays (the module comment)
-      void navigate({ search: next, hash: true, replace: true }).then(() => pinAddress(savedId));
+      void navigate({ search: next, hash: addressHash, replace: true }).then(() =>
+        pinAddress(savedId),
+      );
       return;
     }
-    void navigate({ search: next, hash: true, replace: true });
+    void navigate({ search: next, hash: addressHash, replace: true });
   };
   const onDeckCreated = (deckId: string) => {
     void navigate({ to: '/edit/$deckId', params: { deckId } });

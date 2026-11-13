@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
+import { addressHash } from '@turboslide/viewer/hash';
+
 import { TryPage } from '../try/TryPage';
 import { validateEditSearch } from './-edit-search';
 import type { EditSearch } from './-edit-search';
@@ -34,7 +36,7 @@ function Try() {
         for (const key of Object.keys(next)) if (next[key] === undefined) delete next[key];
         return next;
       },
-      hash: true,
+      hash: addressHash,
       replace: true,
     });
   };

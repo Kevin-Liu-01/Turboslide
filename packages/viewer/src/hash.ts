@@ -32,6 +32,16 @@ export function resolveSlideHash(hash: string, ids: readonly string[]): string |
   return ids[parsed.n - 1] ?? null;
 }
 
+/**
+ * The address's hash without its `#`, for a router navigation that keeps the slide
+ * (`navigate({ search, hash: addressHash })`). The shell writes the slide hash past the router
+ * (`writeSlideHash`), so the router's own copy of the hash is the one it last navigated to, and
+ * `hash: true` would put a slide the reader has left back in the address.
+ */
+export function addressHash(): string {
+  return typeof window === 'undefined' ? '' : window.location.hash.replace(/^#/, '');
+}
+
 /** `#12` or `#s/why-the-redesign`. */
 export function formatSlideHash(form: SlideHashForm, slide: { id: string; n: number }): string {
   return form === 'n' ? `#${slide.n}` : `#s/${encodeURIComponent(slide.id)}`;
@@ -72,11 +82,23 @@ export function writeSlideHash(form: SlideHashForm, slide: { id: string; n: numb
   }, wait);
 }
 
+/**
+ * The document's own `replaceState`, read from the prototype. A client router patches the method
+ * on `window.history` to hear every address change (TanStack's `createBrowserHistory`), and a
+ * slide move is view state the shell owns, not a navigation: through the patched method every
+ * move ran a router load, which rendered the root and the head again and fetched the tab icon
+ * again (measured on /deck/gt-brand in a show: two of the advance's six commits). The router's
+ * history state (its index and key) is kept, so its back and forward bookkeeping holds.
+ */
 function replaceHash(next: string): void {
   lastWrite = Date.now();
   try {
-    window.history.replaceState(
-      null,
+    const history = window.history;
+    const replace =
+      typeof History === 'undefined' ? history.replaceState : History.prototype.replaceState;
+    replace.call(
+      history,
+      history.state,
       '',
       `${window.location.pathname}${window.location.search}${next}`,
     );
